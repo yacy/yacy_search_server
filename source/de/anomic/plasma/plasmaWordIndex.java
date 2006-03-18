@@ -393,12 +393,12 @@ public final class plasmaWordIndex {
     
     public Iterator wordHashes(String startHash, int resourceLevel, boolean rot) throws IOException {
         if (rot) return new rotatingWordIterator(startHash, resourceLevel);
-        else return new correctedWordIterator(startHash, resourceLevel, rot); // use correction until bug is found
+        else return wordHashes(startHash, resourceLevel);
     }
 
-    private Iterator wordHashesX(String startWordHash, int resourceLevel, boolean rot) throws IOException {
+    private Iterator wordHashes(String startWordHash, int resourceLevel) throws IOException {
         if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) {
-            return ramCache.wordHashes(startWordHash, rot);
+            return ramCache.wordHashes(startWordHash, false);
         }
         /*
         if (resourceLevel == plasmaWordIndex.RL_FILECACHE) {
@@ -407,16 +407,16 @@ public final class plasmaWordIndex {
         */
         if (resourceLevel == plasmaWordIndex.RL_ASSORTMENTS) {
             return new kelondroMergeIterator(
-                            ramCache.wordHashes(startWordHash, rot),
-                            assortmentCluster.hashConjunction(startWordHash, true, rot),
+                            ramCache.wordHashes(startWordHash, false),
+                            assortmentCluster.hashConjunction(startWordHash, true, false),
                             kelondroNaturalOrder.naturalOrder,
                             true);
         }
         if (resourceLevel == plasmaWordIndex.RL_WORDFILES) {
             return new kelondroMergeIterator(
                             new kelondroMergeIterator(
-                                     ramCache.wordHashes(startWordHash, rot),
-                                     assortmentCluster.hashConjunction(startWordHash, true, rot),
+                                     ramCache.wordHashes(startWordHash, false),
+                                     assortmentCluster.hashConjunction(startWordHash, true, false),
                                      kelondroNaturalOrder.naturalOrder,
                                      true),
                             backend.wordHashes(startWordHash, true, false),
@@ -426,64 +426,13 @@ public final class plasmaWordIndex {
         return null;
     }
     
-    
-    private final class correctedWordIterator implements Iterator {    
-        Iterator iter;
-        String nextWord;
-
-        public correctedWordIterator(String firstWord, int resourceLevel, boolean rotating) throws IOException {
-            iter = wordHashesX(firstWord, resourceLevel, rotating);
-            try {
-            nextWord = (iter.hasNext()) ? (String) iter.next() : null;
-            boolean corrected = true;
-            int cc = 0; // to avoid rotation loops
-            while ((nextWord != null) && (corrected) && (cc < 50)) {
-                int c = firstWord.compareTo(nextWord);
-                corrected = false;
-                if (c > 0) {
-                    // firstKey > nextNode.getKey()
-                    //System.out.println("CORRECTING WORD ITERATOR: firstWord=" + firstWord + ", nextWord=" + nextWord);
-                    nextWord = (iter.hasNext()) ? (String) iter.next() : null;
-                    corrected = true;
-                    cc++;
-                }
-            }
-            } catch (java.util.ConcurrentModificationException e) {
-                nextWord = null;
-            }
-        }
-
-        public void finalize() {
-            iter = null;
-            nextWord = null;
-        }
-
-        public boolean hasNext() {
-            return nextWord != null;
-        }
-
-        public Object next() {
-            String r = nextWord;
-            try {
-                nextWord = (iter.hasNext()) ? (String) iter.next() : null;                        
-            } catch (java.util.ConcurrentModificationException e) {
-                nextWord = null;
-            }
-            return r;
-        }
-
-        public void remove() {
-            throw new java.lang.UnsupportedOperationException("correctedWordIterator  does not support remove");
-        }
-    } // correctedWordIterator
-
     private class rotatingWordIterator implements Iterator {
         Iterator i;
         int resourceLevel;
 
         public rotatingWordIterator(String startWordHash, int resourceLevel) throws IOException {
             this.resourceLevel = resourceLevel;
-            i = new correctedWordIterator(startWordHash, resourceLevel, false);
+            i = wordHashes(startWordHash, resourceLevel);
         }
 
         public void finalize() {
@@ -493,7 +442,7 @@ public final class plasmaWordIndex {
         public boolean hasNext() {
             if (i.hasNext()) return true;
             else try {
-                i = new correctedWordIterator("------------", resourceLevel, false);
+                i = wordHashes("------------", resourceLevel);
                 return i.hasNext();
             } catch (IOException e) {
                 return false;
