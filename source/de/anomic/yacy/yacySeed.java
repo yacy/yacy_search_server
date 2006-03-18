@@ -1,4 +1,4 @@
-// yacySeed.java 
+// yacySeed.java
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
@@ -40,24 +40,22 @@
 // done inside the copyright notive above. A re-distribution must contain
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
-
-/*
-  YACY stands for Yet Another CYberspace
-  
-  the yacySeed Object is the object that bundles and carries all information about
-  a single peer in the yacy space.
-  The yacySeed object is carried along peers using a string representation, that can
-  be compressed and/or scrambled, depending on the purpose of the process.
-
-  the yacy status
-  any value that is defined here will be overwritten each time the proxy is started
-  to prevent that the system gets confused, it should be set to "" which means
-  undefined. Other status' that can be reached at run-time are
-  junior    - a peer that has no public socket, thus cannot be reached on demand
-  senior    - a peer that has a public socked and serves search queries
-  principal - a peer like a senior socket and serves as gateway for network definition
-
-*/
+//
+//
+// YACY stands for Yet Another CYberspace
+//
+// the yacySeed Object is the object that bundles and carries all information about
+// a single peer in the yacy space.
+// The yacySeed object is carried along peers using a string representation, that can
+// be compressed and/or scrambled, depending on the purpose of the process.
+//
+// the yacy status
+// any value that is defined here will be overwritten each time the proxy is started
+// to prevent that the system gets confused, it should be set to "" which means
+// undefined. Other status' that can be reached at run-time are
+// junior    - a peer that has no public socket, thus cannot be reached on demand
+// senior    - a peer that has a public socked and serves search queries
+// principal - a peer like a senior socket and serves as gateway for network definition
 
 package de.anomic.yacy;
 
@@ -82,21 +80,47 @@ import de.anomic.tools.crypt;
 
 public class yacySeed {
 
+    /**
+     * <b>substance</b> "sI" (send index/words)
+     */
     public static final String INDEX_OUT = "sI";
+    /**
+     * <b>substance</b> "rI" (received index/words)
+     */
     public static final String INDEX_IN  = "rI";
+    /**
+     * <b>substance</b> "sU" (send URLs)
+     */
     public static final String URL_OUT = "sU";
+    /**
+     * <b>substance</b> "rU" (received URLs)
+     */
     public static final String URL_IN  = "rU";
-
+    /**
+     * <b>substance</b> "virgin"
+     */
     public static final String PEERTYPE_VIRGIN = "virgin";
+    /**
+     * <b>substance</b> "junior"
+     */
     public static final String PEERTYPE_JUNIOR = "junior";
+    /**
+     * <b>substance</b> "senior"
+     */
     public static final String PEERTYPE_SENIOR = "senior";
+    /**
+     * <b>substance</b> "principal"
+     */
     public static final String PEERTYPE_PRINCIPAL = "principal";
+    /**
+     * <b>substance</b> "PeerType"
+     */
     public static final String PEERTYPE = "PeerType";
-   
+
     public static final String IPTYPE    = "IPType";
     public static final String FLAGS     = "Flags";
     public static final String VERSION   = "Version";
-    
+
     public static final String YOURTYPE  = "yourtype";
     public static final String LASTSEEN  = "LastSeen";
     public static final String USPEED    = "USpeed";
@@ -176,7 +200,7 @@ public class yacySeed {
         setFlagAcceptRemoteIndex(true);
         setFlagAcceptCitationReference(true);
         setUnusedFlags();
-        
+
         // index transfer
         this.dna.put(INDEX_OUT, "0"); // send index
         this.dna.put(INDEX_IN, "0");  // received Index
