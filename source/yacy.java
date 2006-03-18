@@ -218,8 +218,6 @@ public final class yacy {
                 System.out.println("could not find logging properties in homePath=" + homePath);
                 e.printStackTrace();
             }
-            serverLog.logConfig("STARTUP", copyright);
-            serverLog.logConfig("STARTUP", hline);
             serverLog.logConfig("STARTUP", "java version " + System.getProperty("java.version", "no-java-version"));
             serverLog.logConfig("STARTUP", "Application Root Path: " + homePath);
             serverLog.logConfig("STARTUP", "Time Zone: UTC" + serverDate.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
