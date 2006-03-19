@@ -221,6 +221,7 @@ public final class yacy {
             serverLog.logConfig("STARTUP", "java version " + System.getProperty("java.version", "no-java-version"));
             serverLog.logConfig("STARTUP", "Application Root Path: " + homePath);
             serverLog.logConfig("STARTUP", "Time Zone: UTC" + serverDate.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
+            serverLog.logConfig("STARTUP", "Maximum file systen path length: " + serverSystem.maxPathLength);
 
             // create data folder
             final File dataFolder = new File(homePath, "DATA");

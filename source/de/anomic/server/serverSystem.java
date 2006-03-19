@@ -67,6 +67,9 @@ public final class serverSystem {
     public static boolean isUnixFS = false;
     public static boolean canExecUnix = false;
 
+    // calculated system constants
+    public static int maxPathLength = 65535;
+    
     // Macintosh-specific statics
     private static Class       macMRJFileUtils = null;
     private static Class       macMRJOSType = null;
@@ -116,15 +119,13 @@ public final class serverSystem {
 	    //e.printStackTrace();
 	    macMRJFileUtils = null; macMRJOSType = null;
 	}
+    
+        // set up maximum path length accoring to system
+        if (systemOS == systemWindows) maxPathLength = 255; else maxPathLength = 65535;
     }
 
     public static boolean isWindows() {
         return systemOS == systemWindows;
-    }
-    
-    public static int maxPathLength() {
-        if (systemOS == systemWindows) return 255;
-        return 65535;
     }
     
     public static Object getMacOSTS(String s) {

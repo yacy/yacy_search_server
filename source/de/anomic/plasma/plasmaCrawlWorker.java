@@ -358,7 +358,7 @@ public final class plasmaCrawlWorker extends Thread {
                 //long contentLength = res.responseHeader.contentLength();
 
                 htCache = cacheManager.newEntry(requestDate, depth, url, name, requestHeader, res.status, res.responseHeader, initiator, profile);
-                if (htCache.cacheFile.getAbsolutePath().length() > serverSystem.maxPathLength()) {
+                if (htCache.cacheFile.getAbsolutePath().length() > serverSystem.maxPathLength) {
                     remote.close();
                     log.logInfo("REJECTED URL " + url.toString() + " because path too long '" +
                                 cacheManager.cachePath.getAbsolutePath() + "'");

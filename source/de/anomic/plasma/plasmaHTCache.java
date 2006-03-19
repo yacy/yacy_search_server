@@ -742,7 +742,7 @@ public final class plasmaHTCache {
         // we cannot match that here in the cache file path and therefore omit writing into the cache
         if (this.cacheFile.getParentFile().isFile() || this.cacheFile.isDirectory()) { return "path_ambiguous"; }
         if (this.cacheFile.toString().indexOf("..") >= 0) { return "path_dangerous"; }
-        if (this.cacheFile.getAbsolutePath().length() > serverSystem.maxPathLength()) { return "path too long"; }
+        if (this.cacheFile.getAbsolutePath().length() > serverSystem.maxPathLength) { return "path too long"; }
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable in caches
