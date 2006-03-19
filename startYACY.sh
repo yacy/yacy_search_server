@@ -55,7 +55,13 @@ else
 		nohup java $java_args -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
 #		nohup java -Xms160m -Xmx160m -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
 	fi
-	echo "YaCy started as daemon process. View it's activity in DATA/LOG/yacy00.log"
-	echo "To stop YaCy, please execute stopYACY.sh and wait some seconds"
-	echo "To administrate YaCy, start your web browser and open http://localhost:8080"
+	echo "****************** YaCy Web Crawler/Indexer & Search Engine *******************"
+	echo "**** (C) by Michael Peter Christen, usage granted unter the GPL Version. 2 ****"
+	echo "**** USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/yacy   **"
+	echo "**  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy<xx>.log)                **"
+	echo "**  STOP         YaCy: execute stopYACY.sh and wait some seconds             **"
+	echo "**  GET HELP for YaCy: see www.yacy-websearch.net/wiki and www.yacy-forum.de **"
+	echo "*******************************************************************************"
+	echo " >> YaCy started as daemon process. Administration at http://localhost:8080 <<"
+	
 fi
