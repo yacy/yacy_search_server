@@ -69,7 +69,7 @@ import de.anomic.yacy.yacyCore;
 
 public class yacysearch {
 
-    public static final int MAX_TOPWORDS = 16;
+    public static final int MAX_TOPWORDS = 24;
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -160,7 +160,7 @@ public class yacysearch {
             final String delHash = post.get("deleteref", "");
             sb.removeReferences(delHash, query);
         }
-        
+
         // prepare search order
         final String order = post.get("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
         final int count = Integer.parseInt(post.get("count", "10"));
@@ -169,9 +169,9 @@ public class yacysearch {
                                     (yacyCore.seedDB.mySeed != null) &&
                                     (yacyCore.seedDB.mySeed.getAddress() != null));
 
-        String order1=plasmaSearchRankingProfile.ORDER_DATE;
-        String order2=plasmaSearchRankingProfile.ORDER_YBR;
-        String order3=plasmaSearchRankingProfile.ORDER_QUALITY;
+        String order1 = plasmaSearchRankingProfile.ORDER_DATE;
+        String order2 = plasmaSearchRankingProfile.ORDER_YBR;
+        String order3 = plasmaSearchRankingProfile.ORDER_QUALITY;
         if (order.startsWith("YBR"))        order1 = plasmaSearchRankingProfile.ORDER_YBR;
         if (order.startsWith("Date"))       order1 = plasmaSearchRankingProfile.ORDER_DATE;
         if (order.startsWith("Quality"))    order1 = plasmaSearchRankingProfile.ORDER_QUALITY;
@@ -206,7 +206,7 @@ public class yacysearch {
         env.setConfig("last-search", querystring);
         // process result of search
         prop.put("resultbottomline", 0);
-        if (filtered.size() > 0){
+        if (filtered.size() > 0) {
             prop.put("excluded", 1);
             prop.put("excluded_stopwords", filtered.toString());
         } else {
@@ -234,9 +234,12 @@ public class yacysearch {
 
                     prop.put("combine", 1);
 
+                    // get the topwords
                     final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
+                    String tmp = "";
                     for (int i = 0; i < hintcount; i++) {
-                        topwords.add(references[i]);
+                        tmp = (String) references[i];
+                        if (!tmp.matches("[0-9]+")) { topwords.add(tmp); } // omit in the production ?
                     }
 
                     // filter out the badwords
@@ -264,7 +267,7 @@ public class yacysearch {
                 }
             } else {
                 if (totalcount == 0) {
-                    prop.put("num-results", 3);//long
+                    prop.put("num-results", 3); // long
                 } else {
                     prop.put("num-results", 4);
                     prop.put("num-results_linkcount", linkcount);
@@ -333,8 +336,8 @@ public class yacysearch {
 
         // adding some additional properties needed for the rss feed
         String hostName = (String) header.get("Host","localhost");
-        if (hostName.indexOf(":") == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port","8080"));
-        prop.put("rssYacyImageURL","http://" + hostName + "/env/grafics/yacy.gif");
+        if (hostName.indexOf(":") == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
+        prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
 
         return prop;
     }
