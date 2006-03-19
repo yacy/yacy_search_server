@@ -167,6 +167,7 @@ public final class plasmaWordIndex {
     }
 
     public synchronized void flushCacheSome() {
+        ramCache.shiftK2W();
         int flushCount = ramCache.wSize() / 1000;
         if (flushCount > 50) flushCount = 50;
         if (flushCount < 3) flushCount = 3;
