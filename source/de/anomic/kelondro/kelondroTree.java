@@ -83,6 +83,8 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     private Search writeSearchObj = new Search();
     protected kelondroOrder objectOrder = new kelondroNaturalOrder(true);
     private final kelondroOrder loopDetectionOrder = new kelondroNaturalOrder(true);
+    private int readAheadChunkSize = 100;
+    private long lastIteratorCount = readAheadChunkSize;
     
     public kelondroTree(File file, long buffersize, int key, int value, boolean exitOnFail) {
         this(file, buffersize, new int[] { key, value }, new kelondroNaturalOrder(true), 1, 8, exitOnFail);
@@ -1057,9 +1059,12 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             rot = rotating;
             count = 0;
             lastKey = null;
-            chunkSize = (int) Math.min(100, guessedCountLimit);
+            //System.out.println("*** rowIterator: " + filename + ": readAheadChunkSize = " + readAheadChunkSize + ", lastIteratorCount = " + lastIteratorCount);
+            readAheadChunkSize = Math.min(1000, 3 + (int) ((3 * readAheadChunkSize + lastIteratorCount) / 4));
+            chunkSize = (int) Math.min(readAheadChunkSize / 3, guessedCountLimit);
             rowBuffer = rowMap(inc, rot, start, true, chunkSize);
             bufferIterator = rowBuffer.entrySet().iterator();
+            lastIteratorCount = 0;
         }
         
         public boolean hasNext() {
@@ -1085,6 +1090,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             
             // return the row
             count++;
+            lastIteratorCount++;
             return entry.getValue();
         }
         
@@ -1114,9 +1120,12 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             rot = rotating;
             count = 0;
             lastKey = null;
-            chunkSize = (int) Math.min(100, guessedCountLimit);
+            //System.out.println("*** keyIterator: " + filename + ": readAheadChunkSize = " + readAheadChunkSize + ", lastIteratorCount = " + lastIteratorCount);
+            readAheadChunkSize = Math.min(1000, 3 + (int) ((3 * readAheadChunkSize + lastIteratorCount) / 4));
+            chunkSize = (int) Math.min(readAheadChunkSize / 3, guessedCountLimit);
             keyBuffer = keySet(inc, rot, start, true, chunkSize);
             bufferIterator = keyBuffer.iterator();
+            lastIteratorCount = 0;
         }
                 
         public boolean hasNext() {
@@ -1141,6 +1150,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             
             // return the row
             count++;
+            lastIteratorCount++;
             return lastKey;
         }
         
