@@ -58,7 +58,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.http.httpdProxyHandler;
-import de.anomic.plasma.plasmaHTCache.Entry;
+import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
@@ -358,7 +358,7 @@ public final class plasmaCrawlWorker extends Thread {
                 //long contentLength = res.responseHeader.contentLength();
 
                 htCache = cacheManager.newEntry(requestDate, depth, url, name, requestHeader, res.status, res.responseHeader, initiator, profile);
-                if (htCache.cacheFile.getAbsolutePath().length() > Entry.MAXPATHLENGTH) {
+                if (htCache.cacheFile.getAbsolutePath().length() > serverSystem.maxPathLength()) {
                     remote.close();
                     log.logInfo("REJECTED URL " + url.toString() + " because path too long '" +
                                 cacheManager.cachePath.getAbsolutePath() + "'");

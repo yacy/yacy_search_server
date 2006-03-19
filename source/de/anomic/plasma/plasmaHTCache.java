@@ -76,6 +76,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverDate;
 import de.anomic.tools.enumerateFiles;
@@ -604,8 +605,6 @@ public final class plasmaHTCache {
 
     public final class Entry {
 
-    public static final int MAXPATHLENGTH = 255;
-
     // the class objects
     public Date                     initDate;       // the date when the request happened; will be used as a key
     public int                      depth;          // the depth of prefetching
@@ -743,7 +742,7 @@ public final class plasmaHTCache {
         // we cannot match that here in the cache file path and therefore omit writing into the cache
         if (this.cacheFile.getParentFile().isFile() || this.cacheFile.isDirectory()) { return "path_ambiguous"; }
         if (this.cacheFile.toString().indexOf("..") >= 0) { return "path_dangerous"; }
-        if (this.cacheFile.getAbsolutePath().length() > MAXPATHLENGTH) { return "path too long"; }
+        if (this.cacheFile.getAbsolutePath().length() > serverSystem.maxPathLength()) { return "path too long"; }
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable in caches

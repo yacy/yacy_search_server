@@ -118,6 +118,15 @@ public final class serverSystem {
 	}
     }
 
+    public static boolean isWindows() {
+        return systemOS == systemWindows;
+    }
+    
+    public static int maxPathLength() {
+        if (systemOS == systemWindows) return 255;
+        return 65535;
+    }
+    
     public static Object getMacOSTS(String s) {
 	if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
 	    if ((s == null) || (s.equals(blankTypeString))) return macMRJOSNullObj;
