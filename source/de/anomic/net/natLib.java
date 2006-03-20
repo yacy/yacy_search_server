@@ -125,19 +125,20 @@ public class natLib {
 
     //TODO: This is not IPv6 compatible
     public static boolean isProper(String ip) {
-	plasmaSwitchboard sb=plasmaSwitchboard.getSwitchboard();
-        if (sb == null) return false;
-        String yacyDebugMode = sb.getConfig("yacyDebugMode", "false");
-	if(yacyDebugMode.equals("true")){
-		return true;
-	}
-    //support for staticIP
-    if(sb.getConfig("staticIP", "").equals(ip)){
-        return true;
-    }
-	if (ip == null) return false;
-	if (ip.indexOf(":") >= 0) return false; // ipv6...
-		return ( isNotLocal(ip)) && (isIP(ip) );
+        plasmaSwitchboard sb=plasmaSwitchboard.getSwitchboard();
+        if (sb != null) {
+            String yacyDebugMode = sb.getConfig("yacyDebugMode", "false");
+            if (yacyDebugMode.equals("true")) {
+                return true;
+            }
+            // support for staticIP
+            if (sb.getConfig("staticIP", "").equals(ip)) {
+                return true;
+            }
+        }
+        if (ip == null) return false;
+        if (ip.indexOf(":") >= 0) return false; // ipv6...
+        return (isNotLocal(ip)) && (isIP(ip));
     }
 
     private static int retrieveOptions() {

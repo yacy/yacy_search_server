@@ -400,6 +400,7 @@ public class yacyPeerActions {
     }
 
     public boolean peerArrival(yacySeed peer, boolean direct) {
+        if (peer == null) return false;
         boolean res = connectPeer(peer, direct);
         // perform all actions if peer is effective new
         if (res) {
@@ -410,6 +411,7 @@ public class yacyPeerActions {
     }
     
     public void peerDeparture(yacySeed peer) {
+        if (peer == null) return;
         //System.out.println("PEER DEPARTURE:" + peer.toString());
         disconnectPeer(peer);
         // perform all actions
@@ -418,6 +420,7 @@ public class yacyPeerActions {
     }
     
     public void peerPing(yacySeed peer) {
+        if (peer == null) return;
         // this is called only if the peer has junior status
         seedDB.addPotential(peer);
         // perform all actions

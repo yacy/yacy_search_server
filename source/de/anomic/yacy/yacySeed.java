@@ -605,7 +605,9 @@ public class yacySeed {
         if (seed == null) { return null; }
         final HashMap dna = serverCodings.string2map(seed);
         final String hash = (String) dna.remove("Hash");
-        return new yacySeed(hash, dna);
+        yacySeed resultSeed = new yacySeed(hash, dna);
+        if (resultSeed.isProper() == null) return resultSeed;
+        return null;
     }
 
     public String toString() {       
