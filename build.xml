@@ -65,6 +65,7 @@
 <property name="build" location="classes"/>
 <property name="htroot" location="htroot"/>
 <property name="locales" location="locales"/>
+<property name="skins" location="skins"/>
 <property name="ranking" location="ranking"/>
 <property name="release" location="RELEASE"/>
 <property name="htdocsWWW" location="${data}/HTDOCS/www"/>
@@ -413,6 +414,13 @@
 	<!-- copy locales  -->
 	<copy todir="${release_main}/locales">
 	  <fileset dir="${locales}">
+	    <include name="*"/>
+	  </fileset>
+	</copy>
+	
+	<!-- copy skins  -->
+	<copy todir="${release_main}/skins">
+	  <fileset dir="${skins}">
 	    <include name="*"/>
 	  </fileset>
 	</copy>
