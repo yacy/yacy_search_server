@@ -42,6 +42,7 @@
 package de.anomic.plasma;
 
 import java.io.File;
+import java.net.URL;
 import java.util.HashMap;
 import de.anomic.kelondro.kelondroMSetTools;
 
@@ -84,6 +85,10 @@ public class plasmaURLPattern {
         hostpaths.put(host.toLowerCase(), path);
     }
 
+    public boolean isListed(URL url) {
+        return isListed(url.getHost().toLowerCase(), url.getFile());
+    }
+    
     public boolean isListed(String hostlow, String path) {
         if (path.length() > 0 && path.charAt(0) == '/') path = path.substring(1);
         String pp = ""; // path-pattern

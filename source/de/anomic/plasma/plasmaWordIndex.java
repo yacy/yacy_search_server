@@ -559,7 +559,7 @@ public final class plasmaWordIndex {
                         // "+entry.getUrlHash());
                         try {
                             url = lurl.getEntry(entry.getUrlHash(), null).url();
-                            if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(url.getHost().toLowerCase(), url.getPath()) == true)) {
+                            if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(url) == true)) {
                                 urlHashs.add(entry.getUrlHash());
                             }
                         } catch (IOException e) {

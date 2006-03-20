@@ -460,7 +460,7 @@ public class IndexControl_p {
 
                     } else {
                         url = new URL(us);
-                        if (plasmaSwitchboard.urlBlacklist.isListed(url.getHost().toLowerCase(), url.getPath())) {
+                        if (plasmaSwitchboard.urlBlacklist.isListed(url)) {
                             result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" checked value=\"").append(uh[0]).append("\" align=\"top\">");
                         } else {
                             result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" value=\"").append(uh[0]).append("\" align=\"top\">");

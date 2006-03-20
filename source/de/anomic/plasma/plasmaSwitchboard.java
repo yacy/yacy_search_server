@@ -187,7 +187,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaCrawlStacker          sbStackCrawlThread;
     public  messageBoard                messageDB;
     public  wikiBoard                   wikiDB;
-    public	blogBoard					blogDB;
+    public  blogBoard                   blogDB;
     public  static plasmaCrawlRobotsTxt robots;
     public  plasmaCrawlProfile          profiles;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
