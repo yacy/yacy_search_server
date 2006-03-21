@@ -60,9 +60,9 @@ public class plasmaDHTTransfer extends Thread {
     private String transferStatusMessage = "";
 
     // delivery destination
-    private static yacySeed [] seeds = null;
+    private yacySeed [] seeds = null;
     private static int seedcount = 0;
-    yacySeed seed = null;
+    private yacySeed seed = null;
 
     // word chunk
     plasmaDHTChunk dhtChunk;
@@ -89,7 +89,7 @@ public class plasmaDHTTransfer extends Thread {
         this.timeout4Transfer = timeout;
         this.dhtChunk = dhtChunk;
         this.maxRetry = retries;
-        setSeeds(seeds);
+        this.seeds = seeds;
     }
 
     public void run() {
@@ -198,10 +198,6 @@ public class plasmaDHTTransfer extends Thread {
                 }
             }
         }
-    }
-
-    private static void setSeeds(yacySeed [] seeds) {
-        plasmaDHTTransfer.seeds = seeds;
     }
 
     public static void setSeedcount(int seedcount) {
