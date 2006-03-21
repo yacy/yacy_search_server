@@ -1,12 +1,13 @@
-// httpdProxyHandler.java 
+// httpdProxyHandler.java
 // -----------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// 
-// last major change: $LastChangedDate$ by $LastChangedBy$
-// Revision: $LastChangedRevision$
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -323,29 +324,30 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
      * @see de.anomic.http.httpdHandler#doGet(java.util.Properties, de.anomic.http.httpHeader, java.io.OutputStream)
      */
     public void doGet(Properties conProp, httpHeader requestHeader, OutputStream respond) throws IOException {
-        
+
         this.connectionProperties = conProp;
-        
+
         try {
             // remembering the starting time of the request
             final Date requestDate = new Date(); // remember the time...
             this.connectionProperties.put(httpHeader.CONNECTION_PROP_REQUEST_START,new Long(requestDate.getTime()));
             if (yacyTrigger) de.anomic.yacy.yacyCore.triggerOnlineAction();
             switchboard.proxyLastAccess = System.currentTimeMillis();
-            
+
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)
             respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2);
-            
-            String host =    conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
-            final String path =    conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);     // always starts with leading '/'
-            final String args =    conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);     // may be null if no args were given
-            final String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
+
+            String host = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
+            String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);           // always starts with leading '/'
+            final String args = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);     // may be null if no args were given
+            final String ip   = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
             int pos=0;
             int port=0;
-            
+
             URL url = null;
             try {
                 url = httpHeader.getRequestURL(conProp);
+
                 //redirector
                 if (redirectorEnabled){
                     synchronized(redirectorProcess){
@@ -377,7 +379,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 port = Integer.parseInt(host.substring(pos + 1));
                 host = host.substring(0, pos);
             }
-            
+
             String ext;
             if ((pos = path.lastIndexOf('.')) < 0) {
                 ext = "";
@@ -389,16 +391,17 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             // blacklist idea inspired by [AS]:
             // respond a 404 for all AGIS ("all you get is shit") servers
             String hostlow = host.toLowerCase();
+            if (args != null) { path = path + "?" + args; }
             if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, path)) {
                 httpd.sendRespondError(conProp,respond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 this.theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
                 return;
             }
-            
+
             // handle outgoing cookies
             handleOutgoingCookies(requestHeader, host, ip);
-            
+
             // set another userAgent, if not yellowlisted
             if ((yellowList != null) && (!(yellowList.contains(domain(hostlow))))) {
                 // change the User-Agent
@@ -441,7 +444,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     requestDate,                     // init date 
                     0,                               // crawling depth
                     url,                             // url
-                    "",                              // name of the url is unknown
+                    "",                        // name of the url is unknown
                     requestHeader,                   // request headers
                     "200 OK",                        // request status
                     cachedResponseHeader,            // response headers
@@ -646,9 +649,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
                     byte[] cacheArray = res.writeContent(hfos);
                     this.theLogger.logFine("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
-                    
+
                     if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
-                    
+
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
                         //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
@@ -667,7 +670,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                         cacheEntry.cacheArray = cacheArray;
                         cacheManager.push(cacheEntry); // necessary update, write response header to cache
                         conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
-                    }          
+                    }
                 } else {
                     // the file is too big to cache it in the ram, or the size is unknown
                     // write to file right here.
@@ -701,7 +704,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                         " StoreError=" + ((storeError==null)?"None":storeError) + 
                         " StoreHTCache=" + storeHTCache + 
                         " SupportetContent=" + isSupportedContent);
-                
+
                 res.writeContent(hfos, null);
                 if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
                 if (sizeBeforeDelete == -1) {
@@ -715,7 +718,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 }
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
             }
-            
+
             if (gzippedOut != null) {
                 gzippedOut.finish();
             }
@@ -908,7 +911,11 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // check the blacklist, inspired by [AS]: respond a 404 for all AGIS (all you get is shit) servers
             String hostlow = host.toLowerCase();
-            if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, path)) {
+
+            // re-calc the url path
+            String remotePath = (args == null) ? path : (path + "?" + args);
+
+            if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, remotePath)) {
                 httpd.sendRespondError(conProp,respond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 this.theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
@@ -926,9 +933,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // resolve yacy and yacyh domains
             String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
-            
-            // re-calc the url path
-            String remotePath = (args == null) ? path : (path + "?" + args);
             
             // attach possible yacy-sublevel-domain
             if ((yAddress != null) && ((pos = yAddress.indexOf("/")) >= 0)) remotePath = yAddress.substring(pos) + remotePath;
@@ -987,7 +991,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             String path    = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
             String args    = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS); // may be null if no args were given
             String httpVer = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
-            
+
             int port, pos;
             if ((pos = host.indexOf(":")) < 0) {
                 port = 80;
@@ -1101,46 +1105,49 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     public void doConnect(Properties conProp, de.anomic.http.httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) throws IOException {
         this.connectionProperties = conProp;
         switchboard.proxyLastAccess = System.currentTimeMillis();
-        
+
         String host = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
         String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
-        
+        String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
+        final String args = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);
+        if (args != null) { path = path + "?" + args; }
+
         int port, pos;
         if ((pos = host.indexOf(":")) < 0) {
             port = 80;
         } else {
             port = Integer.parseInt(host.substring(pos + 1));
             host = host.substring(0, pos);
-        }                
-        
+        }
+
         // check the blacklist
         // blacklist idea inspired by [AS]:
         // respond a 404 for all AGIS ("all you get is shit") servers
-        String hostlow = host.toLowerCase();
-        if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, "/")) {
+        final String hostlow = host.toLowerCase();
+        if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, path)) {
             httpd.sendRespondError(conProp,clientOut,4,403,null,
                     "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
             this.theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
             forceConnectionClose();
             return;
         }
-        
+
         // possibly branch into PROXY-PROXY connection
         if (
-                (switchboard.remoteProxyConfig != null) && 
+                (switchboard.remoteProxyConfig != null) &&
                 (switchboard.remoteProxyConfig.useProxy()) &&
                 (switchboard.remoteProxyConfig.useProxy4SSL())
         ) {
             httpc remoteProxy = null;
             try {
                 remoteProxy = httpc.getInstance(
-                        host, 
-                        port, 
-                        timeout, 
-                        false, 
+                        host,
+                        port,
+                        timeout,
+                        false,
                         switchboard.remoteProxyConfig
                 );
-                
+
                 httpc.response response = remoteProxy.CONNECT(host, port, requestHeader);
                 response.print();
                 if (response.success()) {
@@ -1160,8 +1167,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             } finally {
                 if (remoteProxy != null) httpc.returnInstance(remoteProxy);
             }
-        } 
-        
+        }
+
         // try to establish connection to remote host
         Socket sslSocket = new Socket(host, port);
         sslSocket.setSoTimeout(timeout); // waiting time for write
