@@ -1233,6 +1233,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;
         }
+        if (sbQueue.size() >= indexingSlots) {
+            log.logFine("GlobalCrawl: too many processes in indexing queue, dismissed (" +
+            "sbQueueSize=" + sbQueue.size() + ")");
+            return false;
+        }
+        if (cacheLoader.size() >= crawlSlots) {
+            log.logFine("GlobalCrawl: too many processes in loader queue, dismissed (" +
+            "cacheLoader=" + cacheLoader.size() + ")");
+            return false;
+        }        
         if (onlineCaution()) {
             log.logFine("GlobalCrawl: online caution, omitting processing");
             return false;
