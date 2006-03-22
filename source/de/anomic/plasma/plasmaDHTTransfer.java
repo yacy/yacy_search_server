@@ -94,7 +94,9 @@ public class plasmaDHTTransfer extends Thread {
 
     public void run() {
         while (getStatus() != plasmaDHTChunk.chunkStatus_COMPLETE && seedcount < seeds.length)try {
-            seed = seeds[seedcount++];
+            synchronized(seed) {
+                seed = seeds[seedcount++];
+            }
             uploadIndex();
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
