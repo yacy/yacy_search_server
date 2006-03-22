@@ -122,7 +122,7 @@ public final class crawlOrder {
             delay = "3600"; // may request one hour later again
         } else try {
             yacySeed requester = yacyCore.seedDB.getConnected(iam);
-            int queuesize = switchboard.coreCrawlJobSize() + switchboard.limitCrawlTriggerJobSize() + switchboard.remoteTriggeredCrawlJobSize();
+            int queuesize = switchboard.coreCrawlJobSize() + switchboard.limitCrawlTriggerJobSize() + switchboard.remoteTriggeredCrawlJobSize() + switchboard.queueSize();
             if (requester == null) {
                 response = "denied";
                 reason = "unknown-client";
