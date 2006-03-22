@@ -63,6 +63,8 @@ public class plasmaDHTChunk {
     public static final int chunkStatus_INTERRUPTED = 3;
     public static final int chunkStatus_COMPLETE = 4;
     
+    public static final int peerRedundancy = 3;
+    
     private plasmaWordIndex wordIndex;
     private serverLog log;
     private plasmaCrawlLURL lurls;
@@ -147,10 +149,11 @@ public class plasmaDHTChunk {
     private String selectTransferStart() {
         String startPointHash;
         // first try to select with increasing probality a good start point
+        double minimumDistance = ((double) peerRedundancy) / ((double) yacyCore.seedDB.sizeConnected());
         if (Math.round(Math.random() * 6) != 4)
             for (int i = 9; i > 0; i--) {
                 startPointHash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(i + System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
-                if (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash) > ((double) i / (double) 10))
+                if (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash) > (minimumDistance + ((double) i / (double) 10)))
                     return startPointHash;
             }
         // if that fails, take simply the best start point (this is usually avoided, since that leads to always the same target peers)
@@ -182,8 +185,10 @@ public class plasmaDHTChunk {
             int refcount = 0;
 
             urlCache = new HashMap();
+            double maximumDistance = ((double) peerRedundancy * 2) / ((double) yacyCore.seedDB.sizeConnected());
+            
             while ((maxcount > refcount) && (wordHashIterator.hasNext()) && ((nexthash = (String) wordHashIterator.next()) != null) && (nexthash.trim().length() > 0)
-                            && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(nexthash, ((plasmaWordIndexEntryContainer) tmpContainers.get(0)).wordHash()) < 0.2))) {
+                            && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(nexthash, ((plasmaWordIndexEntryContainer) tmpContainers.get(0)).wordHash()) < maximumDistance))) {
                 // make an on-the-fly entity and insert values
                 indexContainer = wordIndex.getContainer(nexthash, true, 10000);
                 int notBoundCounter = 0;
