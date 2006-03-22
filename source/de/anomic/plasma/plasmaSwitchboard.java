@@ -680,7 +680,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             (getConfig(STR_PROXYPROFILE, "").length() == 0) ||
             (this.profiles.getEntry(getConfig(STR_PROXYPROFILE, "")) == null)) {
             // generate new default entry for proxy crawling
-            this.defaultProxyProfile = this.profiles.newEntry("proxy", "", ".*", ".*", Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), false, true, true, true, getConfigBool("proxyCrawlOrder", false), true, true, true);
+            this.defaultProxyProfile = this.profiles.newEntry("proxy", "", ".*", ".*", Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), 60 * 24 * 30, -1, false, true, true, true, getConfigBool("proxyCrawlOrder", false), true, true, true);
             setConfig(STR_PROXYPROFILE, this.defaultProxyProfile.handle());
         } else {
             this.defaultProxyProfile = this.profiles.getEntry(getConfig(STR_PROXYPROFILE, ""));
@@ -689,8 +689,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             (getConfig(STR_REMOTEPROFILE, "").length() == 0) ||
             (profiles.getEntry(getConfig(STR_REMOTEPROFILE, "")) == null)) {
             // generate new default entry for remote crawling
-            defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, false, true, true, false, true, true, false);
-//          defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, true, true, true, true, true, true, true, false);
+            defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, 60 * 24 * 30, -1, true, false, true, true, false, true, true, false);
             setConfig(STR_REMOTEPROFILE, defaultRemoteProfile.handle());
         } else {
             defaultRemoteProfile = profiles.getEntry(getConfig(STR_REMOTEPROFILE, ""));

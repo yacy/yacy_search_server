@@ -95,6 +95,10 @@ public class IndexCreate_p {
                     env.setConfig("crawlingFilter", newcrawlingfilter);
                     int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "0"));
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
+                    int recrawlIfOlder = Integer.parseInt(post.get("recrawlIfOlder", "-1"));
+                    env.setConfig("crawlingIfOlder", recrawlIfOlder);
+                    int autoDomFilterDepth = Integer.parseInt(post.get("autoDomFilterDepth", "-1"));
+                    env.setConfig("crawlingautoDomFilterDepth", Integer.toString(autoDomFilterDepth));
                     boolean crawlingQ = post.get("crawlingQ", "").equals("on");
                     env.setConfig("crawlingQ", (crawlingQ) ? "true" : "false");
                     boolean storeHTCache = post.get("storeHTCache", "").equals("on");
@@ -145,7 +149,7 @@ public class IndexCreate_p {
                             switchboard.urlPool.errorURL.remove(urlhash);
                             
                             // stack url
-                            plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
+                            plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, recrawlIfOlder, autoDomFilterDepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
                             String reasonString = switchboard.sbStackCrawlThread.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed.hash, "CRAWLING-ROOT", new Date(), 0, pe);
                             
                             if (reasonString == null) {
@@ -206,7 +210,7 @@ public class IndexCreate_p {
                                 HashMap hyperlinks = (HashMap) scraper.getAnchors();
                                 
                                 // creating a crawler profile
-                                plasmaCrawlProfile.entry profile = switchboard.profiles.newEntry(fileName, file.toURL().toString(), newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);                                
+                                plasmaCrawlProfile.entry profile = switchboard.profiles.newEntry(fileName, file.toURL().toString(), newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, recrawlIfOlder, autoDomFilterDepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);                                
                                 
                                 // loop through the contained links
                                 Iterator interator = hyperlinks.entrySet().iterator();

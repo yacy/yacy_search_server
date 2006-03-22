@@ -45,7 +45,11 @@ public class urlRedirectord implements serverHandler {
                             ".*", 
                             // depth
                             0, 
-                            0, 
+                            0,
+                            // recrawlIfOlder (minutes), if negative: do not re-crawl
+                            -1,
+                            // autoDomFilterDepth, if negative: no auto-filter
+                            -1,
                             // crawlDynamic
                             false, 
                             // storeHTCache

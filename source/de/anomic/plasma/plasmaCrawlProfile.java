@@ -176,6 +176,7 @@ public class plasmaCrawlProfile {
     
     public entry newEntry(String name, String startURL, String generalFilter, String specificFilter,
                            int generalDepth, int specificDepth,
+                           int recrawlIfOlder /*minutes*/, int autoDomFilterDepth, 
                            boolean crawlingQ,
                            boolean storeHTCache, boolean storeTXCache,
                            boolean localIndexing, boolean remoteIndexing,
@@ -183,6 +184,7 @@ public class plasmaCrawlProfile {
         
         entry ne = new entry(name, startURL, generalFilter, specificFilter,
                              generalDepth, specificDepth,
+                             recrawlIfOlder, autoDomFilterDepth,
                              crawlingQ, storeHTCache, storeTXCache, localIndexing, remoteIndexing,
                              xsstopw, xdstopw, xpstopw);
         try {
@@ -225,6 +227,7 @@ public class plasmaCrawlProfile {
         private Map mem;
         public entry(String name, String startURL, String generalFilter, String specificFilter,
                      int generalDepth, int specificDepth,
+                     int recrawlIfOlder /*minutes*/, int autoDomFilterDepth, 
                      boolean crawlingQ,
                      boolean storeHTCache, boolean storeTXCache,
                      boolean localIndexing, boolean remoteIndexing,
@@ -238,6 +241,8 @@ public class plasmaCrawlProfile {
             mem.put("specificFilter", specificFilter);
             mem.put("generalDepth", Integer.toString(generalDepth));
             mem.put("specificDepth", Integer.toString(specificDepth));
+            mem.put("recrawlIfOlder", Integer.toString(recrawlIfOlder));
+            mem.put("autoDomFilterDepth", Integer.toString(autoDomFilterDepth));
             mem.put("crawlingQ", (crawlingQ) ? "true" : "false"); // crawling of urls with '?'
             mem.put("storeHTCache", (storeHTCache) ? "true" : "false");
             mem.put("storeTXCache", (storeTXCache) ? "true" : "false");
@@ -295,6 +300,27 @@ public class plasmaCrawlProfile {
         }
         public int specificDepth() {
             String r = (String) mem.get("specificDepth");
+            if (r == null) return 0; else try {
+                return Integer.parseInt(r);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+        public long recrawlIfOlder() {
+            // returns a long (millis) that is the minimum age that
+            // an antry must have to be re-crawled
+            String r = (String) mem.get("recrawlIfOlder");
+            if (r == null) return Long.MAX_VALUE; else try {
+                long l = Long.parseLong(r) * ((long) 60000);
+                if (l < 0) return Long.MAX_VALUE; else return l;
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+        public int autoDomFilterDepth() {
+            // if the depth is equal or less to this depth,
+            // the the current url feeds with its domain the crawl filter
+            String r = (String) mem.get("autoDomFilterDepth");
             if (r == null) return 0; else try {
                 return Integer.parseInt(r);
             } catch (NumberFormatException e) {

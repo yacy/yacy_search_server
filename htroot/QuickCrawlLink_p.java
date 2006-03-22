@@ -164,8 +164,10 @@ public class QuickCrawlLink_p {
                         crawlingFilter, 
                         CrawlingDepth, 
                         CrawlingDepth, 
+                        60 * 24 * 30, // recrawlIfOlder (minutes); here: one month
+                        -1, // autoDomFilterDepth, if negative: no auto-filter
                         crawlDynamic, 
-                        storeHTCache, 
+                        storeHTCache,
                         true, 
                         localIndexing, 
                         remoteIndexing, 
