@@ -159,17 +159,17 @@ public final class serverFileUtils {
         }
     }
     
-    public static void writeAndZip(byte[] source, File dest) throws IOException {
+    public static void writeAndGZip(byte[] source, File dest) throws IOException {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(dest);
-            writeAndZip(source, fos);
+            writeAndGZip(source, fos);
         } finally {
             if (fos != null) try {fos.close();} catch (Exception e) {}
         }
     }
     
-    public static void writeAndZip(byte[] source, OutputStream dest) throws IOException {
+    public static void writeAndGZip(byte[] source, OutputStream dest) throws IOException {
         GZIPOutputStream zipOut = null;
         try {
             zipOut = new GZIPOutputStream(dest);
@@ -288,7 +288,7 @@ public final class serverFileUtils {
     
     public static void main(String[] args) {
         try {
-            writeAndZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));
+            writeAndGZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -104,7 +104,7 @@ public class ConfigSkins_p {
 	}
 	
 	//if there are no skins, use the current style as default
-	//normally only invoked at first start of YACY
+	//normally only invoked at first start of YaCy
 	if(skinFiles.length == 0){
 		copyFile(new File(env.getRootPath(), "htroot/env/style.css"), new File(skinPath, "default.css"));
 		env.setConfig("currentSkin", "default");
@@ -120,14 +120,14 @@ public class ConfigSkins_p {
 			File skinfile= new File(skinPath, (String)post.get("skin"));
 			skinfile.delete();
 
-		//load Skin from URL
+		//load skin from URL
 		} else if (post.containsKey("url")){
 			String url = (String)post.get("url");
 			ArrayList skinVector;
 			try{
 				skinVector = httpc.wget(new URL(url), 6000, null, null, switchboard.remoteProxyConfig);
 			}catch(IOException e){
-				prop.put("status", 1);//unable to get url
+				prop.put("status", 1);//unable to get URL
 				prop.put("status_url", url);
 				return prop;
 			}
@@ -151,7 +151,7 @@ public class ConfigSkins_p {
 	}
 
 	
-	//reread Skins
+	//reread skins
 	skinFiles = listManager.getDirListing(skinPath);
 	int i;
 	for(i=0;i<= skinFiles.length-1;i++){

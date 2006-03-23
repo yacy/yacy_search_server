@@ -114,9 +114,9 @@ public class yacyPeerActions {
 		}
         
         //the speed of indexing (pages/minute) of the peer
-        if(uptimediff==0){
+        if(uptimediff<=0){
             //no timedelta. we cannot calculate a new value
-        }else if(indexedcdiff==0){
+        }else if(indexedcdiff<=0){
             //no indexing in the time...
             seedDB.mySeed.put(yacySeed.ISPEED, Long.toString(0));
         }else{
@@ -162,7 +162,7 @@ public class yacyPeerActions {
         
         yacyCore.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
         
-        // - load the superseed: a list of URL's
+        // - load the superseed: a list of URLs
         disorderSet superseed = loadSuperseed(superseedFile, superseedURL);
         
         // - use the superseed to further fill up the seedDB
