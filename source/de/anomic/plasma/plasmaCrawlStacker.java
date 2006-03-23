@@ -311,10 +311,36 @@ public final class plasmaCrawlStacker {
             return reason;
         }
         
+        // add domain to profile domain list
+        if (currentdepth <= profile.domFilterDepth()) {
+            profile.domInc(nexturl.getHost());
+        }
+
+        // deny urls that do not match with the profile domain list
+        if (profile.domCount(nexturl.getHost()) == 0) {
+            reason = "denied_(no_match_with_domain_filter)";
+            this.log.logFine("URL '" + nexturlString + "' is not listed in granted domains. " + 
+                             "Stack processing time: " + (System.currentTimeMillis()-startTime));
+            return reason;
+        }
+
+        // deny urls that exceed allowed number of occurrences
+        if (profile.domCount(nexturl.getHost()) > profile.domMaxPages()) {
+            reason = "denied_(domain_count_exceeded)";
+            this.log.logFine("URL '" + nexturlString + "' appeared too often, a maximum of " + profile.domMaxPages() + " is allowed. "+ 
+                             "Stack processing time: " + (System.currentTimeMillis()-startTime));
+            return reason;
+        }
+
         String nexturlhash = plasmaURL.urlHash(nexturl);
-        String dbocc = "";
-        if ((dbocc = this.sb.urlPool.exists(nexturlhash)) != null) {
-            // DISTIGUISH OLD/RE-SEARCH CASES HERE!
+        String dbocc = this.sb.urlPool.exists(nexturlhash);
+        plasmaCrawlLURL.Entry oldEntry = null;
+        if (dbocc != null) try {
+            oldEntry = this.sb.urlPool.loadedURL.getEntry(nexturlhash, null);
+        } catch (IOException e) {}
+        boolean recrawl = (oldEntry != null) &&
+                          (((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000) > profile.recrawlIfOlder());
+        if ((dbocc != null) && (!(recrawl))) {
             reason = "double_(registered_in_" + dbocc + ")";
             /*
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
@@ -323,7 +349,7 @@ public final class plasmaCrawlStacker {
                              "Stack processing time: " + (System.currentTimeMillis()-startTime));
             return reason;
         }
-        
+
         // checking robots.txt
         if (robotsParser.isDisallowed(nexturl)) {
             reason = "denied_(robots.txt)";
@@ -333,6 +359,12 @@ public final class plasmaCrawlStacker {
             this.log.logFine("Crawling of URL '" + nexturlString + "' disallowed by robots.txt. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime));
             return reason;            
+        }
+
+        // show potential re-crawl
+        if (recrawl) {
+            this.log.logFine("RE-CRAWL of URL '" + nexturlString + "': this url was crawled " +
+                    ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
         }
         
         // store information

@@ -48,7 +48,9 @@ public class urlRedirectord implements serverHandler {
                             0,
                             // recrawlIfOlder (minutes), if negative: do not re-crawl
                             -1,
-                            // autoDomFilterDepth, if negative: no auto-filter
+                            // domFilterDepth, if negative: no auto-filter
+                            -1,
+                            // domMaxPages, if negative: no count restriction
                             -1,
                             // crawlDynamic
                             false, 

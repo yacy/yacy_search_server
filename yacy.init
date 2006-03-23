@@ -329,13 +329,14 @@ browserPopUpApplication=netscape
 yacyOwnSeedFile=DATA/YACYDB/mySeed.txt
 yacyDB=DATA/YACYDB
 
-# index sharing attributes
-# by default, sharing is on. If you want to use the proxy only for
-# local indexing, you may switch this off
+# index sharing attributes: by default, sharing is on.
+# If you want to use YaCy only for local indexing (robinson mode),
+# you may switch this off
 allowDistributeIndex=true
 allowDistributeIndexWhileCrawling=false
 allowReceiveIndex=true
-indexReceiveBlockBlacklist=false
+allowUnlimitedReceiveIndexFrom=
+indexReceiveBlockBlacklist=true
 
 # the frequency is the number of links per minute, that the peer allowes
 # _every_ other peer to send to this peer
@@ -362,6 +363,9 @@ proxyCrawlOrder=false
 # Be careful with this number. Consider a branching factor of average 20;
 # A prefect-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
 crawlingDepth=2
+crawlingIfOlder=525600
+crawlingDomFilterDepth=-1
+crawlingDomMaxPages=-1
 localIndexing=true
 
 # Filter for crawlinig; may be used to restrict a crawl to a specific domain

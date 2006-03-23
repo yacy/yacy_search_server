@@ -176,7 +176,7 @@ public class plasmaCrawlProfile {
     
     public entry newEntry(String name, String startURL, String generalFilter, String specificFilter,
                            int generalDepth, int specificDepth,
-                           int recrawlIfOlder /*minutes*/, int autoDomFilterDepth, 
+                           int recrawlIfOlder /*minutes*/, int domFilterDepth,  int domMaxPages,
                            boolean crawlingQ,
                            boolean storeHTCache, boolean storeTXCache,
                            boolean localIndexing, boolean remoteIndexing,
@@ -184,7 +184,7 @@ public class plasmaCrawlProfile {
         
         entry ne = new entry(name, startURL, generalFilter, specificFilter,
                              generalDepth, specificDepth,
-                             recrawlIfOlder, autoDomFilterDepth,
+                             recrawlIfOlder, domFilterDepth, domMaxPages,
                              crawlingQ, storeHTCache, storeTXCache, localIndexing, remoteIndexing,
                              xsstopw, xdstopw, xpstopw);
         try {
@@ -225,9 +225,11 @@ public class plasmaCrawlProfile {
         // this is a simple record structure that hold all properties of a single crawl start
 
         private Map mem;
+        private Map doms;
+        
         public entry(String name, String startURL, String generalFilter, String specificFilter,
                      int generalDepth, int specificDepth,
-                     int recrawlIfOlder /*minutes*/, int autoDomFilterDepth, 
+                     int recrawlIfOlder /*minutes*/, int domFilterDepth, int domMaxPages,
                      boolean crawlingQ,
                      boolean storeHTCache, boolean storeTXCache,
                      boolean localIndexing, boolean remoteIndexing,
@@ -242,7 +244,8 @@ public class plasmaCrawlProfile {
             mem.put("generalDepth", Integer.toString(generalDepth));
             mem.put("specificDepth", Integer.toString(specificDepth));
             mem.put("recrawlIfOlder", Integer.toString(recrawlIfOlder));
-            mem.put("autoDomFilterDepth", Integer.toString(autoDomFilterDepth));
+            mem.put("domFilterDepth", Integer.toString(domFilterDepth));
+            mem.put("domMaxPages", Integer.toString(domMaxPages));
             mem.put("crawlingQ", (crawlingQ) ? "true" : "false"); // crawling of urls with '?'
             mem.put("storeHTCache", (storeHTCache) ? "true" : "false");
             mem.put("storeTXCache", (storeTXCache) ? "true" : "false");
@@ -251,6 +254,8 @@ public class plasmaCrawlProfile {
             mem.put("xsstopw", (xsstopw) ? "true" : "false"); // exclude static stop-words
             mem.put("xdstopw", (xdstopw) ? "true" : "false"); // exclude dynamic stop-word
             mem.put("xpstopw", (xpstopw) ? "true" : "false"); // exclude parent stop-words
+
+            doms = new HashMap();
         }
         
         public String toString() {
@@ -317,12 +322,27 @@ public class plasmaCrawlProfile {
                 return 0;
             }
         }
-        public int autoDomFilterDepth() {
+        public int domFilterDepth() {
             // if the depth is equal or less to this depth,
-            // the the current url feeds with its domain the crawl filter
-            String r = (String) mem.get("autoDomFilterDepth");
+            // then the current url feeds with its domain the crawl filter
+            // if this is -1, all domains are feeded
+            String r = (String) mem.get("domFilterDepth");
             if (r == null) return 0; else try {
-                return Integer.parseInt(r);
+                int i = Integer.parseInt(r);
+                if (i < 0) return Integer.MAX_VALUE;
+                return i;
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+        public int domMaxPages() {
+            // this is the maximum number of pages that are crawled for a single domain
+            // if -1, this means no limit
+            String r = (String) mem.get("domMaxPages");
+            if (r == null) return 0; else try {
+                int i = Integer.parseInt(r);
+                if (i < 0) return Integer.MAX_VALUE;
+                return i;
             } catch (NumberFormatException e) {
                 return 0;
             }
@@ -362,6 +382,33 @@ public class plasmaCrawlProfile {
         public void changeEntry(String propName, String newValue) throws IOException {
             mem.put(propName,  newValue);
             profileTable.set(handle(), mem);
+        }
+        public void domInc(String domain) {
+            Integer c = (Integer) doms.get(domain);
+            if (c == null) {
+                // new domain
+                doms.put(domain, new Integer(1));
+            } else {
+                // increase counter
+                doms.put(domain, new Integer(c.intValue() + 1));
+            }
+        }
+        public int domCount(String domain) {
+            Integer c = (Integer) doms.get(domain);
+            if (c == null) {
+                return 0;
+            } else {
+                return c.intValue();
+            }
+        }
+        public int domSize() {
+            return doms.size();
+        }
+        public boolean domExists(String domain) {
+            return doms.containsKey(domain);
+        }
+        public Iterator domNames() {
+            return doms.keySet().iterator();
         }
     }
 }

@@ -97,8 +97,10 @@ public class IndexCreate_p {
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                     int recrawlIfOlder = Integer.parseInt(post.get("recrawlIfOlder", "-1"));
                     env.setConfig("crawlingIfOlder", recrawlIfOlder);
-                    int autoDomFilterDepth = Integer.parseInt(post.get("autoDomFilterDepth", "-1"));
-                    env.setConfig("crawlingautoDomFilterDepth", Integer.toString(autoDomFilterDepth));
+                    int domFilterDepth = Integer.parseInt(post.get("domFilterDepth", "-1"));
+                    env.setConfig("crawlingDomFilterDepth", Integer.toString(domFilterDepth));
+                    int domMaxPages = Integer.parseInt(post.get("domMaxPages", "-1"));
+                    env.setConfig("crawlingDomMaxPages", Integer.toString(domMaxPages));
                     boolean crawlingQ = post.get("crawlingQ", "").equals("on");
                     env.setConfig("crawlingQ", (crawlingQ) ? "true" : "false");
                     boolean storeHTCache = post.get("storeHTCache", "").equals("on");
@@ -149,7 +151,7 @@ public class IndexCreate_p {
                             switchboard.urlPool.errorURL.remove(urlhash);
                             
                             // stack url
-                            plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, recrawlIfOlder, autoDomFilterDepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
+                            plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, recrawlIfOlder, domFilterDepth, domMaxPages, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
                             String reasonString = switchboard.sbStackCrawlThread.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed.hash, "CRAWLING-ROOT", new Date(), 0, pe);
                             
                             if (reasonString == null) {
@@ -210,7 +212,7 @@ public class IndexCreate_p {
                                 HashMap hyperlinks = (HashMap) scraper.getAnchors();
                                 
                                 // creating a crawler profile
-                                plasmaCrawlProfile.entry profile = switchboard.profiles.newEntry(fileName, file.toURL().toString(), newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, recrawlIfOlder, autoDomFilterDepth, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);                                
+                                plasmaCrawlProfile.entry profile = switchboard.profiles.newEntry(fileName, file.toURL().toString(), newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, recrawlIfOlder, domFilterDepth, domMaxPages, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);                                
                                 
                                 // loop through the contained links
                                 Iterator interator = hyperlinks.entrySet().iterator();
@@ -299,6 +301,9 @@ public class IndexCreate_p {
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", env.getConfig("crawlingDepth", "0"));
         prop.put("crawlingFilter", env.getConfig("crawlingFilter", "0"));
+        prop.put("crawlingIfOlder", env.getConfig("crawlingIfOlder", "-1"));
+        prop.put("crawlingDomFilterDepth", env.getConfig("crawlingDomFilterDepth", "-1"));
+        prop.put("crawlingDomMaxPages", env.getConfig("crawlingDomMaxPages", "-1"));
         prop.put("crawlingQChecked", env.getConfig("crawlingQ", "").equals("true") ? 1 : 0);
         prop.put("storeHTCacheChecked", env.getConfig("storeHTCache", "").equals("true") ? 1 : 0);
         prop.put("localIndexingChecked", env.getConfig("localIndexing", "").equals("true") ? 1 : 0);
