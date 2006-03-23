@@ -19,12 +19,12 @@ You can define URLs as start points for Web page crawling and start crawling her
 
 <table border="0" cellpadding="5" cellspacing="1" width="100%">
 <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-  <tr valign="top" class="TableCellDark">
-  <td></td>
-  <td></td>
-  <td></td>
+  <tr class="TableHeader">
+  <td class="small"><b>Attribut</b></td>
+  <td class="small"><b>Value</b></td>
+  <td class="small"><b>Description</b></td>
   </tr>
-  <tr valign="top" class="TableCellDark">
+  <tr valign="top" class="TableCellLight">
     <td class=small>Crawling Depth:</td>
     <td class=small><input name="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#"></td>
     <td class=small>
@@ -34,7 +34,7 @@ You can define URLs as start points for Web page crawling and start crawling her
     A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.
     </td>
   </tr>
-  <tr valign="top" class="TableCellLight">
+  <tr valign="top" class="TableCellDark">
     <td class=small>Crawling Filter:</td>
     <td class=small><input name="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#"></td>
     <td class=small >
@@ -43,9 +43,9 @@ You can define URLs as start points for Web page crawling and start crawling her
     the crawling depth.
     </td>
   </tr>
-  <tr valign="top" class="TableCellDark">
+  <tr valign="top" class="TableCellLight">
     <td class=small>Re-Crawl Option:</td>
-    <td class=small><input name="crawlingIfOlder" type="text" size="5" maxlength="2" value="#[crawlingIfOlder]#"></td>
+    <td class=small><input name="crawlingIfOlder" type="text" size="7" maxlength="7" value="#[crawlingIfOlder]#"></td>
     <td class=small>
     
     </td>
@@ -57,9 +57,9 @@ You can define URLs as start points for Web page crawling and start crawling her
     
     </td>
   </tr>
-  <tr valign="top" class="TableCellDark">
+  <tr valign="top" class="TableCellLight">
     <td class=small>Maximum Pages per Domain:</td>
-    <td class=small><input name="crawlingDomMaxPages" type="text" size="5" maxlength="2" value="#[crawlingDomMaxPages]#"></td>
+    <td class=small><input name="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#"></td>
     <td class=small>
     
     </td>
