@@ -178,7 +178,7 @@ public class kelondroAttrSeq {
             sb.append((char) 13); sb.append((char) 10);
         }
         if (out.toString().endsWith(".gz")) {
-            serverFileUtils.writeAndZip(sb.toString().getBytes(), out);
+            serverFileUtils.writeAndGZip(sb.toString().getBytes(), out);
         } else {
             serverFileUtils.write(sb.toString().getBytes(), out);
         }

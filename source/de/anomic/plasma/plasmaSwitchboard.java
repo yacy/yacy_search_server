@@ -1645,7 +1645,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         header.append("# ---"); header.append((char) 13); header.append((char) 10);
         cr.insert(0, header.toString());
         try {
-            serverFileUtils.writeAndZip(cr.toString().getBytes(), file);
+            serverFileUtils.writeAndGZip(cr.toString().getBytes(), file);
             log.logFine("wrote citation reference dump " + file.toString());
         } catch (IOException e) {
             e.printStackTrace();
