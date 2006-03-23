@@ -210,7 +210,7 @@ public class bookmarksDB {
     public void setTagsTable(Tag tag){
         try {
             if(tag.size() >0){
-                bookmarksDB.this.tagsTable.set(tag.getTagHash(), tag.mem);
+                bookmarksDB.this.tagsTable.set(tag.getTagHash(), tag.getMap());
             }else{
                 bookmarksDB.this.tagsTable.remove(tag.getTagHash());
             }
@@ -218,7 +218,7 @@ public class bookmarksDB {
     }
     public String addTag(Tag tag){
         try {
-            tagsTable.set(tag.getTagName(), tag.mem);
+            tagsTable.set(tag.getTagName(), tag.getMap());
             return tag.getTagName();
         } catch (IOException e) {
             return null;
@@ -288,12 +288,12 @@ public class bookmarksDB {
     	String tagHash=tagHash(oldName);
         Tag tag=getTag(tagHash);
             if (tag != null) {
-            ArrayList urlHashes = tag.getUrlHashes();
+            HashSet urlHashes = tag.getUrlHashes();
             try {
                 tagsTable.remove(tagHash(oldName));
             } catch (IOException e) {
             }
-            tag=new Tag(tagHash(newName), tag.mem);
+            tag=new Tag(tagHash(newName), tag.getMap());
             tag.tagHash = tagHash(newName);
             setTagsTable(tag);
             Iterator it = urlHashes.iterator();
@@ -350,7 +350,7 @@ public class bookmarksDB {
         TreeSet set=new TreeSet(new bookmarkComparator(true));
         String tagHash=tagHash(tagName);
         Tag tag=getTag(tagHash);
-        ArrayList hashes=new ArrayList();
+        HashSet hashes=new HashSet();
         if(tag != null){
             hashes=getTag(tagHash).getUrlHashes();
         }
@@ -521,22 +521,33 @@ public class bookmarksDB {
         public static final String TAG_NAME="tagName";
         private String tagHash;
         private Map mem;
+        private HashSet urlHashes;
 
         public Tag(String hash, Map map){
         	tagHash=hash;
             mem=map;
+            if(mem.containsKey(URL_HASHES))
+                urlHashes=listManager.string2hashset((String) mem.get(URL_HASHES));
+            else
+                urlHashes=new HashSet();
         }
-        public Tag(String name, ArrayList entries){
+        public Tag(String name, HashSet entries){
             tagHash=tagHash(name);
             mem=new HashMap();
-            mem.put(URL_HASHES, listManager.arraylist2string(entries));
+            //mem.put(URL_HASHES, listManager.arraylist2string(entries));
+            urlHashes=entries;
             mem.put(TAG_NAME, name);
         }
         public Tag(String name){
             tagHash=tagHash(name);
             mem=new HashMap();
-            mem.put(URL_HASHES, "");
+            //mem.put(URL_HASHES, "");
+            urlHashes=new HashSet();
             mem.put(TAG_NAME, name);
+        }
+        public Map getMap(){
+            mem.put(URL_HASHES, listManager.hashset2string(this.urlHashes));
+            return mem;
         }
         /**
          * get the lowercase Tagname
@@ -565,8 +576,8 @@ public class bookmarksDB {
             }
             return "notagname";
         }
-        public ArrayList getUrlHashes(){
-            return listManager.string2arraylist((String)this.mem.get(URL_HASHES));
+        public HashSet getUrlHashes(){
+            return urlHashes;
         }
         public boolean hasPublicItems(){
         	Iterator it=getBookmarksIterator(this.getTagName(), false);
@@ -576,34 +587,13 @@ public class bookmarksDB {
         	return false;
         }
         public void add(String urlHash){
-            String urlHashes = (String)mem.get(URL_HASHES);
-            ArrayList list;
-            if(urlHashes != null && !urlHashes.equals("")){
-                list=listManager.string2arraylist(urlHashes);
-            }else{
-                list=new ArrayList();
-            }
-            if(!list.contains(urlHash) && !urlHash.equals("")){
-                list.add(urlHash);
-            }
-            this.mem.put(URL_HASHES, listManager.arraylist2string(list));
-            /*if(urlHashes!=null && !urlHashes.equals("") ){
-                if(urlHashes.indexOf(urlHash) <0){
-                    this.mem.put(URL_HASHES, urlHashes+","+urlHash);
-                }
-            }else{
-                this.mem.put(URL_HASHES, urlHash);
-            }*/
+            urlHashes.add(urlHash);
         }
         public void delete(String urlHash){
-            ArrayList list=listManager.string2arraylist((String) this.mem.get(URL_HASHES));
-            if(list.contains(urlHash)){
-                list.remove(urlHash);
-            }
-            this.mem.put(URL_HASHES, listManager.arraylist2string(list));
+            urlHashes.remove(urlHash);
         }
         public int size(){
-            return listManager.string2arraylist(((String)this.mem.get(URL_HASHES))).size();
+            return urlHashes.size();
         }
     }
     public class bookmarksDate{

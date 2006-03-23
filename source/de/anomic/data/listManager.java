@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -285,6 +286,34 @@ public class listManager {
             ret = new Vector();
             if(!string.equals("")){
             	ret.add(string);
+            }
+        }
+        return ret;
+    }
+    public static String hashset2string(HashSet hashset){
+        StringBuffer ret=new StringBuffer();
+        if(hashset!=null){
+            Iterator it=hashset.iterator();
+            if(it.hasNext()){
+                ret.append((String)it.next());
+                while(it.hasNext()){
+                    ret.append(",").append((String)it.next());
+                }
+            }
+        }
+        return ret.toString();
+    }
+    public static HashSet string2hashset(String string){
+        HashSet ret=new HashSet();
+        String[] hashes=string.split(",");
+        if(string.indexOf(",") > -1){
+            for(int i=0;i<hashes.length;i++){
+                ret.add(hashes[i]);
+            }
+        }else{
+            ret = new HashSet();
+            if(!string.equals("")){
+                ret.add(string);
             }
         }
         return ret;
