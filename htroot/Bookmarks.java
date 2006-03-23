@@ -115,7 +115,7 @@ public class Bookmarks {
                 	bookmark.setPublic(false);
                 }
                 bookmark.setTags(tags, true);
-                switchboard.bookmarksDB.setBookmarksTable(bookmark);
+                switchboard.bookmarksDB.saveBookmark(bookmark);
                 
             }else{
                 //ERROR
