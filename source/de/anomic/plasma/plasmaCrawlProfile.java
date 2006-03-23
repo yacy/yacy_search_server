@@ -270,6 +270,7 @@ public class plasmaCrawlProfile {
         
         public entry(Map mem) {
             this.mem = mem;
+            this.doms = new HashMap();
         }
         
         public Map map() {
