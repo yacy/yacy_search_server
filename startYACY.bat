@@ -18,14 +18,14 @@ Rem Starting YaCy
 Echo Generated classpath:%CLASSPATH%
 Echo JRE Parameters:%javacmd%
 
-	Echo ****************** YaCy Web Crawler/Indexer & Search Engine *******************
+	Echo ****************** YaCy Web Crawler/Indexer ^& Search Engine *******************
 	Echo **** (C) by Michael Peter Christen, usage granted unter the GPL Version 2  ****
 	Echo **** USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/yacy   **
-	Echo **  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy<xx>.log)                **
+	Echo **  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy^<xx^>.log)                **
 	Echo **  STOP         YaCy: execute stopYACY.sh and wait some seconds             **
 	Echo **  GET HELP for YaCy: see www.yacy-websearch.net/wiki and www.yacy-forum.de **
 	Echo *******************************************************************************
-	Echo  >> YaCy started as daemon process. Administration at http://localhost:8080 <<
+	Echo  ^>^> YaCy started as daemon process. Administration at http://localhost:8080 ^<^<
     
 java %javacmd% -classpath %CLASSPATH% yacy
 
