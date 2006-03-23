@@ -81,6 +81,7 @@ public class bookmarksDB {
     kelondroMap tagsTable;
     kelondroMap bookmarksTable;
     kelondroMap datesTable;
+    HashMap tagCache;
     
     public static String tagHash(String tagName){
         return plasmaWordIndexEntry.word2hash(tagName.toLowerCase());
@@ -120,6 +121,7 @@ public class bookmarksDB {
     public bookmarksDB(File bookmarksFile, File tagsFile, File datesFile, int bufferkb){
         //bookmarks
         //check if database exists
+        tagCache=new HashMap();
         if(bookmarksFile.exists()){
             try {
                 //open it
@@ -182,6 +184,7 @@ public class bookmarksDB {
             bookmarksTable.close();
         } catch (IOException e) {}
         try {
+            flushTagCache();
             tagsTable.close();
         } catch (IOException e) {}
         try {
@@ -191,8 +194,14 @@ public class bookmarksDB {
     public int bookmarksSize(){
         return bookmarksTable.size();
     }
-    public int tagsSize(){
+    public int tagSize(boolean flushed){
+        if(flushed){
+            flushTagCache();
+        }
         return tagsTable.size();
+    }
+    public int tagsSize(){
+        return tagSize(false);
     }
     /**
      * Store a Bookmark in the Bookmarkstable
@@ -203,11 +212,30 @@ public class bookmarksDB {
             bookmarksDB.this.bookmarksTable.set(bookmark.getUrlHash(), bookmark.mem);
         } catch (IOException e) {}
     }
+
+    public Tag loadTag(String hash){
+        Map map;
+        Tag ret=null;
+        try {
+            map = tagsTable.get(hash);
+            if(map!=null){
+                ret=new Tag(hash, map);
+                tagCache.put(hash, ret);
+            }
+        } catch (IOException e) {}
+        
+        return ret;
+    }
+    public void saveTag(Tag tag){
+        if(tag!=null){
+            tagCache.put(tag.getTagName(), tag);
+        }
+    }
     /**
      * store a Tag in the tagsDB or remove an empty tag
      * @param tag the tagobject to be stored/removed
      */
-    public void setTagsTable(Tag tag){
+    public void storeTag(Tag tag){
         try {
             if(tag.size() >0){
                 bookmarksDB.this.tagsTable.set(tag.getTagHash(), tag.getMap());
@@ -216,13 +244,18 @@ public class bookmarksDB {
             }
         } catch (IOException e) {}
     }
-    public String addTag(Tag tag){
-        try {
-            tagsTable.set(tag.getTagName(), tag.getMap());
-            return tag.getTagName();
-        } catch (IOException e) {
-            return null;
+    public void flushTagCache(){
+        Iterator it=tagCache.keySet().iterator();
+        while(it.hasNext()){
+            storeTag((Tag) tagCache.get(it.next()));
         }
+        tagCache=new HashMap();
+    }
+    
+    public String addTag(Tag tag){
+        //tagsTable.set(tag.getTagName(), tag.getMap());
+        tagCache.put(tag.getTagHash(), tag);
+        return tag.getTagName();
     }
     public void rebuildTags(){
         serverLog.logInfo("BOOKMARKS", "rebuilding tags.db from bookmarks.db...");
@@ -240,9 +273,10 @@ public class bookmarksDB {
                     tag=new Tag(tags[i]);
                 }
                 tag.add(bookmark.getUrlHash());
-                setTagsTable(tag);
+                saveTag(tag);
             }
         }
+        flushTagCache();
         serverLog.logInfo("BOOKMARKS", "Rebuilt "+tagsTable.size()+" tags using your "+bookmarksTable.size()+" bookmarks.");
     }
     public void rebuildDates(){
@@ -264,14 +298,10 @@ public class bookmarksDB {
         serverLog.logInfo("BOOKMARKS", "Rebuilt "+datesTable.size()+" dates using your "+bookmarksTable.size()+" bookmarks.");
     }
     public Tag getTag(String hash){
-        Map map;
-        try {
-            map = tagsTable.get(hash);
-            if(map==null) return null;
-            return new Tag(hash, map);
-        } catch (IOException e) {
-            return null;
+        if(tagCache.containsKey(hash)){
+            return (Tag) tagCache.get(hash);
         }
+        return loadTag(hash); //null if it does not exists
     }
     public bookmarksDate getDate(String date){
         Map map;
@@ -290,12 +320,14 @@ public class bookmarksDB {
             if (tag != null) {
             HashSet urlHashes = tag.getUrlHashes();
             try {
+                if(tagCache.containsKey(tagHash(oldName))){
+                    tagCache.remove(tagHash(oldName));
+                }
                 tagsTable.remove(tagHash(oldName));
             } catch (IOException e) {
             }
             tag=new Tag(tagHash(newName), tag.getMap());
-            tag.tagHash = tagHash(newName);
-            setTagsTable(tag);
+            saveTag(tag);
             Iterator it = urlHashes.iterator();
             Bookmark bookmark;
             ArrayList tags;
@@ -311,9 +343,12 @@ public class bookmarksDB {
         }
         return false;
     }
-    public void removeTag(String tagName){
+    public void removeTag(String hash){
         try {
-            tagsTable.remove(tagName);
+            if(tagCache.containsKey(hash)){
+                tagCache.remove(hash);
+            }
+            tagsTable.remove(hash);
         } catch (IOException e) {}
     }
     public String addBookmark(Bookmark bookmark){
@@ -389,7 +424,7 @@ public class bookmarksDB {
             tag=getTag(tagHash(tags[i]));
             if(tag !=null){
                 tag.delete(urlHash);
-                setTagsTable(tag);
+                saveTag(tag);
             }
         }
         try {
@@ -446,7 +481,7 @@ public class bookmarksDB {
             bm.setPublic(importPublic);
             setBookmarksTable(bm);
         }
-
+        flushTagCache();
     }
     public void importFromXML(String input, boolean importPublic){
         DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
@@ -511,6 +546,7 @@ public class bookmarksDB {
                 parseXMLimport(children.item(i), importPublic);
             }
         }
+        flushTagCache();
     }
     /**
      * Subclass, which stores an Tag
@@ -786,7 +822,7 @@ public class bookmarksDB {
                 }
                 tag.add(getUrlHash());
                 if(local){
-                    setTagsTable(tag);
+                    saveTag(tag);
                 }
             }
         }
@@ -810,6 +846,7 @@ public class bookmarksDB {
         kelondroDyn.dynKeyIterator tagIter;
         bookmarksDB.Tag nextEntry;
         public tagIterator(boolean up) throws IOException {
+            flushTagCache(); //XXX: This costs performace :-((
             this.tagIter = bookmarksDB.this.tagsTable.keys(up, false);
             this.nextEntry = null;
         }
