@@ -219,13 +219,13 @@ public class bookmarksDB {
      */
     public void storeBookmark(Bookmark bookmark){
         try {
-            bookmarksDB.this.bookmarksTable.set(bookmark.getUrlHash(), bookmark.mem);
+            bookmarksDB.this.bookmarksTable.set(bookmark.getUrlHash(), bookmark.getMap());
         } catch (IOException e) {}
     }
     public void flushBookmarkCache(){
         Iterator it=bookmarkCache.keySet().iterator();
         while(it.hasNext()){
-            storeBookmark((Bookmark) it.next());
+            storeBookmark((Bookmark) bookmarkCache.get(it.next()));
         }
         bookmarkCache=new HashMap();
     }
@@ -347,10 +347,10 @@ public class bookmarksDB {
             saveTag(tag);
             Iterator it = urlHashes.iterator();
             Bookmark bookmark;
-            ArrayList tags;
+            HashSet tags;
             while (it.hasNext()) {
                 bookmark = getBookmark((String) it.next());
-                tags = listManager.string2arraylist(bookmark.getTags());
+                tags = listManager.string2hashset(bookmark.getTags());
                 tags.remove(oldName); //this will fail, if upper/lowercase is not matching
                 tags.add(newName);
                 bookmark.setTags(tags, true);
@@ -478,7 +478,7 @@ public class bookmarksDB {
         Iterator it;
         String url,title;
         Bookmark bm;
-        ArrayList tags=listManager.string2arraylist(tag); //this allow multiple default tags
+        HashSet tags=listManager.string2hashset(tag); //this allow multiple default tags
         try {
             //load the links
             htmlFilterContentScraper scraper = new htmlFilterContentScraper(baseURL);
@@ -542,13 +542,13 @@ public class bookmarksDB {
             if(attributes.getNamedItem("time")!=null){
                 time=attributes.getNamedItem("time").getNodeValue();
             }
-            ArrayList tags=new ArrayList();
+            HashSet tags=new HashSet();
             
             if(title != null){
                 bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
             }
             if(tagsString!=null){
-                tags = listManager.string2arraylist(tagsString.replace(' ', ','));
+                tags = listManager.string2hashset(tagsString.replace(' ', ','));
             }
             bm.setTags(tags, true);
             if(time != null){
@@ -760,6 +760,9 @@ public class bookmarksDB {
             mem=new HashMap();
             mem.put(BOOKMARK_URL, url);
         }
+        public Map getMap(){
+            return mem;
+        }
         public String getUrlHash(){
             return urlHash;
         }
@@ -806,11 +809,11 @@ public class bookmarksDB {
             //setBookmarksTable();
         }
         public void addTag(String tag){
-            ArrayList tags;
+            HashSet tags;
             if(!mem.containsKey(BOOKMARK_TAGS)){
-                tags=new ArrayList();
+                tags=new HashSet();
             }else{
-                tags=listManager.string2arraylist((String) mem.get(BOOKMARK_TAGS));
+                tags=listManager.string2hashset((String) mem.get(BOOKMARK_TAGS));
             }
             tags.add(tag);
             this.setTags(tags, true);
@@ -819,7 +822,7 @@ public class bookmarksDB {
          * set the Tags of the bookmark, and write them into the tags table.
          * @param tags a ArrayList with the tags
          */
-        public void setTags(ArrayList tags){
+        public void setTags(HashSet tags){
             setTags(tags, true);
         }
         /**
@@ -827,8 +830,8 @@ public class bookmarksDB {
          * @param tags ArrayList with the tagnames
          * @param local sets, whether the updated tags should be stored to tagsDB
          */
-        public void setTags(ArrayList tags, boolean local){
-            mem.put(BOOKMARK_TAGS, listManager.arraylist2string(tags));
+        public void setTags(HashSet tags, boolean local){
+            mem.put(BOOKMARK_TAGS, listManager.hashset2string(tags));
             Iterator it=tags.iterator();
             while(it.hasNext()){
                 String tagName=(String) it.next();
