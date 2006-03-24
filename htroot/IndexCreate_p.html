@@ -47,12 +47,12 @@ You can define URLs as start points for Web page crawling and start crawling her
     <td class=small>Re-Crawl Option:</td>
     <td class=small>
     <input type="checkbox" name="crawlingIfOlderCheck" align="top" #(crawlingIfOlderCheck)#::checked#(/crawlingIfOlderCheck)#>
-    <input name="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#">
-	Year(s)&nbsp;<input type="radio" name="crawlingIfOlderUnit" value="year"  #(crawlingIfOlderUnitYearCheck)#::checked#(/crawlingIfOlderUnitYearCheck)#>
-	Month(s)&nbsp;<input type="radio" name="crawlingIfOlderUnit" value="month" #(crawlingIfOlderUnitMonthCheck)#::checked#(/crawlingIfOlderUnitMonthCheck)#>
-    Day(s)&nbsp;<input type="radio" name="crawlingIfOlderUnit" value="day" #(crawlingIfOlderUnitDayCheck)#::checked#(/crawlingIfOlderUnitDayCheck)#>
-    Hour(s)&nbsp;<input type="radio" name="crawlingIfOlderUnit" value="hour" #(crawlingIfOlderUnitHourCheck)#::checked#(/crawlingIfOlderUnitHourCheck)#>
-    Minute(s)&nbsp;<input type="radio" name="crawlingIfOlderUnit" value="minute" #(crawlingIfOlderUnitMinuteCheck)#::checked#(/crawlingIfOlderUnitMinuteCheck)#></td>
+    <input name="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#"><br>
+<input type="radio" name="crawlingIfOlderUnit" value="year"  #(crawlingIfOlderUnitYearCheck)#::checked#(/crawlingIfOlderUnitYearCheck)#>Year(s)&nbsp;&nbsp;
+    <input type="radio" name="crawlingIfOlderUnit" value="month" #(crawlingIfOlderUnitMonthCheck)#::checked#(/crawlingIfOlderUnitMonthCheck)#>Month(s)&nbsp;&nbsp;
+    <input type="radio" name="crawlingIfOlderUnit" value="day" #(crawlingIfOlderUnitDayCheck)#::checked#(/crawlingIfOlderUnitDayCheck)#>Day(s)&nbsp;&nbsp;
+    <input type="radio" name="crawlingIfOlderUnit" value="hour" #(crawlingIfOlderUnitHourCheck)#::checked#(/crawlingIfOlderUnitHourCheck)#>Hour(s)&nbsp;&nbsp;
+    <input type="radio" name="crawlingIfOlderUnit" value="minute" #(crawlingIfOlderUnitMinuteCheck)#::checked#(/crawlingIfOlderUnitMinuteCheck)#>Minute(s)</td>
     <td class=small>
     If you use this option, web pages that are already existent in your database are crawled and indexed again.
     It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given
