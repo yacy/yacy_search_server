@@ -95,11 +95,11 @@ public class IndexCreate_p {
                     env.setConfig("crawlingFilter", newcrawlingfilter);
                     int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "0"));
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
-                    int recrawlIfOlder = Integer.parseInt(post.get("recrawlIfOlder", "-1"));
+                    int recrawlIfOlder = Integer.parseInt(post.get("crawlingIfOlder", "-1"));
                     env.setConfig("crawlingIfOlder", recrawlIfOlder);
-                    int domFilterDepth = Integer.parseInt(post.get("domFilterDepth", "-1"));
+                    int domFilterDepth = Integer.parseInt(post.get("crawlingDomFilterDepth", "-1"));
                     env.setConfig("crawlingDomFilterDepth", Integer.toString(domFilterDepth));
-                    int domMaxPages = Integer.parseInt(post.get("domMaxPages", "-1"));
+                    int domMaxPages = Integer.parseInt(post.get("crawlingDomMaxPages", "-1"));
                     env.setConfig("crawlingDomMaxPages", Integer.toString(domMaxPages));
                     boolean crawlingQ = post.get("crawlingQ", "").equals("on");
                     env.setConfig("crawlingQ", (crawlingQ) ? "true" : "false");
@@ -353,6 +353,8 @@ public class IndexCreate_p {
         Iterator it = switchboard.profiles.profiles(true);
         plasmaCrawlProfile.entry profile;
         dark = true;
+        Iterator domnamesi;
+        String domnames;
         while (it.hasNext()) {
             profile = (plasmaCrawlProfile.entry) it.next();
             //table += profile.map().toString() + "<br>";
@@ -362,6 +364,12 @@ public class IndexCreate_p {
             prop.put("crawlProfiles_"+count+"_handle", wikiCode.replaceHTML(profile.handle()));
             prop.put("crawlProfiles_"+count+"_depth", profile.generalDepth());
             prop.put("crawlProfiles_"+count+"_filter", profile.generalFilter());
+            prop.put("crawlProfiles_"+count+"_crawlingIfOlder", (profile.recrawlIfOlder() == Long.MAX_VALUE) ? "no re-crawl" : ""+profile.recrawlIfOlder());
+            prop.put("crawlProfiles_"+count+"_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : ""+profile.domFilterDepth());
+            domnamesi = profile.domNames();
+            domnames=""; while (domnamesi.hasNext()) domnames += ((String) domnamesi.next()) + ", ";
+            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", domnames);
+            prop.put("crawlProfiles_"+count+"_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : ""+profile.domMaxPages());
             prop.put("crawlProfiles_"+count+"_withQuery", ((profile.crawlingQ()) ? 1 : 0));
             prop.put("crawlProfiles_"+count+"_storeCache", ((profile.storeHTCache()) ? 1 : 0));
             prop.put("crawlProfiles_"+count+"_localIndexing", ((profile.localIndexing()) ? 1 : 0));

@@ -57,6 +57,7 @@ import de.anomic.server.serverCodings;
 public class plasmaCrawlProfile {
     
     private kelondroMap profileTable;
+    private HashMap domsCache;
     private File profileTableFile;
     private int bufferkb;
     
@@ -73,6 +74,7 @@ public class plasmaCrawlProfile {
             dyn = new kelondroDyn(file, bufferkb * 1024, plasmaURL.urlCrawlProfileHandleLength, 2000, '#', true);
         }
         profileTable = new kelondroMap(dyn);
+        domsCache = new HashMap();
     }
     
     public int[] dbCacheChunkSize() {
@@ -270,7 +272,8 @@ public class plasmaCrawlProfile {
         
         public entry(Map mem) {
             this.mem = mem;
-            this.doms = new HashMap();
+            this.doms = (HashMap) domsCache.get(this.mem.get("handle"));
+            if (this.doms == null) this.doms = new HashMap();
         }
         
         public Map map() {
@@ -393,6 +396,7 @@ public class plasmaCrawlProfile {
                 // increase counter
                 doms.put(domain, new Integer(c.intValue() + 1));
             }
+            domsCache.put(this.mem.get("handle"), doms);
         }
         public int domCount(String domain) {
             Integer c = (Integer) doms.get(domain);
