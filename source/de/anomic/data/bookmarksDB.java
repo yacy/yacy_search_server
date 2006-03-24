@@ -282,14 +282,14 @@ public class bookmarksDB {
         String[] tags;
         while(it.hasNext()){
             bookmark=(Bookmark) it.next();
-            tags = bookmark.getTags().split(",");
+            tags = bookmark.getTagsString().split(",");
             tag=null;
             for(int i=0;i<tags.length;i++){
                 tag=getTag(tagHash(tags[i]));
                 if(tag==null){
                     tag=new Tag(tags[i]);
                 }
-                tag.add(bookmark.getUrlHash());
+                tag.addUrl(bookmark.getUrlHash());
                 saveTag(tag);
             }
         }
@@ -350,7 +350,7 @@ public class bookmarksDB {
             HashSet tags;
             while (it.hasNext()) {
                 bookmark = getBookmark((String) it.next());
-                tags = listManager.string2hashset(bookmark.getTags());
+                tags = bookmark.getTags();
                 tags.remove(oldName); //this will fail, if upper/lowercase is not matching
                 tags.add(newName);
                 bookmark.setTags(tags, true);
@@ -435,11 +435,12 @@ public class bookmarksDB {
     public boolean removeBookmark(String urlHash){
         Bookmark bookmark = getBookmark(urlHash);
         if(bookmark == null) return false; //does not exist
-        String[] tags = bookmark.getTags().split(",");
+        HashSet tags = bookmark.getTags();
         bookmarksDB.Tag tag=null;
-        for(int i=0;i<tags.length;i++){
-            tag=getTag(tagHash(tags[i]));
-            if(tag !=null){
+        Iterator it=tags.iterator();
+        while(it.hasNext()){
+            tag=getTag((String) it.next());
+            if(tag!=null){
                 tag.delete(urlHash);
                 saveTag(tag);
             }
@@ -643,7 +644,7 @@ public class bookmarksDB {
         	}
         	return false;
         }
-        public void add(String urlHash){
+        public void addUrl(String urlHash){
             urlHashes.add(urlHash);
         }
         public void delete(String urlHash){
@@ -727,9 +728,13 @@ public class bookmarksDB {
         public static final String BOOKMARK_TIMESTAMP="bookmarkTimestamp";
         private String urlHash;
         private Map mem;
+        private HashSet tags;
+        private long timestamp;
         public Bookmark(String urlHash, Map map){
             this.urlHash=urlHash;
             this.mem=map;
+            tags=listManager.string2hashset((String) map.get(BOOKMARK_TAGS));
+            loadTimestamp();
         }
         public Bookmark(String url){
             if(!url.toLowerCase().startsWith("http://")){
@@ -738,30 +743,43 @@ public class bookmarksDB {
             this.urlHash=plasmaURL.urlHash(url);
             mem=new HashMap();
             mem.put(BOOKMARK_URL, url);
+            this.timestamp=System.currentTimeMillis();
+            tags=new HashSet();
             Bookmark oldBm=getBookmark(this.urlHash);
             if(oldBm!=null && oldBm.mem.containsKey(BOOKMARK_TIMESTAMP)){
                 mem.put(BOOKMARK_TIMESTAMP, oldBm.mem.get(BOOKMARK_TIMESTAMP)); //preserve timestamp on edit
             }else{
                 mem.put(BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
             }  
-                bookmarksDate bmDate=getDate((String) mem.get(BOOKMARK_TIMESTAMP));
-                bmDate.add(this.urlHash);
-                bmDate.setDatesTable();
-                
-                removeBookmark(this.urlHash); //prevent empty tags
+            bookmarksDate bmDate=getDate((String) mem.get(BOOKMARK_TIMESTAMP));
+            bmDate.add(this.urlHash);
+            bmDate.setDatesTable();
+            
+            removeBookmark(this.urlHash); //prevent empty tags
         }
         public Bookmark(String urlHash, URL url){
             this.urlHash=urlHash;
             mem=new HashMap();
             mem.put(BOOKMARK_URL, url.toString());
+            tags=new HashSet();
+            timestamp=System.currentTimeMillis();
         }
         public Bookmark(String urlHash, String url){
             this.urlHash=urlHash;
             mem=new HashMap();
             mem.put(BOOKMARK_URL, url);
+            tags=new HashSet();
+            timestamp=System.currentTimeMillis();
         }
+       
         public Map getMap(){
+            mem.put(BOOKMARK_TAGS, listManager.hashset2string(tags));
+            mem.put(BOOKMARK_TIMESTAMP, String.valueOf(this.timestamp));
             return mem;
+        }
+        private void loadTimestamp(){
+            if(this.mem.containsKey(BOOKMARK_TIMESTAMP))
+                this.timestamp=Long.parseLong((String)mem.get(BOOKMARK_TIMESTAMP));
         }
         public String getUrlHash(){
             return urlHash;
@@ -769,14 +787,11 @@ public class bookmarksDB {
         public String getUrl(){
             return (String) this.mem.get(BOOKMARK_URL);
         }
-        public String getTags(){
-            if(this.mem.containsKey(BOOKMARK_TAGS)){
-                return (String)this.mem.get(BOOKMARK_TAGS);
-            }
-            return "";
+        public HashSet getTags(){
+            return tags;
         }
-        public ArrayList getTagsList(){
-        	return listManager.string2arraylist(this.getTags());
+        public String getTagsString(){
+            return listManager.hashset2string(getTags());
         }
         public String getDescription(){
             if(this.mem.containsKey(BOOKMARK_DESCRIPTION)){
@@ -809,14 +824,7 @@ public class bookmarksDB {
             //setBookmarksTable();
         }
         public void addTag(String tag){
-            HashSet tags;
-            if(!mem.containsKey(BOOKMARK_TAGS)){
-                tags=new HashSet();
-            }else{
-                tags=listManager.string2hashset((String) mem.get(BOOKMARK_TAGS));
-            }
             tags.add(tag);
-            this.setTags(tags, true);
         }
         /**
          * set the Tags of the bookmark, and write them into the tags table.
@@ -831,7 +839,7 @@ public class bookmarksDB {
          * @param local sets, whether the updated tags should be stored to tagsDB
          */
         public void setTags(HashSet tags, boolean local){
-            mem.put(BOOKMARK_TAGS, listManager.hashset2string(tags));
+            tags.addAll(tags);
             Iterator it=tags.iterator();
             while(it.hasNext()){
                 String tagName=(String) it.next();
@@ -839,7 +847,7 @@ public class bookmarksDB {
                 if(tag == null){
                     tag=new Tag(tagName);
                 }
-                tag.add(getUrlHash());
+                tag.addUrl(getUrlHash());
                 if(local){
                     saveTag(tag);
                 }
@@ -847,14 +855,10 @@ public class bookmarksDB {
         }
 
         public long getTimeStamp(){
-            if(mem.containsKey(BOOKMARK_TIMESTAMP)){
-                return Long.parseLong((String)mem.get(BOOKMARK_TIMESTAMP));
-            }else{
-                return 0;
-            }
+            return timestamp;
         }
-        public void setTimeStamp(long timestamp){
-        	this.mem.put(BOOKMARK_TIMESTAMP, String.valueOf(timestamp));
+        public void setTimeStamp(long ts){
+        	this.timestamp=ts;
         }
     }
     public class tagIterator implements Iterator{
@@ -943,10 +947,21 @@ public class bookmarksDB {
             Bookmark bm1=getBookmark((String)obj1);
             Bookmark bm2=getBookmark((String)obj2);
             //XXX: what happens, if there is a big difference? (to much for int)
-            if(this.newestFirst){
+            /*if(this.newestFirst){
                 return (new Long(bm2.getTimeStamp() - bm1.getTimeStamp())).intValue();
             }else{
                 return (new Long(bm1.getTimeStamp() - bm2.getTimeStamp())).intValue();
+            }*/
+            if(this.newestFirst){
+                if(bm2.getTimeStamp() - bm1.getTimeStamp() >0)
+                    return 1;
+                else
+                    return -1;
+            }else{
+                if(bm1.getTimeStamp() - bm2.getTimeStamp() >0)
+                    return 1;
+                else
+                    return -1;
             }
         }
     }

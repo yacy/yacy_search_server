@@ -48,7 +48,6 @@
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -56,8 +55,8 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -152,7 +151,7 @@ public class Bookmarks {
                         prop.put("mode_title", bookmark.getTitle());
                         prop.put("mode_description", bookmark.getDescription());
                         prop.put("mode_url", bookmark.getUrl());
-                        prop.put("mode_tags", bookmark.getTags());
+                        prop.put("mode_tags", bookmark.getTagsString());
                         if (bookmark.getPublic()) {
                             prop.put("mode_public", 1);
                         } else {
@@ -221,7 +220,7 @@ public class Bookmarks {
         count++;
     }
     count=0;
-    ArrayList tags;
+    HashSet tags;
     Iterator tagsIt;
     int tagCount;
     while(count<max_count && it.hasNext()){
@@ -233,7 +232,7 @@ public class Bookmarks {
             prop.put("bookmarks_"+count+"_public", (bookmark.getPublic()? 1:0));
             
             //List Tags.
-            tags=bookmark.getTagsList();
+            tags=bookmark.getTags();
             tagsIt=tags.iterator();
             tagCount=0;
             while(tagsIt.hasNext()){

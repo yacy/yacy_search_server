@@ -78,7 +78,7 @@ public class all {
             prop.putNoHTML("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
             date=new Date(bookmark.getTimeStamp());
             prop.putNoHTML("posts_"+count+"_time", bookmarksDB.dateToiso8601(date));
-            prop.putNoHTML("posts_"+count+"_tags", bookmark.getTags().replaceAll(","," "));
+            prop.putNoHTML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
             count++;
         }
         prop.put("posts", count);
