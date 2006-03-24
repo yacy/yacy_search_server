@@ -95,8 +95,11 @@ public class IndexCreate_p {
                     env.setConfig("crawlingFilter", newcrawlingfilter);
                     int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "0"));
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
-                    int recrawlIfOlder = Integer.parseInt(post.get("crawlingIfOlder", "-1"));
-                    env.setConfig("crawlingIfOlder", recrawlIfOlder);
+                    boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "").equals("on");
+                    int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));
+                    String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year");
+                    int crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);                    
+                    env.setConfig("crawlingIfOlder", crawlingIfOlder);
                     int domFilterDepth = Integer.parseInt(post.get("crawlingDomFilterDepth", "-1"));
                     env.setConfig("crawlingDomFilterDepth", Integer.toString(domFilterDepth));
                     int domMaxPages = Integer.parseInt(post.get("crawlingDomMaxPages", "-1"));
@@ -151,7 +154,7 @@ public class IndexCreate_p {
                             switchboard.urlPool.errorURL.remove(urlhash);
                             
                             // stack url
-                            plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, recrawlIfOlder, domFilterDepth, domMaxPages, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
+                            plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, domFilterDepth, domMaxPages, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
                             String reasonString = switchboard.sbStackCrawlThread.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed.hash, "CRAWLING-ROOT", new Date(), 0, pe);
                             
                             if (reasonString == null) {
@@ -212,7 +215,7 @@ public class IndexCreate_p {
                                 HashMap hyperlinks = (HashMap) scraper.getAnchors();
                                 
                                 // creating a crawler profile
-                                plasmaCrawlProfile.entry profile = switchboard.profiles.newEntry(fileName, file.toURL().toString(), newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, recrawlIfOlder, domFilterDepth, domMaxPages, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);                                
+                                plasmaCrawlProfile.entry profile = switchboard.profiles.newEntry(fileName, file.toURL().toString(), newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, domFilterDepth, domMaxPages, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);                                
                                 
                                 // loop through the contained links
                                 Iterator interator = hyperlinks.entrySet().iterator();
@@ -301,7 +304,32 @@ public class IndexCreate_p {
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", env.getConfig("crawlingDepth", "0"));
         prop.put("crawlingFilter", env.getConfig("crawlingFilter", "0"));
-        prop.put("crawlingIfOlder", env.getConfig("crawlingIfOlder", "-1"));
+        
+        int crawlingIfOlder = (int) env.getConfigLong("crawlingIfOlder", -1);
+        prop.put("crawlingIfOlderCheck", (crawlingIfOlder == Integer.MAX_VALUE) ? 0 : 1);
+        prop.put("crawlingIfOlderUnitYearCheck", 0);
+        prop.put("crawlingIfOlderUnitMonthCheck", 0);
+        prop.put("crawlingIfOlderUnitDayCheck", 0);
+        prop.put("crawlingIfOlderUnitHourCheck", 0);
+        prop.put("crawlingIfOlderUnitMinuteCheck", 0);
+        if (crawlingIfOlder == Integer.MAX_VALUE) {
+        } else if (crawlingIfOlder >= 60*24*365) {
+            prop.put("crawlingIfOlderNumber", crawlingIfOlder / 60*24*365);
+            prop.put("crawlingIfOlderUnitYearCheck", 1);
+        } else if (crawlingIfOlder >= 60*24*30) {
+            prop.put("crawlingIfOlderNumber", crawlingIfOlder / 60*24*30);
+            prop.put("crawlingIfOlderUnitMonthCheck", 1);
+        } else if (crawlingIfOlder >= 60*24) {
+            prop.put("crawlingIfOlderNumber", crawlingIfOlder / 60*24);
+            prop.put("crawlingIfOlderUnitDayCheck", 1);
+        } else if (crawlingIfOlder >= 60) {
+            prop.put("crawlingIfOlderNumber", crawlingIfOlder / 60);
+            prop.put("crawlingIfOlderUnitHourCheck", 1);
+        } else {
+            prop.put("crawlingIfOlderNumber", crawlingIfOlder);
+            prop.put("crawlingIfOlderUnitMinuteCheck", 1);
+        }
+        //prop.put("crawlingIfOlder", crawlingIfOlder);
         prop.put("crawlingDomFilterDepth", env.getConfig("crawlingDomFilterDepth", "-1"));
         prop.put("crawlingDomMaxPages", env.getConfig("crawlingDomMaxPages", "-1"));
         prop.put("crawlingQChecked", env.getConfig("crawlingQ", "").equals("true") ? 1 : 0);
@@ -476,7 +504,16 @@ public class IndexCreate_p {
         // return rewrite properties
         return prop;
     }
-    
+
+    private static int recrawlIfOlderC(boolean recrawlIfOlderCheck, int recrawlIfOlderNumber, String crawlingIfOlderUnit) {
+        if (!recrawlIfOlderCheck) return -1;
+        if (crawlingIfOlderUnit.equals("year")) return recrawlIfOlderNumber * 60 * 24 * 356;
+        if (crawlingIfOlderUnit.equals("month")) return recrawlIfOlderNumber * 60 * 24 * 30;
+        if (crawlingIfOlderUnit.equals("day")) return recrawlIfOlderNumber * 60 * 24;
+        if (crawlingIfOlderUnit.equals("hour")) return recrawlIfOlderNumber * 60;
+        if (crawlingIfOlderUnit.equals("minute")) return recrawlIfOlderNumber;
+        return -1;
+    }
 }
 
 

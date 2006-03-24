@@ -138,7 +138,7 @@ public final class yacy {
     private static float version = (float) 0.1;
 
     private static final String vDATE   = "@REPL_DATE@";
-    private static final String copyright = "[ YACY Proxy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
+    private static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
    
     /**
@@ -163,10 +163,10 @@ public final class yacy {
     }
 
     /**
-    * Combines the version of the proxy with the versionnumber from SVN to a
+    * Combines the version of YaCy with the versionnumber from SVN to a
     * combined version
     *
-    * @param version Current given version for this proxy.
+    * @param version Current given version.
     * @param svn Current version given from svn.
     * @return String with the combined version
     */
