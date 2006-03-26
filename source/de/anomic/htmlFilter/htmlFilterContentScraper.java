@@ -183,7 +183,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
 
         if (defaultPort) return url.getProtocol() + "://" + url.getHost() + path;
-        return url.getProtocol() + "://" + url.getHost() + ":" + url.getPort() + path;
+        return url.getProtocol() + "://" + url.getHost().toLowerCase() + ":" + url.getPort() + path;
     }
 
     public static String urlNormalform(URL baseURL, String us) {
