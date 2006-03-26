@@ -239,8 +239,14 @@ public final class plasmaCrawlStacker {
          return reason;
          }
          */
-        URL nexturl = null;
+        URL nexturl = null, referrerURL = null;
         if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = plasmaURL.dummyHash;
+        try {
+            referrerURL = new URL(referrerString);
+        } catch (MalformedURLException e) {
+            referrerURL = null;
+            referrerString = null;
+        }
         String referrerHash = (referrerString==null)?null:plasmaURL.urlHash(referrerString);
         try {
             nexturl = new URL(nexturlString);
@@ -313,7 +319,7 @@ public final class plasmaCrawlStacker {
         
         // add domain to profile domain list
         if (currentdepth <= profile.domFilterDepth()) {
-            profile.domInc(nexturl.getHost());
+            profile.domInc(nexturl.getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), currentdepth);
         }
 
         // deny urls that do not match with the profile domain list

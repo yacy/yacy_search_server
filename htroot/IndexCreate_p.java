@@ -381,8 +381,6 @@ public class IndexCreate_p {
         Iterator it = switchboard.profiles.profiles(true);
         plasmaCrawlProfile.entry profile;
         dark = true;
-        Iterator domnamesi;
-        String domnames;
         while (it.hasNext()) {
             profile = (plasmaCrawlProfile.entry) it.next();
             //table += profile.map().toString() + "<br>";
@@ -394,9 +392,7 @@ public class IndexCreate_p {
             prop.put("crawlProfiles_"+count+"_filter", profile.generalFilter());
             prop.put("crawlProfiles_"+count+"_crawlingIfOlder", (profile.recrawlIfOlder() == Long.MAX_VALUE) ? "no re-crawl" : ""+profile.recrawlIfOlder());
             prop.put("crawlProfiles_"+count+"_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : ""+profile.domFilterDepth());
-            domnamesi = profile.domNames();
-            domnames=""; while (domnamesi.hasNext()) domnames += ((String) domnamesi.next()) + ", ";
-            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", domnames);
+            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", profile.domNames(true));
             prop.put("crawlProfiles_"+count+"_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : ""+profile.domMaxPages());
             prop.put("crawlProfiles_"+count+"_withQuery", ((profile.crawlingQ()) ? 1 : 0));
             prop.put("crawlProfiles_"+count+"_storeCache", ((profile.storeHTCache()) ? 1 : 0));

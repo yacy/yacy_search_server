@@ -115,10 +115,10 @@ public class plasmaCrawlProfile {
     public class profileIterator implements Iterator {
         // the iterator iterates all keys, which are byte[] objects
         kelondroDyn.dynKeyIterator handleIterator;
-        entry next;
+        String lastkey;
         public profileIterator(boolean up) throws IOException {
             handleIterator = profileTable.keys(up, false);
-            next = null;
+            lastkey = null;
         }
         public boolean hasNext() {
             try {
@@ -130,16 +130,16 @@ public class plasmaCrawlProfile {
         }
         public Object next() {
             try {
-                return getEntry((String) handleIterator.next());
+                lastkey = (String) handleIterator.next();
+                return getEntry(lastkey);
             } catch (kelondroException e) {
                 resetDatabase();
                 return null;
             }
         }
         public void remove() {
-            if (next != null) try {
-                Object handle = next.handle();
-                if (handle != null) removeEntry((String) handle);
+            if (lastkey != null) try {
+                removeEntry(lastkey);
             } catch (kelondroException e) {
                 resetDatabase();
             }
@@ -221,7 +221,22 @@ public class plasmaCrawlProfile {
         }
     }
     
-
+    public class DomProfile {
+        
+        public String referrer;
+        public int depth, count;
+        
+        public DomProfile(String ref, int d) {
+            this.referrer = ref;
+            this.depth = d;
+            this.count = 1;
+        }
+        
+        public void inc() {
+            this.count++;
+        }
+        
+    }
     
     public class entry {
         // this is a simple record structure that hold all properties of a single crawl start
@@ -387,33 +402,44 @@ public class plasmaCrawlProfile {
             mem.put(propName,  newValue);
             profileTable.set(handle(), mem);
         }
-        public void domInc(String domain) {
-            Integer c = (Integer) doms.get(domain);
-            if (c == null) {
+        public void domInc(String domain, String referrer, int depth) {
+            DomProfile dp = (DomProfile) doms.get(domain);
+            if (dp == null) {
                 // new domain
-                doms.put(domain, new Integer(1));
+                doms.put(domain, new DomProfile(referrer, depth));
             } else {
                 // increase counter
-                doms.put(domain, new Integer(c.intValue() + 1));
+                dp.inc();
+                doms.put(domain, dp);
             }
             domsCache.put(this.mem.get("handle"), doms);
         }
         public int domCount(String domain) {
-            Integer c = (Integer) doms.get(domain);
-            if (c == null) {
+            DomProfile dp = (DomProfile) doms.get(domain);
+            if (dp == null) {
                 return 0;
             } else {
-                return c.intValue();
+                return dp.count;
             }
         }
         public int domSize() {
             return doms.size();
         }
         public boolean domExists(String domain) {
+            if (domFilterDepth() == Integer.MAX_VALUE) return true;
             return doms.containsKey(domain);
         }
-        public Iterator domNames() {
-            return doms.keySet().iterator();
+        public String domNames(boolean attr) {
+            Iterator domnamesi = doms.entrySet().iterator();
+            String domnames="";
+            Map.Entry ey;
+            DomProfile dp;
+            while (domnamesi.hasNext()) {
+                ey = (Map.Entry) domnamesi.next();
+                dp = (DomProfile) ey.getValue();
+                domnames += ((String) ey.getKey()) + ((attr) ? ("/d=" + dp.depth + ",c=" + dp.count + " ") : " ");
+            }
+            return domnames;
         }
     }
 }
