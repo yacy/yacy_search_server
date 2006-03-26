@@ -1,4 +1,4 @@
-// htmlFilterContentScraper.java 
+// htmlFilterContentScraper.java
 // -----------------------------
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
@@ -43,6 +43,9 @@
 
 package de.anomic.htmlFilter;
 
+import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverByteBuffer;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Collator;
@@ -52,11 +55,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverByteBuffer;
+import java.util.TreeSet;
 
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 
@@ -170,10 +171,10 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         } else if (url.getProtocol().equals("https")) {
             if (url.getPort() < 0 || url.getPort() == 443) { defaultPort = true; }
         }
-        String path = url.getFile();
+        String path = url.getFile().toLowerCase();
 
         // (this is different from previous normal forms where a '/' must not appear in root paths; here it must appear. Makes everything easier.)
-        if (path.length() == 0 || path.charAt(0) != '/') path = "/" + path;
+        if (path.length() == 0 || path.charAt(0) != '/') { path = "/" + path; }
 
         Pattern pathPattern = Pattern.compile("(/[^/\\.]+/)[.]{2}(?=/)|/\\.(?=/)|/(?=/)");
         Matcher matcher = pathPattern.matcher(path);
@@ -182,7 +183,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             matcher.reset(path);
         }
 
-        if (defaultPort) return url.getProtocol() + "://" + url.getHost() + path;
+        if (defaultPort) { return url.getProtocol() + "://" + url.getHost().toLowerCase() + path; }
         return url.getProtocol() + "://" + url.getHost().toLowerCase() + ":" + url.getPort() + path;
     }
 
