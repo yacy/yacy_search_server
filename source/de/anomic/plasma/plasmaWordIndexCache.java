@@ -60,7 +60,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
 
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
-    public static final int  wCacheReferenceLimit = 50;
+    public static final int  wCacheReferenceLimit = 64;
     public static final long wCacheMaxAge         = 1000 * 60 * 30; // milliseconds; 30 minutes
     public static final long kCacheMaxAge         = 1000 * 60 * 2;  // milliseconds; 2 minutes
     
