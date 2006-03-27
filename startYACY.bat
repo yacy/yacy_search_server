@@ -22,7 +22,7 @@ Echo JRE Parameters:%javacmd%
 	Echo **** (C) by Michael Peter Christen, usage granted unter the GPL Version 2  ****
 	Echo **** USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/yacy   **
 	Echo **  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy^<xx^>.log)                **
-	Echo **  STOP         YaCy: execute stopYACY.sh and wait some seconds             **
+	Echo **  STOP         YaCy: execute stopYACY.bat and wait some seconds            **
 	Echo **  GET HELP for YaCy: see www.yacy-websearch.net/wiki and www.yacy-forum.de **
 	Echo *******************************************************************************
 	Echo  ^>^> YaCy started as daemon process. Administration at http://localhost:8080 ^<^<
