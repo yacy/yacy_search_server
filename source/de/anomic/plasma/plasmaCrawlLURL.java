@@ -416,10 +416,11 @@ public final class plasmaCrawlLURL extends plasmaURL {
         // - author / copyright owner
         // - keywords
         // - phrasecount, total number of phrases
-        // - boolean: URL attributes
+        // - boolean: URL attributes (see Word-Entity definition)
         // - boolean: appearance of bold and/or italics
         // - int: # of outlinks to same domain
         // - int: # of outlinks to outside domain
+        // - ETag: for re-crawl decision upon HEAD request
         
         public Entry(URL url, String descr, Date moddate, Date loaddate, String referrerHash, int copyCount, boolean localNeed, int quality, String language, char doctype, int size, int wordCount) {
             // create new entry and store it into database

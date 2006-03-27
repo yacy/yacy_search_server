@@ -414,12 +414,24 @@ public class plasmaCrawlProfile {
             }
             domsCache.put(this.mem.get("handle"), doms);
         }
-        public int domCount(String domain) {
+        public boolean grantedDomAppearance(String domain) {
+            int max = domFilterDepth();
+            if (max == Integer.MAX_VALUE) return true;
             DomProfile dp = (DomProfile) doms.get(domain);
             if (dp == null) {
-                return 0;
+                return 0 < max;
             } else {
-                return dp.count;
+                return dp.count < max;
+            }
+        }
+        public boolean grantedDomCount(String domain) {
+            int max = domMaxPages();
+            if (max == Integer.MAX_VALUE) return true;
+            DomProfile dp = (DomProfile) doms.get(domain);
+            if (dp == null) {
+                return 0 < max;
+            } else {
+                return dp.count < max;
             }
         }
         public int domSize() {
@@ -429,7 +441,7 @@ public class plasmaCrawlProfile {
             if (domFilterDepth() == Integer.MAX_VALUE) return true;
             return doms.containsKey(domain);
         }
-        public String domNames(boolean attr) {
+        public String domNames(boolean attr, int maxlength) {
             Iterator domnamesi = doms.entrySet().iterator();
             String domnames="";
             Map.Entry ey;
@@ -438,6 +450,10 @@ public class plasmaCrawlProfile {
                 ey = (Map.Entry) domnamesi.next();
                 dp = (DomProfile) ey.getValue();
                 domnames += ((String) ey.getKey()) + ((attr) ? ("/d=" + dp.depth + ",c=" + dp.count + " ") : " ");
+                if ((maxlength > 0) && (domnames.length() >= maxlength)) {
+                    domnames = domnames.substring(0, maxlength-3) + "...";
+                    break;
+                }
             }
             return domnames;
         }

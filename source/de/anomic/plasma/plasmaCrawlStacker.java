@@ -323,7 +323,7 @@ public final class plasmaCrawlStacker {
         }
 
         // deny urls that do not match with the profile domain list
-        if (profile.domCount(nexturl.getHost()) == 0) {
+        if (!(profile.grantedDomAppearance(nexturl.getHost()))) {
             reason = "denied_(no_match_with_domain_filter)";
             this.log.logFine("URL '" + nexturlString + "' is not listed in granted domains. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime));
@@ -331,7 +331,7 @@ public final class plasmaCrawlStacker {
         }
 
         // deny urls that exceed allowed number of occurrences
-        if (profile.domCount(nexturl.getHost()) > profile.domMaxPages()) {
+        if (!(profile.grantedDomCount(nexturl.getHost()))) {
             reason = "denied_(domain_count_exceeded)";
             this.log.logFine("URL '" + nexturlString + "' appeared too often, a maximum of " + profile.domMaxPages() + " is allowed. "+ 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime));
