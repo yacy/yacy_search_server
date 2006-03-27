@@ -67,7 +67,7 @@ public class Network {
     private static final String STR_TABLE_LIST = "table_list_";
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
@@ -124,6 +124,7 @@ public class Network {
                 }
                 prop.put("table_my-acceptcrawl", seed.getFlagAcceptRemoteCrawl() ? 1 : 0);
                 prop.put("table_my-dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);
+                prop.put("table_my-rankingreceive", seed.getFlagAcceptCitationReference() ? 1 : 0);
 
 
                 myppm = seed.getPPM();
@@ -366,7 +367,7 @@ public class Network {
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_type_url", seed.get("seedURL", "http://nowhere/"));
 
-                            long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
+                            final long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
                             if (page == 2 || lastseen > 1440) { // Passive Peers should be passive, also Peers without contact greater than an day
                                 // principal/senior/junior: red/red=offline
                                 prop.put(STR_TABLE_LIST + conCount + "_type_direct", 2);
@@ -391,7 +392,8 @@ public class Network {
                                 } else {
                                     prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", 0);  // red/red; offline was off
                                 }
-                                if (seed.getVersion() >= yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION) {
+                                if (seed.getVersion() >= yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION &&
+                                    seed.getFlagAcceptCitationReference()) {
                                     prop.put(STR_TABLE_LIST + conCount + "_rankingreceive", 1);
                                 } else {
                                     prop.put(STR_TABLE_LIST + conCount + "_rankingreceive", 0);
