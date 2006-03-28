@@ -325,7 +325,7 @@ public class IndexCreate_p {
         prop.put("crawlingIfOlderUnitDayCheck", 0);
         prop.put("crawlingIfOlderUnitHourCheck", 0);
         prop.put("crawlingIfOlderUnitMinuteCheck", 0);
-        if (crawlingIfOlder == -1) {
+        if ((crawlingIfOlder == -1) || (crawlingIfOlder == Integer.MAX_VALUE)) {
             prop.put("crawlingIfOlderNumber", 1);
             prop.put("crawlingIfOlderUnitYearCheck", 1);
         } else if (crawlingIfOlder >= 60*24*365) {

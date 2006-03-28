@@ -421,7 +421,7 @@ public class plasmaCrawlProfile {
             if (dp == null) {
                 return 0 < max;
             } else {
-                return dp.count < max;
+                return dp.depth < max;
             }
         }
         public boolean grantedDomCount(String domain) {
