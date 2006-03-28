@@ -8,14 +8,9 @@ http://seed.paepstin.info/seed.txt
 http://trumpkin.de/yacy/seed.txt
 http://www-public.tu-bs.de:8080/~y0018680/seed.txt
 http://www.anomic.de/yacy/seed.txt
-http://www.axmo12.de/yacy/seedFile.txt
 http://www.blowmymind.de/yacy/seed1.txt
-http://www.content-space.de/yacy/seed.txt
-http://www.daburna.de/YaCy/seed.txt
 http://www.lincksdrachen.de/yacy/seed.txt
 http://www.lulabad.de/seed.txt
 http://www.mitglied.lycos.de/szymonhp/seed.txt
-http://www.pariserstr.de/seed.txt
-http://www.roland-ramthun.de/seed.txt
 http://www.suma-lab.de/yacy/seed.txt
 http://www.yacy.net/yacy/seed.txt
