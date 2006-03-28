@@ -93,30 +93,43 @@ public class IndexCreate_p {
                     // set new properties
                     String newcrawlingfilter = post.get("crawlingFilter", ".*");
                     env.setConfig("crawlingFilter", newcrawlingfilter);
+                    
                     int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "0"));
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
-                    boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "").equals("on");
+                    
+                    boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
                     int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));
                     String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year");
                     int crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);                    
                     env.setConfig("crawlingIfOlder", crawlingIfOlder);
-                    int domFilterDepth = Integer.parseInt(post.get("crawlingDomFilterDepth", "-1"));
-                    env.setConfig("crawlingDomFilterDepth", Integer.toString(domFilterDepth));
-                    int domMaxPages = Integer.parseInt(post.get("crawlingDomMaxPages", "-1"));
-                    env.setConfig("crawlingDomMaxPages", Integer.toString(domMaxPages));
-                    boolean crawlingQ = post.get("crawlingQ", "").equals("on");
+                    
+                    boolean crawlingDomFilterCheck = post.get("crawlingDomFilterCheck", "off").equals("on");
+                    int crawlingDomFilterDepth = (crawlingDomFilterCheck) ? Integer.parseInt(post.get("crawlingDomFilterDepth", "-1")) : -1;
+                    env.setConfig("crawlingDomFilterDepth", Integer.toString(crawlingDomFilterDepth));
+                    
+                    boolean crawlingDomMaxCheck = post.get("crawlingDomMaxCheck", "off").equals("on");
+                    int crawlingDomMaxPages = (crawlingDomMaxCheck) ? Integer.parseInt(post.get("crawlingDomFilterDepth", "-1")) : -1;
+                    env.setConfig("crawlingDomMaxPages", Integer.toString(crawlingDomMaxPages));
+                    
+                    boolean crawlingQ = post.get("crawlingQ", "off").equals("on");
                     env.setConfig("crawlingQ", (crawlingQ) ? "true" : "false");
-                    boolean storeHTCache = post.get("storeHTCache", "").equals("on");
+                    
+                    boolean storeHTCache = post.get("storeHTCache", "off").equals("on");
                     env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
-                    boolean localIndexing = post.get("localIndexing", "").equals("on");
+                    
+                    boolean localIndexing = post.get("localIndexing", "off").equals("on");
                     env.setConfig("localIndexing", (localIndexing) ? "true" : "false");
-                    boolean crawlOrder = post.get("crawlOrder", "").equals("on");
+                    
+                    boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
                     env.setConfig("crawlOrder", (crawlOrder) ? "true" : "false");
-                    boolean xsstopw = post.get("xsstopw", "").equals("on");
+                    
+                    boolean xsstopw = post.get("xsstopw", "off").equals("on");
                     env.setConfig("xsstopw", (xsstopw) ? "true" : "false");
-                    boolean xdstopw = post.get("xdstopw", "").equals("on");
+                    
+                    boolean xdstopw = post.get("xdstopw", "off").equals("on");
                     env.setConfig("xdstopw", (xdstopw) ? "true" : "false");
-                    boolean xpstopw = post.get("xpstopw", "").equals("on");
+                    
+                    boolean xpstopw = post.get("xpstopw", "off").equals("on");
                     env.setConfig("xpstopw", (xpstopw) ? "true" : "false");
                     
                     String crawlingMode = post.get("crawlingMode","url");
@@ -154,7 +167,7 @@ public class IndexCreate_p {
                             switchboard.urlPool.errorURL.remove(urlhash);
                             
                             // stack url
-                            plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, domFilterDepth, domMaxPages, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
+                            plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
                             String reasonString = switchboard.sbStackCrawlThread.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed.hash, "CRAWLING-ROOT", new Date(), 0, pe);
                             
                             if (reasonString == null) {
@@ -215,7 +228,7 @@ public class IndexCreate_p {
                                 HashMap hyperlinks = (HashMap) scraper.getAnchors();
                                 
                                 // creating a crawler profile
-                                plasmaCrawlProfile.entry profile = switchboard.profiles.newEntry(fileName, file.toURL().toString(), newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, domFilterDepth, domMaxPages, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);                                
+                                plasmaCrawlProfile.entry profile = switchboard.profiles.newEntry(fileName, file.toURL().toString(), newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);                                
                                 
                                 // loop through the contained links
                                 Iterator interator = hyperlinks.entrySet().iterator();
@@ -306,7 +319,7 @@ public class IndexCreate_p {
         prop.put("crawlingFilter", env.getConfig("crawlingFilter", "0"));
         
         int crawlingIfOlder = (int) env.getConfigLong("crawlingIfOlder", -1);
-        prop.put("crawlingIfOlderCheck", (crawlingIfOlder == Integer.MAX_VALUE) ? 0 : 1);
+        prop.put("crawlingIfOlderCheck", (crawlingIfOlder == -1) ? 0 : 1);
         prop.put("crawlingIfOlderUnitYearCheck", 0);
         prop.put("crawlingIfOlderUnitMonthCheck", 0);
         prop.put("crawlingIfOlderUnitDayCheck", 0);
@@ -329,9 +342,12 @@ public class IndexCreate_p {
             prop.put("crawlingIfOlderNumber", crawlingIfOlder);
             prop.put("crawlingIfOlderUnitMinuteCheck", 1);
         }
-        //prop.put("crawlingIfOlder", crawlingIfOlder);
-        prop.put("crawlingDomFilterDepth", env.getConfig("crawlingDomFilterDepth", "-1"));
-        prop.put("crawlingDomMaxPages", env.getConfig("crawlingDomMaxPages", "-1"));
+        int crawlingDomFilterDepth = (int) env.getConfigLong("crawlingDomFilterDepth", -1);
+        prop.put("crawlingDomFilterCheck", (crawlingDomFilterDepth == -1) ? 0 : 1);
+        prop.put("crawlingDomFilterDepth", (crawlingDomFilterDepth == -1) ? 1 : crawlingDomFilterDepth);
+        int crawlingDomMaxPages = (int) env.getConfigLong("crawlingDomMaxPages", -1);
+        prop.put("crawlingDomMaxCheck", (crawlingDomMaxPages == -1) ? 0 : 1);
+        prop.put("crawlingDomMaxPages", (crawlingDomMaxPages == -1) ? 10000 : crawlingDomMaxPages);
         prop.put("crawlingQChecked", env.getConfig("crawlingQ", "").equals("true") ? 1 : 0);
         prop.put("storeHTCacheChecked", env.getConfig("storeHTCache", "").equals("true") ? 1 : 0);
         prop.put("localIndexingChecked", env.getConfig("localIndexing", "").equals("true") ? 1 : 0);

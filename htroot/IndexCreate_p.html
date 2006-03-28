@@ -46,8 +46,8 @@ You can define URLs as start points for Web page crawling and start crawling her
   <tr valign="top" class="TableCellLight">
     <td class=small>Re-Crawl Option:</td>
     <td class=small>
-    <input type="checkbox" name="crawlingIfOlderCheck" align="top" #(crawlingIfOlderCheck)#::checked#(/crawlingIfOlderCheck)#>
-    <input name="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#"><br>
+    Use:<input type="checkbox" name="crawlingIfOlderCheck" align="top" #(crawlingIfOlderCheck)#::checked#(/crawlingIfOlderCheck)#>&nbsp;&nbsp;
+    Time:<input name="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#"><br>
 <input type="radio" name="crawlingIfOlderUnit" value="year"  #(crawlingIfOlderUnitYearCheck)#::checked#(/crawlingIfOlderUnitYearCheck)#>Year(s)&nbsp;&nbsp;
     <input type="radio" name="crawlingIfOlderUnit" value="month" #(crawlingIfOlderUnitMonthCheck)#::checked#(/crawlingIfOlderUnitMonthCheck)#>Month(s)&nbsp;&nbsp;
     <input type="radio" name="crawlingIfOlderUnit" value="day" #(crawlingIfOlderUnitDayCheck)#::checked#(/crawlingIfOlderUnitDayCheck)#>Day(s)&nbsp;&nbsp;
@@ -60,17 +60,26 @@ You can define URLs as start points for Web page crawling and start crawling her
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
-    <td class=small>Auto-Dom-Filter Depth:</td>
-    <td class=small><input name="crawlingDomFilterDepth" type="text" size="2" maxlength="2" value="#[crawlingDomFilterDepth]#"></td>
+    <td class=small>Auto-Dom-Filter:</td>
     <td class=small>
-    
+    Use:<input type="checkbox" name="crawlingDomFilterCheck" align="top" #(crawlingDomFilterCheck)#::checked#(/crawlingDomFilterCheck)#>&nbsp;&nbsp;
+    Depth:<input name="crawlingDomFilterDepth" type="text" size="2" maxlength="2" value="#[crawlingDomFilterDepth]#"></td>
+    <td class=small>
+    This option will cause a creation of a domain-list during indexing. This list is filled only with domains that
+    appear on the given depth during crawling. The domain-list is then used to filter-out all domains, that appear
+    on depths greater then the given depth, but do not appear in the domain-list. You can use this option i.e.
+    to crawl pages with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page.
     </td>
   </tr>
   <tr valign="top" class="TableCellLight">
     <td class=small>Maximum Pages per Domain:</td>
-    <td class=small><input name="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#"></td>
     <td class=small>
-    
+    Use:<input type="checkbox" name="crawlingDomMaxCheck" align="top" #(crawlingDomMaxCheck)#::checked#(/crawlingDomMaxCheck)#>&nbsp;&nbsp;
+    Page-Count:<input name="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#"></td>
+    <td class=small>
+    You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.
+    You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within
+    the given depth. Domains outside the given depth are then sorted-out anyway.
     </td>
   </tr>
   <tr valign="top" class="TableCellDark">
