@@ -108,7 +108,7 @@ public class IndexCreate_p {
                     env.setConfig("crawlingDomFilterDepth", Integer.toString(crawlingDomFilterDepth));
                     
                     boolean crawlingDomMaxCheck = post.get("crawlingDomMaxCheck", "off").equals("on");
-                    int crawlingDomMaxPages = (crawlingDomMaxCheck) ? Integer.parseInt(post.get("crawlingDomFilterDepth", "-1")) : -1;
+                    int crawlingDomMaxPages = (crawlingDomMaxCheck) ? Integer.parseInt(post.get("crawlingDomMaxPages", "-1")) : -1;
                     env.setConfig("crawlingDomMaxPages", Integer.toString(crawlingDomMaxPages));
                     
                     boolean crawlingQ = post.get("crawlingQ", "off").equals("on");
@@ -325,7 +325,9 @@ public class IndexCreate_p {
         prop.put("crawlingIfOlderUnitDayCheck", 0);
         prop.put("crawlingIfOlderUnitHourCheck", 0);
         prop.put("crawlingIfOlderUnitMinuteCheck", 0);
-        if (crawlingIfOlder == Integer.MAX_VALUE) {
+        if (crawlingIfOlder == -1) {
+            prop.put("crawlingIfOlderNumber", 1);
+            prop.put("crawlingIfOlderUnitYearCheck", 1);
         } else if (crawlingIfOlder >= 60*24*365) {
             prop.put("crawlingIfOlderNumber", crawlingIfOlder / 60*24*365);
             prop.put("crawlingIfOlderUnitYearCheck", 1);

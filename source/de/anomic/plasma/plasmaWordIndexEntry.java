@@ -112,14 +112,15 @@ public final class plasmaWordIndexEntry implements Cloneable {
     public static final int AP_PATH      =  9; // word inside an url: in path
     public static final int AP_IMG       = 10; // tag inside image references
     public static final int AP_ANCHOR    = 11; // anchor description
-    public static final int AP_BOLD      = 12; // may be interpreted as emphasized
-    public static final int AP_ITALICS   = 13; // may be interpreted as emphasized
-    public static final int AP_WEAK      = 14; // for Text that is small or bareley visible
-    public static final int AP_INVISIBLE = 15; // good for spam detection
-    public static final int AP_TAG       = 16; // for tagged indexeing (i.e. using mp3 tags)
-    public static final int AP_AUTHOR    = 17; // word appears in author name
-    public static final int AP_OPUS      = 18; // word appears in name of opus, which may be an album name (in mp3 tags)
-    public static final int AP_TRACK     = 19; // word appears in track name (i.e. in mp3 tags)
+    public static final int AP_ENV       = 12; // word appears in environment (similar to anchor appearance)
+    public static final int AP_BOLD      = 13; // may be interpreted as emphasized
+    public static final int AP_ITALICS   = 14; // may be interpreted as emphasized
+    public static final int AP_WEAK      = 15; // for Text that is small or bareley visible
+    public static final int AP_INVISIBLE = 16; // good for spam detection
+    public static final int AP_TAG       = 17; // for tagged indexeing (i.e. using mp3 tags)
+    public static final int AP_AUTHOR    = 18; // word appears in author name
+    public static final int AP_OPUS      = 19; // word appears in name of opus, which may be an album name (in mp3 tags)
+    public static final int AP_TRACK     = 20; // word appears in track name (i.e. in mp3 tags)
     
     // URL attributes
     public static final int UA_LOCAL    =  0; // URL was crawled locally
@@ -165,9 +166,9 @@ public final class plasmaWordIndexEntry implements Cloneable {
         char doctype = DT_UNKNOWN;
         if (mime == null) doctype = DT_UNKNOWN;
         else if (mime.startsWith("image/")) doctype = DT_IMAGE;
-/*      else if (mime.endsWith("/gif")) doctype = DT_IMAGE;
+        else if (mime.endsWith("/gif")) doctype = DT_IMAGE;
         else if (mime.endsWith("/jpeg")) doctype = DT_IMAGE;
-        else if (mime.endsWith("/png")) doctype = DT_IMAGE; */
+        else if (mime.endsWith("/png")) doctype = DT_IMAGE;
         else if (mime.endsWith("/html")) doctype = DT_HTML;
         else if (mime.endsWith("/rtf")) doctype = DT_DOC;
         else if (mime.endsWith("/pdf")) doctype = DT_PDFPS;
@@ -177,7 +178,7 @@ public final class plasmaWordIndexEntry implements Cloneable {
         else if (mime.endsWith("/mspowerpoint")) doctype = DT_DOC;
         else if (mime.endsWith("/postscript")) doctype = DT_PDFPS;
         else if (mime.startsWith("text/")) doctype = DT_TEXT;
-//      else if (mime.startsWith("image/")) doctype = DT_IMAGE;
+        else if (mime.startsWith("image/")) doctype = DT_IMAGE;
         else if (mime.startsWith("audio/")) doctype = DT_AUDIO;
         else if (mime.startsWith("video/")) doctype = DT_MOVIE;
         //bz2     = application/x-bzip2
