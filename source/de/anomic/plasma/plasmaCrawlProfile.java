@@ -403,35 +403,42 @@ public class plasmaCrawlProfile {
             profileTable.set(handle(), mem);
         }
         public void domInc(String domain, String referrer, int depth) {
-            DomProfile dp = (DomProfile) doms.get(domain);
-            if (dp == null) {
-                // new domain
-                doms.put(domain, new DomProfile(referrer, depth));
-            } else {
-                // increase counter
-                dp.inc();
-                doms.put(domain, dp);
+            synchronized (domain.intern()) {
+                DomProfile dp = (DomProfile) doms.get(domain);
+                if (dp == null) {
+                    // new domain
+                    doms.put(domain, new DomProfile(referrer, depth));
+                } else {
+                    // increase counter
+                    dp.inc();
+                    doms.put(domain, dp);
+                }
             }
             domsCache.put(this.mem.get("handle"), doms);
         }
         public boolean grantedDomAppearance(String domain) {
             int max = domFilterDepth();
             if (max == Integer.MAX_VALUE) return true;
-            DomProfile dp = (DomProfile) doms.get(domain);
-            if (dp == null) {
-                return 0 < max;
-            } else {
-                return dp.depth < max;
+            synchronized (domain.intern()) {
+                DomProfile dp = (DomProfile) doms.get(domain);
+                if (dp == null) {
+                    return 0 < max;
+                } else {
+                    return dp.depth < max;
+                }
             }
         }
+
         public boolean grantedDomCount(String domain) {
             int max = domMaxPages();
             if (max == Integer.MAX_VALUE) return true;
-            DomProfile dp = (DomProfile) doms.get(domain);
-            if (dp == null) {
-                return 0 < max;
-            } else {
-                return dp.count < max;
+            synchronized (domain.intern()) {
+                DomProfile dp = (DomProfile) doms.get(domain);
+                if (dp == null) {
+                    return 0 < max;
+                } else {
+                    return dp.count < max;
+                }
             }
         }
         public int domSize() {

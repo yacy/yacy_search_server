@@ -421,6 +421,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         // - int: # of outlinks to same domain
         // - int: # of outlinks to outside domain
         // - ETag: for re-crawl decision upon HEAD request
+        // - int: # of keywords
         
         public Entry(URL url, String descr, Date moddate, Date loaddate, String referrerHash, int copyCount, boolean localNeed, int quality, String language, char doctype, int size, int wordCount) {
             // create new entry and store it into database

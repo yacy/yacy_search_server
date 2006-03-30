@@ -241,7 +241,6 @@ public final class plasmaWordIndexEntry implements Cloneable {
         // more needed attributes:
         // - boolean: appearance attributes: title, appears in header, anchor-descr, image-tag etc
         // - boolean: URL attributes
-        // - int: # of keywords
         
     if ((language == null) || (language.length() != plasmaURL.urlLanguageLength)) language = "uk";
         this.urlHash = urlHash;
