@@ -115,19 +115,29 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
     // two arrays are also equal if one array is a subset of the other's array
     // with filled-up char(0)-values
     public int compare(byte[] a, byte[] b) {
-        return (asc) ? compares(a, b) : compares(b, a);
+        return (asc) ? compare0(a, b) : compare0(b, a);
     }
 
+    public int compare0(byte[] a, byte[] b) {
+        if (zero == null) return compares(a, b);
+        // we have an artificial start point. check all combinations
+        int az = compares(a, zero); // -1 if a < z; 0 if a == z; 1 if a > z
+        int bz = compares(b, zero); // -1 if b < z; 0 if b == z; 1 if b > z
+        if ((az ==  0) && (bz ==  0)) return 0;
+        if  (az ==  0) return -1;
+        if  (bz ==  0) return  1;
+        if  (az == bz) return compares(a, b);
+        return bz;
+    }
+    
     public static final int compares(byte[] a, byte[] b) {
         int i = 0;
         final int al = a.length;
         final int bl = b.length;
         final int len = (al > bl) ? bl : al;
         while (i < len) {
-            if (a[i] > b[i])
-                return 1;
-            if (a[i] < b[i])
-                return -1;
+            if (a[i] > b[i]) return 1;
+            if (a[i] < b[i]) return -1;
             // else the bytes are equal and it may go on yet undecided
             i++;
         }
