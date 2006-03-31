@@ -307,6 +307,7 @@ public final class plasmaWordIndex {
             // check time
             remaining = maxTime - (System.currentTimeMillis() - start);
             //if ((maxTime > 0) && (remaining <= 0)) break;
+            if ((maxTime >= 0) && (remaining <= 0)) remaining = 100;
             
             // get next hash:
             singleHash = (String) i.next();
