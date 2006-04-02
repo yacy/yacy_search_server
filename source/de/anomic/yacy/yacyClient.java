@@ -507,7 +507,7 @@ public final class yacyClient {
             }
 
             // finally insert the containers to the index
-            for (int m = 0; m < words; m++) { containerCache.add(container[m]); }
+            for (int m = 0; m < words; m++) { containerCache.add(container[m], -1); }
 
             // generate statistics
             long searchtime;

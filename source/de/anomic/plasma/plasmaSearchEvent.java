@@ -218,13 +218,15 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
         plasmaWordIndexEntryContainer searchResult = new plasmaWordIndexEntryContainer(null);
-        searchResult.add(rcLocal);
-        searchResult.add(rcGlobal);
-        
         long preorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         long postorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         
         profileLocal.startTimer();
+        long pst = System.currentTimeMillis();
+        searchResult.add(rcLocal, preorderTime / 3);
+        searchResult.add(rcGlobal, preorderTime / 3);
+        preorderTime = preorderTime - (System.currentTimeMillis() - pst);
+        if (preorderTime < 0) preorderTime = 100;
         plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking);
         preorder.addContainer(searchResult, preorderTime);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
@@ -237,12 +239,12 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         
         // start url-fetch
         plasmaWordIndexEntry entry;
-        long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + postorderTime;
+        long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : (System.currentTimeMillis() + postorderTime);
         plasmaCrawlLURL.Entry page;
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {
             while (preorder.hasNext()) {
-                if ((acc.sizeFetched() >= minEntries) && (System.currentTimeMillis() >= postorderLimitTime)) break;
+                if ((acc.sizeFetched() >= minEntries) || (System.currentTimeMillis() >= postorderLimitTime)) break;
                 entry = preorder.next();
                 // find the url entry
                 try {

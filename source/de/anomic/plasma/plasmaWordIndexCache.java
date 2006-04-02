@@ -439,7 +439,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             String wordHash = container.wordHash();
             plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) wCache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
             if (entries == null) entries = new plasmaWordIndexEntryContainer(wordHash);
-            added = entries.add(container);
+            added = entries.add(container, -1);
             if (added > 0) {
                 wCache.put(wordHash, entries);
                 hashScore.addScore(wordHash, added);

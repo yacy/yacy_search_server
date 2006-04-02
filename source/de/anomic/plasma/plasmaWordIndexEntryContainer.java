@@ -116,12 +116,13 @@ public final class plasmaWordIndexEntryContainer {
         return c;
     }
     
-    public int add(plasmaWordIndexEntryContainer c) {
+    public int add(plasmaWordIndexEntryContainer c, long maxTime) {
         // returns the number of new elements
+        long startTime = System.currentTimeMillis();
         if (c == null) return 0;
         Iterator i = c.entries();
         int x = 0;
-        while (i.hasNext()) {
+        while ((i.hasNext()) && ((maxTime < 0) || ((startTime + maxTime) > System.currentTimeMillis()))) {
             try {
                 if (addi((plasmaWordIndexEntry) i.next())) x++;
             } catch (ConcurrentModificationException e) {}
@@ -131,12 +132,13 @@ public final class plasmaWordIndexEntryContainer {
     }
 
     private boolean addi(plasmaWordIndexEntry entry) {
-        // returns true if the new entry was added, false if it already existet
-        plasmaWordIndexEntry oldEntry = (plasmaWordIndexEntry) container.get(entry.getUrlHash());
+        // returns true if the new entry was added, false if it already existed
+        plasmaWordIndexEntry oldEntry = (plasmaWordIndexEntry) container.put(entry.getUrlHash(), entry);
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this container
+            container.put(entry.getUrlHash(), oldEntry); // put it back
             return false;
         }
-        return (container.put(entry.getUrlHash(), entry) == null);
+        return (oldEntry == null);
     }
 
     public boolean contains(String urlHash) {

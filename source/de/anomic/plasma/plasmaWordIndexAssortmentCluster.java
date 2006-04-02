@@ -102,7 +102,7 @@ public final class plasmaWordIndexAssortmentCluster {
         if (newContainer.size() > clusterCount) return newContainer; // it will not fit
         plasmaWordIndexEntryContainer buffer;
         while ((buffer = assortments[newContainer.size() - 1].remove(wordHash)) != null) {
-            if (newContainer.add(buffer) == 0) return newContainer; // security check; othervise this loop does not terminate
+            if (newContainer.add(buffer, -1) == 0) return newContainer; // security check; othervise this loop does not terminate
             if (newContainer.size() > clusterCount) return newContainer; // it will not fit
         }
         // the assortment (newContainer.size() - 1) should now be empty. put it in there
@@ -200,7 +200,7 @@ public final class plasmaWordIndexAssortmentCluster {
         if (newContainer == null) return null;
         
         // clean up the whole thing and try to insert the container then
-        newContainer.add(removeFromAll(wordHash, -1));
+        newContainer.add(removeFromAll(wordHash, -1), -1);
         if (newContainer.size() > clusterCapacity) return newContainer;
         storeStretched(wordHash, newContainer);
         return null;
@@ -210,10 +210,12 @@ public final class plasmaWordIndexAssortmentCluster {
         // removes all records from all the assortments and return them
         plasmaWordIndexEntryContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
+        long remainingTime;
         for (int i = 0; i < clusterCount; i++) {
             buffer = assortments[i].remove(wordHash);
-            if (buffer != null) record.add(buffer);
-            if (System.currentTimeMillis() > limitTime) break;
+            remainingTime = limitTime - System.currentTimeMillis();
+            if (0 > remainingTime) break;
+            if (buffer != null) record.add(buffer, remainingTime);
         }
         return record;
     }
@@ -222,10 +224,13 @@ public final class plasmaWordIndexAssortmentCluster {
         // collect all records from all the assortments and return them
         plasmaWordIndexEntryContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
+        long remainingTime;
         for (int i = 0; i < clusterCount; i++) {
             buffer = assortments[i].get(wordHash);
-            if (buffer != null) record.add(buffer);
-            if (System.currentTimeMillis() > limitTime) break;
+            remainingTime = limitTime - System.currentTimeMillis();
+            if (0 > remainingTime) break;
+            if (buffer != null) record.add(buffer, remainingTime);
+            
         }
         return record;
     }

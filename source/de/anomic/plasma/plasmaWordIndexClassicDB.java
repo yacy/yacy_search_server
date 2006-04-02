@@ -181,14 +181,15 @@ public class plasmaWordIndexClassicDB {
         }
     }
 
-    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
+    public synchronized plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         long start = System.currentTimeMillis();
+        if ((maxTime < 0) || (maxTime > 60000)) maxTime=60000; // maximum is one minute
         if (plasmaWordIndexEntity.wordHash2path(databaseRoot, wordHash).exists()) {
             plasmaWordIndexEntity entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
             plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
             plasmaWordIndexEntry entry;
             Iterator i = entity.elements(true);
-            while ((i.hasNext()) && ((maxTime < 0) || (System.currentTimeMillis() < start + maxTime))) {
+            while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) {
                 entry = (plasmaWordIndexEntry) i.next();
                 container.add(entry);
             }
