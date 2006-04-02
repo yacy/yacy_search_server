@@ -156,26 +156,39 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     public int localSearch() {
         // search for the set of hashes and return an array of urlEntry elements
         
-        // retrieve entities that belong to the hashes
-        profileLocal.startTimer();
-        Set containers = wordIndex.getContainers(query.queryHashes, true, true, profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_COLLECTION));
-        if (containers.size() < query.size()) containers = null; // prevent that only a subset is returned
-        profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_COLLECTION);
-        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_COLLECTION, (containers == null) ? 0 : containers.size());
-        
-        // since this is a conjunction we return an empty entity if any word is not known
-        if (containers == null) {
-            rcLocal = new plasmaWordIndexEntryContainer(null);
-            return 0;
+        // we synchronize with flushThreads to allow only one local search at a time,
+        // so all search tasks are queued
+        synchronized (flushThreads) {
+
+            // retrieve entities that belong to the hashes
+            profileLocal.startTimer();
+            Set containers = wordIndex.getContainers(
+                            query.queryHashes,
+                            true,
+                            true,
+                            profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_COLLECTION));
+            if (containers.size() < query.size()) containers = null; // prevent that only a subset is returned
+            profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_COLLECTION);
+            profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_COLLECTION, (containers == null) ? 0 : containers.size());
+
+            // since this is a conjunction we return an empty entity if any word
+            // is not known
+            if (containers == null) {
+                rcLocal = new plasmaWordIndexEntryContainer(null);
+                return 0;
+            }
+
+            // join the result
+            profileLocal.startTimer();
+            rcLocal = plasmaWordIndexEntryContainer.joinContainer(
+                            containers,
+                            profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN),
+                            query.maxDistance);
+            profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_JOIN);
+            profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_JOIN, rcLocal.size());
+
+            return rcLocal.size();
         }
-        
-        // join the result
-        profileLocal.startTimer();
-        rcLocal = plasmaWordIndexEntryContainer.joinContainer(containers, profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN), query.maxDistance);
-        profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_JOIN);
-        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_JOIN, rcLocal.size());
-        
-        return rcLocal.size();
     }
     
     public int globalSearch(int fetchpeers) {
