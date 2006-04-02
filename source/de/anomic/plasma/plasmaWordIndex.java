@@ -279,17 +279,17 @@ public final class plasmaWordIndex {
         // e.g. indexTransfer might keep this container for minutes while
         // several new pages could be added to the index, possibly with the same words that have
         // been selected for transfer
-        container.add(ramCache.getContainer(wordHash, true), maxTime / 2);
+        container.add(ramCache.getContainer(wordHash, true), (maxTime < 0) ? -1 : maxTime / 2);
 
         // get from assortments
-        container.add(assortmentCluster.getFromAll(wordHash, (maxTime < 0) ? -1 : maxTime / 2), maxTime / 2);
+        container.add(assortmentCluster.getFromAll(wordHash, (maxTime < 0) ? -1 : maxTime / 2), (maxTime < 0) ? -1 : maxTime / 2);
 
         // get from backend
         if (maxTime > 0) {
             maxTime = maxTime - (System.currentTimeMillis() - start);
             if (maxTime < 0) maxTime = 100;
         }
-        container.add(backend.getContainer(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime / 2), maxTime / 2);
+        container.add(backend.getContainer(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime / 2), (maxTime < 0) ? -1 : maxTime / 2);
         return container;
     }
 
