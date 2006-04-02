@@ -244,7 +244,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {
             while (preorder.hasNext()) {
-                if ((acc.sizeFetched() >= minEntries) || (System.currentTimeMillis() >= postorderLimitTime)) break;
+                if ((acc.sizeFetched() >= 50) && ((acc.sizeFetched() >= minEntries) || (System.currentTimeMillis() >= postorderLimitTime))) break;
                 entry = preorder.next();
                 // find the url entry
                 try {
