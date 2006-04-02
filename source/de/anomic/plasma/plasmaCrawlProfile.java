@@ -424,7 +424,7 @@ public class plasmaCrawlProfile {
                 if (dp == null) {
                     return 0 < max;
                 } else {
-                    return dp.depth < max;
+                    return dp.depth <= max;
                 }
             }
         }
@@ -437,7 +437,7 @@ public class plasmaCrawlProfile {
                 if (dp == null) {
                     return 0 < max;
                 } else {
-                    return dp.count < max;
+                    return dp.count <= max;
                 }
             }
         }
