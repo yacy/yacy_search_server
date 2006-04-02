@@ -424,6 +424,7 @@ public class plasmaSnippetCache {
             socketTimeout,
             this.sb.remoteProxyConfig,
             this.cacheManager,
+            true,
             this.log);
     }
     

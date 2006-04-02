@@ -74,6 +74,8 @@
 
 package de.anomic.http;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -456,12 +458,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
             if ((targetClass != null) && (path.endsWith("png"))) {
                 // call an image-servlet to produce an on-the-fly - generated image
-                ymagePainter yp = null;
+                Object img = null;
                 try {
                     requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
                     requestHeader.put("PATH", path);
                     // in case that there are no args given, args = null or empty hashmap
-                    yp = (ymagePainter) rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
+                    img = rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
                 } catch (InvocationTargetException e) {
                     this.theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
                     e.getMessage() +
@@ -471,28 +473,66 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'",e);
                     targetClass = null;
                 }
-                if (yp == null) {
+                if (img == null) {
                     // error with image generation; send file-not-found
                     httpd.sendRespondError(this.connectionProperties,out,3,404,"File not Found",null,null);
                 } else {
-                    // send an image to client
-                    targetDate = new Date(System.currentTimeMillis());
-                    nocache = true;
-                    String mimeType = mimeTable.getProperty(targetExt,"text/html");
-                    
-                    // generate an byte array from the generated image
-                    serverByteBuffer baos = new serverByteBuffer();
-                    //ymagePNGEncoderJDE jde = new ymagePNGEncoderJDE((ymageMatrixPainter) yp, ymagePNGEncoderJDE.FILTER_NONE, 0);
-                    //byte[] result = jde.pngEncode();
-                    ImageIO.write(ymagePNGEncoderAWT.toImage((ymageMatrixPainter) yp, true), targetExt, baos);
-                    byte[] result = baos.toByteArray();
-                    baos.close(); baos = null;
-                    
-                    // write the array to the client
-                    httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, null, null, nocache);
-                    if (! method.equals(httpHeader.METHOD_HEAD)) {
-                        Thread.sleep(200); // see below
-                        serverFileUtils.write(result, out);
+                    if (img instanceof ymagePainter) {
+                        ymagePainter yp = (ymagePainter) img;
+                        // send an image to client
+                        targetDate = new Date(System.currentTimeMillis());
+                        nocache = true;
+                        String mimeType = mimeTable.getProperty(targetExt, "text/html");
+
+                        // generate an byte array from the generated image
+                        serverByteBuffer baos = new serverByteBuffer();
+                        // ymagePNGEncoderJDE jde = new
+                        // ymagePNGEncoderJDE((ymageMatrixPainter) yp,
+                        // ymagePNGEncoderJDE.FILTER_NONE, 0);
+                        // byte[] result = jde.pngEncode();
+                        ImageIO.write(ymagePNGEncoderAWT.toImage(
+                                        (ymageMatrixPainter) yp, true),
+                                        targetExt, baos);
+                        byte[] result = baos.toByteArray();
+                        baos.close();
+                        baos = null;
+
+                        // write the array to the client
+                        httpd.sendRespondHeader(this.connectionProperties, out,
+                                httpVersion, 200, null, mimeType,
+                                result.length, targetDate, null, null, null,
+                                null, nocache);
+                        if (!method.equals(httpHeader.METHOD_HEAD)) {
+                            Thread.sleep(200); // see below
+                            serverFileUtils.write(result, out);
+                        }
+                    }
+                    if (img instanceof Image) {
+                        Image i = (Image) img;
+                        // send an image to client
+                        targetDate = new Date(System.currentTimeMillis());
+                        nocache = true;
+                        String mimeType = mimeTable.getProperty(targetExt, "text/html");
+
+                        // generate an byte array from the generated image
+                        serverByteBuffer baos = new serverByteBuffer();
+                        BufferedImage bi = new BufferedImage(i.getWidth(null), i.getHeight(null), BufferedImage.TYPE_INT_RGB);
+                        bi.createGraphics().drawImage(i, 0, 0, i.getWidth(null), i.getHeight(null), null); 
+                        ImageIO.write(bi, targetExt, baos);
+
+                        byte[] result = baos.toByteArray();
+                        baos.close();
+                        baos = null;
+
+                        // write the array to the client
+                        httpd.sendRespondHeader(this.connectionProperties, out,
+                                httpVersion, 200, null, mimeType,
+                                result.length, targetDate, null, null, null,
+                                null, nocache);
+                        if (!method.equals(httpHeader.METHOD_HEAD)) {
+                            Thread.sleep(200); // see below
+                            serverFileUtils.write(result, out);
+                        }
                     }
                 }
             } else if ((targetClass != null) && (path.endsWith(".stream"))) {

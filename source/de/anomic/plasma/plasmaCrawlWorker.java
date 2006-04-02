@@ -215,6 +215,7 @@ public final class plasmaCrawlWorker extends Thread {
                  this.socketTimeout,
                  this.sb.remoteProxyConfig,
                  this.cacheManager,
+                 false,
                  this.log
             );
 
@@ -256,6 +257,7 @@ public final class plasmaCrawlWorker extends Thread {
             int socketTimeout,
             httpRemoteProxyConfig theRemoteProxyConfig,
             plasmaHTCache cacheManager,
+            boolean acceptAllContent,
             serverLog log
         ) throws IOException {
         return load(url,
@@ -269,7 +271,8 @@ public final class plasmaCrawlWorker extends Thread {
              cacheManager,
              log,
              DEFAULT_CRAWLING_RETRY_COUNT,
-             true
+             true,
+             acceptAllContent
         );
     }
 
@@ -285,7 +288,8 @@ public final class plasmaCrawlWorker extends Thread {
             plasmaHTCache cacheManager,
             serverLog log,
             int crawlingRetryCount,
-            boolean useContentEncodingGzip
+            boolean useContentEncodingGzip,
+            boolean acceptAllContent
         ) throws IOException {
         if (url == null) return null;
 
@@ -378,7 +382,7 @@ public final class plasmaCrawlWorker extends Thread {
                 // request has been placed and result has been returned. work off response
                 File cacheFile = cacheManager.getCachePath(url);
                 try {
-                    if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,url,res.responseHeader.mime())) {
+                    if ((acceptAllContent) || (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,url,res.responseHeader.mime()))) {
                         if (cacheFile.isFile()) {
                             cacheManager.deleteFile(url);
                         }
@@ -465,7 +469,8 @@ public final class plasmaCrawlWorker extends Thread {
                              cacheManager,
                              log,
                              --crawlingRetryCount,
-                             useContentEncodingGzip
+                             useContentEncodingGzip,
+                             acceptAllContent
                         );
                         
                         if (redirectedEntry != null) {
@@ -574,6 +579,7 @@ public final class plasmaCrawlWorker extends Thread {
                      cacheManager,
                      log,
                      --crawlingRetryCount,
+                     false,
                      false
                 );
             }
