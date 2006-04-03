@@ -8,6 +8,7 @@
 			<url>#[rssYacyImageURL]#</url>
 			<title>Search for #[former]#</title>
 		</image>
+		#(type)#
 		#{results}#
 		<item>
 			<title>#[description]#</title>
@@ -16,7 +17,7 @@
 			<pubDate>#[date]#</pubDate>
 		</item>
 		#{/results}#
-        <yacyTopwords:topwords>
+		<yacyTopwords:topwords>
             #(combine)#
             ::
             #{words}#
@@ -26,5 +27,7 @@
             #{/words}#
             #(/combine)#
         </yacyTopwords:topwords>
+        ::
+		#(/type)#
 	</channel>
 </rss>

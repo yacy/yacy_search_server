@@ -100,37 +100,18 @@ public class yacysearch {
 
             // we create empty entries for template strings
             final serverObjects prop = new serverObjects();
-            prop.put("promoteSearchPageGreeting", env.getConfig("promoteSearchPageGreeting", ""));
             prop.put("former", "");
-            prop.put("num-results", 0);
-            prop.put("excluded", 0);
-            prop.put("combine", 0);
-            prop.put("resultbottomline", 0);
-            prop.put("count-10", 1);
-            prop.put("count-50", 0);
-            prop.put("count-100", 0);
-            prop.put("count-1000", 0);
             prop.put("count", 10);
-            prop.put("order-ybr-date-quality", plasmaSearchPreOrder.canUseYBR() ? 1 : 0);
-            prop.put("order-ybr-quality-date", 0);
-            prop.put("order-date-ybr-quality", 0);
-            prop.put("order-quality-ybr-date", 0);
-            prop.put("order-date-quality-ybr", plasmaSearchPreOrder.canUseYBR() ? 0 : 1);
-            prop.put("order-quality-date-ybr", 0);
             prop.put("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
-            prop.put("resource-global", ((global) ? 1 : 0));
-            prop.put("resource-local", ((global) ? 0 : 1));
             prop.put("resource", "global");
-            prop.put("time-1", 0);
-            prop.put("time-3", 0);
-            prop.put("time-6", 1);
-            prop.put("time-10", 0);
-            prop.put("time-30", 0);
-            prop.put("time-60", 0);
             prop.put("time", 6);
-            prop.put("results", "");
-            prop.put("urlmaskoptions", 0);
-            prop.put("urlmaskoptions_urlmaskfilter", ".*");
+            prop.put("urlmaskfilter", ".*");
+            prop.put("type", 0);
+            prop.put("type_excluded", 0);
+            prop.put("type_num-results", 0);
+            prop.put("type_combine", 0);
+            prop.put("type_resultbottomline", 0);
+            prop.put("type_results", "");
             return prop;
         }
 
@@ -204,35 +185,37 @@ public class yacysearch {
                                      */
         // remember the last search expression
         env.setConfig("last-search", querystring);
+        
         // process result of search
-        prop.put("resultbottomline", 0);
+        prop.put("type", 0); // set type of result: normal link list
+        prop.put("type_resultbottomline", 0);
         if (filtered.size() > 0) {
-            prop.put("excluded", 1);
-            prop.put("excluded_stopwords", filtered.toString());
+            prop.put("type_excluded", 1);
+            prop.put("type_excluded_stopwords", filtered.toString());
         } else {
-            prop.put("excluded", 0);
+            prop.put("type_excluded", 0);
         }
 
         if (prop == null || prop.size() == 0) {
             if (post.get("search", "").length() < 3) {
-                prop.put("num-results", 2); // no results - at least 3 chars
+                prop.put("type_num-results", 2); // no results - at least 3 chars
             } else {
-                prop.put("num-results", 1); //no results
+                prop.put("type_num-results", 1); //no results
             }
         } else {
-            final int linkcount = Integer.parseInt(prop.get("linkcount", "0"));
-            final int orderedcount = Integer.parseInt(prop.get("orderedcount", "0"));
-            final int totalcount = Integer.parseInt(prop.get("totalcount", "0"));
+            final int linkcount = Integer.parseInt(prop.get("type_linkcount", "0"));
+            final int orderedcount = Integer.parseInt(prop.get("type_orderedcount", "0"));
+            final int totalcount = Integer.parseInt(prop.get("type_totalcount", "0"));
             if (totalcount > 10) {
-                final Object[] references = (Object[]) prop.get("references", new String[0]);
-                prop.put("num-results", 4);
-                prop.put("num-results_linkcount", linkcount);
-                prop.put("num-results_orderedcount", orderedcount);
-                prop.put("num-results_totalcount", totalcount);
+                final Object[] references = (Object[]) prop.get("type_references", new String[0]);
+                prop.put("type_num-results", 4);
+                prop.put("type_num-results_linkcount", linkcount);
+                prop.put("type_num-results_orderedcount", orderedcount);
+                prop.put("type_num-results_totalcount", totalcount);
                 int hintcount = references.length;
                 if (hintcount > 0) {
 
-                    prop.put("combine", 1);
+                    prop.put("type_combine", 1);
 
                     // get the topwords
                     final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
@@ -254,91 +237,58 @@ public class yacysearch {
                     while (iter.hasNext()) {
                         word = (String) iter.next();
                         if (word != null) {
-                            prop.put("combine_words_" + hintcount + "_word", word);
-                            prop.put("combine_words_" + hintcount + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
-                            prop.put("combine_words_" + hintcount + "_count", count);
-                            prop.put("combine_words_" + hintcount + "_order", order);
-                            prop.put("combine_words_" + hintcount + "_resource", ((global) ? "global" : "local"));
-                            prop.put("combine_words_" + hintcount + "_time", (searchtime / 1000));
+                            prop.put("type_combine_words_" + hintcount + "_word", word);
+                            prop.put("type_combine_words_" + hintcount + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
+                            prop.put("type_combine_words_" + hintcount + "_count", count);
+                            prop.put("type_combine_words_" + hintcount + "_order", order);
+                            prop.put("type_combine_words_" + hintcount + "_resource", ((global) ? "global" : "local"));
+                            prop.put("type_combine_words_" + hintcount + "_time", (searchtime / 1000));
                         }
-                        prop.put("combine_words", hintcount);
+                        prop.put("type_combine_words", hintcount);
                         if (hintcount++ > MAX_TOPWORDS) { break; }
                     }
                 }
             } else {
                 if (totalcount == 0) {
-                    prop.put("num-results", 3); // long
+                    prop.put("type_num-results", 3); // long
                 } else {
-                    prop.put("num-results", 4);
-                    prop.put("num-results_linkcount", linkcount);
-                    prop.put("num-results_orderedcount", orderedcount);
-                    prop.put("num-results_totalcount", totalcount);
+                    prop.put("type_num-results", 4);
+                    prop.put("type_num-results_linkcount", linkcount);
+                    prop.put("type_num-results_orderedcount", orderedcount);
+                    prop.put("type_num-results_totalcount", totalcount);
                 }
             }
         }
 
-        if (urlmask.equals(".*")) {
-            prop.put("urlmaskoptions", 0);
-        } else {
-            prop.put("urlmaskoptions", 1);
-        }
-        prop.put("urlmaskfilter", urlmask);
-        prop.put("urlmaskoptions_urlmaskfilter", urlmask);
-
+        
         if (yacyonline) {
             if (global) {
-                prop.put("resultbottomline", 1);
-                prop.put("resultbottomline_globalresults", prop.get("globalresults", "0"));
+                prop.put("type_resultbottomline", 1);
+                prop.put("type_resultbottomline_globalresults", prop.get("type_globalresults", "0"));
             } else {
-                prop.put("resultbottomline", 2);
+                prop.put("type_resultbottomline", 2);
             }
         } else {
             if (global) {
-                prop.put("resultbottomlien", 3);
+                prop.put("type_resultbottomlien", 3);
             } else {
-                prop.put("resultbottomline", 4);
+                prop.put("type_resultbottomline", 4);
             }
         }
 
-        prop.put("count-10", ((count == 10)) ? 1 : 0);
-        prop.put("count-50", ((count == 50)) ? 1 : 0);
-        prop.put("count-100", ((count == 100)) ? 1 : 0);
-        prop.put("count-1000", ((count == 1000)) ? 1 : 0);
-        prop.put("count", count);
-        prop.put("order-ybr-date-quality", ((order.equals("YBR-Date-Quality")) ? 1 : 0));
-        prop.put("order-ybr-quality-date", ((order.equals("YBR-Quality-Date")) ? 1 : 0));
-        prop.put("order-date-ybr-quality", ((order.equals("Date-YBR-Quality")) ? 1 : 0));
-        prop.put("order-quality-ybr-date", ((order.equals("Quality-YBR-Date")) ? 1 : 0));
-        prop.put("order-date-quality-ybr", ((order.equals("Date-Quality-YBR")) ? 1 : 0));
-        prop.put("order-quality-date-ybr", ((order.equals("Quality-Date-YBR")) ? 1 : 0));
-        prop.put("resource-global", ((global) ? 1 : 0));
-        prop.put("resource-local", ((global) ? 0 : 1));
-        prop.put("resource", (global) ? "global" : "local");
-        prop.put("time-1", ((searchtime == 1000) ? 1 : 0));
-        prop.put("time-3", ((searchtime == 3000) ? 1 : 0));
-        prop.put("time-6", ((searchtime == 6000) ? 1 : 0));
-        prop.put("time-10", ((searchtime == 10000) ? 1 : 0));
-        prop.put("time-30", ((searchtime == 30000) ? 1 : 0));
-        prop.put("time-60", ((searchtime == 60000) ? 1 : 0));
-        prop.put("time", searchtime / 1000);
         prop.put("former", post.get("search", ""));
+        prop.put("count", count);
         prop.put("order", order);
-
-        // 'enrich search' variables
-        prop.put("num-results_former", post.get("search", ""));
-        prop.put("num-results_time", searchtime / 1000);
-        prop.put("num-results_count", count);
-        prop.put("num-results_resource", (global) ? "global" : "local");
-        prop.put("num-results_order", order);
-
-        // return rewrite properties
-        prop.put("promoteSearchPageGreeting", env.getConfig("promoteSearchPageGreeting", ""));
+        prop.put("resource", (global) ? "global" : "local");
+        prop.put("time", searchtime / 1000);
+        prop.put("urlmaskfilter", urlmask);
 
         // adding some additional properties needed for the rss feed
         String hostName = (String) header.get("Host","localhost");
         if (hostName.indexOf(":") == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
         prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
 
+        // return rewrite properties
         return prop;
     }
 

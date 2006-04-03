@@ -161,8 +161,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public static int maxCRLDump            = 500000;
     public static int maxCRGDump            = 200000;
-    private int       dhtTransferIndexCount = 150;
-    
+    private int       dhtTransferIndexCount = 50;
+    private static final int dhtTransferIndexMinimum = 30;
     
     // couloured list management
     public static TreeSet badwords = null;
@@ -1805,13 +1805,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // result is a List of urlEntry elements: prepare answer
             if (acc == null) {
-                prop.put("totalcount", "0");
-                prop.put("orderedcount", "0");
-                prop.put("linkcount", "0");
+                prop.put("type_totalcount", "0");
+                prop.put("type_orderedcount", "0");
+                prop.put("type_linkcount", "0");
             } else {
-                prop.put("globalresults", acc.globalContributions);
-                prop.put("totalcount", acc.globalContributions + acc.localContributions);
-                prop.put("orderedcount", Integer.toString(acc.sizeOrdered()));
+                prop.put("type_totalcount", acc.globalContributions + acc.localContributions);
+                prop.put("type_orderedcount", Integer.toString(acc.sizeOrdered()));
+                prop.put("type_globalresults", acc.globalContributions);
                 int i = 0;
                 int p;
                 URL url;
@@ -1866,23 +1866,23 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH) {
                             // suppress line: there is no match in that resource
                         } else {
-                            prop.put("results_" + i + "_delete", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
-                            prop.put("results_" + i + "_description", descr);
-                            prop.put("results_" + i + "_url", urlstring);
-                            prop.put("results_" + i + "_urlhash", urlhash);
-                            prop.put("results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(urlhash));
-                            prop.put("results_" + i + "_urlname", nxTools.cutUrlText(urlname, 120));
-                            prop.put("results_" + i + "_date", dateString(urlentry.moddate()));
-                            prop.put("results_" + i + "_ybr", plasmaSearchPreOrder.ybr(urlentry.hash()));
-                            prop.put("results_" + i + "_size", Long.toString(urlentry.size()));
-                            prop.put("results_" + i + "_words",URLEncoder.encode(query.queryWords.toString(),"UTF-8"));
+                            prop.put("type_results_" + i + "_delete", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
+                            prop.put("type_results_" + i + "_description", descr);
+                            prop.put("type_results_" + i + "_url", urlstring);
+                            prop.put("type_results_" + i + "_urlhash", urlhash);
+                            prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(urlhash));
+                            prop.put("type_results_" + i + "_urlname", nxTools.cutUrlText(urlname, 120));
+                            prop.put("type_results_" + i + "_date", dateString(urlentry.moddate()));
+                            prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(urlentry.hash()));
+                            prop.put("type_results_" + i + "_size", Long.toString(urlentry.size()));
+                            prop.put("type_results_" + i + "_words",URLEncoder.encode(query.queryWords.toString(),"UTF-8"));
                             // adding snippet if available
                             if (snippet.exists()) {
-                                prop.put("results_" + i + "_snippet", 1);
-                                prop.put("results_" + i + "_snippet_text", snippet.getLineMarked(query.queryHashes));
+                                prop.put("type_results_" + i + "_snippet", 1);
+                                prop.put("type_results_" + i + "_snippet_text", snippet.getLineMarked(query.queryHashes));
                             } else {
-                                prop.put("results_" + i + "_snippet", 0);
-                                prop.put("results_" + i + "_snippet_text", "");
+                                prop.put("type_results_" + i + "_snippet", 0);
+                                prop.put("type_results_" + i + "_snippet_text", "");
                             }
                             i++;
                         }
@@ -1912,16 +1912,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     for (int ii = 0; ii < ws.length; ii++) System.out.print(ws[ii] + ", ");
                     System.out.println(" all words = " + ref.getElementCount() + ", total count = " + ref.getTotalCount());
                      */
-                prop.put("references", ws);
-                prop.put("linkcount", Integer.toString(i));
-                prop.put("results", Integer.toString(i));
+                prop.put("type_references", ws);
+                prop.put("type_linkcount", Integer.toString(i));
+                prop.put("type_results", Integer.toString(i));
             }
             
             // log
             log.logInfo("EXIT WORD SEARCH: " + query.queryWords + " - " +
-            prop.get("totalcount", "0") + " links found, " +
-            prop.get("orderedcount", "0") + " links ordered, " +
-            prop.get("linkcount", "?") + " links selected, " +
+            prop.get("type_totalcount", "0") + " links found, " +
+            prop.get("type_orderedcount", "0") + " links ordered, " +
+            prop.get("type_linkcount", "?") + " links selected, " +
             ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             return prop;
         } catch (IOException e) {
@@ -2115,7 +2115,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } else {
                 dhtTransferIndexCount++;
             }
-            if (dhtTransferIndexCount < 50) dhtTransferIndexCount = 50;
+            if (dhtTransferIndexCount < dhtTransferIndexMinimum) dhtTransferIndexCount = dhtTransferIndexMinimum;
             
             // show success
             return true;

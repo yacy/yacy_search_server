@@ -4,6 +4,7 @@
 		<title>Search for #[former]#</title>
 		<description>Search for #[former]#</description>
 		
+		#(type)#
 		<totalResultCount>#[totalcount]#</totalResultCount>
 		<currentResultCount>#[linkcount]#</currentResultCount>
 		
@@ -22,5 +23,7 @@
 			<size>#[size]#</size>
 		</yacySearchResultItem>
 		#{/results}#
+		::
+		#(/type)#
 	</yacySearchResult>
 </yacySearch>
