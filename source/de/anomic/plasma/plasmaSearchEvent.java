@@ -219,27 +219,27 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
         plasmaWordIndexEntryContainer searchResult = new plasmaWordIndexEntryContainer(null);
         long preorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
-        long postorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         
         profileLocal.startTimer();
         long pst = System.currentTimeMillis();
-        searchResult.add(rcLocal, preorderTime / 3);
-        searchResult.add(rcGlobal, preorderTime / 3);
+        searchResult.add(rcLocal, preorderTime);
+        searchResult.add(rcGlobal, preorderTime);
         preorderTime = preorderTime - (System.currentTimeMillis() - pst);
-        if (preorderTime < 0) preorderTime = 100;
+        if (preorderTime < 0) preorderTime = 200;
         plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking);
         preorder.addContainer(searchResult, preorderTime);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_PRESORT, rcLocal.size());
         
+        // start url-fetch
+        long postorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_POSTSORT);
+        long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : (System.currentTimeMillis() + postorderTime);
         profileLocal.startTimer();
         plasmaSearchResult acc = new plasmaSearchResult(query, ranking);
-        if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
-        if (searchResult.size() == 0) return acc; // case that we have nothing to do
-        
-        // start url-fetch
+        //if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
+        //if (searchResult.size() == 0) return acc; // case that we have nothing to do
+
         plasmaWordIndexEntry entry;
-        long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : (System.currentTimeMillis() + postorderTime);
         plasmaCrawlLURL.Entry page;
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {

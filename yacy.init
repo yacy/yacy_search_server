@@ -657,34 +657,34 @@ storagePeerHash =
 # time-percent is the percent of total search time
 # count-percent is the percent of total wanted urls in result
 # we distinguish local and remote search times
-searchProcessLocalTime_c = 25
+searchProcessLocalTime_c = 10
 searchProcessLocalCount_c = 10000000
 searchProcessLocalTime_j = 10
 searchProcessLocalCount_j = 1000000
 searchProcessLocalTime_r = 10
 searchProcessLocalCount_r =100000
-searchProcessLocalTime_u = 30
+searchProcessLocalTime_u = 50
 searchProcessLocalCount_u = 10000
 searchProcessLocalTime_o = 10
 searchProcessLocalCount_o = 100
 searchProcessLocalTime_f = 5
 searchProcessLocalCount_f = 100
-searchProcessLocalTime_s = 10
+searchProcessLocalTime_s = 5
 searchProcessLocalCount_s = 30
 
-searchProcessRemoteTime_c =  25
+searchProcessRemoteTime_c = 10
 searchProcessRemoteCount_c = 1000000
 searchProcessRemoteTime_j = 10
 searchProcessRemoteCount_j = 1000000
 searchProcessRemoteTime_r = 10 
 searchProcessRemoteCount_r = 1000
-searchProcessRemoteTime_u = 30
+searchProcessRemoteTime_u = 50
 searchProcessRemoteCount_u = 1000
 searchProcessRemoteTime_o = 10
 searchProcessRemoteCount_o = 1000
 searchProcessRemoteTime_f = 5
 searchProcessRemoteCount_f = 100
-searchProcessRemoteTime_s = 10
+searchProcessRemoteTime_s = 5
 searchProcessRemoteCount_s = 10
 
 # path to ranking directory containing ranking reference files

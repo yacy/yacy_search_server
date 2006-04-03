@@ -86,6 +86,8 @@ public class plasmaSearchTimingProfile implements Cloneable {
     public static final char PROCESS_FILTER       = 'f';
     public static final char PROCESS_SNIPPETFETCH = 's';
     
+    private static final long minimumTargetTime = 100;
+    
     public static char[] sequence = new char[]{
         PROCESS_COLLECTION,
         PROCESS_JOIN,
@@ -197,11 +199,11 @@ public class plasmaSearchTimingProfile implements Cloneable {
             element = new Character(sequence[i]);
             t = (Long) targetTime.get(element);
             if (t != null) sum += t.longValue();
-            if (type == sequence[i]) return (sum < 0) ? 0 : sum;
+            if (type == sequence[i]) return (sum < 0) ? minimumTargetTime : sum;
             t = (Long) yieldTime.get(element);
             if (t != null) sum -= t.longValue();
         }
-        return 0;
+        return minimumTargetTime;
     }
     
     public int getTargetCount(char type) {
