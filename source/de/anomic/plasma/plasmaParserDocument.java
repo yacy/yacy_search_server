@@ -144,7 +144,7 @@ public class plasmaParserDocument {
     }
     
     public Map getImages() {
-        // returns all links enbedded as pictures (visible iin document)
+        // returns all links enbedded as pictures (visible in document)
         return images;
     }
     

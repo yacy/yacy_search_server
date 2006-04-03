@@ -106,89 +106,89 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     public plasmaSearchResult search() {
         // combine all threads
         
-        if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
-            int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
-            if (fetchpeers > 50) fetchpeers = 50;
-            if (fetchpeers < 30) fetchpeers = 30;
-            
-            // remember time
-            long start = System.currentTimeMillis();
-            
-            // first trigger a local search within a separate thread
-            serverInstantThread.oneTimeJob(this, "localSearch", log, 0);
-        
-            // do a global search
-            int globalContributions = globalSearch(fetchpeers);
-            log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-            
-            // combine the result and order
-            plasmaSearchResult result = order();
-            result.globalContributions = globalContributions;
-            result.localContributions = rcLocal.size();
-            flushGlobalResults(); // make these values available for immediate next search
-            
-            // flush results in a separate thread
-            this.start(); // start to flush results
-            //serverInstantThread.oneTimeJob(this, "flushResults", log, 0);
-            
-            // clean up
-            rcLocal = null;
-            
-            // return search result
-            log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
-            lastEvent = this;
-            return result;
-        } else {
-            localSearch();
-            plasmaSearchResult result = order();
-            result.localContributions = rcLocal.size();
-            
-            // clean up
-            rcLocal = null;
-            
-            // return search result
-            log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
-            lastEvent = this;
-            return result;
+        // we synchronize with flushThreads to allow only one local search at a time,
+        // so all search tasks are queued
+        synchronized (flushThreads) {
+
+            if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
+                int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
+                if (fetchpeers > 50) fetchpeers = 50;
+                if (fetchpeers < 30) fetchpeers = 30;
+
+                // remember time
+                long start = System.currentTimeMillis();
+
+                // first trigger a local search within a separate thread
+                serverInstantThread.oneTimeJob(this, "localSearch", log, 0);
+
+                // do a global search
+                int globalContributions = globalSearch(fetchpeers);
+                log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+
+                // combine the result and order
+                plasmaSearchResult result = order();
+                result.globalContributions = globalContributions;
+                result.localContributions = rcLocal.size();
+                flushGlobalResults(); // make these values available for immediate next search
+
+                // flush results in a separate thread
+                this.start(); // start to flush results
+                // serverInstantThread.oneTimeJob(this, "flushResults", log, 0);
+
+                // clean up
+                rcLocal = null;
+
+                // return search result
+                log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
+                lastEvent = this;
+                return result;
+            } else {
+                localSearch();
+                plasmaSearchResult result = order();
+                result.localContributions = rcLocal.size();
+
+                // clean up
+                rcLocal = null;
+
+                // return search result
+                log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
+                lastEvent = this;
+                return result;
+            }
         }
     }
     
     public int localSearch() {
         // search for the set of hashes and return an array of urlEntry elements
-        
-        // we synchronize with flushThreads to allow only one local search at a time,
-        // so all search tasks are queued
-        synchronized (flushThreads) {
 
-            // retrieve entities that belong to the hashes
-            profileLocal.startTimer();
-            Set containers = wordIndex.getContainers(
-                            query.queryHashes,
-                            true,
-                            true,
-                            profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_COLLECTION));
-            if (containers.size() < query.size()) containers = null; // prevent that only a subset is returned
-            profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_COLLECTION);
-            profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_COLLECTION, (containers == null) ? 0 : containers.size());
+        // retrieve entities that belong to the hashes
+        profileLocal.startTimer();
+        Set containers = wordIndex.getContainers(
+                        query.queryHashes,
+                        true,
+                        true,
+                        profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_COLLECTION));
+        if (containers.size() < query.size()) containers = null; // prevent that only a subset is returned
+        profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_COLLECTION);
+        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_COLLECTION, (containers == null) ? 0 : containers.size());
 
-            // since this is a conjunction we return an empty entity if any word
-            // is not known
-            if (containers == null) {
-                rcLocal = new plasmaWordIndexEntryContainer(null);
-                return 0;
-            }
-
-            // join the result
-            profileLocal.startTimer();
-            rcLocal = plasmaWordIndexEntryContainer.joinContainer(
-                            containers,
-                            profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN),
-                            query.maxDistance);
-            profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_JOIN);
-            profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_JOIN, rcLocal.size());
-
-            return rcLocal.size();
+        // since this is a conjunction we return an empty entity if any word
+        // is not known
+        if (containers == null) {
+            rcLocal = new plasmaWordIndexEntryContainer(null);
+            return 0;
         }
+
+        // join the result
+        profileLocal.startTimer();
+        rcLocal = plasmaWordIndexEntryContainer.joinContainer(containers,
+                profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN),
+                query.maxDistance);
+        profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_JOIN);
+        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_JOIN, rcLocal.size());
+
+        return rcLocal.size();
+
     }
     
     public int globalSearch(int fetchpeers) {
