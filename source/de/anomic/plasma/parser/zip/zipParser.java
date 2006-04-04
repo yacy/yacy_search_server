@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -100,8 +101,7 @@ public class zipParser extends AbstractParser implements Parser {
             StringBuffer docAbstrct = new StringBuffer();
             serverByteBuffer docText = new serverByteBuffer();
             Map docAnchors = new HashMap();
-            Map docImages = new HashMap(); 
-            
+            TreeSet docImages = new TreeSet(); 
             
             // creating a new parser class to parse the unzipped content
             plasmaParser theParser = new plasmaParser();            
@@ -151,7 +151,7 @@ public class zipParser extends AbstractParser implements Parser {
                 docText.append(theDoc.getText());                 
                 
                 docAnchors.putAll(theDoc.getAnchors());
-                docImages.putAll(theDoc.getImages());
+                docImages.addAll(theDoc.getImages());
             }
             
             /* (URL location, String mimeType,

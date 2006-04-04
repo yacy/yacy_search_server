@@ -299,7 +299,13 @@ public final class serverDate {
             return "unknown";
         }
     }
-        
+    
+    public static long remainingTime(long start, long due, long minimum) {
+        if (due < 0) return -1;
+        long r = due + start - System.currentTimeMillis();
+        if (r <= 0) return minimum; else return r;
+    }
+    
     public static void main(String[] args) {
         //System.out.println("kelondroDate is (" + new kelondroDate().toString() + ")");
         System.out.println("offset is " + (UTCDiff()/1000/60/60) + " hours, javaDate is " + new Date() + ", correctedDate is " + new Date(correctedUTCTime()));

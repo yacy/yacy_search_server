@@ -43,12 +43,15 @@
 package de.anomic.plasma;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterImageEntry;
 
 import java.io.ByteArrayInputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeSet;
 
 public class plasmaParserDocument {
     
@@ -61,7 +64,7 @@ public class plasmaParserDocument {
     String abstrct;     // an abstract, if present: short content description
     byte[] text;        // the clear text, all that is visible
     Map anchors;        // all links embedded as clickeable entities (anchor tags)
-    Map images;         // all visible pictures in document
+    TreeSet images;     // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
@@ -69,11 +72,12 @@ public class plasmaParserDocument {
     Map medialinks;
     Map emaillinks;
     plasmaCondenser condenser;
+    boolean resorted;
                     
     public plasmaParserDocument(URL location, String mimeType,
                     String keywords, String shortTitle, String longTitle,
                     String[] sections, String abstrct,
-                    byte[] text, Map anchors, Map images) {
+                    byte[] text, Map anchors, TreeSet images) {
         this.location = location;
         this.mimeType = (mimeType==null)?"application/octet-stream":mimeType;
         this.keywords = (keywords==null)?"":keywords;
@@ -83,23 +87,14 @@ public class plasmaParserDocument {
         this.abstrct = (abstrct==null)?"":abstrct;
         this.text = (text==null)?new byte[0]:text;
         this.anchors = (anchors==null)?new HashMap(0):anchors;
-        this.images = (images==null)?new HashMap(0):images;
+        this.images = (images==null)?new TreeSet():images;
         this.hyperlinks = null;
         this.medialinks = null;
         this.emaillinks = null;
         this.condenser = null;
+        this.resorted = false;
     }
-    
-    /*
-    private String absolutePath(String relativePath) {
-        try {
-            return htmlFilterContentScraper.urlNormalform(location, relativePath);
-        } catch (Exception e) {
-            return "";
-        }
-    }
-    */
-    
+
     public String getMimeType() {
         return this.mimeType;
     }
@@ -143,8 +138,10 @@ public class plasmaParserDocument {
         return anchors;
     }
     
-    public Map getImages() {
+    public TreeSet getImages() {
         // returns all links enbedded as pictures (visible in document)
+        // this resturns a htmlFilterImageEntry collection
+        if (!resorted) resortLinks();
         return images;
     }
     
@@ -152,23 +149,25 @@ public class plasmaParserDocument {
     
     public Map getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
-        if (hyperlinks == null) resortLinks();
+        if (!resorted) resortLinks();
         return hyperlinks;
     }
     
     public Map getMedialinks() {
         // this is partly subset of getAnchor and getImage: all non-hyperrefs
-        if (medialinks == null) resortLinks();
+        if (!resorted) resortLinks();
         return medialinks;
     }
     
     public Map getEmaillinks() {
         // this is part of the getAnchor-set: only links to email addresses
-        if (emaillinks == null) resortLinks();
+        if (!resorted) resortLinks();
         return emaillinks;
     }
     
     private synchronized void resortLinks() {
+        
+        // extract hyperlinks, medialinks and emaillinks from anchorlinks
         Iterator i;
         String url;
         int extpos, qpos;
@@ -177,6 +176,7 @@ public class plasmaParserDocument {
         hyperlinks = new HashMap();
         medialinks = new HashMap();
         emaillinks = new HashMap();
+        TreeSet collectedImages = new TreeSet(); // this is a set that is collected now and joined later to the imagelinks
         Map.Entry entry;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
@@ -190,42 +190,54 @@ public class plasmaParserDocument {
                     if (((qpos = url.indexOf("?")) >= 0) && (qpos > extpos)) {
                         ext = url.substring(extpos, qpos).toLowerCase();
                     } else {
-			ext = url.substring(extpos).toLowerCase();
+                        ext = url.substring(extpos).toLowerCase();
                     }
                     normal = htmlFilterContentScraper.urlNormalform(null, url);
                     if (normal != null) { //TODO: extension function is not correct
                         if (plasmaParser.mediaExtContains(ext.substring(1))) {
-                            // this is not an normal anchor, its a media link
+                            // this is not a normal anchor, its a media link
                             medialinks.put(normal, entry.getValue());
                         } else {
                             hyperlinks.put(normal, entry.getValue());
+                        }
+                        if (plasmaParser.imageExtContains(ext.substring(1))) {
+                            try {
+                                collectedImages.add(new htmlFilterImageEntry(new URL(normal), "", -1, -1));
+                            } catch (MalformedURLException e) {}
                         }
                     }
                 }
             }
         }
-        // finally add the images to the medialinks
-        i = images.entrySet().iterator();
+        
+        // add the images to the medialinks
+        i = images.iterator();
         String normal;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
             url = (String) entry.getKey();
             normal = htmlFilterContentScraper.urlNormalform(null, url);
-            if (normal != null) medialinks.put(normal, entry.getValue()); // avoid NullPointerException
+            if (normal != null) medialinks.put(normal, ((htmlFilterImageEntry) entry.getValue()).alt()); // avoid NullPointerException
         }
-        expandHyperlinks();
-    }
-    
-    
-    public synchronized void expandHyperlinks() {
-        // we add artificial hyperlinks to the hyperlink set that can be calculated from
-        // given hyperlinks and imagelinks
+        
+        // expand the hyperlinks:
+        // we add artificial hyperlinks to the hyperlink set
+        // that can be calculated from given hyperlinks and imagelinks
         hyperlinks.putAll(plasmaParser.allReflinks(hyperlinks));
         hyperlinks.putAll(plasmaParser.allReflinks(medialinks));
         hyperlinks.putAll(plasmaParser.allSubpaths(hyperlinks));
         hyperlinks.putAll(plasmaParser.allSubpaths(medialinks));
+        
+        // finally add image links that we collected from the anchors to the image map
+        i = collectedImages.iterator();
+        htmlFilterImageEntry iEntry;
+        while (i.hasNext()) {
+            iEntry = (htmlFilterImageEntry) i.next();
+            if (!images.contains(iEntry)) images.add(iEntry);
+        }
+        
+        // don't do this again
+        this.resorted = true;
     }
-
-
     
 }

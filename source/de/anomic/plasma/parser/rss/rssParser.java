@@ -53,9 +53,11 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -104,7 +106,7 @@ public class rssParser extends AbstractParser implements Parser {
         try {
             LinkedList feedSections = new LinkedList();
             HashMap anchors = new HashMap();
-            HashMap images = new HashMap();
+            TreeSet images  = new TreeSet();
             serverByteBuffer text = new serverByteBuffer();
             
             
@@ -125,7 +127,7 @@ public class rssParser extends AbstractParser implements Parser {
             
             ImageIF channelImage = channel.getImage();
             if (channelImage != null) {
-                images.put(channelImage.getLocation().toString(),channelImage.getTitle());
+                images.add(new htmlFilterImageEntry(channelImage.getLocation(), channelImage.getTitle(), -1, -1));
             }            
             
             // loop through the feed items
@@ -162,9 +164,9 @@ public class rssParser extends AbstractParser implements Parser {
                             anchors.putAll(itemLinks);
                         }
                         
-                        Map itemImages = scraper.getImages();
+                        TreeSet itemImages = scraper.getImages();
                         if ((itemImages != null) && (itemImages.size() > 0)) {
-                            images.putAll(itemImages);
+                            images.addAll(itemImages);
                         }
                         
                         byte[] extractedText = scraper.getText();

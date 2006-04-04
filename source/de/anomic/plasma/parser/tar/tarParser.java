@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
 import com.ice.tar.TarEntry;
@@ -115,7 +116,7 @@ public class tarParser extends AbstractParser implements Parser {
             StringBuffer docAbstrct = new StringBuffer();
             serverByteBuffer docText = new serverByteBuffer();
             Map docAnchors = new HashMap();
-            Map docImages = new HashMap(); 
+            TreeSet docImages = new TreeSet(); 
                         
             // looping through the contained files
             TarEntry entry;
@@ -174,7 +175,7 @@ public class tarParser extends AbstractParser implements Parser {
                 docText.append(theDoc.getText());                 
                 
                 docAnchors.putAll(theDoc.getAnchors());
-                docImages.putAll(theDoc.getImages());
+                docImages.addAll(theDoc.getImages());
             }
             
             /* (URL location, String mimeType,

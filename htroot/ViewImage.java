@@ -66,9 +66,10 @@ public class ViewImage {
         }
         int width = post.getInt("width", 0);
         int height = post.getInt("height", 0);
+        int timeout = post.getInt("timeout", 5000);
         
         // load image
-        byte[] imgb = sb.snippetCache.getResource(url, true);
+        byte[] imgb = sb.snippetCache.getResource(url, true, timeout);
         if (imgb == null) return null;
         
         // create image 
@@ -76,7 +77,20 @@ public class ViewImage {
         Image original = Toolkit.getDefaultToolkit().createImage(imgb); 
         mediaTracker.addImage(original, 0); 
         try {mediaTracker.waitForID(0);} catch (InterruptedException e) {} 
-        if ((width == 0) || (height == 0)) return original;
+        boolean auth = ((String) header.get("CLIENTIP", "")).equals("localhost") || sb.verifyAuthentication(header, false); // handle access rights
+        if ((auth) && ((width == 0) || (height == 0))) return original;
+
+        // in case of not-authorized access shrink the image to prevent copyright problems
+        // so that images are not larger than thumbnails
+        if (!auth) {
+            width = width / 2;
+            height = height / 2;
+            int xsc = Math.max(width, height);
+            if (xsc > 64) {
+                width = width * 64 / xsc;
+                height = height * 64 / xsc;
+            }
+        }
         
         // scale image 
         Image scaled = original.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING); 

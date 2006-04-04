@@ -398,13 +398,12 @@ public class plasmaSnippetCache {
         }
     }
     
-    public byte[] getResource(URL url, boolean fetchOnline) {
+    public byte[] getResource(URL url, boolean fetchOnline, int socketTimeout) {
         // load the url as resource from the web
         try {
-            //return httpc.singleGET(url, 5000, null, null, remoteProxyHost, remoteProxyPort);
             byte[] resource = cacheManager.loadResource(url);
             if ((fetchOnline) && (resource == null)) {
-                loadResourceFromWeb(url, 5000);
+                loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout);
                 resource = cacheManager.loadResource(url);
             }
             return resource;

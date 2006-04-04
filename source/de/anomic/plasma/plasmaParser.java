@@ -132,7 +132,12 @@ public final class plasmaParser {
     /**
      * A list of media extensions that should <b>not</b> be handled by the plasmaParser
      */
-    private static final HashSet mediaExtSet = new HashSet(28);
+    private static final HashSet mediaExtSet = new HashSet();
+    
+    /**
+     * A list of image extensions that should be handleable by image viewer apps
+     */
+    private static final HashSet imageExtSet = new HashSet();
     
     /**
      * This {@link FilenameFilter} is used to find all classes based on there filenames 
@@ -160,8 +165,17 @@ public final class plasmaParser {
      * @see #initMediaExt(String)
      */
     static {
-        initMediaExt(extString2extList("swf,wmv,jpg,jpeg,jpe,rm,mov,mpg,mpeg,mp3,asf,gif,png,avi,zip,rar," +
-        "sit,hqx,img,dmg,tar,gz,ps,xls,ppt,ram,bz2,arj"));
+        initMediaExt(extString2extList(
+                "sit,hqx,img,dmg,exe,com,bat,sh" +   // application container
+                "tar,gz,bz2,arj,zip,rar," +          // archive formats
+                "ps,xls,ppt,asf," +                  // text formats without support
+                "mp3,ogg,aac," +                     // audio formats
+                "swf,avi,wmv,rm,mov,mpg,mpeg,ram," + // video formats
+                "jpg,jpeg,jpe,gif,png"               // image formats
+                ));
+        initImageExt(extString2extList(
+                "jpg,jpeg,jpe,gif,png"               // image formats
+                ));
         
         /* ===================================================
          * initializing the parser object pool
@@ -225,8 +239,6 @@ public final class plasmaParser {
         }        
     }
     
-
-    
     public static List extString2extList(String extString) {
         LinkedList extensions = new LinkedList();
         if ((extString == null) || (extString.length() == 0)) {
@@ -242,6 +254,13 @@ public final class plasmaParser {
         synchronized (mediaExtSet) {
             mediaExtSet.clear();
             mediaExtSet.addAll(mediaExtList);
+        }
+    }
+    
+    public static void initImageExt(List imageExtList) {
+        synchronized (imageExtSet) {
+            imageExtSet.clear();
+            imageExtSet.addAll(imageExtList);
         }
     }
     
@@ -313,6 +332,13 @@ public final class plasmaParser {
         synchronized (mediaExtSet) {
 			return mediaExtSet.contains(mediaExt);
 		}
+    }
+
+    public static boolean imageExtContains(String imageExt) {
+        if (imageExt == null) return false;
+        synchronized (imageExtSet) {
+            return imageExtSet.contains(imageExt.trim().toLowerCase());
+        }
     }
 
     public static String getRealMimeType(String mimeType) {

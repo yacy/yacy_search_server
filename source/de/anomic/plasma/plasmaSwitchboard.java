@@ -1958,7 +1958,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // get set of words
             // Set words = plasmaCondenser.getWords(getText(getResource(url,
             // fetchOnline)));
-            Iterator witer = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline)).getText());
+            Iterator witer = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline, 10000)).getText());
             // delete all word references
             int count = removeReferences(urlhash, witer);
             // finally delete the url entry itself

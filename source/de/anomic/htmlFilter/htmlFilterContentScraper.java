@@ -89,7 +89,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
     // class variables: collectors for links
     private HashMap anchors;
-    private HashMap images;
+    private TreeSet images; // String(absolute url)/ImageEntry relation
     private HashMap metas;
     private String title;
     //private String headline;
@@ -103,7 +103,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         super(linkTags0, linkTags1);
         this.root = root;
         this.anchors = new HashMap();
-        this.images = new HashMap();
+        this.images = new TreeSet();
         this.metas = new HashMap();
         this.title = "";
         this.headlines = new ArrayList[4];
@@ -112,54 +112,10 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public void scrapeText(byte[] newtext) {
-//      System.out.println("SCRAPE: " + new String(newtext));
+        // System.out.println("SCRAPE: " + new String(newtext));
         if ((content.length() != 0) && (content.byteAt(content.length() - 1) != 32)) content.append(32);
         content.append(super.stripAll(new serverByteBuffer(newtext, newtext.length + 1)).trim()).append(32);
     }
-
-    
-    /*
-    public static String urlNormalform(String us) {
-        if (us == null) { return null; }
-        if (us.length() == 0) { return null; }
-
-        serverLog.logFiner("htmlFilter", "urlNormalform:  IN=" + us);
-        
-        // TODO: what about 
-        // - case insensitive domain names
-        // - chars that should be escaped in URLs
-
-        // cutting of everything behind #
-        int cpos = us.indexOf("#");
-        if (cpos >= 0) { us = us.substring(0, cpos); }
-        if (us.startsWith("https")) {
-            if (us.endsWith(":443")) {
-                us = us.substring(0, us.length() - 4);
-                serverLog.logFinest("htmlFilter", "urlNormalform: :443=" + us);
-            } else {
-                cpos = us.indexOf(":443/");
-                if (cpos >= 0) {
-                    us = us.substring(0, cpos).concat(us.substring(cpos + 4));
-                    serverLog.logFinest("htmlFilter", "urlNormalform: :443/=" + us);
-                }
-            }
-        } else if (us.startsWith("http")) {
-            if (us.endsWith(":80")) {
-                us = us.substring(0, us.length() - 3);
-                serverLog.logFinest("htmlFilter", "urlNormalform: :80=" + us);
-            } else {
-                cpos = us.indexOf(":80/");
-                if (cpos >= 0) {
-                    us = us.substring(0, cpos).concat(us.substring(cpos + 3));
-                    serverLog.logFinest("htmlFilter", "urlNormalform: :80/=" + us);
-                }
-            } 
-        }
-        if (((us.endsWith("/")) && (us.lastIndexOf('/', us.length() - 2) < 8))) us = us.substring(0, us.length() - 1);
-        serverLog.logFine("htmlFilter", "urlNormalform: OUT=" + us);        
-        return us;
-    }
-    */
 
     public static String urlNormalform(URL url) {
         boolean defaultPort = false;
@@ -212,7 +168,18 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public void scrapeTag0(String tagname, Properties tagopts) {
-        if (tagname.equalsIgnoreCase("img")) images.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("alt",""));
+        if (tagname.equalsIgnoreCase("img")) {
+            int width = -1, height = -1;
+            try {
+                width = Integer.parseInt(tagopts.getProperty("width", "-1"));
+                height = Integer.parseInt(tagopts.getProperty("height", "-1"));
+            } catch (NumberFormatException e) {}
+            try {
+                URL url = new URL(absolutePath(tagopts.getProperty("src", "")));
+                htmlFilterImageEntry ie = new htmlFilterImageEntry(url, tagopts.getProperty("alt",""), width, height);
+                images.add(ie);
+            } catch (MalformedURLException e) {}
+        }
         if (tagname.equalsIgnoreCase("base")) try {root = new URL(tagopts.getProperty("href", ""));} catch (MalformedURLException e) {}
         if (tagname.equalsIgnoreCase("frame")) anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
         if (tagname.equalsIgnoreCase("meta")) {
@@ -230,7 +197,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
-//      System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
+        // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
         if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) anchors.put(absolutePath(tagopts.getProperty("href", "")), super.stripAll(new serverByteBuffer(text)).trim().toString());
         String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
@@ -303,7 +270,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         return anchors;
     }
 
-    public Map getImages() {
+    public TreeSet getImages() {
+        // this resturns a String(absolute url)/htmlFilterImageEntry - relation
         return images;
     }
 
@@ -389,7 +357,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         System.out.println("METAS    :" + metas.toString());
         System.out.println("TEXT     :" + new String(content.getBytes()));
     }
-
+    
+    
+    
 /*
     public static void main(String[] args) {  
         try {
