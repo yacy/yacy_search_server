@@ -53,9 +53,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.plasma.plasmaSearchImages;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -124,170 +126,203 @@ public class yacysearch {
             maxDistance = 1;
         }
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
-        final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
-        // filter out stopwords
-        final TreeSet filtered = kelondroMSetTools.joinConstructive(query, plasmaSwitchboard.stopwords);
-        if (filtered.size() > 0) {
-            kelondroMSetTools.excludeDestructive(query, plasmaSwitchboard.stopwords);
-        }
-
-        // if a minus-button was hit, remove a special reference first
-        if (post.containsKey("deleteref")) {
-            if (!sb.verifyAuthentication(header, true)) {
-                final serverObjects prop = new serverObjects();
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
-                return prop;
-            }
-            final String delHash = post.get("deleteref", "");
-            sb.removeReferences(delHash, query);
-        }
-
-        // prepare search order
-        final String order = post.get("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
-        final int count = Integer.parseInt(post.get("count", "10"));
-        final long searchtime = 1000 * Long.parseLong(post.get("time", "10"));
-        final boolean yacyonline = ((yacyCore.seedDB != null) &&
-                                    (yacyCore.seedDB.mySeed != null) &&
-                                    (yacyCore.seedDB.mySeed.getAddress() != null));
-
-        String order1 = plasmaSearchRankingProfile.ORDER_DATE;
-        String order2 = plasmaSearchRankingProfile.ORDER_YBR;
-        String order3 = plasmaSearchRankingProfile.ORDER_QUALITY;
-        if (order.startsWith("YBR"))        order1 = plasmaSearchRankingProfile.ORDER_YBR;
-        if (order.startsWith("Date"))       order1 = plasmaSearchRankingProfile.ORDER_DATE;
-        if (order.startsWith("Quality"))    order1 = plasmaSearchRankingProfile.ORDER_QUALITY;
-        if (order.indexOf("-YBR-") > 0)     order2 = plasmaSearchRankingProfile.ORDER_YBR;
-        if (order.indexOf("-Date-") > 0)    order2 = plasmaSearchRankingProfile.ORDER_DATE;
-        if (order.indexOf("-Quality-") > 0) order2 = plasmaSearchRankingProfile.ORDER_QUALITY;
-        if (order.endsWith("YBR"))          order3 = plasmaSearchRankingProfile.ORDER_YBR;
-        if (order.endsWith("Date"))         order3 = plasmaSearchRankingProfile.ORDER_DATE;
-        if (order.endsWith("Quality"))      order3 = plasmaSearchRankingProfile.ORDER_QUALITY;
-        String urlmask = "";
-        if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
-            urlmask = ".*";
-        } else {
-            urlmask = (post.containsKey("urlmaskfilter")) ? (String) post.get("urlmaskfilter") : ".*";
-        }
-
-        // do the search
-        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, maxDistance, count, searchtime, urlmask,
-                                                             ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
-                                                             "", 20);
-        plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile(new String[]{order1, order2, order3});
-        plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-        plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-        final serverObjects prop = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming);
-
-        /*
-        final serverObjects prop = sb.searchFromLocal(query, order1, order2, count,
-                                   ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))),
-                                     searchtime, urlmask);
-                                     */
-        // remember the last search expression
-        env.setConfig("last-search", querystring);
         
-        // process result of search
-        prop.put("type", 0); // set type of result: normal link list
-        prop.put("type_resultbottomline", 0);
-        if (filtered.size() > 0) {
-            prop.put("type_excluded", 1);
-            prop.put("type_excluded_stopwords", filtered.toString());
-        } else {
-            prop.put("type_excluded", 0);
-        }
-
-        if (prop == null || prop.size() == 0) {
-            if (post.get("search", "").length() < 3) {
-                prop.put("type_num-results", 2); // no results - at least 3 chars
-            } else {
-                prop.put("type_num-results", 1); //no results
+        serverObjects prop = new serverObjects();
+        
+        if (post.get("type", "href").equals("href")) {
+            prop.put("type", 0); // set type of result: normal link list
+            
+            final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
+            // filter out stopwords
+            final TreeSet filtered = kelondroMSetTools.joinConstructive(query,
+                    plasmaSwitchboard.stopwords);
+            if (filtered.size() > 0) {
+                kelondroMSetTools.excludeDestructive(query, plasmaSwitchboard.stopwords);
             }
-        } else {
-            final int linkcount = Integer.parseInt(prop.get("type_linkcount", "0"));
-            final int orderedcount = Integer.parseInt(prop.get("type_orderedcount", "0"));
-            final int totalcount = Integer.parseInt(prop.get("type_totalcount", "0"));
-            if (totalcount > 10) {
-                final Object[] references = (Object[]) prop.get("type_references", new String[0]);
-                prop.put("type_num-results", 4);
-                prop.put("type_num-results_linkcount", linkcount);
-                prop.put("type_num-results_orderedcount", orderedcount);
-                prop.put("type_num-results_totalcount", totalcount);
-                int hintcount = references.length;
-                if (hintcount > 0) {
 
-                    prop.put("type_combine", 1);
+            // if a minus-button was hit, remove a special reference first
+            if (post.containsKey("deleteref")) {
+                if (!sb.verifyAuthentication(header, true)) {
+                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                    return prop;
+                }
+                final String delHash = post.get("deleteref", "");
+                sb.removeReferences(delHash, query);
+            }
 
-                    // get the topwords
-                    final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
-                    String tmp = "";
-                    for (int i = 0; i < hintcount; i++) {
-                        tmp = (String) references[i];
-                        if (!tmp.matches("[0-9]+")) { topwords.add(tmp); } // omit in the production ?
-                    }
+            // prepare search order
+            final String order = post.get("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
+            final int count = Integer.parseInt(post.get("count", "10"));
+            final long searchtime = 1000 * Long.parseLong(post.get("time", "10"));
+            final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed != null) && (yacyCore.seedDB.mySeed.getAddress() != null));
 
-                    // filter out the badwords
-                    final TreeSet filteredtopwords = kelondroMSetTools.joinConstructive(topwords, plasmaSwitchboard.badwords);
-                    if (filteredtopwords.size() > 0) {
-                        kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
-                    }
+            String order1 = plasmaSearchRankingProfile.ORDER_DATE;
+            String order2 = plasmaSearchRankingProfile.ORDER_YBR;
+            String order3 = plasmaSearchRankingProfile.ORDER_QUALITY;
+            if (order.startsWith("YBR")) order1 = plasmaSearchRankingProfile.ORDER_YBR;
+            if (order.startsWith("Date")) order1 = plasmaSearchRankingProfile.ORDER_DATE;
+            if (order.startsWith("Quality")) order1 = plasmaSearchRankingProfile.ORDER_QUALITY;
+            if (order.indexOf("-YBR-") > 0) order2 = plasmaSearchRankingProfile.ORDER_YBR;
+            if (order.indexOf("-Date-") > 0) order2 = plasmaSearchRankingProfile.ORDER_DATE;
+            if (order.indexOf("-Quality-") > 0) order2 = plasmaSearchRankingProfile.ORDER_QUALITY;
+            if (order.endsWith("YBR")) order3 = plasmaSearchRankingProfile.ORDER_YBR;
+            if (order.endsWith("Date")) order3 = plasmaSearchRankingProfile.ORDER_DATE;
+            if (order.endsWith("Quality")) order3 = plasmaSearchRankingProfile.ORDER_QUALITY;
+            String urlmask = "";
+            if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
+                urlmask = ".*";
+            } else {
+                urlmask = (post.containsKey("urlmaskfilter")) ? (String) post.get("urlmaskfilter") : ".*";
+            }
 
-                    String word;
-                    hintcount = 0;
-                    final Iterator iter = topwords.iterator();
-                    while (iter.hasNext()) {
-                        word = (String) iter.next();
-                        if (word != null) {
-                            prop.put("type_combine_words_" + hintcount + "_word", word);
-                            prop.put("type_combine_words_" + hintcount + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
-                            prop.put("type_combine_words_" + hintcount + "_count", count);
-                            prop.put("type_combine_words_" + hintcount + "_order", order);
-                            prop.put("type_combine_words_" + hintcount + "_resource", ((global) ? "global" : "local"));
-                            prop.put("type_combine_words_" + hintcount + "_time", (searchtime / 1000));
-                        }
-                        prop.put("type_combine_words", hintcount);
-                        if (hintcount++ > MAX_TOPWORDS) { break; }
-                    }
+            // do the search
+            plasmaSearchQuery thisSearch = new plasmaSearchQuery(
+                    query,
+                    maxDistance,
+                    count,
+                    searchtime,
+                    urlmask,
+                    ((global) && (yacyonline) && (!(env.getConfig(
+                            "last-search", "").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT
+                            : plasmaSearchQuery.SEARCHDOM_LOCAL, "", 20);
+            plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile( new String[] { order1, order2, order3 });
+            plasmaSearchTimingProfile localTiming = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
+            plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
+            prop = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming);
+
+            /*
+             * final serverObjects prop = sb.searchFromLocal(query, order1,
+             * order2, count, ((global) && (yacyonline) &&
+             * (!(env.getConfig("last-search","").equals(querystring)))),
+             * searchtime, urlmask);
+             */
+            // remember the last search expression
+            env.setConfig("last-search", querystring);
+
+            // process result of search
+            prop.put("type_resultbottomline", 0);
+            if (filtered.size() > 0) {
+                prop.put("type_excluded", 1);
+                prop.put("type_excluded_stopwords", filtered.toString());
+            } else {
+                prop.put("type_excluded", 0);
+            }
+
+            if (prop == null || prop.size() == 0) {
+                if (post.get("search", "").length() < 3) {
+                    prop.put("type_num-results", 2); // no results - at least 3 chars
+                } else {
+                    prop.put("type_num-results", 1); // no results
                 }
             } else {
-                if (totalcount == 0) {
-                    prop.put("type_num-results", 3); // long
-                } else {
+                final int linkcount = Integer.parseInt(prop.get("type_linkcount", "0"));
+                final int orderedcount = Integer.parseInt(prop.get("type_orderedcount", "0"));
+                final int totalcount = Integer.parseInt(prop.get("type_totalcount", "0"));
+                if (totalcount > 10) {
+                    final Object[] references = (Object[]) prop.get( "type_references", new String[0]);
                     prop.put("type_num-results", 4);
                     prop.put("type_num-results_linkcount", linkcount);
                     prop.put("type_num-results_orderedcount", orderedcount);
                     prop.put("type_num-results_totalcount", totalcount);
+                    int hintcount = references.length;
+                    if (hintcount > 0) {
+
+                        prop.put("type_combine", 1);
+
+                        // get the topwords
+                        final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
+                        String tmp = "";
+                        for (int i = 0; i < hintcount; i++) {
+                            tmp = (String) references[i];
+                            if (!tmp.matches("[0-9]+")) {
+                                topwords.add(tmp);
+                            } // omit in the production ?
+                        }
+
+                        // filter out the badwords
+                        final TreeSet filteredtopwords = kelondroMSetTools.joinConstructive(topwords, plasmaSwitchboard.badwords);
+                        if (filteredtopwords.size() > 0) {
+                            kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
+                        }
+
+                        String word;
+                        hintcount = 0;
+                        final Iterator iter = topwords.iterator();
+                        while (iter.hasNext()) {
+                            word = (String) iter.next();
+                            if (word != null) {
+                                prop.put("type_combine_words_" + hintcount + "_word", word);
+                                prop.put("type_combine_words_" + hintcount + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
+                                prop.put("type_combine_words_" + hintcount + "_count", count);
+                                prop.put("type_combine_words_" + hintcount + "_order", order);
+                                prop.put("type_combine_words_" + hintcount + "_resource", ((global) ? "global" : "local"));
+                                prop.put("type_combine_words_" + hintcount + "_time", (searchtime / 1000));
+                            }
+                            prop.put("type_combine_words", hintcount);
+                            if (hintcount++ > MAX_TOPWORDS) {
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    if (totalcount == 0) {
+                        prop.put("type_num-results", 3); // long
+                    } else {
+                        prop.put("type_num-results", 4);
+                        prop.put("type_num-results_linkcount", linkcount);
+                        prop.put("type_num-results_orderedcount", orderedcount);
+                        prop.put("type_num-results_totalcount", totalcount);
+                    }
                 }
             }
-        }
 
+            if (yacyonline) {
+                if (global) {
+                    prop.put("type_resultbottomline", 1);
+                    prop.put("type_resultbottomline_globalresults", prop.get("type_globalresults", "0"));
+                } else {
+                    prop.put("type_resultbottomline", 2);
+                }
+            } else {
+                if (global) {
+                    prop.put("type_resultbottomlien", 3);
+                } else {
+                    prop.put("type_resultbottomline", 4);
+                }
+            }
+
+            prop.put("former", post.get("search", ""));
+            prop.put("count", count);
+            prop.put("order", order);
+            prop.put("resource", (global) ? "global" : "local");
+            prop.put("time", searchtime / 1000);
+            prop.put("urlmaskfilter", urlmask);
+
+            // adding some additional properties needed for the rss feed
+            String hostName = (String) header.get("Host", "localhost");
+            if (hostName.indexOf(":") == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
+            prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
+
+        }
         
-        if (yacyonline) {
-            if (global) {
-                prop.put("type_resultbottomline", 1);
-                prop.put("type_resultbottomline_globalresults", prop.get("type_globalresults", "0"));
-            } else {
-                prop.put("type_resultbottomline", 2);
-            }
-        } else {
-            if (global) {
-                prop.put("type_resultbottomlien", 3);
-            } else {
-                prop.put("type_resultbottomline", 4);
+        if (post.get("type", "href").equals("image")) {
+            prop.put("type", 1); // set type of result: image list
+            
+            if (querystring.startsWith("http://")) {
+                try {
+                    plasmaSearchImages si = new plasmaSearchImages(sb.snippetCache, 6000, new URL(querystring), 0);
+                    Iterator i = si.entries();
+                    htmlFilterImageEntry ie;
+                    int c = 0;
+                    while (i.hasNext()) {
+                        ie = (htmlFilterImageEntry) i.next();
+                        prop.put("type_results_" + c + "_url", ie.url().toString());
+                        c++;
+                    }
+                    prop.put("type_results", c);
+                } catch (MalformedURLException e) {}
             }
         }
-
-        prop.put("former", post.get("search", ""));
-        prop.put("count", count);
-        prop.put("order", order);
-        prop.put("resource", (global) ? "global" : "local");
-        prop.put("time", searchtime / 1000);
-        prop.put("urlmaskfilter", urlmask);
-
-        // adding some additional properties needed for the rss feed
-        String hostName = (String) header.get("Host","localhost");
-        if (hostName.indexOf(":") == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
-        prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
-
         // return rewrite properties
         return prop;
     }
