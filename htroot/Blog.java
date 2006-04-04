@@ -72,6 +72,7 @@ public class Blog {
 	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 		plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
 		serverObjects prop = new serverObjects();
+		blogBoard.entry page = null;
 		
 		boolean hasRights = switchboard.verifyAuthentication(header, true);
 
@@ -120,16 +121,22 @@ public class Blog {
 				content = post.get("content", "").getBytes();
 			}
 
-			//set name for new entry
+			Date date = null;
+			
+			//set name for new entry or date for old entry
 			if(pagename.equals("blog_default"))
 				pagename = String.valueOf(System.currentTimeMillis());
+			else {
+				page = switchboard.blogDB.read(pagename); //must I read it again after submitting?
+				date = page.date();
+			}
 
 			try {
-				switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, post.get("subject",""), author, ip, content));
+				switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, post.get("subject",""), author, ip, date, content));
 			} catch (IOException e) {}
 		}
 
-		blogBoard.entry page = switchboard.blogDB.read(pagename);
+		page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
 
 		if (post.containsKey("edit")) {
 		    //edit an entry

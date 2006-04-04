@@ -96,10 +96,6 @@ public class blogBoard {
     public void close() {
         try {datbase.close();} catch (IOException e) {}
     }
-    
-    private static String dateString() {
-	return dateString(new GregorianCalendar(GMTTimeZone).getTime());
-    }
 
     private static String dateString(Date date) {
 	return SimpleFormatter.format(date);
@@ -123,8 +119,8 @@ public class blogBoard {
         return wikiBoard.guessAuthor(ip);
     }
 
-    public entry newEntry(String key, String subject, String author, String ip, byte[] page) throws IOException {
-	return new entry(normalize(key), subject, author, ip, page);
+    public entry newEntry(String key, String subject, String author, String ip, Date date, byte[] page) throws IOException {
+	return new entry(normalize(key), subject, author, ip, date, page);
     }
 
     public class entry {
@@ -132,11 +128,12 @@ public class blogBoard {
 	String key;
         Map record;
 
-    public entry(String nkey, String subject, String author, String ip, byte[] page) throws IOException {
+    public entry(String nkey, String subject, String author, String ip, Date date, byte[] page) throws IOException {
 	    record = new HashMap();
 	    key = nkey;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
-	    record.put("date", dateString());
+	    if(date == null) date = new GregorianCalendar(GMTTimeZone).getTime(); 
+	    record.put("date", dateString(date));
 	    if ((subject == null) || (subject.length() == 0)) subject = "";
 	    record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject.getBytes("UTF-8")));
 	    if ((author == null) || (author.length() == 0)) author = "anonymous";
@@ -215,7 +212,7 @@ public class blogBoard {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);
             Map record = base.get(key);
-            if (record == null) return newEntry(key, "", "anonymous", "127.0.0.1", "".getBytes());
+            if (record == null) return newEntry(key, "", "anonymous", "127.0.0.1", new GregorianCalendar(GMTTimeZone).getTime(), "".getBytes());
             return new entry(key, record);
     	} catch (IOException e) {
     		return null;
