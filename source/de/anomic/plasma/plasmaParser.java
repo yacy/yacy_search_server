@@ -473,7 +473,8 @@ public final class plasmaParser {
             tempFile = File.createTempFile("parseSource", ".tmp");
             serverFileUtils.write(source, tempFile);
             return parseSource(location, mimeType, tempFile);
-        } catch (Exception e) {   
+        } catch (Exception e) {
+            serverLog.logSevere("PARSER", "parseSource1: " + e.getMessage(), e);
             return null;
         } finally {
             if (tempFile != null) try { tempFile.delete(); } catch (Exception ex){}
@@ -555,10 +556,11 @@ public final class plasmaParser {
                 hfos.close();
                 return transformScraper(location, mimeType, scraper);
             } else {
+                serverLog.logWarning("PARSER", "parseSource2: wrong mime type");
                 return null;
             }
         } catch (Exception e) {
-            //e.printStackTrace();
+            serverLog.logSevere("PARSER", "parseSource2: " + e.getMessage(), e);
             return null;
         } finally {
             if (theParser != null) {
