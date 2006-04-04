@@ -213,11 +213,11 @@ public class plasmaParserDocument {
         // add the images to the medialinks
         i = images.iterator();
         String normal;
+        htmlFilterImageEntry iEntry;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            url = (String) entry.getKey();
-            normal = htmlFilterContentScraper.urlNormalform(null, url);
-            if (normal != null) medialinks.put(normal, ((htmlFilterImageEntry) entry.getValue()).alt()); // avoid NullPointerException
+            iEntry = (htmlFilterImageEntry) i.next();
+            normal = htmlFilterContentScraper.urlNormalform(iEntry.url());
+            if (normal != null) medialinks.put(normal, iEntry.alt()); // avoid NullPointerException
         }
         
         // expand the hyperlinks:
@@ -230,7 +230,6 @@ public class plasmaParserDocument {
         
         // finally add image links that we collected from the anchors to the image map
         i = collectedImages.iterator();
-        htmlFilterImageEntry iEntry;
         while (i.hasNext()) {
             iEntry = (htmlFilterImageEntry) i.next();
             if (!images.contains(iEntry)) images.add(iEntry);

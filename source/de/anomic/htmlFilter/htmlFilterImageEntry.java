@@ -42,7 +42,7 @@ package de.anomic.htmlFilter;
 
 import java.net.URL;
 
-public class htmlFilterImageEntry {
+public class htmlFilterImageEntry implements Comparable {
 
     private URL url;
     private String alt;
@@ -72,7 +72,7 @@ public class htmlFilterImageEntry {
     }
 
     public String toString() {
-        return "{" + alt + ", " + width + "/" + height + "}";
+        return "{" + url.toString() + ", " + alt + ", " + width + "/" + height + "}";
     }
 
     public int hashCode() {
