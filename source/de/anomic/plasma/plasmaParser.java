@@ -899,6 +899,7 @@ final class plasmaParserFactory implements KeyedPoolableObjectFactory {
             theParser.reset();
         }
     }
+    
 }    
 
 final class plasmaParserPool extends GenericKeyedObjectPool {

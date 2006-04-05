@@ -117,6 +117,8 @@ public class index {
         prop.put("results", "");
         prop.put("urlmaskoptions", 0);
         prop.put("urlmaskoptions_urlmaskfilter", ".*");
+        prop.put("type", "href");
+        prop.put("depth", "0");
         return prop;
     }
 

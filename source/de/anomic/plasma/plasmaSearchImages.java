@@ -61,7 +61,7 @@ public final class plasmaSearchImages {
         if (maxTime > 10) {
             byte[] res = sc.getResource(url, true, (int) maxTime);
             if (res != null) {
-                plasmaParserDocument document = sc.parseDocument(url, res); // #### THIS RETURNS ONLY ANCHOR TAGS! BUG! ###
+                plasmaParserDocument document = sc.parseDocument(url, res);
 
                 // add the image links
                 this.addAll(document.getImages());

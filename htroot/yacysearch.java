@@ -108,6 +108,8 @@ public class yacysearch {
             prop.put("resource", "global");
             prop.put("time", 6);
             prop.put("urlmaskfilter", ".*");
+            prop.put("type", "href");
+            prop.put("depth", "0");
             prop.put("type", 0);
             prop.put("type_excluded", 0);
             prop.put("type_num-results", 0);
@@ -297,6 +299,8 @@ public class yacysearch {
             prop.put("resource", (global) ? "global" : "local");
             prop.put("time", searchtime / 1000);
             prop.put("urlmaskfilter", urlmask);
+            prop.put("type", "href");
+            prop.put("depth", "0");
 
             // adding some additional properties needed for the rss feed
             String hostName = (String) header.get("Host", "localhost");
@@ -308,9 +312,11 @@ public class yacysearch {
         if (post.get("type", "href").equals("image")) {
             prop.put("type", 1); // set type of result: image list
             
+            int depth = post.getInt("depth", 0);
+            
             if (querystring.startsWith("http://")) {
                 try {
-                    plasmaSearchImages si = new plasmaSearchImages(sb.snippetCache, 6000, new URL(querystring), 0);
+                    plasmaSearchImages si = new plasmaSearchImages(sb.snippetCache, 6000, new URL(querystring), depth);
                     Iterator i = si.entries();
                     htmlFilterImageEntry ie;
                     int c = 0;
@@ -322,6 +328,10 @@ public class yacysearch {
                     prop.put("type_results", c);
                 } catch (MalformedURLException e) {}
             }
+            
+            prop.put("former", post.get("search", ""));
+            prop.put("type", "image");
+            prop.put("depth", depth);
         }
         // return rewrite properties
         return prop;
