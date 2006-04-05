@@ -108,7 +108,7 @@ public class yacysearch {
             prop.put("resource", "global");
             prop.put("time", 6);
             prop.put("urlmaskfilter", ".*");
-            prop.put("type", "href");
+            prop.put("cat", "href");
             prop.put("depth", "0");
             prop.put("type", 0);
             prop.put("type_excluded", 0);
@@ -131,7 +131,7 @@ public class yacysearch {
         
         serverObjects prop = new serverObjects();
         
-        if (post.get("type", "href").equals("href")) {
+        if (post.get("cat", "href").equals("href")) {
             prop.put("type", 0); // set type of result: normal link list
             
             final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
@@ -299,7 +299,8 @@ public class yacysearch {
             prop.put("resource", (global) ? "global" : "local");
             prop.put("time", searchtime / 1000);
             prop.put("urlmaskfilter", urlmask);
-            prop.put("type", "href");
+            prop.put("type", "0");
+            prop.put("cat", "href");
             prop.put("depth", "0");
 
             // adding some additional properties needed for the rss feed
@@ -309,28 +310,25 @@ public class yacysearch {
 
         }
         
-        if (post.get("type", "href").equals("image")) {
-            prop.put("type", 1); // set type of result: image list
+        if ((post.get("cat", "href").equals("image")) && (querystring.startsWith("http://"))) {
             
             int depth = post.getInt("depth", 0);
-            
-            if (querystring.startsWith("http://")) {
-                try {
-                    plasmaSearchImages si = new plasmaSearchImages(sb.snippetCache, 6000, new URL(querystring), depth);
-                    Iterator i = si.entries();
-                    htmlFilterImageEntry ie;
-                    int c = 0;
-                    while (i.hasNext()) {
-                        ie = (htmlFilterImageEntry) i.next();
-                        prop.put("type_results_" + c + "_url", ie.url().toString());
-                        c++;
-                    }
-                    prop.put("type_results", c);
-                } catch (MalformedURLException e) {}
+            URL url = null;
+            try {url = new URL(querystring);} catch (MalformedURLException e) {}
+            plasmaSearchImages si = new plasmaSearchImages(sb.snippetCache, 6000, url, depth);
+            Iterator i = si.entries();
+            htmlFilterImageEntry ie;
+            int c = 0;
+            while (i.hasNext()) {
+                ie = (htmlFilterImageEntry) i.next();
+                prop.put("type_results_" + c + "_url", ie.url().toString());
+                c++;
             }
-            
+            prop.put("type_results", c);
+
+            prop.put("cat", "image");
+            prop.put("type", 1); // set type of result: image list
             prop.put("former", post.get("search", ""));
-            prop.put("type", "image");
             prop.put("depth", depth);
         }
         // return rewrite properties
