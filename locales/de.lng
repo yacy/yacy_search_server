@@ -282,7 +282,7 @@ This is a distributed web crawler and also a caching HTTP proxy. You are using t
 For more detailed information, visit the==F&uuml;r weitergehende Informationen besuchen Sie bitte die
 YaCy homepage==YaCy-Homepage
 Local and Global Search: Options and Functions==Lokale und globale Suche: Optionen und Funktionen
-The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die einen lokalen Index bildet, der sich aus den Weseiten zusammensetzt, die Sie mit dem Proxy besuchen.
+The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die einen lokalen Index bildet, der sich aus den Webseiten zusammensetzt, die Sie mit dem Proxy besuchen.
 The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie k&ouml;nnen aber auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
 Search Word List==Such Wort Liste
 You can search for several words simultanous. Words must be separated by a single space.==Sie k&ouml;nnen eine Suche mit mehreren W&ouml;rtern gleichzeitig starten. Die W&ouml;rter m&uuml;ssen durch ein Leerzeichen getrennt sein.
