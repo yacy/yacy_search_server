@@ -34,7 +34,7 @@ You may also provide your blacklist to other peers by sharing them; in return yo
 collect blacklist entries from other peers.==Im Gegenzug k&ouml;nnen Sie sich selber von anderen Peers Blacklists runterladen.
 Edit list:==Liste bearbeiten:
 \(active\)\#not active::active\#\(/active\)\# \#\(shared\)\#not shared::shared\#\(/shared\)==(active)#nicht aktiv::aktiv#(/active)# #(shared)#nicht freigegeben::freigegeben#(/shared)
-"select"=="w&auml;hle"
+"select"=="w&auml;hlen"
 New list:==Neue Liste:
 "create"=="anlegen"
 Enable/disable this list==Liste an/ausschalten
@@ -130,7 +130,7 @@ The maximum cache size is==Die maximale Gr&ouml;&szlig;e betr&auml;gt
 Advanced Config==Erweiterte Einstellungen
 Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie k&ouml;nnen alles &auml;ndern, bedenken Sie aber, dass einige &Auml;nderungen einen Neustart von YaCy erfordern und andere &Auml;nderungen YaCy ganz zum Absturz bringen k&ouml;nnen.
-For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in der Datei yacy.init
+For an explanation of the available options please look into yacy.init==Eine Erkl&auml;rung der einzelnen Optionen finden Sie in der Datei yacy.init
 "Save"==Speichern
 
 
@@ -279,7 +279,7 @@ Cookies==Cookies
 YaCy: Help==YaCy: Hilfeseiten
 >Help==>Hilfe
 This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==YaCy ist eine Suchmaschine,  die &auml;hnlich dem Prinzip des verteilten Rechnens (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und Indexieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <i>online-Interface</i> von YaCy. Sie k&ouml;nnen dieses Interface auch zum Konfigurieren Ihrer pers&ouml;nlichen Einstellungen, Proxy-Einstellungen, der Zugriffs-Kontrolle und den Crawl-Einstellungen benutzen. Sie k&ouml;nnen das Interface auch zum Starten von Crawls, Nachrichtenversand an andere YaCy-Nutzer und zur &Uuml;berwachung Ihres Index, Cache-Status und des Crawl-Prozesses benutzen. Besonders wichtig ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den <i>globalen</i> Index zu durchsuchen.
-For more detailed information, visit the====F&uuml;r weitergehende Informationen besuchen Sie bitte die
+For more detailed information, visit the==F&uuml;r weitergehende Informationen besuchen Sie bitte die
 YaCy homepage==YaCy-Homepage
 Local and Global Search: Options and Functions==Lokale und globale Suche: Optionen und Funktionen
 The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die einen lokalen Index bildet, der sich aus den Weseiten zusammensetzt, die Sie mit dem Proxy besuchen.
