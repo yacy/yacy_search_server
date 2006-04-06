@@ -329,13 +329,13 @@ public class IndexCreate_p {
             prop.put("crawlingIfOlderNumber", 1);
             prop.put("crawlingIfOlderUnitYearCheck", 1);
         } else if (crawlingIfOlder >= 60*24*365) {
-            prop.put("crawlingIfOlderNumber", crawlingIfOlder / 60*24*365);
+            prop.put("crawlingIfOlderNumber", crawlingIfOlder / (60*24*365));
             prop.put("crawlingIfOlderUnitYearCheck", 1);
         } else if (crawlingIfOlder >= 60*24*30) {
-            prop.put("crawlingIfOlderNumber", crawlingIfOlder / 60*24*30);
+            prop.put("crawlingIfOlderNumber", crawlingIfOlder / (60*24*30));
             prop.put("crawlingIfOlderUnitMonthCheck", 1);
         } else if (crawlingIfOlder >= 60*24) {
-            prop.put("crawlingIfOlderNumber", crawlingIfOlder / 60*24);
+            prop.put("crawlingIfOlderNumber", crawlingIfOlder / (60*24));
             prop.put("crawlingIfOlderUnitDayCheck", 1);
         } else if (crawlingIfOlder >= 60) {
             prop.put("crawlingIfOlderNumber", crawlingIfOlder / 60);

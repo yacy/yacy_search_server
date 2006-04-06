@@ -94,7 +94,7 @@ public final class search {
         if (yacyCore.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
-            yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(oseed, key), true);
+            yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(oseed, key, true), true);
         }
 
         // prepare search

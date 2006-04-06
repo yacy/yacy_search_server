@@ -151,7 +151,7 @@ public final class yacyClient {
         yacySeed otherPeer = null;
         float otherPeerVersion = 0;
         if (otherHash != null && otherHash.length() > 0) {
-            otherPeer = yacySeed.genRemoteSeed((String) result.get("seed0"), key);
+            otherPeer = yacySeed.genRemoteSeed((String) result.get("seed0"), key, true);
             if (otherPeer == null || !otherPeer.hash.equals(otherHash)) {
                 yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
                 return -1; // no success
@@ -233,7 +233,7 @@ public final class yacyClient {
         while ((seedStr = (String) result.get(yacySeed.SEED + i++)) != null) {
             // integrate new seed into own database
             // the first seed, "seed0" is the seed of the responding peer
-            if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, key), (i == 1))) count++;
+            if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, key, true), (i == 1))) count++;
         }
         return count;
     }
@@ -266,7 +266,7 @@ public final class yacyClient {
             
             if (result == null || result.size() == 0) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-            return yacySeed.genRemoteSeed((String) result.get("response"), key);
+            return yacySeed.genRemoteSeed((String) result.get("response"), key, true);
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.querySeed error:" + e.getMessage());
             return null;

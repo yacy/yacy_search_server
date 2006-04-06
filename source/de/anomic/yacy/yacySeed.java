@@ -597,7 +597,7 @@ public class yacySeed {
         return hash;
     }
     
-    public static yacySeed genRemoteSeed(String seedStr, String key) {
+    public static yacySeed genRemoteSeed(String seedStr, String key, boolean properTest) {
         // this method is used to convert the external representation of a seed into a seed object
 //      yacyCore.log.logFinest("genRemoteSeed: seedStr=" + seedStr + " key=" + key);
         if (seedStr == null) { return null; }
@@ -606,8 +606,14 @@ public class yacySeed {
         final HashMap dna = serverCodings.string2map(seed);
         final String hash = (String) dna.remove("Hash");
         yacySeed resultSeed = new yacySeed(hash, dna);
-        if (resultSeed.isProper() == null) return resultSeed;
-        return null;
+        if (properTest) {
+            String testResult = resultSeed.isProper();
+            if (testResult != null) {
+                yacyCore.log.logFinest("seed is not proper (" + testResult + "): " + resultSeed);
+                return null;
+            }
+        }
+        return resultSeed;
     }
 
     public String toString() {       
@@ -655,7 +661,7 @@ public class yacySeed {
         final char[] b = new char[(int) f.length()];
         fr.read(b, 0, b.length);
         fr.close();
-        return genRemoteSeed(new String(b), null);
+        return genRemoteSeed(new String(b), null, false);
     }
 
     public Object clone() {

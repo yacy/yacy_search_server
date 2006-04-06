@@ -192,7 +192,7 @@ public class yacyPeerActions {
                         enu = seedList.iterator();
                         lc = 0;
                         while (enu.hasNext()) {
-                            ys = yacySeed.genRemoteSeed((String) enu.next(), null);
+                            ys = yacySeed.genRemoteSeed((String) enu.next(), null, true);
                             if ((ys != null) && (ys.isProper() == null) &&
                                     ((seedDB.mySeed == null) || (seedDB.mySeed.hash != ys.hash))) {
                                 if (connectPeer(ys, false)) lc++;

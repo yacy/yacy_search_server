@@ -79,7 +79,7 @@ public final class hello {
         int  count = 0;
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (NumberFormatException e) {count = 0;}
 //      final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(MYTIME)); // read remote time
-        final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key);
+        final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key, true);
 
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
         if (remoteSeed == null) { return null; }
