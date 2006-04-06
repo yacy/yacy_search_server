@@ -64,7 +64,10 @@ public class index {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
+        boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
+        int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
@@ -96,30 +99,33 @@ public class index {
         prop.put("excluded", 0);
         prop.put("combine", 0);
         prop.put("resultbottomline", 0);
-        prop.put("count-10", 1);
-        prop.put("count-50", 0);
-        prop.put("count-100", 0);
-        prop.put("count-1000", 0);
-        prop.put("order-ybr-date-quality", plasmaSearchPreOrder.canUseYBR() ? 1 : 0);
-        prop.put("order-ybr-quality-date", 0);
-        prop.put("order-date-ybr-quality", 0);
-        prop.put("order-quality-ybr-date", 0);
-        prop.put("order-date-quality-ybr", plasmaSearchPreOrder.canUseYBR() ? 0 : 1);
-        prop.put("order-quality-date-ybr", 0);
-        prop.put("resource-global", ((global) ? 1 : 0));
-        prop.put("resource-local", ((global) ? 0 : 1));
-        prop.put("time-1", 0);
-        prop.put("time-3", 0);
-        prop.put("time-6", 1);
-        prop.put("time-10", 0);
-        prop.put("time-30", 0);
-        prop.put("time-60", 0);
+        prop.put("searchoptions", searchoptions);
+        prop.put("searchoptions_count-10", 1);
+        prop.put("searchoptions_count-50", 0);
+        prop.put("searchoptions_count-100", 0);
+        prop.put("searchoptions_count-1000", 0);
+        prop.put("searchoptions_order-ybr-date-quality", plasmaSearchPreOrder.canUseYBR() ? 1 : 0);
+        prop.put("searchoptions_order-ybr-quality-date", 0);
+        prop.put("searchoptions_order-date-ybr-quality", 0);
+        prop.put("searchoptions_order-quality-ybr-date", 0);
+        prop.put("searchoptions_order-date-quality-ybr", plasmaSearchPreOrder.canUseYBR() ? 0 : 1);
+        prop.put("searchoptions_order-quality-date-ybr", 0);
+        prop.put("searchoptions_resource-global", ((global) ? 1 : 0));
+        prop.put("searchoptions_resource-local", ((global) ? 0 : 1));
+        prop.put("searchoptions_time-1", 0);
+        prop.put("searchoptions_time-3", 0);
+        prop.put("searchoptions_time-6", 1);
+        prop.put("searchoptions_time-10", 0);
+        prop.put("searchoptions_time-30", 0);
+        prop.put("searchoptions_time-60", 0);
+        prop.put("searchoptions_urlmaskoptions", 0);
+        prop.put("searchoptions_urlmaskoptions_urlmaskfilter", ".*");
         prop.put("results", "");
-        prop.put("urlmaskoptions", 0);
-        prop.put("urlmaskoptions_urlmaskfilter", ".*");
         prop.put("cat", "href");
         prop.put("type", "0");
         prop.put("depth", "0");
+        prop.put("display", display);
+        prop.put("searchoptions_display", display);
         return prop;
     }
 

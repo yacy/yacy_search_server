@@ -1,0 +1,27 @@
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr><td></td></tr>
+<tr><td height="2"></td></tr>
+
+<tr><td><table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr>
+<td width="20" valign="top"></td>
+<td valign="top">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr><td height="2"></td></tr>
+  <tr><td>
+  
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="SubMenu">
+<tr class="TableHeader">
+<td width="25%" class="MenuSubItem">&nbsp;
+<a href="/Status.html" class="MenuItemLink">Peer Administration</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="25%" class="MenuSubItem">&nbsp;
+<a href="http://www.yacy.net/yacy/" class="MenuItemLink">Project Home</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="25%" class="MenuSubItem">&nbsp;
+<a href="http://www.yacy-websearch.net/wiki/" class="MenuItemLink">Help / Wiki</a>&nbsp;</td>
+<td class="MenuSubSpacer"></td>
+<td width="25%" class="MenuSubItem">&nbsp;
+<a href="/ConfigProfile_p.html" class="MenuItemLink">Peer Owner Profile</a>&nbsp;</td>
+</tr>
+</table><br>

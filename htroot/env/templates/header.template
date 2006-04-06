@@ -26,7 +26,7 @@
 <tr><td width="100" valign="top">
 <table width="100%" border="0" cellspacing="2" cellpadding="0" class="Menu">
   <tr><td class="MenuHeader">&nbsp;Global&nbsp;Index</td></tr>
-  <tr><td class="MenuItem">&nbsp;<a href="/index.html" accesskey="s" class="MenuItemLink">Search Page</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="/index.html?display=1" accesskey="s" class="MenuItemLink">Search Page</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/DetailedSearch.html" class="MenuItemLink">Detailed Search</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/Bookmarks.html" class="MenuItemLink">Bookmarks</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/Help.html" class="MenuItemLink">Help</a></td></tr>

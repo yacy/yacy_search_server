@@ -649,6 +649,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return sb;
     }
 
+    public boolean isRobinsonMode() {
+        return (yacyCore.seedDB.sizeConnected() == 0) && (yacyCore.seedDB.mySeed.isVirgin());
+    }
     
     /**
      * This method changes the HTCache size.<br>

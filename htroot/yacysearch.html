@@ -10,8 +10,13 @@
  <script src="/js/yacysearch.js"></script>   
    
 </head>
- <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+
+#(display)#
+#%env/templates/simpleheader.template%#
+::
 #%env/templates/header.template%#
+#(/display)#
 
 <SCRIPT LANGUAGE="JavaScript">
 picEmpty = new Image(11, 11);
@@ -53,6 +58,7 @@ picPlus.src = "/env/grafics/plus.gif";
   <input type="hidden" name="depth" value="#[depth]#">
   <input type="hidden" name="cat" value="#[cat]#">
   <input type="hidden" name="type" value="#[type]#">
+  <input type="hidden" name="display" value="#[display]#">
   </form>
 </p><hr>
 
@@ -152,7 +158,11 @@ with the target of implementing a P2P-based global search engine.<br>
 Architecture (C) by Michael Peter Christen,
 <img src="/env/grafics/mcemailh.gif"></i></center>
 
+#(display)#
+#%env/templates/simplefooter.template%#
+::
 #%env/templates/footer.template%#
+#(/display)#
 
 <script language="JavaScript">
 AllSnippets();

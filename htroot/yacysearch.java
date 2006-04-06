@@ -76,6 +76,8 @@ public class yacysearch {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
+        boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
@@ -116,6 +118,7 @@ public class yacysearch {
             prop.put("type_combine", 0);
             prop.put("type_resultbottomline", 0);
             prop.put("type_results", "");
+            prop.put("display", display);
             return prop;
         }
 
@@ -302,6 +305,7 @@ public class yacysearch {
             prop.put("type", "0");
             prop.put("cat", "href");
             prop.put("depth", "0");
+            
 
             // adding some additional properties needed for the rss feed
             String hostName = (String) header.get("Host", "localhost");
@@ -331,6 +335,7 @@ public class yacysearch {
             prop.put("former", post.get("search", ""));
             prop.put("depth", depth);
         }
+        prop.put("display", display);
         // return rewrite properties
         return prop;
     }

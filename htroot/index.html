@@ -6,12 +6,17 @@
   <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?search=#[former]#">
  </head>
  <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#(display)#
+#%env/templates/simpleheader.template%#
+::
 #%env/templates/header.template%#
+#(/display)#
   <br>
   <center><span style="font-size=12pt; font-family:Helvetica, Arial; color:#212942"><img src="/env/grafics/kaskelix.png" align="middle" alt="Kaskelix - the YaCy logo"><br>P2P WEB SEARCH</span></center><br>
   <center>#[promoteSearchPageGreeting]#</center><br>
 
   <form action="yacysearch.html" method="get">
+  <input type="hidden" name="display" value="#[display]#">
   <center>
 
   <table border="0" cellspacing="0" cellpadding="0">
@@ -22,9 +27,18 @@
      <input type="submit" name="Enter" value="Search"><p>
      <input type="hidden" name="former" value="#[former]#">
     </center>
-
-    </td>
+   </td>
    </tr>
+   #(searchoptions)#
+   <input type="hidden" name="count" value="50">
+   <input type="hidden" name="order" value="Date-YBR-Quality">
+   <input type="hidden" name="resource" value="global">
+   <input type="hidden" name="time" value="6">
+   <tr align="left">
+    <td></td>
+    <td><a href="/index.html?searchoptions=1&display=#[display]#">more options...</a></td>
+   </tr>
+   ::
    <tr align="left">
     <td>
      Max. number of results:
@@ -92,17 +106,15 @@
 	#(/urlmaskoptions)#
    </td>
   </tr>
+  #(/searchoptions)#
  </table>
  </center>
  </form>
 
-<br><br><br><br><br><br><br><br>
-<hr>
-<center><i>YaCy is a GPL'ed project
-with the target of implementing a P2P-based global search engine.<br>
-Architecture (C) by Michael Peter Christen,
-<img src="/env/grafics/mcemailh.gif"></i></center>
-
+#(display)#
+#%env/templates/simplefooter.template%#
+::
 #%env/templates/footer.template%#
+#(/display)#
 </body>
 </html>
