@@ -417,12 +417,13 @@ Index Administration==Index Administration
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Der lokale Index besteht im Moment aus #[wcount]# W&ouml;rtern und #[ucount]# URL-Links.
 To transfer the whole index to an other peer, click==Um den kompletten Index an einen anderen Peer zu &uuml;bertragen, klicken Sie
 To import an index from a file or a foreign peer click==Um einen Index aus einer Datei oder von einem fremden Peer zu importieren, klicken Sie
-value="Show URL Entries for Word:">==value="URL Eintr&auml;ge f&uuml;r Wort zeigen">
+"Show URL Entries for Word"=="URL Eintr&auml;ge f&uuml;r Wort zeigen"
 "Generate List"=="Liste erstellen"
+"Show URL Entries for Word-Hash"=="URL Eintr&auml;ge f&uuml;r Wort-Hash zeigen"
 "Transfer to other peer"=="An anderen Peer senden"
-URL==URL
+#URL:==URL:
 "Show Details for URL"=="Details f&uuml;r URL zeigen"
-URL-Hash:==URL-Hash
+#URL-Hash:==URL-Hash:
 "Show Details for URL-Hash"=="Details f&uuml;r URL-Hash zeigen"
 DHT Transmission control:==DHT-Verteilungs Kontrolle:
 The transmission is necessary for the functionality of global search on other peers.==Die Verteilung ist notwendig, damit auf anderen Peers die globale Suche funktioniert.
@@ -437,7 +438,8 @@ If checked, your peer silently ignores transmitted URLs that match your blacklis
 "set"=="Speichern"
 Changes will take effect immediately==&Auml;nderungen sind sofort aktiv
 #Let this translation here to avoid errors.
-Word==Wort
+Word:</td>==Wort:</td>
+Word-Hash:</td>==Wort-Hash:</td>
 
 #-------------------------------------------------------
 #File: IndexCreate_p.html
