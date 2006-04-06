@@ -52,7 +52,7 @@ else
 	then
 		nohup java $java_args -classpath classes:htroot:$CLASSPATH yacy >> yacy.log &
 	else
-		nohup java $java_args -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
+		nohup java $java_args -Djava.awt.headless=true -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
 #		nohup java -Xms160m -Xmx160m -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
 	fi
 	echo "****************** YaCy Web Crawler/Indexer & Search Engine *******************"
