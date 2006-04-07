@@ -179,7 +179,7 @@ public class CacheAdmin_p {
             }
         }
 
-        prop.put("cachesize", Long.toString(switchboard.cacheManager.currCacheSize/1024));
+        prop.put("cachesize", Long.toString(switchboard.cacheManager.curCacheSize/1024));
         prop.put("cachemax", Long.toString(switchboard.cacheManager.maxCacheSize/1024));
         prop.put("path", path.toString());
         prop.put("info_info", info.toString());
