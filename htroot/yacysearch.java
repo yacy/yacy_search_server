@@ -314,21 +314,32 @@ public class yacysearch {
 
         }
         
-        if ((post.get("cat", "href").equals("image")) && (querystring.startsWith("http://"))) {
+        if (post.get("cat", "href").equals("image")) {
             
             int depth = post.getInt("depth", 0);
+            int columns = post.getInt("columns", 6);
             URL url = null;
-            try {url = new URL(querystring);} catch (MalformedURLException e) {}
+            try {url = new URL(post.get("url", ""));} catch (MalformedURLException e) {}
             plasmaSearchImages si = new plasmaSearchImages(sb.snippetCache, 6000, url, depth);
             Iterator i = si.entries();
             htmlFilterImageEntry ie;
-            int c = 0;
+            int line = 0;
             while (i.hasNext()) {
-                ie = (htmlFilterImageEntry) i.next();
-                prop.put("type_results_" + c + "_url", ie.url().toString());
-                c++;
+                int col = 0;
+                for (col = 0; col < columns; col++) {
+                    if (!i.hasNext()) break;
+                    ie = (htmlFilterImageEntry) i.next();
+                    String urls = ie.url().toString();
+                    String name = "";
+                    int p = urls.lastIndexOf('/');
+                    if (p > 0) name = urls.substring(p + 1);
+                    prop.put("type_results_" + line + "_line_" + col + "_url", urls);
+                    prop.put("type_results_" + line + "_line_" + col + "_name", name);
+                }
+                prop.put("type_results_" + line + "_line", col);
+                line++;
             }
-            prop.put("type_results", c);
+            prop.put("type_results", line);
 
             prop.put("cat", "image");
             prop.put("type", 1); // set type of result: image list

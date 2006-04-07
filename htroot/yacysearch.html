@@ -119,7 +119,7 @@ available for everyone. Then stay online to support crawls from other peers. Tha
 <span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span><br>
 <img src="/env/grafics/empty.gif" border="0">&nbsp;<a id="url#[urlhash]#" href="#[url]#">#[urlname]#</a><br>
 <img src="/env/grafics/empty.gif"><span class="ResultDateYBR">&nbsp;#[date]#</span> |
-<span class="ResultDateYBR">YBR-#[ybr]#</span> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a> | <a href="yacysearch.html?cat=image&url=#[url]">Pictures</a>
+<span class="ResultDateYBR">YBR-#[ybr]#</span> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a> | <a href="yacysearch.html?cat=image&url=#[url]#">Pictures</a>
 <br>
 </p>
 <!-- link end -->
@@ -147,11 +147,17 @@ You can enrich the search results by using the 'global' option; you must also sw
 #(/resultbottomline)#
 </p>
 ::
+<table border="0" cellspacing="16" cellpadding="0">
 #{results}#
-<p style="border-bottom:1px #000 dashed; padding-bottom: 1em;">
-<a href="#[url]#"><img src="/ViewImage.png?maxwidth=64&maxheight=64&url=#[url]#" border="0"></a>
-</p>
+<tr valign="bottom">
+#{line}#
+<td>
+<a href="#[url]#"><img src="/ViewImage.png?maxwidth=96&maxheight=96&url=#[url]#" border="0"></a><br><a href="#[url]#">#[name]#</a>
+</td>
+#{/line}#
+</tr>
 #{/results}#
+</table>
 #(/type)#
 
 <br><hr>

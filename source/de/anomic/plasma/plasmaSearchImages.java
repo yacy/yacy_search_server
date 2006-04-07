@@ -64,7 +64,7 @@ public final class plasmaSearchImages {
                 plasmaParserDocument document = sc.parseDocument(url, res);
 
                 // add the image links
-                this.addAll(document.getImages());
+                if (document != null) this.addAll(document.getImages());
 
                 // add also links from pages one step deeper, if depth > 0
                 if (depth > 0) {
