@@ -44,20 +44,21 @@
 
 package de.anomic.plasma;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroStack;
+import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverDate;
+import de.anomic.yacy.yacySeedDB;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.http.httpHeader;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroStack;
-import de.anomic.server.serverDate;
-import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacySeedDB;
 
 public class plasmaSwitchboardQueue {
 
@@ -327,16 +328,26 @@ public class plasmaSwitchboardQueue {
          * if the answer is 'NO' (do not index), it returns a string with the reason
          * to reject the crawling demand in clear text
          */
-         public String shallIndexCacheForProxy() {
+        public final String shallIndexCacheForProxy() {
+            if (profile() == null) {
+                return "shallIndexCacheForProxy: profile() is null !";
+            }
+
             // check profile
-            if (!profile().localIndexing()) { return "Indexing_Not_Allowed"; }
+            if (!profile().localIndexing()) {
+                return "Indexing_Not_Allowed";
+            }
 
             String nURL = normalizedURLString();
             // -CGI access in request
             // CGI access makes the page very individual, and therefore not usable in caches
             if (!profile().crawlingQ()) {
-                if (plasmaHTCache.isPOST(nURL)) { return "Dynamic_(POST)"; }
-                if (plasmaHTCache.isCGI(nURL)) { return "Dynamic_(CGI)"; }
+                if (plasmaHTCache.isPOST(nURL)) {
+                    return "Dynamic_(POST)";
+                }
+                if (plasmaHTCache.isCGI(nURL)) {
+                    return "Dynamic_(CGI)";
+                }
             }
 
             // -authorization cases in request
@@ -346,7 +357,9 @@ public class plasmaSwitchboardQueue {
             // we checked that in shallStoreCache
 
             // a picture cannot be indexed
-            if (plasmaHTCache.noIndexingURL(nURL)) { return "Media_Content_(forbidden)"; }
+            if (plasmaHTCache.noIndexingURL(nURL)) {
+                return "Media_Content_(forbidden)";
+            }
 
             // -cookies in request
             // unfortunately, we cannot index pages which have been requested with a cookie
@@ -361,15 +374,21 @@ public class plasmaSwitchboardQueue {
             // thus we do not care about it here for indexing
             if (responseHeader() != null) {
                 // a picture cannot be indexed
-                if (plasmaHTCache.isPicture(responseHeader())) return "Media_Content_(Picture)";
-                if (!plasmaHTCache.isText(responseHeader())) return "Media_Content_(not_text)";
+                if (plasmaHTCache.isPicture(responseHeader())) {
+                    return "Media_Content_(Picture)";
+                }
+                if (!plasmaHTCache.isText(responseHeader())) {
+                    return "Media_Content_(not_text)";
+                }
 
                 // -if-modified-since in request
                 // if the page is fresh at the very moment we can index it
                 if ((ifModifiedSince != null) && (responseHeader().containsKey(httpHeader.LAST_MODIFIED))) {
                     // parse date
                     Date d = responseHeader().lastModified();
-                    if (d == null) d = new Date(serverDate.correctedUTCTime());
+                    if (d == null) {
+                        d = new Date(serverDate.correctedUTCTime());
+                    }
                     // finally, we shall treat the cache as stale if the modification time is after the if-.. time
                     if (d.after(ifModifiedSince)) {
                         //System.out.println("***not indexed because if-modified-since");
@@ -392,9 +411,9 @@ public class plasmaSwitchboardQueue {
                 // the expires value gives us a very easy hint when the cache is stale
                 // sometimes, the expires date is set to the past to prevent that a page is cached
                 // we use that information to see if we should index it
-                Date expires = responseHeader().expires();
-                if (expires != null) {
-                    if (expires.before(new Date(serverDate.correctedUTCTime()))) return "Stale_(Expired)";
+                final Date expires = responseHeader().expires();
+                if (expires != null && expires.before(new Date(serverDate.correctedUTCTime()))) {
+                    return "Stale_(Expired)";
                 }
 
                 // -lastModified in cached response
@@ -415,15 +434,17 @@ public class plasmaSwitchboardQueue {
                         cacheControl.startsWith("NO-CACHE") ||
                         cacheControl.startsWith("NO-STORE")) {
                         // easy case
-                        return "Stale_(denied_by_cache-control=" + cacheControl+ ")";
+                        return "Stale_(denied_by_cache-control=" + cacheControl + ")";
 //                  } else if (cacheControl.startsWith("PUBLIC")) {
-//                      // ok, do nothing 
+//                      // ok, do nothing
                     } else if (cacheControl.startsWith("MAX-AGE=")) {
                         // we need also the load date
-                        Date date = responseHeader().date();
-                        if (date == null) return "Stale_(no_date_given_in_response)";
+                        final Date date = responseHeader().date();
+                        if (date == null) {
+                            return "Stale_(no_date_given_in_response)";
+                        }
                         try {
-                            long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
+                            final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
                             if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
                                 //System.out.println("***not indexed because cache-control");
                                 return "Stale_(expired_by_cache-control)";
@@ -436,18 +457,22 @@ public class plasmaSwitchboardQueue {
             }
             return null;
         }
-        
+
         /**
          * decide upon header information if a specific file should be indexed
          * this method returns null if the answer is 'YES'!
          * if the answer is 'NO' (do not index), it returns a string with the reason
          * to reject the crawling demand in clear text
          */
-        public String shallIndexCacheForCrawler() {
+        public final String shallIndexCacheForCrawler() {
+            if (profile() == null) {
+                return "shallIndexCacheForCrawler: profile() is null !";
+            }
+
             // check profile
             if (!profile().localIndexing()) { return "Indexing_Not_Allowed"; }
 
-            String nURL = normalizedURLString();
+            final String nURL = normalizedURLString();
             // -CGI access in request
             // CGI access makes the page very individual, and therefore not usable in caches
             if (!profile().crawlingQ()) {
@@ -484,7 +509,7 @@ public class plasmaSwitchboardQueue {
 
             // -pragma in cached response
             // -> in the crawler we ignore this
-            
+
             // look for freshnes information
 
             // -expires in cached response
@@ -492,7 +517,7 @@ public class plasmaSwitchboardQueue {
             // sometimes, the expires date is set to the past to prevent that a page is cached
             // we use that information to see if we should index it
             // -> this does not apply for a crawler
-        
+
             // -lastModified in cached response
             // this information is too weak to use it to prevent indexing
             // even if we can apply a TTL heuristic for cache usage
