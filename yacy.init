@@ -657,13 +657,13 @@ storagePeerHash =
 # time-percent is the percent of total search time
 # count-percent is the percent of total wanted urls in result
 # we distinguish local and remote search times
-searchProcessLocalTime_c = 10
+searchProcessLocalTime_c = 44
 searchProcessLocalCount_c = 10000000
-searchProcessLocalTime_j = 10
+searchProcessLocalTime_j = 8
 searchProcessLocalCount_j = 1000000
-searchProcessLocalTime_r = 10
+searchProcessLocalTime_r = 8
 searchProcessLocalCount_r =100000
-searchProcessLocalTime_u = 50
+searchProcessLocalTime_u = 20
 searchProcessLocalCount_u = 10000
 searchProcessLocalTime_o = 10
 searchProcessLocalCount_o = 100
@@ -672,13 +672,13 @@ searchProcessLocalCount_f = 100
 searchProcessLocalTime_s = 5
 searchProcessLocalCount_s = 30
 
-searchProcessRemoteTime_c = 10
+searchProcessRemoteTime_c = 44
 searchProcessRemoteCount_c = 1000000
-searchProcessRemoteTime_j = 10
+searchProcessRemoteTime_j = 8
 searchProcessRemoteCount_j = 1000000
-searchProcessRemoteTime_r = 10 
+searchProcessRemoteTime_r = 8 
 searchProcessRemoteCount_r = 1000
-searchProcessRemoteTime_u = 50
+searchProcessRemoteTime_u = 20
 searchProcessRemoteCount_u = 1000
 searchProcessRemoteTime_o = 10
 searchProcessRemoteCount_o = 1000

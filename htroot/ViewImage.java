@@ -66,6 +66,8 @@ public class ViewImage {
         }
         int width = post.getInt("width", 0);
         int height = post.getInt("height", 0);
+        int maxwidth = post.getInt("maxwidth", 0);
+        int maxheight = post.getInt("maxheight", 0);
         int timeout = post.getInt("timeout", 5000);
         
         // load image
@@ -78,17 +80,29 @@ public class ViewImage {
         mediaTracker.addImage(original, 0); 
         try {mediaTracker.waitForID(0);} catch (InterruptedException e) {} 
         boolean auth = ((String) header.get("CLIENTIP", "")).equals("localhost") || sb.verifyAuthentication(header, false); // handle access rights
-        if ((auth) && ((width == 0) || (height == 0))) return original;
+        if ((auth) && ((width == 0) || (height == 0)) && (maxwidth == 0) && (maxheight == 0)) return original;
 
         // in case of not-authorized access shrink the image to prevent copyright problems
         // so that images are not larger than thumbnails
         if (!auth) {
-            width = width / 2;
-            height = height / 2;
-            int xsc = Math.max(width, height);
-            if (xsc > 64) {
-                width = width * 64 / xsc;
-                height = height * 64 / xsc;
+            maxwidth = 64;
+            maxheight = 64;
+        }
+        
+        // calculate width & height from maxwidth & maxheight
+        if ((maxwidth != 0) || (maxheight != 0)) {
+            int h = original.getHeight(null);
+            int w = original.getWidth(null);
+            double hs = (w <= maxwidth) ? 1.0 : ((double) w) / ((double) maxwidth);
+            double vs = (h <= maxheight) ? 1.0 : ((double) h) / ((double) maxheight);
+            double scale = Math.max(hs, vs);
+            if ((scale > 1.0) && (!auth)) scale = 0.6; // this is for copyright purpose
+            if (scale > 1.0) {
+                width = (int) (((double) w) / scale);
+                height = (int) (((double) h) / scale);
+            } else {
+                width = w;
+                height = h;
             }
         }
         
