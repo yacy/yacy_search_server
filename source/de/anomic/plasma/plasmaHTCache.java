@@ -1,4 +1,4 @@
-// plasmaHTCache.java 
+// plasmaHTCache.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@anomic.de
@@ -53,33 +53,33 @@
 
 package de.anomic.plasma;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.http.httpc;
+import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverDate;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverSystem;
+import de.anomic.tools.enumerateFiles;
+
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashSet;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
-import de.anomic.kelondro.kelondroDyn;
-import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroMap;
-import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverInstantThread;
-import de.anomic.server.serverSystem;
-import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverDate;
-import de.anomic.tools.enumerateFiles;
+import java.util.TreeMap;
 
 public final class plasmaHTCache {
 
@@ -89,7 +89,7 @@ public final class plasmaHTCache {
     private kelondroMap responseHeaderDB = null;
     private final LinkedList cacheStack;
     private final TreeMap cacheAge; // a <date+hash, cache-path> - relation
-    public long currCacheSize;
+    public long curCacheSize;
     public long maxCacheSize;
     public final File cachePath;
     public final serverLog log;
@@ -111,8 +111,7 @@ public final class plasmaHTCache {
                     if (!object.getName().equals("http")  &&
                         !object.getName().equals("yacy")  &&
                         !object.getName().equals("https") &&
-                        !object.getName().equals("ftp")   &&
-                        !object.getName().equals("anon")) {
+                        !object.getName().equals("ftp")) {
                         deleteOldHTCache(cachePath);
                         break;
                     }
@@ -147,7 +146,7 @@ public final class plasmaHTCache {
 
         // init cache age and size management
         this.cacheAge = new TreeMap();
-        this.currCacheSize = 0;
+        this.curCacheSize = 0;
         this.maxCacheSize = maxCacheSize;
 
         // start the cache startup thread
@@ -220,7 +219,7 @@ public final class plasmaHTCache {
      * @return the cache size in bytes
      */
     public long getFreeSize() {
-        return (this.currCacheSize >= this.maxCacheSize) ? 0 : this.maxCacheSize - this.currCacheSize;
+        return (this.curCacheSize >= this.maxCacheSize) ? 0 : this.maxCacheSize - this.curCacheSize;
     }
 
     public boolean writeFile(URL url, byte[] array) {
@@ -247,7 +246,7 @@ public final class plasmaHTCache {
     public void writeFileAnnouncement(File file) {
         synchronized (this.cacheAge) {
             if (file.exists()) {
-                this.currCacheSize += file.length();
+                this.curCacheSize += file.length();
                 this.cacheAge.put(ageString(file.lastModified(), file), file);
                 cleanup();
             }
@@ -276,7 +275,7 @@ public final class plasmaHTCache {
         if (obj.exists() && !filesInUse.contains(obj)) {
             long size = obj.length();
             if (obj.delete()) {
-                this.currCacheSize -= size;
+                this.curCacheSize -= size;
                 return true;
             }
         }
@@ -301,7 +300,7 @@ public final class plasmaHTCache {
     private void cleanupDoIt(long newCacheSize) {
         File obj;
         Iterator iter = this.cacheAge.keySet().iterator();
-        while (iter.hasNext() && this.currCacheSize >= newCacheSize) {
+        while (iter.hasNext() && this.curCacheSize >= newCacheSize) {
             Object key = iter.next();
             obj = (File) this.cacheAge.get(key);
             if (obj != null) {
@@ -325,7 +324,7 @@ public final class plasmaHTCache {
 
     private void cleanup() {
         // clean up cache to have 4% (enough) space for next entries
-        if (this.cacheAge.size() > 0 && this.currCacheSize >= this.maxCacheSize) {
+        if (this.cacheAge.size() > 0 && this.curCacheSize >= this.maxCacheSize) {
             if (this.maxCacheSize > 0) { cleanupDoIt(this.maxCacheSize - (this.maxCacheSize / 100) * 4); }
         }
     }
@@ -357,7 +356,7 @@ public final class plasmaHTCache {
             long d = f.lastModified();
             //System.out.println("Cache: " + dom(f));
             doms.incScore(dom(f));
-            this.currCacheSize += f.length();
+            this.curCacheSize += f.length();
             this.cacheAge.put(ageString(d, f), f);
             try {Thread.sleep(10);} catch (InterruptedException e) {}
         }
@@ -370,7 +369,7 @@ public final class plasmaHTCache {
             //e.printStackTrace();
         }
         this.log.logConfig("CACHE SCANNED, CONTAINS " + c +
-                      " FILES = " + this.currCacheSize/1048576 + "MB, OLDEST IS " + 
+                      " FILES = " + this.curCacheSize/1048576 + "MB, OLDEST IS " + 
             ((ageHours < 24) ? (ageHours + " HOURS") : ((ageHours / 24) + " DAYS")) + " OLD");
         cleanup();
 
