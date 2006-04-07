@@ -8,7 +8,6 @@ http://borg-0300.dyndns.org:3000/share/seed.txt
 http://descovery.losespace.de/downloads/seed.txt
 http://dustland.dyndns.org/yacy/seedfile.txt
 http://home.arcor.de/k.c.e/yacy/seed.txt
-http://lthawk.de/seed.txt
 http://seed.paepstin.info/seed.txt
 http://trumpkin.de/yacy/seed.txt
 http://www-public.tu-bs.de:8080/~y0018680/seed.txt
