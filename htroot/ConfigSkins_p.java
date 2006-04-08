@@ -112,7 +112,7 @@ public class ConfigSkins_p {
 	
 	if (post != null){
 		//change skin
-		if(post.containsKey("use_button")){
+		if(post.containsKey("use_button") && (String)post.get("skin") != null){
 			changeSkin(switchboard, skinPath, (String)post.get("skin"));
 			
 		//delete skin

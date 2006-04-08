@@ -83,7 +83,7 @@ public class ConfigLanguage_p {
 	
 	if (post != null){
 		//change language
-		if(post.containsKey("use_button")){
+		if(post.containsKey("use_button") && (String)post.get("lang") != null){
 			translator.changeLang(env, langPath, (String)post.get("lang"));
 			
 		//delete language file
