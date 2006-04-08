@@ -102,22 +102,43 @@ public final class plasmaHTCache {
         this.cachePath = htCachePath;
 
         // reset old HTCache ?
-        final String[] list = cachePath.list();
+        String[] list = this.cachePath.list();
         if (list != null) {
             File object;
             for (int i = list.length - 1; i >= 0; i--) {
-                object = new File(cachePath, list[i]);
-                if (object.isDirectory()) {
-                    if (!object.getName().equals("http")  &&
-                        !object.getName().equals("yacy")  &&
-                        !object.getName().equals("https") &&
-                        !object.getName().equals("ftp")) {
-                        deleteOldHTCache(cachePath);
-                        break;
-                    }
+                object = new File(this.cachePath, list[i]);
+
+                if (!object.isDirectory()) { continue; }
+
+                if (!object.getName().equals("http") &&
+                    !object.getName().equals("yacy") &&
+                    !object.getName().equals("https") &&
+                    !object.getName().equals("ftp")) {
+                    deleteOldHTCache(this.cachePath);
+                    break;
+
                 }
             }
         }
+        File testpath = new File(this.cachePath, "/http/");
+        list = testpath.list();
+        if (list != null) {
+            File object;
+            for (int i = list.length - 1; i >= 0; i--) {
+                object = new File(testpath, list[i]);
+
+                if (!object.isDirectory()) { continue; }
+
+                if (!object.getName().equals("ip") &&
+                    !object.getName().equals("other") &&
+                    !object.getName().equals("www")) {
+                    deleteOldHTCache(this.cachePath);
+                    break;
+                }
+            }
+        }
+        testpath = null;
+
 
         // set/make cache path
         if (!htCachePath.exists()) {
@@ -324,8 +345,10 @@ public final class plasmaHTCache {
 
     private void cleanup() {
         // clean up cache to have 4% (enough) space for next entries
-        if (this.cacheAge.size() > 0 && this.curCacheSize >= this.maxCacheSize) {
-            if (this.maxCacheSize > 0) { cleanupDoIt(this.maxCacheSize - (this.maxCacheSize / 100) * 4); }
+        if (this.cacheAge.size() > 0 &&
+            this.curCacheSize >= this.maxCacheSize &&
+            this.maxCacheSize > 0) {
+            cleanupDoIt(this.maxCacheSize - (this.maxCacheSize / 100) * 4);
         }
     }
 
@@ -480,17 +503,25 @@ public final class plasmaHTCache {
      * that path will be generated
      * @return new File
      */
-    public File getCachePath(URL url) {
+    public File getCachePath(final URL url) {
 //      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
+
+        // peer.yacy || www.peer.yacy  = http/yacy/peer
+        // protocol://www.doamin.net   = protocol/www/domain.net
+        // protocol://other.doamin.net = protocol/other/other.domain.net
+        // protocol://xxx.xxx.xxx.xxx  = protocol/ip/xxx.xxx.xxx.xxx
+
+        String host = url.getHost().toLowerCase();
+
         String path = url.getPath();
-        String query = url.getQuery();
+        final String query = url.getQuery();
         if (!path.startsWith("/")) { path = "/" + path; }
         if (path.endsWith("/") && query == null) { path = path + "ndx"; }
 
         // yes this is not reversible, but that is not needed
         path = replaceRegex(path, "/\\.\\./", "/!!/");
-        path = replaceRegex(path, "(\"|\\\\|\\*|\\?|:|<|>|\\|)", "_"); // hier wird kein '/' gefiltert
-        path = path.concat(replaceRegex(query, "(\"|\\\\|\\*|\\?|/|:|<|>|\\|)", "_"));
+        path = replaceRegex(path, "(\"|\\\\|\\*|\\?|:|<|>|\\|+)", "_"); // hier wird kein '/' gefiltert
+        path = path.concat(replaceRegex(query, "(\"|\\\\|\\*|\\?|/|:|<|>|\\|+)", "_"));
 
         // only set NO default ports
         int port = url.getPort();
@@ -502,13 +533,23 @@ public final class plasmaHTCache {
                  port = -1;
             }
         }
-        if (url.getHost().toLowerCase().endsWith(".yacy")) {
+        if (host.endsWith(".yacy")) {
+            host = host.substring(0, host.length() - 5);
+            if (host.startsWith("www.")) {
+                host = host.substring(4);
+            }
             protocol = "yacy";
+        } else if (host.startsWith("www.")) {
+            host = "www/" + host.substring(4);
+        } else if (host.matches("\\d{2,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")) {
+            host = "ip/" + host;
+        } else {
+            host = "other/" + host;
         }
         if (port < 0) {
-            return new File(this.cachePath, protocol + "/" + url.getHost() + path);
+            return new File(this.cachePath, protocol + "/" + host + path);
         } else {
-            return new File(this.cachePath, protocol + "/" + url.getHost() + "!" + port + path);
+            return new File(this.cachePath, protocol + "/" + host + "!" + port + path);
         }
     }
 
@@ -516,51 +557,86 @@ public final class plasmaHTCache {
      * this is the reverse function to getCachePath: it constructs the url as string
      * from a given storage path
      */
-    public static URL getURL(File cachePath, File f) {
+    public static URL getURL(final File cachePath, final File f) {
 //      this.log.logFinest("plasmaHTCache: getURL:  IN: Path=[" + cachePath + "] File=[" + f + "]");
         final String c = cachePath.toString().replace('\\', '/');
-        String s = f.toString().replace('\\', '/');
+        String path = f.toString().replace('\\', '/');
 
-        if (s.endsWith("ndx")) { s = s.substring(0, s.length() - 3); }
+        if (path.endsWith("ndx")) { path = path.substring(0, path.length() - 3); }
 
-        int pos = s.lastIndexOf(c);
+        int pos = path.lastIndexOf(c);
         if (pos == 0) {
-            s = s.substring(pos + c.length());
-            while (s.startsWith("/")) { s = s.substring(1); }
+            path = path.substring(pos + c.length());
+            while (path.startsWith("/")) { path = path.substring(1); }
 
-            String protocol = "";
-            if (s.startsWith("http/")) {
-                protocol = "http://";
-                s = s.substring(5);
-            } else if (s.startsWith("https/")) {
-                protocol = "https://";
-                s = s.substring(6);
-            } else if (s.startsWith("ftp/")) {
-                protocol = "ftp://";
-                s = s.substring(4);
-            } else if (s.startsWith("yacy/")) {
-                protocol = "http://";
-                s = s.substring(5);
-            } else {
-                return null;
-            }
-
-            Pattern pathPattern = Pattern.compile("/!!/");
-            Matcher matcher = pathPattern.matcher(s);
-            while (matcher.find()) {
-                s = matcher.replaceAll("/\\.\\./");
-                matcher.reset(s);
-            }
-
-            pos = s.indexOf("!");
+            pos = path.indexOf("!");
             if (pos >= 0) {
-                s = s.substring(0, pos) + ":" + s.substring(pos + 1);
+                path = path.substring(0, pos) + ":" + path.substring(pos + 1);
+            }
+
+            String protocol = "http://";
+            String host = "";
+            if (path.startsWith("yacy/")) {
+                path = path.substring(5);
+
+                pos = path.indexOf("/");
+                if (pos > 0) {
+                    host = path.substring(0, pos);
+                    path = path.substring(pos);
+                } else {
+                    host = path;
+                    path = "";
+                }
+                pos = host.indexOf(":");
+                if (pos > 0) {
+                    host = host.substring(0, pos) + ".yacy" + host.substring(pos);
+                } else {
+                    host = host + ".yacy";
+                }
+
+            } else {
+                if (path.startsWith("http/")) {
+                    path = path.substring(5);
+                } else if (path.startsWith("https/")) {
+                    protocol = "https://";
+                    path = path.substring(6);
+                } else if (path.startsWith("ftp/")) {
+                    protocol = "ftp://";
+                    path = path.substring(4);
+                } else {
+                    return null;
+                }
+                if (path.startsWith("www/")) {
+                    path = path.substring(4);
+                    host = "www.";
+                } else if (path.startsWith("other/")) {
+                    path = path.substring(6);
+                } else if (path.startsWith("ip/")) {
+                    path = path.substring(3);
+                }
+                pos = path.indexOf("/");
+                if (pos > 0) {
+                    host = host + path.substring(0, pos);
+                    path = path.substring(pos);
+                } else {
+                    host = host + path;
+                    path = "";
+                }
+            }
+
+            if (!path.equals("")) {
+                final Pattern pathPattern = Pattern.compile("/!!/");
+                final Matcher matcher = pathPattern.matcher(path);
+                while (matcher.find()) {
+                    path = matcher.replaceAll("/\\.\\./");
+                    matcher.reset(path);
+                }
             }
 
 //          this.log.logFinest("plasmaHTCache: getURL: OUT=" + s);
             try {
-                return new URL(protocol + s);
-            } catch (Exception e) {
+                return new URL(protocol + host + path);
+            } catch (final Exception e) {
                 return null;
             }
         }
