@@ -346,24 +346,24 @@ public class plasmaCrawlProfile {
             // then the current url feeds with its domain the crawl filter
             // if this is -1, all domains are feeded
             String r = (String) mem.get("domFilterDepth");
-            if (r == null) return 0; else try {
+            if (r == null) return Integer.MAX_VALUE; else try {
                 int i = Integer.parseInt(r);
                 if (i < 0) return Integer.MAX_VALUE;
                 return i;
             } catch (NumberFormatException e) {
-                return 0;
+                return Integer.MAX_VALUE;
             }
         }
         public int domMaxPages() {
             // this is the maximum number of pages that are crawled for a single domain
             // if -1, this means no limit
             String r = (String) mem.get("domMaxPages");
-            if (r == null) return 0; else try {
+            if (r == null) return Integer.MAX_VALUE; else try {
                 int i = Integer.parseInt(r);
                 if (i < 0) return Integer.MAX_VALUE;
                 return i;
             } catch (NumberFormatException e) {
-                return 0;
+                return Integer.MAX_VALUE;
             }
         }
         public boolean crawlingQ() {
