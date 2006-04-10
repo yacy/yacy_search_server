@@ -93,7 +93,9 @@ public class index {
 
         // we create empty entries for template strings
         final serverObjects prop = new serverObjects();
-        prop.put("promoteSearchPageGreeting", env.getConfig("promoteSearchPageGreeting", ""));
+        String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
+        if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
+        prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("former", "");
         prop.put("num-results", 0);
         prop.put("excluded", 0);

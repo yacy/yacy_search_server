@@ -78,7 +78,9 @@ public class yacysearch {
 
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
-        
+        String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
+        if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
+
         // case if no values are requested
         final String referer = (String) header.get("Referer");
         if (post == null || env == null) {
@@ -100,6 +102,7 @@ public class yacysearch {
 
             // we create empty entries for template strings
             final serverObjects prop = new serverObjects();
+            prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
             prop.put("former", "");
             prop.put("count", 10);
             prop.put("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
@@ -128,8 +131,6 @@ public class yacysearch {
         }
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
         
-        serverObjects prop = new serverObjects();
-        
         final int count = Integer.parseInt(post.get("count", "10"));
         final String order = post.get("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
@@ -144,9 +145,10 @@ public class yacysearch {
             urlmask = (post.containsKey("urlmaskfilter")) ? (String) post.get("urlmaskfilter") : ".*";
         }
         String prefer = post.get("prefer", ".*");
+
+        serverObjects prop = new serverObjects();
         
         if (post.get("cat", "href").equals("href")) {
-            prop.put("type", 0); // set type of result: normal link list
             
             final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
             // filter out stopwords
@@ -342,6 +344,7 @@ public class yacysearch {
             prop.put("depth", depth);
         }
         
+        prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("former", post.get("search", ""));
         prop.put("count", count);
         prop.put("order", order);
