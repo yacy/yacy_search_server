@@ -63,19 +63,20 @@ public class wikiCode {
     private String ListLevel="";
     private String defListLevel="";
     private plasmaSwitchboard sb;
-    private boolean cellprocessing=false;     // needed for prevention of double-execution of replaceHTML
-    private boolean escape = false;           //needed for escape
-    private boolean escaped = false;          //needed for <pre> not getting in the way
-    private boolean escapeSpan = false;       //needed for escape symbols [= and =] spanning over several lines
-    private boolean newrowstart=false;        // needed for the first row not to be empty
-    private boolean preformatted = false;     //needed for preformatted text
-    private boolean preformattedSpan = false; //needed for <pre> and </pre> spanning over several lines
-    private boolean replacedHTML = false;     //indicates if method replaceHTML has been used with line already
+    private boolean cellprocessing=false;       // needed for prevention of double-execution of replaceHTML
+    private boolean defList = false;            //needed for definition lists
+    private boolean escape = false;             //needed for escape
+    private boolean escaped = false;            //needed for <pre> not getting in the way
+    private boolean escapeSpan = false;         //needed for escape symbols [= and =] spanning over several lines
+    private boolean newrowstart=false;          // needed for the first row not to be empty
+    private boolean preformatted = false;       //needed for preformatted text
+    private boolean preformattedSpan = false;   //needed for <pre> and </pre> spanning over several lines
+    private boolean replacedHTML = false;       //indicates if method replaceHTML has been used with line already
     private boolean replacedCharacters = false; //indicates if method replaceCharachters has been used with line
-    private boolean table=false;              // needed for tables, because they reach over several lines
-    private int preindented = 0;              //needed for indented <pre>s
-    private int escindented = 0;              //needed for indented [=s
-    private int headlines = 0;                //number of headlines in page
+    private boolean table=false;                // needed for tables, because they reach over several lines
+    private int preindented = 0;                //needed for indented <pre>s
+    private int escindented = 0;                //needed for indented [=s
+    private int headlines = 0;                  //number of headlines in page
     private ArrayList dirElements = new ArrayList();    //List of headlines used to create diectory of page
 
     /** Constructor of the class wikiCode */
@@ -495,6 +496,214 @@ public class wikiCode {
         return result;
     }
 
+    /** This method processes unordered lists.
+      */
+    //contributed by [AS] put into it's own method by [MN]
+    private String unorderedList(String result){
+        int p0 = 0;
+        int p1 = 0;
+        //contributed by [AS]
+        if(result.startsWith(ListLevel + "*")){ //more stars
+            p0 = result.indexOf(ListLevel);
+            p1 = result.length();
+            result = "<ul>" + serverCore.crlfString +
+                "<li>" +
+            result.substring(ListLevel.length() + 1, p1) +
+                "</li>";
+            ListLevel += "*";
+        }else if(ListLevel.length() > 0 && result.startsWith(ListLevel)){ //equal number of stars
+            p0 = result.indexOf(ListLevel);
+            p1 = result.length();
+            result = "<li>" +
+                result.substring(ListLevel.length(), p1) +
+                "</li>";
+        }else if(ListLevel.length() > 0){ //less stars
+            int i = ListLevel.length();
+            String tmp = "";
+
+            while(! result.startsWith(ListLevel.substring(0,i)) ){
+                tmp += "</ul>";
+                i--;
+            }
+            ListLevel = ListLevel.substring(0,i);
+            p0 = ListLevel.length();
+            p1 = result.length();
+
+            if(ListLevel.length() > 0){
+                result = tmp +
+                    "<li>" +
+                    result.substring(p0, p1) +
+                    "</li>";
+            }else{
+                result = tmp + result.substring(p0, p1);
+            }
+        }
+        //end contrib [AS]
+        return result;
+    }
+
+    /** This method processes definition lists.
+      */
+    //contributed by [MN] based on unordered list code by [AS]
+    private String definitionList(String result){
+        int p0 = 0;
+        int p1 = 0;
+        if(result.startsWith(defListLevel + ";")){ //more semicolons
+            String dt = ""; 
+            String dd = "";
+            p0 = result.indexOf(defListLevel);
+            p1 = result.length();
+            String resultCopy = result.substring(defListLevel.length() + 1, p1);
+            if((p0 = resultCopy.indexOf(":")) > 0){
+                dt = resultCopy.substring(0,p0);
+                dd = resultCopy.substring(p0+1);
+                result = "<dl>" + "<dt>" + dt + "</dt>" + "<dd>" + dd;
+                defList = true;
+            }
+            defListLevel += ";";
+        }else if(defListLevel.length() > 0 && result.startsWith(defListLevel)){ //equal number of semicolons
+            String dt = ""; 
+            String dd = "";
+            p0 = result.indexOf(defListLevel);
+            p1 = result.length();
+            String resultCopy = result.substring(defListLevel.length(), p1);
+            if((p0 = resultCopy.indexOf(":")) > 0){
+                dt = resultCopy.substring(0,p0);
+                dd = resultCopy.substring(p0+1);
+                result = "<dt>" + dt + "</dt>" + "<dd>" + dd;
+                defList = true;
+            }
+        }else if(defListLevel.length() > 0){ //less semicolons
+            String dt = ""; 
+            String dd = "";
+            int i = defListLevel.length();
+            String tmp = "";
+            while(! result.startsWith(defListLevel.substring(0,i)) ){
+                tmp += "</dd></dl>";
+                i--;
+            }
+            defListLevel = defListLevel.substring(0,i);
+            p0 = defListLevel.length();
+            p1 = result.length();
+            if(defListLevel.length() > 0){
+                String resultCopy = result.substring(p0, p1);
+                if((p0 = resultCopy.indexOf(":")) > 0){
+                    dt = resultCopy.substring(0,p0);
+                    dd = resultCopy.substring(p0+1);
+                    result = tmp + "<dt>" + dt + "</dt>" + "<dd>" + dd;
+                    defList = true;
+                }
+            }else{
+                result = tmp + result.substring(p0, p1);
+            }
+        }
+        return result; 
+    }
+
+    /** This method processes links and images.
+      */
+    //contributed by [AS] except where stated otherwise
+    private String linksAndImages(String result, plasmaSwitchboard switchboard){
+
+        // create links
+        String kl, kv, alt, align;
+        int p;
+        int p0 = 0;
+        int p1 = 0;
+        // internal links and images
+        while ((p0 = result.indexOf("[[")) >= 0) {
+            p1 = result.indexOf("]]", p0 + 2);
+            if (p1 <= p0) break;
+            kl = result.substring(p0 + 2, p1);
+
+            // this is the part of the code that's responsible for images
+            // contributed by [MN]
+            if (kl.startsWith("Image:")) {
+                alt = "";
+                align = "";
+                kv = "";
+                kl = kl.substring(6);
+
+                // are there any arguments for the image?
+                if ((p = kl.indexOf("|")) > 0) {
+                    kv = kl.substring(p + 1);
+                    kl = kl.substring(0, p);
+                    // if there are 2 arguments, write them into ALIGN and ALT
+                    if ((p = kv.indexOf("|")) > 0) {
+                        align = kv.substring(0, p);
+                        //checking validity of value for align. Only non browser specific
+                        //values get supported. Not supported: absmiddle, baseline, texttop
+                        if ((align.equals("bottom"))||
+                            (align.equals("center"))||
+                            (align.equals("left"))||
+                            (align.equals("middle"))||
+                            (align.equals("right"))||
+                            (align.equals("top")))
+                        {
+                            align = " align=\"" + align + "\"";
+                        }
+                        else align = "";
+                        alt = " alt=\"" + kv.substring(p + 1) + "\"";
+                    }
+                    // if there is just one, put it into ALT
+                    else
+                        alt = " alt=\"" + kv + "\"";
+                }
+
+                // replace incomplete URLs and make them point to http://peerip:port/...
+                // with this feature you can access an image in DATA/HTDOCS/share/yacy.gif
+                // using the wikicode [[Image:share/yacy.gif]]
+                // or an image DATA/HTDOCS/grafics/kaskelix.jpg with [[Image:grafics/kaskelix.jpg]]
+                // you are free to use other sub-paths of DATA/HTDOCS
+                if (!((kl.indexOf("://"))>=0)) {
+                    kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
+                }
+
+                result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align + alt + ">" + result.substring(p1 + 2);
+            }
+            // end contrib [MN]
+
+            // if it's no image, it might be an internal link
+            else {
+                if ((p = kl.indexOf("|")) > 0) {
+                    kv = kl.substring(p + 1);
+                    kl = kl.substring(0, p);
+                } else {
+                    kv = kl;
+                }
+                if (switchboard.wikiDB.read(kl) != null)
+                    result = result.substring(0, p0) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + result.substring(p1 + 2);
+                else
+                    result = result.substring(0, p0) + "<a class=\"unknown\" href=\"Wiki.html?page=" + kl + "&edit=Edit\">" + kv + "</a>" + result.substring(p1 + 2);
+            }
+        }
+
+        // external links
+        while ((p0 = result.indexOf("[")) >= 0) {
+            p1 = result.indexOf("]", p0 + 1);
+            if (p1 <= p0) break;
+            kl = result.substring(p0 + 1, p1);
+            if ((p = kl.indexOf(" ")) > 0) {
+                kv = kl.substring(p + 1);
+                kl = kl.substring(0, p);
+            }
+            // No text for the link? -> <a href="http://www.url.com/">http://www.url.com/</a>
+            else {
+                kv = kl;
+            }
+            // replace incomplete URLs and make them point to http://peerip:port/...
+            // with this feature you can access a file at DATA/HTDOCS/share/page.html
+            // using the wikicode [share/page.html]
+            // or a file DATA/HTDOCS/www/page.html with [www/page.html]
+            // you are free to use other sub-paths of DATA/HTDOCS
+            if (!((kl.indexOf("://"))>=0)) {
+                kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
+            }
+        result = result.substring(0, p0) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + result.substring(p1 + 1);
+        }
+        return result;
+    }
+
     /** This method creates a directory for a wiki page.
       * @return directory of the wiki
       */
@@ -625,7 +834,6 @@ public class wikiCode {
     public String transformLine(String result, plasmaSwitchboard switchboard) {
         // transform page
         int p0, p1;
-        boolean defList = false;    //needed for definition lists
 
         if (!replacedHTML){
             result = replaceHTMLonly(result);
@@ -644,7 +852,7 @@ public class wikiCode {
            (result.indexOf("&lt;pre&gt;")<0)&&(result.indexOf("&lt;/pre&gt;")<0)&&(!preformattedSpan)){
 
             //tables first -> wiki-tags in cells can be treated after that
-            result = this.processTable(result, switchboard);
+            result = processTable(result, switchboard);
 
             // format lines
             if (result.startsWith(" ")) result = "<tt>" + result + "</tt>";
@@ -672,196 +880,12 @@ public class wikiCode {
             result = pairReplace(result,"'''","<b>","</b>");
             result = pairReplace(result,"''","<i>","</i>");
 
-            //* unorderd Lists contributed by [AS]
-            //** Sublist
-            if(result.startsWith(ListLevel + "*")){ //more stars
-                p0 = result.indexOf(ListLevel);
-                p1 = result.length();
-                result = "<ul>" + serverCore.crlfString +
-                    "<li>" +
-                result.substring(ListLevel.length() + 1, p1) +
-                    "</li>";
-                ListLevel += "*";
-            }else if(ListLevel.length() > 0 && result.startsWith(ListLevel)){ //equal number of stars
-                p0 = result.indexOf(ListLevel);
-                p1 = result.length();
-                result = "<li>" +
-                    result.substring(ListLevel.length(), p1) +
-                    "</li>";
-            }else if(ListLevel.length() > 0){ //less stars
-                int i = ListLevel.length();
-                String tmp = "";
-
-                while(! result.startsWith(ListLevel.substring(0,i)) ){
-                    tmp += "</ul>";
-                    i--;
-                }
-                ListLevel = ListLevel.substring(0,i);
-                p0 = ListLevel.length();
-                p1 = result.length();
-
-                if(ListLevel.length() > 0){
-                    result = tmp +
-                        "<li>" +
-                        result.substring(p0, p1) +
-                        "</li>";
-                }else{
-                    result = tmp + result.substring(p0, p1);
-                }
-            }
-
+            result = unorderedList(result);
             result = orderedList(result);
+            result = definitionList(result);
 
-            //* definition Lists contributed by [MN] based on unordered list code by [AS]
-            if(result.startsWith(defListLevel + ";")){ //more semicolons
-                String dt = ""; 
-                String dd = "";
-                p0 = result.indexOf(defListLevel);
-                p1 = result.length();
-                String resultCopy = result.substring(defListLevel.length() + 1, p1);
-                if((p0 = resultCopy.indexOf(":")) > 0){
-                    dt = resultCopy.substring(0,p0);
-                    dd = resultCopy.substring(p0+1);
-                    result = "<dl>" + "<dt>" + dt + "</dt>" + "<dd>" + dd;
-                    defList = true;
-                }
-                defListLevel += ";";
-            }else if(defListLevel.length() > 0 && result.startsWith(defListLevel)){ //equal number of semicolons
-                String dt = ""; 
-                String dd = "";
-                p0 = result.indexOf(defListLevel);
-                p1 = result.length();
-                String resultCopy = result.substring(defListLevel.length(), p1);
-                if((p0 = resultCopy.indexOf(":")) > 0){
-                    dt = resultCopy.substring(0,p0);
-                    dd = resultCopy.substring(p0+1);
-                    result = "<dt>" + dt + "</dt>" + "<dd>" + dd;
-                    defList = true;
-                }
-            }else if(defListLevel.length() > 0){ //less semicolons
-                String dt = ""; 
-                String dd = "";
-                int i = defListLevel.length();
-                String tmp = "";
-                while(! result.startsWith(defListLevel.substring(0,i)) ){
-                    tmp += "</dd></dl>";
-                    i--;
-                }
-                defListLevel = defListLevel.substring(0,i);
-                p0 = defListLevel.length();
-                p1 = result.length();
-                if(defListLevel.length() > 0){
-                    String resultCopy = result.substring(p0, p1);
-                    if((p0 = resultCopy.indexOf(":")) > 0){
-                        dt = resultCopy.substring(0,p0);
-                        dd = resultCopy.substring(p0+1);
-                        result = tmp + "<dt>" + dt + "</dt>" + "<dd>" + dd;
-                        defList = true;
-                    }
+            result = linksAndImages(result, switchboard);
 
-                }else{
-                    result = tmp + result.substring(p0, p1);
-                }
-            }
-            // end contrib [MN]	
-
-
-            // create links
-            String kl, kv, alt, align;
-            int p;
-            // internal links and images
-            while ((p0 = result.indexOf("[[")) >= 0) {
-                p1 = result.indexOf("]]", p0 + 2);
-                if (p1 <= p0) break;
-                kl = result.substring(p0 + 2, p1);
-
-                // this is the part of the code that's responsible for images
-                // contributed by [MN]
-                if (kl.startsWith("Image:")) {
-                    alt = "";
-                    align = "";
-                    kv = "";
-                    kl = kl.substring(6);
-
-                    // are there any arguments for the image?
-                    if ((p = kl.indexOf("|")) > 0) {
-                        kv = kl.substring(p + 1);
-                        kl = kl.substring(0, p);
-
-                        // if there are 2 arguments, write them into ALIGN and ALT
-                        if ((p = kv.indexOf("|")) > 0) {
-                            align = kv.substring(0, p);
-                            //checking validity of value for align. Only non browser specific
-                            //values get supported. Not supported: absmiddle, baseline, texttop
-                            if ((align.equals("bottom"))||
-                                (align.equals("center"))||
-                                (align.equals("left"))||
-                                (align.equals("middle"))||
-                                (align.equals("right"))||
-                                (align.equals("top")))
-                            {
-                                align = " align=\"" + align + "\"";
-                            }
-                            else align = "";
-                            alt = " alt=\"" + kv.substring(p + 1) + "\"";
-                        }
-
-                        // if there is just one, put it into ALT
-                        else
-                            alt = " alt=\"" + kv + "\"";
-                    }
-
-                    // replace incomplete URLs and make them point to http://peerip:port/...
-                    // with this feature you can access an image in DATA/HTDOCS/share/yacy.gif
-                    // using the wikicode [[Image:share/yacy.gif]]
-                    // or an image DATA/HTDOCS/grafics/kaskelix.jpg with [[Image:grafics/kaskelix.jpg]]
-                    // you are free to use other sub-paths of DATA/HTDOCS
-                    if (!((kl.indexOf("://"))>=0)) {
-                        kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
-                    }
-
-                    result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align + alt + ">" + result.substring(p1 + 2);
-                }
-                // end contrib [MN]
-
-                // if it's no image, it might be an internal link
-                else {
-                    if ((p = kl.indexOf("|")) > 0) {
-                        kv = kl.substring(p + 1);
-                        kl = kl.substring(0, p);
-                    } else {
-                        kv = kl;
-                    }
-                    if (switchboard.wikiDB.read(kl) != null)
-                        result = result.substring(0, p0) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + result.substring(p1 + 2);
-                    else
-                        result = result.substring(0, p0) + "<a class=\"unknown\" href=\"Wiki.html?page=" + kl + "&edit=Edit\">" + kv + "</a>" + result.substring(p1 + 2);
-                }
-            }
-
-            // external links
-            while ((p0 = result.indexOf("[")) >= 0) {
-                p1 = result.indexOf("]", p0 + 1);
-                if (p1 <= p0) break;
-                kl = result.substring(p0 + 1, p1);
-                if ((p = kl.indexOf(" ")) > 0) {
-                    kv = kl.substring(p + 1);
-                    kl = kl.substring(0, p);
-                }
-                // No text for the link? -> <a href="http://www.url.com/">http://www.url.com/</a>
-                else {
-                    kv = kl;
-                }
-                // replace incomplete URLs and make them point to http://peerip:port/...
-                // with this feature you can access a file at DATA/HTDOCS/share/page.html
-                // using the wikicode [share/page.html]
-                // or a file DATA/HTDOCS/www/page.html with [www/page.html]
-                // you are free to use other sub-paths of DATA/HTDOCS
-                if (!((kl.indexOf("://"))>=0)) {
-                    kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
-                }
-                result = result.substring(0, p0) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + result.substring(p1 + 1);
-            }
         }
 
         //escape code ([=...=]) contributed by [MN]
@@ -912,6 +936,13 @@ public class wikiCode {
             result = result.replaceAll("!esc!txt!", escapeText) + bq;
             escaped = false;
         }
+        //Getting rid of surplus =]
+        else if (((p0 = result.indexOf("=]"))>=0)&&(!escapeSpan)&&(!preformatted)){
+            while((p0 = result.indexOf("=]"))>=0){
+                result = result.substring(0,p0)+result.substring(p0+2);
+            }
+            result = transformLine(result, switchboard);
+        }
         //end contrib [MN]
 
         //preformatted code (<pre>...</pre>) contributed by [MN]
@@ -954,6 +985,13 @@ public class wikiCode {
             result = result.replaceAll("!pre!txt!", preformattedText) + bq;
             result = result.replaceAll("!pre!!", "!pre!");
             preformatted = false;
+        }
+        //Getting rid of surplus </pre>
+        else if (((p0 = result.indexOf("&lt;/pre&gt;"))>=0)&&(!preformattedSpan)&&(!escaped)){
+            while((p0 = result.indexOf("&lt;/pre&gt;"))>=0){
+                result = result.substring(0,p0)+result.substring(p0+12);
+            }
+            result = transformLine(result, switchboard);
         }
         //end contrib [MN]
 
