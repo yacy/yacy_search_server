@@ -78,11 +78,7 @@ public class yacysearch {
 
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
-        boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
-        final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
-        final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
-        if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
-
+        
         // case if no values are requested
         final String referer = (String) header.get("Referer");
         if (post == null || env == null) {
@@ -134,6 +130,21 @@ public class yacysearch {
         
         serverObjects prop = new serverObjects();
         
+        final int count = Integer.parseInt(post.get("count", "10"));
+        final String order = post.get("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
+        boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
+        final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
+        final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
+        if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
+        final long searchtime = 1000 * Long.parseLong(post.get("time", "10"));
+        String urlmask = "";
+        if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
+            urlmask = ".*";
+        } else {
+            urlmask = (post.containsKey("urlmaskfilter")) ? (String) post.get("urlmaskfilter") : ".*";
+        }
+        String prefer = post.get("prefer", ".*");
+        
         if (post.get("cat", "href").equals("href")) {
             prop.put("type", 0); // set type of result: normal link list
             
@@ -156,9 +167,7 @@ public class yacysearch {
             }
 
             // prepare search order
-            final String order = post.get("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
-            final int count = Integer.parseInt(post.get("count", "10"));
-            final long searchtime = 1000 * Long.parseLong(post.get("time", "10"));
+            
             final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed != null) && (yacyCore.seedDB.mySeed.getAddress() != null));
 
             String order1 = plasmaSearchRankingProfile.ORDER_DATE;
@@ -173,13 +182,7 @@ public class yacysearch {
             if (order.endsWith("YBR")) order3 = plasmaSearchRankingProfile.ORDER_YBR;
             if (order.endsWith("Date")) order3 = plasmaSearchRankingProfile.ORDER_DATE;
             if (order.endsWith("Quality")) order3 = plasmaSearchRankingProfile.ORDER_QUALITY;
-            String urlmask = "";
-            if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
-                urlmask = ".*";
-            } else {
-                urlmask = (post.containsKey("urlmaskfilter")) ? (String) post.get("urlmaskfilter") : ".*";
-            }
-
+            
             // do the search
             plasmaSearchQuery thisSearch = new plasmaSearchQuery(
                     query,
@@ -296,16 +299,9 @@ public class yacysearch {
                 }
             }
 
-            prop.put("former", post.get("search", ""));
-            prop.put("count", count);
-            prop.put("order", order);
-            prop.put("resource", (global) ? "global" : "local");
-            prop.put("time", searchtime / 1000);
-            prop.put("urlmaskfilter", urlmask);
             prop.put("type", "0");
             prop.put("cat", "href");
             prop.put("depth", "0");
-            
 
             // adding some additional properties needed for the rss feed
             String hostName = (String) header.get("Host", "localhost");
@@ -340,13 +336,21 @@ public class yacysearch {
                 line++;
             }
             prop.put("type_results", line);
-
-            prop.put("cat", "image");
+            
             prop.put("type", 1); // set type of result: image list
-            prop.put("former", post.get("search", ""));
+            prop.put("cat", "href");
             prop.put("depth", depth);
         }
+        
+        prop.put("former", post.get("search", ""));
+        prop.put("count", count);
+        prop.put("order", order);
+        prop.put("resource", (global) ? "global" : "local");
+        prop.put("time", searchtime / 1000);
+        prop.put("urlmaskfilter", urlmask);
+        prop.put("prefer", prefer);
         prop.put("display", display);
+        
         // return rewrite properties
         return prop;
     }

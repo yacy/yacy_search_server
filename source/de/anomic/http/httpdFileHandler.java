@@ -515,9 +515,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         String mimeType = mimeTable.getProperty(targetExt, "text/html");
 
                         // generate an byte array from the generated image
+                        int width = i.getWidth(null);
+                        int height = i.getHeight(null);
+                        BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                        bi.createGraphics().drawImage(i, 0, 0, width, height, null); 
                         serverByteBuffer baos = new serverByteBuffer();
-                        BufferedImage bi = new BufferedImage(i.getWidth(null), i.getHeight(null), BufferedImage.TYPE_INT_RGB);
-                        bi.createGraphics().drawImage(i, 0, 0, i.getWidth(null), i.getHeight(null), null); 
                         ImageIO.write(bi, targetExt, baos);
 
                         byte[] result = baos.toByteArray();

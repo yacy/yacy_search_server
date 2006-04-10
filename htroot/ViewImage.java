@@ -76,9 +76,10 @@ public class ViewImage {
         
         // create image 
         MediaTracker mediaTracker = new MediaTracker(new Container()); 
-        Image original = Toolkit.getDefaultToolkit().createImage(imgb); 
-        mediaTracker.addImage(original, 0); 
-        try {mediaTracker.waitForID(0);} catch (InterruptedException e) {} 
+        Image original = Toolkit.getDefaultToolkit().createImage(imgb);
+        int handle = original.hashCode();
+        mediaTracker.addImage(original, handle); 
+        try {mediaTracker.waitForID(handle);} catch (InterruptedException e) {} 
         boolean auth = ((String) header.get("CLIENTIP", "")).equals("localhost") || sb.verifyAuthentication(header, false); // handle access rights
         if ((auth) && ((width == 0) || (height == 0)) && (maxwidth == 0) && (maxheight == 0)) return original;
 
@@ -105,6 +106,10 @@ public class ViewImage {
                 height = h;
             }
         }
+        
+        // check for minimum values
+        width = Math.max(width, 1);
+        height = Math.max(height, 1);
         
         // scale image 
         Image scaled = original.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING); 
