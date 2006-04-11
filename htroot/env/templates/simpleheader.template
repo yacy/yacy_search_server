@@ -22,6 +22,6 @@
 <a href="http://www.yacy-websearch.net/wiki/" class="MenuItemLink">Help / Wiki</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
 <td width="25%" class="MenuSubItem">&nbsp;
-<a href="/ConfigProfile_p.html" class="MenuItemLink">Peer Owner Profile</a>&nbsp;</td>
+<a href="/ViewProfile.html?hash=localhash" class="MenuItemLink">Peer Owner Profile</a>&nbsp;</td>
 </tr>
 </table><br>

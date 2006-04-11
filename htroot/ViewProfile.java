@@ -45,11 +45,14 @@
 // javac -classpath .:../Classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -65,99 +68,124 @@ import de.anomic.data.wikiCode;
 public class ViewProfile {
 
 	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	//listManager.switchboard = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
-	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	wikiCode wikiTransformer = new wikiCode(switchboard);
+	    // listManager.switchboard = (plasmaSwitchboard) env;
+        serverObjects prop = new serverObjects();
+        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        wikiCode wikiTransformer = new wikiCode(switchboard);
+        boolean authenticated = switchboard.adminAuthenticated(header) >= 2;
+        int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
+        prop.put("display", display);
+        String hash = (post == null) ? null : (String) post.get("hash");
         
-        if ((post != null) && (post.containsKey("hash")) && (yacyCore.seedDB != null)) { //no nullpointer error..
-            yacySeed seed = yacyCore.seedDB.getConnected((String)post.get("hash"));
+        if ((hash == null) || (yacyCore.seedDB == null)) {
+            // wrong access
+            prop.put("success","0");
+            return prop;
+        }
+        
+        // get the profile
+        HashMap profile = null;
+        if (hash.equals("localhash")) {
+            // read the profile from local peer
+            Properties p = new Properties();
+            FileInputStream fileIn = null;
+            try {
+                fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
+                p.load(fileIn);        
+            } catch(IOException e) {} finally {
+                if (fileIn != null) try { fileIn.close(); fileIn = null; } catch (Exception e) {}
+            }
+            profile = new HashMap();
+            profile.putAll(p);
+            prop.put("success", "3"); // everything ok
+            prop.put("localremotepeer", 0);
+            prop.put("success_peername", yacyCore.seedDB.mySeed.getName());
+        } else {
+            // read the profile from remote peer
+            yacySeed seed = yacyCore.seedDB.getConnected(hash);
             if (seed == null) {
-                seed = yacyCore.seedDB.getDisconnected((String)post.get("hash"));
+                seed = yacyCore.seedDB.getDisconnected(hash);
                 if (seed == null) {
-                    prop.put("success","1"); // peer unknown
+                    prop.put("success", "1"); // peer unknown
                 } else {
-                    prop.put("success","2"); // peer known, but disconnected
+                    prop.put("success", "2"); // peer known, but disconnected
                     prop.put("success_peername", seed.getName());
                 }
             } else {
-                prop.put("success","3"); // everything ok
+                prop.put("success", "3"); // everything ok
                 // process news if existent
                 try {
                     yacyNewsRecord record = yacyCore.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, "prfleupd", seed.hash);
                     if (record != null) yacyCore.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
                 } catch (IOException e) {}
-                
-                // read profile from other peer
-                HashMap profile = yacyClient.getProfile(seed);
-                yacyCore.log.logInfo("fetched profile:" + profile);
-                Iterator i;
-                if(profile != null){
-                	i = profile.entrySet().iterator();
-                }else{
-                	i = (new ArrayList()).iterator();
-                }
-                Map.Entry entry;
-		//all known keys which should be set as they are
-		ArrayList knownKeys = new ArrayList();
-		knownKeys.add("name");
-		knownKeys.add("nickname");
-		//knownKeys.add("homepage");//+http
-		knownKeys.add("email");
-		knownKeys.add("icq");
-		knownKeys.add("jabber");
-		knownKeys.add("yahoo");
-		knownKeys.add("msn");
-		knownKeys.add("comment");
-		
-		//empty values
-		Iterator it=knownKeys.iterator();
-		while(it.hasNext()){
-		    prop.put("success_"+(String)it.next(), 0);
-		}
-		
-		//number of not explicitly recognized but displayed items
-		int numUnknown=0;
-                while (i.hasNext()) {
-                    entry = (Map.Entry) i.next();
-		    String key=(String)entry.getKey();
-		    String value=new String();
-		    
-		    //only comments get "wikified"
-		    //this prevents broken links ending in <br>
-		    if(key.equals("comment")){
-		        value=wikiTransformer.transform( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
-		    }
-		    //else only HTML tags get transformed to regular text    
-		    else{
-		        value=wikiCode.replaceHTML( ((String)entry.getValue()).replaceAll("\r","").replaceAll("\\\\n","\n") );
-		    }
 
-		    //all known Keys which should be set as they are
-		    if(knownKeys.contains(key)){
-			prop.put("success_"+key, 1);
-			prop.put("success_"+key+"_value", value);
-			//special handling, hide flower if no icq uin is set
-		    }else if(key.equals("homepage")){
-			if(! (value.startsWith("http")) ){
-			    value="http://"+value;
-			}
-			prop.put("success_"+key, 1);
-			prop.put("success_"+key+"_value", value);
-			//This will display unknown items(of newer versions) as plaintext
-		    }else{//unknown
-                    	prop.put("success_other_"+numUnknown+"_key", key);
-                    	prop.put("success_other_"+numUnknown+"_value", value);
-			numUnknown++;
-		    }
-                }
-		prop.put("success_other", numUnknown);
-                //prop.putAll(profile);
-                prop.put("success_peername", seed.getName());
+                // read profile from other peer
+                profile = yacyClient.getProfile(seed);
+                yacyCore.log.logInfo("fetched profile:" + profile);
             }
-        } else {
-            prop.put("success","0"); // wrong access
+            prop.put("localremotepeer", 1);
+            prop.put("success_peername", seed.getName());
         }
+        Iterator i;
+        if (profile != null) {
+            i = profile.entrySet().iterator();
+        } else {
+            i = (new ArrayList()).iterator();
+        }
+        Map.Entry entry;
+        // all known keys which should be set as they are
+        ArrayList knownKeys = new ArrayList();
+        knownKeys.add("name");
+        knownKeys.add("nickname");
+        // knownKeys.add("homepage");//+http
+        knownKeys.add("email");
+        knownKeys.add("icq");
+        knownKeys.add("jabber");
+        knownKeys.add("yahoo");
+        knownKeys.add("msn");
+        knownKeys.add("comment");
+
+        //empty values
+        Iterator it = knownKeys.iterator();
+        while (it.hasNext()) {
+            prop.put("success_" + (String) it.next(), 0);
+        }
+
+        //number of not explicitly recognized but displayed items
+        int numUnknown = 0;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            String key = (String) entry.getKey();
+            String value = new String();
+
+            // only comments get "wikified"
+            // this prevents broken links ending in <br>
+            if (key.equals("comment")) {
+                value = wikiTransformer.transform(((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"));
+            } else { // else only HTML tags get transformed to regular text   
+                value = wikiCode.replaceHTML(((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"));
+            }
+
+            //all known Keys which should be set as they are
+            if (knownKeys.contains(key)) {
+                prop.put("success_" + key, 1);
+                prop.put("success_" + key + "_value", value);
+                //special handling, hide flower if no icq uin is set
+            } else if (key.equals("homepage")) {
+                if (!(value.startsWith("http"))) {
+                    value = "http://" + value;
+                }
+                prop.put("success_" + key, 1);
+                prop.put("success_" + key + "_value", value);
+                //This will display unknown items(of newer versions) as plaintext
+            } else {
+                //unknown
+                prop.put("success_other_" + numUnknown + "_key", key);
+                prop.put("success_other_" + numUnknown + "_value", value);
+                numUnknown++;
+            }
+        }
+        prop.put("success_other", numUnknown);
 
         return prop;
     }

@@ -5,9 +5,17 @@
 #%env/templates/metas.template%#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#(display)#
+#%env/templates/simpleheader.template%#
+::
 #%env/templates/header.template%#
+#(/display)#
 <br><br>
+#(localremotepeer)#
+<h2>Local Peer Profile:</h2>
+::
 <h2>Remote Peer Profile:</h2>
+#(/localremotepeer)#
 <p>
 #(success)#
 Wrong access of this page
@@ -80,6 +88,10 @@ The peer #[peername]# is not online.
 
 </table>
 #(/success)#
+#(display)#
+#%env/templates/simplefooter.template%#
+::
 #%env/templates/footer.template%#
+#(/display)#
 </body>
 </html>
