@@ -456,7 +456,7 @@ public class plasmaCrawlProfile {
             while (domnamesi.hasNext()) {
                 ey = (Map.Entry) domnamesi.next();
                 dp = (DomProfile) ey.getValue();
-                domnames += ((String) ey.getKey()) + ((attr) ? ("/d=" + dp.depth + ",c=" + dp.count + " ") : " ");
+                domnames += ((String) ey.getKey()) + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count + " ") : " ") + "<br>";
                 if ((maxlength > 0) && (domnames.length() >= maxlength)) {
                     domnames = domnames.substring(0, maxlength-3) + "...";
                     break;

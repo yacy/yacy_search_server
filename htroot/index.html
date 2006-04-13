@@ -34,6 +34,8 @@
    <input type="hidden" name="order" value="Date-YBR-Quality">
    <input type="hidden" name="resource" value="global">
    <input type="hidden" name="time" value="6">
+   <input type="hidden" name="urlmaskfilter" value=".*">
+   <input type="hidden" name="prefermaskfilter" value="">
    <tr align="left">
     <td></td>
     <td><a href="/index.html?searchoptions=1&display=#[display]#">more options...</a></td>
@@ -104,6 +106,19 @@
 	<input type="radio" name="urlmask" value="yes" checked> restrict on <input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#">
 	<input type="radio" name="urlmask" value="no"> show all
 	#(/urlmaskoptions)#
+   </td>
+  </tr>
+  <tr align="left">
+   <td>
+    Prefer mask:
+   </td>
+   <td>
+	#(prefermaskoptions)#
+	<input name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#">
+	::
+	<input type="radio" name="prefermask" value="yes" checked> restrict on <input name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#">
+	<input type="radio" name="prefermask" value="no"> show all
+	#(/prefermaskoptions)#
    </td>
   </tr>
   #(/searchoptions)#

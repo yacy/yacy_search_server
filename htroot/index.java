@@ -102,8 +102,8 @@ public class index {
         prop.put("combine", 0);
         prop.put("resultbottomline", 0);
         prop.put("searchoptions", searchoptions);
-        prop.put("searchoptions_count-10", 1);
-        prop.put("searchoptions_count-50", 0);
+        prop.put("searchoptions_count-10", 0);
+        prop.put("searchoptions_count-50", 1);
         prop.put("searchoptions_count-100", 0);
         prop.put("searchoptions_count-1000", 0);
         prop.put("searchoptions_order-ybr-date-quality", plasmaSearchPreOrder.canUseYBR() ? 1 : 0);
@@ -122,6 +122,8 @@ public class index {
         prop.put("searchoptions_time-60", 0);
         prop.put("searchoptions_urlmaskoptions", 0);
         prop.put("searchoptions_urlmaskoptions_urlmaskfilter", ".*");
+        prop.put("searchoptions_prefermaskoptions", 0);
+        prop.put("searchoptions_prefermaskoptions_prefermaskfilter", "");
         prop.put("results", "");
         prop.put("cat", "href");
         prop.put("type", "0");

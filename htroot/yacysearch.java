@@ -109,6 +109,7 @@ public class yacysearch {
             prop.put("resource", "global");
             prop.put("time", 6);
             prop.put("urlmaskfilter", ".*");
+            prop.put("prefermaskfilter", "");
             prop.put("cat", "href");
             prop.put("depth", "0");
             prop.put("type", 0);
@@ -144,7 +145,8 @@ public class yacysearch {
         } else {
             urlmask = (post.containsKey("urlmaskfilter")) ? (String) post.get("urlmaskfilter") : ".*";
         }
-        String prefer = post.get("prefer", ".*");
+        String prefermask = post.get("prefermaskfilter", "");
+        if ((prefermask.length() > 0) && (prefermask.indexOf(".*") < 0)) prefermask = ".*" + prefermask + ".*";
 
         serverObjects prop = new serverObjects();
         
@@ -189,6 +191,7 @@ public class yacysearch {
             plasmaSearchQuery thisSearch = new plasmaSearchQuery(
                     query,
                     maxDistance,
+                    prefermask,
                     count,
                     searchtime,
                     urlmask,
@@ -351,7 +354,7 @@ public class yacysearch {
         prop.put("resource", (global) ? "global" : "local");
         prop.put("time", searchtime / 1000);
         prop.put("urlmaskfilter", urlmask);
-        prop.put("prefer", prefer);
+        prop.put("prefermaskfilter", prefermask);
         prop.put("display", display);
         
         // return rewrite properties

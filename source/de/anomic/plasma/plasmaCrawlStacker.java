@@ -318,7 +318,7 @@ public final class plasmaCrawlStacker {
         }
         
         // add domain to profile domain list
-        if (currentdepth <= profile.domFilterDepth()) {
+        if ((profile.domFilterDepth() != Integer.MAX_VALUE) || (profile.domMaxPages() != Integer.MAX_VALUE)) {
             profile.domInc(nexturl.getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), currentdepth);
         }
 

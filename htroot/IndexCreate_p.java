@@ -81,8 +81,6 @@ public class IndexCreate_p {
         prop.put("error", 0);
         prop.put("info", 0);
         prop.put("refreshbutton", 0);
-                            
-        switchboard.cleanProfiles();
         
         if (post != null) {
             if (post.containsKey("crawlingstart")) {
@@ -395,6 +393,7 @@ public class IndexCreate_p {
         
         //  sed crawl profiles
         int count = 0;
+        int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
         //try{
         Iterator it = switchboard.profiles.profiles(true);
         plasmaCrawlProfile.entry profile;
@@ -410,7 +409,7 @@ public class IndexCreate_p {
             prop.put("crawlProfiles_"+count+"_filter", profile.generalFilter());
             prop.put("crawlProfiles_"+count+"_crawlingIfOlder", (profile.recrawlIfOlder() == Long.MAX_VALUE) ? "no re-crawl" : ""+profile.recrawlIfOlder());
             prop.put("crawlProfiles_"+count+"_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : ""+profile.domFilterDepth());
-            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", profile.domNames(true, 160));
+            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", profile.domNames(true, domlistlength));
             prop.put("crawlProfiles_"+count+"_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : ""+profile.domMaxPages());
             prop.put("crawlProfiles_"+count+"_withQuery", ((profile.crawlingQ()) ? 1 : 0));
             prop.put("crawlProfiles_"+count+"_storeCache", ((profile.storeHTCache()) ? 1 : 0));

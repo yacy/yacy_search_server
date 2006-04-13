@@ -73,6 +73,7 @@ public class plasmaSearchRankingProfile {
     public static final String QUERYINDESCR = "queryindescr";
     public static final String URLCOMPINTOPLIST = "urlcompintoplist";
     public static final String DESCRCOMPINTOPLIST = "descrcompintoplist";
+    public static final String PREFER = "prefer";
     
     public String[] order;
     private HashMap coeff;
@@ -96,6 +97,7 @@ public class plasmaSearchRankingProfile {
         coeff.put(QUERYINDESCR, new Integer(8));
         coeff.put(URLCOMPINTOPLIST, new Integer(3));
         coeff.put(DESCRCOMPINTOPLIST, new Integer(2));
+        coeff.put(PREFER, new Integer(15));
     }
     
     public plasmaSearchRankingProfile(String prefix, String profile) {
@@ -183,6 +185,10 @@ public class plasmaSearchRankingProfile {
         // apply pre-calculated order attributes
         long ranking = this.preRanking(normalizedEntry);
 
+        // prefer hit with 'prefer' pattern
+        if (page.url().toString().matches(query.prefer)) ranking += 256 << ((Integer) coeff.get(PREFER)).intValue();
+        if (page.descr().toString().matches(query.prefer)) ranking += 256 << ((Integer) coeff.get(PREFER)).intValue();
+        
         // apply 'common-sense' heuristic using references
         for (int j = 0; j < urlcomps.length; j++) {
             if (topwords.contains(urlcomps[j])) ranking += 256 << ((Integer) coeff.get(URLCOMPINTOPLIST)).intValue();
@@ -210,6 +216,7 @@ public class plasmaSearchRankingProfile {
         ranking += (255 * page.descr().length() / 80) << ((Integer) coeff.get(DESCRLENGTH)).intValue();
         ranking += (255 * (12 - Math.abs(12 - Math.min(12, descrcomps.length))) / 12) << ((Integer) coeff.get(DESCRCOMPS)).intValue();
 
+        
         return ranking;
     }
     
