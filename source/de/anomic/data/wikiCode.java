@@ -6,7 +6,7 @@
 // Frankfurt, Germany, 2004
 //
 // This file ist contributed by Alexander Schier
-// last major change: 08.03.2006
+// last major change: 17.04.2006
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -57,27 +57,30 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.yacy.yacyCore;
 
-/** This class provides methods to handle texts that have been posted in the yacyWiki. */
+/** This class provides methods to handle texts that have been posted in the yacyWiki or other
+  * parts of YaCy that use this class, like the blog or the profile.
+  */
 public class wikiCode {
     private String numListLevel="";
     private String ListLevel="";
     private String defListLevel="";
     private plasmaSwitchboard sb;
-    private boolean cellprocessing=false;       // needed for prevention of double-execution of replaceHTML
+    private boolean cellprocessing=false;       //needed for prevention of double-execution of replaceHTML
     private boolean defList = false;            //needed for definition lists
     private boolean escape = false;             //needed for escape
     private boolean escaped = false;            //needed for <pre> not getting in the way
     private boolean escapeSpan = false;         //needed for escape symbols [= and =] spanning over several lines
-    private boolean newrowstart=false;          // needed for the first row not to be empty
+    private boolean newrowstart=false;          //needed for the first row not to be empty
+    private boolean nolist = false;             //needed for handling of [= and <pre> in lists
     private boolean preformatted = false;       //needed for preformatted text
     private boolean preformattedSpan = false;   //needed for <pre> and </pre> spanning over several lines
     private boolean replacedHTML = false;       //indicates if method replaceHTML has been used with line already
     private boolean replacedCharacters = false; //indicates if method replaceCharachters has been used with line
-    private boolean table=false;                // needed for tables, because they reach over several lines
+    private boolean table=false;                //needed for tables, because they reach over several lines
     private int preindented = 0;                //needed for indented <pre>s
     private int escindented = 0;                //needed for indented [=s
     private int headlines = 0;                  //number of headlines in page
-    private ArrayList dirElements = new ArrayList();    //List of headlines used to create diectory of page
+    private ArrayList dirElements = new ArrayList();    //list of headlines used to create diectory of page
 
     /** Constructor of the class wikiCode */
     public wikiCode(plasmaSwitchboard switchboard){
@@ -453,46 +456,48 @@ public class wikiCode {
     /** This method processes ordered lists.
       */
     private String orderedList(String result){
-        int p0 = 0;
-        int p1 = 0;
-        //# sorted Lists contributed by [AS]
-        //## Sublist
-        if(result.startsWith(numListLevel + "#")){ //more #
-            p0 = result.indexOf(numListLevel);
-            p1 = result.length();
-             result = "<ol>" + serverCore.crlfString +
-                "<li>" +
-                result.substring(numListLevel.length() + 1, p1) +
-                "</li>";
-            numListLevel += "#";
-        }else if(numListLevel.length() > 0 && result.startsWith(numListLevel)){ //equal number of #
-            p0 = result.indexOf(numListLevel);
-            p1 = result.length();
-            result = "<li>" +
-                result.substring(numListLevel.length(), p1) +
-                "</li>";
-        }else if(numListLevel.length() > 0){ //less #
-            int i = numListLevel.length();
-            String tmp = "";
+        if(!nolist){    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
+            int p0 = 0;
+            int p1 = 0;
+            //# sorted Lists contributed by [AS]
+            //## Sublist
+            if(result.startsWith(numListLevel + "#")){ //more #
+                p0 = result.indexOf(numListLevel);
+                p1 = result.length();
+                result = "<ol>" + serverCore.crlfString +
+                    "<li>" +
+                    result.substring(numListLevel.length() + 1, p1) +
+                    "</li>";
+                numListLevel += "#";
+            }else if(numListLevel.length() > 0 && result.startsWith(numListLevel)){ //equal number of #
+                p0 = result.indexOf(numListLevel);
+                p1 = result.length();
+                result = "<li>" +
+                    result.substring(numListLevel.length(), p1) +
+                    "</li>";
+            }else if(numListLevel.length() > 0){ //less #
+                int i = numListLevel.length();
+                String tmp = "";
 
-            while(! result.startsWith(numListLevel.substring(0,i)) ){
-                tmp += "</ol>";
-                i--;
-            }
-            numListLevel = numListLevel.substring(0,i);
-            p0 = numListLevel.length();
-            p1 = result.length();
+                while(! result.startsWith(numListLevel.substring(0,i)) ){
+                    tmp += "</ol>";
+                    i--;
+                }
+                numListLevel = numListLevel.substring(0,i);
+                p0 = numListLevel.length();
+                p1 = result.length();
 
-            if(numListLevel.length() > 0){
-                result = tmp +
-                     "<li>" +
-                     result.substring(p0, p1) +
-                     "</li>";
-            }else{
-                result = tmp + result.substring(p0, p1);
+                if(numListLevel.length() > 0){
+                    result = tmp +
+                         "<li>" +
+                        result.substring(p0, p1) +
+                        "</li>";
+                }else{
+                    result = tmp + result.substring(p0, p1);
+                }
             }
+            // end contrib [AS]
         }
-        // end contrib [AS]
         return result;
     }
 
@@ -500,45 +505,47 @@ public class wikiCode {
       */
     //contributed by [AS] put into it's own method by [MN]
     private String unorderedList(String result){
-        int p0 = 0;
-        int p1 = 0;
-        //contributed by [AS]
-        if(result.startsWith(ListLevel + "*")){ //more stars
-            p0 = result.indexOf(ListLevel);
-            p1 = result.length();
-            result = "<ul>" + serverCore.crlfString +
-                "<li>" +
-            result.substring(ListLevel.length() + 1, p1) +
-                "</li>";
-            ListLevel += "*";
-        }else if(ListLevel.length() > 0 && result.startsWith(ListLevel)){ //equal number of stars
-            p0 = result.indexOf(ListLevel);
-            p1 = result.length();
-            result = "<li>" +
-                result.substring(ListLevel.length(), p1) +
-                "</li>";
-        }else if(ListLevel.length() > 0){ //less stars
-            int i = ListLevel.length();
-            String tmp = "";
-
-            while(! result.startsWith(ListLevel.substring(0,i)) ){
-                tmp += "</ul>";
-                i--;
-            }
-            ListLevel = ListLevel.substring(0,i);
-            p0 = ListLevel.length();
-            p1 = result.length();
-
-            if(ListLevel.length() > 0){
-                result = tmp +
+        if(!nolist){    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
+            int p0 = 0;
+            int p1 = 0;
+            //contributed by [AS]
+            if(result.startsWith(ListLevel + "*")){ //more stars
+               p0 = result.indexOf(ListLevel);
+                p1 = result.length();
+                result = "<ul>" + serverCore.crlfString +
                     "<li>" +
-                    result.substring(p0, p1) +
+                result.substring(ListLevel.length() + 1, p1) +
                     "</li>";
-            }else{
-                result = tmp + result.substring(p0, p1);
+                ListLevel += "*";
+            }else if(ListLevel.length() > 0 && result.startsWith(ListLevel)){ //equal number of stars
+                p0 = result.indexOf(ListLevel);
+                p1 = result.length();
+                result = "<li>" +
+                    result.substring(ListLevel.length(), p1) +
+                    "</li>";
+            }else if(ListLevel.length() > 0){ //less stars
+                int i = ListLevel.length();
+                String tmp = "";
+
+                while(! result.startsWith(ListLevel.substring(0,i))){
+                    tmp += "</ul>";
+                    i--;
+                }
+                ListLevel = ListLevel.substring(0,i);
+                p0 = ListLevel.length();
+                p1 = result.length();
+
+                if(ListLevel.length() > 0){
+                    result = tmp +
+                        "<li>" +
+                        result.substring(p0, p1) +
+                        "</li>";
+                }else{
+                    result = tmp + result.substring(p0, p1);
+                }
             }
+            //end contrib [AS]
         }
-        //end contrib [AS]
         return result;
     }
 
@@ -546,55 +553,57 @@ public class wikiCode {
       */
     //contributed by [MN] based on unordered list code by [AS]
     private String definitionList(String result){
-        int p0 = 0;
-        int p1 = 0;
-        if(result.startsWith(defListLevel + ";")){ //more semicolons
-            String dt = ""; 
-            String dd = "";
-            p0 = result.indexOf(defListLevel);
-            p1 = result.length();
-            String resultCopy = result.substring(defListLevel.length() + 1, p1);
-            if((p0 = resultCopy.indexOf(":")) > 0){
-                dt = resultCopy.substring(0,p0);
-                dd = resultCopy.substring(p0+1);
-                result = "<dl>" + "<dt>" + dt + "</dt>" + "<dd>" + dd;
-                defList = true;
-            }
-            defListLevel += ";";
-        }else if(defListLevel.length() > 0 && result.startsWith(defListLevel)){ //equal number of semicolons
-            String dt = ""; 
-            String dd = "";
-            p0 = result.indexOf(defListLevel);
-            p1 = result.length();
-            String resultCopy = result.substring(defListLevel.length(), p1);
-            if((p0 = resultCopy.indexOf(":")) > 0){
-                dt = resultCopy.substring(0,p0);
-                dd = resultCopy.substring(p0+1);
-                result = "<dt>" + dt + "</dt>" + "<dd>" + dd;
-                defList = true;
-            }
-        }else if(defListLevel.length() > 0){ //less semicolons
-            String dt = ""; 
-            String dd = "";
-            int i = defListLevel.length();
-            String tmp = "";
-            while(! result.startsWith(defListLevel.substring(0,i)) ){
-                tmp += "</dd></dl>";
-                i--;
-            }
-            defListLevel = defListLevel.substring(0,i);
-            p0 = defListLevel.length();
-            p1 = result.length();
-            if(defListLevel.length() > 0){
-                String resultCopy = result.substring(p0, p1);
+        if(!nolist){    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
+            int p0 = 0;
+            int p1 = 0;
+            if(result.startsWith(defListLevel + ";")){ //more semicolons
+                String dt = ""; 
+                String dd = "";
+                p0 = result.indexOf(defListLevel);
+                p1 = result.length();
+                String resultCopy = result.substring(defListLevel.length() + 1, p1);
                 if((p0 = resultCopy.indexOf(":")) > 0){
                     dt = resultCopy.substring(0,p0);
                     dd = resultCopy.substring(p0+1);
-                    result = tmp + "<dt>" + dt + "</dt>" + "<dd>" + dd;
+                    result = "<dl>" + "<dt>" + dt + "</dt>" + "<dd>" + dd;
                     defList = true;
                 }
-            }else{
-                result = tmp + result.substring(p0, p1);
+                defListLevel += ";";
+            }else if(defListLevel.length() > 0 && result.startsWith(defListLevel)){ //equal number of semicolons
+                String dt = ""; 
+                String dd = "";
+                p0 = result.indexOf(defListLevel);
+                p1 = result.length();
+                String resultCopy = result.substring(defListLevel.length(), p1);
+                if((p0 = resultCopy.indexOf(":")) > 0){
+                    dt = resultCopy.substring(0,p0);
+                    dd = resultCopy.substring(p0+1);
+                    result = "<dt>" + dt + "</dt>" + "<dd>" + dd;
+                    defList = true;
+                }
+            }else if(defListLevel.length() > 0){ //less semicolons
+                String dt = ""; 
+                String dd = "";
+                int i = defListLevel.length();
+                String tmp = "";
+                while(! result.startsWith(defListLevel.substring(0,i)) ){
+                    tmp += "</dd></dl>";
+                    i--;
+                }
+                defListLevel = defListLevel.substring(0,i);
+                p0 = defListLevel.length();
+                p1 = result.length();
+                if(defListLevel.length() > 0){
+                    String resultCopy = result.substring(p0, p1);
+                    if((p0 = resultCopy.indexOf(":")) > 0){
+                        dt = resultCopy.substring(0,p0);
+                        dd = resultCopy.substring(p0+1);
+                        result = tmp + "<dt>" + dt + "</dt>" + "<dd>" + dd;
+                        defList = true;
+                    }
+                }else{
+                    result = tmp + result.substring(p0, p1);
+                }
             }
         }
         return result; 
@@ -700,6 +709,141 @@ public class wikiCode {
                 kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
             }
         result = result.substring(0, p0) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + result.substring(p1 + 1);
+        }
+        return result;
+    }
+
+    /** This method handles the escape tags [= =] */
+    //contributed by [MN]
+    private String escapeTag(String result, plasmaSwitchboard switchboard){
+        int p0 = 0;
+        int p1 = 0;
+        //both [= and =] in the same line
+        if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>0)&&(!(preformatted))){
+            if(p0<p1){
+                String escapeText = result.substring(p0+2,p1);
+                result = transformLine(result.substring(0,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!"+result.substring(p1+2).replaceAll("!esc!", "!esc!!"), switchboard);
+                result = result.replaceAll("!esc!txt!", escapeText);
+                result = result.replaceAll("!esc!!", "!esc!");
+            }
+            //handles cases like [=[= =]=] [= =] that would cause an exception otherwise
+            else{
+                escape = true;
+                String temp1 = transformLine(result.substring(0,p0-1).replaceAll("!tmp!","!tmp!!")+"!tmp!txt!", switchboard);
+                nolist = true;
+                String temp2 = transformLine(result.substring(p0), switchboard);
+                nolist = false;
+                result = temp1.replaceAll("!tmp!txt!",temp2);
+                result = result.replaceAll("!tmp!!", "!tmp!");
+                escape = false;
+            }
+        }
+
+        //start [=
+        else if(((p0 = result.indexOf("[="))>=0)&&(!escapeSpan)&&(!preformatted)){
+            escape = true;    //prevent surplus line breaks
+            escaped = true;   //prevents <pre> being parsed
+            String bq = "";   //gets filled with <blockquote>s as needed
+            String escapeText = result.substring(p0+2);
+            //taking care of indented lines
+            while(result.substring(escindented,p0).startsWith(":")){
+                escindented++;
+                bq = bq + "<blockquote>";
+            }
+            result = transformLine(result.substring(escindented,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!", switchboard);
+            result = bq + result.replaceAll("!esc!txt!", escapeText);
+            escape = false;
+            escapeSpan = true;
+        }
+
+        //end =]
+        else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)&&(!preformatted)){
+            escapeSpan = false;
+            String bq = ""; //gets filled with </blockquote>s as neede
+            String escapeText = result.substring(0,p0);
+            //taking care of indented lines
+            while(escindented > 0){
+                bq = bq + "</blockquote>";
+                escindented--;
+            }
+            result = transformLine("!esc!txt!"+result.substring(p0+2).replaceAll("!esc!", "!esc!!"), switchboard);
+            result = result.replaceAll("!esc!txt!", escapeText) + bq;
+            escaped = false;
+        }
+        //Getting rid of surplus =]
+        else if (((p0 = result.indexOf("=]"))>=0)&&(!escapeSpan)&&(!preformatted)){
+            while((p0 = result.indexOf("=]"))>=0){
+                result = result.substring(0,p0)+result.substring(p0+2);
+            }
+            result = transformLine(result, switchboard);
+        }
+        return result;
+    }
+
+    /** This method handles the preformatted tags <pre> </pre> */
+    //contributed by [MN]
+    private String preformattedTag(String result, plasmaSwitchboard switchboard){
+        int p0 = 0;
+        int p1 = 0;
+        //implementation very similar to escape code (see above)
+        //both <pre> and </pre> in the same line
+        if(((p0=result.indexOf("&lt;pre&gt;"))>=0)&&((p1=result.indexOf("&lt;/pre&gt;"))>0)&&(!(escaped))){
+            if(p0<p1){
+                String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11,p1)+"</pre>";
+                result = transformLine(result.substring(0,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!"+result.substring(p1+12).replaceAll("!pre!", "!pre!!"), switchboard);
+                result = result.replaceAll("!pre!txt!", preformattedText);
+                result = result.replaceAll("!pre!!", "!pre!");
+            }
+            //handles cases like <pre><pre> </pre></pre> <pre> </pre> that would cause an exception otherwise
+            else{
+                preformatted = true;
+                String temp1 = transformLine(result.substring(0,p0-1).replaceAll("!tmp!","!tmp!!")+"!tmp!txt!", switchboard);
+                nolist = true;
+                String temp2 = transformLine(result.substring(p0), switchboard);
+                nolist = false;
+                result = temp1.replaceAll("!tmp!txt!",temp2);
+                result = result.replaceAll("!tmp!!", "!tmp!");
+                preformatted = false;
+            }
+        }
+
+        //start <pre>
+        else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&(!preformattedSpan)&&(!escaped)){
+            preformatted = true;    //prevent surplus line breaks
+            String bq ="";  //gets filled with <blockquote>s as needed
+            String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11);
+            //taking care of indented lines
+            while(result.substring(preindented,p0).startsWith(":")){
+                preindented++;
+                bq = bq + "<blockquote>";
+            }
+            result = transformLine(result.substring(preindented,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!", switchboard);
+            result = bq + result.replaceAll("!pre!txt!", preformattedText);
+            result = result.replaceAll("!pre!!", "!pre!");
+            preformattedSpan = true;
+        }
+
+        //end </pre>
+        else if(((p0 = result.indexOf("&lt;/pre&gt;"))>=0)&&(preformattedSpan)&&(!escaped)){
+            preformattedSpan = false;
+            String bq = ""; //gets filled with </blockquote>s as needed
+            String preformattedText = result.substring(0,p0)+"</pre>";
+                //taking care of indented lines
+            while (preindented > 0){
+                bq = bq + "</blockquote>";
+                preindented--;
+            }
+            result = transformLine("!pre!txt!"+result.substring(p0+12).replaceAll("!pre!", "!pre!!"), switchboard);
+            result = result.replaceAll("!pre!txt!", preformattedText) + bq;
+            result = result.replaceAll("!pre!!", "!pre!");
+            preformatted = false;
+        }
+        //Getting rid of surplus </pre>
+        else if (((p0 = result.indexOf("&lt;/pre&gt;"))>=0)&&(!preformattedSpan)&&(!escaped)){
+            while((p0 = result.indexOf("&lt;/pre&gt;"))>=0){
+                result = result.substring(0,p0)+result.substring(p0+12);
+            }
+            result = transformLine(result, switchboard);
         }
         return result;
     }
@@ -832,24 +976,27 @@ public class wikiCode {
       * @return the line of text with HTML tags instead of wiki tags
       */
     public String transformLine(String result, plasmaSwitchboard switchboard) {
-        // transform page
-        int p0, p1;
-
+        //If HTML has not bee replaced yet (can happen if method gets called in recursion), replace now!
         if (!replacedHTML){
             result = replaceHTMLonly(result);
             replacedHTML = true;
         }
+        //If special characters have not bee replaced yet, replace now!
         if (!replacedCharacters){
             result = replaceCharacters(result);
             replacedCharacters = true;
         }
 
-        //check if line contains any escape symbol or tag for preformatted text 
-        //or if we are in an esacpe sequence already or if we are in a preformated text
-        //if that's the case the program will continue further below 
-        //(see code for [= and =] and <pre> and </pre>) [MN]
-        if((result.indexOf("[=")<0)&&(result.indexOf("=]")<0)&&(!escapeSpan)&&
-           (result.indexOf("&lt;pre&gt;")<0)&&(result.indexOf("&lt;/pre&gt;")<0)&&(!preformattedSpan)){
+        //check if line contains escape symbols([= =]) or if we are in an escape sequence already.
+        if ((result.indexOf("[=")>=0)||(result.indexOf("=]")>=0)||(escapeSpan)){
+                result = escapeTag(result, switchboard);
+        }
+        //check if line contains preformatted symbols or if we are in a preformatted sequence already.
+        else if ((result.indexOf("&lt;pre&gt;")>=0)||(result.indexOf("&lt;/pre&gt;")>=0)||(preformattedSpan)){
+                result = preformattedTag(result, switchboard);
+        }
+        //transform page as usual
+        else {
 
             //tables first -> wiki-tags in cells can be treated after that
             result = processTable(result, switchboard);
@@ -888,114 +1035,7 @@ public class wikiCode {
 
         }
 
-        //escape code ([=...=]) contributed by [MN]
-        //both [= and =] in the same line
-        else if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>0)&&(!(preformatted))){
-            String escapeText = result.substring(p0+2,p1);
-
-            //BUGS TO BE FIXED: [=[=text=]=]  does not work properly:
-            //[=[= undx=]x=] should resolve as [= undx=]x, but resolves as [= undxx=]
-            //ALSO [=[= und =]=]   [= und =] leads to an exception
-            //
-            //handlicg cases where the text inside [= and =] also contains
-            //[= and =]. Example: [=[=...=]=]
-
-            result = transformLine(result.substring(0,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!"+result.substring(p1+2).replaceAll("!esc!", "!esc!!"), switchboard);
-            result = result.replaceAll("!esc!txt!", escapeText);
-            result = result.replaceAll("!esc!!", "!esc!");
-        }
-
-        //start [=
-        else if(((p0 = result.indexOf("[="))>=0)&&(!escapeSpan)&&(!preformatted)){
-            escape = true;    //prevent surplus line breaks
-            escaped = true;   //prevents <pre> being parsed
-            String bq = "";   //gets filled with <blockquote>s as needed
-            String escapeText = result.substring(p0+2);
-            //taking care of indented lines
-            while(result.substring(escindented,p0).startsWith(":")){
-                escindented++;
-                bq = bq + "<blockquote>";
-            }
-            result = transformLine(result.substring(escindented,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!", switchboard);
-            result = bq + result.replaceAll("!esc!txt!", escapeText);
-            escape = false;
-            escapeSpan = true;
-        }
-
-        //end =]
-        else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)&&(!preformatted)){
-            escapeSpan = false;
-            String bq = ""; //gets filled with </blockquote>s as neede
-            String escapeText = result.substring(0,p0);
-            //taking care of indented lines
-            while(escindented > 0){
-                bq = bq + "</blockquote>";
-                escindented--;
-            }
-            result = transformLine("!esc!txt!"+result.substring(p0+2).replaceAll("!esc!", "!esc!!"), switchboard);
-            result = result.replaceAll("!esc!txt!", escapeText) + bq;
-            escaped = false;
-        }
-        //Getting rid of surplus =]
-        else if (((p0 = result.indexOf("=]"))>=0)&&(!escapeSpan)&&(!preformatted)){
-            while((p0 = result.indexOf("=]"))>=0){
-                result = result.substring(0,p0)+result.substring(p0+2);
-            }
-            result = transformLine(result, switchboard);
-        }
-        //end contrib [MN]
-
-        //preformatted code (<pre>...</pre>) contributed by [MN]
-        //implementation very similar to escape code (see above)
-        //both <pre> and </pre> in the same line
-        else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&((p1 =     result.indexOf("&lt;/pre&gt;"))>0)&&(!(escaped))){
-            String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11,p1)+"</pre>";
-            result = transformLine(result.substring(0,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!"+result.substring(p1+12).replaceAll("!pre!", "!pre!!"), switchboard);
-            result = result.replaceAll("!pre!txt!", preformattedText);
-            result = result.replaceAll("!pre!!", "!pre!");
-        }
-
-        //start <pre>
-        else if(((p0 = result.indexOf("&lt;pre&gt;"))>=0)&&(!preformattedSpan)&&(!escaped)){
-            preformatted = true;    //prevent surplus line breaks
-            String bq ="";  //gets filled with <blockquote>s as needed
-            String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11);
-            //taking care of indented lines
-            while(result.substring(preindented,p0).startsWith(":")){
-                preindented++;
-                bq = bq + "<blockquote>";
-            }
-            result = transformLine(result.substring(preindented,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!", switchboard);
-            result = bq + result.replaceAll("!pre!txt!", preformattedText);
-            result = result.replaceAll("!pre!!", "!pre!");
-            preformattedSpan = true;
-        }
-
-        //end </pre>
-        else if(((p0 = result.indexOf("&lt;/pre&gt;"))>=0)&&(preformattedSpan)&&(!escaped)){
-            preformattedSpan = false;
-            String bq = ""; //gets filled with </blockquote>s as needed
-            String preformattedText = result.substring(0,p0)+"</pre>";
-                //taking care of indented lines
-            while (preindented > 0){
-                bq = bq + "</blockquote>";
-                preindented--;
-            }
-            result = transformLine("!pre!txt!"+result.substring(p0+12).replaceAll("!pre!", "!pre!!"), switchboard);
-            result = result.replaceAll("!pre!txt!", preformattedText) + bq;
-            result = result.replaceAll("!pre!!", "!pre!");
-            preformatted = false;
-        }
-        //Getting rid of surplus </pre>
-        else if (((p0 = result.indexOf("&lt;/pre&gt;"))>=0)&&(!preformattedSpan)&&(!escaped)){
-            while((p0 = result.indexOf("&lt;/pre&gt;"))>=0){
-                result = result.substring(0,p0)+result.substring(p0+12);
-            }
-            result = transformLine(result, switchboard);
-        }
-        //end contrib [MN]
-
-        replacedHTML = false;
+        if (!preformatted) replacedHTML = false;
         replacedCharacters = false;
         if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)||(table)||(cellprocessing)) return result;
         return result + "<br>";
