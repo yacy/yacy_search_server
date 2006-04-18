@@ -24,7 +24,7 @@ ComponentText "This will install YaCy v0.44(Build 20060307) on your computer. Se
 #DirText "If an old Version was installed into another locAtion(eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install into:"
 
-LicenseText "You must agree the license to install YaCy"
+LicenseText "You must agree to this license to install YaCy"
 LicenseData "gpl.txt"
 
 Section "Binaries (required)"

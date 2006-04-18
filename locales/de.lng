@@ -12,6 +12,7 @@
 # If you find any untranslated string in the webinterface do so, too.
 
 #English=German
+#DO _NOT_ USE THIS FILE AS TEMPLATE FOR YOUR OWN TRANSLATIONS, INSTEAD GET THE STRINGS DIRECTLY OUT OF THE HTML-FILES
 
 #-------------------------------------------------------
 #File: ConfigLanguage_p.html
@@ -354,6 +355,7 @@ There is ".html" at the end, which is not included with the Regular Expression.=
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
 P2P WEB SEARCH==P2P Internet Suche
 "Search"=="Suchen"
+more options...==mehr Optionen...
 Max. number of results:==Max. Anzahl Ergebnisse:
 order by:==sortieren nach:
 YBR-Date-Quality==YBR-Datum-Qualit&auml;t
@@ -1641,7 +1643,7 @@ No URL hash submitted.==Es wurde kein URL Hash &uuml;vertragen.
 Unable to find URL Entry in DB==Es war nicht m&ouml;glich den URL Eintrag in der DB zu finden.
 Invalid URL==Ung&uuml;ltige URL
 Unable to download resource content.==Es war nicht m&ouml;glich den Inhalt der Quelle runterzuladen.
-Unable to parse resource content.==Es war nicht m&ouml;glich den Inahlt der Quelle zu parsen.
+Unable to parse resource content.==Es war nicht m&ouml;glich den Inhalt der Quelle zu parsen.
 Plain Resource Content==Reiner Quellen Inhalt
 Parsed Resource Content==Geparster Quellen Inhalt
 Parsed Resource Sentences==Geparste Quellen S&auml;tze
@@ -1728,6 +1730,15 @@ The global search resulted in \#\[globalresults\]\# link contributions from othe
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
 Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
+
+#--------------------------------------------------------
+#File: env/templates/simpleheader.template
+#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
+
+Project Home==Projektseite
+Help / Wiki==Hilfe / Wiki
+Peer Owner Profile==Impressum dieses Peers
+
 #--------------------------------------------------------
 #File: env/templates/header.template
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>

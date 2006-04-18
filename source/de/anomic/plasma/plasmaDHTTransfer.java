@@ -145,7 +145,7 @@ public class plasmaDHTTransfer extends Thread {
             if (error == null) {
                 // words successfully transfered
                 transferTime = System.currentTimeMillis() - start;
-                this.log.logInfo("Index transfer of " + dhtChunk.indexCount() + " words [" + dhtChunk.firstContainer().wordHash() + " .. " + dhtChunk.lastContainer().wordHash() + "]" + " to peer " + seed.getName() + ":" + seed.hash + " in " + (transferTime / 1000) + " seconds successfull ("
+                this.log.logInfo("Index transfer of " + dhtChunk.indexCount() + " words [" + dhtChunk.firstContainer().wordHash() + " .. " + dhtChunk.lastContainer().wordHash() + "]" + " to peer " + seed.getName() + ":" + seed.hash + " in " + (transferTime / 1000) + " seconds successful ("
                                 + (1000 * dhtChunk.indexCount() / (transferTime + 1)) + " words/s)");
                 retryCount = 0;
                 transferStatusMessage = "Finished: Transfer of chunk to target " + seed.hash + "/" + seed.getName();

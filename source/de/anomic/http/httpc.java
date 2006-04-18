@@ -1728,7 +1728,7 @@ do upload
         * Returns wether this request was successful or not. Stati beginning
         * with 2 or 3 are considered successful.
         *
-        * @return True, if the request was successfull.
+        * @return True, if the request was successful.
         */
         public boolean success() {
             return ((this.status.charAt(0) == '2') || (this.status.charAt(0) == '3'));

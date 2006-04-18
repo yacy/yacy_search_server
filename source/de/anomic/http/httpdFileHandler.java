@@ -318,7 +318,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
             // authorization is given
             if (sb.userDB.hasAdminRight(authorization)) {
-                // Authentication successfull. remove brute-force flag
+                // Authentication successful. remove brute-force flag
                 serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
             } else {
                 // a wrong authentication was given. Ask again
