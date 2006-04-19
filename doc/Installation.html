@@ -51,93 +51,79 @@ globalheader();
 <h2>Installation and Start-up of YaCy</h2>
 
 
-<p>Since we provide YaCy as a generic release for all operation systems and a special 'flavour' for Windows users, we distinguish two different processes for installation. Windows users may want to <a href="#wininst">switch to the Windows installation instructions</a>, however, the following description is more general and applies to all operation systems:
+<p>Installation of YaCy is VERY EASY! Just follow the <b>simple three steps</b> for either <a href="#linuxinst">Linux</a>, <a href="#macinst">Macintosh</a> or <a href="#wininst">Windows</a> operating systems. If you upgrade from a previous version of YaCy, please see the <a href="#upgradeinst">Upgrade Instructions</a>. 
 
-<h3><a name="geninst"></a>General Instructions:</h3>
-
-<p>Please follow these steps:</p>
+<h3><a name="wininst"></a>Instructions for Windows:</h3>
 <p><table border="0" cellspacing="1" cellpadding="5" width="100%">
-<tr><td width="30%" valign="top"><b>1st Step:<br>de-compress the release</b></td><td width="70%">
-<p>After <a href="http://www.yacy.net/yacy/Download.html">downloading</a>
-the latest release, simply decompress the archive with your favourite tool
-(which can be WinRar or WinZip on Windows, or Stuffit Expander on Mac OS X; Linux
-users type 'gunzip &lt;release&gt.tar.gz' and 'tar -xf &lt;release&gt.tar') and move the result to any place you want.</p>
-<p>If you upgrade from a previous version of YACY, <b>please migrate your settings and data</b>.
-This is very easy: simply move (not copy) your DATA directory from the application root directory of the old YACY installation to the new application root directory. If done so, you don't need to do the other remaining configuration steps below again.</p>
+<tr><td width="20%" valign="top"><b>1st Step:<br>Run Installer</b></td><td width="80%">
+<p>Just double-click the Installer file. The installer will ask you about some settings: simply use the default options.</p>
 </td></tr>
-<tr><td width="30%" valign="top"><b>2nd Step:<br>Configure Network Settings</b></td><td width="70%">
-<p>Change the proxy settings either in your network configuration or directly in you browser. Check the 'Use HTTP Proxy' flag and configure the IP and port according to the location of the proxy. If you do a single-user installation without changing the configuration in #2, the IP/Host shall be set to '127.0.0.1' or 'localhost', and the Port shall be set to '8080'.</p>
-</td></tr>
-<tr><td width="30%" valign="top"><b>3rd Step:<br>Start YACY</b></td><td width="70%">
-<p>We supply some wrapper shell scripts to start the java processes:
-  <ul>
-  <li>on a MS-Windows system, double-click the file 'startYACY.bat'</li>
-  <li>on a Mac OS X system, double-click the file 'startYACY.command'</li>
-  <li>on a Linux system, start the file 'startYACY.sh'</li>
-  </ul>
-</p>
-</td></tr>
-<tr><td width="30%" valign="top"><b>4th Step:<br>Administrate the proxy</b></td><td width="70%">
-<p>After you started YACY, terminal-window will come up.
-That's the application; no windows, no user interface.
-You can now access YACY's administration interface by browsing to<br>
-<a href="http://localhost:8080"><tt>http://localhost:8080</tt></a><br>
-See the 'Settings' menu: you should set an administration password and checkt the access rules.
-The default settings are fine, so please change them only if you know what they mean.
-</td></tr>
-<tr><td width="30%" valign="top"><b>5th Step:<br>Use YACY and it's search service</b></td><td width="70%">
-<p>Browse the internet using your web-browser. You should notice that your actions take effect as cache fill/cache hit log's in the httpProxy's terminal window. Whenever you vistited a page through the proxy, the page is indexed and can be search using the search page at
-<a href="http://localhost:8080"><tt>http://localhost:8080</tt></a>.
-Please be aware that if your settings allow to access the http-server, then anybode else can also search your index as well. If you don't want this, you must set the 'IP-Number filter' of the 'Server Access Settings' in the 'Settings' menu to a string that applies to you local network scheme, like
-'localhost,127.0.0.1,192.168*,10*', which should be fine in most cases.
-</p>
-</td></tr>
-</table></p>
-
-<h3><a name="wininst"></a>Instructions for Windows and the Internet Explorer</h3>
-
-<p><table border="0" cellspacing="1" cellpadding="5" width="100%">
-<tr><td width="30%" valign="top"><b>1st Step:<br>Run Installer</b></td><td width="70%">
-<p>The Windows release comes with it's own Installer in a single file. Just double-click the Installer file.</p>
-<p>If you upgrade from a previous version of YACY, <b>please migrate your settings and data</b>.
-This is very easy: simply move (not copy) your DATA directory from the application root directory of the old proxy installation
-to the new application root directory. If done so, you don't need to do the other remaining configuration steps below again.</p>
-</td></tr>
-<tr><td width="30%" valign="top"><b>2nd Step:<br>Configure Browser</b></td><td width="70%">
-<p>In your Internet Explorer, open 'Extras' -> 'Internet Options':<br>
-<img src="grafics/TutorialDWin1.gif"></p>
-<p>Select 'Connections':<br>
-<img src="grafics/TutorialDWin2.gif"></p>
-<p>Click on 'Settings' of the 'LAN-Settings', even if you are using a dial-up connection:<br>
-<img src="grafics/TutorialDWin3.gif"></p>
-<p>Check the 'Proxyserver' check-box:<br>
-<img src="grafics/TutorialDWin4.gif"></p>
-<p>Enter the location of YACY server. If YACY runs on the same machine as the Browser, set 'localhost'. If you have not changed the initial configuration, the port is '8080'. Check the 'No Proxy for local addess' button. Then hit 'Extended':
-<img src="grafics/TutorialDWin5.gif"></p>
-<p>Un-check the 'Use the same server for all protocols' - button. Then remove the proxy setting from 'FTP', 'Gopher' and 'Socks'. In the 'Exceptions' field, enter 'localhost;192.168;10':
-<img src="grafics/TutorialDWin6.gif"></p>
-<p>Close all windows by clicking on 'Ok'</p>
-</td></tr>
-<tr><td width="30%" valign="top"><b>3rd Step:<br>Start YACY</b></td><td width="70%">
+<tr><td width="20%" valign="top"><b>2nd Step:<br>Start YaCy</b></td><td width="80%">
 <p>The installer creates a link to the application on the desktop. Just double-click the 'YACY Console' icon.</p>
 </td></tr>
-<tr><td width="30%" valign="top"><b>4th Step:<br>Administrate YACY</b></td><td width="70%">
-<p>After you started YACY, terminal-window will come up.
-That's the application; no windows, no user interface.
-You can now access YACY's administration interface by browsing to<br>
+<tr><td width="20%" valign="top"><b>3rd Step:<br>Administrate YaCy<br>with your Web Browser</b></td><td width="80%">
+<p>Start your web browser and open<br>
 <a href="http://localhost:8080"><tt>http://localhost:8080</tt></a><br>
-See the 'Settings' menu: you should set an administration password and checkt the access rules.
-The default settings are fine, so please change them only if you know what they mean.
-</td></tr>
-<tr><td width="30%" valign="top"><b>5th Step:<br>Use YACY and it's search service<br></b></td><td width="70%">
-<p>Browse the internet using your web-browser. You should notice that your actions take effect as cache fill/cache hit log's in the httpProxy's terminal window. Whenever you vistited a page through the proxy, the page is indexed and can be search using the search page at
-<a href="http://localhost:8080"><tt>http://localhost:8080</tt></a>.
-Please be aware that if your settings allow to access the http-server, then anybode else can also search your index as well. If you don't want this, you must set the 'IP-Number filter' of the 'Server Access Settings' in the 'Settings' menu to a string that applies to you local network scheme, like
-'localhost,127.0.0.1,192.168*,10*', which should be fine in most cases.
+You should set an administration password there.
+All the other default settings are fine, so please change them only if you know what they mean.
 </p>
 </td></tr>
 </table></p>
 
+<h3><a name="linuxinst"></a>Instructions for Linux:</h3>
+<p><table border="0" cellspacing="1" cellpadding="5" width="100%">
+<tr><td width="20%" valign="top"><b>1st Step:<br>de-compress the release</b></td><td width="80%">
+<p>Open a terminal an type something like (replace names with current release name):<br>
+<tt>&gt; gunzip yacy_v0.44_20060307_1844.tar.gz</tt><br>
+<tt>&gt; tar xf yacy_v0.44_20060307_1844.tar</tt><br>
+</p>
+</td></tr>
+<tr><td width="20%" valign="top"><b>2nd Step:<br>Start YaCy</b></td><td width="80%">
+<p>Change to the application directory ..<br>
+<tt>&gt; cd yacy_v0.44_20060307_1844</tt><br>
+.. and start the YaCy start script:<br>
+<tt>&gt; ./startYACY.sh</tt><br>
+</p>
+</td></tr>
+<tr><td width="20%" valign="top"><b>3rd Step:<br>Administrate YaCy<br>with your Web Browser</b></td><td width="80%">
+<p>Start your web browser and open<br>
+<a href="http://localhost:8080"><tt>http://localhost:8080</tt></a><br>
+You should set an administration password there.
+All the other default settings are fine, so please change them only if you know what they mean.
+</p>
+</td></tr>
+</table></p>
+
+<h3><a name="macinst"></a>Instructions for Macintosh:</h3>
+<p><table border="0" cellspacing="1" cellpadding="5" width="100%">
+<tr><td width="20%" valign="top"><b>1st Step:<br>de-compress the release</b></td><td width="80%">
+<p>Decompress the release file using Stuffit Expander, rename the resulting folder to 'YaCy' and move this folder to your application directory.
+</p>
+</td></tr>
+<tr><td width="20%" valign="top"><b>2nd Step:<br>Start YaCy</b></td><td width="80%">
+<p>Open the folder 'YaCy' (now in your application directory) and double-click the file 'startYACY.command'
+</p>
+</td></tr>
+<tr><td width="20%" valign="top"><b>3rd Step:<br>Administrate YaCy<br>with your Web Browser</b></td><td width="80%">
+<p>Start Safari and open<br>
+<a href="http://localhost:8080"><tt>http://localhost:8080</tt></a><br>
+You should set an administration password there.
+All the other default settings are fine, so please change them only if you know what they mean.
+</p>
+</td></tr>
+</table></p>
+
+<h3><a name="upgradeinst"></a>If you upgrade from a previous version of YaCy:</h3>
+<p><table border="0" cellspacing="1" cellpadding="5" width="100%">
+<tr><td width="20%" valign="top"><b>migrate your data</b></td><td width="80%">
+<p>There is a DATA directory in your current installation that holds all your data that you created during the last YaCy run-time:</p>
+<p>If you have a windows installation, first de-install YaCy using the YaCy de-installer and answer to the question 'keep DATA' with 'yes'. Then simply run the installer of the new YaCy release.</p>
+<p>If you have a Linux or Macintosh system, first decompress the new YaCy release and then move the DATA directory from the old installation path to the new installation path.</p>
+</td></tr>
+</table></p>
+
+<!--<p>If you upgrade from a previous version of YACY, <b>please migrate your settings and data</b>.
+This is very easy: simply move (not copy) your DATA directory from the application root directory of the old YACY installation to the new application root directory. If done so, you don't need to do the other remaining configuration steps below again.</p>-->
 
 <!-- ----- HERE ENDS CONTENT PART ----- -->
 <SCRIPT LANGUAGE="JavaScript1.1"><!--
