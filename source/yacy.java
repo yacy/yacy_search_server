@@ -683,7 +683,7 @@ public final class yacy {
                     log.logInfo("SKIPPED  " + wordhash + ": " + migrationStatus);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.logSevere("Exception", e);
             }
         log.logInfo("FINISHED MIGRATION JOB, WAIT FOR DUMP");
         wordIndexCache.close(60);
@@ -767,9 +767,9 @@ public final class yacy {
                 }                
             }
         } catch (Error e) {
-            e.printStackTrace();
+            log.logWarning("Error", e);
         } catch (Exception e) {
-            e.printStackTrace();        
+            log.logWarning("Exception", e);
         } finally {
             log.logInfo("ASSORTMENT-IMPORT FINISHED");
             if (homeWordIndex != null) try { homeWordIndex.close(5000); } catch (Exception e){/* nothing todo here */}
@@ -925,7 +925,6 @@ public final class yacy {
             log.logInfo("DB-IMPORT FINISHED");
         } catch (Exception e) {
             log.logSevere("Database import failed.",e);
-            e.printStackTrace();
         } finally {
             if (homeUrlDB != null) try { homeUrlDB.close(); } catch (Exception e){}
             if (importUrlDB != null) try { importUrlDB.close(); } catch (Exception e){}
@@ -934,24 +933,26 @@ public final class yacy {
         }
     }
     
-    public static void minimizeUrlDB(String homePath) {
+    public static void minimizeUrlDB(String homePath, int dbcache) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
         try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
+        serverLog log = new serverLog("URL-CLEANUP");
         try {
-            serverLog log = new serverLog("URL-CLEANUP");
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), 4194304);
+            int cache = dbcache * 1024 * 1024;
+            log.logFine("URLDB-Caches: "+cache+" bytes");
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), cache);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.temp.db"), 4194304);
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.temp.db"), cache);
             
             Runtime rt = Runtime.getRuntime();
             int cacheMem = (int)(rt.maxMemory()-rt.totalMemory())-5*1024*1024;
             plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, cacheMem, log);
-            Iterator wordHashIterator = wordIndex.wordHashes("------------", plasmaWordIndex.RL_WORDFILES, true);
+            Iterator wordHashIterator = wordIndex.wordHashes("------------", plasmaWordIndex.RL_WORDFILES, false);
             
             String wordhash;
             long urlCounter = 0, wordCounter = 0;
@@ -999,7 +1000,7 @@ public final class yacy {
                     
                     
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.logSevere("Exception", e);
                 } finally {
                     if (wordIdxContainer != null) try { wordIdxContainer = null; } catch (Exception e) {}
                 }
@@ -1016,7 +1017,7 @@ public final class yacy {
             log.logInfo("FINISHED URL CLEANUP, WAIT FOR DUMP");
             log.logInfo("TERMINATED URL CLEANUP");
         } catch (IOException e) {
-            e.printStackTrace();
+            log.logSevere("IOException", e);
         }
     }
 
@@ -1283,6 +1284,7 @@ public final class yacy {
     private static void urldbcleanup(String homePath) {
         File root = new File(homePath);
         File dbroot = new File(root, "DATA/PLASMADB");
+        serverLog log = new serverLog("URLDBCLEANUP");
         HashSet damagedURLS = new HashSet();
         try {
             plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), 4194304);
@@ -1296,7 +1298,7 @@ public final class yacy {
                 damagedURLS.add(m.substring(m.length() - 12));
             }
             try { Thread.sleep(1000); } catch (InterruptedException e) { }
-            System.out.println("URLs vorher: " + currentUrlDB.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
+            log.logInfo("URLs vorher: " + currentUrlDB.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
 
             Iterator eiter2 = damagedURLS.iterator();
             String urlHash;
@@ -1326,15 +1328,15 @@ public final class yacy {
                         if (res.statusCode == 200) {
                             entry[1] = newUrl.toString().getBytes();
                             currentUrlDB.urlHashCache.put(entry);
-                            System.out.println("UrlDB-Entry with urlHash '" + urlHash + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
+                            log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
                         } else {
                             currentUrlDB.remove(urlHash);
-                            System.out.println("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + res.status);
+                            log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + res.status);
                         }
                     }
                 } catch (Exception e) {
                     currentUrlDB.remove(urlHash);
-                    System.out.println("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tExecption: " + e.getMessage());
+                    log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tExecption: " + e.getMessage());
                 } finally {
                     if (theHttpc != null) try {
                         theHttpc.close();
@@ -1343,10 +1345,10 @@ public final class yacy {
                 }
             }
 
-            System.out.println("URLs nachher: " + currentUrlDB.size() + " kaputte URLs: " + damagedURLS.size());
+            log.logInfo("URLs nachher: " + currentUrlDB.size() + " kaputte URLs: " + damagedURLS.size());
             currentUrlDB.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.logSevere("IOException", e);
         }
     }
     
@@ -1410,7 +1412,7 @@ public final class yacy {
             }
             log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + wordHash);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.logSevere("IOException", e);
         }
         if (WordIndex != null) {
             WordIndex.close(60);
@@ -1504,8 +1506,13 @@ public final class yacy {
         } else if ((args.length >= 1) && (args[0].equals("-minimizeUrlDB"))) {
             // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
             // attention: this may run long and should not be interrupted!
+            int dbcache = 4;
+            if (args.length >= 3 && args[1].equals("-cache")) {
+                dbcache = Integer.parseInt(args[2]);
+                args = shift(args, 1, 2);
+            }
             if (args.length == 2) applicationRoot= args[1];
-            minimizeUrlDB(applicationRoot);
+            minimizeUrlDB(applicationRoot, dbcache);
         } else if ((args.length >= 1) && (args[0].equals("-importDB"))) {
             // attention: this may run long and should not be interrupted!
             String importRoot = null;
