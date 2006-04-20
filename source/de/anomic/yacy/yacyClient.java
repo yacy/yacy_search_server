@@ -351,6 +351,8 @@ public final class yacyClient {
 
     public static int search(
             String wordhashes,
+            String prefer,
+            String filter,
             int maxDistance,
             boolean global, 
             yacySeed targetPeer,
@@ -404,6 +406,8 @@ public final class yacyClient {
             obj.put("count", timingProfile.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT));
             obj.put("resource", ((global) ? "global" : "local"));
             obj.put("query", wordhashes);
+            obj.put("prefer", prefer);
+            obj.put("filter", filter);
             obj.put("ttl", "0");
             obj.put("duetime", Long.toString(duetime));
             obj.put("profile", timingProfile.targetToString()); // new duetimes splitted by specific search tasks

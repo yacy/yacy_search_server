@@ -70,12 +70,15 @@ public class yacySearch extends Thread {
     private int maxDistance;
     final private plasmaSearchTimingProfile timingProfile;
     final private plasmaSearchRankingProfile rankingProfile;
+    final private String prefer, filter;
     
-    public yacySearch(Set wordhashes, int maxDistance, boolean global, yacySeed targetPeer,
+    public yacySearch(Set wordhashes, String prefer, String filter, int maxDistance, boolean global, yacySeed targetPeer,
                       plasmaCrawlLURL urlManager, plasmaWordIndexEntryContainer containerCache, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
                       plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile) {
         super("yacySearch_" + targetPeer.getName());
         this.wordhashes = wordhashes;
+        this.prefer = prefer;
+        this.filter = filter;
         this.global = global;
         this.urlManager = urlManager;
         this.containerCache = containerCache;
@@ -89,7 +92,7 @@ public class yacySearch extends Thread {
     }
 
     public void run() {
-        this.links = yacyClient.search(set2string(wordhashes), maxDistance, global, targetPeer, urlManager, containerCache, blacklist, snippetCache, timingProfile, rankingProfile);
+        this.links = yacyClient.search(set2string(wordhashes), prefer, filter, maxDistance, global, targetPeer, urlManager, containerCache, blacklist, snippetCache, timingProfile, rankingProfile);
         if (links != 0) {
             //yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + links + " links for word hash " + wordhashes);
             yacyCore.seedDB.mySeed.incRI(links);
@@ -178,7 +181,7 @@ public class yacySearch extends Thread {
         return result;
     }
 
-    public static yacySearch[] searchHashes(Set wordhashes, int maxDist, plasmaCrawlLURL urlManager, plasmaWordIndexEntryContainer containerCache,
+    public static yacySearch[] searchHashes(Set wordhashes, String prefer, String filter, int maxDist, plasmaCrawlLURL urlManager, plasmaWordIndexEntryContainer containerCache,
                            int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
                            plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile) {
         // check own peer status
@@ -192,7 +195,7 @@ public class yacySearch extends Thread {
         if (targets == 0) return null;
         yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {
-            searchThreads[i]= new yacySearch(wordhashes, maxDist, true, targetPeers[i],
+            searchThreads[i]= new yacySearch(wordhashes, prefer, filter, maxDist, true, targetPeers[i],
                     urlManager, containerCache, blacklist, snippetCache, timingProfile, rankingProfile);
             searchThreads[i].start();
             try {Thread.sleep(20);} catch (InterruptedException e) {}

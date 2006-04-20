@@ -84,6 +84,7 @@ public final class search {
         final int     count  = post.getInt("count", 10); // maximum number of wanted results
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
+        final String  filter = post.get("filter", ".*");
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
@@ -105,7 +106,7 @@ public final class search {
         }
         final long timestamp = System.currentTimeMillis();
         
-        plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, maxdist, prefer, count, duetime, ".*");
+        plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, maxdist, prefer, count, duetime, filter);
         squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
 
         serverObjects prop = new serverObjects();
