@@ -139,7 +139,7 @@ public final class plasmaWordIndex {
 
     public void flushControl() {
         // check for forced flush
-        ramCache.shiftK2W();
+        synchronized (this) { ramCache.shiftK2W(); }
         while (ramCache.maxURLinWCache() > plasmaWordIndexCache.wCacheReferenceLimit) {
             flushCache(1);
         }
@@ -166,18 +166,18 @@ public final class plasmaWordIndex {
         return added;
     }
 
-    public synchronized void flushCacheSome() {
-        ramCache.shiftK2W();
+    public void flushCacheSome() {
+        synchronized (this) { ramCache.shiftK2W(); }
         int flushCount = ramCache.wSize() / 500;
         if (flushCount > 70) flushCount = 70;
         if (flushCount < 5) flushCount = 5;
         flushCache(flushCount);
     }
     
-    public synchronized void flushCache(int count) {
+    public void flushCache(int count) {
         for (int i = 0; i < count; i++) {
             if (ramCache.wSize() == 0) break;
-            flushCache(ramCache.bestFlushWordHash());
+            synchronized (this) { flushCache(ramCache.bestFlushWordHash()); }
             try {Thread.sleep(10);} catch (InterruptedException e) {}
         }
     }
@@ -224,7 +224,7 @@ public final class plasmaWordIndex {
         return ((long) microDateDays) * ((long) day);
     }
     
-    public synchronized int addPageIndex(URL url, String urlHash, Date urlModified, int size, plasmaParserDocument document, plasmaCondenser condenser, String language, char doctype, int outlinksSame, int outlinksOther) {
+    public int addPageIndex(URL url, String urlHash, Date urlModified, int size, plasmaParserDocument document, plasmaCondenser condenser, String language, char doctype, int outlinksSame, int outlinksOther) {
         // this is called by the switchboard to put in a new page into the index
         // use all the words in one condenser object to simultanous create index entries
         
@@ -341,7 +341,7 @@ public final class plasmaWordIndex {
         return size;
     }
 
-    public void close(int waitingBoundSeconds) {
+    public synchronized void close(int waitingBoundSeconds) {
         ramCache.close(waitingBoundSeconds);
         assortmentCluster.close();
         backend.close(10);
@@ -353,20 +353,29 @@ public final class plasmaWordIndex {
         backend.deleteIndex(wordHash);
     }
     
-    public synchronized int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
-        int removed = ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
-        if (removed == urlHashes.length) return removed;
-        plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(wordHash, -1);
-        if (container != null) {
-            removed += container.removeEntries(wordHash, urlHashes, deleteComplete);
-            if (container.size() != 0) this.addEntries(container, System.currentTimeMillis(), false);
+    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
+        int removed;
+        boolean addedEntryToRamCache = false;
+        synchronized (this) {
+            removed = ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
+            if (removed == urlHashes.length) return removed;
+            plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(wordHash, -1);
+            if (container != null) {
+                removed += container.removeEntries(wordHash, urlHashes, deleteComplete);
+                if (container.size() != 0) {
+                    ramCache.addEntries(container, System.currentTimeMillis(), false);
+                    addedEntryToRamCache = true;
+                }
+            }
+            if (removed != urlHashes.length) {
+                removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
+            }
         }
-        if (removed == urlHashes.length) return removed;
-        removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
+        if (addedEntryToRamCache) flushControl();
         return removed;
     }
     
-    public synchronized int tryRemoveURLs(String urlHash) {
+    public int tryRemoveURLs(String urlHash) {
         // this tries to delete an index from the cache that has this
         // urlHash assigned. This can only work if the entry is really fresh
         // and can be found in the RAM cache
