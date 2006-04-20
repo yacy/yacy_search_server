@@ -1161,19 +1161,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl");
         }
         
-        
-        if (sbQueue.size() >= indexingSlots) {
-            log.logFine("LimitCrawl: too many processes in indexing queue, dismissed to protect emergency case (" +
-            "sbQueueSize=" + sbQueue.size() + ")");
-            return false;
-        }
-        if (cacheLoader.size() >= crawlSlots) {
-            log.logFine("LimitCrawl: too many processes in loader queue, dismissed to protect emergency case (" +
-            "cacheLoader=" + cacheLoader.size() + ")");
-            return false;
-        }
-        
-        
         // if the server is busy, we do crawling more slowly
         //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
         
@@ -1214,7 +1201,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (success) return true;
             }
 
-            processLocalCrawling(urlEntry, profile, stats);
+            processLocalCrawling(urlEntry, profile, stats); // emergency case
+            
+            if (sbQueue.size() >= indexingSlots) {
+                log.logFine("LimitCrawl: too many processes in indexing queue, delayed to protect emergency case (" +
+                "sbQueueSize=" + sbQueue.size() + ")");
+                return false;
+            }
+            
+            if (cacheLoader.size() >= crawlSlots) {
+                log.logFine("LimitCrawl: too many processes in loader queue, delayed to protect emergency case (" +
+                "cacheLoader=" + cacheLoader.size() + ")");
+                return false;
+            }
+            
             return true;
         } catch (IOException e) {
             log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage());
@@ -1706,7 +1706,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // do the request
         try {
-            HashMap page = yacyClient.crawlOrder(remoteSeed, urlEntry.url(), urlPool.getURL(urlEntry.referrerHash()));
+            HashMap page = yacyClient.crawlOrder(remoteSeed, urlEntry.url(), urlPool.getURL(urlEntry.referrerHash()), 6000);
         
             // check success
             /*

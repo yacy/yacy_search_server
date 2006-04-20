@@ -733,11 +733,11 @@ public final class yacyClient {
         return "wrong protocol: " + protocol;
     }
     
-    public static HashMap crawlOrder(yacySeed targetSeed, URL url, URL referrer) {
-        return crawlOrder(targetSeed,new URL[]{url},new URL[]{referrer}); 
+    public static HashMap crawlOrder(yacySeed targetSeed, URL url, URL referrer, int timeout) {
+        return crawlOrder(targetSeed, new URL[]{url}, new URL[]{referrer}, timeout); 
     }
     
-    public static HashMap crawlOrder(yacySeed targetSeed, URL[] url, URL[] referrer) {
+    public static HashMap crawlOrder(yacySeed targetSeed, URL[] url, URL[] referrer, int timeout) {
         // this post a message to the remote message board
         if (targetSeed == null) { return null; }
         if (yacyCore.seedDB.mySeed == null) { return null; }
@@ -777,7 +777,7 @@ public final class yacyClient {
             return nxTools.table(
                     httpc.wput(
                             new URL("http://" + address + "/yacy/crawlOrder.html"),
-                            60000, 
+                            timeout, 
                             null, 
                             null, 
                             (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null, 
