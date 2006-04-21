@@ -61,6 +61,7 @@ public class NetworkPicture {
         int passiveLimit = 300;
         int potentialLimit = 300;
         int maxCount = 1000;
+        boolean corona = true;
         
         if (post != null) {
             width = post.getInt("width", 640);
@@ -68,17 +69,18 @@ public class NetworkPicture {
             passiveLimit = post.getInt("pal", 300);
             potentialLimit = post.getInt("pol", 300);
             maxCount = post.getInt("max", 1000);
+            corona = post.get("corona", "true").equals("true");
         }
         
         //too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
         if (width < 320 ) width = 320;
         if (width > 1920) width = 1920;
         if (height < 240) height = 240;
-        if (height > 1200) height = 1200;
+        if (height > 1920) height = 1920;
         if (passiveLimit > 1000000) passiveLimit = 1000000;
         if (potentialLimit > 1000000) potentialLimit = 1000000;
         if (maxCount > 1000) maxCount = 1000;
-        return plasmaGrafics.getNetworkPicture(10000, width, height, passiveLimit, potentialLimit, maxCount);
+        return plasmaGrafics.getNetworkPicture(10000, width, height, passiveLimit, potentialLimit, maxCount, corona);
     }
     
 }

@@ -106,17 +106,17 @@ public class plasmaGrafics {
     }
     
     public static ymagePainter getNetworkPicture(long maxAge) {
-        return getNetworkPicture(maxAge, 640, 480, 300, 300, 1000);
+        return getNetworkPicture(maxAge, 640, 480, 300, 300, 1000, true);
     }
     
-    public static ymagePainter getNetworkPicture(long maxAge, int width, int height, int passiveLimit, int potentialLimit, int maxCount) {
+    public static ymagePainter getNetworkPicture(long maxAge, int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona) {
         if ((networkPicture == null) || ((System.currentTimeMillis() - networkPictureDate) > maxAge)) {
-            drawNetworkPicture(width, height, passiveLimit, potentialLimit, maxCount);
+            drawNetworkPicture(width, height, passiveLimit, potentialLimit, maxCount, corona);
         }
         return networkPicture;
     }
     
-    private static void drawNetworkPicture(int width, int height, int passiveLimit, int potentialLimit, int maxCount) {
+    private static void drawNetworkPicture(int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona) {
         
         int innerradius = Math.min(width, height) / 5;
         int outerradius = innerradius + innerradius * yacyCore.seedDB.sizeConnected() / 100;
@@ -144,7 +144,7 @@ public class plasmaGrafics {
         while (e.hasMoreElements() && count < maxCount) {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, "000040", "608860", "B0FFB0");
+                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, "000040", "608860", "B0FFB0", corona);
                 count++;
             }
         }
@@ -158,7 +158,7 @@ public class plasmaGrafics {
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
                 if (lastseen > passiveLimit) break; // we have enough, this list is sorted so we don't miss anything
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, "101010", "401000", "802000");
+                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, "101010", "401000", "802000", corona);
                 count++;
             }
         }
@@ -172,14 +172,14 @@ public class plasmaGrafics {
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
                 if (lastseen > potentialLimit) break; // we have enough, this list is sorted so we don't miss anything
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, "202000", "505000", "A0A000");
+                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, "202000", "505000", "A0A000", corona);
                 count++;
             }
         }
         totalCount += count;
         
         // draw my own peer
-        drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, yacyCore.seedDB.mySeed, "800000", "AAAAAA", "FFFFFF");
+        drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, yacyCore.seedDB.mySeed, "800000", "AAAAAA", "FFFFFF", corona);
         
         // draw description
         networkPicture.setColor("FFFFFF");
@@ -192,7 +192,7 @@ public class plasmaGrafics {
         networkPictureDate = System.currentTimeMillis();
     }
     
-    private static void drawNetworkPicturePeer(ymagePainter img, int x, int y, int innerradius, int outerradius, yacySeed seed, String colorDot, String colorLine, String colorText) {
+    private static void drawNetworkPicturePeer(ymagePainter img, int x, int y, int innerradius, int outerradius, yacySeed seed, String colorDot, String colorLine, String colorText, boolean corona) {
         String name = seed.getName().toUpperCase();
         if (name.length() < shortestName) shortestName = name.length();
         if (name.length() > longestName) longestName = name.length();
@@ -212,9 +212,10 @@ public class plasmaGrafics {
         // draw text
         img.setColor(colorText);
         img.arcPrint(x, y, innerradius + linelength, angle, name);
+        
         // draw corona around dot for crawling activity
         int ppm10 = seed.getPPM() / 10;
-        if (ppm10 > 0) {
+        if ((corona) && (ppm10 > 0)) {
             if (ppm10 > 3) ppm10 = 3;
             // draw a wave around crawling peers
             long strength;

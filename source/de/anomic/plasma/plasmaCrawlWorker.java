@@ -327,9 +327,7 @@ public final class plasmaCrawlWorker extends Thread {
         // TODO: resolve yacy and yacyh domains
         //String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
 
-        // set referrer; in some case advertise a little bit:
         referer = (referer == null) ? "" : referer.trim();
-        if (referer.length() == 0) referer = "http://www.yacy.net/yacy/";
 
         // take a file from the net
         httpc remote = null;
