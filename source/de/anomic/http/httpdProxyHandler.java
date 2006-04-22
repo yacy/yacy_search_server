@@ -846,6 +846,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
          */
         
         headers.remove(httpHeader.CONNECTION);
+        headers.remove(httpHeader.KEEP_ALIVE);
         headers.remove(httpHeader.PROXY_CONNECTION);
         headers.remove(httpHeader.PROXY_AUTHENTICATE);
         headers.remove(httpHeader.PROXY_AUTHORIZATION);
