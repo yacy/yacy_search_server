@@ -84,9 +84,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -298,6 +300,14 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         if (path.indexOf("..") >= 0) {
             httpd.sendRespondError(conProp,out,4,403,null,"Access not allowed",null);
             return;
+        }
+        
+        // url decoding of path
+        try {
+            path = URLDecoder.decode(path, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // This should never occur
+            assert(false) : "UnsupportedEncodingException: " + e.getMessage();
         }
         
         // check permission/granted access
