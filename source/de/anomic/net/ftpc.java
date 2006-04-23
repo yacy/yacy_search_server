@@ -96,11 +96,14 @@ public class ftpc {
   // client socket for commands
   private Socket ControlSocket = null;
 
+  // socket timeout
+  private int ControlSocketTimeout = 300000;  
+  
   // socket for data transactions
   private ServerSocket DataSocketActive = null;
   private Socket       DataSocketPassive = null;
   private boolean      DataSocketPassiveMode = true;
-
+  
   // output and input streams for client control connection
   private BufferedReader   clientInput = null;
   private DataOutputStream clientOutput = null;
@@ -1187,6 +1190,7 @@ cd ..
     }
     try {
       ControlSocket = new Socket(cmd[1], port);
+      ControlSocket.setSoTimeout(this.ControlSocketTimeout);
       clientInput  = new BufferedReader(new InputStreamReader(ControlSocket.getInputStream()));
       clientOutput = new DataOutputStream(new BufferedOutputStream(ControlSocket.getOutputStream()));
 
@@ -1793,6 +1797,14 @@ cd ..
     String reply = receive();
 
     if (Integer.parseInt(reply.substring(0, 1)) == 5) throw new IOException(reply);    
+  }
+  
+  public int getTimeout() {
+      return this.ControlSocketTimeout;
+  }
+  
+  public void setTimeout(int timeout) {
+      this.ControlSocketTimeout = timeout;
   }
 
  class ee extends SecurityException {
