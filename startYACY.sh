@@ -9,7 +9,7 @@ elif [ ! -x "`which java`" ]
 then
 	echo "The java command is not executable."
 	echo "Either you have not installed java or it is not in your PATH"
-	echo "Has this script been invoked by CRON? Then use the -c option."
+	#echo "Has this script been invoked by CRON? Then use the -c option."
 	exit 1
 	
 	#-c to be imlemented.
@@ -56,7 +56,7 @@ else
 #		nohup java -Xms160m -Xmx160m -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
 	fi
 	echo "****************** YaCy Web Crawler/Indexer & Search Engine *******************"
-	echo "**** (C) by Michael Peter Christen, usage granted unter the GPL Version 2  ****"
+	echo "**** (C) by Michael Peter Christen, usage granted under the GPL Version 2  ****"
 	echo "**** USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/yacy ****"
 	echo "**  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy<xx>.log)                **"
 	echo "**  STOP         YaCy: execute stopYACY.sh and wait some seconds             **"

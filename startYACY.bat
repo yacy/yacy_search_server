@@ -19,7 +19,7 @@ Echo Generated classpath:%CLASSPATH%
 Echo JRE Parameters:%javacmd%
 
 	Echo ****************** YaCy Web Crawler/Indexer ^& Search Engine *******************
-	Echo **** (C) by Michael Peter Christen, usage granted unter the GPL Version 2  ****
+	Echo **** (C) by Michael Peter Christen, usage granted under the GPL Version 2  ****
 	Echo **** USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/yacy ****
 	Echo **  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy^<xx^>.log)                **
 	Echo **  STOP         YaCy: execute stopYACY.bat and wait some seconds            **

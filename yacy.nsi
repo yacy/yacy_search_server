@@ -21,7 +21,7 @@ InstType "Full"
 ; The text to prompt the user to enter a directory
 ComponentText "This will install YaCy v0.44(Build 20060307) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
-#DirText "If an old Version was installed into another locAtion(eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
+#DirText "If an old version was installed into another location (eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install into:"
 
 LicenseText "You must agree to this license to install YaCy"
