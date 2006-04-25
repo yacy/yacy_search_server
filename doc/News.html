@@ -84,6 +84,46 @@ globalheader();
 </ul>
 -->
 
+<br><p>v0.45_2006042x_2xxx
+<ul>
+<li>Enhanced Search Functions</li>
+  <ul>
+  <li>Re-designed search page: this shows now a simplified page without the left navigation column. The column is only shown if the user is logged-in.</li>
+  <li>Added Picture-option to search results: this shows only pictures that are on the found page in thumbnail size.</li>
+  <li>Added 'prefer' option to search: this will move search results with matching headlines to the top of the search results.</li>
+  </ul>
+<li>Enhanced Crawler Options</li>
+  <ul>
+  <li>Introduced a re-crawl option for crawl starts of already indexed web pages.</li>
+  <li>Introduced a auto-dom-filter for special steering of the crawler in case that the crawl start is a link-list and crawls should stay within only the domains of the link-list.</li>
+  <li>Introduced a link-per-domain limitation for the crawler.</li>
+  </ul>
+<li>Other User Interface Enhancements</li>
+  <ul>
+  <li>Re-designed (re-ordered) left navigation bar.</li>
+  <li>Added blog to Communication/Publication section of navigation bar.</li>
+  <li>New index cleaner job and interface to delete blacklisted indexes from the database.</li>
+  <li>The Profile-Viewer may now also show the local profile. A link to a profile-presentation of the local peer is included on the new simplified search page.</li>
+  </ul>
+<li>Performance Enhancements</li>
+  <ul>
+  <li>Introduced a second RAM cache for indexes that are received from DHT transmission and removed second cache flush limit from normal index cache.</li>
+  <li>Added a period of rest to the cache flush process: this prevents that indexes are flushed to disc if they could be candidates for DHT transmission.</li>
+  </ul>
+<li>Bugfixes</li>
+  <ul>
+  <li>Simplified installation instructions (removed proxy config).</li>
+  <li>Enhanced html parser to support image tags.</li>
+  <li>Added checks to protect peers from wrong seeds.</li>
+  <li>Re-design of kelondroTree-iterator to prevent concurrent modification exceptions.</li>
+  <li>Blacklists are now also applied to urls during DHT receives.</li>
+  <li>Fixed bugs with index cache flushs.</li>
+  <li>Fixed behavior of remote crawl trigger that caused long pauses in case of local index queue overflow</li>
+  <li>Better robots.txt support.</li>
+  <li>Many minor bugfixes concerning file type handling, url normal form computation, crawl profile storage, network peer counting, parser errors, wiki code, htcache storage etc.</li>
+  </ul>
+</ul>
+
 <br><p>v0.44_20060307_1844
 <ul>
 <li>New Features</li>
