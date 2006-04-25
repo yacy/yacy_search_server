@@ -71,6 +71,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.data.userDB;
 
@@ -1400,6 +1401,23 @@ public final class httpd implements serverHandler {
         return isThisHostIP;        
     }    
     
+    public static boolean isThisSeedIP(String hostName) {
+        if ((hostName == null) || (hostName.length() == 0)) return false;
+        
+        // getting ip address and port of this seed
+        yacySeed thisSeed =  yacyCore.seedDB.mySeed;
+        String thisSeedIP   = thisSeed.get(yacySeed.IP,null);
+        String thisSeedPort = thisSeed.get(yacySeed.PORT,null);
+        
+        // resolve ip addresses
+        if (thisSeedIP == null || thisSeedPort == null) return false;
+        InetAddress seedInetAddress = httpc.dnsResolve(thisSeedIP);
+        InetAddress hostInetAddress = httpc.dnsResolve(hostName);
+        
+        // if it's equal, the hostname points to this seed
+        return (seedInetAddress.equals(hostInetAddress));        
+    }
+    
     public static boolean isThisHostIP(String hostName) {
         if ((hostName == null) || (hostName.length() == 0)) return false;
         
@@ -1455,8 +1473,16 @@ public final class httpd implements serverHandler {
              * If the port number is equal to the yacy port and the IP address is an address of this host ...
              * Please note that yacy is listening to all interfaces of this host
              */
-            } else if (dstPort.equals(new Integer(serverCore.getPortNr(switchboard.getConfig("port", "8080")))) &&
-                        isThisHostIP(dstHost)) {
+            } else if (
+                    // check if the destination port is equal to the port yacy is listening to
+                    dstPort.equals(new Integer(serverCore.getPortNr(switchboard.getConfig("port", "8080")))) &&
+                    (
+                            // check if the destination host is our local IP address
+                            isThisHostIP(dstHost) ||
+                            // check if the destination host is our seed ip address
+                            isThisSeedIP(dstHost)
+                    )
+            ) {
                  return true;                
             } else if ((serverCore.portForwardingEnabled) && 
                        (serverCore.portForwarding != null) && 
