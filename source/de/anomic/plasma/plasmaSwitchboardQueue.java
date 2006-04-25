@@ -131,7 +131,9 @@ public class plasmaSwitchboardQueue {
 
     public Entry pop() throws IOException {
         if (sbQueueStack.size() == 0) return null;
-        return new Entry(sbQueueStack.pot());
+        byte[][] b = sbQueueStack.pot();
+        if (b == null) return null;
+        return new Entry(b);
     }
 
     public Entry remove(int index) throws IOException {
