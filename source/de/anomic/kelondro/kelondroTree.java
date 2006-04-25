@@ -1021,7 +1021,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             Iterator i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
             while ((set.size() < count) && (i.hasNext())) {
                 n = (Node) i.next();
-                if (n != null) set.add(new String(n.getKey()));
+                if ((n != null) && (n.getKey() != null)) set.add(new String(n.getKey()));
             }
         }
         return set;
