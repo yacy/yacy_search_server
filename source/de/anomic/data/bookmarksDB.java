@@ -838,8 +838,8 @@ public class bookmarksDB {
          * @param tags ArrayList with the tagnames
          * @param local sets, whether the updated tags should be stored to tagsDB
          */
-        public void setTags(HashSet tags, boolean local){
-            tags.addAll(tags);
+        public void setTags(HashSet mytags, boolean local){
+            tags.addAll(mytags);
             Iterator it=tags.iterator();
             while(it.hasNext()){
                 String tagName=(String) it.next();
