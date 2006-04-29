@@ -167,11 +167,11 @@ public class ViewProfile {
             }
 
             //all known Keys which should be set as they are
-            if (knownKeys.contains(key)) {
+            if ((knownKeys.contains(key)) && (value.length() > 0)) {
                 prop.put("success_" + key, 1);
                 prop.put("success_" + key + "_value", value);
                 //special handling, hide flower if no icq uin is set
-            } else if (key.equals("homepage")) {
+            } else if ((key.equals("homepage")) && (value.length() > 0)) {
                 if (!(value.startsWith("http"))) {
                     value = "http://" + value;
                 }
