@@ -485,8 +485,8 @@ This is an emacs-like regular expression that must match with the URLs which are
 Use this i.e. to crawl a single domain. If you set this filter it would make sense to increase==Benutzen Sie dies z.B., um nur eine einzelne Domain zu crawlen. Wenn Sie diese Maske aktivieren, macht es Sinn
 the crawling depth.==die Crawling Tiefe zu erh&ouml;hen.
 #Re-Crawl Option:==Re-Crawl Option:
-Use:==Nutzen:
-Time:==Zeit:
+Use:==Benutzen:
+Interval:==Intervall:
 Year\(s\)==Jahr(e)
 Month\(s\)==Monat(e)
 Day\(s\)==Tag(e)
@@ -500,7 +500,7 @@ appear on the given depth during crawling. The domain-list is then used to filte
 on depths greater then the given depth, but do not appear in the domain-list. You can use this option i.e.==tiefer als die angegebene Tiefe vorkommen, aber nicht auf der Domain-Liste vorkommen. Sie k&ouml;nnen diese Option z.B. dazu benutzen,
 to crawl pages with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page.==um Seiten mit Lesezeichen zu crawlen, w&auml;hrend der Crawl auf die, nur auf diese Lesezeichen-Seite auftauchenden Domains, begrenzt ist.
 Maximum Pages per Domain:==Maximale Seiten pro Domain:
-Page-Count:==Seiten Anzahl:
+Page-Count:==Seitenanzahl:
 You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.==Sie k&ouml;nnen die maximale Anzahl an Seiten, die von einer einzelnen Domain gefunden und indexiert werden, mit dieser Option begrenzen.
 You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==Sie k&ouml;nnen diese Option auch mit dem 'Auto-Dom-Filter' kombinieren, so dass das Limit f&uuml;r alle Domains mit der
 the given depth. Domains outside the given depth are then sorted-out anyway.==angegebenen Tiefe gilt. Domains ausserhalb der angegebenen Tiefe werden einfach aussortiert.
