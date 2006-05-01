@@ -6,7 +6,7 @@
 ;last major change: 22.07.2005
 Name "YaCy"
 
-OutFile "yacy_v0.44_20060307_1846.exe"
+OutFile "yacy_v0.45_20060501_2049.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
@@ -19,7 +19,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.44(Build 20060307) on your computer. Select which optional things you want to be installed."
+ComponentText "This will install YaCy v0.45 (Build 20060501) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old version was installed into another location (eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install into:"
@@ -52,6 +52,7 @@ Section "Binaries (required)"
 	File "yacy.stopwords"
 	File "yacy.logging"
 	File "ChangeLog"
+	File "AUTHORS"
 	File "COPYRIGHT"
 	File "yacy.stopwords.de"
 	
@@ -87,6 +88,7 @@ Section "Binaries (required)"
 	File "htroot\*.class"
 	File "htroot\*.ico"
     File "htroot\*.bmp"
+    File "htroot\*.gif"
     File "htroot\*.png"
     File "htroot\*.src" #firefox plugin
 	#File "htroot\*.gif"
