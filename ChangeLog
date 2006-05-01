@@ -1,5 +1,21 @@
 YaCy: The Search Engine with the friendly whale
 
+version 0.46
+
+version 0.45
+	* UPDATED: new Design of search page
+	* ADDED: Image search
+	* ADDED: Recrawl option
+	* ADDED: auto-dom-filter for the crawler
+	* ADDED: link per domain limitation for the crawler
+	* ADDED: blog in the menu
+	* FIXED: ViewProfile now shows the local profile, too
+	* ADDED: new caches for indexes from dht transmission
+	* ADDED: a basic bookmarkscache to speed up the bookmark system
+	* UPDATED: html parser to support image tags
+	* FIXED: blacklists are now used for dht, too
+	* UPDATED: better robots.txt support
+	
 version 0.44
 	* FIXED: special chars(like german umlauts) in tagNames allowed. (Allo)
 	* ADDED: Show public Bookmarks in Bookmarks.html, private ones, if the user is logged in. (Allo)
