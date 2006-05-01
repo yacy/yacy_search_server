@@ -15,6 +15,29 @@
 # 	   192.168.0.1:8080
 port = 8080
 
+# peer-to-peer construction for distributed search
+# we have several stages:
+# 1st: a file within every distribution that has a list of URLs:
+#      -> this is the superseed file
+# 2nd: the files that can be retrieved by the superseeds' URLs
+#      are called seed list-files.
+#      -> the seed list-files contain IP/port combinations of running
+#         AnomicHTTPProxies
+# 3rd: the peers that are targeted within the seed files are called superpeers
+# 4th: the superpeers hold and share a list of all client/search/crawl peers
+#
+# some superpeers should be able to create again seed list-files.
+# These superpeers must upload their IP or their list of peer-IP's to a
+# ftp location to create the seed list-file.
+# Everyone who do so should mail his/her new seed location to mc<at>anomic.de
+# The seed list-file location will then be included in the superseed file.
+# This superseed file is available then at two localtions:
+# - it is included in every distribution and
+# - updated through a specific URL-location
+# we see the file name and the URL of the superseed here:
+superseedFile=superseed.txt
+superseedLocation=http://www.yacy.net/superseed.txt
+
 # time-out of client control socket in milliseconds
 # since this applies only to the client-proxy connection,
 # it can be rather short
@@ -218,30 +241,6 @@ serverAccountBase64MD5=
 #adminAccount=admin:anomic
 adminAccount=
 adminAccountBase64MD5=
-
-# peer-to-peer construction for distributed search
-# we have several stages:
-# 1st: a file within every distribution that has a list of URLs:
-#      -> this is the superseed file
-# 2nd: the files that can be retrieved by the superseeds' URLs
-#      are called seed list-files.
-#      -> the seed list-files contain IP/port combinations of running
-#         AnomicHTTPProxies
-# 3rd: the peers that are targeted within the seed files are called superpeers
-# 4th: the superpeers hold and share a list of all client/search/crawl peers
-#
-# some superpeers should be able to create again seed list-files.
-# These superpeers must upload their IP or their list of peer-IP's to a
-# ftp location to create the seed list-file.
-# Everyone who do so should mail his/her new seed location to mc<at>anomic.de
-# The seed list-file location will then be included in the superseed file.
-# This superseed file is available then at two localtions:
-# - it is included in every distribution and
-# - updated through a specific URL-location
-# we see the file name and the URL of the superseed here:
-superseedFile=superseed.txt
-superseedLocation=http://www.yacy.net/superseed.txt
-
 
 # if you are running a principal peer, you must update the following variables
 # The upload method that should be used to upload the seed-list file to
