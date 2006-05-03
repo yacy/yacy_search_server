@@ -74,6 +74,7 @@ public class yacyPeerActions {
     public  long seniorConnects;
     public  long principalConnects;
     public  long disconnects;
+    private int  bootstrapLoadTimeout;
     
     public yacyPeerActions(yacySeedDB seedDB, plasmaSwitchboard switchboard, File superseedFile, String superseedURL) {
         this.seedDB = seedDB;
@@ -87,6 +88,7 @@ public class yacyPeerActions {
         this.seniorConnects = 0;
         this.principalConnects = 0;
         this.disconnects = 0;
+        this.bootstrapLoadTimeout = (int) switchboard.getConfigLong("bootstrapLoadTimeout", 6000);
     }
     
     public void deploy(yacyPeerAction action) {
@@ -181,14 +183,14 @@ public class yacyPeerActions {
                     reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
                     
                     url = new URL(seedListFileURL);
-                    header = httpc.whead(url, 5000, null, null, this.sb.remoteProxyConfig,reqHeader);
+                    header = httpc.whead(url, this.bootstrapLoadTimeout, null, null, this.sb.remoteProxyConfig,reqHeader);
                     if ((header == null) || (header.lastModified() == null)) {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available");
                     } else if ((header.age() > 86400000) && (ssc > 0)) {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-                        seedList = httpc.wget(url, 5000, null, null, this.sb.remoteProxyConfig,reqHeader);
+                        seedList = httpc.wget(url, this.bootstrapLoadTimeout, null, null, this.sb.remoteProxyConfig,reqHeader);
                         enu = seedList.iterator();
                         lc = 0;
                         while (enu.hasNext()) {

@@ -38,6 +38,14 @@ port = 8080
 superseedFile=superseed.txt
 superseedLocation=http://www.yacy.net/superseed.txt
 
+# bootstrapLoadTimeout
+# this is the time-out for loading of the seedlist files during bootstraping
+# the time may not too long, since loading of the seedlist is not parallelized
+# and a not successful loading of a seed file may prevent a peer from becoming
+# a (at least) junior status. If the time-out is too short, there is the danger
+# that the peer stays in virgin mode
+bootstrapLoadTimeout = 6000
+
 # time-out of client control socket in milliseconds
 # since this applies only to the client-proxy connection,
 # it can be rather short
