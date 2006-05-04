@@ -50,6 +50,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaHTCache;
@@ -182,6 +183,7 @@ public class ViewFile {
                 
                 if (viewMode.equals("parsed")) {
                     String content = new String(document.getText());
+		    content = wikiCode.replaceHTML(content); //added by Marc Nause
                     content = content.replaceAll("\n","<br>")
                                      .replaceAll("\t","&nbsp;&nbsp;&nbsp;&nbsp;");
                     
@@ -196,7 +198,7 @@ public class ViewFile {
                     
                     boolean dark = true;
                     for (int i=0; i < sentences.length; i++) {
-                        String currentSentence = sentences[i];
+                        String currentSentence = wikiCode.replaceHTML(sentences[i]);
                         
                         // Search word highlighting
                         String words = post.get("words",null);
@@ -212,7 +214,6 @@ public class ViewFile {
                                         "<b style=\"color: black; background-color: rgb(" + highlightingColors[j%6] + ");\">" + currentWord + "</b>");
                             }
                         }
-                        
                         
                         prop.put("viewMode_sentences_" + i + "_nr",Integer.toString(i+1)); 
                         prop.put("viewMode_sentences_" + i + "_text",currentSentence);   
