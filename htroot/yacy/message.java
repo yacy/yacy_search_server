@@ -184,7 +184,7 @@ public final class message {
             .append("yacy@")
             .append(yacyCore.seedDB.mySeed.getName())
             .append("\nSubject: [YaCy] ")
-            .append(msgEntry.subject())
+            .append(msgEntry.subject().replace('\n', ' '))
             .append("\nDate: ")
             .append(msgEntry.date())
             .append("\n")
