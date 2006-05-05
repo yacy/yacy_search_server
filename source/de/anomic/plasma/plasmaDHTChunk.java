@@ -261,20 +261,18 @@ public class plasmaDHTChunk {
         plasmaWordIndexEntry indexEntry;
         String[] urlHashes;
         int count = 0;
-        synchronized (wordIndex) {
-            for (int i = 0; i < this.indexContainers.length; i++) {
-                // delete entries separately
-                int c = 0;
-                urlHashes = new String[this.indexContainers[i].size()];
-                urlIter = this.indexContainers[i].entries();
-                while (urlIter.hasNext()) {
-                    indexEntry = (plasmaWordIndexEntry) urlIter.next();
-                    urlHashes[c++] = indexEntry.getUrlHash();
-                }
-                count += wordIndex.removeEntries(this.indexContainers[i].wordHash(), urlHashes, true);
-                log.logFine("Deleted partial index (" + c + " URLs) for word " + this.indexContainers[i].wordHash() + "; " + this.wordIndex.indexSize(indexContainers[i].wordHash()) + " entries left");
-                this.indexContainers[i] = null;
+        for (int i = 0; i < this.indexContainers.length; i++) {
+            // delete entries separately
+            int c = 0;
+            urlHashes = new String[this.indexContainers[i].size()];
+            urlIter = this.indexContainers[i].entries();
+            while (urlIter.hasNext()) {
+                indexEntry = (plasmaWordIndexEntry) urlIter.next();
+                urlHashes[c++] = indexEntry.getUrlHash();
             }
+            count += wordIndex.removeEntries(this.indexContainers[i].wordHash(), urlHashes, true);
+            log.logFine("Deleted partial index (" + c + " URLs) for word " + this.indexContainers[i].wordHash() + "; " + this.wordIndex.indexSize(indexContainers[i].wordHash()) + " entries left");
+            this.indexContainers[i] = null;
         }
         return count;
     }
