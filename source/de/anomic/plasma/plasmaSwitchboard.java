@@ -926,7 +926,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if ((dhtShallTransfer() == null) &&
             ((this.dhtTransferChunk == null) ||
              (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_UNDEFINED) ||
-             (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) ||
+             // (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) ||
              (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_FAILED))) {
             // generate new chunk
             dhtTransferChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, 30, dhtTransferIndexCount);
