@@ -7,7 +7,7 @@
 //
 // This File is contributed by Jan Sandbrink
 // Contains contributions from Marc Nause [MN]
-// last change: 03.04.2006
+// last change: 06.05.2006
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -143,9 +143,9 @@ public class Blog {
 			if(hasRights) {
 				try {
 			        prop.put("mode", 1); //edit
-			        prop.put("mode_author", author);
+			        prop.put("mode_author", wikiCode.replaceHTML(author));
 			        prop.put("mode_pageid", page.key());
-			        prop.put("mode_subject", page.subject());
+			        prop.put("mode_subject", wikiCode.replaceHTML(page.subject()));
 			        prop.put("mode_page-code", new String(page.page(), "UTF-8").replaceAll("<","&lt;").replaceAll(">","&gt;"));
 			    } catch (UnsupportedEncodingException e) {}
 			}
@@ -159,8 +159,8 @@ public class Blog {
 				wikiCode wikiTransformer=new wikiCode(switchboard);
 	            prop.put("mode", 2);//preview
 	            prop.put("mode_pageid", pagename);
-	            prop.put("mode_author", author);
-	            prop.put("mode_subject", post.get("subject",""));
+	            prop.put("mode_author", wikiCode.replaceHTML(author));
+	            prop.put("mode_subject", wikiCode.replaceHTML(post.get("subject","")));
 	            prop.put("mode_date", dateString(new Date()));
 	            prop.put("mode_page", wikiTransformer.transform(post.get("content", "")));
 	            prop.put("mode_page-code", post.get("content", "").replaceAll("<","&lt;").replaceAll(">","&gt;"));
@@ -171,8 +171,8 @@ public class Blog {
 			if(hasRights) {
 				prop.put("mode",4);
 				prop.put("mode_pageid",pagename);
-				prop.put("mode_author",page.author());
-				prop.put("mode_subject",page.subject());
+				prop.put("mode_author",wikiCode.replaceHTML(page.author()));
+				prop.put("mode_subject",wikiCode.replaceHTML(page.subject()));
 			}
 			else prop.put("mode",3); //access denied (no rights)
 		}
@@ -198,8 +198,8 @@ public class Blog {
 	        				continue;
 	        			entry = switchboard.blogDB.read(pageid);
 	        			prop.put("mode_entries_"+count+"_pageid",entry.key());
-	        			prop.put("mode_entries_"+count+"_subject", entry.subject());
-	        			prop.put("mode_entries_"+count+"_author", entry.author());
+	        			prop.put("mode_entries_"+count+"_subject", wikiCode.replaceHTML(entry.subject()));
+	        			prop.put("mode_entries_"+count+"_author", wikiCode.replaceHTML(entry.author()));
 	        			prop.put("mode_entries_"+count+"_date", dateString(entry.date()));
 	        			prop.put("mode_entries_"+count+"_page", wikiTransformer.transform(entry.page()));
 	        			if(hasRights) {
@@ -224,8 +224,8 @@ public class Blog {
 	        	//only show 1 entry
 	        	prop.put("mode_entries",1);
 	        	prop.put("mode_entries_0_pageid", page.key());
-	        	prop.put("mode_entries_0_subject", page.subject());
-	        	prop.put("mode_entries_0_author", page.author());
+	        	prop.put("mode_entries_0_subject", wikiCode.replaceHTML(page.subject()));
+	        	prop.put("mode_entries_0_author", wikiCode.replaceHTML(page.author()));
 	        	prop.put("mode_entries_0_date", dateString(page.date()));
 	        	prop.put("mode_entries_0_page", wikiTransformer.transform(page.page()));
 	        	if(hasRights) {
