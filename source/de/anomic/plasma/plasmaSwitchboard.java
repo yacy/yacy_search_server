@@ -2117,7 +2117,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             if ((System.currentTimeMillis() - starttime) > (10000 * peerCount)) {
                 dhtTransferIndexCount--;
             } else {
-                dhtTransferIndexCount++;
+                if (dhtTransferChunk.indexCount() >= dhtTransferIndexCount) dhtTransferIndexCount++;
             }
             if (dhtTransferIndexCount < dhtTransferIndexMinimum) dhtTransferIndexCount = dhtTransferIndexMinimum;
             
