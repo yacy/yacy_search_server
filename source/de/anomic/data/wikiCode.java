@@ -76,7 +76,7 @@ public class wikiCode {
     private boolean preformattedSpan = false;   //needed for <pre> and </pre> spanning over several lines
     private boolean replacedHTML = false;       //indicates if method replaceHTML has been used with line already
     private boolean replacedCharacters = false; //indicates if method replaceCharachters has been used with line
-    private boolean table=false;                //needed for tables, because they reach over several lines
+    private boolean table = false;              //needed for tables, because they reach over several lines
     private int preindented = 0;                //needed for indented <pre>s
     private int escindented = 0;                //needed for indented [=s
     private int headlines = 0;                  //number of headlines in page
@@ -192,9 +192,6 @@ public class wikiCode {
 
         "\u0060","&#096;",
 
-        "\u007B","&#123;",
-        "\u007C","&#124;",
-        "\u007D","&#125;",
         "\u007E","&#126;",
 
         "\u0082","&#130;",
@@ -486,7 +483,7 @@ public class wikiCode {
                 }
             }
             else if(values[i].equals("nowrap")){
-                str = str + "nowrap";
+                str = str + " nowrap";
             }
         }
         return str;
