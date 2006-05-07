@@ -6,7 +6,7 @@
 // Frankfurt, Germany, 2004
 //
 // This file ist contributed by Alexander Schier
-// last major change: 17.04.2006
+// last major change: 08.05.2006
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -188,11 +188,13 @@ public class wikiCode {
     //patterns that will be replaced. To add new codes or patterns, just put them at the end
     //of the list. Codes or patterns in this list can not be escaped with [= or <pre>
     public static String[] characters={
-        "\u005E","&#094;",
+        "\u005E","&#094;",  // Caret
 
-        "\u0060","&#096;",
-
-        "\u007E","&#126;",
+        "\u0060","&#096;",  // Accent Grave `
+        "\u007B","&#123;",  // {
+        "\u007C","&#124;",  // |
+        "\u007D","&#125;",  // }
+        "\u007E","&#126;",  // ~
 
         "\u0082","&#130;",
         "\u0083","&#131;",
@@ -328,18 +330,29 @@ public class wikiCode {
       */
       //[FB], changes by [MN]
     private String processTable(String result, plasmaSwitchboard switchboard){
-        String line="";
-        if ((result.startsWith("{|")) && (!table)) {
+        //some variables that make it easier to change codes for the table
+        String line = "";
+        String tableStart = "&#123;&#124;";                 // {|
+        String newLine = "&#124;-";                         // |-
+        String cellDivider = "&#124;&#124;";                // ||
+        String tableEnd = "&#124;&#125;";                   // |}
+        String attribDivider = "&#124;";                    // |
+        int lenTableStart = tableStart.length();
+        int lenCellDivider = cellDivider.length();
+        int lenTableEnd = tableEnd.length();
+        int lenAttribDivider = attribDivider.length();
+
+        if ((result.startsWith(tableStart)) && (!table)) {
             table=true;
             newrowstart=true;
             line="<table";
-            if (result.trim().length()>2) {
-                line+=parseTableProperties(result.substring(2).trim());
+            if (result.trim().length()>lenTableStart) {
+                line+=parseTableProperties(result.substring(lenTableStart).trim());
             }
             line+=">";
             result=line;
         }
-        else if (result.startsWith("|-") && (table)) {          // new row
+        else if (result.startsWith(newLine) && (table)) {          // new row
             if (!newrowstart) {
                 line+="\t</tr>\n";
             } else {
@@ -348,36 +361,42 @@ public class wikiCode {
             line=line+"\t<tr>";
             result=line;
         }
-        else if ((result.startsWith("||")) && (table)) {
+        else if ((result.startsWith(cellDivider)) && (table)) {
             line+="\t\t<td";
-            int cellEnd=(result.indexOf("||",2)>0)?(result.indexOf("||",2)):(result.length());
-            int propEnd = 0;
+            int cellEnd=(result.indexOf(cellDivider,lenCellDivider)>0)?(result.indexOf(cellDivider,lenCellDivider)):(result.length());
+            int propEnd = result.indexOf(attribDivider,lenCellDivider);
+            int occImage = result.indexOf("[[Image:",lenCellDivider);
+            int occEscape = result.indexOf("[=",lenCellDivider);
             //If resultOf("[[Image:") is less than propEnd, that means that there is no
             //property for this cell, only an image. Without this, YaCy could get confused
             //by a | in [[Image:picture.png|alt-text]] or [[Image:picture.png|alt-text]]
-            if(((propEnd = result.indexOf("|",2)) > 0)&&(!(result.indexOf("[[Image:",2) < propEnd))){
-                propEnd = result.indexOf("|",2);
+            //Same for [= (part of [= =])
+            if((propEnd > lenCellDivider)
+            &&((occImage > propEnd)||( occImage < 0))
+            &&((occEscape> propEnd)||( occEscape < 0))
+            ){
+                propEnd = result.indexOf(attribDivider,lenCellDivider)+lenAttribDivider;
             }
             else {
                 propEnd = cellEnd;
             }
             // both point at same place => new line
             if (propEnd==cellEnd) {
-                propEnd=1;
+                propEnd=lenCellDivider;
             } else {
-                line+=parseTableProperties(result.substring(2,propEnd).trim());
+                line+=parseTableProperties(result.substring(lenCellDivider,propEnd-lenAttribDivider).trim());
             }
             table=false; cellprocessing=true;
-            line+=">"+processTable(result.substring(propEnd+1,cellEnd).trim(), switchboard)+"</td>";
+            line+=">"+processTable(result.substring(propEnd,cellEnd).trim(), switchboard)+"</td>";
             table=true; cellprocessing=false;
             if (cellEnd<result.length()) {
                 line+="\n"+processTable(result.substring(cellEnd), switchboard);
             }
             result=line;
         }
-        else if (result.startsWith("|}") && (table)) {          // Table end
+        else if (result.startsWith(tableEnd) && (table)) {          // Table end
             table=false;
-            line+="\t</tr>\n</table>"+result.substring(2);
+            line+="\t</tr>\n</table>"+result.substring(lenTableEnd);
             result=line;
         }
         return result;
@@ -670,11 +689,11 @@ public class wikiCode {
                 kl = kl.substring(6);
 
                 // are there any arguments for the image?
-                if ((p = kl.indexOf("|")) > 0) {
+                if ((p = kl.indexOf("&#124;")) > 0) {
                     kv = kl.substring(p + 1);
                     kl = kl.substring(0, p);
                     // if there are 2 arguments, write them into ALIGN and ALT
-                    if ((p = kv.indexOf("|")) > 0) {
+                    if ((p = kv.indexOf("&#124;")) > 0) {
                         align = kv.substring(0, p);
                         //checking validity of value for align. Only non browser specific
                         //values get supported. Not supported: absmiddle, baseline, texttop
@@ -710,7 +729,7 @@ public class wikiCode {
 
             // if it's no image, it might be an internal link
             else {
-                if ((p = kl.indexOf("|")) > 0) {
+                if ((p = kl.indexOf("&#124;")) > 0) {
                     kv = kl.substring(p + 1);
                     kl = kl.substring(0, p);
                 } else {
