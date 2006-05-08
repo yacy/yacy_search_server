@@ -38,7 +38,10 @@ public class plasmaWordIndexAssortmentImporter extends AbstractImporter implemen
             errorMsg = "AssortmentFile '" + this.importAssortmentFile + "' is not readable.";
         else if (!this.importAssortmentFile.canWrite()) 
             errorMsg = "AssortmentFile '" + this.importAssortmentFile + "' is not writeable.";
-        
+        if (errorMsg != null) {
+            this.log.logSevere(errorMsg);
+            throw new IllegalStateException(errorMsg);
+        }        
         
         // getting the assortment length 
         File importAssortmentPath = null;
@@ -51,12 +54,9 @@ public class plasmaWordIndexAssortmentImporter extends AbstractImporter implemen
             }
         } catch (NumberFormatException e) {
             errorMsg = "Unable to parse the assortment file number.";
-        }        
-        
-        if (errorMsg != null) {
             this.log.logSevere(errorMsg);
             throw new IllegalStateException(errorMsg);
-        }
+        }        
 
         // initializing the import assortment db
         this.log.logInfo("Initializing source assortment file");
