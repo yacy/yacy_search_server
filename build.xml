@@ -71,7 +71,12 @@
 <property name="htdocsWWW" location="${data}/HTDOCS/www"/>
 <property name="release_main" location="${release}/MAIN"/>
 <property name="release_ext" location="${release}/EXT"/>	
-    
+
+<!-- determining if the sourcecode of the yacybar is available -->   
+<condition property="yacyBarDirExists">
+    <available file="./yacybar" />        
+</condition> 	
+	
 <condition property="singleExtFile">
     <equals arg1="${extensionTarget}" arg2="copy"/>
 </condition> 
@@ -247,7 +252,7 @@
 	         source="${javacSource}" target="${javacTarget}"/>	
 	
 </target>	    	
-	
+
 <!-- compiling optional content parsers and building install packages -->
 <target name="compileParsers" depends="compileMain" description="Compiling and zipping all additional parsers">
   <subant target="${extensionTarget}">
@@ -328,9 +333,18 @@
   <delete file="${build}/yacy.java" />
 </target>	
 
-	<!-- ======================================================================================================= 
-		 putting all extensions together into a single zip file 
-		 ======================================================================================================= --> 	
+<!-- compiling the yacybar -->
+<target name="buildYacyBar" if="yacyBarDirExists" depends="init" description="Building the yacyBar XPI file">
+	<!-- building yacybar xpi -->
+	<subant target="" buildpath="./yacybar" />
+	
+	<!-- move xpi file into addon folder -->
+	<move file="./yacybar/yacybar.xpi" tofile="${addon}/yacybar.xpi"/>
+</target>  	
+  	
+<!-- ======================================================================================================= 
+	 putting all extensions together into a single zip file 
+	 ======================================================================================================= --> 	
 <target name="distExtensions" if="singleExtFile" depends="compileExtensions">
       <tar destfile="${release}/${extensionFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">
         <tarfileset dir="${release_ext}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
@@ -341,7 +355,7 @@
     <delete dir="${release_ext}"/>        
 </target>   
 
-<target name="copyMain4Dist" depends="compileMain">	
+<target name="copyMain4Dist" depends="compileMain,buildYacyBar">	
 	<!-- copy main class files -->
 	<copy todir="${release_main}/classes" failonerror="false">		
 		<fileset dir="${build}">
@@ -443,9 +457,14 @@
 	<copy todir="${release_main}/source">
 	  <fileset dir="${src}">
 	    <include name="**/*.*"/>
+	  	<!-- excluding sources for additional content parsers --> 
 	    <exclude name="de/anomic/plasma/parser/*/*"/>
+	  	<!-- excluding sources for additional seed uploaders -->
 	    <exclude name="de/anomic/yacy/seedUpload/yacySeedUpload**"/>
+	  	<!-- excluding soap -->
 	    <exclude name="de/anomic/soap/**"/> 
+	    <!-- excluding the port forwarder --> 
+	    <exclude name="de/anomic/server/serverPortForwardingSch.java"/> 
 	  </fileset>
 	  <fileset dir="${src}">
 	    <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java"/>
