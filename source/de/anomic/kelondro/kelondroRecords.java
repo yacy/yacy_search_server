@@ -127,6 +127,7 @@ public class kelondroRecords {
     private   int        headchunksize;// overheadsize + key element column size
     private   int        tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
     private   int        recordsize;   // (overhead + sum(all: COLWIDTHS)) = the overall size of a record
+    protected int        objectsize;   // sum(all: COLWIDTHS)) = the size of all data fields
 
     // dynamic run-time seek pointers
     private long POS_HANDLES = 0; // starts after end of POS_COLWIDHS which is POS_COLWIDTHS + COLWIDTHS.length * 4
@@ -247,8 +248,9 @@ public class kelondroRecords {
         
         // store dynamic run-time data
         this.overhead = ohbytec + 4 * ohhandlec;
-        this.recordsize = this.overhead;
-        for (int i = 0; i < columns.length; i++) this.recordsize += columns[i];
+        this.objectsize = 0;
+        for (int i = 0; i < columns.length; i++) this.objectsize += columns[i];
+        this.recordsize = this.overhead + this.objectsize;
         this.headchunksize = overhead + columns[0];
         this.tailchunksize = this.recordsize - this.headchunksize;
 
@@ -412,7 +414,9 @@ public class kelondroRecords {
         // assign remaining values that are only present at run-time
         this.overhead = OHBYTEC + 4 * OHHANDLEC;
         this.recordsize = this.overhead;
-        for (int i = 0; i < COLWIDTHS.length; i++) this.recordsize += COLWIDTHS[i];
+        this.objectsize = 0;
+        for (int i = 0; i < COLWIDTHS.length; i++) this.objectsize += COLWIDTHS[i];
+        this.recordsize = this.overhead + this.objectsize;
         this.headchunksize = this.overhead + COLWIDTHS[0];
         this.tailchunksize = this.recordsize - this.headchunksize;
     }
