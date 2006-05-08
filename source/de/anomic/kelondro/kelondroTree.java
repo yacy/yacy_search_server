@@ -123,7 +123,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         super.setLogger(log);
         long objectbuffersize = objectCachePercent * buffersize / (nodeCachePercent + objectCachePercent);
         long nodecachesize = objectbuffersize / (super.objectsize + 8 * columns.length);
-        this.objectCache = new kelondroObjectCache((int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
+        this.objectCache = new kelondroObjectCache(this.filename, (int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
     }
     
     public kelondroTree(kelondroRA ra, long buffersize, int[] columns, boolean exitOnFail) {
@@ -149,7 +149,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         super.setLogger(log);
         long objectbuffersize = objectCachePercent * buffersize / (nodeCachePercent + objectCachePercent);
         long nodecachesize = objectbuffersize / (super.objectsize + 8 * columns.length);
-        this.objectCache = new kelondroObjectCache((int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
+        this.objectCache = new kelondroObjectCache(this.filename, (int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
     }
 
     public kelondroTree(File file, long buffersize) throws IOException {
@@ -159,7 +159,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         super.setLogger(log);
         long objectbuffersize = objectCachePercent * buffersize / (nodeCachePercent + objectCachePercent);
         long nodecachesize = objectbuffersize / (super.objectsize + 8 * super.columns());
-        this.objectCache = new kelondroObjectCache((int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
+        this.objectCache = new kelondroObjectCache(this.filename, (int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
     }
 
     public kelondroTree(kelondroRA ra, long buffersize) throws IOException {
@@ -169,7 +169,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         super.setLogger(log);
         long objectbuffersize = objectCachePercent * buffersize / (nodeCachePercent + objectCachePercent);
         long nodecachesize = objectbuffersize / (super.objectsize + 8 * super.columns());
-        this.objectCache = new kelondroObjectCache((int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
+        this.objectCache = new kelondroObjectCache(this.filename, (int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
     }
 
     private void writeOrderType() {
@@ -217,16 +217,19 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     public byte[][] get(byte[] key) throws IOException {
         // System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
         byte[][] result = (byte[][]) objectCache.get(key);
-        if (result != null) return result;
+        if (result != null) {
+            //System.out.println("cache hit in objectCache, db:" + super.filename);
+            return result;
+        }
         // writeLock.stay(2000, 1000);
         synchronized (writeSearchObj) {
             writeSearchObj.process(key);
             if (writeSearchObj.found()) {
                 result = writeSearchObj.getMatcher().getValues();
+                objectCache.put(key, result);
             } else {
                 result = null;
             }
-            objectCache.put(key, result);
         }
         // writeLock.release();
         return result;

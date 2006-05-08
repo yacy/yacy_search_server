@@ -60,26 +60,33 @@ import java.util.TreeMap;
 
 public class kelondroObjectCache {
 
-    private final TreeMap cache;
-    private final kelondroMScoreCluster ages;
-    private long  startTime;
-    private int   maxSize;
-    private long  maxAge;
-    private long  minMem;
-    private int   readHit, readMiss, writeUnique, writeDouble;
+    private final  TreeMap cache;
+    private final  kelondroMScoreCluster ages;
+    private long   startTime;
+    private int    maxSize;
+    private long   maxAge;
+    private long   minMem;
+    private int    readHit, readMiss, writeUnique, writeDouble;
+    private String name;
     
-    public kelondroObjectCache(int maxSize, long maxAge, long minMem) {
+    public kelondroObjectCache(String name, int maxSize, long maxAge, long minMem) {
+        this.name = name;
         this.cache = new TreeMap();
         this.ages  = new kelondroMScoreCluster();
         this.startTime = System.currentTimeMillis();
-        this.maxAge = maxAge;
-        this.minMem = minMem;
+        this.maxSize = Math.max(maxSize, 1);
+        this.maxAge = Math.max(maxAge, 10000);
+        this.minMem = Math.max(minMem, 1024 * 1024);
         this.readHit = 0;
         this.readMiss = 0;
         this.writeUnique = 0;
         this.writeDouble = 0;
     }
 
+    public String getName() {
+        return name;
+    }
+    
     public void setMaxAge(long maxAge) {
         this.maxAge = maxAge;
     }
@@ -162,10 +169,11 @@ public class kelondroObjectCache {
         String k;
         synchronized(cache) {
             while ((ages.size() > 0) &&
+                   ((k = bestFlush()) != null) &&
                    ((size() > maxSize) ||
-                   (longEmit(ages.getMinScore()) > maxAge) ||
-                   (Runtime.getRuntime().freeMemory() < minMem)) &&
-                  ((k = bestFlush()) != null)) {
+                    ((System.currentTimeMillis() - longEmit(ages.getScore(k))) > maxAge) ||
+                    (Runtime.getRuntime().freeMemory() < minMem))
+                  ) {
                 cache.remove(k);
                 ages.deleteScore(k);
                 if (Runtime.getRuntime().freeMemory() < minMem) System.gc(); // prevent unnecessary loops
