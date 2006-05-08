@@ -690,7 +690,7 @@ public class wikiCode {
 
                 // are there any arguments for the image?
                 if ((p = kl.indexOf("&#124;")) > 0) {
-                    kv = kl.substring(p + 1);
+                    kv = kl.substring(p + 6);
                     kl = kl.substring(0, p);
                     // if there are 2 arguments, write them into ALIGN and ALT
                     if ((p = kv.indexOf("&#124;")) > 0) {
@@ -707,7 +707,7 @@ public class wikiCode {
                             align = " align=\"" + align + "\"";
                         }
                         else align = "";
-                        alt = " alt=\"" + kv.substring(p + 1) + "\"";
+                        alt = " alt=\"" + kv.substring(p + 6) + "\"";
                     }
                     // if there is just one, put it into ALT
                     else
@@ -730,7 +730,7 @@ public class wikiCode {
             // if it's no image, it might be an internal link
             else {
                 if ((p = kl.indexOf("&#124;")) > 0) {
-                    kv = kl.substring(p + 1);
+                    kv = kl.substring(p + 6);
                     kl = kl.substring(0, p);
                 } else {
                     kv = kl;
