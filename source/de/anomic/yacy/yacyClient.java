@@ -124,7 +124,8 @@ public final class yacyClient {
             
             // sending request
             result = nxTools.table(
-                    httpc.wput(url,                                 
+                    httpc.wput(url,
+                               yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                                105000, 
                                null, 
                                null,
@@ -257,10 +258,12 @@ public final class yacyClient {
                                     "&object=seed" +
                                     "&env=" + seedHash
                             ),
+                            yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                             10000, 
                             null, 
                             null, 
-                            (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null
+                            (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
+                            null
                     )
             );
             
@@ -292,6 +295,7 @@ public final class yacyClient {
                                     "&env=" + wordHash +
                                     "&ttl=0"
                             ),
+                            yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                             10000, 
                             null, 
                             null, 
@@ -331,7 +335,8 @@ public final class yacyClient {
         try {
             final HashMap result = nxTools.table(
                     httpc.wget(
-                            new URL(querystr), 
+                            new URL(querystr),
+                            yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                             6000, 
                             null, 
                             null,
@@ -422,6 +427,7 @@ public final class yacyClient {
             final HashMap result = nxTools.table(
                     httpc.wput(
                             new URL(url),
+                            yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                             300000, 
                             null, 
                             null,
@@ -556,6 +562,7 @@ public final class yacyClient {
             return nxTools.table(
                     httpc.wput(
                             new URL("http://" + address + "/yacy/message.html"),
+                            yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                             8000, 
                             null, 
                             null, 
@@ -599,7 +606,8 @@ public final class yacyClient {
         // sending request
         try {
             final ArrayList v = httpc.wput(
-                    new URL("http://" + address + "/yacy/message.html"), 
+                    new URL("http://" + address + "/yacy/message.html"),
+                    yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                     20000, 
                     null, 
                     null,
@@ -653,6 +661,7 @@ public final class yacyClient {
             return nxTools.table(
                     httpc.wput(
                             new URL("http://" + targetAddress + "/yacy/transfer.html"),
+                            yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                             8000, 
                             null, 
                             null, 
@@ -692,7 +701,8 @@ public final class yacyClient {
         // sending request
         try {
             final ArrayList v = httpc.wput(
-                    new URL("http://" + targetAddress + "/yacy/transfer.html"), 
+                    new URL("http://" + targetAddress + "/yacy/transfer.html"),
+                    yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                     20000, 
                     null, 
                     null,
@@ -777,6 +787,7 @@ public final class yacyClient {
             return nxTools.table(
                     httpc.wput(
                             new URL("http://" + address + "/yacy/crawlOrder.html"),
+                            yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                             timeout, 
                             null, 
                             null, 
@@ -851,6 +862,7 @@ public final class yacyClient {
                                     "&wordh=" + wordhashes +
                                     "&lurlEntry=" + ((entry == null) ? "" : crypt.simpleEncode(entry.toString(), key))
                             ),
+                            yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                             60000, 
                             null, 
                             null,             
@@ -965,6 +977,7 @@ public final class yacyClient {
         try {
             final ArrayList v = httpc.wput(
                     new URL("http://" + address + "/yacy/transferRWI.html"), 
+                    yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                     timeout, 
                     null, 
                     null,
@@ -1021,7 +1034,8 @@ public final class yacyClient {
         post.put("urlc", Integer.toString(urlc));
         try {
             final ArrayList v = httpc.wput(
-                    new URL("http://" + address + "/yacy/transferURL.html"), 
+                    new URL("http://" + address + "/yacy/transferURL.html"),
+                    yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                     timeout, 
                     null, 
                     null,
@@ -1056,6 +1070,7 @@ public final class yacyClient {
         try {
             final ArrayList v = httpc.wput(
                     new URL("http://" + address + "/yacy/profile.html"), 
+                    yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                     20000, 
                     null, 
                     null,
@@ -1095,6 +1110,7 @@ public final class yacyClient {
                                     "&count=10" +
                                     "&resource=global" +
                                     "&query=" + wordhashe),
+                                    yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                                     5000, 
                                     null, 
                                     null, 

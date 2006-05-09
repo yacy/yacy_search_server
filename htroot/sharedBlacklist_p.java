@@ -147,7 +147,8 @@ public class sharedBlacklist_p {
             reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
             
             // get List
-            otherBlacklist = httpc.wget(new URL(address), 12000, null, null, switchboard.remoteProxyConfig,reqHeader); 
+            URL u = new URL(address);
+            otherBlacklist = httpc.wget(u, u.getHost(), 12000, null, null, switchboard.remoteProxyConfig,reqHeader); 
         } catch (Exception e) {}
                 
 		//Make HTML-Optionlist with retrieved items
@@ -178,7 +179,8 @@ public class sharedBlacklist_p {
 		Name = address;
                 
                 try {
-                    otherBlacklist = httpc.wget(new URL(address), 6000, null, null, switchboard.remoteProxyConfig); //get List
+                    URL u = new URL(address);
+                    otherBlacklist = httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig); //get List
                 } catch (Exception e) {}
 		prop.put("status", 0); //TODO: check if the wget failed...
 

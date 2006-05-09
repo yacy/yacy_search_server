@@ -1152,6 +1152,7 @@ do upload
 
     public static byte[] singlePOST(
             URL u, 
+            String host,
             int timeout,
             String user, 
             String password,
@@ -1186,8 +1187,10 @@ do upload
             serverObjects props
     ) throws IOException {
         try {
+            URL u = new URL(url);
             return singlePOST(
-                    new URL(url), 
+                    u,
+                    u.getHost(),
                     timeout, 
                     null, 
                     null, 
@@ -1201,20 +1204,23 @@ do upload
     }
 
     public static ArrayList wget(
-            URL url, 
+            URL url,
+            String host,
             int timeout, 
             String user, 
             String password, 
             httpRemoteProxyConfig theRemoteProxyConfig
     ) throws IOException {
-        return wget(url,timeout,user,password,theRemoteProxyConfig,null);
+        return wget(url, host,timeout,user,password,theRemoteProxyConfig,null);
     }
+    
     public static ArrayList wget(URL url) throws IOException{
-        return wget(url, 6000, null, null, plasmaSwitchboard.getSwitchboard().remoteProxyConfig);
+        return wget(url, url.getHost(), 6000, null, null, plasmaSwitchboard.getSwitchboard().remoteProxyConfig, null);
     }
     
     public static ArrayList wget(
-            URL url, 
+            URL url,
+            String host,
             int timeout, 
             String user, 
             String password, 
@@ -1231,7 +1237,7 @@ do upload
         
         // splitting of the byte array into lines
         byte[] a = singleGET(
-                url.getHost(), 
+                host,
                 port, 
                 path, 
                 timeout, 
@@ -1346,7 +1352,8 @@ do upload
      */
 
     public static ArrayList wput(
-            URL url, 
+            URL url,
+            String host,
             int timeout, 
             String user, 
             String password, 
@@ -1356,7 +1363,8 @@ do upload
     ) throws IOException {
         // splitting of the byte array into lines
         byte[] a = singlePOST(
-                url, 
+                url,
+                host,
                 timeout, 
                 user, 
                 password, 
@@ -1402,7 +1410,8 @@ do upload
             
             httpRemoteProxyConfig theRemoteProxyConfig = httpRemoteProxyConfig.init(proxyHost,proxyPort);
             try {
-                text = wget(new URL(url), timeout, null, null, theRemoteProxyConfig);
+                URL u = new URL(url);
+                text = wget(u, u.getHost(), timeout, null, null, theRemoteProxyConfig);
             } catch (MalformedURLException e) {
                 System.out.println("The url '" + url + "' is wrong.");
             } catch (IOException e) {

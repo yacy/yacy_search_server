@@ -703,7 +703,8 @@ public final class yacySeedDB {
         reqHeader.put(httpHeader.PRAGMA, "no-cache");
         reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
         ArrayList check  = httpc.wget(
-                seedURL, 
+                seedURL,
+                seedURL.getHost(),
                 10000, 
                 null, 
                 null, 

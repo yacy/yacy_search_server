@@ -60,7 +60,7 @@ public class natLib {
 	  rm status.htm
 	*/
 	try {
-	    ArrayList x = httpc.wget(new URL("http://192.168.0.1:80/status.htm"), 5000, "admin", password, null);
+	    ArrayList x = httpc.wget(new URL("http://192.168.0.1:80/status.htm"), "192.168.0.1", 5000, "admin", password, null);
 	    x = nxTools.grep(x, 1, "IP Address");
 	    if ((x == null) || (x.size() == 0)) return null;
 	    String line = nxTools.tail1(x);
@@ -72,7 +72,7 @@ public class natLib {
 
     private static String getWhatIsMyIP() {
 	try {
-        ArrayList x = httpc.wget(new URL("http://www.whatismyip.com/"), 5000, null, null, null);
+        ArrayList x = httpc.wget(new URL("http://www.whatismyip.com/"), "whatsmyip.com", 5000, null, null, null);
 	    x = nxTools.grep(x, 0, "Your IP is");
 	    String line = nxTools.tail1(x);
 	    return nxTools.awk(line, " ", 4);
@@ -83,7 +83,7 @@ public class natLib {
 
     private static String getStanford() {
 	try {
-        ArrayList x = httpc.wget(new URL("http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl"), 5000, null, null, null);
+        ArrayList x = httpc.wget(new URL("http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl"), "stanford.edu", 5000, null, null, null);
 	    x = nxTools.grep(x, 0, "firewall protecting your browser");
 	    String line = nxTools.tail1(x);
 	    return nxTools.awk(line, " ", 7);
@@ -94,7 +94,7 @@ public class natLib {
 
     private static String getIPID() {
 	try {
-        ArrayList x = httpc.wget(new URL("http://ipid.shat.net/"), 5000, null, null, null);
+        ArrayList x = httpc.wget(new URL("http://ipid.shat.net/"), "shat.net", 5000, null, null, null);
 	    x = nxTools.grep(x, 2, "Your IP address");
 	    String line = nxTools.tail1(x);
 	    return nxTools.awk(nxTools.awk(nxTools.awk(line, " ", 5), ">", 2), "<", 1);
