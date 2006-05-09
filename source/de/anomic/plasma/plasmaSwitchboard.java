@@ -161,8 +161,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public static int maxCRLDump            = 500000;
     public static int maxCRGDump            = 200000;
-    private int       dhtTransferIndexCount = 50;
-    private static final int dhtTransferIndexMinimum = 30;
+    
+    private int       dhtTransferIndexCount = 50;    
     
     // couloured list management
     public static TreeSet badwords = null;
@@ -548,6 +548,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // initializing dht chunk generation
         this.dhtTransferChunk = null;
+        this.dhtTransferIndexCount = (int) getConfigLong("indexDistribution.startChunkSize", 50);
         
         // deploy threads
         log.logConfig("Starting Threads");
@@ -929,7 +930,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
              // (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) ||
              (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_FAILED))) {
             // generate new chunk
-            dhtTransferChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, 30, dhtTransferIndexCount);
+            int minChunkSize = (int) getConfigLong("indexDistribution.minChunkSize", 30);
+            dhtTransferChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, minChunkSize, dhtTransferIndexCount);
             doneSomething = true;
         }
         
@@ -2119,7 +2121,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } else {
                 if (dhtTransferChunk.indexCount() >= dhtTransferIndexCount) dhtTransferIndexCount++;
             }
-            if (dhtTransferIndexCount < dhtTransferIndexMinimum) dhtTransferIndexCount = dhtTransferIndexMinimum;
+            int minChunkSize = (int) getConfigLong("indexDistribution.minChunkSize", 30);
+            int maxChunkSize = (int) getConfigLong("indexDistribution.maxChunkSize", 3000);
+            if (dhtTransferIndexCount < minChunkSize) dhtTransferIndexCount = minChunkSize;
+            if (dhtTransferIndexCount > maxChunkSize) dhtTransferIndexCount = maxChunkSize;
             
             // show success
             return true;

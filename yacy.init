@@ -611,6 +611,11 @@ indexTransfer.timeout = 120000
 indexDistribution.maxOpenFiles = 800
 indexTransfer.maxOpenFiles = 800
 
+# sizes for index distribution
+indexDistribution.minChunkSize = 5
+indexDistribution.maxChunkSize = 1000
+indexDistribution.startChunkSize = 50
+
 # Distribution of Citation-Reference (CR-) files
 # The distribution is done in two steps:
 # first step to anonymize the records
