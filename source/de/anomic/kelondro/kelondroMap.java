@@ -133,12 +133,16 @@ public class kelondroMap {
         return dyn.columnSize(0);
     }
 
-    public int[] cacheChunkSize() {
-        return dyn.cacheChunkSize();
+    public int[] cacheNodeChunkSize() {
+        return dyn.cacheNodeChunkSize();
     }
 
-    public int[] cacheFillStatus() {
-        return dyn.cacheFillStatus();
+    public int[] cacheNodeFillStatus() {
+        return dyn.cacheNodeFillStatus();
+    }
+    
+    public String[] cacheObjectStatus() {
+        return dyn.cacheObjectStatus();
     }
 
     public synchronized void set(String key, Map newMap) throws IOException {

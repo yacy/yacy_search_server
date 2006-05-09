@@ -202,13 +202,17 @@ public final class plasmaHTCache {
     }
 
     public int[] dbCacheChunkSize() {
-        return this.responseHeaderDB.cacheChunkSize();
+        return this.responseHeaderDB.cacheNodeChunkSize();
     }
 
     public int[] dbCacheFillStatus() {
-        return this.responseHeaderDB.cacheFillStatus();
+        return this.responseHeaderDB.cacheNodeFillStatus();
     }
 
+    public String[] dbCacheObjectStatus() {
+        return this.responseHeaderDB.cacheObjectStatus();
+    }
+    
     public void push(Entry entry) {
         synchronized (this.cacheStack) {
             this.cacheStack.add(entry);

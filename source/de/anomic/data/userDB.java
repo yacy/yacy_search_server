@@ -92,12 +92,12 @@ public final class userDB {
         }
     }
     
-    public int[] dbCacheChunkSize() {
-        return userTable.cacheChunkSize();
+    public int[] dbCacheNodeChunkSize() {
+        return userTable.cacheNodeChunkSize();
     }    
     
-    public int[] dbCacheFillStatus() {
-        return userTable.cacheFillStatus();
+    public int[] dbCacheNodeFillStatus() {
+        return userTable.cacheNodeFillStatus();
     }    
     
     void resetDatabase() {

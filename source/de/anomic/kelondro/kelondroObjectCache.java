@@ -95,6 +95,10 @@ public class kelondroObjectCache {
         this.maxSize = maxSize;
     }
     
+    public int maxSize() {
+        return this.maxSize;
+    }
+    
     public void setMinMem(int minMem) {
         this.minMem = minMem;
     }
@@ -111,6 +115,41 @@ public class kelondroObjectCache {
     
     public int size() {
         return cache.size();
+    }
+    
+    public String[] status() {
+        return new String[]{
+                Integer.toString(maxSize()),
+                Integer.toString(size()),
+                Long.toString(this.maxAge),
+                Long.toString(minAge()),
+                Long.toString(maxAge()),
+                Integer.toString(readHit),
+                Integer.toString(readMiss),
+                Integer.toString(writeUnique),
+                Integer.toString(writeDouble)
+                };
+    }
+    
+    private static String[] combinedStatus(String[] a, String[] b) {
+        return new String[]{
+                Integer.toString(Integer.parseInt(a[0]) + Integer.parseInt(b[0])),
+                Integer.toString(Integer.parseInt(a[1]) + Integer.parseInt(b[1])),
+                Long.toString(Math.max(Long.parseLong(a[2]), Long.parseLong(b[2]))),
+                Long.toString(Math.min(Long.parseLong(a[3]), Long.parseLong(b[3]))),
+                Long.toString(Math.max(Long.parseLong(a[4]), Long.parseLong(b[4]))),
+                Integer.toString(Integer.parseInt(a[5]) + Integer.parseInt(b[5])),
+                Integer.toString(Integer.parseInt(a[6]) + Integer.parseInt(b[6])),
+                Integer.toString(Integer.parseInt(a[7]) + Integer.parseInt(b[7])),
+                Integer.toString(Integer.parseInt(a[8]) + Integer.parseInt(b[8]))
+        };
+    }
+    
+    public static String[] combinedStatus(String[][] a, int l) {
+        if ((a == null) || (a.length == 0) || (l == 0)) return null;
+        if ((a.length >= 1) && (l == 1)) return a[0];
+        if ((a.length >= 2) && (l == 2)) return combinedStatus(a[0], a[1]);
+        return combinedStatus(combinedStatus(a, l - 1), a[l - 1]);
     }
     
     private int intTime(long longTime) {

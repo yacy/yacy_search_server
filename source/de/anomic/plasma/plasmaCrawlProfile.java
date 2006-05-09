@@ -77,13 +77,17 @@ public class plasmaCrawlProfile {
         domsCache = new HashMap();
     }
     
-    public int[] dbCacheChunkSize() {
-        return profileTable.cacheChunkSize();
+    public int[] dbCacheNodeChunkSize() {
+        return profileTable.cacheNodeChunkSize();
     }    
     
-    public int[] dbCacheFillStatus() {
-        return profileTable.cacheFillStatus();
+    public int[] dbCacheNodeFillStatus() {
+        return profileTable.cacheNodeFillStatus();
     }    
+    
+    public String[] dbCacheObjectStatus() {
+        return profileTable.cacheObjectStatus();
+    }
     
     private void resetDatabase() {
         // deletes the profile database and creates a new one

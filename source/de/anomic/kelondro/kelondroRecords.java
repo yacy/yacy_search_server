@@ -427,11 +427,11 @@ public class kelondroRecords {
             this.XcacheHeaders = null;
             this.cacheScore = null;
         } else {
-            if ((buffersize / cacheChunkSize(false)) > size()) {
-                this.XcacheSize = (int) (buffersize / cacheChunkSize(false));
+            if ((buffersize / cacheNodeChunkSize(false)) > size()) {
+                this.XcacheSize = (int) (buffersize / cacheNodeChunkSize(false));
                 this.cacheScore = null; // no cache control because we have more cache slots than database entries
             } else {
-                this.XcacheSize = (int) (buffersize / cacheChunkSize(true));
+                this.XcacheSize = (int) (buffersize / cacheNodeChunkSize(true));
                 this.cacheScore = new kelondroMScoreCluster(); // cache control of CP_HIGH caches
             }
             this.XcacheHeaders = new HashMap[]{new HashMap(), new HashMap(), new HashMap()};
@@ -452,23 +452,23 @@ public class kelondroRecords {
         return new File(filename);
     }
     
-    protected final int cacheChunkSize(boolean cacheControl) {
+    protected final int cacheNodeChunkSize(boolean cacheControl) {
         return this.headchunksize + element_in_cache + ((cacheControl) ? cache_control_entry : 0);
     }
     
-    public int[] cacheChunkSize() {
+    public int[] cacheNodeChunkSize() {
         // returns three integers:
         // #0: chunk size of CP_LOW - priority entries
         // #1: chunk size of CP_MEDIUM - priority entries
         // #2: chunk size of CP_HIGH - priority entries
         int[] i = new int[3];
-        i[CP_LOW]    = cacheChunkSize(false);
-        i[CP_MEDIUM] = cacheChunkSize(false);
-        i[CP_HIGH]   = cacheChunkSize(this.cacheScore != null);
+        i[CP_LOW]    = cacheNodeChunkSize(false);
+        i[CP_MEDIUM] = cacheNodeChunkSize(false);
+        i[CP_HIGH]   = cacheNodeChunkSize(this.cacheScore != null);
         return i;
     }
     
-    public int[] cacheFillStatus() {
+    public int[] cacheNodeFillStatus() {
         if (XcacheHeaders == null) return new int[]{0,0,0,0};
         return new int[]{XcacheSize - (XcacheHeaders[CP_HIGH].size() + XcacheHeaders[CP_MEDIUM].size() + XcacheHeaders[CP_LOW].size()), XcacheHeaders[CP_HIGH].size(), XcacheHeaders[CP_MEDIUM].size(), XcacheHeaders[CP_LOW].size()};
     }

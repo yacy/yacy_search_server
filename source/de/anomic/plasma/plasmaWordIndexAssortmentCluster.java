@@ -52,6 +52,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroObjectCache;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.server.logging.serverLog;
@@ -266,7 +267,7 @@ public final class plasmaWordIndexAssortmentCluster {
         int[] i = new int[]{0, 0, 0};
         int[] a = new int[3];
         for (int j = 0; j < clusterCount; j++) {
-            a = assortments[j].cacheChunkSize();
+            a = assortments[j].cacheNodeChunkSize();
             i[kelondroRecords.CP_LOW]    += a[kelondroRecords.CP_LOW];
             i[kelondroRecords.CP_MEDIUM] += a[kelondroRecords.CP_MEDIUM];
             i[kelondroRecords.CP_HIGH]   += a[kelondroRecords.CP_HIGH];
@@ -280,10 +281,16 @@ public final class plasmaWordIndexAssortmentCluster {
     public int[] cacheFillStatusCml() {
         int[] a, cml = new int[]{0, 0, 0, 0};
         for (int i = 0; i < clusterCount; i++) {
-            a = assortments[i].cacheFillStatus();
+            a = assortments[i].cacheNodeFillStatus();
             for (int j = 0; j < 4; j++) cml[j] += a[j];
         }
         return cml;
+    }
+    
+    public String[] cacheObjectStatus() {
+        String[][] a = new String[assortments.length][];
+        for (int i = 0; i < assortments.length; i++) a[i] = assortments[i].dbCacheObjectStatus();
+        return kelondroObjectCache.combinedStatus(a, a.length);
     }
     
     public void close() {

@@ -63,8 +63,9 @@ public class PerformanceMemory_p {
     private static final int MB = 1024 * KB;
     private static Map defaultSettings = null;
         
-    private static int[] slt,chk;
-    private static int   req,usd,bst,god;
+    private static int[]    slt,chk;
+    private static String[] ost;
+    private static int      req, usd, bst, god;
     
     private static long usedTotal, currTotal, dfltTotal, goodTotal, bestTotal;
         
@@ -157,61 +158,73 @@ public class PerformanceMemory_p {
         req = sb.wordIndex.size();
         chk = sb.wordIndex.assortmentsCacheChunkSizeAvg();
         slt = sb.wordIndex.assortmentsCacheFillStatusCml();
+        ost = sb.wordIndex.assortmentsCacheObjectStatus();
         putprop(prop, env, "RWI", set);
         
         req = sb.cacheManager.dbSize();
         chk = sb.cacheManager.dbCacheChunkSize();
         slt = sb.cacheManager.dbCacheFillStatus();
+        ost = sb.cacheManager.dbCacheObjectStatus();
         putprop(prop, env, "HTTP", set);
         
         req = sb.urlPool.loadedURL.urlHashCache.size();
-        chk = sb.urlPool.loadedURL.urlHashCache.cacheChunkSize();
-        slt = sb.urlPool.loadedURL.urlHashCache.cacheFillStatus();
+        chk = sb.urlPool.loadedURL.urlHashCache.cacheNodeChunkSize();
+        slt = sb.urlPool.loadedURL.urlHashCache.cacheNodeFillStatus();
+        ost = sb.urlPool.loadedURL.urlHashCache.cacheObjectStatus();
         putprop(prop, env, "LURL", set);
         
         req = sb.urlPool.noticeURL.urlHashCache.size();
-        chk = sb.urlPool.noticeURL.urlHashCache.cacheChunkSize();
-        slt = sb.urlPool.noticeURL.urlHashCache.cacheFillStatus();
+        chk = sb.urlPool.noticeURL.urlHashCache.cacheNodeChunkSize();
+        slt = sb.urlPool.noticeURL.urlHashCache.cacheNodeFillStatus();
+        ost = sb.urlPool.noticeURL.urlHashCache.cacheObjectStatus();
         putprop(prop, env, "NURL", set);
         
         req = sb.urlPool.errorURL.urlHashCache.size();
-        chk = sb.urlPool.errorURL.urlHashCache.cacheChunkSize();
-        slt = sb.urlPool.errorURL.urlHashCache.cacheFillStatus();
+        chk = sb.urlPool.errorURL.urlHashCache.cacheNodeChunkSize();
+        slt = sb.urlPool.errorURL.urlHashCache.cacheNodeFillStatus();
+        ost = sb.urlPool.errorURL.urlHashCache.cacheObjectStatus();
         putprop(prop, env, "EURL", set);
         
         req = yacyCore.seedDB.sizeConnected() + yacyCore.seedDB.sizeDisconnected() + yacyCore.seedDB.sizePotential();
-        chk = yacyCore.seedDB.dbCacheChunkSize();
-        slt = yacyCore.seedDB.dbCacheFillStatus();
+        chk = yacyCore.seedDB.dbCacheNodeChunkSize();
+        slt = yacyCore.seedDB.dbCacheNodeFillStatus();
+        ost = yacyCore.seedDB.dbCacheObjectStatus();
         putprop(prop, env, "DHT", set);
         
         req = sb.messageDB.size();
-        chk = sb.messageDB.dbCacheChunkSize();
-        slt = sb.messageDB.dbCacheFillStatus();
+        chk = sb.messageDB.dbCacheNodeChunkSize();
+        slt = sb.messageDB.dbCacheNodeFillStatus();
+        ost = sb.messageDB.dbCacheObjectStatus();
         putprop(prop, env, "Message", set);
         
         req = sb.wikiDB.sizeOfTwo();
-        chk = sb.wikiDB.dbCacheChunkSize();
-        slt = sb.wikiDB.dbCacheFillStatus();
+        chk = sb.wikiDB.dbCacheNodeChunkSize();
+        slt = sb.wikiDB.dbCacheNodeFillStatus();
+        ost = sb.wikiDB.dbCacheObjectStatus();
         putprop(prop, env, "Wiki", set);
         
         req = sb.blogDB.size();
-        chk = sb.blogDB.dbCacheChunkSize();
-        slt = sb.blogDB.dbCacheFillStatus();
+        chk = sb.blogDB.dbCacheNodeChunkSize();
+        slt = sb.blogDB.dbCacheNodeFillStatus();
+        ost = sb.blogDB.dbCacheObjectStatus();
         putprop(prop, env, "Blog", set);
         
         req = yacyCore.newsPool.dbSize();
-        chk = yacyCore.newsPool.dbCacheChunkSize();
-        slt = yacyCore.newsPool.dbCacheFillStatus();
+        chk = yacyCore.newsPool.dbCacheNodeChunkSize();
+        slt = yacyCore.newsPool.dbCacheNodeFillStatus();
+        ost = yacyCore.newsPool.dbCacheObjectStatus();
         putprop(prop, env, "News", set);
         
         req = plasmaSwitchboard.robots.size();
-        chk = plasmaSwitchboard.robots.dbCacheChunkSize();
-        slt = plasmaSwitchboard.robots.dbCacheFillStatus();
+        chk = plasmaSwitchboard.robots.dbCacheNodeChunkSize();
+        slt = plasmaSwitchboard.robots.dbCacheNodeFillStatus();
+        ost = plasmaSwitchboard.robots.dbCacheObjectStatus();
         putprop(prop, env, "Robots", set);
         
         req = sb.profiles.size();
-        chk = sb.profiles.dbCacheChunkSize();
-        slt = sb.profiles.dbCacheFillStatus();
+        chk = sb.profiles.dbCacheNodeChunkSize();
+        slt = sb.profiles.dbCacheNodeFillStatus();
+        ost = sb.profiles.dbCacheObjectStatus();
         putprop(prop, env, "Profiles", set);
         
         prop.put("usedTotal", usedTotal / MB);
@@ -289,6 +302,10 @@ public class PerformanceMemory_p {
         prop.put("slhig" + db, slt[1]);
         prop.put("slmed" + db, slt[2]);
         prop.put("sllow" + db, slt[3]);
+        prop.put("ochunkmax" + db, ost[0]);
+        prop.put("ochunkcur" + db, ost[1]);
+        prop.put("ohittmiss" + db, ost[5] + ":" + ost[6]);
+        prop.put("ouniqdoub" + db, ost[7] + ":" + ost[8]);
         prop.put("used" + db, usd / KB);
         prop.put("good" + db, god / KB);
         prop.put("best" + db, bst / KB);

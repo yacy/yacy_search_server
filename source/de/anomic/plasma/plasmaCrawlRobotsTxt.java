@@ -85,13 +85,17 @@ public class plasmaCrawlRobotsTxt {
         }
     }
     
-    public int[] dbCacheChunkSize() {
-        return robotsTable.cacheChunkSize();
+    public int[] dbCacheNodeChunkSize() {
+        return robotsTable.cacheNodeChunkSize();
     }    
     
-    public int[] dbCacheFillStatus() {
-        return robotsTable.cacheFillStatus();
+    public int[] dbCacheNodeFillStatus() {
+        return robotsTable.cacheNodeFillStatus();
     }    
+    
+    public String[] dbCacheObjectStatus() {
+        return robotsTable.cacheObjectStatus();
+    }
     
     private void resetDatabase() {
         // deletes the robots.txt database and creates a new one

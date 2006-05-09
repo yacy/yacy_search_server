@@ -133,6 +133,10 @@ public final class plasmaWordIndex {
         return assortmentCluster.cacheFillStatusCml();
     }
     
+    public String[] assortmentsCacheObjectStatus() {
+        return assortmentCluster.cacheObjectStatus();
+    }
+    
     public void setMaxWordCount(int maxWords) {
         ramCache.setMaxWordCount(maxWords);
     }

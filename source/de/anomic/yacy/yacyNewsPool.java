@@ -106,12 +106,16 @@ public class yacyNewsPool {
         return newsDB.size();
     }
     
-    public int[] dbCacheChunkSize() {
-        return newsDB.dbCacheChunkSize();
+    public int[] dbCacheNodeChunkSize() {
+        return newsDB.dbCacheNodeChunkSize();
     }
     
-    public int[] dbCacheFillStatus() {
-        return newsDB.dbCacheFillStatus();
+    public int[] dbCacheNodeFillStatus() {
+        return newsDB.dbCacheNodeFillStatus();
+    }
+    
+    public String[] dbCacheObjectStatus() {
+        return newsDB.dbCacheObjectStatus();
     }
     
     public void publishMyNews(yacyNewsRecord record) throws IOException {

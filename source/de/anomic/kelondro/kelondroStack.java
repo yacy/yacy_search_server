@@ -99,7 +99,7 @@ public final class kelondroStack extends kelondroRecords {
     public static kelondroStack reset(kelondroStack stack) {
         // memorize settings to this file
         File f = new File(stack.filename);
-        long bz = stack.XcacheSize * stack.cacheChunkSize(true);
+        long bz = stack.XcacheSize * stack.cacheNodeChunkSize(true);
         int[] cols = stack.COLWIDTHS;
         
         // close and delete the file

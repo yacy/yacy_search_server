@@ -100,9 +100,9 @@ public class wikiBoard {
         return datbase.size();
     }
     
-    public int[] dbCacheChunkSize() {
-        int[] db = datbase.cacheChunkSize();
-        int[] bk = bkpbase.cacheChunkSize();
+    public int[] dbCacheNodeChunkSize() {
+        int[] db = datbase.cacheNodeChunkSize();
+        int[] bk = bkpbase.cacheNodeChunkSize();
         int[] i = new int[3];
         i[kelondroRecords.CP_LOW] = (db[kelondroRecords.CP_LOW] + bk[kelondroRecords.CP_LOW]) / 2;
         i[kelondroRecords.CP_MEDIUM] = (db[kelondroRecords.CP_MEDIUM] + bk[kelondroRecords.CP_MEDIUM]) / 2;
@@ -110,10 +110,14 @@ public class wikiBoard {
         return i;
     }
     
-    public int[] dbCacheFillStatus() {
-        int[] a = datbase.cacheFillStatus();
-        int[] b = bkpbase.cacheFillStatus();
+    public int[] dbCacheNodeFillStatus() {
+        int[] a = datbase.cacheNodeFillStatus();
+        int[] b = bkpbase.cacheNodeFillStatus();
         return new int[]{a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]};
+    }
+    
+    public String[] dbCacheObjectStatus() {
+        return datbase.cacheObjectStatus();
     }
     
     public void close() {

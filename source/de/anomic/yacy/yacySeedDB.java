@@ -64,6 +64,7 @@ import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroObjectCache;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -169,10 +170,10 @@ public final class yacySeedDB {
         } catch (IOException e) {}
     }
     
-    public int[] dbCacheChunkSize() {
-        int[] ac = seedActiveDB.cacheChunkSize();
-        int[] pa = seedPassiveDB.cacheChunkSize();
-        int[] po = seedPotentialDB.cacheChunkSize();
+    public int[] dbCacheNodeChunkSize() {
+        int[] ac = seedActiveDB.cacheNodeChunkSize();
+        int[] pa = seedPassiveDB.cacheNodeChunkSize();
+        int[] po = seedPotentialDB.cacheNodeChunkSize();
         int[] i = new int[3];
         i[kelondroRecords.CP_LOW] = (ac[kelondroRecords.CP_LOW] + pa[kelondroRecords.CP_LOW] + po[kelondroRecords.CP_LOW]) / 3;
         i[kelondroRecords.CP_MEDIUM] = (ac[kelondroRecords.CP_MEDIUM] + pa[kelondroRecords.CP_MEDIUM] + po[kelondroRecords.CP_MEDIUM]) / 3;
@@ -180,11 +181,18 @@ public final class yacySeedDB {
         return i;
     }
     
-    public int[] dbCacheFillStatus() {
-        int[] ac = seedActiveDB.cacheFillStatus();
-        int[] pa = seedPassiveDB.cacheFillStatus();
-        int[] po = seedPotentialDB.cacheFillStatus();
+    public int[] dbCacheNodeFillStatus() {
+        int[] ac = seedActiveDB.cacheNodeFillStatus();
+        int[] pa = seedPassiveDB.cacheNodeFillStatus();
+        int[] po = seedPotentialDB.cacheNodeFillStatus();
         return new int[]{ac[0] + pa[0] + po[0], ac[1] + pa[1] + po[1], ac[2] + pa[2] + po[2], ac[3] + pa[3] + po[3]};
+    }
+    
+    public String[] dbCacheObjectStatus() {
+        return kelondroObjectCache.combinedStatus(new String[][] {
+                seedActiveDB.cacheObjectStatus(),
+                seedPassiveDB.cacheObjectStatus(),
+                seedPotentialDB.cacheObjectStatus() }, 3);
     }
     
     private synchronized kelondroMap openSeedTable(File seedDBFile) {

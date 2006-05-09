@@ -86,12 +86,16 @@ public class messageBoard {
         return database.size();
     }
     
-    public int[] dbCacheChunkSize() {
-        return database.cacheChunkSize();
+    public int[] dbCacheNodeChunkSize() {
+        return database.cacheNodeChunkSize();
     }
     
-    public int[] dbCacheFillStatus() {
-        return database.cacheFillStatus();
+    public int[] dbCacheNodeFillStatus() {
+        return database.cacheNodeFillStatus();
+    }
+    
+    public String[] dbCacheObjectStatus() {
+        return database.cacheObjectStatus();
     }
     
     public void close() {

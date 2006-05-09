@@ -122,7 +122,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         writeOrderType();
         super.setLogger(log);
         long objectbuffersize = objectCachePercent * buffersize / (nodeCachePercent + objectCachePercent);
-        long nodecachesize = objectbuffersize / (super.objectsize + 8 * columns.length);
+        long nodecachesize = objectbuffersize / cacheObjectChunkSize();
         this.objectCache = new kelondroObjectCache(this.filename, (int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
     }
     
@@ -148,7 +148,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         writeOrderType();
         super.setLogger(log);
         long objectbuffersize = objectCachePercent * buffersize / (nodeCachePercent + objectCachePercent);
-        long nodecachesize = objectbuffersize / (super.objectsize + 8 * columns.length);
+        long nodecachesize = objectbuffersize / cacheObjectChunkSize();
         this.objectCache = new kelondroObjectCache(this.filename, (int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
     }
 
@@ -158,7 +158,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         readOrderType();
         super.setLogger(log);
         long objectbuffersize = objectCachePercent * buffersize / (nodeCachePercent + objectCachePercent);
-        long nodecachesize = objectbuffersize / (super.objectsize + 8 * super.columns());
+        long nodecachesize = objectbuffersize / cacheObjectChunkSize();
         this.objectCache = new kelondroObjectCache(this.filename, (int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
     }
 
@@ -168,10 +168,18 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         readOrderType();
         super.setLogger(log);
         long objectbuffersize = objectCachePercent * buffersize / (nodeCachePercent + objectCachePercent);
-        long nodecachesize = objectbuffersize / (super.objectsize + 8 * super.columns());
+        long nodecachesize = objectbuffersize / cacheObjectChunkSize();
         this.objectCache = new kelondroObjectCache(this.filename, (int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
     }
-
+    
+    public final int cacheObjectChunkSize() {
+        return super.objectsize + 8 * super.columns();
+    }
+    
+    public String[] cacheObjectStatus() {
+        return this.objectCache.status();
+    }
+    
     private void writeOrderType() {
         try {
             super.setDescription(objectOrder.signature().getBytes());

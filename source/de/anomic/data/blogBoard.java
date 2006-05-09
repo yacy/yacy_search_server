@@ -85,12 +85,16 @@ public class blogBoard {
         return datbase.size();
     }
     
-    public int[] dbCacheChunkSize() {
-        return datbase.cacheChunkSize();
+    public int[] dbCacheNodeChunkSize() {
+        return datbase.cacheNodeChunkSize();
     }
     
-    public int[] dbCacheFillStatus() {
-        return datbase.cacheFillStatus();
+    public int[] dbCacheNodeFillStatus() {
+        return datbase.cacheNodeFillStatus();
+    }
+    
+    public String[] dbCacheObjectStatus() {
+        return datbase.cacheObjectStatus();
     }
     
     public void close() {
