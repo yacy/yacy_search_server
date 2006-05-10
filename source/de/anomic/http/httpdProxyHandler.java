@@ -211,9 +211,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             isTransparentProxy = Boolean.valueOf(switchboard.getConfig("isTransparentProxy","false")).booleanValue();
             
-            // doing httpc init
-            httpc.useYacyReferer = sb.getConfig("useYacyReferer", "true").equals("true");
-            
 //            // load remote proxy data
 //            remoteProxyHost    = switchboard.getConfig("remoteProxyHost","");
 //            try {

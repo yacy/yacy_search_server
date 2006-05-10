@@ -348,7 +348,7 @@ public final class yacyClient {
             if ((result == null) || (result.size() == 0)) return -1;
             final String resp = (String) result.get("response");
             if (resp == null) { return -1; } else { return Integer.parseInt(resp); }
-        } catch (Exception e) {
+        } catch (IOException e) {
             yacyCore.log.logSevere("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
             return -1;
         }
