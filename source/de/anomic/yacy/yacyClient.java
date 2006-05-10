@@ -1071,7 +1071,7 @@ public final class yacyClient {
             final ArrayList v = httpc.wput(
                     new URL("http://" + address + "/yacy/profile.html"), 
                     yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
-                    20000, 
+                    10000, 
                     null, 
                     null,
                     (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null, 

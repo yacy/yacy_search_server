@@ -105,26 +105,31 @@ public class ViewProfile {
             yacySeed seed = yacyCore.seedDB.getConnected(hash);
             if (seed == null) {
                 seed = yacyCore.seedDB.getDisconnected(hash);
-                if (seed == null) {
-                    prop.put("success", "1"); // peer unknown
-                } else {
-                    prop.put("success", "2"); // peer known, but disconnected
-                    prop.put("success_peername", seed.getName());
-                }
+                long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
+                if (lastseen > 120) seed = null; // if contact is too old, we treat it as disconnected
+            }
+            if (seed == null) {
+                prop.put("success", "1"); // peer unknown
             } else {
-                prop.put("success", "3"); // everything ok
                 // process news if existent
                 try {
                     yacyNewsRecord record = yacyCore.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, "prfleupd", seed.hash);
                     if (record != null) yacyCore.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
                 } catch (IOException e) {}
-
-                // read profile from other peer
+                
+                // try to get the profile from remote peer
                 profile = yacyClient.getProfile(seed);
-                yacyCore.log.logInfo("fetched profile:" + profile);
+                
+                // if profile did not arrive, say that peer is disconnected
+                if (profile == null) {
+                    prop.put("success", "2"); // peer known, but disconnected
+                } else {
+                    yacyCore.log.logInfo("fetched profile:" + profile);
+                    prop.put("success", "3"); // everything ok
+                }
+                prop.put("success_peername", seed.getName());
             }
             prop.put("localremotepeer", 1);
-            prop.put("success_peername", seed.getName());
         }
         Iterator i;
         if (profile != null) {
