@@ -111,15 +111,15 @@ public final class plasmaCrawlLURL extends plasmaURL {
         if (cachePath.exists()) {
             // open existing cache
             try {
-                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400);
+                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent);
             } catch (IOException e) {
                 cachePath.getParentFile().mkdirs();
-                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce, true);
+                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
             }
         } else {
             // create new cache
             cachePath.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce, true);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
         }
 
         // init result stacks

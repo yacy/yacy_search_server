@@ -80,22 +80,23 @@
 <form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
 <tr class="TableHeader" valign="bottom">
 <td class="small" rowspan="2">Database<br>&nbsp;</td>
-<td class="small" rowspan="2">Node<br>Chunk Size<br>high/med/low<br>(bytes)</td>
-<td class="small" colspan="5">#Slots</td>
-<td class="small" rowspan="2">Object<br>Chunk Size<br>Max</td>
-<td class="small" rowspan="2">Object<br>Chunk Size<br>Current</td>
-<td class="small" rowspan="2">Hit/Miss<br>Ratio<br></td>
-<td class="small" rowspan="2">Unique/Double<br>Ratio<br></td>
+<td class="small" rowspan="2">DB&nbsp;Size<br>&nbsp;</td>
+<td class="small" colspan="5">Node Cache</td>
+<td class="small" colspan="4">Object Cache</td>
 <td class="small" colspan="5">Memory Occupation (KBytes)</td>
 <td class="small" rowspan="2">Description<br>&nbsp;</td>
 </tr>
 
 <tr class="TableHeader" valign="bottom">
-<td class="small">Needed<br>(=&nbsp;DB&nbsp;Size)</td>
-<td class="small">Empty<br>&nbsp;</td>
+<td class="small">Chunk Size<br>high/med/low<br>(bytes)</td>
+<td class="small">Empty<br>(avail.)<br>Slots</td>
 <td class="small">Used<br>High Prio</td>
 <td class="small">Used<br>Medium Prio</td>
 <td class="small">Used<br>Low Prio</td>
+<td class="small">Chunk Size<br>Max</td>
+<td class="small">Chunk Size<br>Current</td>
+<td class="small">Hit/<br>Miss<br>Ratio<br></td>
+<td class="small">Unique/<br>Double<br>Ratio<br></td>
 <td class="small">Used Now</td>
 <td class="small">Assigned Max</td>
 <td class="small">Default Max</td>
@@ -105,8 +106,8 @@
 
 <tr class="TableCellDark">
 <td class="small" align="left">RWI Assortment Cluster</td>
-<td class="small" align="center">#[chunkRWI]#</td>
 <td class="small" align="right">#[slreqRWI]#</td>
+<td class="small" align="center">#[chunkRWI]#</td>
 <td class="small" align="right">#[slempRWI]#</td>
 <td class="small" align="right">#[slhigRWI]#</td>
 <td class="small" align="right">#[slmedRWI]#</td>
@@ -127,8 +128,8 @@ cache will speed up crawls with a depth > 3.</td>
 
 <tr class="TableCellDark">
 <td class="small" align="left">HTTP Response Header</td>
-<td class="small" align="center">#[chunkHTTP]#</td>
 <td class="small" align="right">#[slreqHTTP]#</td>
+<td class="small" align="center">#[chunkHTTP]#</td>
 <td class="small" align="right">#[slempHTTP]#</td>
 <td class="small" align="right">#[slhigHTTP]#</td>
 <td class="small" align="right">#[slmedHTTP]#</td>
@@ -149,8 +150,8 @@ Increasing this cache will be most important for a fast proxy mode.</td>
 
 <tr class="TableCellDark">
 <td class="small" align="left">'loaded' URLs</td>
-<td class="small" align="center">#[chunkLURL]#</td>
 <td class="small" align="right">#[slreqLURL]#</td>
+<td class="small" align="center">#[chunkLURL]#</td>
 <td class="small" align="right">#[slempLURL]#</td>
 <td class="small" align="right">#[slhigLURL]#</td>
 <td class="small" align="right">#[slmedLURL]#</td>
@@ -170,8 +171,8 @@ This cache is very important for a fast search process. Increasing the cache siz
 
 <tr class="TableCellDark">
 <td class="small" align="left">'noticed' URLs</td>
-<td class="small" align="center">#[chunkNURL]#</td>
 <td class="small" align="right">#[slreqNURL]#</td>
+<td class="small" align="center">#[chunkNURL]#</td>
 <td class="small" align="right">#[slempNURL]#</td>
 <td class="small" align="right">#[slhigNURL]#</td>
 <td class="small" align="right">#[slmedNURL]#</td>
@@ -191,8 +192,8 @@ Increasing the cache size will result in faster double-check during URL recognit
 
 <tr class="TableCellDark">
 <td class="small" align="left">'error' URLs</td>
-<td class="small" align="center">#[chunkEURL]#</td>
 <td class="small" align="right">#[slreqEURL]#</td>
+<td class="small" align="center">#[chunkEURL]#</td>
 <td class="small" align="right">#[slempEURL]#</td>
 <td class="small" align="right">#[slhigEURL]#</td>
 <td class="small" align="right">#[slmedEURL]#</td>
@@ -212,8 +213,8 @@ Increasing the cache size will most probably speed up crawling slightly, but not
 
 <tr class="TableCellDark">
 <td class="small" align="left">DHT Control</td>
-<td class="small" align="center">#[chunkDHT]#</td>
 <td class="small" align="right">#[slreqDHT]#</td>
+<td class="small" align="center">#[chunkDHT]#</td>
 <td class="small" align="right">#[slempDHT]#</td>
 <td class="small" align="right">#[slhigDHT]#</td>
 <td class="small" align="right">#[slmedDHT]#</td>
@@ -234,8 +235,8 @@ Increasing this cache may speed up many functions, but we need to test this to s
 
 <tr class="TableCellDark">
 <td class="small" align="left">Messages</td>
-<td class="small" align="center">#[chunkMessage]#</td>
 <td class="small" align="right">#[slreqMessage]#</td>
+<td class="small" align="center">#[chunkMessage]#</td>
 <td class="small" align="right">#[slempMessage]#</td>
 <td class="small" align="right">#[slhigMessage]#</td>
 <td class="small" align="right">#[slmedMessage]#</td>
@@ -254,8 +255,8 @@ Increasing this cache may speed up many functions, but we need to test this to s
 
 <tr class="TableCellDark">
 <td class="small" align="left">Wiki</td>
-<td class="small" align="center">#[chunkWiki]#</td>
 <td class="small" align="right">#[slreqWiki]#</td>
+<td class="small" align="center">#[chunkWiki]#</td>
 <td class="small" align="right">#[slempWiki]#</td>
 <td class="small" align="right">#[slhigWiki]#</td>
 <td class="small" align="right">#[slmedWiki]#</td>
@@ -276,8 +277,8 @@ Increasing this cache may speed up access to the wiki pages.</td>
 
 <tr class="TableCellDark">
 <td class="small" align="left">Blog</td>
-<td class="small" align="center">#[chunkBlog]#</td>
 <td class="small" align="right">#[slreqBlog]#</td>
+<td class="small" align="center">#[chunkBlog]#</td>
 <td class="small" align="right">#[slempBlog]#</td>
 <td class="small" align="right">#[slhigBlog]#</td>
 <td class="small" align="right">#[slmedBlog]#</td>
@@ -297,8 +298,8 @@ Increasing this cache may speed up access to the Blog.</td>
 
 <tr class="TableCellDark">
 <td class="small" align="left">News</td>
-<td class="small" align="center">#[chunkNews]#</td>
 <td class="small" align="right">#[slreqNews]#</td>
+<td class="small" align="center">#[chunkNews]#</td>
 <td class="small" align="right">#[slempNews]#</td>
 <td class="small" align="right">#[slhigNews]#</td>
 <td class="small" align="right">#[slmedNews]#</td>
@@ -318,8 +319,8 @@ Increasing this cache may speed up the peer-ping.</td>
 
 <tr class="TableCellDark">
 <td class="small" align="left">robots.txt DB</td>
-<td class="small" align="center">#[chunkRobots]#</td>
 <td class="small" align="right">#[slreqRobots]#</td>
+<td class="small" align="center">#[chunkRobots]#</td>
 <td class="small" align="right">#[slempRobots]#</td>
 <td class="small" align="right">#[slhigRobots]#</td>
 <td class="small" align="right">#[slmedRobots]#</td>
@@ -339,8 +340,8 @@ Increasing this cache may speed up validation if crawling of the URL is allowed.
 
 <tr class="TableCellDark">
 <td class="small" align="left">Crawl Profiles</td>
-<td class="small" align="center">#[chunkProfiles]#</td>
 <td class="small" align="right">#[slreqProfiles]#</td>
+<td class="small" align="center">#[chunkProfiles]#</td>
 <td class="small" align="right">#[slempProfiles]#</td>
 <td class="small" align="right">#[slhigProfiles]#</td>
 <td class="small" align="right">#[slmedProfiles]#</td>
@@ -359,7 +360,7 @@ Increasing this cache may speed up crawling, but not much space is needed, so th
 </tr>
 
 <tr class="TableCellSummary">
-<td class="small" align="left" colspan="7">Totals</td>
+<td class="small" align="left" colspan="11">Totals</td>
 <td class="small" align="right">#[usedTotal]# MB</td>
 <td class="small" align="right">#[currTotal]# MB</td>
 <td class="small" align="right">#[dfltTotal]# MB</td>
@@ -369,7 +370,7 @@ Increasing this cache may speed up crawling, but not much space is needed, so th
 </tr>
 
 <tr class="TableCellLight">
-<td class="small" align="right" colspan="8">Re-Configuration:</td>
+<td class="small" align="right" colspan="12">Re-Configuration:</td>
 <td class="small" align="center"><input type="submit" name="setCustom" value="Set"><br>these<br>custom<br>values<br>&nbsp;</td>
 <td class="small" align="center"><input type="submit" name="setDefault" value="Set"><br>all<br>default<br>values<br>&nbsp;</td>
 <td class="small" align="center"><input type="submit" name="setGood" value="Set"><br>all<br>recom-<br>mended values</td>

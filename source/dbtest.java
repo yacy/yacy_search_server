@@ -167,9 +167,9 @@ public class dbtest {
             if (dbe.equals("kelondroold")) {
                 File tablefile = new File(tablename + ".kelondro.db");
                 if (tablefile.exists()) {
-                    table = new kelondroTree(tablefile, buffer);
+                    table = new kelondroTree(tablefile, buffer, kelondroTree.defaultObjectCachePercent);
                 } else {
-                    table = new kelondroTree(tablefile, buffer, new int[]{keylength, valuelength, valuelength}, true);
+                    table = new kelondroTree(tablefile, buffer, kelondroTree.defaultObjectCachePercent, new int[]{keylength, valuelength, valuelength}, true);
                 }
             }
             

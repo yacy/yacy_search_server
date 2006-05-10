@@ -135,7 +135,7 @@ public class kelondroDynTree {
         kelondroRA ra = table.getRA(key); // works always, even with no-existing entry
         treeRAHandles.put(key, ra);
         try {
-            return new kelondroTree(ra, buffersize, columns, false);
+            return new kelondroTree(ra, buffersize, kelondroTree.defaultObjectCachePercent, columns, false);
         } catch (RuntimeException e) {
             throw new IOException(e.getMessage());
         }
@@ -145,7 +145,7 @@ public class kelondroDynTree {
         if (table.existsDyn(key)) {
             kelondroRA ra = table.getRA(key);
             treeRAHandles.put(key, ra);
-            return new kelondroTree(ra, buffersize);
+            return new kelondroTree(ra, buffersize, kelondroTree.defaultObjectCachePercent);
         } else {
             return null;
         }

@@ -163,14 +163,14 @@ public class plasmaCrawlNURL extends plasmaURL {
         File cacheFile = new File(cacheStacksPath, "urlNotice1.db");
         if (cacheFile.exists()) try {
             // open existing cache
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400);
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent);
         } catch (IOException e) {
             cacheFile.delete();
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, ce, true);
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
         } else {
             // create new cache
             cacheFile.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, ce, true);
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
         }
     }
     

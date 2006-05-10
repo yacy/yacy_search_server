@@ -165,7 +165,7 @@ public class kelondroObjectCache {
     }
     
     public void put(String key, Object value) {
-        if (key == null) return;
+        if ((key == null) || (value == null)) return;
         Object prev = null;
         synchronized(cache) {
             prev = cache.put(key, value);

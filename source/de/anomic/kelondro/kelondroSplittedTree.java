@@ -84,15 +84,15 @@ public class kelondroSplittedTree implements kelondroIndex {
             f = dbFile(pathToFiles, filenameStub, forkfactor, columns.length, i);
             if (f.exists()) {
                 try {
-                    ktfs[i] = new kelondroTree(f, buffersize/forkfactor);
+                    ktfs[i] = new kelondroTree(f, buffersize/forkfactor, kelondroTree.defaultObjectCachePercent);
                     this.order = ktfs[i].order();
                 } catch (IOException e) {
-                    ktfs[i] = new kelondroTree(f, buffersize/forkfactor,
+                    ktfs[i] = new kelondroTree(f, buffersize/forkfactor, kelondroTree.defaultObjectCachePercent,
                                                columns, objectOrder, txtProps, txtPropsWidth, exitOnFail);
                     this.order = objectOrder;
                 }
             } else {
-                ktfs[i] = new kelondroTree(f, buffersize/forkfactor,
+                ktfs[i] = new kelondroTree(f, buffersize/forkfactor, kelondroTree.defaultObjectCachePercent,
                                            columns, objectOrder, txtProps, txtPropsWidth, exitOnFail);
                 this.order = objectOrder;
             }
@@ -104,7 +104,7 @@ public class kelondroSplittedTree implements kelondroIndex {
                             long buffersize, int forkfactor, int columns) throws IOException {
         ktfs = new kelondroTree[forkfactor];
         for (int i = 0; i < forkfactor; i++) {
-            ktfs[i] = new kelondroTree(dbFile(pathToFiles, filenameStub, forkfactor, columns, i), buffersize/forkfactor);
+            ktfs[i] = new kelondroTree(dbFile(pathToFiles, filenameStub, forkfactor, columns, i), buffersize/forkfactor, kelondroTree.defaultObjectCachePercent);
         }
         ff = forkfactor;
         this.order = objectOrder;

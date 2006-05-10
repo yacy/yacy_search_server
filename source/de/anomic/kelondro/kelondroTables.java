@@ -93,13 +93,13 @@ public class kelondroTables {
         File tablefile = new File(tablesPath, "table." + tablename + ".tdb");
         kelondroTree Tree;
         if (tablefile.exists()) try {
-            Tree = new kelondroTree(tablefile, buffersize);
+            Tree = new kelondroTree(tablefile, buffersize, kelondroTree.defaultObjectCachePercent);
         } catch (IOException e) {
             tablefile.getParentFile().mkdirs();
-            Tree = new kelondroTree(tablefile, buffersize, columns, exitOnFail);
+            Tree = new kelondroTree(tablefile, buffersize, kelondroTree.defaultObjectCachePercent, columns, exitOnFail);
         } else {
             tablefile.getParentFile().mkdirs();
-            Tree = new kelondroTree(tablefile, buffersize, columns, exitOnFail);
+            Tree = new kelondroTree(tablefile, buffersize, kelondroTree.defaultObjectCachePercent, columns, exitOnFail);
         }
         tTables.put(tablename, Tree);
     }

@@ -87,13 +87,13 @@ public final class plasmaWordIndexEntity {
     if (cacheSize > 1048576) cacheSize = 1048576;
     if (theLocation.exists()) try {
         // open existing index file
-        kt = new kelondroTree(theLocation, cacheSize);
+        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent);
     } catch (IOException e) {
         theLocation.delete();
-        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpace, false);
+        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpace, false);
     } else {
         // create new index file
-        kt = new kelondroTree(theLocation, cacheSize, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpace, false);
+        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpace, false);
     }
     return kt; // everyone who get this should close it when finished!
     }

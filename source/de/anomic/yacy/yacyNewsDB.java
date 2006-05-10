@@ -72,7 +72,7 @@ public class yacyNewsDB {
         this.bufferkb = bufferkb;
 
         if (path.exists()) try {
-            news = new kelondroTree(path, bufferkb * 0x400);
+            news = new kelondroTree(path, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent);
         } catch (IOException e) {
             news = createDB(path, bufferkb);
         } else {
@@ -81,7 +81,7 @@ public class yacyNewsDB {
     }
 
     private static kelondroTree createDB(File path, int bufferkb) {
-        return new kelondroTree(path, bufferkb * 0x400, new int[] {
+        return new kelondroTree(path, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new int[] {
                 yacyNewsRecord.idLength(), // id = created + originator
                 yacyNewsRecord.categoryStringLength,    // category
                 yacyCore.universalDateShortPattern.length(), // received

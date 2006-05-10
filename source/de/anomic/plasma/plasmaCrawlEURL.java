@@ -77,14 +77,14 @@ public class plasmaCrawlEURL extends plasmaURL {
         };
         if (cachePath.exists()) try {
             // open existing cache
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent);
         } catch (IOException e) {
             cachePath.delete();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce, true);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
         } else {
             // create new cache
             cachePath.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, ce, true);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
         }
     }
 
