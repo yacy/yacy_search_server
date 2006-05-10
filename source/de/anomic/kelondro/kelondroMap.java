@@ -260,7 +260,8 @@ public class kelondroMap {
 
         // load map from kra
         if (!(dyn.existsDyn(key))) return null;
-        final kelondroRA kra = new kelondroBufferedRA(dyn.getRA(key), dyn.cacheObjectChunkSize(), 0);
+        //final kelondroRA kra = new kelondroBufferedRA(dyn.getRA(key), dyn.cacheObjectChunkSize(), 0);
+        final kelondroRA kra = dyn.getRA(key);
         map = kra.readMap();
         kra.close();
 
