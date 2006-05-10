@@ -704,7 +704,7 @@ public final class plasmaParser {
                 contentURL = new URL(args[1]);
                 
                 // downloading the document content
-                byte[] contentBytes = httpc.singleGET(contentURL, 10000, null, null, null);
+                byte[] contentBytes = httpc.singleGET(contentURL, contentURL.getHost(), 10000, null, null, null);
                 
                 contentFile = File.createTempFile("content",".tmp");
                 contentFile.deleteOnExit();

@@ -573,7 +573,7 @@ public final class yacy {
         httpHeader requestHeader = new httpHeader();
         requestHeader.put("Authorization", "realm=" + encodedPassword); // for http-authentify
         try {
-            httpc con = httpc.getInstance("localhost", port, 10000, false);
+            httpc con = httpc.getInstance("localhost", "localhost", port, 10000, false);
             httpc.response res = con.GET("Steering.html?shutdown=", requestHeader);
 
             // read response
@@ -1323,7 +1323,7 @@ public final class yacy {
                         URL newUrl = new URL(newUrlStr);
 
                         // doing a http head request to test if the url is correct
-                        theHttpc = httpc.getInstance(newUrl.getHost(), newUrl.getPort(), 30000, false);
+                        theHttpc = httpc.getInstance(newUrl.getHost(), newUrl.getHost(), newUrl.getPort(), 30000, false);
                         response res = theHttpc.HEAD(newUrl.getPath(), null);
 
                         if (res.statusCode == 200) {

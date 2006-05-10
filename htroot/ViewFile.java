@@ -144,7 +144,7 @@ public class ViewFile {
                 if (resHeader == null) {
                     resHeader = sb.cacheManager.getCachedResponse(urlEntry.hash());
                     if (resHeader == null) {
-                        resHeader = httpc.whead(url,5000,null,null,sb.remoteProxyConfig);
+                        resHeader = httpc.whead(url,url.getHost(),5000,null,null,sb.remoteProxyConfig);
                         if (resource == null) {
                             prop.put("error",4);
                             prop.put("viewMode",VIEW_MODE_NO_TEXT);

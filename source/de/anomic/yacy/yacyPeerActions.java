@@ -183,7 +183,7 @@ public class yacyPeerActions {
                     reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
                     
                     url = new URL(seedListFileURL);
-                    header = httpc.whead(url, this.bootstrapLoadTimeout, null, null, this.sb.remoteProxyConfig,reqHeader);
+                    header = httpc.whead(url, url.getHost(), this.bootstrapLoadTimeout, null, null, this.sb.remoteProxyConfig,reqHeader);
                     if ((header == null) || (header.lastModified() == null)) {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available");
                     } else if ((header.age() > 86400000) && (ssc > 0)) {

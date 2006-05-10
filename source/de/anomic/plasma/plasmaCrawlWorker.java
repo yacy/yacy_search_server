@@ -345,8 +345,8 @@ public final class plasmaCrawlWorker extends Thread {
 
             // open the connection
             remote = ((theRemoteProxyConfig != null) && (theRemoteProxyConfig.useProxy()))
-                   ? httpc.getInstance(host, port, socketTimeout, ssl, theRemoteProxyConfig,"CRAWLER",null)
-                   : httpc.getInstance(host, port, socketTimeout, ssl, "CRAWLER",null);
+                   ? httpc.getInstance(host, host, port, socketTimeout, ssl, theRemoteProxyConfig,"CRAWLER",null)
+                   : httpc.getInstance(host, host, port, socketTimeout, ssl, "CRAWLER",null);
 
             // specifying if content encoding is allowed
             remote.setAllowContentEncoding(useContentEncodingGzip);

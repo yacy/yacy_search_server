@@ -181,7 +181,7 @@ public class urlRedirectord implements serverHandler {
                         URL reqURL = new URL(this.nextURL);
                         
                         // getting URL mimeType
-                        httpHeader header = httpc.whead(reqURL, 10000, null, null, switchboard.remoteProxyConfig);                        
+                        httpHeader header = httpc.whead(reqURL, reqURL.getHost(), 10000, null, null, switchboard.remoteProxyConfig);                        
                         
                         if (plasmaParser.supportedContent(
                                 plasmaParser.PARSER_MODE_URLREDIRECTOR,

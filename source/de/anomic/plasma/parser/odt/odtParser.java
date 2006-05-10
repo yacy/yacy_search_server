@@ -202,7 +202,7 @@ public class odtParser extends AbstractParser implements Parser {
             testParser.setLogger(new serverLog("PARSER.ODT"));
             
             // downloading the document content
-            byte[] content = httpc.singleGET(contentUrl, 10000, null, null, null);
+            byte[] content = httpc.singleGET(contentUrl, contentUrl.getHost(), 10000, null, null, null);
             ByteArrayInputStream input = new ByteArrayInputStream(content);
             
             // parsing the document

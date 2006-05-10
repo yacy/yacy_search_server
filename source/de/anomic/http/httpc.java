@@ -135,8 +135,9 @@ public final class httpc {
     // class variables
     private Socket socket = null; // client socket for commands
     private Thread socketOwner = null;
-    private String host = null;
-    //private long timeout;
+    private String adressed_host = null;
+    private int    adressed_port = 80;
+    private String target_virtual_host = null;
     
     // output and input streams for client control connection
     PushbackInputStream clientInput = null;
@@ -146,12 +147,10 @@ public final class httpc {
     private httpdByteCountOutputStream clientOutputByteCount = null;
 
     private boolean remoteProxyUse = false;
-    private String  savedRemoteHost = null;
     private httpRemoteProxyConfig remoteProxyConfig = null;
     
     String  requestPath = null;
     private boolean allowContentEncoding = true;
-	static boolean useYacyReferer = true;
 	public static boolean yacyDebugMode = false;
     
     /**
@@ -249,8 +248,8 @@ public final class httpc {
     * Convert the status of this class into an String object to output it.
     */
     public String toString() {
-        return (this.savedRemoteHost == null) ? "Disconnected" : "Connected to " + this.savedRemoteHost +
-                ((this.remoteProxyUse) ? " via " + this.host : "");
+        return (this.adressed_host == null) ? "Disconnected" : "Connected to " + this.adressed_host +
+                ((this.remoteProxyUse) ? " via " + adressed_host : "");
     }
 
     /**
@@ -269,6 +268,7 @@ public final class httpc {
     */
     public static httpc getInstance(
             String server,
+            String vhost,
             int port,
             int timeout,
             boolean ssl,
@@ -289,6 +289,7 @@ public final class httpc {
         try {
             newHttpc.init(
                     server,
+                    vhost,
                     port,
                     timeout,
                     ssl,
@@ -305,21 +306,23 @@ public final class httpc {
     
     public static httpc getInstance(
             String server,
+            String vhost,
             int port,
             int timeout,
             boolean ssl,
             httpRemoteProxyConfig remoteProxyConfig
             ) throws IOException {
-        return getInstance(server,port,timeout,ssl,remoteProxyConfig,null,null);
+        return getInstance(server,vhost,port,timeout,ssl,remoteProxyConfig,null,null);
     }
 
     public static httpc getInstance(
             String server, 
+            String vhost,
             int port, 
             int timeout, 
             boolean ssl
     ) throws IOException {
-        return getInstance(server,port,timeout,ssl,null,null);
+        return getInstance(server,vhost,port,timeout,ssl,null,null);
     }
 
     
@@ -336,6 +339,7 @@ public final class httpc {
     */
     public static httpc getInstance(
             String server, 
+            String vhost,
             int port, 
             int timeout, 
             boolean ssl,
@@ -354,7 +358,7 @@ public final class httpc {
 
         // initialize it
         try {
-            newHttpc.init(server,port,timeout,ssl,incomingByteCountAccounting,outgoingByteCountAccounting);
+            newHttpc.init(server,vhost,port,timeout,ssl,incomingByteCountAccounting,outgoingByteCountAccounting);
         } catch (IOException e) {
             try{ httpc.theHttpcPool.returnObject(newHttpc); } catch (Exception e1) {}
             throw e;
@@ -499,6 +503,7 @@ public final class httpc {
     */
     void init(
             String server, 
+            String vhost,
             int port, 
             int timeout, 
             boolean ssl,
@@ -514,10 +519,12 @@ public final class httpc {
         String remoteProxyHost = theRemoteProxyConfig.getProxyHost();
         int    remoteProxyPort = theRemoteProxyConfig.getProxyPort();
         
-        this.init(remoteProxyHost, remoteProxyPort, timeout, ssl,incomingByteCountAccounting,outgoingByteCountAccounting);
+        this.init(remoteProxyHost, vhost, remoteProxyPort, timeout, ssl,incomingByteCountAccounting,outgoingByteCountAccounting);
         
         this.remoteProxyUse = true;
-        this.savedRemoteHost = server + ((port == 80) ? "" : (":" + port));
+        this.adressed_host = server;
+        this.adressed_port = port;
+        this.target_virtual_host = vhost;
         this.remoteProxyConfig = theRemoteProxyConfig;
     }
 
@@ -532,7 +539,8 @@ public final class httpc {
     * @throws IOException
     */
     void init(
-            String server, 
+            String server,
+            String vhost,
             int port, 
             int timeout, 
             boolean ssl,
@@ -542,15 +550,15 @@ public final class httpc {
         //serverLog.logDebug("HTTPC", handle + " initialized");
         this.remoteProxyUse = false;
         //this.timeout = timeout;
-        //if(yacyDebugMode){ this.timeout=60000; }
-        this.savedRemoteHost = server;
 
         try {
             if (port == -1) {
                 port = (ssl)? 443 : 80;
             }
             
-            this.host = server + ((port == 80) ? "" : (":" + port));
+            this.adressed_host = server;
+            this.adressed_port = port;
+            this.target_virtual_host = vhost;
             InetAddress hostip;
 //            if ((server.equals("localhost")) || (server.equals("127.0.0.1")) || (server.startsWith("192.168.")) || (server.startsWith("10."))) {
 //                hostip = server;
@@ -640,12 +648,12 @@ public final class httpc {
             this.clientOutputByteCount = null;
         }
 
-        this.host = null;
+        this.adressed_host = null;
+        this.target_virtual_host = null;
         //this.timeout = 0;
 
         this.remoteProxyUse = false;
         this.remoteProxyConfig = null;
-        this.savedRemoteHost = null;
         this.requestPath = null;
 
         this.allowContentEncoding = true;
@@ -715,10 +723,11 @@ public final class httpc {
         // set the host attribute. This is in particular necessary, if we contact another proxy
         // the host is mandatory, if we use HTTP/1.1
         if (!(header.containsKey(httpHeader.HOST))) {
-            if (this.remoteProxyUse)
-                header.put(httpHeader.HOST, this.savedRemoteHost);
-            else
-                header.put(httpHeader.HOST, this.host);
+            if (this.remoteProxyUse) {
+                header.put(httpHeader.HOST, this.adressed_host);
+            } else {
+                header.put(httpHeader.HOST, this.target_virtual_host);
+            }
         }
         
         if (this.remoteProxyUse) {
@@ -759,7 +768,7 @@ public final class httpc {
 
         // send request
         if ((this.remoteProxyUse) && (!(method.equals(httpHeader.METHOD_CONNECT))))
-            path = (this.savedRemoteHost.endsWith("443")?"https://":"http://") + this.savedRemoteHost + path;
+            path = ((this.adressed_port == 443) ? "https://" : "http://") + this.adressed_host + ":" + this.adressed_port + path;
         serverCore.send(this.clientOutput, method + " " + path + " HTTP/1.0"); // if set to HTTP/1.1, servers give time-outs?
 
         // send header
@@ -1044,7 +1053,8 @@ do upload
      */
 
     public static byte[] singleGET(
-            String host, 
+            String realhost,
+            String virtualhost,
             int port, 
             String path, 
             int timeout,
@@ -1063,11 +1073,10 @@ do upload
 
         httpc con = null;
         try {
-
             if ((theRemoteProxyConfig == null)||(!theRemoteProxyConfig.useProxy())) {
-                con = httpc.getInstance(host, port, timeout, ssl);
+                con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl);
             } else {
-                con = httpc.getInstance(host, port, timeout, ssl, theRemoteProxyConfig);
+                con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig);
             }
 
             httpc.response res = con.GET(path, requestHeader);
@@ -1084,7 +1093,8 @@ do upload
     }
 
     public static byte[] singleGET(
-            URL u, 
+            URL u,
+            String vhost,
             int timeout,
             String user, 
             String password,
@@ -1096,7 +1106,7 @@ do upload
         String path = u.getPath();
         String query = u.getQuery();
         if ((query != null) && (query.length() > 0)) path = path + "?" + query;
-        return singleGET(u.getHost(), port, path, timeout, user, password, ssl, theRemoteProxyConfig, null);
+        return singleGET(u.getHost(), vhost, port, path, timeout, user, password, ssl, theRemoteProxyConfig, null);
     }
 
     /*
@@ -1110,7 +1120,8 @@ do upload
      */
 
     public static byte[] singlePOST(
-            String host, 
+            String realhost, 
+            String virtualhost, 
             int port, 
             String path, 
             int timeout,
@@ -1131,9 +1142,9 @@ do upload
         httpc con = null;
         try {
             if ((theRemoteProxyConfig == null)||(!theRemoteProxyConfig.useProxy())) {
-                con = httpc.getInstance(host, port, timeout, ssl);
+                con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl);
             } else {
-                con = httpc.getInstance(host, port, timeout, ssl, theRemoteProxyConfig);
+                con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig);
             }
             httpc.response res = con.POST(path, requestHeader, props, files);
 
@@ -1152,7 +1163,7 @@ do upload
 
     public static byte[] singlePOST(
             URL u, 
-            String host,
+            String vhost,
             int timeout,
             String user, 
             String password,
@@ -1167,7 +1178,8 @@ do upload
         String query = u.getQuery();
         if ((query != null) && (query.length() > 0)) path = path + "?" + query;
         return singlePOST(
-                u.getHost(), 
+                u.getHost(),
+                vhost,
                 port, 
                 path, 
                 timeout, 
@@ -1205,13 +1217,13 @@ do upload
 
     public static ArrayList wget(
             URL url,
-            String host,
+            String vhost,
             int timeout, 
             String user, 
             String password, 
             httpRemoteProxyConfig theRemoteProxyConfig
     ) throws IOException {
-        return wget(url, host,timeout,user,password,theRemoteProxyConfig,null);
+        return wget(url, vhost,timeout,user,password,theRemoteProxyConfig,null);
     }
     
     public static ArrayList wget(URL url) throws IOException{
@@ -1220,7 +1232,7 @@ do upload
     
     public static ArrayList wget(
             URL url,
-            String host,
+            String vhost,
             int timeout, 
             String user, 
             String password, 
@@ -1237,7 +1249,8 @@ do upload
         
         // splitting of the byte array into lines
         byte[] a = singleGET(
-                host,
+                url.getHost(),
+                vhost,
                 port, 
                 path, 
                 timeout, 
@@ -1286,17 +1299,19 @@ do upload
     }
 
     public static httpHeader whead(
-            URL url, 
+            URL url,
+            String vhost,
             int timeout, 
             String user, 
             String password, 
             httpRemoteProxyConfig theRemoteProxyConfig
     ) throws IOException {
-        return whead(url,timeout,user,password,theRemoteProxyConfig,null);
+        return whead(url,vhost,timeout,user,password,theRemoteProxyConfig,null);
     }
     
     public static httpHeader whead(
-            URL url, 
+            URL url,
+            String vhost,
             int timeout, 
             String user, 
             String password, 
@@ -1316,14 +1331,14 @@ do upload
         String path = url.getPath();
         String query = url.getQuery();
         if ((query != null) && (query.length() > 0)) path = path + "?" + query;
-        String host = url.getHost();
+        String realhost = url.getHost();
 
         // start connection
         httpc con = null;
         try {
             if ((theRemoteProxyConfig == null)||(!theRemoteProxyConfig.useProxy()))
-                con = httpc.getInstance(host, port, timeout, ssl);
-            else con = httpc.getInstance(host, port, timeout, ssl, theRemoteProxyConfig);
+                con = httpc.getInstance(realhost, vhost, port, timeout, ssl);
+            else con = httpc.getInstance(realhost, vhost, port, timeout, ssl, theRemoteProxyConfig);
 
             httpc.response res = con.HEAD(path, requestHeader);
             if (res.status.startsWith("2")) {
@@ -1339,21 +1354,9 @@ do upload
         }
     }
 
-    /*
-    public static Vector wget(String url) {
-        try {
-            return wget(new URL(url), 5000, null, null, null, 0);
-        } catch (IOException e) {
-            Vector ll = new Vector();
-            ll.add("503 " + e.getMessage());
-            return ll;
-        }
-    }
-     */
-
     public static ArrayList wput(
             URL url,
-            String host,
+            String vhost,
             int timeout, 
             String user, 
             String password, 
@@ -1364,7 +1367,7 @@ do upload
         // splitting of the byte array into lines
         byte[] a = singlePOST(
                 url,
-                host,
+                vhost,
                 timeout, 
                 user, 
                 password, 
@@ -1384,19 +1387,6 @@ do upload
         }
         return v;
     }
-
-    /*
-    public static Vector wput(String url, serverObjects props) {
-        try {
-            return wput(url, 5000, null, null, null, 0, props);
-        } catch (IOException e) {
-            serverLog.logError("HTTPC", "wput exception for URL " + url + ": " + e.getMessage(), e);
-            Vector ll = new Vector();
-            ll.add("503 " + e.getMessage());
-            return ll;
-        }
-    }
-     */
 
     public static void main(String[] args) {
         System.out.println("ANOMIC.DE HTTP CLIENT v" + vDATE);
@@ -1692,7 +1682,7 @@ do upload
                     if (p > 0) {
                         this.responseHeader.add(buffer.substring(0, p).trim(), buffer.substring(p + 1).trim());
                     } else {
-                        serverLog.logSevere("HTTPC", "RESPONSE PARSE ERROR: HOST='" + httpc.this.host + "', PATH='" + httpc.this.requestPath + "', STATUS='" + this.status + "'");
+                        serverLog.logSevere("HTTPC", "RESPONSE PARSE ERROR: HOST='" + httpc.this.adressed_host + "', PATH='" + httpc.this.requestPath + "', STATUS='" + this.status + "'");
                         serverLog.logSevere("HTTPC", "..............BUFFER: " + buffer);
                         throw new IOException(this.status);
                     }

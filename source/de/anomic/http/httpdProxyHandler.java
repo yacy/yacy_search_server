@@ -1140,6 +1140,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             try {
                 remoteProxy = httpc.getInstance(
                         host,
+                        host,
                         port,
                         timeout,
                         false,
@@ -1279,6 +1280,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         if (useProxy) {
             return httpc.getInstance(
                     server, 
+                    server,
                     port, 
                     timeout, 
                     false, 
@@ -1286,7 +1288,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             );
         }
         return httpc.getInstance(
-                server, 
+                server,
+                server,
                 port, 
                 timeout, 
                 false

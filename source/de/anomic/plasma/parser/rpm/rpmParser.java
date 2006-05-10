@@ -171,7 +171,7 @@ public class rpmParser extends AbstractParser implements Parser {
             URL contentUrl = new URL(args[0]);
             
             rpmParser testParser = new rpmParser();
-            byte[] content = httpc.singleGET(contentUrl, 10000, null, null, null);
+            byte[] content = httpc.singleGET(contentUrl, contentUrl.getHost(), 10000, null, null, null);
             ByteArrayInputStream input = new ByteArrayInputStream(content);
             testParser.parse(contentUrl, "application/x-rpm", input);
         } catch (Exception e) {
