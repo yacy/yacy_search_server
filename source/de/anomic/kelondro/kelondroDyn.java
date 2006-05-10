@@ -339,8 +339,7 @@ public class kelondroDyn extends kelondroTree {
 
         public int read(byte[] b, int off, int len) throws IOException {
             byte[] buf = getDyn(filekey, seekpos, len);
-            if (buf == null)
-                return 0;
+            if (buf == null) return 0;
             System.arraycopy(buf, 0, b, off, len);
             seekpos += len;
             return len;

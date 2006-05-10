@@ -410,10 +410,12 @@ public class yacyCore {
             LinkedList seedList = new LinkedList();
             LinkedList tmpSeedList = new LinkedList();
             for(int i = 0; i < seeds.length; i++) {
+                if (seeds[i] != null) {
                 if (amIAccessibleDB.containsKey(seeds[i].hash)) {
                     tmpSeedList.add(seeds[i]);
                 } else {
                     seedList.add(seeds[i]);
+                }
                 }
             }
             while (!tmpSeedList.isEmpty()) { seedList.add(tmpSeedList.remove(0)); }

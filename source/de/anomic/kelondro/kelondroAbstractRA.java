@@ -44,7 +44,11 @@
 
 package de.anomic.kelondro;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
@@ -80,7 +84,21 @@ abstract class kelondroAbstractRA implements kelondroRA {
             len -= r;
         }
     }
-
+    /*
+    public byte[] readFully() throws IOException {
+        ByteArrayOutputStream dest = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        
+        int c, total = 0;
+        while ((c = read(buffer, 0, 1024)) > 0) {
+            dest.write(buffer, 0, c);
+            total += c;
+        }
+        dest.flush();
+        dest.close();
+        return dest.toByteArray();
+    }
+    */  
     public byte readByte() throws IOException {
         final int ch = this.read();
         if (ch < 0) throw new IOException();
@@ -135,9 +153,19 @@ abstract class kelondroAbstractRA implements kelondroRA {
     private static final byte lf = 10;
     
     public void writeLine(final String line) throws IOException {
-        this.write(line.getBytes());
-        this.write(cr);
-        this.write(lf);
+        byte[] b = new byte[line.length() + 2];
+        System.arraycopy(line.getBytes(), 0, b, 0, line.length());
+        b[b.length - 2] = cr;
+        b[b.length - 1] = lf;
+        this.write(b);
+    }
+
+    public void writeLine(final byte[] line) throws IOException {
+        byte[] b = new byte[line.length + 2];
+        System.arraycopy(line, 0, b, 0, line.length);
+        b[b.length - 2] = cr;
+        b[b.length - 1] = lf;
+        this.write(b);
     }
 
     public String readLine() throws IOException {
@@ -166,6 +194,30 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
     }
 
+    /*
+    public void writeProperties(final Properties props, final String comment) throws IOException {
+        this.seek(0);
+        final Enumeration e = props.propertyNames();
+        String key, value;
+        StringBuffer sb = new StringBuffer(props.size() * 40);
+        sb.append("# " + comment);
+        sb.append(cr);
+        sb.append(lf);
+        while (e.hasMoreElements()) {
+            key = (String) e.nextElement();
+            value = props.getProperty(key, "");
+            sb.append(key);
+            sb.append('=');
+            sb.append(value);
+            sb.append(cr);
+            sb.append(lf);
+        }
+        sb.append("# EOF");
+        sb.append(cr);
+        sb.append(lf);
+        write(new String(sb).getBytes());
+    }
+    */
     public void writeProperties(final Properties props, final String comment) throws IOException {
         this.seek(0);
         writeLine("# " + comment);
@@ -180,7 +232,27 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
         writeLine("# EOF");
     }
-
+    
+    /*
+    public Properties readProperties() throws IOException {
+        this.seek(0);
+        byte[] b = readFully();
+        //System.out.println("DEBUG-Properties:" + new String(b));
+        BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
+        final Properties props = new Properties();
+        String line;
+        int pos;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.equals("# EOF")) return props;
+            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
+            pos = line.indexOf("=");
+            if (pos < 0) continue;
+            props.setProperty(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
+        }
+        return props;
+    }
+    */
     public Properties readProperties() throws IOException {
         this.seek(0);
         final Properties props = new Properties();
@@ -196,7 +268,30 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
         return props;
     }
-
+    /*
+    public void writeMap(final Map map, final String comment) throws IOException {
+        this.seek(0);
+        final Iterator iter = map.entrySet().iterator();
+        Map.Entry entry;
+        StringBuffer sb = new StringBuffer(map.size() * 40);
+        sb.append("# " + comment);
+        sb.append(cr);
+        sb.append(lf);
+        while (iter.hasNext()) {
+            entry = (Map.Entry) iter.next();
+            sb.append((String) entry.getKey());
+            sb.append('=');
+            sb.append((String) entry.getValue());
+            sb.append(cr);
+            sb.append(lf);
+        }
+        sb.append("# EOF");
+        sb.append(cr);
+        sb.append(lf);
+        //System.out.println("DEBUG-WRITE-MAP:" + new String(sb));
+        write(new String(sb).getBytes());
+    }
+    */
     public void writeMap(final Map map, final String comment) throws IOException {
         this.seek(0);
         writeLine("# " + comment);
@@ -210,7 +305,27 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
         writeLine("# EOF");
     }
-
+    
+    /*
+    public Map readMap() throws IOException {
+        this.seek(0);
+        byte[] b = readFully();
+        //System.out.println("DEBUG-READ-MAP:" + new String(b));
+        BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
+        final TreeMap map = new TreeMap();
+        String line;
+        int pos;
+        while ((line = br.readLine()) != null) { // very slow readLine????
+            line = line.trim();
+            if (line.equals("# EOF")) return map;
+            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
+            pos = line.indexOf("=");
+            if (pos < 0) continue;
+            map.put(line.substring(0, pos), line.substring(pos + 1));
+        }
+        return map;
+    }
+    */
     public Map readMap() throws IOException {
         this.seek(0);
         final TreeMap map = new TreeMap();

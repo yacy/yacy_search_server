@@ -71,6 +71,7 @@ public interface kelondroRA {
 
     // derived methods:
     public void readFully(byte[] b, int off, int len) throws IOException;
+    //public byte[] readFully() throws IOException;
     public byte readByte() throws IOException;
     public void writeByte(int v) throws IOException;
 

@@ -215,7 +215,7 @@ public class kelondroObjectCache {
                   ) {
                 cache.remove(k);
                 ages.deleteScore(k);
-                if (Runtime.getRuntime().freeMemory() < minMem) System.gc(); // prevent unnecessary loops
+                //if (Runtime.getRuntime().freeMemory() < minMem) System.gc(); // prevent unnecessary loops
             }
         }
     }
