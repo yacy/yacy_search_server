@@ -266,6 +266,11 @@ public final class userDB {
         public static final String PROXY_RIGHT = "proxyRight";
         public static final String BLOG_RIGHT = "blogRight";
         
+        public static final int PROXY_ALLOK = 0; //can Surf
+        public static final int PROXY_ERROR = 1; //unknown error
+        public static final int PROXY_NORIGHT = 2; //no proxy right
+        public static final int PROXY_TIMELIMIT_REACHED = 3;
+        
         // this is a simple record structure that hold all properties of a user
         private Map mem;
         private String userName;
@@ -367,18 +372,21 @@ public final class userDB {
             return (this.mem.containsKey(LAST_ACCESS)?Long.valueOf((String)this.mem.get(LAST_ACCESS)):null);
         }        
         
-		public boolean canSurf(){
-            //TODO: more returnvalues.
-            //Exception if false, or CONSTANTS
-			long timeUsed=this.updateLastAccess(true);
+        public int surfRight(){
+            long timeUsed=this.updateLastAccess(true);
             if(this.hasProxyRight() == false)
+                return PROXY_NORIGHT;
+
+            if(! (this.getTimeLimit() <= 0 || ( timeUsed < this.getTimeLimit())) ){ //no timelimit or timelimit not reached
+                return PROXY_TIMELIMIT_REACHED;
+            }
+            return PROXY_ERROR;
+        }
+		public boolean canSurf(){
+            if(this.surfRight()==PROXY_ALLOK)
+                return true;
+            else
                 return false;
-
-			return ( this.getTimeLimit() == 0 ||
-                      this.getTimeLimit() <= 0 ||
-                      ( timeUsed < this.getTimeLimit() )
-                    ); //no timelimit or timelimit not reached
-
 		}
         public long updateLastAccess(boolean incrementTimeUsed) {
 			return updateLastAccess(System.currentTimeMillis(), incrementTimeUsed);

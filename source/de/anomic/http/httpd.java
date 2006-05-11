@@ -322,13 +322,19 @@ public final class httpd implements serverHandler {
 				entry=switchboard.userDB.proxyAuth(auth, this.clientIP);
 			}
             if(entry != null){
-			    if(entry.canSurf()){
+                int returncode=entry.surfRight();
+			    if(returncode==userDB.Entry.PROXY_ALLOK){
 				    return true;
 				}
                 serverObjects tp=new serverObjects();
-                tp.put("limit", "0");//time per day
-                tp.put("limit_timelimit", entry.getTimeLimit());
-                sendRespondError(this.prop, this.session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
+                if(returncode==userDB.Entry.PROXY_TIMELIMIT_REACHED){
+                    tp.put("limit", "1");//time per day
+                    tp.put("limit_timelimit", entry.getTimeLimit());
+                    sendRespondError(this.prop, this.session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
+                }else if(returncode==userDB.Entry.PROXY_NORIGHT){
+                    tp.put("limit", "0");
+                    sendRespondError(this.prop, this.session.out, 403, "Proxy use forbidden", new File("proxymsg/proxylimits.inc"), tp, null);
+                }
                 return false;
 			}
             // ask for authenticate
