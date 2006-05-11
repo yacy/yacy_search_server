@@ -380,7 +380,7 @@ public final class userDB {
             if(! (this.getTimeLimit() <= 0 || ( timeUsed < this.getTimeLimit())) ){ //no timelimit or timelimit not reached
                 return PROXY_TIMELIMIT_REACHED;
             }
-            return PROXY_ERROR;
+            return PROXY_ALLOK;
         }
 		public boolean canSurf(){
             if(this.surfRight()==PROXY_ALLOK)
