@@ -139,9 +139,9 @@ public class blogBoard {
 	    if(date == null) date = new GregorianCalendar(GMTTimeZone).getTime(); 
 	    record.put("date", dateString(date));
 	    if ((subject == null) || (subject.length() == 0)) subject = "";
-	    record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject.getBytes("UTF-8")));
+	    record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject.getBytes()));
 	    if ((author == null) || (author.length() == 0)) author = "anonymous";
-	    record.put("author", kelondroBase64Order.enhancedCoder.encode(author.getBytes("UTF-8")));
+	    record.put("author", kelondroBase64Order.enhancedCoder.encode(author.getBytes()));
 	    if ((ip == null) || (ip.length() == 0)) ip = "";
 	    record.put("ip", ip);
 	    if (page == null)
