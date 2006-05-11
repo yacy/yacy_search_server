@@ -130,6 +130,12 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         return bz;
     }
     
+    public static final boolean equal(byte[] a, byte[] b) {
+        if ((a == null) && (b == null)) return true;
+        if ((a == null) || (b == null)) return false;
+        return compares(a, b) == 0;
+    }
+    
     public static final int compares(byte[] a, byte[] b) {
         int i = 0;
         final int al = a.length;

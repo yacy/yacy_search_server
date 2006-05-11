@@ -66,6 +66,7 @@ public class kelondroDyn extends kelondroTree {
     private int reclen;
     private int segmentCount;
     private char fillChar;
+    private kelondroObjectBuffer buffer;
     
     public kelondroDyn(File file, long buffersize /*bytes*/, int key, int nodesize, char fillChar, boolean exitOnFail) {
         this(file, buffersize, key, nodesize, fillChar, new kelondroNaturalOrder(true), exitOnFail);
@@ -81,6 +82,7 @@ public class kelondroDyn extends kelondroTree {
         this.fillChar = fillChar;
         this.segmentCount = 0;
         writeSegmentCount();
+        buffer = new kelondroObjectBuffer(file.toString());
     }
 
     public kelondroDyn(File file, long buffersize, char fillChar) throws IOException {
@@ -90,6 +92,7 @@ public class kelondroDyn extends kelondroTree {
         this.reclen = columnSize(1);
         this.fillChar = fillChar;
         this.segmentCount = 0;
+        buffer = new kelondroObjectBuffer(file.toString());
     }
     
     private void writeSegmentCount() {
@@ -187,6 +190,10 @@ public class kelondroDyn extends kelondroTree {
     
     private byte[] getValueCached(byte[] key) throws IOException {
 
+        // read from buffer
+        byte[] buffered = (byte[]) buffer.get(key);
+        if (buffered != null) return buffered;
+        
         // read from db
         byte[][] result = get(key);
         if (result == null) return null;
@@ -197,7 +204,10 @@ public class kelondroDyn extends kelondroTree {
 
     private synchronized void setValueCached(byte[] key, byte[] value) throws IOException {
         // update storage
-        put(key, value);
+        synchronized (this) {
+            put(key, value);
+            buffer.put(key, value);
+        }
     }
 
     public synchronized int getDyn(String key, int pos) throws IOException {
@@ -302,6 +312,7 @@ public class kelondroDyn extends kelondroTree {
         byte[] k;
         while (super.get(k = dynKey(key, recpos)) != null) {
             super.remove(k);
+            buffer.remove(k);
             recpos++;
         }
         //segmentCount--; writeSegmentCount();
