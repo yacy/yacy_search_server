@@ -9,5 +9,3 @@ http://seed.paepstin.info/seed.txt
 http://www-public.tu-bs.de:8080/~y0018680/seed.txt
 http://home.arcor.de/k.c.e/yacy/seed.txt
 http://yacy.christian-schwarz.net/seed.txt
-
-

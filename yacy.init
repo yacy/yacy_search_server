@@ -417,8 +417,8 @@ xpstopw=true
 # the prereq-value is a memory pre-requisite: that much bytes must
 # be available/free in the heap; othervise the loop is not executed
 # and another idlesleep is performed
-20_dhtdistribution_idlesleep=20000
-20_dhtdistribution_busysleep=2000
+20_dhtdistribution_idlesleep=10000
+20_dhtdistribution_busysleep=30000
 20_dhtdistribution_memprereq=8388608
 30_peerping_idlesleep=120000
 30_peerping_busysleep=120000

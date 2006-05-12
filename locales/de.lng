@@ -193,7 +193,7 @@ Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
 Current language:==Aktuelle Sprache
 default\(english\)==Deutsch
-Languagefile Author(s) (chronological):==Autor(en) der Sprachdatei (chronologisch):
+Languagefile Author\(s\) (chronological):==Autor(en) der Sprachdatei (chronologisch):
 Send additions to maintainer:==Schicken Sie Erg&auml;nzungen bitte an:
 Available Languages:==Verf&uuml;gbare Sprachen:
 Install new language from URL:==Neue Sprachdatei herunterladen:
@@ -290,6 +290,8 @@ You can search for several words simultanous. Words must be separated by a singl
 The words are treated conjunctive, that means every must occur in the result, not any.==
 If you do a global search \(see below\) you may get different results each time you do a search.==Wenn Sie eine globale Suche (siehe unten) durchf&uuml;hren, kann es sein, dass Sie bei wiederholten Suchanfragen jedesmal andere Ergebnisse erhalten.
 Maximum Number of Results==Maximale Anzahl an Ergebnissen
+#DAS ist eine Murksübersetzung... bitte ggf. verbessern.
+Prefer mask:==Vorzugsmaske:
 You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Sie k&ouml;nnen ausw&auml;hlen, wieviele Links Ihnen angezeigt werden sollen. Wir unterst&uuml;tzen im Moment keine mehrfachen Ergebnisseiten f&uuml;r jeden m&ouml;glichen Link.
 Instead we encourage you to enhance the search result by submitting more search words.==Stattdessen m&ouml;chten wir Sie dazu auffordern, Ihre Suchergebnisse durch das Eingeben von mehreren Suchw&ouml;rtern, zu vergr&ouml;&szlig;ern.
 Result Order Options==Reihenfolge der Ergebnisse
@@ -406,7 +408,7 @@ To do this, press this button:==Um dies zu tun, klicken Sie bitte auf folgenden 
 "go online"=="gehe online"
 you must also switch to online mode==Sie m&uuml;ssen aber erst in den online Modus wechseln
 \(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen) um auch am globalen Index beizutragen.
-The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;t #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
+The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;lt #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
 Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
@@ -575,11 +577,12 @@ Start Time==Startzeit
 Peer Name==Peer Name
 Start URL==Start URL
 Intention/Description==Absicht/Beschreibung
-Recently started remote crawls, finished:==Gerade gestartetes Indexieren auf anderen Peers, beendet:
+Recently started remote crawls, finished:==Gerade gestartete Remote-Crawls anderer Peers, beendete:
 Remote Crawling Peers:==Remote-Crawl Peers:
 No remote crawl peers availible.==Kein Peer zum Remote-Crawl erreichbar.
 peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.
 Idle Peers==unt&auml;tige Peers
+Accept \'\?\' URLs==URLs mit '?' akzeptieren
 Busy Peers==Besch&auml;tigte Peers
 \#\(withQuery\)\#no::yes\#\(/withQuery\)\#==#(withQuery)#nein::ja#(/withQuery)#
 \#\(storeCache\)\#no::yes\#\(/storeCache\)\#==#(storeCache)#nein::ja#(/storeCache)#
@@ -633,7 +636,7 @@ Depth==Tiefe
 
 YaCy '\#\[clientname\]\#': Index Creation / WWW Global Crawl Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Globale WWW Warteschlange
 Index Creation: WWW Global Crawl Queue==Index Erzeugung: Globale WWW Warteschlange
-This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Diese Warteschlange enth&auml;t URLs, die an andere Peers gesendet werden sollen, um einen Remote Crawl durchzuf&uuml;hren.
+This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Diese Warteschlange enth&auml;lt URLs, die an andere Peers gesendet werden sollen, um einen Remote Crawl durchzuf&uuml;hren.
 If there is no peer for remote crawling available, the links are crawled locally.==Wenn kein Peer zum Remote Crawl vorhanden ist, werden die Links lokal gecrawlt.
 The global crawler queue is empty==Die globale Crawler Warteschlange ist leer.
 "clear global crawl queue"=="L&ouml;sche globale Crawler Warteschlange"
@@ -653,8 +656,8 @@ Anchor Name==Anker Name
 
 YaCy '\#\[clientname\]\#': Index Creation / WWW Local Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Lokale WWW Warteschlange
 Index Creation: WWW Local Crawl Queue==Index Erzeugung: Lokale WWW Warteschlange
-This queue stores the urls that shall be crawled localy by this peer.==Diese Warteschlange enth&auml;t URLs, die von diesem Peer lokal gecrawlt werden sollen.
-It may also contain urls that are computed by the proxy-prefetch.==Sie enth&auml;t auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
+This queue stores the urls that shall be crawled localy by this peer.==Diese Warteschlange enth&auml;lt URLs, die von diesem Peer lokal gecrawlt werden sollen.
+It may also contain urls that are computed by the proxy-prefetch.==Sie enth&auml;lt auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
 The local crawler queue is empty==Die lokale Crawler Warteschlange ist leer.
 "clear local crawl queue"=="L&ouml;sche lokale Crawler Warteschlange"
 There are <b>\#\[num\]\#</b> entries in the local crawler queue. Showing <b>\#\[show-num\]\#</b> most recent entries.==Es befinden sich <b>#[num]#</b> Eintr&auml;ge in der lokalen Crawler Warteschlange. Gezeigt werden die <b>#[show-num]#</b> neusten Eintr&auml;ge.
@@ -723,7 +726,7 @@ you have to rename it first.==m&uuml;ssen Sie sie zuerst umbenennen.
 Please note that the imported words are useless if the destination peer doesn't know==Bitte bedenken Sie, dass die importierten W&ouml;rter nutzlos sind, wenn der Ziel-Peer nicht wei&szlig;,
 the URLs the imported words belongs to.==zu welchen URLs sie geh&ouml;ren.
 Crawling Queue Import:==Crawler-Warteschlangen-Import:
-Contains data about the crawljob an URL belongs to==Enth&auml;t Daten &uuml;ber den Crawljob zu dem eine URL geh&ouml;rt
+Contains data about the crawljob an URL belongs to==Enth&auml;lt Daten &uuml;ber den Crawljob zu dem eine URL geh&ouml;rt
 The crawling queue==Die Crawler-Warteschlange
 Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zur Crawler-Warteschlange geh&ouml;ren
 
@@ -753,13 +756,13 @@ Some processes occur double to document the complex index migration structure.==
 This is the list of web pages that this peer initiated to crawl,==Dies ist eine Liste von Internetseiten, bei der Ihr Peer den Crawl initiiert hat,
 but had been crawled by <i>other</i> peers.==die aber von <i>anderen</i> Peers gecrawlt wurden.
 This is the 'mirror'-case of process \(6\).==Dies ist der 'Gegensatz' Prozess zu (6)
-<i>Use Case:</i> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<i>Anwendung:</i> Sie erhalten hier Eintr&auml;ge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
+<i>Use Case:</i> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<i>Anwendungsfall:</i> Sie erhalten hier Eintr&auml;ge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
 'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==die 'Remote Indexierung' aktivieren. Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde,
 is reported back and can be monitored here.==wird nun zur&uuml;ck gemeldet und hier angezeigt.
 \(2\) Index Monitor for Result of Search Queries==(2) Index Monitor f&uuml;r Resultate bei Suchanfragen
-This index transfer was initiated by your peer by doing a search query.==Der Index Transfer von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
-The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecawlt und nun Ihnen breitgestellt.
-<i>Use Case:</i> This list fills up if you do a search query on the 'Search Page'==<i>Anwendung:</i> Diese Liste f&uuml;llt sich, wenn Sie eine Suchanfrage auf der 'Suchseite' starten.
+This index transfer was initiated by your peer by doing a search query.==Dieser Index Transfer wurde von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
+The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecrawlt und nun Ihnen breitgestellt.
+<i>Use Case:</i> This list fills up if you do a search query on the 'Search Page'==<i>Anwendungsfall:</i> Diese Liste f&uuml;llt sich, wenn Sie eine Suchanfrage auf der 'Suchseite' starten.
 \(3\) Index Monitor for Index Transfer.==(3) Index Monitor f&uuml;r die DHT-Verteilung
 The url fetch was initiated and executed by other peers.==Die URL Indexierung wurde von anderen Peers initiiert und durchgef&uuml;hrt.
 These links here have been transmitted to you because your peer is the most appropriate for storage according to==Diese Links wurden an Ihren Peer &uuml;bermittelt, da er am angemessensten zur Speicherung
@@ -777,7 +780,7 @@ on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'E
 These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen lokalen Crawl auf der 'Index erzeugen' Seite gestartet haben.
 <i>Use Case:</i> start a crawl by setting a crawl start point on the 'Index Create' page.==<i>Anwendung:</i> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
 \(6\) Index Monitor for Global Crawling==(6) Index Monitor f&uuml;r das globale Crawlen
-These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen remote Peer initiiert.
+These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen Peer initiiert (remote-Crawl).
 This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
 <i>Use Case:</i> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<i>Anwendung:</i> Diese Liste f&uuml;llt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
 The stack is empty.==Die Liste ist leer.
@@ -961,8 +964,8 @@ Outgoing&nbsp;News==ausgehende News
 Published&nbsp;News==ver&ouml;ffentlichte News
 News Overview==News&uuml;berblick
 This is the YaCyNews system \(currently under testing\).==Dies ist das YaCy News-System (zur Zeit noch im Test).
-The news service is controlled by several entry points:==Dieser News Service wird von folgenden Punkten initiert:
-A crawl start with remote indexing will automatically create a news entry.==Wird ein Crawl von einem anderen Peer initiert, dann wird automatisch ein News-Eintrag erstellt.
+The news service is controlled by several entry points:==Dieser News Service wird von folgenden Punkten initiiert:
+A crawl start with remote indexing will automatically create a news entry.==Wird ein Crawl von einem anderen Peer initiiert, dann wird automatisch ein News-Eintrag erstellt.
 Other peers may use this information to prevent double-crawls from the same start point.==Andere Peers k&ouml;nnen diese Informationen benutzen, um einen doppelten Crawl vom selben Startpunkt zu vermeiden.
 A table with recently started crawls is presented on the Index Create - page==Eine Tabelle mit gerade gestarteten Crawls wird auf der "Index erzeugen"-Seite angezeigt.
 A change in the personal profile will create a news entry. You can see recently made changes of==Durch eine &Auml;nderung im Profil, wird auch ein News-Eintrag erstellt.
@@ -1319,6 +1322,7 @@ Enable&nbsp;port&nbsp;forwarding:==Aktiviere Port Weiterleitung:
 Enabling disabling port forwarding via secure channel.==Aktivieren/Deaktivieren von Port Weiterleitung &uuml;ber sicheren Kanal.
 Forwarding&nbsp;via&nbsp;proxy:==Weiterleitung &uuml;ber Proxy:
 Function not available at the moment.==Funktion im Moment nicht verf&uuml;gbar.
+You need to install libx to use this feature==Sie müssen die libx installieren, um diese Funktionen benutzen zu können
 Forwarding&nbsp;port:==Weiterleitender Port
 The port on the remote server that should be forwarded via the secure channel to the local host.==Der Port des Remote Servers der mittels sicherem Kanal auf den lokalen Host weitergeleitet werden soll.
 Forwarding&nbsp;host:==Weiterleitender Host
@@ -1770,7 +1774,7 @@ To do this, press this button:==Um dies zu tun, klicken Sie bitte auf folgenden 
 "go online"=="gehe online"
 you must also switch to online mode==Sie m&uuml;ssen aber erst in den online Modus wechseln
 \(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen) um auch am globalen Index beizutragen.
-The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;t #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
+The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;lt #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
 Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
@@ -1789,7 +1793,7 @@ Peer Owner Profile==Impressum dieses Peers
 
 YaCy&nbsp;-&nbsp;Distributed&nbsp;Web&nbsp;Indexing&nbsp;-&nbsp;Administration==YaCy - Verteiltes Internet-Indexieren - Administration
 Global&nbsp;Index==Globaler Index
-Distributed Crawler==Verteilter Crawler
+Crawler Control==Crawler Steuerung
 Local Proxy==Lokaler Proxy
 Communication / Publication==Kommunikation / Publikation
 Peer&nbsp;Control==Peer-Verwaltung
