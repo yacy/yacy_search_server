@@ -1,12 +1,11 @@
 //userDB.java 
 //-------------------------------------
 //part of YACY
-//(C) by Michael Peter Christen; mc@anomic.de
-//first published on http://www.anomic.de
-//Frankfurt, Germany, 2004
 //
-//This file ist contributed by Martin Thelian
-//last major change: $LastChangedDate$ by $LastChangedBy$
+//(C) 2005, 2006 by Martin Thelian
+//                  Alexander Schier
+//
+//last change: $LastChangedDate$ by $LastChangedBy$
 //Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify

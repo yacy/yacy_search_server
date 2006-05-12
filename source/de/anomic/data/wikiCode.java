@@ -1,12 +1,12 @@
 // wikiCode.java 
 // -------------------------------------
 // part of YACY
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
 //
-// This file ist contributed by Alexander Schier
-// last major change: 08.05.2006
+// (C) 2005, 2006 by Alexander Schier 
+//                   Marc Nause
+//
+//
+// last change: $LastChangedDate: $ by $LastChangedBy: $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

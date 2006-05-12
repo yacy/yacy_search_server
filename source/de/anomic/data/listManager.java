@@ -1,14 +1,11 @@
 // listManager.java
 // -------------------------------------
 // part of YACY
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
 // 
-// This file ist contributed by Alexander Schier
-//
-// $LastChangedDate$
+// (C) 2005, 2006 by Alexander Schier
+// 
+// last change: $LastChangedDate$ by $LastChangedBy$
 // $LastChangedRevision$
-// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

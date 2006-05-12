@@ -1,10 +1,8 @@
 // migration.java
 // -----------------------
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.yacy.net
-// Frankfurt, Germany, 2004, 2005
+// (C) by Alexander Schier
 //
-// this file is contributed by Alexander Schier
+// last change: $LastChangedDate: $ by $LastChangedBy: $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
