@@ -75,6 +75,9 @@ public class plasmaDHTChunk {
     private HashMap urlCache; // String (url-hash) / plasmaCrawlLURL.Entry
     private int idxCount;
     
+    private long selectionStartTime = 0;
+    private long selectionEndTime = 0;
+    
     public plasmaWordIndexEntryContainer firstContainer() {
         return indexContainers[0];
     }
@@ -161,15 +164,20 @@ public class plasmaDHTChunk {
         return startPointHash;
     }
 
-    private void selectTransferContainers(String hash, int mincount, int maxcount) {
-        int refcountRAM = selectTransferContainersResource(hash, plasmaWordIndex.RL_RAMCACHE, maxcount);
-        if (refcountRAM >= mincount) {
-            log.logFine("DHT selection from RAM: " + refcountRAM + " entries");
+    private void selectTransferContainers(String hash, int mincount, int maxcount) {        
+        try {
+            this.selectionStartTime = System.currentTimeMillis();
+            int refcountRAM = selectTransferContainersResource(hash, plasmaWordIndex.RL_RAMCACHE, maxcount);
+            if (refcountRAM >= mincount) {
+                log.logFine("DHT selection from RAM: " + refcountRAM + " entries");
+                return;
+            }
+            int refcountFile = selectTransferContainersResource(hash, plasmaWordIndex.RL_WORDFILES, maxcount);
+            log.logFine("DHT selection from FILE: " + refcountFile + " entries, RAM provided only " + refcountRAM + " entries");
             return;
+        } finally {
+            this.selectionEndTime = System.currentTimeMillis();
         }
-        int refcountFile = selectTransferContainersResource(hash, plasmaWordIndex.RL_WORDFILES, maxcount);
-        log.logFine("DHT selection from FILE: " + refcountFile + " entries, RAM provided only " + refcountRAM + " entries");
-        return;
     }
 
     private int selectTransferContainersResource(String hash, int resourceLevel, int maxcount) {
@@ -277,4 +285,8 @@ public class plasmaDHTChunk {
         return count;
     }
     
+    public long getSelectionTime() {
+        if (this.selectionStartTime == 0 || this.selectionEndTime == 0) return -1;
+        return this.selectionEndTime-this.selectionStartTime;
+    }
 }

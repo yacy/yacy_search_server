@@ -70,14 +70,14 @@ public class plasmaDHTFlush extends Thread {
             this.seed = seed;
             this.delete = delete;
             this.sb = plasmaSwitchboard.getSwitchboard();
-            this.initialWordsDBSize = sb.wordIndex.size();   
+            this.initialWordsDBSize = this.sb.wordIndex.size();   
             this.gzipBody4Transfer = gzipBody;
             this.timeout4Transfer = timeout;
             //this.maxOpenFiles4Transfer = (int) sb.getConfigLong("indexTransfer.maxOpenFiles",800);
         }
         
         public void run() {
-            performTransferWholeIndex();
+            this.performTransferWholeIndex();
         }
         
         public void stopIt(boolean wait) throws InterruptedException {
@@ -110,17 +110,17 @@ public class plasmaDHTFlush extends Thread {
         }
         
         public float getTransferedContainerPercent() {
-            long currentWordsDBSize = sb.wordIndex.size(); 
-            if (initialWordsDBSize == 0) return 100;
-            else if (currentWordsDBSize >= initialWordsDBSize) return 0;
+            long currentWordsDBSize = this.sb.wordIndex.size(); 
+            if (this.initialWordsDBSize == 0) return 100;
+            else if (currentWordsDBSize >= this.initialWordsDBSize) return 0;
             //else return (float) ((initialWordsDBSize-currentWordsDBSize)/(initialWordsDBSize/100));
-            else return (float)(this.transferedContainerCount*100/initialWordsDBSize);
+            else return (this.transferedContainerCount*100/this.initialWordsDBSize);
         }
         
         public int getTransferedEntitySpeed() {
-            long transferTime = System.currentTimeMillis() - startingTime;
+            long transferTime = System.currentTimeMillis() - this.startingTime;
             if (transferTime <= 0) transferTime = 1;
-            return (int) ((1000 * transferedEntryCount) / transferTime);
+            return (int) ((1000 * this.transferedEntryCount) / transferTime);
         }
         
         public yacySeed getSeed() {
@@ -138,144 +138,132 @@ public class plasmaDHTFlush extends Thread {
         public String[] getRange() {
             plasmaDHTTransfer workerThread = this.worker;
             if (workerThread != null) {
-                return new String[]{"[" + oldStartingPointHash + ".." + startPointHash + "]",
-                                    "[" + workerThread.dhtChunk.firstContainer().hashCode() + ".." + workerThread.dhtChunk.lastContainer().hashCode() + "]"};
+                return new String[]{"[" + this.oldStartingPointHash + ".." + this.startPointHash + "]",
+                                    "[" + workerThread.dhtChunk.firstContainer().wordHash() + ".." + workerThread.dhtChunk.lastContainer().wordHash() + "]"};
             }
-            return new String[]{"[" + oldStartingPointHash + ".." + startPointHash + "]","[------------..------------]"};
+            return new String[]{"[" + this.oldStartingPointHash + ".." + this.startPointHash + "]","[------------..------------]"};
         }
         
         public void performTransferWholeIndex() {
             plasmaDHTChunk newDHTChunk = null, oldDHTChunk = null;
             try {
-                // pausing the regular index distribution
-                // TODO: adding sync, to wait for a still running index distribution to finish
-                //plasmaWordIndexDistribution.paused = true;
-                
                 // initial startingpoint of intex transfer is "------------"                 
-                log.logFine("Selected hash " + startPointHash + " as start point for index distribution of whole index");        
+                this.log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution of whole index");        
                 
                 /* Loop until we have
                  * - finished transfer of whole index
                  * - detected a server shutdown or user interruption
                  * - detected a failure
                  */
-                long selectionStart = System.currentTimeMillis(), selectionEnd = 0, selectionTime = 0, iteration = 0;
+                long iteration = 0;
                 
-                while (!finished && !Thread.currentThread().isInterrupted()) {
+                while (!this.finished && !Thread.currentThread().isInterrupted()) {
                     iteration++;
-                    selectionStart = System.currentTimeMillis();
                     oldDHTChunk = newDHTChunk;
                     
                     // selecting 500 words to transfer
                     this.status = "Running: Selecting chunk " + iteration;
-                    newDHTChunk = new plasmaDHTChunk(log, wordIndex, sb.urlPool.loadedURL, this.chunkSize/3, this.chunkSize, this.startPointHash);
+                    newDHTChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.sb.urlPool.loadedURL, this.chunkSize/3, this.chunkSize, this.startPointHash);
                     
                     /* If we havn't selected a word chunk this could be because of
                      * a) no words are left in the index
                      * b) max open file limit was exceeded 
                      */
-                    if ((newDHTChunk == null) ||
-                        (newDHTChunk.containerSize() == 0) ||
-                        (newDHTChunk.getStatus() == plasmaDHTChunk.chunkStatus_FAILED)) {
-                        if (sb.wordIndex.size() > 0) {
+                    if (nothingSelected(newDHTChunk)) {
+                        if (this.sb.wordIndex.size() > 0) {
                             // if there are still words in the index we try it again now
-                            startPointHash = "------------";
+                            this.startPointHash = "------------";
                         } else {                            
                             // otherwise we could end transfer now
-                            log.logFine("No index available for index transfer, hash start-point " + startPointHash);
+                            this.log.logFine("No index available for index transfer, hash start-point " + this.startPointHash);
                             this.status = "Finished. " + iteration + " chunks transfered.";
-                            finished = true; 
+                            this.finished = true; 
                         }
                     } else {
                         
                         // getting start point for next DHT-selection
-                        oldStartingPointHash = startPointHash;
-                        startPointHash = newDHTChunk.lastContainer().wordHash(); // DHT targets must have greater hashes
+                        this.oldStartingPointHash = this.startPointHash;
+                        this.startPointHash = newDHTChunk.lastContainer().wordHash(); // DHT targets must have greater hashes
                         
-                        selectionEnd = System.currentTimeMillis();
-                        selectionTime = selectionEnd - selectionStart;
-                        log.logInfo("Index selection of " + newDHTChunk.indexCount() + " words [" + newDHTChunk.firstContainer().wordHash() + " .. " + newDHTChunk.lastContainer().wordHash() + "]" +
+                        this.log.logInfo("Index selection of " + newDHTChunk.indexCount() + " words [" + newDHTChunk.firstContainer().wordHash() + " .. " + newDHTChunk.lastContainer().wordHash() + "]" +
                                 " in " +
-                                (selectionTime / 1000) + " seconds (" +
-                                (1000 * newDHTChunk.indexCount() / (selectionTime+1)) + " words/s)");                     
+                                (newDHTChunk.getSelectionTime() / 1000) + " seconds (" +
+                                (1000 * newDHTChunk.indexCount() / (newDHTChunk.getSelectionTime()+1)) + " words/s)");                     
                     }
                     
                     // query status of old worker thread
-                    if (worker != null) {
+                    if (this.worker != null) {
                         this.status = "Finished: Selecting chunk " + iteration;
-                        worker.join();
-                        if (worker.dhtChunk.getStatus() != plasmaDHTChunk.chunkStatus_COMPLETE) {
+                        this.worker.join();
+                        if (this.worker.getStatus() != plasmaDHTChunk.chunkStatus_COMPLETE) {
                             // if the transfer failed we abort index transfer now
-                            this.status = "Aborted because of Transfer error:\n" + worker.dhtChunk.getStatus();
+                            this.status = "Aborted because of Transfer error:\n" + this.worker.dhtChunk.getStatus();
                             
                             // abort index transfer
                             return;
-                        } else {
-                            /* 
-                             * If index transfer was done successfully we close all remaining open
-                             * files that belong to the old index chunk and handover a new chunk
-                             * to the transfer thread.
-                             * Addintionally we recalculate the chunk size to optimize performance
-                             */
-                            
-                            this.chunkSize = worker.dhtChunk.indexCount();
-                            long transferTime = worker.getTransferTime();
-                            //TODO: only increase chunk Size if there is free memory left on the server
-                            
-                            // we need aprox. 73Byte per IndexEntity and an average URL length of 32 char
-                            //if (ft.freeMemory() < 73*2*100)                                                        
-                            if (transferTime > 60*1000) {
-                                if (chunkSize>200) chunkSize-=100;
-                            } else if (selectionTime < transferTime){
-                                this.chunkSize +=100;
-                                //chunkSize+=50;
-                            } else if (selectionTime >= selectionTime){
-                                if (chunkSize>200) chunkSize-=100;
-                            }
-                            
-                            selectionStart = System.currentTimeMillis();
-                            
-                            // deleting transfered words from index
-                            if (delete) {
-                                this.status = "Running: Deleting chunk " + iteration;
-                                transferedEntryCount += oldDHTChunk.indexCount();
-                                transferedContainerCount += oldDHTChunk.containerSize();
-                                int urlReferences = oldDHTChunk.deleteTransferIndexes();
-                                log.logFine("Deleted from " + oldDHTChunk.containerSize() + " transferred RWIs locally " + urlReferences + " URL references");
-                            } else {
-                                transferedEntryCount += oldDHTChunk.indexCount();
-                                transferedContainerCount += oldDHTChunk.containerSize();
-                            }
-                            oldDHTChunk = null;
                         }
+                        
+                        // calculationg the new transfer size
+                        this.calculateNewChunkSize();
                         this.worker = null;
+
+                        // counting transfered containers / entries
+                        this.transferedEntryCount += oldDHTChunk.indexCount();
+                        this.transferedContainerCount += oldDHTChunk.containerSize();
+                        
+                        // deleting transfered words from index
+                        if (this.delete) {
+                            this.status = "Running: Deleting chunk " + iteration;
+                            int urlReferences = oldDHTChunk.deleteTransferIndexes();
+                            this.log.logFine("Deleted from " + oldDHTChunk.containerSize() + " transferred RWIs locally " + urlReferences + " URL references");
+                        } 
+                        oldDHTChunk = null;
                     }
                     
                     // handover chunk to transfer worker
-                    if ((newDHTChunk != null) &&
-                        (newDHTChunk.containerSize() > 0) ||
-                        (newDHTChunk.getStatus() == plasmaDHTChunk.chunkStatus_FILLED)) {
-                        worker = new plasmaDHTTransfer(log, seed, newDHTChunk, gzipBody4Transfer, timeout4Transfer, 5);
-                        worker.start();
+                    if ((newDHTChunk.containerSize() > 0) || (newDHTChunk.getStatus() == plasmaDHTChunk.chunkStatus_FILLED)) {
+                        this.worker = new plasmaDHTTransfer(this.log, this.seed, newDHTChunk, this.gzipBody4Transfer, this.timeout4Transfer, 5);
+                        this.worker.start();
                     }
                 }
                 
                 // if we reach this point we were aborted by the user or by server shutdown
-                if (sb.wordIndex.size() > 0) this.status = "aborted";
+                if (this.sb.wordIndex.size() > 0) this.status = "aborted";
             } catch (Exception e) {
                 this.status = "Error: " + e.getMessage();
-                log.logWarning("Index transfer to peer " + seed.getName() + ":" + seed.hash + " failed:'" + e.getMessage() + "'",e);
+                this.log.logWarning("Index transfer to peer " + this.seed.getName() + ":" + this.seed.hash + " failed:'" + e.getMessage() + "'",e);
                 
             } finally {
-                if (worker != null) {
-                    worker.stopIt();
-                    try {worker.join();}catch(Exception e){}
-                    // worker = null;
+                if (this.worker != null) {
+                    this.worker.stopIt();
+                    try {this.worker.join();}catch(Exception e){}
                 }
-                
-                //plasmaWordIndexDistribution.paused = false;
             }
         }
 
-    
+    private void calculateNewChunkSize() {
+        // getting the transfered chunk size
+        this.chunkSize = this.worker.dhtChunk.indexCount();
+        
+        // getting the chunk selection time
+        long selectionTime = this.worker.dhtChunk.getSelectionTime();
+        
+        // getting the chunk transfer time
+        long transferTime = this.worker.getTransferTime();
+
+        // calculationg the new chunk size
+        if (transferTime > 60*1000 && this.chunkSize>200) {
+            this.chunkSize-=100;
+        } else if (selectionTime < transferTime){
+            this.chunkSize +=100;
+        } else if (selectionTime >= selectionTime && this.chunkSize>200){
+            this.chunkSize-=100;
+        }    
+    }
+
+    private static boolean nothingSelected(plasmaDHTChunk newDHTChunk) {
+        return (newDHTChunk == null) ||
+               (newDHTChunk.containerSize() == 0) ||
+               (newDHTChunk.getStatus() == plasmaDHTChunk.chunkStatus_FAILED);        
+    }
 }

@@ -111,9 +111,9 @@ public final class IndexTransfer_p {
             prop.put("running_transfer.twchunk", Integer.toString(chunk[1]));
 
             
-            //prop.put("running_twEntityCount",transfThread.getTransferedEntityCount());
+            prop.put("running_twEntityCount",switchboard.transferIdxThread.getTransferedContainerCount());
             prop.put("running_twEntryCount",switchboard.transferIdxThread.getTransferedEntryCount());
-            //prop.put("running_twEntityPercent",Float.toString(transfThread.getTransferedEntityPercent()));
+            prop.put("running_twEntityPercent",Float.toString(switchboard.transferIdxThread.getTransferedContainerPercent()));
             prop.put("running_twEntitySpeed",Integer.toString(switchboard.transferIdxThread.getTransferedEntitySpeed()));
             
             prop.put("running_deleteIndex", switchboard.transferIdxThread.deleteIndex()?1:0);

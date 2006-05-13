@@ -111,6 +111,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -2138,56 +2139,69 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public boolean dhtTransferProcess(plasmaDHTChunk dhtChunk, int peerCount) {
         if ((yacyCore.seedDB == null) || (yacyCore.seedDB.sizeConnected() == 0)) return false;
 
-        // find a list of DHT-peers
-        yacySeed[] seeds = yacyCore.dhtAgent.getDHTTargets(log, peerCount, 10, dhtChunk.firstContainer().wordHash(), dhtChunk.lastContainer().wordHash(), 0.4);
+        try {
+            // find a list of DHT-peers
+            ArrayList seeds = new ArrayList(Arrays.asList(yacyCore.dhtAgent.getDHTTargets(log, peerCount, 10, dhtChunk.firstContainer().wordHash(), dhtChunk.lastContainer().wordHash(), 0.4)));
+            if (seeds.size() < peerCount) {
+                log.logWarning("found not enough (" + seeds.size() + ") peers for distribution");
+                return false;
+            }
 
-        if (seeds.length < peerCount) {
-            log.logWarning("found not enough (" + seeds.length + ") peers for distribution");
+            // send away the indexes to all these peers
+            int hc1 = 0;
+
+            // getting distribution configuration values
+            boolean gzipBody = getConfig("indexDistribution.gzipBody","false").equalsIgnoreCase("true");
+            int timeout = (int)getConfigLong("indexDistribution.timeout",60000);
+            int retries = 0;
+
+            // starting up multiple DHT transfer threads   
+            Iterator seedIter = seeds.iterator();
+            ArrayList transfer = new ArrayList(peerCount);
+            while (hc1 < peerCount && seedIter.hasNext()) {
+
+                // starting up some transfer threads
+                int transferThreadCount = transfer.size();
+                for (int i=0; i < peerCount-hc1-transferThreadCount; i++) {
+                    if (seedIter.hasNext()) {
+                        plasmaDHTTransfer t = new plasmaDHTTransfer(log, (yacySeed)seedIter.next(), dhtChunk,gzipBody,timeout,retries);
+                        t.start();
+                        transfer.add(t);
+                    } else {
+                        break;
+                    }
+                }
+
+                // waiting for the transfer threads to finish
+                Iterator transferIter = transfer.iterator();
+                while (transferIter.hasNext()) {
+                    plasmaDHTTransfer t = (plasmaDHTTransfer)transferIter.next();
+                    if (!t.isAlive()) {
+                        // remove finished thread from the list
+                        transferIter.remove();
+
+                        // count successful transfers
+                        if (t.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) {
+                            this.log.logInfo("DHT distribution: transfer to peer " + t.getSeed().getName() + " finished.");
+                            hc1++;
+                        }
+                    }
+                }
+
+                if (hc1 < peerCount) Thread.sleep(100);
+            }
+
+
+            // clean up and finish with deletion of indexes
+            if (hc1 >= peerCount) {
+                // success
+                return true;
+            }
+            this.log.logSevere("Index distribution failed. Too few peers (" + hc1 + ") received the index, not deleted locally.");
+            return false;
+        } catch (InterruptedException e) {
             return false;
         }
-
-        // send away the indexes to all these peers
-        String peerNames = "";
-        int hc1 = 0;
-        plasmaDHTTransfer.setSeedcount(0);
-        plasmaDHTTransfer [] transfer = new plasmaDHTTransfer[peerCount];
-        for (int i = 0; i < transfer.length; i++) {
-            transfer[i] = new plasmaDHTTransfer(log, seeds, dhtChunk,
-                            getConfig("indexDistribution.gzipBody","false").equalsIgnoreCase("true"),
-                            (int)getConfigLong("indexDistribution.timeout",60000), 0);
-            transfer[i].start();
-        }
-        
-        boolean DHTalive = true;
-        while(DHTalive) {
-            DHTalive =  false;
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            for (int i = 0; i < transfer.length; i++) {
-                if (transfer[i].isAlive()) DHTalive = true;
-            }
-        }
-        
-        for (int i = 0; i < transfer.length; i++) {
-            if (transfer[i].getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) {
-                peerNames += ", " + seeds[i].getName();
-                hc1++;
-            }
-        }
-
-        if (peerNames.length() > 0) peerNames = peerNames.substring(2); // remove comma
-
-        // clean up and finish with deletion of indexes
-        if (hc1 >= peerCount) {
-            // success
-            return true;
-        }
-        this.log.logSevere("Index distribution failed. Too few peers (" + hc1 + ") received the index, not deleted locally.");
-        return false;
     }
     
     public void terminate() {

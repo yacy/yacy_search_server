@@ -60,8 +60,6 @@ public class plasmaDHTTransfer extends Thread {
     private String transferStatusMessage = "";
 
     // delivery destination
-    private yacySeed [] seeds = null;
-    private static int seedcount = 0;
     private yacySeed seed = null;
 
     // word chunk
@@ -71,41 +69,26 @@ public class plasmaDHTTransfer extends Thread {
     private int maxRetry;
     serverLog log;
 
-    public plasmaDHTTransfer(serverLog log, yacySeed seed, plasmaDHTChunk dhtChunk, boolean gzipBody, int timeout, int retries) {
-        super(new ThreadGroup("TransferIndexThreadGroup"), "TransferIndexWorker_" + seed.getName());
+    public plasmaDHTTransfer(serverLog log, yacySeed destSeed, plasmaDHTChunk dhtChunk, boolean gzipBody, int timeout, int retries) {
+        super(new ThreadGroup("TransferIndexThreadGroup"), "TransferIndexWorker_" + destSeed.getName());
         this.log = log;
         this.gzipBody4Transfer = gzipBody;
         this.timeout4Transfer = timeout;
         this.dhtChunk = dhtChunk;
         this.maxRetry = retries;
-        seeds = new yacySeed[1];
-        seeds[0] = seed;
-    }
-    
-    public plasmaDHTTransfer(serverLog log, yacySeed [] seeds, plasmaDHTChunk dhtChunk, boolean gzipBody, int timeout, int retries) {
-        super(new ThreadGroup("TransferIndexThreadGroup"), "TransferIndexWorker_" + seedcount);
-        this.log = log;
-        this.gzipBody4Transfer = gzipBody;
-        this.timeout4Transfer = timeout;
-        this.dhtChunk = dhtChunk;
-        this.maxRetry = retries;
-        this.seeds = seeds;
+        this.seed = destSeed;
     }
 
     public void run() {
-        while (getStatus() != plasmaDHTChunk.chunkStatus_COMPLETE && seedcount < seeds.length)try {
-            seed = seeds[seedcount++];
-            uploadIndex();
+        try {
+            this.uploadIndex();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
-        } finally {
-
         }
     }
     
     private boolean isAborted() {
-        if (stopped || Thread.currentThread().isInterrupted()) {
+        if (this.stopped || Thread.currentThread().isInterrupted()) {
             return true;
         }
         return false;
@@ -120,11 +103,15 @@ public class plasmaDHTTransfer extends Thread {
     }
     
     public int getStatus() {
-        return transferStatus;
+        return this.transferStatus;
     }
 
     public String getStatusMessage() {
-        return transferStatusMessage;
+        return this.transferStatusMessage;
+    }
+    
+    public yacySeed getSeed() {
+        return this.seed;
     }
     
     public void uploadIndex() throws InterruptedException {
@@ -133,78 +120,68 @@ public class plasmaDHTTransfer extends Thread {
          * - have successfully transfered the words list or 
          * - the retry counter limit was exceeded
          */
-        transferStatus = plasmaDHTChunk.chunkStatus_RUNNING;
+        this.transferStatus = plasmaDHTChunk.chunkStatus_RUNNING;
         long retryCount = 0, start = System.currentTimeMillis();
         while (true) {
             // testing if we were aborted
-            if (isAborted()) return;
+            if (this.isAborted()) return;
 
             // transfering seleted words to remote peer
-            transferStatusMessage = "Running: Transfering chunk to target " + seed.hash + "/" + seed.getName();
-            String error = yacyClient.transferIndex(seed, dhtChunk.containers(), dhtChunk.urlCacheMap(), gzipBody4Transfer, timeout4Transfer);
+            this.transferStatusMessage = "Running: Transfering chunk to target " + this.seed.hash + "/" + this.seed.getName();
+            String error = yacyClient.transferIndex(this.seed, this.dhtChunk.containers(), this.dhtChunk.urlCacheMap(), this.gzipBody4Transfer, this.timeout4Transfer);
             if (error == null) {
                 // words successfully transfered
-                transferTime = System.currentTimeMillis() - start;
-                this.log.logInfo("Index transfer of " + dhtChunk.indexCount() + " words [" + dhtChunk.firstContainer().wordHash() + " .. " + dhtChunk.lastContainer().wordHash() + "]" + " to peer " + seed.getName() + ":" + seed.hash + " in " + (transferTime / 1000) + " seconds successful ("
-                                + (1000 * dhtChunk.indexCount() / (transferTime + 1)) + " words/s)");
+                this.transferTime = System.currentTimeMillis() - start;
+                this.log.logInfo("Index transfer of " + this.dhtChunk.indexCount() + " words [" + this.dhtChunk.firstContainer().wordHash() + " .. " + this.dhtChunk.lastContainer().wordHash() + "]" + " to peer " + this.seed.getName() + ":" + this.seed.hash + " in " + (this.transferTime / 1000) + " seconds successful ("
+                                + (1000 * this.dhtChunk.indexCount() / (this.transferTime + 1)) + " words/s)");
                 retryCount = 0;
-                transferStatusMessage = "Finished: Transfer of chunk to target " + seed.hash + "/" + seed.getName();
-                transferStatus = plasmaDHTChunk.chunkStatus_COMPLETE;
+                this.transferStatusMessage = "Finished: Transfer of chunk to target " + this.seed.hash + "/" + this.seed.getName();
+                this.transferStatus = plasmaDHTChunk.chunkStatus_COMPLETE;
                 break;
-            } else {
-                // words transfer failed
+            }
+            
+            // inc retry counter
+            retryCount++;
 
-                // inc retry counter
-                retryCount++;
+            // testing if we were aborted ...
+            if (this.isAborted()) return;
 
+            // we have lost the connection to the remote peer. Adding peer to disconnected list
+            this.log.logWarning("Index transfer to peer " + this.seed.getName() + ":" + this.seed.hash + " failed:'" + error + "', disconnecting peer");
+            yacyCore.peerActions.peerDeparture(this.seed);
+
+            // if the retry counter limit was not exceeded we'll retry it in a few seconds
+            this.transferStatusMessage = "Disconnected peer: " + ((retryCount > 5) ? error + ". Transfer aborted" : "Retry " + retryCount);
+            if (retryCount > this.maxRetry) {
+                this.transferStatus = plasmaDHTChunk.chunkStatus_FAILED;
+                return;
+            }
+            Thread.sleep(retryCount * 5000);
+
+            /* loop until 
+             * - we have successfully done a peer ping or 
+             * - the retry counter limit was exceeded
+             */
+            while (true) {
                 // testing if we were aborted ...
-                if (isAborted()) return;
-
-                // we have lost the connection to the remote peer. Adding peer to disconnected list
-                this.log.logWarning("Index transfer to peer " + seed.getName() + ":" + seed.hash + " failed:'" + error + "', disconnecting peer");
-                yacyCore.peerActions.peerDeparture(seed);
-
-                // if the retry counter limit was not exceeded we'll retry it in a few seconds
-                transferStatusMessage = "Disconnected peer: " + ((retryCount > 5) ? error + ". Transfer aborted" : "Retry " + retryCount);
-                if (retryCount > maxRetry) {
-                    transferStatus = plasmaDHTChunk.chunkStatus_FAILED;
+                if (this.isAborted())
                     return;
-                }
-                Thread.sleep(retryCount * 5000);
 
-                /* loop until 
-                 * - we have successfully done a peer ping or 
-                 * - the retry counter limit was exceeded
-                 */
-                while (true) {
-                    // testing if we were aborted ...
-                    if (isAborted())
-                        return;
-
-                    // doing a peer ping to the remote seed
-                    int added = yacyClient.publishMySeed(seed.getAddress(), seed.hash);
-                    if (added < 0) {
-                        // inc. retry counter
-                        retryCount++;
-                        transferStatusMessage = "Disconnected peer: Peer ping failed. " + ((retryCount > 5) ? "Transfer aborted." : "Retry " + retryCount);
-                        if (retryCount > maxRetry) return;
-                        Thread.sleep(retryCount * 5000);
-                        continue;
-                    } else {
-                        yacyCore.seedDB.getConnected(seed.hash);
-                        transferStatusMessage = "running";
-                        break;
-                    }
+                // doing a peer ping to the remote seed
+                int added = yacyClient.publishMySeed(this.seed.getAddress(), this.seed.hash);
+                if (added < 0) {
+                    // inc. retry counter
+                    retryCount++;
+                    this.transferStatusMessage = "Disconnected peer: Peer ping failed. " + ((retryCount > 5) ? "Transfer aborted." : "Retry " + retryCount);
+                    if (retryCount > this.maxRetry) return;
+                    Thread.sleep(retryCount * 5000);
+                    continue;
                 }
+                
+                yacyCore.seedDB.getConnected(this.seed.hash);
+                this.transferStatusMessage = "running";
+                break;
             }
         }
-    }
-
-    public static void setSeedcount(int seedcount) {
-        plasmaDHTTransfer.seedcount = seedcount;
-    }
-
-    public static int getSeedcount() {
-        return seedcount;
     }
 }
