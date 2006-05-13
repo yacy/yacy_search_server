@@ -241,11 +241,13 @@ public final class plasmaCrawlStacker {
          */
         URL nexturl = null, referrerURL = null;
         if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = plasmaURL.dummyHash;
-        try {
-            referrerURL = new URL(referrerString);
-        } catch (MalformedURLException e) {
-            referrerURL = null;
-            referrerString = null;
+        if (referrerString != null) {
+            try {
+                referrerURL = new URL(referrerString);
+            } catch (MalformedURLException e) {
+                referrerURL = null;
+                referrerString = null;
+            }
         }
         String referrerHash = (referrerString==null)?null:plasmaURL.urlHash(referrerString);
         try {
