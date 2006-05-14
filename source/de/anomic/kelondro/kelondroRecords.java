@@ -456,21 +456,21 @@ public class kelondroRecords {
         return this.headchunksize + element_in_cache + ((cacheControl) ? cache_control_entry : 0);
     }
     
-    public int[] cacheNodeChunkSize() {
+    public long[] cacheNodeChunkSize() {
         // returns three integers:
         // #0: chunk size of CP_LOW - priority entries
         // #1: chunk size of CP_MEDIUM - priority entries
         // #2: chunk size of CP_HIGH - priority entries
-        int[] i = new int[3];
+        long[] i = new long[3];
         i[CP_LOW]    = cacheNodeChunkSize(false);
         i[CP_MEDIUM] = cacheNodeChunkSize(false);
         i[CP_HIGH]   = cacheNodeChunkSize(this.cacheScore != null);
         return i;
     }
     
-    public int[] cacheNodeFillStatus() {
-        if (XcacheHeaders == null) return new int[]{0,0,0,0};
-        return new int[]{XcacheSize - (XcacheHeaders[CP_HIGH].size() + XcacheHeaders[CP_MEDIUM].size() + XcacheHeaders[CP_LOW].size()), XcacheHeaders[CP_HIGH].size(), XcacheHeaders[CP_MEDIUM].size(), XcacheHeaders[CP_LOW].size()};
+    public long[] cacheNodeFillStatus() {
+        if (XcacheHeaders == null) return new long[]{0,0,0,0};
+        return new long[]{XcacheSize - (XcacheHeaders[CP_HIGH].size() + XcacheHeaders[CP_MEDIUM].size() + XcacheHeaders[CP_LOW].size()), XcacheHeaders[CP_HIGH].size(), XcacheHeaders[CP_MEDIUM].size(), XcacheHeaders[CP_LOW].size()};
     }
     
     protected Node newNode() throws IOException {

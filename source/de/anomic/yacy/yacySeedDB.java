@@ -170,22 +170,22 @@ public final class yacySeedDB {
         } catch (IOException e) {}
     }
     
-    public int[] dbCacheNodeChunkSize() {
-        int[] ac = seedActiveDB.cacheNodeChunkSize();
-        int[] pa = seedPassiveDB.cacheNodeChunkSize();
-        int[] po = seedPotentialDB.cacheNodeChunkSize();
-        int[] i = new int[3];
+    public long[] dbCacheNodeChunkSize() {
+        long[] ac = seedActiveDB.cacheNodeChunkSize();
+        long[] pa = seedPassiveDB.cacheNodeChunkSize();
+        long[] po = seedPotentialDB.cacheNodeChunkSize();
+        long[] i = new long[3];
         i[kelondroRecords.CP_LOW] = (ac[kelondroRecords.CP_LOW] + pa[kelondroRecords.CP_LOW] + po[kelondroRecords.CP_LOW]) / 3;
         i[kelondroRecords.CP_MEDIUM] = (ac[kelondroRecords.CP_MEDIUM] + pa[kelondroRecords.CP_MEDIUM] + po[kelondroRecords.CP_MEDIUM]) / 3;
         i[kelondroRecords.CP_HIGH] = (ac[kelondroRecords.CP_HIGH] + pa[kelondroRecords.CP_HIGH] + po[kelondroRecords.CP_HIGH]) / 3;
         return i;
     }
     
-    public int[] dbCacheNodeFillStatus() {
-        int[] ac = seedActiveDB.cacheNodeFillStatus();
-        int[] pa = seedPassiveDB.cacheNodeFillStatus();
-        int[] po = seedPotentialDB.cacheNodeFillStatus();
-        return new int[]{ac[0] + pa[0] + po[0], ac[1] + pa[1] + po[1], ac[2] + pa[2] + po[2], ac[3] + pa[3] + po[3]};
+    public long[] dbCacheNodeFillStatus() {
+        long[] ac = seedActiveDB.cacheNodeFillStatus();
+        long[] pa = seedPassiveDB.cacheNodeFillStatus();
+        long[] po = seedPotentialDB.cacheNodeFillStatus();
+        return new long[]{ac[0] + pa[0] + po[0], ac[1] + pa[1] + po[1], ac[2] + pa[2] + po[2], ac[3] + pa[3] + po[3]};
     }
     
     public String[] dbCacheObjectStatus() {

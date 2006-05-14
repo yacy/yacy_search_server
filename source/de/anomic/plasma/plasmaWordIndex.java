@@ -125,11 +125,11 @@ public final class plasmaWordIndex {
         return assortmentCluster.sizes();
     }
 
-    public int[] assortmentsCacheChunkSizeAvg() {
+    public long[] assortmentsCacheChunkSizeAvg() {
         return assortmentCluster.cacheChunkSizeAvg();
     }
 
-    public int[] assortmentsCacheFillStatusCml() {
+    public long[] assortmentsCacheFillStatusCml() {
         return assortmentCluster.cacheFillStatusCml();
     }
     

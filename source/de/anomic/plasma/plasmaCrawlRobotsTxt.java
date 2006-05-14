@@ -85,11 +85,11 @@ public class plasmaCrawlRobotsTxt {
         }
     }
     
-    public int[] dbCacheNodeChunkSize() {
+    public long[] dbCacheNodeChunkSize() {
         return robotsTable.cacheNodeChunkSize();
     }    
     
-    public int[] dbCacheNodeFillStatus() {
+    public long[] dbCacheNodeFillStatus() {
         return robotsTable.cacheNodeFillStatus();
     }    
     

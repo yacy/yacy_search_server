@@ -63,9 +63,9 @@ public class PerformanceMemory_p {
     private static final int MB = 1024 * KB;
     private static Map defaultSettings = null;
         
-    private static int[]    slt,chk;
+    private static long[]    slt,chk;
     private static String[] ost;
-    private static int      req, usd, bst, god;
+    private static long     req, usd, bst, god;
     
     private static long usedTotal, currTotal, dfltTotal, goodTotal, bestTotal;
         

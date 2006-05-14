@@ -106,11 +106,11 @@ public class yacyNewsPool {
         return newsDB.size();
     }
     
-    public int[] dbCacheNodeChunkSize() {
+    public long[] dbCacheNodeChunkSize() {
         return newsDB.dbCacheNodeChunkSize();
     }
     
-    public int[] dbCacheNodeFillStatus() {
+    public long[] dbCacheNodeFillStatus() {
         return newsDB.dbCacheNodeFillStatus();
     }
     

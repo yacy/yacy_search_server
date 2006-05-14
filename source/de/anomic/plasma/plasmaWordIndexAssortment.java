@@ -261,11 +261,11 @@ public final class plasmaWordIndexAssortment {
 	return assortments.size();
     }
 
-    public int[] cacheNodeChunkSize() {
+    public long[] cacheNodeChunkSize() {
         return assortments.cacheNodeChunkSize();
     }
     
-    public int[] cacheNodeFillStatus() {
+    public long[] cacheNodeFillStatus() {
         return assortments.cacheNodeFillStatus();
     }
     

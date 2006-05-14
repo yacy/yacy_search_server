@@ -263,9 +263,9 @@ public final class plasmaWordIndexAssortmentCluster {
         return sizes;
     }
     
-    public int[] cacheChunkSizeAvg() {
+    public long[] cacheChunkSizeAvg() {
         int[] i = new int[]{0, 0, 0};
-        int[] a = new int[3];
+        long[] a = new long[3];
         for (int j = 0; j < clusterCount; j++) {
             a = assortments[j].cacheNodeChunkSize();
             i[kelondroRecords.CP_LOW]    += a[kelondroRecords.CP_LOW];
@@ -278,8 +278,8 @@ public final class plasmaWordIndexAssortmentCluster {
         return a;
     }
     
-    public int[] cacheFillStatusCml() {
-        int[] a, cml = new int[]{0, 0, 0, 0};
+    public long[] cacheFillStatusCml() {
+        long[] a, cml = new long[]{0, 0, 0, 0};
         for (int i = 0; i < clusterCount; i++) {
             a = assortments[i].cacheNodeFillStatus();
             for (int j = 0; j < 4; j++) cml[j] += a[j];

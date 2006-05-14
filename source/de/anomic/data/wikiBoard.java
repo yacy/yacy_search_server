@@ -100,20 +100,20 @@ public class wikiBoard {
         return datbase.size();
     }
     
-    public int[] dbCacheNodeChunkSize() {
-        int[] db = datbase.cacheNodeChunkSize();
-        int[] bk = bkpbase.cacheNodeChunkSize();
-        int[] i = new int[3];
+    public long[] dbCacheNodeChunkSize() {
+        long[] db = datbase.cacheNodeChunkSize();
+        long[] bk = bkpbase.cacheNodeChunkSize();
+        long[] i = new long[3];
         i[kelondroRecords.CP_LOW] = (db[kelondroRecords.CP_LOW] + bk[kelondroRecords.CP_LOW]) / 2;
         i[kelondroRecords.CP_MEDIUM] = (db[kelondroRecords.CP_MEDIUM] + bk[kelondroRecords.CP_MEDIUM]) / 2;
         i[kelondroRecords.CP_HIGH] = (db[kelondroRecords.CP_HIGH] + bk[kelondroRecords.CP_HIGH]) / 2;
         return i;
     }
     
-    public int[] dbCacheNodeFillStatus() {
-        int[] a = datbase.cacheNodeFillStatus();
-        int[] b = bkpbase.cacheNodeFillStatus();
-        return new int[]{a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]};
+    public long[] dbCacheNodeFillStatus() {
+        long[] a = datbase.cacheNodeFillStatus();
+        long[] b = bkpbase.cacheNodeFillStatus();
+        return new long[]{a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]};
     }
     
     public String[] dbCacheObjectStatus() {

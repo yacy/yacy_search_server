@@ -91,11 +91,11 @@ public final class userDB {
         }
     }
     
-    public int[] dbCacheNodeChunkSize() {
+    public long[] dbCacheNodeChunkSize() {
         return userTable.cacheNodeChunkSize();
     }    
     
-    public int[] dbCacheNodeFillStatus() {
+    public long[] dbCacheNodeFillStatus() {
         return userTable.cacheNodeFillStatus();
     }    
     
