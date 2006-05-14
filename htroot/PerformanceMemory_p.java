@@ -59,8 +59,8 @@ import de.anomic.yacy.yacyCore;
 
 public class PerformanceMemory_p {
     
-    private static final int KB = 1024;
-    private static final int MB = 1024 * KB;
+    private static final long KB = 1024;
+    private static final long MB = 1024 * KB;
     private static Map defaultSettings = null;
         
     private static long[]    slt,chk;
@@ -291,9 +291,9 @@ public class PerformanceMemory_p {
     }
     
     private static void putprop(serverObjects prop, serverSwitch env, String db, String set) {
-        usd = chk[0]*slt[3] + chk[1]*slt[2] + chk[2]*slt[1];
-        bst = (((chk[2] * req) >> 10) + 1) << 10;
-        god = (((bst / (1+slt[1]+slt[2]+slt[3]) * slt[1]) >> 10) + 1) << 10;
+        usd = ((long) chk[0]) * ((long) slt[3]) + ((long) chk[1]) * ((long) slt[2]) + ((long) chk[2]) * ((long) slt[1]);
+        bst = (((((long) chk[2]) * ((long) req)) >> 10) + 1) << 10;
+        god = (((((long) bst) / ((long) (1+slt[1]+slt[2]+slt[3])) * ((long) slt[1])) >> 10) + 1) << 10;
         if (set.equals("setGood")) env.setConfig("ramCache" + db, god);
         if (set.equals("setBest")) env.setConfig("ramCache" + db, bst);
         prop.put("chunk" + db, chk[2] + "/" + chk[1] + "/" + chk[0]);
