@@ -170,7 +170,7 @@ public class plasmaDHTFlush extends Thread {
                      * b) max open file limit was exceeded 
                      */
                     if (nothingSelected(newDHTChunk)) {
-                        if (this.sb.wordIndex.size() > 0) {
+                        if (this.sb.wordIndex.size() > 0 && this.delete) {
                             // if there are still words in the index we try it again now
                             this.startPointHash = "------------";
                         } else {                            
