@@ -201,11 +201,11 @@ public final class plasmaHTCache {
         return this.responseHeaderDB.size();
     }
 
-    public long[] dbCacheChunkSize() {
+    public int[] dbCacheChunkSize() {
         return this.responseHeaderDB.cacheNodeChunkSize();
     }
 
-    public long[] dbCacheFillStatus() {
+    public int[] dbCacheFillStatus() {
         return this.responseHeaderDB.cacheNodeFillStatus();
     }
 

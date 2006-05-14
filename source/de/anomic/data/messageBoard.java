@@ -86,11 +86,11 @@ public class messageBoard {
         return database.size();
     }
     
-    public long[] dbCacheNodeChunkSize() {
+    public int[] dbCacheNodeChunkSize() {
         return database.cacheNodeChunkSize();
     }
     
-    public long[] dbCacheNodeFillStatus() {
+    public int[] dbCacheNodeFillStatus() {
         return database.cacheNodeFillStatus();
     }
     
