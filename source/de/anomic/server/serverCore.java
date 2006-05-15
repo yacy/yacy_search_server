@@ -46,6 +46,7 @@
 package de.anomic.server;
 
 // standard server
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -62,8 +63,16 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.channels.ClosedByInterruptException;
+import java.security.KeyStore;
 import java.util.Enumeration;
 import java.util.Hashtable;
+
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.HandshakeCompletedListener;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool.Config;
@@ -97,6 +106,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static boolean useStaticIP = false;
     public static serverPortForwarding portForwarding = null;
     
+    private SSLSocketFactory sslSocketFactory = null;
     private ServerSocket socket;           // listener
     serverLog log;                         // log object
     private int timeout;                   // connection time-out of the socket
@@ -186,6 +196,9 @@ public final class serverCore extends serverAbstractThread implements serverThre
         // initialize logger
         this.log = new serverLog("SERVER");
 
+        // init the ssl socket factory
+        this.sslSocketFactory = initSSLFactory();
+        
         // init servercore
         init();
     }
@@ -479,10 +492,22 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.log.logFinest(
                     "* waiting for connections, " + this.theSessionPool.getNumActive() + " sessions running, " +
                     this.theSessionPool.getNumIdle() + " sleeping");
+                        
+            announceThreadBlockApply();
             
             // wait for new connection
-            announceThreadBlockApply();
             Socket controlSocket = this.socket.accept();
+            
+            // wrap this socket
+            if (this.sslSocketFactory != null) {
+                controlSocket = new serverCoreSocket(controlSocket);
+
+                // if the current connection is SSL we need to do a handshake
+                if (((serverCoreSocket)controlSocket).isSSL()) {                
+                    controlSocket = negotiateSSL(controlSocket);    
+                }            
+            }
+            
             announceThreadBlockRelease();
             
             String cIP = clientAddress(controlSocket);
@@ -977,7 +1002,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     }
                 }
             } catch (InterruptedException ex) {
-                serverLog.logFiner("SESSION-POOL","Interruption of thread '" + this.getName() + "' detected."); 
+                serverLog.logFiner("SESSION-POOL","Interruption of thread '" + this.getName() + "' detected.");
             } finally {
                 if (serverCore.this.theSessionPool != null && !this.destroyed) 
                     serverCore.this.theSessionPool.invalidateObject(this);
@@ -1000,7 +1025,11 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 // TODO: check if we want to allow this socket to connect us
                 
                 // getting input and output stream for communication with client
-                this.in = new PushbackInputStream(this.controlSocket.getInputStream());
+                if (this.controlSocket.getInputStream() instanceof PushbackInputStream) {
+                    this.in = (PushbackInputStream) this.controlSocket.getInputStream();
+                } else {
+                    this.in = new PushbackInputStream(this.controlSocket.getInputStream());
+                }
                 this.out = this.controlSocket.getOutputStream();
 
                 // reseting the command counter
@@ -1015,8 +1044,11 @@ public final class serverCore extends serverAbstractThread implements serverThre
         		try {
                     this.out.flush();               
                     
-                    this.controlSocket.shutdownInput();
-                    this.controlSocket.shutdownOutput();                    
+                    // maybe this doesn't work for all SSL socket implementations
+                    if (!(this.controlSocket instanceof SSLSocket)) {
+                        this.controlSocket.shutdownInput();
+                        this.controlSocket.shutdownOutput();
+                    }
                     
                     this.in.close();                    
                     this.out.close();                     
@@ -1191,6 +1223,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
             }
             //announceMoreExecTime(System.currentTimeMillis() - this.start);
         }
+
+        public boolean isSSL() {
+            return this.controlSocket instanceof SSLSocket;
+        }
         
     }
 
@@ -1280,4 +1316,89 @@ public final class serverCore extends serverAbstractThread implements serverThre
             serverCore.this.close();
         }
     }
+    
+    private SSLSocketFactory initSSLFactory() {
+        
+        // getting the keystore file name
+        String keyStoreFileName = this.switchboard.getConfig("keyStore", "");
+        if (keyStoreFileName.length() == 0) return null;
+        
+        // getting the keystore pwd
+        String keyStorePwd = this.switchboard.getConfig("keyStorePassword", "");
+        if (keyStorePwd.length() == 0) return null;        
+        
+        // get the ssl context
+        try {
+            this.log.logInfo("Initializing SSL support ...");
+            
+            // creating a new keystore instance of type (java key store)
+            this.log.logFine("Initializing keystore ...");
+            KeyStore ks = KeyStore.getInstance("JKS");
+            
+            // loading keystore data from file
+            this.log.logFine("Loading keystore file " + keyStoreFileName);
+            FileInputStream stream = new FileInputStream(keyStoreFileName);            
+            ks.load(stream, keyStorePwd.toCharArray());
+            
+            // creating a keystore factory
+            this.log.logFine("Initializing key manager factory ...");
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(ks,keyStorePwd.toCharArray());
+            
+            // initializing the ssl context
+            this.log.logFine("Initializing SSL context ...");
+            SSLContext sslcontext = SSLContext.getInstance("TLS");
+            sslcontext.init(kmf.getKeyManagers(), null, null);
+            
+            SSLSocketFactory factory = sslcontext.getSocketFactory(); 
+            this.log.logInfo("SSL support initialized successfully");
+            return factory;
+        } catch (Exception e) {
+            String errorMsg = "FATAL ERROR: Unable to initialize the SSL Socket factory. " + e.getMessage();
+            this.log.logSevere(errorMsg);
+            System.out.println(errorMsg);             
+            System.exit(0); 
+            return null;
+        }
+    }
+    
+    public Socket negotiateSSL(Socket sock) throws Exception {
+
+        SSLSocket sslsock;
+        
+        try {
+            sslsock=(SSLSocket)this.sslSocketFactory.createSocket(
+                    sock,
+                    sock.getInetAddress().getHostName(),
+                    sock.getPort(),
+                    true);
+            
+            sslsock.addHandshakeCompletedListener(
+                    new HandshakeCompletedListener() {
+                       public void handshakeCompleted(
+                          HandshakeCompletedEvent event) {
+                          System.out.println("Handshake finished!");
+                          System.out.println(
+                          "\t CipherSuite:" + event.getCipherSuite());
+                          System.out.println(
+                          "\t SessionId " + event.getSession());
+                          System.out.println(
+                          "\t PeerHost " + event.getSession().getPeerHost());
+                       }
+                    }
+                 );             
+            
+            sslsock.setUseClientMode(false);
+            String[] suites = sslsock.getSupportedCipherSuites();
+            sslsock.setEnabledCipherSuites(suites);
+//            start handshake
+            sslsock.startHandshake();
+            
+            String cipherSuite = sslsock.getSession().getCipherSuite();
+            
+            return sslsock;
+        } catch (Exception e) {
+            throw e;
+        }
+    }    
 }

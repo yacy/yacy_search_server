@@ -15,6 +15,21 @@
 # 	   192.168.0.1:8080
 port = 8080
 
+# SSL support:
+# With this you can access your peer using https://localhost:8080
+# 
+# For testing purposes, you can create a keystore with a self-signed certificate, 
+# using the following command:
+# 
+# |> keytool -keystore mySrvKeystore -genkey -keyalg RSA -alias mycert
+#
+# Then configure the keyStore properties accordingly, e.g.
+# keyStore = c:/yacy/DATA/SETTINGS/mySrvKeystore 
+# keyStorePassword = mypwd
+#
+keyStore =
+keyStorePassword =
+
 # peer-to-peer construction for distributed search
 # we have several stages:
 # 1st: a file within every distribution that has a list of URLs:

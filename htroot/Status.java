@@ -149,6 +149,9 @@ public class Status {
             prop.put("extPortFormat",0);
         }
         prop.put("host", serverCore.publicLocalIP());
+        
+        // ssl support
+        prop.put("sslSupport",env.getConfig("keyStore", "").length() == 0 ? 0:1);
 
         // port forwarding: hostname and port
         if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {

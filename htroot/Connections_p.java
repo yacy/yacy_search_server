@@ -162,11 +162,13 @@ public final class Connections_p {
                 int userPort = currentSession.getUserPort();
                 if (userAddress == null) continue;
                 
+                boolean isSSL = currentSession.isSSL();
+                
                 String dest = null;
                 String prot = null;
                 serverHandler cmdObj = currentSession.getCommandObj();
                 if (cmdObj instanceof httpd) {
-                    prot = "http";
+                    prot = isSSL ? "https":"http";
                     
                     
                     // getting the http command object

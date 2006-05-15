@@ -20,7 +20,7 @@
 </tr>
 <tr class="TableCellLight">
 	<td>Peer host</td>
-	<td>#[host]#:#[port]# #(extPortFormat)#::(Binding to interface: #[extPort]#)#(/extPortFormat)#</td>
+	<td>#[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: enabled#(/sslSupport)#</td>
 	<td>&nbsp;</td>
 </tr>
 <tr class="TableCellDark">
