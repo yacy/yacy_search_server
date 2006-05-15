@@ -319,13 +319,17 @@ public class Network {
                             if ((wikiPage = (String) updatedWiki.get(seed.hash)) == null) {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 0);
                             } else {
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage_page", wikiPage);
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage_address", seed.getAddress());
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage_name", seed.get(yacySeed.NAME, "deadlink"));
                             }
                             if ((blogPage = (String) updatedBlog.get(seed.hash)) == null) {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             } else {
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_page", blogPage);
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_address", seed.getAddress());
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_name", seed.get(yacySeed.NAME, "deadlink"));
                             }
                             try {
