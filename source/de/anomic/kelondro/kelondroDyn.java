@@ -349,11 +349,13 @@ public class kelondroDyn extends kelondroTree {
         }
 
         public int read(byte[] b, int off, int len) throws IOException {
-            byte[] buf = getDyn(filekey, seekpos, len);
-            if (buf == null) return 0;
-            System.arraycopy(buf, 0, b, off, len);
-            seekpos += len;
-            return len;
+            int l = Math.min(b.length - off, len);
+            byte[] buf = getDyn(filekey, seekpos, l);
+            if (buf == null) return -1;
+            l = Math.min(buf.length, l);
+            System.arraycopy(buf, 0, b, off, l);
+            seekpos += l;
+            return l;
         }
 
         public void write(byte[] b, int off, int len) throws IOException {

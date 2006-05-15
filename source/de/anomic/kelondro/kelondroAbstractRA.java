@@ -44,6 +44,7 @@
 
 package de.anomic.kelondro;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -80,7 +81,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
             len -= r;
         }
     }
-    /*
+    
     public byte[] readFully() throws IOException {
         ByteArrayOutputStream dest = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
@@ -94,7 +95,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
         dest.close();
         return dest.toByteArray();
     }
-    */  
+    
     public byte readByte() throws IOException {
         final int ch = this.read();
         if (ch < 0) throw new IOException();
