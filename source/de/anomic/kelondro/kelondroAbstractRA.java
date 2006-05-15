@@ -44,8 +44,11 @@
 
 package de.anomic.kelondro;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
@@ -230,11 +233,10 @@ abstract class kelondroAbstractRA implements kelondroRA {
         writeLine("# EOF");
     }
     
-    /*
+    
     public Properties readProperties() throws IOException {
         this.seek(0);
         byte[] b = readFully();
-        //System.out.println("DEBUG-Properties:" + new String(b));
         BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
         final Properties props = new Properties();
         String line;
@@ -249,22 +251,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
         return props;
     }
-    */
-    public Properties readProperties() throws IOException {
-        this.seek(0);
-        final Properties props = new Properties();
-        String line;
-        int pos;
-        while ((line = readLine()) != null) {
-            line = line.trim();
-            if (line.equals("# EOF")) return props;
-            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
-            pos = line.indexOf("=");
-            if (pos < 0) continue;
-            props.setProperty(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
-        }
-        return props;
-    }
+    
     /*
     public void writeMap(final Map map, final String comment) throws IOException {
         this.seek(0);
@@ -303,32 +290,14 @@ abstract class kelondroAbstractRA implements kelondroRA {
         writeLine("# EOF");
     }
     
-    /*
     public Map readMap() throws IOException {
         this.seek(0);
         byte[] b = readFully();
-        //System.out.println("DEBUG-READ-MAP:" + new String(b));
         BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
         final TreeMap map = new TreeMap();
         String line;
         int pos;
         while ((line = br.readLine()) != null) { // very slow readLine????
-            line = line.trim();
-            if (line.equals("# EOF")) return map;
-            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
-            pos = line.indexOf("=");
-            if (pos < 0) continue;
-            map.put(line.substring(0, pos), line.substring(pos + 1));
-        }
-        return map;
-    }
-    */
-    public Map readMap() throws IOException {
-        this.seek(0);
-        final TreeMap map = new TreeMap();
-        String line;
-        int pos;
-        while ((line = readLine()) != null) { // very slow readLine????
             line = line.trim();
             if (line.equals("# EOF")) return map;
             if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
