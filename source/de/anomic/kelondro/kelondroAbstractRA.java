@@ -194,7 +194,6 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
     }
 
-    /*
     public void writeProperties(final Properties props, final String comment) throws IOException {
         this.seek(0);
         final Enumeration e = props.propertyNames();
@@ -217,23 +216,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
         sb.append(lf);
         write(new String(sb).getBytes());
     }
-    */
-    public void writeProperties(final Properties props, final String comment) throws IOException {
-        this.seek(0);
-        writeLine("# " + comment);
-        final Enumeration e = props.propertyNames();
-        String key, value;
-        while (e.hasMoreElements()) {
-            key = (String) e.nextElement();
-            value = props.getProperty(key, "");
-            write(key.getBytes());
-            write((byte) '=');
-            writeLine(value);
-        }
-        writeLine("# EOF");
-    }
-    
-    
+
     public Properties readProperties() throws IOException {
         this.seek(0);
         byte[] b = readFully();
@@ -252,7 +235,6 @@ abstract class kelondroAbstractRA implements kelondroRA {
         return props;
     }
     
-    /*
     public void writeMap(final Map map, final String comment) throws IOException {
         this.seek(0);
         final Iterator iter = map.entrySet().iterator();
@@ -272,24 +254,9 @@ abstract class kelondroAbstractRA implements kelondroRA {
         sb.append("# EOF");
         sb.append(cr);
         sb.append(lf);
-        //System.out.println("DEBUG-WRITE-MAP:" + new String(sb));
         write(new String(sb).getBytes());
     }
-    */
-    public void writeMap(final Map map, final String comment) throws IOException {
-        this.seek(0);
-        writeLine("# " + comment);
-        final Iterator iter = map.entrySet().iterator();
-        Map.Entry entry;
-        while (iter.hasNext()) {
-            entry = (Map.Entry) iter.next();
-            write(((String) entry.getKey()).getBytes());
-            write((byte) '=');
-           writeLine((String) entry.getValue());
-        }
-        writeLine("# EOF");
-    }
-    
+
     public Map readMap() throws IOException {
         this.seek(0);
         byte[] b = readFully();
