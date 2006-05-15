@@ -1419,6 +1419,7 @@ public final class httpd implements serverHandler {
         if (thisSeedIP == null || thisSeedPort == null) return false;
         InetAddress seedInetAddress = httpc.dnsResolve(thisSeedIP);
         InetAddress hostInetAddress = httpc.dnsResolve(hostName);
+        if (seedInetAddress == null || hostInetAddress == null) return false;
         
         // if it's equal, the hostname points to this seed
         return (seedInetAddress.equals(hostInetAddress));        
