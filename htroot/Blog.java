@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.data.userDB;
@@ -59,6 +60,8 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsRecord;
 
 public class Blog {
 
@@ -131,9 +134,21 @@ public class Blog {
 				date = page.date();
 			}
 
+            String subject = wikiCode.replaceHTML(post.get("subject",""));
+            
 			try {
-				switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, post.get("subject",""), author, ip, date, content));
+				switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content));
 			} catch (IOException e) {}
+            
+			// create a news message
+             HashMap map = new HashMap();
+             map.put("subject", subject);
+             map.put("page", pagename);
+             map.put("author", author);
+             map.put("ip", ip);
+             try {
+                 yacyCore.newsPool.publishMyNews(new yacyNewsRecord("blog_add", map));
+             } catch (IOException e) {}
 		}
 
 		page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"

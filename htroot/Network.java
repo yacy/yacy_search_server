@@ -242,6 +242,7 @@ public class Network {
                     // find updated Information using YaCyNews
                     final HashSet updatedProfile = new HashSet();
                     final HashMap updatedWiki = new HashMap();
+                    final HashMap updatedBlog = new HashMap();
                     final HashMap isCrawling = new HashMap();
                     int availableNews = yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB);
                     if (availableNews > 300) { availableNews = 300; }
@@ -255,6 +256,8 @@ public class Network {
                                 updatedProfile.add(record.originator());
                             } else if (record.category().equals("wiki_upd")) {
                                 updatedWiki.put(record.originator(), record.attributes().get("page"));
+                            } else if (record.category().equals("blog_add")) {
+                                updatedBlog.put(record.originator(), record.attributes().get("page"));
                             } else if (record.category().equals("crwlstrt")) {
                                 isCrawling.put(record.originator(), record.attributes().get("startURL"));
                             }
@@ -274,6 +277,7 @@ public class Network {
                     int p;
                     String startURL;
                     String wikiPage;
+                    String blogPage;
                     String userAgent, location;
                     int PPM;
                     long myValue=0, nextValue=0, prevValue=0, nextPPM=0, myPPM=0;
@@ -282,6 +286,7 @@ public class Network {
                         if (seed != null) {
                             prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 0);
+                            prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 0);
                             if (conCount >= maxCount) { break; }
                             if (seed.hash.equals(yacyCore.seedDB.mySeed.hash)) {
@@ -316,6 +321,12 @@ public class Network {
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage_page", wikiPage);
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage_name", seed.get(yacySeed.NAME, "deadlink"));
+                            }
+                            if ((blogPage = (String) updatedBlog.get(seed.hash)) == null) {
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
+                            } else {
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_page", blogPage);
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_name", seed.get(yacySeed.NAME, "deadlink"));
                             }
                             try {
                                 PPM = Integer.parseInt(seed.get(yacySeed.ISPEED, "-"));

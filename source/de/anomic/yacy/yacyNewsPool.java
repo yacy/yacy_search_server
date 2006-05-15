@@ -79,8 +79,8 @@ public class yacyNewsPool {
         "bkmrkdvt", // a vote and comment on a bookmark delete
         "wiki_add", // a wiki page was created
         "wiki_upd", // a wiki page was updated
-        "wiki_del"  // a wiki page das deleted
-        // urlvotes
+        "wiki_del", // a wiki page das deleted
+        "blog_add"  // a blog entry was added
     };
     public static HashSet categories;
     static {
@@ -179,15 +179,19 @@ public class yacyNewsPool {
         if (record == null) return false;
         if (record.category() == null) return true;
         if ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24 * 7) /* 1 Week */) {
-	    // remove everything after 1 week
+            // remove everything after 1 week
             return true;
         }
-        if ((record.category().equals("wiki_upd")) &&
-            ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24) /* 1 Day */)) {
+        if (((record.category().equals("wiki_add")) || (record.category().equals("wiki_upd"))) &&
+            ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24 * 3) /* 3 Days */)) {
             return true;
         }
+        if ((record.category().equals("blog_add")) &&
+                ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24 * 3) /* 3 Days */)) {
+                return true;
+            }
         if ((record.category().equals("crwlstrt")) &&
-            ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24) /* 1 Day */)) {
+            ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24 * 2) /* 2 Days */)) {
             yacySeed seed = yacyCore.seedDB.get(record.originator());
             if (seed == null) return false;
             try {
