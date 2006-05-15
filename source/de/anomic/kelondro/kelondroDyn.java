@@ -248,21 +248,17 @@ public class kelondroDyn extends kelondroTree {
             }
         }
         // if this is all, return
-        if (recpos + len <= reclen)
-            return segment1;
+        if (recpos + len <= reclen) return segment1;
         // read from several records
         // we combine recursively all participating records
-        // we have two segments: the one in the starting record, and the
-        // remaining
-        // segment 1 in record <reccnt> : start = recpos, length = reclen -
-        // recpos
-        // segment 2 in record <reccnt>+1: start = 0, length = len - reclen +
-        // recpos
+        // we have two segments: the one in the starting record, and the remaining
+        // segment 1 in record <reccnt> : start = recpos, length = reclen - recpos
+        // segment 2 in record <reccnt>+1: start = 0, length = len - reclen + recpos
         // recursively step further
         byte[] segment2 = getDyn(key, pos + segment1.length, len - segment1.length);
-        if (segment2 == null) return null;
+        if (segment2 == null) return segment1;
         // now combine the two segments into the result
-        byte[] result = new byte[len];
+        byte[] result = new byte[segment1.length + segment2.length];
         System.arraycopy(segment1, 0, result, 0, segment1.length);
         System.arraycopy(segment2, 0, result, segment1.length, segment2.length);
         return result;
