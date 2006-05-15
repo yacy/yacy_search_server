@@ -255,7 +255,7 @@ public final class plasmaCrawlStacker {
         } catch (MalformedURLException e) {
             reason = "denied_(url_'" + nexturlString + "'_wrong)";
             this.log.logSevere("Wrong URL in stackCrawl: " + nexturlString + 
-                               ". Stack processing time: " + (System.currentTimeMillis()-startTime));
+                               ". Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
         
@@ -264,17 +264,17 @@ public final class plasmaCrawlStacker {
         if (hostAddress == null) {
             reason = "denied_(unknown_host)";
             this.log.logFine("Unknown host in URL '" + nexturlString + "'. " +
-                    "Stack processing time: " + (System.currentTimeMillis()-startTime));
+                    "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;                
         } else if (hostAddress.isSiteLocalAddress()) {
             reason = "denied_(private_ip_address)";
             this.log.logFine("Host in URL '" + nexturlString + "' has private IP address. " +
-                    "Stack processing time: " + (System.currentTimeMillis()-startTime));
+                    "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;                
         } else if (hostAddress.isLoopbackAddress()) {
             reason = "denied_(loopback_ip_address)";
             this.log.logFine("Host in URL '" + nexturlString + "' has loopback IP address. " + 
-                    "Stack processing time: " + (System.currentTimeMillis()-startTime));
+                    "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;                  
         }
         
@@ -282,7 +282,7 @@ public final class plasmaCrawlStacker {
         if (plasmaSwitchboard.urlBlacklist.isListed(nexturl)) {
             reason = "denied_(url_in_blacklist)";
             this.log.logFine("URL '" + nexturlString + "' is in blacklist. " +
-                             "Stack processing time: " + (System.currentTimeMillis()-startTime));
+                             "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }        
         
@@ -293,7 +293,7 @@ public final class plasmaCrawlStacker {
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
             this.log.logFine("URL '" + nexturlString + "' does not match crawling filter '" + profile.generalFilter() + "'. " +
-                             "Stack processing time: " + (System.currentTimeMillis()-startTime));
+                             "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
         
@@ -304,7 +304,7 @@ public final class plasmaCrawlStacker {
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
             this.log.logFine("URL '" + nexturlString + "' is CGI URL. " + 
-                             "Stack processing time: " + (System.currentTimeMillis()-startTime));
+                             "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
         
@@ -315,7 +315,7 @@ public final class plasmaCrawlStacker {
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
             this.log.logFine("URL '" + nexturlString + "' is post URL. " + 
-                             "Stack processing time: " + (System.currentTimeMillis()-startTime));
+                             "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
         
@@ -328,7 +328,7 @@ public final class plasmaCrawlStacker {
         if (!(profile.grantedDomAppearance(nexturl.getHost()))) {
             reason = "denied_(no_match_with_domain_filter)";
             this.log.logFine("URL '" + nexturlString + "' is not listed in granted domains. " + 
-                             "Stack processing time: " + (System.currentTimeMillis()-startTime));
+                             "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
 
@@ -336,7 +336,7 @@ public final class plasmaCrawlStacker {
         if (!(profile.grantedDomCount(nexturl.getHost()))) {
             reason = "denied_(domain_count_exceeded)";
             this.log.logFine("URL '" + nexturlString + "' appeared too often, a maximum of " + profile.domMaxPages() + " is allowed. "+ 
-                             "Stack processing time: " + (System.currentTimeMillis()-startTime));
+                             "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
 
@@ -354,7 +354,7 @@ public final class plasmaCrawlStacker {
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
             this.log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'. " +
-                             "Stack processing time: " + (System.currentTimeMillis()-startTime));
+                             "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
 
@@ -365,7 +365,7 @@ public final class plasmaCrawlStacker {
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
             this.log.logFine("Crawling of URL '" + nexturlString + "' disallowed by robots.txt. " +
-                             "Stack processing time: " + (System.currentTimeMillis()-startTime));
+                             "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;            
         }
 
