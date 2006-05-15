@@ -2158,7 +2158,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // starting up multiple DHT transfer threads   
             Iterator seedIter = seeds.iterator();
             ArrayList transfer = new ArrayList(peerCount);
-            while (hc1 < peerCount && seedIter.hasNext()) {
+            while (hc1 < peerCount && (transfer.size() > 0 || seedIter.hasNext())) {
 
                 // starting up some transfer threads
                 int transferThreadCount = transfer.size();
