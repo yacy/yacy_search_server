@@ -49,6 +49,7 @@
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.io.IOException;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -255,9 +256,9 @@ public class Network {
                             } else if (record.category().equals("prfleupd")) {
                                 updatedProfile.add(record.originator());
                             } else if (record.category().equals("wiki_upd")) {
-                                updatedWiki.put(record.originator(), record.attributes().get("page"));
+                                updatedWiki.put(record.originator(), record.attributes());
                             } else if (record.category().equals("blog_add")) {
-                                updatedBlog.put(record.originator(), record.attributes().get("page"));
+                                updatedBlog.put(record.originator(), record.attributes());
                             } else if (record.category().equals("crwlstrt")) {
                                 isCrawling.put(record.originator(), record.attributes().get("startURL"));
                             }
@@ -276,8 +277,8 @@ public class Network {
                     }
                     int p;
                     String startURL;
-                    String wikiPage;
-                    String blogPage;
+                    Map wikiMap;
+                    Map blogMap;
                     String userAgent, location;
                     int PPM;
                     long myValue=0, nextValue=0, prevValue=0, nextPPM=0, myPPM=0;
@@ -316,21 +317,20 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedProfile_hash", seed.hash);
                             }
-                            if ((wikiPage = (String) updatedWiki.get(seed.hash)) == null) {
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 0);
+                            if ((wikiMap = (Map) updatedWiki.get(seed.hash)) == null) {
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWiki", 0);
                             } else {
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 1);
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage_page", wikiPage);
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage_address", seed.getAddress());
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage_name", seed.get(yacySeed.NAME, "deadlink"));
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWiki", 1);
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWiki_page", (String) wikiMap.get("page"));
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWiki_address", seed.getAddress());
                             }
-                            if ((blogPage = (String) updatedBlog.get(seed.hash)) == null) {
+                            if ((blogMap = (Map) updatedBlog.get(seed.hash)) == null) {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 1);
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_page", blogPage);
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_page", (String) blogMap.get("page"));
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_subject", (String) blogMap.get("subject"));
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_address", seed.getAddress());
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_name", seed.get(yacySeed.NAME, "deadlink"));
                             }
                             try {
                                 PPM = Integer.parseInt(seed.get(yacySeed.ISPEED, "-"));

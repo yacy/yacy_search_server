@@ -81,8 +81,8 @@
 <tr class="TableHeader" valign="bottom">
 <td class="small" rowspan="2">Database<br>&nbsp;</td>
 <td class="small" rowspan="2">DB&nbsp;Size<br>&nbsp;</td>
-<td class="small" colspan="5">Node Cache</td>
-<td class="small" colspan="4">Object Cache</td>
+<td class="small" colspan="3">Node Cache</td>
+<td class="small" colspan="3">Object Cache</td>
 <td class="small" colspan="5">Memory Occupation (KBytes)</td>
 <td class="small" rowspan="2">Description<br>&nbsp;</td>
 </tr>
@@ -90,13 +90,10 @@
 <tr class="TableHeader" valign="bottom">
 <td class="small">Chunk Size<br>high/med/low<br>(bytes)</td>
 <td class="small">Empty<br>(avail.)<br>Slots</td>
-<td class="small">Used<br>High Prio</td>
-<td class="small">Used<br>Medium Prio</td>
-<td class="small">Used<br>Low Prio</td>
-<td class="small">Chunk Size<br>Max</td>
-<td class="small">Chunk Size<br>Current</td>
-<td class="small">Hit/<br>Miss<br>Ratio<br></td>
-<td class="small">Unique/<br>Double<br>Ratio<br></td>
+<td class="small">Used:<br>High,&nbsp;Medium,&nbsp;Low<br>Prio</td>
+<td class="small">&nbsp;<br>Size<br>Max</td>
+<td class="small">&nbsp;<br>Size<br>Current</td>
+<td class="small">Ratio<br>Hit:Miss<br>Unique:Double<br></td>
 <td class="small">Used Now</td>
 <td class="small">Assigned Max</td>
 <td class="small">Default Max</td>
@@ -109,13 +106,10 @@
 <td class="small" align="right">#[slreqRWI]#</td>
 <td class="small" align="center">#[chunkRWI]#</td>
 <td class="small" align="right">#[slempRWI]#</td>
-<td class="small" align="right">#[slhigRWI]#</td>
-<td class="small" align="right">#[slmedRWI]#</td>
-<td class="small" align="right">#[sllowRWI]#</td>
+<td class="small" align="right">#[slhigRWI]#<br>#[slmedRWI]#<br>#[sllowRWI]#</td>
 <td class="small" align="right">#[ochunkmaxRWI]#</td>
 <td class="small" align="right">#[ochunkcurRWI]#</td>
-<td class="small" align="right">#[ohittmissRWI]#</td>
-<td class="small" align="right">#[ouniqdoubRWI]#</td>
+<td class="small" align="right">#[ohittmissRWI]#<br>#[ouniqdoubRWI]#</td>
 <td class="small" align="right">#[usedRWI]#</td>
 <td class="small" align="right"><input name="ramCacheRWI" type="text" align="right" size="6" maxlength="7" value="#[ramCacheRWI]#"></td>
 <td class="small" align="right">#[dfltRWI]#</td>
@@ -131,13 +125,10 @@ cache will speed up crawls with a depth > 3.</td>
 <td class="small" align="right">#[slreqHTTP]#</td>
 <td class="small" align="center">#[chunkHTTP]#</td>
 <td class="small" align="right">#[slempHTTP]#</td>
-<td class="small" align="right">#[slhigHTTP]#</td>
-<td class="small" align="right">#[slmedHTTP]#</td>
-<td class="small" align="right">#[sllowHTTP]#</td>
+<td class="small" align="right">#[slhigHTTP]#<br>#[slmedHTTP]#<br>#[sllowHTTP]#</td>
 <td class="small" align="right">#[ochunkmaxHTTP]#</td>
 <td class="small" align="right">#[ochunkcurHTTP]#</td>
-<td class="small" align="right">#[ohittmissHTTP]#</td>
-<td class="small" align="right">#[ouniqdoubHTTP]#</td>
+<td class="small" align="right">#[ohittmissHTTP]#<br>#[ouniqdoubHTTP]#</td>
 <td class="small" align="right">#[usedHTTP]#</td>
 <td class="small" align="right"><input name="ramCacheHTTP" type="text" align="right" size="6" maxlength="7" value="#[ramCacheHTTP]#"></td>
 <td class="small" align="right">#[dfltHTTP]#</td>
@@ -153,13 +144,10 @@ Increasing this cache will be most important for a fast proxy mode.</td>
 <td class="small" align="right">#[slreqLURL]#</td>
 <td class="small" align="center">#[chunkLURL]#</td>
 <td class="small" align="right">#[slempLURL]#</td>
-<td class="small" align="right">#[slhigLURL]#</td>
-<td class="small" align="right">#[slmedLURL]#</td>
-<td class="small" align="right">#[sllowLURL]#</td>
+<td class="small" align="right">#[slhigLURL]#<br>#[slmedLURL]#<br>#[sllowLURL]#</td>
 <td class="small" align="right">#[ochunkmaxLURL]#</td>
 <td class="small" align="right">#[ochunkcurLURL]#</td>
-<td class="small" align="right">#[ohittmissLURL]#</td>
-<td class="small" align="right">#[ouniqdoubLURL]#</td>
+<td class="small" align="right">#[ohittmissLURL]#<br>#[ouniqdoubLURL]#</td>
 <td class="small" align="right">#[usedLURL]#</td>
 <td class="small" align="right"><input name="ramCacheLURL" type="text" align="right" size="6" maxlength="7" value="#[ramCacheLURL]#"></td>
 <td class="small" align="right">#[dfltLURL]#</td>
@@ -174,13 +162,10 @@ This cache is very important for a fast search process. Increasing the cache siz
 <td class="small" align="right">#[slreqNURL]#</td>
 <td class="small" align="center">#[chunkNURL]#</td>
 <td class="small" align="right">#[slempNURL]#</td>
-<td class="small" align="right">#[slhigNURL]#</td>
-<td class="small" align="right">#[slmedNURL]#</td>
-<td class="small" align="right">#[sllowNURL]#</td>
+<td class="small" align="right">#[slhigNURL]#<br>#[slmedNURL]#<br>#[sllowNURL]#</td>
 <td class="small" align="right">#[ochunkmaxNURL]#</td>
 <td class="small" align="right">#[ochunkcurNURL]#</td>
-<td class="small" align="right">#[ohittmissNURL]#</td>
-<td class="small" align="right">#[ouniqdoubNURL]#</td>
+<td class="small" align="right">#[ohittmissNURL]#<br>#[ouniqdoubNURL]#</td>
 <td class="small" align="right">#[usedNURL]#</td>
 <td class="small" align="right"><input name="ramCacheNURL" type="text" align="right" size="6" maxlength="7" value="#[ramCacheNURL]#"></td>
 <td class="small" align="right">#[dfltNURL]#</td>
@@ -195,13 +180,10 @@ Increasing the cache size will result in faster double-check during URL recognit
 <td class="small" align="right">#[slreqEURL]#</td>
 <td class="small" align="center">#[chunkEURL]#</td>
 <td class="small" align="right">#[slempEURL]#</td>
-<td class="small" align="right">#[slhigEURL]#</td>
-<td class="small" align="right">#[slmedEURL]#</td>
-<td class="small" align="right">#[sllowEURL]#</td>
+<td class="small" align="right">#[slhigEURL]#<br>#[slmedEURL]#<br>#[sllowEURL]#</td>
 <td class="small" align="right">#[ochunkmaxEURL]#</td>
 <td class="small" align="right">#[ochunkcurEURL]#</td>
-<td class="small" align="right">#[ohittmissEURL]#</td>
-<td class="small" align="right">#[ouniqdoubEURL]#</td>
+<td class="small" align="right">#[ohittmissEURL]#<br>#[ouniqdoubEURL]#</td>
 <td class="small" align="right">#[usedEURL]#</td>
 <td class="small" align="right"><input name="ramCacheEURL" type="text" align="right" size="6" maxlength="7" value="#[ramCacheEURL]#"></td>
 <td class="small" align="right">#[dfltEURL]#</td>
@@ -216,13 +198,10 @@ Increasing the cache size will most probably speed up crawling slightly, but not
 <td class="small" align="right">#[slreqDHT]#</td>
 <td class="small" align="center">#[chunkDHT]#</td>
 <td class="small" align="right">#[slempDHT]#</td>
-<td class="small" align="right">#[slhigDHT]#</td>
-<td class="small" align="right">#[slmedDHT]#</td>
-<td class="small" align="right">#[sllowDHT]#</td>
+<td class="small" align="right">#[slhigDHT]#<br>#[slmedDHT]#<br>#[sllowDHT]#</td>
 <td class="small" align="right">#[ochunkmaxDHT]#</td>
 <td class="small" align="right">#[ochunkcurDHT]#</td>
-<td class="small" align="right">#[ohittmissDHT]#</td>
-<td class="small" align="right">#[ouniqdoubDHT]#</td>
+<td class="small" align="right">#[ohittmissDHT]#<br>#[ouniqdoubDHT]#</td>
 <td class="small" align="right">#[usedDHT]#</td>
 <td class="small" align="right"><input name="ramCacheDHT" type="text" align="right" size="6" maxlength="7" value="#[ramCacheDHT]#"></td>
 <td class="small" align="right">#[dfltDHT]#</td>
@@ -238,13 +217,10 @@ Increasing this cache may speed up many functions, but we need to test this to s
 <td class="small" align="right">#[slreqMessage]#</td>
 <td class="small" align="center">#[chunkMessage]#</td>
 <td class="small" align="right">#[slempMessage]#</td>
-<td class="small" align="right">#[slhigMessage]#</td>
-<td class="small" align="right">#[slmedMessage]#</td>
-<td class="small" align="right">#[sllowMessage]#</td>
+<td class="small" align="right">#[slhigMessage]#<br>#[slmedMessage]#<br>#[sllowMessage]#</td>
 <td class="small" align="right">#[ochunkmaxMessage]#</td>
 <td class="small" align="right">#[ochunkcurMessage]#</td>
-<td class="small" align="right">#[ohittmissMessage]#</td>
-<td class="small" align="right">#[ouniqdoubMessage]#</td>
+<td class="small" align="right">#[ohittmissMessage]#<br>#[ouniqdoubMessage]#</td>
 <td class="small" align="right">#[usedMessage]#</td>
 <td class="small" align="right"><input name="ramCacheMessage" type="text" align="right" size="6" maxlength="7" value="#[ramCacheMessage]#"></td>
 <td class="small" align="right">#[dfltMessage]#</td>
@@ -258,13 +234,10 @@ Increasing this cache may speed up many functions, but we need to test this to s
 <td class="small" align="right">#[slreqWiki]#</td>
 <td class="small" align="center">#[chunkWiki]#</td>
 <td class="small" align="right">#[slempWiki]#</td>
-<td class="small" align="right">#[slhigWiki]#</td>
-<td class="small" align="right">#[slmedWiki]#</td>
-<td class="small" align="right">#[sllowWiki]#</td>
+<td class="small" align="right">#[slhigWiki]#<br>#[slmedWiki]#<br>#[sllowWiki]#</td>
 <td class="small" align="right">#[ochunkmaxWiki]#</td>
 <td class="small" align="right">#[ochunkcurWiki]#</td>
-<td class="small" align="right">#[ohittmissWiki]#</td>
-<td class="small" align="right">#[ouniqdoubWiki]#</td>
+<td class="small" align="right">#[ohittmissWiki]#<br>#[ouniqdoubWiki]#</td>
 <td class="small" align="right">#[usedWiki]#</td>
 <td class="small" align="right"><input name="ramCacheWiki" type="text" align="right" size="6" maxlength="7" value="#[ramCacheWiki]#"></td>
 <td class="small" align="right">#[dfltWiki]#</td>
@@ -280,13 +253,10 @@ Increasing this cache may speed up access to the wiki pages.</td>
 <td class="small" align="right">#[slreqBlog]#</td>
 <td class="small" align="center">#[chunkBlog]#</td>
 <td class="small" align="right">#[slempBlog]#</td>
-<td class="small" align="right">#[slhigBlog]#</td>
-<td class="small" align="right">#[slmedBlog]#</td>
-<td class="small" align="right">#[sllowBlog]#</td>
+<td class="small" align="right">#[slhigBlog]#<br>#[slmedBlog]#<br>#[sllowBlog]#</td>
 <td class="small" align="right">#[ochunkmaxBlog]#</td>
 <td class="small" align="right">#[ochunkcurBlog]#</td>
-<td class="small" align="right">#[ohittmissBlog]#</td>
-<td class="small" align="right">#[ouniqdoubBlog]#</td>
+<td class="small" align="right">#[ohittmissBlog]#<br>#[ouniqdoubBlog]#</td>
 <td class="small" align="right">#[usedBlog]#</td>
 <td class="small" align="right"><input name="ramCacheBlog" type="text" align="right" size="6" maxlength="7" value="#[ramCacheBlog]#"></td>
 <td class="small" align="right">#[dfltBlog]#</td>
@@ -301,13 +271,10 @@ Increasing this cache may speed up access to the Blog.</td>
 <td class="small" align="right">#[slreqNews]#</td>
 <td class="small" align="center">#[chunkNews]#</td>
 <td class="small" align="right">#[slempNews]#</td>
-<td class="small" align="right">#[slhigNews]#</td>
-<td class="small" align="right">#[slmedNews]#</td>
-<td class="small" align="right">#[sllowNews]#</td>
+<td class="small" align="right">#[slhigNews]#<br>#[slmedNews]#<br>#[sllowNews]#</td>
 <td class="small" align="right">#[ochunkmaxNews]#</td>
 <td class="small" align="right">#[ochunkcurNews]#</td>
-<td class="small" align="right">#[ohittmissNews]#</td>
-<td class="small" align="right">#[ouniqdoubNews]#</td>
+<td class="small" align="right">#[ohittmissNews]#<br>#[ouniqdoubNews]#</td>
 <td class="small" align="right">#[usedNews]#</td>
 <td class="small" align="right"><input name="ramCacheNews" type="text" align="right" size="6" maxlength="7" value="#[ramCacheNews]#"></td>
 <td class="small" align="right">#[dfltNews]#</td>
@@ -322,13 +289,10 @@ Increasing this cache may speed up the peer-ping.</td>
 <td class="small" align="right">#[slreqRobots]#</td>
 <td class="small" align="center">#[chunkRobots]#</td>
 <td class="small" align="right">#[slempRobots]#</td>
-<td class="small" align="right">#[slhigRobots]#</td>
-<td class="small" align="right">#[slmedRobots]#</td>
-<td class="small" align="right">#[sllowRobots]#</td>
+<td class="small" align="right">#[slhigRobots]#<br>#[slmedRobots]#<br>#[sllowRobots]#</td>
 <td class="small" align="right">#[ochunkmaxRobots]#</td>
 <td class="small" align="right">#[ochunkcurRobots]#</td>
-<td class="small" align="right">#[ohittmissRobots]#</td>
-<td class="small" align="right">#[ouniqdoubRobots]#</td>
+<td class="small" align="right">#[ohittmissRobots]#<br>#[ouniqdoubRobots]#</td>
 <td class="small" align="right">#[usedRobots]#</td>
 <td class="small" align="right"><input name="ramCacheRobots" type="text" align="right" size="6" maxlength="7" value="#[ramCacheRobots]#"></td>
 <td class="small" align="right">#[dfltRobots]#</td>
@@ -343,13 +307,10 @@ Increasing this cache may speed up validation if crawling of the URL is allowed.
 <td class="small" align="right">#[slreqProfiles]#</td>
 <td class="small" align="center">#[chunkProfiles]#</td>
 <td class="small" align="right">#[slempProfiles]#</td>
-<td class="small" align="right">#[slhigProfiles]#</td>
-<td class="small" align="right">#[slmedProfiles]#</td>
-<td class="small" align="right">#[sllowProfiles]#</td>
+<td class="small" align="right">#[slhigProfiles]#<br>#[slmedProfiles]#<br>#[sllowProfiles]#</td>
 <td class="small" align="right">#[ochunkmaxProfiles]#</td>
 <td class="small" align="right">#[ochunkcurProfiles]#</td>
-<td class="small" align="right">#[ohittmissProfiles]#</td>
-<td class="small" align="right">#[ouniqdoubProfiles]#</td>
+<td class="small" align="right">#[ohittmissProfiles]#<br>#[ouniqdoubProfiles]#</td>
 <td class="small" align="right">#[usedProfiles]#</td>
 <td class="small" align="right"><input name="ramCacheProfiles" type="text" align="right" size="6" maxlength="7" value="#[ramCacheProfiles]#"></td>
 <td class="small" align="right">#[dfltProfiles]#</td>
@@ -360,7 +321,7 @@ Increasing this cache may speed up crawling, but not much space is needed, so th
 </tr>
 
 <tr class="TableCellSummary">
-<td class="small" align="left" colspan="11">Totals</td>
+<td class="small" align="left" colspan="8">Totals</td>
 <td class="small" align="right">#[usedTotal]# MB</td>
 <td class="small" align="right">#[currTotal]# MB</td>
 <td class="small" align="right">#[dfltTotal]# MB</td>
@@ -370,7 +331,7 @@ Increasing this cache may speed up crawling, but not much space is needed, so th
 </tr>
 
 <tr class="TableCellLight">
-<td class="small" align="right" colspan="12">Re-Configuration:</td>
+<td class="small" align="right" colspan="9">Re-Configuration:</td>
 <td class="small" align="center"><input type="submit" name="setCustom" value="Set"><br>these<br>custom<br>values<br>&nbsp;</td>
 <td class="small" align="center"><input type="submit" name="setDefault" value="Set"><br>all<br>default<br>values<br>&nbsp;</td>
 <td class="small" align="center"><input type="submit" name="setGood" value="Set"><br>all<br>recom-<br>mended values</td>
