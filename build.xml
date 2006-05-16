@@ -164,6 +164,7 @@
   <mkdir dir="${build}/de/anomic/http"/>
   <mkdir dir="${build}/de/anomic/kelondro"/>
   <mkdir dir="${build}/de/anomic/net"/>
+  <mkdir dir="${build}/de/anomic/index"/>
   <mkdir dir="${build}/de/anomic/plasma"/>
   <mkdir dir="${build}/de/anomic/plasma/parser"/>
   <mkdir dir="${build}/de/anomic/server"/>
