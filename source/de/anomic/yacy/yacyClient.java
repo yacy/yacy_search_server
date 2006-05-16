@@ -53,6 +53,7 @@ import java.util.Iterator;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
+import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -464,10 +465,10 @@ public final class yacyClient {
             //System.out.println("***result count " + results);
             
             // create containers
-            final int words = wordhashes.length() / plasmaWordIndexEntry.wordHashLength;
+            final int words = wordhashes.length() / indexEntryAttribute.wordHashLength;
             plasmaWordIndexEntryContainer[] container = new plasmaWordIndexEntryContainer[words];
             for (int i = 0; i < words; i++) {
-                container[i] = new plasmaWordIndexEntryContainer(wordhashes.substring(i * plasmaWordIndexEntry.wordHashLength, (i + 1) * plasmaWordIndexEntry.wordHashLength));
+                container[i] = new plasmaWordIndexEntryContainer(wordhashes.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
             }
 
             // insert results to containers
@@ -1093,7 +1094,7 @@ public final class yacyClient {
             /*final yacyCore core =*/ new yacyCore(sb);
             yacyCore.peerActions.loadSeedLists();
             final yacySeed target = yacyCore.seedDB.getConnected(args[1]);
-            final String wordhashe = plasmaWordIndexEntry.word2hash("test");
+            final String wordhashe = indexEntryAttribute.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
             // should we use the proxy?

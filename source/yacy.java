@@ -72,6 +72,7 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.http.httpc.response;
+import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
@@ -1035,7 +1036,7 @@ public final class yacy {
         try {
             String word;
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(wordlist)));
-            while ((word = br.readLine()) != null) wordmap.put(plasmaWordIndexEntry.word2hash(word),word);
+            while ((word = br.readLine()) != null) wordmap.put(indexEntryAttribute.word2hash(word),word);
             br.close();
         } catch (IOException e) {}
         return wordmap;
@@ -1140,7 +1141,7 @@ public final class yacy {
         Iterator i = stopwords.iterator();
         while (i.hasNext()) {
             w = (String) i.next();
-            f = plasmaWordIndexEntity.wordHash2path(dbRoot, plasmaWordIndexEntry.word2hash(w));
+            f = plasmaWordIndexEntity.wordHash2path(dbRoot, indexEntryAttribute.word2hash(w));
             if (f.exists()) {
                 thisamount = f.length();
                 if (f.delete()) {

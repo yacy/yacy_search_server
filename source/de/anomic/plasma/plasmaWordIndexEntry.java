@@ -48,23 +48,15 @@
 
 package de.anomic.plasma;
 
-import java.net.URL;
 import java.util.Properties;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.server.serverCodings;
-import de.anomic.yacy.yacySeedDB;
-// import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexEntry implements Cloneable {
 
     // an wordEntry can be filled in either of two ways:
     // by the discrete values of the entry
     // or by the encoded entry-string
-
-    // the size of a word hash
-    public static final int wordHashLength   = yacySeedDB.commonHashLength; // 12
-    public static final int  urlHashLength   = yacySeedDB.commonHashLength; // 12
 
     // the size of the index entry attributes
     public static final int attrSpace = 24;
@@ -85,134 +77,6 @@ public final class plasmaWordIndexEntry implements Cloneable {
     private byte[] language;    // essentially the country code (the TLD as heuristic), two letters lowercase only
     private char   doctype;     // type of source
     private char   localflag;   // indicates if the index was created locally
-
-    // doctypes:
-    public static final char DT_PDFPS   = 'p';
-    public static final char DT_TEXT    = 't';
-    public static final char DT_HTML    = 'h';
-    public static final char DT_DOC     = 'd';
-    public static final char DT_IMAGE   = 'i';
-    public static final char DT_MOVIE   = 'm';
-    public static final char DT_FLASH   = 'f';
-    public static final char DT_SHARE   = 's';
-    public static final char DT_AUDIO   = 'a';
-    public static final char DT_BINARY  = 'b';
-    public static final char DT_UNKNOWN = 'u';
-
-    // appearance locations: (used for flags)
-    public static final int AP_TITLE     =  0; // title tag from html header
-    public static final int AP_H1        =  1; // headline - top level
-    public static final int AP_H2        =  2; // headline, second level
-    public static final int AP_H3        =  3; // headline, 3rd level
-    public static final int AP_H4        =  4; // headline, 4th level
-    public static final int AP_H5        =  5; // headline, 5th level
-    public static final int AP_H6        =  6; // headline, 6th level
-    public static final int AP_TEXT      =  7; // word appears in text (used to check validation of other appearances against spam)
-    public static final int AP_DOM       =  8; // word inside an url: in Domain
-    public static final int AP_PATH      =  9; // word inside an url: in path
-    public static final int AP_IMG       = 10; // tag inside image references
-    public static final int AP_ANCHOR    = 11; // anchor description
-    public static final int AP_ENV       = 12; // word appears in environment (similar to anchor appearance)
-    public static final int AP_BOLD      = 13; // may be interpreted as emphasized
-    public static final int AP_ITALICS   = 14; // may be interpreted as emphasized
-    public static final int AP_WEAK      = 15; // for Text that is small or bareley visible
-    public static final int AP_INVISIBLE = 16; // good for spam detection
-    public static final int AP_TAG       = 17; // for tagged indexeing (i.e. using mp3 tags)
-    public static final int AP_AUTHOR    = 18; // word appears in author name
-    public static final int AP_OPUS      = 19; // word appears in name of opus, which may be an album name (in mp3 tags)
-    public static final int AP_TRACK     = 20; // word appears in track name (i.e. in mp3 tags)
-    
-    // URL attributes
-    public static final int UA_LOCAL    =  0; // URL was crawled locally
-    public static final int UA_TILDE    =  1; // tilde appears in URL
-    public static final int UA_REDIRECT =  2; // The URL is a redirection
-    
-    // local flag attributes
-    public static final char LT_LOCAL   = 'L';
-    public static final char LT_GLOBAL  = 'G';
-
-    // create a word hash
-    public static String word2hash(String word) {
-        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase())).substring(0, wordHashLength);
-    }
-
-    // doctype calculation
-    public static char docType(URL url) {
-        String path = htmlFilterContentScraper.urlNormalform(url);
-        // serverLog.logFinest("PLASMA", "docType URL=" + path);
-        char doctype = doctype = DT_UNKNOWN;
-        if (path.endsWith(".gif"))       { doctype = DT_IMAGE; }
-        else if (path.endsWith(".jpg"))  { doctype = DT_IMAGE; }
-        else if (path.endsWith(".jpeg")) { doctype = DT_IMAGE; }
-        else if (path.endsWith(".png"))  { doctype = DT_IMAGE; }
-        else if (path.endsWith(".html")) { doctype = DT_HTML;  }
-        else if (path.endsWith(".txt"))  { doctype = DT_TEXT;  }
-        else if (path.endsWith(".doc"))  { doctype = DT_DOC;   }
-        else if (path.endsWith(".rtf"))  { doctype = DT_DOC;   }
-        else if (path.endsWith(".pdf"))  { doctype = DT_PDFPS; }
-        else if (path.endsWith(".ps"))   { doctype = DT_PDFPS; }
-        else if (path.endsWith(".avi"))  { doctype = DT_MOVIE; }
-        else if (path.endsWith(".mov"))  { doctype = DT_MOVIE; }
-        else if (path.endsWith(".qt"))   { doctype = DT_MOVIE; }
-        else if (path.endsWith(".mpg"))  { doctype = DT_MOVIE; }
-        else if (path.endsWith(".md5"))  { doctype = DT_SHARE; }
-        else if (path.endsWith(".mpeg")) { doctype = DT_MOVIE; }
-        else if (path.endsWith(".asf"))  { doctype = DT_FLASH; }
-        return doctype;
-    }
-
-    public static char docType(String mime) {
-        // serverLog.logFinest("PLASMA", "docType mime=" + mime);
-        char doctype = DT_UNKNOWN;
-        if (mime == null) doctype = DT_UNKNOWN;
-        else if (mime.startsWith("image/")) doctype = DT_IMAGE;
-        else if (mime.endsWith("/gif")) doctype = DT_IMAGE;
-        else if (mime.endsWith("/jpeg")) doctype = DT_IMAGE;
-        else if (mime.endsWith("/png")) doctype = DT_IMAGE;
-        else if (mime.endsWith("/html")) doctype = DT_HTML;
-        else if (mime.endsWith("/rtf")) doctype = DT_DOC;
-        else if (mime.endsWith("/pdf")) doctype = DT_PDFPS;
-        else if (mime.endsWith("/octet-stream")) doctype = DT_BINARY;
-        else if (mime.endsWith("/x-shockwave-flash")) doctype = DT_FLASH;
-        else if (mime.endsWith("/msword")) doctype = DT_DOC;
-        else if (mime.endsWith("/mspowerpoint")) doctype = DT_DOC;
-        else if (mime.endsWith("/postscript")) doctype = DT_PDFPS;
-        else if (mime.startsWith("text/")) doctype = DT_TEXT;
-        else if (mime.startsWith("image/")) doctype = DT_IMAGE;
-        else if (mime.startsWith("audio/")) doctype = DT_AUDIO;
-        else if (mime.startsWith("video/")) doctype = DT_MOVIE;
-        //bz2     = application/x-bzip2
-        //dvi     = application/x-dvi
-        //gz      = application/gzip
-        //hqx     = application/mac-binhex40
-        //lha     = application/x-lzh
-        //lzh     = application/x-lzh
-        //pac     = application/x-ns-proxy-autoconfig
-        //php     = application/x-httpd-php
-        //phtml   = application/x-httpd-php
-        //rss     = application/xml
-        //tar     = application/tar
-        //tex     = application/x-tex
-        //tgz     = application/tar
-        //torrent = application/x-bittorrent
-        //xhtml   = application/xhtml+xml
-        //xla     = application/msexcel
-        //xls     = application/msexcel
-        //xsl     = application/xml
-        //xml     = application/xml
-        //Z       = application/x-compress
-        //zip     = application/zip
-        return doctype;
-    }
-
-    // language calculation
-    public static String language(URL url) {
-        String language = "uk";
-        String host = url.getHost();
-        int pos = host.lastIndexOf(".");
-        if ((pos > 0) && (host.length() - pos == 3)) language = host.substring(pos + 1).toLowerCase();
-        return language;
-    }
 
     // the class instantiation can only be done by a plasmaStore method
     // therefore they are all public
@@ -255,7 +119,7 @@ public final class plasmaWordIndexEntry implements Cloneable {
         this.quality = quality;
         this.language = language.getBytes();
         this.doctype = doctype;
-        this.localflag = (local) ? LT_LOCAL : LT_GLOBAL;
+        this.localflag = (local) ? indexEntryAttribute.LT_LOCAL : indexEntryAttribute.LT_GLOBAL;
     }
     
     public plasmaWordIndexEntry(String urlHash, String code) {
@@ -299,7 +163,7 @@ public final class plasmaWordIndexEntry implements Cloneable {
        this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(pr.getProperty("q", "__"));
        this.language = pr.getProperty("l", "uk").getBytes();
        this.doctype = pr.getProperty("d", "u").charAt(0);
-       this.localflag = pr.getProperty("f", ""+LT_LOCAL).charAt(0);
+       this.localflag = pr.getProperty("f", ""+indexEntryAttribute.LT_LOCAL).charAt(0);
     }
     
     public Object clone() {
@@ -412,7 +276,7 @@ public final class plasmaWordIndexEntry implements Cloneable {
     public int phrasecount() { return phrasecount; }
     public String getLanguage() { return new String(language); }
     public char getType() { return doctype; }
-    public boolean isLocal() { return localflag == LT_LOCAL; }
+    public boolean isLocal() { return localflag == indexEntryAttribute.LT_LOCAL; }
 
     public boolean isNewer(plasmaWordIndexEntry other) {
         if (other == null) return true;
@@ -439,7 +303,7 @@ public final class plasmaWordIndexEntry implements Cloneable {
     public static void main(String[] args) {
         // outputs the word hash to a given word
         if (args.length != 1) System.exit(0);
-        System.out.println("WORDHASH: " + word2hash(args[0]));
+        System.out.println("WORDHASH: " + indexEntryAttribute.word2hash(args[0]));
     }
    
 }

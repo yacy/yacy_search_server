@@ -58,12 +58,12 @@ import java.util.Map;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
-import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
@@ -463,7 +463,7 @@ public class dir {
                 false, /*localneed*/
                 condenser.RESULT_WORD_ENTROPHY,
                 "**", /*language*/
-                plasmaWordIndexEntry.DT_SHARE, /*doctype*/
+                indexEntryAttribute.DT_SHARE, /*doctype*/
                 phrase.length(), /*size*/
                 condenser.RESULT_NUMB_WORDS
             );
@@ -476,7 +476,7 @@ public class dir {
                 );
             
             final String urlHash = newEntry.hash();
-            /*final int words =*/ switchboard.wordIndex.addPageIndex(url, urlHash, new Date(), phrase.length() + descr.length() + 13, null, condenser, "**", plasmaWordIndexEntry.DT_SHARE, 0, 0);
+            /*final int words =*/ switchboard.wordIndex.addPageIndex(url, urlHash, new Date(), phrase.length() + descr.length() + 13, null, condenser, "**", indexEntryAttribute.DT_SHARE, 0, 0);
         } catch (IOException e) {}
     }
 
@@ -487,7 +487,7 @@ public class dir {
             Map.Entry entry;
             while (words.hasNext()) {
                 entry = (Map.Entry) words.next();
-                switchboard.wordIndex.removeEntries(plasmaWordIndexEntry.word2hash((String) entry.getKey()), new String[] {urlhash}, true);
+                switchboard.wordIndex.removeEntries(indexEntryAttribute.word2hash((String) entry.getKey()), new String[] {urlhash}, true);
             }
             switchboard.urlPool.loadedURL.remove(urlhash);
         } catch (Exception e) {

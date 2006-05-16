@@ -69,11 +69,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
+import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.plasma.plasmaURL;
-import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
@@ -85,7 +85,7 @@ public class bookmarksDB {
     HashMap bookmarkCache;
     
     public static String tagHash(String tagName){
-        return plasmaWordIndexEntry.word2hash(tagName.toLowerCase());
+        return indexEntryAttribute.word2hash(tagName.toLowerCase());
     }
     public static String dateToiso8601(Date date){
     	return new SimpleDateFormat("yyyy-MM-dd").format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z";

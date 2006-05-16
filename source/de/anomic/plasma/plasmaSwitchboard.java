@@ -130,6 +130,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
+import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -1422,8 +1423,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             referrerHash,
                             0, true,
                             condenser.RESULT_WORD_ENTROPHY,
-                            plasmaWordIndexEntry.language(entry.url()),
-                            plasmaWordIndexEntry.docType(document.getMimeType()),
+                            indexEntryAttribute.language(entry.url()),
+                            indexEntryAttribute.docType(document.getMimeType()),
                             (int) entry.size(),
                             condenser.RESULT_NUMB_WORDS
                     );
@@ -1451,14 +1452,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 (storagePeerHash.trim().length() == 0) ||
                                 ((seed = yacyCore.seedDB.getConnected(storagePeerHash))==null)){
                             words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, (int) entry.size(), document, condenser,
-                                                           plasmaWordIndexEntry.language(entry.url()), plasmaWordIndexEntry.docType(document.getMimeType()),
+                                    indexEntryAttribute.language(entry.url()), indexEntryAttribute.docType(document.getMimeType()),
                                                            ioLinks[0].intValue(), ioLinks[1].intValue());
                         } else {
                             HashMap urlCache = new HashMap(1);
                             urlCache.put(newEntry.hash(),newEntry);
                             ArrayList tmpContainers = new ArrayList(condenser.RESULT_SIMI_WORDS);
-                            String language = plasmaWordIndexEntry.language(entry.url());
-                            char doctype = plasmaWordIndexEntry.docType(document.getMimeType());
+                            String language = indexEntryAttribute.language(entry.url());
+                            char doctype = indexEntryAttribute.docType(document.getMimeType());
                             int urlLength = newEntry.url().toString().length();
                             int urlComps = htmlFilterContentScraper.urlComps(newEntry.url().toString()).length;
 
@@ -1470,7 +1471,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 wentry = (Map.Entry) i.next();
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
-                                String wordHash = plasmaWordIndexEntry.word2hash(word);
+                                String wordHash = indexEntryAttribute.word2hash(word);
                                 plasmaWordIndexEntryContainer wordIdxContainer = new plasmaWordIndexEntryContainer(wordHash);
                                 plasmaWordIndexEntry wordIdxEntry = new plasmaWordIndexEntry(urlHash,
                                                                                              urlLength, urlComps,
@@ -1509,8 +1510,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             if (error != null) {
                                 words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, (int) entry.size(),
                                                                document, condenser,
-                                                               plasmaWordIndexEntry.language(entry.url()),
-                                                               plasmaWordIndexEntry.docType(document.getMimeType()),
+                                                               indexEntryAttribute.language(entry.url()),
+                                                               indexEntryAttribute.docType(document.getMimeType()),
                                                                ioLinks[0].intValue(), ioLinks[1].intValue());
                             }
                             
@@ -1990,7 +1991,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         while (iter.hasNext()) {
             word = (String) iter.next();
             // delete the URL reference in this word index
-            count += wordIndex.removeEntries(plasmaWordIndexEntry.word2hash(word), urlEntries, true);
+            count += wordIndex.removeEntries(indexEntryAttribute.word2hash(word), urlEntries, true);
         }
         return count;
     }
@@ -2006,7 +2007,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             entry = (Map.Entry) wordStatPropIterator.next();
             word = (String) entry.getKey();
             // delete the URL reference in this word index
-            count += wordIndex.removeEntries(plasmaWordIndexEntry.word2hash(word), urlEntries, true);
+            count += wordIndex.removeEntries(indexEntryAttribute.word2hash(word), urlEntries, true);
         }
         return count;
     }

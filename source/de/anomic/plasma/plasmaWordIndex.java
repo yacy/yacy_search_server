@@ -58,6 +58,7 @@ import java.util.TreeSet;
 import java.net.URL;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
@@ -247,7 +248,7 @@ public final class plasmaWordIndex {
             word = (String) wentry.getKey();
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
-            wordHash = plasmaWordIndexEntry.word2hash(word);
+            wordHash = indexEntryAttribute.word2hash(word);
             ientry = new plasmaWordIndexEntry(urlHash,
                                               urlLength, urlComps, (document == null) ? urlLength : document.longTitle.length(),
                                              wprop.count,

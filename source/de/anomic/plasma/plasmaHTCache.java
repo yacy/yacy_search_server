@@ -56,6 +56,7 @@ package de.anomic.plasma;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -761,9 +762,9 @@ public final class plasmaHTCache {
             this.lastModified = responseHeader.lastModified();
             if (this.lastModified == null) this.lastModified = new Date(serverDate.correctedUTCTime()); // does not exist in header
         }
-        this.doctype = plasmaWordIndexEntry.docType(responseHeader.mime());
-        if (this.doctype == plasmaWordIndexEntry.DT_UNKNOWN) this.doctype = plasmaWordIndexEntry.docType(url);
-        this.language = plasmaWordIndexEntry.language(url);
+        this.doctype = indexEntryAttribute.docType(responseHeader.mime());
+        if (this.doctype == indexEntryAttribute.DT_UNKNOWN) this.doctype = indexEntryAttribute.docType(url);
+        this.language = indexEntryAttribute.language(url);
 
         // to be defined later:
         this.cacheArray     = null;

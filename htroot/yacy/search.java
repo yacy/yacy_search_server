@@ -49,6 +49,7 @@
 
 import java.util.HashSet;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexEntryAttribute;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -56,7 +57,6 @@ import de.anomic.plasma.plasmaSearchResult;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndexEntry;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -100,9 +100,9 @@ public final class search {
         }
 
         // prepare search
-        final HashSet keyhashes = new HashSet(query.length() / plasmaWordIndexEntry.wordHashLength);
-        for (int i = 0; i < (query.length() / plasmaWordIndexEntry.wordHashLength); i++) {
-            keyhashes.add(query.substring(i * plasmaWordIndexEntry.wordHashLength, (i + 1) * plasmaWordIndexEntry.wordHashLength));
+        final HashSet keyhashes = new HashSet(query.length() / indexEntryAttribute.wordHashLength);
+        for (int i = 0; i < (query.length() / indexEntryAttribute.wordHashLength); i++) {
+            keyhashes.add(query.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
         }
         final long timestamp = System.currentTimeMillis();
         

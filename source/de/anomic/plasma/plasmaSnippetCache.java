@@ -55,6 +55,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.index.indexEntryAttribute;
 
 public class plasmaSnippetCache {
 
@@ -125,7 +126,7 @@ public class plasmaSnippetCache {
             while (i.hasNext()) {
                 h = (String) i.next();
                 for (int j = 0; j < w.length; j++) {
-                    if (plasmaWordIndexEntry.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
+                    if (indexEntryAttribute.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
                 }
             }
             StringBuffer l = new StringBuffer(line.length() + queryHashes.size() * 8);
@@ -347,7 +348,7 @@ public class plasmaSnippetCache {
         String word;
         while (words.hasMoreElements()) {
             word = (String) words.nextElement();
-            map.put(plasmaWordIndexEntry.word2hash(word), new Integer(pos));
+            map.put(indexEntryAttribute.word2hash(word), new Integer(pos));
             pos += word.length() + 1;
         }
         return map;

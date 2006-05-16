@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroTree;
@@ -66,10 +67,10 @@ public final class plasmaWordIndexAssortment {
     // environment constants
     private static final String assortmentFileName = "indexAssortment";
     public  static final int[] bufferStructureBasis = new int[]{
-        plasmaWordIndexEntry.wordHashLength, // a wordHash
+        indexEntryAttribute.wordHashLength,  // a wordHash
         4,                                   // occurrence counter
         8,                                   // timestamp of last access
-        plasmaWordIndexEntry.urlHashLength,  // corresponding URL hash
+        indexEntryAttribute.urlHashLength,   // corresponding URL hash
         plasmaWordIndexEntry.attrSpace       // URL attributes
     };
     
