@@ -45,6 +45,7 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.Boolean;
 import java.net.URL;
 import java.util.Date;
 import java.util.Enumeration;
@@ -206,7 +207,10 @@ public class plasmaCrawlEURL extends plasmaURL {
                     this.failreason.getBytes(),
                     this.flags.getBytes()
 		};
-		urlHashCache.put(entry);
+                synchronized(existsIndex) {
+                    urlHashCache.put(entry);
+                    existsIndex.put(this.hash, Boolean.TRUE);
+                }
 	    } catch (IOException e) {
 		System.out.println("INTERNAL ERROR AT plasmaEURL:url2hash:" + e.toString());
 	    }

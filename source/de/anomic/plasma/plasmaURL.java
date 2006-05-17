@@ -42,10 +42,10 @@
 package de.anomic.plasma;
 
 import java.io.IOException;
+import java.lang.Boolean;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
-import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -424,11 +424,11 @@ public class plasmaURL {
     
     // the class object
     public kelondroTree urlHashCache;
-    private final HashSet existsIndex;
+    public final HashMap existsIndex; // allow subclasses to access the existsIndex during Entry.store()
 
     public plasmaURL() {
         urlHashCache = null;
-        existsIndex = new HashSet();
+        existsIndex = new HashMap();
     }
 
     public int size() {
@@ -441,12 +441,14 @@ public class plasmaURL {
 
     public boolean exists(String urlHash) {
         synchronized (existsIndex) {
-            if (existsIndex.contains(urlHash)) return true;
+            Boolean existsInIndex = (Boolean) existsIndex.get(urlHash);
+            if (existsInIndex != null) return existsInIndex.booleanValue();
             try {
                 if (urlHashCache.get(urlHash.getBytes()) != null) {
-                    existsIndex.add(urlHash);
+                    existsIndex.put(urlHash, Boolean.TRUE);
                     return true;
                 } else {
+                    existsIndex.put(urlHash, Boolean.FALSE);
                     return false;
                 }
             } catch (IOException e) {
@@ -462,12 +464,20 @@ public class plasmaURL {
     public boolean remove(String urlHash) {
         synchronized (existsIndex) {
             try {
-                boolean existsInIndex = this.existsIndex.remove(urlHash);
+                Boolean existsInIndex = (Boolean) existsIndex.remove(urlHash);
+                if (existsInIndex == null) existsInIndex = Boolean.FALSE;
                 boolean existsInCache = (this.urlHashCache.remove(urlHash.getBytes()) != null);
-                return existsInIndex || existsInCache;
+                existsIndex.put(urlHash, Boolean.FALSE);
+                return existsInIndex.booleanValue() || existsInCache;
             } catch (IOException e) {
                 return false;
             }
+        }
+    }
+
+    public void clearExistsIndex() {
+        synchronized (existsIndex) {
+            existsIndex.clear();
         }
     }
 

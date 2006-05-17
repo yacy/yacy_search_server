@@ -45,6 +45,7 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.Boolean;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -559,7 +560,10 @@ public class plasmaCrawlNURL extends plasmaURL {
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
                 };
-                urlHashCache.put(entry);
+                synchronized(existsIndex) {
+                    urlHashCache.put(entry);
+                    existsIndex.put(this.hash, Boolean.TRUE);
+                }
             } catch (IOException e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", resetting NURL-DB");
                 e.printStackTrace();

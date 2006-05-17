@@ -54,6 +54,7 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.Boolean;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -516,63 +517,66 @@ public final class plasmaCrawlLURL extends plasmaURL {
         public void store() {
             // Check if there is a more recent Entry already in the DB
             if (this.stored) return;
-            Entry oldEntry;
-            try {
-                if (exists(urlHash)) {
-                    oldEntry = new Entry (urlHash, null);
-                } else {
+            synchronized(existsIndex) {
+                Entry oldEntry;
+                try {
+                    if (exists(urlHash)) {
+                        oldEntry = new Entry (urlHash, null);
+                    } else {
+                        oldEntry = null;
+                    }
+                } catch (Exception e) {
                     oldEntry = null;
                 }
-            } catch (Exception e) {
-                oldEntry = null;
-            }
-            if ((oldEntry != null) && (isOlder(oldEntry))) {
-                // the fetched oldEntry is better, so return its properties instead of the new ones
-                // this.urlHash = oldEntry.urlHash; // unnecessary, should be the same
-                // this.url = oldEntry.url; // unnecessary, should be the same
-                this.descr = oldEntry.descr;
-                this.moddate = oldEntry.moddate;
-                this.loaddate = oldEntry.loaddate;
-                this.referrerHash = oldEntry.referrerHash;
-                this.copyCount = oldEntry.copyCount;
-                this.flags =  oldEntry.flags;
-                this.quality = oldEntry.quality;
-                this.language = oldEntry.language;
-                this.doctype = oldEntry.doctype;
-                this.size = oldEntry.size;
-                this.wordCount = oldEntry.wordCount;
-                // this.snippet // not read from db
-                // this.word // not read from db
-                return;
-            }
+                if ((oldEntry != null) && (isOlder(oldEntry))) {
+                    // the fetched oldEntry is better, so return its properties instead of the new ones
+                    // this.urlHash = oldEntry.urlHash; // unnecessary, should be the same
+                    // this.url = oldEntry.url; // unnecessary, should be the same
+                    this.descr = oldEntry.descr;
+                    this.moddate = oldEntry.moddate;
+                    this.loaddate = oldEntry.loaddate;
+                    this.referrerHash = oldEntry.referrerHash;
+                    this.copyCount = oldEntry.copyCount;
+                    this.flags =  oldEntry.flags;
+                    this.quality = oldEntry.quality;
+                    this.language = oldEntry.language;
+                    this.doctype = oldEntry.doctype;
+                    this.size = oldEntry.size;
+                    this.wordCount = oldEntry.wordCount;
+                    // this.snippet // not read from db
+                    // this.word // not read from db
+                    return;
+                }
 
-            // stores the values from the object variables into the database
-            final String moddatestr = kelondroBase64Order.enhancedCoder.encodeLong(moddate.getTime() / 86400000, urlDateLength);
-            final String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, urlDateLength);
+                // stores the values from the object variables into the database
+                final String moddatestr = kelondroBase64Order.enhancedCoder.encodeLong(moddate.getTime() / 86400000, urlDateLength);
+                final String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, urlDateLength);
 
-            // store the hash in the hash cache
-            try {
-                // even if the entry exists, we simply overwrite it
-                final byte[][] entry = new byte[][] {
-                    urlHash.getBytes(),
-                    url.toString().getBytes(),
-                    descr.getBytes(), // null?
-                    moddatestr.getBytes(),
-                    loaddatestr.getBytes(),
-                    referrerHash.getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(copyCount, urlCopyCountLength).getBytes(),
-                    flags.getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(quality, urlQualityLength).getBytes(),
-                    language.getBytes(),
-                    new byte[] {(byte) doctype},
-                    kelondroBase64Order.enhancedCoder.encodeLong(size, urlSizeLength).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(wordCount, urlWordCountLength).getBytes(),
-                };
-                urlHashCache.put(entry);
-                serverLog.logFine("PLASMA","STORED new LURL " + url.toString());
-                this.stored = true;
-            } catch (Exception e) {
-                serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString(), e);
+                // store the hash in the hash cache
+                try {
+                    // even if the entry exists, we simply overwrite it
+                    final byte[][] entry = new byte[][] {
+                        urlHash.getBytes(),
+                        url.toString().getBytes(),
+                        descr.getBytes(), // null?
+                        moddatestr.getBytes(),
+                        loaddatestr.getBytes(),
+                        referrerHash.getBytes(),
+                        kelondroBase64Order.enhancedCoder.encodeLong(copyCount, urlCopyCountLength).getBytes(),
+                        flags.getBytes(),
+                        kelondroBase64Order.enhancedCoder.encodeLong(quality, urlQualityLength).getBytes(),
+                        language.getBytes(),
+                        new byte[] {(byte) doctype},
+                        kelondroBase64Order.enhancedCoder.encodeLong(size, urlSizeLength).getBytes(),
+                        kelondroBase64Order.enhancedCoder.encodeLong(wordCount, urlWordCountLength).getBytes(),
+                    };
+                    urlHashCache.put(entry);
+                    serverLog.logFine("PLASMA","STORED new LURL " + url.toString());
+                    this.stored = true;
+                    existsIndex.put(urlHash, Boolean.TRUE);
+                } catch (Exception e) {
+                    serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString(), e);
+                }
             }
         }
 

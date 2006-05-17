@@ -278,13 +278,13 @@ public class PerformanceMemory_p {
         // other caching structures
         long amount = sb.urlPool.errorURL.existsIndexSize();
         prop.put("eurl.existsIndexAmount",Long.toString(amount));
-        prop.put("eurl.existsIndexSize",serverMemory.bytesToString(amount*plasmaURL.urlHashLength));
+        prop.put("eurl.existsIndexSize",serverMemory.bytesToString(amount*(2*plasmaURL.urlHashLength+28)));
         amount = sb.urlPool.noticeURL.existsIndexSize();
         prop.put("nurl.existsIndexAmount",Long.toString(amount));
-        prop.put("nurl.existsIndexSize",serverMemory.bytesToString(amount*plasmaURL.urlHashLength));
+        prop.put("nurl.existsIndexSize",serverMemory.bytesToString(amount*(2*plasmaURL.urlHashLength+28)));
         amount = sb.urlPool.loadedURL.existsIndexSize();
         prop.put("lurl.existsIndexAmount",Long.toString(amount));
-        prop.put("lurl.existsIndexSize",serverMemory.bytesToString(amount*plasmaURL.urlHashLength));
+        prop.put("lurl.existsIndexSize",serverMemory.bytesToString(amount*(2*plasmaURL.urlHashLength+28)));
         
         // return rewrite values for templates
         return prop;

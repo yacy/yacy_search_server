@@ -1023,7 +1023,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         // clean up profiles
         if (cleanProfiles()) hasDoneSomething = true;
-        
+        // clean up existsIndex
+        if (urlPool.errorURL.existsIndexSize() > 10000) {
+            log.logFine("Cleaning Error-URLs exists index, " + urlPool.errorURL.existsIndexSize() + " entries in index");
+            urlPool.errorURL.clearExistsIndex();
+        }
+        if (urlPool.noticeURL.existsIndexSize() > 10000) {
+            log.logFine("Cleaning Notice-URLs exists index, " + urlPool.noticeURL.existsIndexSize() + " entries in index");
+            urlPool.noticeURL.clearExistsIndex();
+        }
+        if (urlPool.loadedURL.existsIndexSize() > 100000) {
+            log.logFine("Cleaning Loaded-URLs exists index, " + urlPool.loadedURL.existsIndexSize() + " entries in index");
+            urlPool.loadedURL.clearExistsIndex();
+        }
+
         // clean up news
         try {
             log.logFine("Cleaning Incoming News, " + yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
