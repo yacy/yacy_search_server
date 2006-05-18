@@ -77,8 +77,10 @@ public final class transferRWI {
         final int wordc       = Integer.parseInt(post.get("wordc", ""));  // number of different words
         final int entryc      = Integer.parseInt(post.get("entryc", "")); // number of entries in indexes
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
-        final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
+        boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
 
+        if (sb.wordIndex.kSize() > 1000) granted = false; // don't accept more words if there are too many words to flush
+        
         // response values
         String result = "";
         StringBuffer unknownURLs = new StringBuffer();

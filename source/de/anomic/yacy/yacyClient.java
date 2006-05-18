@@ -897,7 +897,11 @@ public final class yacyClient {
         if (in == null) { return "no_connection_1"; }
         String result = (String) in.get("result");
         if (result == null) { return "no_result_1"; }
-        if (!(result.equals("ok"))) return result;
+        if (!(result.equals("ok"))) {
+            targetSeed.setFlagAcceptRemoteIndex(false);
+            yacyCore.seedDB.update(targetSeed.hash, targetSeed);
+            return result;
+        }
         
         // in now contains a list of unknown hashes
         final String uhss = (String) in.get("unknownURL");
@@ -920,7 +924,11 @@ public final class yacyClient {
         if (in == null) { return "no_connection_2"; }
         result = (String) in.get("result");
         if (result == null) { return "no_result_2"; }
-        if (!(result.equals("ok"))) { return result; }
+        if (!(result.equals("ok"))) {
+            targetSeed.setFlagAcceptRemoteIndex(false);
+            yacyCore.seedDB.update(targetSeed.hash, targetSeed);
+            return result;
+        }
 //      int doubleentries = Integer.parseInt((String) in.get("double"));
 //      System.out.println("DEBUG tansferIndex: transferred " + uhs.length + " URL's, double=" + doubleentries);
         

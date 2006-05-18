@@ -478,6 +478,22 @@ public final class yacySeedDB {
         return seed;
     }
     
+    public void update(String hash, yacySeed seed) {
+        if ((mySeed != null) && (hash.equals(mySeed.hash))) {
+            mySeed = seed;
+            return;
+        }
+        
+        yacySeed s = get(hash, seedActiveDB);
+        if (s != null) try { seedActiveDB.set(hash, seed.getMap()); return;} catch (IOException e) {}
+        
+        s = get(hash, seedPassiveDB);
+        if (s != null) try { seedPassiveDB.set(hash, seed.getMap()); return;} catch (IOException e) {}
+        
+        s = get(hash, seedPotentialDB);
+        if (s != null) try { seedPotentialDB.set(hash, seed.getMap()); return;} catch (IOException e) {}
+    }
+    
     public yacySeed lookupByName(String peerName) {
         // reads a seed by searching by name
         
