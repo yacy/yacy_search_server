@@ -131,6 +131,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -828,7 +829,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             
             // enqueue for further crawling
-            enQueue(this.sbQueue.newEntry(entry.url, plasmaURL.urlHash(entry.referrerURL()),
+            enQueue(this.sbQueue.newEntry(entry.url, indexURL.urlHash(entry.referrerURL()),
             entry.requestHeader.ifModifiedSince(), entry.requestHeader.containsKey(httpHeader.COOKIE),
             entry.initiator(), entry.depth, entry.profile.handle(),
             entry.name()
@@ -1211,7 +1212,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             boolean tryRemote = ((urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) != 0) || (sbQueue.size() != 0)) &&
                                  (profile.remoteIndexing()) &&
                                  (urlEntry.initiator() != null) &&
-                                // (!(urlEntry.initiator().equals(plasmaURL.dummyHash))) &&
+                                // (!(urlEntry.initiator().equals(indexURL.dummyHash))) &&
                                  ((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal()));
             if (tryRemote) {
                 boolean success = processRemoteCrawlTrigger(urlEntry);
@@ -1321,8 +1322,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // 6) local fetching for global crawling (other known or unknwon initiator)
             int processCase = 0;
             yacySeed initiator = null;
-            String initiatorHash = (entry.proxy()) ? plasmaURL.dummyHash : entry.initiator();
-            if (initiatorHash.equals(plasmaURL.dummyHash)) {
+            String initiatorHash = (entry.proxy()) ? indexURL.dummyHash : entry.initiator();
+            if (initiatorHash.equals(indexURL.dummyHash)) {
                 // proxy-load
                 processCase = 4;
             } else if (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) {
@@ -1394,7 +1395,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     // rejectReason = stackCrawl(nexturlstring, entry.normalizedURLString(), initiatorHash, (String) e.getValue(), loadDate, entry.depth() + 1, entry.profile());
                     // if (rejectReason == null) { c++; } else {
                     //     urlPool.errorURL.newEntry(new URL(nexturlstring), entry.normalizedURLString(), entry.initiator(), yacyCore.seedDB.mySeed.hash,
-                    //     (String) e.getValue(), rejectReason, new bitfield(plasmaURL.urlFlagLength), false);
+                    //     (String) e.getValue(), rejectReason, new bitfield(indexURL.urlFlagLength), false);
                     // }
                 }
                 log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.normalizedURLString() +
@@ -1406,8 +1407,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             String descr = document.getMainLongTitle();
             String referrerHash;
             URL referrerURL = entry.referrerURL();
-            referrerHash = plasmaURL.urlHash(referrerURL);
-            if (referrerHash == null) referrerHash = plasmaURL.dummyHash;
+            referrerHash = indexURL.urlHash(referrerURL);
+            if (referrerHash == null) referrerHash = indexURL.dummyHash;
 
             String noIndexReason = "unspecified";
             if (processCase == 4) {
@@ -1563,9 +1564,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } else {
                 log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
                 urlPool.errorURL.newEntry(entry.url(), referrerHash,
-                        ((entry.proxy()) ? plasmaURL.dummyHash : entry.initiator()),
+                        ((entry.proxy()) ? indexURL.dummyHash : entry.initiator()),
                         yacyCore.seedDB.mySeed.hash,
-                        descr, noIndexReason, new bitfield(plasmaURL.urlFlagLength), true);
+                        descr, noIndexReason, new bitfield(indexURL.urlFlagLength), true);
                 if ((processCase == 6) && (initiator != null)) {
                     yacyClient.crawlReceipt(initiator, "crawl", "rejected", noIndexReason, null, "");
                 }
@@ -1606,7 +1607,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int GCount = 0;
         int LCount = 0;
         while (it.hasNext()) {
-            nexturlhash = plasmaURL.urlHash((String) ((Map.Entry) it.next()).getKey());
+            nexturlhash = indexURL.urlHash((String) ((Map.Entry) it.next()).getKey());
             if (nexturlhash != null) {
                 if (nexturlhash.substring(6).equals(lhp)) {
                     cpl.append(nexturlhash.substring(0, 6));
@@ -1681,7 +1682,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         URL refererURL = null;
         String refererHash = urlEntry.referrerHash();
-        if ((refererHash != null) && (!refererHash.equals(plasmaURL.dummyHash))) try {
+        if ((refererHash != null) && (!refererHash.equals(indexURL.dummyHash))) try {
             refererURL = this.urlPool.getURL(refererHash);
         } catch (IOException e) {
             refererURL = null;
@@ -1711,7 +1712,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logFine("ERROR: plasmaSwitchboard.processRemoteCrawlTrigger - url is null. name=" + urlEntry.name());
             return true;
         }
-        String urlhash = plasmaURL.urlHash(urlEntry.url());
+        String urlhash = indexURL.urlHash(urlEntry.url());
         
         // check remote crawl
         yacySeed remoteSeed = yacyCore.dhtAgent.getCrawlSeed(urlhash);
@@ -1963,7 +1964,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     // method for index deletion
     public int removeAllUrlReferences(URL url, boolean fetchOnline) {
-        return removeAllUrlReferences(plasmaURL.urlHash(url), fetchOnline);
+        return removeAllUrlReferences(indexURL.urlHash(url), fetchOnline);
     }
     
     public int removeAllUrlReferences(String urlhash, boolean fetchOnline) {
@@ -1991,7 +1992,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public int removeReferences(URL url, Set words) {
-        return removeReferences(plasmaURL.urlHash(url), words);
+        return removeReferences(indexURL.urlHash(url), words);
     }
     
     public int removeReferences(final String urlhash, final Set words) {

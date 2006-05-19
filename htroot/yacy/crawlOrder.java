@@ -50,9 +50,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -245,7 +245,7 @@ public final class crawlOrder {
             reason = reasonString;
             // send lurl-Entry as response
             try {
-                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(plasmaURL.urlHash(url), null);
+                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(indexURL.urlHash(url), null);
                 response = "double";
                 switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
                 lurl = crypt.simpleEncode(entry.toString());

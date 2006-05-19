@@ -6,11 +6,11 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -46,7 +46,7 @@ public class snippet {
         } else {
             prop.put("text", snippet.getError());
         }
-        prop.put("urlHash",plasmaURL.urlHash(url));
+        prop.put("urlHash",indexURL.urlHash(url));
         
         
         // return rewrite properties

@@ -53,11 +53,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Iterator;
 
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.tools.bitfield;
 
-public class plasmaCrawlEURL extends plasmaURL {
+public class plasmaCrawlEURL extends indexURL {
 
     private LinkedList rejectedStack = new LinkedList(); // strings: url
     

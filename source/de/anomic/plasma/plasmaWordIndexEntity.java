@@ -47,6 +47,8 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
@@ -90,10 +92,10 @@ public final class plasmaWordIndexEntity {
         kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent);
     } catch (IOException e) {
         theLocation.delete();
-        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, plasmaURL.urlHashLength, plasmaWordIndexEntryInstance.encodedStringFormLength(), false);
+        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, indexURL.urlHashLength, plasmaWordIndexEntryInstance.encodedStringFormLength(), false);
     } else {
         // create new index file
-        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, plasmaURL.urlHashLength, plasmaWordIndexEntryInstance.encodedStringFormLength(), false);
+        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, indexURL.urlHashLength, plasmaWordIndexEntryInstance.encodedStringFormLength(), false);
     }
     return kt; // everyone who get this should close it when finished!
     }

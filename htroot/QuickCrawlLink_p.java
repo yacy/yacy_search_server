@@ -56,9 +56,9 @@ import java.util.Date;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -149,7 +149,7 @@ public class QuickCrawlLink_p {
                 return prop;
             }
                     
-            String urlhash = plasmaURL.urlHash(crawlingStart);
+            String urlhash = indexURL.urlHash(crawlingStart);
             switchboard.urlPool.loadedURL.remove(urlhash);
             switchboard.urlPool.noticeURL.remove(urlhash);
             switchboard.urlPool.errorURL.remove(urlhash);

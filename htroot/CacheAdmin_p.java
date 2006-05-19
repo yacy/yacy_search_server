@@ -55,10 +55,10 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -102,7 +102,7 @@ public class CacheAdmin_p {
 
             info.ensureCapacity(40000);
             try {
-                final httpHeader fileheader = switchboard.cacheManager.getCachedResponse(plasmaURL.urlHash(url));
+                final httpHeader fileheader = switchboard.cacheManager.getCachedResponse(indexURL.urlHash(url));
                 info.append("<b>HTTP Header:</b><br>").append(formatHeader(fileheader)).append("<br>");
                 final String ff = file.toString();
                 final int dotpos = ff.lastIndexOf('.');

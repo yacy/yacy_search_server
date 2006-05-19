@@ -56,6 +56,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexURL;
 
 public class plasmaSnippetCache {
 
@@ -143,7 +144,7 @@ public class plasmaSnippetCache {
     
     public boolean existsInCache(URL url, Set queryhashes) {
         String hashes = yacySearch.set2string(queryhashes);
-        return retrieveFromCache(hashes, plasmaURL.urlHash(url)) != null;
+        return retrieveFromCache(hashes, indexURL.urlHash(url)) != null;
     }
     
     public result retrieve(URL url, Set queryhashes, boolean fetchOnline, int snippetMaxLength) {
@@ -152,7 +153,7 @@ public class plasmaSnippetCache {
             //System.out.println("found no queryhashes for URL retrieve " + url);
             return new result(null, ERROR_NO_HASH_GIVEN, "no query hashes given");
         }
-        String urlhash = plasmaURL.urlHash(url);
+        String urlhash = indexURL.urlHash(url);
         
         // try to get snippet from snippetCache
         int source = SOURCE_CACHE;
@@ -363,7 +364,7 @@ public class plasmaSnippetCache {
         
         if (header == null) {
             try {
-                header = this.cacheManager.getCachedResponse(plasmaURL.urlHash(url));
+                header = this.cacheManager.getCachedResponse(indexURL.urlHash(url));
             } catch (IOException e) {}
         }
         

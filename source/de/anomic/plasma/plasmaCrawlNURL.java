@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRecords;
@@ -60,7 +61,7 @@ import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 
-public class plasmaCrawlNURL extends plasmaURL {
+public class plasmaCrawlNURL extends indexURL {
 
     public static final int STACK_TYPE_NULL     =  0; // do not stack
     public static final int STACK_TYPE_CORE     =  1; // put on local stack
@@ -126,23 +127,23 @@ public class plasmaCrawlNURL extends plasmaURL {
         if (imageStackFile.exists()) try {
             imageStack = new kelondroStack(imageStackFile, 0);
         } catch (IOException e) {
-            imageStack = new kelondroStack(imageStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
+            imageStack = new kelondroStack(imageStackFile, 0, new int[] {indexURL.urlHashLength}, true);
         } else {
-            imageStack = new kelondroStack(imageStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
+            imageStack = new kelondroStack(imageStackFile, 0, new int[] {indexURL.urlHashLength}, true);
         }
         if (movieStackFile.exists()) try {
             movieStack = new kelondroStack(movieStackFile, 0);
         } catch (IOException e) {
-            movieStack = new kelondroStack(movieStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
+            movieStack = new kelondroStack(movieStackFile, 0, new int[] {indexURL.urlHashLength}, true);
         } else {
-            movieStack = new kelondroStack(movieStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
+            movieStack = new kelondroStack(movieStackFile, 0, new int[] {indexURL.urlHashLength}, true);
         }
         if (musicStackFile.exists()) try {
             musicStack = new kelondroStack(musicStackFile, 0);
         } catch (IOException e) {
-            musicStack = new kelondroStack(musicStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
+            musicStack = new kelondroStack(musicStackFile, 0, new int[] {indexURL.urlHashLength}, true);
         } else {
-            musicStack = new kelondroStack(musicStackFile, 0, new int[] {plasmaURL.urlHashLength}, true);
+            musicStack = new kelondroStack(musicStackFile, 0, new int[] {indexURL.urlHashLength}, true);
         }
 
         // init stack Index

@@ -58,9 +58,9 @@ import de.anomic.data.wikiCode;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -159,7 +159,7 @@ public class IndexCreate_p {
                         } else try {
                             // stack request
                             // first delete old entry, if exists
-                            String urlhash = plasmaURL.urlHash(crawlingStart);
+                            String urlhash = indexURL.urlHash(crawlingStart);
                             switchboard.urlPool.loadedURL.remove(urlhash);
                             switchboard.urlPool.noticeURL.remove(urlhash);
                             switchboard.urlPool.errorURL.remove(urlhash);
@@ -196,7 +196,7 @@ public class IndexCreate_p {
                                 prop.put("error_reasonString", reasonString);
                                 
                                 switchboard.urlPool.errorURL.newEntry(crawlingStartURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
-                                                                      crawlingStartURL.getHost(), reasonString, new bitfield(plasmaURL.urlFlagLength), false);                                
+                                                                      crawlingStartURL.getHost(), reasonString, new bitfield(indexURL.urlFlagLength), false);                                
                             }
                         } catch (Exception e) {
                             // mist
@@ -260,7 +260,7 @@ public class IndexCreate_p {
                                         c++;
                                     } else {
                                         switchboard.urlPool.errorURL.newEntry(nexturlURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
-                                       (String) e.getValue(), rejectReason, new bitfield(plasmaURL.urlFlagLength), false);
+                                       (String) e.getValue(), rejectReason, new bitfield(indexURL.urlFlagLength), false);
                                     }
                                 }                             
                                 
@@ -482,8 +482,8 @@ public class IndexCreate_p {
             //table += "Sorry, cannot show any crawl output now because the system is not completely initialised. Please re-try.";
             prop.put("error", 3);
         } else {
-            Enumeration crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(plasmaURL.dummyHash, true);
-            Enumeration crawlpendi = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(plasmaURL.dummyHash, false);
+            Enumeration crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(indexURL.dummyHash, true);
+            Enumeration crawlpendi = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(indexURL.dummyHash, false);
             if ((!(crawlavail.hasMoreElements())) && (!(crawlpendi.hasMoreElements()))) {
                 prop.put("remoteCrawlPeers", 0); //no peers availible
             } else {

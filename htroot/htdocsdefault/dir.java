@@ -59,11 +59,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
@@ -482,7 +482,7 @@ public class dir {
 
     public static void deletePhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr) {
         try {
-            final String urlhash = plasmaURL.urlHash(new URL(urlstring));
+            final String urlhash = indexURL.urlHash(new URL(urlstring));
             final Iterator words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"));
             Map.Entry entry;
             while (words.hasNext()) {

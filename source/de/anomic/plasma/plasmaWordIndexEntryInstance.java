@@ -53,6 +53,7 @@ import java.util.Properties;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexEntryPrototype;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 
 public final class plasmaWordIndexEntryInstance extends indexEntryPrototype implements Cloneable, indexEntry {
@@ -89,7 +90,7 @@ public final class plasmaWordIndexEntryInstance extends indexEntryPrototype impl
         // - boolean: appearance attributes: title, appears in header, anchor-descr, image-tag etc
         // - boolean: URL attributes
         
-    if ((language == null) || (language.length() != plasmaURL.urlLanguageLength)) language = "uk";
+    if ((language == null) || (language.length() != indexURL.urlLanguageLength)) language = "uk";
         this.urlHash = urlHash;
         this.hitcount = hitcount;
         this.wordcount = wordcount;
@@ -163,7 +164,7 @@ public final class plasmaWordIndexEntryInstance extends indexEntryPrototype impl
        // if you need a complete dump, use toExternalForm()
        StringBuffer buf = new StringBuffer(encodedStringFormLength());
        
-       buf.append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.quality, plasmaURL.urlQualityLength))
+       buf.append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.quality, indexURL.urlQualityLength))
           .append(kelondroBase64Order.enhancedCoder.encodeLongSmart(plasmaWordIndex.microDateDays(this.lastModified), 3))
           .append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.hitcount, 2))
           .append(new String(this.language))
@@ -193,7 +194,7 @@ public final class plasmaWordIndexEntryInstance extends indexEntryPrototype impl
        
        str.append("{")
            .append( "h=").append(this.urlHash)
-           .append(",q=").append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.quality, plasmaURL.urlQualityLength))
+           .append(",q=").append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.quality, indexURL.urlQualityLength))
            .append(",a=").append(kelondroBase64Order.enhancedCoder.encodeLongSmart(plasmaWordIndex.microDateDays(this.lastModified), 3))
            .append(",c=").append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.hitcount, 2))
            .append(",l=").append(new String(this.language))

@@ -26,7 +26,7 @@
 
 package de.anomic.index;
 
-import de.anomic.plasma.plasmaURL;
+//import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWordIndex;
 
 public abstract class indexEntryPrototype implements indexEntry {
@@ -142,7 +142,7 @@ public abstract class indexEntryPrototype implements indexEntry {
     }
 
     public int domlengthNormalized() {
-        return 255 * plasmaURL.domLengthEstimation(this.urlHash) / 30;
+        return 255 * indexURL.domLengthEstimation(this.urlHash) / 30;
     }
 
     public static void main(String[] args) {

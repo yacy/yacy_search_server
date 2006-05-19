@@ -65,6 +65,7 @@ import java.util.Locale;
 import java.util.Properties;
 
 import de.anomic.http.httpc;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.plasma.plasmaHTCache;
@@ -76,7 +77,7 @@ import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public final class plasmaCrawlLURL extends plasmaURL {
+public final class plasmaCrawlLURL extends indexURL {
 
     // result stacks;
     // these have all entries of form

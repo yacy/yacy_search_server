@@ -49,10 +49,10 @@
 import java.io.IOException;
 
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
@@ -133,8 +133,8 @@ public final class crawlReceipt {
                 switchboard.urlPool.loadedURL.stackEntry(entry, youare, iam, 1);
                 
                 // generating url hash
-                String newUrlHash = plasmaURL.urlHash(entry.url());
-                String oldUrlHash = plasmaURL.oldurlHash(entry.url());
+                String newUrlHash = indexURL.urlHash(entry.url());
+                String oldUrlHash = indexURL.oldurlHash(entry.url());
                 
                 // removing URL from notice URL                
                 switchboard.urlPool.noticeURL.remove(newUrlHash);
@@ -148,7 +148,7 @@ public final class crawlReceipt {
         } else {
             try {
                 plasmaCrawlNURL.Entry en = switchboard.urlPool.noticeURL.getEntry(receivedUrlhash);
-                switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(plasmaURL.urlFlagLength), false);
+                switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(indexURL.urlFlagLength), false);
                 switchboard.urlPool.noticeURL.remove(receivedUrlhash);
             } catch (IOException e) {
 

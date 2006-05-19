@@ -57,6 +57,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -157,7 +158,7 @@ public final class plasmaHTCache {
             if (dbfile.exists())
                 this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, '#'));
             else
-                this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, plasmaURL.urlHashLength, 150, '#', false));
+                this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, indexURL.urlHashLength, 150, '#', false));
         } catch (IOException e) {
             this.log.logSevere("the request header database could not be opened: " + e.getMessage());
             System.exit(0);
@@ -288,7 +289,7 @@ public final class plasmaHTCache {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
                 this.log.logFinest("Trying to remove responseHeader from URL: " + url.toString());
-                this.responseHeaderDB.remove(plasmaURL.urlHash(url));
+                this.responseHeaderDB.remove(indexURL.urlHash(url));
             } catch (IOException e) {
                 this.log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
             }
@@ -337,7 +338,7 @@ public final class plasmaHTCache {
                         // As the file is gone, the entry in responseHeader.db is not needed anymore
                         this.log.logFinest("Trying to remove responseHeader for URL: " +
                             getURL(this.cachePath ,obj).toString());
-                        this.responseHeaderDB.remove(plasmaURL.urlHash(getURL(this.cachePath ,obj)));
+                        this.responseHeaderDB.remove(indexURL.urlHash(getURL(this.cachePath ,obj)));
                     } catch (IOException e) {
                         this.log.logInfo("IOExeption removing response header from DB: " +
                             e.getMessage(), e);
@@ -736,7 +737,7 @@ public final class plasmaHTCache {
         }
         this.name             = name;
         this.cacheFile        = getCachePath(this.url);
-        this.nomalizedURLHash = plasmaURL.urlHash(this.nomalizedURLString);
+        this.nomalizedURLHash = indexURL.urlHash(this.nomalizedURLString);
 
        // assigned:
         this.initDate       = initDate;

@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ArrayList;
 
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroStack;
 
@@ -61,10 +62,10 @@ public class plasmaCrawlBalancer {
             try {
                 stack = new kelondroStack(stackFile, buffersize);
             } catch (IOException e) {
-                stack = new kelondroStack(stackFile, buffersize, new int[] {plasmaURL.urlHashLength}, true);
+                stack = new kelondroStack(stackFile, buffersize, new int[] {indexURL.urlHashLength}, true);
             }
         } else {
-            stack = new kelondroStack(stackFile, buffersize, new int[] {plasmaURL.urlHashLength}, true);
+            stack = new kelondroStack(stackFile, buffersize, new int[] {indexURL.urlHashLength}, true);
         }
         domainStacks = new HashMap();
     }

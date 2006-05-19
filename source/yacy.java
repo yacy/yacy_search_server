@@ -73,12 +73,12 @@ import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.http.httpc.response;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexAssortment;
@@ -628,7 +628,7 @@ public final class yacy {
         kelondroMScoreCluster hs = new kelondroMScoreCluster();
         while (ef.hasMoreElements()) {
             f = (File) ef.nextElement();
-            h = f.getName().substring(0, plasmaURL.urlHashLength);
+            h = f.getName().substring(0, indexURL.urlHashLength);
             hs.addScore(h, (int) f.length());
         }
 

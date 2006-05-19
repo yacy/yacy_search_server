@@ -92,10 +92,10 @@ import java.util.zip.GZIPOutputStream;
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.htmlFilter.htmlFilterTransformer;
+import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -410,7 +410,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // decide wether to use a cache entry or connect to the network
             File cacheFile = cacheManager.getCachePath(url);
-            String urlHash = plasmaURL.urlHash(url);
+            String urlHash = indexURL.urlHash(url);
             httpHeader cachedResponseHeader = cacheManager.getCachedResponse(urlHash);
             boolean cacheExists = ((cacheFile.isFile()) && (cachedResponseHeader != null));
             

@@ -59,6 +59,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.data.robotsParser;
 import de.anomic.http.httpc;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroTree;
@@ -240,7 +241,7 @@ public final class plasmaCrawlStacker {
          }
          */
         URL nexturl = null, referrerURL = null;
-        if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = plasmaURL.dummyHash;
+        if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = indexURL.dummyHash;
         if (referrerString != null) {
             try {
                 referrerURL = new URL(referrerString);
@@ -249,7 +250,7 @@ public final class plasmaCrawlStacker {
                 referrerString = null;
             }
         }
-        String referrerHash = (referrerString==null)?null:plasmaURL.urlHash(referrerString);
+        String referrerHash = (referrerString==null)?null:indexURL.urlHash(referrerString);
         try {
             nexturl = new URL(nexturlString);
         } catch (MalformedURLException e) {
@@ -340,7 +341,7 @@ public final class plasmaCrawlStacker {
             return reason;
         }
 
-        String nexturlhash = plasmaURL.urlHash(nexturl);
+        String nexturlhash = indexURL.urlHash(nexturl);
         String dbocc = this.sb.urlPool.exists(nexturlhash);
         plasmaCrawlLURL.Entry oldEntry = null;
         if (dbocc != null) try {
@@ -376,7 +377,7 @@ public final class plasmaCrawlStacker {
         }
         
         // store information
-        boolean local = ((initiatorHash.equals(plasmaURL.dummyHash)) || (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)));
+        boolean local = ((initiatorHash.equals(indexURL.dummyHash)) || (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)));
         boolean global = 
             (profile != null) &&
             (profile.remoteIndexing()) /* granted */ &&
@@ -434,17 +435,17 @@ public final class plasmaCrawlStacker {
                 int forkfactor) {
             try {
                 // create new entry and store it into database
-                this.urlHash       = plasmaURL.urlHash(urlString);
+                this.urlHash       = indexURL.urlHash(urlString);
                 this.initiator     = initiator;
                 this.url           = urlString;
-                this.referrerHash  = (referrerUrlString == null) ? plasmaURL.dummyHash : plasmaURL.urlHash(referrerUrlString);
+                this.referrerHash  = (referrerUrlString == null) ? indexURL.dummyHash : indexURL.urlHash(referrerUrlString);
                 this.name          = (name == null) ? "" : name;
                 this.loaddate      = (loaddate == null) ? new Date() : loaddate;
                 this.profileHandle = profileHandle; // must not be null
                 this.depth         = depth;
                 this.anchors       = anchors;
                 this.forkfactor    = forkfactor;
-                this.flags         = new bitfield(plasmaURL.urlFlagLength);
+                this.flags         = new bitfield(indexURL.urlFlagLength);
                 this.handle        = 0;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -459,7 +460,7 @@ public final class plasmaCrawlStacker {
                 this.urlHash       = urlHash;
                 this.initiator     = new String(entryBytes[1], "UTF-8");
                 this.url           = new String(entryBytes[2], "UTF-8").trim();
-                this.referrerHash      = (entryBytes[3]==null) ? plasmaURL.dummyHash : new String(entryBytes[3], "UTF-8");
+                this.referrerHash      = (entryBytes[3]==null) ? indexURL.dummyHash : new String(entryBytes[3], "UTF-8");
                 this.name          = (entryBytes[4] == null) ? "" : new String(entryBytes[4], "UTF-8").trim();
                 this.loaddate      = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[5], "UTF-8")));
                 this.profileHandle = (entryBytes[6] == null) ? null : new String(entryBytes[6], "UTF-8").trim();
@@ -509,7 +510,7 @@ public final class plasmaCrawlStacker {
             str.append("urlHash: ").append(urlHash==null ? "null" : urlHash).append(" | ")
                .append("initiator: ").append(initiator==null?"null":initiator).append(" | ")
                .append("url: ").append(url==null?"null":url).append(" | ")
-               .append("referrer: ").append((referrerHash == null) ? plasmaURL.dummyHash : referrerHash).append(" | ")
+               .append("referrer: ").append((referrerHash == null) ? indexURL.dummyHash : referrerHash).append(" | ")
                .append("name: ").append((name == null) ? "null" : name).append(" | ")
                .append("loaddate: ").append((loaddate == null) ? new Date() : loaddate).append(" | ")
                .append("profile: ").append(profileHandle==null?"null":profileHandle).append(" | ")
@@ -522,7 +523,7 @@ public final class plasmaCrawlStacker {
         
         public byte[][] getBytes() {
             // stores the values from the object variables into the database
-            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, plasmaURL.urlDateLength);
+            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, indexURL.urlDateLength);
             // store the hash in the hash cache
 
             // even if the entry exists, we simply overwrite it
@@ -534,9 +535,9 @@ public final class plasmaCrawlStacker {
                     this.name.getBytes(),
                     loaddatestr.getBytes(),
                     (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, plasmaURL.urlCrawlDepthLength).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, plasmaURL.urlParentBranchesLength).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, plasmaURL.urlForkFactorLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, indexURL.urlCrawlDepthLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, indexURL.urlParentBranchesLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, indexURL.urlForkFactorLength).getBytes(),
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
             };
@@ -545,7 +546,7 @@ public final class plasmaCrawlStacker {
         
         private String normalizeHandle(int h) {
             String d = Integer.toHexString(h);
-            while (d.length() < plasmaURL.urlHandleLength) d = "0" + d;
+            while (d.length() < indexURL.urlHandleLength) d = "0" + d;
             return d;
         }
     }      
@@ -942,7 +943,7 @@ public final class plasmaCrawlStacker {
                                 yacyCore.seedDB.mySeed.hash,
                                 this.theMsg.name,
                                 rejectReason,
-                                new bitfield(plasmaURL.urlFlagLength),
+                                new bitfield(indexURL.urlFlagLength),
                                 false
                         );
                     }

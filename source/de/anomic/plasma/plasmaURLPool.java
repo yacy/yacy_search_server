@@ -48,6 +48,8 @@ import java.net.URL;
 import java.io.File;
 import java.io.IOException;
 
+import de.anomic.index.indexURL;
+
 public class plasmaURLPool {
     
     
@@ -72,7 +74,7 @@ public class plasmaURLPool {
     }
     
     public URL getURL(String urlhash) throws IOException {
-        if (urlhash.equals(plasmaURL.dummyHash)) return null;
+        if (urlhash.equals(indexURL.dummyHash)) return null;
         plasmaCrawlNURL.Entry ne = noticeURL.getEntry(urlhash);
         if (ne != null) return ne.url();
         try {

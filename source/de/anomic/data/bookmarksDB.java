@@ -70,10 +70,10 @@ import org.xml.sax.SAXException;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
@@ -740,7 +740,7 @@ public class bookmarksDB {
             if(!url.toLowerCase().startsWith("http://")){
                 url="http://"+url;
             }
-            this.urlHash=plasmaURL.urlHash(url);
+            this.urlHash=indexURL.urlHash(url);
             mem=new HashMap();
             mem.put(BOOKMARK_URL, url);
             this.timestamp=System.currentTimeMillis();

@@ -46,6 +46,7 @@ package de.anomic.plasma;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroStack;
@@ -83,25 +84,25 @@ public class plasmaSwitchboardQueue {
         } catch (IOException e) {
             sbQueueStackPath.delete();
             sbQueueStack = new kelondroStack(sbQueueStackPath, 0, new int[] {
-                            plasmaURL.urlStringLength,
-                            plasmaURL.urlHashLength,
+                            indexURL.urlStringLength,
+                            indexURL.urlHashLength,
                             11,
                             1,
                             yacySeedDB.commonHashLength,
-                            plasmaURL.urlCrawlDepthLength,
-                            plasmaURL.urlCrawlProfileHandleLength,
-                            plasmaURL.urlDescrLength
+                            indexURL.urlCrawlDepthLength,
+                            indexURL.urlCrawlProfileHandleLength,
+                            indexURL.urlDescrLength
                         }, true);
         } else {
             sbQueueStack = new kelondroStack(sbQueueStackPath, 0, new int[] {
-                plasmaURL.urlStringLength,
-                plasmaURL.urlHashLength,
+                indexURL.urlStringLength,
+                indexURL.urlHashLength,
                 11,
                 1,
                 yacySeedDB.commonHashLength,
-                plasmaURL.urlCrawlDepthLength,
-                plasmaURL.urlCrawlProfileHandleLength,
-                plasmaURL.urlDescrLength
+                indexURL.urlCrawlDepthLength,
+                indexURL.urlCrawlProfileHandleLength,
+                indexURL.urlDescrLength
             }, true);
         }
     }
@@ -119,12 +120,12 @@ public class plasmaSwitchboardQueue {
     public void push(Entry entry) throws IOException {
         sbQueueStack.push(new byte[][]{
             entry.url.toString().getBytes(),
-            (entry.referrerHash == null) ? plasmaURL.dummyHash.getBytes() : entry.referrerHash.getBytes(),
+            (entry.referrerHash == null) ? indexURL.dummyHash.getBytes() : entry.referrerHash.getBytes(),
             kelondroBase64Order.enhancedCoder.encodeLong((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
             new byte[]{entry.flags},
-            (entry.initiator == null) ? plasmaURL.dummyHash.getBytes() : entry.initiator.getBytes(),
-            kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, plasmaURL.urlCrawlDepthLength).getBytes(),
-            (entry.profileHandle == null) ? plasmaURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
+            (entry.initiator == null) ? indexURL.dummyHash.getBytes() : entry.initiator.getBytes(),
+            kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, indexURL.urlCrawlDepthLength).getBytes(),
+            (entry.profileHandle == null) ? indexURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
             (entry.anchorName == null) ? "-".getBytes() : entry.anchorName.getBytes()
         });
     }
@@ -265,7 +266,7 @@ public class plasmaSwitchboardQueue {
         }
 
         public String urlHash() {
-            return plasmaURL.urlHash(url);
+            return indexURL.urlHash(url);
         }
 
         public boolean requestedWithCookie() {
@@ -277,7 +278,7 @@ public class plasmaSwitchboardQueue {
         }
 
         public boolean proxy() {
-            return (initiator == null) || (initiator.equals(plasmaURL.dummyHash));
+            return (initiator == null) || (initiator.equals(indexURL.dummyHash));
         }
 
         public String initiator() {
@@ -299,7 +300,7 @@ public class plasmaSwitchboardQueue {
 
         public httpHeader responseHeader() {
             if (responseHeader == null) try {
-                responseHeader = htCache.getCachedResponse(plasmaURL.urlHash(url));
+                responseHeader = htCache.getCachedResponse(indexURL.urlHash(url));
             } catch (IOException e) {
                 serverLog.logSevere("PLASMA", "responseHeader: failed to get header", e);
                 return null;
@@ -309,7 +310,7 @@ public class plasmaSwitchboardQueue {
 
         public URL referrerURL() {
             if (referrerURL == null) {
-                if ((referrerHash == null) || (referrerHash.equals(plasmaURL.dummyHash))) return null;
+                if ((referrerHash == null) || (referrerHash.equals(indexURL.dummyHash))) return null;
                 try {
                     referrerURL = lurls.getEntry(referrerHash, null).url();
                 } catch (IOException e) {

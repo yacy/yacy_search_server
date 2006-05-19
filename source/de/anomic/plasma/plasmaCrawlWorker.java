@@ -58,6 +58,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.http.httpdProxyHandler;
+import de.anomic.index.indexURL;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
@@ -318,7 +319,7 @@ public final class plasmaCrawlWorker extends Thread {
                     yacyCore.seedDB.mySeed.hash,
                     name,
                     "denied_(url_in_blacklist)",
-                    new bitfield(plasmaURL.urlFlagLength),
+                    new bitfield(indexURL.urlFlagLength),
                     true
             );
             return null;
@@ -451,7 +452,7 @@ public final class plasmaCrawlWorker extends Thread {
                         }
 
                         // generating url hash
-                        String urlhash = plasmaURL.urlHash(redirectionUrl);
+                        String urlhash = indexURL.urlHash(redirectionUrl);
                         
                         // removing url from loader queue
                         plasmaCrawlLoader.switchboard.urlPool.noticeURL.remove(urlhash);

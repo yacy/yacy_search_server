@@ -58,9 +58,9 @@ import java.util.TreeMap;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexEntryInstance;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
@@ -305,7 +305,7 @@ public class IndexControl_p {
         if (post.containsKey("urlstringsearch")) {
             try {
                 URL url = new URL(urlstring);
-            urlhash = plasmaURL.urlHash(url);
+            urlhash = indexURL.urlHash(url);
             prop.put("urlhash", urlhash);
                 plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash, null);
                 prop.put("result", genUrlProfile(switchboard, entry, urlhash));
