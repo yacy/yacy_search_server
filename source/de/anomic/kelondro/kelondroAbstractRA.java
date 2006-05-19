@@ -49,10 +49,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeMap;
 
 abstract class kelondroAbstractRA implements kelondroRA {
@@ -194,47 +192,6 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
     }
 
-    public void writeProperties(final Properties props, final String comment) throws IOException {
-        this.seek(0);
-        final Enumeration e = props.propertyNames();
-        String key, value;
-        StringBuffer sb = new StringBuffer(props.size() * 40);
-        sb.append("# " + comment);
-        sb.append(cr);
-        sb.append(lf);
-        while (e.hasMoreElements()) {
-            key = (String) e.nextElement();
-            value = props.getProperty(key, "");
-            sb.append(key);
-            sb.append('=');
-            sb.append(value);
-            sb.append(cr);
-            sb.append(lf);
-        }
-        sb.append("# EOF");
-        sb.append(cr);
-        sb.append(lf);
-        write(new String(sb).getBytes());
-    }
-
-    public Properties readProperties() throws IOException {
-        this.seek(0);
-        byte[] b = readFully();
-        BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
-        final Properties props = new Properties();
-        String line;
-        int pos;
-        while ((line = br.readLine()) != null) {
-            line = line.trim();
-            if (line.equals("# EOF")) return props;
-            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
-            pos = line.indexOf("=");
-            if (pos < 0) continue;
-            props.setProperty(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
-        }
-        return props;
-    }
-    
     public void writeMap(final Map map, final String comment) throws IOException {
         this.seek(0);
         final Iterator iter = map.entrySet().iterator();

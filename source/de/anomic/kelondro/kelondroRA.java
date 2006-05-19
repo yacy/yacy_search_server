@@ -52,7 +52,6 @@ package de.anomic.kelondro;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Properties;
 
 public interface kelondroRA {
 
@@ -71,7 +70,7 @@ public interface kelondroRA {
 
     // derived methods:
     public void readFully(byte[] b, int off, int len) throws IOException;
-    //public byte[] readFully() throws IOException;
+    public byte[] readFully() throws IOException;
     public byte readByte() throws IOException;
     public void writeByte(int v) throws IOException;
 
@@ -88,10 +87,6 @@ public interface kelondroRA {
 
     public void writeLine(String line) throws IOException;
     public String readLine() throws IOException;
-
-    // tool methods that organize the complete content
-    public void writeProperties(Properties props, String comment) throws IOException;
-    public Properties readProperties() throws IOException;
 
     public void writeMap(Map props, String comment) throws IOException;
     public Map readMap() throws IOException;

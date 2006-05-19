@@ -46,7 +46,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Map;
-import java.util.Properties;
 
 public final class kelondroFileRA extends kelondroAbstractRA implements kelondroRA {
 
@@ -97,31 +96,6 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
     }
     
     // some static tools
-    public static void writeProperties(File f, Properties props, String comment) throws IOException {
-        File fp = f.getParentFile();
-        if (fp != null) fp.mkdirs();
-        kelondroRA kra = null;
-        try {
-            kra = new kelondroFileRA(f);
-            kra.writeProperties(props, comment);
-            kra.close();
-        } finally {
-            if (kra != null) try {kra.close();}catch(Exception e){}
-        }
-    }
-
-    public static Properties readProperties(File f) throws IOException {
-        kelondroRA kra = null;
-        try {
-            kra = new kelondroFileRA(f);
-            Properties props = kra.readProperties();
-            kra.close();
-            return props;
-        } finally {
-            if (kra != null) try{kra.close();}catch(Exception e) {}
-        }
-    }
-
     public static void writeMap(File f, Map map, String comment) throws IOException {
         File fp = f.getParentFile();
         if (fp != null) fp.mkdirs();
