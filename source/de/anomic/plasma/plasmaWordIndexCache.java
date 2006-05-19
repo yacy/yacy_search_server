@@ -117,7 +117,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
             String wordHash;
             plasmaWordIndexEntryContainer container;
             long updateTime;
-            plasmaWordIndexEntry wordEntry;
+            plasmaWordIndexEntryInstance wordEntry;
             byte[][] row = new byte[5][];
             
             // write kCache, this will be melted with the wCache upon load
@@ -130,12 +130,12 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     if (container != null) {
                         Iterator ci = container.entries();
                         while (ci.hasNext()) {
-                            wordEntry = (plasmaWordIndexEntry) ci.next();
+                            wordEntry = (plasmaWordIndexEntryInstance) ci.next();
                             row[0] = container.wordHash().getBytes();
                             row[1] = kelondroRecords.long2bytes(container.size(), 4);
                             row[2] = kelondroRecords.long2bytes(container.updated(), 8);
                             row[3] = wordEntry.getUrlHash().getBytes();
-                            row[4] = wordEntry.toEncodedForm().getBytes();
+                            row[4] = wordEntry.toEncodedStringForm().getBytes();
                             dumpArray.set((int) urlcount++, row);
                         }
                     }
@@ -159,12 +159,12 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     if (container != null) {
                         Iterator ci = container.entries();
                         while (ci.hasNext()) {
-                            wordEntry = (plasmaWordIndexEntry) ci.next();
+                            wordEntry = (plasmaWordIndexEntryInstance) ci.next();
                             row[0] = wordHash.getBytes();
                             row[1] = kelondroRecords.long2bytes(container.size(), 4);
                             row[2] = kelondroRecords.long2bytes(updateTime, 8);
                             row[3] = wordEntry.getUrlHash().getBytes();
-                            row[4] = wordEntry.toEncodedForm().getBytes();
+                            row[4] = wordEntry.toEncodedStringForm().getBytes();
                             dumpArray.set((int) urlcount++, row);
                         }
                     }
@@ -198,7 +198,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                 int i = dumpArray.size();
                 String wordHash;
                 //long creationTime;
-                plasmaWordIndexEntry wordEntry;
+                plasmaWordIndexEntryInstance wordEntry;
                 byte[][] row;
                 //Runtime rt = Runtime.getRuntime();
                 while (i-- > 0) {
@@ -207,7 +207,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
                     if ((row[0] == null) || (row[1] == null) || (row[2] == null) || (row[3] == null) || (row[4] == null)) continue;
                     wordHash = new String(row[0], "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new plasmaWordIndexEntry(new String(row[3], "UTF-8"), new String(row[4], "UTF-8"));
+                    wordEntry = new plasmaWordIndexEntryInstance(new String(row[3], "UTF-8"), new String(row[4], "UTF-8"));
                     // store to cache
                     addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;
@@ -450,7 +450,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return added;
     }
 
-    public boolean addEntry(String wordHash, plasmaWordIndexEntry newEntry, long updateTime, boolean dhtCase) {
+    public boolean addEntry(String wordHash, plasmaWordIndexEntryInstance newEntry, long updateTime, boolean dhtCase) {
         if (dhtCase) synchronized (kCache) {
             // put container into kCache
             plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
@@ -462,7 +462,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         } else synchronized (wCache) {
             plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) wCache.get(wordHash);
             if (container == null) container = new plasmaWordIndexEntryContainer(wordHash);
-            plasmaWordIndexEntry[] entries = new plasmaWordIndexEntry[] { newEntry };
+            plasmaWordIndexEntryInstance[] entries = new plasmaWordIndexEntryInstance[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
                 wCache.put(wordHash, container);
                 hashScore.incScore(wordHash);

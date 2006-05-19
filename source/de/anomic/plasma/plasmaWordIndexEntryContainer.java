@@ -100,16 +100,16 @@ public final class plasmaWordIndexEntryContainer {
         return wordHash;
     }
 
-    public int add(plasmaWordIndexEntry entry) {
+    public int add(plasmaWordIndexEntryInstance entry) {
         return add(entry, System.currentTimeMillis());
     }
     
-    public int add(plasmaWordIndexEntry entry, long updateTime) {
+    public int add(plasmaWordIndexEntryInstance entry, long updateTime) {
         this.updateTime = java.lang.Math.max(this.updateTime, updateTime);
         return (addi(entry)) ? 1 : 0;
     }
     
-    public int add(plasmaWordIndexEntry[] entries, long updateTime) {
+    public int add(plasmaWordIndexEntryInstance[] entries, long updateTime) {
         int c = 0;
         for (int i = 0; i < entries.length; i++) if (addi(entries[i])) c++;
         this.updateTime = java.lang.Math.max(this.updateTime, updateTime);
@@ -124,16 +124,16 @@ public final class plasmaWordIndexEntryContainer {
         int x = 0;
         while ((i.hasNext()) && ((maxTime < 0) || ((startTime + maxTime) > System.currentTimeMillis()))) {
             try {
-                if (addi((plasmaWordIndexEntry) i.next())) x++;
+                if (addi((plasmaWordIndexEntryInstance) i.next())) x++;
             } catch (ConcurrentModificationException e) {}
         }
         this.updateTime = java.lang.Math.max(this.updateTime, c.updateTime);
         return x;
     }
 
-    private boolean addi(plasmaWordIndexEntry entry) {
+    private boolean addi(plasmaWordIndexEntryInstance entry) {
         // returns true if the new entry was added, false if it already existed
-        plasmaWordIndexEntry oldEntry = (plasmaWordIndexEntry) container.put(entry.getUrlHash(), entry);
+        plasmaWordIndexEntryInstance oldEntry = (plasmaWordIndexEntryInstance) container.put(entry.getUrlHash(), entry);
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this container
             container.put(entry.getUrlHash(), oldEntry); // put it back
             return false;
@@ -145,16 +145,16 @@ public final class plasmaWordIndexEntryContainer {
         return container.containsKey(urlHash);
     }
 
-    public plasmaWordIndexEntry get(String urlHash) {
-        return (plasmaWordIndexEntry) container.get(urlHash);
+    public plasmaWordIndexEntryInstance get(String urlHash) {
+        return (plasmaWordIndexEntryInstance) container.get(urlHash);
     }
     
-    public plasmaWordIndexEntry[] getEntryArray() {
-        return (plasmaWordIndexEntry[]) container.values().toArray();
+    public plasmaWordIndexEntryInstance[] getEntryArray() {
+        return (plasmaWordIndexEntryInstance[]) container.values().toArray();
     }
 
-    public plasmaWordIndexEntry remove(String urlHash) {
-        return (plasmaWordIndexEntry) container.remove(urlHash);
+    public plasmaWordIndexEntryInstance remove(String urlHash) {
+        return (plasmaWordIndexEntryInstance) container.remove(urlHash);
     }
 
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
@@ -254,10 +254,10 @@ public final class plasmaWordIndexEntryContainer {
         System.out.println("DEBUG: JOIN METHOD BY TEST");
         plasmaWordIndexEntryContainer conj = new plasmaWordIndexEntryContainer(null); // start with empty search result
         Iterator se = small.entries();
-        plasmaWordIndexEntry ie0, ie1;
+        plasmaWordIndexEntryInstance ie0, ie1;
         long stamp = System.currentTimeMillis();
             while ((se.hasNext()) && ((System.currentTimeMillis() - stamp) < time)) {
-                ie0 = (plasmaWordIndexEntry) se.next();
+                ie0 = (plasmaWordIndexEntryInstance) se.next();
                 ie1 = large.get(ie0.getUrlHash());
                 if (ie1 != null) {
                     // this is a hit. Calculate word distance:
@@ -276,25 +276,25 @@ public final class plasmaWordIndexEntryContainer {
         Iterator e2 = i2.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
-            plasmaWordIndexEntry ie1;
-            plasmaWordIndexEntry ie2;
-            ie1 = (plasmaWordIndexEntry) e1.next();
-            ie2 = (plasmaWordIndexEntry) e2.next();
+            plasmaWordIndexEntryInstance ie1;
+            plasmaWordIndexEntryInstance ie2;
+            ie1 = (plasmaWordIndexEntryInstance) e1.next();
+            ie2 = (plasmaWordIndexEntryInstance) e2.next();
 
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
                 c = i1.ordering.compare(ie1.getUrlHash(), ie2.getUrlHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
-                    if (e1.hasNext()) ie1 = (plasmaWordIndexEntry) e1.next(); else break;
+                    if (e1.hasNext()) ie1 = (plasmaWordIndexEntryInstance) e1.next(); else break;
                 } else if (c > 0) {
-                    if (e2.hasNext()) ie2 = (plasmaWordIndexEntry) e2.next(); else break;
+                    if (e2.hasNext()) ie2 = (plasmaWordIndexEntryInstance) e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
                     ie1.combineDistance(ie2);
                     if (ie1.worddistance() <= maxDistance) conj.add(ie1);
-                    if (e1.hasNext()) ie1 = (plasmaWordIndexEntry) e1.next(); else break;
-                    if (e2.hasNext()) ie2 = (plasmaWordIndexEntry) e2.next(); else break;
+                    if (e1.hasNext()) ie1 = (plasmaWordIndexEntryInstance) e1.next(); else break;
+                    if (e2.hasNext()) ie2 = (plasmaWordIndexEntryInstance) e2.next(); else break;
                 }
             }
         }

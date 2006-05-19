@@ -62,7 +62,7 @@ import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.plasma.plasmaWordIndexEntryInstance;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -153,7 +153,7 @@ public class IndexControl_p {
                 int i = 0;
                 urlx = new String[index.size()];
                 while (en.hasNext()) {
-                    urlx[i++] = ((plasmaWordIndexEntry) en.next()).getUrlHash();
+                    urlx[i++] = ((plasmaWordIndexEntryInstance) en.next()).getUrlHash();
                 }
                 index = null;
             }
@@ -254,10 +254,10 @@ public class IndexControl_p {
             Iterator urlIter = index.entries();
             HashMap knownURLs = new HashMap();
             HashSet unknownURLEntries = new HashSet();
-            plasmaWordIndexEntry indexEntry;
+            plasmaWordIndexEntryInstance indexEntry;
             plasmaCrawlLURL.Entry lurl;
             while (urlIter.hasNext()) {
-                indexEntry = (plasmaWordIndexEntry) urlIter.next();
+                indexEntry = (plasmaWordIndexEntryInstance) urlIter.next();
                 try {
                     lurl = switchboard.urlPool.loadedURL.getEntry(indexEntry.getUrlHash(), null);
                     if (lurl.toString() == null) {
@@ -437,9 +437,9 @@ public class IndexControl_p {
                 int i = 0;
 
                 final TreeMap tm = new TreeMap();
-                plasmaWordIndexEntry xi;
+                plasmaWordIndexEntryInstance xi;
                 while (en.hasNext()) {
-                    xi = (plasmaWordIndexEntry) en.next();
+                    xi = (plasmaWordIndexEntryInstance) en.next();
                     uh = new String[]{xi.getUrlHash(), Integer.toString(xi.posintext())};
                     try {
                         us = switchboard.urlPool.loadedURL.getEntry(uh[0], null).url().toString();

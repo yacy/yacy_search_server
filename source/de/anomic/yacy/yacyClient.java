@@ -59,7 +59,7 @@ import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.plasma.plasmaWordIndexEntryInstance;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.plasma.plasmaSearchTimingProfile;
@@ -483,10 +483,10 @@ public final class yacyClient {
                 
                 urlManager.stackEntry(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
                 // save the url entry
-                final plasmaWordIndexEntry entry;
+                final plasmaWordIndexEntryInstance entry;
                 if (urlEntry.word() == null) {
                     // the old way to define words
-                    entry = new plasmaWordIndexEntry(
+                    entry = new plasmaWordIndexEntryInstance(
                                                      urlEntry.hash(),
                                                      urlLength, urlComps,
                                                      urlEntry.descr().length(),
@@ -513,7 +513,7 @@ public final class yacyClient {
                 }
                 // add the url entry to the word indexes
                 for (int m = 0; m < words; m++) {
-                    container[m].add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
+                    container[m].add(new plasmaWordIndexEntryInstance[]{entry}, System.currentTimeMillis());
                 }
             }
 
@@ -881,11 +881,11 @@ public final class yacyClient {
         
         // check if we got all necessary urls in the urlCache (only for debugging)
         Iterator eenum;
-        plasmaWordIndexEntry entry;
+        plasmaWordIndexEntryInstance entry;
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].entries();
             while (eenum.hasNext()) {
-                entry = (plasmaWordIndexEntry) eenum.next();
+                entry = (plasmaWordIndexEntryInstance) eenum.next();
                 if (urlCache.get(entry.getUrlHash()) == null) {
                     yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.getUrlHash() + "' is not contained in urlCache");
                 }
@@ -961,13 +961,13 @@ public final class yacyClient {
         int indexcount = 0;
         final StringBuffer entrypost = new StringBuffer(indexes.length*73);
         Iterator eenum;
-        plasmaWordIndexEntry entry;
+        plasmaWordIndexEntryInstance entry;
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].entries();
             while (eenum.hasNext()) {
-                entry = (plasmaWordIndexEntry) eenum.next();
+                entry = (plasmaWordIndexEntryInstance) eenum.next();
                 entrypost.append(indexes[i].wordHash()) 
-                         .append(entry.toExternalForm()) 
+                         .append(entry.toPropertyForm()) 
                          .append(serverCore.crlfString);
                 indexcount++;
             }

@@ -90,10 +90,10 @@ public final class plasmaWordIndexEntity {
         kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent);
     } catch (IOException e) {
         theLocation.delete();
-        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpace, false);
+        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, plasmaURL.urlHashLength, plasmaWordIndexEntryInstance.encodedStringFormLength(), false);
     } else {
         // create new index file
-        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, plasmaURL.urlHashLength, plasmaWordIndexEntry.attrSpace, false);
+        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, plasmaURL.urlHashLength, plasmaWordIndexEntryInstance.encodedStringFormLength(), false);
     }
     return kt; // everyone who get this should close it when finished!
     }
@@ -132,27 +132,27 @@ public final class plasmaWordIndexEntity {
     } catch (IOException e) {}
     }
 
-    public plasmaWordIndexEntry getEntry(String urlhash) throws IOException {
+    public plasmaWordIndexEntryInstance getEntry(String urlhash) throws IOException {
         byte[][] n = theIndex.get(urlhash.getBytes());
         if (n == null) return null;
-        return new plasmaWordIndexEntry(new String(n[0]), new String(n[1]));
+        return new plasmaWordIndexEntryInstance(new String(n[0]), new String(n[1]));
     }
     
     public boolean contains(String urlhash) throws IOException {
         return (theIndex.get(urlhash.getBytes()) != null);
     }
     
-    public boolean contains(plasmaWordIndexEntry entry) throws IOException {
+    public boolean contains(plasmaWordIndexEntryInstance entry) throws IOException {
         return (theIndex.get(entry.getUrlHash().getBytes()) != null);
     }
     
-    public boolean addEntry(plasmaWordIndexEntry entry) throws IOException {
+    public boolean addEntry(plasmaWordIndexEntryInstance entry) throws IOException {
         if (entry == null) return false;
-        plasmaWordIndexEntry oldEntry = getEntry(entry.getUrlHash());
+        plasmaWordIndexEntryInstance oldEntry = getEntry(entry.getUrlHash());
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this entity
             return false;
         }
-        return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedForm().getBytes()) == null);
+        return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedStringForm().getBytes()) == null);
     }
     
     public int addEntries(plasmaWordIndexEntryContainer container) throws IOException {
@@ -167,7 +167,7 @@ public final class plasmaWordIndexEntity {
         if (container != null) {
             Iterator i = container.entries();
             while (i.hasNext()) {
-                if (addEntry((plasmaWordIndexEntry) i.next())) count++;
+                if (addEntry((plasmaWordIndexEntryInstance) i.next())) count++;
             }
         }
         
@@ -231,7 +231,7 @@ public final class plasmaWordIndexEntity {
         public Object next() {
             if (i == null) return null;
             byte[][] n = (byte[][]) i.next();
-            return new plasmaWordIndexEntry(new String(n[0]), new String(n[1]));
+            return new plasmaWordIndexEntryInstance(new String(n[0]), new String(n[1]));
         }
         public void remove() {
             throw new UnsupportedOperationException();
@@ -251,7 +251,7 @@ public final class plasmaWordIndexEntity {
         long timeout = (time == -1) ? Long.MAX_VALUE : System.currentTimeMillis() + time;
         try {
         while ((i.hasNext()) && (System.currentTimeMillis() < timeout)) {
-            addEntry((plasmaWordIndexEntry) i.next());            
+            addEntry((plasmaWordIndexEntryInstance) i.next());            
         }
         } catch (kelondroException e) {
             serverLog.logSevere("PLASMA", "plasmaWordIndexEntity.merge: " + e.getMessage());

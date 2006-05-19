@@ -56,7 +56,7 @@ public final class plasmaSearchPreOrder {
     public  static kelondroBinSearch[] ybrTables = null; // block-rank tables
     private static boolean useYBR = true;
     
-    private plasmaWordIndexEntry entryMin, entryMax;
+    private plasmaWordIndexEntryInstance entryMin, entryMax;
     private TreeMap pageAcc; // key = order hash; value = plasmaLURL.entry
     private plasmaSearchQuery query;
     private plasmaSearchRankingProfile ranking;
@@ -116,36 +116,36 @@ public final class plasmaSearchPreOrder {
         return pageAcc.size() > 0;
     }
     
-    public plasmaWordIndexEntry next() {
+    public plasmaWordIndexEntryInstance next() {
         Object top = pageAcc.lastKey();
-        return (plasmaWordIndexEntry) pageAcc.remove(top);
+        return (plasmaWordIndexEntryInstance) pageAcc.remove(top);
     }
     
     public void addContainer(plasmaWordIndexEntryContainer container, long maxTime) {
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
-        plasmaWordIndexEntry indexEntry;
+        plasmaWordIndexEntryInstance indexEntry;
 
         // first pass: find min/max to obtain limits for normalization
         Iterator i = container.entries();
         int count = 0;
         while (i.hasNext()) {
             if (System.currentTimeMillis() > limitTime) break;
-            indexEntry = (plasmaWordIndexEntry) i.next();
-            if (entryMin == null) entryMin = (plasmaWordIndexEntry) indexEntry.clone(); else entryMin.min(indexEntry);
-            if (entryMax == null) entryMax = (plasmaWordIndexEntry) indexEntry.clone(); else entryMax.max(indexEntry);
+            indexEntry = (plasmaWordIndexEntryInstance) i.next();
+            if (entryMin == null) entryMin = (plasmaWordIndexEntryInstance) indexEntry.clone(); else entryMin.min(indexEntry);
+            if (entryMax == null) entryMax = (plasmaWordIndexEntryInstance) indexEntry.clone(); else entryMax.max(indexEntry);
             count++;
         }
         
         // second pass: normalize entries and get ranking
         i = container.entries();
         for (int j = 0; j < count; j++) {
-            indexEntry = (plasmaWordIndexEntry) i.next();
+            indexEntry = (plasmaWordIndexEntryInstance) i.next();
             pageAcc.put(serverCodings.encodeHex(this.ranking.preRanking(indexEntry.generateNormalized(entryMin, entryMax)), 16) + indexEntry.getUrlHash(), indexEntry);
         }
     }
     
-    public plasmaWordIndexEntry[] getNormalizer() {
-        return new plasmaWordIndexEntry[] {entryMin, entryMax};
+    public plasmaWordIndexEntryInstance[] getNormalizer() {
+        return new plasmaWordIndexEntryInstance[] {entryMin, entryMax};
     }
 
     public static int ybr_p(String urlHash) {

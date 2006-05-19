@@ -155,7 +155,7 @@ public final class plasmaWordIndex {
         }
     }
 
-    public boolean addEntry(String wordHash, plasmaWordIndexEntry entry, long updateTime, boolean dhtCase) {
+    public boolean addEntry(String wordHash, plasmaWordIndexEntryInstance entry, long updateTime, boolean dhtCase) {
         if (ramCache.addEntry(wordHash, entry, updateTime, dhtCase)) {
             if (!dhtCase) flushControl();
             return true;
@@ -237,7 +237,7 @@ public final class plasmaWordIndex {
         Iterator i = condenser.words();
         Map.Entry wentry;
         String word;
-        plasmaWordIndexEntry ientry;
+        plasmaWordIndexEntryInstance ientry;
         plasmaCondenser.wordStatProp wprop;
         String wordHash;
         int urlLength = url.toString().length();
@@ -249,7 +249,7 @@ public final class plasmaWordIndex {
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
             wordHash = indexEntryAttribute.word2hash(word);
-            ientry = new plasmaWordIndexEntry(urlHash,
+            ientry = new plasmaWordIndexEntryInstance(urlHash,
                                               urlLength, urlComps, (document == null) ? urlLength : document.longTitle.length(),
                                              wprop.count,
                                              condenser.RESULT_SIMI_WORDS,
@@ -503,11 +503,11 @@ public final class plasmaWordIndex {
                     // the combined container will fit, read the container
                     try {
                         Iterator entries = entity.elements(true);
-                        plasmaWordIndexEntry entry;
+                        plasmaWordIndexEntryInstance entry;
                         while (entries.hasNext()) {
-                            entry = (plasmaWordIndexEntry) entries.next();
+                            entry = (plasmaWordIndexEntryInstance) entries.next();
                             // System.out.println("ENTRY = " + entry.getUrlHash());
-                            container.add(new plasmaWordIndexEntry[]{entry}, System.currentTimeMillis());
+                            container.add(new plasmaWordIndexEntryInstance[]{entry}, System.currentTimeMillis());
                         }
                         // we have read all elements, now delete the entity
                         entity.deleteComplete();
@@ -555,7 +555,7 @@ public final class plasmaWordIndex {
             serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             String wordHash = "";
             plasmaWordIndexEntryContainer wordContainer = null;
-            plasmaWordIndexEntry entry = null;
+            plasmaWordIndexEntryInstance entry = null;
             URL url = null;
             HashSet urlHashs = new HashSet();
             try {
@@ -568,7 +568,7 @@ public final class plasmaWordIndex {
                     wordHashNow = wordHash;
                     while (containerIterator.hasNext() && run) {
                         waiter();
-                        entry = (plasmaWordIndexEntry) containerIterator.next();
+                        entry = (plasmaWordIndexEntryInstance) containerIterator.next();
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
                         try {

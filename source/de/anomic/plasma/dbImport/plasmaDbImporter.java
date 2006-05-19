@@ -10,7 +10,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.plasma.plasmaWordIndexEntry;
+import de.anomic.plasma.plasmaWordIndexEntryInstance;
 import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverDate;
 
@@ -128,13 +128,13 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                     // loop throug the entities of the container and get the
                     // urlhash
                     Iterator importWordIdxEntries = newContainer.entries();
-                    plasmaWordIndexEntry importWordIdxEntry;
+                    plasmaWordIndexEntryInstance importWordIdxEntry;
                     while (importWordIdxEntries.hasNext()) {
                         // testing if import process was aborted
                         if (isAborted()) break;
 
                         // getting next word index entry
-                        importWordIdxEntry = (plasmaWordIndexEntry) importWordIdxEntries.next();
+                        importWordIdxEntry = (plasmaWordIndexEntryInstance) importWordIdxEntries.next();
                         String urlHash = importWordIdxEntry.getUrlHash();
                         entityUrls.add(urlHash);
                     }

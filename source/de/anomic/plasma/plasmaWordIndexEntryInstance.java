@@ -49,38 +49,21 @@
 package de.anomic.plasma;
 
 import java.util.Properties;
+
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexEntryPrototype;
 import de.anomic.kelondro.kelondroBase64Order;
 
-public final class plasmaWordIndexEntry implements Cloneable {
+public final class plasmaWordIndexEntryInstance extends indexEntryPrototype implements Cloneable, indexEntry {
 
     // an wordEntry can be filled in either of two ways:
     // by the discrete values of the entry
     // or by the encoded entry-string
 
-    // the size of the index entry attributes
-    public static final int attrSpace = 24;
-
-    // the associated hash
-    private final String urlHash;
-
-    // discrete values
-    private int    hitcount;    // number of this words in file
-    private int    wordcount;   // number of all words in the file
-    private int    phrasecount; // number of all phrases in the file
-    private int    posintext;   // first position of the word in text as number of word; 0=unknown or irrelevant position
-    private int    posinphrase; // position within a phrase of the word
-    private int    posofphrase; // position of the phrase in the text as count of sentences; 0=unknown; 1=path; 2=keywords; 3=headline; >4: in text
-    private int    worddistance;// distance between the words, only used if the index is artificial (from a conjunction)
-    private long   lastModified;// calculated by using last-modified
-    private int    quality;     // result of a heuristic on the source file
-    private byte[] language;    // essentially the country code (the TLD as heuristic), two letters lowercase only
-    private char   doctype;     // type of source
-    private char   localflag;   // indicates if the index was created locally
-
     // the class instantiation can only be done by a plasmaStore method
     // therefore they are all public
-    public plasmaWordIndexEntry(String  urlHash,
+    public plasmaWordIndexEntryInstance(String  urlHash,
                                 int     urlLength,    // byte-length of complete URL
                                 int     urlComps,     // number of path components
                                 int     titleLength,  // length of description/length (longer are better?)
@@ -122,7 +105,7 @@ public final class plasmaWordIndexEntry implements Cloneable {
         this.localflag = (local) ? indexEntryAttribute.LT_LOCAL : indexEntryAttribute.LT_GLOBAL;
     }
     
-    public plasmaWordIndexEntry(String urlHash, String code) {
+    public plasmaWordIndexEntryInstance(String urlHash, String code) {
         // the code is not parsed but used later on
         this.urlHash = urlHash;
         this.hitcount = (int) kelondroBase64Order.enhancedCoder.decodeLong(code.substring(6, 8));
@@ -142,7 +125,7 @@ public final class plasmaWordIndexEntry implements Cloneable {
         if (phrasecount == 0) phrasecount = 100;
     }
     
-    public plasmaWordIndexEntry(String external) {
+    public plasmaWordIndexEntryInstance(String external) {
        // parse external form
        String[] elts = external.substring(1, external.length() - 1).split(",");
        Properties pr = new Properties();
@@ -167,13 +150,18 @@ public final class plasmaWordIndexEntry implements Cloneable {
     }
     
     public Object clone() {
-        return new plasmaWordIndexEntry(this.toExternalForm());
+        return new plasmaWordIndexEntryInstance(this.toPropertyForm());
     }
     
-    public String toEncodedForm() {
+    public static int encodedStringFormLength() {
+        // the size of the index entry attributes when encoded to string
+        return 24;
+    }
+    
+    public String toEncodedStringForm() {
        // attention: this integrates NOT the URL hash into the encoding
        // if you need a complete dump, use toExternalForm()
-       StringBuffer buf = new StringBuffer(attrSpace);
+       StringBuffer buf = new StringBuffer(encodedStringFormLength());
        
        buf.append(kelondroBase64Order.enhancedCoder.encodeLongSmart(this.quality, plasmaURL.urlQualityLength))
           .append(kelondroBase64Order.enhancedCoder.encodeLongSmart(plasmaWordIndex.microDateDays(this.lastModified), 3))
@@ -191,7 +179,16 @@ public final class plasmaWordIndexEntry implements Cloneable {
        return buf.toString();
     }
     
-    public String toExternalForm() {
+    public static int encodedByteArrayFormLength() {
+        // the size of the index entry attributes when encoded to string
+        return encodedStringFormLength();
+    }
+    
+    public byte[] toEncodedByteArrayForm() {
+        return toEncodedStringForm().getBytes();
+    }
+    
+    public String toPropertyForm() {
        StringBuffer str = new StringBuffer(61);
        
        str.append("{")
@@ -213,93 +210,6 @@ public final class plasmaWordIndexEntry implements Cloneable {
        return str.toString();
     }
     
-    public void combineDistance(plasmaWordIndexEntry oe) {
-        this.worddistance = this.worddistance + oe.worddistance + Math.abs(this.posintext - oe.posintext);
-        this.posintext = Math.min(this.posintext, oe.posintext);
-        if (this.posofphrase != oe.posofphrase) this.posinphrase = 0; // (unknown)
-        this.posofphrase = Math.min(this.posofphrase, oe.posofphrase);
-        this.wordcount = (this.wordcount + oe.wordcount) / 2;
-    }
-    
-    public void min(plasmaWordIndexEntry other) {
-        if (this.hitcount > other.hitcount) this.hitcount = other.hitcount;
-        if (this.wordcount > other.wordcount) this.wordcount = other.wordcount;
-        if (this.phrasecount > other.phrasecount) this.phrasecount = other.phrasecount;
-        if (this.posintext > other.posintext) this.posintext = other.posintext;
-        if (this.posinphrase > other.posinphrase) this.posinphrase = other.posinphrase;
-        if (this.posofphrase > other.posofphrase) this.posofphrase = other.posofphrase;
-        if (this.worddistance > other.worddistance) this.worddistance = other.worddistance;
-        if (this.lastModified > other.lastModified) this.lastModified = other.lastModified;
-        if (this.quality > other.quality) this.quality = other.quality;
-    }
-    
-    public void max(plasmaWordIndexEntry other) {
-        if (this.hitcount < other.hitcount) this.hitcount = other.hitcount;
-        if (this.wordcount < other.wordcount) this.wordcount = other.wordcount;
-        if (this.phrasecount < other.phrasecount) this.phrasecount = other.phrasecount;
-        if (this.posintext < other.posintext) this.posintext = other.posintext;
-        if (this.posinphrase < other.posinphrase) this.posinphrase = other.posinphrase;
-        if (this.posofphrase < other.posofphrase) this.posofphrase = other.posofphrase;
-        if (this.worddistance < other.worddistance) this.worddistance = other.worddistance;
-        if (this.lastModified < other.lastModified) this.lastModified = other.lastModified;
-        if (this.quality < other.quality) this.quality = other.quality;
-    }
-    
-    public void normalize(plasmaWordIndexEntry min, plasmaWordIndexEntry max) {
-        this.hitcount     = (this.hitcount     == 0) ? 0 : 1 + 255 * (this.hitcount     - min.hitcount    ) / (1 + max.hitcount     - min.hitcount);
-        this.wordcount    = (this.wordcount    == 0) ? 0 : 1 + 255 * (this.wordcount    - min.wordcount   ) / (1 + max.wordcount    - min.wordcount);
-        this.phrasecount  = (this.phrasecount  == 0) ? 0 : 1 + 255 * (this.phrasecount  - min.phrasecount ) / (1 + max.phrasecount  - min.phrasecount);
-        this.posintext    = (this.posintext    == 0) ? 0 : 1 + 255 * (this.posintext    - min.posintext   ) / (1 + max.posintext    - min.posintext);
-        this.posinphrase  = (this.posinphrase  == 0) ? 0 : 1 + 255 * (this.posinphrase  - min.posinphrase ) / (1 + max.posinphrase  - min.posinphrase);
-        this.posofphrase  = (this.posofphrase  == 0) ? 0 : 1 + 255 * (this.posofphrase  - min.posofphrase ) / (1 + max.posofphrase  - min.posofphrase);
-        this.worddistance = (this.worddistance == 0) ? 0 : 1 + 255 * (this.worddistance - min.worddistance) / (1 + max.worddistance - min.worddistance);
-        this.lastModified = (this.lastModified == 0) ? 0 : 1 + 255 * (this.lastModified - min.lastModified) / (1 + max.lastModified - min.lastModified);
-        this.quality      = (this.quality      == 0) ? 0 : 1 + 255 * (this.quality      - min.quality     ) / (1 + max.quality      - min.quality);
-    }
-    
-    public plasmaWordIndexEntry generateNormalized(plasmaWordIndexEntry min, plasmaWordIndexEntry max) {
-        plasmaWordIndexEntry e = (plasmaWordIndexEntry) this.clone();
-        e.normalize(min, max);
-        return e;
-    }
-    
-    public String getUrlHash() { return urlHash; }
-    public int getQuality() { return quality; }
-    public int getVirtualAge() { return plasmaWordIndex.microDateDays(lastModified); }
-    public long getLastModified() { return lastModified; }
-    public int hitcount() { return hitcount; }
-    public int posintext() { return posintext; }
-    public int posinphrase() { return posinphrase; }
-    public int posofphrase() { return posofphrase; }
-    public int worddistance() { return worddistance; }
-    public int wordcount() { return wordcount; }
-    public int phrasecount() { return phrasecount; }
-    public String getLanguage() { return new String(language); }
-    public char getType() { return doctype; }
-    public boolean isLocal() { return localflag == indexEntryAttribute.LT_LOCAL; }
-
-    public boolean isNewer(plasmaWordIndexEntry other) {
-        if (other == null) return true;
-        if (this.lastModified > other.lastModified) return true;
-        if (this.lastModified == other.getLastModified()) {
-            if (this.quality > other.quality) return true;
-        }
-        return false;
-    }
- 
-    public boolean isOlder(plasmaWordIndexEntry other) {
-        if (other == null) return false;
-        if (this.lastModified < other.getLastModified()) return true;
-        if (this.lastModified == other.getLastModified()) {
-            if (this.quality < other.quality) return true;
-        }
-        return false;
-    }
-
-    public int domlengthNormalized() {
-        return 255 * plasmaURL.domLengthEstimation(this.urlHash) / 30;
-    }
-
     public static void main(String[] args) {
         // outputs the word hash to a given word
         if (args.length != 1) System.exit(0);

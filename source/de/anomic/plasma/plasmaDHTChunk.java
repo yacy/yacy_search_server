@@ -188,7 +188,7 @@ public class plasmaDHTChunk {
             Iterator wordHashIterator = wordIndex.wordHashSet(hash, resourceLevel, true, maxcount).iterator();
             plasmaWordIndexEntryContainer indexContainer;
             Iterator urlIter;
-            plasmaWordIndexEntry indexEntry;
+            plasmaWordIndexEntryInstance indexEntry;
             plasmaCrawlLURL.Entry lurl;
             int refcount = 0;
 
@@ -204,7 +204,7 @@ public class plasmaDHTChunk {
                     urlIter = indexContainer.entries();
                     // iterate over indexes to fetch url entries and store them in the urlCache
                     while ((urlIter.hasNext()) && (maxcount > refcount)) {
-                        indexEntry = (plasmaWordIndexEntry) urlIter.next();
+                        indexEntry = (plasmaWordIndexEntryInstance) urlIter.next();
                         try {
                             lurl = lurls.getEntry(indexEntry.getUrlHash(), indexEntry);
                             if ((lurl == null) || (lurl.url() == null)) {
@@ -224,7 +224,7 @@ public class plasmaDHTChunk {
 
                     // remove all remaining; we have enough
                     while (urlIter.hasNext()) {
-                        indexEntry = (plasmaWordIndexEntry) urlIter.next();
+                        indexEntry = (plasmaWordIndexEntryInstance) urlIter.next();
                         urlIter.remove();
                     }
 
@@ -266,7 +266,7 @@ public class plasmaDHTChunk {
     
     public int deleteTransferIndexes() {
         Iterator urlIter;
-        plasmaWordIndexEntry indexEntry;
+        plasmaWordIndexEntryInstance indexEntry;
         String[] urlHashes;
         int count = 0;
         for (int i = 0; i < this.indexContainers.length; i++) {
@@ -275,7 +275,7 @@ public class plasmaDHTChunk {
             urlHashes = new String[this.indexContainers[i].size()];
             urlIter = this.indexContainers[i].entries();
             while (urlIter.hasNext()) {
-                indexEntry = (plasmaWordIndexEntry) urlIter.next();
+                indexEntry = (plasmaWordIndexEntryInstance) urlIter.next();
                 urlHashes[c++] = indexEntry.getUrlHash();
             }
             count += wordIndex.removeEntries(this.indexContainers[i].wordHash(), urlHashes, true);

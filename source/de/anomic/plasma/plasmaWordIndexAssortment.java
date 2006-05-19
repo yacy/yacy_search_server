@@ -71,7 +71,7 @@ public final class plasmaWordIndexAssortment {
         4,                                   // occurrence counter
         8,                                   // timestamp of last access
         indexEntryAttribute.urlHashLength,   // corresponding URL hash
-        plasmaWordIndexEntry.attrSpace       // URL attributes
+        plasmaWordIndexEntryInstance.encodedStringFormLength()       // URL attributes
     };
     
     // class variables
@@ -135,11 +135,11 @@ public final class plasmaWordIndexAssortment {
         row[1] = kelondroRecords.long2bytes(1, 4);
         row[2] = kelondroRecords.long2bytes(newContainer.updated(), 8);
         Iterator entries = newContainer.entries();
-        plasmaWordIndexEntry entry;
+        plasmaWordIndexEntryInstance entry;
         for (int i = 0; i < assortmentLength; i++) {
-            entry = (plasmaWordIndexEntry) entries.next();
+            entry = (plasmaWordIndexEntryInstance) entries.next();
             row[3 + 2 * i] = entry.getUrlHash().getBytes();
-	        row[4 + 2 * i] = entry.toEncodedForm().getBytes();
+	        row[4 + 2 * i] = entry.toEncodedStringForm().getBytes();
         }
         byte[][] oldrow = null;
         try {
@@ -217,7 +217,7 @@ public final class plasmaWordIndexAssortment {
         plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
         for (int i = 0; i < assortmentLength; i++) {
             container.add(
-                    new plasmaWordIndexEntry[] { new plasmaWordIndexEntry(
+                    new plasmaWordIndexEntryInstance[] { new plasmaWordIndexEntryInstance(
                             new String(row[3 + 2 * i]), new String(row[4 + 2 * i])) }, updateTime);
         }
         return container;

@@ -147,7 +147,7 @@ public final class plasmaWordIndexAssortmentCluster {
             c = new plasmaWordIndexEntryContainer(wordHash);
             for (int k = 0; k < j; k++) {
                 if (i.hasNext()) {
-                    c.add((plasmaWordIndexEntry) i.next(), newContainer.updated());
+                    c.add((plasmaWordIndexEntryInstance) i.next(), newContainer.updated());
                 } else {
                     storeForced(wordHash, c);
                     return;
@@ -190,7 +190,7 @@ public final class plasmaWordIndexAssortmentCluster {
                 c = new plasmaWordIndexEntryContainer(wordHash);
                 for (int k = 0; k <= j; k++) {
                     assert (i.hasNext());
-                    c.add((plasmaWordIndexEntry) i.next(), newContainer.updated());
+                    c.add((plasmaWordIndexEntryInstance) i.next(), newContainer.updated());
                 }
                 storeForced(wordHash, c);
             }

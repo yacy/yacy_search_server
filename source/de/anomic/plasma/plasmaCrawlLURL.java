@@ -179,7 +179,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
 
-    public Entry getEntry(String hash, plasmaWordIndexEntry searchedWord) throws IOException {
+    public Entry getEntry(String hash, plasmaWordIndexEntryInstance searchedWord) throws IOException {
         return new Entry(hash, searchedWord);
     }
 
@@ -410,7 +410,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
         private int size;
         private int wordCount;
         private String snippet;
-        private plasmaWordIndexEntry word; // this is only used if the url is transported via remote search requests
+        private plasmaWordIndexEntryInstance word; // this is only used if the url is transported via remote search requests
         private boolean stored;
         
         // more needed attributes:
@@ -445,7 +445,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
             this.stored = false;
         }
 
-        public Entry(String urlHash, plasmaWordIndexEntry searchedWord) throws IOException {
+        public Entry(String urlHash, plasmaWordIndexEntryInstance searchedWord) throws IOException {
             // generates an plasmaLURLEntry using the url hash
             // to speed up the access, the url-hashes are buffered
             // in the hash cache.
@@ -506,7 +506,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
                 this.wordCount = Integer.parseInt(prop.getProperty("wc", "0"));
                 this.snippet = prop.getProperty("snippet", "");
                 if (snippet.length() == 0) snippet = null; else snippet = crypt.simpleDecode(snippet, null);
-                this.word = (prop.containsKey("word")) ? new plasmaWordIndexEntry(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word",""))) : null;
+                this.word = (prop.containsKey("word")) ? new plasmaWordIndexEntryInstance(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word",""))) : null;
                 this.stored = false;
                 //}
             } catch (Exception e) {
@@ -646,7 +646,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
             return snippet;
         }
 
-        public plasmaWordIndexEntry word() {
+        public plasmaWordIndexEntryInstance word() {
             return word;
         }
     
@@ -683,7 +683,7 @@ public final class plasmaCrawlLURL extends plasmaURL {
 
                 if (this.word != null) {
                     // append also word properties
-                    corePropStr.append(",word=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toExternalForm()));
+                    corePropStr.append(",word=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm()));
                 }
                 return corePropStr;
 

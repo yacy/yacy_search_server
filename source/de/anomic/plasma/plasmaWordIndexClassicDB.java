@@ -187,10 +187,10 @@ public class plasmaWordIndexClassicDB {
         if (plasmaWordIndexEntity.wordHash2path(databaseRoot, wordHash).exists()) {
             plasmaWordIndexEntity entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
             plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
-            plasmaWordIndexEntry entry;
+            plasmaWordIndexEntryInstance entry;
             Iterator i = entity.elements(true);
             while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) {
-                entry = (plasmaWordIndexEntry) i.next();
+                entry = (plasmaWordIndexEntryInstance) i.next();
                 container.add(entry);
             }
             return container;

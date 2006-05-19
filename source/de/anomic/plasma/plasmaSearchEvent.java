@@ -239,7 +239,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         //if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
         //if (searchResult.size() == 0) return acc; // case that we have nothing to do
 
-        plasmaWordIndexEntry entry;
+        plasmaWordIndexEntryInstance entry;
         plasmaCrawlLURL.Entry page;
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {

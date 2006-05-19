@@ -1486,7 +1486,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = indexEntryAttribute.word2hash(word);
                                 plasmaWordIndexEntryContainer wordIdxContainer = new plasmaWordIndexEntryContainer(wordHash);
-                                plasmaWordIndexEntry wordIdxEntry = new plasmaWordIndexEntry(urlHash,
+                                plasmaWordIndexEntryInstance wordIdxEntry = new plasmaWordIndexEntryInstance(urlHash,
                                                                                              urlLength, urlComps,
                                                                                              wordStat.count,
                                                                                              document.longTitle.length(),

@@ -46,6 +46,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import de.anomic.index.indexEntry;
+
 public class plasmaSearchRankingProfile {
 
     // old parameters for ordering
@@ -161,21 +163,23 @@ public class plasmaSearchRankingProfile {
         return new String(ext);
     }
     
-    public long preRanking(plasmaWordIndexEntry normalizedEntry) {
+    public long preRanking(indexEntry entry) {
         long ranking = 0;
-        
-        ranking += normalizedEntry.getQuality() << ((Integer) coeff.get(ENTROPY)).intValue();
-        ranking += normalizedEntry.getVirtualAge() << ((Integer) coeff.get(DATE)).intValue();
-        ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.getUrlHash()) << ((Integer) coeff.get(YBR)).intValue();
-        ranking += (normalizedEntry.posintext()    == 0) ? 0 : (255 - normalizedEntry.posintext()) << ((Integer) coeff.get(POSINTEXT)).intValue();
-        ranking += (normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance()) << ((Integer) coeff.get(WORDDISTANCE)).intValue();
-        ranking += (normalizedEntry.hitcount()     == 0) ? 0 : normalizedEntry.hitcount() << ((Integer) coeff.get(HITCOUNT)).intValue();
-        ranking += (255 - normalizedEntry.domlengthNormalized()) << ((Integer) coeff.get(DOMLENGTH)).intValue();
+        if (entry instanceof plasmaWordIndexEntryInstance) {
+            plasmaWordIndexEntryInstance normalizedEntry = (plasmaWordIndexEntryInstance) entry;
+            ranking += normalizedEntry.getQuality() << ((Integer) coeff.get(ENTROPY)).intValue();
+            ranking += normalizedEntry.getVirtualAge() << ((Integer) coeff.get(DATE)).intValue();
+            ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.getUrlHash()) << ((Integer) coeff.get(YBR)).intValue();
+            ranking += (normalizedEntry.posintext() == 0) ? 0 : (255 - normalizedEntry.posintext()) << ((Integer) coeff.get(POSINTEXT)).intValue();
+            ranking += (normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance()) << ((Integer) coeff.get(WORDDISTANCE)).intValue();
+            ranking += (normalizedEntry.hitcount() == 0) ? 0 : normalizedEntry.hitcount() << ((Integer) coeff.get(HITCOUNT)).intValue();
+            ranking += (255 - normalizedEntry.domlengthNormalized()) << ((Integer) coeff.get(DOMLENGTH)).intValue();
+        }
         return ranking;
     }
     
     public long postRanking(
-                    plasmaWordIndexEntry normalizedEntry,
+                    indexEntry normalizedEntry,
                     plasmaSearchQuery query,
                     Set topwords,
                     String[] urlcomps,
