@@ -194,6 +194,37 @@ abstract class kelondroAbstractRA implements kelondroRA {
 
     public void writeMap(final Map map, final String comment) throws IOException {
         this.seek(0);
+        writeLine("# " + comment);
+        final Iterator iter = map.entrySet().iterator();
+        Map.Entry entry;
+        while (iter.hasNext()) {
+            entry = (Map.Entry) iter.next();
+            write(((String) entry.getKey()).getBytes());
+            write((byte) '=');
+            writeLine((String) entry.getValue());
+        }
+        writeLine("# EOF");
+    }
+
+    public Map readMap() throws IOException {
+        this.seek(0);
+        final TreeMap map = new TreeMap();
+        String line;
+        int pos;
+        while ((line = readLine()) != null) { // very slow readLine????
+            line = line.trim();
+            if (line.equals("# EOF")) return map;
+            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
+            pos = line.indexOf("=");
+            if (pos < 0) continue;
+            map.put(line.substring(0, pos), line.substring(pos + 1));
+        }
+        return map;
+    }
+
+    /*
+    public void writeMap(final Map map, final String comment) throws IOException {
+        this.seek(0);
         final Iterator iter = map.entrySet().iterator();
         Map.Entry entry;
         StringBuffer sb = new StringBuffer(map.size() * 40);
@@ -214,6 +245,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
         write(new String(sb).getBytes());
     }
 
+    
     public Map readMap() throws IOException {
         this.seek(0);
         byte[] b = readFully();
@@ -231,7 +263,8 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
         return map;
     }
-
+    */
+    
     /**
      * this does not write the content to the see position
      * but to the very beginning of the record
