@@ -174,7 +174,10 @@ public class blogBoard {
 	public Date date() {
 	    try {
 		String c = (String) record.get("date");
-		if(c == null) return new Date();
+		if (c == null) {
+            System.out.println("DEBUG - ERROR: date field missing in blogBoard");
+            return new Date();
+        }
 		return SimpleFormatter.parse(c);
 	    } catch (ParseException e) {
 		return new Date();
