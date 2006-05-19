@@ -78,17 +78,27 @@ public final class transferRWI {
         final int entryc      = Integer.parseInt(post.get("entryc", "")); // number of entries in indexes
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
-
-        if (sb.wordIndex.kSize() > 1000) granted = false; // don't accept more words if there are too many words to flush
-        
-        // response values
-        String result = "";
-        StringBuffer unknownURLs = new StringBuffer();
-
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
         
-        if (granted) {
+        // response values
+        String       result      = "ok";
+        StringBuffer unknownURLs = new StringBuffer();
+        int          pause       = 0;
+
+        if (!granted) {
+            // we dont want to receive indexes
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
+            result = "not_granted";
+            pause = 0;
+        } else if (sb.wordIndex.kSize() > 1000) {
+            // we are too busy to receive indexes
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.wordIndex.kSize() + ").");
+            granted = false; // don't accept more words if there are too many words to flush
+            result = "busy";
+            pause = 60000;
+        } else {
+            // we want and can receive indexes
             // log value status (currently added to find outOfMemory error
             sb.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
             final long startProcess = System.currentTimeMillis();
@@ -161,13 +171,12 @@ public final class transferRWI {
                 sb.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
             }
             result = "ok";
-        } else {
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
-            result = "error_not_granted";
+            pause = (sb.wordIndex.kSize() < 500) ? 0 : 60 * sb.wordIndex.kSize(); // estimation of necessary pause time
         }
 
         prop.put("unknownURL", unknownURLs.toString());
         prop.put("result", result);
+        prop.put("pause", Integer.toString(pause));
 
         // return rewrite properties
         return prop;
