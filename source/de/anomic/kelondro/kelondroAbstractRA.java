@@ -53,6 +53,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import de.anomic.server.serverByteBuffer;
+
 abstract class kelondroAbstractRA implements kelondroRA {
 
     // logging support
@@ -191,7 +193,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
             bb[bbsize++] = (byte) c;
         }
     }
-
+/*
     public void writeMap(final Map map, final String comment) throws IOException {
         this.seek(0);
         writeLine("# " + comment);
@@ -221,28 +223,28 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
         return map;
     }
+*/
 
-    /*
     public void writeMap(final Map map, final String comment) throws IOException {
         this.seek(0);
         final Iterator iter = map.entrySet().iterator();
         Map.Entry entry;
-        StringBuffer sb = new StringBuffer(map.size() * 40);
-        sb.append("# " + comment);
-        sb.append(cr);
-        sb.append(lf);
+        serverByteBuffer bb = new serverByteBuffer(map.size() * 40);
+        bb.append("# " + comment);
+        bb.append(cr);
+        bb.append(lf);
         while (iter.hasNext()) {
             entry = (Map.Entry) iter.next();
-            sb.append((String) entry.getKey());
-            sb.append('=');
-            sb.append((String) entry.getValue());
-            sb.append(cr);
-            sb.append(lf);
+            bb.append((String) entry.getKey());
+            bb.append('=');
+            bb.append((String) entry.getValue());
+            bb.append(cr);
+            bb.append(lf);
         }
-        sb.append("# EOF");
-        sb.append(cr);
-        sb.append(lf);
-        write(new String(sb).getBytes());
+        bb.append("# EOF");
+        bb.append(cr);
+        bb.append(lf);
+        write(bb.getBytes());
     }
 
     
@@ -263,7 +265,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
         return map;
     }
-    */
+    
     
     /**
      * this does not write the content to the see position
