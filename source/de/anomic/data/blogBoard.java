@@ -124,7 +124,7 @@ public class blogBoard {
         return wikiBoard.guessAuthor(ip);
     }
 
-    public entry newEntry(String key, String subject, String author, String ip, Date date, byte[] page) throws IOException {
+    public entry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page) throws IOException {
 	return new entry(normalize(key), subject, author, ip, date, page);
     }
 
@@ -133,24 +133,22 @@ public class blogBoard {
 	String key;
         Map record;
 
-    public entry(String nkey, String subject, String author, String ip, Date date, byte[] page) throws IOException {
+    public entry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page) throws IOException {
 	    record = new HashMap();
 	    key = nkey;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
 	    if(date == null) date = new GregorianCalendar(GMTTimeZone).getTime(); 
 	    record.put("date", dateString(date));
-	    if ((subject == null) || (subject.length() == 0)) subject = "";
-	    record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject.getBytes("UTF-8")));
-	    if ((author == null) || (author.length() == 0)) author = "anonymous";
-	    record.put("author", kelondroBase64Order.enhancedCoder.encode(author.getBytes("UTF-8")));
+	    if (subject == null) record.put("subject","");
+	    else record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
+	    if (author == null) record.put("author","");
+	    else record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
 	    if ((ip == null) || (ip.length() == 0)) ip = "";
 	    record.put("ip", ip);
-	    if (page == null)
-		record.put("page", "");
-	    else
-		record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
+	    if (page == null) record.put("page", "");
+	    else record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
 	    
-        wikiBoard.setAuthor(ip, author);
+        wikiBoard.setAuthor(ip, new String(author));
         //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
 	}
 
@@ -163,12 +161,12 @@ public class blogBoard {
 		return key;
 	}
 
-	public String subject() {
-		String a = (String) record.get("subject");
-	    if (a == null) return "";
-	    byte[] b = kelondroBase64Order.enhancedCoder.decode(a);
-	    if (b == null) return "";
-	    return new String(b);
+	public byte[] subject() {
+		String m = (String) record.get("subject");
+	    if (m == null) return new byte[0];
+	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m);
+	    if (b == null) return "".getBytes();
+	    return b;
 	}
 
 	public Date date() {
@@ -184,12 +182,12 @@ public class blogBoard {
 	    }
 	}
 	
-	public String author() {
-	    String a = (String) record.get("author");
-	    if (a == null) return "anonymous";
-	    byte[] b = kelondroBase64Order.enhancedCoder.decode(a);
-	    if (b == null) return "anonymous";
-	    return new String(b);
+	public byte[] author() {
+		String m = (String) record.get("author");
+	    if (m == null) return new byte[0];
+	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m);
+	    if (b == null) return "".getBytes();
+	    return b;
 	}
 
 	public byte[] page() {
@@ -221,7 +219,7 @@ public class blogBoard {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);
             Map record = base.get(key);
-            if (record == null) return newEntry(key, "", "anonymous", "127.0.0.1", new GregorianCalendar(GMTTimeZone).getTime(), "".getBytes());
+            if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new GregorianCalendar(GMTTimeZone).getTime(), "".getBytes());
             return new entry(key, record);
     	} catch (IOException e) {
     		return null;

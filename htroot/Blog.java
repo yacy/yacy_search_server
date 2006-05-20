@@ -100,14 +100,30 @@ public class Blog {
 
 		String pagename = post.get("page", "blog_default");
 	    String ip = post.get("CLIENTIP", "127.0.0.1");
-	    String author = post.get("author", "anonymous");
+	    
+	    byte[] author;
+		try {
+			author = post.get("author", "").getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			author = post.get("author", "").getBytes();
+		}
+		
 		if (author.equals("anonymous")) {
-	    	author = switchboard.blogDB.guessAuthor(ip);
+			try {
+				author = switchboard.blogDB.guessAuthor(ip).getBytes("UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				author = switchboard.blogDB.guessAuthor(ip).getBytes();
+			}
 	    	if (author == null) {
 	    		if (de.anomic.yacy.yacyCore.seedDB.mySeed == null)
-	    			author = "anonymous";
-	        	else
-	        		author = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous");
+	    			author = "anonymous".getBytes();
+	        	else {
+	        		try {
+	        			author = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous").getBytes("UTF-8");
+	        		} catch (UnsupportedEncodingException e) {
+	        			author = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous").getBytes();
+	        		}
+	        	}
 	        }
 	    }
 
@@ -135,7 +151,12 @@ public class Blog {
 				date = page.date();
 			}
 
-			String subject = post.get("subject","");
+			byte[] subject;
+			try {
+				subject = post.get("subject", "").getBytes("UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				subject = post.get("subject", "").getBytes();
+			}
             
 			try {
 				switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content));
@@ -159,9 +180,9 @@ public class Blog {
 			if(hasRights) {
 				try {
 			        prop.put("mode", 1); //edit
-			        prop.put("mode_author", wikiCode.replaceHTML(page.author()));
+			        prop.put("mode_author", wikiCode.replaceHTML(new String(page.author(),"UTF-8")));
 			        prop.put("mode_pageid", page.key());
-			        prop.put("mode_subject", wikiCode.replaceHTML(page.subject()));
+			        prop.put("mode_subject", wikiCode.replaceHTML(new String(page.subject(), "UTF-8")));
 			        prop.put("mode_page-code", new String(page.page(), "UTF-8").replaceAll("<","&lt;").replaceAll(">","&gt;"));
 			    } catch (UnsupportedEncodingException e) {}
 			}
@@ -175,7 +196,11 @@ public class Blog {
 				wikiCode wikiTransformer=new wikiCode(switchboard);
 	            prop.put("mode", 2);//preview
 	            prop.put("mode_pageid", pagename);
-	            prop.put("mode_author", wikiCode.replaceHTML(author));
+	            try {
+					prop.put("mode_author", wikiCode.replaceHTML(new String(author, "UTF-8")));
+				} catch (UnsupportedEncodingException e) {
+					prop.put("mode_author", wikiCode.replaceHTML(new String(author)));
+				}
 	            prop.put("mode_subject", wikiCode.replaceHTML(post.get("subject","")));
 	            prop.put("mode_date", dateString(new Date()));
 	            prop.put("mode_page", wikiTransformer.transform(post.get("content", "")));
@@ -187,8 +212,16 @@ public class Blog {
 			if(hasRights) {
 				prop.put("mode",4);
 				prop.put("mode_pageid",pagename);
-				prop.put("mode_author",wikiCode.replaceHTML(page.author()));
-				prop.put("mode_subject",wikiCode.replaceHTML(page.subject()));
+				try {
+					prop.put("mode_author",wikiCode.replaceHTML(new String(page.author(), "UTF-8")));
+				} catch (UnsupportedEncodingException e) {
+					prop.put("mode_author",wikiCode.replaceHTML(new String(page.author())));
+				}
+				try {
+					prop.put("mode_subject",wikiCode.replaceHTML(new String(page.subject(),"UTF-8")));
+				} catch (UnsupportedEncodingException e) {
+					prop.put("mode_subject",wikiCode.replaceHTML(new String(page.subject())));
+				}
 			}
 			else prop.put("mode",3); //access denied (no rights)
 		}
@@ -214,8 +247,8 @@ public class Blog {
 	        				continue;
 	        			entry = switchboard.blogDB.read(pageid);
 	        			prop.put("mode_entries_"+count+"_pageid",entry.key());
-	        			prop.put("mode_entries_"+count+"_subject", wikiCode.replaceHTML(entry.subject()));
-	        			prop.put("mode_entries_"+count+"_author", wikiCode.replaceHTML(entry.author()));
+	        			prop.put("mode_entries_"+count+"_subject", wikiCode.replaceHTML(new String(entry.subject(),"UTF-8")));
+	        			prop.put("mode_entries_"+count+"_author", wikiCode.replaceHTML(new String(entry.author(),"UTF-8")));
 	        			prop.put("mode_entries_"+count+"_date", dateString(entry.date()));
 	        			prop.put("mode_entries_"+count+"_page", wikiTransformer.transform(entry.page()));
 	        			if(hasRights) {
@@ -240,8 +273,16 @@ public class Blog {
 	        	//only show 1 entry
 	        	prop.put("mode_entries",1);
 	        	prop.put("mode_entries_0_pageid", page.key());
-	        	prop.put("mode_entries_0_subject", wikiCode.replaceHTML(page.subject()));
-	        	prop.put("mode_entries_0_author", wikiCode.replaceHTML(page.author()));
+	        	try {
+					prop.put("mode_entries_0_subject", wikiCode.replaceHTML(new String(page.subject(),"UTF-8")));
+				} catch (UnsupportedEncodingException e) {
+					prop.put("mode_entries_0_subject", wikiCode.replaceHTML(new String(page.subject())));
+				}
+	        	try {
+					prop.put("mode_entries_0_author", wikiCode.replaceHTML(new String(page.author(),"UTF-8")));
+				} catch (UnsupportedEncodingException e) {
+					prop.put("mode_entries_0_author", wikiCode.replaceHTML(new String(page.author())));
+				}
 	        	prop.put("mode_entries_0_date", dateString(page.date()));
 	        	prop.put("mode_entries_0_page", wikiTransformer.transform(page.page()));
 	        	if(hasRights) {
