@@ -113,6 +113,7 @@ public class Blog {
 
 		if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
 			switchboard.blogDB.delete(pagename);
+			pagename = "blog_default";
 		}
 
 		if (post.containsKey("submit") && (hasRights)) {
@@ -134,7 +135,7 @@ public class Blog {
 				date = page.date();
 			}
 
-            String subject = wikiCode.replaceHTML(post.get("subject",""));
+			String subject = post.get("subject","");
             
 			try {
 				switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content));
@@ -158,7 +159,7 @@ public class Blog {
 			if(hasRights) {
 				try {
 			        prop.put("mode", 1); //edit
-			        prop.put("mode_author", wikiCode.replaceHTML(author));
+			        prop.put("mode_author", wikiCode.replaceHTML(page.author()));
 			        prop.put("mode_pageid", page.key());
 			        prop.put("mode_subject", wikiCode.replaceHTML(page.subject()));
 			        prop.put("mode_page-code", new String(page.page(), "UTF-8").replaceAll("<","&lt;").replaceAll(">","&gt;"));
