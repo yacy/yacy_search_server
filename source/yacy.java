@@ -384,7 +384,7 @@ public final class yacy {
                         boolean properPW = (sb.getConfig("adminAccount", "").length() == 0) && (sb.getConfig("adminAccountBase64MD5", "").length() > 0);
                         if (!properPW) browserPopUpPage = "ConfigBasic.html";
                         final String  browserPopUpApplication = sb.getConfig("browserPopUpApplication", "netscape");
-                        serverSystem.openBrowser("http://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
+                        serverSystem.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
                     }
 
                     //Copy the shipped locales into DATA
@@ -460,7 +460,7 @@ public final class yacy {
                     server.terminate(false);
                     server.interrupt();
                     if (server.isAlive()) try {
-                        URL u = new URL("http://localhost:" + serverCore.getPortNr(port));
+                        URL u = new URL((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port));
                         httpc.wget(u, u.getHost(), 1000, null, null, null); // kick server
                         serverLog.logConfig("SHUTDOWN", "sent termination signal to server socket");
                     } catch (IOException ee) {

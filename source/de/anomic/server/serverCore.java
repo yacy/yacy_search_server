@@ -64,6 +64,8 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.channels.ClosedByInterruptException;
 import java.security.KeyStore;
+import java.security.PublicKey;
+import java.security.cert.Certificate;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -71,6 +73,7 @@ import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -201,6 +204,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
         // init servercore
         init();
+    }
+    
+    public boolean withSSL() {
+        return this.sslSocketFactory != null;
     }
     
     public synchronized void init() {
@@ -1291,8 +1298,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
         if (currentThread.isInterrupted()) throw new InterruptedException();  
         if ((currentThread instanceof serverCore.Session) && ((serverCore.Session)currentThread).isStopped()) throw new InterruptedException();
     }
-    
     public void reconnect() {
+        this.reconnect(5000);
+    }
+    public void reconnect(int delay) {
         Thread restart = new Restarter();
         restart.start();
     }
@@ -1300,10 +1309,11 @@ public final class serverCore extends serverAbstractThread implements serverThre
     // restarting the serverCore
     public class Restarter extends Thread { 
         public serverCore theServerCore = null;
+        public int delay = 5000;
         public void run() {
             // waiting for a while
             try {
-                Thread.sleep(5000);
+                Thread.sleep(delay);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -1372,7 +1382,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     sock.getInetAddress().getHostName(),
                     sock.getPort(),
                     true);
-            
+
             sslsock.addHandshakeCompletedListener(
                     new HandshakeCompletedListener() {
                        public void handshakeCompleted(

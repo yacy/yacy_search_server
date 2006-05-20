@@ -62,6 +62,12 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class ConfigBasic {
+    private static final int NEXTSTEP_FINISHED = 0;
+    private static final int NEXTSTEP_PWD = 1;
+    private static final int NEXTSTEP_PEERNAME = 2;
+    private static final int NEXTSTEP_PEERPORT = 3;
+    private static final int NEXTSTEP_RECONNECT = 4;
+    
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
@@ -121,11 +127,26 @@ public class ConfigBasic {
         }
  
         // check port
+        boolean reconnect = false;
         if (!env.getConfig("port", port).equals(port)) {
             // validate port
             serverCore theServerCore = (serverCore) env.getThread("10_httpd");
             env.setConfig("port", port);
-            theServerCore.reconnect();
+            
+            // redirect the browser to the new port
+            reconnect = true;
+            prop.put("reconnect", 1);
+            prop.put("reconnect_host", serverCore.publicLocalIP().getHostAddress());
+            prop.put("nextStep_host", serverCore.publicLocalIP().getHostAddress());
+            prop.put("reconnect_port", port);
+            prop.put("nextStep_port", port);            
+            prop.put("reconnect_sslSupport", theServerCore.withSSL() ? 1:0);
+            prop.put("nextStep_sslSupport", theServerCore.withSSL() ? 1:0);
+            
+            // force reconnection in 7 seconds
+            theServerCore.reconnect(7000);
+        } else {
+            prop.put("reconnect", 0);
         }
         
         // check if values are proper
@@ -140,21 +161,19 @@ public class ConfigBasic {
         prop.put("statusName", (properName) ? 1 : 0);
         prop.put("statusPassword", (properPW) ? 1 : 0);
         prop.put("statusPort", (properPort) ? 1 : 0);
-        if (properPW) {
-            if (properName) {
-                if (properPort) {
-                    prop.put("nextStep", 0);
-                } else {
-                    prop.put("nextStep", 3);
-                }
-            } else {
-                prop.put("nextStep", 2);
-            }
+        if (reconnect) {
+            prop.put("nextStep", NEXTSTEP_RECONNECT);
+        } else if (!properPW) {
+            prop.put("nextStep", NEXTSTEP_PWD);
+        } else if (!properName) {
+            prop.put("nextStep", NEXTSTEP_PEERNAME);
+        } else if (!properPort) {
+            prop.put("nextStep", NEXTSTEP_PEERPORT);
         } else {
-            prop.put("nextStep", 1);
+            prop.put("nextStep", NEXTSTEP_FINISHED);
         }
         
-        // set default values
+        // set default values       
         prop.put("defaultName", env.getConfig("peerName", ""));
         prop.put("defaultUser", "admin");
         prop.put("defaultPort", env.getConfig("port", "8080"));

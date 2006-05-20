@@ -11,6 +11,8 @@ document.getElementById("value").value=element.value;
 }
 -->
 </script>
+	<!-- redirecting browser if port was changed -->
+	#(reconnect)#::<meta http-equiv="refresh" content="10; URL=#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html">#(/reconnect)#
 </head>
 <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 #%env/templates/header.template%#
@@ -39,7 +41,7 @@ Your YaCy Peer needs some basic information to operate properly
 </form>
 
 <p><b>What you should do next:</b><br>
-#(nextStep)#
+#(nextStep)#<!-- [0] -->
 Your basic configuration is complete! You can now (for example):
 <ul>
  <li><a href="index.html">start an uncensored search</a>;</li>
@@ -47,9 +49,14 @@ Your basic configuration is complete! You can now (for example):
  <li><a href="ConfigProfile_p.html">set a personal peer profile</a> (optional settings);</li>
  <li>just <a href="Network.html">monitor at the network page</a> what the other peers are doing</li>
 </ul>::
+<!-- [1]: password not proper -->
 You did not set a user name and/or a password. Some pages are protected by passwords. You should set a password here to secure your YaCy peer.::
+<!-- [2]: peername not proper -->
 Your Peer name is a default name; please set another peer name. If this does not work, the name is probably taken by someone else. Please try to choose another one.::
-You did not open a port in your firewall or your router does not forward the server port to your peer. This is needed if you want to fully participate in the YaCy network. You can also use your peer without opening it, but this is not recomended.
+<!-- [3]: port not proper -->
+You did not open a port in your firewall or your router does not forward the server port to your peer. This is needed if you want to fully participate in the YaCy network. You can also use your peer without opening it, but this is not recomended.::
+<!-- [4]: reconnect to different port -->
+The peer port was changed successfully. Your browser will be redirected to the new <a href="#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html">location</a> in 10 seconds.
 #(/nextStep)#
 #%env/templates/footer.template%#
 </body>
