@@ -113,11 +113,20 @@ public class PerformanceMemory_p {
                 Runtime.getRuntime().gc();
                 prop.put("gc", 1);
             }
-            if (post.containsKey("Xmx")) {
-                env.setConfig("javastart_Xmx", "Xmx" + post.get("Xmx", "64") + "m");
-            }
+            
+            int xms = 10; 
             if (post.containsKey("Xms")) {
-                env.setConfig("javastart_Xms", "Xms" + post.get("Xms", "10") + "m");
+                try { xms = Integer.valueOf(post.get("Xms", "10")).intValue(); } catch (NumberFormatException e){}
+                env.setConfig("javastart_Xms", "Xms" + xms + "m");               
+            }            
+            int xmx = 64; // default maximum heap size
+            if (post.containsKey("Xmx")) {
+                try { xmx = Integer.valueOf(post.get("Xmx", "64")).intValue(); } catch (NumberFormatException e){}
+                // initial heap size must be less than or equal to the maximum heap size 
+                if (xmx < xms) xmx = xms;
+                env.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
+            } else if (xmx < xms) {
+                env.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
             }
         }
         
