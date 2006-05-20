@@ -4,7 +4,7 @@
   <tr height="36">
     <td width="160">
 	<a href="http://www.yacy.net">
-	<img width="52" height="33" border="0" src="/env/grafics/yacy.gif" align="top">
+	<img width="52" height="33" border="0" src="/env/grafics/yacy.gif" align="top" alt="YaCy-Logo">
         </a>
     </td>
     <td width="100%" align="center" class="Headline">

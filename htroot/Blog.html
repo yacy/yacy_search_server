@@ -13,11 +13,11 @@
 <table width="80%" border="1" cellspacing="0">
 <tr class="TableHeader"><td align="left">#[date]#</td><td>by #[author]#</td></tr>
 <tr class="WikiBackground"><td colspan=2 align="left"><div style="padding:5px;"><h2>#[subject]#</h2><br>#[page]#</div></td></tr>
-<tr class="TableHeader"><td colspan=2 align="left"><a href="Blog.html?page=#[pageid]#">link</a>#(admin)#:: - <a href="Blog.html?page=#[pageid]#&edit=true">edit</a> - <a href="Blog.html?page=#[pageid]#&delete=try">delete</a>#(/admin)#</td></tr>
+<tr class="TableHeader"><td colspan=2 align="left"><a href="Blog.html?page=#[pageid]#">link</a>#(admin)#:: - <a href="Blog.html?page=#[pageid]#&edit=true">edit</a> - <a href="Blog.html?page=#[pageid]#&amp;delete=try">delete</a>#(/admin)#</td></tr>
 </table>
 <br>
 #{/entries}#
-#(moreentries)#::<a href="Blog.html?start=#[start]#&num=#[num]#">show more entries...</a>#(/moreentries)#
+#(moreentries)#::<a href="Blog.html?start=#[start]#&amp;num=#[num]#">show more entries...</a>#(/moreentries)#
 <br>
 #(admin)#<a href="Blog.html?login=true">Login</a> - ::<a href="Blog.html?edit=true">new entry</a> - #(/admin)#<a href="Blog.html">Blog-Home</a></center>
 ::
@@ -52,7 +52,7 @@
 ::
 <!-- 3: Access Denied (no rights) -->
 <h3>Access denied</h3>
-To edit or create blog-entries you need to be logged in as Admin or User that has Blog rights.
+To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.
 ::
 <!-- 4: Delete Confirmation -->
 <h3>Are you sure...</h3>

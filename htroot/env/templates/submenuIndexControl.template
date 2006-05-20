@@ -2,16 +2,16 @@
 <tr height="10"><td colspan="7" class="MenuHeader">&nbsp;Index Control Menu</td></tr>
 <tr height="2"><td colspan="17"></td></tr>
 <tr class="TableHeader">
-<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <a href="/IndexControl_p.html" class="MenuItemLink">Index Administration</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <a href="/IndexImport_p.html" class="MenuItemLink">Index Import</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <a href="/IndexTransfer_p.html" class="MenuItemLink">Index Transfer</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="25%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <a href="/IndexCleaner_p.html" class="MenuItemLink">Index Cleaner</a>&nbsp;</td>
 </tr>
 </table>

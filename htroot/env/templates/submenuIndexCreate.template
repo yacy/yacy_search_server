@@ -9,31 +9,31 @@
 <td class="MenuTopItem" colspan="5">&nbsp;Media Crawl Queues</td>
 </tr>
 <tr class="TableHeader">
-<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <a href="/IndexCreate_p.html" class="MenuItemLink">Crawl Start</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <a href="/IndexCreateIndexingQueue_p.html" class="MenuItemLink">Indexing</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <a href="/IndexCreateLoaderQueue_p.html" class="MenuItemLink">Loader</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <a href="/IndexCreateWWWLocalQueue_p.html" class="MenuItemLink">Local</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <a href="/IndexCreateWWWGlobalQueue_p.html" class="MenuItemLink">Global</a>&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <!--<a href="/IndexCreateWWWOverhangQueue_p.html" class="MenuItemLink">--><i>Overhang</i><!--</a>-->&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <!--<a href="/IndexCreateImageQueue_p.html" class="MenuItemLink">--><i>Images</i><!--</a>-->&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <!--<a href="/IndexCreateMovieQueue_p.html" class="MenuItemLink">--><i>Movies</i><!--</a>-->&nbsp;</td>
 <td class="MenuSubSpacer"></td>
-<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top">&nbsp;
+<td width="11%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
 <!--<a href="/IndexCreateMusicQueue_p.html" class="MenuItemLink">--><i>Music</i><!--</a>-->&nbsp;</td>
 </tr>
 </table>

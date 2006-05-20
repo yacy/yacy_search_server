@@ -79,7 +79,7 @@ Subject:==Titel:
 >Preview==>Vorschau
 No changes have been submitted so far!==Es wurden noch keine &Auml;nderungen &uuml;bertragen!
 Access denied==Zugriff verweigert
-To edit or create blog-entries you need to be logged in as Admin or User that has Blog rights.==Um Blogeintr&auml;ge zu ver&auml;ndern oder zu erstellen m&uuml;ssen Sie als Admin oder User mit Blog-Rechten eingeloggt sein.
+To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Um Blogeintr&auml;ge zu ver&auml;ndern oder zu erstellen m&uuml;ssen Sie als Admin oder User mit Blog-Rechten eingeloggt sein.
 Are you sure==Sind Sie sicher
 that you want to delete <b>\#\[subject\]\#</b> by \#\[author\]\#?==dass Sie <b>#[subject]#</b> von #[author]# l&ouml;schen wollen?
 Yes, delete it.==Ja, l&ouml;schen.
@@ -193,7 +193,7 @@ Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
 Current language:==Aktuelle Sprache
 default\(english\)==Deutsch
-Languagefile Author\(s\) (chronological):==Autor(en) der Sprachdatei (chronologisch):
+Languagefile Author\(s\) \(chronological\)\:==Autor(en) der Sprachdatei (chronologisch):
 Send additions to maintainer:==Schicken Sie Erg&auml;nzungen bitte an:
 Available Languages:==Verf&uuml;gbare Sprachen:
 Install new language from URL:==Neue Sprachdatei herunterladen:
@@ -291,7 +291,7 @@ The words are treated conjunctive, that means every must occur in the result, no
 If you do a global search \(see below\) you may get different results each time you do a search.==Wenn Sie eine globale Suche (siehe unten) durchf&uuml;hren, kann es sein, dass Sie bei wiederholten Suchanfragen jedesmal andere Ergebnisse erhalten.
 Maximum Number of Results==Maximale Anzahl an Ergebnissen
 #DAS ist eine Murksübersetzung... bitte ggf. verbessern.
-Prefer mask:==Vorzugsmaske:
+Prefer mask\:==Vorzugsmaske:
 You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Sie k&ouml;nnen ausw&auml;hlen, wieviele Links Ihnen angezeigt werden sollen. Wir unterst&uuml;tzen im Moment keine mehrfachen Ergebnisseiten f&uuml;r jeden m&ouml;glichen Link.
 Instead we encourage you to enhance the search result by submitting more search words.==Stattdessen m&ouml;chten wir Sie dazu auffordern, Ihre Suchergebnisse durch das Eingeben von mehreren Suchw&ouml;rtern, zu vergr&ouml;&szlig;ern.
 Result Order Options==Reihenfolge der Ergebnisse
@@ -524,7 +524,7 @@ If you need your crawling results locally, you should switch this off.==Wenn Sie
 Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl initiieren oder erhalten.
 <b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can omit starting a crawl with the same start point.==<b>Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren,</b> damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
 Exclude <i>static</i> Stop-Words==Stop-Words ausschlie&szlig;en:
-This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem h&auml;fig vorkommende W&ouml;rter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle W&ouml;rter von der Indexierung auszuschliessen, die in der Datei <tt class=small>yacy.stopwords</tt> enthalten sind,
+This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem h&auml;ufig vorkommende W&ouml;rter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle W&ouml;rter von der Indexierung auszuschliessen, die in der Datei <tt class=small>yacy.stopwords</tt> enthalten sind,
 check this box.==aktivieren Sie diese Box.
 Starting Point:==Startpunkt:
 From&nbsp;File:==Aus Datei:
@@ -1538,6 +1538,7 @@ Click here to==Klicken Sie
 download</a> it.==hier</a>, um sie herunterzuladen.
 This&nbsp;peer's&nbsp;address==Adresse dieses Peers
 #Not assigned==nicht zugewiesen
+enabled==aktiviert
 Not assigned. The peer must go online to get an address.==Nicht zugewiesen. Ihr Peer muss online gehen, um eine Adresse zu bekommen.
 #---
 The peer does not go online until you use the proxy to surf the internet,==Ihr Peer geht nicht online, bis Sie den Proxy benutzen,
