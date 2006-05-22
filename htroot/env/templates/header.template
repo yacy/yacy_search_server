@@ -45,7 +45,7 @@
   <tr><td class="MenuItem">&nbsp;<a href="/share/" class="MenuItemLink">File&nbsp;Share</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/Wiki.html" class="MenuItemLink">Wiki</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="/Blog.html" class="MenuItemLink">Blog</a></td></tr>
-  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="Password protected">&nbsp;<a href="/Messages_p.html" class="MenuItemLink">Messages</a>&nbsp;<img border="0" src="notifier.gif" align="center"></td></tr>
+  <tr><td class="MenuItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="Password protected">&nbsp;<a href="/Messages_p.html" class="MenuItemLink">Messages</a>&nbsp;<img border="0" src="notifier.gif" align="center" alt="You have a new message!"></td></tr>
   <tr><td class="MenuSpacer"></td></tr>
 
   <tr><td class="MenuHeader">&nbsp;Peer&nbsp;Control</td></tr>
