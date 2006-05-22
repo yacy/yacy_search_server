@@ -69,7 +69,7 @@ public class Steering {
 
         if (post.containsKey("shutdown")) {
             ss.setConfig("restart", "false");
-            sb.terminate();
+            sb.terminate(3000);
             prop.put("info", 3);
             return prop;
         }

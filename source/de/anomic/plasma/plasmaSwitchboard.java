@@ -2219,6 +2219,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
     }
     
+    public void terminate(long delay) {
+        if (delay <= 0) throw new IllegalArgumentException("The shutdown delay must be greater than 0.");
+        (new delayedShutdown(this,delay)).start();
+    }
+    
     public void terminate() {
         this.terminate = true;
         this.shutdownSync.V();
@@ -2231,5 +2236,23 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public boolean waitForShutdown() throws InterruptedException {
         this.shutdownSync.P();
         return this.terminate;
+    }
+}
+
+class delayedShutdown extends Thread {
+    private plasmaSwitchboard sb;
+    private long delay;
+    public delayedShutdown(plasmaSwitchboard sb, long delay) {
+        this.sb = sb;
+        this.delay = delay;
+    }
+    
+    public void run() {
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        this.sb.terminate();
     }
 }
