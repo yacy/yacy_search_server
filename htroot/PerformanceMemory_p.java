@@ -176,22 +176,22 @@ public class PerformanceMemory_p {
         ost = sb.cacheManager.dbCacheObjectStatus();
         putprop(prop, env, "HTTP", set);
         
-        req = sb.urlPool.loadedURL.urlHashCache.size();
-        chk = sb.urlPool.loadedURL.urlHashCache.cacheNodeChunkSize();
-        slt = sb.urlPool.loadedURL.urlHashCache.cacheNodeFillStatus();
-        ost = sb.urlPool.loadedURL.urlHashCache.cacheObjectStatus();
+        req = sb.urlPool.loadedURL.size();
+        chk = sb.urlPool.loadedURL.cacheNodeChunkSize();
+        slt = sb.urlPool.loadedURL.cacheNodeFillStatus();
+        ost = sb.urlPool.loadedURL.cacheObjectStatus();
         putprop(prop, env, "LURL", set);
         
-        req = sb.urlPool.noticeURL.urlHashCache.size();
-        chk = sb.urlPool.noticeURL.urlHashCache.cacheNodeChunkSize();
-        slt = sb.urlPool.noticeURL.urlHashCache.cacheNodeFillStatus();
-        ost = sb.urlPool.noticeURL.urlHashCache.cacheObjectStatus();
+        req = sb.urlPool.noticeURL.size();
+        chk = sb.urlPool.noticeURL.cacheNodeChunkSize();
+        slt = sb.urlPool.noticeURL.cacheNodeFillStatus();
+        ost = sb.urlPool.noticeURL.cacheObjectStatus();
         putprop(prop, env, "NURL", set);
         
-        req = sb.urlPool.errorURL.urlHashCache.size();
-        chk = sb.urlPool.errorURL.urlHashCache.cacheNodeChunkSize();
-        slt = sb.urlPool.errorURL.urlHashCache.cacheNodeFillStatus();
-        ost = sb.urlPool.errorURL.urlHashCache.cacheObjectStatus();
+        req = sb.urlPool.errorURL.size();
+        chk = sb.urlPool.errorURL.cacheNodeChunkSize();
+        slt = sb.urlPool.errorURL.cacheNodeFillStatus();
+        ost = sb.urlPool.errorURL.cacheObjectStatus();
         putprop(prop, env, "EURL", set);
         
         req = yacyCore.seedDB.sizeConnected() + yacyCore.seedDB.sizeDisconnected() + yacyCore.seedDB.sizePotential();

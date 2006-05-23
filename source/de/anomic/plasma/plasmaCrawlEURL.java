@@ -134,15 +134,15 @@ public class plasmaCrawlEURL extends indexURL {
     
     public class Entry {
 
-	private String   hash;       // the url's hash
+        private String   hash;       // the url's hash
         private String   referrer;   // the url's referrer hash
         private String   initiator;  // the crawling initiator
         private String   executor;  // the crawling initiator
         private URL      url;        // the url as string
-	private String   name;       // the name of the url, from anchor tag <a>name</a>     
+        private String   name;       // the name of the url, from anchor tag <a>name</a>     
         private Date     initdate;   // the time when the url was first time appeared
         private Date     trydate;    // the time when the url was last time tried to load
-	private int      trycount;   // number of tryings
+        private int      trycount;   // number of tryings
         private String   failreason; // string describing reason for load fail
         private bitfield flags;      // extra space
 

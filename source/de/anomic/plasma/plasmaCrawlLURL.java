@@ -59,12 +59,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Properties;
 
 import de.anomic.http.httpc;
+import de.anomic.http.httpc.response;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
@@ -132,28 +134,6 @@ public final class plasmaCrawlLURL extends indexURL {
         lcrawlResultStack = new LinkedList();
         gcrawlResultStack = new LinkedList();
     }
-
-    /*
-    public synchronized Entry addEntry(URL url, String descr, Date moddate, Date loaddate,
-                                       String initiatorHash, String executorHash,
-                                       String referrerHash, int copyCount, boolean localNeed,
-                                       int quality, String language, char doctype,
-                                       int size, int wordCount, int stackType) {
-        Entry e = new Entry(url, descr, moddate, loaddate, referrerHash, copyCount, localNeed, quality, language, doctype, size, wordCount);
-        if (initiatorHash == null) { initiatorHash = dummyHash; }
-        if (executorHash == null) { executorHash = dummyHash; }
-        switch (stackType) {
-            case 0: break;
-            case 1: externResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-            case 2: searchResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-            case 3: transfResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-            case 4: proxyResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-            case 5: lcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-            case 6: gcrawlResultStack.add(e.urlHash + initiatorHash + executorHash); break;
-        }
-        return e;
-    }
-    */
     
     public synchronized void stackEntry(Entry e, String initiatorHash, String executorHash, int stackType) {
         if (e == null) { return; }
@@ -793,6 +773,79 @@ public final class plasmaCrawlLURL extends indexURL {
     public Iterator entries(boolean up, boolean rotating) throws IOException {
         // enumerates entry elements
         return new kiter(up, rotating);
+    }
+    
+    /**
+     * Uses an Iteration over urlHash.db to detect malformed URL-Entries.
+     * Damaged URL-Entries will be marked in a HashSet and removed at the end of the function.
+     *
+     * @param homePath Root-Path where all information is to be found.
+     */
+    public void urldbcleanup() {
+        serverLog log = new serverLog("URLDBCLEANUP");
+        HashSet damagedURLS = new HashSet();
+        try {
+            Iterator eiter = entries(true, false);
+            int iteratorCount = 0;
+            while (eiter.hasNext()) try {
+                eiter.next();
+                iteratorCount++;
+            } catch (RuntimeException e) {
+                String m = e.getMessage();
+                damagedURLS.add(m.substring(m.length() - 12));
+            }
+            try { Thread.sleep(1000); } catch (InterruptedException e) { }
+            log.logInfo("URLs vorher: " + size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
+
+            Iterator eiter2 = damagedURLS.iterator();
+            String urlHash;
+            while (eiter2.hasNext()) {
+                urlHash = (String) eiter2.next();
+
+                // trying to fix the invalid URL
+                httpc theHttpc = null;
+                String oldUrlStr = null;
+                try {
+                    // getting the url data as byte array
+                    byte[][] entry = urlHashCache.get(urlHash.getBytes());
+
+                    // getting the wrong url string
+                    oldUrlStr = new String(entry[1]).trim();
+
+                    int pos = -1;
+                    if ((pos = oldUrlStr.indexOf("://")) != -1) {
+                        // trying to correct the url
+                        String newUrlStr = "http://" + oldUrlStr.substring(pos + 3);
+                        URL newUrl = new URL(newUrlStr);
+
+                        // doing a http head request to test if the url is correct
+                        theHttpc = httpc.getInstance(newUrl.getHost(), newUrl.getHost(), newUrl.getPort(), 30000, false);
+                        response res = theHttpc.HEAD(newUrl.getPath(), null);
+
+                        if (res.statusCode == 200) {
+                            entry[1] = newUrl.toString().getBytes();
+                            urlHashCache.put(entry);
+                            log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
+                        } else {
+                            remove(urlHash);
+                            log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + res.status);
+                        }
+                    }
+                } catch (Exception e) {
+                    remove(urlHash);
+                    log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tExecption: " + e.getMessage());
+                } finally {
+                    if (theHttpc != null) try {
+                        theHttpc.close();
+                        httpc.returnInstance(theHttpc);
+                    } catch (Exception e) { }
+                }
+            }
+
+            log.logInfo("URLs nachher: " + size() + " kaputte URLs: " + damagedURLS.size());
+        } catch (IOException e) {
+            log.logSevere("IOException", e);
+        }
     }
 
     //  The Cleaner class was provided as "UrldbCleaner" by Hydrox

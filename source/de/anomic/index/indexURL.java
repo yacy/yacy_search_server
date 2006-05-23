@@ -382,8 +382,8 @@ public class indexURL {
  
  
  // the class object
- public kelondroTree urlHashCache;
- public final HashMap existsIndex; // allow subclasses to access the existsIndex during Entry.store()
+ protected kelondroTree urlHashCache;
+ protected final HashMap existsIndex; // allow subclasses to access the existsIndex during Entry.store()
 
  public indexURL() {
      urlHashCache = null;
@@ -398,6 +398,18 @@ public class indexURL {
      if (urlHashCache != null) urlHashCache.close();
  }
 
+ public int[] cacheNodeChunkSize() {
+     return urlHashCache.cacheNodeChunkSize();
+ }
+ 
+ public int[] cacheNodeFillStatus() {
+     return urlHashCache.cacheNodeFillStatus();
+ }
+ 
+ public String[] cacheObjectStatus() {
+     return urlHashCache.cacheObjectStatus();
+ }
+ 
  public boolean exists(String urlHash) {
      synchronized (existsIndex) {
          Boolean existsInIndex = (Boolean) existsIndex.get(urlHash);
