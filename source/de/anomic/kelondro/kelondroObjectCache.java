@@ -271,8 +271,8 @@ public class kelondroObjectCache {
             while ((ages.size() > 0) &&
                    ((k = (String) ages.getMinObject()) != null) &&
                    ((ages.size() > maxSize) ||
-                    ((System.currentTimeMillis() - longEmit(ages.getScore(k))) > maxAge) ||
-                    (Runtime.getRuntime().freeMemory() < minMem))
+                    (((System.currentTimeMillis() - longEmit(ages.getScore(k))) > maxAge) &&
+                     (Runtime.getRuntime().freeMemory() < minMem)))
                   ) {
                 cache.remove(k);
                 ages.deleteScore(k);
@@ -287,8 +287,8 @@ public class kelondroObjectCache {
             while ((hasnot.size() > 0) &&
                     ((k = (String) hasnot.getMinObject()) != null) &&
                     ((hasnot.size() > maxSize) ||
-                     ((System.currentTimeMillis() - longEmit(hasnot.getScore(k))) > maxAge) ||
-                     (Runtime.getRuntime().freeMemory() < minMem))
+                      (((System.currentTimeMillis() - longEmit(hasnot.getScore(k))) > maxAge) &&
+                       (Runtime.getRuntime().freeMemory() < minMem)))
                    ) {
                  hasnot.deleteScore(k);
                  hasnotFlush++;

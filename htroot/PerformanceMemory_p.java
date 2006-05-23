@@ -284,17 +284,6 @@ public class PerformanceMemory_p {
         prop.put("heap" , Integer.toString(c));
         */
         
-        // other caching structures
-        long amount = 0;
-        prop.put("eurl.existsIndexAmount",Long.toString(amount));
-        prop.put("eurl.existsIndexSize",serverMemory.bytesToString(amount*(2*indexURL.urlHashLength+28)));
-        amount = 0;
-        prop.put("nurl.existsIndexAmount",Long.toString(amount));
-        prop.put("nurl.existsIndexSize",serverMemory.bytesToString(amount*(2*indexURL.urlHashLength+28)));
-        amount = 0;
-        prop.put("lurl.existsIndexAmount",Long.toString(amount));
-        prop.put("lurl.existsIndexSize",serverMemory.bytesToString(amount*(2*indexURL.urlHashLength+28)));
-        
         // return rewrite values for templates
         return prop;
     }
@@ -315,6 +304,10 @@ public class PerformanceMemory_p {
         prop.put("ochunkcur" + db, ost[1]);
         prop.put("ohittmiss" + db, ost[5] + ":" + ost[6]);
         prop.put("ouniqdoub" + db, ost[7] + ":" + ost[8]);
+        prop.put("oflush" + db, ost[9]);
+        prop.put("nhittmiss" + db, ost[10] + ":" + ost[11]);
+        prop.put("nuniqdoub" + db, ost[12] + ":" + ost[13]);
+        prop.put("nflush" + db, ost[14]);
         prop.put("used" + db, usd / KB);
         prop.put("good" + db, god / KB);
         prop.put("best" + db, bst / KB);
