@@ -184,12 +184,13 @@ public class kelondroObjectCache {
     
     public Object get(byte[] key) {
         if (key == null) return null;
-        Object r = cache.get(new String(key));
+        String keys = new String(key);
+        Object r = cache.get(keys);
         flushc();
         if (r == null) {
             this.readMiss++;
         } else {
-            hasnot.deleteScore(key);
+            hasnot.deleteScore(keys);
             this.readHit++;
         }
         return r;
