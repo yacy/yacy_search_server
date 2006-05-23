@@ -228,6 +228,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             //System.out.println("cache hit in objectCache, db:" + super.filename);
             return result;
         }
+        if ((objectCache != null) && (objectCache.has(key) == -1)) return null;
         synchronized (writeSearchObj) {
             writeSearchObj.process(key);
             if (writeSearchObj.found()) {
@@ -235,6 +236,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 if (objectCache != null) objectCache.put(key, result);
             } else {
                 result = null;
+                if (objectCache != null) objectCache.hasnot(key);
             }
         }
         return result;

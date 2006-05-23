@@ -1,7 +1,6 @@
 package de.anomic.index;
 
 import java.io.IOException;
-import java.lang.Boolean;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
@@ -383,11 +382,9 @@ public class indexURL {
  
  // the class object
  protected kelondroTree urlHashCache;
- protected final HashMap existsIndex; // allow subclasses to access the existsIndex during Entry.store()
-
+ 
  public indexURL() {
      urlHashCache = null;
-     existsIndex = new HashMap();
  }
 
  public int size() {
@@ -410,47 +407,6 @@ public class indexURL {
      return urlHashCache.cacheObjectStatus();
  }
  
- public boolean exists(String urlHash) {
-     synchronized (existsIndex) {
-         Boolean existsInIndex = (Boolean) existsIndex.get(urlHash);
-         if (existsInIndex != null) return existsInIndex.booleanValue();
-         try {
-             if (urlHashCache.get(urlHash.getBytes()) != null) {
-                 existsIndex.put(urlHash, Boolean.TRUE);
-                 return true;
-             } else {
-                 existsIndex.put(urlHash, Boolean.FALSE);
-                 return false;
-             }
-         } catch (IOException e) {
-             return false;
-         }
-     }
- }
- 
- public long existsIndexSize() {
-     return this.existsIndex.size();
- }
-
- public boolean remove(String urlHash) {
-     synchronized (existsIndex) {
-         try {
-             Boolean existsInIndex = (Boolean) existsIndex.remove(urlHash);
-             if (existsInIndex == null) existsInIndex = Boolean.FALSE;
-             boolean existsInCache = (this.urlHashCache.remove(urlHash.getBytes()) != null);
-             existsIndex.put(urlHash, Boolean.FALSE);
-             return existsInIndex.booleanValue() || existsInCache;
-         } catch (IOException e) {
-             return false;
-         }
-     }
- }
-
- public void clearExistsIndex() {
-     synchronized (existsIndex) {
-         existsIndex.clear();
-     }
- }
 
  public static final int flagTypeID(String hash) {
      return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 32) >> 5;

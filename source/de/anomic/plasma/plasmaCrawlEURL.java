@@ -45,7 +45,6 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.Boolean;
 import java.net.URL;
 import java.util.Date;
 import java.util.Enumeration;
@@ -118,6 +117,22 @@ public class plasmaCrawlEURL extends indexURL {
 	return new Entry(hash);
     }
 
+    public boolean exists(String urlHash) {
+        try {
+            return (urlHashCache.get(urlHash.getBytes()) != null);
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    
+    public boolean remove(String urlHash) {
+        try {
+            return (this.urlHashCache.remove(urlHash.getBytes()) != null);
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    
     public void clearStack() {
         rejectedStack.clear();
     }
@@ -207,11 +222,8 @@ public class plasmaCrawlEURL extends indexURL {
                     kelondroBase64Order.enhancedCoder.encodeLong(this.trycount, urlRetryLength).getBytes(),
                     this.failreason.getBytes(),
                     this.flags.getBytes()
-		};
-                synchronized(existsIndex) {
-                    urlHashCache.put(entry);
-                    existsIndex.put(this.hash, Boolean.TRUE);
-                }
+		    };
+            urlHashCache.put(entry);
 	    } catch (IOException e) {
 		System.out.println("INTERNAL ERROR AT plasmaEURL:url2hash:" + e.toString());
 	    }

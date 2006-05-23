@@ -61,18 +61,20 @@ import java.util.TreeMap;
 public class kelondroObjectCache {
 
     private final  TreeMap cache;
-    private final  kelondroMScoreCluster ages;
+    private final  kelondroMScoreCluster ages, hasnot;
     private long   startTime;
     private int    maxSize;
     private long   maxAge;
     private long   minMem;
     private int    readHit, readMiss, writeUnique, writeDouble;
+    private int    hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble;
     private String name;
     
     public kelondroObjectCache(String name, int maxSize, long maxAge, long minMem) {
         this.name = name;
         this.cache = new TreeMap();
         this.ages  = new kelondroMScoreCluster();
+        this.hasnot  = new kelondroMScoreCluster();
         this.startTime = System.currentTimeMillis();
         this.maxSize = Math.max(maxSize, 1);
         this.maxAge = Math.max(maxAge, 10000);
@@ -81,6 +83,10 @@ public class kelondroObjectCache {
         this.readMiss = 0;
         this.writeUnique = 0;
         this.writeDouble = 0;
+        this.hasnotHit = 0;
+        this.hasnotMiss = 0;
+        this.hasnotUnique = 0;
+        this.hasnotDouble = 0;
     }
 
     public String getName() {
@@ -170,25 +176,75 @@ public class kelondroObjectCache {
         synchronized(cache) {
             prev = cache.put(key, value);
             ages.setScore(key, intTime(System.currentTimeMillis()));
+            hasnot.deleteScore(key);
         }
         if (prev == null) this.writeUnique++; else this.writeDouble++;
-        flush();
+        flushc();
     }
     
     public Object get(byte[] key) {
         if (key == null) return null;
         Object r = cache.get(new String(key));
-        flush();
-        if (r == null) this.readMiss++; else this.readHit++;
+        flushc();
+        if (r == null) {
+            this.readMiss++;
+        } else {
+            hasnot.deleteScore(key);
+            this.readHit++;
+        }
         return r;
     }
     
     public Object get(String key) {
         if (key == null) return null;
         Object r =  cache.get(key);
-        flush();
-        if (r == null) this.readMiss++; else this.readHit++;
+        flushc();
+        if (r == null) {
+            this.readMiss++;
+        } else {
+            hasnot.deleteScore(key);
+            this.readHit++;
+        }
         return r;
+    }
+    
+    public void hasnot(byte[] key) {
+        hasnot(new String(key));
+    }
+    
+    public void hasnot(String key) {
+        if (key == null) return;
+        int prev = 0;
+        synchronized(cache) {
+            cache.remove(key);
+            ages.deleteScore(key);
+            prev = hasnot.getScore(key);
+            hasnot.setScore(key, intTime(System.currentTimeMillis()));
+        }
+        if (prev == 0) this.hasnotUnique++; else this.hasnotDouble++;
+        flushh();
+    }
+    
+    public int has(byte[] key) {
+        return has(new String(key));
+    }
+    
+    public int has(String key) {
+        // returns a 3-value boolean:
+        //  1 = key definitely exists
+        // -1 = key definitely does not exist
+        //  0 = unknown, if key exists
+        if (key == null) return 0;
+        synchronized(cache) {
+            if (hasnot.getScore(key) > 0) {
+                this.hasnotHit++;
+                return -1;
+            }
+            this.hasnotMiss++;
+            if (cache.get(key) != null) return 1;
+        }
+        flushh();
+        return 0;
     }
     
     public void remove(byte[] key) {
@@ -200,34 +256,37 @@ public class kelondroObjectCache {
         synchronized(cache) {
             cache.remove(key);
             ages.deleteScore(key);
+            hasnot.setScore(key, intTime(System.currentTimeMillis()));
         }
-        flush();
     }
     
-    public void flush() {
+    public void flushc() {
         String k;
         synchronized(cache) {
             while ((ages.size() > 0) &&
-                   ((k = bestFlush()) != null) &&
-                   ((size() > maxSize) ||
+                   ((k = (String) ages.getMinObject()) != null) &&
+                   ((ages.size() > maxSize) ||
                     ((System.currentTimeMillis() - longEmit(ages.getScore(k))) > maxAge) ||
                     (Runtime.getRuntime().freeMemory() < minMem))
                   ) {
                 cache.remove(k);
                 ages.deleteScore(k);
-                //if (Runtime.getRuntime().freeMemory() < minMem) System.gc(); // prevent unnecessary loops
             }
         }
     }
     
-    public String bestFlush() {
-        if (cache.size() == 0) return null;
-        try {
-            synchronized (cache) {
-                return (String) ages.getMinObject(); // flush oldest entries
-            }
-        } catch (Exception e) {}
-        return null;
+    public void flushh() {
+        String k;
+        synchronized(cache) {
+            while ((hasnot.size() > 0) &&
+                    ((k = (String) hasnot.getMinObject()) != null) &&
+                    ((hasnot.size() > maxSize) ||
+                     ((System.currentTimeMillis() - longEmit(hasnot.getScore(k))) > maxAge) ||
+                     (Runtime.getRuntime().freeMemory() < minMem))
+                   ) {
+                 hasnot.deleteScore(k);
+                 
+             }
+        }
     }
-    
 }

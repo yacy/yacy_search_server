@@ -285,13 +285,13 @@ public class PerformanceMemory_p {
         */
         
         // other caching structures
-        long amount = sb.urlPool.errorURL.existsIndexSize();
+        long amount = 0;
         prop.put("eurl.existsIndexAmount",Long.toString(amount));
         prop.put("eurl.existsIndexSize",serverMemory.bytesToString(amount*(2*indexURL.urlHashLength+28)));
-        amount = sb.urlPool.noticeURL.existsIndexSize();
+        amount = 0;
         prop.put("nurl.existsIndexAmount",Long.toString(amount));
         prop.put("nurl.existsIndexSize",serverMemory.bytesToString(amount*(2*indexURL.urlHashLength+28)));
-        amount = sb.urlPool.loadedURL.existsIndexSize();
+        amount = 0;
         prop.put("lurl.existsIndexAmount",Long.toString(amount));
         prop.put("lurl.existsIndexSize",serverMemory.bytesToString(amount*(2*indexURL.urlHashLength+28)));
         

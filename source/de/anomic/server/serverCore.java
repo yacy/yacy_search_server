@@ -64,8 +64,6 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.channels.ClosedByInterruptException;
 import java.security.KeyStore;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -73,7 +71,6 @@ import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 

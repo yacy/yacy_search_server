@@ -45,7 +45,6 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.Boolean;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
@@ -561,10 +560,7 @@ public class plasmaCrawlNURL extends indexURL {
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
                 };
-                synchronized(existsIndex) {
-                    urlHashCache.put(entry);
-                    existsIndex.put(this.hash, Boolean.TRUE);
-                }
+                urlHashCache.put(entry);
             } catch (IOException e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", resetting NURL-DB");
                 e.printStackTrace();
@@ -622,23 +618,4 @@ public class plasmaCrawlNURL extends indexURL {
         }
     }
 
-    /*
-    public class kenum implements Enumeration {
-    // enumerates entry elements
-    kelondroTree.rowIterator i;
-    public kenum(boolean up, boolean rotating) throws IOException {
-            i = urlHashCache.rows(up, rotating);
-        }
-    public boolean hasMoreElements() {
-            return i.hasNext();
-        }
-    public Object nextElement() {
-            return new entry(new String(((byte[][]) i.next())[0]));
-        }
-    }
-    public Enumeration elements(boolean up, boolean rotating) throws IOException {
-    // enumerates entry elements
-    return new kenum(up, rotating);
-    }
-    */
 }

@@ -54,7 +54,6 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.Boolean;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -270,19 +269,41 @@ public final class plasmaCrawlLURL extends indexURL {
     }
 
     public boolean remove(String urlHash) {
-        boolean exists1 = super.remove(urlHash);
         for (int stack = 1; stack <= 6; stack++) {
             for (int i = getStackSize(stack) - 1; i >= 0; i--) {
                 if (getUrlHash(stack,i).equals(urlHash)) {
-                    boolean exits2 = removeStack(stack,i);
-                    exists1 = exists1 || exits2;
-                    return exists1;
+                    return removeStack(stack,i);
                 }
             }
         }
-        return exists1;
+        return false;
     }
 
+
+    public boolean exists(String urlHash) {
+            try {
+                if (urlHashCache.get(urlHash.getBytes()) != null) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (IOException e) {
+                return false;
+            }
+    }
+    
+    /*
+    public long existsIndexSize() {
+        return this.existsIndex.size();
+    }
+
+    public void clearExistsIndex() {
+        synchronized (existsIndex) {
+            existsIndex.clear();
+        }
+    }
+    */
+    
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
     private static String daydate(Date date) {
         if (date == null) {
@@ -498,11 +519,10 @@ public final class plasmaCrawlLURL extends indexURL {
         public void store() {
             // Check if there is a more recent Entry already in the DB
             if (this.stored) return;
-            synchronized(existsIndex) {
                 Entry oldEntry;
                 try {
                     if (exists(urlHash)) {
-                        oldEntry = new Entry (urlHash, null);
+                        oldEntry = new Entry(urlHash, null);
                     } else {
                         oldEntry = null;
                     }
@@ -554,11 +574,9 @@ public final class plasmaCrawlLURL extends indexURL {
                     urlHashCache.put(entry);
                     serverLog.logFine("PLASMA","STORED new LURL " + url.toString());
                     this.stored = true;
-                    existsIndex.put(urlHash, Boolean.TRUE);
                 } catch (Exception e) {
                     serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString(), e);
                 }
-            }
         }
 
         public String hash() {
