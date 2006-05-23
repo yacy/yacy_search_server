@@ -1730,9 +1730,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
              * is also returned in lurl
              */
             if ((page == null) || (page.get("delay") == null)) {
-                log.logInfo("CRAWL: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CAUSE: unknown (URL=" + urlEntry.url().toString() + ")");
-                if (remoteSeed != null)
+                log.logInfo("CRAWL: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CAUSE: unknown (URL=" + urlEntry.url().toString() + "). Removed peer.");
+                if (remoteSeed != null) {
                     yacyCore.peerActions.peerDeparture(remoteSeed);
+                }
                 return false;
             } else
                 try {
@@ -1756,10 +1757,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             return true;
                         } else {
                             log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " REJECTED. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + ")");
+                            remoteSeed.setFlagAcceptRemoteCrawl(false);
+                            yacyCore.seedDB.update(remoteSeed.hash, remoteSeed);
                             return false;
                         }
                     } else {
                         log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " DENIED. RESPONSE=" + response + ", CAUSE=" + page.get("reason") + ", URL=" + urlEntry.url().toString());
+                        remoteSeed.setFlagAcceptRemoteCrawl(false);
+                        yacyCore.seedDB.update(remoteSeed.hash, remoteSeed);
                         return false;
                     }
                 } catch (Exception e) {

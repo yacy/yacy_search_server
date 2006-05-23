@@ -81,7 +81,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     private static int root       = 0; // pointer for FHandles-array: pointer to root node
 
     // calibration of cache
-    public  static int defaultObjectCachePercent = 10;
+    public  static int defaultObjectCachePercent = 30;
     
     // class variables
     private Search writeSearchObj = new Search();
