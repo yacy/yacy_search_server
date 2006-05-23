@@ -202,7 +202,11 @@ public class kelondroObjectCache {
     
     public Object get(String key) {
         if (key == null) return null;
-        Object r =  cache.get(key);
+        Object r = null;
+        synchronized(cache) {
+            r = cache.get(key);
+            ages.setScore(key, intTime(System.currentTimeMillis())); // renew cache update time
+        }
         flushc();
         if (r == null) this.readMiss++; else this.readHit++;
         return r;
@@ -237,6 +241,7 @@ public class kelondroObjectCache {
         if (key == null) return 0;
         synchronized(cache) {
             if (hasnot.getScore(key) > 0) {
+                hasnot.setScore(key, intTime(System.currentTimeMillis())); // renew cache update time
                 this.hasnotHit++;
                 return -1;
             }
