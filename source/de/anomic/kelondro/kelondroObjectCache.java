@@ -66,8 +66,8 @@ public class kelondroObjectCache {
     private int    maxSize;
     private long   maxAge;
     private long   minMem;
-    private int    readHit, readMiss, writeUnique, writeDouble;
-    private int    hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble;
+    private int    readHit, readMiss, writeUnique, writeDouble, cacheFlush;
+    private int    hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotFlush;
     private String name;
     
     public kelondroObjectCache(String name, int maxSize, long maxAge, long minMem) {
@@ -83,10 +83,12 @@ public class kelondroObjectCache {
         this.readMiss = 0;
         this.writeUnique = 0;
         this.writeDouble = 0;
+        this.cacheFlush = 0;
         this.hasnotHit = 0;
         this.hasnotMiss = 0;
         this.hasnotUnique = 0;
         this.hasnotDouble = 0;
+        this.hasnotFlush = 0;
     }
 
     public String getName() {
@@ -133,7 +135,13 @@ public class kelondroObjectCache {
                 Integer.toString(readHit),
                 Integer.toString(readMiss),
                 Integer.toString(writeUnique),
-                Integer.toString(writeDouble)
+                Integer.toString(writeDouble),
+                Integer.toString(cacheFlush),
+                Integer.toString(hasnotHit),
+                Integer.toString(hasnotMiss),
+                Integer.toString(hasnotUnique),
+                Integer.toString(hasnotDouble),
+                Integer.toString(hasnotFlush)
                 };
     }
     
@@ -147,7 +155,13 @@ public class kelondroObjectCache {
                 Integer.toString(Integer.parseInt(a[5]) + Integer.parseInt(b[5])),
                 Integer.toString(Integer.parseInt(a[6]) + Integer.parseInt(b[6])),
                 Integer.toString(Integer.parseInt(a[7]) + Integer.parseInt(b[7])),
-                Integer.toString(Integer.parseInt(a[8]) + Integer.parseInt(b[8]))
+                Integer.toString(Integer.parseInt(a[8]) + Integer.parseInt(b[8])),
+                Integer.toString(Integer.parseInt(a[9]) + Integer.parseInt(b[9])),
+                Integer.toString(Integer.parseInt(a[10]) + Integer.parseInt(b[10])),
+                Integer.toString(Integer.parseInt(a[11]) + Integer.parseInt(b[11])),
+                Integer.toString(Integer.parseInt(a[12]) + Integer.parseInt(b[12])),
+                Integer.toString(Integer.parseInt(a[13]) + Integer.parseInt(b[13])),
+                Integer.toString(Integer.parseInt(a[14]) + Integer.parseInt(b[14]))
         };
     }
     
@@ -183,29 +197,14 @@ public class kelondroObjectCache {
     }
     
     public Object get(byte[] key) {
-        if (key == null) return null;
-        String keys = new String(key);
-        Object r = cache.get(keys);
-        flushc();
-        if (r == null) {
-            this.readMiss++;
-        } else {
-            hasnot.deleteScore(keys);
-            this.readHit++;
-        }
-        return r;
+        return get(new String(key));
     }
     
     public Object get(String key) {
         if (key == null) return null;
         Object r =  cache.get(key);
         flushc();
-        if (r == null) {
-            this.readMiss++;
-        } else {
-            hasnot.deleteScore(key);
-            this.readHit++;
-        }
+        if (r == null) this.readMiss++; else this.readHit++;
         return r;
     }
     
@@ -272,6 +271,7 @@ public class kelondroObjectCache {
                   ) {
                 cache.remove(k);
                 ages.deleteScore(k);
+                cacheFlush++;
             }
         }
     }
@@ -286,7 +286,7 @@ public class kelondroObjectCache {
                      (Runtime.getRuntime().freeMemory() < minMem))
                    ) {
                  hasnot.deleteScore(k);
-                 
+                 hasnotFlush++;
              }
         }
     }

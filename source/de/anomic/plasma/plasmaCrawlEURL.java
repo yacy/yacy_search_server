@@ -125,14 +125,6 @@ public class plasmaCrawlEURL extends indexURL {
         }
     }
     
-    public boolean remove(String urlHash) {
-        try {
-            return (this.urlHashCache.remove(urlHash.getBytes()) != null);
-        } catch (IOException e) {
-            return false;
-        }
-    }
-    
     public void clearStack() {
         rejectedStack.clear();
     }

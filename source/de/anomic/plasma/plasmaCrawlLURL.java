@@ -269,10 +269,12 @@ public final class plasmaCrawlLURL extends indexURL {
     }
 
     public boolean remove(String urlHash) {
+        if (!super.remove(urlHash)) return false;
         for (int stack = 1; stack <= 6; stack++) {
             for (int i = getStackSize(stack) - 1; i >= 0; i--) {
                 if (getUrlHash(stack,i).equals(urlHash)) {
-                    return removeStack(stack,i);
+                    removeStack(stack,i);
+                    return true;
                 }
             }
         }
