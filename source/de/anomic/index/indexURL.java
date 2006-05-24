@@ -434,8 +434,8 @@ public class indexURL {
      return urlHashCache.cacheNodeChunkSize();
  }
  
- public int[] cacheNodeFillStatus() {
-     return urlHashCache.cacheNodeFillStatus();
+ public int[] cacheNodeStatus() {
+     return urlHashCache.cacheNodeStatus();
  }
  
  public String[] cacheObjectStatus() {

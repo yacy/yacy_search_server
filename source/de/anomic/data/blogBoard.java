@@ -90,8 +90,8 @@ public class blogBoard {
         return datbase.cacheNodeChunkSize();
     }
     
-    public int[] dbCacheNodeFillStatus() {
-        return datbase.cacheNodeFillStatus();
+    public int[] dbCacheNodeStatus() {
+        return datbase.cacheNodeStatus();
     }
     
     public String[] dbCacheObjectStatus() {

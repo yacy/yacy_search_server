@@ -81,7 +81,7 @@
 <tr class="TableHeader" valign="bottom">
 <td class="small" rowspan="2">Database<br>&nbsp;</td>
 <td class="small" rowspan="2">DB&nbsp;Size<br>&nbsp;</td>
-<td class="small" colspan="3">Node Cache</td>
+<td class="small" colspan="4">Node Cache</td>
 <td class="small" colspan="4">Object Cache</td>
 <td class="small" colspan="5">Memory Occupation (KBytes)</td>
 <td class="small" rowspan="2">Description<br>&nbsp;</td>
@@ -91,10 +91,11 @@
 <td class="small">Chunk Size<br>high/med/low<br>(bytes)</td>
 <td class="small">Empty<br>(avail.)<br>Slots</td>
 <td class="small">Used: High, Medium, Low Prio</td>
+<td class="small">Node-Cache<br>Hit:Miss<br>Uniq:Doub<br>Flush<br></td>
 <td class="small">&nbsp;<br>Size<br>Max</td>
 <td class="small">&nbsp;<br>Size<br>Current</td>
-<td class="small">Cache<br>Hit:Miss<br>Unique:Double<br>Flush<br></td>
-<td class="small">Miss<br>Hit:Miss<br>Unique:Double<br>Flush<br></td>
+<td class="small">Hit-Cache<br>Hit:Miss<br>Uniq:Doub<br>Flush<br></td>
+<td class="small">Miss-Cache<br>Hit:Miss<br>Uniq:Doub<br>Flush<br></td>
 <td class="small">Used Now</td>
 <td class="small">Assigned Max</td>
 <td class="small">Default Max</td>
@@ -108,6 +109,7 @@
 <td class="small" align="center">#[chunkRWI]#</td>
 <td class="small" align="right">#[slempRWI]#</td>
 <td class="small" align="right">#[slhigRWI]#<br>#[slmedRWI]#<br>#[sllowRWI]#</td>
+<td class="small" align="right">#[slhittmissRWI]#<br>#[sluniqdoubRWI]#<br>#[slflushRWI]#</td>
 <td class="small" align="right">#[ochunkmaxRWI]#</td>
 <td class="small" align="right">#[ochunkcurRWI]#</td>
 <td class="small" align="right">#[ohittmissRWI]#<br>#[ouniqdoubRWI]#<br>#[oflushRWI]#</td>
@@ -128,6 +130,7 @@ cache will speed up crawls with a depth > 3.</td>
 <td class="small" align="center">#[chunkHTTP]#</td>
 <td class="small" align="right">#[slempHTTP]#</td>
 <td class="small" align="right">#[slhigHTTP]#<br>#[slmedHTTP]#<br>#[sllowHTTP]#</td>
+<td class="small" align="right">#[slhittmissHTTP]#<br>#[sluniqdoubHTTP]#<br>#[slflushHTTP]#</td>
 <td class="small" align="right">#[ochunkmaxHTTP]#</td>
 <td class="small" align="right">#[ochunkcurHTTP]#</td>
 <td class="small" align="right">#[ohittmissHTTP]#<br>#[ouniqdoubHTTP]#<br>#[oflushHTTP]#</td>
@@ -148,6 +151,7 @@ Increasing this cache will be most important for a fast proxy mode.</td>
 <td class="small" align="center">#[chunkLURL]#</td>
 <td class="small" align="right">#[slempLURL]#</td>
 <td class="small" align="right">#[slhigLURL]#<br>#[slmedLURL]#<br>#[sllowLURL]#</td>
+<td class="small" align="right">#[slhittmissLURL]#<br>#[sluniqdoubLURL]#<br>#[slflushLURL]#</td>
 <td class="small" align="right">#[ochunkmaxLURL]#</td>
 <td class="small" align="right">#[ochunkcurLURL]#</td>
 <td class="small" align="right">#[ohittmissLURL]#<br>#[ouniqdoubLURL]#<br>#[oflushLURL]#</td>
@@ -167,6 +171,7 @@ This cache is very important for a fast search process. Increasing the cache siz
 <td class="small" align="center">#[chunkNURL]#</td>
 <td class="small" align="right">#[slempNURL]#</td>
 <td class="small" align="right">#[slhigNURL]#<br>#[slmedNURL]#<br>#[sllowNURL]#</td>
+<td class="small" align="right">#[slhittmissNURL]#<br>#[sluniqdoubNURL]#<br>#[slflushNURL]#</td>
 <td class="small" align="right">#[ochunkmaxNURL]#</td>
 <td class="small" align="right">#[ochunkcurNURL]#</td>
 <td class="small" align="right">#[ohittmissNURL]#<br>#[ouniqdoubNURL]#<br>#[oflushNURL]#</td>
@@ -186,6 +191,7 @@ Increasing the cache size will result in faster double-check during URL recognit
 <td class="small" align="center">#[chunkEURL]#</td>
 <td class="small" align="right">#[slempEURL]#</td>
 <td class="small" align="right">#[slhigEURL]#<br>#[slmedEURL]#<br>#[sllowEURL]#</td>
+<td class="small" align="right">#[slhittmissEURL]#<br>#[sluniqdoubEURL]#<br>#[slflushEURL]#</td>
 <td class="small" align="right">#[ochunkmaxEURL]#</td>
 <td class="small" align="right">#[ochunkcurEURL]#</td>
 <td class="small" align="right">#[ohittmissEURL]#<br>#[ouniqdoubEURL]#<br>#[oflushEURL]#</td>
@@ -205,6 +211,7 @@ Increasing the cache size will most probably speed up crawling slightly, but not
 <td class="small" align="center">#[chunkDHT]#</td>
 <td class="small" align="right">#[slempDHT]#</td>
 <td class="small" align="right">#[slhigDHT]#<br>#[slmedDHT]#<br>#[sllowDHT]#</td>
+<td class="small" align="right">#[slhittmissDHT]#<br>#[sluniqdoubDHT]#<br>#[slflushDHT]#</td>
 <td class="small" align="right">#[ochunkmaxDHT]#</td>
 <td class="small" align="right">#[ochunkcurDHT]#</td>
 <td class="small" align="right">#[ohittmissDHT]#<br>#[ouniqdoubDHT]#<br>#[oflushDHT]#</td>
@@ -225,6 +232,7 @@ Increasing this cache may speed up many functions, but we need to test this to s
 <td class="small" align="center">#[chunkMessage]#</td>
 <td class="small" align="right">#[slempMessage]#</td>
 <td class="small" align="right">#[slhigMessage]#<br>#[slmedMessage]#<br>#[sllowMessage]#</td>
+<td class="small" align="right">#[slhittmissMessage]#<br>#[sluniqdoubMessage]#<br>#[slflushMessage]#</td>
 <td class="small" align="right">#[ochunkmaxMessage]#</td>
 <td class="small" align="right">#[ochunkcurMessage]#</td>
 <td class="small" align="right">#[ohittmissMessage]#<br>#[ouniqdoubMessage]#<br>#[oflushMessage]#</td>
@@ -243,6 +251,7 @@ Increasing this cache may speed up many functions, but we need to test this to s
 <td class="small" align="center">#[chunkWiki]#</td>
 <td class="small" align="right">#[slempWiki]#</td>
 <td class="small" align="right">#[slhigWiki]#<br>#[slmedWiki]#<br>#[sllowWiki]#</td>
+<td class="small" align="right">#[slhittmissWiki]#<br>#[sluniqdoubWiki]#<br>#[slflushWiki]#</td>
 <td class="small" align="right">#[ochunkmaxWiki]#</td>
 <td class="small" align="right">#[ochunkcurWiki]#</td>
 <td class="small" align="right">#[ohittmissWiki]#<br>#[ouniqdoubWiki]#<br>#[oflushWiki]#</td>
@@ -263,6 +272,7 @@ Increasing this cache may speed up access to the wiki pages.</td>
 <td class="small" align="center">#[chunkBlog]#</td>
 <td class="small" align="right">#[slempBlog]#</td>
 <td class="small" align="right">#[slhigBlog]#<br>#[slmedBlog]#<br>#[sllowBlog]#</td>
+<td class="small" align="right">#[slhittmissBlog]#<br>#[sluniqdoubBlog]#<br>#[slflushBlog]#</td>
 <td class="small" align="right">#[ochunkmaxBlog]#</td>
 <td class="small" align="right">#[ochunkcurBlog]#</td>
 <td class="small" align="right">#[ohittmissBlog]#<br>#[ouniqdoubBlog]#<br>#[oflushBlog]#</td>
@@ -282,6 +292,7 @@ Increasing this cache may speed up access to the Blog.</td>
 <td class="small" align="center">#[chunkNews]#</td>
 <td class="small" align="right">#[slempNews]#</td>
 <td class="small" align="right">#[slhigNews]#<br>#[slmedNews]#<br>#[sllowNews]#</td>
+<td class="small" align="right">#[slhittmissNews]#<br>#[sluniqdoubNews]#<br>#[slflushNews]#</td>
 <td class="small" align="right">#[ochunkmaxNews]#</td>
 <td class="small" align="right">#[ochunkcurNews]#</td>
 <td class="small" align="right">#[ohittmissNews]#<br>#[ouniqdoubNews]#<br>#[oflushNews]#</td>
@@ -301,6 +312,7 @@ Increasing this cache may speed up the peer-ping.</td>
 <td class="small" align="center">#[chunkRobots]#</td>
 <td class="small" align="right">#[slempRobots]#</td>
 <td class="small" align="right">#[slhigRobots]#<br>#[slmedRobots]#<br>#[sllowRobots]#</td>
+<td class="small" align="right">#[slhittmissRobots]#<br>#[sluniqdoubRobots]#<br>#[slflushRobots]#</td>
 <td class="small" align="right">#[ochunkmaxRobots]#</td>
 <td class="small" align="right">#[ochunkcurRobots]#</td>
 <td class="small" align="right">#[ohittmissRobots]#<br>#[ouniqdoubRobots]#<br>#[oflushRobots]#</td>
@@ -320,6 +332,7 @@ Increasing this cache may speed up validation if crawling of the URL is allowed.
 <td class="small" align="center">#[chunkProfiles]#</td>
 <td class="small" align="right">#[slempProfiles]#</td>
 <td class="small" align="right">#[slhigProfiles]#<br>#[slmedProfiles]#<br>#[sllowProfiles]#</td>
+<td class="small" align="right">#[slhittmissProfiles]#<br>#[sluniqdoubProfiles]#<br>#[slflushProfiles]#</td>
 <td class="small" align="right">#[ochunkmaxProfiles]#</td>
 <td class="small" align="right">#[ochunkcurProfiles]#</td>
 <td class="small" align="right">#[ohittmissProfiles]#<br>#[ouniqdoubProfiles]#<br>#[oflushProfiles]#</td>
@@ -334,7 +347,7 @@ Increasing this cache may speed up crawling, but not much space is needed, so th
 </tr>
 
 <tr class="TableCellSummary">
-<td class="small" align="left" colspan="9">Totals</td>
+<td class="small" align="left" colspan="10">Totals</td>
 <td class="small" align="right">#[usedTotal]# MB</td>
 <td class="small" align="right">#[currTotal]# MB</td>
 <td class="small" align="right">#[dfltTotal]# MB</td>
@@ -344,7 +357,7 @@ Increasing this cache may speed up crawling, but not much space is needed, so th
 </tr>
 
 <tr class="TableCellLight">
-<td class="small" align="right" colspan="10">Re-Configuration:</td>
+<td class="small" align="right" colspan="11">Re-Configuration:</td>
 <td class="small" align="center"><input type="submit" name="setCustom" value="Set"><br>these<br>custom<br>values<br>&nbsp;</td>
 <td class="small" align="center"><input type="submit" name="setDefault" value="Set"><br>all<br>default<br>values<br>&nbsp;</td>
 <td class="small" align="center"><input type="submit" name="setGood" value="Set"><br>all<br>recom-<br>mended values</td>

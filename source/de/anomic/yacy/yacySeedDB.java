@@ -181,11 +181,11 @@ public final class yacySeedDB {
         return i;
     }
     
-    public int[] dbCacheNodeFillStatus() {
-        int[] ac = seedActiveDB.cacheNodeFillStatus();
-        int[] pa = seedPassiveDB.cacheNodeFillStatus();
-        int[] po = seedPotentialDB.cacheNodeFillStatus();
-        return new int[]{ac[0] + pa[0] + po[0], ac[1] + pa[1] + po[1], ac[2] + pa[2] + po[2], ac[3] + pa[3] + po[3]};
+    public int[] dbCacheNodeStatus() {
+        int[] ac = seedActiveDB.cacheNodeStatus();
+        int[] pa = seedPassiveDB.cacheNodeStatus();
+        int[] po = seedPotentialDB.cacheNodeStatus();
+        return kelondroRecords.cacheCombinedStatus(new int[][]{ac, pa, po}, 3);
     }
     
     public String[] dbCacheObjectStatus() {

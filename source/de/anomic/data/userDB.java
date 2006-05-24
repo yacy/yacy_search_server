@@ -95,8 +95,8 @@ public final class userDB {
         return userTable.cacheNodeChunkSize();
     }    
     
-    public int[] dbCacheNodeFillStatus() {
-        return userTable.cacheNodeFillStatus();
+    public int[] dbCacheNodeStatus() {
+        return userTable.cacheNodeStatus();
     }    
     
     void resetDatabase() {

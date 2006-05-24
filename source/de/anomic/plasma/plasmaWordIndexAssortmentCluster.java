@@ -278,18 +278,15 @@ public final class plasmaWordIndexAssortmentCluster {
         return a;
     }
     
-    public int[] cacheFillStatusCml() {
-        int[] a, cml = new int[]{0, 0, 0, 0};
-        for (int i = 0; i < clusterCount; i++) {
-            a = assortments[i].cacheNodeFillStatus();
-            for (int j = 0; j < 4; j++) cml[j] += a[j];
-        }
-        return cml;
+    public int[] cacheNodeStatus() {
+        int[][] a = new int[assortments.length][];
+        for (int i = assortments.length - 1; i >= 0; i--) a[i] = assortments[i].cacheNodeStatus();
+        return kelondroRecords.cacheCombinedStatus(a, assortments.length);
     }
     
     public String[] cacheObjectStatus() {
         String[][] a = new String[assortments.length][];
-        for (int i = 0; i < assortments.length; i++) a[i] = assortments[i].dbCacheObjectStatus();
+        for (int i = assortments.length - 1; i >= 0; i--) a[i] = assortments[i].dbCacheObjectStatus();
         return kelondroObjectCache.combinedStatus(a, a.length);
     }
     

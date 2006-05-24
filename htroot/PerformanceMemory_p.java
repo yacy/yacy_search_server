@@ -48,9 +48,7 @@ import java.util.Map;
 import java.io.File;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverFileUtils;
@@ -166,73 +164,73 @@ public class PerformanceMemory_p {
     
         req = sb.wordIndex.size();
         chk = sb.wordIndex.assortmentsCacheChunkSizeAvg();
-        slt = sb.wordIndex.assortmentsCacheFillStatusCml();
+        slt = sb.wordIndex.assortmentsCacheNodeStatus();
         ost = sb.wordIndex.assortmentsCacheObjectStatus();
         putprop(prop, env, "RWI", set);
         
         req = sb.cacheManager.dbSize();
         chk = sb.cacheManager.dbCacheChunkSize();
-        slt = sb.cacheManager.dbCacheFillStatus();
+        slt = sb.cacheManager.dbCacheStatus();
         ost = sb.cacheManager.dbCacheObjectStatus();
         putprop(prop, env, "HTTP", set);
         
         req = sb.urlPool.loadedURL.size();
         chk = sb.urlPool.loadedURL.cacheNodeChunkSize();
-        slt = sb.urlPool.loadedURL.cacheNodeFillStatus();
+        slt = sb.urlPool.loadedURL.cacheNodeStatus();
         ost = sb.urlPool.loadedURL.cacheObjectStatus();
         putprop(prop, env, "LURL", set);
         
         req = sb.urlPool.noticeURL.size();
         chk = sb.urlPool.noticeURL.cacheNodeChunkSize();
-        slt = sb.urlPool.noticeURL.cacheNodeFillStatus();
+        slt = sb.urlPool.noticeURL.cacheNodeStatus();
         ost = sb.urlPool.noticeURL.cacheObjectStatus();
         putprop(prop, env, "NURL", set);
         
         req = sb.urlPool.errorURL.size();
         chk = sb.urlPool.errorURL.cacheNodeChunkSize();
-        slt = sb.urlPool.errorURL.cacheNodeFillStatus();
+        slt = sb.urlPool.errorURL.cacheNodeStatus();
         ost = sb.urlPool.errorURL.cacheObjectStatus();
         putprop(prop, env, "EURL", set);
         
         req = yacyCore.seedDB.sizeConnected() + yacyCore.seedDB.sizeDisconnected() + yacyCore.seedDB.sizePotential();
         chk = yacyCore.seedDB.dbCacheNodeChunkSize();
-        slt = yacyCore.seedDB.dbCacheNodeFillStatus();
+        slt = yacyCore.seedDB.dbCacheNodeStatus();
         ost = yacyCore.seedDB.dbCacheObjectStatus();
         putprop(prop, env, "DHT", set);
         
         req = sb.messageDB.size();
         chk = sb.messageDB.dbCacheNodeChunkSize();
-        slt = sb.messageDB.dbCacheNodeFillStatus();
+        slt = sb.messageDB.dbCacheNodeStatus();
         ost = sb.messageDB.dbCacheObjectStatus();
         putprop(prop, env, "Message", set);
         
         req = sb.wikiDB.sizeOfTwo();
         chk = sb.wikiDB.dbCacheNodeChunkSize();
-        slt = sb.wikiDB.dbCacheNodeFillStatus();
+        slt = sb.wikiDB.dbCacheNodeStatus();
         ost = sb.wikiDB.dbCacheObjectStatus();
         putprop(prop, env, "Wiki", set);
         
         req = sb.blogDB.size();
         chk = sb.blogDB.dbCacheNodeChunkSize();
-        slt = sb.blogDB.dbCacheNodeFillStatus();
+        slt = sb.blogDB.dbCacheNodeStatus();
         ost = sb.blogDB.dbCacheObjectStatus();
         putprop(prop, env, "Blog", set);
         
         req = yacyCore.newsPool.dbSize();
         chk = yacyCore.newsPool.dbCacheNodeChunkSize();
-        slt = yacyCore.newsPool.dbCacheNodeFillStatus();
+        slt = yacyCore.newsPool.dbCacheNodeStatus();
         ost = yacyCore.newsPool.dbCacheObjectStatus();
         putprop(prop, env, "News", set);
         
         req = plasmaSwitchboard.robots.size();
         chk = plasmaSwitchboard.robots.dbCacheNodeChunkSize();
-        slt = plasmaSwitchboard.robots.dbCacheNodeFillStatus();
+        slt = plasmaSwitchboard.robots.dbCacheNodeStatus();
         ost = plasmaSwitchboard.robots.dbCacheObjectStatus();
         putprop(prop, env, "Robots", set);
         
         req = sb.profiles.size();
         chk = sb.profiles.dbCacheNodeChunkSize();
-        slt = sb.profiles.dbCacheNodeFillStatus();
+        slt = sb.profiles.dbCacheNodeStatus();
         ost = sb.profiles.dbCacheObjectStatus();
         putprop(prop, env, "Profiles", set);
         
@@ -296,10 +294,13 @@ public class PerformanceMemory_p {
         if (set.equals("setBest")) env.setConfig("ramCache" + db, bst);
         prop.put("chunk" + db, chk[2] + "/" + chk[1] + "/" + chk[0]);
         prop.put("slreq" + db, req);
-        prop.put("slemp" + db, slt[0]);
+        prop.put("slemp" + db, slt[0] - slt[1] - slt[2] - slt[3]);
         prop.put("slhig" + db, slt[1]);
         prop.put("slmed" + db, slt[2]);
         prop.put("sllow" + db, slt[3]);
+        prop.put("slhittmiss" + db, slt[4] + ":" + slt[5]);
+        prop.put("sluniqdoub" + db, slt[6] + ":" + slt[7]);
+        prop.put("slflush" + db, slt[8]);
         prop.put("ochunkmax" + db, ost[0]);
         prop.put("ochunkcur" + db, ost[1]);
         prop.put("ohittmiss" + db, ost[5] + ":" + ost[6]);

@@ -207,8 +207,8 @@ public final class plasmaHTCache {
         return this.responseHeaderDB.cacheNodeChunkSize();
     }
 
-    public int[] dbCacheFillStatus() {
-        return this.responseHeaderDB.cacheNodeFillStatus();
+    public int[] dbCacheStatus() {
+        return this.responseHeaderDB.cacheNodeStatus();
     }
 
     public String[] dbCacheObjectStatus() {

@@ -110,10 +110,10 @@ public class wikiBoard {
         return i;
     }
     
-    public int[] dbCacheNodeFillStatus() {
-        int[] a = datbase.cacheNodeFillStatus();
-        int[] b = bkpbase.cacheNodeFillStatus();
-        return new int[]{a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]};
+    public int[] dbCacheNodeStatus() {
+        int[] a = datbase.cacheNodeStatus();
+        int[] b = bkpbase.cacheNodeStatus();
+        return kelondroRecords.cacheCombinedStatus(new int[][]{a, b}, 2);
     }
     
     public String[] dbCacheObjectStatus() {

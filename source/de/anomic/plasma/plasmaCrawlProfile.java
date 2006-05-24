@@ -82,8 +82,8 @@ public class plasmaCrawlProfile {
         return profileTable.cacheNodeChunkSize();
     }    
     
-    public int[] dbCacheNodeFillStatus() {
-        return profileTable.cacheNodeFillStatus();
+    public int[] dbCacheNodeStatus() {
+        return profileTable.cacheNodeStatus();
     }    
     
     public String[] dbCacheObjectStatus() {

@@ -90,8 +90,8 @@ public class messageBoard {
         return database.cacheNodeChunkSize();
     }
     
-    public int[] dbCacheNodeFillStatus() {
-        return database.cacheNodeFillStatus();
+    public int[] dbCacheNodeStatus() {
+        return database.cacheNodeStatus();
     }
     
     public String[] dbCacheObjectStatus() {
