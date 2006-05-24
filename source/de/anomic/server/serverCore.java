@@ -47,6 +47,7 @@ package de.anomic.server;
 
 // standard server
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -81,6 +82,7 @@ import de.anomic.http.httpc;
 import de.anomic.icap.icapd;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.PKCS12Tool;
 import de.anomic.urlRedirector.urlRedirectord;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -1327,12 +1329,54 @@ public final class serverCore extends serverAbstractThread implements serverThre
     private SSLSocketFactory initSSLFactory() {
         
         // getting the keystore file name
-        String keyStoreFileName = this.switchboard.getConfig("keyStore", "");
-        if (keyStoreFileName.length() == 0) return null;
+        String keyStoreFileName = this.switchboard.getConfig("keyStore", "").trim();        
         
         // getting the keystore pwd
-        String keyStorePwd = this.switchboard.getConfig("keyStorePassword", "");
-        if (keyStorePwd.length() == 0) return null;        
+        String keyStorePwd = this.switchboard.getConfig("keyStorePassword", "").trim();
+        
+        // take a look if we have something to import
+        String pkcs12ImportFile = this.switchboard.getConfig("pkcs12ImportFile", "").trim();
+        if (pkcs12ImportFile.length() > 0) {
+            this.log.logInfo("Import certificates from import file '" + pkcs12ImportFile + "'.");
+            
+            try {
+                // getting the password
+                String pkcs12ImportPwd = this.switchboard.getConfig("pkcs12ImportPwd", "").trim();
+
+                // creating tool to import cert
+                PKCS12Tool pkcsTool = new PKCS12Tool(pkcs12ImportFile,pkcs12ImportPwd);
+
+                // creating a new keystore file
+                if (keyStoreFileName.length() == 0) {
+                    // using the default keystore name
+                    keyStoreFileName = "DATA/SETTINGS/myPeerKeystore";
+                    
+                    // creating an empty java keystore
+                    KeyStore ks = KeyStore.getInstance("JKS");
+                    ks.load(null,keyStorePwd.toCharArray());
+                    FileOutputStream ksOut = new FileOutputStream(keyStoreFileName);
+                    ks.store(ksOut, keyStorePwd.toCharArray());
+                    ksOut.close();
+                    
+                    // storing path to keystore into config file
+                    this.switchboard.setConfig("keyStore", keyStoreFileName);
+                }
+
+                // importing certificate
+                pkcsTool.importToJKS(keyStoreFileName, keyStorePwd);
+                
+                // removing entries from config file
+                this.switchboard.setConfig("pkcs12ImportFile", "");
+                this.switchboard.setConfig("keyStorePassword", "");
+                
+                // deleting original import file
+                // TODO: should we do this
+                
+            } catch (Exception e) {
+                this.log.logSevere("Unable to import certificate from import file '" + pkcs12ImportFile + "'.",e);
+            }
+        } else if (keyStoreFileName.length() == 0) return null;
+        
         
         // get the ssl context
         try {

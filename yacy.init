@@ -18,17 +18,35 @@ port = 8080
 # SSL support:
 # With this you can access your peer using https://localhost:8080
 # 
-# For testing purposes, you can create a keystore with a self-signed certificate, 
-# using the following command:
-# 
-# |> keytool -keystore mySrvKeystore -genkey -keyalg RSA -alias mycert
+# There are two possibilities to specify which certificate should
+# be used by YaCy.
 #
-# Then configure the keyStore properties accordingly, e.g.
-# keyStore = c:/yacy/DATA/SETTINGS/mySrvKeystore 
-# keyStorePassword = mypwd
+# 1) Create a new Certificate:
+#
+#    *) For testing purposes, you can create a keystore with a self-signed certificate, 
+#       using the following command:
+#       C:\> keytool -keystore mySrvKeystore -genkey -keyalg RSA -alias mycert
+#
+#    *) Then configure the keyStoreXXXX properties accordingly, e.g.
+#       keyStore = c:/yacy/DATA/SETTINGS/mySrvKeystore 
+#       keyStorePassword = mypwd
+#
+# 2) Import an existing certificate:
+# 
+#    Alternatively you can import an existing certificate in pkcs12 format into
+#    the keystore.
+#    
+#    This can be done by setting the pkcs12XXX properties accordingly, e.g.
+#    pkcs12ImportFile = c:/temp/keystore.pkcs12
+#    pkcs12ImportPwd = test
+#
+#    If the property keyStore is not specified, then a new keystore file 
+#    DATA/SETTINGS/myPeerKeystore will be created.
 #
 keyStore =
 keyStorePassword =
+pkcs12ImportFile = 
+pkcs12ImportPwd = 
 
 # peer-to-peer construction for distributed search
 # we have several stages:
