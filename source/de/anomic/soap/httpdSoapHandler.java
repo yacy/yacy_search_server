@@ -35,7 +35,7 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSwitch;
 
 /**
- * Class to accept SOAP Requests and invoke the desired {@link de.anomic.http.httpdSoapService soapService}.
+ * Class to accept SOAP Requests and invoke the desired soapService.
  * An example how to do a soap call from php:
  * <code>
  * <?php
@@ -81,7 +81,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
       +     "xmlns=\"http://xml.apache.org/axis/wsdd/\" " 
       +     "xmlns:java=\"http://xml.apache.org/axis/wsdd/providers/java\" >"
       +     "<service name=\"index\" provider=\"java:RPC\" >"
-      +         "<parameter name=\"className\" value=\"" + httpdSoapService.class.getName() + "\" />"
+      +         "<parameter name=\"className\" value=\"de.anomic.soap.httpdSoapService\" />"
       +         "<parameter name=\"allowedMethods\" value=\"*\" />"
       +     "</service>"
       + "</deployment>";   

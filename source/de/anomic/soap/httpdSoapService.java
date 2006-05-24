@@ -28,7 +28,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 /**
- * SOAP Service Class that will be invoked by the {@link de.anomic.http.httpdSoapHandler}
+ * SOAP Service Class that will be invoked by the httpdSoapHandler
  * 
  * @author Martin Thelian
  */

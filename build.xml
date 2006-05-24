@@ -669,7 +669,21 @@
 	
 <!-- create the html-documentation from javadoc  -->
 <target name="create-doc" description="Create the javadoc-HTML-Pages">
-  <javadoc destdir="doc/api" version="no" use="yes" encoding="iso-8859-1" windowtitle="YaCy API Documentation">
+  <javadoc destdir="doc/api"
+	       author="true"
+	       version="true"
+	       use="false"
+           encoding="iso-8859-1"
+	       windowtitle="YaCy API Documentation">
+    <classpath>
+        <fileset dir="${lib}">
+          <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${libx}">
+          <include name="**/*.jar"/>
+        </fileset>      	
+    	<pathelement location="${build}"/>
+    </classpath>  	
     <fileset dir="source" defaultexcludes="yes">
       <include name="**/*.java" />
     </fileset>
