@@ -100,14 +100,14 @@ public final class kelondroStack extends kelondroRecords {
         // memorize settings to this file
         File f = new File(stack.filename);
         long bz = stack.cacheNodeStatus()[0] * stack.cacheNodeChunkSize(true);
-        int[] cols = stack.COLWIDTHS;
+        kelondroRow row = stack.row();
         
         // close and delete the file
         try {stack.close();} catch (Exception e) {};
         if (f.exists()) f.delete();
 
         // re-open a database with same settings as before
-        return new kelondroStack(f, bz, cols, true);
+        return new kelondroStack(f, bz, row.widths(), true);
     }
     
     public class Counter implements Iterator {

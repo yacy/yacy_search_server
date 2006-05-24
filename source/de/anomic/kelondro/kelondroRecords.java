@@ -143,7 +143,7 @@ public class kelondroRecords {
     private   usageControl      USAGE;       // counter for used and re-use records and pointer to free-list
     private   short             OHBYTEC;     // number of extra bytes in each node
     private   short             OHHANDLEC;   // number of handles in each node
-    protected int               COLWIDTHS[]; // array with widths of columns
+    private   kelondroRow       ROW;         // array with widths of columns
     private   Handle            HANDLES[];   // array with handles
     private   byte[]            TXTPROPS[];  // array with text properties
     private   int               TXTPROPW;    // size of a single TXTPROPS element
@@ -264,7 +264,7 @@ public class kelondroRecords {
         USAGE     = new usageControl(0, 0, new Handle(NUL));
         OHBYTEC   = ohbytec;
         OHHANDLEC = ohhandlec;
-        COLWIDTHS = columns;
+        ROW = new kelondroRow(columns);
         HANDLES   = new Handle[FHandles];
         for (int i = 0; i < FHandles; i++) HANDLES[i] = new Handle(NUL);
         TXTPROPS  = new byte[txtProps][];
@@ -276,7 +276,7 @@ public class kelondroRecords {
         entryFile.writeByte(POS_BUSY, 0); // unlock: default
         entryFile.writeShort(POS_PORT, 4444); // default port (not used yet)
         entryFile.write(POS_DESCR, "--AnomicRecords file structure--".getBytes());
-        entryFile.writeShort(POS_COLUMNS, this.COLWIDTHS.length);
+        entryFile.writeShort(POS_COLUMNS, this.ROW.columns());
         entryFile.writeShort(POS_OHBYTEC, OHBYTEC);
         entryFile.writeShort(POS_OHHANDLEC, OHHANDLEC);
         entryFile.writeInt(POS_USEDC, this.USAGE.USEDC);
@@ -290,8 +290,8 @@ public class kelondroRecords {
         entryFile.writeInt(POS_TXTPROPW, txtPropWidth);
 
         // write configuration arrays
-        for (int i = 0; i < this.COLWIDTHS.length; i++) {
-            entryFile.writeInt(POS_COLWIDTHS + 4 * i, COLWIDTHS[i]);
+        for (int i = 0; i < this.ROW.columns(); i++) {
+            entryFile.writeInt(POS_COLWIDTHS + 4 * i, this.ROW.width(i));
         }
         for (int i = 0; i < this.HANDLES.length; i++) {
             entryFile.writeInt(POS_HANDLES + 4 * i, NUL);
@@ -388,7 +388,7 @@ public class kelondroRecords {
         this.OHBYTEC = entryFile.readShort(POS_OHBYTEC);
         this.OHHANDLEC = entryFile.readShort(POS_OHHANDLEC);
 
-        this.COLWIDTHS = new int[entryFile.readShort(POS_COLUMNS)];
+        int[] COLWIDTHS = new int[entryFile.readShort(POS_COLUMNS)];
         this.HANDLES = new Handle[entryFile.readInt(POS_INTPROPC)];
         this.TXTPROPS = new byte[entryFile.readInt(POS_TXTPROPC)][];
         this.TXTPROPW = entryFile.readInt(POS_TXTPROPW);
@@ -404,6 +404,7 @@ public class kelondroRecords {
         for (int i = 0; i < COLWIDTHS.length; i++) {
             COLWIDTHS[i] = entryFile.readInt(POS_COLWIDTHS + 4 * i);
         }
+        this.ROW = new kelondroRow(COLWIDTHS);
         for (int i = 0; i < HANDLES.length; i++) {
             HANDLES[i] = new Handle(entryFile.readInt(POS_HANDLES + 4 * i));
         }
@@ -416,9 +417,9 @@ public class kelondroRecords {
         this.overhead = OHBYTEC + 4 * OHHANDLEC;
         this.recordsize = this.overhead;
         this.objectsize = 0;
-        for (int i = 0; i < COLWIDTHS.length; i++) this.objectsize += COLWIDTHS[i];
+        for (int i = 0; i < this.ROW.columns(); i++) this.objectsize += this.ROW.width(i);
         this.recordsize = this.overhead + this.objectsize;
-        this.headchunksize = this.overhead + COLWIDTHS[0];
+        this.headchunksize = this.overhead + this.ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
     }
     
@@ -741,11 +742,11 @@ public class kelondroRecords {
             
             // set values
             if (this.handle.index != NUL) {
-                setValue(row[0], COLWIDTHS[0], headChunk, overhead);
+                setValue(row[0], ROW.width(0), headChunk, overhead);
                 int offset = 0;
                 for (int i = 1; i < row.length; i++) {
-                    setValue(row[i], COLWIDTHS[i], tailChunk, offset);
-                    offset +=COLWIDTHS[i];
+                    setValue(row[i], ROW.width(i), tailChunk, offset);
+                    offset +=ROW.width(i);
                 } 
             }
             this.headChanged = true;
@@ -755,7 +756,7 @@ public class kelondroRecords {
 
         public byte[] getKey() {
             // read key
-            return trimCopy(headChunk, overhead, COLWIDTHS[0]);
+            return trimCopy(headChunk, overhead, ROW.width(0));
         }
 
         public byte[][] getValues() throws IOException {
@@ -768,16 +769,16 @@ public class kelondroRecords {
             }
 
             // create return value
-            byte[][] values = new byte[COLWIDTHS.length][];
+            byte[][] values = new byte[ROW.columns()][];
 
             // read key
-            values[0] = trimCopy(headChunk, overhead, COLWIDTHS[0]);
+            values[0] = trimCopy(headChunk, overhead, ROW.width(0));
 
             // read remaining values
             int offset = 0;
-            for (int i = 1; i < COLWIDTHS.length; i++) {
-                values[i] = trimCopy(tailChunk, offset, COLWIDTHS[i]);
-                offset += COLWIDTHS[i];
+            for (int i = 1; i < ROW.columns(); i++) {
+                values[i] = trimCopy(tailChunk, offset, ROW.width(i));
+                offset += ROW.width(i);
             }
 
             return values;
@@ -1018,13 +1019,17 @@ public class kelondroRecords {
         for (int j = 0; j < chunk.length; j++) System.out.print(chunk[j] + ",");
     }
 
+    public synchronized kelondroRow row() {
+        return this.ROW;
+    }
+    
     public synchronized int columns() {
-        return this.COLWIDTHS.length;
+        return this.ROW.columns();
     }
 
     public synchronized int columnSize(int column) {
-        if ((column < 0) || (column >= this.COLWIDTHS.length)) return -1;
-        return this.COLWIDTHS[column];
+        if ((column < 0) || (column >= this.ROW.columns())) return -1;
+        return ROW.width(column);
     }
 
     private final long seekpos(Handle handle) {
@@ -1245,8 +1250,8 @@ public class kelondroRecords {
         System.out.println("  Data Offset: 0x" + Long.toHexString(POS_NODES));
         System.out.println("--");
         System.out.println("RECORDS");
-        System.out.print("  Columns    : " + columns() + " columns  {" + COLWIDTHS[0]);
-        for (int i = 1; i < columns(); i++) System.out.print(", " + COLWIDTHS[i]);
+        System.out.print("  Columns    : " + columns() + " columns  {" + ROW.width(0));
+        for (int i = 1; i < columns(); i++) System.out.print(", " + ROW.width(i));
         System.out.println("}");
         System.out.println("  Overhead   : " + this.overhead + " bytes  (" + OHBYTEC + " OH bytes, " + OHHANDLEC + " OH Handles)");
         System.out.println("  Recordsize : " + this.recordsize + " bytes");
