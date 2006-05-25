@@ -42,6 +42,7 @@
 
 package de.anomic.plasma;
 
+import java.lang.StringBuffer;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
@@ -147,8 +148,12 @@ public class plasmaDHTTransfer extends Thread {
             if (this.isAborted()) return;
 
             // we have lost the connection to the remote peer. Adding peer to disconnected list
-            this.log.logWarning("Index transfer to peer " + this.seed.getName() + ":" + this.seed.hash + " failed:'" + error + "', disconnecting peer");
-            yacyCore.peerActions.peerDeparture(this.seed);
+            StringBuffer failMessage = new StringBuffer("Index transfer to peer " + this.seed.getName() + ":" + this.seed.hash + " failed:'" + error + "'");
+            if (!error.equals("busy")) {
+                yacyCore.peerActions.peerDeparture(this.seed);
+                failMessage.append(", disconnected peer");
+            }
+            this.log.logWarning(failMessage.toString());
 
             // if the retry counter limit was not exceeded we'll retry it in a few seconds
             this.transferStatusMessage = "Disconnected peer: " + ((retryCount > 5) ? error + ". Transfer aborted" : "Retry " + retryCount);
