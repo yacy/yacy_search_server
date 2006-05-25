@@ -499,10 +499,10 @@ xpstopw=true
 ramCacheRWI     =  8388608
 
 # ram cache for responseHeader.db
-ramCacheHTTP    =  4194304
+ramCacheHTTP    =  1048576
 
 # ram cache for urlHash.db
-ramCacheLURL    =  4194304
+ramCacheLURL    =  8388608
 
 # ram cache for urlNotice.db
 ramCacheNURL    =  4194304
@@ -511,7 +511,7 @@ ramCacheNURL    =  4194304
 ramCacheEURL    =     8192
 
 # ram cache for seedDBs
-ramCacheDHT     =     8192
+ramCacheDHT     =   131072
 
 # ram cache for message.db
 ramCacheMessage =     8192
@@ -523,10 +523,10 @@ ramCacheWiki    =     8192
 ramCacheBlog    =     2048
 
 # ram cache for news1.db
-ramCacheNews    =     8192
+ramCacheNews    =  1048576
 
 # ram cache for robotsTxt.db
-ramCacheRobots  =  2097152
+ramCacheRobots  =  4194304
 
 # ram cache for crawlProfile.db
 ramCacheProfiles  =   8192

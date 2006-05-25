@@ -153,7 +153,7 @@ public class kelondroRecords {
     private int                   cacheSize;    // number of cache records
     private long                  cacheStartup; // startup time; for cache aging
     private kelondroMScoreCluster cacheScore;   // controls cache aging
-    private int readHit, readMiss, writeUnique, writeDouble, cacheFlush;
+    private int readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     
     // optional logger
     protected Logger theLogger = null;
@@ -443,6 +443,7 @@ public class kelondroRecords {
         this.readMiss = 0;
         this.writeUnique = 0;
         this.writeDouble = 0;
+        this.cacheDelete = 0;
         this.cacheFlush = 0;
     }
     
@@ -476,7 +477,7 @@ public class kelondroRecords {
     }
     
     public int[] cacheNodeStatus() {
-        if (cacheHeaders == null) return new int[]{0,0,0,0,0,0,0,0,0};
+        if (cacheHeaders == null) return new int[]{0,0,0,0,0,0,0,0,0,0};
         return new int[]{
                 cacheSize,
                 cacheHeaders[CP_HIGH].size(),
@@ -486,6 +487,7 @@ public class kelondroRecords {
                 readMiss,
                 writeUnique,
                 writeDouble,
+                cacheDelete,
                 cacheFlush
         };
     }
@@ -533,7 +535,7 @@ public class kelondroRecords {
                     // no cache control for low-priority entries
                     cacheHeaders[CP_LOW].remove(handle);
                 }
-                cacheFlush++;
+                cacheDelete++;
             }
         }
         dispose(handle);

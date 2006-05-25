@@ -164,7 +164,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         if (objectCachePercent > 0) {
             long objectbuffersize = objectCachePercent * buffersize / 100;
             long nodecachesize = objectbuffersize / cacheObjectChunkSize();
-            this.objectCache = new kelondroObjectCache(this.filename, (int) nodecachesize, nodecachesize * 300 , 4*1024*1024);
+            this.objectCache = new kelondroObjectCache(this.filename, (int) nodecachesize, nodecachesize * 3000 , 2*1024*1024);
         } else {
             this.objectCache = null;
         }
