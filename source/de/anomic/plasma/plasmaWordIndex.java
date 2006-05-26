@@ -158,16 +158,17 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         }
     }
 
-    public boolean addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtCase) {
-        if (ramCache.addEntry(wordHash, entry, updateTime, dhtCase)) {
+    public plasmaWordIndexEntryContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtCase) {
+        plasmaWordIndexEntryContainer c;
+        if ((c = ramCache.addEntry(wordHash, entry, updateTime, dhtCase)) == null) {
             if (!dhtCase) flushControl();
-            return true;
+            return null;
         }
-        return false;
+        return c;
     }
     
-    public int addEntries(plasmaWordIndexEntryContainer entries, long updateTime, boolean dhtCase) {
-        int added = ramCache.addEntries(entries, updateTime, dhtCase);
+    public plasmaWordIndexEntryContainer addEntries(plasmaWordIndexEntryContainer entries, long updateTime, boolean dhtCase) {
+        plasmaWordIndexEntryContainer added = ramCache.addEntries(entries, updateTime, dhtCase);
 
         // force flush
         if (!dhtCase) flushControl();
@@ -193,7 +194,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     private synchronized void flushCache(String wordHash) {
         plasmaWordIndexEntryContainer c = ramCache.deleteContainer(wordHash);
         if (c != null) {
-            plasmaWordIndexEntryContainer feedback = assortmentCluster.storeTry(wordHash, c);
+            plasmaWordIndexEntryContainer feedback = assortmentCluster.addEntries(c, c.updated(), false);
             if (feedback != null) {
                 backend.addEntries(feedback, System.currentTimeMillis(), true);
             }
@@ -290,7 +291,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         container.add(ramCache.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime / 2), (maxTime < 0) ? -1 : maxTime / 2);
 
         // get from assortments
-        container.add(assortmentCluster.getFromAll(wordHash, (maxTime < 0) ? -1 : maxTime / 2), (maxTime < 0) ? -1 : maxTime / 2);
+        container.add(assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime / 2), (maxTime < 0) ? -1 : maxTime / 2);
 
         // get from backend
         if (maxTime > 0) {
@@ -331,7 +332,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public int size() {
-        return java.lang.Math.max(assortmentCluster.sizeTotal(),
+        return java.lang.Math.max(assortmentCluster.size(),
                         java.lang.Math.max(backend.size(), ramCache.size()));
     }
 
@@ -351,13 +352,13 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     public synchronized void close(int waitingBoundSeconds) {
         ramCache.close(waitingBoundSeconds);
-        assortmentCluster.close();
+        assortmentCluster.close(-1);
         backend.close(10);
     }
 
     public synchronized plasmaWordIndexEntryContainer deleteContainer(String wordHash) {
         plasmaWordIndexEntryContainer c = ramCache.deleteContainer(wordHash);
-        c.add(assortmentCluster.removeFromAll(wordHash, -1), -1);
+        c.add(assortmentCluster.deleteContainer(wordHash, -1), -1);
         c.add(backend.deleteContainer(wordHash), -1);
         return c;
     }
@@ -368,7 +369,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         synchronized (this) {
             removed = ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
             if (removed == urlHashes.length) return removed;
-            plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(wordHash, -1);
+            plasmaWordIndexEntryContainer container = assortmentCluster.deleteContainer(wordHash, -1);
             if (container != null) {
                 removed += container.removeEntries(wordHash, urlHashes, deleteComplete);
                 if (container.size() != 0) {
@@ -439,7 +440,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         if (resourceLevel == plasmaWordIndex.RL_ASSORTMENTS) {
             return new kelondroMergeIterator(
                             ramCache.wordHashes(startWordHash, false),
-                            assortmentCluster.hashConjunction(startWordHash, true, false),
+                            assortmentCluster.wordHashes(startWordHash, true, false),
                             kelondroNaturalOrder.naturalOrder,
                             true);
         }
@@ -447,7 +448,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             return new kelondroMergeIterator(
                             new kelondroMergeIterator(
                                      ramCache.wordHashes(startWordHash, false),
-                                     assortmentCluster.hashConjunction(startWordHash, true, false),
+                                     assortmentCluster.wordHashes(startWordHash, true, false),
                                      kelondroNaturalOrder.naturalOrder,
                                      true),
                             backend.wordHashes(startWordHash, true, false),
@@ -505,7 +506,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             } else {
                 // take out all words from the assortment to see if it fits
                 // together with the extracted assortment
-                plasmaWordIndexEntryContainer container = assortmentCluster.removeFromAll(wordhash, -1);
+                plasmaWordIndexEntryContainer container = assortmentCluster.deleteContainer(wordhash, -1);
                 if (size + container.size() > assortmentCluster.clusterCapacity) {
                     // this will also be too big to integrate, add to entity
                     entity.addEntries(container);
@@ -525,7 +526,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                         entity.deleteComplete();
                         entity.close(); entity = null;
                         // integrate the container into the assortments; this will work
-                        assortmentCluster.storeTry(wordhash, container);
+                        assortmentCluster.addEntries(container, container.updated(), false);
                         return new Integer(size);
                     } catch (kelondroException e) {
                         // database corrupted, we simply give up the database and delete it

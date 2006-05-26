@@ -416,7 +416,7 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
         return delCount;
     }
     
-    public int addEntries(plasmaWordIndexEntryContainer container, long updateTime, boolean dhtCase) {
+    public plasmaWordIndexEntryContainer addEntries(plasmaWordIndexEntryContainer container, long updateTime, boolean dhtCase) {
         // this puts the entries into the cache, not into the assortment directly
         int added = 0;
 
@@ -440,10 +440,10 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
             }
             entries = null;
         }
-        return added;
+        return null;
     }
 
-    public boolean addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
+    public plasmaWordIndexEntryContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
         if (dhtCase) synchronized (kCache) {
             // put container into kCache
             plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
@@ -451,7 +451,7 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
             kCache.put(new Long(updateTime + kCacheInc), container);
             kCacheInc++;
             if (kCacheInc > 10000) kCacheInc = 0;
-            return true;
+            return null;
         } else synchronized (wCache) {
             plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) wCache.get(wordHash);
             if (container == null) container = new plasmaWordIndexEntryContainer(wordHash);
@@ -460,11 +460,11 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
                 wCache.put(wordHash, container);
                 hashScore.incScore(wordHash);
                 hashDate.setScore(wordHash, intTime(updateTime));
-                return true;
+                return null;
             }
             container = null;
             entries = null;
-            return false;
+            return null;
         }
     }
 

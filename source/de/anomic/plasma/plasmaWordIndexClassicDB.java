@@ -73,7 +73,7 @@ public class plasmaWordIndexClassicDB extends indexAbstractRI implements indexRI
     }
     
     public Iterator wordHashes(String startHash, boolean rot) {
-        return wordHashes(startHash, rot);
+        return wordHashes(startHash, true, rot);
     }
     
     public Iterator wordHashes(String startHash, boolean up, boolean rot) {
@@ -240,23 +240,23 @@ public class plasmaWordIndexClassicDB extends indexAbstractRI implements indexRI
         }
     }
     
-    public int addEntries(plasmaWordIndexEntryContainer container, long creationTime, boolean highPriority) {
+    public plasmaWordIndexEntryContainer addEntries(plasmaWordIndexEntryContainer container, long creationTime, boolean highPriority) {
 	//System.out.println("* adding " + newEntries.size() + " cached word index entries for word " + wordHash); // debug
 	// fetch the index cache
-        if ((container == null) || (container.size() == 0)) return 0;
+        if ((container == null) || (container.size() == 0)) return null;
         
         // open file
         plasmaWordIndexEntity pi = null;
         try {
             pi = new plasmaWordIndexEntity(databaseRoot, container.wordHash(), false);
-            int count = pi.addEntries(container);
+            pi.addEntries(container);
             
             // close and return
             pi.close(); pi = null;
-            return count;
+            return null;
         } catch (IOException e) {
             log.logSevere("plasmaWordIndexClassic.addEntries: " + e.getMessage());
-            return 0;
+            return container;
         } finally {
             if (pi != null) try{pi.close();}catch (Exception e){}
         }

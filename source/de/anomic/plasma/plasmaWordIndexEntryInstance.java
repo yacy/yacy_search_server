@@ -52,11 +52,11 @@ import java.util.Properties;
 
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexEntryPrototype;
+import de.anomic.index.indexAbstractEntry;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 
-public final class plasmaWordIndexEntryInstance extends indexEntryPrototype implements Cloneable, indexEntry {
+public final class plasmaWordIndexEntryInstance extends indexAbstractEntry implements Cloneable, indexEntry {
 
     // an wordEntry can be filled in either of two ways:
     // by the discrete values of the entry

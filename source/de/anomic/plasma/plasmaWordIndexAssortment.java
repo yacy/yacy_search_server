@@ -125,13 +125,13 @@ public final class plasmaWordIndexAssortment {
         if (log != null) log.logConfig("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer");
     }
 
-    public void store(String wordHash, plasmaWordIndexEntryContainer newContainer) {
+    public void store(plasmaWordIndexEntryContainer newContainer) {
         // stores a word index to assortment database
         // this throws an exception if the word hash already existed
         //log.logDebug("storeAssortment: wordHash=" + wordHash + ", urlHash=" + entry.getUrlHash() + ", time=" + creationTime);
         if (newContainer.size() != assortmentLength) throw new RuntimeException("plasmaWordIndexAssortment.store: wrong container size");
         byte[][] row = new byte[this.bufferStructureLength][];
-        row[0] = wordHash.getBytes();
+        row[0] = newContainer.wordHash().getBytes();
         row[1] = kelondroRecords.long2bytes(1, 4);
         row[2] = kelondroRecords.long2bytes(newContainer.updated(), 8);
         Iterator entries = newContainer.entries();

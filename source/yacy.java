@@ -1312,7 +1312,7 @@ public final class yacy {
                 WordHashIterator = WordIndex.wordHashes(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
             } else if (resource.equals("assortments")) {
                 plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, log);
-                WordHashIterator = assortmentCluster.hashConjunction(wordChunkStartHash, true, false);
+                WordHashIterator = assortmentCluster.wordHashes(wordChunkStartHash, true, false);
             } else if (resource.startsWith("assortment")) {
                 int a = Integer.parseInt(resource.substring(10));
                 plasmaWordIndexAssortment assortment = new plasmaWordIndexAssortment(new File(homeDBroot, "ACLUSTER"), a, 8*1024*1024, null);

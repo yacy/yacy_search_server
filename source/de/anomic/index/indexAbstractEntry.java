@@ -1,4 +1,4 @@
-// indexEntryPrototype.java
+// indexbstractEntry.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 20.05.2006 on http://www.anomic.de
 //
@@ -29,7 +29,7 @@ package de.anomic.index;
 //import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWordIndex;
 
-public abstract class indexEntryPrototype implements indexEntry {
+public abstract class indexAbstractEntry implements indexEntry {
 
     // the associated hash
     protected String urlHash;
@@ -57,40 +57,40 @@ public abstract class indexEntryPrototype implements indexEntry {
     public abstract String toPropertyForm();
     
     public void combineDistance(indexEntry oe) {
-        this.worddistance = this.worddistance + ((indexEntryPrototype) oe).worddistance + Math.abs(this.posintext - ((indexEntryPrototype) oe).posintext);
-        this.posintext = Math.min(this.posintext, ((indexEntryPrototype) oe).posintext);
-        if (this.posofphrase != ((indexEntryPrototype) oe).posofphrase) this.posinphrase = 0; // (unknown)
-        this.posofphrase = Math.min(this.posofphrase, ((indexEntryPrototype) oe).posofphrase);
-        this.wordcount = (this.wordcount + ((indexEntryPrototype) oe).wordcount) / 2;
+        this.worddistance = this.worddistance + ((indexAbstractEntry) oe).worddistance + Math.abs(this.posintext - ((indexAbstractEntry) oe).posintext);
+        this.posintext = Math.min(this.posintext, ((indexAbstractEntry) oe).posintext);
+        if (this.posofphrase != ((indexAbstractEntry) oe).posofphrase) this.posinphrase = 0; // (unknown)
+        this.posofphrase = Math.min(this.posofphrase, ((indexAbstractEntry) oe).posofphrase);
+        this.wordcount = (this.wordcount + ((indexAbstractEntry) oe).wordcount) / 2;
     }
     
     public void min(indexEntry other) {
-        if (this.hitcount > ((indexEntryPrototype) other).hitcount) this.hitcount = ((indexEntryPrototype) other).hitcount;
-        if (this.wordcount > ((indexEntryPrototype) other).wordcount) this.wordcount = ((indexEntryPrototype) other).wordcount;
-        if (this.phrasecount > ((indexEntryPrototype) other).phrasecount) this.phrasecount = ((indexEntryPrototype) other).phrasecount;
-        if (this.posintext > ((indexEntryPrototype) other).posintext) this.posintext = ((indexEntryPrototype) other).posintext;
-        if (this.posinphrase > ((indexEntryPrototype) other).posinphrase) this.posinphrase = ((indexEntryPrototype) other).posinphrase;
-        if (this.posofphrase > ((indexEntryPrototype) other).posofphrase) this.posofphrase = ((indexEntryPrototype) other).posofphrase;
-        if (this.worddistance > ((indexEntryPrototype) other).worddistance) this.worddistance = ((indexEntryPrototype) other).worddistance;
-        if (this.lastModified > ((indexEntryPrototype) other).lastModified) this.lastModified = ((indexEntryPrototype) other).lastModified;
-        if (this.quality > ((indexEntryPrototype) other).quality) this.quality = ((indexEntryPrototype) other).quality;
+        if (this.hitcount > ((indexAbstractEntry) other).hitcount) this.hitcount = ((indexAbstractEntry) other).hitcount;
+        if (this.wordcount > ((indexAbstractEntry) other).wordcount) this.wordcount = ((indexAbstractEntry) other).wordcount;
+        if (this.phrasecount > ((indexAbstractEntry) other).phrasecount) this.phrasecount = ((indexAbstractEntry) other).phrasecount;
+        if (this.posintext > ((indexAbstractEntry) other).posintext) this.posintext = ((indexAbstractEntry) other).posintext;
+        if (this.posinphrase > ((indexAbstractEntry) other).posinphrase) this.posinphrase = ((indexAbstractEntry) other).posinphrase;
+        if (this.posofphrase > ((indexAbstractEntry) other).posofphrase) this.posofphrase = ((indexAbstractEntry) other).posofphrase;
+        if (this.worddistance > ((indexAbstractEntry) other).worddistance) this.worddistance = ((indexAbstractEntry) other).worddistance;
+        if (this.lastModified > ((indexAbstractEntry) other).lastModified) this.lastModified = ((indexAbstractEntry) other).lastModified;
+        if (this.quality > ((indexAbstractEntry) other).quality) this.quality = ((indexAbstractEntry) other).quality;
     }
     
     public void max(indexEntry other) {
-        if (this.hitcount < ((indexEntryPrototype) other).hitcount) this.hitcount = ((indexEntryPrototype) other).hitcount;
-        if (this.wordcount < ((indexEntryPrototype) other).wordcount) this.wordcount = ((indexEntryPrototype) other).wordcount;
-        if (this.phrasecount < ((indexEntryPrototype) other).phrasecount) this.phrasecount = ((indexEntryPrototype) other).phrasecount;
-        if (this.posintext < ((indexEntryPrototype) other).posintext) this.posintext = ((indexEntryPrototype) other).posintext;
-        if (this.posinphrase < ((indexEntryPrototype) other).posinphrase) this.posinphrase = ((indexEntryPrototype) other).posinphrase;
-        if (this.posofphrase < ((indexEntryPrototype) other).posofphrase) this.posofphrase = ((indexEntryPrototype) other).posofphrase;
-        if (this.worddistance < ((indexEntryPrototype) other).worddistance) this.worddistance = ((indexEntryPrototype) other).worddistance;
-        if (this.lastModified < ((indexEntryPrototype) other).lastModified) this.lastModified = ((indexEntryPrototype) other).lastModified;
-        if (this.quality < ((indexEntryPrototype) other).quality) this.quality = ((indexEntryPrototype) other).quality;
+        if (this.hitcount < ((indexAbstractEntry) other).hitcount) this.hitcount = ((indexAbstractEntry) other).hitcount;
+        if (this.wordcount < ((indexAbstractEntry) other).wordcount) this.wordcount = ((indexAbstractEntry) other).wordcount;
+        if (this.phrasecount < ((indexAbstractEntry) other).phrasecount) this.phrasecount = ((indexAbstractEntry) other).phrasecount;
+        if (this.posintext < ((indexAbstractEntry) other).posintext) this.posintext = ((indexAbstractEntry) other).posintext;
+        if (this.posinphrase < ((indexAbstractEntry) other).posinphrase) this.posinphrase = ((indexAbstractEntry) other).posinphrase;
+        if (this.posofphrase < ((indexAbstractEntry) other).posofphrase) this.posofphrase = ((indexAbstractEntry) other).posofphrase;
+        if (this.worddistance < ((indexAbstractEntry) other).worddistance) this.worddistance = ((indexAbstractEntry) other).worddistance;
+        if (this.lastModified < ((indexAbstractEntry) other).lastModified) this.lastModified = ((indexAbstractEntry) other).lastModified;
+        if (this.quality < ((indexAbstractEntry) other).quality) this.quality = ((indexAbstractEntry) other).quality;
     }
     
     public void normalize(indexEntry mi, indexEntry ma) {
-        indexEntryPrototype min = (indexEntryPrototype) mi;
-        indexEntryPrototype max = (indexEntryPrototype) ma;
+        indexAbstractEntry min = (indexAbstractEntry) mi;
+        indexAbstractEntry max = (indexAbstractEntry) ma;
         this.hitcount     = (this.hitcount     == 0) ? 0 : 1 + 255 * (this.hitcount     - min.hitcount    ) / (1 + max.hitcount     - min.hitcount);
         this.wordcount    = (this.wordcount    == 0) ? 0 : 1 + 255 * (this.wordcount    - min.wordcount   ) / (1 + max.wordcount    - min.wordcount);
         this.phrasecount  = (this.phrasecount  == 0) ? 0 : 1 + 255 * (this.phrasecount  - min.phrasecount ) / (1 + max.phrasecount  - min.phrasecount);
@@ -103,7 +103,7 @@ public abstract class indexEntryPrototype implements indexEntry {
     }
     
     public indexEntry generateNormalized(indexEntry min, indexEntry max) {
-        indexEntry e = (indexEntryPrototype) this.clone();
+        indexEntry e = (indexAbstractEntry) this.clone();
         e.normalize(min, max);
         return e;
     }
@@ -125,18 +125,18 @@ public abstract class indexEntryPrototype implements indexEntry {
 
     public boolean isNewer(indexEntry other) {
         if (other == null) return true;
-        if (this.lastModified > ((indexEntryPrototype) other).lastModified) return true;
-        if (this.lastModified == ((indexEntryPrototype) other).getLastModified()) {
-            if (this.quality > ((indexEntryPrototype) other).quality) return true;
+        if (this.lastModified > ((indexAbstractEntry) other).lastModified) return true;
+        if (this.lastModified == ((indexAbstractEntry) other).getLastModified()) {
+            if (this.quality > ((indexAbstractEntry) other).quality) return true;
         }
         return false;
     }
  
     public boolean isOlder(indexEntry other) {
         if (other == null) return false;
-        if (this.lastModified < ((indexEntryPrototype) other).getLastModified()) return true;
-        if (this.lastModified == ((indexEntryPrototype) other).getLastModified()) {
-            if (this.quality < ((indexEntryPrototype) other).quality) return true;
+        if (this.lastModified < ((indexAbstractEntry) other).getLastModified()) return true;
+        if (this.lastModified == ((indexAbstractEntry) other).getLastModified()) {
+            if (this.quality < ((indexAbstractEntry) other).quality) return true;
         }
         return false;
     }
