@@ -184,7 +184,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                     if (newContainer.size() > 0) { this.homeWordIndex.addEntries(newContainer, System.currentTimeMillis(), false); }
                     
                     // delete complete index entity file
-                    this.importWordIndex.deleteIndex(this.wordHash);                 
+                    this.importWordIndex.deleteContainer(this.wordHash);                 
                     
                     // print out some statistical information
                     if (this.entryCounter % 500 == 0) {

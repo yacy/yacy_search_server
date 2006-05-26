@@ -1,4 +1,4 @@
-// plasmaWordIndexInterface.java
+// indexRI.java
 // -----------------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@anomic.de
@@ -40,22 +40,25 @@
 // Contributions and changes to the program code must be marked as such.
 
 
-package de.anomic.plasma;
+package de.anomic.index;
 
 import java.util.Iterator;
 
-public interface plasmaWordIndexInterface {
+import de.anomic.plasma.plasmaWordIndexEntryContainer;
+import de.anomic.plasma.plasmaWordIndexEntryInstance;
+
+public interface indexRI {
     
     public int size();
     
     public Iterator wordHashes(String startWordHash, boolean rot);
     public long getUpdateTime(String wordHash);
     
-    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty);
+    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime);
     public plasmaWordIndexEntryContainer deleteContainer(String wordHash);
     
-    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete);
-    public boolean addEntry(String wordHash, plasmaWordIndexEntryInstance entry, long updateTime, boolean dhtCase);
+    public int removeEntries(String wordHash, String[] referenceHashes, boolean deleteComplete);
+    public boolean addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtCase);
     public int addEntries(plasmaWordIndexEntryContainer newEntries, long creationTime, boolean dhtCase);
 
     public void close(int waitingSeconds);

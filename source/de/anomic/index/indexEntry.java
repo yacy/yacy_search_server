@@ -33,6 +33,7 @@ public interface indexEntry {
     public byte[] toEncodedByteArrayForm();
     public String toPropertyForm();
     
+    public String getUrlHash();
     public void combineDistance(indexEntry oe);
     public void min(indexEntry other);
     public void max(indexEntry other);

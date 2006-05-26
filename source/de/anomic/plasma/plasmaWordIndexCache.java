@@ -49,6 +49,10 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+
+import de.anomic.index.indexEntry;
+import de.anomic.index.indexRI;
+import de.anomic.index.indexAbstractRI;
 import de.anomic.kelondro.kelondroArray;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -56,7 +60,7 @@ import de.anomic.kelondro.kelondroRecords;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
+public final class plasmaWordIndexCache extends indexAbstractRI implements indexRI {
 
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
@@ -356,19 +360,8 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return (((long) intTime) * (long) 1000) + startTime;
     }
     
-    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty) {
+    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime_dummy) {
         return (plasmaWordIndexEntryContainer) wCache.get(wordHash);
-    }
-
-    public long getUpdateTime(String wordHash) {
-        plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) wCache.get(wordHash);
-        if (entries == null) return 0;
-        return entries.updated();
-        /*
-        Long time = new Long(longTime(hashDate.getScore(wordHash)));
-        if (time == null) return 0;
-        return time.longValue();
-        */
     }
 
     public plasmaWordIndexEntryContainer deleteContainer(String wordHash) {
@@ -450,7 +443,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         return added;
     }
 
-    public boolean addEntry(String wordHash, plasmaWordIndexEntryInstance newEntry, long updateTime, boolean dhtCase) {
+    public boolean addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
         if (dhtCase) synchronized (kCache) {
             // put container into kCache
             plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
@@ -462,7 +455,7 @@ public final class plasmaWordIndexCache implements plasmaWordIndexInterface {
         } else synchronized (wCache) {
             plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) wCache.get(wordHash);
             if (container == null) container = new plasmaWordIndexEntryContainer(wordHash);
-            plasmaWordIndexEntryInstance[] entries = new plasmaWordIndexEntryInstance[] { newEntry };
+            indexEntry[] entries = new indexEntry[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
                 wCache.put(wordHash, container);
                 hashScore.incScore(wordHash);

@@ -892,7 +892,7 @@ public final class yacy {
                     homeWordIndex.addEntries(newContainer, System.currentTimeMillis(), true);
                                         
                     // delete complete index entity file
-                    importWordIndex.deleteIndex(wordHash);                 
+                    importWordIndex.deleteContainer(wordHash);                 
                     
                     // print out some statistical information
                     if (wordCounter%500 == 0) {

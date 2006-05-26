@@ -165,7 +165,7 @@ public class IndexControl_p {
                     switchboard.urlPool.loadedURL.remove(urlx[i]);
                 }
             }
-            switchboard.wordIndex.deleteIndex(keyhash);
+            switchboard.wordIndex.deleteContainer(keyhash);
             post.remove("keyhashdeleteall");
             if (keystring.length() > 0 &&
                 indexEntryAttribute.word2hash(keystring).equals(keyhash)) {

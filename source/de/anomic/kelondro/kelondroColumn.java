@@ -1,4 +1,4 @@
-// kelondroCell.java
+// kelondroColumn.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 24.05.2006 on http://www.anomic.de
 //
@@ -28,7 +28,7 @@
 
 package de.anomic.kelondro;
 
-public class kelondroCell {
+public class kelondroColumn {
 
     public static int celltype_undefined  = 0;
     public static int celltype_boolean    = 1;
@@ -40,7 +40,7 @@ public class kelondroCell {
     private int celltype, dbwidth;
     private String nickname, description;
     
-    public kelondroCell(int celltype, int dbwidth, String nickname, String description) {
+    public kelondroColumn(int celltype, int dbwidth, String nickname, String description) {
         this.celltype = celltype;
         this.dbwidth = dbwidth;
         this.nickname = nickname;

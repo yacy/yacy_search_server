@@ -49,11 +49,13 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import de.anomic.index.indexRI;
+import de.anomic.index.indexAbstractRI;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public class plasmaWordIndexClassicDB {
+public class plasmaWordIndexClassicDB extends indexAbstractRI implements indexRI {
     
     // class variables
     private final File      databaseRoot;
@@ -68,6 +70,10 @@ public class plasmaWordIndexClassicDB {
     
     public int size() {
         return size;
+    }
+    
+    public Iterator wordHashes(String startHash, boolean rot) {
+        return wordHashes(startHash, rot);
     }
     
     public Iterator wordHashes(String startHash, boolean up, boolean rot) {
@@ -208,8 +214,9 @@ public class plasmaWordIndexClassicDB {
         if (f.exists()) return f.lastModified(); else return -1;
     }
     
-    public void deleteIndex(String wordHash) {
+    public plasmaWordIndexEntryContainer deleteContainer(String wordHash) {
         plasmaWordIndexEntity.removePlasmaIndex(databaseRoot, wordHash);
+        return new plasmaWordIndexEntryContainer(wordHash);
     }
 
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
@@ -223,7 +230,7 @@ public class plasmaWordIndexClassicDB {
             int size = pi.size();
             pi.close(); pi = null;
             // check if we can remove the index completely
-            if ((deleteComplete) && (size == 0)) deleteIndex(wordHash);
+            if ((deleteComplete) && (size == 0)) deleteContainer(wordHash);
             return count;
         } catch (IOException e) {
             log.logSevere("plasmaWordIndexClassic.removeEntries: " + e.getMessage());

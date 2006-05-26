@@ -233,7 +233,7 @@ public class plasmaDHTChunk {
                     tmpContainers.add(indexContainer);
                 } catch (kelondroException e) {
                     log.logSevere("plasmaWordIndexDistribution/2: deleted DB for word " + nexthash, e);
-                    wordIndex.deleteIndex(nexthash);
+                    wordIndex.deleteContainer(nexthash);
                 }
             }
             // create result

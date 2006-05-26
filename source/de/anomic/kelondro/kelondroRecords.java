@@ -1021,15 +1021,15 @@ public class kelondroRecords {
         for (int j = 0; j < chunk.length; j++) System.out.print(chunk[j] + ",");
     }
 
-    public synchronized kelondroRow row() {
+    public final kelondroRow row() {
         return this.ROW;
     }
     
-    public synchronized int columns() {
+    public final int columns() {
         return this.ROW.columns();
     }
 
-    public synchronized int columnSize(int column) {
+    public final int columnSize(int column) {
         if ((column < 0) || (column >= this.ROW.columns())) return -1;
         return ROW.width(column);
     }

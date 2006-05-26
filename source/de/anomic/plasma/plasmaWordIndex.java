@@ -58,7 +58,10 @@ import java.util.TreeSet;
 import java.net.URL;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexRI;
+import de.anomic.index.indexAbstractRI;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
@@ -66,7 +69,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.server.logging.serverLog;
 
-public final class plasmaWordIndex {
+public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     private static final String indexAssortmentClusterPath = "ACLUSTER";
     private static final int assortmentCount = 64;
@@ -155,7 +158,7 @@ public final class plasmaWordIndex {
         }
     }
 
-    public boolean addEntry(String wordHash, plasmaWordIndexEntryInstance entry, long updateTime, boolean dhtCase) {
+    public boolean addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtCase) {
         if (ramCache.addEntry(wordHash, entry, updateTime, dhtCase)) {
             if (!dhtCase) flushControl();
             return true;
@@ -284,7 +287,7 @@ public final class plasmaWordIndex {
         // e.g. indexTransfer might keep this container for minutes while
         // several new pages could be added to the index, possibly with the same words that have
         // been selected for transfer
-        container.add(ramCache.getContainer(wordHash, true), (maxTime < 0) ? -1 : maxTime / 2);
+        container.add(ramCache.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime / 2), (maxTime < 0) ? -1 : maxTime / 2);
 
         // get from assortments
         container.add(assortmentCluster.getFromAll(wordHash, (maxTime < 0) ? -1 : maxTime / 2), (maxTime < 0) ? -1 : maxTime / 2);
@@ -352,10 +355,11 @@ public final class plasmaWordIndex {
         backend.close(10);
     }
 
-    public synchronized void deleteIndex(String wordHash) {
-        ramCache.deleteContainer(wordHash);
-        assortmentCluster.removeFromAll(wordHash, -1);
-        backend.deleteIndex(wordHash);
+    public synchronized plasmaWordIndexEntryContainer deleteContainer(String wordHash) {
+        plasmaWordIndexEntryContainer c = ramCache.deleteContainer(wordHash);
+        c.add(assortmentCluster.removeFromAll(wordHash, -1), -1);
+        c.add(backend.deleteContainer(wordHash), -1);
+        return c;
     }
     
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
@@ -408,6 +412,14 @@ public final class plasmaWordIndex {
             }
         }
         return hashes;
+    }
+    
+    public Iterator wordHashes(String startHash, boolean rot) {
+        try {
+            return wordHashes(startHash, RL_WORDFILES, rot);
+        } catch (IOException e) {
+            return new HashSet().iterator();
+        }
     }
     
     public Iterator wordHashes(String startHash, int resourceLevel, boolean rot) throws IOException {

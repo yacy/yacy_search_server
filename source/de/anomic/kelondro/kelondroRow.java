@@ -29,15 +29,15 @@ package de.anomic.kelondro;
 
 public class kelondroRow {
 
-    private kelondroCell[] row;
+    private kelondroColumn[] row;
     
-    public kelondroRow(kelondroCell[] row) {
+    public kelondroRow(kelondroColumn[] row) {
         this.row = row;
     }
 
     public kelondroRow(int[] row) {
-        this.row = new kelondroCell[row.length];
-        for (int i = 0; i < row.length; i++) this.row[i] = new kelondroCell(kelondroCell.celltype_undefined, row[i], "", "");
+        this.row = new kelondroColumn[row.length];
+        for (int i = 0; i < row.length; i++) this.row[i] = new kelondroColumn(kelondroColumn.celltype_undefined, row[i], "", "");
     }
     
     public int columns() {

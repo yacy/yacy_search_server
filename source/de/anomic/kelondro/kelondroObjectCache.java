@@ -123,14 +123,19 @@ public class kelondroObjectCache {
         return System.currentTimeMillis() - longEmit(ages.getMinScore());
     }
     
-    public int size() {
+    public int hitsize() {
         return cache.size();
+    }
+    
+    public int misssize() {
+        return hasnot.size();
     }
     
     public String[] status() {
         return new String[]{
                 Integer.toString(maxSize()),
-                Integer.toString(size()),
+                Integer.toString(hitsize()),
+                Integer.toString(misssize()),
                 Long.toString(this.maxAge),
                 Long.toString(minAge()),
                 Long.toString(maxAge()),
@@ -153,10 +158,10 @@ public class kelondroObjectCache {
         return new String[]{
                 Integer.toString(Integer.parseInt(a[0]) + Integer.parseInt(b[0])),
                 Integer.toString(Integer.parseInt(a[1]) + Integer.parseInt(b[1])),
-                Long.toString(Math.max(Long.parseLong(a[2]), Long.parseLong(b[2]))),
-                Long.toString(Math.min(Long.parseLong(a[3]), Long.parseLong(b[3]))),
-                Long.toString(Math.max(Long.parseLong(a[4]), Long.parseLong(b[4]))),
-                Integer.toString(Integer.parseInt(a[5]) + Integer.parseInt(b[5])),
+                Integer.toString(Integer.parseInt(a[2]) + Integer.parseInt(b[2])),
+                Long.toString(Math.max(Long.parseLong(a[3]), Long.parseLong(b[3]))),
+                Long.toString(Math.min(Long.parseLong(a[4]), Long.parseLong(b[4]))),
+                Long.toString(Math.max(Long.parseLong(a[5]), Long.parseLong(b[5]))),
                 Integer.toString(Integer.parseInt(a[6]) + Integer.parseInt(b[6])),
                 Integer.toString(Integer.parseInt(a[7]) + Integer.parseInt(b[7])),
                 Integer.toString(Integer.parseInt(a[8]) + Integer.parseInt(b[8])),
@@ -167,7 +172,8 @@ public class kelondroObjectCache {
                 Integer.toString(Integer.parseInt(a[13]) + Integer.parseInt(b[13])),
                 Integer.toString(Integer.parseInt(a[14]) + Integer.parseInt(b[14])),
                 Integer.toString(Integer.parseInt(a[15]) + Integer.parseInt(b[15])),
-                Integer.toString(Integer.parseInt(a[16]) + Integer.parseInt(b[16]))
+                Integer.toString(Integer.parseInt(a[16]) + Integer.parseInt(b[16])),
+                Integer.toString(Integer.parseInt(a[17]) + Integer.parseInt(b[17]))
         };
     }
     

@@ -57,6 +57,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 
+import de.anomic.index.indexEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
@@ -100,16 +101,16 @@ public final class plasmaWordIndexEntryContainer {
         return wordHash;
     }
 
-    public int add(plasmaWordIndexEntryInstance entry) {
+    public int add(indexEntry entry) {
         return add(entry, System.currentTimeMillis());
     }
     
-    public int add(plasmaWordIndexEntryInstance entry, long updateTime) {
+    public int add(indexEntry entry, long updateTime) {
         this.updateTime = java.lang.Math.max(this.updateTime, updateTime);
         return (addi(entry)) ? 1 : 0;
     }
     
-    public int add(plasmaWordIndexEntryInstance[] entries, long updateTime) {
+    public int add(indexEntry[] entries, long updateTime) {
         int c = 0;
         for (int i = 0; i < entries.length; i++) if (addi(entries[i])) c++;
         this.updateTime = java.lang.Math.max(this.updateTime, updateTime);
@@ -131,7 +132,7 @@ public final class plasmaWordIndexEntryContainer {
         return x;
     }
 
-    private boolean addi(plasmaWordIndexEntryInstance entry) {
+    private boolean addi(indexEntry entry) {
         // returns true if the new entry was added, false if it already existed
         plasmaWordIndexEntryInstance oldEntry = (plasmaWordIndexEntryInstance) container.put(entry.getUrlHash(), entry);
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this container
