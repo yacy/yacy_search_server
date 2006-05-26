@@ -26,14 +26,13 @@ function checkers(name, n) {
 }
   </SCRIPT>
 <form action="DetailedSearch.html" method="get" enctype="multipart/form-data">
-<table border="0" cellpadding="5" cellspacing="0">
-  <tr heigth="1"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-  <tr valign="center" class="TableCellLight">
-    <td><h2>Detailed&nbsp;Search</h2></td>
-    <td colspan="2"><input type="text" name="search" value="#[search]#" size="50" maxlength="250"></td>
-    <td><input type="submit" name="Enter" value="Search"></td>
+<br><br><h2>Detailed&nbsp;Search</h2><br>
+<table border="0" cellpadding="5" cellspacing="0"> 
+  <tr valign="center">
+    <td colspan="2" align="right"><input type="text" name="search" value="#[search]#" size="50" maxlength="250">&nbsp;<input type="submit" name="Enter" value="Search"></td>
+    <td></td>
   </tr>
-  <tr valign="top" class="TableCellLight">
+  <tr valign="top">
   <td colspan="2">
   <table border="0" cellpadding="0" cellspacing="1">
   <tr valign="center" class="TableHeader"><td class="small" colspan="2">Local Query</td></tr>
@@ -46,13 +45,13 @@ function checkers(name, n) {
   <tr valign="center" class="TableCellDark">
     <td class=small>Max. search time (seconds):</td>
     <td class=small>
-      <input type="text" name="localTime" value="#[localTime]#" size="2" maxlength="3">
+      <input type="text" name="localTime" value="#[localTime]#" size="4" maxlength="3">
 	</td>
   </tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Max. word distance:</td>
     <td class=small>
-      <input type="text" name="localWDist" value="#[localWDist]#" size="3" maxlength="4">
+      <input type="text" name="localWDist" value="#[localWDist]#" size="4" maxlength="4">
 	</td>
   </tr>
 

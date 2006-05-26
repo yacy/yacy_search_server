@@ -65,10 +65,8 @@ You can define URLs as start points for Web page crawling and start crawling her
     Use:<input type="checkbox" name="crawlingDomFilterCheck" align="top" #(crawlingDomFilterCheck)#::checked#(/crawlingDomFilterCheck)#>&nbsp;&nbsp;
     Depth:<input name="crawlingDomFilterDepth" type="text" size="2" maxlength="2" value="#[crawlingDomFilterDepth]#"></td>
     <td class=small>
-    This option will cause a creation of a domain-list during indexing. This list is filled only with domains that
-    appear on the given depth during crawling. The domain-list is then used to filter-out all domains, that appear
-    on depths greater then the given depth, but do not appear in the domain-list. You can use this option i.e.
-    to crawl pages with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page.
+    This option will automatically create a domain-filter which limits the crawl on domains the crawler will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth for this example would be 1.<br>
+    The default value 0 gives no restrictions.
     </td>
   </tr>
   <tr valign="top" class="TableCellLight">

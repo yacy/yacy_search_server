@@ -130,7 +130,7 @@ public final class plasmaCrawlLoader extends Thread {
             // interrupting the plasmaCrawlLoader
             this.interrupt();
 
-            // waiting for the thread to finish ...
+            // waiting for the thread to finish...
             this.log.logInfo("Waiting for plasmaCrawlLoader shutdown ...");
             this.join(5000);
         } catch (Exception e) {
@@ -162,7 +162,7 @@ public final class plasmaCrawlLoader extends Thread {
             }
         }
 
-        // consuming the is interrupted flag
+        // consuming the "is interrupted"-flag
         this.isInterrupted();
 
         // closing the pool
@@ -170,7 +170,6 @@ public final class plasmaCrawlLoader extends Thread {
             this.crawlwerPool.close();
         }
         catch (Exception e) {
-            // TODO Auto-generated catch block
             this.log.logSevere("plasmaCrawlLoader.run/close", e);
         }
         
@@ -194,7 +193,6 @@ public final class plasmaCrawlLoader extends Thread {
             try  {
                 this.theQueue.addMessage(theMsg);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 this.log.logSevere("plasmaCrawlLoader.loadParallel", e);
             }
         }

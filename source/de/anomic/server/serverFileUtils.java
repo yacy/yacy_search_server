@@ -64,7 +64,17 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 public final class serverFileUtils {
-    
+
+    /**
+    * Copies an InputStream to an OutputStream.
+    * @param source    InputStream
+    * @param dest    OutputStream
+    * @return Total number of bytes copied.
+    * @see copy(InputStream source, File dest)
+    * @see copyRange(File source, OutputStream dest, int start)
+    * @see copy(File source, OutputStream dest)
+    * @see copy(File source, File dest)
+    */
     public static int copy(InputStream source, OutputStream dest) throws IOException {
         byte[] buffer = new byte[4096];
         
@@ -78,7 +88,16 @@ public final class serverFileUtils {
         
         return total;
     }
-          
+
+    /**
+    * Copies an InputStream to a File.
+    * @param source    InputStream
+    * @param dest    File
+    * @see copy(InputStream source, OutputStream dest)
+    * @see copyRange(File source, OutputStream dest, int start)
+    * @see copy(File source, OutputStream dest)
+    * @see copy(File source, File dest)
+    */
     public static void copy(InputStream source, File dest) throws IOException {
         FileOutputStream fos = null;
         try {
@@ -88,7 +107,17 @@ public final class serverFileUtils {
             if (fos != null) try {fos.close();} catch (Exception e) {}
         }
     }
-    
+
+    /**
+    * Copies a part of a File to an OutputStream.
+    * @param source    File
+    * @param dest    OutputStream
+    * @param start Number of bytes to skip from the beginning of the File
+    * @see copy(InputStream source, OutputStream dest)
+    * @see copy(InputStream source, File dest)
+    * @see copy(File source, OutputStream dest)
+    * @see copy(File source, File dest)
+    */
     public static void copyRange(File source, OutputStream dest, int start) throws IOException {
         InputStream fis = null;
         try {
@@ -99,18 +128,36 @@ public final class serverFileUtils {
         } finally {
             if (fis != null) try { fis.close(); } catch (Exception e) {}
         }
-    }    
-    
+    }
+
+    /**
+    * Copies a File to an OutputStream.
+    * @param source    File
+    * @param dest    OutputStream
+    * @see copy(InputStream source, OutputStream dest)
+    * @see copy(InputStream source, File dest)
+    * @see copyRange(File source, OutputStream dest, int start)
+    * @see copy(File source, File dest)
+    */
     public static void copy(File source, OutputStream dest) throws IOException {
-		InputStream fis = null;
+        InputStream fis = null;
         try {
-			fis = new FileInputStream(source);
-			copy(fis, dest);
+            fis = new FileInputStream(source);
+            copy(fis, dest);
         } finally {
             if (fis != null) try { fis.close(); } catch (Exception e) {}
         }
     }
-    
+
+    /**
+    * Copies a File to a File.
+    * @param source    File
+    * @param dest    File
+    * @see copy(InputStream source, OutputStream dest)
+    * @see copy(InputStream source, File dest)
+    * @see copyRange(File source, OutputStream dest, int start)
+    * @see copy(File source, OutputStream dest)
+    */
     public static void copy(File source, File dest) throws IOException {
         FileInputStream fis = null;
         FileOutputStream fos = null;
@@ -130,7 +177,7 @@ public final class serverFileUtils {
         baos.close();
         return baos.toByteArray();
     }
-    
+
     public static byte[] read(File source) throws IOException {
         byte[] buffer = new byte[(int) source.length()];
         InputStream fis = null;
@@ -143,7 +190,7 @@ public final class serverFileUtils {
         }
         return buffer;
     }
-    
+
     public static byte[] readAndZip(File source) throws IOException {
         ByteArrayOutputStream byteOut = null;
         GZIPOutputStream zipOut = null;
@@ -158,7 +205,7 @@ public final class serverFileUtils {
             if (byteOut != null) try { byteOut.close(); } catch (Exception e) {}
         }
     }
-    
+
     public static void writeAndGZip(byte[] source, File dest) throws IOException {
         FileOutputStream fos = null;
         try {
@@ -168,7 +215,7 @@ public final class serverFileUtils {
             if (fos != null) try {fos.close();} catch (Exception e) {}
         }
     }
-    
+
     public static void writeAndGZip(byte[] source, OutputStream dest) throws IOException {
         GZIPOutputStream zipOut = null;
         try {
@@ -179,15 +226,15 @@ public final class serverFileUtils {
             if (zipOut != null) try { zipOut.close(); } catch (Exception e) {}
         }
     }
-    
+
     public static void write(byte[] source, OutputStream dest) throws IOException {
         copy(new ByteArrayInputStream(source), dest);
     }
-    
+
     public static void write(byte[] source, File dest) throws IOException {
         copy(new ByteArrayInputStream(source), dest);
     }
-    
+
     public static HashSet loadList(File file) {
         HashSet set = new HashSet();
         BufferedReader br = null;
@@ -240,7 +287,7 @@ public final class serverFileUtils {
         file.delete();
         tf.renameTo(file);
     }
-    
+
     public static Set loadSet(File file, int chunksize, boolean tree) throws IOException {
         Set set = (tree) ? (Set) new TreeSet() : (Set) new HashSet();
         byte[] b = read(file);
@@ -278,14 +325,19 @@ public final class serverFileUtils {
         file.delete();
         tf.renameTo(file);
     }
-    
+
+    /**
+    * Moves all files from a directory to another.
+    * @param from_dir    Directory which contents will be moved.
+    * @param to_dir    Directory to move into. It must exist already.
+    */
     public static void moveAll(File from_dir, File to_dir) {
         if (!(from_dir.isDirectory())) return;
         if (!(to_dir.isDirectory())) return;
         String[] list = from_dir.list();
         for (int i = 0; i < list.length; i++) (new File(from_dir, list[i])).renameTo(new File(to_dir, list[i]));
     }
-    
+
     public static void main(String[] args) {
         try {
             writeAndGZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));

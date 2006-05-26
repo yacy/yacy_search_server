@@ -167,8 +167,8 @@ public final class yacy {
     * combined version
     *
     * @param version Current given version.
-    * @param svn Current version given from svn.
-    * @return String with the combined version
+    * @param svn Current version given from SVN.
+    * @return String with the combined version.
     */
     public static float versvn2combinedVersion(float v, int svn) {
         return (float) (((double) v * 100000000.0 + ((double) svn)) / 100000000.0);
@@ -550,7 +550,7 @@ public final class yacy {
     }
     
     /**
-    * Call the shutdown-page from yacy to tell it to shut down. This method is
+    * Call the shutdown-page of YaCy to tell it to shut down. This method is
     * called if you start yacy with the argument -shutdown.
     *
     * @param homePath Root-path where all the information is to be found.
@@ -1170,10 +1170,12 @@ public final class yacy {
             serverLog.logInfo("TRANSFER-CR", "could not read file " + crfile);
         }
     }
-        /**
+    /**
     * Generates a text file containing all domains in this peer's DB.
+    * This may be useful to calculate the YaCy-Blockrank.
     *
-    * @param format String which determines format of the text file. Possible values: "html", "zip", "gzip" or "plain"
+    * @param format String which determines the format of the file. Possible values: "html", "zip", "gzip" or "plain"
+    * @see urllist
     */
     private static void domlist(String homePath, String format, String targetName) {
     	
@@ -1364,9 +1366,9 @@ public final class yacy {
     }
     
     /**
-     * Searching for peers affected by Bug http://www.yacy-forum.de/viewtopic.php?p=16056
+     * Searching for peers affected by Bug documented in <a href="http://www.yacy-forum.de/viewtopic.php?p=16056#16056">YaCy-Forum Posting 16056</a>
      * @param homePath
-     * @see http://www.yacy-forum.de/viewtopic.php?p=16056
+     * @see <a href="http://www.yacy-forum.de/viewtopic.php?p=16056#16056">YaCy-Forum Posting 16056</a>
      */
     public static void testPeerDB(String homePath) {
         
