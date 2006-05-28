@@ -18,8 +18,8 @@
 #Contributors are in chronological ordern, not how much they did absolutely.
 #Thank you for your help!
 <!-- lang -->default\(english\)==Slovenky
-<!-- author -->==Rostislav Svoboda
-<!-- maintainer -->==&lt;Rostislav.Svoboda@gmail.com&gt;
+<!-- author -->==Roland Ramthun, Oliver Wunder, Jan Sandbrink, Rostislav Svoboda
+<!-- maintainer -->==&lt;admin@yacy-forum.de&gt;
 
 #-----------------------------------------------------------
 #File: Blacklist_p.html
@@ -492,330 +492,332 @@ Month\(s\)==Mesiac(e)
 Day\(s\)==Den(Dni)
 Hour\(s\)==Hodina(y)
 Minute\(s\)==Minuta(y)
-If you use this option, web pages that are already existent in your database are crawled and indexed again.==Ist diese Option aktiviert, werden bereits in Ihrer Datenbank existierende Internetseite erneut gecrawled und indexiert.
-It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es h&auml;ngt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl &auml;lter als das angegebene
-date, the page is crawled again, othervise it is treaded as 'double' and not loaded or indexed again.==Datum ist, wird die Seite erneut gecrawlet, sonst wird sie als 'double' markiert und weder geladen noch indexiert.
+If you use this option, web pages that are already existent in your database are crawled and indexed again.==Ak aktivujete tuto volbu, tak web stranky ulozene vo Vasej databaze budu nanovo precrawlovane a indexovane.
+It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Zavisi od veku posledneho crawlu ci tak bude vykonane alebo nie. Ak je posledny crawl starsi ako zadany
+date, the page is crawled again, othervise it is treaded as 'double' and not loaded or indexed again.==datum, tak budu tieto stranky nanovo precrawlovane. V opacnom pripade budu oznacene ako 'double' a nebudu nanovo nahravane ani indexovane.
 Auto-Dom-Filter:==Auto-Dom-Filter:
-Depth:==Tiefe:
-This option will automatically create a domain-filter which limits the crawl on domains the crawler will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth for this example would be 1.==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschr�nkt , die auf der angegebenen Tiefe gefunden werden. Diese Option kann man beispielsweise benutzen, um eine Seite mit Bookmarks zu crawlen und dann den folgenden Crawl automatisch auf die Domains zu beschr�nken, die in der Bookmarkliste vorkamen. Die einzustellende Tiefe f�r dieses Beispiel w�re 1.
-The default value 0 gives no restrictions.==Der Vorgabewert 0 bedeutet, dass nichts eingeschr�nkt wird.
-appear on the given depth during crawling. The domain-list is then used to filter-out all domains, that appear==in der angegebenen Tiefe w&auml;hrend des Crawls auftauchen. Die Domain-Liste wird dann benutzt, um alle Domains rauszufiltern, die
-on depths greater then the given depth, but do not appear in the domain-list. You can use this option i.e.==tiefer als die angegebene Tiefe vorkommen, aber nicht auf der Domain-Liste vorkommen. Sie k&ouml;nnen diese Option z.B. dazu benutzen,
-to crawl pages with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page.==um Seiten mit Lesezeichen zu crawlen, w&auml;hrend der Crawl auf die, nur auf diese Lesezeichen-Seite auftauchenden Domains, begrenzt ist.
-Maximum Pages per Domain:==Maximale Seiten pro Domain:
-Page-Count:==Seitenanzahl:
-You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.==Sie k&ouml;nnen die maximale Anzahl an Seiten, die von einer einzelnen Domain gefunden und indexiert werden, mit dieser Option begrenzen.
-You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==Sie k&ouml;nnen diese Option auch mit dem 'Auto-Dom-Filter' kombinieren, so dass das Limit f&uuml;r alle Domains mit der
-the given depth. Domains outside the given depth are then sorted-out anyway.==angegebenen Tiefe gilt. Domains ausserhalb der angegebenen Tiefe werden einfach aussortiert.
-Accept URLs with '\?' / dynamic URLs:==Akzeptiere URLs mit '?' / dynamische URLs:
-A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Ein Fragezeichen ist normalerweise ein Hinweis auf eine dynamische Seite. URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden. Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
-is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
-Store to Proxy Cache:==Speichern im Proxy-Cache:
-This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardm&auml;ssig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
-We recommend to leave this switched off unless you want to control the crawl results with the==Wir raten Ihnen, sie nicht zu aktivieren, ausser Sie wollen die Crawl Resulate mit
-Cache Monitor==Cache Monitor kontrollieren.
-Do Local Indexing:==Lokales Indexieren:
-This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Dies aktiviert die Indexierung von Webseiten, die der Crawler runterl&auml;dt. Dies sollte standardm&auml;ssig aktiviert sein, ausser Sie wollen den
-Proxy Cache</a> without indexing.==Proxy Cache</a> ohne Indexierung f&uuml;llen.
-Do Remote Indexing:==Indexieren auf anderen Peers:
-Describe your intention to start this global crawl \(optional\):==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional):
-This message will appear in the 'Other Peer Crawl Start' table of other peers.==Diese Nachricht wird bei anderen Peers in der 'Anderer Peer Crawl Start' Tabelle angezeigt.
-If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler mit anderen Peers Kontakt aufnehmen und diese als Remote Indexierer f&uuml;r Ihren Crawl benutzen.
-If you need your crawling results locally, you should switch this off.==Wenn Sie die Crawling Ergebnisse lokal ben&ouml;tigen, sollten Sie diese Funktion aktivieren.
-Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl initiieren oder erhalten.
-<b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can omit starting a crawl with the same start point.==<b>Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren,</b> damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
-Exclude <i>static</i> Stop-Words==Stop-Words ausschlie&szlig;en:
-This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem h&auml;ufig vorkommende W&ouml;rter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle W&ouml;rter von der Indexierung auszuschliessen, die in der Datei <tt class=small>yacy.stopwords</tt> enthalten sind,
-check this box.==aktivieren Sie diese Box.
-Starting Point:==Startpunkt:
-From&nbsp;File:==Aus Datei:
-From&nbsp;URL:==Von URL:
-Existing start URLs are re-crawled.==Die existierende Start URL wird wieder gecrawlt.
-Other already visited URLs are sorted out as \"double\".==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert.
-A complete re-crawl will be available soon.==Ein kompletter Re-Crawl wird bald m&ouml;glich sein.
-"Start New Crawl"=="Neuen Crawl starten"
-<b>Distributed Indexing: </b>==<b>Verteiltes Indexieren: </b>
-Crawling and indexing can be done by remote peers.==Crawlen und Indexieren kann von anderen Peers durchgef&uuml;hrt werden.
-Your peer can search and index for other peers and they can search for you.==Ihr Peer kann suchen und indexieren f&uuml;r andere Peers und diese k&ouml;nnen f&uuml;r Sie suchen.
-Accept remote crawling requests and perform crawl at maximum load==Akzeptiere Remote-Crawling Anfragen und crawle bis zur maximalen Auslastung.
-Accept remote crawling requests and perform crawl at maximum of==Akzeptiere Remote-Crawling Anfragen und crawle bis zu einem Maximum von
-Pages Per Minute \(minimum is 1, low system load usually at PPM <= 30\)==Seiten pro Minute (Minimum ist 1, langsame Systeme sollten normalerweise unter 30 Seiten pro Minute laden)
-Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Akzeptiere keine Remote-Crawling Anfragen (bitte aktivieren Sie dies nur, wenn Sie nicht eine Seite pro Minute crawlen k&ouml;nnen; siehe Option oben)
-"set"=="Speichern"
-Error:==Fehler:
-Application not yet initialized. Sorry. Please wait some seconds and repeat the request.==Nicht richtig initialisiert. Sorry. Bitte warten Sie einige Sekunden und wiederholen Sie die Anfrage.
-Crawling of "\#\[crawlingURL\]\#" failed. Reason:==Crawling von "#[crawlingURL]#" fehlgeschlagen. Grund:
-Error with file input==Fehler mit der eingegebenen Datei
-Set new prefetch depth to==Neue Crawl Tiefe gesetzt auf
-Crawling of "\#\[crawlingURL\]\#" started.==Crawling von "#[crawlingURL]#" gestartet.
-You can monitor the crawling progress either by watching the URL queues==Sie k&ouml;nnen den Crawling Prozess auch sehen, indem Sie auf einer der folgenden URLs nachsehen:
-local queue</a>==lokale Warteschlange</a>
-global queue</a>==globale Warteschlange</a>
-loader queue</a>==Lade-Warteschlange</a>
-indexing queue</a>==Indexier-Warteschlange</a>
-or see the fill/process count of all queues on the==Oder sehen Sie sich den F&uuml;ll-Prozess von allen Warteschlangen auf der
->performance page</a>.==>Performance-Seite</a> an.
-Index Monitor</a>-page.==Index Monitor</a>-Seite angezeigt.
-<b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>==<b>Es dauert in der Regel mind. 30 Sekunden bis das Sie dort die ersten Ergebnisse sehen k&ouml;nnen. Bitte beachten Sie, dass das Crawling jedesmal, wenn Sie den Proxy oder den Web-Sever benutzen, pausiert wird, um maximale Verf&uuml;gbarkeit zu garantieren.</b>
-If you crawl any un-wanted pages, you can delete them==Wenn Sie Seiten crawlen, die Sie nicht crawlen wollen, k&ouml;nnen Sie diese
-here</a>.==hier</a> l&ouml;schen.
-Removed \#\[numEntries\]\# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty==#[numEntries]# Eintr&auml;ge wurden aus der Crawl Warteschlange entfernt. Diese Warteschlange wird sich erneut f&uuml;llen, wenn noch Eintr&auml;ge in der Lade- und Indexier Warteschlange stehen.
-Crawling paused successfully.==Crawling wurde erfolgreich unterbrochen (Pause).
-Continue crawling.==Crawling wird fortgesetzt.
-"refresh"=="Aktualisieren"
-"continue crawling"=="Crawling fortsetzen"
+Depth:==Hlbka:
+This option will automatically create a domain-filter which limits the crawl on domains the crawler will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while	restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth for this example would be 1.==Tato volba automaticky vytvory domenovy filter ktory obmedzuje crawl na domeny ktore crawler najde v zadanej hlbke. Mozete pouzit tuto volbu t.j. crawlovat stranku zo zalozkami a nasledne obmedzit nasledujuci crawl na tie domeny ktore sa vyskytuje v zozname zaloziek. Primerana hlbka by v tomto pripade bola 1.
+The default value 0 gives no restrictions.==Prednastavena hodnota 0 znamena ziadne obmedzenie.
+appear on the given depth during crawling. The domain-list is then used to filter-out all domains, that appear==zobrazia sa vo zvolenej hlbke pocas crawlingu. Zoznam domen je potom pouzity na odfiltrovanie vsetkych domen 
+on depths greater then the given depth, but do not appear in the domain-list. You can use this option i.e.==ktore sa vyskytuju hlbsie ako zvolena hlbka, ale nevyskytu sa na zozname domen. Mozete pouzit tuto volbu t.j.
+to crawl pages with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page.==crawlovat stranky so zalozkami, pricom crawl je obmedzeny len na domeny ktore sa vyskytuju na stranke zaloziek. 
+Maximum Pages per Domain:==Maximum stranok na domenu:
+Page-Count:==Pocet stranok:
+You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.==Maximalny pocet stranok vybratych a indexovanych z jednej domeny mozete touto volbou obmedzit.
+You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==Tuto volbu mozete kombinovat s 'Auto-Dom-Filtrom', takze toto obmedzenie bude aplikovane na vsetky domeny vo 
+the given depth. Domains outside the given depth are then sorted-out anyway.==zvolenej hlbke. Domeny mimo zvolenej hlbky budu v kazdom pripade vytriedene.
+Accept URLs with '\?' / dynamic URLs:==Akceptuj URL adresy s '?' / dynamicke URL adresy:
+A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Otaznik sa vacsinou pouziva ako priznak dynamickej stranky. URL adresa odkazujuca na dynamicky obsah by v normalnom pripade nemala byt crawlovana. Niekedy sa vsak stava ze stranky na ktore sa odkazuje URL adresou  
+is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==obsahujucou otaznik maju staticky obsah. Neaktivujte tuto volbu ak ste si nie isty nebezpecenstvom zacyklenia crawlingu.  
+Store to Proxy Cache:==Uloz do proxy cache:
+This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Tato volba je standartne pouzita na proxy predvyber, avsak pre cisty crawling nie je potrebna. 
+We recommend to leave this switched off unless you want to control the crawl results with the==Odporucame ponechat tuto volbu vypnutu ak nechcete kontrolovat vysledky crawlingu pomocou 
+Cache Monitor==cache monitoru.
+Do Local Indexing:==Lokalne indexovanie:
+This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Toto aktivuje indexovanie web stranok, ktore crawler stiahol. Toto by malo byt standartne vypnute, ak nechcete crawlovat  
+Proxy Cache</a> without indexing.==len na vyplnenie proxy cache</a> bez indexovania.
+Do Remote Indexing:==Indexovanie inych peerov:
+Describe your intention to start this global crawl \(optional\):==Popiste preco chcete zacat tento globalny crawl (popis je nepovinny):
+This message will appear in the 'Other Peer Crawl Start' table of other peers.==Tento popis sa u ostatnych peerov objavi v tabulke 'Start crawlingu ineho peera'.
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Ak aktivovane tak crawler bude kontaktovat inych peerov and bude ich vyuzivat ako vzdialenych indexatorov pre Vas crawl.
+If you need your crawling results locally, you should switch this off.==Aktivujte tuto volbu, ak potrebujete mat vysledy crawlingu lokalne.
+Only senior and principal peers can initiate or receive remote crawls.==Len Senior a Principal peeri mozu odstartovat alebo obdrzat vzialene crawly.
+<b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can omit starting a crawl with the same start point.==<b>YaCy sprava bude vytvorena na informovanie ostatnych peerov o globalnom crawle</b>, aby sa zabranilo odstartovaniu crawlu z rovnakeho startovacieho bodu.
+Exclude <i>static</i> Stop-Words==Vyluc <i>staticke</i> stop slova
+This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,==Toto ma zmysel pre zabranenie pridavania velmi casto sa vyskytujucich slov do databazy, ako napr. "a", "alebo", "to" atd. Aktivujte tuto volbu na vylucenie indexovania vsetkych slov uvedenych 
+check this box.==v subore <tt class=small>yacy.stopwords</tt>.
+Starting Point:==Startovaci bod:
+From&nbsp;File:==Zo suboru:
+From&nbsp;URL:==Z URL adresy:
+Existing start URLs are re-crawled.==Existjuce start URL adresy sa crawluju nanovo.
+Other already visited URLs are sorted out as \"double\".==Ine uz navstivene stranky budu ako 'dvojnasobne' vylucene.
+A complete re-crawl will be available soon.==Kompletny re-crawl bude uz coskoro mozny.
+"Start New Crawl"=="Odstartuj novy crawl"
+<b>Distributed Indexing: </b>==<b>Distribuovane indexovanie: </b>
+Crawling and indexing can be done by remote peers.==Crawling a indexovanie moze byt vykonane inymi peermi.
+Your peer can search and index for other peers and they can search for you.==Vas peer moze hladat a indexovat pre inych peerov a ine peeri mozu hladat pre Vas. 
+Accept remote crawling requests and perform crawl at maximum load==Akceptuj poziadavky na vzdialeny crawling a vykonaj crawling s maximalnym moznym vytazenim. 
+Accept remote crawling requests and perform crawl at maximum of==Akceptuj poziadavky na vzdialeny crawling a vykonaj crawling s maximalnym vytazenim
+Pages Per Minute \(minimum is 1, low system load usually at PPM <= 30\)==stranok za minutu (minimum je 1, pomale systemy nahravaju normalne pod 30 stranok za minutu)
+Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Neakceptuj poziadavky na vzdialeny crawling (prosim aktivujte tuto volbu len ak nemozete crawlovat 1 stranku za minut - pozri vyzsie)
+"set"=="Uloz"
+Error:==Chyba:
+Application not yet initialized. Sorry. Please wait some seconds and repeat the request.==Nespravna inicializacia. Sorry. Prosim cakajte niekolko sekund a zopakujte Vasu poziadavku.
+Crawling of "\#\[crawlingURL\]\#" failed. Reason:==Crawling URL adresy "#[crawlingURL]#" skoncil s chybou. Dovod:
+Error with file input==Chyba vstupneho suboru
+Set new prefetch depth to==Nastav novu hlbku crawlingu na
+Crawling of "\#\[crawlingURL\]\#" started.==Crawling URL adresy "#[crawlingURL]#" bol odstartovany.
+You can monitor the crawling progress either by watching the URL queues==Crawling proces mozete monitorovat pomocou jedneho al. viacerych z nasledovnych URL cakacich listin:
+	Sie k&ouml;nnen den Crawling Prozess auch sehen, indem Sie auf einer der folgenden URLs nachsehen:
+local queue</a>==lokalna cakacia listina</a>
+global queue</a>==globalna cakacia listina</a>
+loader queue</a>==nahravacia cakacia listina</a>
+indexing queue</a>==indexovacia cakacia listina</a>
+or see the fill/process count of all queues on the==alebo sa pozrite na proces vyplnania vsetkych cakacich listin na 
+>performance page</a>.==>stranke vykonu</a>.
+Index Monitor</a>-page.==stranke Monitor indexu</a>.
+<b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>==<b>Bude trvat priblizne 30 sekund pokym sa zobrazi prvy vysledok. Budte prosim trpezlivy. Kvoli zabezpeceniu maximalnej dostupnosti bude crawling pozastaveny pri kazdom pouziti proxy alebo web servera na</b> 
+If you crawl any un-wanted pages, you can delete them==Ak crawlujete stranky ktore ste povodne nechceli crawlovat tak ich mozete 
+here</a>.==na tomto mieste</a> zmazat.
+Removed \#\[numEntries\]\# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty==#[numEntries]# zaznamov bolo zmazanych z crawl cakacej listiny. Tato cakacia listina sa nanovo naplni ak nahravacia al. indexovacia listina nie je prazdna.
+Crawling paused successfully.==Crawling bol uspesne pozastaveny (pauzaa).
+Continue crawling.==Pokracuj v crawlingu.
+"refresh"=="aktualizuj"
+"continue crawling"=="pokracuj v crawlingu"
 "pause crawling"=="Crawling pausieren"
-Crawl Profile List:==Crawl Profil Liste:
-Crawl Thread==Crawl Art
-Start URL==Start URL
-Depth</b>==Tiefe</b>
-Filter</b>==Maske</b>
-Fill Proxy Cache==F&uuml;lle Proxy Cache
-Local Indexing</b>==Lokales Indexieren</b>
-Remote Indexing</b>==Indexieren auf anderen Peers</b>
-Recently started remote crawls in progress:==Gerade gestartetes Indexieren auf anderen Peers in Bearbeitung:
-Start Time==Startzeit
-Peer Name==Peer Name
-Start URL==Start URL
-Intention/Description==Absicht/Beschreibung
-Recently started remote crawls, finished:==Gerade gestartete Remote-Crawls anderer Peers, beendete:
-Remote Crawling Peers:==Remote-Crawl Peers:
-No remote crawl peers availible.==Kein Peer zum Remote-Crawl erreichbar.
-peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.
-Idle Peers==unt&auml;tige Peers
-Accept \'\?\' URLs==URLs mit '?' akzeptieren
-Busy Peers==Besch&auml;tigte Peers
-\#\(withQuery\)\#no::yes\#\(/withQuery\)\#==#(withQuery)#nein::ja#(/withQuery)#
-\#\(storeCache\)\#no::yes\#\(/storeCache\)\#==#(storeCache)#nein::ja#(/storeCache)#
-\#\(localIndexing\)\#no::yes\#\(/localIndexing\)\#==#(localIndexing)#nein::ja#(/localIndexing)#
-\#\(remoteIndexing\)\#no::yes\#\(/remoteIndexing\)\#==#(remoteIndexing)#nein::ja#(/remoteIndexing)#
-\#\(crawlingQ\)\#no::yes\#\(/crawlingQ\)\#==#(crawlingQ)#nein::ja#(/crawlingQ)#
-\#\{available\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)&nbsp;&nbsp; \#\{/available\}\#==#{available}##[name]# (#[due]# Sekunden lang)&nbsp;&nbsp; #{/available}#
-\#\{busy\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)&nbsp;&nbsp;\#\{/busy\}\#==#{busy}##[name]# (#[due]# Sekunden lang)&nbsp;&nbsp;#{/busy}#
+Crawl Profile List:==Profil crawl zoznamu:
+Crawl Thread==Vlakno crawlu
+Start URL==Startovacia URL
+Depth</b>==Hlbka</b>
+Filter</b>==Filter</b>
+Fill Proxy Cache==Vypln proxy cache
+Local Indexing</b>==Lokalne indexovanie</b>
+Remote Indexing</b>==Indexovanie na inych peeroch</b>
+Recently started remote crawls in progress:==Posledne odstartovane a spracovavane indexovania na inych peeroch:
+Start Time==Startovaci cas
+Peer Name==Meno peera
+Start URL==Startovacia URL adresa
+Intention/Description==Umysel/Popis
+Recently started remote crawls, finished:==Posledne odstartovane a ukoncene indexovania na inych peeroch:
+Remote Crawling Peers:==Peeri na vzdialeny crawl:
+No remote crawl peers availible.==Ziadny peer na vzdialeny crawling nie je dostupny.
+peers available for remote crawling.==Peeri dostupni na vzialeny crawling.
+Idle Peers==Necinni peeri
+Accept \'\?\' URLs==Akceptuj URL adresy s '?' 
+Busy Peers==Vytazeni peeri
+\#\(withQuery\)\#no::yes\#\(/withQuery\)\#==#(withQuery)#nie::ano#(/withQuery)#
+\#\(storeCache\)\#no::yes\#\(/storeCache\)\#==#(storeCache)#nie::ano#(/storeCache)#
+\#\(localIndexing\)\#no::yes\#\(/localIndexing\)\#==#(localIndexing)#nie::ano#(/localIndexing)#
+\#\(remoteIndexing\)\#no::yes\#\(/remoteIndexing\)\#==#(remoteIndexing)#nie::ano#(/remoteIndexing)#
+\#\(crawlingQ\)\#no::yes\#\(/crawlingQ\)\#==#(crawlingQ)#nie::ano#(/crawlingQ)#
+\#\{available\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)&nbsp;&nbsp; \#\{/available\}\#==#{available}##[name]# (#[due]# sekund)&nbsp;&nbsp; #{/available}#
+\#\{busy\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)&nbsp;&nbsp;\#\{/busy\}\#==#{busy}##[name]# (#[due]# sekund)&nbsp;&nbsp;#{/busy}#
 
 #-------------------------------------------------------
 #File: IndexCreateIndexingQueue_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Index Creation/Indexing Queue==Index Erzeugung/Indexier Warteschlange
-Index Creation: Indexing Queue==Index Erzeugung: Indexier Warteschlange
-The indexing queue is empty==Die Indexier Warteschlange ist leer.
-"clear indexing queue"=="Warteschlange l&ouml;schen"
-There are <b>\#\[num\]\#</b> entries in the indexing queue. Showing <b>\#\[show\]\#</b> entries with a total size of <b>\#\[totalSize\]\#</b>.==Es befinden sich <b>#[num]#</b> Eintr&auml;ge in der Indexier Warteschlange. <b>#[show]#</b> Eintr&auml;ge mit einer Gr&ouml;sse von <b>#[totalSize]#</b> werden angezeigt.
-Show last==Zeige die letzten
-</a> entries.==</a> Eintr&auml;ge.
-Initiator==Initiator
-Depth==Tiefe
-Modified Date==&Auml;nderungsdatum
-Anchor Name==Anker Name
+Index Creation/Indexing Queue==Vytvorenie indexu/Cakacia listina indexu 
+Index Creation: Indexing Queue==Vytvorenie indexu: Cakacia listina indexu
+The indexing queue is empty==Cakacia listina indexu je prazdna.
+"clear indexing queue"=="Zmaz cakaciu listinu indexu"
+There are <b>\#\[num\]\#</b> entries in the indexing queue. Showing <b>\#\[show\]\#</b> entries with a total size of <b>\#\[totalSize\]\#</b>.==V cakacej listine indexu sa nachadza <b>#[num]#</b> zaznamov. Zobrazuje sa <b>#[show]#</b> zaznamov s celkovou velkostou <b>\#\[totalSize\]\#</b>.
+Show last==Zobraz posledne
+</a> entries.==</a> zaznami
+Initiator==Iniciator
+Depth==Hlbka
+Modified Date==Posledna zmena
+Anchor Name==Nazov kotvy
 #URL==URL
-Size</th>==Gr&ouml;sse</th>
-Delete==L&ouml;schen
-Rejected URL List:</b>&nbsp;There are \#\[num\]\# entries in the rejected-urls list.==Ausschluss URL Liste:</b>&nbsp;Es befinden sich #[num]# Eintr&auml;ge in der ausgeschlossene-URL Liste.
-Showing latest \#\[num\]\# entries.==Es werden die letzten #[num]# Eintr&auml;ge gezeigt.
-"show more"=="Mehr zeigen"
-"clear list"=="Liste l&ouml;schen"
-There are \#\[num\]\# entries in the rejected-queue:==Es befinden sich #[num]# Eintr&auml;ge in der ausgeschlossenen Warteschlange:
-Executor==Ausf&uuml;hrender
-Fail-Reason==Fehler Grund
+Size</th>==Velkost</th>
+Delete==Zmazat
+Rejected URL List:</b>&nbsp;There are \#\[num\]\# entries in the rejected-urls list.==Zoznam odmietnutych URL adries:</b>&nbsp; V zozname odmietnutych URL adries sa nachadza #[num]# zaznamov. 
+Showing latest \#\[num\]\# entries.==Zobrazuju sa #[num]# posledne zaznami.
+"show more"=="zobraz ostatne"
+"clear list"=="vymaz zoznam"
+There are \#\[num\]\# entries in the rejected-queue:==V cakacej listine odmietnutych sa nachadza #[num]# zaznamov:
+Executor==Vykonavatel
+Fail-Reason==Dovod zlyhania
 
 #-------------------------------------------------------
 #File: IndexCreateLoaderQueue_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Index Creation / Loader Queue==Index Erzeugung / Lade Warteschlange
-Index Creation: Loader Queue==Index Erzeugung: Lade Warteschlange
-The loader set is empty==Die Lade Warteschlange ist leer.
-There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Eintr&auml;ge in der Lade Warteschlange:
-Initiator==Initiator
-Depth==Tiefe
+Index Creation / Loader Queue==Vytvorenie indexu / Cakacia listina nahravaca
+Index Creation: Loader Queue==Vytvorenie indexu: Cakacia listina nahravaca
+The loader set is empty==Cakacia listina nahravaca je prazdna.
+There are \#\[num\]\# entries in the loader set:==V cakacej listine nahravaca sa nachadza #[num]# zaznamov:
+Initiator==Iniciator
+Depth==Hlbka
 #URL==URL
 
 #-------------------------------------------------------
 #File: IndexCreateWWWGlobalQueue_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy '\#\[clientname\]\#': Index Creation / WWW Global Crawl Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Globale WWW Warteschlange
-Index Creation: WWW Global Crawl Queue==Index Erzeugung: Globale WWW Warteschlange
-This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Diese Warteschlange enth&auml;lt URLs, die an andere Peers gesendet werden sollen, um einen Remote Crawl durchzuf&uuml;hren.
-If there is no peer for remote crawling available, the links are crawled locally.==Wenn kein Peer zum Remote Crawl vorhanden ist, werden die Links lokal gecrawlt.
-The global crawler queue is empty==Die globale Crawler Warteschlange ist leer.
-"clear global crawl queue"=="L&ouml;sche globale Crawler Warteschlange"
-There are <b>\#\[num\]\#</b> entries in the global crawler queue. Showing <b>\#\[show-num\]\#</b> most recent entries.==Es befinden sich <b>#[num]#</b> Eintr&auml;ge in der globalen Crawler Warteschlange. Gezeigt werden die <b>#[show-num]#</b> neusten Eintr&auml;ge.
-Show last==Zeige die letzten
-</a> entries.==</a> Eintr&auml;ge.
-Initiator==Initiator
+YaCy '\#\[clientname\]\#': Index Creation / WWW Global Crawl Crawl Queue==YaCy '#[clientname]#': Vytvorenie indexu / Globalna WWW cakacia listina
+Index Creation: WWW Global Crawl Queue==Vytvorenie indexu: Globalna WWW cakacia listina
+This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Tato cakacia listi naobsahuje URL adresy ktore by sa mali poslat inym peerom na vykonanie vzdialeneho crawlu. 
+If there is no peer for remote crawling available, the links are crawled locally.==Ak nie je dostupny ziaden peer na vzdialeny crawl, tak budu tieto linky crawlovane lokalne.
+The global crawler queue is empty==Globalna cakacia listina crawleru je prazdna.
+"clear global crawl queue"=="Zmaz globalnu cakaciu listinu crawleru"
+There are <b>\#\[num\]\#</b> entries in the global crawler queue. Showing <b>\#\[show-num\]\#</b> most recent entries.==V globalnej cakacej listine crawleru sa nachadza <b>#[num]#</b> zaznamov. Zobrazuje sa <b>#[show-num]#</b> poslednych zaznamov.  
+Show last==Zobraz posledne
+</a> entries.==</a> zaznamy.
+Initiator==Iniciator
 Profile==Profil
-Depth==Tiefe
-Modified Date==&Auml;nderungsdatum
-Anchor Name==Anker Name
+Depth==Hlbka
+Modified Date==Datum poslednej zmeny
+Anchor Name==Meno kotvy
 #URL==URL
 
 #-------------------------------------------------------
 #File: IndexCreateWWWLocalQueue_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy '\#\[clientname\]\#': Index Creation / WWW Local Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Lokale WWW Warteschlange
-Index Creation: WWW Local Crawl Queue==Index Erzeugung: Lokale WWW Warteschlange
-This queue stores the urls that shall be crawled localy by this peer.==Diese Warteschlange enth&auml;lt URLs, die von diesem Peer lokal gecrawlt werden sollen.
-It may also contain urls that are computed by the proxy-prefetch.==Sie enth&auml;lt auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
-The local crawler queue is empty==Die lokale Crawler Warteschlange ist leer.
-"clear local crawl queue"=="L&ouml;sche lokale Crawler Warteschlange"
-There are <b>\#\[num\]\#</b> entries in the local crawler queue. Showing <b>\#\[show-num\]\#</b> most recent entries.==Es befinden sich <b>#[num]#</b> Eintr&auml;ge in der lokalen Crawler Warteschlange. Gezeigt werden die <b>#[show-num]#</b> neusten Eintr&auml;ge.
-Show last==Zeige die letzten
-</a> entries.==</a> Eintr&auml;ge.
-Initiator==Initiator
+YaCy '\#\[clientname\]\#': Index Creation / WWW Local Crawl Queue==YaCy '#[clientname]#': Vytvorenie indexu / Lokalna WWW cakacia listina
+Index Creation: WWW Local Crawl Queue==Vytvorenie indexu: Lokalna WWW cakacia listina
+This queue stores the urls that shall be crawled localy by this peer.==Tato cakacia listi naobsahuje URL adresy ktore by sa mali byt crawlovane lokalne Vasom peeri.
+It may also contain urls that are computed by the proxy-prefetch.==Obsahuje tiez URL adresy vytvorene pomocou proxy predvyberu.
+The local crawler queue is empty==Lokalna cakacia listina crawleru je prazdna.
+"clear local crawl queue"=="Zmaz lokalnu cakaciu listinu crawleru"
+There are <b>\#\[num\]\#</b> entries in the local crawler queue. Showing <b>\#\[show-num\]\#</b> most recent entries.==V lokalnej cakacej listine crawleru sa nachadza <b>#[num]#</b> zaznamov. Zobrazuje sa <b>#[show-num]#</b> poslednych zaznamov.  
+
+Show last==Zobraz posledne
+</a> entries.==</a> zaznamy.
+Initiator==Iniciator
 Profile==Profil
-Depth==Tiefe
-Modified Date==&Auml;nderungsdatum
-Anchor Name==Anker Name
+Depth==Hlbka
+Modified Date==Datum poslednej zmeny
+Anchor Name==Meno kotvy
 URL==URL
-\[Delete\]==[L&ouml;schen]
-Delete Entries:==L&ouml;sche Eintr&auml;ge:
-"Delete"=="L&ouml;schen"
-This may take a quite long time.==Dies wird vielleicht einige Zeit dauern.
+\[Delete\]==[Zmaz]
+Delete Entries:==Zmaz zaznami:
+"Delete"=="Zmaz"
+This may take a quite long time.==Toto moze chvilku trvat.
 
 #-------------------------------------------------------
 #File: IndexImport_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy \'\#\[clientname\]\#\': Index Import==YaCy '#[clientname]#': Index Import
-Index DB Import==Index Datenbank Import
-The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==Der lokale Index besteht zur Zeit aus (mindestens) #[wcount]# W&ouml;rtern und #[ucount]# URLs.
-Import Job with the same path already started.==Ein Import mit dem selben Pfad ist bereits gestartet.
-Starting new Job==Neuen Import starten
-Import&nbsp;Type:==Import-Typ:
-Cache Size==Cachegr&ouml;&szlig;e
-Usage Examples==Benutzungs-<br>beispiele
-"Path to the PLASMADB directory of the foreign peer"=="Pfad zum PLASMADB Verzeichnis des fremden Peer"
-Import&nbsp;Path:==Import-Pfad:
-"Start Import"=="Import starten"
-Attention:==Achtung:
-Always do a backup of your source and destination database before starting to use this import function.==Machen Sie immer ein Backup von Ihrer Quell- und Zieldatenbank bevor Sie die Import-Funktion nutzen.
-Currently running jobs==Gerade laufende Aufgaben
-Job Type==Job-Typ
->Path==>Pfad
-Status==Status
-Elapsed<br>Time==Verstrichene Zeit
-Time<br>Left==verbl.<br>Zeit
-Abort Import==Import abbrechen
-Pause Import==Import pausieren
-Finished::Running::Paused==Fertig::Laufend::Pausiert
-Continue Import==Import fortsetzen
-Finished jobs==Fertige Importierungen
-"Clear List"=="Liste l&ouml;schen"
-Last Refresh:==Letzte Aktualisierung:
-Example Path:==Beispielpfad:
-Requirements:==Voraussetzungen:
-You need to have at least the following directories and files in this path:==Sie m&uuml;ssen mindestens die folgenden Dateien und Ordner in diesem Pfad haben:
+YaCy \'\#\[clientname\]\#\': Index Import==YaCy '#[clientname]#': Import indexu
+Index DB Import==Import databazoveho indexu 
+The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==	Lokalny index pozostava aktualne z (najmenej) #[wcount]# slov a #[ucount]# URL adries.
+Import Job with the same path already started.==Import z rovnakou cestou uz bol odstartovany.
+Starting new Job==Odstartuj novy import
+Import&nbsp;Type:==Typ importu:
+Cache Size==Velkost cache:
+Usage Examples==Priklady pouzitia
+"Path to the PLASMADB directory of the foreign peer"=="Cesta k PLASMADB adresaru cudzieho peera"
+Import&nbsp;Path:==Cesta importu:
+"Start Import"=="Odstartuj import"
+Attention:==Pozor:
+Always do a backup of your source and destination database before starting to use this import function.==Urobte si vzdy zalohu Vasej zdrojovej a cielovej databazy predtym ako spustite import-funkciu.
+Currently running jobs==Prave vykonavane ulohy
+Job Type==Typ ulohy
+>Path==>Cesta
+Status==Stav
+Elapsed<br>Time==Uplynuly cas
+Time<br>Left==Zostavajuci<br>cas
+Abort Import==Prerus import
+Pause Import==Pozastav import
+Finished::Running::Paused==Ukoncene::Beziace::Pozastavene
+Continue Import==Pokracuj v importe
+Finished jobs==Ukoncene importy
+"Clear List"=="Zmaz zoznam"
+Last Refresh:==Posledna aktualizacia:
+Example Path:==Priklad cesty:
+Requirements:==Poziadavky:
+You need to have at least the following directories and files in this path:==V tejto ceste musite mat aspon nasledovne subory a cesty:
 >Type==>Typ
->Writeable==>Schreibrechte
->Description==>Beschreibung
->File==>Datei
->Directory==>Verzeichnis
->Yes<==>Ja<
->No<==>Nein<
-The LoadedURL Database containing all loaded and indexed URLs==Die 'geladene URLs'-Datenbank, enth&auml;lt alle geladenen und indexierten URLs
-The assortment directory containing parts of the word index.==Das Assortment-Verzeichnis, enth&auml;lt Teile des Wort-Index.
-The words directory containing parts of the word index.==Das Wort-Verzeichnis, enth&auml;lt Teile des Wort-Index.
-The assortment file that should be imported.==Die Assortment-Datei die importiert werden soll.
-The assortment file must have the postfix==Die Assortment-Datei muss den Suffix
-.db".==.db" haben.
-If you would like to import an assortment file from the <tt>PLASMADB\\ACLUSTER\\ABKP</tt>== Wenn Sie eine Assortment-Datei aus <tt>PLASMADB\\ACLUSTER\\ABKP</tt> importieren wollen,
-you have to rename it first.==m&uuml;ssen Sie sie zuerst umbenennen.
->Notes:==>Anmerkung:
-Please note that the imported words are useless if the destination peer doesn't know==Bitte bedenken Sie, dass die importierten W&ouml;rter nutzlos sind, wenn der Ziel-Peer nicht wei&szlig;,
-the URLs the imported words belongs to.==zu welchen URLs sie geh&ouml;ren.
-Crawling Queue Import:==Crawler-Warteschlangen-Import:
-Contains data about the crawljob an URL belongs to==Enth&auml;lt Daten &uuml;ber den Crawljob zu dem eine URL geh&ouml;rt
-The crawling queue==Die Crawler-Warteschlange
-Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zur Crawler-Warteschlange geh&ouml;ren
+>Writeable==>Zapisovatelne
+>Description==>Popis
+>File==>Subor
+>Directory==>Adresar
+>Yes<==>Ano<
+>No<==>Nie<
+The LoadedURL Database containing all loaded and indexed URLs==Databaza 'nahratych URL adries' obsahuje vsetky nahrate a zaindexovane URL adresy
+The assortment directory containing parts of the word index.==Adresar Assortment, obsahuje casti indexu slov.
+The words directory containing parts of the word index.==Adresar slov, obsahuje casti indexu slov.
+The assortment file that should be imported.==Assortment subor na import.
+The assortment file must have the postfix==Assortment subor musi mat priponu
+.db".==.db".
+If you would like to import an assortment file from the <tt>PLASMADB\\ACLUSTER\\ABKP</tt>==Ak chcete importovat Assortment subor z <tt>PLASMADB\\ACLUSTER\\ABKP</tt>, 
+you have to rename it first.==tak ho musite najprv premenovat.
+>Notes:==>Poznamky:
+Please note that the imported words are useless if the destination peer doesn't know==Nezabudnite prosim, ze importovane slova su nepouzitelne ak cielovy peer nevie 
+the URLs the imported words belongs to.==ku ktorym URL adresam tieto slova patria.
+Crawling Queue Import:==Import cakacej listiny crawleru:
+Contains data about the crawljob an URL belongs to==Obsahuje data o crawl-ulohe ku ktorej prislucha URL adresa
+The crawling queue==Cakacia listina crawleru
+Various stack files that belong to the crawling queue==Rozdielne stack subory patriace cakacej listine crawlingu
 
 #-------------------------------------------------------
 #File: IndexMonitor.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 #YaCy '#[clientname]#': Index Monitor
-Index Monitor Menu==Index Monitor Men&uuml;
-Index&nbsp;Monitor&nbsp;Overview==Index Monitor &Uuml;berblick
-Receipts</a>==R&uuml;ckmeldungen</a>
-Queries</a>==Suchanfragen</a>
-DHT&nbsp;Transfer==DHT-Verteilung
-Proxy&nbsp;Use==Proxy Benutzung
-Local&nbsp;Crawling==Lokales Crawlen
-Global&nbsp;Crawling==Globales Crawlen
-Indexing Queues Monitor Overview==Index Reihen Monitor &Uuml;berblick
-These are monitoring pages for the different indexing queues.==Dies sind die Monitor Seiten f&uuml;r die unterschiedlichen Index Varianten.
-YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy kennt 5 verschiedene Arten, um zu indexieren. Die Details zu diesen Prozessen (1-5) sind in den Untermen&uuml;s oben beschrieben.
-above which also will show you a table with indexing results so far. The information in these tables is considered as private,==Dort kann man ausserdem eine Tabelle mit den Resultaten des Index sehen. Informationen in diesen Tabellen sind als privat eingestuft,
-so you need to log-in with your administration password.==also m&uuml;ssen Sie sich mit Ihrem Administrator Passwort einloggen, um sie zu sehen.
-Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==Fall (6) ist ein Monitor des lokalen Empfangs-Generator, der Gegensatz zu (1). Er enth&auml;lt ausserdem einen Index Resulate Monitor, ist aber nicht privat,
-since it shows crawl requests from other peers.==da er Crawl Anfragen von anderen Peers zeigt.
-The image above illustrates the data flow initiated by web index acquisition.==Das obige Bild zeigt den Datenfluss, der durch die Index Erwerbung &uuml;ber das Internet entsteht.
-Some processes occur double to document the complex index migration structure.==Einige Prozesse erscheinen doppelt, um die Komplexizit&auml;t der Index Verteilungs Struktur zu erkl&auml;ren.
-\(1\) Index Monitor of Remote Crawl Receipts==(1) Index Monitor f&uuml;r Remote Crawl R&uuml;ckmeldungen
-This is the list of web pages that this peer initiated to crawl,==Dies ist eine Liste von Internetseiten, bei der Ihr Peer den Crawl initiiert hat,
-but had been crawled by <i>other</i> peers.==die aber von <i>anderen</i> Peers gecrawlt wurden.
-This is the 'mirror'-case of process \(6\).==Dies ist der 'Gegensatz' Prozess zu (6)
-<i>Use Case:</i> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<i>Anwendungsfall:</i> Sie erhalten hier Eintr&auml;ge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
-'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==die 'Remote Indexierung' aktivieren. Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde,
-is reported back and can be monitored here.==wird nun zur&uuml;ck gemeldet und hier angezeigt.
-\(2\) Index Monitor for Result of Search Queries==(2) Index Monitor f&uuml;r Resultate bei Suchanfragen
-This index transfer was initiated by your peer by doing a search query.==Dieser Index Transfer wurde von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
-The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecrawlt und nun Ihnen breitgestellt.
-<i>Use Case:</i> This list fills up if you do a search query on the 'Search Page'==<i>Anwendungsfall:</i> Diese Liste f&uuml;llt sich, wenn Sie eine Suchanfrage auf der 'Suchseite' starten.
-\(3\) Index Monitor for Index Transfer.==(3) Index Monitor f&uuml;r die DHT-Verteilung
-The url fetch was initiated and executed by other peers.==Die URL Indexierung wurde von anderen Peers initiiert und durchgef&uuml;hrt.
-These links here have been transmitted to you because your peer is the most appropriate for storage according to==Diese Links wurden an Ihren Peer &uuml;bermittelt, da er am angemessensten zur Speicherung
-the logic of the Global Distributed Hash Table.==&uuml;bereinstimmend mit der Logic der verteilten Hash Tabelle ist.
-<i>Use Case:</i> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<i>Anwendung:</i> Dies Liste f&uuml;llt sich, wenn Sie die 'Index Empfang' Option auf der 'Index Kontrolle' Seite aktiviert haben.
-\(4\) Index Monitor for Proxy Indexing==(4) Index Monitor f&uuml;r die Proxy Indexierung
-These web pages had been indexed as result of your proxy usage.==Diese Internetseiten wurden durch die Benutzung des Proxy indexiert.
-No personal or protected page is indexed==Weder pers&ouml;nliche noch gesch&uuml;tzte Seiten werden indexiert
-such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Solche Seiten werden durch die Benutzung von Cookies oder POST-Parametern (in der URL oder im HTTP Protokoll) identifiziert
-and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
-<i>Use Case:</i> You must use YaCy as proxy to fill up this table.==<i>Anwendung:</i> Sie m&uuml;ssen YaCy als Proxy benutzen, um diese Tabelle zu f&uuml;llen.
-Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihres Browsers auf den selben Port, der
-on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
-\(5\) Index Monitor for Local Crawling.==(5) Index Monitor f&uuml;r das lokale Crawlen
-These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen lokalen Crawl auf der 'Index erzeugen' Seite gestartet haben.
-<i>Use Case:</i> start a crawl by setting a crawl start point on the 'Index Create' page.==<i>Anwendung:</i> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
-\(6\) Index Monitor for Global Crawling==(6) Index Monitor f&uuml;r das globale Crawlen
-These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen Peer initiiert (remote-Crawl).
-This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
-<i>Use Case:</i> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<i>Anwendung:</i> Diese Liste f&uuml;llt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
-The stack is empty.==Die Liste ist leer.
-Showing all \#\[all\]\# entries in this stack.==Zeigt alle #[all]# Eintr&auml;ge in diesem Bereich.
-Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt die letzten #[count]# Eintr&auml;ge aus diesem Bereich von insgesamt #[all]# Eintr&auml;gen.
-"clear list"=="Liste leeren"
-#Initiator==Initiator
-Executor==Ausf&uuml;hrender
-Modified Date==&Auml;nderungsdatum
-Words==W&ouml;rter
-Title==Titel
+Index Monitor Menu==Menu monitoringu indexu 
+Index&nbsp;Monitor&nbsp;Overview==Monitoring indexu - prehlad
+Receipts</a>==Odpovede</a>
+Queries</a>==Vyhlad&aacute;vacie dotazy</a>
+DHT&nbsp;Transfer==DHT prenos
+Proxy&nbsp;Use==Vyuzitie proxy 
+Local&nbsp;Crawling==Lok&aacute;lny crawling
+Global&nbsp;Crawling==Glob&aacute;lny crawling
+Indexing Queues Monitor Overview==Prehlad monitoringu indexovac&iacute;ch variant
+These are monitoring pages for the different indexing queues.==Toto s&uacute; monitorovacie str&aacute;nky pre rozdielne indexovacie varianty.
+YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy rozpozn&aacute;va 5 rozdielnych sp&ocirc;sobov index&aacute;cie webu. Detaily k tymto procesom \(1-5\) s&uacute; pop&iacute;san&eacute; v submenu vyz&scaron;ie.
+above which also will show you a table with indexing results so far. The information in these tables is considered as private,==Tu sa d&aacute; takisto vidiet tabulka v&yacute;sledkov indexovania. Inform&aacute;cie v t&yacute;chto tabulk&aacute;ch sa hodnotia ako s&uacute;kromn&eacute;.
+so you need to log-in with your administration password.==Na ich zobrazenie sa mus&iacute;te prihl&aacute;sit heslom administr&aacute;tora.
+Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==Pr&iacute;pad \(6\) je monitor lok&aacute;lneho prij&iacute;macieho gener&aacute;tora, v protiklade k \(1\). Obsahuje okrem in&eacute;ho monitor v&yacute;sledku indexovania av&scaron;ak nie je povazovan&yacute; za s&uacute;kromn&yacute;, 
+since it shows crawl requests from other peers.==pretoze zobrazuje crawl dotazy in&yacute;ch peerov.
+The image above illustrates the data flow initiated by web index acquisition.==Obr&aacute;zok hore zobrazuje d&aacute;tov&yacute; tok pozost&aacute;vaj&uacute;ci z pr&iacute;rastku web indexu.
+Some processes occur double to document the complex index migration structure.==Niektor&eacute; procesy sa kv&ocirc;li redukcii komplexnej &scaron;trukt&uacute;ry indexu vyskytuj&uacute; viacn&aacute;sobne. 
+\(1\) Index Monitor of Remote Crawl Receipts==\(1\) Monitorovanie indexu pre hl&aacute;senia zo vzdialen&eacute;ho crawlingu 	
+This is the list of web pages that this peer initiated to crawl==Toto je zoznam web str&aacute;nok ktor&eacute; zacal crawlovat V&aacute;&scaron; peer
+but had been crawled by <i>other</i> peers.==av&scaron;ak ktor&eacute; boli precrawlovan&eacute; in&yacute;m peerom.
+This is the 'mirror'-case of process \(6\).==Toto je opacn&yacute; pr&iacute;klad k procesu \(6\).
+<i>Use Case:</i> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<i>Pr&iacute;padov&aacute; &scaron;t&uacute;dia:</i> Tu obdrz&iacute;te z&aacute;znami, ak zacnete lok&aacute;lny crawling na str&aacute;nke 'Vytvorenie indexu' a aktivujete   
+'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request=='Vzdialen&eacute; indexovanie'. Kazd&aacute; str&aacute;nka ktor&uacute; vzdialen&yacute; peer pomocou tohoto dotazu zaindexuje 
+is reported back and can be monitored here.==bude sp&auml;tne hl&aacute;sen&aacute; a na tomto mieste zobrazen&aacute;.
+\(2\) Index Monitor for Result of Search Queries==(2) Monitoring indexu pre v&yacute;sledky dotazov vyhlad&aacute;vania
+This index transfer was initiated by your peer by doing a search query.==Tento index transfer bol iniciovan&yacute; od&scaron;tartovan&iacute;m vyhlad&aacute;vacieho dotazu. 
+The index was crawled and contributed by other peers.==Index bol crawlovan&yacute; in&yacute;mi peermi a dodan&yacute; k Va&scaron;ej dispoz&iacute;cii. 
+<i>Use Case:</i> This list fills up if you do a search query on the 'Search Page'==<i>Pr&iacute;padov&aacute; &scaron;t&uacute;dia:</i> Tento zoznam sa vypln&iacute; ked  od&scaron;tartujete vyhlad&aacute;vanie na 'Vyhlad&aacute;vacej str&aacute;nke'
+\(3\) Index Monitor for Index Transfer.==\(3\) Monitoring indexu pre DHT prenos.
+The url fetch was initiated and executed by other peers.==Index&aacute;cia URL bola od&scaron;tartovan&aacute; a vykonan&aacute; in&yacute;mi peermi.
+These links here have been transmitted to you because your peer is the most appropriate for storage according to==Tieto odkazy boli k V&aacute;m prenesen&eacute;, pretoze V&aacute;&scaron; peer je podla    
+the logic of the Global Distributed Hash Table.==logiky glob&aacute;lne distribuovanej hash tabulky najvhodnej&scaron;&iacute; na ich ulozenie.
+<i>Use Case:</i> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<i>Pouzitie:</i> Tento zoznam sa vypln&iacute; ak ste aktivovali 'Index Receive' volbu na str&aacute;ne 'Kontrola indexu'   
+\(4\) Index Monitor for Proxy Indexing==\(4\) Monitorovanie indexu pre index&aacute;ciu proxy
+These web pages had been indexed as result of your proxy usage.==Tieto web str&aacute;nky boli indexovan&eacute; za pouzitia Va&scaron;eho proxy.
+No personal or protected page is indexed==Ziadne osobn&eacute; ani chr&aacute;nen&eacute; str&aacute;nky nie s&uacute; indexovan&eacute;
+such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Tak&eacute;to str&aacute;nky s&uacute; detekovan&eacute; za pouzitia cookies alebo POST parametrov \(v URL adrese alebo v HTTP protokole\)
+and automatically excluded from indexing.==a s&uacute; z indexovania automaticky vyl&uacute;cen&eacute;.
+<i>Use Case:</i> You must use YaCy as proxy to fill up this table.==<i>Pouzitie:</i> Musite pouzit YaCy ako proxy na vyplnenie tejto tabulky.
+Set the proxy settings of your browser to the same port as given==V proxy nastaveniach Vaseho browsera nastavte rovnaky port ako je port uvedeny 
+on the 'Settings'-page in the 'Proxy and Administration Port' field.==na stranke 'Nastavenia' v polozke 'Proxy a port administracie'.
+\(5\) Index Monitor for Local Crawling.==(5) Monitor indexu pre lokalny crawling.
+These web pages had been crawled by your own crawl task.==Tieto web stranky boli precrawlovane Vasim vlastnym lokalnym crawlom odstartovanym na stranke 'Vytvorenie indexu'. 
+<i>Use Case:</i> start a crawl by setting a crawl start point on the 'Index Create' page.==<i>Pouzitie:</i> Odstartujte crawl tym ze nastavite startovaci bod na stranke 'Vytvorenie indexu'.
+\(6\) Index Monitor for Global Crawling==(6) Monitor indexu pre globalny crawling
+These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Tieto stranky boli zaindexovane Vasim vlastnym peerom, avsak crawl bol vytvoreny inym peerom (vzdialeny crawl).
+This is the 'mirror'-case of process \(1\).==Toto je opak procesu (1).
+<i>Use Case:</i> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<i>Pouzitie:</i> Tento zoznam sa vyplni ak aktivujete 'Akceptuj dotazy vzdialeneho crawlingu' na stranke 'Vytvorenie indexu'.
+The stack is empty.==Zoznam je prazdny.
+Showing all \#\[all\]\# entries in this stack.==Zobrazuju sa vsetkych #[all]# zaznamov tohoto zoznamu.
+Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zobrazuju sa posledne #[count]# z celkovo #[all]# zaznamov tohoto zoznamu.
+"clear list"=="Vymaz zoznam"
+#Initiator==Iniciator
+Executor==Vykonavatel
+Modified Date==Datum poslednej zmeny
+Words==Slov
+Title==Nazov
 #URL==URL
-"delete"=="L&ouml;schen"
+"delete"=="zmaz"
 	
 #-------------------------------------------------------
 #File: IndexTransfer_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==Der lokale Index besteht zur Zeit aus (ungef&auml;hr) #[wcount]# W&ouml;rtern und #[ucount]# URLs.
-Chunk Size<br>\(Word Entries\)==Chunk-Gr&ouml;sse<br>(Wort Eintr&auml;ge)
-Words Range==Worte-Bereich
-Transfered Words==&Uuml;bertragene W&ouml;rter
-Delete<br>Index==Index<br>l&ouml;schen
-true==ja
-false==nein
-Selection==Auswahl
-words<==Worte<
-Last Refresh:==Letzte Aktualisierung:
-Overwrite IP==IP &uuml;berschreiben
-blank for defaultip==leer f&uuml;r Standard-IP
-Start/Stop Transfer==Starte/Stoppe Transfer
-"Start Index Transfer"=="Starte Index-Transfer"
-"Stop Index Transfer"=="Stoppe Index-Transfer"
-"Start New Index Transfer"=="Starte neuen Index-Transfer"
+The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==	Lokalny index momentalne pozostava z (priblizne) #[wcount]# slov a #[ucount]# URL adries.
+Chunk Size<br>\(Word Entries\)==Velkost chunku<br>(zaznamov slov)
+Words Range==Rozsah slov
+Transfered Words==Prenesene slova
+Delete<br>Index==Zmaz<br>index
+true==ano
+false==nie
+Selection==Vyber
+words<==slov<
+Last Refresh:==Posledna aktualizacia
+Overwrite IP==prepis IP adresu 
+blank for defaultip==prazdne pre standardnu IP adresu
+Start/Stop Transfer==Start/Stop prenosu
+"Start Index Transfer"=="Odstartuj prenos indexu"
+"Stop Index Transfer"=="Stopni prenos indexu"
+"Start New Index Transfer"=="Odstartuj novy prenos indexu"
 
 #-------------------------------------------------------
 #File: Language_p.html
@@ -1250,50 +1252,50 @@ Port Forwarding \(optional\)==Port Weiterleitung (optional)
 
 #-------------------------------------------------------
 #File: Settings_General.inc
-General Settings==Generelle Einstellungen
-<b>Your peer name defines also a new '.yacy' - domain, which can be accessed from every peer running this proxy.</b>==<b>Ihr Peer Name erzeugt auch eine '.yacy'-domain die von jedem Nutzer dieses Proxys erreicht werden kann.</b>
-Using your 'Home Page' and 'File Share' - zones you also have a platform to provide content to your new domain.==Mittels Ihrer 'Homepage' und 'File Share'-Zonen haben Sie auch eine Plattform, um Inhalte f&uuml;r Ihre neue Domain bereit zu stellen.
-staticIP ==statische IP
-<b>The staticIP can help that your peer can be reached by other peers in case that your==<b>Die statische IP kann helfen Ihren Peer f&uuml;r andere Peers erreichbar zu machen, falls Sie
-peer is behind a firewall or proxy.</b>==hinter einer Firewall oder einem Proxy sind.</b>
+General Settings==Vseobecne nastavenia
+<b>Your peer name defines also a new '.yacy' - domain, which can be accessed from every peer running this proxy.</b>==<b>Nazov Vaseho peera vytvara '.yacy' domenu ktora je dosiahnutelna kazdemu uzivatelovi tychto proxy.</b>
+Using your 'Home Page' and 'File Share' - zones you also have a platform to provide content to your new domain.==Prostrednictvom Vasich zon: 'Domovska stranka' a 'Zdielaj subor' mate tiez platformu na poskytovanie obsahu Vasej novej domeny. 
+staticIP ==statika IP adresa
+<b>The staticIP can help that your peer can be reached by other peers in case that your==<b>Staticka IP adresa moze pomoct Vasemu peeru pri dosiahnutelnosti z inych peerov v pripade, ze
+peer is behind a firewall or proxy.</b>==Vas peer je za firewallom alebo inym proxy..</b>
 
 #-------------------------------------------------------
 #File: Settings_ProxyAccess.inc
-Server Access Settings==Serverzugangseinstellungen
-These settings configure the access method to your own http proxy and server.==Diese Einstellungen beeinflussen den Zugriff auf Ihren HTTP-Proxy und -Server.
-Server/Proxy Port Configuration==Server/Proxy Port Konfiguration
-The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Peers oder HTTP-Clients warten soll.
-You have four possibilities to specify the address:==Sie haben vier M&ouml;glichkeiten die Adresse anzugeben:
-defining a port only==nur einen Port angeben
-<i>e.g. 8080</i>==<i>z.B. 8080</i>
-defining IP address and port==eine IP-Adresse und Port angeben
-<i>e.g. 192.168.0.1:8080</i>==<i>z.B. 192.168.0.1:8080</i>
-defining host name and port==einen Hostnamen und Port angeben
-<i>e.g. home:8080</i>==<i>z.B. home:8080</i>
-defining interface name and port==einen Interface-namen und Port angeben
-<i>e.g. #eth0:8080</i>==<i>z.B. #eth0:8080</i>
-Hint: Dont forget to change your firewall configuration after you have changed the port.==Hinweis: Denken Sie daran Ihre Firewalleinstellungen zu &auml;ndern nachdem Sie den Port ge&auml;ndert haben.
-Proxy and http-Server Administration Port:==Proxy und HTTP-Server Administrations Port:
-Changes will take effect in 5-10 seconds==Die &Auml;nderungen werden in 5-10 Sekunden wirksam
-Server Access Restrictions==Server Zugangsbeschr&auml;nkungen
-You can restrict the access to this proxy/server using a two-stage security barrier:==Sie k&ouml;nnen den Zugang zu diesem Proxy/Server mit einer 2-stufigen Sicherheitsbarriere einschr&auml;nken:
-define an <i>access domain</i> with a list of granted client IP-numbers or with wildcards==geben Sie einen <i>Netzwerkadressraum</i> mithilfe einer Liste zugelassener Client-IP-Adressen oder mit Platzhaltern an
-define an <i>user account</i> with an user:password - pair==geben Sie einen <i>Nutzeraccount</i> mit einem nutzer:passwort-Paar an
+Server Access Settings==Nastavenia pristupu k serveru
+These settings configure the access method to your own http proxy and server.==Tieto nastavenia ovplyvnuju pristup na Vas HTTP proxy a HTTP server.
+Server/Proxy Port Configuration==Konfiguracia porty servera/proxy
+The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Socket-adresy na ktorych by malo YaCy cakat na prichadzajuce spojenia z ostatnych YaCy peerov a http klientov. 
+You have four possibilities to specify the address:==Mate styri moznosti specifikacie adresy:
+defining a port only==zadanim len portu
+<i>e.g. 8080</i>==<i>napr. 8080</i>
+defining IP address and port==zadanim IP adresy a portu
+<i>e.g. 192.168.0.1:8080</i>==<i>napr. 192.168.0.1:8080</i>
+defining host name and port==zadanim hostname pocitaca a portu
+<i>e.g. home:8080</i>==<i>napr. home:8080</i>
+defining interface name and port==zadanim rozhrania a portu
+<i>e.g. #eth0:8080</i>==<i>napr.. #eth0:8080</i>
+Hint: Dont forget to change your firewall configuration after you have changed the port.==Rada: Nezabudnite zmenit nastavenia firewallu po zmene portu.
+Proxy and http-Server Administration Port:==Administracny port proxy a HTTP servera:
+Changes will take effect in 5-10 seconds==Zmeny budu ucinne za 5-10 sekund
+Server Access Restrictions==Obmedzenia pristupu k serveru
+You can restrict the access to this proxy/server using a two-stage security barrier:==Pristup k tomuto proxy resp. HTTP serveru mozete obmedzit pouzitym 2-stupnovej bezpecnostnej bariery:
+define an <i>access domain</i> with a list of granted client IP-numbers or with wildcards==zadajte <i>priestor sietovych domen</i> so zoznamom IP adries povolenych klientov alebo pomocou wildcard znakov 
+define an <i>user account</i> with an user:password - pair==vytvorte <i>uzivatelsky ucet</i> pomocou paru 'uzivatel:heslo'
 This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gew&auml;hrt wird.
-You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet.==Sie wollen den Proxy vermutlich nicht im Internet zur Verf&uuml;gung stellen, deshalb sollten Sie den IP-Adressraum so einstellen, dass er auf Ihr lokales Intranet zutrifft.
-The default setting should be right in most cases.==Die Standardwerte sollten in den meisten F&auml;llen richtig sein.
-If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.==Wenn Sie wollen k&ouml;nnen Sie auch Proxyaccounts erstellen, sodass sich jeder Proxynutzer zuerst anmelden muss, aber das ist eher un&uuml;blich.
-IP-Number filter:==IP-Adressen Filter:
-Use <a==Nutze <a
+You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet.==Pravdepodobne nechcete na internete zielat Vase proxy, takze by ste mali zvolit IP adresovy priestor tak aby zodpovedal adresam Vaseho intranetu.
+The default setting should be right in most cases.==Predvolene nastavenia by mali byt vo vacsine pripadov spravne. 
+If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.==Ak chcete mozete tiez vytvorit proxy ucet, takze kazdy uzivatel proxy sa musi najprv prihlasit, co je vsak neobvykle riesenie.
+IP-Number filter:==Filter IP adries:
+Use <a==Pouzi <a
 
 #-------------------------------------------------------
 #File: Settings_Http.inc
-HTTP Networking==HTTP Netzwerk
-Transparent&nbsp;Proxy:==Transparenter Proxy:
-With this you can specify if YaCy can be used as transparent proxy.==Hiermit k&ouml;nnen Sie festlegen ob YaCy als transparenter Proxy genutzt werden kann.
-Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule:==Hinweis: Unter Linux k&ouml;nnen Sie Ihre Firewall darauf einstellen alle HTTP-Verbindungen transparent an YaCy weiterzuleiten indem Sie diese iptables-Regel verwenden:
-With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Hiermit k&ouml;nnen Sie festlegen ob YaCy die HTTP connection keep-alive Funktionalit&auml;t unterst&uuml;tzen soll.
-Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
+HTTP Networking==HTTP Siet
+Transparent&nbsp;Proxy:==Transparentne proxy:
+With this you can specify if YaCy can be used as transparent proxy.==Tu mozete urcit ci moze byt YaCy pouzite ako transparentne proxy. 
+Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule:==Rada: Pod linuxom mozete nakonfigurovat Vas firewall na transparentne presmerovanie vsetkej http prevadzky (http traffic) za pouzitia toho iptables pravidla:  
+With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Tu mozete urcit ci ma YaCy podporovat HTTP connection keep-alive funkcie.
+Changes will take effect immediately.==Zmeny su okamzite ucinne.
 
 #-------------------------------------------------------
 #File: Settings_Proxy.inc
@@ -1476,53 +1478,53 @@ Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um
 #File: Settings_Admin.inc
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Administration Account Settings==Administrator Konto Einstellungen
-This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:==Dies ist das Konto, das Zugriff auf diese sonst gesch&uuml;tzte "Einstellungen" Seite hat. Wenn Sie es noch nicht eingerichtet haben, sollten Sie es nun tun:
-Account Name:==Konto Name:
-Password:==Passwort:
-Password \(repeat same as above\):==Passwort (bitte zur Sicherheit erneut eingeben):
-value="submit">==value="Speichern">
+Administration Account Settings==Nastavenia konta administratora
+This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:==Toto je konto ktore obmedzuje pristum na tuto stranku 'Nastaveni'. Ak ste toto konte este nevytvorili, mali by ste teraz tak urobit.
+Account Name:==Nazov konta:
+Password:==Heslo:
+Password \(repeat same as above\):==Heslo (zopakujte prosim):
+value="submit">==value="Uloz">
 
 #-------------------------------------------------------
 #File: Settings_SystemBehaviour.inc
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-System Behaviour Settings==System Einstellungen
-Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite beim Start von YaCy:
-"enable"=="Aktivieren"
-"disable"=="Deaktivieren"
+System Behaviour Settings==Systemove nastavenia
+Auto pop-up of status page on start-up:==Automaticky pop-up stranky stavu pri starte YaCy:
+"enable"=="aktivuj"
+"disable"=="deaktivuj"
 
 #-------------------------------------------------------
 #File: simple_search.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
-"Search for \#\[former\]\#"=="Suche f&uuml;r #[former]#"
-P2P WEB SEARCH==P2P Internet Suche
-"Search"==Suchen
-Max. number of results:==Max. Anzahl Ergebnisse:
-No Results.==Keine Ergebnisse.
-length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
-If you think this is unsatisfactory then you may consider to support==Wenn Sie das unbefriedigend finden, sollten Sie &uuml;berlegen,
-the global index by running your own proxy/peer.==den globalen Index durch das Betreiben  eines eigenen Proxies/Peers zu unterst&uuml;tzen.
-If everybody contributes, the results will get better.==Wenn jeder etwas beitr&auml;gt, werden die Ergebnisse besser.
-Other possible reasons for no result:==Andere m&ouml;gliche Gr&uuml;nde daf&uuml;r, dass Sie keine Ergebnisse erhalten haben:
-The search time was too short. Search again with same query to catch up 'late peers'==Die Zeit zum suchen war zu kurz. Suchen Sie erneut mit erh&ouml;hter max. Suchdauer nach dem gleichen Begriff, um so auch Ergebnisse von langsameren Peers zu erhalten.
-There is currently no support for german umlaute. Please use ae/oe/ue instead==Zur Zeit gibt es keine Unterst&uuml;tzung der deutschen Umlaute. Bitte benutzen Sie stattdessen ae/oe/ue.
-Words of length < 3 are not indexed. Please omit such words==W&ouml;rter mit weniger als drei Buchstaben werden nicht indiziert.
-YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indiziert nur den Singular eines Wortes. Bitte suchen Sie daher auch nur nach dem Singular.
-Only complete words are indexed, not parts of words==Nur komplette W&ouml;rter sind indiziert, keine Teile eines Wortes.
-Don't use stopwords as search words==Benutzen Sie bitte keine Stopwords in der Suche.
-During this test phase the reaction time of remote peers is unknown.==W&auml;hrend dieser Testphase ist die Reaktionszeit des remote Peers unbekannt.
-Please repeat your search to see if there are late-responses from remote peers==Bitte wiederholen Sie jede Suche, um zu sehen, wie lange der remote Peer zum antworten braucht.
-If you think the information you searched should exist in the global index,==Wenn Sie glauben, die Information, nach der Sie suchen, sollte im globalen Index stehen,
-then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen crawl nach der gesuchten Information, um sie
-available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um crawls von anderen Peers zu erlauben. Danke!
-results from a total number of==Resultate aus
-known links.==bekannten Links.
-You can try to==Sie k&ouml;nnen versuchen
-catch up more links==mehr Links zu sammeln
-from 'late' peers to enrich this search result.==um mehr Treffer zu erzielen.
+YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Vyhladavacia stranka
+"Search for \#\[former\]\#"=="Hladaj #[former]#"
+	P2P WEB SEARCH==P2P Internetov&eacute; Vyhlad&aacute;vanie
+"Search"==Hladaj
+Max. number of results:==Max. pocet vysledkov:
+No Results.==Ziadne vysledky.
+length of search words must be at least 3 characters==Vyhladavane slova musia mat najmenej 3 znaky
+If you think this is unsatisfactory then you may consider to support==Ak to povazujete za nedostatocne, zvazte podporu 
+the global index by running your own proxy/peer.==globalneho indexu pomocou vytvorenia vlastnych proxy a/alebo peerov.
+If everybody contributes, the results will get better.==Vysledky vyhladavania sa zlepsia ak bude kazdy prispievat.
+Other possible reasons for no result:==Dalsie mozne dovody preco ste neobdrzali ziadne vysledku su:
+The search time was too short. Search again with same query to catch up 'late peers'==Cas vyhladavania bol prilis kratky. Zopakujte vyhladavanie so zvysenym max. casom vyhladavania na ziskanie vysledkov od pomalsich peerov.
+There is currently no support for german umlaute. Please use ae/oe/ue instead==Diakritika nie je v sucasnosti podporovana. Nahradte prosim znaky s diakritikou zodpovedajucimi znakmi bez diakritiky.
+Words of length < 3 are not indexed. Please omit such words==Slova s menej ako 3 pismenami nie su indexovane. Prosim vypustite taketo slova.
+YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indexuje len jednotne cisla slov v indexe. Zadavajte preto prosim slova len v jednotnom cisle.
+Only complete words are indexed, not parts of words==Len kompletne slova su indexovane, nie casti slov.
+Don't use stopwords as search words==Prosim nepouzivajte stop-slova vo vyhladavani.
+During this test phase the reaction time of remote peers is unknown.==Pocas tejto testovacej fazy je reakcny cas vzdialenych peerov neznami.
+Please repeat your search to see if there are late-responses from remote peers==Prosim opakujte vyhladavanie na ziskanie pripadnej odpovede od pomalych peerov.
+If you think the information you searched should exist in the global index,==Ak si myslite ze informacie, ktore hladate by sa mali nachadzat v globalnom indexe,
+then please run your own peer and start a crawl of your wanted information to make it==tak prosim spustite proces preliezania (crawl) zo svojho vlastneho peera, za ucelom spristupnenia 
+available for everyone. Then stay online to support crawls from other peers. Thank you!==tejto informacie aj ostatnym peerom. Zostante prosim online kvoli podpore procesu preliezania (crawls) z ostatnych peerov. Dakujeme!
+results from a total number of==Vysledkov z celkoveho poctu 
+known links.==znamych odkazov.
+You can try to==Mozete skusit 
+catch up more links==Zhromazdit viacej odkazov
+from 'late' peers to enrich this search result.==z pomalych peerov na zlepsenie vysledkov vyhladavania.
 
 #-------------------------------------------------------
 #File: Status.html
@@ -1600,40 +1602,40 @@ Private System Properties==Sukromne systemove vlastnosti
 System Resources==Systemove zdroje
 Processors:==Procesory:
 Protection==Ochrana
-<b>Your settings are _not_ protected!</b> Please go to the==<b>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</b> Bitte geben Sie auf der
-settings</a> page <b>immediately</b> and set an administration password.==Einstellungen-Seite</a> <b>sofort</b> ein Kennwort an.
-Your settings are protected by a password.==Ihre Einstellungen sind mit einem Kennwort gesch&uuml;tzt.
+<b>Your settings are _not_ protected!</b> Please go to the==<b>Vase nastavenia _nie_su_ chranene heslom</b> Chodte prosim na 
+settings</a> page <b>immediately</b> and set an administration password.==stranku nastaveni</a> a <b>ihned</b> si zvolte heslo.
+Your settings are protected by a password.==Vase nastavenia su chranene heslom.
 Peer host==Peer Host
 Port forwarding host==Port forwarding Host
-not used==nicht benutzt
-broken==unterbrochen
-connected==verbunden
-Remote proxy==Remote Proxy
-not used==nicht benutzt
-Used for YaCy -> YaCy communication:==Benutzt zur YaCy -> YaCy Kommunikation:
-Yes==Ja
-No==Nein
-Auto-popup on start-up==Auto-Popup beim Starten
-Disabled. To enable this again please use the==Deaktiviert. Um diese Funktion wieder zu aktivieren, benutzen Sie bitte die
-Settings</a> page.==Einstellungen-Seite</a>.
-Enabled. To disable this please use the==Aktiviert. Um diese Funktion zu deaktivieren, benutzen Sie bitte die
-Memory Usage==Speicherverbrauch
-free:==Frei:
-total:==Total:
-max:==Maximal:
-Connections Incoming==Eingehende Verbindungen
-Active:==Aktiv:
-Idle:==Wartend:
+not used==nepouzite
+broken==prerusene
+connected==spojene
+Remote proxy==vzdialene proxy
+not used==nepouzite
+Used for YaCy -> YaCy communication:==Pozite pre YaCy -> YaCy komunikacia:
+Yes==Ano
+No==Nie
+Auto-popup on start-up==Auto-Popup pri starte
+Disabled. To enable this again please use the==Deaktivovane. Na aktivaciu tejto funkcie pouzite prosim 
+Settings</a> page.==stranku nastaveni</a>.
+Enabled. To disable this please use the==Aktivovane. Na deaktivaciu tejto funkcie pouzite prosim
+Memory Usage==Spotreba pamate
+free:==volna:
+total:==celkova:
+max:==maximalna:
+Connections Incoming==Prichadzajuce spojenia
+Active:==Aktivne:
+Idle:==Cakajuce:
 #Max:Max:
-Indexing Queue==Indexier Warteschlange
-Loader Queue==Lade Warteschlange
-paused==angehalten
-Crawler Queues==Crawler Warteschlangen
-Local Crawl==Lokales Crawlen
-Remote triggered Crawl==eingehende Remote-Crawls
-Global Crawl Trigger==ausgehende Remote-Crawls
+Indexing Queue==Cakacia listina indexacie
+Loader Queue==Cakacia listina nahravaca
+paused==pozastavene
+Crawler Queues==Cakacia listina crawleru
+Local Crawl==Lokalne crawlovat
+Remote triggered Crawl==prichadzajuce vzialene crawly
+Global Crawl Trigger==odchadzajuce vzialene crawly
 #Pre-Queueing==
- local== lokal
+ local== lokalne
 
 #-------------------------------------------------------
 #File: Steering.html
@@ -1654,50 +1656,50 @@ You can now go back to the <a href="Settings_p.html">Settings</a> page if you wa
 
 #-------------------------------------------------------
 #File: User_p.html
-new User==neuer Benutzer
-Edit User==Benutzer bearbeiten
-Delete User==Benutzer l&ouml;schen
-Current User:==aktueller Benutzer:
-Password:==Passwort:
-Password\(repeat\):==Passwort(wiederholen):
-First Name:==Vorname:
-Last Name:==Nachname:
-Address:==Adresse:
-Rights==Rechte
-Timelimit:==Zeitlimit:
-Time used:==verbrauchte Zeit:
-Save User==Benutzer speichern
-User created:==Benutzer erstellt:
-User changed:==Benutzer ge&auml;ndert:
-Passwords do not match.==Passw&ouml;rter stimmen nicht &uuml;berein.
-If you want to manage more Users, return to the==Wenn Sie mehr Benutzer verwalten wollen kehren Sie zur
-user</a> page.==Benutzerseite</a> zur&uuml;ck.
+new User==Novy uzivatel
+Edit User==Edituj uzivatela
+Delete User==Zmaz uzivatela
+Current User:==Aktualny uzivatel:
+Password:==Heslo:
+Password\(repeat\):==Heslo(zopakujte):
+First Name:==Meno:
+Last Name:==Priezvysko:
+Address:==Adresa:
+Rights==Prava
+Timelimit:==Casovy limit:
+Time used:==Spotrebovany cas:
+Save User==Uloz uzivatela
+User created:==Vytvoreny uzivatel:
+User changed:==Zmeneny uzivatel:
+Passwords do not match.==Zadane hesla nie su rovnake.
+If you want to manage more Users, return to the==Ak chcete spravovat viacerych pouzivatelov, vratte sa spat do 
+user</a> page.==stranky pouzivatelov</a>.
 
 #-------------------------------------------------------
 #File: ViewFile.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy \'\#\[clientname\]\#\': View URL Content==YaCy '#[clientname]#': Zeige URL Inhalte
-View URL Content==Zeige URL Inhalte
+YaCy \'\#\[clientname\]\#\': View URL Content==YaCy '#[clientname]#': Zobraz obsah URL adresy
+View URL Content==Zobraz obsah URL adresy
 #URL==URL
 #Hash==Hash
-Word Count==Anzahl W&ouml;rter
-Description==Beschreibung
-Size==Gr&ouml;sse
+Word Count==Pocet slov
+Description==Popis
+Size==Velkost
 View as:==Zeige als:
 #Original==Original
-Plain Text==Quelltext
-Parsed Text==Geparsten Text
-Parsed Sentences==Geparste S&auml;tze
-No URL hash submitted.==Es wurde kein URL Hash &uuml;vertragen.
-Unable to find URL Entry in DB==Es war nicht m&ouml;glich den URL Eintrag in der DB zu finden.
-Invalid URL==Ung&uuml;ltige URL
-Unable to download resource content.==Es war nicht m&ouml;glich den Inhalt der Quelle runterzuladen.
-Unable to parse resource content.==Es war nicht m&ouml;glich den Inhalt der Quelle zu parsen.
-Plain Resource Content==Reiner Quellen Inhalt
-Parsed Resource Content==Geparster Quellen Inhalt
-Parsed Resource Sentences==Geparste Quellen S&auml;tze
-Original Resource Content==Original Quellen Inhalt
+Plain Text==Plain text
+Parsed Text==Parsovany text
+Parsed Sentences==Parsovane vety
+No URL hash submitted.==Ziadna URL hash nebola odoslana.
+Unable to find URL Entry in DB==Nebolo mozne najst URL zaznam v databaze.
+Invalid URL==Neplatna URL
+Unable to download resource content.==Nebolo mozne stiahnut obsah zdroja.
+Unable to parse resource content.==Nebolo mozne parsovat obsah zdroja.
+Plain Resource Content==Cisty obsah zdroja
+Parsed Resource Content==Parsovany obsah zdroja
+Parsed Resource Sentences==Parsovane zdrojove vety
+Original Resource Content==Originalny obsah zdroja
 
  
 #-------------------------------------------------------
@@ -1738,45 +1740,45 @@ Changes will be published as announcement on YaCyNews==Zmeny budu zverejnene pom
 
 #-----------------------------------------------------------
 #File: yacysearch.html
-Result Page==Ergebnisseite
-P2P WEB SEARCH==P2P Internet Suche
-"Search"=="Suchen"
-"delete"=="l&ouml;schen"
-The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
-No Results.==Keine Ergebnisse.
-length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
-If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.==Wenn Sie das f&uuml;r unzureichend halten, sollten Sie &uuml;berlegen, den globalen Index durch das Betreiben eines eigenen Proxies/Peers zu unterst&uuml;tzen.
-If everybody contributes, the results will get better.==Wenn jeder etwas beitr&auml;gt, werden die Ergebnisse besser.
-Other possible reasons for no result:==Andere m&ouml;gliche Gr&uuml;nde daf&uuml;r, dass Sie keine Ergebnisse erhalten haben:
-The search time was too short. Search again with same query to catch up 'late peers'==Die Zeit zum suchen war zu kurz. Suchen Sie erneut mit erh&ouml;hter max. Suchdauer nach dem gleichen Begriff, um so auch Ergebnisse von langsameren Peers zu erhalten.
-There is currently no support for german umlaute. Please use ae/oe/ue instead==Zur Zeit gibt es keine Unterst&uuml;tzung der deutschen Umlaute. Bitte benutzen Sie stattdessen ae/oe/ue.
-Words of length < 3 are not indexed. Please omit such words==W&ouml;rter mit weniger als drei Buchstaben werden nicht indiziert.
-YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indiziert nur den Singular eines Wortes. Bitte suchen Sie daher auch nur nach dem Singular.
-Only complete words are indexed, not parts of words==Nur komplette W&ouml;rter sind indiziert, keine Teile eines Wortes.
-Don't use stopwords as search words==Benutzen Sie bitte keine Stopwords in der Suche.
-During this test phase the reaction time of remote peers is unknown.==W&auml;hrend dieser Testphase ist die Reaktionszeit von anderen Peers unbekannt.
-Please repeat your search to see if there are late-responses from remote peers==Bitte wiederholen Sie Ihre Suche, um zu sehen ob es Antworten von sp&auml;t reagierenden Peers gibt
-If you think the information you searched should exist in the global index,==Wenn Sie glauben, die Information, nach der Sie suchen, sollte im globalen Index stehen,
-then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen Crawl nach der gesuchten Information, um sie
-available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um Crawls von anderen Peers zu erlauben. Danke!
-results from==Resultate aus
-ordered links of a total number of==gefunden Links von insgesamt
-known.==bekannten Links.
-Catch up more links==Sammel mehr Links
-from 'late' peers.==von sp&auml;t antwortenden Peers.
-<b>Topwords</b> \(to refine search\):==<b>Topw&ouml;rter</b> (um Suche zu verfeinern):
-You can enrich the search results by using the 'global' option==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen
-This will search also other YaCy peers==So werden auch andere YaCy Peers zum Suchen benutzt.
-You cannot get global search results because you are not connected to another YaCy peer.==Sie k&ouml;nnen keine globalen Treffer erhalten, da sie nicht mit einem anderen YaCy Peer verbunden sind.
-To connect you must first use the proxy.==Um sich zu verbinden, m&uuml;ssen Sie erst den Proxy benutzen.
-See here for an==Sehen Sie hier
-installation guide==f&uuml;r eine Installations-Anleitung
-Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativ k&ouml;nnen Sie auch den Proxy im permanent online Modus laufen lassen. Dies garantiert eine globale Suche.
-To do this, press this button:==Um dies zu tun, klicken Sie bitte auf folgenden Button:
-"go online"=="gehe online"
-you must also switch to online mode==Sie m&uuml;ssen aber erst in den online Modus wechseln
-\(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen) um auch am globalen Index beizutragen.
-The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;lt #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
+Result Page==Stranka vysledkov
+P2P WEB SEARCH==P2P Internetov&eacute; Vyhlad&aacute;vanie
+"Search"=="Hladaj"
+"delete"=="zmaz"
+The following words are stop-words and had been excluded from the search:==Nasledujuce slova su stop-slova a do vyhladavania neboli zahrnute
+No Results.==Ziadne vysledky
+length of search words must be at least 3 characters==dlzka vyhladavaneho slova musi byt najmenej 3 znaky
+If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.==Ziadne vysledky. Zvazte podporu globalneho indexu pomocou proxies/peerov ak to povazujete za nedostatocne.
+If everybody contributes, the results will get better.==Vysledky vyhladavania sa zlepsia ak bude kazdy prispievat.
+Other possible reasons for no result:==Dalsie mozne dovody preco ste neobdrzali ziadne vysledku su:
+The search time was too short. Search again with same query to catch up 'late peers'==Cas vyhladavania bol prilis kratky. Zopakujte vyhladavanie so zvysenym max. casom vyhladavania na ziskanie vysledkov od pomalsich peerov.
+There is currently no support for german umlaute. Please use ae/oe/ue instead==Diakritika nie je v sucasnosti podporovana. Nahradte prosim znaky s diakritikou zodpovedajucimi znakmi bez diakritiky.
+Words of length < 3 are not indexed. Please omit such words==Slova s menej ako 3 pismenami nie su indexovane. Prosim vypustite taketo slova.
+YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indexuje len jednotne cisla slov v indexe. Zadavajte preto prosim slova len v jednotnom cisle.
+Only complete words are indexed, not parts of words==Len kompletne slova su indexovane, nie casti slov.
+Don't use stopwords as search words==Prosim nepouzivajte stop-slova vo vyhladavani.
+During this test phase the reaction time of remote peers is unknown.==Pocas tejto testovacej fazy je reakcny cas vzdialenych peerov neznami.
+Please repeat your search to see if there are late-responses from remote peers==Prosim opakujte vyhladavanie na ziskanie pripadnej odpovede od pomalych peerov.
+If you think the information you searched should exist in the global index,==Ak si myslite ze informacie, ktore hladate by sa mali nachadzat v globalnom indexe,
+then please run your own peer and start a crawl of your wanted information to make it==tak prosim spustite proces preliezania (crawl) zo svojho vlastneho peera, za ucelom spristupnenia 
+available for everyone. Then stay online to support crawls from other peers. Thank you!==tejto informacie aj ostatnym peerom. Zostante prosim online kvoli podpore procesu preliezania (crawls) z ostatnych peerov. Dakujeme!
+results from==vysledkov z 
+ordered links of a total number of==z celkovo najdenych 
+known.==znamych odkazov.
+Catch up more links==Zhromazdit viacej odkazov
+from 'late' peers.==z pomalych peerov.
+<b>Topwords</b> \(to refine search\):==<b>Top-slova</b> (na zjemnenie vyhladavania):
+You can enrich the search results by using the 'global' option==Zapnutim nastavenia 'global' mozete zvysit pocet vysledkov 
+This will search also other YaCy peers==takto budu prehladavani aj ostatni YaCy peeri.
+You cannot get global search results because you are not connected to another YaCy peer.==Nemozete ziskat vysledky globalneho vyhlavania, pretoze nie ste pripojeny k ziadnemu inemu YaCy peerovi.
+To connect you must first use the proxy.==na pripojenie musite najprv pouzit proxy.
+See here for an==Tu najdete 
+installation guide==instalacnu prirucku
+Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativne mozete nechat bezat proxy permanentne v online mode. Tento mod garantuje globalne vyhladavanie.
+To do this, press this button:==Kliknite prosim na nasledujuce tlacitko na prechod do online modu:
+"go online"==pripoj online
+you must also switch to online mode==najprv sa vsak musite prepnut do online modu
+\(by using the proxy\) to contribute to the global index.==(v ktorom pouzivate proxy) aby ste mohli prehladavat globalny index.
+The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Globalne vyhladavanie obsahuje #[globalresults]# vysledkov, ktore boli vytvorene za prispenia ostatnych peerov.  
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
 Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
@@ -1847,59 +1849,59 @@ Interface Skins==Nastavenie vzhladu
 #File: env/templates/submenuCookie.template
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Cookie Menu==Cookie Men&uuml;
-Incoming&nbsp;Cookies==Eingehende Cookies
-Outgoing&nbsp;Cookies==Ausgehende Cookies
+Cookie Menu==Cookie Menu
+Incoming&nbsp;Cookies==Prichadzajuce cookies
+Outgoing&nbsp;Cookies==Odchadzajuce cookies
 
 #--------------------------------------------------------
 #File: env/templates/submenuIndexControl.template
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Index Control Menu==Index Verwalten Men&uuml;
-#Index Administration==Index Administration
-#Index Import==Index Import
-#Index Transfer==Index Transfer
+Index Control Menu==Menu spravy indexu
+#Index Administration==Administracia indexu 
+#Index Import==Import indexu
+#Index Transfer==Prenos indexu
 
 #--------------------------------------------------------
 #File: env/templates/submenuIndexCreate.template
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Index Creation Menu==Index-erzeugen Men&uuml;
-Control Queues==Kontrolle der Warteschlangen
-WWW Crawl Queues==WWW Crawl Warteschlangen
-Media Crawl Queues==Medien Crawl Warteschlangen
-#Crawl Start==Crawl Start
->Indexing==>Indexieren
->Loader==>Lader
+Index Creation Menu==Menu vytvorenia indexu
+Control Queues==Kontrola cakacej listiny
+WWW Crawl Queues==Cakacia listina WWW crawlu
+Media Crawl Queues==Cakacia listina Media crawlu
+#Crawl Start==Start crawlu 
+>Indexing==>Indexovanie
+>Loader==>Nahravac
 >Local==>Lokal
 #Global==Global
 >Overhang==>Overhang
->Images==>Bilder
->Movies==>Filme
->Music==>Musik
+>Images==>Obrazky
+>Movies==>Filmy
+>Music==>Hudba
 
 #--------------------------------------------------------
 #File: env/templates/submenuPerformance.template
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Performance Menu==Performance Men&uuml;
-Queues Performance Settings==Warteschlangen Performance Einstellungen
-Memory Settings for Database Caches==Speicher Einstellungen des Datenbank Caches
-Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequenz
+Performance Menu==Menu vykonu
+Queues Performance Settings==Cakacia listina nastaveny vykonu
+Memory Settings for Database Caches==Nastavenia pamate databazovej cache
+Timing Settings for Search Sequence==Nastavenia casu pre vyhladavaciu sekvenciu
 
 #--------------------------------------------------------
 #File: htdocsdefault/dir.html
 
-YaCy: Public Files==YaCy: &Ouml;ffentliche Dateien
-Public&nbsp;File&nbsp;Directory==&Ouml;ffentliches Datei Verzeichnis
-value="\#\[peername\]\#'s Console"==value="#[peername]#s Konsole"
-Welcome! You are identified and authorized as==Willkommen! Sie sind identifiziert und authorisiert als
+YaCy: Public Files==YaCy: Verejne subory
+Public&nbsp;File&nbsp;Directory==Adresar verejneho suboru
+value="\#\[peername\]\#'s Console"==value="#[peername]#s konzola"
+Welcome! You are identified and authorized as==Vytajte! Ste identifikovany a autorizovany ako
 
 #--------------------------------------------------------
 #File: htdocsdefault/welcome.html
-YACY: Default Page for Individual Peer Content==YACY: Standardseite f&uuml;r eigene Peer-Inhalte
-Individual&nbsp;Web&nbsp;Page==eigene Webseite
-Welcome to your own web page<br>in the <b>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br>im <b>YaCy-Netzwerk
-THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE F&Uuml;R IHREN EIGENEN WEB SERVER!
-PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
-&lt;YaCy-application-home&gt;<b>\#\[wwwpath\]\#</b>==&lt;YaCy-Programmpfad&gt;<b>#[wwwpath]#</b> ABLEGEN.
+YACY: Default Page for Individual Peer Content==YACY: Standartna stranaka pre individualny obsah peera
+Individual&nbsp;Web&nbsp;Page==Vlastna web stranka
+Welcome to your own web page<br>in the <b>YaCy Network==Vytajte na Vasej vlastnej web stranke v<br> sieti YaCy
+THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==TOTO JE PRIKLAD WEB STRANKY PRE VAS VLASTNY WEB SERVER!
+PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==PROSIM NAHRADTE TUTO STRANKU TYM ZE UMIESTNITE VLASTNY index.html SUBOR DO ADRESARA
+&lt;YaCy-application-home&gt;<b>\#\[wwwpath\]\#</b>==&lt;YaCy-adresar&gt;<b>#[wwwpath]#</b>
