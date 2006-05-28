@@ -58,6 +58,7 @@ import java.util.TreeSet;
 import java.net.URL;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexRI;
@@ -158,8 +159,8 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         }
     }
 
-    public plasmaWordIndexEntryContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtCase) {
-        plasmaWordIndexEntryContainer c;
+    public indexContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtCase) {
+        indexContainer c;
         if ((c = ramCache.addEntry(wordHash, entry, updateTime, dhtCase)) == null) {
             if (!dhtCase) flushControl();
             return null;
@@ -167,8 +168,8 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         return c;
     }
     
-    public plasmaWordIndexEntryContainer addEntries(plasmaWordIndexEntryContainer entries, long updateTime, boolean dhtCase) {
-        plasmaWordIndexEntryContainer added = ramCache.addEntries(entries, updateTime, dhtCase);
+    public indexContainer addEntries(indexContainer entries, long updateTime, boolean dhtCase) {
+        indexContainer added = ramCache.addEntries(entries, updateTime, dhtCase);
 
         // force flush
         if (!dhtCase) flushControl();
@@ -192,9 +193,9 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
     
     private synchronized void flushCache(String wordHash) {
-        plasmaWordIndexEntryContainer c = ramCache.deleteContainer(wordHash);
+        indexContainer c = ramCache.deleteContainer(wordHash);
         if (c != null) {
-            plasmaWordIndexEntryContainer feedback = assortmentCluster.addEntries(c, c.updated(), false);
+            indexContainer feedback = assortmentCluster.addEntries(c, c.updated(), false);
             if (feedback != null) {
                 backend.addEntries(feedback, System.currentTimeMillis(), true);
             }
@@ -277,7 +278,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         return condenser.RESULT_SIMI_WORDS;
     }
 
-    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
+    public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         long start = System.currentTimeMillis();
         
         plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
@@ -307,7 +308,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         // retrieve entities that belong to the hashes
         HashSet containers = new HashSet();
         String singleHash;
-        plasmaWordIndexEntryContainer singleContainer;
+        indexContainer singleContainer;
         Iterator i = wordHashes.iterator();
         long start = System.currentTimeMillis();
         long remaining;
@@ -356,8 +357,9 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         backend.close(10);
     }
 
-    public synchronized plasmaWordIndexEntryContainer deleteContainer(String wordHash) {
-        plasmaWordIndexEntryContainer c = ramCache.deleteContainer(wordHash);
+    public synchronized indexContainer deleteContainer(String wordHash) {
+        indexContainer c = ramCache.deleteContainer(wordHash);
+        if (c == null) c = new plasmaWordIndexEntryContainer(wordHash);
         c.add(assortmentCluster.deleteContainer(wordHash, -1), -1);
         c.add(backend.deleteContainer(wordHash), -1);
         return c;
@@ -369,7 +371,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         synchronized (this) {
             removed = ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
             if (removed == urlHashes.length) return removed;
-            plasmaWordIndexEntryContainer container = assortmentCluster.deleteContainer(wordHash, -1);
+            indexContainer container = assortmentCluster.deleteContainer(wordHash, -1);
             if (container != null) {
                 removed += container.removeEntries(wordHash, urlHashes, deleteComplete);
                 if (container.size() != 0) {
@@ -506,7 +508,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             } else {
                 // take out all words from the assortment to see if it fits
                 // together with the extracted assortment
-                plasmaWordIndexEntryContainer container = assortmentCluster.deleteContainer(wordhash, -1);
+                indexContainer container = assortmentCluster.deleteContainer(wordhash, -1);
                 if (size + container.size() > assortmentCluster.clusterCapacity) {
                     // this will also be too big to integrate, add to entity
                     entity.addEntries(container);
@@ -567,7 +569,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         public void run() {
             serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             String wordHash = "";
-            plasmaWordIndexEntryContainer wordContainer = null;
+            indexContainer wordContainer = null;
             plasmaWordIndexEntryInstance entry = null;
             URL url = null;
             HashSet urlHashs = new HashSet();

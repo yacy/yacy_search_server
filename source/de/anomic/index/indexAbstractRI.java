@@ -30,14 +30,14 @@ import de.anomic.plasma.plasmaWordIndexEntryContainer;
 
 public abstract class indexAbstractRI implements indexRI {
 
-    public plasmaWordIndexEntryContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
+    public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
         plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
         container.add(newEntry);
         return addEntries(container, updateTime, dhtCase);
     }
     
     public long getUpdateTime(String wordHash) {
-        plasmaWordIndexEntryContainer entries = getContainer(wordHash, false, -1);
+        indexContainer entries = getContainer(wordHash, false, -1);
         if (entries == null) return 0;
         return entries.updated();
     }

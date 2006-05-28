@@ -51,6 +51,7 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverInstantThread;
 import de.anomic.yacy.yacySearch;
+import de.anomic.index.indexContainer;
 
 public final class plasmaSearchEvent extends Thread implements Runnable {
     
@@ -64,7 +65,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private plasmaWordIndex wordIndex;
     private plasmaCrawlLURL urlStore;
     private plasmaSnippetCache snippetCache;
-    private plasmaWordIndexEntryContainer rcLocal, rcGlobal; // caches for results
+    private indexContainer rcLocal, rcGlobal; // caches for results
     private int rcGlobalCount;
     private plasmaSearchTimingProfile profileLocal, profileGlobal;
     private yacySearch[] searchThreads;

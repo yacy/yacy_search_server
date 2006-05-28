@@ -6,12 +6,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import de.anomic.index.indexContainer;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexEntryInstance;
-import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverDate;
 
 public class plasmaDbImporter extends AbstractImporter implements dbImporter {
@@ -119,7 +119,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
             while (!isAborted() && importWordHashIterator.hasNext()) {
                 
                 TreeSet entityUrls = new TreeSet(new kelondroNaturalOrder(true));
-                plasmaWordIndexEntryContainer newContainer = null;
+                indexContainer newContainer = null;
                 try {
                     this.wordCounter++;
                     this.wordHash = (String) importWordHashIterator.next();

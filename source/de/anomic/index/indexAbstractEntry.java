@@ -26,7 +26,6 @@
 
 package de.anomic.index;
 
-//import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWordIndex;
 
 public abstract class indexAbstractEntry implements indexEntry {

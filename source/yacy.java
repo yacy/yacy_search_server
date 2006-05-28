@@ -71,6 +71,7 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroDyn;
@@ -85,7 +86,6 @@ import de.anomic.plasma.plasmaWordIndexAssortmentCluster;
 import de.anomic.plasma.plasmaWordIndexClassicDB;
 import de.anomic.plasma.plasmaWordIndexEntity;
 import de.anomic.plasma.plasmaWordIndexEntryInstance;
-import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
@@ -754,7 +754,7 @@ public final class yacy {
                 
                 byte[][] row = (byte[][]) contentIter.next();
                 String hash = new String(row[0]);
-                plasmaWordIndexEntryContainer container = assortmentFile.row2container(hash, row);
+                indexContainer container = assortmentFile.row2container(hash, row);
                 wordEntryCount += container.size();
                 
                 // importing entity container to home db
@@ -848,7 +848,7 @@ public final class yacy {
                 // testing if import process was aborted
                 if (Thread.interrupted()) break;
                 
-                plasmaWordIndexEntryContainer newContainer;
+                indexContainer newContainer;
                 try {
                     wordCounter++;
                     wordHash = (String) importWordHashIterator.next();
@@ -961,7 +961,7 @@ public final class yacy {
             String wordChunkStartHash = "------------", wordChunkEndHash;
             
             while (wordHashIterator.hasNext()) {
-                plasmaWordIndexEntryContainer wordIdxContainer = null;
+                indexContainer wordIdxContainer = null;
                 try {
                     wordCounter++;
                     wordhash = (String) wordHashIterator.next();

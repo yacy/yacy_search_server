@@ -44,8 +44,6 @@ package de.anomic.index;
 
 import java.util.Iterator;
 
-import de.anomic.plasma.plasmaWordIndexEntryContainer;
-
 public interface indexRI {
     
     public int size();
@@ -53,12 +51,12 @@ public interface indexRI {
     public Iterator wordHashes(String startWordHash, boolean rot);
     public long getUpdateTime(String wordHash);
     
-    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime);
-    public plasmaWordIndexEntryContainer deleteContainer(String wordHash);
+    public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime);
+    public indexContainer deleteContainer(String wordHash);
     
     public int removeEntries(String wordHash, String[] referenceHashes, boolean deleteComplete);
-    public plasmaWordIndexEntryContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtCase);
-    public plasmaWordIndexEntryContainer addEntries(plasmaWordIndexEntryContainer newEntries, long creationTime, boolean dhtCase);
+    public indexContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtCase);
+    public indexContainer addEntries(indexContainer newEntries, long creationTime, boolean dhtCase);
 
     public void close(int waitingSeconds);
 

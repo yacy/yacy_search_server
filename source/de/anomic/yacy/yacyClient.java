@@ -53,6 +53,7 @@ import java.util.Iterator;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCrawlLURL;
@@ -363,7 +364,7 @@ public final class yacyClient {
             boolean global, 
             yacySeed targetPeer,
             plasmaCrawlLURL urlManager, 
-            plasmaWordIndexEntryContainer containerCache,
+            indexContainer containerCache,
             plasmaURLPattern blacklist, 
             plasmaSnippetCache snippets, 
             plasmaSearchTimingProfile timingProfile,
@@ -877,7 +878,7 @@ public final class yacyClient {
         }
     }
 
-    public static String transferIndex(yacySeed targetSeed, plasmaWordIndexEntryContainer[] indexes, HashMap urlCache, boolean gzipBody, int timeout) {
+    public static String transferIndex(yacySeed targetSeed, indexContainer[] indexes, HashMap urlCache, boolean gzipBody, int timeout) {
         
         // check if we got all necessary urls in the urlCache (only for debugging)
         Iterator eenum;
@@ -935,7 +936,7 @@ public final class yacyClient {
         return null;
     }
 
-    private static HashMap transferRWI(yacySeed targetSeed, plasmaWordIndexEntryContainer[] indexes, boolean gzipBody, int timeout) {
+    private static HashMap transferRWI(yacySeed targetSeed, indexContainer[] indexes, boolean gzipBody, int timeout) {
         final String address = targetSeed.getAddress();
         if (address == null) { return null; }
         

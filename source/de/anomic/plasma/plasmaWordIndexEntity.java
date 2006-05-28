@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
@@ -157,7 +158,7 @@ public final class plasmaWordIndexEntity {
         return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedStringForm().getBytes()) == null);
     }
     
-    public int addEntries(plasmaWordIndexEntryContainer container) throws IOException {
+    public int addEntries(indexContainer container) throws IOException {
     //System.out.println("* adding " + newEntries.size() + " cached word index entries for word " + wordHash); // debug
     // fetch the index cache
         if ((container == null) || (container.size() == 0)) return 0;
@@ -178,6 +179,7 @@ public final class plasmaWordIndexEntity {
     }
     
     public boolean deleteComplete() {
+        if (theIndex == null) return false;
         try { theIndex.close(); } catch (IOException e) {}
         // remove file
         boolean success = theLocation.delete();

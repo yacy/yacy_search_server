@@ -1,4 +1,4 @@
-// indexEntry.java
+// indexAbstractConatiner.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 20.05.2006 on http://www.anomic.de
 //
@@ -26,21 +26,39 @@
 
 package de.anomic.index;
 
-public interface indexEntry {
+import de.anomic.kelondro.kelondroBase64Order;
 
-    public Object clone();
-    public String toEncodedStringForm();
-    public byte[] toEncodedByteArrayForm();
-    public String toPropertyForm();
+public abstract class indexAbstractContainer implements indexContainer {
+
+    private String wordHash;
+    private long updateTime;
+
+    public void setWordHash(String newWordHash) {
+        // this is used to replicate a container for different word indexes during global search
+        this.wordHash = newWordHash;
+    }
     
-    public String getUrlHash();
-    public void combineDistance(indexEntry oe);
-    public int worddistance();
-    public void min(indexEntry other);
-    public void max(indexEntry other);
-    public void normalize(indexEntry min, indexEntry max);
-    public indexEntry generateNormalized(indexEntry min, indexEntry max);
-    public boolean isNewer(indexEntry other);
-    public boolean isOlder(indexEntry other);
-   
+    public long updated() {
+        return updateTime;
+    }
+    
+    public String wordHash() {
+        return wordHash;
+    }
+
+    public int add(indexEntry entry) {
+        return add(entry, System.currentTimeMillis());
+    }
+
+    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
+        if (!wordHash.equals(this.wordHash)) return 0;
+        int count = 0;
+        for (int i = 0; i < urlHashes.length; i++) count += (remove(urlHashes[i]) == null) ? 0 : 1;
+        return count;
+    }
+    
+    public int hashCode() {
+        return (int) kelondroBase64Order.enhancedCoder.decodeLong(this.wordHash.substring(0, 4));
+    }
+
 }

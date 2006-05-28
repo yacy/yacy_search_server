@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRecords;
@@ -125,7 +126,7 @@ public final class plasmaWordIndexAssortment {
         if (log != null) log.logConfig("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer");
     }
 
-    public void store(plasmaWordIndexEntryContainer newContainer) {
+    public void store(indexContainer newContainer) {
         // stores a word index to assortment database
         // this throws an exception if the word hash already existed
         //log.logDebug("storeAssortment: wordHash=" + wordHash + ", urlHash=" + entry.getUrlHash() + ", time=" + creationTime);
@@ -154,7 +155,7 @@ public final class plasmaWordIndexAssortment {
         if (oldrow != null) throw new RuntimeException("Store to assortment ambiguous");
     }
 
-    public plasmaWordIndexEntryContainer remove(String wordHash) {
+    public indexContainer remove(String wordHash) {
 		// deletes a word index from assortment database
 		// and returns the content record
 		byte[][] row = null;
@@ -191,7 +192,7 @@ public final class plasmaWordIndexAssortment {
         }
     }
     
-    public plasmaWordIndexEntryContainer get(String wordHash) {
+    public indexContainer get(String wordHash) {
         // gets a word index from assortment database
         // and returns the content record
         byte[][] row = null;
@@ -211,7 +212,7 @@ public final class plasmaWordIndexAssortment {
         return row2container(wordHash, row);
     }
     
-    public plasmaWordIndexEntryContainer row2container(String wordHash, byte[][] row) {
+    public indexContainer row2container(String wordHash, byte[][] row) {
         if (row == null) return null;
         final long updateTime = kelondroRecords.bytes2long(row[2]);
         plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);

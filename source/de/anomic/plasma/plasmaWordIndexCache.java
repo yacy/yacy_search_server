@@ -50,6 +50,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
@@ -360,11 +361,11 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
         return (((long) intTime) * (long) 1000) + startTime;
     }
     
-    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime_dummy) {
+    public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime_dummy) {
         return (plasmaWordIndexEntryContainer) wCache.get(wordHash);
     }
 
-    public plasmaWordIndexEntryContainer deleteContainer(String wordHash) {
+    public indexContainer deleteContainer(String wordHash) {
         // returns the index that had been deleted
         synchronized (wCache) {
             plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) wCache.remove(wordHash);
@@ -416,7 +417,7 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
         return delCount;
     }
     
-    public plasmaWordIndexEntryContainer addEntries(plasmaWordIndexEntryContainer container, long updateTime, boolean dhtCase) {
+    public indexContainer addEntries(indexContainer container, long updateTime, boolean dhtCase) {
         // this puts the entries into the cache, not into the assortment directly
         int added = 0;
 
@@ -443,7 +444,7 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
         return null;
     }
 
-    public plasmaWordIndexEntryContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
+    public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
         if (dhtCase) synchronized (kCache) {
             // put container into kCache
             plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);

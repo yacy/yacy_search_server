@@ -1,4 +1,4 @@
-// indexEntry.java
+// indexContainer.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 20.05.2006 on http://www.anomic.de
 //
@@ -24,23 +24,52 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+// an index container is a set of index entries
+
 package de.anomic.index;
 
-public interface indexEntry {
+import java.util.Iterator;
 
-    public Object clone();
-    public String toEncodedStringForm();
-    public byte[] toEncodedByteArrayForm();
-    public String toPropertyForm();
+import de.anomic.kelondro.kelondroOrder;
+
+public interface indexContainer {
     
-    public String getUrlHash();
-    public void combineDistance(indexEntry oe);
-    public int worddistance();
-    public void min(indexEntry other);
-    public void max(indexEntry other);
-    public void normalize(indexEntry min, indexEntry max);
-    public indexEntry generateNormalized(indexEntry min, indexEntry max);
-    public boolean isNewer(indexEntry other);
-    public boolean isOlder(indexEntry other);
-   
+    public void setWordHash(String newWordHash);
+    
+    public void clear();
+    
+    public int size();
+    
+    public long updated();
+    
+    public kelondroOrder order();
+    
+    public String wordHash();
+
+    public int add(indexEntry entry);
+    
+    public int add(indexEntry entry, long updateTime);
+    
+    public int add(indexEntry[] entries, long updateTime);
+    
+    public int add(indexContainer c, long maxTime);
+
+    public boolean contains(String urlHash) ;
+
+    public indexEntry get(String urlHash);
+    
+    public indexEntry[] getEntryArray() ;
+
+    public indexEntry remove(String urlHash);
+
+    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete);
+
+    public Iterator entries();
+
+    public String toString();
+    
+    public int hashCode();
+
+    //public void joinConstructive(indexContainer c, long time, int maxDistance);
+    
 }

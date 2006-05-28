@@ -48,13 +48,13 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.HashMap;
 
+import de.anomic.index.indexContainer;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSearchTimingProfile;
-import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.logging.serverLog;
 
 public class yacySearch extends Thread {
@@ -62,7 +62,7 @@ public class yacySearch extends Thread {
     final private Set wordhashes;
     final private boolean global;
     final private plasmaCrawlLURL urlManager;
-    final private plasmaWordIndexEntryContainer containerCache;
+    final private indexContainer containerCache;
     final private plasmaURLPattern blacklist;
     final private plasmaSnippetCache snippetCache;
     final private yacySeed targetPeer;
@@ -73,7 +73,7 @@ public class yacySearch extends Thread {
     final private String prefer, filter;
     
     public yacySearch(Set wordhashes, String prefer, String filter, int maxDistance, boolean global, yacySeed targetPeer,
-                      plasmaCrawlLURL urlManager, plasmaWordIndexEntryContainer containerCache, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
+                      plasmaCrawlLURL urlManager, indexContainer containerCache, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
                       plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile) {
         super("yacySearch_" + targetPeer.getName());
         this.wordhashes = wordhashes;
@@ -181,7 +181,7 @@ public class yacySearch extends Thread {
         return result;
     }
 
-    public static yacySearch[] searchHashes(Set wordhashes, String prefer, String filter, int maxDist, plasmaCrawlLURL urlManager, plasmaWordIndexEntryContainer containerCache,
+    public static yacySearch[] searchHashes(Set wordhashes, String prefer, String filter, int maxDist, plasmaCrawlLURL urlManager, indexContainer containerCache,
                            int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
                            plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile) {
         // check own peer status

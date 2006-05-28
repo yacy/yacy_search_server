@@ -3,9 +3,9 @@ package de.anomic.plasma.dbImport;
 import java.io.File;
 import java.util.Iterator;
 
+import de.anomic.index.indexContainer;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexAssortment;
-import de.anomic.plasma.plasmaWordIndexEntryContainer;
 
 public class plasmaWordIndexAssortmentImporter extends AbstractImporter implements dbImporter{
 
@@ -99,7 +99,7 @@ public class plasmaWordIndexAssortmentImporter extends AbstractImporter implemen
                 String hash = new String(row[0]);
                 
                 // creating an word entry container
-                plasmaWordIndexEntryContainer container;
+                indexContainer container;
                 try {
                     container = this.assortmentFile.row2container(hash, row);
                 } catch (NullPointerException e) {

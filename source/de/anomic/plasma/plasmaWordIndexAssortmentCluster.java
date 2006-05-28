@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -97,13 +98,13 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         }
     }
 
-    private plasmaWordIndexEntryContainer storeSingular(plasmaWordIndexEntryContainer newContainer) {
+    private indexContainer storeSingular(indexContainer newContainer) {
         // this tries to store the record. If the record does not fit, or a same hash already
         // exists and would not fit together with the new record, then the record is deleted from
         // the assortmen(s) and returned together with the newRecord.
         // if storage was successful, NULL is returned.
         if (newContainer.size() > clusterCount) return newContainer; // it will not fit
-        plasmaWordIndexEntryContainer buffer;
+        indexContainer buffer;
         while ((buffer = assortments[newContainer.size() - 1].remove(newContainer.wordHash())) != null) {
             if (newContainer.add(buffer, -1) == 0) return newContainer; // security check; othervise this loop does not terminate
             if (newContainer.size() > clusterCount) return newContainer; // it will not fit
@@ -114,14 +115,14 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         return null;
     }
     
-    private void storeForced(plasmaWordIndexEntryContainer newContainer) {
+    private void storeForced(indexContainer newContainer) {
         // this stores the record and overwrites an existing record.
         // this is safe if we can be shure that the record does not exist before.
         if ((newContainer == null) || (newContainer.size() == 0) || (newContainer.size() > clusterCount)) return; // it will not fit
         assortments[newContainer.size() - 1].store(newContainer);
     }
     
-    private void storeStretched(plasmaWordIndexEntryContainer newContainer) {
+    private void storeStretched(indexContainer newContainer) {
         // this stores the record and stretches the storage over
         // all the assortments that are necessary to fit in the record
         // IMPORTANT: it must be ensured that the wordHash does not exist in the cluster before
@@ -159,7 +160,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         }
     }
     
-    public plasmaWordIndexEntryContainer addEntries(plasmaWordIndexEntryContainer newContainer, long creationTime, boolean dhtCase) {
+    public indexContainer addEntries(indexContainer newContainer, long creationTime, boolean dhtCase) {
         // this is called by the index ram cache flush process
         // it returnes NULL if the storage was successful
         // it returnes a new container if the given container cannot be stored
@@ -209,13 +210,13 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         return null;
     }
     
-    public plasmaWordIndexEntryContainer deleteContainer(String wordHash) {
+    public indexContainer deleteContainer(String wordHash) {
         return deleteContainer(wordHash, -1);
     }
     
-    public plasmaWordIndexEntryContainer deleteContainer(String wordHash, long maxTime) {
+    public indexContainer deleteContainer(String wordHash, long maxTime) {
         // removes all records from all the assortments and return them
-        plasmaWordIndexEntryContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
+        indexContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         long remainingTime;
         for (int i = 0; i < clusterCount; i++) {
@@ -228,7 +229,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
     }
 
     public int removeEntries(String wordHash, String[] referenceHashes, boolean deleteComplete) {
-        plasmaWordIndexEntryContainer c = deleteContainer(wordHash, -1);
+        indexContainer c = deleteContainer(wordHash, -1);
         int b = c.size();
         c.removeEntries(wordHash, referenceHashes, false);
         if (c.size() != 0) {
@@ -237,9 +238,9 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         return b - c.size();
     }
     
-    public plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
+    public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         // collect all records from all the assortments and return them
-        plasmaWordIndexEntryContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
+        indexContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         long remainingTime;
         for (int i = 0; i < clusterCount; i++) {

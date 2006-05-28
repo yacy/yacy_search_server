@@ -49,6 +49,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -187,7 +188,7 @@ public class plasmaWordIndexClassicDB extends indexAbstractRI implements indexRI
         }
     }
 
-    public synchronized plasmaWordIndexEntryContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
+    public synchronized indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         long start = System.currentTimeMillis();
         if ((maxTime < 0) || (maxTime > 60000)) maxTime=60000; // maximum is one minute
         if (plasmaWordIndexEntity.wordHash2path(databaseRoot, wordHash).exists()) {
@@ -214,7 +215,7 @@ public class plasmaWordIndexClassicDB extends indexAbstractRI implements indexRI
         if (f.exists()) return f.lastModified(); else return -1;
     }
     
-    public plasmaWordIndexEntryContainer deleteContainer(String wordHash) {
+    public indexContainer deleteContainer(String wordHash) {
         plasmaWordIndexEntity.removePlasmaIndex(databaseRoot, wordHash);
         return new plasmaWordIndexEntryContainer(wordHash);
     }
@@ -240,7 +241,7 @@ public class plasmaWordIndexClassicDB extends indexAbstractRI implements indexRI
         }
     }
     
-    public plasmaWordIndexEntryContainer addEntries(plasmaWordIndexEntryContainer container, long creationTime, boolean highPriority) {
+    public indexContainer addEntries(indexContainer container, long creationTime, boolean highPriority) {
 	//System.out.println("* adding " + newEntries.size() + " cached word index entries for word " + wordHash); // debug
 	// fetch the index cache
         if ((container == null) || (container.size() == 0)) return null;

@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import de.anomic.index.indexContainer;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.serverCodings;
@@ -186,7 +187,7 @@ public class plasmaDHTChunk {
         String nexthash = "";
         try {
             Iterator wordHashIterator = wordIndex.wordHashSet(hash, resourceLevel, true, maxcount).iterator();
-            plasmaWordIndexEntryContainer indexContainer;
+            indexContainer indexContainer;
             Iterator urlIter;
             plasmaWordIndexEntryInstance indexEntry;
             plasmaCrawlLURL.Entry lurl;

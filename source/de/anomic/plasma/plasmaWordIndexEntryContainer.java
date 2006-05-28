@@ -57,12 +57,14 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 
+import de.anomic.index.indexContainer;
+import de.anomic.index.indexAbstractContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
 
-public final class plasmaWordIndexEntryContainer {
+public final class plasmaWordIndexEntryContainer extends indexAbstractContainer implements indexContainer {
 
     private String wordHash;
     private final TreeMap container; // urlHash/plasmaWordIndexEntry - Mapping
@@ -97,6 +99,10 @@ public final class plasmaWordIndexEntryContainer {
         return updateTime;
     }
     
+    public kelondroOrder order() {
+        return ordering;
+    }
+    
     public String wordHash() {
         return wordHash;
     }
@@ -117,7 +123,7 @@ public final class plasmaWordIndexEntryContainer {
         return c;
     }
     
-    public int add(plasmaWordIndexEntryContainer c, long maxTime) {
+    public int add(indexContainer c, long maxTime) {
         // returns the number of new elements
         long startTime = System.currentTimeMillis();
         if (c == null) return 0;
@@ -128,7 +134,7 @@ public final class plasmaWordIndexEntryContainer {
                 if (addi((plasmaWordIndexEntryInstance) i.next())) x++;
             } catch (ConcurrentModificationException e) {}
         }
-        this.updateTime = java.lang.Math.max(this.updateTime, c.updateTime);
+        this.updateTime = java.lang.Math.max(this.updateTime, c.updated());
         return x;
     }
 
@@ -146,15 +152,15 @@ public final class plasmaWordIndexEntryContainer {
         return container.containsKey(urlHash);
     }
 
-    public plasmaWordIndexEntryInstance get(String urlHash) {
+    public indexEntry get(String urlHash) {
         return (plasmaWordIndexEntryInstance) container.get(urlHash);
     }
     
-    public plasmaWordIndexEntryInstance[] getEntryArray() {
+    public indexEntry[] getEntryArray() {
         return (plasmaWordIndexEntryInstance[]) container.values().toArray();
     }
 
-    public plasmaWordIndexEntryInstance remove(String urlHash) {
+    public indexEntry remove(String urlHash) {
         return (plasmaWordIndexEntryInstance) container.remove(urlHash);
     }
 
@@ -178,7 +184,7 @@ public final class plasmaWordIndexEntryContainer {
         return (int) kelondroBase64Order.enhancedCoder.decodeLong(this.wordHash.substring(0, 4));
     }
     
-    public static plasmaWordIndexEntryContainer joinContainer(Set containers, long time, int maxDistance) {
+    public static indexContainer joinContainer(Set containers, long time, int maxDistance) {
         
         long stamp = System.currentTimeMillis();
         
@@ -205,13 +211,13 @@ public final class plasmaWordIndexEntryContainer {
         // the map now holds the search results in order of number of hits per word
         // we now must pairwise build up a conjunction of these sets
         Long k = (Long) map.firstKey(); // the smallest, which means, the one with the least entries
-        plasmaWordIndexEntryContainer searchA, searchB, searchResult = (plasmaWordIndexEntryContainer) map.remove(k);
+        indexContainer searchA, searchB, searchResult = (indexContainer) map.remove(k);
         while ((map.size() > 0) && (searchResult.size() > 0)) {
             // take the first element of map which is a result and combine it with result
             k = (Long) map.firstKey(); // the next smallest...
             time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
             searchA = searchResult;
-            searchB = (plasmaWordIndexEntryContainer) map.remove(k);
+            searchB = (indexContainer) map.remove(k);
             searchResult = plasmaWordIndexEntryContainer.joinConstructive(searchA, searchB, 2 * time / (map.size() + 1), maxDistance);
             // free resources
             searchA = null;
@@ -230,7 +236,7 @@ public final class plasmaWordIndexEntryContainer {
         return l;
     }
     
-    public static plasmaWordIndexEntryContainer joinConstructive(plasmaWordIndexEntryContainer i1, plasmaWordIndexEntryContainer i2, long time, int maxDistance) {
+    public static indexContainer joinConstructive(indexContainer i1, indexContainer i2, long time, int maxDistance) {
         if ((i1 == null) || (i2 == null)) return null;
         if ((i1.size() == 0) || (i2.size() == 0)) return new plasmaWordIndexEntryContainer(null);
         
@@ -251,14 +257,14 @@ public final class plasmaWordIndexEntryContainer {
         }
     }
     
-    private static plasmaWordIndexEntryContainer joinConstructiveByTest(plasmaWordIndexEntryContainer small, plasmaWordIndexEntryContainer large, long time, int maxDistance) {
+    private static indexContainer joinConstructiveByTest(indexContainer small, indexContainer large, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY TEST");
         plasmaWordIndexEntryContainer conj = new plasmaWordIndexEntryContainer(null); // start with empty search result
         Iterator se = small.entries();
-        plasmaWordIndexEntryInstance ie0, ie1;
+        indexEntry ie0, ie1;
         long stamp = System.currentTimeMillis();
             while ((se.hasNext()) && ((System.currentTimeMillis() - stamp) < time)) {
-                ie0 = (plasmaWordIndexEntryInstance) se.next();
+                ie0 = (indexEntry) se.next();
                 ie1 = large.get(ie0.getUrlHash());
                 if (ie1 != null) {
                     // this is a hit. Calculate word distance:
@@ -269,10 +275,10 @@ public final class plasmaWordIndexEntryContainer {
         return conj;
     }
     
-    private static plasmaWordIndexEntryContainer joinConstructiveByEnumeration(plasmaWordIndexEntryContainer i1, plasmaWordIndexEntryContainer i2, long time, int maxDistance) {
+    private static indexContainer joinConstructiveByEnumeration(indexContainer i1, indexContainer i2, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
         plasmaWordIndexEntryContainer conj = new plasmaWordIndexEntryContainer(null); // start with empty search result
-        if (!(i1.ordering.signature().equals(i2.ordering.signature()))) return conj; // ordering must be equal
+        if (!(i1.order().signature().equals(i2.order().signature()))) return conj; // ordering must be equal
         Iterator e1 = i1.entries();
         Iterator e2 = i2.entries();
         int c;
@@ -284,7 +290,7 @@ public final class plasmaWordIndexEntryContainer {
 
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
-                c = i1.ordering.compare(ie1.getUrlHash(), ie2.getUrlHash());
+                c = i1.order().compare(ie1.getUrlHash(), ie2.getUrlHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = (plasmaWordIndexEntryInstance) e1.next(); else break;

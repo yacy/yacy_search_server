@@ -57,13 +57,13 @@ import java.util.TreeMap;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexEntryInstance;
-import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -147,7 +147,7 @@ public class IndexControl_p {
         if (post.containsKey("keyhashdeleteall")) {
             if (delurl || delurlref) {
                 // generate an urlx array
-                plasmaWordIndexEntryContainer index = null;
+                indexContainer index = null;
                 index = switchboard.wordIndex.getContainer(keyhash, true, -1);
                 Iterator en = index.entries();
                 int i = 0;
@@ -246,7 +246,7 @@ public class IndexControl_p {
             }
             prop.put("urlstring", "");
             prop.put("urlhash", "");
-            plasmaWordIndexEntryContainer index;
+            indexContainer index;
             String result;
             long starttime = System.currentTimeMillis();
             index = switchboard.wordIndex.getContainer(keyhash, true, -1);
@@ -275,7 +275,7 @@ public class IndexControl_p {
             int timeout = (int) switchboard.getConfigLong("indexControl.timeout",60000);
             result = yacyClient.transferIndex(
                          yacyCore.seedDB.getConnected(post.get("hostHash", "")),
-                         new plasmaWordIndexEntryContainer[]{index},
+                         new indexContainer[]{index},
                          knownURLs,
                          "true".equalsIgnoreCase(gzipBody),
                          timeout);
@@ -421,7 +421,7 @@ public class IndexControl_p {
 
     public static String genUrlList(plasmaSwitchboard switchboard, String keyhash, String keystring) {
         // search for a word hash and generate a list of url links
-        plasmaWordIndexEntryContainer index = null;
+        indexContainer index = null;
         try {
             index = switchboard.wordIndex.getContainer(keyhash, true, -1);
 
