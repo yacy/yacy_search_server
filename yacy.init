@@ -118,7 +118,7 @@ defaultFiles = ConfigBasic.html,index.html,default.html,search.html,console.html
 # the htLocaleSelection selects from the given locales, value=one-of-<dir>
 htDefaultPath=htroot
 htLocalePath=DATA/HTROOT/locale
-htLocaleLang=default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk,gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;
+htLocaleLang=default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk,gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha,sk/Slovenky;
 htLocaleSelection=default
 
 # virtual host for httpdFileServlet access
