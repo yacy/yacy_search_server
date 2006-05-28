@@ -83,8 +83,8 @@ import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexAssortment;
 import de.anomic.plasma.plasmaWordIndexAssortmentCluster;
-import de.anomic.plasma.plasmaWordIndexClassicDB;
-import de.anomic.plasma.plasmaWordIndexEntity;
+import de.anomic.plasma.plasmaWordIndexFileCluster;
+import de.anomic.plasma.plasmaWordIndexFile;
 import de.anomic.index.indexURLEntry;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
@@ -1140,7 +1140,7 @@ public final class yacy {
         Iterator i = stopwords.iterator();
         while (i.hasNext()) {
             w = (String) i.next();
-            f = plasmaWordIndexEntity.wordHash2path(dbRoot, indexEntryAttribute.word2hash(w));
+            f = plasmaWordIndexFile.wordHash2path(dbRoot, indexEntryAttribute.word2hash(w));
             if (f.exists()) {
                 thisamount = f.length();
                 if (f.delete()) {
@@ -1318,7 +1318,7 @@ public final class yacy {
                 plasmaWordIndexAssortment assortment = new plasmaWordIndexAssortment(new File(homeDBroot, "ACLUSTER"), a, 8*1024*1024, null);
                 WordHashIterator = assortment.hashes(wordChunkStartHash, true, false);
             } else if (resource.equals("words")) {
-                plasmaWordIndexClassicDB fileDB = new plasmaWordIndexClassicDB(homeDBroot, log);
+                plasmaWordIndexFileCluster fileDB = new plasmaWordIndexFileCluster(homeDBroot, log);
                 WordHashIterator = fileDB.wordHashes(wordChunkStartHash, true, false);
             }
             int counter = 0;

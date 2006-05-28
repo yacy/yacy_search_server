@@ -82,12 +82,12 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     private final indexRAMCacheRI ramCache;
     private final plasmaWordIndexAssortmentCluster assortmentCluster;
     private int assortmentBufferSize; //kb
-    private final plasmaWordIndexClassicDB backend;    
+    private final plasmaWordIndexFileCluster backend;    
     private final kelondroOrder indexOrder = new kelondroNaturalOrder(true);
     
     public plasmaWordIndex(File databaseRoot, int bufferkb, serverLog log) {
         this.databaseRoot = databaseRoot;
-        this.backend = new plasmaWordIndexClassicDB(databaseRoot, log);
+        this.backend = new plasmaWordIndexFileCluster(databaseRoot, log);
         this.ramCache = new indexRAMCacheRI(databaseRoot, log);
 
         // create new assortment cluster path
@@ -343,7 +343,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public int indexSize(String wordHash) {
         int size = 0;
         try {
-            plasmaWordIndexEntity entity = backend.getEntity(wordHash, true, -1);
+            plasmaWordIndexFile entity = backend.getEntity(wordHash, true, -1);
             if (entity != null) {
                 size += entity.size();
                 entity.close();
@@ -498,11 +498,11 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public Object migrateWords2Assortment(String wordhash) throws IOException {
         // returns the number of entries that had been added to the assortments
         // can be negative if some assortments have been moved to the backend
-        File db = plasmaWordIndexEntity.wordHash2path(databaseRoot, wordhash);
+        File db = plasmaWordIndexFile.wordHash2path(databaseRoot, wordhash);
         if (!(db.exists())) return "not available";
-        plasmaWordIndexEntity entity = null;
+        plasmaWordIndexFile entity = null;
         try {
-            entity =  new plasmaWordIndexEntity(databaseRoot, wordhash, true);
+            entity =  new plasmaWordIndexFile(databaseRoot, wordhash, true);
             int size = entity.size();
             if (size > assortmentCluster.clusterCapacity) {
                 // this will be too big to integrate it

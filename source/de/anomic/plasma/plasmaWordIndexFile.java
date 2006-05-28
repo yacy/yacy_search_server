@@ -55,14 +55,14 @@ import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
 
-public final class plasmaWordIndexEntity {
+public final class plasmaWordIndexFile {
 
     private final String theWordHash;
     private kelondroTree theIndex;
     private File         theLocation;
     private boolean      delete;
 
-    public plasmaWordIndexEntity(File databaseRoot, String wordHash, boolean deleteIfEmpty) {
+    public plasmaWordIndexFile(File databaseRoot, String wordHash, boolean deleteIfEmpty) {
         theWordHash = wordHash;
         theIndex    = indexFile(databaseRoot, wordHash);
         delete      = deleteIfEmpty;
@@ -248,7 +248,7 @@ public final class plasmaWordIndexEntity {
     }
 
     
-    public void merge(plasmaWordIndexEntity otherEntity, long time) throws IOException {
+    public void merge(plasmaWordIndexFile otherEntity, long time) throws IOException {
         // this is a merge of another entity to this entity
         // the merge is interrupted when the given time is over
         // a time=-1 means: no timeout
