@@ -26,12 +26,11 @@
 
 package de.anomic.index;
 
-import de.anomic.plasma.plasmaWordIndexEntryContainer;
 
 public abstract class indexAbstractRI implements indexRI {
 
     public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
-        plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
+        indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
         container.add(newEntry);
         return addEntries(container, updateTime, dhtCase);
     }

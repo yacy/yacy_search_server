@@ -131,7 +131,9 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexTreeMapContainer;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -1473,8 +1475,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = indexEntryAttribute.word2hash(word);
-                                plasmaWordIndexEntryContainer wordIdxContainer = new plasmaWordIndexEntryContainer(wordHash);
-                                plasmaWordIndexEntryInstance wordIdxEntry = new plasmaWordIndexEntryInstance(urlHash,
+                                indexTreeMapContainer wordIdxContainer = new indexTreeMapContainer(wordHash);
+                                indexURLEntry wordIdxEntry = new indexURLEntry(urlHash,
                                                                                              urlLength, urlComps,
                                                                                              wordStat.count,
                                                                                              document.longTitle.length(),
@@ -1503,7 +1505,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             // transfering the index to the storage peer
                             String error = yacyClient.transferIndex(
                                             seed,
-                                            (plasmaWordIndexEntryContainer[])tmpContainers.toArray(new plasmaWordIndexEntryContainer[tmpContainers.size()]),
+                                            (indexTreeMapContainer[])tmpContainers.toArray(new indexTreeMapContainer[tmpContainers.size()]),
                                             urlCache,
                                             true,
                                             120000);

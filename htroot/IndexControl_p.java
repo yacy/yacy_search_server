@@ -63,7 +63,7 @@ import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.plasma.plasmaWordIndexEntryInstance;
+import de.anomic.index.indexURLEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -153,7 +153,7 @@ public class IndexControl_p {
                 int i = 0;
                 urlx = new String[index.size()];
                 while (en.hasNext()) {
-                    urlx[i++] = ((plasmaWordIndexEntryInstance) en.next()).getUrlHash();
+                    urlx[i++] = ((indexURLEntry) en.next()).getUrlHash();
                 }
                 index = null;
             }
@@ -254,10 +254,10 @@ public class IndexControl_p {
             Iterator urlIter = index.entries();
             HashMap knownURLs = new HashMap();
             HashSet unknownURLEntries = new HashSet();
-            plasmaWordIndexEntryInstance indexEntry;
+            indexURLEntry indexEntry;
             plasmaCrawlLURL.Entry lurl;
             while (urlIter.hasNext()) {
-                indexEntry = (plasmaWordIndexEntryInstance) urlIter.next();
+                indexEntry = (indexURLEntry) urlIter.next();
                 try {
                     lurl = switchboard.urlPool.loadedURL.getEntry(indexEntry.getUrlHash(), null);
                     if (lurl.toString() == null) {
@@ -437,9 +437,9 @@ public class IndexControl_p {
                 int i = 0;
 
                 final TreeMap tm = new TreeMap();
-                plasmaWordIndexEntryInstance xi;
+                indexURLEntry xi;
                 while (en.hasNext()) {
-                    xi = (plasmaWordIndexEntryInstance) en.next();
+                    xi = (indexURLEntry) en.next();
                     uh = new String[]{xi.getUrlHash(), Integer.toString(xi.posintext())};
                     try {
                         us = switchboard.urlPool.loadedURL.getEntry(uh[0], null).url().toString();

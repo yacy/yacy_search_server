@@ -49,6 +49,8 @@ import java.util.Iterator;
 
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
+import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBinSearch;
 
 public final class plasmaSearchPreOrder {
@@ -56,7 +58,7 @@ public final class plasmaSearchPreOrder {
     public  static kelondroBinSearch[] ybrTables = null; // block-rank tables
     private static boolean useYBR = true;
     
-    private plasmaWordIndexEntryInstance entryMin, entryMax;
+    private indexURLEntry entryMin, entryMax;
     private TreeMap pageAcc; // key = order hash; value = plasmaLURL.entry
     private plasmaSearchQuery query;
     private plasmaSearchRankingProfile ranking;
@@ -116,36 +118,36 @@ public final class plasmaSearchPreOrder {
         return pageAcc.size() > 0;
     }
     
-    public plasmaWordIndexEntryInstance next() {
+    public indexURLEntry next() {
         Object top = pageAcc.lastKey();
-        return (plasmaWordIndexEntryInstance) pageAcc.remove(top);
+        return (indexURLEntry) pageAcc.remove(top);
     }
     
-    public void addContainer(plasmaWordIndexEntryContainer container, long maxTime) {
+    public void addContainer(indexTreeMapContainer container, long maxTime) {
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
-        plasmaWordIndexEntryInstance indexEntry;
+        indexURLEntry indexEntry;
 
         // first pass: find min/max to obtain limits for normalization
         Iterator i = container.entries();
         int count = 0;
         while (i.hasNext()) {
             if (System.currentTimeMillis() > limitTime) break;
-            indexEntry = (plasmaWordIndexEntryInstance) i.next();
-            if (entryMin == null) entryMin = (plasmaWordIndexEntryInstance) indexEntry.clone(); else entryMin.min(indexEntry);
-            if (entryMax == null) entryMax = (plasmaWordIndexEntryInstance) indexEntry.clone(); else entryMax.max(indexEntry);
+            indexEntry = (indexURLEntry) i.next();
+            if (entryMin == null) entryMin = (indexURLEntry) indexEntry.clone(); else entryMin.min(indexEntry);
+            if (entryMax == null) entryMax = (indexURLEntry) indexEntry.clone(); else entryMax.max(indexEntry);
             count++;
         }
         
         // second pass: normalize entries and get ranking
         i = container.entries();
         for (int j = 0; j < count; j++) {
-            indexEntry = (plasmaWordIndexEntryInstance) i.next();
+            indexEntry = (indexURLEntry) i.next();
             pageAcc.put(serverCodings.encodeHex(this.ranking.preRanking(indexEntry.generateNormalized(entryMin, entryMax)), 16) + indexEntry.getUrlHash(), indexEntry);
         }
     }
     
-    public plasmaWordIndexEntryInstance[] getNormalizer() {
-        return new plasmaWordIndexEntryInstance[] {entryMin, entryMax};
+    public indexURLEntry[] getNormalizer() {
+        return new indexURLEntry[] {entryMin, entryMax};
     }
 
     public static int ybr_p(String urlHash) {

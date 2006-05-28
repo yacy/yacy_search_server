@@ -1,11 +1,15 @@
-// plasmaIndexEntryContainer.java 
-// ------------------------------
-// part of YaCy
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2005
-// last major change: 07.05.2005
+// indexTreeMapContainer.java
+// (C) 2005, 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
+// first published 07.05.2005 on http://www.anomic.de
 //
+// This is a part of YaCy, a peer-to-peer based web search engine
+//
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
+// $LastChangedBy: orbiter $
+//
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -19,26 +23,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
-
 
 /*
     an indexContainer is a bag of indexEntries for a single word
@@ -50,32 +34,29 @@
     the creationTime is necessary to organize caching of containers
 */
 
-package de.anomic.plasma;
+package de.anomic.index;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 
-import de.anomic.index.indexContainer;
-import de.anomic.index.indexAbstractContainer;
-import de.anomic.index.indexEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
 
-public final class plasmaWordIndexEntryContainer extends indexAbstractContainer implements indexContainer {
+public final class indexTreeMapContainer extends indexAbstractContainer implements indexContainer {
 
     private String wordHash;
     private final TreeMap container; // urlHash/plasmaWordIndexEntry - Mapping
     private long updateTime;
     private kelondroOrder ordering;
     
-    public plasmaWordIndexEntryContainer(String wordHash) {
+    public indexTreeMapContainer(String wordHash) {
         this(wordHash, new kelondroNaturalOrder(true));
     }
     
-    public plasmaWordIndexEntryContainer(String wordHash, kelondroOrder ordering) {
+    public indexTreeMapContainer(String wordHash, kelondroOrder ordering) {
         this.wordHash = wordHash;
         this.updateTime = 0;
         this.ordering = ordering;
@@ -131,7 +112,7 @@ public final class plasmaWordIndexEntryContainer extends indexAbstractContainer 
         int x = 0;
         while ((i.hasNext()) && ((maxTime < 0) || ((startTime + maxTime) > System.currentTimeMillis()))) {
             try {
-                if (addi((plasmaWordIndexEntryInstance) i.next())) x++;
+                if (addi((indexURLEntry) i.next())) x++;
             } catch (ConcurrentModificationException e) {}
         }
         this.updateTime = java.lang.Math.max(this.updateTime, c.updated());
@@ -140,7 +121,7 @@ public final class plasmaWordIndexEntryContainer extends indexAbstractContainer 
 
     private boolean addi(indexEntry entry) {
         // returns true if the new entry was added, false if it already existed
-        plasmaWordIndexEntryInstance oldEntry = (plasmaWordIndexEntryInstance) container.put(entry.getUrlHash(), entry);
+        indexURLEntry oldEntry = (indexURLEntry) container.put(entry.getUrlHash(), entry);
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this container
             container.put(entry.getUrlHash(), oldEntry); // put it back
             return false;
@@ -153,15 +134,15 @@ public final class plasmaWordIndexEntryContainer extends indexAbstractContainer 
     }
 
     public indexEntry get(String urlHash) {
-        return (plasmaWordIndexEntryInstance) container.get(urlHash);
+        return (indexURLEntry) container.get(urlHash);
     }
     
     public indexEntry[] getEntryArray() {
-        return (plasmaWordIndexEntryInstance[]) container.values().toArray();
+        return (indexURLEntry[]) container.values().toArray();
     }
 
     public indexEntry remove(String urlHash) {
-        return (plasmaWordIndexEntryInstance) container.remove(urlHash);
+        return (indexURLEntry) container.remove(urlHash);
     }
 
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
@@ -190,15 +171,15 @@ public final class plasmaWordIndexEntryContainer extends indexAbstractContainer 
         
         // order entities by their size
         TreeMap map = new TreeMap();
-        plasmaWordIndexEntryContainer singleContainer;
+        indexTreeMapContainer singleContainer;
         Iterator i = containers.iterator();
         int count = 0;
         while (i.hasNext()) {
             // get next entity:
-            singleContainer = (plasmaWordIndexEntryContainer) i.next();
+            singleContainer = (indexTreeMapContainer) i.next();
             
             // check result
-            if ((singleContainer == null) || (singleContainer.size() == 0)) return new plasmaWordIndexEntryContainer(null); // as this is a cunjunction of searches, we have no result if any word is not known
+            if ((singleContainer == null) || (singleContainer.size() == 0)) return new indexTreeMapContainer(null); // as this is a cunjunction of searches, we have no result if any word is not known
             
             // store result in order of result size
             map.put(new Long(singleContainer.size() * 1000 + count), singleContainer);
@@ -206,7 +187,7 @@ public final class plasmaWordIndexEntryContainer extends indexAbstractContainer 
         }
         
         // check if there is any result
-        if (map.size() == 0) return new plasmaWordIndexEntryContainer(null); // no result, nothing found
+        if (map.size() == 0) return new indexTreeMapContainer(null); // no result, nothing found
         
         // the map now holds the search results in order of number of hits per word
         // we now must pairwise build up a conjunction of these sets
@@ -218,14 +199,14 @@ public final class plasmaWordIndexEntryContainer extends indexAbstractContainer 
             time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
             searchA = searchResult;
             searchB = (indexContainer) map.remove(k);
-            searchResult = plasmaWordIndexEntryContainer.joinConstructive(searchA, searchB, 2 * time / (map.size() + 1), maxDistance);
+            searchResult = indexTreeMapContainer.joinConstructive(searchA, searchB, 2 * time / (map.size() + 1), maxDistance);
             // free resources
             searchA = null;
             searchB = null;
         }
 
         // in 'searchResult' is now the combined search result
-        if (searchResult.size() == 0) return new plasmaWordIndexEntryContainer(null);
+        if (searchResult.size() == 0) return new indexTreeMapContainer(null);
         return searchResult;
     }
     
@@ -238,7 +219,7 @@ public final class plasmaWordIndexEntryContainer extends indexAbstractContainer 
     
     public static indexContainer joinConstructive(indexContainer i1, indexContainer i2, long time, int maxDistance) {
         if ((i1 == null) || (i2 == null)) return null;
-        if ((i1.size() == 0) || (i2.size() == 0)) return new plasmaWordIndexEntryContainer(null);
+        if ((i1.size() == 0) || (i2.size() == 0)) return new indexTreeMapContainer(null);
         
         // decide which method to use
         int high = ((i1.size() > i2.size()) ? i1.size() : i2.size());
@@ -259,7 +240,7 @@ public final class plasmaWordIndexEntryContainer extends indexAbstractContainer 
     
     private static indexContainer joinConstructiveByTest(indexContainer small, indexContainer large, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY TEST");
-        plasmaWordIndexEntryContainer conj = new plasmaWordIndexEntryContainer(null); // start with empty search result
+        indexTreeMapContainer conj = new indexTreeMapContainer(null); // start with empty search result
         Iterator se = small.entries();
         indexEntry ie0, ie1;
         long stamp = System.currentTimeMillis();
@@ -277,31 +258,31 @@ public final class plasmaWordIndexEntryContainer extends indexAbstractContainer 
     
     private static indexContainer joinConstructiveByEnumeration(indexContainer i1, indexContainer i2, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
-        plasmaWordIndexEntryContainer conj = new plasmaWordIndexEntryContainer(null); // start with empty search result
+        indexTreeMapContainer conj = new indexTreeMapContainer(null); // start with empty search result
         if (!(i1.order().signature().equals(i2.order().signature()))) return conj; // ordering must be equal
         Iterator e1 = i1.entries();
         Iterator e2 = i2.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
-            plasmaWordIndexEntryInstance ie1;
-            plasmaWordIndexEntryInstance ie2;
-            ie1 = (plasmaWordIndexEntryInstance) e1.next();
-            ie2 = (plasmaWordIndexEntryInstance) e2.next();
+            indexURLEntry ie1;
+            indexURLEntry ie2;
+            ie1 = (indexURLEntry) e1.next();
+            ie2 = (indexURLEntry) e2.next();
 
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
                 c = i1.order().compare(ie1.getUrlHash(), ie2.getUrlHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
-                    if (e1.hasNext()) ie1 = (plasmaWordIndexEntryInstance) e1.next(); else break;
+                    if (e1.hasNext()) ie1 = (indexURLEntry) e1.next(); else break;
                 } else if (c > 0) {
-                    if (e2.hasNext()) ie2 = (plasmaWordIndexEntryInstance) e2.next(); else break;
+                    if (e2.hasNext()) ie2 = (indexURLEntry) e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
                     ie1.combineDistance(ie2);
                     if (ie1.worddistance() <= maxDistance) conj.add(ie1);
-                    if (e1.hasNext()) ie1 = (plasmaWordIndexEntryInstance) e1.next(); else break;
-                    if (e2.hasNext()) ie2 = (plasmaWordIndexEntryInstance) e2.next(); else break;
+                    if (e1.hasNext()) ie1 = (indexURLEntry) e1.next(); else break;
+                    if (e2.hasNext()) ie2 = (indexURLEntry) e2.next(); else break;
                 }
             }
         }

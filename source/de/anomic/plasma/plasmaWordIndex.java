@@ -61,8 +61,11 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexRAMCacheRI;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
+import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
@@ -76,7 +79,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     private static final int assortmentCount = 64;
     
     private final File databaseRoot;
-    private final plasmaWordIndexCache ramCache;
+    private final indexRAMCacheRI ramCache;
     private final plasmaWordIndexAssortmentCluster assortmentCluster;
     private int assortmentBufferSize; //kb
     private final plasmaWordIndexClassicDB backend;    
@@ -85,7 +88,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public plasmaWordIndex(File databaseRoot, int bufferkb, serverLog log) {
         this.databaseRoot = databaseRoot;
         this.backend = new plasmaWordIndexClassicDB(databaseRoot, log);
-        this.ramCache = new plasmaWordIndexCache(databaseRoot, log);
+        this.ramCache = new indexRAMCacheRI(databaseRoot, log);
 
         // create new assortment cluster path
         File assortmentClusterPath = new File(databaseRoot, indexAssortmentClusterPath);
@@ -149,7 +152,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public void flushControl() {
         // check for forced flush
         synchronized (this) { ramCache.shiftK2W(); }
-        while (ramCache.maxURLinWCache() > plasmaWordIndexCache.wCacheReferenceLimit) {
+        while (ramCache.maxURLinWCache() > indexRAMCacheRI.wCacheReferenceLimit) {
             flushCache(1);
         }
         if (ramCache.wSize() > ramCache.getMaxWordCount()) {
@@ -242,7 +245,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         Iterator i = condenser.words();
         Map.Entry wentry;
         String word;
-        plasmaWordIndexEntryInstance ientry;
+        indexURLEntry ientry;
         plasmaCondenser.wordStatProp wprop;
         String wordHash;
         int urlLength = url.toString().length();
@@ -254,7 +257,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
             wordHash = indexEntryAttribute.word2hash(word);
-            ientry = new plasmaWordIndexEntryInstance(urlHash,
+            ientry = new indexURLEntry(urlHash,
                                               urlLength, urlComps, (document == null) ? urlLength : document.longTitle.length(),
                                              wprop.count,
                                              condenser.RESULT_SIMI_WORDS,
@@ -281,7 +284,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         long start = System.currentTimeMillis();
         
-        plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
+        indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
         // get from cache
         // We must not use the container from cache to store everything we find,
         // as that container remains linked to in the cache and might be changed later
@@ -359,7 +362,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     public synchronized indexContainer deleteContainer(String wordHash) {
         indexContainer c = ramCache.deleteContainer(wordHash);
-        if (c == null) c = new plasmaWordIndexEntryContainer(wordHash);
+        if (c == null) c = new indexTreeMapContainer(wordHash);
         c.add(assortmentCluster.deleteContainer(wordHash, -1), -1);
         c.add(backend.deleteContainer(wordHash), -1);
         return c;
@@ -518,11 +521,11 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                     // the combined container will fit, read the container
                     try {
                         Iterator entries = entity.elements(true);
-                        plasmaWordIndexEntryInstance entry;
+                        indexURLEntry entry;
                         while (entries.hasNext()) {
-                            entry = (plasmaWordIndexEntryInstance) entries.next();
+                            entry = (indexURLEntry) entries.next();
                             // System.out.println("ENTRY = " + entry.getUrlHash());
-                            container.add(new plasmaWordIndexEntryInstance[]{entry}, System.currentTimeMillis());
+                            container.add(new indexURLEntry[]{entry}, System.currentTimeMillis());
                         }
                         // we have read all elements, now delete the entity
                         entity.deleteComplete();
@@ -570,7 +573,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             String wordHash = "";
             indexContainer wordContainer = null;
-            plasmaWordIndexEntryInstance entry = null;
+            indexURLEntry entry = null;
             URL url = null;
             HashSet urlHashs = new HashSet();
             try {
@@ -583,7 +586,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                     wordHashNow = wordHash;
                     while (containerIterator.hasNext() && run) {
                         waiter();
-                        entry = (plasmaWordIndexEntryInstance) containerIterator.next();
+                        entry = (indexURLEntry) containerIterator.next();
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
                         try {

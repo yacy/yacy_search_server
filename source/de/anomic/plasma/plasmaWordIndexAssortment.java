@@ -58,6 +58,8 @@ import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroTree;
@@ -72,7 +74,7 @@ public final class plasmaWordIndexAssortment {
         4,                                   // occurrence counter
         8,                                   // timestamp of last access
         indexEntryAttribute.urlHashLength,   // corresponding URL hash
-        plasmaWordIndexEntryInstance.encodedStringFormLength()       // URL attributes
+        indexURLEntry.encodedStringFormLength()       // URL attributes
     };
     
     // class variables
@@ -136,9 +138,9 @@ public final class plasmaWordIndexAssortment {
         row[1] = kelondroRecords.long2bytes(1, 4);
         row[2] = kelondroRecords.long2bytes(newContainer.updated(), 8);
         Iterator entries = newContainer.entries();
-        plasmaWordIndexEntryInstance entry;
+        indexURLEntry entry;
         for (int i = 0; i < assortmentLength; i++) {
-            entry = (plasmaWordIndexEntryInstance) entries.next();
+            entry = (indexURLEntry) entries.next();
             row[3 + 2 * i] = entry.getUrlHash().getBytes();
 	        row[4 + 2 * i] = entry.toEncodedStringForm().getBytes();
         }
@@ -215,10 +217,10 @@ public final class plasmaWordIndexAssortment {
     public indexContainer row2container(String wordHash, byte[][] row) {
         if (row == null) return null;
         final long updateTime = kelondroRecords.bytes2long(row[2]);
-        plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
+        indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
         for (int i = 0; i < assortmentLength; i++) {
             container.add(
-                    new plasmaWordIndexEntryInstance[] { new plasmaWordIndexEntryInstance(
+                    new indexURLEntry[] { new indexURLEntry(
                             new String(row[3 + 2 * i]), new String(row[4 + 2 * i])) }, updateTime);
         }
         return container;

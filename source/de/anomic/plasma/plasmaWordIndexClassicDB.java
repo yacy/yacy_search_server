@@ -52,6 +52,8 @@ import java.util.TreeSet;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
+import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
@@ -193,16 +195,16 @@ public class plasmaWordIndexClassicDB extends indexAbstractRI implements indexRI
         if ((maxTime < 0) || (maxTime > 60000)) maxTime=60000; // maximum is one minute
         if (plasmaWordIndexEntity.wordHash2path(databaseRoot, wordHash).exists()) {
             plasmaWordIndexEntity entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
-            plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
-            plasmaWordIndexEntryInstance entry;
+            indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
+            indexURLEntry entry;
             Iterator i = entity.elements(true);
             while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) {
-                entry = (plasmaWordIndexEntryInstance) i.next();
+                entry = (indexURLEntry) i.next();
                 container.add(entry);
             }
             return container;
         } else {
-            return new plasmaWordIndexEntryContainer(wordHash);
+            return new indexTreeMapContainer(wordHash);
         }
     }
     
@@ -217,7 +219,7 @@ public class plasmaWordIndexClassicDB extends indexAbstractRI implements indexRI
     
     public indexContainer deleteContainer(String wordHash) {
         plasmaWordIndexEntity.removePlasmaIndex(databaseRoot, wordHash);
-        return new plasmaWordIndexEntryContainer(wordHash);
+        return new indexTreeMapContainer(wordHash);
     }
 
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {

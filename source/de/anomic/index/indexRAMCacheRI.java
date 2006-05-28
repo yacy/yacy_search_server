@@ -1,14 +1,15 @@
-// plasmaWordIndexCache.java
-// -------------------------
-// part of YACY
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2005
+// indexRAMCacheRI.java
+// (C) 2005, 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
+// first published 2005 on http://www.anomic.de
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// This is a part of YaCy, a peer-to-peer based web search engine
 //
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
+// $LastChangedBy: orbiter $
+//
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -22,27 +23,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
 
-package de.anomic.plasma;
+package de.anomic.index;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,18 +32,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
-import de.anomic.index.indexRI;
-import de.anomic.index.indexAbstractRI;
 import de.anomic.kelondro.kelondroArray;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRecords;
+import de.anomic.plasma.plasmaWordIndexAssortment;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public final class plasmaWordIndexCache extends indexAbstractRI implements indexRI {
+public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
 
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
@@ -87,7 +66,7 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
         //minKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
 
-    public plasmaWordIndexCache(File databaseRoot, serverLog log) {
+    public indexRAMCacheRI(File databaseRoot, serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
@@ -120,22 +99,22 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
             long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
             Map.Entry entry;
             String wordHash;
-            plasmaWordIndexEntryContainer container;
+            indexTreeMapContainer container;
             long updateTime;
-            plasmaWordIndexEntryInstance wordEntry;
+            indexURLEntry wordEntry;
             byte[][] row = new byte[5][];
             
             // write kCache, this will be melted with the wCache upon load
             synchronized (kCache) {
                 Iterator i = kCache.values().iterator();
                 while (i.hasNext()) {
-                    container = (plasmaWordIndexEntryContainer) i.next();
+                    container = (indexTreeMapContainer) i.next();
 
                     // put entries on stack
                     if (container != null) {
                         Iterator ci = container.entries();
                         while (ci.hasNext()) {
-                            wordEntry = (plasmaWordIndexEntryInstance) ci.next();
+                            wordEntry = (indexURLEntry) ci.next();
                             row[0] = container.wordHash().getBytes();
                             row[1] = kelondroRecords.long2bytes(container.size(), 4);
                             row[2] = kelondroRecords.long2bytes(container.updated(), 8);
@@ -158,13 +137,13 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
                     entry = (Map.Entry) i.next();
                     wordHash = (String) entry.getKey();
                     updateTime = getUpdateTime(wordHash);
-                    container = (plasmaWordIndexEntryContainer) entry.getValue();
+                    container = (indexTreeMapContainer) entry.getValue();
 
                     // put entries on stack
                     if (container != null) {
                         Iterator ci = container.entries();
                         while (ci.hasNext()) {
-                            wordEntry = (plasmaWordIndexEntryInstance) ci.next();
+                            wordEntry = (indexURLEntry) ci.next();
                             row[0] = wordHash.getBytes();
                             row[1] = kelondroRecords.long2bytes(container.size(), 4);
                             row[2] = kelondroRecords.long2bytes(updateTime, 8);
@@ -203,7 +182,7 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
                 int i = dumpArray.size();
                 String wordHash;
                 //long creationTime;
-                plasmaWordIndexEntryInstance wordEntry;
+                indexURLEntry wordEntry;
                 byte[][] row;
                 //Runtime rt = Runtime.getRuntime();
                 while (i-- > 0) {
@@ -212,7 +191,7 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
                     if ((row[0] == null) || (row[1] == null) || (row[2] == null) || (row[3] == null) || (row[4] == null)) continue;
                     wordHash = new String(row[0], "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new plasmaWordIndexEntryInstance(new String(row[3], "UTF-8"), new String(row[4], "UTF-8"));
+                    wordEntry = new indexURLEntry(new String(row[3], "UTF-8"), new String(row[4], "UTF-8"));
                     // store to cache
                     addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;
@@ -288,7 +267,7 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
 
     public int indexSize(String wordHash) {
         int size = 0;
-        plasmaWordIndexEntryContainer cacheIndex = (plasmaWordIndexEntryContainer) wCache.get(wordHash);
+        indexTreeMapContainer cacheIndex = (indexTreeMapContainer) wCache.get(wordHash);
         if (cacheIndex != null) size += cacheIndex.size();
         return size;
     }
@@ -302,13 +281,13 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
         // find entries in kCache that are too old for that place and shift them to the wCache
         long time;
         Long l;
-        plasmaWordIndexEntryContainer container;
+        indexTreeMapContainer container;
         synchronized (kCache) {
             while (kCache.size() > 0) {
                 l = (Long) kCache.firstKey();
                 time = l.longValue();
                 if (System.currentTimeMillis() - time < kCacheMaxAge) return;
-                container = (plasmaWordIndexEntryContainer) kCache.remove(l);
+                container = (indexTreeMapContainer) kCache.remove(l);
                 addEntries(container, container.updated(), false);
             }
         }
@@ -362,13 +341,13 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
     }
     
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime_dummy) {
-        return (plasmaWordIndexEntryContainer) wCache.get(wordHash);
+        return (indexTreeMapContainer) wCache.get(wordHash);
     }
 
     public indexContainer deleteContainer(String wordHash) {
         // returns the index that had been deleted
         synchronized (wCache) {
-            plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) wCache.remove(wordHash);
+            indexTreeMapContainer container = (indexTreeMapContainer) wCache.remove(wordHash);
             hashScore.deleteScore(wordHash);
             hashDate.deleteScore(wordHash);
             return container;
@@ -379,7 +358,7 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
         if (urlHashes.length == 0) return 0;
         int count = 0;
         synchronized (wCache) {
-            plasmaWordIndexEntryContainer c = (plasmaWordIndexEntryContainer) deleteContainer(wordHash);
+            indexTreeMapContainer c = (indexTreeMapContainer) deleteContainer(wordHash);
             if (c != null) {
                 count = c.removeEntries(wordHash, urlHashes, deleteComplete);
                 if (c.size() != 0) this.addEntries(c, System.currentTimeMillis(), false);
@@ -397,13 +376,13 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
             Iterator i = kCache.entrySet().iterator();
             Map.Entry entry;
             Long l;
-            plasmaWordIndexEntryContainer c;
+            indexTreeMapContainer c;
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
                 l = (Long) entry.getKey();
             
                 // get container
-                c = (plasmaWordIndexEntryContainer) entry.getValue();
+                c = (indexTreeMapContainer) entry.getValue();
                 if (c.remove(urlHash) != null) {
                     if (c.size() == 0) {
                         i.remove();
@@ -431,8 +410,8 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
         } else synchronized (wCache) {
             // put container into wCache
             String wordHash = container.wordHash();
-            plasmaWordIndexEntryContainer entries = (plasmaWordIndexEntryContainer) wCache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
-            if (entries == null) entries = new plasmaWordIndexEntryContainer(wordHash);
+            indexTreeMapContainer entries = (indexTreeMapContainer) wCache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+            if (entries == null) entries = new indexTreeMapContainer(wordHash);
             added = entries.add(container, -1);
             if (added > 0) {
                 wCache.put(wordHash, entries);
@@ -447,15 +426,15 @@ public final class plasmaWordIndexCache extends indexAbstractRI implements index
     public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
         if (dhtCase) synchronized (kCache) {
             // put container into kCache
-            plasmaWordIndexEntryContainer container = new plasmaWordIndexEntryContainer(wordHash);
+            indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
             container.add(newEntry);
             kCache.put(new Long(updateTime + kCacheInc), container);
             kCacheInc++;
             if (kCacheInc > 10000) kCacheInc = 0;
             return null;
         } else synchronized (wCache) {
-            plasmaWordIndexEntryContainer container = (plasmaWordIndexEntryContainer) wCache.get(wordHash);
-            if (container == null) container = new plasmaWordIndexEntryContainer(wordHash);
+            indexTreeMapContainer container = (indexTreeMapContainer) wCache.get(wordHash);
+            if (container == null) container = new indexTreeMapContainer(wordHash);
             indexEntry[] entries = new indexEntry[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
                 wCache.put(wordHash, container);

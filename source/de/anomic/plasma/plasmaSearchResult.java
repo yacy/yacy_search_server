@@ -57,10 +57,11 @@ import de.anomic.server.serverCodings;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexURLEntry;
 
 public final class plasmaSearchResult {
     
-    private plasmaWordIndexEntryInstance entryMin, entryMax;
+    private indexURLEntry entryMin, entryMax;
     private TreeMap pageAcc;            // key = order hash; value = plasmaLURL.entry
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
     private ArrayList results;          // this is a buffer for plasmaWordIndexEntry + plasmaCrawlLURL.entry - objects
@@ -107,11 +108,11 @@ public final class plasmaSearchResult {
         return (plasmaCrawlLURL.Entry) pageAcc.remove(top);
     }
     
-    protected void addResult(plasmaWordIndexEntryInstance indexEntry, plasmaCrawlLURL.Entry page) {
+    protected void addResult(indexURLEntry indexEntry, plasmaCrawlLURL.Entry page) {
         
         // make min/max for normalization
-        if (entryMin == null) entryMin = (plasmaWordIndexEntryInstance) indexEntry.clone(); else entryMin.min(indexEntry);
-        if (entryMax == null) entryMax = (plasmaWordIndexEntryInstance) indexEntry.clone(); else entryMax.max(indexEntry);
+        if (entryMin == null) entryMin = (indexURLEntry) indexEntry.clone(); else entryMin.min(indexEntry);
+        if (entryMax == null) entryMax = (indexURLEntry) indexEntry.clone(); else entryMax.max(indexEntry);
         
         // take out relevant information for reference computation
         URL url = page.url();
@@ -139,13 +140,13 @@ public final class plasmaSearchResult {
         for (int i = 0; i < references.length; i++) commonSense.add(references[i]);
         
         Object[] resultVector;
-        plasmaWordIndexEntryInstance indexEntry;
+        indexURLEntry indexEntry;
         plasmaCrawlLURL.Entry page;
         long ranking;
         for (int i = 0; i < results.size(); i++) {
             // take out values from result array
             resultVector = (Object[]) results.get(i);
-            indexEntry = (plasmaWordIndexEntryInstance) resultVector[0];
+            indexEntry = (indexURLEntry) resultVector[0];
             page = (plasmaCrawlLURL.Entry) resultVector[1];
             
             // calculate ranking

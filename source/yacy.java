@@ -85,7 +85,7 @@ import de.anomic.plasma.plasmaWordIndexAssortment;
 import de.anomic.plasma.plasmaWordIndexAssortmentCluster;
 import de.anomic.plasma.plasmaWordIndexClassicDB;
 import de.anomic.plasma.plasmaWordIndexEntity;
-import de.anomic.plasma.plasmaWordIndexEntryInstance;
+import de.anomic.index.indexURLEntry;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
@@ -858,7 +858,7 @@ public final class yacy {
                     
                     // the combined container will fit, read the container
                     Iterator importWordIdxEntries = newContainer.entries();
-                    plasmaWordIndexEntryInstance importWordIdxEntry;
+                    indexURLEntry importWordIdxEntry;
                     while (importWordIdxEntries.hasNext()) {
                         
                         // testing if import process was aborted
@@ -866,7 +866,7 @@ public final class yacy {
 
                         // getting next word index entry
                         entryCounter++;
-                        importWordIdxEntry = (plasmaWordIndexEntryInstance) importWordIdxEntries.next();
+                        importWordIdxEntry = (indexURLEntry) importWordIdxEntries.next();
                         String urlHash = importWordIdxEntry.getUrlHash();                    
                         if ((importUrlDB.exists(urlHash)) && (!homeUrlDB.exists(urlHash))) try {
                             // importing the new url
@@ -969,9 +969,9 @@ public final class yacy {
                     
                     // the combined container will fit, read the container
                     Iterator wordIdxEntries = wordIdxContainer.entries();
-                    plasmaWordIndexEntryInstance wordIdxEntry;
+                    indexURLEntry wordIdxEntry;
                     while (wordIdxEntries.hasNext()) {
-                        wordIdxEntry = (plasmaWordIndexEntryInstance) wordIdxEntries.next();
+                        wordIdxEntry = (indexURLEntry) wordIdxEntries.next();
                         String urlHash = wordIdxEntry.getUrlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
                             plasmaCrawlLURL.Entry urlEntry = currentUrlDB.getEntry(urlHash, null);                       

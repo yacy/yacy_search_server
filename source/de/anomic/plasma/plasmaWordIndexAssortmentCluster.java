@@ -54,6 +54,8 @@ import java.util.Iterator;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
+import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroObjectCache;
 import de.anomic.kelondro.kelondroRecords;
@@ -144,13 +146,13 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         int clusterStart = clusterCount - (int) (Math.random() * (clusterCount - clusterMinStart));
 
         // do the insert
-        plasmaWordIndexEntryContainer c;
+        indexTreeMapContainer c;
         Iterator i = newContainer.entries();
         for (int j = clusterStart; j >= 1; j--) {
-            c = new plasmaWordIndexEntryContainer(newContainer.wordHash());
+            c = new indexTreeMapContainer(newContainer.wordHash());
             for (int k = 0; k < j; k++) {
                 if (i.hasNext()) {
-                    c.add((plasmaWordIndexEntryInstance) i.next(), newContainer.updated());
+                    c.add((indexURLEntry) i.next(), newContainer.updated());
                 } else {
                     storeForced(c);
                     return;
@@ -186,14 +188,14 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         }
         if (need == 0) {
             // we found spaces so that we can put in the newContainer into these spaces
-            plasmaWordIndexEntryContainer c;
+            indexTreeMapContainer c;
             Iterator i = newContainer.entries();
             for (int j = testsize - 1; j >= 0; j--) {
                 if (spaces[j] == 0) continue;
-                c = new plasmaWordIndexEntryContainer(newContainer.wordHash());
+                c = new indexTreeMapContainer(newContainer.wordHash());
                 for (int k = 0; k <= j; k++) {
                     assert (i.hasNext());
-                    c.add((plasmaWordIndexEntryInstance) i.next(), newContainer.updated());
+                    c.add((indexURLEntry) i.next(), newContainer.updated());
                 }
                 storeForced(c);
             }
@@ -216,7 +218,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
     
     public indexContainer deleteContainer(String wordHash, long maxTime) {
         // removes all records from all the assortments and return them
-        indexContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
+        indexContainer buffer, record = new indexTreeMapContainer(wordHash);
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         long remainingTime;
         for (int i = 0; i < clusterCount; i++) {
@@ -240,7 +242,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
     
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         // collect all records from all the assortments and return them
-        indexContainer buffer, record = new plasmaWordIndexEntryContainer(wordHash);
+        indexContainer buffer, record = new indexTreeMapContainer(wordHash);
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         long remainingTime;
         for (int i = 0; i < clusterCount; i++) {

@@ -47,6 +47,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.serverCodings;
@@ -72,22 +74,22 @@ public class plasmaDHTChunk {
     
     private int status = chunkStatus_UNDEFINED;
     private String startPointHash;
-    private plasmaWordIndexEntryContainer[] indexContainers = null;
+    private indexTreeMapContainer[] indexContainers = null;
     private HashMap urlCache; // String (url-hash) / plasmaCrawlLURL.Entry
     private int idxCount;
     
     private long selectionStartTime = 0;
     private long selectionEndTime = 0;
     
-    public plasmaWordIndexEntryContainer firstContainer() {
+    public indexTreeMapContainer firstContainer() {
         return indexContainers[0];
     }
     
-    public plasmaWordIndexEntryContainer lastContainer() {
+    public indexTreeMapContainer lastContainer() {
         return indexContainers[indexContainers.length - 1];
     }
     
-    public plasmaWordIndexEntryContainer[] containers() {
+    public indexTreeMapContainer[] containers() {
         return indexContainers;
     }
     
@@ -189,7 +191,7 @@ public class plasmaDHTChunk {
             Iterator wordHashIterator = wordIndex.wordHashSet(hash, resourceLevel, true, maxcount).iterator();
             indexContainer indexContainer;
             Iterator urlIter;
-            plasmaWordIndexEntryInstance indexEntry;
+            indexURLEntry indexEntry;
             plasmaCrawlLURL.Entry lurl;
             int refcount = 0;
 
@@ -197,7 +199,7 @@ public class plasmaDHTChunk {
             double maximumDistance = ((double) peerRedundancy * 2) / ((double) yacyCore.seedDB.sizeConnected());
             
             while ((maxcount > refcount) && (wordHashIterator.hasNext()) && ((nexthash = (String) wordHashIterator.next()) != null) && (nexthash.trim().length() > 0)
-                            && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(nexthash, ((plasmaWordIndexEntryContainer) tmpContainers.get(0)).wordHash()) < maximumDistance))) {
+                            && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(nexthash, ((indexTreeMapContainer) tmpContainers.get(0)).wordHash()) < maximumDistance))) {
                 // make an on-the-fly entity and insert values
                 indexContainer = wordIndex.getContainer(nexthash, true, 10000);
                 int notBoundCounter = 0;
@@ -205,7 +207,7 @@ public class plasmaDHTChunk {
                     urlIter = indexContainer.entries();
                     // iterate over indexes to fetch url entries and store them in the urlCache
                     while ((urlIter.hasNext()) && (maxcount > refcount)) {
-                        indexEntry = (plasmaWordIndexEntryInstance) urlIter.next();
+                        indexEntry = (indexURLEntry) urlIter.next();
                         try {
                             lurl = lurls.getEntry(indexEntry.getUrlHash(), indexEntry);
                             if ((lurl == null) || (lurl.url() == null)) {
@@ -225,7 +227,7 @@ public class plasmaDHTChunk {
 
                     // remove all remaining; we have enough
                     while (urlIter.hasNext()) {
-                        indexEntry = (plasmaWordIndexEntryInstance) urlIter.next();
+                        indexEntry = (indexURLEntry) urlIter.next();
                         urlIter.remove();
                     }
 
@@ -238,7 +240,7 @@ public class plasmaDHTChunk {
                 }
             }
             // create result
-            indexContainers = (plasmaWordIndexEntryContainer[]) tmpContainers.toArray(new plasmaWordIndexEntryContainer[tmpContainers.size()]);
+            indexContainers = (indexTreeMapContainer[]) tmpContainers.toArray(new indexTreeMapContainer[tmpContainers.size()]);
 
             if ((indexContainers == null) || (indexContainers.length == 0)) {
                 log.logFine("No index available for index transfer, hash start-point " + startPointHash);
@@ -251,13 +253,13 @@ public class plasmaDHTChunk {
             return refcount;
         } catch (kelondroException e) {
             log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
-            indexContainers = new plasmaWordIndexEntryContainer[0];
+            indexContainers = new indexTreeMapContainer[0];
             urlCache = new HashMap();
             this.status = chunkStatus_FAILED;
             return 0;
         } catch (IOException e) {
             log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
-            indexContainers = new plasmaWordIndexEntryContainer[0];
+            indexContainers = new indexTreeMapContainer[0];
             urlCache = new HashMap();
             this.status = chunkStatus_FAILED;
             return 0;
@@ -267,7 +269,7 @@ public class plasmaDHTChunk {
     
     public int deleteTransferIndexes() {
         Iterator urlIter;
-        plasmaWordIndexEntryInstance indexEntry;
+        indexURLEntry indexEntry;
         String[] urlHashes;
         int count = 0;
         for (int i = 0; i < this.indexContainers.length; i++) {
@@ -276,7 +278,7 @@ public class plasmaDHTChunk {
             urlHashes = new String[this.indexContainers[i].size()];
             urlIter = this.indexContainers[i].entries();
             while (urlIter.hasNext()) {
-                indexEntry = (plasmaWordIndexEntryInstance) urlIter.next();
+                indexEntry = (indexURLEntry) urlIter.next();
                 urlHashes[c++] = indexEntry.getUrlHash();
             }
             count += wordIndex.removeEntries(this.indexContainers[i].wordHash(), urlHashes, true);

@@ -52,6 +52,8 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverInstantThread;
 import de.anomic.yacy.yacySearch;
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexURLEntry;
 
 public final class plasmaSearchEvent extends Thread implements Runnable {
     
@@ -84,8 +86,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.ranking = ranking;
         this.urlStore = urlStore;
         this.snippetCache = snippetCache;
-        this.rcLocal = new plasmaWordIndexEntryContainer(null);
-        this.rcGlobal = new plasmaWordIndexEntryContainer(null);
+        this.rcLocal = new indexTreeMapContainer(null);
+        this.rcGlobal = new indexTreeMapContainer(null);
         this.rcGlobalCount = 0;
         this.profileLocal = localTiming;
         this.profileGlobal = remoteTiming;
@@ -176,13 +178,13 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // since this is a conjunction we return an empty entity if any word
         // is not known
         if (containers == null) {
-            rcLocal = new plasmaWordIndexEntryContainer(null);
+            rcLocal = new indexTreeMapContainer(null);
             return 0;
         }
 
         // join the result
         profileLocal.startTimer();
-        rcLocal = plasmaWordIndexEntryContainer.joinContainer(containers,
+        rcLocal = indexTreeMapContainer.joinContainer(containers,
                 profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN),
                 query.maxDistance);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_JOIN);
@@ -218,7 +220,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
-        plasmaWordIndexEntryContainer searchResult = new plasmaWordIndexEntryContainer(null);
+        indexTreeMapContainer searchResult = new indexTreeMapContainer(null);
         long preorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         
         profileLocal.startTimer();
@@ -240,7 +242,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         //if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
         //if (searchResult.size() == 0) return acc; // case that we have nothing to do
 
-        plasmaWordIndexEntryInstance entry;
+        indexURLEntry entry;
         plasmaCrawlLURL.Entry page;
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {

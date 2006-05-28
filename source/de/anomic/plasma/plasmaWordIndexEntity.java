@@ -50,6 +50,7 @@ import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
@@ -93,10 +94,10 @@ public final class plasmaWordIndexEntity {
         kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent);
     } catch (IOException e) {
         theLocation.delete();
-        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, indexURL.urlHashLength, plasmaWordIndexEntryInstance.encodedStringFormLength(), false);
+        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, indexURL.urlHashLength, indexURLEntry.encodedStringFormLength(), false);
     } else {
         // create new index file
-        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, indexURL.urlHashLength, plasmaWordIndexEntryInstance.encodedStringFormLength(), false);
+        kt = new kelondroTree(theLocation, cacheSize, kelondroTree.defaultObjectCachePercent, indexURL.urlHashLength, indexURLEntry.encodedStringFormLength(), false);
     }
     return kt; // everyone who get this should close it when finished!
     }
@@ -135,23 +136,23 @@ public final class plasmaWordIndexEntity {
     } catch (IOException e) {}
     }
 
-    public plasmaWordIndexEntryInstance getEntry(String urlhash) throws IOException {
+    public indexURLEntry getEntry(String urlhash) throws IOException {
         byte[][] n = theIndex.get(urlhash.getBytes());
         if (n == null) return null;
-        return new plasmaWordIndexEntryInstance(new String(n[0]), new String(n[1]));
+        return new indexURLEntry(new String(n[0]), new String(n[1]));
     }
     
     public boolean contains(String urlhash) throws IOException {
         return (theIndex.get(urlhash.getBytes()) != null);
     }
     
-    public boolean contains(plasmaWordIndexEntryInstance entry) throws IOException {
+    public boolean contains(indexURLEntry entry) throws IOException {
         return (theIndex.get(entry.getUrlHash().getBytes()) != null);
     }
     
-    public boolean addEntry(plasmaWordIndexEntryInstance entry) throws IOException {
+    public boolean addEntry(indexURLEntry entry) throws IOException {
         if (entry == null) return false;
-        plasmaWordIndexEntryInstance oldEntry = getEntry(entry.getUrlHash());
+        indexURLEntry oldEntry = getEntry(entry.getUrlHash());
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this entity
             return false;
         }
@@ -170,7 +171,7 @@ public final class plasmaWordIndexEntity {
         if (container != null) {
             Iterator i = container.entries();
             while (i.hasNext()) {
-                if (addEntry((plasmaWordIndexEntryInstance) i.next())) count++;
+                if (addEntry((indexURLEntry) i.next())) count++;
             }
         }
         
@@ -235,7 +236,7 @@ public final class plasmaWordIndexEntity {
         public Object next() {
             if (i == null) return null;
             byte[][] n = (byte[][]) i.next();
-            return new plasmaWordIndexEntryInstance(new String(n[0]), new String(n[1]));
+            return new indexURLEntry(new String(n[0]), new String(n[1]));
         }
         public void remove() {
             throw new UnsupportedOperationException();
@@ -255,7 +256,7 @@ public final class plasmaWordIndexEntity {
         long timeout = (time == -1) ? Long.MAX_VALUE : System.currentTimeMillis() + time;
         try {
         while ((i.hasNext()) && (System.currentTimeMillis() < timeout)) {
-            addEntry((plasmaWordIndexEntryInstance) i.next());            
+            addEntry((indexURLEntry) i.next());            
         }
         } catch (kelondroException e) {
             serverLog.logSevere("PLASMA", "plasmaWordIndexEntity.merge: " + e.getMessage());

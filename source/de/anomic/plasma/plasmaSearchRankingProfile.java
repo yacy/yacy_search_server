@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.anomic.index.indexEntry;
+import de.anomic.index.indexURLEntry;
 
 public class plasmaSearchRankingProfile {
 
@@ -165,8 +166,8 @@ public class plasmaSearchRankingProfile {
     
     public long preRanking(indexEntry entry) {
         long ranking = 0;
-        if (entry instanceof plasmaWordIndexEntryInstance) {
-            plasmaWordIndexEntryInstance normalizedEntry = (plasmaWordIndexEntryInstance) entry;
+        if (entry instanceof indexURLEntry) {
+            indexURLEntry normalizedEntry = (indexURLEntry) entry;
             ranking += normalizedEntry.getQuality() << ((Integer) coeff.get(ENTROPY)).intValue();
             ranking += normalizedEntry.getVirtualAge() << ((Integer) coeff.get(DATE)).intValue();
             ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.getUrlHash()) << ((Integer) coeff.get(YBR)).intValue();

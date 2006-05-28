@@ -55,13 +55,13 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndexEntryInstance;
-import de.anomic.plasma.plasmaWordIndexEntryContainer;
 import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.server.serverCore;
@@ -467,9 +467,9 @@ public final class yacyClient {
             
             // create containers
             final int words = wordhashes.length() / indexEntryAttribute.wordHashLength;
-            plasmaWordIndexEntryContainer[] container = new plasmaWordIndexEntryContainer[words];
+            indexTreeMapContainer[] container = new indexTreeMapContainer[words];
             for (int i = 0; i < words; i++) {
-                container[i] = new plasmaWordIndexEntryContainer(wordhashes.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
+                container[i] = new indexTreeMapContainer(wordhashes.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
             }
 
             // insert results to containers
@@ -484,10 +484,10 @@ public final class yacyClient {
                 
                 urlManager.stackEntry(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
                 // save the url entry
-                final plasmaWordIndexEntryInstance entry;
+                final indexURLEntry entry;
                 if (urlEntry.word() == null) {
                     // the old way to define words
-                    entry = new plasmaWordIndexEntryInstance(
+                    entry = new indexURLEntry(
                                                      urlEntry.hash(),
                                                      urlLength, urlComps,
                                                      urlEntry.descr().length(),
@@ -514,7 +514,7 @@ public final class yacyClient {
                 }
                 // add the url entry to the word indexes
                 for (int m = 0; m < words; m++) {
-                    container[m].add(new plasmaWordIndexEntryInstance[]{entry}, System.currentTimeMillis());
+                    container[m].add(new indexURLEntry[]{entry}, System.currentTimeMillis());
                 }
             }
 
@@ -882,11 +882,11 @@ public final class yacyClient {
         
         // check if we got all necessary urls in the urlCache (only for debugging)
         Iterator eenum;
-        plasmaWordIndexEntryInstance entry;
+        indexURLEntry entry;
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].entries();
             while (eenum.hasNext()) {
-                entry = (plasmaWordIndexEntryInstance) eenum.next();
+                entry = (indexURLEntry) eenum.next();
                 if (urlCache.get(entry.getUrlHash()) == null) {
                     yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.getUrlHash() + "' is not contained in urlCache");
                 }
@@ -962,11 +962,11 @@ public final class yacyClient {
         int indexcount = 0;
         final StringBuffer entrypost = new StringBuffer(indexes.length*73);
         Iterator eenum;
-        plasmaWordIndexEntryInstance entry;
+        indexURLEntry entry;
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].entries();
             while (eenum.hasNext()) {
-                entry = (plasmaWordIndexEntryInstance) eenum.next();
+                entry = (indexURLEntry) eenum.next();
                 entrypost.append(indexes[i].wordHash()) 
                          .append(entry.toPropertyForm()) 
                          .append(serverCore.crlfString);
