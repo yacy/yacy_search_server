@@ -17,9 +17,9 @@
 #Only part 1.
 #Contributors are in chronological ordern, not how much they did absolutely.
 #Thank you for your help!
-<!-- lang -->default\(english\)==Slovenky
-<!-- author -->==Roland Ramthun, Oliver Wunder, Jan Sandbrink, Rostislav Svoboda
-<!-- maintainer -->==&lt;admin@yacy-forum.de&gt;
+<!-- lang -->default\(english\)==Slovensky
+<!-- author -->==Rostislav Svoboda
+<!-- maintainer -->==&lt;Rostislav.Svoboda@gmail.com&gt;
 
 #-----------------------------------------------------------
 #File: Blacklist_p.html
@@ -565,7 +565,7 @@ Crawling paused successfully.==Crawling bol uspesne pozastaveny (pauzaa).
 Continue crawling.==Pokracuj v crawlingu.
 "refresh"=="aktualizuj"
 "continue crawling"=="pokracuj v crawlingu"
-"pause crawling"=="Crawling pausieren"
+"pause crawling"=="pozastav crawling"
 Crawl Profile List:==Profil crawl zoznamu:
 Crawl Thread==Vlakno crawlu
 Start URL==Startovacia URL
@@ -1139,9 +1139,9 @@ all<br>optimum<br>values==aller<br>Optimal-<br>werte
 
 #-------------------------------------------------------
 #File: PerformanceSearch_p.html
-Performance Settings of Search Sequence==Performanceeinstellungen des Suchablaufs
-Timing Settings of Search Sequence==Timing-Einstellungen des Suchablaufs
-Settings for local search profile:==Einstellungen des lokalen Suchprofils:
+Performance Settings of Search Sequence==Nastavenia vykonu priebehu vyhladavania
+Timing Settings of Search Sequence==Casove nastavenia priebehu vyhladavania
+Settings for local search profile:==Nastavenia lokalneho profilu vyhladavania 
 #Entity==
 #Collection==
 #Join==
@@ -1150,105 +1150,105 @@ Settings for local search profile:==Einstellungen des lokalen Suchprofils:
 #Post-Sort==
 #Filter==
 #Snippet-Fetch==
-execution Time==Ausf&uuml;hrungszeit
-percentage; sum of this must be 100==prozentual; Summe muss 100 sein
+execution Time==cas vykonavania
+percentage; sum of this must be 100==percentualne; suma musi davat 100%
 #result count==
 #percentage of requested amount==
-Submit New Profile Values==neue Profilwerte &uuml;bertragen
-Reset To Default Values==Auf Standardwerte zur&uuml;cksetzen
-Your settings are valid and will be used for next search.==Ihre Einstellungen sind g&uuml;ltig und werden f&uuml;r die n&auml;chste Suche genutzt.
-Reset to default settings done.==Standardwerte wurden wiederhergestellt.
-Your settings cannot be accepted: sum of execution time percentage is not 100==Ihre Einstellungen k&ouml;nnen nicht &uuml;bernommen werden: Summe der prozentualen Ausf&uuml;hrungszeit ist nicht 100.
-Timing results of latest search request:==Timing-Ergebnisse der letzten Suchanfrage:
-absolute milliseconds==absolut, Millisekunden
-absolute amount==absoluter Wert
-The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Das Netzwerkbild zeigt wie die letzte Suche durch Anfragen bei zust&auml;ndigen Peers im DHT gel&ouml;st wurde.
+Submit New Profile Values==Uloz nove hodnoty profilu 
+Reset To Default Values==Obnov predvolene hodnoty 
+Your settings are valid and will be used for next search.==Vase nastavenia su platne a budu pouzite pri dalsom vyhladavani
+Reset to default settings done.==Predvolene nastavenia boli obnovene.
+Your settings cannot be accepted: sum of execution time percentage is not 100==Vase nastavenia memozu byt akceptovane: suma percentualneho casu vykonavania nie je 100%
+Timing results of latest search request:==Casove vysledky posledneho vyhladavacieho dotazu:
+absolute milliseconds==absolutne, v millisekundach
+absolute amount==absolutna hodnota
+The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Obrazok siete nizsie ukazuje bol vyrieseny posledny vyhladavaci dotaz u prislusnych peerov v DHT:
 
 #-------------------------------------------------------
 #File: ProxyIndexingMonitor_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Index Monitor for Proxy Indexing==Index Profil f&uuml;r den Proxy Index
-This is the control page for web pages that your peer has indexed during the current application run-time==Dies ist die Kontrollseite f&uuml;r Internetseiten, die Ihr Peer w&auml;hrend der aktuellen Sitzung
-as result of proxy fetch/prefetch.==durch Besuchen einer Seite indexiert.
-No personal or protected page is indexed==Pers&ouml;nliche Seiten und gesch&uuml;tze Seiten werden nicht indexiert
-those pages are detected by properties in the HTTP header \(like Cookie-Use, or HTTP Authorization\)==solche Seiten werden entweder durch Merkmale im HTTP Header (Kopf der Seite) (z.B.: Cookies oder HTTP Authorisierung)
-or by POST-Parameters \(either in URL or as HTTP protocol\)==oder durch POST-Parameter (z.B. in einer URL oder im HTTP Protokoll) erkannt
-and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
-Proxy pre-fetch setting:==Proxy Indexier Einstellung:
-this is an automated html page loading procedure that takes actual proxy-requested==Dies ist eine automatische Web Seiten Lade Funktion, die aktuell besuchte
-URLs as crawling start points for crawling.==URLs als Startpunkt zum Indexieren benutzt.
-Prefetch Depth==Indizier Tiefe
-A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==Bei einer Tiefe von 0 wird nur die besuchte Seite indexiert; eine Tiefe von 1 bedeutet, dass alle Seiten
-embedded URLs, but since embedded image links are loaded by the browser==die auf dieser Seite verlinkt sind, geladen und indexiert werden; Da Links auf Bilder sowieso schon vom Browser geladen werden,
-this means that only embedded href-anchors are prefetched additionally.==trifft dies nur auf eingebettet HREF-Anker zu.
-Store to Cache==Speicher im Cache
-It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Es wird empfohlen diese Option immer zu aktivieren. Einzige Ausnahme: Sie haben einen zweiten Proxy als Cache laufen und Yacy soll im "Proxy-zu-Proxy"-Modus laufen.
-Do Remote Indexing==Remote Indexierung
-If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler andere Peers anfragen und als remote Indexierer f&uuml;r Ihren Crawl nutzen.
-If you need your crawling results locally, you should switch this off.==Sollten Sie Ihre Crawling Ergebnisse lokal ben&ouml;tigen, dann deaktivieren Sie diese Funktion.
-Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl starten oder empfangen.
-Please note that this setting only take effect for a prefetch depth greater than 0.==Bitte ber&uuml;cksichtigen Sie, dass diese Einstellung nur wirkt, wenn Ihre Indizier Tiefe gr&ouml;sser als 0 ist.
-Proxy generally==Proxy Allgemein
-Path==Verzeichnis
-The path where the pages are stored \(max. length 300\)==Verzeichnis in dem der Cache sein soll (max. 300 Zeichen)
-Size</td>==Gr&ouml;sse</td>
-The size in MB of the cache.==Die Gr&ouml;sse des Cache in MB.
-"Set proxy profile"=="Proxy Profil speichern"
-The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DATA/PLASMADB/crawlProfiles0.db fehlt entweder oder ist defekt.
-Please delete that file and restart.==Bitte l&ouml;schen Sie diese Datei und starten Sie YaCy neu.
-Pre-fetch is now set to depth==Proxy Indizierung erfolgt nun bis zu einer Tiefe von
-Caching is now \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Proxy Speichern im Cache ist nun #(caching)#aus::an#(/caching)#.
-Cachepath is now set to \'\#\[return\]\#\'.</b> Please move the old data in the new directory.==Der Cache ist nun im Verzeichnis '#[return]#'.</b> Bitte verschieben Sie Ihre alten Daten in das neue Verzeichnis.
-Cachesize is now set to \#\[return\]\#MB.==Die Cache Gr&ouml;sse ist nun auf #[return]#MB gesetzt.
-Changes will take effect after restart only.==&Auml;nderungen werden erst nach einem Neustart von YaCy wirksam.
-Remote Indexing is now \#\(crawlOrder\)\#off::on==Remote-Indexieren ist nun #(crawlOrder)#aus::an
-An error has occurred:==Es trat ein Fehler auf:
-You can see a snapshot of recently indexed pages==Sie k&ouml;nnen sich Voransichten von frisch indexierten Seiten
-on the==auf der
-Page.==Seite ansehen.
+Index Monitor for Proxy Indexing==Monitor indexu pre indexaciu proxy
+This is the control page for web pages that your peer has indexed during the current application run-time==Toto je kontrolna stranke pre web stranky, ktore Vas peer indexoval pocas aktualneho behu aplikacie 
+as result of proxy fetch/prefetch.==ako vysledok proxy vyberu/predvyberu.
+No personal or protected page is indexed==Osobne a chranene stranky nebudu indexovane
+those pages are detected by properties in the HTTP header \(like Cookie-Use, or HTTP Authorization\)==taketo stranky su detekovane pomocou vlastnosti (properties) v HTTP hlavicke (headery) stranky (napr. cookies alebo HTTP autorizacia)
+or by POST-Parameters \(either in URL or as HTTP protocol\)==alebo pomocou POST parametru (napr. v URL adrese alebo v HTTP protokole)
+and automatically excluded from indexing.==a automaticky z indexovania vylucene.
+Proxy pre-fetch setting:==Nastavenia indexacie proxy:
+this is an automated html page loading procedure that takes actual proxy-requested==Toto je automaticka funkcia nahravania web stranok, ktora pouziva prave navstevovane 
+URLs as crawling start points for crawling.==URL adresy ako startovaci bod indexacie.
+Prefetch Depth==Hlbka predvyberu
+A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==Hlbke 0 znamena ziaden predvyber. Hlbka 1 znamena predvyber vsetkych 
+embedded URLs, but since embedded image links are loaded by the browser==URL adries ktore sa na konkretnej web stranke vyskytuju. Kedze vsak obrazk su nahravane web browserom 
+this means that only embedded href-anchors are prefetched additionally.==znamena to ze len emdedded href kotvy "<a href='...'>" budu dodatocne predvyberane
+Store to Cache==Uloz do cache
+It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Doporucujeme mat tuto volbu vzdy aktivovanu. Jedinou vynimkou je ak Vam bezi dalsi proxi ako cache a chcete aby YaCy bezalo v mode "od proxy k proxy".
+Do Remote Indexing==Vzdialene indexovanie 
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Ak je aktivovane, tak crawler bude kontaktovat ine peeri a pouzivat ich ako vzialenych indexatorov pre Vas crawl.
+If you need your crawling results locally, you should switch this off.==Deaktivujte tuto funkciu ak potrebujete lokalne ulozit vysledky Vaseho crawlingu. 
+Only senior and principal peers can initiate or receive remote crawls.==Len Senior a Principal peeri mozu odstartovat alebo prijat vzdialeny crawl.
+Please note that this setting only take effect for a prefetch depth greater than 0.==Prosim uvazte ze tieto nastavenia su ucinne len ak je zvolena hlbka predvyberu vacsia ako 0. 
+Proxy generally==Proxy vseobecne
+Path==Adresar
+The path where the pages are stored \(max. length 300\)==Adresar kde je ulozena cache (max. 300 znakov)
+Size</td>==Velkost</td>
+The size in MB of the cache.==Velkost cache v MB.
+"Set proxy profile"=="Uloz proxy profil"
+The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Subor DATA/PLASMADB/crawlProfiles0.db nebol najdeny alebo je poskodeny.
+Please delete that file and restart.==Prosim zmazte tento subor a restartujte YaCy.
+Pre-fetch is now set to depth==Predvyber je nastaveny na hlbku
+Caching is now \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Ukladamie do chache je momentalne #(caching)#vypnute::zapnute#(/caching)#.
+Cachepath is now set to \'\#\[return\]\#\'.</b> Please move the old data in the new directory.==Cache sa momentalne nachadza v adresari '#[return]#'.</b> Presunte prosim Vase stare subory do tohoto noveho adresara
+Cachesize is now set to \#\[return\]\#MB.==Velkost cache je momentalne nastavena na #[return]#MB.
+Changes will take effect after restart only.==Zmeny budu ucinne az po restarte YaCy.
+Remote Indexing is now \#\(crawlOrder\)\#off::on==Vzdialene indexovanie je momentalne #(crawlOrder)#vypnute::zapnute
+An error has occurred:==Nastala chyba:
+You can see a snapshot of recently indexed pages==Mozete si pozriet 'aktualny snimok' (snapshot) prave zaindexovanych web stranok
+on the==na 
+Page.==stranke.
 
 
 #-------------------------------------------------------
 #File: QuickCrawlLink_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Schnell-Crawl-Link
-Quick Crawl Link==Schnell Crawl Link
-Quickly adding Bookmarks:==Schnell Crawl Lesezeichen:
-Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
-If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, w&auml;hrend Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zur YaCy Crawler Warteschlange hinzugef&uuml;gt, um indexiert zu werden.
-Crawl with YaCy==Mit YaCy crawlen
-Title:==Titel:
-Link:==link:
-Status:==Status:
-URL successfully added to Crawler Queue==Die Url wurde erfolgreich zur Crawler Warteschlange hinzugef&uuml;gt.
-Malformed URL==Fehler in der URL
-Unable to create new crawling profile for URL:==Es ist nicht m&ouml;glich f&uuml;r diese URL ein Crawling Profil zu erstellen:
-Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zur Crawler Warteschlange hinzuzuf&uuml;gen:
+YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Rychly Crawl Link
+Quick Crawl Link==Rychly Crawl Link
+Quickly adding Bookmarks:==Rychly Crawl - Zalozky:
+Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Kliknite na tahajte (drag and drop) odkaz nizsie do toolbar/linkbaru Vaseho browsera. 
+If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Ak nan kliknete pocas surfovania, tak bude prave prehliadana stranka pridana na indexaciu do cakacej listine YaCy crawleru. 
+Crawl with YaCy==Crawl s YaCy
+Title:==Titul:
+Link:==Odkaz:
+Status:==Stav:
+URL successfully added to Crawler Queue==URL adresa bola uspesne pridana do cakacej listiny crawleru.
+Malformed URL==Chyba v URL adrese
+Unable to create new crawling profile for URL:==Nie je mozne vytvorit crawling profil pre tuto URL adresu:
+Unable to add URL to crawler queue:==Nie je mozne pridat URL adresu do cakacej listiny crawleru: 
 
 #-------------------------------------------------------
 #File: Settings_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Einstellungen
-<h2>Settings</h2>==<h2>Einstellungen</h2>
-This is the configuration page for YaCy. Access to this page should be limited to an administration person only.==Dies ist die Konfigurationsseite f&uuml;r YaCy. Zugriff auf diese Seite sollte nur der Administrator haben.
-To restrict the access to this page, please set an administrator account and password <a href="#admin">below.</a>==Um den Zugriff auf diese Seite zu beschr&auml;nken, richten Sie bitte <a href="#admin">hier</a> ein Administrator Konto mit Passwort ein.
-If you want to restore all settings to the default values,==Wenn Sie alle Einstellungen auf die urspr&uuml;nglichen Werte zur&uuml;cksetzen wollen,
-but <b>forgot your administration password</b>, you must stop the proxy,==aber Ihr <b>Administatorpasswort vergessen haben</b>, m&uuml;ssen Sie YaCy stoppen,
-delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/httpProxy.conf' im YaCy Hauptordner l&ouml;schen und YaCy neu starten.
-Administration Account Settings==Administrations Konto Einstellungen
-Server Access Settings==Server Zugangs-Einstellungen
-General Settings==Generelle Einstellungen
-System Behaviour Settings==System Einstellungen
-Server Access Settings==Server Zugangs Einstellungen
-Seed Upload Settings==Seed Upload Einstellungen
-HTTP Networking==HTTP Netzwerk
-Message Forwarding \(optional\)==Nachrichten Weiterleitung (optional)
-#Remote Proxy \(optional\)==Remote Proxy (optional)
-Content Parser Settings==Inhalt Parser Einstellungen
-Port Forwarding \(optional\)==Port Weiterleitung (optional)
+YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Nastavenia
+<h2>Settings</h2>==<h2>Nastavenia</h2>
+This is the configuration page for YaCy. Access to this page should be limited to an administration person only.==Toto je konfiguracna stranka pre YaCy. Pristun na tuto stranku by mal mat iba administrator.
+To restrict the access to this page, please set an administrator account and password <a href="#admin">below.</a>==Na obmedzenie pristupu na tuto stranku vytvorte prosim ucet a heslo pre administratora <a href="#admin">tu</a>.
+If you want to restore all settings to the default values,==Ak chcete obnovit povodne nastavenia,
+but <b>forgot your administration password</b>, you must stop the proxy,==avsak <b>zabudli ste heslo administratora</b>, tak musite YaCy zastavit (prikaz 'stopYaCy.*'),  
+delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==zmazat subor 'DATA/SETTINGS/httpProxy.conf' v domovskom adresary YaCy a YaCy restartovat (prikaz 'startYaCy.*')
+Administration Account Settings==Nastavenia konta administratora
+Server Access Settings==Nastavenia pristupu k serveru
+General Settings==Vseobecne nastavenia
+System Behaviour Settings==Systemove nastavenia
+Server Access Settings==Nastavenia pristupu k serveru
+Seed Upload Settings==Nastavenia seed-uploadu
+HTTP Networking==Siet HTTP
+Message Forwarding \(optional\)==Preposielanie sprav dalej (nepovinne)
+#Remote Proxy \(optional\)==Vzdialene proxy (nepovinne)
+Content Parser Settings==Nastavenia parseru obsahu
+Port Forwarding \(optional\)==Port Forwarding (nepovinne)
 
 #-------------------------------------------------------
 #File: Settings_General.inc
