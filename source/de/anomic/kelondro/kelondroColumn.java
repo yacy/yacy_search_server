@@ -25,17 +25,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
 package de.anomic.kelondro;
 
 public class kelondroColumn {
 
-    public static int celltype_undefined  = 0;
-    public static int celltype_boolean    = 1;
-    public static int celltype_bytes      = 2;
-    public static int celltype_string     = 3;
-    public static int celltype_cardinal   = 4;
-    public static int celltype_real       = 5;
+    public static final int celltype_undefined  = 0;
+    public static final int celltype_boolean    = 1;
+    public static final int celltype_bytes      = 2;
+    public static final int celltype_string     = 3;
+    public static final int celltype_cardinal   = 4;
+    public static final int celltype_real       = 5;
     
     private int celltype, dbwidth;
     private String nickname, description;
@@ -62,4 +61,5 @@ public class kelondroColumn {
     public String description() {
         return this.description;
     }
+    
 }
