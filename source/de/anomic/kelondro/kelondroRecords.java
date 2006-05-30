@@ -730,6 +730,7 @@ public class kelondroRecords {
             return (h == NUL) ? null : new Handle(h);
         }
         
+        /*
         public byte[][] setValueCells(byte[][] row) throws IOException {
             // if the index is defined, then write values directly to the file, else only to the object
             byte[][] result = getValueCells(); // previous value (this loads the values if not already happened)
@@ -747,7 +748,7 @@ public class kelondroRecords {
             this.tailChanged = true;
             return result; // return previous value
         }
-
+        */
         public byte[] setValueRow(byte[] row) throws IOException {
             // if the index is defined, then write values directly to the file, else only to the object
             assert row.length == ROW.size();
@@ -768,6 +769,7 @@ public class kelondroRecords {
             return trimCopy(headChunk, overhead, ROW.width(0));
         }
 
+        /*
         public byte[][] getValueCells() throws IOException {
             
             if (this.tailChunk == null) {
@@ -792,7 +794,7 @@ public class kelondroRecords {
 
             return values;
         }
-
+*/
         public byte[] getValueRow() throws IOException {
             
             if (this.tailChunk == null) {
@@ -867,8 +869,8 @@ public class kelondroRecords {
                     h = getOHHandle(i);
                     if (h == null) s = s + ":hNULL"; else s = s + ":h" + h.toString();
                 }
-                byte[][] content = getValueCells();
-                for (int i = 0; i < content.length; i++) s = s + ":" + ((content[i] == null) ? "NULL" : (new String(content[i], "UTF-8")).trim());
+                kelondroRow.Entry content = row().newEntry(getValueRow());
+                for (int i = 0; i < row().columns(); i++) s = s + ":" + ((content.empty(i)) ? "NULL" : content.getColString(i, "UTF-8").trim());
             } catch (IOException e) {
                 s = s + ":***LOAD ERROR***:" + e.getMessage();
             }
@@ -1165,7 +1167,7 @@ public class kelondroRecords {
                 Node n = new Node(pos);
                 pos.index++;
                 while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
-                return n.getValueCells();
+                return row().newEntry(n.getValueRow()).getCols();
             } catch (IOException e) {
                 throw new kelondroException(filename, e.getMessage());
             }

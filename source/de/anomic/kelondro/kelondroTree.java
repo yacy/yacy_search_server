@@ -223,23 +223,23 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     // Returns the value to which this map maps the specified key.
     public byte[][] get(byte[] key) throws IOException {
         // System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
-        byte[][] result = (objectCache == null) ? null : (byte[][]) objectCache.get(key);
+        kelondroRow.Entry result = (objectCache == null) ? null : (kelondroRow.Entry) objectCache.get(key);
         if (result != null) {
             //System.out.println("cache hit in objectCache, db:" + super.filename);
-            return result;
+            return result.getCols();
         }
         if ((objectCache != null) && (objectCache.has(key) == -1)) return null;
         synchronized (writeSearchObj) {
             writeSearchObj.process(key);
             if (writeSearchObj.found()) {
-                result = writeSearchObj.getMatcher().getValueCells();
+                result = row().newEntry(writeSearchObj.getMatcher().getValueRow());
                 if (objectCache != null) objectCache.put(key, result);
             } else {
                 result = null;
                 if (objectCache != null) objectCache.hasnot(key);
             }
         }
-        return result;
+        return (result == null) ? null : result.getCols();
     }
 
     public class Search {
@@ -373,17 +373,18 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     
     // Associates the specified value with the specified key in this map
     public byte[][] put(byte[][] newrow) throws IOException {
-        byte[][] result = null;
+        kelondroRow.Entry result = null;
         //writeLock.stay(2000, 1000);
         if (newrow.length != columns()) throw new IllegalArgumentException("put: wrong row length " + newrow.length + "; must be " + columns());
         // first try to find the key element in the database
         synchronized(writeSearchObj) {
-            if (objectCache != null) objectCache.put(newrow[0], newrow);
+            kelondroRow.Entry newentry = row().newEntry(newrow);
+            if (objectCache != null) objectCache.put(newentry.getColBytes(0), newentry);
             writeSearchObj.process(newrow[0]);
             if (writeSearchObj.found()) {
                 // a node with this key exist. simply overwrite the content and return old content
                 Node e = writeSearchObj.getMatcher();
-                result = e.setValueCells(newrow);
+                result = row().newEntry(e.setValueRow(newentry.bytes()));
                 commitNode(e);
             } else if (writeSearchObj.isRoot()) {
                 // a node with this key does not exist and there is no node at all
@@ -392,7 +393,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     throw new kelondroException(filename, "tried to create root node twice");
                 // we dont have any Nodes in the file, so start here to create one
                 Node e = newNode();
-                e.setValueCells(newrow);
+                e.setValueRow(newentry.bytes());
                 // write the propetries
                 e.setOHByte(magic,   (byte) 1);
                 e.setOHByte(balance, (byte) 0);
@@ -414,7 +415,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 // create new node and assign values
                 Node parentNode = writeSearchObj.getParent();
                 Node theNode = newNode();
-                theNode.setValueCells(newrow);
+                theNode.setValueRow(newentry.bytes());
                 theNode.setOHByte(0, (byte) 1); // fresh magic
                 theNode.setOHByte(1, (byte) 0); // fresh balance
                 theNode.setOHHandle(parent, parentNode.handle());
@@ -514,7 +515,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             }
         }
         //writeLock.release();
-        return result;
+        return (result == null) ? null : result.getCols();
     }
 
     private void assignChild(Node parentNode, Node childNode, int childType) throws IOException {
@@ -647,9 +648,9 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             writeSearchObj.process(key);
             if (writeSearchObj.found()) {
                 Node result = writeSearchObj.getMatcher();
-                byte[][] values = result.getValueCells();
+                kelondroRow.Entry values = row().newEntry(result.getValueRow());
                 remove(result, writeSearchObj.getParent());
-                return values;
+                return values.getCols();
             } else {
                 return null;
             }
@@ -1006,7 +1007,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             Iterator i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
             while ((rows.size() < count) && (i.hasNext())) {
                 n = (Node) i.next();
-                if (n != null) rows.put(new String(n.getKey()), n.getValueCells());
+                if (n != null) rows.put(new String(n.getKey()), row().newEntry(n.getValueRow()).getCols());
             }
         }
         return rows;

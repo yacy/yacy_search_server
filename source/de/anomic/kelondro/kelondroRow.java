@@ -172,6 +172,25 @@ public class kelondroRow {
             kelondroNaturalOrder.encodeLong(cell, rowinstance, colstart[column], row[column].cellwidth());
         }
         
+        public byte[][] getCols() {
+            byte[][] values = new byte[row.length][];
+
+            int length, offset;
+            for (int i = 0; i < row.length; i++) {
+                length = row[i].cellwidth();
+                offset = colstart[i];
+                while ((length > 0) && (rowinstance[offset + length - 1] == 0)) length--;
+                if (length == 0) {
+                    values[i] = null;
+                } else {
+                    values[i] = new byte[length];
+                    System.arraycopy(rowinstance, offset, values[i], 0, length);
+                }
+            }
+
+            return values;
+        }
+        
         public String getColString(int column, String encoding) {
             int length = row[column].cellwidth();
             int offset = colstart[column];

@@ -206,7 +206,7 @@ public final class kelondroStack extends kelondroRecords {
         // return row relative to the bottom of the stack and remove addressed element
         Node n = botNode(dist);
         if (n == null) return null;
-        kelondroRow.Entry ret = row().newEntry(n.getValueCells());
+        kelondroRow.Entry ret = row().newEntry(n.getValueRow());
 
         // remove node
         unlinkNode(n);
@@ -337,17 +337,17 @@ public final class kelondroStack extends kelondroRecords {
         Node n;
         try {
             Iterator it = iterator();
+            kelondroRow.Entry r;
             while (it.hasNext()) {
                 n = (Node) it.next();
+                r = row().newEntry(n.getValueRow());
                 // n = getNode(h, null, 0);
                 System.out.println("> NODE " + hp(n.handle()) + "; left "
                         + hp(n.getOHHandle(left)) + ", right "
                         + hp(n.getOHHandle(right)));
-                System.out.print("  KEY:'"
-                        + (new String(n.getValueCells()[0])).trim() + "'");
+                System.out.print("  KEY:'" + r.getColString(0, null) + "'");
                 for (int j = 1; j < columns(); j++)
-                    System.out.print(", V[" + j + "]:'"
-                            + (new String(n.getValueCells()[j])).trim() + "'");
+                    System.out.print(", V[" + j + "]:'" + r.getColString(j, null) + "'");
                 System.out.println();
             }
             System.out.println();
