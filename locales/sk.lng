@@ -32,7 +32,7 @@ from being loaded. You can define several blacklists and activate them separatel
 You may also provide your blacklist to other peers by sharing them; in return you may==Vas blacklist mozete takisto poskytnut inemu peerovy na stiahnutie a naopak 
 collect blacklist entries from other peers.==zaznamy z blacklistov inych peerov mozete zhromazdovat.
 Edit list:==Edituj zoznam:
-\(active\)\#not active::active\#\(/active\)\# \#\(shared\)\#not shared::shared\#\(/shared\)==\(aktivny\)\#neaktivny::aktivny\#\(/aktivny\)\# \#\(zdielany\)\#nezdielany::zdielany\#\(/zdielany\)==
+\(active\)\#not active::active\#\(/active\)\# \#\(shared\)\#not shared::shared\#\(/shared\)==\(aktivny\)\#neaktivny::aktivny\#\(/aktivny\)\# \#\(zdielany\)\#nezdielany::zdielany\#\(/zdielany\)
 "select"=="vyber"
 New list:==Novy zoznam:
 "create"==vytvor
@@ -994,145 +994,145 @@ Attributes==Atribut
 
 #-------------------------------------------------------
 #File: PerformanceQueues_p.html
-Performance Settings of Queues and Processes==Performanceeinstellungen f&uuml;r Warteschlangen und Prozesse
-Scheduled tasks overview and waiting time settings:==&Uuml;bersicht geplanter Aufgaben und Wartezeiteinstellungen:
-Queue Size==Warteschl.-<br>l&auml;nge
->Total==>gesamte
+Performance Settings of Queues and Processes==Nastavenia vykonu pre cakacie listiny a procesy
+Scheduled tasks overview and waiting time settings:==Prehlad naplanovanych uloh a nastaveny casov cakania
+Queue Size==Velkost cakacej listiny
+>Total==>Celkovo
 #Block Time==
 #Sleep Time==
 #Exec Time==
->Cycles==>Durchl.
->Idle==>unt&auml;t.
->Busy==>besch&auml;ft.
-Short Mem<br>Cycles==Durchl. ohne ausr. Speicher
->per Cycle==>pro Durchlauf
->per Busy-Cycle==>pro besch&auml;ft. Durchl.
->Memoy Use==>Speicher-<br>nutzung
->Delay between==>Verz&ouml;gerung zwischen
->idle loops==>unt&auml;t. Durchl.
->busy loops==>besch&auml;ft. Durchl.
-Minimum of<br>Required Memory==Mindestens ben&ouml;tigter Speicher
-Full Description==vollst&auml;ndige Beschreibung
-Submit New Delay Values==Neue Verz&ouml;gerungswerte speichern
-Reset To Default Values==Standardwerte wiederherstellen
-Changes take effect immediately==&Auml;nderungen werden sofort wirksam
-Indexing Cache Settings:==Indexier Cache Einstellungen:
-Words in RAM Cache:==W&ouml;rter im RAM-Cache
-This is the current size of the word cache.==Dies ist die momentane Gr&ouml;&szlig;e des Wort-Caches.
-The smaller this number, the faster the shut-down procedure will be.==Je kleiner diese Zahl ist, desto schneller wird das Herunterfahren von YaCy gehen.
-The maximum of this cache can be set below.==Die Maximalgr&ouml;&szlig;e dieses Cache kann nachfolgend eingestellt werden.
-Maximum URLs currently assigned<br>to one cached word:==h&ouml;chste Anzahl URLs die derzeit einem Wort im Zwischenspeicher zugewiesen wurde:
-This is the maximum size of URLs assigned to a single word cache entry.==Dies ist die maximale Menge an URLs, die einem einzelnen Wort-Cache Eintrag zugewiesen wurden.
-If this is a big number, it shows that the caching works efficiently.==Wenn diese Zahl hoch ist, hei&szlig;t das, dass der Wort-Cache effizient arbeitet.
-Maximum Age of Word in cache:==h&ouml;chstes Alter eines Wortes im Cache:
-This is the maximum age of a word index that is in the RAM cache in minutes.==Dies ist das maximale Alter eines Wortes im RAM-Cache (in Minuten)
-Minimum Age of Word in cache:==geringstes Alter eines Wortes im Cache:
-This is the minimum age of a word index that is in the RAM cache in minutes.==Dies ist das minimale Alter eines Wortes im RAM-Cache (in Minuten)
-Maximum number of Word Caches, low limit:==Maximale Wortzahl im Cache, niedrige Grenze
-Maximum number of Word Caches, high limit:==Maximale Wortzahl im Cache, hohe Grenze
-This is is the number of word indexes that shall be held in the==Dies ist die Anzahl der Wort-indexe die w&auml;hrend des Indexierens im
-ram cache during indexing. When YaCy is shut down, this cache must be==RAM-Cache gehalten werden sollen. Sobald YaCy herunterf&auml;hrt muss dieser Cache
-flushed to disc; this may last some minutes.==auf die Festplatte gesichert werden; dies kann einige Minuten dauern.
-The low limit is valid for crawling tasks, the high limit is valid==Die niedrige Grenze gilt f&uuml;r Crawling-Aufgaben, die hohe Grenze gilt f&uuml;r
-for search and DHT transmission tasks.==Such- und DHT-&Uuml;bertragungsaufgaben.
-Enter New Cache Size==Neue Cachegr&ouml;&szlig;e eintragen
-Thread pool settings:==Threadpool Einstellungen:
-maximum Active==max. aktiv
-maximum Idle==max. inaktiv
-minimum Idle==min. inaktiv
-current Active==derzeit aktiv
-current Idle==derzeit inaktiv
-Enter new Threadpool Configuration==neue Threadpoolkonfiguration eintragen
-Proxy Performance Settings:==Proxy Performance Einstellungen
+>Cycles==>Cyklov
+>Idle==>Necinny
+>Busy==>Cinny
+Short Mem<br>Cycles==Kratke pamatove cykly
+>per Cycle==>za cyklus
+>per Busy-Cycle==>za cinny  cyklus
+>Memoy Use==>Vyuzitie pamate
+>Delay between==>Zdrzania medzi
+>idle loops==>necinne cyckly
+>busy loops==>cinne cykly
+Minimum of<br>Required Memory==Pozadovane minimum pamate
+Full Description==Pnly popis
+Submit New Delay Values==Uloz nove hodnoty zdrzani
+Reset To Default Values==Obnov predvolene nastavenia
+Changes take effect immediately==Zmenu su okamzite ucinne
+Indexing Cache Settings:==Nastavenia indexovaceh cache:
+Words in RAM Cache:==Slov v RAM chache
+This is the current size of the word cache.==Toto je momentalna velkost cache slov.
+The smaller this number, the faster the shut-down procedure will be.==Cim mensie cislo, tym bude vypnutie YaCy rychlesie 
+The maximum of this cache can be set below.==Maximalna velkost cache moze byt nastavena nizsie.
+Maximum URLs currently assigned<br>to one cached word:==Maximalny pocet URL adries prave priradenych jednemu slovu v cache pamati:
+This is the maximum size of URLs assigned to a single word cache entry.==Toto je maximalna velkost URL adries ktore su priradene jedinemu slovu v cache slov
+If this is a big number, it shows that the caching works efficiently.==Ak je to velke cislo, znamena to ze cachovanie pracuje efektivne.
+Maximum Age of Word in cache:==Maximalny vek jedneho slova v cache:
+This is the maximum age of a word index that is in the RAM cache in minutes.==Toto je maximalny vek jedneho slova v RAM cache v minutach
+Minimum Age of Word in cache:==Minimalny vek jedneho slova v cache:
+This is the minimum age of a word index that is in the RAM cache in minutes.==Toto je minimalny vek jedneho slova v RAM cache v minutach
+Maximum number of Word Caches, low limit:==Maximalny poces slov v cache, dolna hranica 
+Maximum number of Word Caches, high limit:==Maximalny poces slov v cache, horna hranica
+This is is the number of word indexes that shall be held in the==Toto je pocet indexov slov ktore by mali byt
+ram cache during indexing. When YaCy is shut down, this cache must be==v RAM cache pocas indexacie. Ak je YaCy vypnute, tato cache musi byt
+flushed to disc; this may last some minutes.==ulozena na disk. To moze trvat niekolko minut.
+The low limit is valid for crawling tasks, the high limit is valid==Dolna hranica plati pre ulohy crawlingu. Horna hranica plati pre 
+for search and DHT transmission tasks.==vyhladavacie ulohy a ulohy DHT prenosu.
+Enter New Cache Size==Zadajte novu velkost cache
+Thread pool settings:==Nastavenia threadpool-u
+maximum Active==max. aktivnych
+maximum Idle==max. neaktivnych
+minimum Idle==min. neaktivnych
+current Active==prave aktivnych
+current Idle==prave neaktivnych
+Enter new Threadpool Configuration==Zadajte novu konfiguraciu Threadpool-u
+Proxy Performance Settings:==Nastavenia vykonu proxy
 #Online Caution Delay==
-This is the time that the crawler idles when the proxy is accessed.==Dies ist die Zeit die der Crawler pausiert wenn auf den Proxy zugegriffen wird.
-The delay is extended by this time==Die normale Verz&ouml;gerung wird um diese Zeit verl&auml;ngert,
-each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.==wenn auf den Proxy zugegriffen wird. Dies soll die Performance des Proxydurchsatzes erh&ouml;hen.
-current delta is==Seit dem letzten Zugriff auf den Proxy sind
-since last proxy access.==vergangen.
-Enter New Parameters==Neue Parameter eintragen
-milliseconds==Millisekunden
+This is the time that the crawler idles when the proxy is accessed.==Toto je cas pocas ktoreho je crawler neaktivny ked sa pristupuje na proxy.
+The delay is extended by this time==Normalne zdrzanie bude predlzene o tento cas,
+each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.==pri kazdom pristupe na proxy. Toto by malo zlepsit priepustnost proxy.
+current delta is==Od posledneho pristupu k proxy 
+since last proxy access.==uplynulo.
+Enter New Parameters==Zadajte nove parametre
+milliseconds==Millisekundy
 
 #-------------------------------------------------------
 #File: PerformanceMemory_p.html
-Performance Settings for Memory==Performanceeinstellungen f&uuml;r Speicher
-Memory Usage:==Speichernutzung:
-After Startup==Nach Start
-After Initializations==Nach Initialisierungen
-before GC==vor GC
-after GC==nach GC
->Now==>Jetzt
-before <==vor <
-Next<br>Startup==N&auml;chster<br>Start
-Description==Beschreibung
-maximum memory that the JVM will attempt to use==maximaler Speicher den die JVM nutzen wird
->Available<==>Verf&uuml;gbar<
-total available memory including free for the JVM within maximum==gesamter verf&uuml;gbarer Speicher f&uuml;r die JVM innerhalb des Maximums.
->Total<==>Gesamt<
-total memory taken from the OS==gesamter vom Betriebssystem zugewiesener Speicher
->Free<==>Frei<
-free memory in the JVM within total amount==freier Speicher in der JVM innerhalb des Gesamten Speichers
->Used<==>Belegt<
-used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
-Re-Configuration of Startup Paramenters:==Neukonfiguration der Startparameter:
-Changes take effect after <b>re-start</b> of YaCy==&Auml;nderungen werden erst nach <b>Neustart</b> von YaCy wirksam
-RAM Cache for Database Files:==RAM-Cache f&uuml;r Datenbank-Dateien:
-Chunk Size==Chunk Gr&ouml;&szlig;e
+Performance Settings for Memory==Nastavenia vykonu pamate
+Memory Usage:==Vyuzitie pamate:
+After Startup==Po starte
+After Initializations==Po inicializacii
+before GC==pred GC
+after GC==po GC
+>Now==>Teraz
+before <==pred <
+Next<br>Startup==Dalsi<br>start
+Description==Popis
+maximum memory that the JVM will attempt to use==maximum pamate pre JVM
+>Available<==>Dostupna<
+total available memory including free for the JVM within maximum==celkovo dostupnej pamate vratane volnej pamate pre JVM v ramci maxima
+>Total<==>Celkovo<
+total memory taken from the OS==celkove mnozstvo pamate priradenej od operacneho systemu
+>Free<==>Volna<
+free memory in the JVM within total amount==volna pamat v JVM v ramci celkovej pamate
+>Used<==>Pouzitej<
+free memory in the JVM within total amount==volna pamat v JVM v ramci celkovej pamate
+Re-Configuration of Startup Paramenters:==Nova konfiguracia startovacich parametrov:
+Changes take effect after <b>re-start</b> of YaCy==Zmeny sa prejavia az po <b>restarte</b> YaCy
+RAM Cache for Database Files:==RAM-Cache pre databazove subory:
+Chunk Size==Velkost chunk-u
 #Slots==
-Memory Occupation==Speicherbeanspruchung
-Needed<br>==Ben&ouml;tigt<br>
-&nbsp;DB&nbsp;Size==&nbsp;DB&nbsp;Gr&ouml;&szlig;e
->Empty==>Frei
-High Prio==hohe Prio
-Medium Prio==mittlere Prio
-Low Prio==niedr. Prio
-Used Now==jetzt Belegt
-Assigned Max==zugewiesenes Max.
-Default Max==standard Max.
-Good Max==gutes Max.
-Best Max==bestes Max.
-The Assortment Cluster stores most of the page indexes.==Der Assortment Cluster speichert die meisten Seitenindexe.
-Flushing speed of the temporary RWI cache depends on the size of this file cache. Increasing the space of this==Die Entleerungsgeschwindigkeit des tempor&auml;ren RWI Caches h&auml;ngt von der Gr&ouml;&szlig;e dieses Datei-Caches ab. Ein Vergr&ouml;&szlig;ern des Speichers dieses
-cache will speed up crawls with a depth > 3.==Caches wird Crawls mit einer Tiefe >3 beschleunigen.
+Memory Occupation==Obsadenie pamate
+Needed<br>==Potrebna<br>
+&nbsp;DB&nbsp;Size==&nbsp;Velkost&nbsp;DB
+>Empty==>Volna
+High Prio==Vysoka prioria
+Medium Prio==Stredna prioria
+Low Prio==Nizska priorita
+Used Now==Prave pouzita
+Assigned Max==Maximalne priradenej
+Default Max==Maximum standartne
+Good Max==Dobre maximum
+Best Max==Najlepsie maximum
+The Assortment Cluster stores most of the page indexes.==Assortment cluster uklada vacsinu indexov stranok.
+Flushing speed of the temporary RWI cache depends on the size of this file cache. Increasing the space of this==Rychlost vyprazdnovania pomocnej RWI cache zavisi na velkosti tejto suborovej cache. Zvacsenie tejto
+cache will speed up crawls with a depth > 3.==cache urychly crawly s hlbkou > 3.
 #HTTP Response Header==
-The Response Header database stores the HTTP heades that other servers send when YaCy retrieves web pages==Die Response-Header Datenbank speichert die HTTP-Heads, die andere Server schicken, wenn YaCy
-during proxy mode, when performing crawls or if it fetches pages for snippet generation.==durch den Proxymodus, beim Durchf&uuml;hren von Crawls oder zur Snippeterstellung Webseiten empf&auml;ngt.
-Increasing this cache will be most important for a fast proxy mode.==Erh&ouml;hen dieses Caches ist f&uuml;r einen schnellen Proxybetrieb am wichtigsten.
-'loaded' URLs=='geladene' URLs
-This is the database that holds the hash/url - relation and properties regarding the url like load date and server date.==Dies ist die Datenbank, die die Hash/URL-Beziehung und Eigenschaften der URL, wie Ladedatum und Serverdatum, speichert.
-This cache is very important for a fast search process.==Dieser Cache ist sehr wichtig f&uuml;r einen schnellen Suchprozess.
-Increasing the cache size will result in more search results and less IO during DHT transfer.==Vergr&ouml;&szlig;ern dieses Caches wird mehr Suchergebnisse und weniger IO-Last w&auml;hrend eines DHT-Transfers hervorbringen.
-'noticed' URLs=='bekannte' URLs
-A noticed URL is one that was discovered during crawling but was not loaded yet.==Eine bekannte URL wurde beim Crawlen entdeckt, aber noch nicht geladen.
+The Response Header database stores the HTTP heades that other servers send when YaCy retrieves web pages==Databaza Response Headerov uklada HTTP headery ktore posielaju ostatne servery ked YaCy obdrzi web stranky 
+during proxy mode, when performing crawls or if it fetches pages for snippet generation.==pocas proxy modu, pri vykonavani crawlov alebo prijati web stranky na generovanie snippetu.
+Increasing this cache will be most important for a fast proxy mode.==Zvacsenie tejto cache je najpodstatnejsie pre rychly proxy mod.
+'loaded' URLs=='nahrate' URL adresy
+This is the database that holds the hash/url - relation and properties regarding the url like load date and server date.==Toto je databaza obsahujuca vztahy "hash/URL adresa" a ine vlastnosti prinaleziace URL adresam, ako napr. datum nahratia, datum servera atd.   
+This cache is very important for a fast search process.==Tato cache je velmi dolezita pre rychle vyhladavanie. 
+Increasing the cache size will result in more search results and less IO during DHT transfer.==Dosledok zvacsenie tejto cache je viac vysledkov vyhladavania a menej vstupno/vystupnej zataze pocas DHT prenosu.
+'noticed' URLs=='zname' URL adresy
+A noticed URL is one that was discovered during crawling but was not loaded yet.==Znama URL adresa je taka ktora bola objavena pocas crawlingu avsak nebola este nahrata.
 Increasing the cache size will result in faster double-check during URL recognition when doing crawls.==Erh&ouml;hen der Cachegr&ouml;&szlig;e resultiert in schnellerer R&uuml;ck&uuml;berpr&uuml;fung beim Durchf&uuml;hren von Crawls.
-'error' URLs=='fehlerhafte' URLs
-URLs that cannot be loaded are stored in this database. It is also used for double-checked during crawling.==URLs die nicht geladen werden k&ouml;nnen werden in dieser Datenbank gespeichert.
-Increasing the cache size will most probably speed up crawling slightly, but not significantly.==Erh&ouml;hen der Cachegr&ouml;&szlig;e wird h&ouml;chstwahrscheinlich das Crawlen etwas, aber nicht sehr, beschleunigen.
-DHT Control==DHT Kontrolle
-This is simply the cache for the seed-dbs==Dies ist der Cache f&uuml;r die Seed-dbs
-active, passive, potential==Aktiv, Passiv, Potenziell
-This cache is divided into three equal parts.==Dieser Cache ist in 3 gleich gro&szlig;e Teile zerlegt.
-Increasing this cache may speed up many functions, but we need to test this to see the effects.==Vergr&ouml;&szlig;ern dieses Caches k&ouml;nnte viele Funktionen beschleunigen, aber wir m&uuml;ssen es testen um die Effekte zu sehen.
->Messages==>Nachrichten
-The Message cache for peer-to-peer messages. Less important.==Der Nachrichtencache f&uuml;r Peer-to-Peer Nachrichten. Unwichtig.
-The YaCy-Wiki uses a database to store its pages.==Das YaCy-Wiki nutzt eine Datenbank um ihre Seiten zu sichern.
-This cache is divided in two parts, one for the wiki database and one for its backup.==Dieser Cache ist in 2 Teile getrennt, einer f&uuml;r die Wiki-Datenbank und einer f&uuml;r ihr Backup.
-Increasing this cache may speed up access to the wiki pages.==Vergr&ouml;&szlig;ern dieses Caches kann den Zugriff auf die Wikiseiten beschleunigen.
-The News-DB stores property-lists for news that are included in seeds.==Die News-DB speichert Eigenschaftslisten f&uuml;r News die in Seeds enthalten sind.
-Increasing this cache may speed up the peer-ping.==Erh&ouml;hen dieses Caches kann den Peer-Ping beschleunigen.
-The robots.txt DB stores downloaded records from robots.txt files.==Die robots.txt-DB speichert heruntergeladene Eintr&auml;ge aus robots.txt-Dateien.
-Increasing this cache may speed up validation if crawling of the URL is allowed.==Vergr&ouml;&szlig;ern dieses Caches kann die &Uuml;berpr&uuml;fung ob eine URL gecrawled werden darf beschleunigen.
-Crawl Profiles==Crawl Profile
-The profile database stores properties for each crawl that is started on the local peer.==Die Profil-Datenbank speichert Eigenschaften f&uuml;r jeden Crawl der auf dem lokalen Peer gestartet wurde.
-Increasing this cache may speed up crawling, but not much space is needed, so the effect may be low.==Vergr&ouml;&szlig;ern dieses Caches kann das Crawlen beschleunigen, aber es wird nicht viel Platz gebraucht, der Effekt k&ouml;nnte also gering sein.
->Totals==>Gesamt
-Sum of memory amounts==Summe der Speichermengen
-Re-Configuration:==Neukonfiguration:
-"Set"=="Setzen"
-these<br>custom<br>values==dieser<br>nutzerdef.<br>Werte
-all<br>default<br>values==aller<br>Standard-<br>werte
-all<br>recom-<br>mended values==aller<br>empfohlenen<br>Werte
-all<br>optimum<br>values==aller<br>Optimal-<br>werte
+'error' URLs=='chybne' URL adresy
+URLs that cannot be loaded are stored in this database. It is also used for double-checked during crawling.==URL adresy ktore nemozu byt nahrante su ulozene v tejto databaze. Takisto sa pouziva pri dvojnasobnej kontrole pocas crawlingu. 
+Increasing the cache size will most probably speed up crawling slightly, but not significantly.==Zvacsenie tejto cache pravdepodobne jemne zvysi rychlost crawlingu, nie vsak o vela. 
+DHT Control==DHT kontrola
+This is simply the cache for the seed-dbs==Toto je cache pre seed-dbs
+active, passive, potential==aktivna, pasivna, potencialna
+This cache is divided into three equal parts.==Tato cache je rozdelena na 3 rovnako velke casti.
+Increasing this cache may speed up many functions, but we need to test this to see the effects.==Zvacsenie tejto cache moze zrychlit mnoho funkcii, avsak potrebujeme to otestovat kvoli zisteniu vsetkych dosledkov.
+>Messages==>Spravy
+The Message cache for peer-to-peer messages. Less important.==Cache sprav pre peer-to-peer spravy. Nema velky vyznam.
+The YaCy-Wiki uses a database to store its pages.==YaCy-Wiki pouziva databazu na ukladanie jej stranok.
+This cache is divided in two parts, one for the wiki database and one for its backup.==Tato cache je rozdelena na dve casti, jednu pre wiki databazu a druhu pre jej backup. 
+Increasing this cache may speed up access to the wiki pages.==Zvacsenie tejto cache moze zvysit rychlost wiki stranok.
+The News-DB stores property-lists for news that are included in seeds.==Databaza novych sprav (News-DB) uklada zoznamy pre nove spravy ktore sa nachadzaju v seed-och. 
+Increasing this cache may speed up the peer-ping.==Zvacsenie tejto cache moze zrychlit peer-ping.
+The robots.txt DB stores downloaded records from robots.txt files.==Databaza robots.txt uklada zaznami stiahnute zo suboru robots.txt.
+Increasing this cache may speed up validation if crawling of the URL is allowed.==Zvacsenie tejto cache moze zvysit rychlost kontroly ak je povoleny crawling URL adries.
+Crawl Profiles==Profil crawlu
+The profile database stores properties for each crawl that is started on the local peer.==Databaza profilov uklada vlastnosti pre kazdy crawl odstartovany na lokalnom peeri.
+Increasing this cache may speed up crawling, but not much space is needed, so the effect may be low.==Zvacsenie tejto cache moze zrychlit crawling, na ten vsak nie je potrebne vela miesta, takze efekt zvysenia bude pravdepodobne nizsky.
+>Totals==>Celkovo
+Sum of memory amounts==Suma mnozstiev pamate
+Re-Configuration:==Nova konfiguracia:
+"Set"=="Nastav"
+these<br>custom<br>values==tieto<br>uzivatelom vytvorene<br>hodnoty
+all<br>default<br>values==vsetky<br>standartne-<br>hodnoty
+all<br>recom-<br>mended values==vsetky<br>odporucane<br>hodnoty
+all<br>optimum<br>values==vsetky<br>optimalne-<br>hodnoty
 #Write Cache Object Allocation:==
 #now alive in write cache==
 #currently held in write buffer heap==
@@ -1245,9 +1245,9 @@ System Behaviour Settings==Systemove nastavenia
 Server Access Settings==Nastavenia pristupu k serveru
 Seed Upload Settings==Nastavenia seed-uploadu
 HTTP Networking==Siet HTTP
-Message Forwarding \(optional\)==Preposielanie sprav dalej (nepovinne)
+Message Forwarding \(optional\)==Preposielanie sprav (nepovinne)
 #Remote Proxy \(optional\)==Vzdialene proxy (nepovinne)
-Content Parser Settings==Nastavenia parseru obsahu
+Content Parser Settings==Nastavenia parsera obsahu
 Port Forwarding \(optional\)==Port Forwarding (nepovinne)
 
 #-------------------------------------------------------
