@@ -175,6 +175,7 @@ public class kelondroRow {
         public String getColString(int column, String encoding) {
             int length = row[column].cellwidth();
             int offset = colstart[column];
+            if (rowinstance[offset] == 0) return null;
             if (length > rowinstance.length - offset) length = rowinstance.length - offset;
             while ((length > 0) && (rowinstance[offset + length - 1] == 0)) length--;
             if (length == 0) return null;
@@ -188,8 +189,16 @@ public class kelondroRow {
             }
         }
         
-        public long getColLong(int column) {
+        public long getColLongB256(int column) {
             return kelondroNaturalOrder.decodeLong(rowinstance, colstart[column], row[column].cellwidth());
+        }
+        
+        public long getColLongB64E(int column) {
+            return kelondroBase64Order.enhancedCoder.decodeLong(rowinstance, colstart[column], row[column].cellwidth());
+        }
+        
+        public byte getColByte(int column) {
+            return rowinstance[colstart[column]];
         }
         
         public byte[] getColBytes(int column) {

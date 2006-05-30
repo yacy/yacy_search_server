@@ -314,9 +314,9 @@ public class plasmaCrawlNURL extends indexURL {
                 case STACK_TYPE_LIMIT:    limitStack.add(domain, hash.getBytes()); break;
                 case STACK_TYPE_OVERHANG: overhangStack.add(domain, hash.getBytes()); break;
                 case STACK_TYPE_REMOTE:   remoteStack.add(domain, hash.getBytes()); break;
-                case STACK_TYPE_IMAGE:    imageStack.push(new byte[][] {hash.getBytes()}); break;
-                case STACK_TYPE_MOVIE:    movieStack.push(new byte[][] {hash.getBytes()}); break;
-                case STACK_TYPE_MUSIC:    musicStack.push(new byte[][] {hash.getBytes()}); break;
+                case STACK_TYPE_IMAGE:    imageStack.push(imageStack.row().newEntry(new byte[][] {hash.getBytes()})); break;
+                case STACK_TYPE_MOVIE:    movieStack.push(movieStack.row().newEntry(new byte[][] {hash.getBytes()})); break;
+                case STACK_TYPE_MUSIC:    musicStack.push(musicStack.row().newEntry(new byte[][] {hash.getBytes()})); break;
                 default: break;
             }
             stackIndex.add(hash);
@@ -389,7 +389,7 @@ public class plasmaCrawlNURL extends indexURL {
     private Entry pop(kelondroStack stack) throws IOException {
         // this is a filo - pop
         if (stack.size() > 0) {
-            Entry e = new Entry(new String(stack.pop()[0]));
+            Entry e = new Entry(new String(stack.pop().getColBytes(0)));
             stackIndex.remove(e.hash);
             return e;
         } else {
@@ -414,7 +414,7 @@ public class plasmaCrawlNURL extends indexURL {
         ArrayList list = new ArrayList(count);
         for (int i = 0; i < count; i++) {
             try {
-                byte[] hash = stack.top(i)[0];
+                byte[] hash = stack.top(i).getColBytes(0);
                 list.add(new Entry(new String(hash)));
             } catch (IOException e) {
                 continue;

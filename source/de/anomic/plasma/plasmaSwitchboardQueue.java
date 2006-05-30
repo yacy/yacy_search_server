@@ -50,6 +50,7 @@ import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroStack;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverDate;
 import de.anomic.yacy.yacySeedDB;
@@ -118,7 +119,7 @@ public class plasmaSwitchboardQueue {
     }
 
     public void push(Entry entry) throws IOException {
-        sbQueueStack.push(new byte[][]{
+        sbQueueStack.push(sbQueueStack.row().newEntry(new byte[][]{
             entry.url.toString().getBytes(),
             (entry.referrerHash == null) ? indexURL.dummyHash.getBytes() : entry.referrerHash.getBytes(),
             kelondroBase64Order.enhancedCoder.encodeLong((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
@@ -127,12 +128,12 @@ public class plasmaSwitchboardQueue {
             kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, indexURL.urlCrawlDepthLength).getBytes(),
             (entry.profileHandle == null) ? indexURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
             (entry.anchorName == null) ? "-".getBytes() : entry.anchorName.getBytes()
-        });
+        }));
     }
 
     public Entry pop() throws IOException {
         if (sbQueueStack.size() == 0) return null;
-        byte[][] b = sbQueueStack.pot();
+        kelondroRow.Entry b = sbQueueStack.pot();
         if (b == null) return null;
         return new Entry(b);
     }
@@ -218,6 +219,27 @@ public class plasmaSwitchboardQueue {
             this.profileHandle = profileHandle;
             this.anchorName = (anchorName==null)?"":anchorName.trim();
             
+            this.profileEntry = null;
+            this.responseHeader = null;
+            this.referrerURL = null;
+        }
+
+        public Entry(kelondroRow.Entry row) throws IOException {
+            long ims = row.getColLongB64E(2);
+            byte flags = row.getColByte(3);
+            try {
+                this.url = new URL(row.getColString(0, "UTF-8"));
+            } catch (MalformedURLException e) {
+                this.url = null;
+            }
+            this.referrerHash = row.getColString(1, "UTF-8");
+            this.ifModifiedSince = (ims == 0) ? null : new Date(ims);
+            this.flags = ((flags & 1) == 1) ? (byte) 1 : (byte) 0;
+            this.initiator = row.getColString(4, "UTF-8");
+            this.depth = (int) row.getColLongB64E(5);
+            this.profileHandle = row.getColString(6, "UTF-8");
+            this.anchorName = row.getColString(7, "UTF-8");
+
             this.profileEntry = null;
             this.responseHeader = null;
             this.referrerURL = null;

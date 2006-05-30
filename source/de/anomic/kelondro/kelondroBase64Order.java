@@ -134,10 +134,16 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
     }
 
     public long decodeLong(String s) {
-        while (s.endsWith("="))
-            s = s.substring(0, s.length() - 1);
+        while (s.endsWith("=")) s = s.substring(0, s.length() - 1);
         long c = 0;
         for (int i = 0; i < s.length(); i++) c = (c << 6) | ahpla[s.charAt(i)];
+        return c;
+    }
+
+    public long decodeLong(byte[] s, int offset, int length) {
+        while ((length > 0) && (s[offset + length - 1] == '=')) length--;
+        long c = 0;
+        for (int i = 0; i < length; i++) c = (c << 6) | ahpla[s[offset + i]];
         return c;
     }
 

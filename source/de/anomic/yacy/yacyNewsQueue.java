@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroException;
 
@@ -140,26 +141,14 @@ public class yacyNewsQueue {
         return null;
     }
 
-
-    /*
-    public synchronized void incDistributedCounter(yacyNewsRecord entry) throws IOException {
-        // this works only if the entry element lies ontop of the stack
-        yacyNewsRecord topEntry = top();
-        if (!(topEntry.id().equals(entry.id()))) throw new IllegalArgumentException("entry is not ontop of the stack");
-        pop();
-        entry.incDistribution();
-        push(entry);
-    }
-    */
-
-    private yacyNewsRecord b2r(byte[][] b) throws IOException {
+    private yacyNewsRecord b2r(kelondroRow.Entry b) throws IOException {
         if (b == null) return null;
-        String id = new String(b[0]);
+        String id = b.getColString(0, null);
         //Date touched = yacyCore.parseUniversalDate(new String(b[1]));
         return newsDB.get(id);
     }
 
-    private byte[][] r2b(yacyNewsRecord r, boolean updateDB) throws IOException {
+    private kelondroRow.Entry r2b(yacyNewsRecord r, boolean updateDB) throws IOException {
         if (r == null) return null;
         if (updateDB) {
             newsDB.put(r);
@@ -167,9 +156,9 @@ public class yacyNewsQueue {
             yacyNewsRecord r1 = newsDB.get(r.id());
             if (r1 == null) newsDB.put(r);
         }
-        byte[][] b = new byte[2][];
-        b[0] = r.id().getBytes();
-        b[1] = yacyCore.universalDateShortString(new Date()).getBytes();
+        kelondroRow.Entry b = queueStack.row().newEntry(new byte[][]{
+                r.id().getBytes(),
+                yacyCore.universalDateShortString(new Date()).getBytes()});
         return b;
     }
 

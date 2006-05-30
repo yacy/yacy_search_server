@@ -108,7 +108,7 @@ public class plasmaCrawlBalancer {
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
                 list = (ArrayList) entry.getValue();
-                stack.push(new byte[][]{(byte[]) list.remove(0)});
+                stack.push(stack.row().newEntry(new byte[][]{(byte[]) list.remove(0)}));
                 if (list.size() == 0) i.remove();
             }
         }
@@ -141,10 +141,10 @@ public class plasmaCrawlBalancer {
         // returns a pair of domain/hash from the stack
         // if the domain is unknown, a null/hash is returned
         if (stack.size() > 0) {
-            return new Object[]{null, stack.pop()[0]};
+            return new Object[]{null, stack.pop().getColBytes(0)};
         } else if (domainStacks.size() > 0) {
             flushOnce();
-            return new Object[]{null, stack.pop()[0]};
+            return new Object[]{null, stack.pop().getColBytes(0)};
         } else {
             return null;
         }
@@ -152,7 +152,7 @@ public class plasmaCrawlBalancer {
     
     public synchronized byte[] top(int dist) throws IOException {
         flushAll();
-        return stack.top(dist)[0];
+        return stack.top(dist).getColBytes(0);
     }
     
     public void clear() throws IOException {
