@@ -681,11 +681,11 @@ public class kelondroRecords {
             }
         }
         
-        private void setValue(byte[] value, int valuewidth, byte[] targetarray, int targetoffset) {
+        private void setValue(byte[] value, int valueoffset, int valuewidth, byte[] targetarray, int targetoffset) {
             if (value == null) {
                 while (valuewidth-- > 0) targetarray[targetoffset + valuewidth] = 0;
             } else {
-                System.arraycopy(value, 0, targetarray, targetoffset, Math.min(value.length, valuewidth)); // error?
+                System.arraycopy(value, valueoffset, targetarray, targetoffset, Math.min(value.length, valuewidth)); // error?
                 if (value.length < valuewidth) {
                     while (valuewidth-- > value.length) targetarray[targetoffset + valuewidth] = 0;
                 }
@@ -736,10 +736,10 @@ public class kelondroRecords {
             
             // set values
             if (this.handle.index != NUL) {
-                setValue(row[0], ROW.width(0), headChunk, overhead);
+                setValue(row[0], 0, ROW.width(0), headChunk, overhead);
                 int offset = 0;
                 for (int i = 1; i < row.length; i++) {
-                    setValue(row[i], ROW.width(i), tailChunk, offset);
+                    setValue(row[i], 0, ROW.width(i), tailChunk, offset);
                     offset +=ROW.width(i);
                 } 
             }
@@ -755,8 +755,8 @@ public class kelondroRecords {
             
             // set values
             if (this.handle.index != NUL) {
-                setValue(row, ROW.width(0), headChunk, overhead);
-                setValue(row, ROW.width(1), tailChunk, 0);
+                setValue(row, 0, ROW.width(0), headChunk, overhead);
+                if (ROW.columns() > 0) setValue(row, ROW.width(0), ROW.size() - ROW.width(0), tailChunk, 0);
             }
             this.headChanged = true;
             this.tailChanged = true;

@@ -443,7 +443,17 @@ public final class kelondroStack extends kelondroRecords {
         // -g test.stack
         // -v test.stack
         // -g 1 test.stack
-	cmd(args);
+        cmd(args);
+        /*
+        kelondroStack s = new kelondroStack(new File("/Users/admin/dev/yacy/trunk/test.stack"), 1024, new int[]{10,10}, false);
+        try {
+            s.push(s.row().newEntry(new byte[][]{"test123".getBytes(), "abcdefg".getBytes()}));
+            s.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        */
     }
     
 }

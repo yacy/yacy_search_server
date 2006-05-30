@@ -143,7 +143,7 @@ public class kelondroRow {
             rowinstance = new byte[objectsize];
             for (int i = 0; i < objectsize; i++) this.rowinstance[i] = 0;
             for (int i = 0; i < cols.length; i++) {
-                System.arraycopy(cols[i], 0, rowinstance, colstart[i], row[i].cellwidth());
+                if (cols[i] != null) System.arraycopy(cols[i], 0, rowinstance, colstart[i], Math.min(cols[i].length, row[i].cellwidth()));
             }
         }
         
