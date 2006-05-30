@@ -1299,68 +1299,68 @@ Changes will take effect immediately.==Zmeny su okamzite ucinne.
 
 #-------------------------------------------------------
 #File: Settings_Proxy.inc
-YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCy kann einen anderen Proxy nutzen um sich zum Internet zu verbinden. Sie k&ouml;nnen die Adresse f&uuml;r den Remote Proxy hier eingeben.
-Use remote proxy:==Nutze Remote Proxy:
-Enables the usage of the remote proxy by yacy==Aktiviert die Nutzung des Remote Proxies durch YaCy
-Use remote proxy for yacy <-> yacy communication==Nutze Remote Proxy f&uuml;r YaCy <-> YaCy Kommunikation
-Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==Gibt an, ob der Remote Proxy f&uuml;r Kommunikation zwischen diesem und anderen YaCy-Peers genutzt werden soll.
-<i>Hint:</i> Enabling this option could cause this peer to remain in junior status.==<i>Hinweis:</i> Dies k&ouml;nnte dazu f&uuml;hren, dass dieser Peer im Junior-Status verbleibt.
-Use remote proxy for https==Nutze Remote Proxy f&uuml;r HTTPS
-Specifies if YaCy should forward ssl connections to the remote proxy.==Gibt an, ob YaCy SSL-Verbindungen zum Remote Proxy weiterleiten soll.
-The ip address or domain name of the remote proxy==Die IP-Adresse oder der Domainname des Remote Proxy
-the port of the remote proxy==Der Port des Remote Proxy
-no-proxy adresses:==proxylose Adressen:
-IP addresses for which the remote proxy should not be used==IP-Adressen f&uuml;r die der Remote Proxy nicht genutzt werden soll
-Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
+YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCy moze pouzit iny proxy server na pripojenie k internetu. Na tomto mieste mozete zadat adresu tohoto vzdialeneho proxy servera:  
+Use remote proxy:==Pouzi vzialeny proxy server:
+Enables the usage of the remote proxy by yacy==Aktivuje pouzitie vzdialeneho proxy servera cez YaCy
+Use remote proxy for yacy <-> yacy communication==Pouzi vzdialeny proxy server pre YaCy <-> YaCy komunikaciu
+Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==Udava ci vzdialeny proxy server ma byt pouzity na komunikaciu medzi tymto a inymi peermi.  
+<i>Hint:</i> Enabling this option could cause this peer to remain in junior status.==<i>Rada:</i> Zapnutie tejto volby moze sposobit ze Vas peer ostane v stave Junior. 
+Use remote proxy for https==Pouzi vzdialeny proxy server pre HTTPS
+Specifies if YaCy should forward ssl connections to the remote proxy.==Udava ci ma YaCy preposielat ssl spojenia vzdialenemu proxy serveru.
+The ip address or domain name of the remote proxy==IP adresa alebo nazov domeny vzdialeneho proxy servera
+the port of the remote proxy==Port vzdialeneho proxy servera
+no-proxy adresses:==Adresy bez proxy:
+IP addresses for which the remote proxy should not be used==IP adresy pre ktore nema byt vzdialeny proxy server pouzity
+Changes will take effect immediately.==Zmeny su okamzite ucinne.
 
 
 #-------------------------------------------------------
 #File: Settings_PortForwarding.inc
 #check for logical mistakes, unsure about some translations
-Port Forwarding==Port Weiterleitung
-You can use a remote server running a ssh demon to forward your server/proxy port.==Sie k&ouml;nnen einen Remote Server mit einem ssh demon nutzen, um Ihrem Server/Proxy Port weiterzuleiten.
-This is useful if you want to tunnel throug a NAT/router.==Dies ist n&uuml;tzlich, wenn Sie durch einen NAT/Router tunneln wollen.
-Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.==Alternativ k&ouml;nnen Sie einfach einen virtuellen Server in Ihrem NAT/Router einstellen, um Verbindungen von Au&szlig;erhalb zu erm&ouml;glichen.
-Enable&nbsp;port&nbsp;forwarding:==Aktiviere Port Weiterleitung:
-Enabling disabling port forwarding via secure channel.==Aktivieren/Deaktivieren von Port Weiterleitung &uuml;ber sicheren Kanal.
-Forwarding&nbsp;via&nbsp;proxy:==Weiterleitung &uuml;ber Proxy:
-Function not available at the moment.==Funktion im Moment nicht verf&uuml;gbar.
-You need to install libx to use this feature==Sie m�ssen die libx installieren, um diese Funktionen benutzen zu k�nnen
-Forwarding&nbsp;port:==Weiterleitender Port
-The port on the remote server that should be forwarded via the secure channel to the local host.==Der Port des Remote Servers der mittels sicherem Kanal auf den lokalen Host weitergeleitet werden soll.
-Forwarding&nbsp;host:==Weiterleitender Host
-Forwarding&nbsp;host&nbsp;port:==Weiterleitender Host Port
-Forwarding&nbsp;host&nbsp;user:==Weiterleitender Host Nutzer
-Forwarding&nbsp;host&nbsp;password:==Weiterleitender Host Passwort
-Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
+Port Forwarding==Port forwarding 
+You can use a remote server running a ssh demon to forward your server/proxy port.==Mozete pouzit vzdialeny server na ktorom bezi ssh demon na preposielanie Vaseho server/proxy portu.  
+This is useful if you want to tunnel throug a NAT/router.==Toto je uzitocne ak chcete "tunelovat" cez NAT/router.
+Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.==Alternativne mozete jednoducho vytvorit virtualny port serveru na ktorom Vas NAT/servery na umoznenie spojeni z vonku.
+Enable&nbsp;port&nbsp;forwarding:==Aktivuj port forwarding:
+Enabling disabling port forwarding via secure channel.==Aktivacia/Deaktivacia port forwardingu cez zapezpeceny kanal.
+Forwarding&nbsp;via&nbsp;proxy:==Forwarding cez proxy:
+Function not available at the moment.==Funkcia je momentalne nedostupna.
+You need to install libx to use this feature==Musite si nainstalovat libx, ak chcete pouzivat tuto funkciu
+Forwarding&nbsp;port:==Forwardujuci port
+The port on the remote server that should be forwarded via the secure channel to the local host.==Port vzdialeneho servera ktory ma byt cez forwardovany na lokalny host cez zabezpeceny kanal.
+Forwarding&nbsp;host:==Forwardujuci host
+Forwarding&nbsp;host&nbsp;port:==Forwardujuci host port
+Forwarding&nbsp;host&nbsp;user:==Forwardujuci host uzivatel
+Forwarding&nbsp;host&nbsp;password:==Forwardujuce host heslo
+Changes will take effect immediately.==Zmeny su okamzite ucinne.
 
 #-------------------------------------------------------
 #File: Settings_ServerAccess.inc
-Server Access Settings==Server Zugangs Einstellungen
-Here you can restrict access to the server.==Hier k&ouml;nnen Sie den Zugang zum Server beschr&auml;nken.
-By default, the access is not limited, because this function is needed to spawn the p2p index-sharing function.==Standardm&auml;&szlig;ig ist der Zugang unbeschr&auml;nkt, da dies notwendig ist um den p2p-indextausch zu erm&ouml;glichen.
-If you block access to your server==Wenn Sie den Zugang zu Ihrem Server blockieren
-setting anything else than==Einstellen von irgendetwas anderem als
-then you will also be blocked from using other peers' indexes for search service.==dann werden Sie auch davon ausgeschlossen den Index anderer Peers zur Suche zu verwenden.
-However, blocking access may be correct in enterprise environments where you only want to index your company's own web pages.==Wie auch immer, in Unternehmensumgebungen kann ein Blockieren richtig sein, wenn Sie nur die Unternehmenseigenen Websites indexieren wollen.
-ATTENTION: Your current IP is recognized as==ACHTUNG: Ihre aktuelle IP wird als
-. If the value you enter here does not match with this IP, you will not be able to access the server pages anymore== erkannt. Falls der Wert den Sie hier eingeben nicht auf diese IP zutrifft, werden Sie nicht mehr in der Lage sein diese Seite zu erreichen.
-IP-Number filter:==IP-Addressfilter:
-
+Server Access Settings==Nastavenia pristupu k serveru
+Here you can restrict access to the server.==Na tomto mieste mozete obmedzit pristup k serveru.
+By default, the access is not limited, because this function is needed to spawn the p2p index-sharing function.==Standartne je pristup neobmedzeny, pretoze tato funkcia je potrebna na vytvorenie zdielania p2p indexu.
+If you block access to your server==Ak zablokujete pristup k Vasemu serveru
+setting anything else than==nastavenie cohokolvek ineho ako 
+then you will also be blocked from using other peers' indexes for search service.==potom Vam nebude umoznene pouzivat indexy ostatnych peerov.
+However, blocking access may be correct in enterprise environments where you only want to index your company's own web pages.==Avsak zablokovanie pristupu moze byt spravnym opatrenim vo firemnej sieti kde chcete indexovat len stranky vlastnej firmy. 
+ATTENTION: Your current IP is recognized as==POZOR: Vasa aktualna IP adresa rozpoznavana ako 
+. If the value you enter here does not match with this IP, you will not be able to access the server pages anymore==Ak hodnota ktoru ste tu zadali nezodpoveda tejto IP adrese, tak nebudete schopny pristupovat na tiete stranky servera.
+IP-Number filter:==Filter IP adries:
+	
 #-------------------------------------------------------
 #File: Settings_Seed.inc
-Seed Upload Settings==Seed Upload Einstellungen
-With these settings you can configure if you have an account on a public accessible==Mit diesen Einstellungen k&ouml;nnen Sie bestimmen ob Sie einen Account auf einem &ouml;ffentlich zug&auml;nglichen
-server where you can host a seed-list file.==Server haben, wo Sie eine Seed-Liste bereitstellen k&ouml;nnen.
-General Settings:==Allgemeine Einstellungen:
-If you enable one of the available uploading methods, you will become a principal peer.==Wenn Sie eine der verf&uuml;gbaren Uploadmethoden aktivieren, werden Sie ein Principal-Peer.
-Your peer will then upload the seed-bootstrap information periodically,==Ihr Peer wird dann die Seed-Bootstrap Informationen periodisch hochladen,
-but only if there have been changes to the seed-list.==jedoch nur wenn &Auml;nderungen an der Seed-Liste vorgenommen wurden.
-Upload Method:==Uploadmethode:
-Retry Uploading==Upload versuchen
-Here you can specify which upload method should be used.==Hier k&ouml;nnen Sie ausw&auml;hlen welche Uploadmethode verwendet werden soll.
-Select 'none' to deactivate uploading.==Verwenden Sie 'none' um den Upload zu deaktivieren.
-The URL that can be used to retrieve the uploaded seed file, like==Die URL die genutzt werden kann um die hochgeladene Seed-Liste zu erhalten, wie
+Seed Upload Settings==Nastavenia nahravania seedu
+With these settings you can configure if you have an account on a public accessible==Tymito nastaveniami mozete urcit ci mate konto na verejne dostupnom 
+server where you can host a seed-list file.==serveri, kde mozete dat k dispozicii subor seed-zoznamu
+General Settings:==Vseobecne nastavenia:
+If you enable one of the available uploading methods, you will become a principal peer.==Ak aktivujete jednu z dostupnych nahravacich metod, stanete sa Principal peerom.
+Your peer will then upload the seed-bootstrap information periodically,==Vas peer bude potom periodicky nahravat seed-bootstrap informacie,
+but only if there have been changes to the seed-list.==avsak len ak sa v seed zozname vyskytli zmeny.
+Upload Method:==Sposob nahravania:
+Retry Uploading==Vyskusaj nahravanie
+Here you can specify which upload method should be used.==Tu mozete urcit aka nahravacia metoda sa ma pouzit.
+Select 'none' to deactivate uploading.==Zvojte 'none' na deaktivovanie nahravania.
+The URL that can be used to retrieve the uploaded seed file, like==URL adresa ktora moze byt pouzita na ziskanie nahravacieho seedu ako
 
 #--------------------------------------------------------
 #File: yacy/seedUpload/yacySeedUploadFtp.html
