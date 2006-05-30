@@ -189,7 +189,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                 while (i-- > 0) {
                     // get out one entry
                     row = dumpArray.get(i);
-                    if (row == null) continue;
+                    if ((row == null) || (row.empty(0)) || (row.empty(3)) || (row.empty(4))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
                     wordEntry = new indexURLEntry(row.getColString(3, "UTF-8"), row.getColString(4, "UTF-8"));

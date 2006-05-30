@@ -158,7 +158,7 @@ public class plasmaSwitchboardQueue {
         try {
             ArrayList list = sbQueueStack.botList(index);
             for (int i = 0; i < list.size(); i++) {
-                list.set(i, new Entry((byte[][]) list.get(i)));
+                list.set(i, new Entry((kelondroRow.Entry) list.get(i)));
             }
             return list;
         } catch (kelondroException e) {
