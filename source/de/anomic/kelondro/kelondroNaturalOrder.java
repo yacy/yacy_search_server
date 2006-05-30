@@ -92,7 +92,7 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         return Long.MAX_VALUE - keyCardinal + zeroCardinal + 1;
     }
 
-    public static byte[] encodeLong(long c, int length) {
+    public final static byte[] encodeLong(long c, int length) {
         byte[] b = new byte[length];
         while (length > 0) {
             b[--length] = (byte) (c & 0xFF);
@@ -101,14 +101,31 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         return b;
     }
 
-    public static long decodeLong(byte[] s) {
-        long c = 0;
-        int p = 0;
-        while ((p < 8) && (p < s.length)) c = (c << 8) | ((long) s[p++] & 0xFF);
-        return c;
+    public final static void encodeLong(long c, byte[] b, int offset, int length) {
+        assert offset + length <= b.length;
+        while (length > 0) {
+            b[--length + offset] = (byte) (c & 0xFF);
+            c >>= 8;
+        }
     }
 
-
+    public final static long decodeLong(byte[] s) {
+        if (s == null) return 0;
+        long c = 0;
+        int p = 0;
+        while (p < s.length) c = (c << 8) | ((long) s[p++] & 0xFF);
+        return c;
+    }
+    
+    public final static long decodeLong(byte[] s, int offset, int length) {
+        if (s == null) return 0;
+        long c = 0;
+        int m = Math.min(s.length, offset + length);
+        while (offset < m) c = (c << 8) | ((long) s[offset++] & 0xFF);
+        return c;
+    }
+    
+    
     // Compares its two arguments for order.
     // Returns -1, 0, or 1 as the first argument
     // is less than, equal to, or greater than the second.

@@ -31,17 +31,17 @@ public class kelondroColumn {
 
     public static final int celltype_undefined  = 0;
     public static final int celltype_boolean    = 1;
-    public static final int celltype_bytes      = 2;
+    public static final int celltype_binary     = 2;
     public static final int celltype_string     = 3;
     public static final int celltype_cardinal   = 4;
     public static final int celltype_real       = 5;
     
-    private int celltype, dbwidth;
+    private int celltype, cellwidth;
     private String nickname, description;
     
-    public kelondroColumn(int celltype, int dbwidth, String nickname, String description) {
+    public kelondroColumn(int celltype, int cellwidth, String nickname, String description) {
         this.celltype = celltype;
-        this.dbwidth = dbwidth;
+        this.cellwidth = cellwidth;
         this.nickname = nickname;
         this.description = description;
     }
@@ -50,8 +50,8 @@ public class kelondroColumn {
         return this.celltype;
     }
     
-    public int dbwidth() {
-        return this.dbwidth;
+    public int cellwidth() {
+        return this.cellwidth;
     }
     
     public String nickname() {

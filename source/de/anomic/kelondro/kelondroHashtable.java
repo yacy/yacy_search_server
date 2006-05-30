@@ -138,7 +138,7 @@ public class kelondroHashtable {
     private int offset;
     private int maxk;
     private int maxrehash;
-    private byte[][] dummyRow;
+    private kelondroRow.Entry dummyRow;
     
     private static final byte[] dummyKey = kelondroBase64Order.enhancedCoder.encodeLong(0, 5).getBytes();
 
@@ -157,8 +157,8 @@ public class kelondroHashtable {
         this.maxk = kelondroMSetTools.log2a(maxsize); // equal to |log2(maxsize)| + 1
         if (this.maxk >= kelondroMSetTools.log2a(maxsize + power2(offset + 1) + 1) - 1) this.maxk--;
         this.maxrehash = maxrehash;
-        dummyRow = new byte[hashArray.columns()][];
-        dummyRow[0] = dummyKey;
+        dummyRow = this.hashArray.row().newEntry();
+        dummyRow.setCol(0, dummyKey);
         for (int i = 0; i < hashArray.columns(); i++)
         try {
             hashArray.seti(0, this.offset);
@@ -201,40 +201,43 @@ public class kelondroHashtable {
         return result;
     }
 
-    public synchronized byte[][] put(int key, byte[][] row) throws IOException {
+    public synchronized kelondroRow.Entry put(int key, kelondroRow.Entry rowentry) throws IOException {
         Hash hash = new Hash(key);
+        
         // find row
         Object[] search = search(hash);
-        byte[][] oldrow;
+        kelondroRow.Entry oldhkrow;
         int rowNumber = ((Integer) search[0]).intValue();
         if (search[1] == null) {
-            oldrow = null;
+            oldhkrow = null;
         } else {
-            oldrow = (byte[][]) search[1];
+            oldhkrow = (kelondroRow.Entry) search[1];
         }
+        
         // make space
         while (rowNumber >= hashArray.size()) hashArray.set(hashArray.size(), dummyRow);
+        
         // write row
-        byte[][] newrow = new byte[hashArray.columns()][];
-        newrow[0] = kelondroBase64Order.enhancedCoder.encodeLong(hash.key(), 5).getBytes();
-        System.arraycopy(row, 0, newrow, 1, row.length);
-        hashArray.set(rowNumber, row);
-        return oldrow;
+        kelondroRow.Entry newhkrow = hashArray.row().newEntry();
+        newhkrow.setCol(0, hash.key());
+        newhkrow.setCol(1, rowentry.bytes());
+        hashArray.set(rowNumber, newhkrow);
+        return hashArray.row().newEntry(oldhkrow.getColBytes(1));
     }
     
     private Object[] search(Hash hash) throws IOException {
-        byte[][] row;
+        kelondroRow.Entry hkrow;
         int rowKey;
         int rowNumber;
         do {
             rowNumber = hash.node();
             if (rowNumber >= hashArray.size()) return new Object[]{new Integer(rowNumber), null};
-            row = hashArray.get(rowNumber);
-            rowKey = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(row[0], "UTF-8"));
+            hkrow = hashArray.get(rowNumber);
+            rowKey = (int) hkrow.getColLong(0);
             if (rowKey == 0) return new Object[]{new Integer(rowNumber), null};
             hash.rehash();
         } while (rowKey != hash.key());
-        return new Object[]{new Integer(rowNumber), row};
+        return new Object[]{new Integer(rowNumber), hkrow};
     }
     
     

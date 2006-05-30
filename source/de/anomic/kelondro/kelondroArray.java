@@ -68,13 +68,11 @@ public class kelondroArray extends kelondroRecords {
     }
 
     public kelondroArray(File file) throws IOException{
-	// this opens a file with an existing array
-	super(file, 0);
+        // this opens a file with an existing array
+        super(file, 0);
     }
     
-    public synchronized byte[][] set(int index, byte[][] row) throws IOException {
-	if (row.length != columns())
-            throw new IllegalArgumentException("set: wrong row length " + row.length + "; must be " + columns());
+    public synchronized kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException {
 
         // make room for element
         Node n;
@@ -82,20 +80,20 @@ public class kelondroArray extends kelondroRecords {
             n = newNode();
             n.commit(CP_NONE);
         }
-        
+
         // get the node at position index
         n = getNode(new Handle(index));
-        
-        // write the row
-        byte[][] before = n.setValues(row);
-        n.commit(CP_NONE);
-        
-        return before;
-    }
 
-    public synchronized byte[][] get(int index) throws IOException {
+        // write the row
+        byte[] before = n.setValueRow(rowentry.bytes());
+        n.commit(CP_NONE);
+
+        return row().newEntry(before);
+    }
+    
+    public synchronized kelondroRow.Entry get(int index) throws IOException {
         if (index >= size()) throw new kelondroException(filename, "out of bounds, index=" + index + ", size=" + size());
-        return getNode(new Handle(index)).getValues();
+        return row().newEntry(getNode(new Handle(index)).getValueRow());
     }
 
     public synchronized int seti(int index, int value) throws IOException {
@@ -107,15 +105,12 @@ public class kelondroArray extends kelondroRecords {
     public synchronized int geti(int index) {
         return getHandle(index).hashCode();
     }
-    
-    public synchronized int add(byte[][] row) throws IOException {
-        if (row.length != columns())
-            throw new IllegalArgumentException("add: wrong row length " + row.length + "; must be " + columns());
 
+    public synchronized int add(kelondroRow.Entry rowinstance) throws IOException {
         Node n = newNode();
         n.commit(CP_LOW);
         int index = n.handle().hashCode();
-        set(index, row);
+        set(index, rowinstance);
         return index;
     }
 
@@ -125,11 +120,11 @@ public class kelondroArray extends kelondroRecords {
     
     public void print() throws IOException {
         System.out.println("PRINTOUT of table, length=" + size());
-        byte[][] row;
+        kelondroRow.Entry row;
         for (int i = 0; i < size(); i++) {
             System.out.print("row " + i + ": ");
             row = get(i);
-            for (int j = 0; j < columns(); j++) System.out.print(((row[j] == null) ? "NULL" : new String(row[j], "UTF-8")) + ", ");
+            for (int j = 0; j < columns(); j++) System.out.print(((row.empty(j)) ? "NULL" : row.getColString(j, "UTF-8")) + ", ");
             System.out.println();
         }
         System.out.println("EndOfTable");
@@ -162,22 +157,22 @@ public class kelondroArray extends kelondroRecords {
             if ((args.length == 3) && (args[0].equals("-g"))) {
                 // get <filename> <index> 
                 kelondroArray fm = new kelondroArray(new File(args[1]));
-                byte[][] row = fm.get(Integer.parseInt(args[2]));
-                for (int j = 0; j < fm.columns(); j++) System.out.print(new String(row[j]) + " ");
+                kelondroRow.Entry row = fm.get(Integer.parseInt(args[2]));
+                for (int j = 0; j < fm.columns(); j++) System.out.print(row.getColString(j, null) + " ");
                 System.out.println();
                 fm.close();
             } else
             if ((args.length == 4) && (args[0].equals("-s"))) {
                 // set <filename> <index> <value>
                 kelondroArray fm = new kelondroArray(new File(args[1]));
-                byte[][] row = new byte[][]{args[3].getBytes()};
+                kelondroRow.Entry row = fm.row().newEntry(new byte[][]{args[3].getBytes()});
                 fm.set(Integer.parseInt(args[2]), row);
                 fm.close();
             } else
             if ((args.length == 3) && (args[0].equals("-a"))) {
                 // add <filename> <value>
                 kelondroArray fm = new kelondroArray(new File(args[1]));
-                byte[][] row = new byte[][] { args[2].getBytes() };
+                kelondroRow.Entry row = fm.row().newEntry(new byte[][] {args[2].getBytes()});
                 int index = fm.add(row);
                 System.out.println("Added to row " + index);
                 fm.close();
@@ -193,7 +188,7 @@ public class kelondroArray extends kelondroRecords {
                 if (testfile.exists()) testfile.delete();
                 kelondroArray fm = new kelondroArray(testfile, new int[]{30, 50}, 9, true);
                 for (int i = 0; i < 100; i++) {
-                    fm.set(i, new byte[][]{("name" + i).getBytes(), ("value" + i).getBytes()});
+                    fm.set(i, fm.row().newEntry(new byte[][]{("name" + i).getBytes(), ("value" + i).getBytes()}));
                 }
                 fm.close();
             } else

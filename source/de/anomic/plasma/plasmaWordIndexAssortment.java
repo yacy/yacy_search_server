@@ -61,7 +61,7 @@ import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexTreeMapContainer;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroRecords;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.logging.serverLog;
 
@@ -135,8 +135,8 @@ public final class plasmaWordIndexAssortment {
         if (newContainer.size() != assortmentLength) throw new RuntimeException("plasmaWordIndexAssortment.store: wrong container size");
         byte[][] row = new byte[this.bufferStructureLength][];
         row[0] = newContainer.wordHash().getBytes();
-        row[1] = kelondroRecords.long2bytes(1, 4);
-        row[2] = kelondroRecords.long2bytes(newContainer.updated(), 8);
+        row[1] = kelondroNaturalOrder.encodeLong(1, 4);
+        row[2] = kelondroNaturalOrder.encodeLong(newContainer.updated(), 8);
         Iterator entries = newContainer.entries();
         indexURLEntry entry;
         for (int i = 0; i < assortmentLength; i++) {
@@ -216,7 +216,7 @@ public final class plasmaWordIndexAssortment {
     
     public indexContainer row2container(String wordHash, byte[][] row) {
         if (row == null) return null;
-        final long updateTime = kelondroRecords.bytes2long(row[2]);
+        final long updateTime = kelondroNaturalOrder.decodeLong(row[2]);
         indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
         for (int i = 0; i < assortmentLength; i++) {
             container.add(

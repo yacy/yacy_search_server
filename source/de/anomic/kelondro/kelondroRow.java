@@ -27,6 +27,7 @@
 
 package de.anomic.kelondro;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 public class kelondroRow {
@@ -38,18 +39,32 @@ public class kelondroRow {
     
     
     private kelondroColumn[] row;
+    private int[] colstart;
     private HashMap encodedFormConfiguration;
     private int     encodedFormLength;
+    private int     objectsize;
     
     public kelondroRow(kelondroColumn[] row) {
         this.row = row;
+        this.colstart = new int[row.length];
+        this.objectsize = 0;
+        for (int i = 0; i < row.length; i++) {
+            this.colstart[i] = this.objectsize;
+            this.objectsize += row[i].cellwidth();
+        }
         this.encodedFormConfiguration = null;
         this.encodedFormLength = -1;
     }
 
     public kelondroRow(int[] row) {
         this.row = new kelondroColumn[row.length];
-        for (int i = 0; i < row.length; i++) this.row[i] = new kelondroColumn(kelondroColumn.celltype_undefined, row[i], "col_" + i, "");
+        this.colstart = new int[row.length];
+        this.objectsize = 0;
+        for (int i = 0; i < row.length; i++) {
+            this.row[i] = new kelondroColumn(kelondroColumn.celltype_undefined, row[i], "col_" + i, "");
+            this.colstart[i] = this.objectsize;
+            this.objectsize += row[i];
+        }
         this.encodedFormConfiguration = null;
         this.encodedFormLength = -1;
     }
@@ -58,13 +73,17 @@ public class kelondroRow {
         return this.row.length;
     }
     
+    public int size() {
+        return this.objectsize;
+    }
+    
     public int width(int row) {
-        return this.row[row].dbwidth();
+        return this.row[row].cellwidth();
     }
     
     public int[] widths() {
         int[] w = new int[this.row.length];
-        for (int i = 0; i < this.row.length; i++) w[i] = row[i].dbwidth();
+        for (int i = 0; i < this.row.length; i++) w[i] = row[i].cellwidth();
         return w;
     }
     
@@ -89,12 +108,94 @@ public class kelondroRow {
         }
     }
 
+    public Entry newEntry() {
+        return new Entry();
+    }
+    
+    public Entry newEntry(byte[] rowinstance) {
+        return new Entry(rowinstance);
+    }
+    
+    public Entry newEntry(byte[][] cells) {
+        return new Entry(cells);
+    }
+    
     public class Entry {
 
-        private byte[][] cols;
+        private byte[] rowinstance;
+        
+        public Entry() {
+            rowinstance = new byte[objectsize];
+            for (int i = 0; i < objectsize; i++) this.rowinstance[i] = 0;
+        }
+        
+        public Entry(byte[] rowinstance) {
+            if (rowinstance.length == objectsize) {
+                this.rowinstance = rowinstance;
+            } else {
+                this.rowinstance = new byte[objectsize];
+                System.arraycopy(rowinstance, 0, this.rowinstance, 0, rowinstance.length);
+                for (int i = rowinstance.length; i < objectsize; i++) this.rowinstance[i] = 0;
+            }
+        }
         
         public Entry(byte[][] cols) {
-            this.cols = cols;
+            rowinstance = new byte[objectsize];
+            for (int i = 0; i < objectsize; i++) this.rowinstance[i] = 0;
+            for (int i = 0; i < cols.length; i++) {
+                System.arraycopy(cols[i], 0, rowinstance, colstart[i], row[i].cellwidth());
+            }
+        }
+        
+        public byte[] bytes() {
+            return rowinstance;
+        }
+        
+        public boolean empty(int column) {
+            return rowinstance[colstart[column]] == 0;
+        }
+        
+        public void setCol(int column, byte[] cell) {
+            int valuewidth = row[column].cellwidth();
+            int targetoffset = colstart[column];
+            if (cell == null) {
+                while (valuewidth-- > 0) rowinstance[targetoffset + valuewidth] = 0;
+            } else {
+                System.arraycopy(cell, 0, rowinstance, targetoffset, Math.min(cell.length, valuewidth)); // error?
+                if (cell.length < valuewidth) {
+                    while (valuewidth-- > cell.length) rowinstance[targetoffset + valuewidth] = 0;
+                }
+            }
+        }
+        
+        public void setCol(int column, long cell) {
+            kelondroNaturalOrder.encodeLong(cell, rowinstance, colstart[column], row[column].cellwidth());
+        }
+        
+        public String getColString(int column, String encoding) {
+            int length = row[column].cellwidth();
+            int offset = colstart[column];
+            if (length > rowinstance.length - offset) length = rowinstance.length - offset;
+            while ((length > 0) && (rowinstance[offset + length - 1] == 0)) length--;
+            if (length == 0) return null;
+            try {
+                if ((encoding == null) || (encoding.length() == 0))
+                    return new String (rowinstance, offset, length);
+                else
+                    return new String(rowinstance, offset, length, encoding);
+            } catch (UnsupportedEncodingException e) {
+                return "";
+            }
+        }
+        
+        public long getColLong(int column) {
+            return kelondroNaturalOrder.decodeLong(rowinstance, colstart[column], row[column].cellwidth());
+        }
+        
+        public byte[] getColBytes(int column) {
+            byte[] c = new byte[row[column].cellwidth()];
+            System.arraycopy(rowinstance, colstart[column], c, 0, row[column].cellwidth());
+            return c;
         }
         
         public byte[] toEncodedBytesForm() {
@@ -111,17 +212,17 @@ public class kelondroRow {
                     throw new kelondroException("ROW", "toEncodedForm of celltype undefined not possible");
                 case kelondroColumn.celltype_boolean:
                     throw new kelondroException("ROW", "toEncodedForm of celltype boolean not yet implemented");
-                case kelondroColumn.celltype_bytes:
-                    System.arraycopy(cols[i], 0, b, p, length);
+                case kelondroColumn.celltype_binary:
+                    System.arraycopy(rowinstance, colstart[i], b, p, length);
                     p += length;
                     continue;
                 case kelondroColumn.celltype_string:
-                    System.arraycopy(cols[i], 0, b, p, length);
+                    System.arraycopy(rowinstance, colstart[i], b, p, length);
                     p += length;
                     continue;
                 case kelondroColumn.celltype_cardinal:
                     if (encoder == encoder_b64e) {
-                        long c = kelondroRecords.bytes2long(cols[i]);
+                        long c = bytes2long(rowinstance, colstart[i]);
                         System.arraycopy(kelondroBase64Order.enhancedCoder.encodeLongSmart(c, length).getBytes(), 0, b, p, length);
                         p += length;
                         continue;
@@ -134,4 +235,19 @@ public class kelondroRow {
             return b;
          }
     }
+    
+    public final static void long2bytes(long x, byte[] b, int offset, int length) {
+        for (int i = length - 1; i >= 0; i--) {
+            b[offset + i] = (byte) (x & 0XFF);
+            x >>= 8;
+        }
+    }
+    
+    public final static long bytes2long(byte[] b, int offset) {
+        if (b == null) return 0;
+        long x = 0;
+        for (int i = 0; i < b.length; i++) x = (x << 8) | (0xff & b[offset + i]);
+        return x;
+    }
+    
 }

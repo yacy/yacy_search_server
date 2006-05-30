@@ -139,7 +139,7 @@ public final class kelondroStack extends kelondroRecords {
 	    if (getHandle(root) != null) throw new RuntimeException("push: internal organisation of root and toor");
 	    // create node
 	    Node n = newNode();
-            n.setValues(row);
+            n.setValueCells(row);
 	    n.setOHHandle(left, null);
             n.setOHHandle(right, null);
 	    n.commit(CP_NONE);
@@ -150,7 +150,7 @@ public final class kelondroStack extends kelondroRecords {
 	} else {
 	    // expand the list at the end
 	    Node n = newNode();
-            n.setValues(row);
+            n.setValueCells(row);
 	    n.setOHHandle(left, getHandle(toor));
             n.setOHHandle(right, null);
 	    Node n1 = getNode(getHandle(toor), null, 0);
@@ -172,7 +172,7 @@ public final class kelondroStack extends kelondroRecords {
 	// return row relative to top of the stack and remove addressed element
 	Node n = topNode(dist);
         if (n == null) return null;
-        byte[][] ret = n.getValues();
+        byte[][] ret = n.getValueCells();
 
         // remove node
         unlinkNode(n);
@@ -191,7 +191,7 @@ public final class kelondroStack extends kelondroRecords {
 	// with dist == 0 this is the same function as with top()
         Node n = topNode(dist);
         if (n == null) return null;
-        return n.getValues();
+        return n.getValueCells();
     }
 
     public synchronized byte[][] pot() throws IOException {
@@ -203,7 +203,7 @@ public final class kelondroStack extends kelondroRecords {
 	// return row relative to the bottom of the stack and remove addressed element
 	Node n = botNode(dist);
         if (n == null) return null;
-	byte[][] ret = n.getValues();
+	byte[][] ret = n.getValueCells();
         
         // remove node
         unlinkNode(n);
@@ -222,7 +222,7 @@ public final class kelondroStack extends kelondroRecords {
 	// with dist == 0 this is the same function as with bot()
 	Node n = botNode(dist);
 	if (n == null) return null;
-        return n.getValues();
+        return n.getValueCells();
     }
     
     public synchronized ArrayList botList(int dist) throws IOException {
@@ -344,9 +344,9 @@ public final class kelondroStack extends kelondroRecords {
 		//n = getNode(h, null, 0);
 		System.out.println("> NODE " + hp(n.handle()) +
 				   "; left " + hp(n.getOHHandle(left)) + ", right " + hp(n.getOHHandle(right)));
-		System.out.print("  KEY:'" + (new String(n.getValues()[0])).trim() + "'");
+		System.out.print("  KEY:'" + (new String(n.getValueCells()[0])).trim() + "'");
 		for (int j = 1; j < columns(); j++)
-		    System.out.print(", V[" + j + "]:'" + (new String(n.getValues()[j])).trim() + "'");
+		    System.out.print(", V[" + j + "]:'" + (new String(n.getValueCells()[j])).trim() + "'");
 		System.out.println();
 	    }
 	    System.out.println();

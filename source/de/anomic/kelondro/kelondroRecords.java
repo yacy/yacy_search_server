@@ -127,19 +127,13 @@ public class kelondroRecords {
     private   int        headchunksize;// overheadsize + key element column size
     private   int        tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
     private   int        recordsize;   // (overhead + sum(all: COLWIDTHS)) = the overall size of a record
-    protected int        objectsize;   // sum(all: COLWIDTHS)) = the size of all data fields
-
+    
     // dynamic run-time seek pointers
     private long POS_HANDLES = 0; // starts after end of POS_COLWIDHS which is POS_COLWIDTHS + COLWIDTHS.length * 4
     private long POS_TXTPROPS = 0; // starts after end of POS_HANDLES which is POS_HANDLES + HANDLES.length * 4
     private long POS_NODES  = 0; // starts after end of POS_TXTPROPS which is POS_TXTPROPS + TXTPROPS.length * TXTPROPW
 
     // dynamic variables that are back-ups of stored values in file; read/defined on instantiation
-    /*
-    private   int               USEDC;       // counter of used elements
-    private   int               FREEC;       // counter of free elements in list of free Nodes
-    private   Handle            FREEH;       // pointer to first element in list of free Nodes, empty = NUL
-    */
     private   usageControl      USAGE;       // counter for used and re-use records and pointer to free-list
     private   short             OHBYTEC;     // number of extra bytes in each node
     private   short             OHHANDLEC;   // number of handles in each node
@@ -247,11 +241,12 @@ public class kelondroRecords {
             this.entryFile = new kelondroRAIOChunks(ra, ra.name());
         }
         
+        // create row
+        ROW = new kelondroRow(columns);
+        
         // store dynamic run-time data
         this.overhead = ohbytec + 4 * ohhandlec;
-        this.objectsize = 0;
-        for (int i = 0; i < columns.length; i++) this.objectsize += columns[i];
-        this.recordsize = this.overhead + this.objectsize;
+        this.recordsize = this.overhead + ROW.size();
         this.headchunksize = overhead + columns[0];
         this.tailchunksize = this.recordsize - this.headchunksize;
 
@@ -264,7 +259,6 @@ public class kelondroRecords {
         USAGE     = new usageControl(0, 0, new Handle(NUL));
         OHBYTEC   = ohbytec;
         OHHANDLEC = ohhandlec;
-        ROW = new kelondroRow(columns);
         HANDLES   = new Handle[FHandles];
         for (int i = 0; i < FHandles; i++) HANDLES[i] = new Handle(NUL);
         TXTPROPS  = new byte[txtProps][];
@@ -343,7 +337,7 @@ public class kelondroRecords {
         else
             this.theLogger.fine("KELONDRO DEBUG for file " + this.filename + ": " + message);
     }
-
+    
     public void clear() throws IOException {
         // Removes all mappings from this map
         // throw new UnsupportedOperationException("clear not supported");
@@ -416,9 +410,7 @@ public class kelondroRecords {
         // assign remaining values that are only present at run-time
         this.overhead = OHBYTEC + 4 * OHHANDLEC;
         this.recordsize = this.overhead;
-        this.objectsize = 0;
-        for (int i = 0; i < this.ROW.columns(); i++) this.objectsize += this.ROW.width(i);
-        this.recordsize = this.overhead + this.objectsize;
+        this.recordsize = this.overhead + ROW.size();
         this.headchunksize = this.overhead + this.ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
     }
@@ -738,9 +730,9 @@ public class kelondroRecords {
             return (h == NUL) ? null : new Handle(h);
         }
         
-        public byte[][] setValues(byte[][] row) throws IOException {
+        public byte[][] setValueCells(byte[][] row) throws IOException {
             // if the index is defined, then write values directly to the file, else only to the object
-            byte[][] result = getValues(); // previous value (this loads the values if not already happened)
+            byte[][] result = getValueCells(); // previous value (this loads the values if not already happened)
             
             // set values
             if (this.handle.index != NUL) {
@@ -756,12 +748,27 @@ public class kelondroRecords {
             return result; // return previous value
         }
 
+        public byte[] setValueRow(byte[] row) throws IOException {
+            // if the index is defined, then write values directly to the file, else only to the object
+            assert row.length == ROW.size();
+            byte[] result = getValueRow(); // previous value (this loads the values if not already happened)
+            
+            // set values
+            if (this.handle.index != NUL) {
+                setValue(row, ROW.width(0), headChunk, overhead);
+                setValue(row, ROW.width(1), tailChunk, 0);
+            }
+            this.headChanged = true;
+            this.tailChanged = true;
+            return result; // return previous value
+        }
+
         public byte[] getKey() {
             // read key
             return trimCopy(headChunk, overhead, ROW.width(0));
         }
 
-        public byte[][] getValues() throws IOException {
+        public byte[][] getValueCells() throws IOException {
             
             if (this.tailChunk == null) {
                 // load all values from the database file
@@ -784,6 +791,27 @@ public class kelondroRecords {
             }
 
             return values;
+        }
+
+        public byte[] getValueRow() throws IOException {
+            
+            if (this.tailChunk == null) {
+                // load all values from the database file
+                this.tailChunk = new byte[tailchunksize];
+                // read values
+                entryFile.readFully(seekpos(this.handle) + headchunksize, this.tailChunk, 0, this.tailChunk.length);
+            }
+
+            // create return value
+            byte[] row = new byte[ROW.size()];
+
+            // read key
+            System.arraycopy(headChunk, overhead, row, 0, ROW.width(0));
+
+            // read remaining values
+            System.arraycopy(tailChunk, 0, row, ROW.width(0), tailchunksize);
+
+            return row;
         }
 
         public synchronized void commit(int cachePriority) throws IOException {
@@ -820,12 +848,9 @@ public class kelondroRecords {
         }
 
         private byte[] trimCopy(byte[] a, int offset, int length) {
-            if (length > a.length - offset)
-                length = a.length - offset;
-            while ((length > 0) && (a[offset + length - 1] == 0))
-                length--;
-            if (length == 0)
-                return null;
+            if (length > a.length - offset) length = a.length - offset;
+            while ((length > 0) && (a[offset + length - 1] == 0)) length--;
+            if (length == 0) return null;
             byte[] b = new byte[length];
             System.arraycopy(a, offset, b, 0, length);
             return b;
@@ -842,7 +867,7 @@ public class kelondroRecords {
                     h = getOHHandle(i);
                     if (h == null) s = s + ":hNULL"; else s = s + ":h" + h.toString();
                 }
-                byte[][] content = getValues();
+                byte[][] content = getValueCells();
                 for (int i = 0; i < content.length; i++) s = s + ":" + ((content[i] == null) ? "NULL" : (new String(content[i], "UTF-8")).trim());
             } catch (IOException e) {
                 s = s + ":***LOAD ERROR***:" + e.getMessage();
@@ -1140,7 +1165,7 @@ public class kelondroRecords {
                 Node n = new Node(pos);
                 pos.index++;
                 while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
-                return n.getValues();
+                return n.getValueCells();
             } catch (IOException e) {
                 throw new kelondroException(filename, e.getMessage());
             }
@@ -1183,22 +1208,6 @@ public class kelondroRecords {
         if (a.length != b.length) return false;
         for (int n = 0; n < a.length; n++) if (a[n] != b[n]) return false;
         return true;
-    }
-    
-    public static byte[] long2bytes(long x, int length) {
-        byte[] b = new byte[length];
-        for (int i = length - 1; i >= 0; i--) {
-            b[i] = (byte) (x & 0XFF);
-            x >>= 8;
-        }
-        return b;
-    }
-    
-    public static long bytes2long(byte[] b) {
-        if (b == null) return 0;
-        long x = 0;
-        for (int i = 0; i < b.length; i++) x = (x << 8) | (0xff & b[i]);
-        return x;
     }
     
     public final static void NUL2bytes(byte[] b, int offset) {

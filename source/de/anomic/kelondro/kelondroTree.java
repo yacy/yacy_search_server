@@ -171,7 +171,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     }
     
     public final int cacheObjectChunkSize() {
-        return super.objectsize + 8 * super.columns();
+        return row().size() + 8 * super.columns();
     }
     
     public String[] cacheObjectStatus() {
@@ -232,7 +232,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         synchronized (writeSearchObj) {
             writeSearchObj.process(key);
             if (writeSearchObj.found()) {
-                result = writeSearchObj.getMatcher().getValues();
+                result = writeSearchObj.getMatcher().getValueCells();
                 if (objectCache != null) objectCache.put(key, result);
             } else {
                 result = null;
@@ -241,22 +241,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
         return result;
     }
-    
-    public long[] getLong(byte[] key) throws IOException {
-        byte[][] row = get(key);
-        long[] longs = new long[columns() - 1];
-        if (row == null) {
-            for (int i = 0; i < columns() - 1; i++) {
-                longs[i] = 0;
-            }            
-        } else {
-            for (int i = 0; i < columns() - 1; i++) {
-                longs[i] = bytes2long(row[i + 1]);
-            }
-        }
-        return longs;
-    }
-        
+
     public class Search {
 
         // a search object combines the results of a search in the tree, which are
@@ -386,26 +371,6 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	return (lc.equals(childn.handle()));
     }
     
-    public long[] putLong(byte[] key, long[] newlongs) throws IOException {
-        byte[][] newrow = new byte[newlongs.length + 1][];
-        newrow[0] = key;
-        for (int i = 0; i < newlongs.length; i++) {
-            newrow[i + 1] = long2bytes(newlongs[i], columnSize(i + 1));
-        }
-        byte[][] oldrow = put(newrow);
-        long[] oldlongs = new long[columns() - 1];
-        if (oldrow == null) {
-            for (int i = 0; i < columns() - 1; i++) {
-                oldlongs[i] = 0;
-            }            
-        } else {
-            for (int i = 0; i < columns() - 1; i++) {
-                oldlongs[i] = bytes2long(oldrow[i + 1]);
-            }
-        }
-        return oldlongs;
-    }
-    
     // Associates the specified value with the specified key in this map
     public byte[][] put(byte[][] newrow) throws IOException {
         byte[][] result = null;
@@ -418,7 +383,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             if (writeSearchObj.found()) {
                 // a node with this key exist. simply overwrite the content and return old content
                 Node e = writeSearchObj.getMatcher();
-                result = e.setValues(newrow);
+                result = e.setValueCells(newrow);
                 commitNode(e);
             } else if (writeSearchObj.isRoot()) {
                 // a node with this key does not exist and there is no node at all
@@ -427,7 +392,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     throw new kelondroException(filename, "tried to create root node twice");
                 // we dont have any Nodes in the file, so start here to create one
                 Node e = newNode();
-                e.setValues(newrow);
+                e.setValueCells(newrow);
                 // write the propetries
                 e.setOHByte(magic,   (byte) 1);
                 e.setOHByte(balance, (byte) 0);
@@ -449,7 +414,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 // create new node and assign values
                 Node parentNode = writeSearchObj.getParent();
                 Node theNode = newNode();
-                theNode.setValues(newrow);
+                theNode.setValueCells(newrow);
                 theNode.setOHByte(0, (byte) 1); // fresh magic
                 theNode.setOHByte(1, (byte) 0); // fresh balance
                 theNode.setOHHandle(parent, parentNode.handle());
@@ -682,7 +647,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             writeSearchObj.process(key);
             if (writeSearchObj.found()) {
                 Node result = writeSearchObj.getMatcher();
-                byte[][] values = result.getValues();
+                byte[][] values = result.getValueCells();
                 remove(result, writeSearchObj.getParent());
                 return values;
             } else {
@@ -1041,7 +1006,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             Iterator i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
             while ((rows.size() < count) && (i.hasNext())) {
                 n = (Node) i.next();
-                if (n != null) rows.put(new String(n.getKey()), n.getValues());
+                if (n != null) rows.put(new String(n.getKey()), n.getValueCells());
             }
         }
         return rows;
