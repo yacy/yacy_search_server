@@ -15,6 +15,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroSplittedTree;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.ymage.ymageChart;
 import de.anomic.ymage.ymagePNGEncoderAWT;
 import de.anomic.server.serverMemory;
@@ -131,10 +132,10 @@ public class dbtest {
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
             try {
-                final byte[][] entryBytes = getTable().get(entry.getKey());
+                final kelondroRow.Entry entryBytes = getTable().get(entry.getKey());
                 if (entryBytes != null) {
-                    System.out.println("ENTRY=" + new String(entryBytes[1]));
-                    final STEntry dbEntry = new STEntry(entryBytes[0], entryBytes[1]);
+                    System.out.println("ENTRY=" + entryBytes.getColString(1, null));
+                    final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0), entryBytes.getColBytes(1));
                     if (!dbEntry.isValid()) {
                         System.out.println(dbEntry);
                     } else {
@@ -353,7 +354,7 @@ final class dbTable implements kelondroIndex {
     }
     
     
-    public byte[][] get(byte[] key) throws IOException {
+    public kelondroRow.Entry get(byte[] key) throws IOException {
         return null;
     }
 

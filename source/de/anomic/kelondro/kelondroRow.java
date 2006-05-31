@@ -113,10 +113,12 @@ public class kelondroRow {
     }
     
     public Entry newEntry(byte[] rowinstance) {
+        if (rowinstance == null) return null;
         return new Entry(rowinstance);
     }
     
     public Entry newEntry(byte[][] cells) {
+        if (cells == null) return null;
         return new Entry(cells);
     }
     

@@ -54,6 +54,7 @@ import java.util.Iterator;
 
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.tools.bitfield;
 
@@ -178,18 +179,18 @@ public class plasmaCrawlEURL extends indexURL {
             // - look into the filed properties
             // if the url cannot be found, this returns null
             this.hash = hash;
-            byte[][] entry = urlHashCache.get(hash.getBytes());
+            kelondroRow.Entry entry = urlHashCache.get(hash.getBytes());
             if (entry != null) {
-                this.referrer = new String(entry[1], "UTF-8");
-                this.initiator = new String(entry[2], "UTF-8");
-                this.executor = new String(entry[3], "UTF-8");
-                this.url = new URL(new String(entry[4], "UTF-8").trim());
-                this.name = new String(entry[5], "UTF-8").trim();
-                this.initdate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[6], "UTF-8")));
-                this.trydate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[7], "UTF-8")));
-                this.trycount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[8], "UTF-8"));
-                this.failreason = new String(entry[9], "UTF-8");
-                this.flags = new bitfield(entry[10]);
+                this.referrer = entry.getColString(1, "UTF-8");
+                this.initiator = entry.getColString(2, "UTF-8");
+                this.executor = entry.getColString(3, "UTF-8");
+                this.url = new URL(entry.getColString(4, "UTF-8").trim());
+                this.name = entry.getColString(5, "UTF-8").trim();
+                this.initdate = new Date(86400000 * entry.getColLongB64E(6));
+                this.trydate = new Date(86400000 * entry.getColLongB64E(7));
+                this.trycount = (int) entry.getColLongB64E(8);
+                this.failreason = entry.getColString(9, "UTF-8");
+                this.flags = new bitfield(entry.getColBytes(10));
                 return;
             }
         }

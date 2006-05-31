@@ -63,6 +63,7 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexAssortment {
@@ -160,9 +161,9 @@ public final class plasmaWordIndexAssortment {
     public indexContainer remove(String wordHash) {
 		// deletes a word index from assortment database
 		// and returns the content record
-		byte[][] row = null;
+		kelondroRow.Entry row = null;
 		try {
-			row = assortments.remove(wordHash.getBytes());
+			row = assortments.row().newEntry(assortments.remove(wordHash.getBytes()));
 		} catch (IOException e) {
 			log.logSevere("removeAssortment/IO-error: " + e.getMessage()
 					+ " - reset assortment-DB " + assortments.file(), e);
@@ -180,7 +181,7 @@ public final class plasmaWordIndexAssortment {
     public boolean contains(String wordHash) {
         // gets a word index from assortment database
         // and returns the content record
-        byte[][] row = null;
+        kelondroRow.Entry row = null;
         try {
             row = assortments.get(wordHash.getBytes());
             return (row != null);
@@ -197,7 +198,7 @@ public final class plasmaWordIndexAssortment {
     public indexContainer get(String wordHash) {
         // gets a word index from assortment database
         // and returns the content record
-        byte[][] row = null;
+        kelondroRow.Entry row = null;
         try {
             row = assortments.get(wordHash.getBytes());
         } catch (IOException e) {
@@ -214,14 +215,14 @@ public final class plasmaWordIndexAssortment {
         return row2container(wordHash, row);
     }
     
-    public indexContainer row2container(String wordHash, byte[][] row) {
+    public indexContainer row2container(String wordHash, kelondroRow.Entry row) {
         if (row == null) return null;
-        final long updateTime = kelondroNaturalOrder.decodeLong(row[2]);
+        final long updateTime = row.getColLongB256(2);
         indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
         for (int i = 0; i < assortmentLength; i++) {
             container.add(
                     new indexURLEntry[] { new indexURLEntry(
-                            new String(row[3 + 2 * i]), new String(row[4 + 2 * i])) }, updateTime);
+                            new String(row.getColBytes(3 + 2 * i)), new String(row.getColBytes(4 + 2 * i))) }, updateTime);
         }
         return container;
     }

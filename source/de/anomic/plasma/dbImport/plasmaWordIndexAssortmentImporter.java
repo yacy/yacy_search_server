@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexAssortment;
 
@@ -93,10 +94,10 @@ public class plasmaWordIndexAssortmentImporter extends AbstractImporter implemen
                 this.wordEntityCount++;                
                 
                 // getting next entry as byte array
-                byte[][] row = (byte[][]) contentIter.next();
+                kelondroRow.Entry row = (kelondroRow.Entry) contentIter.next();
                 
                 // getting the word hash
-                String hash = new String(row[0]);
+                String hash = row.getColString(0, null);
                 
                 // creating an word entry container
                 indexContainer container;

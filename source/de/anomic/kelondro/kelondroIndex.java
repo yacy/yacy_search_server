@@ -57,7 +57,7 @@ public interface kelondroIndex {
     public int columns();
     public int columnSize(int column);
     
-    public byte[][] get(byte[] key) throws IOException;
+    public kelondroRow.Entry get(byte[] key) throws IOException;
     public byte[][] put(byte[][] row) throws IOException;
     public byte[][] remove(byte[] key) throws IOException;
     //public Iterator rows(boolean up, boolean rotating, byte[] startKey) throws IOException; // Objects are of type byte[][]

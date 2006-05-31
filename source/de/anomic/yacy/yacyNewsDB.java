@@ -52,6 +52,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 
@@ -167,6 +168,17 @@ public class yacyNewsDB {
             resetDB();
             return null;
         }
+    }
+
+    private static yacyNewsRecord b2r(kelondroRow.Entry b) {
+        if (b == null) return null;
+        return new yacyNewsRecord(
+            b.getColString(0, null),
+            b.getColString(1, null),
+            (b.empty(2)) ? null : yacyCore.parseUniversalDate(b.getColString(2, null), serverDate.UTCDiffString()),
+            (int) b.getColLongB64E(3),
+            serverCodings.string2map(b.getColString(4, null))
+        );
     }
 
     private static yacyNewsRecord b2r(byte[][] b) {

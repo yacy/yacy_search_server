@@ -126,7 +126,7 @@ public class kelondroTables {
         return table.get(key);
     }
 
-    public synchronized byte[][] selectByte(String tablename, String key) throws IOException {
+    public synchronized kelondroRow.Entry selectByte(String tablename, String key) throws IOException {
         kelondroTree tree = (kelondroTree) tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.selectByte: tree table '" + tablename + "' does not exist.");
         return tree.get(key.getBytes());

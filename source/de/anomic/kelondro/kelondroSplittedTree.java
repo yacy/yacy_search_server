@@ -141,7 +141,7 @@ public class kelondroSplittedTree implements kelondroIndex {
         return (int) order.partition(key, ff);
     }
     
-    public byte[][] get(byte[] key) throws IOException {
+    public kelondroRow.Entry get(byte[] key) throws IOException {
         return ktfs[partition(key)].get(key);
     }
 

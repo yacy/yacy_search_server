@@ -53,6 +53,7 @@ import de.anomic.index.indexURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexFile {
@@ -137,9 +138,9 @@ public final class plasmaWordIndexFile {
     }
 
     public indexURLEntry getEntry(String urlhash) throws IOException {
-        byte[][] n = theIndex.get(urlhash.getBytes());
+        kelondroRow.Entry n = theIndex.get(urlhash.getBytes());
         if (n == null) return null;
-        return new indexURLEntry(new String(n[0]), new String(n[1]));
+        return new indexURLEntry(n.getColString(0, null), n.getColString(1, null));
     }
     
     public boolean contains(String urlhash) throws IOException {

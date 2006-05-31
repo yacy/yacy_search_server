@@ -195,11 +195,11 @@ public class kelondroDyn extends kelondroTree {
         if (buffered != null) return buffered;
         
         // read from db
-        byte[][] result = get(key);
+        kelondroRow.Entry result = get(key);
         if (result == null) return null;
 
         // return result
-        return result[1];
+        return result.getColBytes(1);
     }
 
     private synchronized void setValueCached(byte[] key, byte[] value) throws IOException {

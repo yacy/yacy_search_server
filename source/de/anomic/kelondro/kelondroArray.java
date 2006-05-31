@@ -53,7 +53,7 @@ public class kelondroArray extends kelondroRecords {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
-    private static short thisOHHandles = 0; // and two handles overhead for a double-chained list
+    private static short thisOHHandles = 0; // and no handles
     
     public kelondroArray(File file, int[] columns, int intprops, boolean exitOnFail) {
         // this creates a new array
@@ -96,13 +96,13 @@ public class kelondroArray extends kelondroRecords {
         return row().newEntry(getNode(new Handle(index)).getValueRow());
     }
 
-    public synchronized int seti(int index, int value) throws IOException {
+    protected synchronized int seti(int index, int value) throws IOException {
         int before = getHandle(index).hashCode();
         setHandle(index, new Handle(value));
         return before;
     }
 
-    public synchronized int geti(int index) {
+    protected synchronized int geti(int index) {
         return getHandle(index).hashCode();
     }
 

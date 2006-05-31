@@ -57,6 +57,7 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 
@@ -507,20 +508,20 @@ public class plasmaCrawlNURL extends indexURL {
             // - look into the filed properties
             // if the url cannot be found, this returns null
             this.hash = hash;
-            byte[][] entry = urlHashCache.get(hash.getBytes());
+            kelondroRow.Entry entry = urlHashCache.get(hash.getBytes());
             if (entry != null) {
                 //try {
-                    this.initiator = new String(entry[1]);
-                    this.url = new URL(new String(entry[2]).trim());
-                    this.referrer = (entry[3] == null) ? dummyHash : new String(entry[3]);
-                    this.name = (entry[4] == null) ? "" : new String(entry[4]).trim();
-                    this.loaddate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[5])));
-                    this.profileHandle = (entry[6] == null) ? null : new String(entry[6]).trim();
-                    this.depth = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[7]));
-                    this.anchors = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[8]));
-                    this.forkfactor = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[9]));
-                    this.flags = new bitfield(entry[10]);
-                    this.handle = Integer.parseInt(new String(entry[11]));
+                    this.initiator = entry.getColString(1, null);
+                    this.url = new URL(entry.getColString(2, null).trim());
+                    this.referrer = (entry.empty(3)) ? dummyHash : entry.getColString(3, null);
+                    this.name = (entry.empty(4)) ? "" : entry.getColString(4, null).trim();
+                    this.loaddate = new Date(86400000 * entry.getColLongB64E(5));
+                    this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, null).trim();
+                    this.depth = (int) entry.getColLongB64E(7);
+                    this.anchors = (int) entry.getColLongB64E(8);
+                    this.forkfactor = (int) entry.getColLongB64E(9);
+                    this.flags = new bitfield(entry.getColBytes(10));
+                    this.handle = Integer.parseInt(entry.getColString(11, null), 16);
                     return;
                 //} catch (MalformedURLException e) {
                 //    throw new IOException("plasmaCrawlNURL/Entry: " + e);

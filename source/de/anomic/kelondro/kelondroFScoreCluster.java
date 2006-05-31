@@ -86,7 +86,7 @@ public class kelondroFScoreCluster {
     
     public void addScore(String word) throws IOException {
         word = word.toLowerCase();
-        byte[][] record = refcountDB.get(word.getBytes());
+        kelondroRow.Entry record = refcountDB.get(word.getBytes());
         long c;
         String cs;
         if (record == null) {
@@ -94,7 +94,7 @@ public class kelondroFScoreCluster {
             c = 0;
         } else {
             // delete old entry
-            c = kelondroBase64Order.enhancedCoder.decodeLong(new String(record[1]));
+            c = record.getColLongB64E(1);
             cs = kelondroBase64Order.enhancedCoder.encodeLong(c, countlength);
             countrefDB.remove((cs + word).getBytes());
             c++;
@@ -116,11 +116,11 @@ public class kelondroFScoreCluster {
         
     public long getScore(String word) throws IOException {
         word = word.toLowerCase();
-        byte[][] record = refcountDB.get(word.getBytes());
+        kelondroRow.Entry record = refcountDB.get(word.getBytes());
         if (record == null) {
             return 0;
         } else {
-            return kelondroBase64Order.enhancedCoder.decodeLong(new String(record[1]));
+            return record.getColLongB64E(1);
         }
     }
     

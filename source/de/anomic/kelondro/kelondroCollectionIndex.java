@@ -119,7 +119,7 @@ public class kelondroCollectionIndex {
         if (collection.size() > maxChunks) throw new kelondroOutOfLimitsException(maxChunks, collection.size());
 
         // first find an old entry, if one exists
-        byte[][] oldindexrow = index.get(key);
+        kelondroRow.Entry oldindexrow = index.get(key);
         
         // define the new storage array
         byte[][] newarrayrow = new byte[][]{key,
@@ -144,8 +144,8 @@ public class kelondroCollectionIndex {
             // overwrite the old collection
             // read old information
             //int chunksize  = (int) kelondroNaturalOrder.decodeLong(oldindexrow[1]); // needed only for migration
-            int chunkcount = (int) kelondroNaturalOrder.decodeLong(oldindexrow[2]);
-            int rownumber  = (int) kelondroNaturalOrder.decodeLong(oldindexrow[3]);
+            int chunkcount = (int) oldindexrow.getColLongB256(2);
+            int rownumber  = (int) oldindexrow.getColLongB256(3);
             int oldPartitionNumber = arrayIndex(chunkcount);
             int newPartitionNumber = arrayIndex(collection.size());
             
@@ -178,12 +178,12 @@ public class kelondroCollectionIndex {
     
     public kelondroCollection get(byte[] key) throws IOException {
         // find an entry, if one exists
-        byte[][] indexrow = index.get(key);
+        kelondroRow.Entry indexrow = index.get(key);
         if (indexrow == null) return null;
         // read values
-        int chunksize  = (int) kelondroNaturalOrder.decodeLong(indexrow[1]);
-        int chunkcount = (int) kelondroNaturalOrder.decodeLong(indexrow[2]);
-        int rownumber  = (int) kelondroNaturalOrder.decodeLong(indexrow[3]);
+        int chunksize  = (int) indexrow.getColLongB256(1);
+        int chunkcount = (int) indexrow.getColLongB256(2);
+        int rownumber  = (int) indexrow.getColLongB256(3);
         int partitionnumber = arrayIndex(chunkcount);
         // open array entry
         kelondroRow.Entry arrayrow = array[partitionnumber].get(rownumber);
@@ -196,12 +196,12 @@ public class kelondroCollectionIndex {
     
     public void remove(byte[] key) throws IOException {
         // find an entry, if one exists
-        byte[][] indexrow = index.get(key);
+        kelondroRow.Entry indexrow = index.get(key);
         if (indexrow == null) return;
         // read values
         //int chunksize  = (int) kelondroNaturalOrder.decodeLong(indexrow[1]);
-        int chunkcount = (int) kelondroNaturalOrder.decodeLong(indexrow[2]);
-        int rownumber  = (int) kelondroNaturalOrder.decodeLong(indexrow[3]);
+        int chunkcount = (int) indexrow.getColLongB256(2);
+        int rownumber  = (int) indexrow.getColLongB256(3);
         int partitionnumber = arrayIndex(chunkcount);
         // remove array entry
         array[partitionnumber].remove(rownumber);

@@ -40,6 +40,7 @@
 // done inside the copyright notive above. A re-distribution must contain
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -77,6 +78,7 @@ import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURLPool;
@@ -752,8 +754,8 @@ public final class yacy {
             while (contentIter.hasNext()) {
                 wordEntityCount++;
                 
-                byte[][] row = (byte[][]) contentIter.next();
-                String hash = new String(row[0]);
+                kelondroRow.Entry row = (kelondroRow.Entry) contentIter.next();
+                String hash = row.getColString(0, null);
                 indexContainer container = assortmentFile.row2container(hash, row);
                 wordEntryCount += container.size();
                 

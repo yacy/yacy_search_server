@@ -70,6 +70,7 @@ import de.anomic.index.indexURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
@@ -459,22 +460,22 @@ public final class plasmaCrawlLURL extends indexURL {
             // - look into the filed properties
             // if the url cannot be found, this returns null
             this.urlHash = urlHash;
-            byte[][] entry = plasmaCrawlLURL.this.urlHashCache.get(urlHash.getBytes());
+            kelondroRow.Entry entry = plasmaCrawlLURL.this.urlHashCache.get(urlHash.getBytes());
             if (entry == null) throw new IOException("url hash " + urlHash + " not found in LURL");
             try {
                 if (entry != null) {
-                    this.url = new URL(new String(entry[1], "UTF-8").trim());
-                    this.descr = (entry[2] == null) ? this.url.toString() : new String(entry[2], "UTF-8").trim();
-                    this.moddate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[3], "UTF-8")));
-                    this.loaddate = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[4], "UTF-8")));
-                    this.referrerHash = (entry[5] == null) ? dummyHash : new String(entry[5], "UTF-8");
-                    this.copyCount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[6], "UTF-8"));
-                    this.flags = new String(entry[7], "UTF-8");
-                    this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[8], "UTF-8"));
-                    this.language = new String(entry[9], "UTF-8");
-                    this.doctype = (char) entry[10][0];
-                    this.size = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[11], "UTF-8"));
-                    this.wordCount = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entry[12], "UTF-8"));
+                    this.url = new URL(entry.getColString(1, "UTF-8").trim());
+                    this.descr = (entry.empty(2)) ? this.url.toString() : entry.getColString(2, "UTF-8").trim();
+                    this.moddate = new Date(86400000 * entry.getColLongB64E(3));
+                    this.loaddate = new Date(86400000 * entry.getColLongB64E(4));
+                    this.referrerHash = (entry.empty(5)) ? dummyHash : entry.getColString(5, "UTF-8");
+                    this.copyCount = (int) entry.getColLongB64E(6);
+                    this.flags = entry.getColString(7, "UTF-8");
+                    this.quality = (int) entry.getColLongB64E(8);
+                    this.language = entry.getColString(9, "UTF-8");
+                    this.doctype = (char) entry.getColByte(10);
+                    this.size = (int) entry.getColLongB64E(11);
+                    this.wordCount = (int) entry.getColLongB64E(12);
                     this.snippet = null;
                     this.word = searchedWord;
                     this.stored = false;
@@ -828,10 +829,10 @@ public final class plasmaCrawlLURL extends indexURL {
                 String oldUrlStr = null;
                 try {
                     // getting the url data as byte array
-                    byte[][] entry = urlHashCache.get(urlHash.getBytes());
+                    kelondroRow.Entry entry = urlHashCache.get(urlHash.getBytes());
 
                     // getting the wrong url string
-                    oldUrlStr = new String(entry[1]).trim();
+                    oldUrlStr = entry.getColString(1, null).trim();
 
                     int pos = -1;
                     if ((pos = oldUrlStr.indexOf("://")) != -1) {
@@ -844,8 +845,8 @@ public final class plasmaCrawlLURL extends indexURL {
                         response res = theHttpc.HEAD(newUrl.getPath(), null);
 
                         if (res.statusCode == 200) {
-                            entry[1] = newUrl.toString().getBytes();
-                            urlHashCache.put(entry);
+                            entry.setCol(1, newUrl.toString().getBytes());
+                            urlHashCache.put(entry.getCols());
                             log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
                         } else {
                             remove(urlHash);

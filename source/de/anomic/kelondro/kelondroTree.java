@@ -221,6 +221,27 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     }
 
     // Returns the value to which this map maps the specified key.
+    public kelondroRow.Entry get(byte[] key) throws IOException {
+        // System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
+        kelondroRow.Entry result = (objectCache == null) ? null : (kelondroRow.Entry) objectCache.get(key);
+        if (result != null) {
+            //System.out.println("cache hit in objectCache, db:" + super.filename);
+            return result;
+        }
+        if ((objectCache != null) && (objectCache.has(key) == -1)) return null;
+        synchronized (writeSearchObj) {
+            writeSearchObj.process(key);
+            if (writeSearchObj.found()) {
+                result = row().newEntry(writeSearchObj.getMatcher().getValueRow());
+                if (objectCache != null) objectCache.put(key, result);
+            } else {
+                result = null;
+                if (objectCache != null) objectCache.hasnot(key);
+            }
+        }
+        return result;
+    }
+    /*
     public byte[][] get(byte[] key) throws IOException {
         // System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
         kelondroRow.Entry result = (objectCache == null) ? null : (kelondroRow.Entry) objectCache.get(key);
@@ -241,6 +262,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
         return (result == null) ? null : result.getCols();
     }
+*/
 
     public class Search {
 
@@ -365,10 +387,10 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     }
 
     public synchronized boolean isChild(Node childn, Node parentn, int child) {
-	if (childn == null) throw new IllegalArgumentException("isLeftChild: Node parameter is NULL");
-	Handle lc = parentn.getOHHandle(child);
-	if (lc == null) return false;
-	return (lc.equals(childn.handle()));
+        if (childn == null) throw new IllegalArgumentException("isLeftChild: Node parameter is NULL");
+        Handle lc = parentn.getOHHandle(child);
+        if (lc == null) return false;
+        return (lc.equals(childn.handle()));
     }
     
     // Associates the specified value with the specified key in this map
@@ -1360,8 +1382,8 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             }
 		} else if (args[0].equals("-g")) {
 		    kelondroTree fm = new kelondroTree(new File(args[1]), 0x100000, 10);
-		    byte[][] ret2 = fm.get(args[2].getBytes());
-		    ret = ((ret2 == null) ? null : ret2[1]); 
+		    kelondroRow.Entry ret2 = fm.get(args[2].getBytes());
+		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
 		} else if (args[0].equals("-n")) {
 		    kelondroTree fm = new kelondroTree(new File(args[1]), 0x100000, 10);

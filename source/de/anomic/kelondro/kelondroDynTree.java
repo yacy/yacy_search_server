@@ -187,7 +187,7 @@ public class kelondroDynTree {
             byte[][] entry = (byte[][]) tcache.get(key);
             if (entry == null) {
                 kelondroTree t = getTree(this.tablename);
-                entry = t.get(key);
+                entry = t.get(key).getCols();
                 t.close();
                 this.tcache.put(key, entry);
                 this.timestamp = System.currentTimeMillis();

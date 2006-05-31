@@ -1136,7 +1136,7 @@ public class kelondroRecords {
     }
     
     public class contentIterator implements Iterator {
-        // iterator that iterates all byte[][]-objects in the file
+        // iterator that iterates all kelondroRow.Entry-objects in the file
         // all records that are marked as deleted are ommitted
         // this is probably also the fastest way to iterate all objects
         
@@ -1167,7 +1167,7 @@ public class kelondroRecords {
                 Node n = new Node(pos);
                 pos.index++;
                 while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
-                return row().newEntry(n.getValueRow()).getCols();
+                return row().newEntry(n.getValueRow());
             } catch (IOException e) {
                 throw new kelondroException(filename, e.getMessage());
             }
