@@ -30,8 +30,8 @@ import java.io.IOException;
 
 public class kelondroFlexWidthArray implements kelondroArray {
 
-    private kelondroFixedWidthArray[] col;
-    private kelondroRow rowdef;
+    protected kelondroFixedWidthArray[] col;
+    protected kelondroRow rowdef;
     
     public kelondroFlexWidthArray(File path, String tablename, kelondroRow rowdef, boolean exitOnFail) throws IOException {
         this.rowdef = rowdef;
@@ -75,7 +75,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         }
     }
     
-    private static final String colfilename(int start, int end) {
+    protected static final String colfilename(int start, int end) {
         String f = Integer.toString(end);
         while (f.length() < 3) f = "0" + f;
         if (start == end) return "col." + f + ".list";
