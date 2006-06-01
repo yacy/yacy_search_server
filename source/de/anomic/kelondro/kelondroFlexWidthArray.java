@@ -40,12 +40,19 @@ public class kelondroFlexWidthArray implements kelondroArray {
         col = new kelondroFixedWidthArray[rowdef.columns()];
         String check = "";
         for (int i = 0; i < rowdef.columns(); i++) {
-            col = null;
+            col[i] = null;
             check += '_';
         }
         
         // open existing files
-        String[] files = path.list();
+        File tabledir = new File(path, tablename + ".table");
+        if (tabledir.exists()) {
+            if (!(tabledir.isDirectory())) throw new IOException("path " + tabledir.toString() + " must be a directory");
+        } else {
+            tabledir.mkdirs();
+            tabledir.mkdir();
+        }
+        String[] files = tabledir.list();
         for (int i = 0; i < files.length; i++) {
             if ((files[i].startsWith("col.") && (files[i].endsWith(".list")))) {
                 int colstart = Integer.parseInt(files[i].substring(4, 7));
@@ -55,7 +62,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
                 for (int j = colstart; j <= colend; j++) columns[j-colstart] = rowdef.width(j);
                 col[colstart] = new kelondroFixedWidthArray(new File(path, files[i]), columns, 0, true);
                 */
-                col[colstart] = new kelondroFixedWidthArray(new File(path, files[i]));
+                col[colstart] = new kelondroFixedWidthArray(new File(tabledir, files[i]));
                 for (int j = colstart; j <= colend; j++) check = check.substring(0, j) + "X" + check.substring(j + 1);
             }
         }
@@ -64,14 +71,17 @@ public class kelondroFlexWidthArray implements kelondroArray {
         int p, q;
         while ((p = check.indexOf('_')) >= 0) {
             q = p;
-            if (p != 0) while ((check.charAt(q) == '_') && (q <= check.length() - 1)) q++;
+            if (p != 0) {
+                while ((q <= check.length() - 1) && (check.charAt(q) == '_')) q++;
+                q--;
+            }
             // create new array file
             int columns[] = new int[q - p + 1];
             for (int j = p; j <= q; j++) {
                 columns[j - p] = rowdef.width(j);
                 check = check.substring(0, j) + "X" + check.substring(j + 1);
             }
-            col[p] = new kelondroFixedWidthArray(new File(path, colfilename(p, q)), columns, 0, true);
+            col[p] = new kelondroFixedWidthArray(new File(tabledir, colfilename(p, q)), columns, 16, true);
         }
     }
     
@@ -92,53 +102,71 @@ public class kelondroFlexWidthArray implements kelondroArray {
         return rowdef.columns();
     }
     
-    public synchronized kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException {
+    public kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException {
         int r = 0;
         kelondroRow.Entry e0, e1, p;
         p = rowdef.newEntry();
-        while (r < rowdef.columns()) {
-            e0 = col[r].row().newEntry(rowentry.bytes(), rowdef.colstart[r], rowdef.colstart[r] - rowdef.colstart[r + col[r].columns() - 1] + rowdef.width(r));
-            e1 = col[r].set(index, e0);
-            for (int i = 0; i < col[r].columns(); i++)
-                p.setCol(r + i, e1.getColBytes(i));
-            r = r + col[r].columns();
+        synchronized (col) {
+            while (r < rowdef.columns()) {
+                e0 = col[r].row().newEntry(
+                        rowentry.bytes(),
+                        rowdef.colstart[r],
+                        rowdef.colstart[r]
+                                - rowdef.colstart[r + col[r].columns() - 1]
+                                + rowdef.width(r));
+                e1 = col[r].set(index, e0);
+                for (int i = 0; i < col[r].columns(); i++)
+                    p.setCol(r + i, e1.getColBytes(i));
+                r = r + col[r].columns();
+            }
         }
         return p;
     }
     
-    public synchronized kelondroRow.Entry get(int index) throws IOException {
+    public kelondroRow.Entry get(int index) throws IOException {
         int r = 0;
         kelondroRow.Entry e, p;
         p = rowdef.newEntry();
-        while (r < rowdef.columns()) {
-            e = col[r].get(index);
-            for (int i = 0; i < col[r].columns(); i++)
-                p.setCol(r + i, e.getColBytes(i));
-            r = r + col[r].columns();
+        synchronized (col) {
+            while (r < rowdef.columns()) {
+                e = col[r].get(index);
+                for (int i = 0; i < col[r].columns(); i++)
+                    p.setCol(r + i, e.getColBytes(i));
+                r = r + col[r].columns();
+            }
         }
         return p;
     }
 
-    public synchronized int add(kelondroRow.Entry rowentry) throws IOException {
+    public int add(kelondroRow.Entry rowentry) throws IOException {
         kelondroRow.Entry e;
-        
-        e = col[0].row().newEntry(rowentry.bytes(), rowdef.colstart[0], rowdef.colstart[0] - rowdef.colstart[col[0].columns() - 1] + rowdef.width(0));
-        int index = col[0].add(e);
-        int r = col[0].columns();
-        
-        while (r < rowdef.columns()) {
-            e = col[r].row().newEntry(rowentry.bytes(), rowdef.colstart[r], rowdef.colstart[r] - rowdef.colstart[r + col[r].columns() - 1] + rowdef.width(r));
-            col[r].set(index, e);
-            r = r + col[r].columns();
+        int index = -1;
+        synchronized (col) {
+            e = col[0].row().newEntry(rowentry.bytes(), 0, rowdef.width(0));
+            index = col[0].add(e);
+            int r = col[0].columns();
+
+            while (r < rowdef.columns()) {
+                e = col[r].row().newEntry(
+                        rowentry.bytes(),
+                        rowdef.colstart[r],
+                        rowdef.colstart[r + col[r].columns() - 1]
+                                + rowdef.width(r + col[r].columns() - 1)
+                                - rowdef.colstart[r]);
+                col[r].set(index, e);
+                r = r + col[r].columns();
+            }
         }
         return index;
     }
 
-    public synchronized void remove(int index) throws IOException {
+    public void remove(int index) throws IOException {
         int r = 0;
-        while (r < rowdef.columns()) {
-            col[r].remove(index);
-            r = r + col[r].columns();
+        synchronized (col) {
+            while (r < rowdef.columns()) {
+                col[r].remove(index);
+                r = r + col[r].columns();
+            }
         }
     }
     

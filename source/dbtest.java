@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroSplittedTree;
 import de.anomic.kelondro.kelondroTree;
@@ -165,7 +166,7 @@ public class dbtest {
             profiler.start();
             
             // create the database access
-            if (dbe.equals("kelondroold")) {
+            if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
                 if (tablefile.exists()) {
                     table = new kelondroTree(tablefile, buffer, kelondroTree.defaultObjectCachePercent);
@@ -173,14 +174,17 @@ public class dbtest {
                     table = new kelondroTree(tablefile, buffer, kelondroTree.defaultObjectCachePercent, new int[]{keylength, valuelength, valuelength}, true);
                 }
             }
-            
-            if (dbe.equals("kelondro")) {
+            if (dbe.equals("kelondroSplittedTree")) {
                 File tablepath = new File(tablename).getParentFile();
                 table = kelondroSplittedTree.open(tablepath, tablename, kelondroBase64Order.enhancedCoder,
                                 buffer,
                                 8,
                                 new int[]{keylength, valuelength, valuelength}, 1, 80,
                                 true);
+            }
+            if (dbe.equals("kelondroFlexTable")) {
+                File tablepath = new File(tablename).getParentFile();
+                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), new kelondroRow(new int[]{keylength, valuelength, valuelength}), true);
             }
             if (dbe.equals("mysql")) {
                 table = new dbTable("mysql");
