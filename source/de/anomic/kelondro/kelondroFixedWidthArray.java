@@ -49,13 +49,13 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.IOException;
 
-public class kelondroArray extends kelondroRecords {
+public class kelondroFixedWidthArray extends kelondroRecords implements kelondroArray {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
     private static short thisOHHandles = 0; // and no handles
     
-    public kelondroArray(File file, int[] columns, int intprops, boolean exitOnFail) {
+    public kelondroFixedWidthArray(File file, int[] columns, int intprops, boolean exitOnFail) {
         // this creates a new array
         super(file, 0, thisOHBytes, thisOHHandles, columns, intprops, columns.length /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
         for (int i = 0; i < intprops; i++) try {
@@ -67,7 +67,7 @@ public class kelondroArray extends kelondroRecords {
         }
     }
 
-    public kelondroArray(File file) throws IOException{
+    public kelondroFixedWidthArray(File file) throws IOException{
         // this opens a file with an existing array
         super(file, 0);
     }
@@ -144,19 +144,19 @@ public class kelondroArray extends kelondroRecords {
                 // create <filename> <valuelen> 
                 File f = new File(args[1]);
                 if (f.exists()) f.delete();
-                kelondroArray fm = new kelondroArray(f, new int[]{Integer.parseInt(args[2])}, 2, true);
+                kelondroFixedWidthArray fm = new kelondroFixedWidthArray(f, new int[]{Integer.parseInt(args[2])}, 2, true);
                 fm.close();
             } else
             if ((args.length == 2) && (args[0].equals("-v"))) {
                 // view <filename>
-                kelondroArray fm = new kelondroArray(new File(args[1]));
+                kelondroFixedWidthArray fm = new kelondroFixedWidthArray(new File(args[1]));
                 fm.print();
                 fm.print(true);
                 fm.close();
             } else
             if ((args.length == 3) && (args[0].equals("-g"))) {
                 // get <filename> <index> 
-                kelondroArray fm = new kelondroArray(new File(args[1]));
+                kelondroFixedWidthArray fm = new kelondroFixedWidthArray(new File(args[1]));
                 kelondroRow.Entry row = fm.get(Integer.parseInt(args[2]));
                 for (int j = 0; j < fm.columns(); j++) System.out.print(row.getColString(j, null) + " ");
                 System.out.println();
@@ -164,14 +164,14 @@ public class kelondroArray extends kelondroRecords {
             } else
             if ((args.length == 4) && (args[0].equals("-s"))) {
                 // set <filename> <index> <value>
-                kelondroArray fm = new kelondroArray(new File(args[1]));
+                kelondroFixedWidthArray fm = new kelondroFixedWidthArray(new File(args[1]));
                 kelondroRow.Entry row = fm.row().newEntry(new byte[][]{args[3].getBytes()});
                 fm.set(Integer.parseInt(args[2]), row);
                 fm.close();
             } else
             if ((args.length == 3) && (args[0].equals("-a"))) {
                 // add <filename> <value>
-                kelondroArray fm = new kelondroArray(new File(args[1]));
+                kelondroFixedWidthArray fm = new kelondroFixedWidthArray(new File(args[1]));
                 kelondroRow.Entry row = fm.row().newEntry(new byte[][] {args[2].getBytes()});
                 int index = fm.add(row);
                 System.out.println("Added to row " + index);
@@ -179,14 +179,14 @@ public class kelondroArray extends kelondroRecords {
             } else
             if ((args.length == 3) && (args[0].equals("-d"))) {
                 // delete <filename> <index>
-                kelondroArray fm = new kelondroArray(new File(args[1]));
+                kelondroFixedWidthArray fm = new kelondroFixedWidthArray(new File(args[1]));
                 fm.remove(Integer.parseInt(args[2]));
                 fm.close();
             } else
             if ((args.length == 1) && (args[0].equals("-test"))) {
                 File testfile = new File("test.array");
                 if (testfile.exists()) testfile.delete();
-                kelondroArray fm = new kelondroArray(testfile, new int[]{30, 50}, 9, true);
+                kelondroFixedWidthArray fm = new kelondroFixedWidthArray(testfile, new int[]{30, 50}, 9, true);
                 for (int i = 0; i < 100; i++) {
                     fm.set(i, fm.row().newEntry(new byte[][]{("name" + i).getBytes(), ("value" + i).getBytes()}));
                 }

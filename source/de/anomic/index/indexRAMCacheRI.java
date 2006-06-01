@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroArray;
+import de.anomic.kelondro.kelondroFixedWidthArray;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -93,8 +93,8 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         log.logConfig("creating dump for index cache, " + wCache.size() + " words (and much more urls)");
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (indexDumpFile.exists()) indexDumpFile.delete();
-        kelondroArray dumpArray = null;
-            dumpArray = new kelondroArray(indexDumpFile, plasmaWordIndexAssortment.bufferStructureBasis, 0, false);
+        kelondroFixedWidthArray dumpArray = null;
+            dumpArray = new kelondroFixedWidthArray(indexDumpFile, plasmaWordIndexAssortment.bufferStructureBasis, 0, false);
             long startTime = System.currentTimeMillis();
             long messageTime = System.currentTimeMillis() + 5000;
             long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
@@ -173,7 +173,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     private long restore() throws IOException {
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (!(indexDumpFile.exists())) return 0;
-        kelondroArray dumpArray = new kelondroArray(indexDumpFile);
+        kelondroFixedWidthArray dumpArray = new kelondroFixedWidthArray(indexDumpFile);
         log.logConfig("restore array dump of index cache, " + dumpArray.size() + " word/URL relations");
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;

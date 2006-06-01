@@ -134,7 +134,7 @@ import java.io.IOException;
 
 public class kelondroHashtable {
     
-    private kelondroArray hashArray;
+    private kelondroFixedWidthArray hashArray;
     private int offset;
     private int maxk;
     private int maxrehash;
@@ -152,7 +152,7 @@ public class kelondroHashtable {
         // this number is needed to omit grow of the table in case of re-hashing
         // the maxsize is re-computed to a virtual folding height and will result in a tablesize
         // less than the given maxsize. The actual maxsize can be retrieved by maxsize()
-        this.hashArray = new kelondroArray(file, extCol(columns), 6, exitOnFail);
+        this.hashArray = new kelondroFixedWidthArray(file, extCol(columns), 6, exitOnFail);
         this.offset = offset;
         this.maxk = kelondroMSetTools.log2a(maxsize); // equal to |log2(maxsize)| + 1
         if (this.maxk >= kelondroMSetTools.log2a(maxsize + power2(offset + 1) + 1) - 1) this.maxk--;
@@ -173,7 +173,7 @@ public class kelondroHashtable {
 
     public kelondroHashtable(File file) throws IOException{
 	// this opens a file with an existing hashtable
-	this.hashArray = new kelondroArray(file);
+	this.hashArray = new kelondroFixedWidthArray(file);
         this.offset    = hashArray.geti(0);
         this.maxk      = hashArray.geti(1);
         this.maxrehash = hashArray.geti(2);

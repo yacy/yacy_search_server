@@ -37,7 +37,7 @@ public class kelondroCollectionIndex {
     private int chunksize;
     private int partitions;
     private int maxChunks;
-    private kelondroArray[] array;
+    private kelondroFixedWidthArray[] array;
     private int[] arrayCapacity;
     
     private static File arrayFile(File path, String filenameStub, int loadfactor, int chunksize, int partitionNumber) {
@@ -75,7 +75,7 @@ public class kelondroCollectionIndex {
         index = new kelondroSplittedTree(path, filenameStub, indexOrder, buffersize, 8, columns, 1, 80, true);
 
         // create array files
-        this.array = new kelondroArray[partitions];
+        this.array = new kelondroFixedWidthArray[partitions];
         this.arrayCapacity = new int[partitions];
         
         // open array files
@@ -89,11 +89,11 @@ public class kelondroCollectionIndex {
         this.maxChunks = load;
     }
     
-    private kelondroArray openArrayFile(int genericChunkSize, int partitionNumber) throws IOException {
+    private kelondroFixedWidthArray openArrayFile(int genericChunkSize, int partitionNumber) throws IOException {
         File f = arrayFile(path, filenameStub, loadfactor, genericChunkSize, partitionNumber);
         
         if (f.exists()) {
-            return new kelondroArray(f);
+            return new kelondroFixedWidthArray(f);
         } else {
             int load = 1; for (int i = 0; i < partitionNumber; i++) load = load * loadfactor;
             int[] columns = new int[4];
@@ -103,7 +103,7 @@ public class kelondroCollectionIndex {
             columns[3] = 2; // last time wrote
             columns[4] = 2; // flag string, assigns collection order as currently stored in table
             columns[5] = load * genericChunkSize;
-            return new kelondroArray(f, columns, 0, true);
+            return new kelondroFixedWidthArray(f, columns, 0, true);
         }
     }
     

@@ -138,7 +138,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroTables;
+import de.anomic.kelondro.kelondroMapTable;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
@@ -201,7 +201,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaRankingDistribution   rankingOwnDistribution;
     public  plasmaRankingDistribution   rankingOtherDistribution;
     public  HashMap                     outgoingCookies, incomingCookies;
-    public  kelondroTables              facilityDB;
+    public  kelondroMapTable              facilityDB;
     public  plasmaParser                parser;
     public  long                        proxyLastAccess;
     public  yacyCore                    yc;

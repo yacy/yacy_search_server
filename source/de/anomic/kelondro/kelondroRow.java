@@ -38,11 +38,11 @@ public class kelondroRow {
     public static final int encoder_char   = 3;
     
     
-    private kelondroColumn[] row;
-    private int[] colstart;
-    private HashMap encodedFormConfiguration;
-    private int     encodedFormLength;
-    private int     objectsize;
+    private   kelondroColumn[] row;
+    protected int[]            colstart;
+    private   HashMap          encodedFormConfiguration;
+    private   int              encodedFormLength;
+    private   int              objectsize;
     
     public kelondroRow(kelondroColumn[] row) {
         this.row = row;
@@ -117,6 +117,11 @@ public class kelondroRow {
         return new Entry(rowinstance);
     }
     
+    public Entry newEntry(byte[] rowinstance, int start, int length) {
+        if (rowinstance == null) return null;
+        return new Entry(rowinstance);
+    }
+    
     public Entry newEntry(byte[][] cells) {
         if (cells == null) return null;
         return new Entry(cells);
@@ -139,6 +144,12 @@ public class kelondroRow {
                 System.arraycopy(rowinstance, 0, this.rowinstance, 0, rowinstance.length);
                 for (int i = rowinstance.length; i < objectsize; i++) this.rowinstance[i] = 0;
             }
+        }
+        
+        public Entry(byte[] rowinstance, int start, int length) {
+            this.rowinstance = new byte[length];
+            System.arraycopy(rowinstance, start, this.rowinstance, 0, length);
+            for (int i = rowinstance.length; i < objectsize; i++) this.rowinstance[i] = 0;
         }
         
         public Entry(byte[][] cols) {

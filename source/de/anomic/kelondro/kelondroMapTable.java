@@ -1,4 +1,4 @@
-// kelondroTables.java
+// kelondroapTable.java
 // -----------------------
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
@@ -48,12 +48,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class kelondroTables {
+public class kelondroMapTable {
     
     HashMap mTables, tTables, sTables;
     File tablesPath;
 
-    public kelondroTables(File tablesPath) {
+    public kelondroMapTable(File tablesPath) {
         this.mTables = new HashMap();
         this.tTables = new HashMap();
         this.sTables = new HashMap();
