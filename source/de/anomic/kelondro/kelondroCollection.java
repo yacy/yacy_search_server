@@ -85,6 +85,32 @@ public class kelondroCollection {
         }
     }
     
+    public long lastRead() {
+        return lastTimeRead;
+    }
+    
+    public long lastWrote() {
+        return lastTimeWrote;
+    }
+    
+    public byte[] get(int index) {
+        assert (index < chunkcount);
+        byte[] a = new byte[chunksize];
+        synchronized (chunkcache) {
+            System.arraycopy(chunkcache, index * chunksize, a, 0, chunksize);
+        }
+        return a;
+    }
+    
+    public byte[] get(byte[] key) {
+        assert (key.length <= chunksize);
+        synchronized (chunkcache) {
+            int i = find(key);
+            if (i >= 0) return get(i);
+        }
+        return null;
+    }
+    
     public void add(byte[] a) {
         assert (a.length <= chunksize);
         synchronized (chunkcache) {
