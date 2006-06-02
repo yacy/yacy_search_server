@@ -1364,115 +1364,115 @@ The URL that can be used to retrieve the uploaded seed file, like==URL adresa kt
 
 #--------------------------------------------------------
 #File: yacy/seedUpload/yacySeedUploadFtp.html
-Uploading via FTP:==Upload per FTP:
-This is the account for a FTP server where you can host a seed-list file.==Dies ist der Account f&uuml;r einen FTP-Server, auf dem Sie eine Seed-Liste bereitstellen k&ouml;nnen.
-If you set this, you will become a principal peer.==Wenn Sie das tun, werden Sie zum Principal-Peer.
-Your peer will then upload the seed-bootstrap information periodically,==Ihr Peer wird dann die Seed-Bootstrap Informationen periodisch hochladen,
-but only if there had been changes to the seed-list.==jedoch nur wenn &Auml;nderungen an der Seed-Liste existieren.
-The host where you have a FTP account, like==Der Host zu Ihrem FTP-Account, wie
-Path:==Pfad:
-The remote path on the FTP server, like==Der Remote-Pfad auf dem FTP-Server, wie
-Missing sub-directories are NOT created automatically.==Fehlende Unterverzeichnisse werden NICHT automatisch erstellt.
-Your log-in at the FTP server==Ihr Log-in auf dem FTP-Server
-Password:==Passwort:
-The password==Das Passwort
+Uploading via FTP:==Nahravanie cez FTP:
+This is the account for a FTP server where you can host a seed-list file.==Toto je ucet pre FTP server kde mozete dat k dispozicii seed-list subor.
+If you set this, you will become a principal peer.==AK tak urobite stanete sa Principal peerom.
+Your peer will then upload the seed-bootstrap information periodically,==Vas peer bude potom periodicky nahravat seed-bootstrap informacie,
+but only if there had been changes to the seed-list.==avsak len ak sa v seed-liste vyskytli zmeny.
+The host where you have a FTP account, like==Host na ktorom mate FTP ucet ako 
+Path:==Cesta:
+The remote path on the FTP server, like==Vzdialena cesta na FTP serveri, ako
+Missing sub-directories are NOT created automatically.==Chybajuce podadresare NEBUDU automaticky vytvorene.
+Your log-in at the FTP server==Vas log-in na FTP serveri
+Password:==Heslo:
+The password==Heslo
 
 #--------------------------------------------------------
 #File: yacy/seedUpload/yacySeedUploadFile.html
-Store into filesystem:==Ablegen im Dateisystem:
-You must configure this if you want to store the seed-list file onto the file system.==Sie m&uuml;ssen diese Einstellungen vornehmen, wenn Sie die Seed-Liste im Dateisystem ablegen wollen.
-File&nbsp;Location:==Speicherort:
-Here you can specify the path within the filesystem where the seed-list file should be stored.==Hier k&ouml;nnen Sie den Pfad im Dateisystem festlegen, in dem die Seed-Liste abgelegt werden soll.
+Store into filesystem:==Uloz na suborovy system:
+You must configure this if you want to store the seed-list file onto the file system.==Ak chcete ulozit seed-list subor na suborovy system musite nastavit nasledovne parametre.
+File&nbsp;Location:==Miesto ulozenia:
+Here you can specify the path within the filesystem where the seed-list file should be stored.==Tu mozete zadat cestu v suborovom systeme kde ma byt seed-list subor ulozeny.
 
 #-------------------------------------------------------
 #File: Settings_MessageForwarding.inc
-Message Forwarding==Nachrichten Weiterleitung
-With this settings you can activate or deactivate forwarding of yacy-messages via email.==Mit diesen Einstellungen k&ouml;nnen Sie die Weiterleitung von YaCy-Nachrichten per E-Mail aktivieren oder deaktivieren.
-Enable message forwarding:==Aktiviere Nachrichten Weiterleitung:
-Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
-Forwarding Command:==Weiterleitungskommando:
-The command-line program that should be used to forward the message.<br>e.g.:==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br>z.B.:
-Forwarding To:==Weiterleiten An:
-The recipient email-address.<br> e.g.:==Die E-Mail Adresse des Empf&auml;ngers.<br>z.B.:
-Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
+Message Forwarding==Presmerovanie sprav
+With this settings you can activate or deactivate forwarding of yacy-messages via email.==S tymito nastaveniami mozete zapnut alebo vypnut presmerovanie YaCy sprav cez email.
+Enable message forwarding:==Zapni presmerovanie sprav:
+Enabling/Disabling message forwarding via email.==Zapni/Vypni presmerovanie sprav cez email.
+Forwarding Command:==Prikaz presmerovania:
+The command-line program that should be used to forward the message.<br>e.g.:==Program prikazoveho riadku, ktory ma byt pouzity na presmerovanie sprav.<br>napr.:
+Forwarding To:==Presmeruj na:
+The recipient email-address.<br> e.g.:==Email adresa prijimatela.<br>napr.:
+Changes will take effect immediately.==Zmeny su okamzite ucinne.
 
 #-------------------------------------------------------
 #File: Settings_Parser.inc
-Content Parser Settings==Inhalt Parser Einstellungen
-With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen k&ouml;nnen Sie das Parsen zus&auml;tzlicher Dateitypen basierend auf ihren MIME-Typen erm&ouml;glichen.
-For a detailed description of the various MIME-types take a look at==F&uuml;r eine detailierte Beschreibung der verschiedenen MIME-Typen k&ouml;nnen Sie einen Blick auf
-http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
-Changes take effect immediately==&Auml;nderungen sind sofort wirksam
+Content Parser Settings==Nastavenia parsera obsahu
+With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==S tymito nastavenia mozete zapnut alebo vypnut parsovanie dodatocnych suborov na zaklade ich mime-typov.
+For a detailed description of the various MIME-types take a look at==Detailny popis rozlicnych mime-typov najdete na
+http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a>.
+Changes will take effect immediately.==Zmeny su okamzite ucinne.
 
 #-------------------------------------------------------
 #File: SettingsAck_p.html
 
-YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': Einstellung Verarbeitung
-Settings Receipt:==Einstellungen angenommen:
-No information has been submitted==Es wurden keine Informationen &uuml;bertragen.
-Nothing changed==Nichts wurde ver&auml;ndert.
-Error with submitted information.==Es gab einen Fehler bei der &Uuml;bertragung der Informationen.
-Nothing changed.==Nichts wurde ver&auml;ndert.
-The user name must be given.==Der User Name muss angegeben werden
-Your request cannot be processed.<br>Nothing changed.==Ihre Anfrage konnte nicht bearbeitet werden.<br>Nichts wurde ver&auml;ndert.
-The password redundancy check failed. You have probably misstyped your password.==Die Passwort&uuml;berpr&uuml;fung schlug fehl. Sie haben sich wahrscheinlich vertippt.
-Shutting down.</b><br>Application will terminate after working off all crawling tasks.==Runterfahren</b><br>Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
-Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
-Your new administration account name is \#\[user\]\#. The password has been accepted.<br>If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br>Wenn Sie zur&uuml;ck zu den Einstellungen gehen wollen, m&uuml;ssen Sie sich neu einloggen.
-Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden ge&auml;ndert.
-Your proxy account check has been disabled, since you did not supply a password.==
-The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
-The proxy port is:==Der Proxy Port ist:
-if you changed the Port or Port Forwarding Settings, you need to restart YaCy.==Wenn Sie den Port oder die Post Weiterleitungs ge&auml;ndert haben, m&uuml;ssen Sie YaCy neu starten.
-Your proxy access setting has been changed.==Ihre Proxy Zugangs Einstellung wurden ge&auml;ndert.
-Your new proxy account name is \#\[user\]\#. The password has been accepted.==Ihr neuer Proxy Account Name ist #[user]#. Ihr Passwort wurde akzeptiert.
-If you open any public web page through the proxy, you must log-in then.==
-Your server access filter is now set to #[filter]#
-Auto pop-up of the Status page is now <b>disabled</b>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <b>deaktiviert.</b>
-Auto pop-up of the Status page is now <b>enabled</b>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <b>aktiviert.</b>
-You are now permanently <b>online</b>.==Sie sind nun im <b>permanenten Online Modus</b>.
-After a short while you should see the effect on the====Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
-status</a> page.==Status-Seite</a> sehen.
-The Peer Name is:==Der Name dieses Peers ist:
-Your static Ip\(or DynDns\) is:==Ihre statische IP(oder DynDns) ist:
-Seed Settings changed.\#\(success\)\#::You are now a principal peer.==Seed Einstellungen wurden ge&auml;ndert.#(success)#::Sie sind nun ein Principal Peer.
-Seed Settings changed, but something is wrong.==Seed Einstellungen wurden ge&auml;ndert, aber etwas war falsch.
-Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
-Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zur&uuml;ck und modifizieren Sie die Daten.
-The remote-proxy setting has been changed==Die remote-proxy Einstellungen wurden ge&auml;ndert.
-The new setting is effective immediately, you don't need to re-start.
-The submitted peer name is already used by another peer. Please choose a different name.</b> The Peer name has not been changed.
-Your Peer Language is:==Ihre Peer Sprache ist:
-The submitted peer name is not well-formed. Please choose a different name.</b> The Peer name has not been changed.
-Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
-The new parser settings where changed successfully.==Die neuen Parser Einstellungen wurden erfolgreich gespeichert.
-Parsing of the following mime-types was enabled:
-Seed Upload method was changed successfully.==Seed Upload Methode wurde erfolgreich ge&auml;ndert.
-You are now a principal peer.==Sie sind nun ein Principal Peer.
-Seed Upload Method:==Seed Upload Methode:
-Seed File URL:==Seed Datei URL:
-Your proxy networking settings have been changed.==Ihre Proxy Netzwerk Einstellungen wurden ge&auml;ndert.
-Transparent Proxy Support is:
-Connection Keep-Alive Support is:
-Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleitungseinstellungen haben sich ge&auml;ndert.
-Message Forwarding Support is:==Nachrichten Weiterleitungs Unterst&uml;tzung:
-Message Forwarding Command:==Nachrichten Weiterleitungskommando:
-Recipient Address:==Empf&auml;nger Adresse:
-Your port forwarding settings have been changed.
-Port Forwarding Support is:
-Port Forwarding Port:
-Port Forwarding Host:
-Port Forwarding uses proxy:
-Port Forwarding Settings changed, but something is wrong.
-Port Forwarding was deactivated automatically.
-Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zur&uuml;ck und modifizieren Sie die Daten.
-You are now <b>event-based online</b>.==Sie sind nun im  <b>aktivit&auml;tsbasierten Modus</b>.
-After a short while you should see the effect on the==Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
-You are now in <b>Cache Mode</b>.==Sie sind nun im <b>Cache Modus</b>.
-Only Proxy-cache ist available in this mode.==Nur der Proxy Cache ist in diesem Modus verf&uuml;gbar.
-After a short while you should see the effect on the==Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
-You can now go back to the==Sie k&ouml;nnen nun zur&uuml;ck zu den
-Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere &Auml;nderungen vorzunehmen.
+YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': Spracovanie nastaveni
+Settings Receipt:==Prijatie nastaveni:
+No information has been submitted==Ziadne informacie neboli prenesene:
+Nothing changed==Nic nebolo zmenene.
+Error with submitted information.==Pri prenose informacii doslo k chybe.
+Nothing changed==Nic nebolo zmenene.
+The user name must be given.==Meno uzivatela musi byt zadane
+Your request cannot be processed.<br>Nothing changed.==Vasa poziadavka nemoze byt vykonanana.<br>Nic nebolo zmenene.
+The password redundancy check failed. You have probably misstyped your password.==Chyba pri kontrole hesla. Pravdepodobne preklep.
+Shutting down.</b><br>Application will terminate after working off all crawling tasks.==Vypnut</b><br>Aplikacia bude ukoncena po ukonceni vsetkych crawlov.
+Your administration account setting has been made.==Nastavenia k uctu administratora boli ulozene.
+Your new administration account name is \#\[user\]\#. The password has been accepted.<br>If you go back to the Settings page, you must log-in again.==Novy nazov Vaseho administratorskeho uctu je #[user]#. Heslo bolo prijate.<br>Ak sa chcete vratit naspat na stranku nastaveni tak sa musite do YaCy znova prihlasit.
+Your proxy access setting has been changed.==Nastavenia pristupu k Vasemu proxy serveru boli zmenene.
+Your proxy account check has been disabled, since you did not supply a password.==Kontrola Vaseho proxy uctu bola vypnuta, pretoze ste nezadali heslo.
+The new proxy IP filter is set to==Novy proxy IP filter je nastaveny na
+The proxy port is:==Proxy port je:
+if you changed the Port or Port Forwarding Settings, you need to restart YaCy.==Musite restartovat YaCy, ak ste zmenili cislo portu alebo nastavenia presmerovania portu.
+Your proxy access setting has been changed.==Nastavenia pristupu k Vasemu proxy serveru boli zmenene.
+Your new proxy account name is \#\[user\]\#. The password has been accepted.==Novy nazov Vaseho proxy uctu je #[user]#. Heslo bolo prijate.
+If you open any public web page through the proxy, you must log-in then.==Musite sa prihlasit ak chcete otvorit nejaku verejnu web stranku cez proxy.
+Your server access filter is now set to \#\[filter\]\#==Filter Vaseho pristupu k serveru je nastaveny na #[filter]#
+Auto pop-up of the Status page is now <b>disabled</b>==Automaticky pop-up stranky stavu pri starte browsera je teraz <b>vypnuty</b>.
+Auto pop-up of the Status page is now <b>enabled</b>==Automaticky pop-up stranky stavu pri starte browsera je teraz <b>zapnuty</b>.
+You are now permanently <b>online</b>.==Nachadzate sa prave v <b>permanentnom online mode</b>.
+After a short while you should see the effect on the==Za kratky uvidite zmeny na 
+status</a> page.==stranke stavu</a>
+The Peer Name is:==Meno tohoto peera je:
+Your static Ip\(or DynDns\) is:==Vasa staticka IP adresa (alebo DynDns) je:
+Seed Settings changed.\#\(success\)\#::You are now a principal peer.==Nastavenia seed-u sa zmenili.#(success)#::Teraz ste Principal peerom.
+Seed Settings changed, but something is wrong.===Nastavenia seed-u sa zmenili avsak nieco je nespravne.
+Seed Uploading was deactivated automatically.==Nahravanie seed-u bolo automaticky deaktivovane.
+Please return to the settings page and modify the data.==Prosim vratte sa naspat do nastaveni a zmente udaje.
+The remote-proxy setting has been changed==Nastavenia vzdialeneho proxy servera boli zmenene.
+The new setting is effective immediately, you don't need to re-start.==Nove nastavenie je okamzite ucinne, nepotrebujete restart.
+The submitted peer name is already used by another peer. Please choose a different name.</b> The Peer name has not been changed.==Pozadovane meno peera je uz pouzite inym peerom. Vyberte prosim ine meno. Meno peera nebolo zmene.
+Your Peer Language is:==Jazyk Vaseho peera je:
+The submitted peer name is not well-formed. Please choose a different name.</b> The Peer name has not been changed.==Pozadova meno peera ma zly format. Vyberte prosim ine meno. Meno peera nebolo zmene.
+Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.==Meno peera nesmie obsahovat ine znaky ako (a-z, A-Z, 0-9, '-', '_') a nesmie byt dlhsie ako 80 znakov.
+The new parser settings where changed successfully.==Nove nastavenia parsera boli uspesne ulozene.
+Parsing of the following mime-types was enabled:==Aktivovane bolo parsovanie nasledujuci mime-typov:
+Seed Upload method was changed successfully.==Nahravacia seed metoda bola uspesne zmenena.
+You are now a principal peer.==Teraz ste Principal peer.
+Seed Upload Method:==Nahravacia seed metoda:
+Seed File URL:==URL adresa seed suboru:
+Your proxy networking settings have been changed.==Vase nastavenia proxi siete boli zmemene.
+Transparent Proxy Support is:==Transparentna podpora proxi je:
+Connection Keep-Alive Support is:==Podpora keep-alive spojenia je:
+Your message forwarding settings have been changed.==Nastavenia presmerovania Vasich sprav boli zmenene.
+Message Forwarding Support is:==Podpora presmerovania sprav je:
+Message Forwarding Command:==Prikaz presmerovania sprav:
+Recipient Address:==Adresa prijimatela:
+Your port forwarding settings have been changed.==Nastavenia presmerovania na porte boli zmenene.
+Port Forwarding Support is:==Podpora presmerovania na porte je:
+Port Forwarding Port:==Port presmerovania portu:
+Port Forwarding Host:==Host presmerovania portu:
+Port Forwarding uses proxy:==Presmerovanie portu pouziva proxy:
+Port Forwarding Settings changed, but something is wrong.==Nastavenia presmerovania portu boli zmenene, avsak nieco je nespravne.
+Port Forwarding was deactivated automatically.==Presmerovanie portu bolo automaticky vypnute.
+Please return to the settings page and modify the data.==Prosim vratte sa naspat do nastaveni a zmente udaje.
+You are now <b>event-based online</b>.==Nachadzate sa v <b>aktivitou riadenom</b> mode.
+After a short while you should see the effect on the==Za kratky uvidite zmeny na 
+You are now in <b>Cache Mode</b>.==Nachadzate sa v <b>cache mode</b>.
+Only Proxy-cache ist available in this mode.==Iba proxy cache je v tomto mode dostupna.
+After a short while you should see the effect on the==Za kratky uvidite zmeny na 
+You can now go back to the==Mozete sa vratit do
+Settings</a> page if you want to make more changes.==Nastaveni</a> a vykonat dalsie zmeny.
 
 #-------------------------------------------------------
 #File: Settings_Admin.inc
