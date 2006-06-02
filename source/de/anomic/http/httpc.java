@@ -57,6 +57,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -64,7 +65,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -121,9 +125,9 @@ public final class httpc {
     static final HashMap reverseMappingCache = new HashMap();
 
     // the dns cache
-    private static final HashMap nameCacheHit = new HashMap();
-    public static final LinkedList nameCacheNoCachingPatterns = new LinkedList();
-    public static final HashSet nameCacheNoCachingList = new HashSet();
+    private static final Map nameCacheHit = Collections.synchronizedMap(new HashMap()); // a not-synchronized map resulted in deadlocks
+    public  static final List nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList());
+    private static final Set nameCacheNoCachingList = Collections.synchronizedSet(new HashSet());
     //private static HashSet nameCacheMiss = new HashSet();
 
     /**
