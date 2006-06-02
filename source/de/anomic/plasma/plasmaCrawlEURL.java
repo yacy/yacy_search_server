@@ -73,8 +73,8 @@ public class plasmaCrawlEURL extends indexURL {
             urlNameLength,           // the name of the url, from anchor tag <a>name</a>
             urlDateLength,           // the time when the url was first time appeared
             urlDateLength,           // the time when the url was last time tried to load
-	    urlRetryLength,          // number of load retries
-	    urlErrorLength,          // string describing load failure
+            urlRetryLength,          // number of load retries
+            urlErrorLength,          // string describing load failure
             urlFlagLength            // extra space
         };
         if (cachePath.exists()) try {
@@ -82,11 +82,11 @@ public class plasmaCrawlEURL extends indexURL {
             urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent);
         } catch (IOException e) {
             cachePath.delete();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
         } else {
             // create new cache
             cachePath.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
         }
     }
 
@@ -216,7 +216,7 @@ public class plasmaCrawlEURL extends indexURL {
                     this.failreason.getBytes(),
                     this.flags.getBytes()
 		    };
-            urlHashCache.put(entry);
+            urlHashCache.put(urlHashCache.row().newEntry(entry));
 	    } catch (IOException e) {
 		System.out.println("INTERNAL ERROR AT plasmaEURL:url2hash:" + e.toString());
 	    }

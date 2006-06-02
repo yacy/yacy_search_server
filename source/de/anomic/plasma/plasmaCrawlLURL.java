@@ -119,12 +119,12 @@ public final class plasmaCrawlLURL extends indexURL {
                 urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent);
             } catch (IOException e) {
                 cachePath.getParentFile().mkdirs();
-                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
+                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
             }
         } else {
             // create new cache
             cachePath.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
         }
 
         // init result stacks
@@ -575,7 +575,7 @@ public final class plasmaCrawlLURL extends indexURL {
                         kelondroBase64Order.enhancedCoder.encodeLong(size, urlSizeLength).getBytes(),
                         kelondroBase64Order.enhancedCoder.encodeLong(wordCount, urlWordCountLength).getBytes(),
                     };
-                    urlHashCache.put(entry);
+                    urlHashCache.put(urlHashCache.row().newEntry(entry));
                     serverLog.logFine("PLASMA","STORED new LURL " + url.toString());
                     this.stored = true;
                 } catch (Exception e) {
@@ -846,7 +846,7 @@ public final class plasmaCrawlLURL extends indexURL {
 
                         if (res.statusCode == 200) {
                             entry.setCol(1, newUrl.toString().getBytes());
-                            urlHashCache.put(entry.getCols());
+                            urlHashCache.put(entry);
                             log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
                         } else {
                             remove(urlHash);

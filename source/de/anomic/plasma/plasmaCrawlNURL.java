@@ -124,26 +124,27 @@ public class plasmaCrawlNURL extends indexURL {
         limitStack = new plasmaCrawlBalancer(limitStackFile, 0);
         overhangStack = new plasmaCrawlBalancer(overhangStackFile, 0);
         remoteStack = new plasmaCrawlBalancer(remoteStackFile, 0);
+        kelondroRow rowdef = new kelondroRow(new int[] {indexURL.urlHashLength});
         if (imageStackFile.exists()) try {
             imageStack = new kelondroStack(imageStackFile, 0);
         } catch (IOException e) {
-            imageStack = new kelondroStack(imageStackFile, 0, new int[] {indexURL.urlHashLength}, true);
+            imageStack = new kelondroStack(imageStackFile, 0, rowdef, true);
         } else {
-            imageStack = new kelondroStack(imageStackFile, 0, new int[] {indexURL.urlHashLength}, true);
+            imageStack = new kelondroStack(imageStackFile, 0, rowdef, true);
         }
         if (movieStackFile.exists()) try {
             movieStack = new kelondroStack(movieStackFile, 0);
         } catch (IOException e) {
-            movieStack = new kelondroStack(movieStackFile, 0, new int[] {indexURL.urlHashLength}, true);
+            movieStack = new kelondroStack(movieStackFile, 0, rowdef, true);
         } else {
-            movieStack = new kelondroStack(movieStackFile, 0, new int[] {indexURL.urlHashLength}, true);
+            movieStack = new kelondroStack(movieStackFile, 0, rowdef, true);
         }
         if (musicStackFile.exists()) try {
             musicStack = new kelondroStack(musicStackFile, 0);
         } catch (IOException e) {
-            musicStack = new kelondroStack(musicStackFile, 0, new int[] {indexURL.urlHashLength}, true);
+            musicStack = new kelondroStack(musicStackFile, 0, rowdef, true);
         } else {
-            musicStack = new kelondroStack(musicStackFile, 0, new int[] {indexURL.urlHashLength}, true);
+            musicStack = new kelondroStack(musicStackFile, 0, rowdef, true);
         }
 
         // init stack Index
@@ -168,11 +169,11 @@ public class plasmaCrawlNURL extends indexURL {
             urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent);
         } catch (IOException e) {
             cacheFile.delete();
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
         } else {
             // create new cache
             cacheFile.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, ce, true);
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
         }
     }
     
@@ -553,7 +554,7 @@ public class plasmaCrawlNURL extends indexURL {
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
                 };
-                urlHashCache.put(entry);
+                urlHashCache.put(urlHashCache.row().newEntry(entry));
             } catch (IOException e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", resetting NURL-DB");
                 e.printStackTrace();

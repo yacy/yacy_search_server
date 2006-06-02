@@ -142,7 +142,7 @@ public class kelondroHashtable {
     
     private static final byte[] dummyKey = kelondroBase64Order.enhancedCoder.encodeLong(0, 5).getBytes();
 
-    public kelondroHashtable(File file, int[] columns, int offset, int maxsize, int maxrehash, boolean exitOnFail) {
+    public kelondroHashtable(File file, kelondroRow rowdef, int offset, int maxsize, int maxrehash, boolean exitOnFail) {
 	// this creates a new hashtable
         // the key element is not part of the columns array
         // this is unlike the kelondroTree, where the key is part of a row
@@ -152,14 +152,14 @@ public class kelondroHashtable {
         // this number is needed to omit grow of the table in case of re-hashing
         // the maxsize is re-computed to a virtual folding height and will result in a tablesize
         // less than the given maxsize. The actual maxsize can be retrieved by maxsize()
-        this.hashArray = new kelondroFixedWidthArray(file, extCol(columns), 6, exitOnFail);
+        this.hashArray = new kelondroFixedWidthArray(file, extCol(rowdef), 6, exitOnFail);
         this.offset = offset;
         this.maxk = kelondroMSetTools.log2a(maxsize); // equal to |log2(maxsize)| + 1
         if (this.maxk >= kelondroMSetTools.log2a(maxsize + power2(offset + 1) + 1) - 1) this.maxk--;
         this.maxrehash = maxrehash;
         dummyRow = this.hashArray.row().newEntry();
         dummyRow.setCol(0, dummyKey);
-        for (int i = 0; i < hashArray.columns(); i++)
+        for (int i = 0; i < hashArray.row().columns(); i++)
         try {
             hashArray.seti(0, this.offset);
             hashArray.seti(1, this.maxk);
@@ -179,11 +179,11 @@ public class kelondroHashtable {
         this.maxrehash = hashArray.geti(2);
     }
     
-    private int[] extCol(int[] columns) {
-        int[] newCol = new int[columns.length + 1];
+    private kelondroRow extCol(kelondroRow rowdef) {
+        int[] newCol = new int[rowdef.columns() + 1];
         newCol[0] = 4;
-        System.arraycopy(columns, 0, newCol, 1, columns.length);
-        return newCol;
+        for (int i = 0; i < rowdef.columns(); i++) newCol[i + 1] = rowdef.width(i);
+        return new kelondroRow(newCol);
     } 
     
     public static int power2(int x) {
@@ -219,7 +219,7 @@ public class kelondroHashtable {
         
         // write row
         kelondroRow.Entry newhkrow = hashArray.row().newEntry();
-        newhkrow.setCol(0, hash.key());
+        newhkrow.setColLongB256(0, hash.key());
         newhkrow.setCol(1, rowentry.bytes());
         hashArray.set(rowNumber, newhkrow);
         return hashArray.row().newEntry(oldhkrow.getColBytes(1));

@@ -55,9 +55,9 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
     private static short thisOHHandles = 0; // and no handles
     
-    public kelondroFixedWidthArray(File file, int[] columns, int intprops, boolean exitOnFail) {
+    public kelondroFixedWidthArray(File file, kelondroRow rowdef, int intprops, boolean exitOnFail) {
         // this creates a new array
-        super(file, 0, thisOHBytes, thisOHHandles, columns, intprops, columns.length /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
+        super(file, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
         for (int i = 0; i < intprops; i++) try {
             setHandle(i, new Handle(0));
         } catch (IOException e) {
@@ -124,7 +124,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         for (int i = 0; i < size(); i++) {
             System.out.print("row " + i + ": ");
             row = get(i);
-            for (int j = 0; j < columns(); j++) System.out.print(((row.empty(j)) ? "NULL" : row.getColString(j, "UTF-8")) + ", ");
+            for (int j = 0; j < row.columns(); j++) System.out.print(((row.empty(j)) ? "NULL" : row.getColString(j, "UTF-8")) + ", ");
             System.out.println();
         }
         System.out.println("EndOfTable");
@@ -144,7 +144,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
                 // create <filename> <valuelen> 
                 File f = new File(args[1]);
                 if (f.exists()) f.delete();
-                kelondroFixedWidthArray fm = new kelondroFixedWidthArray(f, new int[]{Integer.parseInt(args[2])}, 2, true);
+                kelondroFixedWidthArray fm = new kelondroFixedWidthArray(f, new kelondroRow(new int[]{Integer.parseInt(args[2])}), 2, true);
                 fm.close();
             } else
             if ((args.length == 2) && (args[0].equals("-v"))) {
@@ -158,7 +158,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
                 // get <filename> <index> 
                 kelondroFixedWidthArray fm = new kelondroFixedWidthArray(new File(args[1]));
                 kelondroRow.Entry row = fm.get(Integer.parseInt(args[2]));
-                for (int j = 0; j < fm.columns(); j++) System.out.print(row.getColString(j, null) + " ");
+                for (int j = 0; j < fm.row().columns(); j++) System.out.print(row.getColString(j, null) + " ");
                 System.out.println();
                 fm.close();
             } else
@@ -186,7 +186,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
             if ((args.length == 1) && (args[0].equals("-test"))) {
                 File testfile = new File("test.array");
                 if (testfile.exists()) testfile.delete();
-                kelondroFixedWidthArray fm = new kelondroFixedWidthArray(testfile, new int[]{30, 50}, 9, true);
+                kelondroFixedWidthArray fm = new kelondroFixedWidthArray(testfile, new kelondroRow(new int[]{30, 50}), 9, true);
                 for (int i = 0; i < 100; i++) {
                     fm.set(i, fm.row().newEntry(new byte[][]{("name" + i).getBytes(), ("value" + i).getBytes()}));
                 }

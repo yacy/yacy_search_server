@@ -94,7 +94,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (indexDumpFile.exists()) indexDumpFile.delete();
         kelondroFixedWidthArray dumpArray = null;
-            dumpArray = new kelondroFixedWidthArray(indexDumpFile, plasmaWordIndexAssortment.bufferStructureBasis, 0, false);
+            dumpArray = new kelondroFixedWidthArray(indexDumpFile, new kelondroRow(plasmaWordIndexAssortment.bufferStructureBasis), 0, false);
             long startTime = System.currentTimeMillis();
             long messageTime = System.currentTimeMillis() + 5000;
             long wordsPerSecond = 0, wordcount = 0, urlcount = 0;

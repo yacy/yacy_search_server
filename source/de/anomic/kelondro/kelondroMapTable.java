@@ -87,7 +87,7 @@ public class kelondroMapTable {
         mTables.put(tablename, map);
     }
     
-    public void declareTree(String tablename, int[] columns, long buffersize /*bytes*/, boolean exitOnFail)  {
+    public void declareTree(String tablename, kelondroRow rowdef, long buffersize /*bytes*/, boolean exitOnFail)  {
         if (mTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareTree: table '" + tablename + "' declared already in other context.");
         if (tTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareTree: table '" + tablename + "' declared twice.");
         File tablefile = new File(tablesPath, "table." + tablename + ".tdb");
@@ -96,10 +96,10 @@ public class kelondroMapTable {
             Tree = new kelondroTree(tablefile, buffersize, kelondroTree.defaultObjectCachePercent);
         } catch (IOException e) {
             tablefile.getParentFile().mkdirs();
-            Tree = new kelondroTree(tablefile, buffersize, kelondroTree.defaultObjectCachePercent, columns, exitOnFail);
+            Tree = new kelondroTree(tablefile, buffersize, kelondroTree.defaultObjectCachePercent, rowdef, exitOnFail);
         } else {
             tablefile.getParentFile().mkdirs();
-            Tree = new kelondroTree(tablefile, buffersize, kelondroTree.defaultObjectCachePercent, columns, exitOnFail);
+            Tree = new kelondroTree(tablefile, buffersize, kelondroTree.defaultObjectCachePercent, rowdef, exitOnFail);
         }
         tTables.put(tablename, Tree);
     }
@@ -112,7 +112,7 @@ public class kelondroMapTable {
         mTables.put(tablename, table);
     }
     
-    public synchronized void update(String tablename, byte[][] row /* first element is the unique key = index */) throws IOException {
+    public synchronized void update(String tablename, kelondroRow.Entry row /* first element is the unique key = index */) throws IOException {
         kelondroTree tree = (kelondroTree) tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.update: tree table '" + tablename + "' does not exist.");
         tree.put(row);

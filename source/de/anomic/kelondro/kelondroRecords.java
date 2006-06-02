@@ -193,7 +193,7 @@ public class kelondroRecords {
     
     public kelondroRecords(File file, long buffersize /* bytes */,
                            short ohbytec, short ohhandlec,
-                           int[] columns, int FHandles, int txtProps, int txtPropWidth,
+                           kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
                            boolean exitOnFail) {
         // creates a new file
         // file: the file that shall be created
@@ -208,7 +208,7 @@ public class kelondroRecords {
             kelondroRA raf = new kelondroFileRA(this.filename);
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
-            init(raf, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth, buffersize / 10);
+            init(raf, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, buffersize / 10);
         } catch (IOException e) {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail)
@@ -219,11 +219,11 @@ public class kelondroRecords {
     
     public kelondroRecords(kelondroRA ra, long buffersize /* bytes */,
                            short ohbytec, short ohhandlec,
-                           int[] columns, int FHandles, int txtProps, int txtPropWidth,
+                           kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
                            boolean exitOnFail) {
         this.filename = null;
         try {
-            init(ra, ohbytec, ohhandlec, columns, FHandles, txtProps, txtPropWidth, buffersize / 10);
+            init(ra, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, buffersize / 10);
         } catch (IOException e) {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail) System.exit(-1);
@@ -232,7 +232,7 @@ public class kelondroRecords {
     }
    
     private void init(kelondroRA ra, short ohbytec, short ohhandlec,
-                      int[] columns, int FHandles, int txtProps, int txtPropWidth, long writeBufferSize) throws IOException {
+                      kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth, long writeBufferSize) throws IOException {
 
         // create new Chunked IO
         if (useWriteBuffer) {
@@ -242,16 +242,16 @@ public class kelondroRecords {
         }
         
         // create row
-        ROW = new kelondroRow(columns);
+        ROW = rowdef;
         
         // store dynamic run-time data
         this.overhead = ohbytec + 4 * ohhandlec;
-        this.recordsize = this.overhead + ROW.size();
-        this.headchunksize = overhead + columns[0];
+        this.recordsize = this.overhead + ROW.objectsize();
+        this.headchunksize = overhead + ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
 
         // store dynamic run-time seek pointers
-        POS_HANDLES = POS_COLWIDTHS + columns.length * 4;
+        POS_HANDLES = POS_COLWIDTHS + ROW.columns() * 4;
         POS_TXTPROPS = POS_HANDLES + FHandles * 4;
         POS_NODES = POS_TXTPROPS + txtProps * txtPropWidth;
 
@@ -410,7 +410,7 @@ public class kelondroRecords {
         // assign remaining values that are only present at run-time
         this.overhead = OHBYTEC + 4 * OHHANDLEC;
         this.recordsize = this.overhead;
-        this.recordsize = this.overhead + ROW.size();
+        this.recordsize = this.overhead + ROW.objectsize();
         this.headchunksize = this.overhead + this.ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
     }
@@ -751,13 +751,13 @@ public class kelondroRecords {
         */
         public byte[] setValueRow(byte[] row) throws IOException {
             // if the index is defined, then write values directly to the file, else only to the object
-            assert row.length == ROW.size();
+            assert row.length == ROW.objectsize();
             byte[] result = getValueRow(); // previous value (this loads the values if not already happened)
             
             // set values
             if (this.handle.index != NUL) {
                 setValue(row, 0, ROW.width(0), headChunk, overhead);
-                if (ROW.columns() > 0) setValue(row, ROW.width(0), ROW.size() - ROW.width(0), tailChunk, 0);
+                if (ROW.columns() > 1) setValue(row, ROW.width(0), ROW.objectsize() - ROW.width(0), tailChunk, 0);
             }
             this.headChanged = true;
             this.tailChanged = true;
@@ -805,7 +805,7 @@ public class kelondroRecords {
             }
 
             // create return value
-            byte[] row = new byte[ROW.size()];
+            byte[] row = new byte[ROW.objectsize()];
 
             // read key
             System.arraycopy(headChunk, overhead, row, 0, ROW.width(0));
@@ -1051,15 +1051,6 @@ public class kelondroRecords {
     public final kelondroRow row() {
         return this.ROW;
     }
-    
-    public final int columns() {
-        return this.ROW.columns();
-    }
-
-    public final int columnSize(int column) {
-        if ((column < 0) || (column >= this.ROW.columns())) return -1;
-        return ROW.width(column);
-    }
 
     private final long seekpos(Handle handle) {
         assert (handle.index >= 0): "handle index too low: " + handle.index;
@@ -1263,8 +1254,8 @@ public class kelondroRecords {
         System.out.println("  Data Offset: 0x" + Long.toHexString(POS_NODES));
         System.out.println("--");
         System.out.println("RECORDS");
-        System.out.print("  Columns    : " + columns() + " columns  {" + ROW.width(0));
-        for (int i = 1; i < columns(); i++) System.out.print(", " + ROW.width(i));
+        System.out.print("  Columns    : " + row().columns() + " columns  {" + ROW.width(0));
+        for (int i = 1; i < row().columns(); i++) System.out.print(", " + ROW.width(i));
         System.out.println("}");
         System.out.println("  Overhead   : " + this.overhead + " bytes  (" + OHBYTEC + " OH bytes, " + OHHANDLEC + " OH Handles)");
         System.out.println("  Recordsize : " + this.recordsize + " bytes");

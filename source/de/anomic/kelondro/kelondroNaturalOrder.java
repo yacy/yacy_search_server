@@ -56,25 +56,25 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         this.zero = null;
     }
     
-    public Object clone() {
+    public final Object clone() {
         kelondroNaturalOrder o = new kelondroNaturalOrder(this.asc);
         o.rotate(this.zero);
         return o;
     }
     
-    public static kelondroOrder bySignature(String signature) {
+    public final static kelondroOrder bySignature(String signature) {
         if (signature.equals("nd")) return new kelondroNaturalOrder(false);
         if (signature.equals("nu")) return new kelondroNaturalOrder(true);
         return null;
     }
     
-    public String signature() {
+    public final String signature() {
         if (!asc) return "nd";
         if ( asc) return "nu";
         return null;
     }
     
-    private static long cardinalI(byte[] key) {
+    private final static long cardinalI(byte[] key) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
         int p = 0;
@@ -84,7 +84,7 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         return c;
     }
     
-    public long cardinal(byte[] key) {
+    public final long cardinal(byte[] key) {
         if (this.zero == null) return cardinalI(key);
         long zeroCardinal = cardinalI(this.zero);
         long keyCardinal = cardinalI(key);
@@ -131,11 +131,11 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
     // is less than, equal to, or greater than the second.
     // two arrays are also equal if one array is a subset of the other's array
     // with filled-up char(0)-values
-    public int compare(byte[] a, byte[] b) {
+    public final int compare(byte[] a, byte[] b) {
         return (asc) ? compare0(a, b) : compare0(b, a);
     }
 
-    public int compare0(byte[] a, byte[] b) {
+    public final int compare0(byte[] a, byte[] b) {
         if (zero == null) return compares(a, b);
         // we have an artificial start point. check all combinations
         int az = compares(a, zero); // -1 if a < z; 0 if a == z; 1 if a > z

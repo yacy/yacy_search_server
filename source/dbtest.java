@@ -116,7 +116,7 @@ public class dbtest {
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
             try {
-                getTable().put(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() });
+                getTable().put(getTable().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
             } catch (IOException e) {
                 System.err.println(e);
                 e.printStackTrace();
@@ -166,12 +166,13 @@ public class dbtest {
             profiler.start();
             
             // create the database access
+            kelondroRow testRow = new kelondroRow(new int[]{keylength, valuelength, valuelength});
             if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
                 if (tablefile.exists()) {
                     table = new kelondroTree(tablefile, buffer, kelondroTree.defaultObjectCachePercent);
                 } else {
-                    table = new kelondroTree(tablefile, buffer, kelondroTree.defaultObjectCachePercent, new int[]{keylength, valuelength, valuelength}, true);
+                    table = new kelondroTree(tablefile, buffer, kelondroTree.defaultObjectCachePercent, testRow, true);
                 }
             }
             if (dbe.equals("kelondroSplittedTree")) {
@@ -179,7 +180,7 @@ public class dbtest {
                 table = kelondroSplittedTree.open(tablepath, tablename, kelondroBase64Order.enhancedCoder,
                                 buffer,
                                 8,
-                                new int[]{keylength, valuelength, valuelength}, 1, 80,
+                                testRow, 1, 80,
                                 true);
             }
             if (dbe.equals("kelondroFlexTable")) {
@@ -187,11 +188,11 @@ public class dbtest {
                 table = new kelondroFlexTable(tablepath, new File(tablename).getName(), new kelondroRow(new int[]{keylength, valuelength, valuelength}), true);
             }
             if (dbe.equals("mysql")) {
-                table = new dbTable("mysql");
+                table = new dbTable("mysql", testRow);
             }
             
             if (dbe.equals("pgsql")) {
-                table = new dbTable("pgsql");
+                table = new dbTable("pgsql", testRow);
             }
             
             long afterinit = System.currentTimeMillis();
@@ -210,7 +211,7 @@ public class dbtest {
                 long randomstart = Long.parseLong(args[4]);
                 Random random = new Random(randomstart);
                 for (int i = 0; i < count; i++) {
-                    table.put(new byte[][]{randomHash(random), dummyvalue1, dummyvalue2});
+                    table.put(table.row().newEntry(new byte[][]{randomHash(random), dummyvalue1, dummyvalue2}));
                     if (i % 500 == 0) {
                         System.out.println(i + " entries processed so far.");
                     }
@@ -305,8 +306,10 @@ final class dbTable implements kelondroIndex {
     private PreparedStatement sqlStatement;
     private int commandCount = 0;
     private int batchlimit = 1;
+    private kelondroRow rowdef;
     
-    public dbTable(String dbType) throws Exception {
+    public dbTable(String dbType, kelondroRow rowdef) throws Exception {
+        this.rowdef = rowdef;
         openDatabaseConnection(dbType);
     }
     
@@ -357,15 +360,18 @@ final class dbTable implements kelondroIndex {
         }
     }
     
+    public kelondroRow row() {
+        return this.rowdef;
+    }
     
     public kelondroRow.Entry get(byte[] key) throws IOException {
         return null;
     }
 
-    public byte[][] put(byte[][] row) throws IOException {
+    public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
         try {
-            this.sqlStatement.setString(1,new String(row[0]));
-            sqlStatement.setBytes(2,row[1]);
+            this.sqlStatement.setString(1, new String(row.getColString(0, null)));
+            sqlStatement.setBytes(2, row.getColBytes(1));
             sqlStatement.addBatch();
             commandCount++;
             
@@ -380,7 +386,7 @@ final class dbTable implements kelondroIndex {
         }
     }
 
-    public byte[][] remove(byte[] key) throws IOException {
+    public kelondroRow.Entry remove(byte[] key) throws IOException {
         // TODO Auto-generated method stub
         return null;
     }

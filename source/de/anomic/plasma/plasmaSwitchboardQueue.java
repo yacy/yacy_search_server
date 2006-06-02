@@ -80,22 +80,7 @@ public class plasmaSwitchboardQueue {
     }
 
     private void initQueueStack() {
-        if (sbQueueStackPath.exists()) try {
-            sbQueueStack = new kelondroStack(sbQueueStackPath, 0);
-        } catch (IOException e) {
-            sbQueueStackPath.delete();
-            sbQueueStack = new kelondroStack(sbQueueStackPath, 0, new int[] {
-                            indexURL.urlStringLength,
-                            indexURL.urlHashLength,
-                            11,
-                            1,
-                            yacySeedDB.commonHashLength,
-                            indexURL.urlCrawlDepthLength,
-                            indexURL.urlCrawlProfileHandleLength,
-                            indexURL.urlDescrLength
-                        }, true);
-        } else {
-            sbQueueStack = new kelondroStack(sbQueueStackPath, 0, new int[] {
+        kelondroRow rowdef = new kelondroRow(new int[] {
                 indexURL.urlStringLength,
                 indexURL.urlHashLength,
                 11,
@@ -104,7 +89,14 @@ public class plasmaSwitchboardQueue {
                 indexURL.urlCrawlDepthLength,
                 indexURL.urlCrawlProfileHandleLength,
                 indexURL.urlDescrLength
-            }, true);
+            });
+        if (sbQueueStackPath.exists()) try {
+            sbQueueStack = new kelondroStack(sbQueueStackPath, 0);
+        } catch (IOException e) {
+            sbQueueStackPath.delete();
+            sbQueueStack = new kelondroStack(sbQueueStackPath, 0, rowdef, true);
+        } else {
+            sbQueueStack = new kelondroStack(sbQueueStackPath, 0, rowdef, true);
         }
     }
     

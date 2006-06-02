@@ -30,7 +30,7 @@ public interface kelondroArray {
 
     public int size();
     
-    public int columns();
+    public kelondroRow row();
     
     public kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException;
 

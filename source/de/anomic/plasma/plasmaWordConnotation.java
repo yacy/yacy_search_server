@@ -48,8 +48,8 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDynTree;
+import de.anomic.kelondro.kelondroRow;
 
 public class plasmaWordConnotation {
     
@@ -62,19 +62,19 @@ public class plasmaWordConnotation {
         if (refDBfile.exists()) try {
             refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, fillChar);
         } catch (IOException e) {
-            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, wordlength, nodesize, new int[] {wordlength, countlength}, fillChar, true);
+            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, wordlength, nodesize, new kelondroRow(new int[] {wordlength, countlength}), fillChar, true);
         } else {
-            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, wordlength, nodesize, new int[] {wordlength, countlength}, fillChar, true);
+            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, wordlength, nodesize, new kelondroRow(new int[] {wordlength, countlength}), fillChar, true);
         }
     }
 
     private void addSingleRef(String word, String reference) throws IOException {
         //word = word.toLowerCase();
         //reference = reference.toLowerCase();
-        byte[][] record = refDB.get(word, reference.getBytes());
+        kelondroRow.Entry record = refDB.get(word, reference.getBytes());
         long c;
-        if (record == null) c = 0; else c = kelondroBase64Order.enhancedCoder.decodeLong(new String(record[1], "UTF-8"));
-        record[1] = kelondroBase64Order.enhancedCoder.encodeLong(c++, countlength).getBytes();
+        if (record == null) c = 0; else c = record.getColLongB64E(1);
+        record.setColLongB64E(1, c++);
         refDB.put(word, record);
     }
     

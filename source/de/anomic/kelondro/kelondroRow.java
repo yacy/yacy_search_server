@@ -73,7 +73,7 @@ public class kelondroRow {
         return this.row.length;
     }
     
-    public int size() {
+    public int objectsize() {
         return this.objectsize;
     }
     
@@ -164,6 +164,10 @@ public class kelondroRow {
             return rowinstance;
         }
         
+        public int columns() {
+            return row.length;
+        }
+        
         public boolean empty(int column) {
             return rowinstance[colstart[column]] == 0;
         }
@@ -181,10 +185,15 @@ public class kelondroRow {
             }
         }
         
-        public void setCol(int column, long cell) {
+        public void setColLongB256(int column, long cell) {
             kelondroNaturalOrder.encodeLong(cell, rowinstance, colstart[column], row[column].cellwidth());
         }
         
+        public void setColLongB64E(int column, long cell) {
+            kelondroBase64Order.enhancedCoder.encodeLong(cell, rowinstance, colstart[column], row[column].cellwidth());
+        }
+        
+        /*
         public byte[][] getCols() {
             byte[][] values = new byte[row.length][];
 
@@ -203,7 +212,7 @@ public class kelondroRow {
 
             return values;
         }
-        
+        */
         public String getColString(int column, String encoding) {
             int length = row[column].cellwidth();
             int offset = colstart[column];

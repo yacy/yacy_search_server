@@ -72,7 +72,7 @@ public class kelondroCollectionIndex {
         columns[2] = 4; // chunkcount (number of chunks in this collection)
         columns[3] = 4; // index (position in index file)
         columns[4] = 2; // update time in days since 1.1.2000
-        index = new kelondroSplittedTree(path, filenameStub, indexOrder, buffersize, 8, columns, 1, 80, true);
+        index = new kelondroSplittedTree(path, filenameStub, indexOrder, buffersize, 8, new kelondroRow(columns), 1, 80, true);
 
         // create array files
         this.array = new kelondroFixedWidthArray[partitions];
@@ -97,13 +97,13 @@ public class kelondroCollectionIndex {
         } else {
             int load = 1; for (int i = 0; i < partitionNumber; i++) load = load * loadfactor;
             int[] columns = new int[4];
-            columns[0] = index.columnSize(0); // add always the key
+            columns[0] = index.row().width(0); // add always the key
             columns[1] = 4; // chunkcount (raw format)
             columns[2] = 2; // last time read
             columns[3] = 2; // last time wrote
             columns[4] = 2; // flag string, assigns collection order as currently stored in table
             columns[5] = load * genericChunkSize;
-            return new kelondroFixedWidthArray(f, columns, 0, true);
+            return new kelondroFixedWidthArray(f, new kelondroRow(columns), 0, true);
         }
     }
     
@@ -134,12 +134,13 @@ public class kelondroCollectionIndex {
             // write a new entry in this array
             int newRowNumber = array[part].add(array[part].row().newEntry(newarrayrow));
             // store the new row number in the index
-            index.put(new byte[][]{key,
-                                   kelondroNaturalOrder.encodeLong(this.chunksize, 4),
-                                   kelondroNaturalOrder.encodeLong(collection.size(), 4),
-                                   kelondroNaturalOrder.encodeLong((long) newRowNumber, 4),
-                                   kelondroNaturalOrder.encodeLong(daysSince2000(System.currentTimeMillis()), 2)
-                                  });
+            kelondroRow.Entry e = index.row().newEntry();
+            e.setCol(0, key);
+            e.setColLongB256(1, this.chunksize);
+            e.setColLongB256(2, collection.size());
+            e.setColLongB256(3, (long) newRowNumber);
+            e.setColLongB256(4, daysSince2000(System.currentTimeMillis()));
+            index.put(e);
         } else {
             // overwrite the old collection
             // read old information
@@ -154,24 +155,26 @@ public class kelondroCollectionIndex {
                 // we don't need a new slot, just write in the old one
                 array[oldPartitionNumber].set(rownumber, array[oldPartitionNumber].row().newEntry(newarrayrow));
                 // update the index entry
-                index.put(new byte[][]{key,
-                                       kelondroNaturalOrder.encodeLong(this.chunksize, 4),
-                                       kelondroNaturalOrder.encodeLong(collection.size(), 4),
-                                       kelondroNaturalOrder.encodeLong((long) rownumber, 4),
-                                       kelondroNaturalOrder.encodeLong(daysSince2000(System.currentTimeMillis()), 2)
-                                      });
+                kelondroRow.Entry e = index.row().newEntry();
+                e.setCol(0, key);
+                e.setColLongB256(1, this.chunksize);
+                e.setColLongB256(2, collection.size());
+                e.setColLongB256(3, (long) rownumber);
+                e.setColLongB256(4, daysSince2000(System.currentTimeMillis()));
+                index.put(e);
             } else {
                 // we need a new slot, that means we must first delete the old entry
                 array[oldPartitionNumber].remove(rownumber);
                 // write a new entry in the other array
                 int newRowNumber = array[newPartitionNumber].add(array[newPartitionNumber].row().newEntry(newarrayrow));
                 // store the new row number in the index
-                index.put(new byte[][]{key,
-                                       kelondroNaturalOrder.encodeLong(this.chunksize, 4),
-                                       kelondroNaturalOrder.encodeLong(collection.size(), 4),
-                                       kelondroNaturalOrder.encodeLong((long) newRowNumber, 4),
-                                       kelondroNaturalOrder.encodeLong(daysSince2000(System.currentTimeMillis()), 2)
-                                      });
+                kelondroRow.Entry e = index.row().newEntry();
+                e.setCol(0, key);
+                e.setColLongB256(1, this.chunksize);
+                e.setColLongB256(2, collection.size());
+                e.setColLongB256(3, (long) newRowNumber);
+                e.setColLongB256(4, daysSince2000(System.currentTimeMillis()));
+                index.put(e);
             }
         }
     }

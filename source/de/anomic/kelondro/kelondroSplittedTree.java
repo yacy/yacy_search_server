@@ -75,25 +75,25 @@ public class kelondroSplittedTree implements kelondroIndex {
     public kelondroSplittedTree(File pathToFiles, String filenameStub, kelondroOrder objectOrder,
                             long buffersize,
                             int forkfactor,
-                            int[] columns,
+                            kelondroRow rowdef,
                             int txtProps, int txtPropsWidth,
                             boolean exitOnFail) {
         ktfs = new kelondroTree[forkfactor];
         File f;
         for (int i = 0; i < forkfactor; i++) {
-            f = dbFile(pathToFiles, filenameStub, forkfactor, columns.length, i);
+            f = dbFile(pathToFiles, filenameStub, forkfactor, rowdef.columns(), i);
             if (f.exists()) {
                 try {
                     ktfs[i] = new kelondroTree(f, buffersize/forkfactor, kelondroTree.defaultObjectCachePercent);
                     this.order = ktfs[i].order();
                 } catch (IOException e) {
                     ktfs[i] = new kelondroTree(f, buffersize/forkfactor, kelondroTree.defaultObjectCachePercent,
-                                               columns, objectOrder, txtProps, txtPropsWidth, exitOnFail);
+                            rowdef, objectOrder, txtProps, txtPropsWidth, exitOnFail);
                     this.order = objectOrder;
                 }
             } else {
                 ktfs[i] = new kelondroTree(f, buffersize/forkfactor, kelondroTree.defaultObjectCachePercent,
-                                           columns, objectOrder, txtProps, txtPropsWidth, exitOnFail);
+                        rowdef, objectOrder, txtProps, txtPropsWidth, exitOnFail);
                 this.order = objectOrder;
             }
         }
@@ -113,27 +113,23 @@ public class kelondroSplittedTree implements kelondroIndex {
     public static kelondroSplittedTree open(File pathToFiles, String filenameStub, kelondroOrder objectOrder,
                     long buffersize,
                     int forkfactor,
-                    int[] columns, int txtProps, int txtPropsWidth,
+                    kelondroRow rowdef, int txtProps, int txtPropsWidth,
                     boolean exitOnFail) throws IOException {
         // generated a new splittet tree if it not exists or
         // opens an existing one
-        if (existsAll(pathToFiles, filenameStub, forkfactor, columns.length)) {
-            return new kelondroSplittedTree(pathToFiles, filenameStub, objectOrder, buffersize, forkfactor, columns.length);
+        if (existsAll(pathToFiles, filenameStub, forkfactor, rowdef.columns())) {
+            return new kelondroSplittedTree(pathToFiles, filenameStub, objectOrder, buffersize, forkfactor, rowdef.columns());
         } else {
             return new kelondroSplittedTree(pathToFiles, filenameStub, objectOrder,
                             buffersize,
                             forkfactor,
-                            columns, txtProps, txtPropsWidth,
+                            rowdef, txtProps, txtPropsWidth,
                             exitOnFail);
         }
     }
     
-    public int columns() {
-        return ktfs[0].columns();
-    }
-
-    public int columnSize(int column) {
-        return ktfs[0].columnSize(column);
+    public kelondroRow row() {
+        return ktfs[0].row();
     }
     
     private int partition(byte[] key) {
@@ -145,11 +141,11 @@ public class kelondroSplittedTree implements kelondroIndex {
         return ktfs[partition(key)].get(key);
     }
 
-    public byte[][] put(byte[][] row) throws IOException {
-        return ktfs[partition(row[0])].put(row);
+    public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
+        return ktfs[partition(row.getColBytes(0))].put(row);
     }
 
-    public byte[][] remove(byte[] key) throws IOException {
+    public kelondroRow.Entry remove(byte[] key) throws IOException {
         return ktfs[partition(key)].remove(key);
     }
 

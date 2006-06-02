@@ -81,7 +81,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
                 columns[j - p] = rowdef.width(j);
                 check = check.substring(0, j) + "X" + check.substring(j + 1);
             }
-            col[p] = new kelondroFixedWidthArray(new File(tabledir, colfilename(p, q)), columns, 16, true);
+            col[p] = new kelondroFixedWidthArray(new File(tabledir, colfilename(p, q)), new kelondroRow(columns), 16, true);
         }
     }
     
@@ -94,12 +94,13 @@ public class kelondroFlexWidthArray implements kelondroArray {
         return "col." + f + ".list";
     }
     
-    public int size() {
-        return col[0].size();
+
+    public kelondroRow row() {
+        return rowdef;
     }
     
-    public int columns() {
-        return rowdef.columns();
+    public int size() {
+        return col[0].size();
     }
     
     public kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException {
@@ -112,12 +113,12 @@ public class kelondroFlexWidthArray implements kelondroArray {
                         rowentry.bytes(),
                         rowdef.colstart[r],
                         rowdef.colstart[r]
-                                - rowdef.colstart[r + col[r].columns() - 1]
+                                - rowdef.colstart[r + col[r].row().columns() - 1]
                                 + rowdef.width(r));
                 e1 = col[r].set(index, e0);
-                for (int i = 0; i < col[r].columns(); i++)
+                for (int i = 0; i < col[r].row().columns(); i++)
                     p.setCol(r + i, e1.getColBytes(i));
-                r = r + col[r].columns();
+                r = r + col[r].row().columns();
             }
         }
         return p;
@@ -130,9 +131,9 @@ public class kelondroFlexWidthArray implements kelondroArray {
         synchronized (col) {
             while (r < rowdef.columns()) {
                 e = col[r].get(index);
-                for (int i = 0; i < col[r].columns(); i++)
+                for (int i = 0; i < col[r].row().columns(); i++)
                     p.setCol(r + i, e.getColBytes(i));
-                r = r + col[r].columns();
+                r = r + col[r].row().columns();
             }
         }
         return p;
@@ -144,17 +145,17 @@ public class kelondroFlexWidthArray implements kelondroArray {
         synchronized (col) {
             e = col[0].row().newEntry(rowentry.bytes(), 0, rowdef.width(0));
             index = col[0].add(e);
-            int r = col[0].columns();
+            int r = col[0].row().columns();
 
             while (r < rowdef.columns()) {
                 e = col[r].row().newEntry(
                         rowentry.bytes(),
                         rowdef.colstart[r],
-                        rowdef.colstart[r + col[r].columns() - 1]
-                                + rowdef.width(r + col[r].columns() - 1)
+                        rowdef.colstart[r + col[r].row().columns() - 1]
+                                + rowdef.width(r + col[r].row().columns() - 1)
                                 - rowdef.colstart[r]);
                 col[r].set(index, e);
-                r = r + col[r].columns();
+                r = r + col[r].row().columns();
             }
         }
         return index;
@@ -165,7 +166,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         synchronized (col) {
             while (r < rowdef.columns()) {
                 col[r].remove(index);
-                r = r + col[r].columns();
+                r = r + col[r].row().columns();
             }
         }
     }
@@ -176,7 +177,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         for (int i = 0; i < size(); i++) {
             System.out.print("row " + i + ": ");
             row = get(i);
-            for (int j = 0; j < columns(); j++) System.out.print(((row.empty(j)) ? "NULL" : row.getColString(j, "UTF-8")) + ", ");
+            for (int j = 0; j < row().columns(); j++) System.out.print(((row.empty(j)) ? "NULL" : row.getColString(j, "UTF-8")) + ", ");
             System.out.println();
         }
         System.out.println("EndOfTable");

@@ -68,12 +68,12 @@ public final class kelondroStack extends kelondroRecords {
     private static int toor  = 1; // pointer for FHandles-array: pointer to root node
 
     public kelondroStack(File file, long buffersize, int key, int value, boolean exitOnFail) {
-        this(file, buffersize, new int[] { key, value }, exitOnFail);
+        this(file, buffersize, new kelondroRow(new int[] { key, value }), exitOnFail);
     }
 
-    public kelondroStack(File file, long buffersize, int[] columns, boolean exitOnFail) {
+    public kelondroStack(File file, long buffersize, kelondroRow rowdef, boolean exitOnFail) {
         // this creates a new stack
-        super(file, buffersize, thisOHBytes, thisOHHandles, columns, thisFHandles, columns.length /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
+        super(file, buffersize, thisOHBytes, thisOHHandles, rowdef, thisFHandles, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
         try {
             setHandle(root, null); // define the root value
             setHandle(toor, null); // define the toor value
@@ -107,7 +107,7 @@ public final class kelondroStack extends kelondroRecords {
         if (f.exists()) f.delete();
 
         // re-open a database with same settings as before
-        return new kelondroStack(f, bz, row.widths(), true);
+        return new kelondroStack(f, bz, row, true);
     }
     
     public class Counter implements Iterator {
@@ -307,10 +307,10 @@ public final class kelondroStack extends kelondroRecords {
                     st = new StringTokenizer(s, separator);
                     // buffer the entry
                     c = 0;
-                    while ((c < columns()) && (st.hasMoreTokens())) {
+                    while ((c < row().columns()) && (st.hasMoreTokens())) {
                         buffer.setCol(c++, st.nextToken().trim().getBytes());
                     }
-                    if ((st.hasMoreTokens()) || (c != columns())) {
+                    if ((st.hasMoreTokens()) || (c != row().columns())) {
                         System.err.println("inapropriate number of entries in line " + line);
                     } else {
                         push(buffer);
@@ -346,7 +346,7 @@ public final class kelondroStack extends kelondroRecords {
                         + hp(n.getOHHandle(left)) + ", right "
                         + hp(n.getOHHandle(right)));
                 System.out.print("  KEY:'" + r.getColString(0, null) + "'");
-                for (int j = 1; j < columns(); j++)
+                for (int j = 1; j < row().columns(); j++)
                     System.out.print(", V[" + j + "]:'" + r.getColString(j, null) + "'");
                 System.out.println();
             }
@@ -414,9 +414,7 @@ public final class kelondroStack extends kelondroRecords {
 		    // create <keylen> <valuelen> <filename>
 		    File f = new File(args[3]);
 		    if (f.exists()) f.delete();
-		    int[] lens = new int[2];
-		    lens[0] = Integer.parseInt(args[1]);
-		    lens[1] = Integer.parseInt(args[2]);
+		    kelondroRow lens = new kelondroRow(new int[]{Integer.parseInt(args[1]), Integer.parseInt(args[2])});
 		    kelondroStack fm = new kelondroStack(f, 0x100000, lens, true);
 		    fm.close();
 		} else if (args[0].equals("-p")) {

@@ -50,6 +50,7 @@ import java.util.Iterator;
 
 import de.anomic.yacy.yacyCore;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
@@ -80,15 +81,17 @@ public class yacyNewsDB {
             news = createDB(path, bufferkb);
         }
     }
+    
+    public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
+            new kelondroColumn(kelondroColumn.celltype_string, yacyNewsRecord.idLength(), "newsid", "id = created + originator"),
+            new kelondroColumn(kelondroColumn.celltype_string, yacyNewsRecord.categoryStringLength, "category", ""),
+            new kelondroColumn(kelondroColumn.celltype_string, yacyCore.universalDateShortPattern.length(), "received", ""),
+            new kelondroColumn(kelondroColumn.celltype_string, 2, "", ""),
+            new kelondroColumn(kelondroColumn.celltype_string, attributesMaxLength, "", ""),
+    });
 
     private static kelondroTree createDB(File path, int bufferkb) {
-        return new kelondroTree(path, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new int[] {
-                yacyNewsRecord.idLength(), // id = created + originator
-                yacyNewsRecord.categoryStringLength,    // category
-                yacyCore.universalDateShortPattern.length(), // received
-                2,
-                attributesMaxLength
-            }, true);
+        return new kelondroTree(path, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, rowdef, true);
     }
 
     private void resetDB() {
@@ -153,7 +156,7 @@ public class yacyNewsDB {
         }
 
         public Object next() {
-            return b2r((byte[][]) rowIterator.next());
+            return b2r((kelondroRow.Entry) rowIterator.next());
         }
 
         public void remove() {
@@ -181,6 +184,7 @@ public class yacyNewsDB {
         );
     }
 
+    /*
     private static yacyNewsRecord b2r(byte[][] b) {
         if (b == null) return null;
         return new yacyNewsRecord(
@@ -191,18 +195,18 @@ public class yacyNewsDB {
             serverCodings.string2map(new String(b[4]))
         );
     }
-
-    private static byte[][] r2b(yacyNewsRecord r) {
+*/
+    private kelondroRow.Entry r2b(yacyNewsRecord r) {
         if (r == null) return null;
         String attributes = r.attributes().toString();
         if (attributes.length() > attributesMaxLength) throw new IllegalArgumentException("attribute length=" + attributes.length() + " exceeds maximum size=" + attributesMaxLength);
-        byte[][] b = new byte[5][];
-        b[0] = r.id().getBytes();
-        b[1] = r.category().getBytes();
-        b[2] = (r.received() == null) ? null : yacyCore.universalDateShortString(r.received()).getBytes();
-        b[3] = kelondroBase64Order.enhancedCoder.encodeLong(r.distributed(), 2).getBytes();
-        b[4] = attributes.getBytes();
-        return b;
+        kelondroRow.Entry entry = news.row().newEntry();
+        entry.setCol(0, r.id().getBytes());
+        entry.setCol(1, r.category().getBytes());
+        entry.setCol(2, (r.received() == null) ? null : yacyCore.universalDateShortString(r.received()).getBytes());
+        entry.setCol(3, kelondroBase64Order.enhancedCoder.encodeLong(r.distributed(), 2).getBytes());
+        entry.setCol(4, attributes.getBytes());
+        return entry;
     }
 
 }

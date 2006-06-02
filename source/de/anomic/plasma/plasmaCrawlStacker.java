@@ -62,6 +62,7 @@ import de.anomic.http.httpc;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
@@ -452,23 +453,23 @@ public final class plasmaCrawlStacker {
             }
         } 
         
-        public stackCrawlMessage(String urlHash, byte[][] entryBytes) {
+        public stackCrawlMessage(String urlHash, kelondroRow.Entry entry) {
             if (urlHash == null) throw new NullPointerException();
-            if (entryBytes == null) throw new NullPointerException();
+            if (entry == null) throw new NullPointerException();
 
             try {
                 this.urlHash       = urlHash;
-                this.initiator     = new String(entryBytes[1], "UTF-8");
-                this.url           = new String(entryBytes[2], "UTF-8").trim();
-                this.referrerHash      = (entryBytes[3]==null) ? indexURL.dummyHash : new String(entryBytes[3], "UTF-8");
-                this.name          = (entryBytes[4] == null) ? "" : new String(entryBytes[4], "UTF-8").trim();
-                this.loaddate      = new Date(86400000 * kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[5], "UTF-8")));
-                this.profileHandle = (entryBytes[6] == null) ? null : new String(entryBytes[6], "UTF-8").trim();
-                this.depth         = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[7], "UTF-8"));
-                this.anchors       = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[8], "UTF-8"));
-                this.forkfactor    = (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(entryBytes[9], "UTF-8"));
-                this.flags         = new bitfield(entryBytes[10]);
-                this.handle        = Integer.parseInt(new String(entryBytes[11], "UTF-8"));
+                this.initiator     = entry.getColString(1, "UTF-8");
+                this.url           = entry.getColString(2, "UTF-8").trim();
+                this.referrerHash  = (entry.empty(3)) ? indexURL.dummyHash : entry.getColString(3, "UTF-8");
+                this.name          = (entry.empty(4)) ? "" : entry.getColString(4, "UTF-8").trim();
+                this.loaddate      = new Date(86400000 * entry.getColLongB64E(5));
+                this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, "UTF-8").trim();
+                this.depth         = (int) entry.getColLongB64E(7);
+                this.anchors       = (int) entry.getColLongB64E(8);
+                this.forkfactor    = (int) entry.getColLongB64E(9);
+                this.flags         = new bitfield(entry.getColBytes(10));
+                this.handle        = Integer.parseInt(new String(entry.getColBytes(11), "UTF-8"));
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new IllegalStateException(e.toString());
@@ -578,7 +579,7 @@ public final class plasmaCrawlStacker {
                     this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent);
                 } catch (IOException e) {
                     cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.ce, true);
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
                 }
                 try {
                     // loop through the list and fill the messageList with url hashs
@@ -600,7 +601,7 @@ public final class plasmaCrawlStacker {
                     // deleting old db and creating a new db
                     try {this.urlEntryCache.close();}catch(Exception ex){}
                     cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.ce, true);
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
                 } catch (IOException e) {
                     /* if we have an error, we start with a fresh database */
                     plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, IOException:" + e.getMessage() + ". Reseting DB.\n",e);
@@ -608,12 +609,12 @@ public final class plasmaCrawlStacker {
                     // deleting old db and creating a new db
                     try {this.urlEntryCache.close();}catch(Exception ex){}
                     cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.ce, true);
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
                 }
             } else {
                 // create new cache
                 cacheFile.getParentFile().mkdirs();
-                this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.ce, true);
+                this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
             }            
         }
         
@@ -634,7 +635,7 @@ public final class plasmaCrawlStacker {
                 
                 boolean insertionDoneSuccessfully = false;
                 synchronized(this.urlEntryHashCache) {                    
-                    byte[][] oldValue = this.urlEntryCache.put(newMessage.getBytes());                        
+                    kelondroRow.Entry oldValue = this.urlEntryCache.put(this.urlEntryCache.row().newEntry(newMessage.getBytes()));                        
                     if (oldValue == null) {
                         insertionDoneSuccessfully = this.urlEntryHashCache.add(newMessage.urlHash);
                     }
@@ -659,7 +660,7 @@ public final class plasmaCrawlStacker {
             this.writeSync.P();
             
             String urlHash = null;
-            byte[][] entryBytes = null;
+            kelondroRow.Entry entryBytes = null;
             stackCrawlMessage newMessage = null;
             try {
                 synchronized(this.urlEntryHashCache) {               
@@ -670,7 +671,7 @@ public final class plasmaCrawlStacker {
                 this.writeSync.V();
             }
             
-            newMessage = new stackCrawlMessage(urlHash,entryBytes);
+            newMessage = new stackCrawlMessage(urlHash, entryBytes);
             return newMessage;
         }
     }    

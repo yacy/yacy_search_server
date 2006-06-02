@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroException;
@@ -74,12 +75,14 @@ public class yacyNewsQueue {
             queueStack = createStack(path);
         }
     }
+    
+    public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
+            new kelondroColumn(kelondroColumn.celltype_string, yacyNewsRecord.idLength(), "newsid", "id = created + originator"),
+            new kelondroColumn(kelondroColumn.celltype_string, yacyCore.universalDateShortPattern.length(), "last touched", "")
+    });
 
     private static kelondroStack createStack(File path) {
-        return new kelondroStack(path, 0, new int[] {
-                yacyNewsRecord.idLength(), // id = created + originator
-                yacyCore.universalDateShortPattern.length() // last touched
-            }, true);
+        return new kelondroStack(path, 0, rowdef, true);
     }
 
     private void resetDB() {

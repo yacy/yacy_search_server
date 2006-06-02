@@ -53,7 +53,7 @@ import java.util.Iterator;
 public class kelondroDynTree {
     
     // basic data structures
-    private int[] columns;
+    private kelondroRow rowdef;
     private kelondroDyn table;
     private Hashtable treeRAHandles;
     private File file;
@@ -69,10 +69,10 @@ public class kelondroDynTree {
     private Hashtable buffer, cache;
     private long cycleBuffer;
     
-    public kelondroDynTree(File file, long buffersize, int keylength, int nodesize, int[] columns, char fillChar, boolean exitOnFail) {
+    public kelondroDynTree(File file, long buffersize, int keylength, int nodesize, kelondroRow rowdef, char fillChar, boolean exitOnFail) {
         // creates a new DynTree
         this.file = file;
-        this.columns = columns;
+        this.rowdef = rowdef;
         this.buffer = new Hashtable();
         this.cache = new Hashtable();
         //this.cycleCache = Long.MIN_VALUE;
@@ -97,8 +97,9 @@ public class kelondroDynTree {
         Iterator i = table.dynKeys(true, false);
         String onekey = (String) i.next();
         kelondroTree onetree = getTree(onekey);
-        this.columns = new int[onetree.columns()];
-        for (int j = 0; j < columns.length; j++) columns[j] = onetree.columnSize(j);
+        int[] columns = new int[onetree.row().columns()];
+        for (int j = 0; j < columns.length; j++) columns[j] = onetree.row().width(j);
+        this.rowdef = new kelondroRow(columns);
         closeTree(onekey);
     }
     
@@ -109,15 +110,6 @@ public class kelondroDynTree {
         table.close();
         if (size == 0) this.file.delete();
     }
-
-    /*
-    public void setReadCacheAttr(int maxcount, int maxsize, long maxage, long cycletime) {
-        maxcountCache = maxcount;
-        maxsizeCache = maxsize;
-        maxageCache = maxage;
-        cycletimeCache = cycletime;
-    }
-    */
     
     public void setWriteBufferAttr(int maxcount, int maxsize, long maxage, long cycletime) {
         maxcountBuffer = maxcount;
@@ -135,7 +127,7 @@ public class kelondroDynTree {
         kelondroRA ra = table.getRA(key); // works always, even with no-existing entry
         treeRAHandles.put(key, ra);
         try {
-            return new kelondroTree(ra, buffersize, kelondroTree.defaultObjectCachePercent, columns, false);
+            return new kelondroTree(ra, buffersize, kelondroTree.defaultObjectCachePercent, rowdef, false);
         } catch (RuntimeException e) {
             throw new IOException(e.getMessage());
         }
@@ -183,11 +175,11 @@ public class kelondroDynTree {
             this.timestamp = Long.MAX_VALUE; // to flag no-update
         }
         
-        public byte[][] get(byte[] key) throws IOException {
-            byte[][] entry = (byte[][]) tcache.get(key);
+        public kelondroRow.Entry get(byte[] key) throws IOException {
+            kelondroRow.Entry entry = (kelondroRow.Entry) tcache.get(key);
             if (entry == null) {
                 kelondroTree t = getTree(this.tablename);
-                entry = t.get(key).getCols();
+                entry = t.get(key);
                 t.close();
                 this.tcache.put(key, entry);
                 this.timestamp = System.currentTimeMillis();
@@ -195,8 +187,8 @@ public class kelondroDynTree {
             return entry;
         }
         
-        protected void put(byte[][] entry) { // this is only used internal
-            this.tcache.put(entry[0], entry);
+        protected void put(kelondroRow.Entry entry) { // this is only used internal
+            this.tcache.put(entry.getColBytes(0), entry);
             this.timestamp = System.currentTimeMillis();
         }
         
@@ -218,8 +210,8 @@ public class kelondroDynTree {
             this.timestamp = Long.MAX_VALUE; // to flag no-update
         }
         
-        public void put(byte[][] entry) {
-            this.tbuffer.put(entry[0], entry);
+        public void put(kelondroRow.Entry entry) {
+            this.tbuffer.put(entry.getColBytes(0), entry);
             this.timestamp = System.currentTimeMillis();
         }
         
@@ -233,11 +225,11 @@ public class kelondroDynTree {
             if (this.tbuffer.size() == 0) return;
             Enumeration e = this.tbuffer.keys();
             kelondroTree t = getTree(this.tablename);
-            byte[][] entry;
+            kelondroRow.Entry entry;
             byte[] key;
             while (e.hasMoreElements()) {
                 key = (byte[]) e.nextElement();
-                entry = (byte[][]) this.tbuffer.get(key);
+                entry = (kelondroRow.Entry) this.tbuffer.get(key);
                 t.put(entry);
             }
             t.close();
@@ -248,7 +240,7 @@ public class kelondroDynTree {
     
    
     // read cached
-    public synchronized byte[][] get(String tablename, byte[] key) throws IOException {
+    public synchronized kelondroRow.Entry get(String tablename, byte[] key) throws IOException {
         treeCache tc = (treeCache) cache.get(table);
         if (tc == null) {
             tc = new treeCache(tablename);
@@ -256,31 +248,9 @@ public class kelondroDynTree {
         }
         return tc.get(key);
     }
-
-    /*
-    // clean-up method for cache:
-    private void flushCache() {
-        if ((System.currentTimeMillis() - this.cycleCache < this.cycletimeCache) &&
-            (cache.size() < this.maxcountCache))  return;
-        this.cycleCache = System.currentTimeMillis();
-        // collect all caches which have a time > maxagecache
-        Enumeration e = cache.keys();
-        String tablename;
-        treeCache tc;
-        while (e.hasMoreElements()) {
-            tablename = (String) e.nextElement();
-            tc = (treeCache) cache.get(tablename);
-            if ((System.currentTimeMillis() - tc.timestamp > this.maxageCache) ||
-                (tc.cache.size() > this.maxsizeCache) ||
-                (cache.size() > this.maxcountCache)) {
-                cache.remove(tablename);
-            }
-        }
-    }
-    */
     
     // write buffered
-    public synchronized void put(String tablename, byte[][] newrow) {
+    public synchronized void put(String tablename, kelondroRow.Entry newrow) {
         treeBuffer tb = (treeBuffer) buffer.get(tablename);
         if (tb == null) {
             tb = new treeBuffer(tablename);
@@ -350,17 +320,18 @@ public class kelondroDynTree {
             File file = new File("D:\\bin\\testDyn.db");
             if (file.exists()) {
                 kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, '_');
-                System.out.println("opened: table keylength=" + dt.table.columnSize(0) + ", sectorsize=" + dt.table.columnSize(1) + ", " + dt.table.size() + " entries.");
+                System.out.println("opened: table keylength=" + dt.table.row().width(0) + ", sectorsize=" + dt.table.row().width(1) + ", " + dt.table.size() + " entries.");
             } else {
-                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 16, 512, new int[] {10,20,30}, '_', true);
+                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 16, 512, new kelondroRow(new int[] {10,20,30}), '_', true);
                 String name;
                 kelondroTree t;
-                byte[][] line = new byte[][] {"".getBytes(), "abc".getBytes(), "def".getBytes()};
+                kelondroRow.Entry line;
                 for (int i = 1; i < 100; i++) {
                     name = "test" + i;
                     t = dt.newTree(name);
+                    line = t.row().newEntry(new byte[][] {"".getBytes(), "abc".getBytes(), "def".getBytes()});
                     for (int j = 1; j < 10; j++) {
-                        line[0] = ("entry" + j).getBytes();
+                        line.setCol(0, ("entry" + j).getBytes());
                         t.put(line);
                     }
                     dt.closeTree(name);

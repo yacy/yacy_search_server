@@ -70,11 +70,11 @@ public class kelondroFScoreCluster {
         } catch (IOException e) {
             refcountDBfile.delete();
             countrefDBfile.delete();
-            refcountDB = new kelondroTree(refcountDBfile, 0x100000L, kelondroTree.defaultObjectCachePercent, new int[] {wordlength, countlength}, objectOrder, 1, countlength, exitOnFail);
-            countrefDB = new kelondroTree(countrefDBfile, 0x100000L, kelondroTree.defaultObjectCachePercent, new int[] {countlength + wordlength, 4}, objectOrder, 1, countlength, exitOnFail);
+            refcountDB = new kelondroTree(refcountDBfile, 0x100000L, kelondroTree.defaultObjectCachePercent, new kelondroRow(new int[] {wordlength, countlength}), objectOrder, 1, countlength, exitOnFail);
+            countrefDB = new kelondroTree(countrefDBfile, 0x100000L, kelondroTree.defaultObjectCachePercent, new kelondroRow(new int[] {countlength + wordlength, 4}), objectOrder, 1, countlength, exitOnFail);
         } else if ((!(refcountDBfile.exists())) && (!(countrefDBfile.exists()))) {
-            refcountDB = new kelondroTree(refcountDBfile, 0x100000L, kelondroTree.defaultObjectCachePercent, new int[] {wordlength, countlength}, objectOrder, 1, countlength, exitOnFail);
-            countrefDB = new kelondroTree(countrefDBfile, 0x100000L, kelondroTree.defaultObjectCachePercent, new int[] {countlength + wordlength, 4}, objectOrder, 1, countlength, exitOnFail);
+            refcountDB = new kelondroTree(refcountDBfile, 0x100000L, kelondroTree.defaultObjectCachePercent, new kelondroRow(new int[] {wordlength, countlength}), objectOrder, 1, countlength, exitOnFail);
+            countrefDB = new kelondroTree(countrefDBfile, 0x100000L, kelondroTree.defaultObjectCachePercent, new kelondroRow(new int[] {countlength + wordlength, 4}), objectOrder, 1, countlength, exitOnFail);
         } else {
             if (exitOnFail) {
                 System.exit(-1);

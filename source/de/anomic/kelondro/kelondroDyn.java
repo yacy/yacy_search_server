@@ -76,9 +76,9 @@ public class kelondroDyn extends kelondroTree {
             int nodesize, char fillChar, kelondroOrder objectOrder,
             boolean exitOnFail) {
         // creates a new dynamic tree
-        super(file, buffersize, kelondroTree.defaultObjectCachePercent, new int[] { key + counterlen, nodesize }, objectOrder, 1, 8, exitOnFail);
-        this.keylen = columnSize(0) - counterlen;
-        this.reclen = columnSize(1);
+        super(file, buffersize, kelondroTree.defaultObjectCachePercent, new kelondroRow(new int[] { key + counterlen, nodesize }), objectOrder, 1, 8, exitOnFail);
+        this.keylen = row().width(0) - counterlen;
+        this.reclen = row().width(1);
         this.fillChar = fillChar;
         this.segmentCount = 0;
         writeSegmentCount();
@@ -88,8 +88,8 @@ public class kelondroDyn extends kelondroTree {
     public kelondroDyn(File file, long buffersize, char fillChar) throws IOException {
         // this opens a file with an existing dynamic tree
         super(file, buffersize, kelondroTree.defaultObjectCachePercent);
-        this.keylen = columnSize(0) - counterlen;
-        this.reclen = columnSize(1);
+        this.keylen = row().width(0) - counterlen;
+        this.reclen = row().width(1);
         this.fillChar = fillChar;
         this.segmentCount = 0;
         buffer = new kelondroObjectBuffer(file.toString());
@@ -159,11 +159,11 @@ public class kelondroDyn extends kelondroTree {
             String k;
             String v;
             int c;
-            byte[][] nt;
+            kelondroRow.Entry nt;
             while (ri.hasNext()) {
-                nt = (byte[][]) ri.next();
+                nt = (kelondroRow.Entry) ri.next();
                 if (nt == null) throw new kelondroException(filename, "no more elements available");
-                g = nt[0];
+                g = nt.getColBytes(0);
                 if (g == null) return null;
                 k = new String(g, 0, keylen);
                 v = new String(g, keylen, counterlen);

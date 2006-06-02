@@ -61,31 +61,27 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     */
     
-    public int columnSize(int column) {
-        return rowdef.width(column);
-    }
-    
     public kelondroRow.Entry get(byte[] key) throws IOException {
         Integer i = (Integer) this.index.get(key);
         if (i == null) return null;
         return super.get(i.intValue());
     }
 
-    public byte[][] put(byte[][] row) throws IOException {
-        Integer i = (Integer) this.index.get(row[0]);
+    public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
+        Integer i = (Integer) this.index.get(row.getColBytes(0));
         if (i == null) {
-            i = new Integer(super.add(super.rowdef.newEntry(row)));
-            this.index.put(row[0], i);
+            i = new Integer(super.add(row));
+            this.index.put(row.getColBytes(0), i);
             return null;
         } else {
-            return super.set(i.intValue(), super.rowdef.newEntry(row)).getCols();
+            return super.set(i.intValue(), row);
         }
     }
     
-    public byte[][] remove(byte[] key) throws IOException {
+    public kelondroRow.Entry remove(byte[] key) throws IOException {
         Integer i = (Integer) this.index.get(key);
         if (i == null) return null;
-        byte[][] r = super.get(i.intValue()).getCols();
+        kelondroRow.Entry r = super.get(i.intValue());
         super.remove(i.intValue());
         return r;
     }
