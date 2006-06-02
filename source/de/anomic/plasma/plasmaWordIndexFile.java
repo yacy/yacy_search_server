@@ -236,8 +236,8 @@ public final class plasmaWordIndexFile {
         }
         public Object next() {
             if (i == null) return null;
-            byte[][] n = (byte[][]) i.next();
-            return new indexURLEntry(new String(n[0]), new String(n[1]));
+            kelondroRow.Entry n = (kelondroRow.Entry) i.next();
+            return new indexURLEntry(n.getColString(0, null), n.getColString(1, null));
         }
         public void remove() {
             throw new UnsupportedOperationException();

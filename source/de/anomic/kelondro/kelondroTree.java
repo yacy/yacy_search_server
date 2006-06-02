@@ -241,28 +241,6 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
         return result;
     }
-    /*
-    public byte[][] get(byte[] key) throws IOException {
-        // System.out.println("kelondroTree.get " + new String(key) + " in " + filename);
-        kelondroRow.Entry result = (objectCache == null) ? null : (kelondroRow.Entry) objectCache.get(key);
-        if (result != null) {
-            //System.out.println("cache hit in objectCache, db:" + super.filename);
-            return result.getCols();
-        }
-        if ((objectCache != null) && (objectCache.has(key) == -1)) return null;
-        synchronized (writeSearchObj) {
-            writeSearchObj.process(key);
-            if (writeSearchObj.found()) {
-                result = row().newEntry(writeSearchObj.getMatcher().getValueRow());
-                if (objectCache != null) objectCache.put(key, result);
-            } else {
-                result = null;
-                if (objectCache != null) objectCache.hasnot(key);
-            }
-        }
-        return (result == null) ? null : result.getCols();
-    }
-*/
 
     public class Search {
 

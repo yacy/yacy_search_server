@@ -59,9 +59,5 @@ public interface kelondroIndex {
     public kelondroRow.Entry get(byte[] key) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException;
     public kelondroRow.Entry remove(byte[] key) throws IOException;
-    //public Iterator rows(boolean up, boolean rotating, byte[] startKey) throws IOException; // Objects are of type byte[][]
-    //public Iterator keys(boolean up, boolean rotating, byte[] startKey) throws IOException; // Objects are of type String
-    //public TreeMap rowMap(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException;
-    //public TreeSet keySet(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException;
     
 }

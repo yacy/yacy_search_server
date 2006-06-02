@@ -150,7 +150,7 @@ public class kelondroMapTable {
         return table.maps(up, field);
     }
     
-    public synchronized Iterator /* of byte[][]-Elements */ rows(String tablename, boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized Iterator /* of kelondroRow.Entry-Elements */ rows(String tablename, boolean up, boolean rotating, byte[] firstKey) throws IOException {
        kelondroTree tree = (kelondroTree) tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.bytes: tree table '" + tablename + "' does not exist.");
         return tree.rows(up, rotating, firstKey);

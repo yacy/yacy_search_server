@@ -143,7 +143,7 @@ public class kelondroFScoreCluster {
         }
         
         public Object next() {
-            String s = new String(((byte[][]) iterator.next())[0]);
+            String s = new String(((kelondroRow.Entry) iterator.next()).getColString(0, null));
             return s.substring(countlength) + "-" + kelondroBase64Order.enhancedCoder.decodeLong(s.substring(0, countlength));
         }
         

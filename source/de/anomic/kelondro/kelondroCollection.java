@@ -93,6 +93,7 @@ public class kelondroCollection {
             chunkcount++;
             this.orderkey = null;
         }
+        this.lastTimeWrote = System.currentTimeMillis();
     }
     
     public void addAll(kelondroCollection c) {
@@ -129,6 +130,7 @@ public class kelondroCollection {
         if ((p < 0) || (p >= chunkcount)) return; // out of bounds, nothing to delete
         System.arraycopy(chunkcache, (p + 1) * chunksize, chunkcache, p * chunksize, (chunkcount - p - 1) * chunksize);
         chunkcount--;
+        this.lastTimeWrote = System.currentTimeMillis();
     }
     
     private int find(byte[] a) {
