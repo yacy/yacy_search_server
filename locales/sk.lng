@@ -309,7 +309,7 @@ You may want to use accesskeys to navigate through the YaCy webinterface:==Na na
 Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows a Internet Explorer: Alt + Klavesa + Enter
 Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows a Mozilla/Firefox/Netscape: Alt + Klavesa
 Windows and Opera: Shift \+ Esc \+ Accesskey==Windows a Opera: Shift + Esc + Klavesa
-Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter=Macintosh a Internet Explorer: Ctrl + Klavesa + Enter
+Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter==Macintosh a Internet Explorer: Ctrl + Klavesa + Enter
 Macintosh and Safari: Strg \+ Accesskey==Macintosh a Safari: Ctrl + Klavesa
 Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh a Mozilla/Firefox/Netscape: Ctrl + Klavesa
 Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh a Opera: Shift + Esc + Klavesa
@@ -1582,7 +1582,7 @@ Only Website from the Proxycache are accessable.==Pristupne su len stranky z Pro
 To switch online-mode, press one of the following buttons:==Na prechod do online modu kliknite na jedno z nasledujutich tlacidiel:
 "event-based Mode"=="aktivitou riadeny mod"
 "Permanent Mode"=="permanentny mod"
-You are in <i>event-based</i> online mode.=Nachadzate sa v <i>udalostami riadenom</i> online mode. 
+You are in <i>event-based</i> online mode.==Nachadzate sa v <i>udalostami riadenom</i> online mode. 
 The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.==Siet YaCy p2p bude aktivovana po prvom pouziti proxy alebo po prechode do permanentneho modu.
 Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.==Upozornenie: Pri pouziti proxy v permanentnom mode ostavate online po celu dobu behu YaCy.
 Use this only if you have a flatrate or you have an always-on connection.==Pouzite tento mod len ak mate flatrate pripojenie alebo ste do internetu neustale pripojeny.
