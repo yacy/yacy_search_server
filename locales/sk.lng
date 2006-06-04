@@ -1,10 +1,11 @@
 # sk.lng
 # -----------------------
-# part of YaCy, (C) by Michael Peter Christen; mc@anomic.de
+# part of YaCy
+# (C) by Michael Peter Christen; mc@anomic.de
 # first published on http://www.anomic.de
-# Frankfurt, Germany, 2005, 2006
+# Frankfurt, Germany, 2005
 #
-# This file is written by Rostislav Svoboda <Rostislav.Svoboda@gmail.com>
+# This file is maintained by Rostislav Svoboda <Rostislav.Svoboda@gmail.com>
 
 # If you find any mistakes in this file please don't hesitate to email them to the author
 # If you find any untranslated string in the webinterface do so, too.
@@ -87,7 +88,7 @@ No, leave it.==Nein, ponechat.
 #File: Bookmarks.html
 
 YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Z&aacute;lozky
-<h2>Bookmarks</h2>==<h2>Z&aacute;lozky</h2>
+<h2>Bookmarks==<h2>Z&aacute;lozky
 Add Bookmark==Pridaj z&aacute;lozku
 Import XML Bookmarks==Importuj XML z&aacute;lozku
 Edit Bookmark==Edituj z&aacute;lozky
@@ -118,7 +119,7 @@ Bookmarks per page.==z&aacute;loziek na str&aacute;nku.
 #File: CacheAdmin_p.html
 
 Local Cache Management==Sprava lokalnej cache
->Local Cache>==Lokalna cache
+>Local Cache==Lokalna cache
 The current cache size is==Aktualna velkost cache je
 The maximum cache size is==Maximalna velkost cache je
 
@@ -129,7 +130,7 @@ The maximum cache size is==Maximalna velkost cache je
 Advanced Config==Pokrocile nastavenia
 Here are all configuration options from YaCy.==Tu sa nachadzaju vsetky konfiguracne nastavenia YaCy.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vsetky konfiguracne nastavenia mozu byt zmenene, avsak niektore volby vyzaduju restart a niektore mozu sposobit pad YaCy v pripade zadnia nespravnych hodnot.
-For explanation please look into yacy.init==Vysvetlenie najdete v subore yacy.init
+For an explanation of the available options please look into yacy.init==Vysvetlenie jednotlivych volieb najdete v subore yacy.init
 "Save"==Uloz
 
 
@@ -228,7 +229,7 @@ Current skin:==Pouzity skin:
 Available Skins:==Verf&uuml;gbare Skins:
 "Use"==Pouzi
 "Delete"==Zmaz
-Install new Skin from URL:==Nainstaluj novy skin z URL adresy:
+Install new skin from URL:==Nainstaluj novy skin z URL adresy:
 Use this skin==Pouzi tento skin
 "install"==Nainstaluj
 Unable to get URL:==Nie je mozne nainstalovat pozadovany subor z URL adresy:
@@ -254,7 +255,7 @@ Waiting for new request nr.==Caka sa na poziadavku cislo.
 #File: CookieMonitorIncoming_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Incoming Cookies Monitor==YaCy: Sledovanie prichadzajucich cookies
+Incoming Cookies Monitor==Sledovanie prichadzajucich cookies
 Cookie Monitor: Incoming Cookies==Sledovanie cookies: Prichadzajuce cookies
 This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Toto je zoznam vsetkych cookies, ktore web server poslal klientom YaCy proxy:
 Showing==Zobrazovanie
@@ -265,7 +266,7 @@ Cookies==Cookies
 #File: CookieMonitorOutgoing_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-YaCy: Outgoing Cookies Monitor==YaCy: Sledovanie odchadzajucich cookies
+Outgoing Cookies Monitor==Sledovanie odchadzajucich cookies
 Cookie Monitor: Outgoing Cookies==Sledovanie cookies: Odchadzajuce cookies
 This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Toto je zoznam vsetkych cookies, ktore Vas web prehliadac pouzivajuci YaCy proxy poslal web serverom:
 Showing==Zobrazovanie
@@ -462,7 +463,7 @@ Accept remote Index Transmissions. This works only if you are a senior peer.==Ak
 The DHT-rules do not work without this function.==DHT pravidl&aacute; nefunguj&uacute; bez aktiv&aacute;cie tejto funkcie.
 If checked, your peer silently ignores transmitted URLs that match your blacklist==Ak aktivovan&eacute;, tak V&aacute;&scaron; peer bude potichu ignorovat URL adresy z Va&scaron;eho blacklistu. 
 "set"=="Uloz"
-Changes will take effect immediately==Zmeny s&uacute; okamzite aktivovan&eacute;.
+Changes will take effect immediately==Zmenu su okamzite ucinne
 #Let this translation here to avoid errors.-
 Word:</td>==Slovo:</td>
 Word-Hash:</td>==Hash-slovo:</td>
@@ -471,7 +472,7 @@ Word-Hash:</td>==Hash-slovo:</td>
 #File: IndexCreate_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
-Index Creation=Tvorba indexu
+Index Creation==Tvorba indexu
 Start Crawling Job:==Odstartuj crawling:
 You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Tu mozete zadat URL adresy web stranok ktore budu preliezane (crawled) a z ktorych sa preliezanie (crawling) odstartuje. "Crawling" znamena, ze YaCy siahne zvolenu web stranku, extrahuje vsetky odkazy a nasledne stiahne web stranky pod tymito odkazmi. Toto sa opakuje do hlbky zadanej v policku "Hlbka crawlingu".
 Crawling Depth:==Hlbka crawlingu:
@@ -497,11 +498,8 @@ It depends on the age of the last crawl if this is done or not: if the last craw
 date, the page is crawled again, othervise it is treaded as 'double' and not loaded or indexed again.==datum, tak budu tieto stranky nanovo precrawlovane. V opacnom pripade budu oznacene ako 'double' a nebudu nanovo nahravane ani indexovane.
 Auto-Dom-Filter:==Auto-Dom-Filter:
 Depth:==Hlbka:
-This option will automatically create a domain-filter which limits the crawl on domains the crawler will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while	restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth for this example would be 1.==Tato volba automaticky vytvory domenovy filter ktory obmedzuje crawl na domeny ktore crawler najde v zadanej hlbke. Mozete pouzit tuto volbu t.j. crawlovat stranku zo zalozkami a nasledne obmedzit nasledujuci crawl na tie domeny ktore sa vyskytuje v zozname zaloziek. Primerana hlbka by v tomto pripade bola 1.
+This option will automatically create a domain-filter which limits the crawl on domains the crawler will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth for this example would be 1.==Tato volba automaticky vytvory domenovy filter ktory obmedzuje crawl na domeny ktore crawler najde v zadanej hlbke. Mozete pouzit tuto volbu t.j. crawlovat stranku zo zalozkami a nasledne obmedzit nasledujuci crawl na tie domeny ktore sa vyskytuje v zozname zaloziek. Primerana hlbka by v tomto pripade bola 1.
 The default value 0 gives no restrictions.==Prednastavena hodnota 0 znamena ziadne obmedzenie.
-appear on the given depth during crawling. The domain-list is then used to filter-out all domains, that appear==zobrazia sa vo zvolenej hlbke pocas crawlingu. Zoznam domen je potom pouzity na odfiltrovanie vsetkych domen 
-on depths greater then the given depth, but do not appear in the domain-list. You can use this option i.e.==ktore sa vyskytuju hlbsie ako zvolena hlbka, ale nevyskytu sa na zozname domen. Mozete pouzit tuto volbu t.j.
-to crawl pages with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page.==crawlovat stranky so zalozkami, pricom crawl je obmedzeny len na domeny ktore sa vyskytuju na stranke zaloziek. 
 Maximum Pages per Domain:==Maximum stranok na domenu:
 Page-Count:==Pocet stranok:
 You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.==Maximalny pocet stranok vybratych a indexovanych z jednej domeny mozete touto volbou obmedzit.
@@ -511,7 +509,7 @@ Accept URLs with '\?' / dynamic URLs:==Akceptuj URL adresy s '?' / dynamicke URL
 A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Otaznik sa vacsinou pouziva ako priznak dynamickej stranky. URL adresa odkazujuca na dynamicky obsah by v normalnom pripade nemala byt crawlovana. Niekedy sa vsak stava ze stranky na ktore sa odkazuje URL adresou  
 is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==obsahujucou otaznik maju staticky obsah. Neaktivujte tuto volbu ak ste si nie isty nebezpecenstvom zacyklenia crawlingu.  
 Store to Proxy Cache:==Uloz do proxy cache:
-This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Tato volba je standartne pouzita na proxy predvyber, avsak pre cisty crawling nie je potrebna. 
+This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Tato volba je standartne pouzita na proxy predvyber, avsak pre cisty crawling nie je potrebna.
 We recommend to leave this switched off unless you want to control the crawl results with the==Odporucame ponechat tuto volbu vypnutu ak nechcete kontrolovat vysledky crawlingu pomocou 
 Cache Monitor==cache monitoru.
 Do Local Indexing:==Lokalne indexovanie:
@@ -549,7 +547,6 @@ Error with file input==Chyba vstupneho suboru
 Set new prefetch depth to==Nastav novu hlbku crawlingu na
 Crawling of "\#\[crawlingURL\]\#" started.==Crawling URL adresy "#[crawlingURL]#" bol odstartovany.
 You can monitor the crawling progress either by watching the URL queues==Crawling proces mozete monitorovat pomocou jedneho al. viacerych z nasledovnych URL cakacich listin:
-	Sie k&ouml;nnen den Crawling Prozess auch sehen, indem Sie auf einer der folgenden URLs nachsehen:
 local queue</a>==lokalna cakacia listina</a>
 global queue</a>==globalna cakacia listina</a>
 loader queue</a>==nahravacia cakacia listina</a>
@@ -662,8 +659,7 @@ This queue stores the urls that shall be crawled localy by this peer.==Tato caka
 It may also contain urls that are computed by the proxy-prefetch.==Obsahuje tiez URL adresy vytvorene pomocou proxy predvyberu.
 The local crawler queue is empty==Lokalna cakacia listina crawleru je prazdna.
 "clear local crawl queue"=="Zmaz lokalnu cakaciu listinu crawleru"
-There are <b>\#\[num\]\#</b> entries in the local crawler queue. Showing <b>\#\[show-num\]\#</b> most recent entries.==V lokalnej cakacej listine crawleru sa nachadza <b>#[num]#</b> zaznamov. Zobrazuje sa <b>#[show-num]#</b> poslednych zaznamov.  
-
+There are <b>\#\[num\]\#</b> entries in the local crawler queue. Showing <b>\#\[show-num\]\#</b> most recent entries.==V lokalnej cakacej listine crawleru sa nachadza <b>#[num]#</b> zaznamov. Zobrazuje sa <b>#[show-num]#</b> poslednych zaznamov.
 Show last==Zobraz posledne
 </a> entries.==</a> zaznamy.
 Initiator==Iniciator
@@ -756,7 +752,7 @@ since it shows crawl requests from other peers.==pretoze zobrazuje crawl dotazy 
 The image above illustrates the data flow initiated by web index acquisition.==Obr&aacute;zok hore zobrazuje d&aacute;tov&yacute; tok pozost&aacute;vaj&uacute;ci z pr&iacute;rastku web indexu.
 Some processes occur double to document the complex index migration structure.==Niektor&eacute; procesy sa kv&ocirc;li redukcii komplexnej &scaron;trukt&uacute;ry indexu vyskytuj&uacute; viacn&aacute;sobne. 
 \(1\) Index Monitor of Remote Crawl Receipts==\(1\) Monitorovanie indexu pre hl&aacute;senia zo vzdialen&eacute;ho crawlingu 	
-This is the list of web pages that this peer initiated to crawl==Toto je zoznam web str&aacute;nok ktor&eacute; zacal crawlovat V&aacute;&scaron; peer
+This is the list of web pages that this peer initiated to crawl,==Toto je zoznam web str&aacute;nok ktor&eacute; zacal crawlovat V&aacute;&scaron; peer,
 but had been crawled by <i>other</i> peers.==av&scaron;ak ktor&eacute; boli precrawlovan&eacute; in&yacute;m peerom.
 This is the 'mirror'-case of process \(6\).==Toto je opacn&yacute; pr&iacute;klad k procesu \(6\).
 <i>Use Case:</i> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<i>Pr&iacute;padov&aacute; &scaron;t&uacute;dia:</i> Tu obdrz&iacute;te z&aacute;znami, ak zacnete lok&aacute;lny crawling na str&aacute;nke 'Vytvorenie indexu' a aktivujete   
@@ -797,7 +793,7 @@ Words==Slov
 Title==Nazov
 #URL==URL
 "delete"=="zmaz"
-	
+
 #-------------------------------------------------------
 #File: IndexTransfer_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
@@ -828,9 +824,9 @@ Language selection==Vyber jazyka
 You can change the language of the YaCy-webinterface with translation files.==Mozete zmenit jazyk YaCy web rozhrania pomocou prekladoveho suboru. Vyberte zvoleny jazyk zo zoznamu.
 Current language:==Zvoleny jazyk
 default\(english\)==Predvoleny jazyk (anglictina)
-Languagefile Author:==Autor jazykoveho suboru:
-<!-- author -->==Rostislav Svoboda
-Languages:==Jazyky:
+Languagefile Author(s) (chronological):==Autor(y) jazykoveho suboru (chronologicky):
+Send additions to maintainer:==Prosim poslite zmeny maintainerovy
+Available Languages:==Podporovane jazyky:
 Install new language from URL:==Naistaluj novy jazyk:
 Use this language==Pouzi tento jazyk
 "Use"==Pouzi
@@ -850,7 +846,7 @@ All these things here are to be considered as probably unstable, and/or experime
 You may try out these things but please do not care about bugs.==Vsetky nove funkcie mozete samozrejme vyskusat. Pripadnymi chybami sa vsak nemusite zapodievat.
 The <a==<a
 Advanced <a==Pokrocile <a
-Configuration</a>Nastavenia</a>
+Configuration</a>==Nastavenia</a>
 
 #-------------------------------------------------------
 #File: Messages_p.html
@@ -891,7 +887,7 @@ Passive Peers==Pasivny peeri
 Potential Peers==Potencionalny peeri
 Manually contacting Peer== Manualne kontaktujuci peer
 no remote \#\[peertype\]\# peer for this list known==ziadny vzdialeny #[peertype]# nie je znamy alebo online 
-Showing==Zobrazenych je #[num]# zaznamov z celkovo #[total]# peerov.
+Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Zobrazenych je #[num]# zaznamov z celkovo #[total]# peerov.
 send&nbsp;<b>M</b>essage/<br>show&nbsp;<b>P</b>rofile/<br>edit&nbsp;<b>W</b>iki==Posli&nbsp;spravu&nbsp;(<b>m</b>)/<br>Zobraz&nbsp;profil&nbsp;(<b>p</b>)/<br>Edituj&nbsp;wiki&nbsp;(<b>w</b>)
 Name==Meno
 Address==Adresa
@@ -976,13 +972,13 @@ profile entries on the Network page, where that profile change is visualized wit
 More news services will follow.==Dalsie sluzby pre spravy budu nasledovat.
 
 Above you can see four menues:==V menu mozete vidiet tieto styri zaznami:
-<b>Incoming News</b>: latest news that arrived your peer.==<b>Prichadzajuce spravy:</b> posledne spravy, ktore obdrzal Vas peer.
+<b>Incoming News \(\#\[insize\]\#\)</b>: latest news that arrived your peer.==<b>Prichadzajuce spravy \(\#\[insize\]\#\)</b>: posledne spravy, ktore obdrzal Vas peer.
 Only these news will be used to display specific news services as explained above.==Ako bolo vysvetlene vyzsie na zobrazenie specifickych sluzieb sprav budu pouzite len tieto spravy.
 You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Tieto spravy mozete spracovat pomocou tlacitka na stranke. Po ich spracovani budu tieto spravy zo stranok "Vytvor index" a "Stav siete" odstranene.
-<b>Processed News</b>: this is simply an archive of incoming news that you removed by processing.==<b>Precitane spravy</b>: Toto je jednoduchy archiv obdrzanych sprav, ktore ste odstranili spracovanim.
-<b>Outgoing News</b>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<b>Odchadzajuce spravy</b>: Tu vidite spravy, ktore ste vytvorili. Tieto spravy sa prave dorucuju ostatnym peerom.
+<b>Processed News \(\#\[prsize\]\#\)</b>: this is simply an archive of incoming news that you removed by processing.==<b>Precitane spravy \(\#\[prsize\]\#\)</b>: Toto je jednoduchy archiv obdrzanych sprav, ktore ste odstranili spracovanim.
+<b>Outgoing News \(\#\[ousize\]\#\)</b>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<b>Odchadzajuce spravy \(\#\[ousize\]\#\)</b>: Tu vidite spravy, ktore ste vytvorili. Tieto spravy sa prave dorucuju ostatnym peerom.
 you can stop the broadcast if you want.==Toto dorucovanie mozete kedykolvek zastavit.
-<b>Published News</b>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<b>Zverejnene spravy</b>: Vase spravy, ktore boli uspesne dorucene alebo ktore ste odstranili zo zoznamu dorucovanych sprav.
+<b>Published News \(\#\[pusize\]\#\)</b>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<b>Zverejnene spravy \(\#\[pusize\]\#\)</b>: Vase spravy, ktore boli uspesne dorucene alebo ktore ste odstranili zo zoznamu dorucovanych sprav.
 Originator==Autor
 Created==Vytvorene
 Category==Kategoria
@@ -1073,7 +1069,7 @@ total memory taken from the OS==celkove mnozstvo pamate priradenej od operacneho
 >Free<==>Volna<
 free memory in the JVM within total amount==volna pamat v JVM v ramci celkovej pamate
 >Used<==>Pouzitej<
-free memory in the JVM within total amount==volna pamat v JVM v ramci celkovej pamate
+used memory in the JVM within total amount==pouzita pamat v JVM v ramci celkovej pamate
 Re-Configuration of Startup Paramenters:==Nova konfiguracia startovacich parametrov:
 Changes take effect after <b>re-start</b> of YaCy==Zmeny sa prejavia az po <b>restarte</b> YaCy
 RAM Cache for Database Files:==RAM-Cache pre databazove subory:
@@ -1346,7 +1342,7 @@ However, blocking access may be correct in enterprise environments where you onl
 ATTENTION: Your current IP is recognized as==POZOR: Vasa aktualna IP adresa rozpoznavana ako 
 . If the value you enter here does not match with this IP, you will not be able to access the server pages anymore==Ak hodnota ktoru ste tu zadali nezodpoveda tejto IP adrese, tak nebudete schopny pristupovat na tiete stranky servera.
 IP-Number filter:==Filter IP adries:
-	
+
 #-------------------------------------------------------
 #File: Settings_Seed.inc
 Seed Upload Settings==Nastavenia nahravania seedu
@@ -1402,7 +1398,7 @@ Content Parser Settings==Nastavenia parsera obsahu
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==S tymito nastavenia mozete zapnut alebo vypnut parsovanie dodatocnych suborov na zaklade ich mime-typov.
 For a detailed description of the various MIME-types take a look at==Detailny popis rozlicnych mime-typov najdete na
 http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a>.
-Changes will take effect immediately.==Zmeny su okamzite ucinne.
+Changes take effect immediately==Zmeny su okamzite ucinne
 
 #-------------------------------------------------------
 #File: SettingsAck_p.html
@@ -1412,7 +1408,7 @@ Settings Receipt:==Prijatie nastaveni:
 No information has been submitted==Ziadne informacie neboli prenesene:
 Nothing changed==Nic nebolo zmenene.
 Error with submitted information.==Pri prenose informacii doslo k chybe.
-Nothing changed==Nic nebolo zmenene.
+Nothing changed.==Nic nebolo zmenene.
 The user name must be given.==Meno uzivatela musi byt zadane
 Your request cannot be processed.<br>Nothing changed.==Vasa poziadavka nemoze byt vykonanana.<br>Nic nebolo zmenene.
 The password redundancy check failed. You have probably misstyped your password.==Chyba pri kontrole hesla. Pravdepodobne preklep.
@@ -1427,7 +1423,7 @@ if you changed the Port or Port Forwarding Settings, you need to restart YaCy.==
 Your proxy access setting has been changed.==Nastavenia pristupu k Vasemu proxy serveru boli zmenene.
 Your new proxy account name is \#\[user\]\#. The password has been accepted.==Novy nazov Vaseho proxy uctu je #[user]#. Heslo bolo prijate.
 If you open any public web page through the proxy, you must log-in then.==Musite sa prihlasit ak chcete otvorit nejaku verejnu web stranku cez proxy.
-Your server access filter is now set to \#\[filter\]\#==Filter Vaseho pristupu k serveru je nastaveny na #[filter]#
+Your server access filter is now set to #[filter]#==Filter Vaseho pristupu k serveru je nastaveny na #[filter]#
 Auto pop-up of the Status page is now <b>disabled</b>==Automaticky pop-up stranky stavu pri starte browsera je teraz <b>vypnuty</b>.
 Auto pop-up of the Status page is now <b>enabled</b>==Automaticky pop-up stranky stavu pri starte browsera je teraz <b>zapnuty</b>.
 You are now permanently <b>online</b>.==Nachadzate sa prave v <b>permanentnom online mode</b>.
@@ -1576,7 +1572,7 @@ Settings page</a>.==stranke nastaveni</a> .
 Enabled: Updating periodically to server==Aktivovany: Periodicky update voci serveru
 Enabled: Updating periodically to file==Aktivovany: Periodicky update voci suboru
 Last upload:==Posledny upload:
-nline-mode==Online mod
+Online-mode==Online mod
 You are in <i>Cache-browsing</i> mode.==Nachadzate sa v mode <i>prezeracie cache</i>.
 Only Website from the Proxycache are accessable.==Pristupne su len stranky z Proxycache.
 To switch online-mode, press one of the following buttons:==Na prechod do online modu kliknite na jedno z nasledujutich tlacidiel:
@@ -1701,7 +1697,7 @@ Parsed Resource Content==Parsovany obsah zdroja
 Parsed Resource Sentences==Parsovane zdrojove vety
 Original Resource Content==Originalny obsah zdroja
 
- 
+
 #-------------------------------------------------------
 #File: ViewLog_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
