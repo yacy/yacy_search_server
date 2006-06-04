@@ -101,31 +101,26 @@ public class Blog {
 		String pagename = post.get("page", "blog_default");
 	    String ip = post.get("CLIENTIP", "127.0.0.1");
 	    
-	    byte[] author;
-		try {
-			author = post.get("author", "").getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			author = post.get("author", "").getBytes();
-		}
+		String StrAuthor = post.get("author", "");
 		
-		if (author.equals("anonymous")) {
-			try {
-				author = switchboard.blogDB.guessAuthor(ip).getBytes("UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				author = switchboard.blogDB.guessAuthor(ip).getBytes();
-			}
-	    	if (author == null) {
+		if (StrAuthor.equals("anonymous")) {
+			StrAuthor = switchboard.blogDB.guessAuthor(ip);
+			
+	    	if (StrAuthor == null || StrAuthor.length() == 0) {
 	    		if (de.anomic.yacy.yacyCore.seedDB.mySeed == null)
-	    			author = "anonymous".getBytes();
+	    			StrAuthor = "anonymous";
 	        	else {
-	        		try {
-	        			author = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous").getBytes("UTF-8");
-	        		} catch (UnsupportedEncodingException e) {
-	        			author = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous").getBytes();
-	        		}
+	        		StrAuthor = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous");
 	        	}
 	        }
 	    }
+		
+		byte[] author;
+		try {
+			author = StrAuthor.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			author = StrAuthor.getBytes();
+		}
 
 		if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
 			switchboard.blogDB.delete(pagename);
@@ -150,12 +145,13 @@ public class Blog {
 				page = switchboard.blogDB.read(pagename); //must I read it again after submitting?
 				date = page.date();
 			}
-
+			
+			String StrSubject = post.get("subject", "");
 			byte[] subject;
 			try {
-				subject = post.get("subject", "").getBytes("UTF-8");
+				subject = StrSubject.getBytes("UTF-8");
 			} catch (UnsupportedEncodingException e) {
-				subject = post.get("subject", "").getBytes();
+				subject = StrSubject.getBytes();
 			}
             
 			try {
@@ -164,9 +160,9 @@ public class Blog {
             
 			// create a news message
              HashMap map = new HashMap();
-             map.put("subject", subject);
+             map.put("subject", StrSubject);
              map.put("page", pagename);
-             map.put("author", author);
+             map.put("author", StrAuthor);
              map.put("ip", ip);
              try {
                  yacyCore.newsPool.publishMyNews(new yacyNewsRecord("blog_add", map));
