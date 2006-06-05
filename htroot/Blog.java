@@ -246,6 +246,7 @@ public class Blog {
 	        			prop.put("mode_entries_"+count+"_subject", wikiCode.replaceHTML(new String(entry.subject(),"UTF-8")));
 	        			prop.put("mode_entries_"+count+"_author", wikiCode.replaceHTML(new String(entry.author(),"UTF-8")));
 	        			prop.put("mode_entries_"+count+"_date", dateString(entry.date()));
+	        			prop.put("mode_entries_"+count+"_timestamp", entry.date().getTime());
 	        			prop.put("mode_entries_"+count+"_page", wikiTransformer.transform(entry.page()));
 	        			if(hasRights) {
 	        				prop.put("mode_entries_"+count+"_admin", 1);

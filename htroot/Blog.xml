@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<blog>
+	#(mode)#
+	#{entries}#
+	<item>
+		<id>#[pageid]#</id>
+		<timestamp>#[timestamp]#</timestamp>
+		<author><![CDATA[#[author]#]]></author>
+		<subject><![CDATA[#[subject]#]]></subject>
+		<content><![CDATA[#[page]#]]></content>
+	</item>
+	#{/entries}#
+	#(/mode)#
+</blog>
