@@ -19,7 +19,7 @@
 #{/entries}#
 #(moreentries)#::<a href="Blog.html?start=#[start]#&amp;num=#[num]#">show more entries...</a>#(/moreentries)#
 <br>
-#(admin)#<a href="Blog.html?login=true">Login</a> - ::<a href="Blog.html?edit=true">new entry</a> - #(/admin)#<a href="Blog.html">Blog-Home</a></center>
+#(admin)#<a href="Blog.html?login=true">Login</a> - ::<a href="Blog.html?edit=true">new entry</a> - <a href="Blog.html?import=xml">import XML-File</a> - <a href="Blog.xml?xml=1">export as XML</a> - #(/admin)#<a href="Blog.html">Blog-Home</a></center>
 ::
 <!-- 1: edit -->
 <form action="Blog.html" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
@@ -64,6 +64,19 @@ To edit or create blog-entries you need to be logged in as Admin or User who has
 </form><br>
 <form action="Blog.html" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
 <input type="submit" value="No, leave it.">
+</form>
+::
+<!-- 5: XML-Import -->
+<h3>XML-Import</h3>
+#(state)#
+::
+Import was successful!<br><br>
+::
+Import failed, maybe the supplied file was no valid blog-backup?<br><br>
+#(/state)#
+Please select the XML-file you want to import:<br>
+<form action="Blog.html" method="POST"  enctype="multipart/form-data">
+<input type="file" size=50 name="xmlfile"> <input type="submit" name="importxml" value="Import">
 </form>
 #(/mode)#
 #%env/templates/footer.template%#

@@ -43,8 +43,10 @@
 
 package de.anomic.data;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -53,6 +55,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
@@ -182,12 +194,27 @@ public class blogBoard {
 	    }
 	}
 	
+	public String timestamp() {
+		String c = (String) record.get("date");
+		if (c == null) {
+	        System.out.println("DEBUG - ERROR: date field missing in blogBoard");
+	        return dateString(new Date());
+		}
+		return c;
+	}
+	
 	public byte[] author() {
 		String m = (String) record.get("author");
 	    if (m == null) return new byte[0];
 	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m);
 	    if (b == null) return "".getBytes();
 	    return b;
+	}
+	
+	public String ip() {
+	    String a = (String) record.get("ip");
+	    if (a == null) return "127.0.0.1";
+	    return a;
 	}
 
 	public byte[] page() {
@@ -224,6 +251,85 @@ public class blogBoard {
     	} catch (IOException e) {
     		return null;
     	}
+    }
+    
+    public boolean importXML(String input) {
+    	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    	try {
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(new ByteArrayInputStream(input.getBytes()));
+			return parseXMLimport(doc);
+		} catch (ParserConfigurationException e) {
+		} catch (SAXException e) {
+		} catch (IOException e) {}
+		
+    	return false;
+    }
+    
+    private boolean parseXMLimport(Document doc) {
+    	if(!doc.getDocumentElement().getTagName().equals("blog"))
+    		return false;
+    	
+    	NodeList items = doc.getDocumentElement().getElementsByTagName("item");
+    	if(items.getLength() == 0)
+    		return false; 
+    	
+    	for(int i=0;i<items.getLength();++i) {
+    		String key = null, ip = null, StrSubject = null, StrAuthor = null, StrPage = null, StrDate = null;
+    		Date date = null;
+    		
+    		if(!items.item(i).getNodeName().equals("item"))
+    			continue;
+    		
+    		NodeList currentNodeChildren = items.item(i).getChildNodes();
+    		
+    		for(int j=0;j<currentNodeChildren.getLength();++j) {
+    			Node currentNode = currentNodeChildren.item(j);
+    			if(currentNode.getNodeName().equals("id"))
+    				key = currentNode.getFirstChild().getNodeValue();
+    			else if(currentNode.getNodeName().equals("ip"))
+    				ip = currentNode.getFirstChild().getNodeValue();
+    			else if(currentNode.getNodeName().equals("timestamp"))
+    				StrDate = currentNode.getFirstChild().getNodeValue();
+    			else if(currentNode.getNodeName().equals("subject"))
+    				StrSubject = currentNode.getFirstChild().getNodeValue();
+    			else if(currentNode.getNodeName().equals("author"))
+    				StrAuthor = currentNode.getFirstChild().getNodeValue();
+    			else if(currentNode.getNodeName().equals("content"))
+    				StrPage = currentNode.getFirstChild().getNodeValue();
+    		}
+    		
+    		try {
+				date = SimpleFormatter.parse(StrDate);
+			} catch (ParseException e1) {
+				date = new Date();
+			}
+    		
+    		if(key == null || ip == null || StrSubject == null || StrAuthor == null || StrPage == null || date == null)
+    			return false;
+    		
+    		byte[] subject,author,page;
+    		try {
+				subject = StrSubject.getBytes("UTF-8");
+			} catch (UnsupportedEncodingException e1) {
+				subject = StrSubject.getBytes();
+			}
+			try {
+				author = StrAuthor.getBytes("UTF-8");
+			} catch (UnsupportedEncodingException e1) {
+				author = StrAuthor.getBytes();
+			}
+			try {
+				page = StrPage.getBytes("UTF-8");
+			} catch (UnsupportedEncodingException e1) {
+				page = StrPage.getBytes();
+			}
+    		
+    		try {
+				write (newEntry(key, subject, author, ip, date, page));
+			} catch (IOException e) { }
+    	}
+    	return true;
     }
     
     public void delete(String key) {

@@ -70,6 +70,8 @@ File:==Datei:
 >delete==>l&ouml;schen
 show more entries==zeige weitere Eintr&auml;ge
 new entry==Neuer Eintrag
+import XML-File==XML-Datei importieren
+export as XML==als XML exportieren
 Blog-Home==Blog-Startseite
 Author:==Autor:
 Subject:==Titel:
@@ -84,6 +86,10 @@ Are you sure==Sind Sie sicher
 that you want to delete <b>\#\[subject\]\#</b> by \#\[author\]\#?==dass Sie <b>#[subject]#</b> von #[author]# l&ouml;schen wollen?
 Yes, delete it.==Ja, l&ouml;schen.
 No, leave it.==Nein, belassen.
+Import was successful!==Import war erfolgreich!
+Import failed, maybe the supplied file was no valid blog-backup?==Import fehlgeschlagen, unter Umst&auml;nden war die angegebene Datei keine g&uuml;ltige Blog-Sicherung?
+Please select the XML-file you want to import:==Bitte w&auml;hlen Sie die XML-Datei die Sie importieren wollen:
+
 
 #-----------------------------------------------------------
 #File: Bookmarks.html

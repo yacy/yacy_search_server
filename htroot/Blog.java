@@ -142,7 +142,7 @@ public class Blog {
 			if(pagename.equals("blog_default"))
 				pagename = String.valueOf(System.currentTimeMillis());
 			else {
-				page = switchboard.blogDB.read(pagename); //must I read it again after submitting?
+				page = switchboard.blogDB.read(pagename);
 				date = page.date();
 			}
 			
@@ -221,6 +221,19 @@ public class Blog {
 			}
 			else prop.put("mode",3); //access denied (no rights)
 		}
+		else if(post.containsKey("import")) {
+			prop.put("mode",5);
+			prop.put("mode_state",0);
+		}
+		else if(post.containsKey("xmlfile")) {
+			prop.put("mode",5);
+			if(switchboard.blogDB.importXML(new String((byte[])post.get("xmlfile$file")))) {
+				prop.put("mode_state",1);
+			}
+			else {
+				prop.put("mode_state",2);
+			}
+		}
 		else {
 	        wikiCode wikiTransformer=new wikiCode(switchboard);
 		    // show blog-entry/entries
@@ -231,9 +244,13 @@ public class Blog {
 	        		Iterator i = switchboard.blogDB.keys(false);
 	        		String pageid;
 	        		blogBoard.entry entry;
+	        		boolean xml = false;
+	        		if(post.containsKey("xml"))
+	        			xml = true;
 	        		int count = 0; //counts how many entries are shown to the user
 	        		int start = post.getInt("start",0); //indicates from where entries should be shown
 	        		int num   = post.getInt("num",20);  //indicates how many entries should be shown
+	        		if(xml) num = 0;
 	        		int nextstart = start+num;		//indicates the starting offset for next results
 	        		while(i.hasNext()) {
 	        			if(count >= num && num > 0)
@@ -243,11 +260,19 @@ public class Blog {
 	        				continue;
 	        			entry = switchboard.blogDB.read(pageid);
 	        			prop.put("mode_entries_"+count+"_pageid",entry.key());
-	        			prop.put("mode_entries_"+count+"_subject", wikiCode.replaceHTML(new String(entry.subject(),"UTF-8")));
-	        			prop.put("mode_entries_"+count+"_author", wikiCode.replaceHTML(new String(entry.author(),"UTF-8")));
+	        			if(!xml) {
+	        				prop.put("mode_entries_"+count+"_subject", wikiCode.replaceHTML(new String(entry.subject(),"UTF-8")));
+		        			prop.put("mode_entries_"+count+"_author", wikiCode.replaceHTML(new String(entry.author(),"UTF-8")));
+		        			prop.put("mode_entries_"+count+"_page", wikiTransformer.transform(entry.page()));
+	        			}
+	        			else {
+	        				prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
+		        			prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
+		        			prop.put("mode_entries_"+count+"_page", entry.page());
+		        			prop.put("mode_entries_"+count+"_timestamp", entry.timestamp());
+	        			}
 	        			prop.put("mode_entries_"+count+"_date", dateString(entry.date()));
-	        			prop.put("mode_entries_"+count+"_timestamp", entry.date().getTime());
-	        			prop.put("mode_entries_"+count+"_page", wikiTransformer.transform(entry.page()));
+	        			prop.put("mode_entries_"+count+"_ip", entry.ip());
 	        			if(hasRights) {
 	        				prop.put("mode_entries_"+count+"_admin", 1);
 	        				prop.put("mode_entries_"+count+"_admin_pageid",entry.key());
