@@ -108,12 +108,14 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
         // returns the number of new elements
         long startTime = System.currentTimeMillis();
         if (c == null) return 0;
-        Iterator i = c.entries();
         int x = 0;
-        while ((i.hasNext()) && ((maxTime < 0) || ((startTime + maxTime) > System.currentTimeMillis()))) {
-            try {
-                if (addi((indexURLEntry) i.next())) x++;
-            } catch (ConcurrentModificationException e) {}
+        synchronized (c) {
+            Iterator i = c.entries();
+            while ((i.hasNext()) && ((maxTime < 0) || ((startTime + maxTime) > System.currentTimeMillis()))) {
+                try {
+                    if (addi((indexURLEntry) i.next())) x++;
+                } catch (ConcurrentModificationException e) {}
+            }
         }
         this.updateTime = java.lang.Math.max(this.updateTime, c.updated());
         return x;
