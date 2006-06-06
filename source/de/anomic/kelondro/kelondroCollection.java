@@ -49,26 +49,26 @@ public class kelondroCollection {
     private byte[] chunkcache;
     private int chunkcount;
     private int chunksize;
+    private int sortbound;
     private long lastTimeRead, lastTimeWrote;
-    private String orderkey;
+    private kelondroOrder order;
     
     public kelondroCollection(int objectSize) {
         this(objectSize, 0, null, new byte[0]);
     }
     
-    public kelondroCollection(int objectSize, int objectCount, String signature, byte[] collectioncache) {
-        assert (collectioncache.length % objectSize == 0);
-        assert (objectCount <= collectioncache.length / objectSize);
+    public kelondroCollection(int objectSize, int objectCount, kelondroOrder ordering, byte[] cache) {
         this.chunksize = objectSize;
-        this.chunkcache = collectioncache;
+        this.chunkcache = cache;
         this.chunkcount = objectCount;
-        this.orderkey = signature; // no current ordering
+        this.order = ordering;
+        this.sortbound = 0;
     }
     
     private void ensureSize(int elements) {
         int needed = elements * chunksize;
         if (chunkcache.length >= needed) return;
-        byte[] newChunkcache = new byte[needed];
+        byte[] newChunkcache = new byte[needed * 2];
         System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
         chunkcache = newChunkcache;
         newChunkcache = null;
@@ -117,7 +117,6 @@ public class kelondroCollection {
             ensureSize(chunkcount + 1);
             System.arraycopy(a, 0, chunkcache, chunksize * chunkcount, a.length);
             chunkcount++;
-            this.orderkey = null;
         }
         this.lastTimeWrote = System.currentTimeMillis();
     }
@@ -142,11 +141,11 @@ public class kelondroCollection {
         }
     }
     
-    public void remove(byte[] a, Comparator c) {
+    public void remove(byte[] a, kelondroOrder ko) {
         // the byte[] a may be shorter than the chunksize
         if (chunkcount == 0) return;
         synchronized(chunkcache) {
-            int p = find(a, c);
+            int p = find(a);
             remove(p);
         }
     }
@@ -156,23 +155,8 @@ public class kelondroCollection {
         if ((p < 0) || (p >= chunkcount)) return; // out of bounds, nothing to delete
         System.arraycopy(chunkcache, (p + 1) * chunksize, chunkcache, p * chunksize, (chunkcount - p - 1) * chunksize);
         chunkcount--;
+        if (p < sortbound) sortbound--;
         this.lastTimeWrote = System.currentTimeMillis();
-    }
-    
-    private int find(byte[] a) {
-        // returns the chunknumber
-        for (int i = 0; i < chunkcount; i++) {
-            if (match(a, i)) return i;
-        }
-        return -1;
-    }
-    
-    private int find(byte[] a, Comparator c) {
-        // returns the chunknumber
-        for (int i = 0; i < chunkcount; i++) {
-            if (compare(a, i, c) == 0) return i;
-        }
-        return -1;
     }
     
     public void removeAll(kelondroCollection c) {
@@ -183,13 +167,12 @@ public class kelondroCollection {
     public void clear() {
         this.chunkcount = 0;
         this.chunkcache = new byte[0];
-        this.orderkey = null;
+        this.order = null;
     }
     
     public int size() {
         return chunkcount;
     }
-    
     
     public Iterator elements() {  // iterates byte[] - objects
         return new chunkIterator();
@@ -222,38 +205,133 @@ public class kelondroCollection {
         
     }
     
-    public String getOrderingSignature() {
-        return this.orderkey;
+    public kelondroOrder getOrdering() {
+        return this.order;
     }
 
-    public int binarySearch(byte[] key, Comparator c) {
-        assert (this.orderkey != null);
+    private int find(byte[] a) {
+        // returns the chunknumber; -1 if not found
+        
+        if (this.order == null) return iterativeSearch(a);
+        
+        // check if a re-sorting make sense
+        if (this.chunkcount - this.sortbound > 3000) sort();
+        
+        // first try to find in sorted area
+        int p = iterativeSearch(a);
+        if (p >= 0) return p;
+        
+        // then find in unsorted area
+        return binarySearch(a);
+        
+    }
+    
+    private int iterativeSearch(byte[] key) {
+        // returns the chunknumber
+        
+        if (this.order == null) {
+            for (int i = this.sortbound; i < this.chunkcount; i++) {
+                if (match(key, i)) return i;
+            }
+            return -1;
+        } else {
+            for (int i = this.sortbound; i < this.chunkcount; i++) {
+                if (compare(key, i) == 0) return i;
+            }
+            return -1;
+        }
+    }
+    
+    private int binarySearch(byte[] key) {
+        assert (this.order != null);
         int l = 0;
-        int r = chunkcount - 1;
+        int rbound = this.sortbound;
         int p = 0;
         int d;
-        while (l <= r) {
-            p = (l + r) >> 1;
-            d = compare(key, p, c);
+        while (l < rbound) {
+            p = l + ((rbound - l) >> 1);
+            d = compare(key, p);
             if (d == 0) return p;
-            else if (d < 0) r = p - 1;
-            else l = ++p;
+            else if (d < 0) rbound = p;
+            else l = p + 1;
         }
-        return -p - 1;
+        return -1;
     }
 
-    public void sort(kelondroOrder ko) {
-        if (this.orderkey == ko.signature()) return; // this is already sorted
-        qsort(0, chunkcount - 1, (Comparator) ko);
-        this.orderkey = ko.signature();
+    public void sort() {
+        if (this.sortbound == this.chunkcount) return; // this is already sorted
+        System.out.println("SORT");
+        if (this.sortbound > 1) qsort(0, this.sortbound, this.chunkcount);
+        else qsort(0, this.chunkcount);
+        this.sortbound = this.chunkcount;
     }
 
-    public void sort(int fromIndex, int toIndex, Comparator c) {
-        assert (fromIndex <= toIndex);
-        assert (fromIndex >= 0);
-        synchronized(chunkcache) {
-            qsort(fromIndex, toIndex, c);
+    private void qsort(int l, int sbound, int rbound) {
+        //System.out.println("QSORT: chunkcache.length=" + chunkcache.length + ", chunksize=" + chunksize + ", l=" + l + ", sbound=" + sbound + ", rbound=" + rbound);
+        assert (sbound <= rbound);
+        if (l >= rbound - 1) return;
+        
+        if (rbound - l < 1000) {
+            isort(l, rbound);
+            return;
+         }
+        
+        int p = l + ((sbound - l) / 2);
+        int q = sbound;
+        int qs = q;
+        byte[] a = new byte[chunksize];
+        try {
+        System.arraycopy(chunkcache, p * chunksize, a, 0, chunksize);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("EXCEPTION: chunkcache.length=" + chunkcache.length + ", p=" + p + ", chunksize=" + chunksize + ", l=" + l + ", sbound=" + sbound + ", rbound=" + rbound);
+            System.exit(-1);
         }
+        p++;
+        int ps = p;
+        while (q < rbound) {
+            if (compare(a, q) < 1) {
+                q++;
+            } else {
+                swap(p, q);
+                p++;
+                q++;
+            }
+        }
+        if (qs < p) qs = p;
+        if ((ps - l) <= ((p - l) / 2)) qsort(l, p); else qsort(l, ps, p);
+        if ((qs - p) <= ((q - p) / 2)) qsort(p, q); else qsort(p, qs, q);
+    }
+
+    private void qsort(int l, int rbound) {
+        if (l >= rbound - 1) return;
+        
+        if (rbound - l < 10) {
+            isort(l, rbound);
+            return;
+         }
+        
+        int i = l;
+        int j = rbound - 1;
+        byte[] a = new byte[chunksize];
+        int pivot = (i + j) / 2;
+        System.arraycopy(chunkcache, pivot * chunksize, a, 0, chunksize);
+        while (i <= j) {
+            while (compare(a, i) == 1) i++; // chunkAt[i] < keybuffer
+            while (compare(a, j) == -1) j--; // chunkAt[j] > keybuffer
+            if (i <= j) {
+                swap(i, j);
+                i++;
+                j--;
+            }
+        }
+        qsort(l, i);
+        qsort(i, rbound);
+    }
+
+    private void isort(int l, int rbound) {
+        for (int i = l + 1; i < rbound; i++)
+            for (int j = i; j > l && compare(j - 1, j) > 0; j--)
+                swap(j, j - 1);
     }
 
     private void swap(int i, int j) {
@@ -263,47 +341,15 @@ public class kelondroCollection {
         System.arraycopy(a, 0, chunkcache, chunksize * j, chunksize);
     }
 
-    private void isort(int l, int r, Comparator c) {
-        for (int i = l + 1; i <= r; i++)
-            for (int j = i; j > l && compare(j - 1, j, c) > 0; j--)
-                swap(j, j - 1);
-    }
-
-    private void qsort(int l, int r, Comparator c) {
-        if (l >= r) return;
-        
-        if (r - l < 10) {
-            isort(l, r, c);
-            return;
-         }
-        
-        int i = l;
-        int j = r;
-        byte[] a = new byte[chunksize];
-        int pivot = (i + j) / 2;
-        System.arraycopy(chunkcache, pivot * chunksize, a, 0, chunksize);
-        while (i <= j) {
-            while (compare(a, i, c) == 1) i++; // chunkAt[i] < keybuffer
-            while (compare(a, j, c) == -1) j--; // chunkAt[j] > keybuffer
-            if (i <= j) {
-                swap(i, j);
-                i++;
-                j--;
-            }
-        }
-        qsort(l, j, c);
-        qsort(i, r, c);
-    }
-
-    public void uniq(Comparator c) {
-        assert (this.orderkey != null);
+    public void uniq() {
+        assert (this.order != null);
         // removes double-occurrences of chunks
         // this works only if the collection was ordered with sort before
         synchronized (chunkcache) {
             if (chunkcount <= 1) return;
             int i = 0;
             while (i < chunkcount - 1) {
-                if (compare(i, i + 1, c) == 0) {
+                if (compare(i, i + 1) == 0) {
                     remove(i);
                 } else {
                     i++;
@@ -325,59 +371,69 @@ public class kelondroCollection {
     }
     
     public boolean match(byte[] a, int chunknumber) {
-        if (chunknumber >= chunkcount)
-            return false;
+        if (chunknumber >= chunkcount) return false;
         int i = 0;
         int p = chunknumber * chunksize;
         final int len = a.length;
-        if (len > chunksize)
-            return false;
+        if (len > chunksize) return false;
         while (i < len)
-            if (a[i++] != chunkcache[p++])
-                return false;
+            if (a[i++] != chunkcache[p++]) return false;
         return true;
     }
 
-    public int compare(byte[] a, int chunknumber, Comparator c) {
-        // this can be enhanced
+    public int compare(byte[] a, int chunknumber) {
         assert (chunknumber < chunkcount);
-        byte[] b = new byte[chunksize];
-        System.arraycopy(chunkcache, chunknumber * chunksize, b, 0, chunksize);
-        return c.compare(a, b);
+        int l = Math.min(a.length, chunksize);
+        return this.order.compare(a, chunkcache, chunknumber * chunksize, l);
     }
 
-    public int compare(int i, int j, Comparator c) {
+    public int compare(int i, int j) {
         // this can be enhanced
         assert (i < chunkcount);
         assert (j < chunkcount);
         byte[] a = new byte[chunksize];
-        byte[] b = new byte[chunksize];
         System.arraycopy(chunkcache, i * chunksize, a, 0, chunksize);
-        System.arraycopy(chunkcache, j * chunksize, b, 0, chunksize);
-        return c.compare(a, b);
+        return compare(a, j);
     }
-
+    
     public static void main(String[] args) {
         String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };
-        kelondroCollection c = new kelondroCollection(10);
+        kelondroCollection c = new kelondroCollection(10, 0, kelondroNaturalOrder.naturalOrder, new byte[0]);
         for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
         for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
+        c.sort();
         c.remove("fuenf".getBytes());
         Iterator i = c.elements();
         String s;
+        System.out.print("INPUT-ITERATOR: ");
         while (i.hasNext()) {
             s = new String((byte[]) i.next()).trim();
             System.out.print(s + ", ");
             if (s.equals("drei")) i.remove();
         }
         System.out.println("");
-        System.out.println(c.toString());
-        c.sort(kelondroNaturalOrder.naturalOrder);
-        System.out.println(c.toString());
-        c.uniq(kelondroNaturalOrder.naturalOrder);
-        System.out.println(c.toString());
+        System.out.println("INPUT-TOSTRING: " + c.toString());
+        c.sort();
+        System.out.println("SORTED        : " + c.toString());
+        c.uniq();
+        System.out.println("UNIQ          : " + c.toString());
         c.trim();
-        System.out.println(c.toString());
+        System.out.println("TRIM          : " + c.toString());
+        c = new kelondroCollection(10, 0, kelondroNaturalOrder.naturalOrder, new byte[0]);
+        long start = System.currentTimeMillis();
+        long t, d = 0;
+        byte[] w;
+        for (long k = 0; k < 100000; k++) {
+            t = System.currentTimeMillis();
+            w = ("a" + Long.toString((t % 13775) + k)).getBytes();
+            if (c.get(w) == null) c.add(w); else d++;
+            if (k % 1000 == 0)
+                System.out.println("added " + k + " entries in " +
+                    ((t - start) / 1000) + " seconds, " +
+                    (((t - start) > 1000) ? (k / ((t - start) / 1000)) : 0) +
+                    " entries/second, " + d + " double, size = " + c.size() + 
+                    ", sum = " + (c.size() + d));
+        }
     }
     
 }

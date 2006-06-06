@@ -124,7 +124,7 @@ public class kelondroCollectionIndex {
         // define the new storage array
         byte[][] newarrayrow = new byte[][]{key,
                                             kelondroNaturalOrder.encodeLong((long) collection.size(), 4),
-                                            collection.getOrderingSignature().getBytes(),
+                                            null /*collection.getOrderingSignature().getBytes()*/,
                                             collection.toByteArray()};
         if (oldindexrow == null) {
             // the collection is new
@@ -194,7 +194,7 @@ public class kelondroCollectionIndex {
         // read the row and define a collection
         int chunkcountInArray = (int) arrayrow.getColLongB256(1);
         if (chunkcountInArray != chunkcount) throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, partitionnumber).toString(), "array has different chunkcount than index: index = " + chunkcount + ", array = " + chunkcountInArray);
-        return new kelondroCollection(chunksize, chunkcount, arrayrow.getColString(2, null), arrayrow.getColBytes(3));
+        return new kelondroCollection(chunksize, chunkcount, null /*, arrayrow.getColString(2, null)*/, arrayrow.getColBytes(3));
     }
     
     public void remove(byte[] key) throws IOException {
