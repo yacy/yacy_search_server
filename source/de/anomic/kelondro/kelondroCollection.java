@@ -41,7 +41,6 @@
 
 package de.anomic.kelondro;
 
-import java.util.Comparator;
 import java.util.Iterator;
 
 public class kelondroCollection {
@@ -215,7 +214,8 @@ public class kelondroCollection {
         if (this.order == null) return iterativeSearch(a);
         
         // check if a re-sorting make sense
-        if (this.chunkcount - this.sortbound > 3000) sort();
+        if (this.chunkcount - this.sortbound > 800) sort();
+        //if ((this.chunkcount - this.sortbound) / (this.chunkcount + 1) * 100 > 20) sort();
         
         // first try to find in sorted area
         int p = iterativeSearch(a);
@@ -260,7 +260,7 @@ public class kelondroCollection {
 
     public void sort() {
         if (this.sortbound == this.chunkcount) return; // this is already sorted
-        System.out.println("SORT");
+        //System.out.println("SORT");
         if (this.sortbound > 1) qsort(0, this.sortbound, this.chunkcount);
         else qsort(0, this.chunkcount);
         this.sortbound = this.chunkcount;
@@ -384,16 +384,14 @@ public class kelondroCollection {
     public int compare(byte[] a, int chunknumber) {
         assert (chunknumber < chunkcount);
         int l = Math.min(a.length, chunksize);
-        return this.order.compare(a, chunkcache, chunknumber * chunksize, l);
+        return this.order.compare(a, 0, a.length, chunkcache, chunknumber * chunksize, l);
     }
 
     public int compare(int i, int j) {
         // this can be enhanced
         assert (i < chunkcount);
         assert (j < chunkcount);
-        byte[] a = new byte[chunksize];
-        System.arraycopy(chunkcache, i * chunksize, a, 0, chunksize);
-        return compare(a, j);
+        return this.order.compare(chunkcache, i * chunksize, chunksize, chunkcache, j * chunksize, chunksize);
     }
     
     public static void main(String[] args) {
@@ -423,7 +421,7 @@ public class kelondroCollection {
         long start = System.currentTimeMillis();
         long t, d = 0;
         byte[] w;
-        for (long k = 0; k < 100000; k++) {
+        for (long k = 0; k < 200000; k++) {
             t = System.currentTimeMillis();
             w = ("a" + Long.toString((t % 13775) + k)).getBytes();
             if (c.get(w) == null) c.add(w); else d++;

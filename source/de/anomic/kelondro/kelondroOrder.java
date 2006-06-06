@@ -61,8 +61,6 @@ public interface kelondroOrder extends Comparator {
 
     public int compare(byte[] a, byte[] b);
 
-    public int compare(byte[] a, byte[] b, int boffset, int blength);
-
     public int compare(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength);
     
     public byte[] zero(); // returns the zero point of the Ordering; null if not defined

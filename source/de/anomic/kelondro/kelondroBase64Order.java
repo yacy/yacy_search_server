@@ -260,35 +260,39 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
     }
     
     public final int compare(byte[] a, byte[] b) {
-        return (asc) ? compare0(a, b) : compare0(b, a);
+        return (asc) ? compare0(a, 0, a.length, b, 0, b.length) : compare0(b, 0, b.length, a, 0, a.length);
     }
 
-    public final int compare0(byte[] a, byte[] b) {
-        if (zero == null) return compares(a, b);
+    public final int compare(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
+        return (asc) ? compare0(a, aoffset, alength, b, boffset, blength) : compare0(b, boffset, blength, a, aoffset, alength);
+    }
+    
+    public final int compare0(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
+        if (zero == null) return compares(a, aoffset, alength, b, boffset, blength);
         // we have an artificial start point. check all combinations
-        int az = compares(a, zero); // -1 if a < z; 0 if a == z; 1 if a > z
-        int bz = compares(b, zero); // -1 if b < z; 0 if b == z; 1 if b > z
+        int az = compares(a, aoffset, alength, zero, 0, zero.length); // -1 if a < z; 0 if a == z; 1 if a > z
+        int bz = compares(b, boffset, blength, zero, 0, zero.length); // -1 if b < z; 0 if b == z; 1 if b > z
         if ((az ==  0) && (bz ==  0)) return 0;
         if  (az ==  0) return -1;
         if  (bz ==  0) return  1;
-        if  (az == bz) return compares(a, b);
+        if  (az == bz) return compares(a, aoffset, alength, b, boffset, blength);
         return bz;
     }
     
-    public final int compares(byte[] a, byte[] b) {
+    public final int compares(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
         int i = 0;
-        final int al = a.length;
-        final int bl = b.length;
+        final int al = Math.min(alength, a.length - aoffset);
+        final int bl = Math.min(blength, b.length - boffset);
         final int len = (al > bl) ? bl : al;
         while (i < len) {
-            if (ahpla[a[i]] > ahpla[b[i]]) return 1;
-            if (ahpla[a[i]] < ahpla[b[i]]) return -1;
+            if (ahpla[a[i + aoffset]] > ahpla[b[i + boffset]]) return 1;
+            if (ahpla[a[i + aoffset]] < ahpla[b[i + boffset]]) return -1;
             // else the bytes are equal and it may go on yet undecided
             i++;
         }
         // check if we have a zero-terminated equality
-        if ((i == al) && (i < bl) && (b[i] == 0)) return 0;
-        if ((i == bl) && (i < al) && (a[i] == 0)) return 0;
+        if ((i == al) && (i < bl) && (b[i + boffset] == 0)) return 0;
+        if ((i == bl) && (i < al) && (a[i + aoffset] == 0)) return 0;
         // no, decide by length
         if (al > bl) return 1;
         if (al < bl) return -1;

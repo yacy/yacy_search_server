@@ -74,20 +74,6 @@ public abstract class kelondroAbstractOrder implements kelondroOrder {
             throw new IllegalArgumentException("Object type or Object type combination not supported: a=" + a + ", b=" + b);
     }
 
-    public int compare(byte[] a, byte[] b, int boffset, int blength) {
-        int l = Math.min(a.length, blength);
-        byte[] bb = new byte[l];
-        System.arraycopy(b, boffset, bb, 0, l);
-        return compare(a, bb);
-    }
-    
-    public int compare(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
-        int l = Math.min(alength, blength);
-        byte[] aa = new byte[l];
-        System.arraycopy(a, aoffset, aa, 0, l);
-        return compare(aa, b, boffset, blength);
-    }
-    
     public byte[] zero() {
         return zero;
     }
