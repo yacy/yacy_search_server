@@ -1180,7 +1180,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 "Proxy-agent: YACY" + serverCore.crlfString +
                 serverCore.crlfString).getBytes());
         
-        this.theLogger.logInfo("SSL CONNECTION TO " + host + ":" + port + " ESTABLISHED");
+        this.theLogger.logInfo("SSL connection to " + host + ":" + port + " established.");
         
         // start stream passing with mediate processes
         Mediate cs = new Mediate(sslSocket, clientIn, promiscuousOut);

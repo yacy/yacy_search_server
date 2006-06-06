@@ -13,6 +13,7 @@
 
 #English=German
 #DO _NOT_ USE THIS FILE AS TEMPLATE FOR YOUR OWN TRANSLATIONS, INSTEAD GET THE STRINGS DIRECTLY OUT OF THE HTML-FILES
+#OTHERWISE YOU MAY GET A $TARGET_LANGUAGE - SLOVAK MIXTURE IN THE WEBINTERFACE
 
 #-------------------------------------------------------
 #File: ConfigLanguage_p.html
@@ -169,6 +170,7 @@ Peer User:==Peer-Nutzer:
 Peer Password:==Peer-Passwort:
 repeat same password==selbes Passwort wiederholen
 Your peer cannot be reached from outside==Ihr Peer kann nicht von au&szlig;en erreicht werden
+what is not fatal, but would be good for the YaCy network==was nicht schlimm ist, aber anders wÃ¤re fÃ¼r das YaCy-Netzwerk noch besser
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Bitte &ouml;ffnen Sie Ihre Firewall auf diesem Port und/oder stellen Sie einen virtuellen Server in Ihrem Router ein um Verbindungen auf diesem Port zu erlauben
 Your peer can be reached by other peers==Ihr Peer kann von anderen Peers erreicht werden
 Peer Port:==Peer-Port:
@@ -296,8 +298,8 @@ You can search for several words simultanous. Words must be separated by a singl
 The words are treated conjunctive, that means every must occur in the result, not any.==
 If you do a global search \(see below\) you may get different results each time you do a search.==Wenn Sie eine globale Suche (siehe unten) durchf&uuml;hren, kann es sein, dass Sie bei wiederholten Suchanfragen jedesmal andere Ergebnisse erhalten.
 Maximum Number of Results==Maximale Anzahl an Ergebnissen
-#DAS ist eine Murksübersetzung... bitte ggf. verbessern.
-Prefer mask\:==Vorzugsmaske:
+#DAS ist eine Murksuebersetzung... bitte ggf. verbessern.
+>Prefer mask\:<==>Vorzugsmaske:<
 You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Sie k&ouml;nnen ausw&auml;hlen, wieviele Links Ihnen angezeigt werden sollen. Wir unterst&uuml;tzen im Moment keine mehrfachen Ergebnisseiten f&uuml;r jeden m&ouml;glichen Link.
 Instead we encourage you to enhance the search result by submitting more search words.==Stattdessen m&ouml;chten wir Sie dazu auffordern, Ihre Suchergebnisse durch das Eingeben von mehreren Suchw&ouml;rtern, zu vergr&ouml;&szlig;ern.
 Result Order Options==Reihenfolge der Ergebnisse
@@ -317,7 +319,7 @@ You may want to use accesskeys to navigate through the YaCy webinterface:==Sie k
 Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows und Internet Explorer: Alt + Taste + Enter
 Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows und Mozilla/Firefox/Netscape: Alt + Taste
 Windows and Opera: Shift \+ Esc \+ Accesskey==Windows und Opera: Shift + Esc + Taste
-Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter=Macintosh und Internet Explorer: Str + Taste + Enter
+Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter==Macintosh und Internet Explorer: Str + Taste + Enter
 Macintosh and Safari: Strg \+ Accesskey==Macintosh und Safari: Strg + Taste
 Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh und Mozilla/Firefox/Netscape: Strg + Taste
 Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh und Opera: Shift + Esc + Taste
@@ -503,8 +505,8 @@ Minute\(s\)==Minute(n)
 If you use this option, web pages that are already existent in your database are crawled and indexed again.==Ist diese Option aktiviert, werden bereits in Ihrer Datenbank existierende Internetseite erneut gecrawled und indexiert.
 It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es h&auml;ngt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl &auml;lter als das angegebene
 date, the page is crawled again, othervise it is treaded as 'double' and not loaded or indexed again.==Datum ist, wird die Seite erneut gecrawlet, sonst wird sie als 'double' markiert und weder geladen noch indexiert.Auto-Dom-Filter:==Auto-Dom-Filter:Depth:==Tiefe:
-This option will automatically create a domain-filter which limits the crawl on domains the crawler will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth for this example would be 1.==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschränkt , die auf der angegebenen Tiefe gefunden werden. Diese Option kann man beispielsweise benutzen, um eine Seite mit Bookmarks zu crawlen und dann den folgenden Crawl automatisch auf die Domains zu beschränken, die in der Bookmarkliste vorkamen. Die einzustellende Tiefe für dieses Beispiel wäre 1.
-The default value 0 gives no restrictions.==Der Vorgabewert 0 bedeutet, dass nichts eingeschränkt wird.
+This option will automatically create a domain-filter which limits the crawl on domains the crawler will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth for this example would be 1.==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschrï¿½nkt , die auf der angegebenen Tiefe gefunden werden. Diese Option kann man beispielsweise benutzen, um eine Seite mit Bookmarks zu crawlen und dann den folgenden Crawl automatisch auf die Domains zu beschrï¿½nken, die in der Bookmarkliste vorkamen. Die einzustellende Tiefe fï¿½r dieses Beispiel wï¿½re 1.
+The default value 0 gives no restrictions.==Der Vorgabewert 0 bedeutet, dass nichts eingeschrï¿½nkt wird.
 Maximum Pages per Domain:==Maximale Seiten pro Domain:
 Page-Count:==Seitenanzahl:
 You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.==Sie k&ouml;nnen die maximale Anzahl an Seiten, die von einer einzelnen Domain gefunden und indexiert werden, mit dieser Option begrenzen.
@@ -585,7 +587,7 @@ Recently started remote crawls, finished:==Gerade gestartete Remote-Crawls ander
 Remote Crawling Peers:==Remote-Crawl Peers:
 No remote crawl peers availible.==Kein Peer zum Remote-Crawl erreichbar.
 peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.
-Idle Peers==unt&auml;tige Peers
+Idle Peers==Unt&auml;tige Peers
 Accept \'\?\' URLs==URLs mit '?' akzeptieren
 Busy Peers==Besch&auml;tigte Peers
 \#\(withQuery\)\#no::yes\#\(/withQuery\)\#==#(withQuery)#nein::ja#(/withQuery)#
@@ -851,7 +853,7 @@ All these things here are to be considered as probably unstable, and/or experime
 You may try out these things but please do not care about bugs.==Sie k&ouml;nnen die neuen Funktionen gerne ausprobieren. K&uuml;mmern Sie sich bitte nicht um die Fehler.
 The <a==Das <a
 Advanced <a==erweiterte <a
-Configuration</a>Einstellungen</a>
+Configuration</a>==Einstellungen</a>
 
 #-------------------------------------------------------
 #File: Messages_p.html
@@ -1326,7 +1328,7 @@ Enable&nbsp;port&nbsp;forwarding:==Aktiviere Port Weiterleitung:
 Enabling disabling port forwarding via secure channel.==Aktivieren/Deaktivieren von Port Weiterleitung &uuml;ber sicheren Kanal.
 Forwarding&nbsp;via&nbsp;proxy:==Weiterleitung &uuml;ber Proxy:
 Function not available at the moment.==Funktion im Moment nicht verf&uuml;gbar.
-You need to install libx to use this feature==Sie müssen die libx installieren, um diese Funktionen benutzen zu können
+You need to install libx to use this feature==Sie mï¿½ssen die libx installieren, um diese Funktionen benutzen zu kï¿½nnen
 Forwarding&nbsp;port:==Weiterleitender Port
 The port on the remote server that should be forwarded via the secure channel to the local host.==Der Port des Remote Servers der mittels sicherem Kanal auf den lokalen Host weitergeleitet werden soll.
 Forwarding&nbsp;host:==Weiterleitender Host
