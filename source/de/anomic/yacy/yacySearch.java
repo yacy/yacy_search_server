@@ -205,6 +205,7 @@ public class yacySearch extends Thread {
     }
     
     public static int remainingWaiting(yacySearch[] searchThreads) {
+        if (searchThreads == null) return 0;
         int alive = 0;
         for (int i = 0; i < searchThreads.length; i++) {
             if (searchThreads[i].isAlive()) alive++;

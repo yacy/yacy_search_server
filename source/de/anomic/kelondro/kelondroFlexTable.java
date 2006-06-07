@@ -27,23 +27,31 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 
 public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondroIndex {
 
-    private HashMap index;
+    private kelondroCollection index;
+    private kelondroRow indexrow;
     
     public kelondroFlexTable(File path, String tablename, kelondroRow rowdef, boolean exitOnFail) throws IOException {
         super(path, tablename, rowdef, exitOnFail);
         
         // fill the index
-        this.index = new HashMap();
+        this.index = new kelondroCollection(super.row().width(0) + 4);
         /*
         kelondroFixedWidthArray indexArray = new kelondroFixedWidthArray(new File(path, colfilename(0,0)));
         for (int i = 0; i < indexArray.size(); i++) index.put(indexArray.get(i).getColBytes(0), new Integer(i));
         indexArray.close();
         */
-        for (int i = 0; i < super.col[0].size(); i++) index.put(super.col[0].get(i).getColBytes(0), new Integer(i));
+        this.indexrow = new kelondroRow(new int[]{super.row().width(0), 4});
+        kelondroRow.Entry indexentry;
+        for (int i = 0; i < super.col[0].size(); i++) {
+            indexentry = indexrow.newEntry();
+            indexentry.setCol(0, super.col[0].get(i).getColBytes(0));
+            indexentry.setColLongB256(1, i);
+            index.add(indexentry.bytes());
+        }
+        this.index.setOrdering(kelondroNaturalOrder.naturalOrder);
     }
     
     /*
@@ -62,27 +70,29 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     */
     
     public kelondroRow.Entry get(byte[] key) throws IOException {
-        Integer i = (Integer) this.index.get(key);
-        if (i == null) return null;
-        return super.get(i.intValue());
+        kelondroRow.Entry indexentry = this.indexrow.newEntry(this.index.get(key));
+        if (indexentry == null) return null;
+        return super.get((int) indexentry.getColLongB256(1));
     }
 
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
-        Integer i = (Integer) this.index.get(row.getColBytes(0));
-        if (i == null) {
-            i = new Integer(super.add(row));
-            this.index.put(row.getColBytes(0), i);
+        kelondroRow.Entry indexentry = this.indexrow.newEntry(this.index.get(row.getColBytes(0)));
+        if (indexentry == null) {
+            indexentry = indexrow.newEntry();
+            indexentry.setCol(0, row.getColBytes(0));
+            indexentry.setColLongB256(1, super.add(row));
+            index.add(indexentry.bytes());
             return null;
         } else {
-            return super.set(i.intValue(), row);
+            return super.set((int) indexentry.getColLongB256(1), row);
         }
     }
     
     public kelondroRow.Entry remove(byte[] key) throws IOException {
-        Integer i = (Integer) this.index.get(key);
-        if (i == null) return null;
-        kelondroRow.Entry r = super.get(i.intValue());
-        super.remove(i.intValue());
+        kelondroRow.Entry indexentry = this.indexrow.newEntry(this.index.get(key));
+        if (indexentry == null) return null;
+        kelondroRow.Entry r = super.get((int) indexentry.getColLongB256(1));
+        super.remove((int) indexentry.getColLongB256(1));
         return r;
     }
 
