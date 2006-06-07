@@ -46,7 +46,7 @@ import java.util.Random;
 
 public class kelondroCollection {
 
-    private byte[] chunkcache;
+    protected byte[] chunkcache;
     private int chunkcount;
     private int chunksize;
     private int sortbound;
@@ -122,6 +122,19 @@ public class kelondroCollection {
         return null;
     }
     
+    protected void set(int index, byte[] a) {
+        set(index, a, a.length);
+    }
+    
+    protected void set(int index, byte[] a, int length) {
+        assert (index < this.chunkcount);
+        int l = Math.min(this.chunksize, Math.min(length, a.length));
+        synchronized (chunkcache) {
+            System.arraycopy(a, 0, chunkcache, chunksize * index, l);
+        }
+        this.lastTimeWrote = System.currentTimeMillis();
+    }
+    
     public void add(byte[] a) {
         add(a, a.length);
     }
@@ -149,22 +162,21 @@ public class kelondroCollection {
         }
     }
     
-    public void remove(byte[] a, int length) {
-        // the byte[] a may be shorter than the chunksize
-        if (chunkcount == 0) return;
-        synchronized(chunkcache) {
-            int p = find(a, length);
-            remove(p);
-        }
+    public byte[] remove(byte[] a) {
+        return remove(a, a.length);
     }
     
-    public void remove(byte[] a, int length, kelondroOrder ko) {
+    public byte[] remove(byte[] a, int length) {
         // the byte[] a may be shorter than the chunksize
-        if (chunkcount == 0) return;
+        if (chunkcount == 0) return null;
+        byte[] b = null;
         synchronized(chunkcache) {
             int p = find(a, length);
+            if (p < 0) return null;
+            b = get(p);
             remove(p);
         }
+        return b;
     }
     
     private void remove(int p) {
@@ -240,7 +252,7 @@ public class kelondroCollection {
         }
     }
     
-    private int find(byte[] a, int length) {
+    protected int find(byte[] a, int length) {
         // returns the chunknumber; -1 if not found
         
         if (this.order == null) return iterativeSearch(a, length);
