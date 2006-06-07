@@ -313,7 +313,7 @@ public class kelondroCollection {
         sort(keylen);
     }
 
-    private void sort(int keylen) {
+    public void sort(int keylen) {
         assert (this.order != null);
         if (this.sortbound == this.chunkcount) return; // this is already sorted
         //System.out.println("SORT");

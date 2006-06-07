@@ -42,9 +42,13 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         for (int i = 0; i < indexArray.size(); i++) index.put(indexArray.get(i).getColBytes(0), new Integer(i));
         indexArray.close();
         */
+        System.out.print("Loading " + path);
         for (int i = 0; i < super.col[0].size(); i++) {
-            index.puti(super.col[0].get(i).getColBytes(0), i);
+            index.addi(super.col[0].get(i).getColBytes(0), i);
+            if ((i % 10000) == 0) System.out.print('.');
         }
+        index.sort(super.row().width(0));
+        System.out.println(index.size() + " index entries initialized and sorted");
         this.index.setOrdering(kelondroNaturalOrder.naturalOrder);
     }
     

@@ -38,6 +38,13 @@ public class kelondroCollectionIntMap extends kelondroCollection {
         this.setOrdering(kelondroNaturalOrder.naturalOrder);
     }
 
+    public void addi(byte[] key, int i) {
+        kelondroRow.Entry indexentry = indexrow.newEntry();
+        indexentry.setCol(0, key);
+        indexentry.setColLongB256(1, i);
+        add(indexentry.bytes());
+    }
+    
     public int puti(byte[] key, int i) {
         int index = -1;
         synchronized (chunkcache) {
