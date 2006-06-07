@@ -77,6 +77,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         linkTags0.add("base");
         linkTags0.add("frame");
         linkTags0.add("meta");
+        linkTags0.add("area");
 
         linkTags1 = new TreeSet(insensitiveCollator);
         linkTags1.add("a");
@@ -180,8 +181,12 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
                 images.add(ie);
             } catch (MalformedURLException e) {}
         }
-        if (tagname.equalsIgnoreCase("base")) try {root = new URL(tagopts.getProperty("href", ""));} catch (MalformedURLException e) {}
-        if (tagname.equalsIgnoreCase("frame")) anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
+        if (tagname.equalsIgnoreCase("base")) try {
+            root = new URL(tagopts.getProperty("href", ""));
+        } catch (MalformedURLException e) {}
+        if (tagname.equalsIgnoreCase("frame")) {
+            anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
+        }
         if (tagname.equalsIgnoreCase("meta")) {
             String name = tagopts.getProperty("name", "");
             if (name.length() > 0) {
@@ -194,11 +199,20 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
                 return;
             }
         }
+        if (tagname.equalsIgnoreCase("area")) {
+            String title = cleanLine(tagopts.getProperty("title",""));
+            //String alt   = tagopts.getProperty("alt","");
+            String href  = tagopts.getProperty("href", "");
+            if (href.length() > 0) anchors.put(absolutePath(href), title);
+        }
     }
 
     public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
-        if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) anchors.put(absolutePath(tagopts.getProperty("href", "")), super.stripAll(new serverByteBuffer(text)).trim().toString());
+        if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) {
+            String href = tagopts.getProperty("href", "");
+            if (href.length() > 0) anchors.put(absolutePath(href), super.stripAll(new serverByteBuffer(text)).trim().toString());
+        }
         String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
             h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
