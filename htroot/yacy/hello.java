@@ -79,10 +79,13 @@ public final class hello {
         int  count = 0;
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (NumberFormatException e) {count = 0;}
 //      final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(MYTIME)); // read remote time
-        final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key, true);
+        final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key, false);
 
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
         if (remoteSeed == null) { return null; }
+//      final String properTest = remoteSeed.isProper();
+        // The remote peer might not know its IP yet, so don't abort if the IP check fails
+//      if ((properTest != null) && (! properTest.substring(0,1).equals("IP"))) { return null; }
 
         // we easily know the caller's IP:
         final String clientip = (String) header.get("CLIENTIP", "<unknown>"); // read an artificial header addendum
