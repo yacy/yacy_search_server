@@ -104,21 +104,23 @@ public class kelondroFlexWidthArray implements kelondroArray {
     }
     
     public kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException {
-        int r = 0;
+        int c = 0;
         kelondroRow.Entry e0, e1, p;
         p = rowdef.newEntry();
+        int lastcol;
         synchronized (col) {
-            while (r < rowdef.columns()) {
-                e0 = col[r].row().newEntry(
+            while (c < rowdef.columns()) {
+                lastcol  = c + col[c].row().columns() - 1;
+                e0 = col[c].row().newEntry(
                         rowentry.bytes(),
-                        rowdef.colstart[r],
-                        rowdef.colstart[r]
-                                - rowdef.colstart[r + col[r].row().columns() - 1]
-                                + rowdef.width(r));
-                e1 = col[r].set(index, e0);
-                for (int i = 0; i < col[r].row().columns(); i++)
-                    p.setCol(r + i, e1.getColBytes(i));
-                r = r + col[r].row().columns();
+                        rowdef.colstart[c],
+                        rowdef.colstart[lastcol] - rowdef.colstart[c]
+                                + rowdef.width(lastcol));
+                e1 = col[c].set(index, e0);
+                for (int i = 0; i < col[c].row().columns(); i++) {
+                    p.setCol(c + i, e1.getColBytes(i));
+                }
+                c = c + col[c].row().columns();
             }
         }
         return p;

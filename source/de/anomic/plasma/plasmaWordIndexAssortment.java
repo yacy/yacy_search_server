@@ -257,7 +257,7 @@ public final class plasmaWordIndexAssortment {
     }
     
     public Iterator content() {
-        return this.assortments.content();
+        return this.assortments.contentRows();
     }
 
     public int size() {

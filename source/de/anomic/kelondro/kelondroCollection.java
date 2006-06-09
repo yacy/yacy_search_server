@@ -262,11 +262,11 @@ public class kelondroCollection {
         //if ((this.chunkcount - this.sortbound) / (this.chunkcount + 1) * 100 > 20) sort();
         
         // first try to find in sorted area
-        int p = iterativeSearch(a, length);
+        int p = binarySearch(a, length);
         if (p >= 0) return p;
         
         // then find in unsorted area
-        return binarySearch(a, length);
+        return iterativeSearch(a, length);
         
     }
     

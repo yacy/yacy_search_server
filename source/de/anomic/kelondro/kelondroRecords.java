@@ -1118,23 +1118,61 @@ public class kelondroRecords {
         }
     }
 
-    public Iterator content() {
+    public Iterator contentRows() {
+        // returns an iterator of kelondroRow.Entry-objects that are not marked as 'deleted'
         try {
-            return new contentIterator();
+            return new contentRowIterator();
         } catch (IOException e) {
             return new HashSet().iterator();
         }
     }
     
-    public class contentIterator implements Iterator {
+    public class contentRowIterator implements Iterator {
         // iterator that iterates all kelondroRow.Entry-objects in the file
+        // all records that are marked as deleted are ommitted
+        
+        private Iterator nodeIterator;
+        
+        public contentRowIterator() throws IOException {
+            nodeIterator = contentNodes();
+        }
+
+        public boolean hasNext() {
+            return nodeIterator.hasNext();
+        }
+
+        public Object next() {
+            try {
+                return row().newEntry(((Node) nodeIterator.next()).getValueRow());
+            } catch (IOException e) {
+                throw new kelondroException(filename, e.getMessage());
+            }
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+        
+    }
+    
+    protected Iterator contentNodes() {
+        // returns an iterator of Node-objects that are not marked as 'deleted'
+        try {
+            return new contentNodeIterator();
+        } catch (IOException e) {
+            return new HashSet().iterator();
+        }
+    }
+    
+    protected class contentNodeIterator implements Iterator {
+        // iterator that iterates all Node-objects in the file
         // all records that are marked as deleted are ommitted
         // this is probably also the fastest way to iterate all objects
         
         private HashSet markedDeleted;
         private Handle pos;
         
-        public contentIterator() throws IOException {
+        public contentNodeIterator() throws IOException {
             pos = new Handle(0);
             markedDeleted = new HashSet();
             synchronized (USAGE) {
@@ -1158,7 +1196,7 @@ public class kelondroRecords {
                 Node n = new Node(pos);
                 pos.index++;
                 while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
-                return row().newEntry(n.getValueRow());
+                return n;
             } catch (IOException e) {
                 throw new kelondroException(filename, e.getMessage());
             }

@@ -69,7 +69,9 @@ public class dbtest {
         }
 
         public boolean isValid() {
-            final long source = new Long(new String(this.value).trim()).longValue();
+            String s = new String(this.value).trim();
+            if (s.length() == 0) return false;
+            final long source = new Long(s).longValue();
             return new String(this.key).equals(new String(randomHash(source, source)));
         }
 
@@ -138,8 +140,9 @@ public class dbtest {
                     System.out.println("ENTRY=" + entryBytes.getColString(1, null));
                     final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0), entryBytes.getColBytes(1));
                     if (!dbEntry.isValid()) {
-                        System.out.println(dbEntry);
+                        System.out.println("INVALID: " + dbEntry);
                     } else {
+                        System.out.println("_VALID_: " + dbEntry);
                         getTable().remove(entry.getKey());
                     }
                 }
@@ -185,7 +188,7 @@ public class dbtest {
             }
             if (dbe.equals("kelondroFlexTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), new kelondroRow(new int[]{keylength, valuelength, valuelength}), true);
+                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), testRow, true);
             }
             if (dbe.equals("mysql")) {
                 table = new dbTable("mysql", testRow);

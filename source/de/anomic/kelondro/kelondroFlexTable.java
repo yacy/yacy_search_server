@@ -27,6 +27,7 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
 public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondroIndex {
 
@@ -43,8 +44,13 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         indexArray.close();
         */
         System.out.print("Loading " + path);
-        for (int i = 0; i < super.col[0].size(); i++) {
-            index.addi(super.col[0].get(i).getColBytes(0), i);
+        Iterator content = super.col[0].contentNodes();
+        kelondroRecords.Node node;
+        int i;
+        while (content.hasNext()) {
+            node = (kelondroRecords.Node) content.next();
+            i = node.handle().hashCode();
+            index.addi(node.getValueRow(), i);
             if ((i % 10000) == 0) System.out.print('.');
         }
         index.sort(super.row().width(0));
@@ -69,6 +75,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
     public kelondroRow.Entry get(byte[] key) throws IOException {
         int i = index.geti(key);
+        if (i < 0) return null;
         return super.get(i);
     }
 
