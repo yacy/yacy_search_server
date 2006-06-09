@@ -691,251 +691,12 @@ public final class yacy {
         log.logInfo("FINISHED MIGRATION JOB, WAIT FOR DUMP");
         wordIndexCache.close(60);
         log.logInfo("TERMINATED MIGRATION");
-    }
+    }    
     
-    public static void importAssortment(String homePath, String importAssortmentFileName) {
-        if (homePath == null) throw new NullPointerException();
-        if (importAssortmentFileName == null) throw new NullPointerException();       
-        
-        // initialize logging
-        try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
-        serverLog log = new serverLog("ASSORTMENT-IMPORT");
-        log.logInfo("STARTING ASSORTMENT-IMPORT");     
-        
-        // initializing importAssortmentFile
-        String errorMsg = null;
-        File importAssortmentFile = new File(importAssortmentFileName);
-        if (!importAssortmentFile.exists()) errorMsg = "AssortmentFile '" + importAssortmentFile + "' does not exist.";
-        else if (importAssortmentFile.isDirectory()) errorMsg = "AssortmentFile '" + importAssortmentFile + "' is a directory.";
-        else if (!importAssortmentFile.canRead()) errorMsg = "AssortmentFile '" + importAssortmentFile + "' is not readable.";
-        else if (!importAssortmentFile.canWrite()) errorMsg = "AssortmentFile '" + importAssortmentFile + "' is not writeable.";
-        if (errorMsg != null) {
-            log.logSevere(errorMsg);
-            throw new IllegalStateException(errorMsg);
-        }
-        
-        File importAssortmentPath = null;
-        int assortmentNr = -1;
-        try {
-            importAssortmentPath = new File(importAssortmentFile.getParent());
-            assortmentNr = Integer.valueOf(importAssortmentFile.getName().substring("indexAssortment".length(),importAssortmentFile.getName().length()-3)).intValue();
-        } catch (NumberFormatException e) {
-            errorMsg = "Unable to parse the assortment file number.";
-            log.logSevere(errorMsg,e);
-            throw new IllegalStateException(errorMsg);
-        }
-        
-        plasmaWordIndex homeWordIndex = null;
-        try {
-            // initializing assortment source file
-            log.logInfo("Initializing source assortment file");
-            plasmaWordIndexAssortment assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath,assortmentNr,16*1024*1024, log);
-            
-            // configure destination DB
-            log.logInfo("Initializing destination word index db.");
-            File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
-            if (!homeDBroot.exists()) errorMsg = "DB Directory '" + homeDBroot + "' does not exist.";
-            else if (!homeDBroot.isDirectory()) errorMsg = "DB Directory '" + homeDBroot + "' is not directory.";
-            else if (!homeDBroot.canRead()) errorMsg = "DB Directory '" + homeDBroot + "' is not readable.";
-            else if (!homeDBroot.canWrite()) errorMsg = "DB Directory '" + homeDBroot + "' is not writeable.";
-            if (errorMsg != null) {
-                log.logSevere(errorMsg);
-                throw new IllegalStateException(errorMsg);
-            }
-            
-            // opening the destination database
-            homeWordIndex = new plasmaWordIndex(homeDBroot, 16*1024*1024, log);        
-            
-            // iterating through the content
-            log.logInfo("Importing assortment file containing '" + assortmentFile.size() + "' entities.");
-            
-            int wordEntityCount = 0, wordEntryCount = 0;
-            Iterator contentIter = assortmentFile.content();
-            while (contentIter.hasNext()) {
-                wordEntityCount++;
-                
-                kelondroRow.Entry row = (kelondroRow.Entry) contentIter.next();
-                String hash = row.getColString(0, null);
-                indexContainer container = assortmentFile.row2container(hash, row);
-                wordEntryCount += container.size();
-                
-                // importing entity container to home db
-                homeWordIndex.addEntries(container, System.currentTimeMillis(), true);
-                
-                if (wordEntityCount % 500 == 0) {
-                    log.logFine(wordEntityCount + " word entities processed so far.");
-                }
-                if (wordEntryCount % 2000 == 0) {
-                    log.logFine(wordEntryCount + " word entries processed so far.");
-                }                
-            }
-        } catch (Error e) {
-            log.logWarning("Error", e);
-        } catch (Exception e) {
-            log.logWarning("Exception", e);
-        } finally {
-            log.logInfo("ASSORTMENT-IMPORT FINISHED");
-            if (homeWordIndex != null) try { homeWordIndex.close(5000); } catch (Exception e){/* nothing todo here */}
-        }
-    }
-    
-    public static void importDB(String homePath, String importPath) {
-        if (homePath == null) throw new NullPointerException();
-        if (importPath == null) throw new NullPointerException();
-        if (homePath.equals(importPath)) throw new IllegalArgumentException("Import and home DB directory must not be equal");
-        
-        // configure logging                    
-        try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
-        serverLog log = new serverLog("DB-IMPORT");
-        log.logInfo("STARTING DB-IMPORT");  
-        
-        plasmaWordIndex homeWordIndex = null, importWordIndex = null;
-        plasmaCrawlLURL homeUrlDB = null, importUrlDB = null;
-        try {                                        
-            //
-            Runtime rt = Runtime.getRuntime();
-            String errorMsg = null;
-            
-            // configure destination DB
-            File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
-            if (!homeDBroot.exists()) errorMsg = "Home DB directory does not exist.";
-            if (!homeDBroot.canRead()) errorMsg = "Home DB directory is not readable.";
-            if (!homeDBroot.canWrite()) errorMsg = "Home DB directory is not writeable";
-            if (!homeDBroot.isDirectory()) errorMsg = "Home DB Directory is not a directory.";
-            if (errorMsg != null) {
-                log.logSevere(errorMsg + "\nName: " + homeDBroot.getAbsolutePath());
-                return;
-            }              
-            
-            if ((!homeDBroot.exists())&&(!homeDBroot.canRead())&&(!homeDBroot.isDirectory())) {
-                log.logSevere("DB home directory can not be opened.");
-                return;
-            }
-            log.logFine("Initializing destination word index db.");
-            homeWordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, log);
-            log.logFine("Initializing destination URL db.");
-            homeUrlDB = new plasmaCrawlLURL(new File(homeDBroot, "urlHash.db"), 4*1024*1024);            
-            
-            // configure import DB
-            errorMsg = null;
-            File importDBroot = new File(importPath);
-            if (!importDBroot.exists()) errorMsg = "Import directory does not exist.";
-            if (!importDBroot.canRead()) errorMsg = "Import directory is not readable.";
-            if (!importDBroot.canWrite()) errorMsg = "Import directory is not writeable";
-            if (!importDBroot.isDirectory()) errorMsg = "ImportDirectory is not a directory.";
-            if (errorMsg != null) {
-                log.logSevere(errorMsg + "\nName: " + homeDBroot.getAbsolutePath());
-                return;
-            }    
-            
-            log.logFine("Initializing source word index db.");
-            importWordIndex = new plasmaWordIndex(importDBroot, 8*1024*1024, log);
-            log.logFine("Initializing source URL db.");
-            importUrlDB = new plasmaCrawlLURL(new File(importDBroot, "urlHash.db"), 4*1024*1024);
-            int startSize = importWordIndex.size();
-            
-            log.logInfo("Importing DB from '" + importDBroot.getAbsolutePath() + "' to '" + homeDBroot.getAbsolutePath() + "'.");
-            log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeUrlDB.size() + " URLs.");
-            log.logInfo("Import word index contains " + importWordIndex.size() + " words and " + importUrlDB.size() + " URLs.");                        
-            
-            // iterate over all words from import db
-            String wordHash = "";
-            long urlCounter = 0, wordCounter = 0, entryCounter = 0;
-            long globalStart = System.currentTimeMillis(), wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
-            String wordChunkStartHash = "------------", wordChunkEndHash;
-            
-            Iterator importWordHashIterator = importWordIndex.wordHashes(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, true);
-            while (importWordHashIterator.hasNext()) {
-                
-                // testing if import process was aborted
-                if (Thread.interrupted()) break;
-                
-                indexContainer newContainer;
-                try {
-                    wordCounter++;
-                    wordHash = (String) importWordHashIterator.next();
-                    newContainer = importWordIndex.getContainer(wordHash, true, -1);
-                    
-                    if (newContainer.size() == 0) continue;
-                    
-                    // the combined container will fit, read the container
-                    Iterator importWordIdxEntries = newContainer.entries();
-                    indexURLEntry importWordIdxEntry;
-                    while (importWordIdxEntries.hasNext()) {
-                        
-                        // testing if import process was aborted
-                        if (Thread.interrupted()) break;
-
-                        // getting next word index entry
-                        entryCounter++;
-                        importWordIdxEntry = (indexURLEntry) importWordIdxEntries.next();
-                        String urlHash = importWordIdxEntry.getUrlHash();                    
-                        if ((importUrlDB.exists(urlHash)) && (!homeUrlDB.exists(urlHash))) try {
-                            // importing the new url
-                            plasmaCrawlLURL.Entry urlEntry = importUrlDB.getEntry(urlHash, null);                       
-                            urlCounter++;
-                            plasmaCrawlLURL.Entry homeEntry = homeUrlDB.newEntry(urlEntry);
-                            homeEntry.store();
-                            
-                            if (urlCounter % 500 == 0) {
-                                log.logFine(urlCounter + " URLs processed so far.");
-                            }
-                        } catch (IOException e) {}
-                        
-                        if (entryCounter % 500 == 0) {
-                            log.logFine(entryCounter + " word entries and " + wordCounter + " word entries processed so far.");
-                        }
-                    }
-                    
-                    // testing if import process was aborted
-                    if (Thread.interrupted()) break;
-                    
-                    // importing entity container to home db
-                    homeWordIndex.addEntries(newContainer, System.currentTimeMillis(), true);
-                                        
-                    // delete complete index entity file
-                    importWordIndex.deleteContainer(wordHash);                 
-                    
-                    // print out some statistical information
-                    if (wordCounter%500 == 0) {
-                        wordChunkEndHash = wordHash;
-                        wordChunkEnd = System.currentTimeMillis();
-                        long duration = wordChunkEnd - wordChunkStart;
-                        log.logInfo(wordCounter + " word entities imported " +
-                                "[" + wordChunkStartHash + " .. " + wordChunkEndHash + "] " +
-                                ((startSize-importWordIndex.size())/(importWordIndex.size()/100)) + 
-                                 "%\n" + 
-                                "Speed: "+ 500*1000/duration + " word entities/s" +
-                                " | Elapsed time: " + serverDate.intervalToString(wordChunkEnd-globalStart) +
-                                " | Estimated time: " + serverDate.intervalToString(importWordIndex.size()*((wordChunkEnd-globalStart)/wordCounter)) + "\n" + 
-                                "Free memory: " + rt.freeMemory() + 
-                                " | Total memory: " + rt.totalMemory() + "\n" + 
-                                "Home Words = " + homeWordIndex.size() + 
-                                " | Import Words = " + importWordIndex.size());
-                        wordChunkStart = wordChunkEnd;
-                        wordChunkStartHash = wordChunkEndHash;
-                    }                    
-                    
-                } catch (Exception e) {
-                    log.logSevere("Import of word entity '" + wordHash + "' failed.",e);
-                } finally {
-                }
-            }
-            
-            log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeUrlDB.size() + " URLs.");
-            log.logInfo("Import word index contains " + importWordIndex.size() + " words and " + importUrlDB.size() + " URLs.");
-            
-            log.logInfo("DB-IMPORT FINISHED");
-        } catch (Exception e) {
-            log.logSevere("Database import failed.",e);
-        } finally {
-            if (homeUrlDB != null) try { homeUrlDB.close(); } catch (Exception e){}
-            if (importUrlDB != null) try { importUrlDB.close(); } catch (Exception e){}
-            if (homeWordIndex != null) try { homeWordIndex.close(5000); } catch (Exception e){}
-            if (importWordIndex != null) try { importWordIndex.close(5000); } catch (Exception e){}
-        }
-    }
-    
+    /**
+     * @param homePath path to the YaCy directory
+     * @param dbcache cache size in MB
+     */
     public static void minimizeUrlDB(String homePath, int dbcache) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
         try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
@@ -945,7 +706,7 @@ public final class yacy {
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            int cache = dbcache * 1024 * 1024;
+            int cache = dbcache * 1024; // in KB
             log.logFine("URLDB-Caches: "+cache+" bytes");
             plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), cache);
             
@@ -953,7 +714,9 @@ public final class yacy {
             plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.temp.db"), cache);
             
             Runtime rt = Runtime.getRuntime();
-            int cacheMem = (int)(rt.maxMemory()-rt.totalMemory())-5*1024*1024;
+            int cacheMem = (int)((rt.maxMemory()-rt.totalMemory())/1024)-(2*cache + 8*1024);
+            if (cacheMem < 2048) throw new OutOfMemoryError("Not enough memory available to start clean up.");
+                
             plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, cacheMem, log);
             Iterator wordHashIterator = wordIndex.wordHashes("------------", plasmaWordIndex.RL_WORDFILES, false);
             
@@ -1015,12 +778,16 @@ public final class yacy {
             log.logInfo("current LURL DB contains " + currentUrlDB.size() + " entries.");
             log.logInfo("mimimized LURL DB contains " + minimizedUrlDB.size() + " entries.");
             
-            // TODO: rename the mimimized UrlDB to the name of the previous UrlDB
+            // TODO: rename the mimimized UrlDB to the name of the previous UrlDB            
             
             log.logInfo("FINISHED URL CLEANUP, WAIT FOR DUMP");
+            log.logInfo("You can now backup your old URL DB and rename urlHash.temp.db to urlHash.db");
+            
             log.logInfo("TERMINATED URL CLEANUP");
-        } catch (IOException e) {
-            log.logSevere("IOException", e);
+        } catch (Exception e) {
+            log.logSevere("Exception: " + e.getMessage(), e);
+        } catch (Error e) {
+            log.logSevere("Error: " + e.getMessage(), e);
         }
     }
 
@@ -1460,32 +1227,6 @@ public final class yacy {
             }
             if (args.length == 2) applicationRoot= args[1];
             minimizeUrlDB(applicationRoot, dbcache);
-        } else if ((args.length >= 1) && (args[0].equals("-importDB"))) {
-            // attention: this may run long and should not be interrupted!
-            String importRoot = null;
-            if (args.length == 3) {
-                applicationRoot= args[1];
-                importRoot = args[2];
-            } else if (args.length == 2) {
-                importRoot = args[1];
-            } else {
-                System.err.println("Usage: -importDB [homeDbRoot] importDbRoot");
-                return;
-            }
-            importDB(applicationRoot, importRoot);
-        } else if ((args.length >= 1) && (args[0].equals("-importAssortment"))) {
-            // attention: this may run long and should not be interrupted!
-            String assortmentFileName = null;
-            if (args.length == 3) {
-                applicationRoot= args[1];
-                assortmentFileName = args[2];
-            } else if (args.length == 2) {
-                assortmentFileName = args[1];
-            } else {
-                System.err.println("Usage: -importAssortment [homeDbRoot] [AssortmentFileName]");
-                return;
-            }
-            importAssortment(applicationRoot, assortmentFileName);
         } else if ((args.length >= 1) && (args[0].equals("-testPeerDB"))) {
             if (args.length == 2) {
                 applicationRoot= args[1];
