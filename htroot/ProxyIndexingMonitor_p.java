@@ -88,7 +88,7 @@ public class ProxyIndexingMonitor_p {
                 if (newProxyPrefetchDepth < 0) newProxyPrefetchDepth = 0; 
                 if (newProxyPrefetchDepth > 20) newProxyPrefetchDepth = 20; // self protection ?
                 env.setConfig("proxyPrefetchDepth", Integer.toString(newProxyPrefetchDepth));
-                boolean proxyStoreHTCache = (post.get("proxyStoreHTCache", "")).equals("on");
+                boolean proxyStoreHTCache = post.containsKey("proxyStoreHTCache");
                 env.setConfig("proxyStoreHTCache", (proxyStoreHTCache) ? "true" : "false");
                 boolean proxyCrawlOrder = post.containsKey("proxyCrawlOrder");
                 env.setConfig("proxyCrawlOrder", proxyCrawlOrder ? "true" : "false");
