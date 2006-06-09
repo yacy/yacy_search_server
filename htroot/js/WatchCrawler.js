@@ -135,24 +135,6 @@ function handleQueues(){
 	}
 }
 
-function clearTable(table, numSkip){
-	if(numSkip==null){
-		numSkip=0;
-	}
-	row=getFirstChild(getFirstChild(table, "tbody"), "tr");
-	//skip numSkip rows
-	for(i=0;i<numSkip;i++){
-		row=getNextSibling(row, "tr");
-	}
-    while(row != null){ //delete old entries
-        getFirstChild(table, "tbody").removeChild(row);
-   		row=getFirstChild(getFirstChild(table, "tbody"), "tr");
-		//skip numSkip rows
-		for(i=0;i<numSkip;i++){
-			row=getNextSibling(row, "tr");
-		}
-    }
-}
 function createLoaderTable(loaderqueue){
 	entries=loaderqueue.getElementsByTagName("entry");
 	loaderTable=document.getElementById("loaderTable");
@@ -275,12 +257,6 @@ function createRemoteCrawlerTable(remotecrawlerqueue){
     }
 }
 
-function createCol(content){
-	col=document.createElement("td");
-	text=document.createTextNode(content);
-	col.appendChild(text);
-	return col;
-}
 function createIndexingRow(initiator, depth, modified, anchor, url, size, hash){
     row=document.createElement("tr");
 	row.appendChild(createCol(initiator));
@@ -319,13 +295,4 @@ function createRemoteCrawlerRow(profile, depth, modified, anchor, url){
 	row.appendChild(createLinkCol(url, url));
 	return row;
 }
-function createLinkCol(url, linktext){
-	col=document.createElement("td");
-	link=document.createElement("a");
-	link.setAttribute("href", url);
-	link.setAttribute("target", "_blank");
-	text=document.createTextNode(linktext);
-	link.appendChild(text);
-	col.appendChild(link)
-	return col
-}
+
