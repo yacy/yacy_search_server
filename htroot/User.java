@@ -67,15 +67,23 @@ public class User{
         prop.put("logged_in", 0);
         prop.put("logged-in_limit", 0);
         prop.put("status", 0);
+        //identified via HTTPPassword
         entry=sb.userDB.proxyAuth(((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")));
         if(entry != null){
         		prop.put("logged-in_identified-by", 1);
+        //identified via form-login
+        //TODO: this does not work for a static admin, yet.
+        }else if(post != null && post.containsKey("username") && post.containsKey("password")){
+            entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"), (String)header.get("CLIENTIP", "xxxxxx"));
+            prop.put("logged-in_identified-by", 1);
+        //identified via ip.
         }else{
         		entry=sb.userDB.ipAuth(((String)header.get("CLIENTIP", "xxxxxx")));
         		if(entry != null){
         			prop.put("logged-in_identified-by", 0);
         		}
         }
+        //Logged in via UserDB
         if(entry != null){
         		prop.put("logged-in", 1);
         		prop.put("logged-in_username", entry.getUserName());
@@ -91,14 +99,13 @@ public class User{
                     prop.put("logged-in_limit_percent", percent/3);
                     prop.put("logged-in_limit_percent2", (100-percent)/3);
         		}
+        //logged in via static Password
         }else if(sb.verifyAuthentication(header, true)){
             prop.put("logged-in", 2);
+        //not logged in
         }
         if(post!= null && entry != null){
-        		if(post.containsKey("logout")){
-        			entry.logout(((String)header.get("CLIENTIP", "xxxxxx")));
-        			prop.put("logged-in", 0);
-        		}else if(post.containsKey("changepass")){
+        		if(post.containsKey("changepass")){
         			prop.put("status", 1); //password
         			if(entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(entry.getUserName()+":"+post.get("oldpass", "")))){
         			if(post.get("newpass").equals(post.get("newpass2"))){
@@ -119,6 +126,9 @@ public class User{
         		}
         }else if(post!=null && post.containsKey("logout")){
             prop.put("logged-in",0);
+            if(entry != null){
+                entry.logout(((String)header.get("CLIENTIP", "xxxxxx")));
+            }
             if(sb.verifyAuthentication(header, true)){
                 prop.put("AUTHENTICATE","admin log-in");
             }

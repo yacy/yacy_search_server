@@ -9,7 +9,12 @@
 <br><br>
 <h2>User Page</h2><br>
 #(logged-in)#
-You are not logged in.
+You are not logged in.<br />
+<form action="User.html" method="post">
+Username: <input type="text" name="username"><br />
+Password: <input type="password" name="password"><br />
+<input type="submit" value="login">
+</form>
 ::
 You are currently logged in as #[username]#.<br />
 (Identified by #(identified-by)#IP::Username/Password#(/identified-by)#)<br />
@@ -44,6 +49,8 @@ You are currently logged in as admin.<br />
 <form action="User.html">
   <input type="submit" name="logout" value="logout">
 </form>
+<br />
+(after logout you will be prompted for your password again. simply click "cancel")
 #(/logged-in)#
 #(status)#
 ::

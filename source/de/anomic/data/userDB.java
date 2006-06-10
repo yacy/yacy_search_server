@@ -234,6 +234,14 @@ public final class userDB {
         }
         return null;
     }
+    public Entry passwordAuth(String user, String password, String ip){
+        Entry entry=passwordAuth(user, password);
+        if(entry == null){
+            return null;
+        }
+        this.ipUsers.put(ip, entry.getUserName());
+        return entry;
+    }
     public Entry md5Auth(String user, String md5){
         Entry entry=this.getEntry(user);
         if( entry != null && entry.getMD5EncodedUserPwd().equals(md5)){
