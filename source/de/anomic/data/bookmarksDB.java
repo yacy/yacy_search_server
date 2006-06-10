@@ -245,7 +245,7 @@ public class bookmarksDB {
     }
     public void saveTag(Tag tag){
         if(tag!=null){
-            tagCache.put(tag.getTagName(), tag);
+            tagCache.put(tag.getTagHash(), tag);
         }
     }
     /**
@@ -439,7 +439,7 @@ public class bookmarksDB {
         bookmarksDB.Tag tag=null;
         Iterator it=tags.iterator();
         while(it.hasNext()){
-            tag=getTag((String) it.next());
+            tag=getTag( tagHash((String) it.next()) );
             if(tag!=null){
                 tag.delete(urlHash);
                 saveTag(tag);
@@ -638,7 +638,7 @@ public class bookmarksDB {
             return urlHashes;
         }
         public boolean hasPublicItems(){
-        	Iterator it=getBookmarksIterator(this.getTagName(), false);
+        	Iterator it=getBookmarksIterator(this.getTagHash(), false);
         	if(it.hasNext()){
         		return true;
         	}
@@ -888,8 +888,8 @@ public class bookmarksDB {
         public void remove() {
             if (this.nextEntry != null) {
                 try {
-                    Object tagName = this.nextEntry.getTagName();
-                    if (tagName != null) removeTag((String) tagName);
+                    String tagHash = (String)this.nextEntry.getTagHash();
+                    if (tagHash != null) removeTag((String) tagHash);
                 } catch (kelondroException e) {
                     //resetDatabase();
                 }
