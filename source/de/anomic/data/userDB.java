@@ -202,6 +202,7 @@ public final class userDB {
 		if(entry == null){
 			return null;
 		}
+        entry.updateLastAccess(false);
         this.ipUsers.put(ip, entry.getUserName());
         return entry;
 	}
@@ -239,6 +240,7 @@ public final class userDB {
         if(entry == null){
             return null;
         }
+        entry.updateLastAccess(false);
         this.ipUsers.put(ip, entry.getUserName());
         return entry;
     }
