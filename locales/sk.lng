@@ -10,9 +10,9 @@
 # If you find any mistakes in this file please don't hesitate to email them to the author
 # If you find any untranslated string in the webinterface do so, too.
 
-#English=German
+#English=Slovak
 #DO _NOT_ USE THIS FILE AS TEMPLATE FOR YOUR OWN TRANSLATIONS, INSTEAD GET THE STRINGS DIRECTLY OUT OF THE HTML-FILES
-#OTHERWISE YOU MAY GET A $TARGET_LANGUAGE - SLOVENKY MIXTURE IN THE WEBINTERFACE
+#OTHERWISE YOU MAY GET A $TARGET_LANGUAGE - SLOVAK MIXTURE IN THE WEBINTERFACE
 
 #-------------------------------------------------------
 #File: ConfigLanguage_p.html
@@ -61,6 +61,7 @@ Import blacklist items from file:==Importuj blacklist zo suboru:
 was removed from blacklist==bol z blacklistu vymazany
 was added to the blacklist==bol do blacklistu pridany
 File:==Subor:
+or==alebo
 
 #-----------------------------------------------------------
 #File: Blog.html
@@ -70,6 +71,8 @@ File:==Subor:
 >delete==>zmaz
 show more entries==zobraz dalsie zaznamy
 new entry==Novy zaznam
+import XML-File==importuj XML subor
+export as XML==exportuj ako XML subor
 Blog-Home==Blog-Domovska stranka
 Author:==Autor:
 Subject:==Titul:
@@ -83,7 +86,13 @@ To edit or create blog-entries you need to be logged in as Admin or User who has
 Are you sure==Ste si isty
 that you want to delete <b>\#\[subject\]\#</b> by \#\[author\]\#?==ze chcete zmazat <b>#[subject]#</b> od #[author]#?
 Yes, delete it.==Ano zmazat.
-No, leave it.==Nein, ponechat.
+No, leave it.==Nie, ponechat.
+Import was successful!==Import prebehol uspesne!
+Import failed, maybe the supplied file was no valid blog-backup?==Import zlyhal. Skutocne je importovany subor block-backup subor?
+Please select the XML-file you want to import:==Prosim zvolte XML subor ktory chcete importovat:
+Import==Importuj
+Browse...==Hladaj...
+
 
 #-----------------------------------------------------------
 #File: Bookmarks.html
@@ -96,12 +105,12 @@ Edit Bookmark==Edituj z&aacute;lozky
 #URL:==URL:
 Title:==Titul:
 Description:==Popis:
-Tags \(comma separated\):==Tags (oddelen&eacute; ciarkou):
+Tags \(comma separated\):==Tagy (oddelen&eacute; ciarkou):
 Public:==Verejn&eacute;:
 yes==&aacute;no
 no==nie
-"create"=="vytvorit"
-"edit"=="editovat"
+"create"=="vytvor"
+"edit"=="edituj"
 File:==S&uacute;bor:
 import as Public==importuj ako verejn&eacute;
 "private bookmark"=="S&uacute;kromn&eacute; z&aacute;lozky"
@@ -162,10 +171,10 @@ Password is set==Heslo bolo nastavene
 Peer User:==Peer User:
 Peer Password:==Peer Heslo:
 repeat same password==zopakujte heslo
-Your peer cannot be reached from outside==Vas peer nemoze byt z vonka dosiahnuty
+Your peer cannot be reached from outside (which is not fatal, but would be good for the YaCy network);==Vas peer nemoze byt z vonka dosiahnuty (co nie je fatalna chyba, bolo by to vsak dobre pre siet YaCy);
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Prosim otvorte firewall pre tento port a/alebo vytvorte virtualny server vo Vasom routeri na povolenie spojeni cez tento port
-Your peer can be reached by other peers==Ihr Peer kann von anderen Peers erreicht werden
-Peer Port:==Peer Port:
+Your peer can be reached by other peers==Vas peer nie je dosiahnutelny z inych peerov.
+Peer Port:==Port peera:
 Set Configuration==Uloz konfiguraciu
 What you should do next:==Co mozete urobit v nasledovnych krokoch:
 Your basic configuration is complete! You can now \(for example\)==	Konfiguracia zaklanych nastaveny je hotova. Teraz mozete (napriklad)
@@ -183,6 +192,8 @@ You should set a password here to secure your YaCy peer.==Mali by ste si zvolit 
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Neotvorili ste ziaden port vo Vasom firewalle, alebo Vas router nepreposiela (neforwarduje) port servera Vasemu peeru.
 This is needed if you want to fully participate in the YaCy network.==Toto je nutne ak sa chcete plne ucastnit a podielat na praci siete YaCy. 
 You can also use your peer without opening it, but this is not recomended.==Taktisto mozete pouzivat Vaseho peera bez jeho otvorenia, avsak toto sa nedoporucuje.
+The peer port was changed successfully. Your browser will be redirected to the new==Port peera bol uspesne zmeneny. Vas browser bude presmerovany na novu 
+location</a> in 10 seconds.==adresu</a> za 10 sekund.
 
 #-------------------------------------------------------
 #File: ConfigLanguage_p.html
@@ -209,16 +220,16 @@ Error saving the language file.==Pri nahr&aacute;van&iacute; s&uacute;boru do&sc
 Your Personal Profile==V&aacute;&scaron; osobn&yacute; profil.
 You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Na tomto mieste m&ocirc;zete vytvorit v&aacute;&scaron; osobn&yacute; profil. Ostatn&yacute; uz&iacute;vatelia YaCy uvidia tieto inform&aacute;cie pomocou odkazu na str&aacute;nke siete.
 You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Va&scaron;e osobn&eacute; &uacute;daje nemus&iacute;te ud&aacute;vat, ak v&scaron;ak chcete distribuovat va&scaron;e kontaktn&eacute; &uacute;daje, m&ocirc;zete tak urobit tu.
-#Name==Meno
-#Nick Name==Prez&yacute;vka
-#Homepage==Domovsk&aacute; str&aacute;nka
-#eMail==email
-#ICQ==ICQ
-#Jabber==Jabber
-#Yahoo!==Yahoo!
-#MSN=MSN
+Name==Meno
+Nick Name==Prez&yacute;vka
+Homepage==Domovsk&aacute; str&aacute;nka
+eMail==email
+ICQ==ICQ
+Jabber==Jabber
+Yahoo!==Yahoo!
+MSN==MSN
 Comment==Koment&aacute;r
-"Save"==Ulozit
+"Save"==Uloz profil
 
 #-------------------------------------------------------
 #File: ConfigSkins_p.html
@@ -227,7 +238,7 @@ Comment==Koment&aacute;r
 Skin Selection==Vyber skinov
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Vzhlad YaCy mozete zmenit pomocou skinov. Zvolte jeden z predvytvorenych skinov, stiahnite si nove, alebo vytvorte vlastne skiny.
 Current skin:==Pouzity skin:
-Available Skins:==Verf&uuml;gbare Skins:
+Available Skins:==Dostupne skiny:
 "Use"==Pouzi
 "Delete"==Zmaz
 Install new skin from URL:==Nainstaluj novy skin z URL adresy:
@@ -262,6 +273,10 @@ This is a list of Cookies that a web server has sent to clients of the YaCy Prox
 Showing==Zobrazovanie
 entries from a total of==zaznamov z celkoveho poctu
 Cookies==Cookies
+Sending Host==Odosielatej 	
+Date==Datum
+Receiving Client==Prijemca 	
+Cookie==Cookie
 
 #-------------------------------------------------------
 #File: CookieMonitorOutgoing_p.html
@@ -273,6 +288,10 @@ This is a list of Cookies that a browser using the YaCy Proxy has sent to a web 
 Showing==Zobrazovanie
 entries from a total of==zaznamov z celkoveho poctu
 Cookies==Cookies
+Sending Host==Odosielatej 	
+Date==Datum
+Receiving Client==Prijemca 	
+Cookie==Cookie
 
 #-----------------------------------------------------------
 #File: Help.html
@@ -419,8 +438,8 @@ Architecture \(C\) by Michael Peter Christen==Architektur (c) vytvoril Michael P
 
 Index Control==Kontrola indexu
 Index Cleaner==Cistic indexu
-ThreadAlive:
-ThreadToString:
+ThreadAlive:==Zive vlakno:
+ThreadToString:==Vlakno k retazcu:
 Total URLs searched:==Celkovo prezrete URL adresy:
 Blacklisted URLs found:==Z blacklistu najdene URL adresy:
 Percentage blacklisted:==Percentualne z blacklistu:
@@ -448,10 +467,10 @@ To import an index from a file or a foreign peer click==Na import zo s&uacute;bo
 "Show URL Entries for Word"=="Zobraz URL z&aacute;znamy k tomuto slovu"
 "Generate List"=="Vytvor zoznam"
 "Show URL Entries for Word-Hash"=="Zobraz URL z&aacute;znamy k tomuto hash-slovu"
-"Transfer to other peer"=="Prenos in&eacute;mu peerovy"
-#URL:==URL:
+"Transfer to other peer"=="Prenes in&eacute;mu peerovy"
+URL:==URL adresa:
 "Show Details for URL"=="Zobraz detaily k URL adrese"
-#URL-Hash:==Hash-URL:
+URL-Hash:==Hash-URL adresa:
 "Show Details for URL-Hash"=="Zobraz detaily k hash-URL adrese"
 DHT Transmission control:==DHT-kontrola prenosu:
 The transmission is necessary for the functionality of global search on other peers.==Na to aby fungovalo vyhlad&aacute;vanie u in&yacute;ch peerov je potrebn&yacute; prenos.
@@ -486,7 +505,7 @@ Crawling Filter:==Filter crawlingu:
 This is an emacs-like regular expression that must match with the URLs which are used to be crawled.==Toto je regularny vyraz v style emacs, ktory musi oznacovat URL adresu pouzitu na crawlovanie.
 Use this i.e. to crawl a single domain. If you set this filter it would make sense to increase==Pouzite ho napr. na crawlovanie v jednej domene. Ak aktivujete tento filter tak ma zmysel
 the crawling depth.==zvysit hlbku crawlovania.
-#Re-Crawl Option:==Nastavenia re-crawlovania:
+Re-Crawl Option:==Nastavenia re-crawlovania:
 Use:==Pouzi:
 Interval:==Interval:
 Year\(s\)==Rok(y)
@@ -540,6 +559,12 @@ Accept remote crawling requests and perform crawl at maximum load==Akceptuj pozi
 Accept remote crawling requests and perform crawl at maximum of==Akceptuj poziadavky na vzdialeny crawling a vykonaj crawling s maximalnym vytazenim
 Pages Per Minute \(minimum is 1, low system load usually at PPM <= 30\)==stranok za minutu (minimum je 1, pomale systemy nahravaju normalne pod 30 stranok za minutu)
 Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Neakceptuj poziadavky na vzdialeny crawling (prosim aktivujte tuto volbu len ak nemozete crawlovat 1 stranku za minut - pozri vyzsie)
+
+Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.==
+ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</b> Please try again with different filter.==
+Error with URL input "#[crawlingStart]#": #[error]#==
+	
+	
 "set"=="Uloz"
 Error:==Chyba:
 Application not yet initialized. Sorry. Please wait some seconds and repeat the request.==Nespravna inicializacia. Sorry. Prosim cakajte niekolko sekund a zopakujte Vasu poziadavku.
@@ -554,6 +579,10 @@ loader queue</a>==nahravacia cakacia listina</a>
 indexing queue</a>==indexovacia cakacia listina</a>
 or see the fill/process count of all queues on the==alebo sa pozrite na proces vyplnania vsetkych cakacich listin na 
 >performance page</a>.==>stranke vykonu</a>.
+
+Please wait some seconds, because the request is enqueued and delayed until the proxy/HTTP-server is idle for a certain time.</b>==
+The indexing results are presented on the==
+		
 Index Monitor</a>-page.==stranke Monitor indexu</a>.
 <b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>==<b>Bude trvat priblizne 30 sekund pokym sa zobrazi prvy vysledok. Budte prosim trpezlivy. Kvoli zabezpeceniu maximalnej dostupnosti bude crawling pozastaveny pri kazdom pouziti proxy alebo web servera na</b> 
 If you crawl any un-wanted pages, you can delete them==Ak crawlujete stranky ktore ste povodne nechceli crawlovat tak ich mozete 
@@ -569,6 +598,13 @@ Crawl Thread==Vlakno crawlu
 Start URL==Startovacia URL
 Depth</b>==Hlbka</b>
 Filter</b>==Filter</b>
+
+#Auto Filter Hlbka==
+MaxAge</b>==
+Auto Filter Content==
+Max Page Per Domain==
+Accept "?" URLs==
+
 Fill Proxy Cache==Vypln proxy cache
 Local Indexing</b>==Lokalne indexovanie</b>
 Remote Indexing</b>==Indexovanie na inych peeroch</b>
@@ -607,7 +643,7 @@ Initiator==Iniciator
 Depth==Hlbka
 Modified Date==Posledna zmena
 Anchor Name==Nazov kotvy
-#URL==URL
+URL==URL adresa
 Size</th>==Velkost</th>
 Delete==Zmazat
 Rejected URL List:</b>&nbsp;There are \#\[num\]\# entries in the rejected-urls list.==Zoznam odmietnutych URL adries:</b>&nbsp; V zozname odmietnutych URL adries sa nachadza #[num]# zaznamov. 
@@ -628,7 +664,7 @@ The loader set is empty==Cakacia listina nahravaca je prazdna.
 There are \#\[num\]\# entries in the loader set:==V cakacej listine nahravaca sa nachadza #[num]# zaznamov:
 Initiator==Iniciator
 Depth==Hlbka
-#URL==URL
+URL==URL adresa
 
 #-------------------------------------------------------
 #File: IndexCreateWWWGlobalQueue_p.html
@@ -668,10 +704,11 @@ Profile==Profil
 Depth==Hlbka
 Modified Date==Datum poslednej zmeny
 Anchor Name==Meno kotvy
-URL==URL
-\[Delete\]==[Zmaz]
-Delete Entries:==Zmaz zaznami:
+URL==URL adresa
+#### Delete Entries:==Zmaz zaznami:           # translation doesnt work :(
 "Delete"=="Zmaz"
+Delete==Zmaz
+\[Delete\]==[Zmaz]
 This may take a quite long time.==Toto moze chvilku trvat.
 
 #-------------------------------------------------------
@@ -681,9 +718,9 @@ This may take a quite long time.==Toto moze chvilku trvat.
 YaCy \'\#\[clientname\]\#\': Index Import==YaCy '#[clientname]#': Import indexu
 Index DB Import==Import databazoveho indexu 
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==	Lokalny index pozostava aktualne z (najmenej) #[wcount]# slov a #[ucount]# URL adries.
-Import Job with the same path already started.==Import z rovnakou cestou uz bol odstartovany.
+Import Job with the same path already started.==Import s rovnakou cestou uz bol odstartovany.
 Starting new Job==Odstartuj novy import
-Import&nbsp;Type:==Typ importu:
+Import&nbsp;Type:==Typ&nbsp;importu:
 Cache Size==Velkost cache:
 Usage Examples==Priklady pouzitia
 "Path to the PLASMADB directory of the foreign peer"=="Cesta k PLASMADB adresaru cudzieho peera"
@@ -694,9 +731,11 @@ Always do a backup of your source and destination database before starting to us
 Currently running jobs==Prave vykonavane ulohy
 Job Type==Typ ulohy
 >Path==>Cesta
-Status==Stav
-Elapsed<br>Time==Uplynuly cas
+###Status==Stav			# couldnt get the proper translation
+Elapsed<br>Time==Uplynuly<br>cas
 Time<br>Left==Zostavajuci<br>cas
+Import Status==Stav importu
+Import<br>Status==Stav<br>importu
 Abort Import==Prerus import
 Pause Import==Pozastav import
 Finished::Running::Paused==Ukoncene::Beziace::Pozastavene
@@ -729,6 +768,9 @@ Crawling Queue Import:==Import cakacej listiny crawleru:
 Contains data about the crawljob an URL belongs to==Obsahuje data o crawl-ulohe ku ktorej prislucha URL adresa
 The crawling queue==Cakacia listina crawleru
 Various stack files that belong to the crawling queue==Rozdielne stack subory patriace cakacej listine crawlingu
+Abort==Zrus
+Pause==Pauza
+Continue==Pokracuj
 
 #-------------------------------------------------------
 #File: IndexMonitor.html
@@ -792,7 +834,7 @@ Executor==Vykonavatel
 Modified Date==Datum poslednej zmeny
 Words==Slov
 Title==Nazov
-#URL==URL
+URL==URL adresa
 "delete"=="zmaz"
 
 #-------------------------------------------------------
@@ -813,8 +855,9 @@ Overwrite IP==prepis IP adresu
 blank for defaultip==prazdne pre standardnu IP adresu
 Start/Stop Transfer==Start/Stop prenosu
 "Start Index Transfer"=="Odstartuj prenos indexu"
-"Stop Index Transfer"=="Stopni prenos indexu"
+"Stop Index Transfer"=="Zastav prenos indexu"
 "Start New Index Transfer"=="Odstartuj novy prenos indexu"
+Remote<br>Peer==Vzdialeny<br>peer
 
 #-------------------------------------------------------
 #File: Language_p.html
@@ -857,7 +900,7 @@ Configuration</a>==Nastavenia</a>
 >Date==>Datum
 >From==>Od
 >To==>Pre
->Subject==>Subjekt
+>Subject==>Nazov
 >Action==>Akcia
 From:==Od:
 To:==Pre:
@@ -865,13 +908,30 @@ Date:==Datum:
 Subject:==Subjekt:
 reply==odpovedaj
 >delete==>zmaz
+I/O error reading message table: ==Vstupno/Vystupna chyba pri citani tabulky sprav:
 
 #-------------------------------------------------------
 #File: MessageSend_p.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Send message==Posli spravu
-
+You cannot send a message to==Nemozete poslat spravu pre
+The peer does not respond. It was now removed from the peer-list.==Peer neodpoveda. Bol prave zmazany zo zoznamu peerov.
+You are allowed to send me a message ≤==Nie je Vam dovolene posielat spravu ≤
+kb and an attachment ≤==Kb a prilohu
+The peer==Peer
+is alive and responded:==je zivy a odpoveda:
+Your Message\<\/h3\>==Vasa sprava</h3>
+Subject:==Nazov:
+Text:==Text:
+Enter==Odosli
+#The peer is alive but cannot respond. Sorry.==Peer je zivy avsak nemoze odpovedat.			# cannot be translated
+Your message has been sent. The target peer responded:==Vasa sprava bola odoslana. Cielovy peer odpovedal:
+The target peer is alive but did not receive your message. Sorry.==Cielovy peer je zivy avsak nedostal Vasu spravu. Prepacte.
+Here is a copy of your message, so you can copy it to save it for further attempts:==Tu je kopia Vasej spravy, mozete si ju skopirovat a ulozit pre neskorsie pokusy:
+You cannot call this page directly. Instead, use a link on the==Na tuto stranku sa nemozete priamo odkazovat. Namiesto toho pouzite odkaz na
+Network</a> page.==stranku siete</a>.
+	
 #-------------------------------------------------------
 #File: Network.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
@@ -888,11 +948,14 @@ Passive Peers==Pasivny peeri
 Potential Peers==Potencionalny peeri
 Manually contacting Peer== Manualne kontaktujuci peer
 no remote \#\[peertype\]\# peer for this list known==ziadny vzdialeny #[peertype]# nie je znamy alebo online 
-Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Zobrazenych je #[num]# zaznamov z celkovo #[total]# peerov.
+Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Zobrazenych je #[num]# zaznamov z celkoveho poctu #[total]# peerov.
 send&nbsp;<b>M</b>essage/<br>show&nbsp;<b>P</b>rofile/<br>edit&nbsp;<b>W</b>iki==Posli&nbsp;spravu&nbsp;(<b>m</b>)/<br>Zobraz&nbsp;profil&nbsp;(<b>p</b>)/<br>Edituj&nbsp;wiki&nbsp;(<b>w</b>)
 Name==Meno
 Address==Adresa
 Hash==Hash
+CR-<br>Files==CR-<br>subory
+Age==Vek
+con/h==spojeni<br>za hodinu
 Type==Typ
 Release/<br>SVN==Verzia YaCy/<br>SVN
 Contact==Kontakt
@@ -946,12 +1009,22 @@ red point==cerveny bod
 this peer==Vas peer
 You are in online mode, but probably no internet resource is available. Please check your internet connection.==Nachadzate sa v online mode, avsak momentalne nie ste pripojeny do internetu. Prosim overte Vase internetove pripojenie.
 You are either not in online mode or you do not use the proxy option.==Bud nie ste v online mode, alebo nepouzivate proxy nastavenie.
-'on-demand - mode', see=='on-demand - mod', pozri
+To get connection to the YaCy network, you must use the proxy by setting your browser's settings==Na ziskanie pripojenia do siete YaCy musite pouzit proxy nastavenia Vaseho browsera
+'on-demand - mode', see==mod 'na poziadanie', pozri
 here</a>==tu</a>
 for an installation guide\) or you can go online by activating the permanent online mode.==Mozete sa vsak prejst do online modu tak, ze aktivujete permanentny online mod.
 To do this, press this button:==Na prechod do online stavu, kliknite prosim na toto tlacitko:
 "go online"==Online mod
-
+Progress towards the next peer:==Postup k dalsiemu peeru:
+At current PPM you will reach him==Pri sucasnom pocte stranok za minutu (PPM - Pages Per Minute) dosiahnete dalsieho peera
+in an unknown time:==za neznamy cas
+#in==za 	# the translation causes troubles - must be done somehow else
+never, because he is faster than you==nikdy pretoze je rychlejsi ako vy
+Peer Hash==Hash peera
+Peer IP==IP adresa peera
+Peer Port==Port peera
+add Peer==Pridaj peera
+	
 #-------------------------------------------------------
 #File: News.html
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
@@ -986,8 +1059,8 @@ Category==Kategoria
 Received==Obdrzania
 Distributed==Distribuovane
 Attributes==Atribut
-"\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Gew&auml;hlte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::gew&auml;hlte&nbsp;News&nbsp;L&ouml;schen::Breche&nbsp;Verbreitung&nbsp;gew&auml;hlter&nbsp;News&nbsp;ab::gew&auml;hlte&nbsp;News&nbsp;L&ouml;schen#(/page)#
-"\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"==#(page)#::Markiere&nbsp;alle&nbsp;News&nbsp;als&nbsp;gelesen::L&ouml;sche&nbsp;alle&nbsp;News::Breche&nbsp;Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;ab::L&ouml;sche&nbsp;alle&nbsp;News#(/page)#
+"\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Oznac&nbsp;vybrate&nbsp;spravy&nbsp;ako&nbsp;precitane::Zmaz&nbsp;vybrate&nbsp;spravy::Prerus&nbsp;rozsirovanie&nbsp;oznacenych&nbsp;sprav::Zmaz&nbsp;oznacene&nbsp;spravy#(/page)#
+"\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"==#(page)#::Oznac&nbsp;vsetky&nbsp;spravy&nbsp;ako&nbsp;precitane::Zmaz&nbsp;vsetky&nbsp;spravy::Prerus&nbsp;rozsirovanie&nbsp;vsetkych&nbsp;sprav::Zmaz&nbsp;vsetky&nbsp;spravy#(/page)#
 
 #-------------------------------------------------------
 #File: PerformanceQueues_p.html
@@ -1015,11 +1088,11 @@ Reset To Default Values==Obnov predvolene nastavenia
 Changes take effect immediately==Zmenu su okamzite ucinne
 Indexing Cache Settings:==Nastavenia indexovaceh cache:
 Words in RAM Cache:==Slov v RAM chache
-This is the current size of the word cache.==Toto je momentalna velkost cache slov.
+This is the current size of the word caches.==Toto je momentalna velkost cache slov.
 The smaller this number, the faster the shut-down procedure will be.==Cim mensie cislo, tym bude vypnutie YaCy rychlesie 
 The maximum of this cache can be set below.==Maximalna velkost cache moze byt nastavena nizsie.
 Maximum URLs currently assigned<br>to one cached word:==Maximalny pocet URL adries prave priradenych jednemu slovu v cache pamati:
-This is the maximum size of URLs assigned to a single word cache entry.==Toto je maximalna velkost URL adries ktore su priradene jedinemu slovu v cache slov
+This is the maximum size of URLs assigned to a single word cache entry.==Toto je maximalna velkost URL adries ktore su priradene jedinemu slovu v cache slov.
 If this is a big number, it shows that the caching works efficiently.==Ak je to velke cislo, znamena to ze cachovanie pracuje efektivne.
 Maximum Age of Word in cache:==Maximalny vek jedneho slova v cache:
 This is the maximum age of a word index that is in the RAM cache in minutes.==Toto je maximalny vek jedneho slova v RAM cache v minutach
@@ -1049,6 +1122,15 @@ current delta is==Od posledneho pristupu k proxy
 since last proxy access.==uplynulo.
 Enter New Parameters==Zadajte nove parametre
 milliseconds==Millisekundy
+Cache Settings:</b>==Nastavenia cache:</b>
+Cache Type==Typ cache pamate
+Words in RAM cache:==Slov v cache pamati
+Indexing==Indexovanie
+Description==Popis
+The indexing cache speeds up the indexing process, the DHT cache holds indexes temporary for approval.==Indexovacia cache pamat urychli proces indexacie, DHT cache docasne udrzuje indexy na schvalenie 
+The maximum of this caches can be set below.==Maxima tychto cache pamati mozete vidiet nizsie.
+Maximum URLs currently assigned==Maximalny pocet prave priradenych URL adries
+not controlled<br>for DHT cache==nekontrolovane<br>na DHT cache
 
 #-------------------------------------------------------
 #File: PerformanceMemory_p.html
@@ -1214,7 +1296,7 @@ YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientnam
 Quick Crawl Link==Rychly Crawl Link
 Quickly adding Bookmarks:==Rychly Crawl - Zalozky:
 Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Kliknite na tahajte (drag and drop) odkaz nizsie do toolbar/linkbaru Vaseho browsera. 
-If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Ak nan kliknete pocas surfovania, tak bude prave prehliadana stranka pridana na indexaciu do cakacej listine YaCy crawleru. 
+If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Ak nan kliknete pocas surfovania, tak bude prave prehliadana stranka pridana na indexaciu do cakacej listiny YaCy crawleru. 
 Crawl with YaCy==Crawl s YaCy
 Title:==Titul:
 Link:==Odkaz:
@@ -1726,7 +1808,7 @@ eMail==eMail
 ICQ==ICQ
 Jabber==Jabber
 Yahoo!==Yahoo!
-MSN=MSN
+MSN==MSN
 Comment==Komentar
 
 #-------------------------------------------------------
