@@ -322,7 +322,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 // no authorization given in response. Ask for that
                 httpHeader headers = getDefaultHeaders(path);
                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
-                httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
+                //httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
+                httpd.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), new serverObjects(), null, headers);
                 return;
             }
             

@@ -992,7 +992,8 @@ public final class httpd implements serverHandler {
                 detailedErrorMsg,
                 null,
                 null,
-                stackTrace
+                stackTrace,
+                null
         );
     }
     
@@ -1014,11 +1015,12 @@ public final class httpd implements serverHandler {
                 null,
                 detailedErrorMsgFile,
                 detailedErrorMsgValues,
-                stackTrace
+                stackTrace,
+                null
         );        
     }
     
-    private static final void sendRespondError(
+    public static final void sendRespondError(
             Properties conProp,
             OutputStream respond,
             int errorcase,
@@ -1027,7 +1029,8 @@ public final class httpd implements serverHandler {
             String detailedErrorMsgText,
             Object detailedErrorMsgFile,
             serverObjects detailedErrorMsgValues,
-            Exception stackTrace
+            Exception stackTrace,
+            httpHeader header
     ) throws IOException {
         
         FileInputStream fis = null;
@@ -1144,7 +1147,8 @@ public final class httpd implements serverHandler {
             byte[] result = o.toByteArray();
             o.close(); o = null;
 
-            httpHeader header = new httpHeader();            
+            if(header == null)
+                header = new httpHeader();            
             header.put(httpHeader.DATE, systemDate);
             header.put(httpHeader.CONTENT_TYPE, "text/html");
             header.put(httpHeader.CONTENT_LENGTH, Integer.toString(result.length));
