@@ -160,7 +160,7 @@ public class User{
             if(entry != null){
                 entry.logout(((String)header.get("CLIENTIP", "xxxxxx")), getLoginToken(header.getHeaderCookies())); //todo: logout cookie
             }
-            if(sb.verifyAuthentication(header, true)){ //XXX: for httpauth userDB user, too?
+            if(! ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
                 prop.put("AUTHENTICATE","admin log-in");
             }
         }
