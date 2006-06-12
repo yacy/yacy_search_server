@@ -103,11 +103,11 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.imageio.ImageIO;
 
+import de.anomic.data.userDB;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverClassLoader;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -313,26 +313,26 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         // check permission/granted access
         String authorization = (String) requestHeader.get(httpHeader.AUTHORIZATION);
         String adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "");
+        
         int pos = path.lastIndexOf(".");
         
         if ((path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p") && (adminAccountBase64MD5.length() != 0)) {
             // authentication required
-
-            if (authorization == null) {
+            userDB.Entry entry=sb.userDB.ipAuth(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
+            if( (entry != null && entry.hasAdminRight()) || (authorization != null && sb.userDB.hasAdminRight(authorization)) ){
+                //Authentication successful. remove brute-force flag
+                serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+            }else if (authorization == null) {
                 // no authorization given in response. Ask for that
                 httpHeader headers = getDefaultHeaders(path);
                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                 //httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
-                httpd.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), new serverObjects(), null, headers);
+                serverObjects tp=new serverObjects();
+                tp.put("returnto", path);
+                httpd.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, headers);
                 return;
-            }
-            
-            // authorization is given
-            if (sb.userDB.hasAdminRight(authorization)) {
-                // Authentication successful. remove brute-force flag
-                serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
             } else {
-                // a wrong authentication was given. Ask again
+                // a wrong authentication was given or the userDB user does not have admin access. Ask again
                 String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
                 serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                 Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
@@ -344,17 +344,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 httpHeader headers = getDefaultHeaders(path);
                 headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
-            return;
+                return;
             }
         }
         
-        // handle bfHost in case we have authentified correctly
-        if ((authorization != null) &&
-            (adminAccountBase64MD5.length() != 0) &&
-            (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization.trim().substring(6))))) {
-            // remove brute-force flag
-            serverCore.bfHost.remove(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
-        }
         
         // parse arguments
         serverObjects args = new serverObjects();
@@ -453,7 +446,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     }
                 }
             }else{
-                    //you cannot share a .png/.gif file with a name like a class in htroot.
+                    //XXX: you cannot share a .png/.gif file with a name like a class in htroot.
                     if ( !(targetFile.exists()) && !((path.endsWith("png")||path.endsWith("gif")||path.endsWith(".stream"))&&targetClass!=null ) ){
                         targetFile = new File(htDocsPath, path);
                         targetClass = rewriteClassFile(new File(htDocsPath, path));

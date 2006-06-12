@@ -76,6 +76,9 @@ public class User{
         }else if(post != null && post.containsKey("username") && post.containsKey("password")){
             entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"), (String)header.get("CLIENTIP", "xxxxxx"));
             prop.put("logged-in_identified-by", 1);
+            if(post.containsKey("returnto")){
+                prop.put("LOCATION", (String)post.get("returnto"));
+            }
         //identified via ip.
         }else{
         		entry=sb.userDB.ipAuth(((String)header.get("CLIENTIP", "xxxxxx")));
@@ -124,7 +127,8 @@ public class User{
         				prop.put("status_password", 1); //old pw wrong
         			}
         		}
-        }else if(post!=null && post.containsKey("logout")){
+        }
+        if(post!=null && post.containsKey("logout")){
             prop.put("logged-in",0);
             if(entry != null){
                 entry.logout(((String)header.get("CLIENTIP", "xxxxxx")));
