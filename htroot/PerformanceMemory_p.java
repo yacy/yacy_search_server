@@ -47,6 +47,7 @@
 import java.util.Map;
 import java.io.File;
 
+import de.anomic.http.httpc;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -281,6 +282,12 @@ public class PerformanceMemory_p {
         prop.put("alive", Integer.toString(c));
         prop.put("heap" , Integer.toString(c));
         */
+        
+        // other caching structures
+        long amount = httpc.nameCacheHitSize();
+        prop.put("namecache.hit",Long.toString(amount));
+        amount = httpc.nameCacheNoCachingListSize();
+        prop.put("namecache.noCache",Long.toString(amount));
         
         // return rewrite values for templates
         return prop;

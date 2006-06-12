@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.lang.Math;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -81,6 +82,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCore;
@@ -126,6 +128,10 @@ public final class httpc {
 
     // the dns cache
     private static final Map nameCacheHit = Collections.synchronizedMap(new HashMap()); // a not-synchronized map resulted in deadlocks
+    private static final kelondroMScoreCluster nameCacheAges = new kelondroMScoreCluster();
+    private static final long startTime = System.currentTimeMillis();
+    private static final int maxNameCacheAge = 24 * 60 * 60; // 24 hours in minutes
+    private static final int maxNameCacheSize = 5000; 
     public  static final List nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList());
     private static final Set nameCacheNoCachingList = Collections.synchronizedSet(new HashSet());
     //private static HashSet nameCacheMiss = new HashSet();
@@ -417,6 +423,9 @@ public final class httpc {
         if ((host == null)||(host.length() == 0)) return null;
         host = host.toLowerCase().trim();
         
+        // flushing old entries before accsessing
+        flushNameCacheHit();
+
         // trying to resolve host by doing a name cache lookup
         InetAddress ip = (InetAddress) nameCacheHit.get(host);
         if (ip != null) return ip;
@@ -444,7 +453,12 @@ public final class httpc {
                 }
             }
             
-            if (doCaching) nameCacheHit.put(ip.getHostName(), ip);
+            if (doCaching) {
+                synchronized (nameCacheHit) {
+                    nameCacheHit.put(ip.getHostName(), ip);
+                    nameCacheAges.setScore(ip.getHostName(), intTime(System.currentTimeMillis()));
+                }
+            }
             return ip;
         } catch (UnknownHostException e) {
             //nameCacheMiss.add(host);
@@ -475,6 +489,53 @@ public final class httpc {
 //    }
 
     /**
+    * Returns the number of entries in the nameCacheHit map
+    *
+    * @return int The number of entries in the nameCacheHit map
+    */
+    public static int nameCacheHitSize() {
+        return nameCacheHit.size();
+    }
+
+    /**
+    * Returns the number of entries in the nameCacheNoCachingList list
+    *
+    * @return int The number of entries in the nameCacheNoCachingList list
+    */
+    public static int nameCacheNoCachingListSize() {
+        return nameCacheNoCachingList.size();
+    }
+
+    /**
+    * Converts the time to a non negative int
+    *
+    * @param longTime Time in miliseconds since 01/01/1970 00:00 GMT
+    * @return int seconds since startTime
+    */
+    private static int intTime(long longTime) {
+        return (int) Math.max(0, ((longTime - startTime) / 1000));
+    }
+
+    /**
+    * Removes old entries from the dns cache
+    */
+    public static void flushNameCacheHit() {
+        int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheAge;
+        int size;
+        String k;
+        synchronized (nameCacheHit) {
+            size = nameCacheAges.size();
+            while ((size > 0) &&
+                   (size > maxNameCacheSize) || (nameCacheAges.getMinScore() < cutofftime)) {
+                k = (String) nameCacheAges.getMinObject();
+                nameCacheHit.remove(k);
+                nameCacheAges.deleteScore(k);
+                size--; // size = nameCacheAges.size();
+            }
+        }
+    }
+
+    /**
     * Returns the given date in an HTTP-usable format.
     *
     * @param date The Date-Object to be converted.
@@ -493,8 +554,6 @@ public final class httpc {
     public static Date nowDate() {
         return new GregorianCalendar(GMTTimeZone).getTime();
     }
-
-
 
     /**
     * Initialize the httpc-instance with the given data. This method is used,
