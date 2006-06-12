@@ -80,7 +80,7 @@ public class CookieTest {
         			for(int i=0;i<coockie.length;i++)
         			{
         				String nameValue[]=coockie[i].split("=");
-        				outgoingHeader.setCoockie(nameValue[0].trim(),nameValue.length>1?(nameValue[1].trim()):"","Thu, 01-Jan-99 00:00:01 GMT");	
+        				outgoingHeader.setCookie(nameValue[0].trim(),nameValue.length>1?(nameValue[1].trim()):"","Thu, 01-Jan-99 00:00:01 GMT");	
         			}
         		}
 
@@ -95,31 +95,21 @@ public class CookieTest {
         }
         else if(post.containsKey("act")&&post.get("act").equals("set_cookie"))
        {
-        String CoockieName = post.get("cookie_name").toString().trim();
-        String CoockieValue = post.get("cookie_value").toString().trim();
+        String cookieName = post.get("cookie_name").toString().trim();
+        String cookieValue = post.get("cookie_value").toString().trim();
         httpHeader outgoingHeader=new httpHeader();
         
-        outgoingHeader.setCoockie(CoockieName,CoockieValue);
+        outgoingHeader.setCookie(cookieName,cookieValue);
         prop.setOutgoingHeader(outgoingHeader);
         prop.put("cookiesin",1);
-        prop.put("cookiesin_0_name",CoockieName);
-        prop.put("cookiesin_0_value",CoockieValue);
+        prop.put("cookiesin_0_name",cookieName);
+        prop.put("cookiesin_0_value",cookieValue);
         //header.
         
        }
-Iterator it = header.entrySet().iterator();
 
-while(it.hasNext())
-{
-	java.util.Map.Entry e = (Entry) it.next();
-	System.out.println(""+e.getKey()+" : "+e.getValue());
-	if(e.getKey().equals("Cookie"))
-	{
-		prop.put("cookiesout",1);
-        prop.put("cookiesout_0_string",e.getValue().toString().replaceAll(";",";<br />"));
-	}
-}
-       
+        prop.put("cookiesout",1);
+        prop.put("cookiesout_0_string", header.getHeaderCookies().replaceAll(";",";<br />"));
         return prop;
     }
 

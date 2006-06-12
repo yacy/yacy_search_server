@@ -73,6 +73,7 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.Map.Entry;
 
 import de.anomic.server.serverCore;
 import de.anomic.server.logging.serverLog;
@@ -776,15 +777,15 @@ public final class httpHeader extends TreeMap implements Map {
      * Patch BEGIN:
      * Name: Header Property Patch
      * Date: Fri. 13.01.2006
-     * Description: Makes possible to send header properties such as coockies back to the client.
+     * Description: Makes possible to send header properties such as cookies back to the client.
      * Part 1 of 5
      * Questions: sergej.z@list.ru
      */
     /**
      * Holds header properties
      */
-    //Since properties such as coockies can be multiple, we cannot use HashMap here. We have to use Vector.
-    private Vector coockies=new Vector();
+    //Since properties such as cookies can be multiple, we cannot use HashMap here. We have to use Vector.
+    private Vector cookies=new Vector();
     /**
      *
      * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
@@ -802,89 +803,102 @@ public final class httpHeader extends TreeMap implements Map {
     /**
      * Sets Cookie on the client machine.
      *
-     * @param name: Coockie name
-     * @param value: Coockie value
-     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
-     * @param path: Path the coockie belongs to. Default - "/". Can be <b>null</b>.
+     * @param name: Cookie name
+     * @param value: Cookie value
+     * @param expires: when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
+     * @param path: Path the cookie belongs to. Default - "/". Can be <b>null</b>.
      * @param domain: Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
-     * @param secure: If true coockie will be send only over safe connection such as https
+     * @param secure: If true cookie will be send only over safe connection such as https
      * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCoockie(String name, String value, String expires, String path, String domain, boolean secure)
+    public void setCookie(String name, String value, String expires, String path, String domain, boolean secure)
     {
          /*
          * TODO:Here every value can be validated for correctness if needed
          * For example semicolon should be not in any of the values
          * However an exception in this case would be an overhead IMHO.
          */
-        String coockieString=name+"="+value+";";
+        String cookieString=name+"="+value+";";
         if(expires!=null)
-            coockieString+=" expires="+expires+";";
+            cookieString+=" expires="+expires+";";
         if(path!=null)
-            coockieString+=" path="+path+";";
+            cookieString+=" path="+path+";";
         if(domain!=null)
-            coockieString+=" domain="+domain+";";
+            cookieString+=" domain="+domain+";";
         if(secure)
-            coockieString+=" secure;";
-        coockies.add(new Entry("Set-Cookie",coockieString));
+            cookieString+=" secure;";
+        cookies.add(new Entry("Set-Cookie",cookieString));
     }
     /**
      * Sets Cookie on the client machine.
      *
-     * @param name: Coockie name
-     * @param value: Coockie value
-     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
-     * @param path: Path the coockie belongs to. Default - "/". Can be <b>null</b>.
+     * @param name: Cookie name
+     * @param value: Cookie value
+     * @param expires: when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
+     * @param path: Path the cookie belongs to. Default - "/". Can be <b>null</b>.
      * @param domain: Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
      *
-     * Note: this coockie will be sent over each connection independend if it is safe connection or not.
+     * Note: this cookie will be sent over each connection independend if it is safe connection or not.
      * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCoockie(String name, String value, String expires, String path, String domain)
+    public void setCookie(String name, String value, String expires, String path, String domain)
     {
-        setCoockie( name,  value,  expires,  path,  domain, false);
+        setCookie( name,  value,  expires,  path,  domain, false);
     }
     /**
      * Sets Cookie on the client machine.
      *
-     * @param name: Coockie name
-     * @param value: Coockie value
-     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
-     * @param path: Path the coockie belongs to. Default - "/". Can be <b>null</b>.
+     * @param name: Cookie name
+     * @param value: Cookie value
+     * @param expires: when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
+     * @param path: Path the cookie belongs to. Default - "/". Can be <b>null</b>.
      *
-     * Note: this coockie will be sent over each connection independend if it is safe connection or not.
+     * Note: this cookie will be sent over each connection independend if it is safe connection or not.
      * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCoockie(String name, String value, String expires, String path)
+    public void setCookie(String name, String value, String expires, String path)
     {
-        setCoockie( name,  value,  expires,  path,  null, false);
+        setCookie( name,  value,  expires,  path,  null, false);
     }
     /**
      * Sets Cookie on the client machine.
      *
-     * @param name: Coockie name
-     * @param value: Coockie value
-     * @param expires: when should this coockie be autmatically deleted. If <b>null</b> - coockie will stay forever
+     * @param name: Cookie name
+     * @param value: Cookie value
+     * @param expires: when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
      *
-     * Note: this coockie will be sent over each connection independend if it is safe connection or not.
+     * Note: this cookie will be sent over each connection independend if it is safe connection or not.
      * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCoockie(String name, String value, String expires)
+    public void setCookie(String name, String value, String expires)
     {
-        setCoockie( name,  value,  expires,  null,  null, false);
+        setCookie( name,  value,  expires,  null,  null, false);
     }
     /**
      * Sets Cookie on the client machine.
      *
-     * @param name: Coockie name
-     * @param value: Coockie value
+     * @param name: Cookie name
+     * @param value: Cookie value
      *
-     * Note: this coockie will be sent over each connection independend if it is safe connection or not. This coockie never expires
+     * Note: this cookie will be sent over each connection independend if it is safe connection or not. This cookie never expires
      * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCoockie(String name, String value )
+    public void setCookie(String name, String value )
     {
-        setCoockie( name,  value,  null,  null,  null, false);
+        setCookie( name,  value,  null,  null,  null, false);
+    }
+    public String getHeaderCookies(){
+        Iterator it = this.entrySet().iterator();
+        while(it.hasNext())
+        {
+            java.util.Map.Entry e = (java.util.Map.Entry) it.next();
+            System.out.println(""+e.getKey()+" : "+e.getValue());
+            if(e.getKey().equals("Cookie"))
+            {
+                return e.getValue().toString();
+            }
+        }
+        return "";
     }
     /**
      * Returns an iterator within all properties can be reached.
@@ -903,7 +917,7 @@ public final class httpHeader extends TreeMap implements Map {
      */
     public Iterator getCookies()
     {
-        return coockies.iterator();
+        return cookies.iterator();
     }
     /*
      * Patch END:

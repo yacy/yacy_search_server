@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
@@ -69,6 +70,7 @@ public final class userDB {
     private final File userTableFile;
     private final int bufferkb;
 	private HashMap ipUsers = new HashMap();
+    private HashMap cookieUsers = new HashMap();
     
     public userDB(File userTableFile, int bufferkb) {
         this.userTableFile = userTableFile;
@@ -181,6 +183,9 @@ public final class userDB {
      * it tests both userDB and oldstyle adminpw.
      * @param auth the http-headerline for authorisation
      */
+    public boolean hasAdminRight(String auth, String ip, String cookies){
+        return hasAdminRight(auth);
+    }
     public boolean hasAdminRight(String auth){
         plasmaSwitchboard sb=plasmaSwitchboard.getSwitchboard();
         String adminAccountBase64MD5 = sb.getConfig("adminAccountBase64MD5", "");
@@ -241,7 +246,7 @@ public final class userDB {
             return null;
         }
         entry.updateLastAccess(false);
-        this.ipUsers.put(ip, entry.getUserName());
+        this.ipUsers.put(ip, entry.getUserName()); //XXX: This is insecure. TODO: use cookieauth
         return entry;
     }
     public Entry md5Auth(String user, String md5){
@@ -255,6 +260,17 @@ public final class userDB {
                 }
         }
         return entry;
+    }
+    public Entry cookieAuth(String cookieString){
+        if(cookieUsers.containsKey(cookieString))
+            return (Entry) cookieUsers.get(cookieString);
+        return null;
+    }
+    public String getCookie(Entry entry){
+        Random r = new Random();
+        String token = Long.toString(Math.abs(r.nextLong()), 36);
+        cookieUsers.put(token, entry);
+        return token;
     }
     
     public class Entry {
@@ -472,6 +488,12 @@ public final class userDB {
         }
         public boolean isLoggedOut(){
         	   return (this.mem.containsKey(LOGGED_OUT)?((String)this.mem.get(LOGGED_OUT)).equals("true"):false);
+        }
+        public void logout(String ip, String cookieString){
+            logout(ip);
+            if(cookieUsers.containsKey(cookieString)){
+                cookieUsers.remove(cookieString);
+            }
         }
         public void logout(String ip){
         	   try{

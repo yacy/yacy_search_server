@@ -57,7 +57,17 @@ import de.anomic.server.serverSwitch;
 
 public class User{
     
-    
+    private static String getLoginToken(String cookies){
+        String[] cookie=cookies.split(";"); //TODO: Mozilla uses 
+        String[] pair;
+        for(int i=0;i<cookie.length;i++){
+            pair=cookie[i].split("=");
+            if(pair[0].trim().equals("login")){
+                return pair[1].trim();
+            }
+        }
+        return "";
+    }
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
@@ -70,43 +80,60 @@ public class User{
         //identified via HTTPPassword
         entry=sb.userDB.proxyAuth(((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")));
         if(entry != null){
-        		prop.put("logged-in_identified-by", 1);
-        //identified via form-login
-        //TODO: this does not work for a static admin, yet.
-        }else if(post != null && post.containsKey("username") && post.containsKey("password")){
-            entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"), (String)header.get("CLIENTIP", "xxxxxx"));
-            prop.put("logged-in_identified-by", 1);
-            if(post.containsKey("returnto")){
-                prop.put("LOCATION", (String)post.get("returnto"));
-            }
-        //identified via ip.
+        	prop.put("logged-in_identified-by", 1);
+        //try via cookie
         }else{
-        		entry=sb.userDB.ipAuth(((String)header.get("CLIENTIP", "xxxxxx")));
-        		if(entry != null){
-        			prop.put("logged-in_identified-by", 0);
-        		}
+            entry=sb.userDB.cookieAuth(getLoginToken(header.getHeaderCookies()));
+            prop.put("logged-in_identified-by", 2);
+            //try via ip
+            if(entry == null){
+                entry=sb.userDB.ipAuth(((String)header.get("CLIENTIP", "xxxxxx")));
+                if(entry != null){
+                    prop.put("logged-in_identified-by", 0);
+                }
+            }
         }
-        //Logged in via UserDB
+        
+        //identified via userDB
         if(entry != null){
-        		prop.put("logged-in", 1);
-        		prop.put("logged-in_username", entry.getUserName());
-        		if(entry.getTimeLimit() > 0){
-        			prop.put("logged-in_limit", 1);
-                    long limit=entry.getTimeLimit();
-                    long used=entry.getTimeUsed();
-        			prop.put("logged-in_limit_timelimit", limit);
-        			prop.put("logged-in_limit_timeused", used);
-                    int percent=0;
-                    if(limit!=0 && used != 0)
-                        percent=(int)((float)used/(float)limit*100);
-                    prop.put("logged-in_limit_percent", percent/3);
-                    prop.put("logged-in_limit_percent2", (100-percent)/3);
-        		}
+            prop.put("logged-in", 1);
+            prop.put("logged-in_username", entry.getUserName());
+            if(entry.getTimeLimit() > 0){
+                prop.put("logged-in_limit", 1);
+                long limit=entry.getTimeLimit();
+                long used=entry.getTimeUsed();
+                prop.put("logged-in_limit_timelimit", limit);
+                prop.put("logged-in_limit_timeused", used);
+                int percent=0;
+                if(limit!=0 && used != 0)
+                    percent=(int)((float)used/(float)limit*100);
+                prop.put("logged-in_limit_percent", percent/3);
+                prop.put("logged-in_limit_percent2", (100-percent)/3);
+            }
         //logged in via static Password
         }else if(sb.verifyAuthentication(header, true)){
             prop.put("logged-in", 2);
-        //not logged in
+        //identified via form-login
+        //TODO: this does not work for a static admin, yet.
+        }else if(post != null && post.containsKey("username") && post.containsKey("password")){
+            //entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"), (String)header.get("CLIENTIP", "xxxxxx"));
+            entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"));
+            if(entry != null){
+                //set a random token in a cookie
+                String cookie=sb.userDB.getCookie(entry);
+                httpHeader outgoingHeader=new httpHeader();
+                outgoingHeader.setCookie("login", cookie);
+                prop.setOutgoingHeader(outgoingHeader);
+                
+                prop.put("logged-in", 1);
+                prop.put("logged-in_identified-by", 1);
+                prop.put("logged-in_username", entry.getUserName());
+                if(post.containsKey("returnto")){
+                    prop.put("LOCATION", (String)post.get("returnto"));
+                }
+            }
         }
+        
         if(post!= null && entry != null){
         		if(post.containsKey("changepass")){
         			prop.put("status", 1); //password
@@ -131,9 +158,9 @@ public class User{
         if(post!=null && post.containsKey("logout")){
             prop.put("logged-in",0);
             if(entry != null){
-                entry.logout(((String)header.get("CLIENTIP", "xxxxxx")));
+                entry.logout(((String)header.get("CLIENTIP", "xxxxxx")), getLoginToken(header.getHeaderCookies())); //todo: logout cookie
             }
-            if(sb.verifyAuthentication(header, true)){
+            if(sb.verifyAuthentication(header, true)){ //XXX: for httpauth userDB user, too?
                 prop.put("AUTHENTICATE","admin log-in");
             }
         }
