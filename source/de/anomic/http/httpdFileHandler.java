@@ -318,7 +318,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         
         if ((path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p") && (adminAccountBase64MD5.length() != 0)) {
             // authentication required
-            userDB.Entry entry=sb.userDB.ipAuth(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
+            //FIXME: Form-Login is broken, until the Auth is fixed.
+            //ipAuth is too insecure, if the users uses a proxy.
+            //TODO: cookieAuth or something like this.
+            userDB.Entry entry=null; //sb.userDB.ipAuth(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
             if( (entry != null && entry.hasAdminRight()) || (authorization != null && sb.userDB.hasAdminRight(authorization)) ){
                 //Authentication successful. remove brute-force flag
                 serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
