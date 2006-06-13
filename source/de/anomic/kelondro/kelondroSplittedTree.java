@@ -128,6 +128,10 @@ public class kelondroSplittedTree implements kelondroIndex {
         }
     }
     
+    public void close() throws IOException {
+        for (int i = 0; i < ktfs.length; i++) ktfs[i].close();
+    }
+    
     public kelondroRow row() {
         return ktfs[0].row();
     }

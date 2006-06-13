@@ -28,13 +28,9 @@ public class dbtest {
     public final static int valuelength = 223; // sum of all data length as defined in plasmaURL
     //public final static long buffer = 0;
     public final static long buffer = 8192 * 1024; // 8 MB buffer
-    public static byte[] dummyvalue1 = new byte[valuelength];
     public static byte[] dummyvalue2 = new byte[valuelength];
     static {
         // fill the dummy value
-        for (int i = 0; i < valuelength; i++) dummyvalue1[i] = '.';
-        dummyvalue1[0] = '[';
-        dummyvalue1[valuelength - 1] = ']';
         for (int i = 0; i < valuelength; i++) dummyvalue2[i] = '-';
         dummyvalue2[0] = '{';
         dummyvalue2[valuelength - 1] = '}';
@@ -169,7 +165,7 @@ public class dbtest {
             profiler.start();
             
             // create the database access
-            kelondroRow testRow = new kelondroRow(new int[]{keylength, valuelength, valuelength});
+            kelondroRow testRow = new kelondroRow(new int[]{keylength, keylength, valuelength});
             if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
                 if (tablefile.exists()) {
@@ -213,8 +209,29 @@ public class dbtest {
                 long count = Long.parseLong(args[3]);
                 long randomstart = Long.parseLong(args[4]);
                 Random random = new Random(randomstart);
+                byte[] key;
                 for (int i = 0; i < count; i++) {
-                    table.put(table.row().newEntry(new byte[][]{randomHash(random), dummyvalue1, dummyvalue2}));
+                    key = randomHash(random);
+                    table.put(table.row().newEntry(new byte[][]{key, key, dummyvalue2}));
+                    if (i % 500 == 0) {
+                        System.out.println(i + " entries processed so far.");
+                    }
+                }
+            }
+            
+            if (command.equals("read")) {
+                // read the database and compare with random entries;
+                // args: <number-of-entries> <random-startpoint>
+                long count = Long.parseLong(args[3]);
+                long randomstart = Long.parseLong(args[4]);
+                Random random = new Random(randomstart);
+                kelondroRow.Entry entry;
+                byte[] key;
+                for (int i = 0; i < count; i++) {
+                    key = randomHash(random);
+                    entry = table.get(key);
+                    if (entry == null) System.out.println("missing value for entry " + new String(key)); else
+                    if (!(new String(entry.getColBytes(1)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1)));
                     if (i % 500 == 0) {
                         System.out.println(i + " entries processed so far.");
                     }
@@ -267,11 +284,12 @@ public class dbtest {
                 }
             }
             
-            
             long aftercommand = System.currentTimeMillis();
             
             // finally close the database/table
             if (table instanceof kelondroTree) ((kelondroTree) table).close();
+            if (table instanceof kelondroFlexTable) ((kelondroFlexTable) table).close();
+            if (table instanceof kelondroSplittedTree) ((kelondroSplittedTree) table).close();
             if (table instanceof dbTable) ((dbTable)table).closeDatabaseConnection();
             
             long afterclose = System.currentTimeMillis();

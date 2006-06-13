@@ -1,4 +1,4 @@
-// kelondroFrexTable.java
+// kelondroFlexTable.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 01.06.2006 on http://www.anomic.de
 //
@@ -73,28 +73,37 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     */
     
-    public kelondroRow.Entry get(byte[] key) throws IOException {
-        int i = index.geti(key);
-        if (i < 0) return null;
-        return super.get(i);
+    public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
+        synchronized (index) {
+            int i = index.geti(key);
+            if (i >= this.size()) {
+                System.out.println("errror");
+            }
+            if (i < 0) return null;
+            return super.get(i);
+        }
     }
 
-    public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
-        int i = index.geti(row.getColBytes(0));
-        if (i < 0) {
-            index.puti(row.getColBytes(0), super.add(row));
-            return null;
-        } else {
-            return super.set(i, row);
+    public synchronized kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
+        synchronized (index) {
+            int i = index.geti(row.getColBytes(0));
+            if (i < 0) {
+                index.puti(row.getColBytes(0), super.add(row));
+                return null;
+            } else {
+                return super.set(i, row);
+            }
         }
     }
     
-    public kelondroRow.Entry remove(byte[] key) throws IOException {
-        int i = index.removei(key);
-        if (i < 0) return null;
-        kelondroRow.Entry r = super.get(i);
-        super.remove(i);
-        return r;
+    public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
+        synchronized (index) {
+            int i = index.removei(key);
+            if (i < 0) return null;
+            kelondroRow.Entry r = super.get(i);
+            super.remove(i);
+            return r;
+        }
     }
 
 }

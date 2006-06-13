@@ -44,7 +44,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
             check += '_';
         }
         
-        // open existing files
+        // check if tabel directory exists
         File tabledir = new File(path, tablename + ".table");
         if (tabledir.exists()) {
             if (!(tabledir.isDirectory())) throw new IOException("path " + tabledir.toString() + " must be a directory");
@@ -52,6 +52,8 @@ public class kelondroFlexWidthArray implements kelondroArray {
             tabledir.mkdirs();
             tabledir.mkdir();
         }
+
+        // open existing files
         String[] files = tabledir.list();
         for (int i = 0; i < files.length; i++) {
             if ((files[i].startsWith("col.") && (files[i].endsWith(".list")))) {
@@ -83,6 +85,10 @@ public class kelondroFlexWidthArray implements kelondroArray {
             }
             col[p] = new kelondroFixedWidthArray(new File(tabledir, colfilename(p, q)), new kelondroRow(columns), 16, true);
         }
+    }
+    
+    public void close() throws IOException {
+        for (int i = 0; i < col.length; i++) if (col[i] != null) col[i].close();
     }
     
     protected static final String colfilename(int start, int end) {
@@ -126,6 +132,29 @@ public class kelondroFlexWidthArray implements kelondroArray {
         return p;
     }
     
+    public int add(kelondroRow.Entry rowentry) throws IOException {
+        kelondroRow.Entry e;
+        int index = -1;
+        int lastcol;
+        synchronized (col) {
+            e = col[0].row().newEntry(rowentry.bytes(), 0, rowdef.width(0));
+            index = col[0].add(e);
+            int c = col[0].row().columns();
+
+            while (c < rowdef.columns()) {
+                lastcol  = c + col[c].row().columns() - 1;
+                e = col[c].row().newEntry(
+                        rowentry.bytes(),
+                        rowdef.colstart[c],
+                        rowdef.colstart[lastcol] - rowdef.colstart[c]
+                                + rowdef.width(lastcol));
+                col[c].set(index, e);
+                c = c + col[c].row().columns();
+            }
+        }
+        return index;
+    }
+
     public kelondroRow.Entry get(int index) throws IOException {
         int r = 0;
         kelondroRow.Entry e, p;
@@ -139,28 +168,6 @@ public class kelondroFlexWidthArray implements kelondroArray {
             }
         }
         return p;
-    }
-
-    public int add(kelondroRow.Entry rowentry) throws IOException {
-        kelondroRow.Entry e;
-        int index = -1;
-        synchronized (col) {
-            e = col[0].row().newEntry(rowentry.bytes(), 0, rowdef.width(0));
-            index = col[0].add(e);
-            int r = col[0].row().columns();
-
-            while (r < rowdef.columns()) {
-                e = col[r].row().newEntry(
-                        rowentry.bytes(),
-                        rowdef.colstart[r],
-                        rowdef.colstart[r + col[r].row().columns() - 1]
-                                + rowdef.width(r + col[r].row().columns() - 1)
-                                - rowdef.colstart[r]);
-                col[r].set(index, e);
-                r = r + col[r].row().columns();
-            }
-        }
-        return index;
     }
 
     public void remove(int index) throws IOException {

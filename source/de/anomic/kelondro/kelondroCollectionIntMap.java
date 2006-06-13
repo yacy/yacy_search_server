@@ -38,14 +38,14 @@ public class kelondroCollectionIntMap extends kelondroCollection {
         this.setOrdering(kelondroNaturalOrder.naturalOrder);
     }
 
-    public void addi(byte[] key, int i) {
+    public synchronized void addi(byte[] key, int i) {
         kelondroRow.Entry indexentry = indexrow.newEntry();
         indexentry.setCol(0, key);
         indexentry.setColLongB256(1, i);
         add(indexentry.bytes());
     }
     
-    public int puti(byte[] key, int i) {
+    public synchronized int puti(byte[] key, int i) {
         int index = -1;
         synchronized (chunkcache) {
             index = find(key, key.length);
@@ -65,23 +65,26 @@ public class kelondroCollectionIntMap extends kelondroCollection {
         }
     }
 
-    public int geti(byte[] key) {
+    public synchronized int geti(byte[] key) {
         int index = -1;
         synchronized (chunkcache) {
             index = find(key, key.length);
-        }
-        if (index < 0) {
-            return -1;
-        } else {
-            kelondroRow.Entry indexentry = indexrow.newEntry(get(index));
-            return (int) indexentry.getColLongB256(1);
+            if (index < 0) {
+                return -1;
+            } else {
+                kelondroRow.Entry indexentry = indexrow.newEntry(get(index));
+                return (int) indexentry.getColLongB256(1);
+            }
         }
     }
     
-    public int removei(byte[] key) {
-        byte[] b = remove(key);
-        if (b == null) return -1;
-        kelondroRow.Entry indexentry = indexrow.newEntry(b);
-        return (int) indexentry.getColLongB256(1);
+    public synchronized int removei(byte[] key) {
+        byte[] b;
+        synchronized (chunkcache) {
+            b = remove(key);
+            if (b == null) return -1;
+            kelondroRow.Entry indexentry = indexrow.newEntry(b);
+            return (int) indexentry.getColLongB256(1);
+        }
     }
 }

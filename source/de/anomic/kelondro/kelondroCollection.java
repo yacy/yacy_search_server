@@ -180,8 +180,7 @@ public class kelondroCollection {
     }
     
     private void remove(int p) {
-        if (chunkcount == 0) return;
-        if ((p < 0) || (p >= chunkcount)) return; // out of bounds, nothing to delete
+        assert ((p >= 0) && (p < chunkcount) && (chunkcount > 0));
         System.arraycopy(chunkcache, (p + 1) * chunksize, chunkcache, p * chunksize, (chunkcount - p - 1) * chunksize);
         chunkcount--;
         if (p < sortbound) sortbound--;
