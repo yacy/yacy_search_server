@@ -61,7 +61,7 @@ public class dbImportManager {
         if (type.equals("plasmaDB")) {
             newImporter = new plasmaDbImporter(this.sb);
         } else if (type.equalsIgnoreCase("ASSORTMENT")) {
-            newImporter = new plasmaWordIndexAssortmentImporter(this.sb);
+            newImporter = new AssortmentImporter(this.sb);
         } else if (type.equalsIgnoreCase("NURL")) {
             newImporter = new plasmaCrawlNURLImporter(this.sb);
         }

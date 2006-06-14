@@ -8,7 +8,7 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexAssortment;
 
-public class plasmaWordIndexAssortmentImporter extends AbstractImporter implements dbImporter{
+public class AssortmentImporter extends AbstractImporter implements dbImporter{
 
     private int importStartSize;
     private int wordEntityCount = 0;
@@ -17,7 +17,7 @@ public class plasmaWordIndexAssortmentImporter extends AbstractImporter implemen
     private File importAssortmentFile;
     private plasmaWordIndexAssortment assortmentFile;
     
-    public plasmaWordIndexAssortmentImporter(plasmaSwitchboard sb) {
+    public AssortmentImporter(plasmaSwitchboard sb) {
         super(sb);
         this.jobType = "ASSORTMENT";
     }
