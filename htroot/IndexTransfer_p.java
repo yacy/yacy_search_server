@@ -55,6 +55,7 @@ import java.util.TreeMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -113,6 +114,7 @@ public final class IndexTransfer_p {
             
             prop.put("running_twEntityCount",switchboard.transferIdxThread.getTransferedContainerCount());
             prop.put("running_twEntryCount",switchboard.transferIdxThread.getTransferedEntryCount());
+            prop.put("running_twPayloadSize",serverMemory.bytesToString(switchboard.transferIdxThread.getTransferedBytes()));
             prop.put("running_twEntityPercent",Float.toString(switchboard.transferIdxThread.getTransferedContainerPercent()));
             prop.put("running_twEntitySpeed",Integer.toString(switchboard.transferIdxThread.getTransferedEntitySpeed()));
             

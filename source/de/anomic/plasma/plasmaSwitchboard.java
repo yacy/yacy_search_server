@@ -1503,13 +1503,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             words = condenser.RESULT_SIMI_WORDS;
                             
                             // transfering the index to the storage peer
-                            String error = yacyClient.transferIndex(
+                            HashMap resultObj = yacyClient.transferIndex(
                                             seed,
                                             (indexTreeMapContainer[])tmpContainers.toArray(new indexTreeMapContainer[tmpContainers.size()]),
                                             urlCache,
                                             true,
                                             120000);
-                            
+                            String error = (String) resultObj.get("result");
                             if (error != null) {
                                 words = wordIndex.addPageIndex(entry.url(), urlHash, docDate, (int) entry.size(),
                                                                document, condenser,

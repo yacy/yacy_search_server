@@ -878,62 +878,94 @@ public final class yacyClient {
         }
     }
 
-    public static String transferIndex(yacySeed targetSeed, indexContainer[] indexes, HashMap urlCache, boolean gzipBody, int timeout) {
+    public static HashMap transferIndex(yacySeed targetSeed, indexContainer[] indexes, HashMap urlCache, boolean gzipBody, int timeout) {
         
-        // check if we got all necessary urls in the urlCache (only for debugging)
-        Iterator eenum;
-        indexURLEntry entry;
-        for (int i = 0; i < indexes.length; i++) {
-            eenum = indexes[i].entries();
-            while (eenum.hasNext()) {
-                entry = (indexURLEntry) eenum.next();
-                if (urlCache.get(entry.getUrlHash()) == null) {
-                    yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.getUrlHash() + "' is not contained in urlCache");
+        HashMap resultObj = new HashMap();
+        int payloadSize = 0;
+        try {
+            
+            // check if we got all necessary urls in the urlCache (only for debugging)
+            Iterator eenum;
+            indexURLEntry entry;
+            for (int i = 0; i < indexes.length; i++) {
+                eenum = indexes[i].entries();
+                while (eenum.hasNext()) {
+                    entry = (indexURLEntry) eenum.next();
+                    if (urlCache.get(entry.getUrlHash()) == null) {
+                        yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.getUrlHash() + "' is not contained in urlCache");
+                    }
+                }
+            }        
+            
+            // transfer the RWI without the URLs
+            HashMap in = transferRWI(targetSeed, indexes, gzipBody, timeout);
+            resultObj.put("resultTransferRWI", in);
+            
+            if (in == null) {
+                resultObj.put("result", "no_connection_1");
+                return resultObj;
+            }        
+            if (in.containsKey("indexPayloadSize")) payloadSize += ((Integer)in.get("indexPayloadSize")).intValue();
+            
+            String result = (String) in.get("result");
+            if (result == null) { 
+                resultObj.put("result","no_result_1"); 
+                return resultObj;
+            }
+            if (!(result.equals("ok"))) {
+                targetSeed.setFlagAcceptRemoteIndex(false);
+                yacyCore.seedDB.update(targetSeed.hash, targetSeed);
+                resultObj.put("result",result);
+                return resultObj;
+            }
+            
+            // in now contains a list of unknown hashes
+            final String uhss = (String) in.get("unknownURL");
+            if (uhss == null) {
+                resultObj.put("result","no_unknownURL_tag_in_response");
+                return resultObj;
+            }
+            if (uhss.length() == 0) { return resultObj; } // all url's known, we are ready here
+            
+            final String[] uhs = uhss.split(",");
+            if (uhs.length == 0) { return resultObj; } // all url's known
+            
+            // extract the urlCache from the result
+            plasmaCrawlLURL.Entry[] urls = new plasmaCrawlLURL.Entry[uhs.length];
+            for (int i = 0; i < uhs.length; i++) {
+                urls[i] = (plasmaCrawlLURL.Entry) urlCache.get(uhs[i]);
+                if (urls[i] == null) {
+                    yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
                 }
             }
-        }        
-        
-        // transfer the RWI without the URLs
-        HashMap in = transferRWI(targetSeed, indexes, gzipBody, timeout);
-        if (in == null) { return "no_connection_1"; }
-        String result = (String) in.get("result");
-        if (result == null) { return "no_result_1"; }
-        if (!(result.equals("ok"))) {
-            targetSeed.setFlagAcceptRemoteIndex(false);
-            yacyCore.seedDB.update(targetSeed.hash, targetSeed);
-            return result;
-        }
-        
-        // in now contains a list of unknown hashes
-        final String uhss = (String) in.get("unknownURL");
-        if (uhss == null) { return "no_unknownURL_tag_in_response"; }
-        if (uhss.length() == 0) { return null; } // all url's known, we are ready here
-        
-        final String[] uhs = uhss.split(",");
-        if (uhs.length == 0) { return null; } // all url's known
-        
-        // extract the urlCache from the result
-        plasmaCrawlLURL.Entry[] urls = new plasmaCrawlLURL.Entry[uhs.length];
-        for (int i = 0; i < uhs.length; i++) {
-            urls[i] = (plasmaCrawlLURL.Entry) urlCache.get(uhs[i]);
-            if (urls[i] == null) {
-                yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
+            
+            in = transferURL(targetSeed, urls, gzipBody, timeout);
+            resultObj.put("resultTransferURL", in);
+            
+            if (in == null) {
+                resultObj.put("result","no_connection_2");
+                return resultObj;
             }
+            if (in.containsKey("urlPayloadSize")) payloadSize += ((Integer)in.get("urlPayloadSize")).intValue();
+            
+            result = (String) in.get("result");
+            if (result == null) {
+                resultObj.put("result","no_result_2");
+                return resultObj;
+            }
+            if (!(result.equals("ok"))) {
+                targetSeed.setFlagAcceptRemoteIndex(false);
+                yacyCore.seedDB.update(targetSeed.hash, targetSeed);
+                resultObj.put("result",result);
+                return resultObj;
+            }
+    //      int doubleentries = Integer.parseInt((String) in.get("double"));
+    //      System.out.println("DEBUG tansferIndex: transferred " + uhs.length + " URL's, double=" + doubleentries);
+            
+            return resultObj;
+        } finally {
+            resultObj.put("payloadSize", new Integer(payloadSize));
         }
-        
-        in = transferURL(targetSeed, urls, gzipBody, timeout);
-        if (in == null) { return "no_connection_2"; }
-        result = (String) in.get("result");
-        if (result == null) { return "no_result_2"; }
-        if (!(result.equals("ok"))) {
-            targetSeed.setFlagAcceptRemoteIndex(false);
-            yacyCore.seedDB.update(targetSeed.hash, targetSeed);
-            return result;
-        }
-//      int doubleentries = Integer.parseInt((String) in.get("double"));
-//      System.out.println("DEBUG tansferIndex: transferred " + uhs.length + " URL's, double=" + doubleentries);
-        
-        return null;
     }
 
     private static HashMap transferRWI(yacySeed targetSeed, indexContainer[] indexes, boolean gzipBody, int timeout) {
@@ -1001,6 +1033,8 @@ public final class yacyClient {
             }
             
             final HashMap result = nxTools.table(v);
+            // return the transfered index data in bytes (for debugging only)
+            result.put("indexPayloadSize", new Integer(entrypost.length()));
             return result;
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.transferRWI error:" + e.getMessage());
@@ -1032,11 +1066,13 @@ public final class yacyClient {
         post.put("youare", targetSeed.hash);
         String resource = "";
         int urlc = 0;
+        int urlPayloadSize = 0;
         for (int i = 0; i < urls.length; i++) {
             if (urls[i] != null) {
-                resource = urls[i].toString();
+                resource = urls[i].toString();                
                 if (resource != null) {
                     post.put("url" + urlc, resource);
+                    urlPayloadSize += resource.length();
                     urlc++;
                 }
             }
@@ -1057,7 +1093,11 @@ public final class yacyClient {
             if (v != null) {
                 yacyCore.seedDB.mySeed.incSU(urlc);
             }
-            return nxTools.table(v);
+            
+            HashMap result = nxTools.table(v);
+            // return the transfered url data in bytes (for debugging only)
+            result.put("urlPayloadSize", new Integer(urlPayloadSize));            
+            return result;
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.transferRWI error:" + e.getMessage());
             return null;

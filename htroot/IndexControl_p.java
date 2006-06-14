@@ -273,12 +273,13 @@ public class IndexControl_p {
             // use whats remaining           
             String gzipBody = switchboard.getConfig("indexControl.gzipBody","false");
             int timeout = (int) switchboard.getConfigLong("indexControl.timeout",60000);
-            result = yacyClient.transferIndex(
+            HashMap resultObj = yacyClient.transferIndex(
                          yacyCore.seedDB.getConnected(post.get("hostHash", "")),
                          new indexContainer[]{index},
                          knownURLs,
                          "true".equalsIgnoreCase(gzipBody),
                          timeout);
+            result = (String) resultObj.get("result");
             prop.put("result", (result == null) ? ("Successfully transferred " + index.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds") : result);
             index = null;
         }

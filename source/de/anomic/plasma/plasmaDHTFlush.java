@@ -52,6 +52,7 @@ public class plasmaDHTFlush extends Thread {
         private boolean gzipBody4Transfer = false;
         private int timeout4Transfer = 60000;
         private int transferedEntryCount = 0;
+        private long transferedBytes = 0;
         private int transferedContainerCount = 0;
         private String status = "Running";
         private String oldStartingPointHash = "------------", startPointHash = "------------";
@@ -82,6 +83,7 @@ public class plasmaDHTFlush extends Thread {
         
         public void stopIt(boolean wait) throws InterruptedException {
             this.finished = true;
+            if (this.worker != null) this.worker.stopIt();
             if (wait) this.join();
         }
         
@@ -107,6 +109,10 @@ public class plasmaDHTFlush extends Thread {
         
         public int getTransferedContainerCount() {
             return this.transferedContainerCount;
+        }
+        
+        public long getTransferedBytes() {
+            return this.transferedBytes;
         }
         
         public float getTransferedContainerPercent() {
@@ -205,11 +211,13 @@ public class plasmaDHTFlush extends Thread {
                         
                         // calculationg the new transfer size
                         this.calculateNewChunkSize();
-                        this.worker = null;
 
                         // counting transfered containers / entries
                         this.transferedEntryCount += oldDHTChunk.indexCount();
                         this.transferedContainerCount += oldDHTChunk.containerSize();
+                        this.transferedBytes += this.worker.getPayloadSize();
+                        
+                        this.worker = null;
                         
                         // deleting transfered words from index
                         if (this.delete) {
@@ -223,6 +231,7 @@ public class plasmaDHTFlush extends Thread {
                     // handover chunk to transfer worker
                     if ((newDHTChunk.containerSize() > 0) || (newDHTChunk.getStatus() == plasmaDHTChunk.chunkStatus_FILLED)) {
                         this.worker = new plasmaDHTTransfer(this.log, this.seed, newDHTChunk, this.gzipBody4Transfer, this.timeout4Transfer, 5);
+                        this.worker.setTransferMode(plasmaDHTTransfer.TRANSFER_MODE_FLUSH);
                         this.worker.start();
                     }
                 }
