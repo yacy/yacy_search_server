@@ -229,24 +229,25 @@ public final class yacy {
             final File dataFolder = new File(homePath, "DATA");
             if (!(dataFolder.exists())) dataFolder.mkdir();
 
-            // Testing if the yacy archive file were unzipped correctly.
-            // This test is needed because of classfile-names longer than 100 chars
-            // which could cause problems with incompatible unzip software.
-            // See:
-            // - http://www.yacy-forum.de/viewtopic.php?t=1763
-            // - http://www.yacy-forum.de/viewtopic.php?t=715
-            // - http://www.yacy-forum.de/viewtopic.php?t=1674
-            File unzipTest = new File(homePath,"doc/This_is_a_test_if_the_archive_file_containing_YaCy_was_unpacked_correctly_If_not_please_use_gnu_tar_instead.txt");
-            if (!unzipTest.exists()) {
-                String errorMsg = "The archive file containing YaCy was not unpacked correctly. " +
-                                  "Please use 'GNU-Tar' or upgrade to a newer version of your unzip software.\n" +
-                                  "For detailed information on this bug see: " + 
-                                  "http://www.yacy-forum.de/viewtopic.php?t=715";
-                System.err.println(errorMsg);
-                serverLog.logSevere("STARTUP", errorMsg);
-                System.exit(1); 
-            }
-                    
+            /*
+                // Testing if the yacy archive file were unzipped correctly.
+                // This test is needed because of classfile-names longer than 100 chars
+                // which could cause problems with incompatible unzip software.
+                // See:
+                // - http://www.yacy-forum.de/viewtopic.php?t=1763
+                // - http://www.yacy-forum.de/viewtopic.php?t=715
+                // - http://www.yacy-forum.de/viewtopic.php?t=1674
+                File unzipTest = new File(homePath,"doc/This_is_a_test_if_the_archive_file_containing_YaCy_was_unpacked_correctly_If_not_please_use_gnu_tar_instead.txt");
+                if (!unzipTest.exists()) {
+                    String errorMsg = "The archive file containing YaCy was not unpacked correctly. " +
+                                      "Please use 'GNU-Tar' or upgrade to a newer version of your unzip software.\n" +
+                                      "For detailed information on this bug see: " + 
+                                      "http://www.yacy-forum.de/viewtopic.php?t=715";
+                    System.err.println(errorMsg);
+                    serverLog.logSevere("STARTUP", errorMsg);
+                    System.exit(1); 
+                }
+            */                    
             
             final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
             

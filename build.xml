@@ -514,14 +514,14 @@
 	 ======================================================================================================= -->   
 <target name="distMain" depends="copyMain4Dist" description="Compiling sources and make a release file ...">
 
-	<tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">  	
+	<tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
   	 
 		<!-- packing all files into a gzipped tar -->
-  		<tarfileset dir="${release_main}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
+  		<tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
   		    <include name="**/*.sh"/>
   		    <include name="**/*.command"/>  			
 		</tarfileset>
-  		<tarfileset dir="${release_main}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+  		<tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
     		<include name="**/*.*"/>			
    		    <exclude name="**/*.sh"/>
    		    <exclude name="**/*.command"/>  			    			
@@ -536,20 +536,20 @@
 </target>
 	
 <target name="distAllInOne" depends="copyMain4Dist,compileExtensions">
-	<tar destfile="${release}/${allInOneFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">  	
+	<tar destfile="${release}/${allInOneFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
   	 
 		<!-- packing all files into a gzipped tar -->
-  		<tarfileset dir="${release_main}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
+  		<tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
   		    <include name="**/*.sh"/>
   		    <include name="**/*.command"/>  			
 		</tarfileset>
-  		<tarfileset dir="${release_main}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+  		<tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
     		<include name="**/*.*"/>			
    		    <exclude name="**/*.sh"/>
    		    <exclude name="**/*.command"/>  			    			
 		</tarfileset>
   			
-  		<tarfileset dir="${release_ext}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+  		<tarfileset dir="${release_ext}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
   			<include name="**/*.*"/>
   		</tarfileset>  			
 	</tar>	

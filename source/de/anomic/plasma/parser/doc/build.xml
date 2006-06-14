@@ -26,13 +26,13 @@
   	  <tar destfile="${parserArchive}" compression="gzip">
   	  	<tarfileset dir="${libx}" 
   	  				includes="tm-extractors-0.4.*" 
-  	  				prefix="${releaseDir}/libx/"
+  	  				prefix="${releaseFileParentDir}/libx/"
 			  	  	dirmode="755" mode="644"/>
   	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
-  	  				prefix="${releaseDir}/source/de/anomic/plasma/parser/${parserShortName}"
+  	  				prefix="${releaseFileParentDir}/source/de/anomic/plasma/parser/${parserShortName}"
 			  	  	dirmode="755" mode="644"/>
   	  	<tarfileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" 
-  	  				prefix="${releaseDir}/classes/de/anomic/plasma/parser/${parserShortName}"
+  	  				prefix="${releaseFileParentDir}/classes/de/anomic/plasma/parser/${parserShortName}"
 			  	  	dirmode="755" mode="644"/>	  	
   	  </tar>    	
     </target>	
