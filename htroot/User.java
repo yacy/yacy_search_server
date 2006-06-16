@@ -50,6 +50,7 @@ import java.io.IOException;
 
 import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
@@ -57,17 +58,6 @@ import de.anomic.server.serverSwitch;
 
 public class User{
     
-    private static String getLoginToken(String cookies){
-        String[] cookie=cookies.split(";"); //TODO: Mozilla uses 
-        String[] pair;
-        for(int i=0;i<cookie.length;i++){
-            pair=cookie[i].split("=");
-            if(pair[0].trim().equals("login")){
-                return pair[1].trim();
-            }
-        }
-        return "";
-    }
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
@@ -83,7 +73,7 @@ public class User{
         	prop.put("logged-in_identified-by", 1);
         //try via cookie
         }else{
-            entry=sb.userDB.cookieAuth(getLoginToken(header.getHeaderCookies()));
+            entry=sb.userDB.cookieAuth(userDB.getLoginToken(header.getHeaderCookies()));
             prop.put("logged-in_identified-by", 2);
             //try via ip
             if(entry == null){
@@ -117,17 +107,30 @@ public class User{
         //TODO: this does not work for a static admin, yet.
         }else if(post != null && post.containsKey("username") && post.containsKey("password")){
             //entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"), (String)header.get("CLIENTIP", "xxxxxx"));
-            entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"));
-            if(entry != null){
+            String username=(String)post.get("username");
+            String password=(String)post.get("password");
+            
+            entry=sb.userDB.passwordAuth(username, password);
+            boolean staticAdmin = sb.getConfig("adminAccountBase64MD5", "").equals(
+                    serverCodings.encodeMD5Hex(
+                            kelondroBase64Order.standardCoder.encodeString(username + ":" + password)
+                    )
+            );
+            String cookie="";
+            if(entry != null)
                 //set a random token in a cookie
-                String cookie=sb.userDB.getCookie(entry);
+                cookie=sb.userDB.getCookie(entry);
+            else if(staticAdmin)
+                cookie=sb.userDB.getAdminCookie();
+                
+            if(entry != null || staticAdmin){
                 httpHeader outgoingHeader=new httpHeader();
                 outgoingHeader.setCookie("login", cookie);
                 prop.setOutgoingHeader(outgoingHeader);
                 
                 prop.put("logged-in", 1);
                 prop.put("logged-in_identified-by", 1);
-                prop.put("logged-in_username", entry.getUserName());
+                prop.put("logged-in_username", username);
                 if(post.containsKey("returnto")){
                     prop.put("LOCATION", (String)post.get("returnto"));
                 }
@@ -158,7 +161,7 @@ public class User{
         if(post!=null && post.containsKey("logout")){
             prop.put("logged-in",0);
             if(entry != null){
-                entry.logout(((String)header.get("CLIENTIP", "xxxxxx")), getLoginToken(header.getHeaderCookies())); //todo: logout cookie
+                entry.logout(((String)header.get("CLIENTIP", "xxxxxx")), userDB.getLoginToken(header.getHeaderCookies())); //todo: logout cookie
             }
             if(! ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
                 prop.put("AUTHENTICATE","admin log-in");

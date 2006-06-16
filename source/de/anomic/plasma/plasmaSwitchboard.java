@@ -2021,14 +2021,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
 
     public int adminAuthenticated(httpHeader header) {
+        
+        String adminAccountBase64MD5 = getConfig("adminAccountBase64MD5", "");
+        String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
+        int result=0; //wrong pw
+        int tmp=0;
+        if ((((String) header.get("CLIENTIP", "")).equals("localhost")) && (adminAccountBase64MD5.equals(authorization))) result = 3; // soft-authenticated for localhost
+        if (userDB.hasAdminRight((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"), ((String) header.get("CLIENTIP", "")), header.getHeaderCookies())) return 4; //return, because 4=max
+        tmp=staticAdminAuthenticated(authorization);
+        if(tmp>result) result=tmp;
+        return result;
+    }
+    public int staticAdminAuthenticated(String authorization){
+        if(authorization==null) return 1;
+        if (authorization.length() == 0) return 1; // no authentication information given
         String adminAccountBase64MD5 = getConfig("adminAccountBase64MD5", "");
         if (adminAccountBase64MD5.length() == 0) return 2; // no passwrd stored
-        String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
-        if (authorization.length() == 0) return 1; // no authentication information given
-        if ((((String) header.get("CLIENTIP", "")).equals("localhost")) && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
         if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
-        if (userDB.hasAdminRight((String)header.get(httpHeader.AUTHORIZATION, "xxxxxx"))) return 4;
-        return 0; // wrong password
+        return 0;
     }
     
     public boolean verifyAuthentication(httpHeader header, boolean strict) {

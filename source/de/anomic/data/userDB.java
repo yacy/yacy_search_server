@@ -158,8 +158,11 @@ public final class userDB {
 	 * @param auth a base64 Encoded String, which contains "username:pw".
 	 */
 	public Entry proxyAuth(String auth) {
+        if(auth==null)
+            return null;
 		Entry entry=null;
 		auth=auth.trim().substring(6);
+        
         try{
             auth=kelondroBase64Order.standardCoder.decodeString(auth);
         }catch(RuntimeException e){} //no valid Base64
@@ -184,19 +187,17 @@ public final class userDB {
      * @param auth the http-headerline for authorisation
      */
     public boolean hasAdminRight(String auth, String ip, String cookies){
-        return hasAdminRight(auth);
-    }
-    public boolean hasAdminRight(String auth){
-        plasmaSwitchboard sb=plasmaSwitchboard.getSwitchboard();
-        String adminAccountBase64MD5 = sb.getConfig("adminAccountBase64MD5", "");
-        userDB.Entry entry = sb.userDB.proxyAuth(auth);
-        if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(auth.trim().substring(6)))) {
+        Entry entry=proxyAuth(auth);
+        if(entry != null && entry.hasAdminRight())
             return true;
-        } else if(entry != null && entry.hasAdminRight()){
+        entry=cookieAuth(cookies);
+        if(entry != null && entry.hasAdminRight())
             return true;
-        }
+        if(cookieAdminAuth(cookies))
+            return true;
         return false;
     }
+
 	/*
 	 * use a ProxyAuth String to authenticate a user and save the ip/username for ipAuth
 	 * @param auth a base64 Encoded String, which contains "username:pw".
@@ -262,15 +263,44 @@ public final class userDB {
         return entry;
     }
     public Entry cookieAuth(String cookieString){
-        if(cookieUsers.containsKey(cookieString))
-            return (Entry) cookieUsers.get(cookieString);
+        if(cookieUsers.containsKey(cookieString)){
+            Object entry=cookieUsers.get(cookieString);
+            if(entry instanceof Entry) //String would mean static Admin
+                return (Entry)entry;
+        }
         return null;
+    }
+    public boolean cookieAdminAuth(String cookieString){
+        if(cookieUsers.containsKey(cookieString)){
+            Object entry=cookieUsers.get(cookieString);
+            if(entry instanceof String && entry.equals("admin"))
+                return true;
+        }
+        return false;
     }
     public String getCookie(Entry entry){
         Random r = new Random();
         String token = Long.toString(Math.abs(r.nextLong()), 36);
         cookieUsers.put(token, entry);
         return token;
+    }
+    public String getAdminCookie(){
+        Random r = new Random();
+        String token = Long.toString(Math.abs(r.nextLong()), 36);
+        cookieUsers.put(token, "admin");
+        return token;
+    }
+    
+    public static String getLoginToken(String cookies){
+        String[] cookie=cookies.split(";"); //TODO: Mozilla uses "; "
+        String[] pair;
+        for(int i=0;i<cookie.length;i++){
+            pair=cookie[i].split("=");
+            if(pair[0].trim().equals("login")){
+                return pair[1].trim();
+            }
+        }
+        return "";
     }
     
     public class Entry {
@@ -529,7 +559,8 @@ public final class userDB {
             return new HashSet().iterator();
         }
     }
-    
+
+
     public class userIterator implements Iterator {
         // the iterator iterates all userNames
         kelondroDyn.dynKeyIterator userIter;
