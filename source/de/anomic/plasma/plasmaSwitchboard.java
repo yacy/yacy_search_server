@@ -2034,7 +2034,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     public int staticAdminAuthenticated(String authorization){
         if(authorization==null) return 1;
-        if (authorization.length() == 0) return 1; // no authentication information given
+        if (authorization.length() < 6) return 1; // no authentication information given
+        authorization = authorization.trim().substring(6);
         String adminAccountBase64MD5 = getConfig("adminAccountBase64MD5", "");
         if (adminAccountBase64MD5.length() == 0) return 2; // no passwrd stored
         if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
