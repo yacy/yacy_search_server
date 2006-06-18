@@ -162,7 +162,10 @@ public class User{
             prop.put("logged-in",0);
             if(entry != null){
                 entry.logout(((String)header.get("CLIENTIP", "xxxxxx")), userDB.getLoginToken(header.getHeaderCookies())); //todo: logout cookie
+            }else{
+                sb.userDB.adminLogout(userDB.getLoginToken(header.getHeaderCookies()));
             }
+            //XXX: This should not be needed anymore, because of isLoggedout
             if(! ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
                 prop.put("AUTHENTICATE","admin log-in");
             }

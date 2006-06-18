@@ -316,13 +316,16 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         int pos = path.lastIndexOf(".");
         
         if ((path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p") && (adminAccountBase64MD5.length() != 0)) {
-            // authentication required
-            if(authorization != null){
-                //TODO: One (switchboard? httpd?) method to check it all, without too much userDB in the other classes.
-                if(sb.userDB.hasAdminRight(authorization, conProp.getProperty("CLIENTIP"), requestHeader.getHeaderCookies())|| sb.staticAdminAuthenticated(authorization.trim().substring(6))==4){
-                    //Authentication successful. remove brute-force flag
-                    serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
-                }
+            //authentication required
+            //userDB
+            if(sb.userDB.hasAdminRight(authorization, conProp.getProperty("CLIENTIP"), requestHeader.getHeaderCookies())){
+                //Authentication successful. remove brute-force flag
+                serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+            //static
+            }else if(authorization != null && sb.staticAdminAuthenticated(authorization.trim().substring(6))==4){
+                //Authentication successful. remove brute-force flag
+                serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+            //no auth
             }else if (authorization == null) {
                 // no authorization given in response. Ask for that
                 httpHeader headers = getDefaultHeaders(path);
@@ -330,6 +333,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 //httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                 serverObjects tp=new serverObjects();
                 tp.put("returnto", path);
+                //TODO: separate errorpage Wrong Login / No Login
                 httpd.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, headers);
                 return;
             } else {
@@ -613,6 +617,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 if (location.length() == 0) location = path;
                                 
                                 httpHeader headers = getDefaultHeaders(path);
+                                headers.setCookieVector(tp.getOutgoingHeader().getCookieVector()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
                                 headers.put(httpHeader.LOCATION,location);
                                 httpd.sendRespondHeader(conProp,out,httpVersion,302,headers);
                                 return;

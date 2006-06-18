@@ -186,7 +186,9 @@ public final class userDB {
      * @param auth the http-headerline for authorisation
      */
     public boolean hasAdminRight(String auth, String ip, String cookies){
-        Entry entry=proxyAuth(auth);
+        Entry entry=null;
+        if(auth != null)
+            entry=proxyAuth(auth);
         if(entry != null && entry.hasAdminRight())
             return true;
         entry=cookieAuth(cookies);
@@ -262,16 +264,18 @@ public final class userDB {
         return entry;
     }
     public Entry cookieAuth(String cookieString){
-        if(cookieUsers.containsKey(cookieString)){
-            Object entry=cookieUsers.get(cookieString);
+        String token=getLoginToken(cookieString);
+        if(cookieUsers.containsKey(token)){
+            Object entry=cookieUsers.get(token);
             if(entry instanceof Entry) //String would mean static Admin
                 return (Entry)entry;
         }
         return null;
     }
     public boolean cookieAdminAuth(String cookieString){
-        if(cookieUsers.containsKey(cookieString)){
-            Object entry=cookieUsers.get(cookieString);
+        String token=getLoginToken(cookieString);
+        if(cookieUsers.containsKey(token)){
+            Object entry=cookieUsers.get(token);
             if(entry instanceof String && entry.equals("admin"))
                 return true;
         }
@@ -301,6 +305,13 @@ public final class userDB {
         }
         return "";
     }
+    public void adminLogout(String logintoken){
+        if(cookieUsers.containsKey(logintoken)){
+            //XXX: We could check, if its == "admin", but we want to logout anyway.
+            cookieUsers.remove(logintoken);
+        }
+    }
+    
     
     public class Entry {
         public static final String MD5ENCODED_USERPWD_STRING = "MD5_user:pwd";
@@ -518,10 +529,10 @@ public final class userDB {
         public boolean isLoggedOut(){
         	   return (this.mem.containsKey(LOGGED_OUT)?((String)this.mem.get(LOGGED_OUT)).equals("true"):false);
         }
-        public void logout(String ip, String cookieString){
+        public void logout(String ip, String logintoken){
             logout(ip);
-            if(cookieUsers.containsKey(cookieString)){
-                cookieUsers.remove(cookieString);
+            if(cookieUsers.containsKey(logintoken)){
+                cookieUsers.remove(logintoken);
             }
         }
         public void logout(String ip){
@@ -535,7 +546,6 @@ public final class userDB {
         public void logout(){
         		logout("xxxxxx");
         }
-        
         public String toString() {
             StringBuffer str = new StringBuffer();
             str.append((this.userName==null)?"null":this.userName)

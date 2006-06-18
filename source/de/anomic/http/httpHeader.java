@@ -899,6 +899,12 @@ public final class httpHeader extends TreeMap implements Map {
         }
         return "";
     }
+    public Vector getCookieVector(){
+        return cookies;
+    }
+    public void setCookieVector(Vector mycookies){
+        cookies=mycookies;
+    }
     /**
      * Returns an iterator within all properties can be reached.
      * Is used mainly by httpd.

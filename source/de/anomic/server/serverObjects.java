@@ -79,7 +79,10 @@ public final class serverObjects extends Hashtable implements Cloneable {
     }
     public httpHeader getOutgoingHeader()
     {
-    	return outgoingHeader;
+        if(outgoingHeader!=null)
+            return outgoingHeader;
+        else
+            return new httpHeader();
     }
     
     
