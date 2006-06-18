@@ -318,9 +318,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         
         if ((path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p") && (adminAccountBase64MD5.length() != 0)) {
             // authentication required
-            if( (authorization != null && (sb.userDB.hasAdminRight(authorization, conProp.getProperty("CLIENTIP"), requestHeader.getHeaderCookies()))|| sb.staticAdminAuthenticated(authorization)==4)){
-                //Authentication successful. remove brute-force flag
-                serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+            if(authorization != null){
+                //TODO: One (switchboard? httpd?) method to check it all, without too much userDB in the other classes.
+                if(sb.userDB.hasAdminRight(authorization, conProp.getProperty("CLIENTIP"), requestHeader.getHeaderCookies())|| sb.staticAdminAuthenticated(authorization.trim().substring(6))==4){
+                    //Authentication successful. remove brute-force flag
+                    serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+                }
             }else if (authorization == null) {
                 // no authorization given in response. Ask for that
                 httpHeader headers = getDefaultHeaders(path);
