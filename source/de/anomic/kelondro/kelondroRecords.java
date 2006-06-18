@@ -85,7 +85,7 @@ public class kelondroRecords {
     public final static boolean useWriteBuffer = false;
     
     // memory calculation
-    private static final int element_in_cache = 52;
+    private static final int element_in_cache = 4; // for kelondroCollectionObjectMap: 4; for HashMap: 52
     private static final int cache_control_entry = 96;
     
     // caching flags
