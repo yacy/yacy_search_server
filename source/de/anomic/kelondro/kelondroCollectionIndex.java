@@ -35,7 +35,7 @@ public class kelondroCollectionIndex {
     private String filenameStub;
     private int loadfactor;
     private int chunksize;
-    private int partitions;
+    //private int partitions;
     private int maxChunks;
     private kelondroFixedWidthArray[] array;
     private int[] arrayCapacity;
@@ -61,7 +61,7 @@ public class kelondroCollectionIndex {
         this.path = path;
         this.filenameStub = filenameStub;
         this.chunksize = chunksize;
-        this.partitions = partitions;
+        //this.partitions = partitions;
         this.loadfactor = loadfactor;
 
         // create index file(s)

@@ -1445,7 +1445,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
 //            start handshake
             sslsock.startHandshake();
             
-            String cipherSuite = sslsock.getSession().getCipherSuite();
+            //String cipherSuite = sslsock.getSession().getCipherSuite();
             
             return sslsock;
         } catch (Exception e) {

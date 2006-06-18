@@ -73,7 +73,6 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
-import java.util.Map.Entry;
 
 import de.anomic.server.serverCore;
 import de.anomic.server.logging.serverLog;

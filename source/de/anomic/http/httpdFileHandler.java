@@ -103,7 +103,6 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.imageio.ImageIO;
 
-import de.anomic.data.userDB;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;

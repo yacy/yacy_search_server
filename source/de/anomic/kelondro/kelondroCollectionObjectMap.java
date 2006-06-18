@@ -1,6 +1,6 @@
 // kelondroCollectionObjectMap.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
-// first published 08.06.2006 on http://www.anomic.de
+// first published 18.06.2006 on http://www.anomic.de
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
 // $LastChangedRevision: 1986 $

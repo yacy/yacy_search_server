@@ -42,10 +42,8 @@
 
 package de.anomic.plasma;
 
-import java.lang.StringBuffer;
 import java.util.HashMap;
 
-import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
