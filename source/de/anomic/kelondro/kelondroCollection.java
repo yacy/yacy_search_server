@@ -196,6 +196,13 @@ public class kelondroCollection {
         }
     }
     
+    public void removeOne() {
+        if (chunkcount == 0) return;
+        if (chunkcount == sortbound) sortbound--;
+        chunkcount--;
+        this.lastTimeWrote = System.currentTimeMillis();
+    }
+    
     public void clear() {
         this.chunkcount = 0;
         this.chunkcache = new byte[0];
@@ -257,8 +264,7 @@ public class kelondroCollection {
         if (this.order == null) return iterativeSearch(a, length);
         
         // check if a re-sorting make sense
-        if (this.chunkcount - this.sortbound > 1200) sort(Math.min(a.length, this.chunksize));
-        //if ((this.chunkcount - this.sortbound) / (this.chunkcount + 1) * 100 > 20) sort();
+        if ((this.chunkcount - this.sortbound) > 90) sort(Math.min(a.length, this.chunksize));
         
         // first try to find in sorted area
         int p = binarySearch(a, length);
@@ -315,7 +321,7 @@ public class kelondroCollection {
     public void sort(int keylen) {
         assert (this.order != null);
         if (this.sortbound == this.chunkcount) return; // this is already sorted
-        //System.out.println("SORT");
+        //System.out.println("SORT(chunkcount=" + this.chunkcount + ", sortbound=" + this.sortbound + ")");
         if (this.sortbound > 1) {
             qsort(keylen, 0, this.sortbound, this.chunkcount);
         } else {

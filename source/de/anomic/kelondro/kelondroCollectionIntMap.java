@@ -64,7 +64,7 @@ public class kelondroCollectionIntMap extends kelondroCollection {
             return oldi;
         }
     }
-
+    
     public synchronized int geti(byte[] key) {
         int index = -1;
         synchronized (chunkcache) {
@@ -87,4 +87,9 @@ public class kelondroCollectionIntMap extends kelondroCollection {
             return (int) indexentry.getColLongB256(1);
         }
     }
+    
+    public static void main(String[] args) {
+        
+    }
+    
 }
