@@ -1398,10 +1398,10 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 
     public static void main(String[] args) {
         //cmd(args);
-        iterationtest();
+        //iterationtest();
         //bigtest(Integer.parseInt(args[0]));
         //randomtest(Integer.parseInt(args[0]));
-        //smalltest();
+        smalltest();
     }
  
     public static String[] permutations(int letters) {
@@ -1507,7 +1507,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         File f = new File("test.db");
         if (f.exists()) f.delete();
         try {
-            kelondroTree tt = new kelondroTree(f, 0, 10, 4, 4, true);
+            kelondroTree tt = new kelondroTree(f, 1000, 10, 4, 4, true);
             byte[] b;
             b = testWord('B'); tt.put(b, b); //tt.print();
             b = testWord('C'); tt.put(b, b); //tt.print();
@@ -1520,7 +1520,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             b = testWord('E'); tt.put(b, b);
             b = testWord('F'); tt.put(b, b);
             b = testWord('G'); tt.put(b, b);
-            //b = testWord('H'); tt.put(b, b);
+            b = testWord('H'); tt.put(b, b);
             b = testWord('I'); tt.put(b, b);
             b = testWord('J'); tt.put(b, b);
             b = testWord('K'); tt.put(b, b);
@@ -1529,7 +1529,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             System.out.println("elements: " + c);
             Iterator i = tt.rows(true, true, testWord('G'));
             for (int j = 0; j < c; j++) {
-                System.out.println("Row " + j + ": " + new String(((byte[][]) i.next())[0]));
+                System.out.println("Row " + j + ": " + new String(((kelondroRow.Entry) i.next()).getColBytes(0)));
             }
             System.out.println("TERMINATED");
         } catch (IOException e) {
@@ -1636,10 +1636,10 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         int count = 0;
         try {
             Iterator iter = t.rows(true, false, null);
-            byte[][] row;
+            kelondroRow.Entry row;
             while (iter.hasNext()) {
                 count++;
-                row = (byte[][]) iter.next();
+                row = (kelondroRow.Entry) iter.next();
                 if (row == null) System.out.println("ERROR! null element found");
                 // else System.out.println("counted element: " + new
                 // String(n.getKey()));
