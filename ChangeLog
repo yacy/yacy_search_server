@@ -1,6 +1,9 @@
 YaCy: The Search Engine with the friendly whale
 
 version 0.46
+	* ADDED: more authentication Methods (cookieAuth)
+	* ADDED: Form-Login on User.html
+	* ADDED: nice Errorpage for httpauth-fail.
 
 version 0.45
 	* UPDATED: new Design of search page
