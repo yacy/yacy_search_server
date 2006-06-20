@@ -1,1 +1,23 @@
+#(mode)#
+<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+	<head>
+		<title>Gettext Locales</title>
+		#%env/templates/metas.template%#
+	</head>
+	<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+	#%env/templates/header.template%#
+	<h2>Gettext Locales</h2>
+	<a href="Gettext.html?mode=1">Get empty gettext file</a>
+	<form action="Gettext.html" method="GET">
+	<input type="hidden" name="mode" value="1">
+	old file: <input type="text" name="oldfile" value="DATA/LOCALE">
+	<input type="submit" value="get updated file">
+	</form>
+
+#%env/templates/footer.template%#
+</body>
+</html>
+::
 #[gettext]#
+#(/mode)#

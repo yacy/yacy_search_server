@@ -1,6 +1,8 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 
 import de.anomic.data.gettext;
 import de.anomic.http.httpHeader;
@@ -33,19 +35,41 @@ import de.anomic.server.serverSwitch;
 public class Gettext{
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
-        String htRootPath = env.getConfig("htRootPath", "htroot");
-        File sourceDir = new File(env.getRootPath(), htRootPath);
-        ArrayList list = gettext.createGettextRecursive(sourceDir, "html,template,inc", "locale");
-        Iterator it=list.iterator();
-        String out="";
-        while(it.hasNext()){
-            out+=(String)it.next()+"\n";
+        
+        
+        if(post != null && post.get("mode").equals("1")){
+            prop.put("mode", "1");
+            File oldfile=null;
+            String oldfilename;
+            if(post.containsKey("oldfile")){
+                oldfilename=(String) post.get("oldfile");
+                oldfile=new File(env.getRootPath(), oldfilename);
+                if(!oldfile.exists())
+                    //TODO: display warning?
+                    oldfile=null;
+            }
+            
+            String htRootPath = env.getConfig("htRootPath", "htroot");
+            File sourceDir = new File(env.getRootPath(), htRootPath);
+            ArrayList list;
+            try {
+                list = gettext.createGettextRecursive(sourceDir, "html,template,inc", "locale", oldfile);
+            } catch (FileNotFoundException e) {
+                // TODO warn the user
+                list = gettext.createGettextRecursive(sourceDir, "html,template,inc", "locale", (Map)null);
+            }
+            Iterator it=list.iterator();
+            String out="";
+            while(it.hasNext()){
+                out+=(String)it.next()+"\n";
+            }
+            //this does not work
+            /*httpHeader outheader=new httpHeader();
+            outheader.put("Content-Type", "text/plain");
+            prop.setOutgoingHeader(outheader);*/
+            prop.put("mode_gettext", out);
         }
-        //this does not work
-        /*httpHeader outheader=new httpHeader();
-        outheader.put("Content-Type", "text/plain");
-        prop.setOutgoingHeader(outheader);*/
-        prop.put("gettext", out);
+        
         
         return prop;
     }

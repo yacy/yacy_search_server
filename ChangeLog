@@ -4,7 +4,7 @@ version 0.46
 	* ADDED: more authentication Methods (cookieAuth)
 	* ADDED: Form-Login on User.html
 	* ADDED: nice Errorpage for httpauth-fail.
-	* ADDED: support to generate gettext locales
+	* ADDED: support to generate gettext locales and parse them.
 
 version 0.45
 	* UPDATED: new Design of search page
