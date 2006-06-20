@@ -141,8 +141,9 @@ public class kelondroRow {
                 this.rowinstance = rowinstance;
             } else {
                 this.rowinstance = new byte[objectsize];
-                System.arraycopy(rowinstance, 0, this.rowinstance, 0, rowinstance.length);
-                for (int i = rowinstance.length; i < objectsize; i++) this.rowinstance[i] = 0;
+                int ll = Math.min(objectsize, rowinstance.length);
+                System.arraycopy(rowinstance, 0, this.rowinstance, 0, ll);
+                for (int i = ll; i < objectsize; i++) this.rowinstance[i] = 0;
             }
         }
         

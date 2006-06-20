@@ -175,8 +175,8 @@ public class kelondroRowSet extends kelondroRowCollection {
         String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };
         kelondroRowSet c = new kelondroRowSet(new kelondroRow(new int[]{10, 3}));
         c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes(), 0, 10);
-        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes(), 0, 10);
+        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
+        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
         c.sort();
         c.remove("fuenf".getBytes(), 0, 5);
         Iterator i = c.elements();
@@ -206,7 +206,7 @@ public class kelondroRowSet extends kelondroRowCollection {
         for (long k = 0; k < 60000; k++) {
             t = System.currentTimeMillis();
             w = "a" + Long.toString(rand.nextLong());
-            c.add(w.getBytes(), 0, 10);
+            c.add(w.getBytes());
             if (k % 10000 == 0)
                 System.out.println("added " + k + " entries in " +
                     ((t - start) / 1000) + " seconds, " +
@@ -230,7 +230,7 @@ public class kelondroRowSet extends kelondroRowCollection {
         for (long k = 0; k < 60000; k++) {
             t = System.currentTimeMillis();
             w = "a" + Long.toString(rand.nextLong());
-            if (c.get(w.getBytes(), 0, 10) == null) c.add(w.getBytes(), 0, 10); else d++;
+            if (c.get(w.getBytes(), 0, 10) == null) c.add(w.getBytes()); else d++;
             if (k % 10000 == 0)
                 System.out.println("added " + k + " entries in " +
                     ((t - start) / 1000) + " seconds, " +

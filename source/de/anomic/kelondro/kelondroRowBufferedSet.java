@@ -109,6 +109,14 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         }
     }
     
+    public void add(byte[] a) {
+        this.add(super.rowdef.newEntry(a));
+    }
+    
+    public void add(kelondroRow.Entry a) {
+        this.put(a);
+    }
+    
     public kelondroRow.Entry get(byte[] key) {
         synchronized (buffer) {
             kelondroRow.Entry entry = (kelondroRow.Entry) buffer.get(key);
@@ -170,8 +178,8 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };
         kelondroRowBufferedSet c = new kelondroRowBufferedSet(new kelondroRow(new int[]{10, 3}));
         c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes(), 0, 10);
-        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes(), 0, 10);
+        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
+        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
         c.sort();
         c.remove("fuenf".getBytes());
         Iterator i = c.elements();
@@ -201,7 +209,7 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         for (long k = 0; k < 60000; k++) {
             t = System.currentTimeMillis();
             w = "a" + Long.toString(rand.nextLong());
-            c.add(w.getBytes(), 0, 10);
+            c.add(w.getBytes());
             if (k % 10000 == 0)
                 System.out.println("added " + k + " entries in " +
                     ((t - start) / 1000) + " seconds, " +
@@ -225,7 +233,7 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         for (long k = 0; k < 60000; k++) {
             t = System.currentTimeMillis();
             w = "a" + Long.toString(rand.nextLong());
-            if (c.get(w.getBytes()) == null) c.add(w.getBytes(), 0, 10); else d++;
+            if (c.get(w.getBytes()) == null) c.add(w.getBytes()); else d++;
             if (k % 10000 == 0)
                 System.out.println("added " + k + " entries in " +
                     ((t - start) / 1000) + " seconds, " +

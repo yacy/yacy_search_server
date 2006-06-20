@@ -108,11 +108,15 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public final void add(kelondroRow.Entry a) {
+    public void add(kelondroRow.Entry a) {
         add(a.bytes(), 0, a.bytes().length);
     }
     
-    public final void add(byte[] a, int astart, int alength) {
+    public void add(byte[] a) {
+        add(a, 0, a.length);
+    }
+    
+    private final void add(byte[] a, int astart, int alength) {
         int l = Math.min(rowdef.objectsize(), Math.min(alength, a.length - astart));
         synchronized (chunkcache) {
             ensureSize(chunkcount + 1);
