@@ -34,13 +34,14 @@ public class kelondroCollectionIndex {
     private File path;
     private String filenameStub;
     private int loadfactor;
-    private int chunksize;
     //private int partitions;
     private int maxChunks;
     private kelondroFixedWidthArray[] array;
     private int[] arrayCapacity;
+    private kelondroRow rowdef;
     
     private static File arrayFile(File path, String filenameStub, int loadfactor, int chunksize, int partitionNumber) {
+
         String lf = Integer.toHexString(loadfactor).toUpperCase();
         while (lf.length() < 2) lf = "0" + lf;
         String cs = Integer.toHexString(chunksize).toUpperCase();
@@ -57,10 +58,10 @@ public class kelondroCollectionIndex {
     }
     
     public kelondroCollectionIndex(File path, String filenameStub, int keyLength, kelondroOrder indexOrder, long buffersize,
-                                   int loadfactor, int chunksize, int partitions) throws IOException {
+                                   int loadfactor, kelondroRow rowdef, int partitions) throws IOException {
         this.path = path;
         this.filenameStub = filenameStub;
-        this.chunksize = chunksize;
+        this.rowdef = rowdef;
         //this.partitions = partitions;
         this.loadfactor = loadfactor;
 
@@ -83,14 +84,14 @@ public class kelondroCollectionIndex {
         
         for (int i = 0; i < partitions; i++) {
             load = load * loadfactor;
-            array[i] = openArrayFile(chunksize, i);
+            array[i] = openArrayFile(i);
             arrayCapacity[i] = load;
         }
         this.maxChunks = load;
     }
     
-    private kelondroFixedWidthArray openArrayFile(int genericChunkSize, int partitionNumber) throws IOException {
-        File f = arrayFile(path, filenameStub, loadfactor, genericChunkSize, partitionNumber);
+    private kelondroFixedWidthArray openArrayFile(int partitionNumber) throws IOException {
+        File f = arrayFile(path, filenameStub, loadfactor, rowdef.objectsize(), partitionNumber);
         
         if (f.exists()) {
             return new kelondroFixedWidthArray(f);
@@ -102,7 +103,7 @@ public class kelondroCollectionIndex {
             columns[2] = 2; // last time read
             columns[3] = 2; // last time wrote
             columns[4] = 2; // flag string, assigns collection order as currently stored in table
-            columns[5] = load * genericChunkSize;
+            columns[5] = load * rowdef.objectsize();
             return new kelondroFixedWidthArray(f, new kelondroRow(columns), 0, true);
         }
     }
@@ -115,7 +116,7 @@ public class kelondroCollectionIndex {
         throw new kelondroOutOfLimitsException(maxChunks, requestedCapacity);
     }
     
-    public void put(byte[] key, kelondroCollection collection) throws IOException, kelondroOutOfLimitsException {
+    public void put(byte[] key, kelondroRowCollection collection) throws IOException, kelondroOutOfLimitsException {
         if (collection.size() > maxChunks) throw new kelondroOutOfLimitsException(maxChunks, collection.size());
 
         // first find an old entry, if one exists
@@ -136,7 +137,7 @@ public class kelondroCollectionIndex {
             // store the new row number in the index
             kelondroRow.Entry e = index.row().newEntry();
             e.setCol(0, key);
-            e.setColLongB256(1, this.chunksize);
+            e.setColLongB256(1, this.rowdef.objectsize());
             e.setColLongB256(2, collection.size());
             e.setColLongB256(3, (long) newRowNumber);
             e.setColLongB256(4, daysSince2000(System.currentTimeMillis()));
@@ -157,7 +158,7 @@ public class kelondroCollectionIndex {
                 // update the index entry
                 kelondroRow.Entry e = index.row().newEntry();
                 e.setCol(0, key);
-                e.setColLongB256(1, this.chunksize);
+                e.setColLongB256(1, this.rowdef.objectsize());
                 e.setColLongB256(2, collection.size());
                 e.setColLongB256(3, (long) rownumber);
                 e.setColLongB256(4, daysSince2000(System.currentTimeMillis()));
@@ -170,7 +171,7 @@ public class kelondroCollectionIndex {
                 // store the new row number in the index
                 kelondroRow.Entry e = index.row().newEntry();
                 e.setCol(0, key);
-                e.setColLongB256(1, this.chunksize);
+                e.setColLongB256(1, this.rowdef.objectsize());
                 e.setColLongB256(2, collection.size());
                 e.setColLongB256(3, (long) newRowNumber);
                 e.setColLongB256(4, daysSince2000(System.currentTimeMillis()));
@@ -179,7 +180,7 @@ public class kelondroCollectionIndex {
         }
     }
     
-    public kelondroCollection get(byte[] key) throws IOException {
+    public kelondroRowCollection get(byte[] key) throws IOException {
         // find an entry, if one exists
         kelondroRow.Entry indexrow = index.get(key);
         if (indexrow == null) return null;
@@ -194,7 +195,7 @@ public class kelondroCollectionIndex {
         // read the row and define a collection
         int chunkcountInArray = (int) arrayrow.getColLongB256(1);
         if (chunkcountInArray != chunkcount) throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, partitionnumber).toString(), "array has different chunkcount than index: index = " + chunkcount + ", array = " + chunkcountInArray);
-        return new kelondroCollection(chunksize, chunkcount, arrayrow.getColBytes(3));
+        return new kelondroRowCollection(rowdef, chunkcount, arrayrow.getColBytes(3));
     }
     
     public void remove(byte[] key) throws IOException {
@@ -212,7 +213,7 @@ public class kelondroCollectionIndex {
     
     /*
     public Iterator collections(boolean up, boolean rotating) throws IOException {
-        // Objects are of type kelondroCollection
+        // Objects are of type kelondroRowCollection
     }
     */
     
