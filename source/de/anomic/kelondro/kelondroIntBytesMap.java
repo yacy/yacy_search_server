@@ -26,12 +26,11 @@ package de.anomic.kelondro;
 
 public class kelondroIntBytesMap extends kelondroRowSet {
 
-    // use this only, if key objects can ensure perfect hashing!
-    // (that means, the hash computation must be unique)
-    // this is given for kelondroRecords.Entry objects
-
     public kelondroIntBytesMap(int payloadSize, int initSize) {
         super(new kelondroRow(new int[]{4, payloadSize}), initSize);
+        
+        // initialize ordering
+        super.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
     }
     
     public byte[] getb(int ii) {
@@ -41,27 +40,21 @@ public class kelondroIntBytesMap extends kelondroRowSet {
     }
     
     public byte[] putb(int ii, byte[] value) {
-        int index = -1;
-        byte[] key = kelondroNaturalOrder.encodeLong((long) ii, 4);
-        //System.out.println("ObjectMap PUT " + obj.hashCode() + ", size=" + size());
-        synchronized (chunkcache) {
-            index = find(key, 0, 4);
-        }
-        if (index < 0) {
-            kelondroRow.Entry indexentry = rowdef.newEntry();
-            indexentry.setCol(0, key);
-            indexentry.setCol(1, value);
-            add(indexentry);
-            return null;
-        } else {
-            kelondroRow.Entry indexentry = get(index);
-            byte[] old = indexentry.getColBytes(1);
-            indexentry.setCol(1, value);
-            set(index, indexentry);
-            return old;
-        }
+        kelondroRow.Entry newentry = rowdef.newEntry();
+        newentry.setCol(0, kelondroNaturalOrder.encodeLong((long) ii, 4));
+        newentry.setCol(1, value);
+        kelondroRow.Entry oldentry = super.put(newentry);
+        if (oldentry == null) return null;
+        return oldentry.getColBytes(1);
     }
-
+    
+    public void addb(int ii, byte[] value) {
+        kelondroRow.Entry newentry = rowdef.newEntry();
+        newentry.setCol(0, kelondroNaturalOrder.encodeLong((long) ii, 4));
+        newentry.setCol(1, value);
+        add(newentry);
+    }
+    
     public byte[] removeb(int ii) {
         kelondroRow.Entry indexentry = super.remove(kelondroNaturalOrder.encodeLong((long) ii, 4));
         if (indexentry == null) return null;

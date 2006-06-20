@@ -49,6 +49,21 @@ public class kelondroRowSet extends kelondroRowCollection {
         return null;
     }
     
+    public kelondroRow.Entry put(kelondroRow.Entry entry) {
+        int index = -1;
+        synchronized (chunkcache) {
+            index = find(entry.bytes(), super.rowdef.colstart[super.sortColumn], super.rowdef.width(super.sortColumn));
+            if (index < 0) {
+                add(entry);
+                return null;
+            } else {
+                kelondroRow.Entry oldentry = get(index);
+                set(index, entry);
+                return oldentry;
+            }
+        }
+    }
+    
     public kelondroRow.Entry remove(byte[] a) {
         return remove(a, 0, a.length);
     }

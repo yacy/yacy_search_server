@@ -33,6 +33,21 @@ public class kelondroBytesIntMap extends kelondroRowSet {
         super.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
     }
 
+    public int geti(byte[] key) {
+        kelondroRow.Entry indexentry = super.get(key);
+        if (indexentry == null) return -1;
+        return (int) indexentry.getColLongB256(1);
+    }
+    
+    public int puti(byte[] key, int i) {
+        kelondroRow.Entry newentry = rowdef.newEntry();
+        newentry.setCol(0, key);
+        newentry.setColLongB256(1, i);
+        kelondroRow.Entry oldentry = super.put(newentry);
+        if (oldentry == null) return -1;
+        return (int) oldentry.getColLongB256(1);
+    }
+
     public void addi(byte[] key, int i) {
         kelondroRow.Entry indexentry = rowdef.newEntry();
         indexentry.setCol(0, key);
@@ -40,46 +55,10 @@ public class kelondroBytesIntMap extends kelondroRowSet {
         add(indexentry);
     }
     
-    public int puti(byte[] key, int i) {
-        int index = -1;
-        synchronized (chunkcache) {
-            index = find(key, 0, key.length);
-        }
-        if (index < 0) {
-            kelondroRow.Entry indexentry = rowdef.newEntry();
-            indexentry.setCol(0, key);
-            indexentry.setColLongB256(1, i);
-            add(indexentry);
-            return -1;
-        } else {
-            kelondroRow.Entry indexentry = get(index);
-            int oldi = (int) indexentry.getColLongB256(1);
-            indexentry.setColLongB256(1, i);
-            set(index, indexentry);
-            return oldi;
-        }
-    }
-    
-    public int geti(byte[] key) {
-        int index = -1;
-        synchronized (chunkcache) {
-            index = find(key, 0, key.length);
-            if (index < 0) {
-                return -1;
-            } else {
-                kelondroRow.Entry indexentry = get(index);
-                return (int) indexentry.getColLongB256(1);
-            }
-        }
-    }
-    
     public int removei(byte[] key) {
-        kelondroRow.Entry indexentry;
-        synchronized (chunkcache) {
-            indexentry = remove(key);
-            if (indexentry == null) return -1;
-            return (int) indexentry.getColLongB256(1);
-        }
+        kelondroRow.Entry indexentry = remove(key);
+        if (indexentry == null) return -1;
+        return (int) indexentry.getColLongB256(1);
     }
 
 }
