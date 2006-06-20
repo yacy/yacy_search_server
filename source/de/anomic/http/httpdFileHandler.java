@@ -872,7 +872,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
         } finally {
             try {out.flush();}catch (Exception e) {}
-            if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {
+            if (((String)requestHeader.get(httpHeader.CONNECTION, "close")).indexOf("keep-alive") == -1) {
                 // wait a little time until everything closes so that clients can read from the streams/sockets
                 try {Thread.sleep(1000);} catch (InterruptedException e) {}
             }

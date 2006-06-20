@@ -257,8 +257,8 @@ public final class httpd implements serverHandler {
         // persistent by default, but closed with the "Connection: close"
         // property.
         boolean persistent = !(httpVersion.equals("HTTP/0.9") || httpVersion.equals("HTTP/1.0"));
-        if (((String)header.get(httpHeader.CONNECTION, "keep-alive")).toLowerCase().equals("close") || 
-                ((String)header.get(httpHeader.PROXY_CONNECTION, "keep-alive")).toLowerCase().equals("close")) {
+        if (((String)header.get(httpHeader.CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1 || 
+            ((String)header.get(httpHeader.PROXY_CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1) {
             persistent = false;
         }        
         
