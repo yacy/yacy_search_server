@@ -67,7 +67,7 @@ public class kelondroRowCollection {
         newChunkcache = null;
     }
     
-    public final void trim() {
+    public void trim() {
         synchronized (chunkcache) {
             int needed = chunkcount * rowdef.objectsize();
             if (chunkcache.length == needed) return;
@@ -145,24 +145,24 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public final void removeOne() {
+    public void removeOne() {
         if (chunkcount == 0) return;
         if (chunkcount == sortBound) sortBound--;
         chunkcount--;
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public final void clear() {
+    public void clear() {
         this.chunkcache = new byte[0];
         this.chunkcount = 0;
         this.sortBound = 0;
     }
     
-    public final int size() {
+    public int size() {
         return chunkcount;
     }
     
-    public final Iterator elements() {  // iterates byte[] - objects
+    public Iterator elements() {  // iterates byte[] - objects
         return new chunkIterator();
     }
     
@@ -304,7 +304,7 @@ public class kelondroRowCollection {
         if (i == p) return j; else if (j == p) return i; else return p;
     }
 
-    public final void uniq() {
+    public void uniq() {
         assert (this.sortOrder != null);
         // removes double-occurrences of chunks
         // this works only if the collection was ordered with sort before
@@ -322,7 +322,7 @@ public class kelondroRowCollection {
         }
     }
     
-    public final String toString() {
+    public String toString() {
         StringBuffer s = new StringBuffer();
         Iterator i = elements();
         if (i.hasNext()) s.append(new String((byte[]) i.next()).trim());
@@ -330,7 +330,7 @@ public class kelondroRowCollection {
         return new String(s);
     }
     
-    public final byte[] toByteArray() {
+    public byte[] toByteArray() {
         return this.chunkcache;
     }
 

@@ -29,6 +29,8 @@ import java.util.Random;
 
 public class kelondroRowSet extends kelondroRowCollection {
 
+    private static final int collectionReSortLimit = 90;
+    
     public kelondroRowSet(kelondroRow rowdef) {
         super(rowdef);
     }
@@ -41,7 +43,7 @@ public class kelondroRowSet extends kelondroRowCollection {
         return get(key, 0, key.length);
     }
     
-    public kelondroRow.Entry get(byte[] key, int astart, int alength) {
+    private kelondroRow.Entry get(byte[] key, int astart, int alength) {
         synchronized (chunkcache) {
             int i = find(key, astart, alength);
             if (i >= 0) return get(i);
@@ -68,7 +70,7 @@ public class kelondroRowSet extends kelondroRowCollection {
         return remove(a, 0, a.length);
     }
     
-    public kelondroRow.Entry remove(byte[] a, int astart, int alength) {
+    private kelondroRow.Entry remove(byte[] a, int astart, int alength) {
         // the byte[] a may be shorter than the chunksize
         if (chunkcount == 0) return null;
         kelondroRow.Entry b = null;
@@ -105,13 +107,13 @@ public class kelondroRowSet extends kelondroRowCollection {
     }
     
 
-    protected int find(byte[] a, int astart, int alength) {
+    private int find(byte[] a, int astart, int alength) {
         // returns the chunknumber; -1 if not found
         
         if (this.sortOrder == null) return iterativeSearch(a, astart, alength);
         
         // check if a re-sorting make sense
-        if ((this.chunkcount - this.sortBound) > 90) sort();
+        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) sort();
         
         // first try to find in sorted area
         int p = binarySearch(a, astart, alength);
