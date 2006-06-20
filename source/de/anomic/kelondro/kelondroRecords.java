@@ -141,7 +141,7 @@ public class kelondroRecords {
     private   int               TXTPROPW;    // size of a single TXTPROPS element
 
     // caching buffer
-    private kelondroCollectionObjectMap[]  cacheHeaders; // the cache; holds overhead values and key element
+    private kelondroIntBytesMap[] cacheHeaders; // the cache; holds overhead values and key element
     private int                   cacheSize;    // number of cache records
     private long                  cacheStartup; // startup time; for cache aging
     private kelondroMScoreCluster cacheScore;   // controls cache aging
@@ -426,14 +426,14 @@ public class kelondroRecords {
                 this.cacheSize = (int) (buffersize / cacheNodeChunkSize(true));
                 this.cacheScore = new kelondroMScoreCluster(); // cache control of CP_HIGH caches
             }
-            this.cacheHeaders = new kelondroCollectionObjectMap[]{
-                    new kelondroCollectionObjectMap(this.headchunksize, 0),
-                    new kelondroCollectionObjectMap(this.headchunksize, 0),
-                    new kelondroCollectionObjectMap(this.headchunksize, 0)
+            this.cacheHeaders = new kelondroIntBytesMap[]{
+                    new kelondroIntBytesMap(this.headchunksize, 0),
+                    new kelondroIntBytesMap(this.headchunksize, 0),
+                    new kelondroIntBytesMap(this.headchunksize, 0)
                     };
-            this.cacheHeaders[0].setOrdering(kelondroNaturalOrder.naturalOrder);
-            this.cacheHeaders[1].setOrdering(kelondroNaturalOrder.naturalOrder);
-            this.cacheHeaders[2].setOrdering(kelondroNaturalOrder.naturalOrder);
+            this.cacheHeaders[0].setOrdering(kelondroNaturalOrder.naturalOrder, 0);
+            this.cacheHeaders[1].setOrdering(kelondroNaturalOrder.naturalOrder, 0);
+            this.cacheHeaders[2].setOrdering(kelondroNaturalOrder.naturalOrder, 0);
         }
         this.cacheStartup = System.currentTimeMillis();
         this.readHit = 0;
@@ -518,19 +518,19 @@ public class kelondroRecords {
         if (cacheSize != 0) {
             synchronized (cacheHeaders) {
                 if (cacheScore == null) {
-                    cacheHeaders[CP_LOW].remove(handle);
-                    cacheHeaders[CP_MEDIUM].remove(handle);
-                    cacheHeaders[CP_HIGH].remove(handle);
-                } else if (cacheHeaders[CP_HIGH].get(handle) != null) {
+                    cacheHeaders[CP_LOW].removeb(handle.index);
+                    cacheHeaders[CP_MEDIUM].removeb(handle.index);
+                    cacheHeaders[CP_HIGH].removeb(handle.index);
+                } else if (cacheHeaders[CP_HIGH].getb(handle.index) != null) {
                     // remove handle from cache-control
                     cacheScore.deleteScore(handle);
-                    cacheHeaders[CP_HIGH].remove(handle);
-                } else if (cacheHeaders[CP_MEDIUM].get(handle) != null) {
+                    cacheHeaders[CP_HIGH].removeb(handle.index);
+                } else if (cacheHeaders[CP_MEDIUM].getb(handle.index) != null) {
                     // no cache control for medium-priority entries
-                    cacheHeaders[CP_MEDIUM].remove(handle);
-                } else if (cacheHeaders[CP_LOW].get(handle) != null) {
+                    cacheHeaders[CP_MEDIUM].removeb(handle.index);
+                } else if (cacheHeaders[CP_LOW].getb(handle.index) != null) {
                     // no cache control for low-priority entries
-                    cacheHeaders[CP_LOW].remove(handle);
+                    cacheHeaders[CP_LOW].removeb(handle.index);
                 }
                 cacheDelete++;
             }
@@ -644,13 +644,13 @@ public class kelondroRecords {
             } else synchronized(cacheHeaders) {
                 byte[] cacheEntry = null;
                 int cp = CP_HIGH;
-                cacheEntry = cacheHeaders[CP_HIGH].get(this.handle); // first try
+                cacheEntry = cacheHeaders[CP_HIGH].getb(this.handle.index); // first try
                 if (cacheEntry == null) {
-                    cacheEntry = cacheHeaders[CP_MEDIUM].get(this.handle); // second try
+                    cacheEntry = cacheHeaders[CP_MEDIUM].getb(this.handle.index); // second try
                     cp = CP_MEDIUM;
                 }
                 if (cacheEntry == null) {
-                    cacheEntry = cacheHeaders[CP_LOW].get(this.handle); // third try
+                    cacheEntry = cacheHeaders[CP_LOW].getb(this.handle.index); // third try
                     cp = CP_LOW;
                 }
                 if (cacheEntry == null) {
@@ -840,9 +840,9 @@ public class kelondroRecords {
         
         private void update2Cache(int forPriority) {
             if (cacheSize > 0) {
-                cacheHeaders[CP_LOW].remove(this.handle);
-                cacheHeaders[CP_MEDIUM].remove(this.handle);
-                cacheHeaders[CP_HIGH].remove(this.handle);
+                cacheHeaders[CP_LOW].removeb(this.handle.index);
+                cacheHeaders[CP_MEDIUM].removeb(this.handle.index);
+                cacheHeaders[CP_HIGH].removeb(this.handle.index);
             }
             if (cacheSpace(forPriority)) updateNodeCache(forPriority);
         }
@@ -906,7 +906,7 @@ public class kelondroRecords {
                     // use the cache-control to find the right object
                     Handle delkey = (Handle) cacheScore.getMinObject();
                     cacheScore.deleteScore(delkey);
-                    cacheHeaders[CP_HIGH].remove(delkey);
+                    cacheHeaders[CP_HIGH].removeb(delkey.index);
                     cacheFlush++;
                     return true;
                 } catch (NoSuchElementException e) {
@@ -914,12 +914,12 @@ public class kelondroRecords {
                     // we simply clear the cache
                     String error = "cachScore error: " + e.getMessage() + "; cachesize=" + cacheSize + ", cache.size()=[" + cacheHeaders[0].size() + "," + cacheHeaders[1].size() + "," + cacheHeaders[2].size() + "], cacheScore.size()=" + cacheScore.size();
                     cacheScore = new kelondroMScoreCluster();
-                    cacheHeaders[CP_LOW]    = new kelondroCollectionObjectMap(headchunksize, 0);
-                    cacheHeaders[CP_MEDIUM] = new kelondroCollectionObjectMap(headchunksize, 0);
-                    cacheHeaders[CP_HIGH]   = new kelondroCollectionObjectMap(headchunksize, 0);
-                    cacheHeaders[0].setOrdering(kelondroNaturalOrder.naturalOrder);
-                    cacheHeaders[1].setOrdering(kelondroNaturalOrder.naturalOrder);
-                    cacheHeaders[2].setOrdering(kelondroNaturalOrder.naturalOrder);
+                    cacheHeaders[CP_LOW]    = new kelondroIntBytesMap(headchunksize, 0);
+                    cacheHeaders[CP_MEDIUM] = new kelondroIntBytesMap(headchunksize, 0);
+                    cacheHeaders[CP_HIGH]   = new kelondroIntBytesMap(headchunksize, 0);
+                    cacheHeaders[0].setOrdering(kelondroNaturalOrder.naturalOrder, 0);
+                    cacheHeaders[1].setOrdering(kelondroNaturalOrder.naturalOrder, 0);
+                    cacheHeaders[2].setOrdering(kelondroNaturalOrder.naturalOrder, 0);
                     throw new kelondroException(filename, error);
                     
                 }
@@ -942,10 +942,10 @@ public class kelondroRecords {
                 
                 // store the cache entry
                 boolean upd = false;
-                if (priority != CP_LOW)    upd = upd || (cacheHeaders[CP_LOW].remove(cacheHandle) != null);
-                if (priority != CP_MEDIUM) upd = upd || (cacheHeaders[CP_MEDIUM].remove(cacheHandle) != null);
-                if (priority != CP_HIGH)   upd = upd || (cacheHeaders[CP_HIGH].remove(cacheHandle) != null);
-                cacheHeaders[priority].put(cacheHandle, headChunk);
+                if (priority != CP_LOW)    upd = upd || (cacheHeaders[CP_LOW].removeb(cacheHandle.index) != null);
+                if (priority != CP_MEDIUM) upd = upd || (cacheHeaders[CP_MEDIUM].removeb(cacheHandle.index) != null);
+                if (priority != CP_HIGH)   upd = upd || (cacheHeaders[CP_HIGH].removeb(cacheHandle.index) != null);
+                cacheHeaders[priority].putb(cacheHandle.index, headChunk);
                 if ((cacheScore != null) && (priority == CP_HIGH)) {
                     cacheScore.setScore(cacheHandle, (int) ((System.currentTimeMillis() - cacheStartup) / 1000));
                 }

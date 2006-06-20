@@ -31,13 +31,13 @@ import java.util.Iterator;
 
 public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondroIndex {
 
-    private kelondroCollectionIntMap index;
+    private kelondroBytesIntMap index;
     
     public kelondroFlexTable(File path, String tablename, kelondroRow rowdef, boolean exitOnFail) throws IOException {
         super(path, tablename, rowdef, exitOnFail);
         
         // fill the index
-        this.index = new kelondroCollectionIntMap(super.row().width(0), 0);
+        this.index = new kelondroBytesIntMap(super.row().width(0), 0);
         /*
         kelondroFixedWidthArray indexArray = new kelondroFixedWidthArray(new File(path, colfilename(0,0)));
         for (int i = 0; i < indexArray.size(); i++) index.put(indexArray.get(i).getColBytes(0), new Integer(i));
@@ -53,9 +53,9 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             index.addi(node.getValueRow(), i);
             if ((i % 10000) == 0) System.out.print('.');
         }
-        index.sort(super.row().width(0));
+        this.index.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
+        index.sort();
         System.out.println(index.size() + " index entries initialized and sorted");
-        this.index.setOrdering(kelondroNaturalOrder.naturalOrder);
     }
     
     /*

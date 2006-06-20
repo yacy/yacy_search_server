@@ -31,12 +31,10 @@ public class kelondroRowSet extends kelondroRowCollection {
 
     public kelondroRowSet(kelondroRow rowdef) {
         super(rowdef);
-        
     }
 
     public kelondroRowSet(kelondroRow rowdef, int objectCount) {
         super(rowdef, objectCount);
-        
     }
     
     public kelondroRow.Entry get(byte[] key) {

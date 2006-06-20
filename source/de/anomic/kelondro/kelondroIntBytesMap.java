@@ -1,6 +1,6 @@
-// kelondroCollectionObjectMap.java
+// kelondroIntBytesMap.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
-// first published 18.06.2006 on http://www.anomic.de
+// first published 08.06.2006 on http://www.anomic.de
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
 // $LastChangedRevision: 1986 $
@@ -24,59 +24,48 @@
 
 package de.anomic.kelondro;
 
-public class kelondroCollectionObjectMap extends kelondroCollection {
+public class kelondroIntBytesMap extends kelondroRowSet {
 
     // use this only, if key objects can ensure perfect hashing!
     // (that means, the hash computation must be unique)
     // this is given for kelondroRecords.Entry objects
-    
-    private kelondroRow indexrow;
-    
-    public kelondroCollectionObjectMap(int payloadSize, int objectCount) {
-        super(4 + payloadSize, objectCount);
-        
-        // initialize row
-        this.indexrow = new kelondroRow(new int[]{4, payloadSize});
+
+    public kelondroIntBytesMap(int payloadSize, int initSize) {
+        super(new kelondroRow(new int[]{4, payloadSize}), initSize);
     }
     
-    public byte[] get(Object key) {
-        kelondroRow.Entry indexentry = indexrow.newEntry(super.get(objKey2byteKey(key)));
+    public byte[] getb(int ii) {
+        kelondroRow.Entry indexentry = super.get(kelondroNaturalOrder.encodeLong((long) ii, 4));
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);
     }
     
-    public byte[] put(Object obj, byte[] value) {
+    public byte[] putb(int ii, byte[] value) {
         int index = -1;
-        byte[] key = objKey2byteKey(obj);
+        byte[] key = kelondroNaturalOrder.encodeLong((long) ii, 4);
         //System.out.println("ObjectMap PUT " + obj.hashCode() + ", size=" + size());
         synchronized (chunkcache) {
-            index = find(key, 4);
+            index = find(key, 0, 4);
         }
         if (index < 0) {
-            kelondroRow.Entry indexentry = indexrow.newEntry();
+            kelondroRow.Entry indexentry = rowdef.newEntry();
             indexentry.setCol(0, key);
             indexentry.setCol(1, value);
-            add(indexentry.bytes());
+            add(indexentry);
             return null;
         } else {
-            kelondroRow.Entry indexentry = indexrow.newEntry(get(index));
+            kelondroRow.Entry indexentry = get(index);
             byte[] old = indexentry.getColBytes(1);
             indexentry.setCol(1, value);
-            set(index, indexentry.bytes());
+            set(index, indexentry);
             return old;
         }
     }
 
-    public byte[] remove(Object key) {
-        kelondroRow.Entry indexentry = indexrow.newEntry(super.remove(objKey2byteKey(key)));
+    public byte[] removeb(int ii) {
+        kelondroRow.Entry indexentry = super.remove(kelondroNaturalOrder.encodeLong((long) ii, 4));
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);
-    }
-
-    private byte[] objKey2byteKey(Object obj) {
-        int i = obj.hashCode();
-        byte[] b = kelondroNaturalOrder.encodeLong((long) i, 4);
-        return b;
     }
     
 }
