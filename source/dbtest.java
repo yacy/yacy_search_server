@@ -388,6 +388,7 @@ final class dbTable implements kelondroIndex {
             result.close();
             sqlStatement.close();
             
+            if (value == null) return null;
             kelondroRow.Entry entry = this.rowdef.newEntry(value);
             return entry;
         } catch (Exception e) {
@@ -412,7 +413,7 @@ final class dbTable implements kelondroIndex {
             PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
             
             sqlStatement.setString(1, new String(row.getColString(0, null)));
-            sqlStatement.setBytes(2, row.getColBytes(1));
+            sqlStatement.setBytes(2, row.bytes());
             sqlStatement.execute();
             
             sqlStatement.close();
