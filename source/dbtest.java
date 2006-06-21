@@ -333,23 +333,26 @@ final class dbTable implements kelondroIndex {
     }
     
     private void openDatabaseConnection(String dbType) throws Exception{
-        try {
-            if (dbType == null) throw new IllegalArgumentException(); 
-            
-            String dbDriverStr = null, dbConnStr = null;            
-            if (dbType.equalsIgnoreCase("mysql")) {
-                dbDriverStr = db_driver_str_mysql;
-                dbConnStr = db_conn_str_mysql;
-            } else if (dbType.equalsIgnoreCase("pgsql")) {
-                dbDriverStr = db_driver_str_pgsql;
-                dbConnStr = db_conn_str_pgsql;
-            }                
-            
+
+        if (dbType == null) throw new IllegalArgumentException(); 
+
+        String dbDriverStr = null, dbConnStr = null;            
+        if (dbType.equalsIgnoreCase("mysql")) {
+            dbDriverStr = db_driver_str_mysql;
+            dbConnStr = db_conn_str_mysql;
+        } else if (dbType.equalsIgnoreCase("pgsql")) {
+            dbDriverStr = db_driver_str_pgsql;
+            dbConnStr = db_conn_str_pgsql;
+        }                
+        try {            
             Class.forName(dbDriverStr).newInstance();
-            
+        } catch (Exception e) {
+            throw new Exception ("Unable to load the jdbc driver: " + e.getMessage(),e);
+        }
+        try {
             this.theDBConnection = DriverManager.getConnection (dbConnStr,this.db_usr_str,this.db_pwd_str);
         } catch (Exception e) {
-            throw new Exception ("Unable to establish a database connection.");
+            throw new Exception ("Unable to establish a database connection: " + e.getMessage(),e);
         }
         
     }        
