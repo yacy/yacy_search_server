@@ -24,31 +24,36 @@
 
 package de.anomic.kelondro;
 
-import java.util.HashMap;
+import java.util.TreeMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.Random;
 
 public class kelondroRowBufferedSet extends kelondroRowSet {
 
-    private static final int bufferFlushLimit = 100;
-    private HashMap buffer;
+    private static final int bufferFlushLimit = 10000;
+    private final boolean useRowCollection = true;
+    private TreeMap buffer; // this must be a TreeSet bacause HashMap does not work with byte[]
 
     public kelondroRowBufferedSet(kelondroRow rowdef) {
         super(rowdef);
-        buffer = new HashMap();
+        buffer = new TreeMap(kelondroNaturalOrder.naturalOrder);
     }
 
     public kelondroRowBufferedSet(kelondroRow rowdef, int objectCount) {
         super(rowdef, objectCount);
-        buffer = new HashMap();
+        buffer = new TreeMap(kelondroNaturalOrder.naturalOrder);
     }
     
     private final void flush() {
         // call only in synchronized environment
-        Iterator i = buffer.values().iterator();
+        Iterator i = buffer.entrySet().iterator();
+        Map.Entry entry;
         while (i.hasNext()) {
-            super.add((kelondroRow.Entry) i.next());
+            entry = (Map.Entry) i.next();
+            super.add((kelondroRow.Entry) entry.getValue());
         }
+        buffer.clear();
     }
     
     public final void trim() {
@@ -119,47 +124,59 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
     
     public kelondroRow.Entry get(byte[] key) {
         synchronized (buffer) {
-            kelondroRow.Entry entry = (kelondroRow.Entry) buffer.get(key);
-            if (entry != null) return entry;
-            return super.get(key);
+            if (useRowCollection) {
+                kelondroRow.Entry entry = (kelondroRow.Entry) buffer.get(key);
+                if (entry != null) return entry;
+                return super.get(key);
+            } else {
+                return (kelondroRow.Entry) buffer.get(key);
+            }
         }
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry newentry) {
         byte[] key = newentry.getColBytes(super.sortColumn);
         synchronized (buffer) {
-            kelondroRow.Entry oldentry = (kelondroRow.Entry) buffer.get(key);
-            if (oldentry == null) {
-                // try the collection
-                oldentry = super.get(key);
+            if (useRowCollection) {
+                kelondroRow.Entry oldentry = (kelondroRow.Entry) buffer.get(key);
                 if (oldentry == null) {
-                    // this was not anywhere
-                    buffer.put(key, newentry);
-                    if (buffer.size() > bufferFlushLimit) flush();
-                    return null;
+                    // try the collection
+                    oldentry = super.get(key);
+                    if (oldentry == null) {
+                        // this was not anywhere
+                        buffer.put(key, newentry);
+                        if (buffer.size() > bufferFlushLimit) flush();
+                        return null;
+                    } else {
+                        // replace old entry
+                        super.put(newentry);
+                        return oldentry;
+                    }
                 } else {
-                    // replace old entry
-                    super.put(newentry);
+                    // the entry is already in buffer
+                    // simply replace old entry
+                    buffer.put(key, newentry);
                     return oldentry;
                 }
             } else {
-                // the entry is already in buffer
-                // simply replace old entry
-                buffer.put(key, newentry);
-                return oldentry;
+                return (kelondroRow.Entry) buffer.put(key, newentry);
             }
         }
     }
     
     public kelondroRow.Entry remove(byte[] a) {
         synchronized (buffer) {
-            kelondroRow.Entry oldentry = (kelondroRow.Entry) buffer.remove(a);
-            if (oldentry == null) {
-                // try the collection
-                return super.remove(a);
+            if (useRowCollection) {
+                kelondroRow.Entry oldentry = (kelondroRow.Entry) buffer.remove(a);
+                if (oldentry == null) {
+                    // try the collection
+                    return super.remove(a);
+                } else {
+                    // the entry was in buffer
+                    return oldentry;
+                }
             } else {
-                // the entry was in buffer
-                return oldentry;
+                return (kelondroRow.Entry) buffer.remove(a); // test
             }
         }
     }
@@ -171,8 +188,6 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
             super.removeAll(c);
         }
     }
-
- 
 
     public static void main(String[] args) {
         String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };

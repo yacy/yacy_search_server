@@ -24,7 +24,7 @@
 
 package de.anomic.kelondro;
 
-public class kelondroIntBytesMap extends kelondroRowSet {
+public class kelondroIntBytesMap extends kelondroRowBufferedSet {
 
     public kelondroIntBytesMap(int payloadSize, int initSize) {
         super(new kelondroRow(new int[]{4, payloadSize}), initSize);

@@ -525,11 +525,10 @@ public class kelondroRecords {
                     // remove handle from cache-control
                     cacheScore.deleteScore(handle);
                     cacheHeaders[CP_HIGH].removeb(handle.index);
-                } else if (cacheHeaders[CP_MEDIUM].getb(handle.index) != null) {
-                    // no cache control for medium-priority entries
-                    cacheHeaders[CP_MEDIUM].removeb(handle.index);
-                } else if (cacheHeaders[CP_LOW].getb(handle.index) != null) {
+                } else {
+                    // no cache control for medium-priority entries and
                     // no cache control for low-priority entries
+                    cacheHeaders[CP_MEDIUM].removeb(handle.index);
                     cacheHeaders[CP_LOW].removeb(handle.index);
                 }
                 cacheDelete++;
@@ -672,6 +671,9 @@ public class kelondroRecords {
                     // if space left in cache, copy these value to the cache
                     update2Cache(cp);
                 } else {
+                    //System.out.print("CACHE HIT FOR INDEX " + this.handle.index + ": ");
+                    //for (int i = 0; i < cacheEntry.length; i++) System.out.print(cacheEntry[i] + ", ");
+                    //System.out.println();
                     // cache hit, copy overhead and key from cache
                     readHit++;
                     //System.out.println("**CACHE HIT for " + this.handle.index + "**");
