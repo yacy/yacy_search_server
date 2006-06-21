@@ -1,15 +1,4 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
-
-import de.anomic.data.gettext;
-import de.anomic.http.httpHeader;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-
-//Gettext.java
+//Gettext_p.java
 //------------
 // part of YACY
 //
@@ -32,7 +21,20 @@ import de.anomic.server.serverSwitch;
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-public class Gettext{
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+
+import de.anomic.data.gettext;
+import de.anomic.http.httpHeader;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+
+
+
+public class Gettext_p{
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
         
