@@ -56,6 +56,10 @@ public class kelondroIntBytesMap extends kelondroRowBufferedSet {
     }
     
     public byte[] removeb(int ii) {
+        if (size() == 0) {
+            if (System.currentTimeMillis() - this.lastTimeWrote > 10000) this.trim();
+            return null;
+        }
         kelondroRow.Entry indexentry = super.remove(kelondroNaturalOrder.encodeLong((long) ii, 4));
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);

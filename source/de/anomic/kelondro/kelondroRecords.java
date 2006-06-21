@@ -427,7 +427,7 @@ public class kelondroRecords {
                 this.cacheScore = new kelondroMScoreCluster(); // cache control of CP_HIGH caches
             }
             this.cacheHeaders = new kelondroIntBytesMap[]{
-                    new kelondroIntBytesMap(this.headchunksize, 0),
+                    new kelondroIntBytesMap(this.headchunksize, this.cacheSize / 2),
                     new kelondroIntBytesMap(this.headchunksize, 0),
                     new kelondroIntBytesMap(this.headchunksize, 0)
                     };
@@ -916,7 +916,7 @@ public class kelondroRecords {
                     // we simply clear the cache
                     String error = "cachScore error: " + e.getMessage() + "; cachesize=" + cacheSize + ", cache.size()=[" + cacheHeaders[0].size() + "," + cacheHeaders[1].size() + "," + cacheHeaders[2].size() + "], cacheScore.size()=" + cacheScore.size();
                     cacheScore = new kelondroMScoreCluster();
-                    cacheHeaders[CP_LOW]    = new kelondroIntBytesMap(headchunksize, 0);
+                    cacheHeaders[CP_LOW]    = new kelondroIntBytesMap(headchunksize, cacheSize / 2);
                     cacheHeaders[CP_MEDIUM] = new kelondroIntBytesMap(headchunksize, 0);
                     cacheHeaders[CP_HIGH]   = new kelondroIntBytesMap(headchunksize, 0);
                     cacheHeaders[0].setOrdering(kelondroNaturalOrder.naturalOrder, 0);

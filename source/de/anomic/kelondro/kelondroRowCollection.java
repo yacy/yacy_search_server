@@ -47,6 +47,8 @@ public class kelondroRowCollection {
         this.sortColumn = 0;
         this.sortOrder = null;
         this.sortBound = 0;
+        this.lastTimeRead = System.currentTimeMillis();
+        this.lastTimeWrote = System.currentTimeMillis();
     }
     
     public kelondroRowCollection(kelondroRow rowdef, int objectCount, byte[] cache) {
@@ -56,6 +58,8 @@ public class kelondroRowCollection {
         this.sortColumn = 0;
         this.sortOrder = null;
         this.sortBound = 0;
+        this.lastTimeRead = System.currentTimeMillis();
+        this.lastTimeWrote = System.currentTimeMillis();
     }
     
     private final void ensureSize(int elements) {
@@ -68,6 +72,7 @@ public class kelondroRowCollection {
     }
     
     public void trim() {
+        if (chunkcache.length == 0) return;
         synchronized (chunkcache) {
             int needed = chunkcount * rowdef.objectsize();
             if (chunkcache.length == needed) return;
@@ -92,6 +97,7 @@ public class kelondroRowCollection {
         synchronized (chunkcache) {
             System.arraycopy(chunkcache, index * rowdef.objectsize(), a, 0, rowdef.objectsize());
         }
+        this.lastTimeRead = System.currentTimeMillis();
         return rowdef.newEntry(a);
     }
     
@@ -141,6 +147,7 @@ public class kelondroRowCollection {
     
     public final void remove(int p) {
         assert ((p >= 0) && (p < chunkcount) && (chunkcount > 0));
+        //System.out.println("REMOVE at pos " + p + ", chunkcount=" + chunkcount + ", sortBound=" + sortBound);
         synchronized (chunkcache) {
             System.arraycopy(chunkcache, (p + 1) * rowdef.objectsize(), chunkcache, p * rowdef.objectsize(), (chunkcount - p - 1) * rowdef.objectsize());
             chunkcount--;
@@ -160,6 +167,7 @@ public class kelondroRowCollection {
         this.chunkcache = new byte[0];
         this.chunkcount = 0;
         this.sortBound = 0;
+        this.lastTimeWrote = System.currentTimeMillis();
     }
     
     public int size() {
@@ -211,7 +219,7 @@ public class kelondroRowCollection {
     protected final void sort() {
         assert (this.sortOrder != null);
         if (this.sortBound == this.chunkcount) return; // this is already sorted
-        //System.out.println("SORT(chunkcount=" + this.chunkcount + ", sortbound=" + this.sortbound + ")");
+        //System.out.println("SORT(chunkcount=" + this.chunkcount + ", sortBound=" + this.sortBound + ")");
         if (this.sortBound > 1) {
             qsort(0, this.sortBound, this.chunkcount);
         } else {
