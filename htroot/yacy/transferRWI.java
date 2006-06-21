@@ -78,8 +78,10 @@ public final class transferRWI {
         final int entryc      = Integer.parseInt(post.get("entryc", "")); // number of entries in indexes
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
+        boolean checkLimit    = sb.getConfigBool("indexDistribution.dhtReceiptLimitEnabled", true);
+        final long cachelimit = sb.getConfigLong("indexDistribution.dhtReceiptLimit", 1000);
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
-        final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
+        final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));                
         
         // response values
         String       result      = "ok";
@@ -91,7 +93,7 @@ public final class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "not_granted";
             pause = 0;
-        } else if (sb.wordIndex.kSize() > 1000) {
+        } else if (checkLimit && sb.wordIndex.kSize() > cachelimit) {
             // we are too busy to receive indexes
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.wordIndex.kSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
@@ -171,7 +173,10 @@ public final class transferRWI {
                 sb.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
             }
             result = "ok";
-            pause = (sb.wordIndex.kSize() < 500) ? 0 : 60 * sb.wordIndex.kSize(); // estimation of necessary pause time
+            
+            if (checkLimit) {
+                pause = (sb.wordIndex.kSize() < 500) ? 0 : 60 * sb.wordIndex.kSize(); // estimation of necessary pause time
+            }
         }
 
         prop.put("unknownURL", unknownURLs.toString());

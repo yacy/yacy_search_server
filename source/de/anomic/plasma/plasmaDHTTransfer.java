@@ -258,13 +258,14 @@ public class plasmaDHTTransfer extends Thread {
         if (transferRWIResult != null && transferRWIResult.containsKey("pause")) {
             String pauseStr = (String) transferRWIResult.get("pause");
             try { pause = Integer.valueOf(pauseStr).intValue(); } catch (NumberFormatException numEx){}
-            if (pause <= 0) pause = 60000;
+            if (pause < 0) pause = 60000;
             else if (pause > 1800000) pause = 1800000;
         }        
         return pause;     
     }
     
     private void pause(long sleepTime) throws InterruptedException {        
+        if (sleepTime == 0) return;
         long sleepCounter = sleepTime / 1000;
         long sleepRest = sleepTime % 1000;
         while (!this.isAborted() && sleepCounter > 0) {
