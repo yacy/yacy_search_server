@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Random;
 import java.util.Date;
 import java.util.Iterator;
@@ -324,9 +325,6 @@ final class dbTable implements kelondroIndex {
     private final String db_pwd_str    = "yacy";
     
     private Connection theDBConnection = null;  
-    private PreparedStatement sqlStatement;
-    private int commandCount = 0;
-    private int batchlimit = 1;
     private kelondroRow rowdef;
     
     public dbTable(String dbType, kelondroRow rowdef) throws Exception {
@@ -350,17 +348,6 @@ final class dbTable implements kelondroIndex {
             Class.forName(dbDriverStr).newInstance();
             
             this.theDBConnection = DriverManager.getConnection (dbConnStr,this.db_usr_str,this.db_pwd_str);
-            
-            String sqlQuery = new String
-            (
-                    "INSERT INTO test (" +
-                    "hash, " +
-                    "value) " +
-                    "VALUES (?,?)"
-            );        
-            
-            this.sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
-            
         } catch (Exception e) {
             throw new Exception ("Unable to establish a database connection.");
         }
@@ -369,12 +356,6 @@ final class dbTable implements kelondroIndex {
     
     public void closeDatabaseConnection() throws Exception {
         try {
-            if (commandCount != 0) {
-                sqlStatement.executeBatch();
-            }
-            
-            sqlStatement.close();
-
             this.theDBConnection.close();
         } catch (Exception e) {
             throw new Exception ("Unable to close the database connection.");
@@ -386,30 +367,79 @@ final class dbTable implements kelondroIndex {
     }
     
     public kelondroRow.Entry get(byte[] key) throws IOException {
-        return null;
+        try {
+            String sqlQuery = new String
+            (
+                "SELECT value from test where hash = ?"
+            );
+            
+            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
+            sqlStatement.setString(1, new String(key));
+            
+            byte[] value = null;
+            ResultSet result = sqlStatement.executeQuery();
+            while (result.next()) {
+                value = result.getBytes("value");
+            }  
+            
+            result.close();
+            sqlStatement.close();
+            
+            kelondroRow.Entry entry = this.rowdef.newEntry(value);
+            return entry;
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
         try {
-            this.sqlStatement.setString(1, new String(row.getColString(0, null)));
+            
+            kelondroRow.Entry oldEntry = remove(row.getColBytes(0));            
+            
+            String sqlQuery = new String
+            (
+                    "INSERT INTO test (" +
+                    "hash, " +
+                    "value) " +
+                    "VALUES (?,?)"
+            );                
+            
+            
+            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
+            
+            sqlStatement.setString(1, new String(row.getColString(0, null)));
             sqlStatement.setBytes(2, row.getColBytes(1));
-            sqlStatement.addBatch();
-            commandCount++;
+            sqlStatement.execute();
             
-            if (commandCount >= batchlimit) {
-                sqlStatement.executeBatch();
-                commandCount = 0;
-            }
+            sqlStatement.close();
             
-            return row;
+            return oldEntry;
         } catch (Exception e) {
             throw new IOException(e.getMessage());
         }
     }
 
     public kelondroRow.Entry remove(byte[] key) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            
+            kelondroRow.Entry entry =  this.get(key);
+            if (entry == null) return entry;
+            
+            String sqlQuery = new String
+            (
+                    "DELETE FROM test WHERE hash = ?"
+            );                
+            
+            
+            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);                 
+            sqlStatement.setString(1, new String(key));
+            sqlStatement.execute();
+            
+            return entry;
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
     }
     
     public Iterator rows(boolean up, boolean rotating, byte[] startKey) throws IOException {
