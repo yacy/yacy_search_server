@@ -145,13 +145,18 @@ public class kelondroRowCollection {
         }
     }
     
-    public final void remove(int p) {
+    protected final void removeShift(int pos, int dist, int upBound) {
+        System.arraycopy(chunkcache, (pos + dist) * rowdef.objectsize(),
+                         chunkcache, pos * rowdef.objectsize(),
+                         (upBound - pos - dist) * rowdef.objectsize());
+        if ((pos < sortBound) && (upBound >= sortBound)) sortBound -= dist;
+    }
+    
+    public final void removeShift(int p) {
         assert ((p >= 0) && (p < chunkcount) && (chunkcount > 0));
         //System.out.println("REMOVE at pos " + p + ", chunkcount=" + chunkcount + ", sortBound=" + sortBound);
         synchronized (chunkcache) {
-            System.arraycopy(chunkcache, (p + 1) * rowdef.objectsize(), chunkcache, p * rowdef.objectsize(), (chunkcount - p - 1) * rowdef.objectsize());
-            chunkcount--;
-            if (p < sortBound) sortBound--;
+            removeShift(p, 1, chunkcount--);
         }
         this.lastTimeWrote = System.currentTimeMillis();
     }
@@ -299,7 +304,7 @@ public class kelondroRowCollection {
                 swap(j, j - 1, 0);
     }
 
-    private final int swap(int i, int j, int p) {
+    protected final int swap(int i, int j, int p) {
         if (i == j) return p;
         if (this.chunkcount * this.rowdef.objectsize() < this.chunkcache.length) {
             // there is space in the chunkcache that we can use as buffer
@@ -326,7 +331,7 @@ public class kelondroRowCollection {
             while (i < chunkcount - 1) {
                 if (compare(i, i + 1) == 0) {
                     //System.out.println("DOUBLE: " + new String(this.chunkcache, this.chunksize * i, this.chunksize));
-                    remove(i);
+                    removeShift(i);
                 } else {
                     i++;
                 }
@@ -368,5 +373,5 @@ public class kelondroRowCollection {
                 */
         return c;
     }
-    
+
 }

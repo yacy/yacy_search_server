@@ -24,19 +24,25 @@
 
 package de.anomic.kelondro;
 
+import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.Random;
 
 public class kelondroRowSet extends kelondroRowCollection {
 
     private static final int collectionReSortLimit = 90;
+    private static final int removeMaxSize = 100;
+    
+    private TreeSet removeMarker;
     
     public kelondroRowSet(kelondroRow rowdef) {
         super(rowdef);
+        this.removeMarker = new TreeSet();
     }
 
     public kelondroRowSet(kelondroRow rowdef, int objectCount) {
         super(rowdef, objectCount);
+        this.removeMarker = new TreeSet();
     }
     
     public kelondroRow.Entry get(byte[] key) {
@@ -45,17 +51,24 @@ public class kelondroRowSet extends kelondroRowCollection {
     
     private kelondroRow.Entry get(byte[] key, int astart, int alength) {
         synchronized (chunkcache) {
-            int i = find(key, astart, alength);
-            if (i >= 0) return get(i);
+            int index = find(key, astart, alength);
+            if ((index < 0) || (isMarkedRemoved(index))){
+                return null;
+            } else {
+                return get(index);
+            }
         }
-        return null;
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry entry) {
         int index = -1;
         synchronized (chunkcache) {
             index = find(entry.bytes(), super.rowdef.colstart[super.sortColumn], super.rowdef.width(super.sortColumn));
-            if (index < 0) {
+            if (isMarkedRemoved(index)) {
+                set(index, entry);
+                removeMarker.remove(new Integer(index));
+                return null;
+            } else if (index < 0) {
                 add(entry);
                 return null;
             } else {
@@ -66,11 +79,15 @@ public class kelondroRowSet extends kelondroRowCollection {
         }
     }
     
-    public kelondroRow.Entry remove(byte[] a) {
-        return remove(a, 0, a.length);
+    public int size() {
+        return super.size() - removeMarker.size();
+    }
+
+    public kelondroRow.Entry removeMarked(byte[] a) {
+        return removeMarked(a, 0, a.length);
     }
     
-    private kelondroRow.Entry remove(byte[] a, int astart, int alength) {
+    private kelondroRow.Entry removeMarked(byte[] a, int astart, int alength) {
         // the byte[] a may be shorter than the chunksize
         if (chunkcount == 0) return null;
         kelondroRow.Entry b = null;
@@ -78,17 +95,98 @@ public class kelondroRowSet extends kelondroRowCollection {
             int p = find(a, astart, alength);
             if (p < 0) return null;
             b = get(p);
-            remove(p);
+            if (p < sortBound) {
+                removeMarker.add(new Integer(p));
+            } else {
+                super.swap(p, --chunkcount, 0);
+            }
+        }
+        if (removeMarker.size() == chunkcount) {
+            chunkcount = 0;
+            sortBound = 0;
+            removeMarker.clear();
+        }
+        if (removeMarker.size() >= removeMaxSize) resolveMarkedRemoved();
+        return b;
+    }
+    
+    private boolean isMarkedRemoved(int index) {
+        return removeMarker.contains(new Integer(index));
+    }
+    
+    public void shape() {
+        //System.out.println("SHAPE");
+        synchronized (chunkcache) {
+            resolveMarkedRemoved();
+            super.sort();
+        }
+    }
+    
+    /*
+    private void resolveMarkedRemoved1() {
+        //long start = System.currentTimeMillis();
+        //int c = removeMarker.size();
+        Integer idx = new Integer(sortBound);
+        while (removeMarker.size() > 0) {
+            idx = (Integer) removeMarker.last();
+            removeMarker.remove(idx);
+            chunkcount--;
+            if (idx.intValue() < chunkcount) {
+                super.swap(idx.intValue(), chunkcount, 0);
+            }
+        }
+        if (idx.intValue() < sortBound) sortBound = idx.intValue();
+        removeMarker.clear();
+        //System.out.println("RESOLVED " + c + " entries in " + (System.currentTimeMillis() - start) + " milliseconds");
+    }
+   */
+    
+    private void resolveMarkedRemoved() {
+        if (removeMarker.size() == 0) return;
+        Integer nxt = (Integer) removeMarker.first();
+        removeMarker.remove(nxt);
+        int idx = nxt.intValue();
+        int d = 1;
+        while (removeMarker.size() > 0) {
+            nxt = (Integer) removeMarker.first();
+            removeMarker.remove(nxt);
+            super.removeShift(idx, d, nxt.intValue());
+            idx = nxt.intValue() - d;
+            d++;
+        }
+        super.removeShift(idx, d, chunkcount);
+        chunkcount -= d;
+        removeMarker.clear();
+    }
+
+    
+    protected kelondroRow.Entry removeShift(byte[] a) {
+        return removeShift(a, 0, a.length);
+    }
+    
+    private kelondroRow.Entry removeShift(byte[] a, int astart, int alength) {
+        // the byte[] a may be shorter than the chunksize
+        if (chunkcount == 0) return null;
+        kelondroRow.Entry b = null;
+        synchronized(chunkcache) {
+            int p = find(a, astart, alength);
+            if (p < 0) return null;
+            b = get(p);
+            if (p < sortBound) {
+                removeShift(p);
+            } else {
+                super.swap(p, --chunkcount, 0);
+            }
         }
         return b;
     }
     
-    public void removeAll(kelondroRowCollection c) {
+    public void removeMarkedAll(kelondroRowCollection c) {
         Iterator i = c.elements();
         byte[] b;
         while (i.hasNext()) {
             b = (byte[]) i.next();
-            remove(b, 0, b.length);
+            removeMarked(b, 0, b.length);
         }
     }
     
@@ -113,7 +211,7 @@ public class kelondroRowSet extends kelondroRowCollection {
         if (this.sortOrder == null) return iterativeSearch(a, astart, alength);
         
         // check if a re-sorting make sense
-        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) sort();
+        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) shape();
         
         // first try to find in sorted area
         int p = binarySearch(a, astart, alength);
@@ -177,8 +275,8 @@ public class kelondroRowSet extends kelondroRowCollection {
         c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
         for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
         for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
-        c.sort();
-        c.remove("fuenf".getBytes(), 0, 5);
+        c.shape();
+        c.removeMarked("fuenf".getBytes(), 0, 5);
         Iterator i = c.elements();
         String s;
         System.out.print("INPUT-ITERATOR: ");
@@ -189,7 +287,7 @@ public class kelondroRowSet extends kelondroRowCollection {
         }
         System.out.println("");
         System.out.println("INPUT-TOSTRING: " + c.toString());
-        c.sort();
+        c.shape();
         System.out.println("SORTED        : " + c.toString());
         c.uniq();
         System.out.println("UNIQ          : " + c.toString());
@@ -214,7 +312,7 @@ public class kelondroRowSet extends kelondroRowCollection {
                     " entries/second, size = " + c.size());
         }
         System.out.println("bevore sort: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-        c.sort();
+        c.shape();
         System.out.println("after sort: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
         c.uniq();
         System.out.println("after uniq: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");

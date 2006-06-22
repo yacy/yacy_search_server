@@ -164,13 +164,13 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         }
     }
     
-    public kelondroRow.Entry remove(byte[] a) {
+    public kelondroRow.Entry removeShift(byte[] a) {
         synchronized (buffer) {
             if (useRowCollection) {
                 kelondroRow.Entry oldentry = (kelondroRow.Entry) buffer.remove(a);
                 if (oldentry == null) {
                     // try the collection
-                    return super.remove(a);
+                    return super.removeShift(a);
                 } else {
                     // the entry was in buffer
                     return oldentry;
@@ -181,11 +181,28 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         }
     }
     
-    public void removeAll(kelondroRowCollection c) {
+    public kelondroRow.Entry removeMarked(byte[] a) {
+        synchronized (buffer) {
+            if (useRowCollection) {
+                kelondroRow.Entry oldentry = (kelondroRow.Entry) buffer.remove(a);
+                if (oldentry == null) {
+                    // try the collection
+                    return super.removeMarked(a);
+                } else {
+                    // the entry was in buffer
+                    return oldentry;
+                }
+            } else {
+                return (kelondroRow.Entry) buffer.remove(a); // test
+            }
+        }
+    }
+    
+    public void removeMarkedAll(kelondroRowCollection c) {
         // this can be enhanced
         synchronized (buffer) {
             flush();
-            super.removeAll(c);
+            super.removeMarkedAll(c);
         }
     }
 
@@ -195,8 +212,8 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
         for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
         for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
-        c.sort();
-        c.remove("fuenf".getBytes());
+        c.removeMarked("fuenf".getBytes());
+        c.shape();
         Iterator i = c.elements();
         String s;
         System.out.print("INPUT-ITERATOR: ");
@@ -207,7 +224,7 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         }
         System.out.println("");
         System.out.println("INPUT-TOSTRING: " + c.toString());
-        c.sort();
+        c.shape();
         System.out.println("SORTED        : " + c.toString());
         c.uniq();
         System.out.println("UNIQ          : " + c.toString());
@@ -232,7 +249,7 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
                     " entries/second, size = " + c.size());
         }
         System.out.println("bevore sort: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-        c.sort();
+        c.shape();
         System.out.println("after sort: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
         c.uniq();
         System.out.println("after uniq: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");

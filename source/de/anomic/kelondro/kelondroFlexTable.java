@@ -54,7 +54,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             if ((i % 10000) == 0) System.out.print('.');
         }
         this.index.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-        index.sort();
+        index.shape();
         System.out.println(index.size() + " index entries initialized and sorted");
     }
     
