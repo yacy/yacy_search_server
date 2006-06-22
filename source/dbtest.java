@@ -215,7 +215,7 @@ public class dbtest {
                     key = randomHash(random);
                     table.put(table.row().newEntry(new byte[][]{key, key, dummyvalue2}));
                     if (i % 500 == 0) {
-                        System.out.println(i + " entries processed so far.");
+                        System.out.println(i + " entries. " + ((table instanceof kelondroTree) ? ((kelondroTree) table).cacheNodeStatusString() : ""));
                     }
                 }
             }
@@ -548,3 +548,4 @@ final class memprofiler extends Thread {
         }
     }
 }
+
