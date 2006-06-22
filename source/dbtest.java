@@ -220,6 +220,23 @@ public class dbtest {
                 }
             }
             
+            if (command.equals("benchfill")) {
+                // fill database with random entries;
+                // args: <number-of-entries> <random-startpoint>
+                long count = Long.parseLong(args[3]);
+                long time = System.currentTimeMillis();
+                long randomstart = Long.parseLong(args[4]);
+                Random random = new Random(randomstart);
+                byte[] key;
+                for (int i = 0; i < count; i++) {
+                    key = randomHash(random);
+                    table.put(table.row().newEntry(new byte[][]{key, key, dummyvalue2}));
+                    if (i % 10000 == 0) {
+                        System.out.println(System.currentTimeMillis() - time);
+                    }
+                }
+            }
+            
             if (command.equals("read")) {
                 // read the database and compare with random entries;
                 // args: <number-of-entries> <random-startpoint>
@@ -235,6 +252,26 @@ public class dbtest {
                     if (!(new String(entry.getColBytes(1)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1)));
                     if (i % 500 == 0) {
                         System.out.println(i + " entries processed so far.");
+                    }
+                }
+            }
+            
+            if (command.equals("benchread")) {
+                // read the database and compare with random entries;
+                // args: <number-of-entries> <random-startpoint>
+                long count = Long.parseLong(args[3]);
+                long time = System.currentTimeMillis();
+                long randomstart = Long.parseLong(args[4]);
+                Random random = new Random(randomstart);
+                kelondroRow.Entry entry;
+                byte[] key;
+                for (int i = 0; i < count; i++) {
+                    key = randomHash(random);
+                    entry = table.get(key);
+                    if (entry == null) System.out.println("missing value for entry " + new String(key)); else
+                    if (!(new String(entry.getColBytes(1)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1)));
+                    if (i % 10000 == 0) {
+                        System.out.println(System.currentTimeMillis() - time);
                     }
                 }
             }
