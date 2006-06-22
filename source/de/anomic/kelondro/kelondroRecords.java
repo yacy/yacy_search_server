@@ -81,7 +81,7 @@ public class kelondroRecords {
 
     // constants
     private static final int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
-    private static final long memBlock = 50000000; // do not fill cache further if the amount of available memory is less that this
+    private static final long memBlock = 500000; // do not fill cache further if the amount of available memory is less that this
     public final static boolean useWriteBuffer = false;
     
     // memory calculation
@@ -427,9 +427,9 @@ public class kelondroRecords {
                 this.cacheScore = new kelondroMScoreCluster(); // cache control of CP_HIGH caches
             }
             this.cacheHeaders = new kelondroIntBytesMap[]{
+                    new kelondroIntBytesMap(this.headchunksize, this.cacheSize / 4),
                     new kelondroIntBytesMap(this.headchunksize, 0),
-                    new kelondroIntBytesMap(this.headchunksize, 0),
-                    new kelondroIntBytesMap(this.headchunksize, this.cacheSize / 2)
+                    new kelondroIntBytesMap(this.headchunksize, this.cacheSize / 4)
                     };
             this.cacheHeaders[0].setOrdering(kelondroNaturalOrder.naturalOrder, 0);
             this.cacheHeaders[1].setOrdering(kelondroNaturalOrder.naturalOrder, 0);
@@ -447,7 +447,7 @@ public class kelondroRecords {
     private static final long max = Runtime.getRuntime().maxMemory();
     private static final Runtime runtime = Runtime.getRuntime();
     
-    private static long availableMemory() {
+    public static long availableMemory() {
         // memory that is available including increasing total memory up to maximum
         return max - runtime.totalMemory() + runtime.freeMemory();
     }
@@ -930,9 +930,9 @@ public class kelondroRecords {
                     // we simply clear the cache
                     String error = "cachScore error: " + e.getMessage() + "; cachesize=" + cacheSize + ", cache.size()=[" + cacheHeaders[0].size() + "," + cacheHeaders[1].size() + "," + cacheHeaders[2].size() + "], cacheScore.size()=" + cacheScore.size();
                     cacheScore = new kelondroMScoreCluster();
-                    cacheHeaders[CP_LOW]    = new kelondroIntBytesMap(headchunksize, 0);
+                    cacheHeaders[CP_LOW]    = new kelondroIntBytesMap(headchunksize, cacheSize / 4);
                     cacheHeaders[CP_MEDIUM] = new kelondroIntBytesMap(headchunksize, 0);
-                    cacheHeaders[CP_HIGH]   = new kelondroIntBytesMap(headchunksize, cacheSize / 2);
+                    cacheHeaders[CP_HIGH]   = new kelondroIntBytesMap(headchunksize, cacheSize / 4);
                     cacheHeaders[0].setOrdering(kelondroNaturalOrder.naturalOrder, 0);
                     cacheHeaders[1].setOrdering(kelondroNaturalOrder.naturalOrder, 0);
                     cacheHeaders[2].setOrdering(kelondroNaturalOrder.naturalOrder, 0);

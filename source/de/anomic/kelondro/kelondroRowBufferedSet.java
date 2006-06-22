@@ -31,7 +31,9 @@ import java.util.Random;
 
 public class kelondroRowBufferedSet extends kelondroRowSet {
 
-    private static final int bufferFlushLimit = 10000;
+    private static final long memBlockLimit = 2000000;      // do not fill cache further if the amount of available memory is less that this
+    private static final int bufferFlushLimit = 100000;
+    private static final int bufferFlushMinimum = 1000; 
     private final boolean useRowCollection = true;
     private TreeMap buffer; // this must be a TreeSet bacause HashMap does not work with byte[]
 
@@ -145,7 +147,8 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
                     if (oldentry == null) {
                         // this was not anywhere
                         buffer.put(key, newentry);
-                        if (buffer.size() > bufferFlushLimit) flush();
+                        if (((buffer.size() > bufferFlushMinimum) &&  (kelondroRecords.availableMemory() > memBlockLimit)) ||
+                            (buffer.size() > bufferFlushLimit)) flush();
                         return null;
                     } else {
                         // replace old entry
