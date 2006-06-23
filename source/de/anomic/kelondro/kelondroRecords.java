@@ -1371,4 +1371,15 @@ public class kelondroRecords {
         }
     }
 
+    public kelondroProfile[] profiles() {
+        return new kelondroProfile[]{
+                (cacheHeaders == null) ? new kelondroProfile() :
+                kelondroProfile.consolidate(new kelondroProfile[]{
+                        cacheHeaders[0].profile(),
+                        cacheHeaders[1].profile(),
+                        cacheHeaders[2].profile()
+                }),
+                entryFile.profile()
+        };
+    }
 }

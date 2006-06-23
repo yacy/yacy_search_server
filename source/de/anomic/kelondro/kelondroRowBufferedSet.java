@@ -24,7 +24,7 @@
 
 package de.anomic.kelondro;
 
-import java.util.TreeMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.Random;
@@ -32,19 +32,22 @@ import java.util.Random;
 public class kelondroRowBufferedSet extends kelondroRowSet {
 
     private static final long memBlockLimit = 2000000;      // do not fill cache further if the amount of available memory is less that this
-    private static final int bufferFlushLimit = 100000;
+    private static final int bufferFlushLimit = 10000;
     private static final int bufferFlushMinimum = 1000; 
     private final boolean useRowCollection = true;
-    private TreeMap buffer; // this must be a TreeSet bacause HashMap does not work with byte[]
+    private kelondroProfile profile;
+    private HashMap buffer;
 
     public kelondroRowBufferedSet(kelondroRow rowdef) {
         super(rowdef);
-        buffer = new TreeMap(kelondroNaturalOrder.naturalOrder);
+        buffer = new HashMap();
+        profile = new kelondroProfile();
     }
 
     public kelondroRowBufferedSet(kelondroRow rowdef, int objectCount) {
         super(rowdef, objectCount);
-        buffer = new TreeMap(kelondroNaturalOrder.naturalOrder);
+        buffer = new HashMap();
+        profile = new kelondroProfile();
     }
     
     private final void flush() {
@@ -125,90 +128,97 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
     }
     
     public kelondroRow.Entry get(byte[] key) {
+        long handle = profile.startRead();
+        kelondroRow.Entry entry = null;
         synchronized (buffer) {
-            if (useRowCollection) {
-                kelondroRow.Entry entry = (kelondroRow.Entry) buffer.get(key);
-                if (entry != null) return entry;
-                return super.get(key);
-            } else {
-                return (kelondroRow.Entry) buffer.get(key);
-            }
+            entry = (kelondroRow.Entry) buffer.get(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
+            if ((entry == null) && (useRowCollection)) entry = super.get(key);
         }
+        profile.stopRead(handle);
+        return entry;
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry newentry) {
+        long handle = profile.startWrite();
         byte[] key = newentry.getColBytes(super.sortColumn);
+        kelondroRow.Entry oldentry = null;
         synchronized (buffer) {
             if (useRowCollection) {
-                kelondroRow.Entry oldentry = (kelondroRow.Entry) buffer.get(key);
+                oldentry = (kelondroRow.Entry) buffer.get(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
                 if (oldentry == null) {
                     // try the collection
                     oldentry = super.get(key);
                     if (oldentry == null) {
                         // this was not anywhere
-                        buffer.put(key, newentry);
+                        buffer.put(new Integer((int) kelondroNaturalOrder.decodeLong(key)), newentry);
                         if (((buffer.size() > bufferFlushMinimum) &&  (kelondroRecords.availableMemory() > memBlockLimit)) ||
                             (buffer.size() > bufferFlushLimit)) flush();
-                        return null;
                     } else {
                         // replace old entry
                         super.put(newentry);
-                        return oldentry;
                     }
                 } else {
                     // the entry is already in buffer
                     // simply replace old entry
-                    buffer.put(key, newentry);
-                    return oldentry;
+                    buffer.put(new Integer((int) kelondroNaturalOrder.decodeLong(key)), newentry);
                 }
             } else {
-                return (kelondroRow.Entry) buffer.put(key, newentry);
+                oldentry = (kelondroRow.Entry) buffer.put(new Integer((int) kelondroNaturalOrder.decodeLong(key)), newentry);
             }
         }
+        profile.stopWrite(handle);
+        return oldentry;
     }
     
-    public kelondroRow.Entry removeShift(byte[] a) {
+    public kelondroRow.Entry removeShift(byte[] key) {
+        long handle = profile.startDelete();
+        kelondroRow.Entry oldentry = null;
         synchronized (buffer) {
             if (useRowCollection) {
-                kelondroRow.Entry oldentry = (kelondroRow.Entry) buffer.remove(a);
+                oldentry = (kelondroRow.Entry) buffer.remove(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
                 if (oldentry == null) {
                     // try the collection
-                    return super.removeShift(a);
-                } else {
-                    // the entry was in buffer
-                    return oldentry;
+                    oldentry = super.removeShift(key);
                 }
             } else {
-                return (kelondroRow.Entry) buffer.remove(a); // test
+                oldentry = (kelondroRow.Entry) buffer.remove(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
             }
         }
+        profile.stopDelete(handle);
+        return oldentry;
     }
     
-    public kelondroRow.Entry removeMarked(byte[] a) {
+    public kelondroRow.Entry removeMarked(byte[] key) {
+        long handle = profile.startDelete();
+        kelondroRow.Entry oldentry = null;
         synchronized (buffer) {
             if (useRowCollection) {
-                kelondroRow.Entry oldentry = (kelondroRow.Entry) buffer.remove(a);
+                oldentry = (kelondroRow.Entry) buffer.remove(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
                 if (oldentry == null) {
                     // try the collection
-                    return super.removeMarked(a);
-                } else {
-                    // the entry was in buffer
-                    return oldentry;
+                    return super.removeMarked(key);
                 }
             } else {
-                return (kelondroRow.Entry) buffer.remove(a); // test
+                oldentry = (kelondroRow.Entry) buffer.remove(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
             }
         }
+        profile.stopDelete(handle);
+        return oldentry;
     }
     
     public void removeMarkedAll(kelondroRowCollection c) {
-        // this can be enhanced
+        long handle = profile.startDelete();
         synchronized (buffer) {
             flush();
             super.removeMarkedAll(c);
         }
+        profile.stopDelete(handle);
     }
 
+    public kelondroProfile profile() {
+        return profile;
+    }
+    
     public static void main(String[] args) {
         String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };
         kelondroRowBufferedSet c = new kelondroRowBufferedSet(new kelondroRow(new int[]{10, 3}));

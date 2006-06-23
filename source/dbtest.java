@@ -15,6 +15,7 @@ import java.util.Iterator;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
+import de.anomic.kelondro.kelondroProfile;
 import de.anomic.kelondro.kelondroSplittedTree;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
@@ -177,6 +178,7 @@ public class dbtest {
             }
             if (dbe.equals("kelondroSplittedTree")) {
                 File tablepath = new File(tablename).getParentFile();
+                tablename = new File(tablename).getName();
                 table = kelondroSplittedTree.open(tablepath, tablename, kelondroBase64Order.enhancedCoder,
                                 buffer,
                                 8,
@@ -211,11 +213,21 @@ public class dbtest {
                 long randomstart = Long.parseLong(args[4]);
                 Random random = new Random(randomstart);
                 byte[] key;
+                kelondroProfile ioProfileAcc = new kelondroProfile();
+                kelondroProfile cacheProfileAcc = new kelondroProfile();
+                kelondroProfile[] profiles;
                 for (int i = 0; i < count; i++) {
                     key = randomHash(random);
                     table.put(table.row().newEntry(new byte[][]{key, key, dummyvalue2}));
-                    if (i % 500 == 0) {
+                    if (i % 1000 == 0) {
                         System.out.println(i + " entries. " + ((table instanceof kelondroTree) ? ((kelondroTree) table).cacheNodeStatusString() : ""));
+                        if (table instanceof kelondroTree) {
+                            profiles = ((kelondroTree) table).profiles();
+                            System.out.println("Cache Delta: " + kelondroProfile.delta(profiles[0], cacheProfileAcc).toString());
+                            System.out.println("IO    Delta: " + kelondroProfile.delta(profiles[1],    ioProfileAcc).toString());
+                            cacheProfileAcc = (kelondroProfile) profiles[0].clone();
+                               ioProfileAcc = (kelondroProfile) profiles[1].clone();
+                        }
                     }
                 }
             }
@@ -250,7 +262,7 @@ public class dbtest {
                     entry = table.get(key);
                     if (entry == null) System.out.println("missing value for entry " + new String(key)); else
                     if (!(new String(entry.getColBytes(1)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1)));
-                    if (i % 500 == 0) {
+                    if (i % 1000 == 0) {
                         System.out.println(i + " entries processed so far.");
                     }
                 }

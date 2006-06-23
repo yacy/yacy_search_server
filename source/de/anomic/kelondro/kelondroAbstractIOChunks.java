@@ -51,6 +51,12 @@ public abstract class kelondroAbstractIOChunks {
         return name;
     }
 
+    // profiling support
+    protected kelondroProfile profile = new kelondroProfile();
+    public kelondroProfile profile() {
+        return profile;
+    }
+    
     // pseudo-native methods:
     abstract public int read(long pos, byte[] b, int off, int len) throws IOException;
     abstract public void write(long pos, byte[] b, int off, int len) throws IOException;
@@ -59,6 +65,7 @@ public abstract class kelondroAbstractIOChunks {
 
     // derived methods:
     public void readFully(long pos, byte[] b, int off, int len) throws IOException {
+        long handle = profile.startRead();
         if (len < 0) throw new IndexOutOfBoundsException("length is negative:" + len);
         if (b.length < off + len) throw new IndexOutOfBoundsException("bounds do not fit: b.length=" + b.length + ", off=" + off + ", len=" + len);
         while (len > 0) {
@@ -68,6 +75,7 @@ public abstract class kelondroAbstractIOChunks {
             off += r;
             len -= r;
         }
+        profile.stopRead(handle);
     }
 
     public byte readByte(long pos) throws IOException {
@@ -77,7 +85,9 @@ public abstract class kelondroAbstractIOChunks {
     }
 
     public void writeByte(long pos, final int v) throws IOException {
+        long handle = profile.startWrite();
         this.write(pos, new byte[]{(byte) (v & 0xFF)});
+        profile.stopWrite(handle);
     }
 
     public short readShort(long pos) throws IOException {
@@ -87,7 +97,9 @@ public abstract class kelondroAbstractIOChunks {
     }
 
     public void writeShort(long pos, final int v) throws IOException {
+        long handle = profile.startWrite();
         this.write(pos, new byte[]{(byte) ((v >>> 8) & 0xFF), (byte) ((v >>> 0) & 0xFF)});
+        profile.stopWrite(handle);
     }
 
     public int readInt(long pos) throws IOException {
@@ -97,12 +109,14 @@ public abstract class kelondroAbstractIOChunks {
     }
 
     public void writeInt(long pos, final int v) throws IOException {
+        long handle = profile.startWrite();
         this.write(pos, new byte[]{
                         (byte) ((v >>> 24) & 0xFF),
                         (byte) ((v >>> 16) & 0xFF),
                         (byte) ((v >>>  8) & 0xFF),
                         (byte) ((v >>>  0) & 0xFF)
                         });
+        profile.stopWrite(handle);
     }
 
     public long readLong(long pos) throws IOException {
@@ -112,6 +126,7 @@ public abstract class kelondroAbstractIOChunks {
     }
 
     public void writeLong(long pos, final long v) throws IOException {
+        long handle = profile.startWrite();
         this.write(pos, new byte[]{
                         (byte) ((v >>> 56) & 0xFF),
                         (byte) ((v >>> 48) & 0xFF),
@@ -122,10 +137,13 @@ public abstract class kelondroAbstractIOChunks {
                         (byte) ((v >>>  8) & 0xFF),
                         (byte) ((v >>>  0) & 0xFF)
                         });
+        profile.stopWrite(handle);
     }
 
     public void write(long pos, final byte[] b) throws IOException {
+        long handle = profile.startWrite();
         this.write(pos, b, 0, b.length);
+        profile.stopWrite(handle);
     }
 
 }
