@@ -77,7 +77,7 @@ public class plasmaGrafics {
         if (eventPicture instanceof ymageMatrixPainter) eventPicture = new ymageMatrixPainter((ymageMatrix) eventPicture);
 
         // get dimensions
-        int cr = Math.min(eventPicture.getWidth(), eventPicture.getHeight()) / 5 - maxRadius;
+        int cr = Math.min(eventPicture.getWidth(), eventPicture.getHeight()) / 6 - maxRadius;
         int cx = eventPicture.getWidth() / 2;
         int cy = eventPicture.getHeight() / 2;
 
@@ -119,7 +119,7 @@ public class plasmaGrafics {
 
     private static void drawNetworkPicture(int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona) {
 
-        int innerradius = Math.min(width, height) / 5;
+        int innerradius = Math.min(width, height) / 6;
         int outerradius = innerradius + innerradius * yacyCore.seedDB.sizeConnected() / 100;
         if (outerradius > innerradius * 2) outerradius = innerradius * 2;
 
@@ -213,10 +213,10 @@ public class plasmaGrafics {
         img.arcDot(x, y, innerradius, angle, dotsize);
         // draw line to text
         // img.setColor(colorLine);
-        img.arcLine(x, y, innerradius + dotsize + 2, innerradius + linelength, angle);
+        img.arcLine(x, y, innerradius + dotsize, innerradius + dotsize + linelength, angle);
         // draw text
         img.setColor(colorText);
-        img.arcPrint(x, y, innerradius + linelength, angle, name);
+        img.arcPrint(x, y, innerradius + dotsize + linelength, angle, name);
 
         // draw corona around dot for crawling activity
         int ppm10 = seed.getPPM() / 10;
