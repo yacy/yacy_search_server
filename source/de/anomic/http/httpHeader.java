@@ -891,7 +891,7 @@ public final class httpHeader extends TreeMap implements Map {
         while(it.hasNext())
         {
             java.util.Map.Entry e = (java.util.Map.Entry) it.next();
-            System.out.println(""+e.getKey()+" : "+e.getValue());
+            //System.out.println(""+e.getKey()+" : "+e.getValue());
             if(e.getKey().equals("Cookie"))
             {
                 return e.getValue().toString();
