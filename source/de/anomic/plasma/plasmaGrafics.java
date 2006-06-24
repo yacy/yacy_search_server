@@ -62,8 +62,6 @@ public class plasmaGrafics {
     private static int shortestName = 10;
     private static int longestName = 12;
 
-    private static int maxRadius = 28;
-
     private static ymagePainter networkPicture = null;
     private static long         networkPictureDate = 0;
 
@@ -77,7 +75,7 @@ public class plasmaGrafics {
         if (eventPicture instanceof ymageMatrixPainter) eventPicture = new ymageMatrixPainter((ymageMatrix) eventPicture);
 
         // get dimensions
-        int cr = Math.min(eventPicture.getWidth(), eventPicture.getHeight()) / 6 - maxRadius;
+        int cr = Math.min(eventPicture.getWidth(), eventPicture.getHeight()) / 5 - 20;
         int cx = eventPicture.getWidth() / 2;
         int cy = eventPicture.getHeight() / 2;
 
@@ -89,7 +87,7 @@ public class plasmaGrafics {
             eventPicture.setColor((searches[j].isAlive()) ? ymageMatrix.ADDITIVE_RED : ymageMatrix.ADDITIVE_GREEN);
             hash = searches[j].target().hash;
             angle = (int) ((long) 360 * (yacySeed.dhtPosition(hash) / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
-            eventPicture.arcLine(cx, cy, cr - maxRadius, cr, angle);
+            eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
         }
 
         // draw in the search target
@@ -100,7 +98,7 @@ public class plasmaGrafics {
         while (i.hasNext()) {
             hash = (String) i.next();
             angle = (int) ((long) 360 * (yacySeed.dhtPosition(hash) / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
-            eventPicture.arcLine(cx, cy, cr - maxRadius, cr, angle);
+            eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
         }
 
         return eventPicture;
@@ -119,7 +117,7 @@ public class plasmaGrafics {
 
     private static void drawNetworkPicture(int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona) {
 
-        int innerradius = Math.min(width, height) / 6;
+        int innerradius = Math.min(width, height) / 5;
         int outerradius = innerradius + innerradius * yacyCore.seedDB.sizeConnected() / 100;
         if (outerradius > innerradius * 2) outerradius = innerradius * 2;
 
@@ -130,7 +128,7 @@ public class plasmaGrafics {
 
         // draw network circle
         networkPicture.setColor("008020");
-        networkPicture.arc(width / 2, height / 2, innerradius - maxRadius, innerradius + maxRadius, 0, 360);
+        networkPicture.arc(width / 2, height / 2, innerradius - 20, innerradius + 20, 0, 360);
 
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
         //System.out.println("Seed Minimum distance is       " + yacySeed.minDHTNumber);
@@ -180,7 +178,7 @@ public class plasmaGrafics {
         totalCount += count;
 
         // draw my own peer
-        drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, yacyCore.seedDB.mySeed, "800000", "AAAAAA", "F00000", corona);
+        drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, yacyCore.seedDB.mySeed, "800000", "AAAAAA", "FFFFFF", corona);
 
         // draw description
         networkPicture.setColor("FFFFFF");
@@ -199,24 +197,20 @@ public class plasmaGrafics {
         if (name.length() > longestName) longestName = name.length();
         int angle = (int) ((long) 360 * (seed.dhtPosition() / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
-//      int linelength = maxRadius + outerradius * (maxRadius * (name.length() - shortestName) / (longestName - shortestName) + (Math.abs(seed.hash.hashCode()) % maxRadius)) / 60;
-//      if (linelength > outerradius) linelength = outerradius;
-        int dotsize = 4 + 2 * (int) (seed.getLinkCount() / 1000000L); // peer dotsize
-        if (dotsize > (maxRadius - 2)) dotsize = maxRadius - 2;
-
-        int linelength = maxRadius + outerradius * (dotsize * (name.length() - shortestName) / (longestName - shortestName) + (Math.abs(seed.hash.hashCode()) % dotsize)) / 60;
+        int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + (Math.abs(seed.hash.hashCode()) % 20)) / 60;
         if (linelength > outerradius) linelength = outerradius;
-
+        int dotsize = 6 + 2 * (int) (seed.getLinkCount() / 500000L);
+        if (dotsize > 18) dotsize = 18;
         img.setMode(ymageMatrix.MODE_ADD);
         // draw dot
         img.setColor(colorDot);
         img.arcDot(x, y, innerradius, angle, dotsize);
         // draw line to text
-        // img.setColor(colorLine);
-        img.arcLine(x, y, innerradius + dotsize, innerradius + dotsize + linelength, angle);
+        img.setColor(colorLine);
+        img.arcLine(x, y, innerradius + 18, innerradius + linelength, angle);
         // draw text
         img.setColor(colorText);
-        img.arcPrint(x, y, innerradius + dotsize + linelength, angle, name);
+        img.arcPrint(x, y, innerradius + linelength, angle, name);
 
         // draw corona around dot for crawling activity
         int ppm10 = seed.getPPM() / 10;
