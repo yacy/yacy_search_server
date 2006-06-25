@@ -106,7 +106,7 @@ public class yacyNewsPool {
         return newsDB.size();
     }
     
-    public int[] dbCacheNodeChunkSize() {
+    public int dbCacheNodeChunkSize() {
         return newsDB.dbCacheNodeChunkSize();
     }
     

@@ -808,7 +808,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // work off unwritten files
             if (entry.cacheArray == null)  {
-                this.log.logFine("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
+                //this.log.logFine("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
             } else {
                 String error = entry.shallStoreCacheForProxy();
                 if (error == null) {

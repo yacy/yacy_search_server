@@ -430,7 +430,7 @@ public class indexURL {
      if (urlHashCache != null) urlHashCache.close();
  }
 
- public int[] cacheNodeChunkSize() {
+ public int cacheNodeChunkSize() {
      return urlHashCache.cacheNodeChunkSize();
  }
  

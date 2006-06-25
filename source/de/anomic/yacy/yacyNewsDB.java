@@ -100,7 +100,7 @@ public class yacyNewsDB {
         news = createDB(path, bufferkb);
     }
 
-    public int[] dbCacheNodeChunkSize() {
+    public int dbCacheNodeChunkSize() {
         return news.cacheNodeChunkSize();
     }
 

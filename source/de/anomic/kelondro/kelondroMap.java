@@ -133,7 +133,7 @@ public class kelondroMap {
         return dyn.row().width(0);
     }
 
-    public int[] cacheNodeChunkSize() {
+    public int cacheNodeChunkSize() {
         return dyn.cacheNodeChunkSize();
     }
 

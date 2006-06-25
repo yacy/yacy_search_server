@@ -133,7 +133,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         return assortmentCluster.sizes();
     }
 
-    public int[] assortmentsCacheChunkSizeAvg() {
+    public int assortmentsCacheChunkSizeAvg() {
         return assortmentCluster.cacheChunkSizeAvg();
     }
 

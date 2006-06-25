@@ -170,15 +170,12 @@ public final class yacySeedDB {
         } catch (IOException e) {}
     }
     
-    public int[] dbCacheNodeChunkSize() {
-        int[] ac = seedActiveDB.cacheNodeChunkSize();
-        int[] pa = seedPassiveDB.cacheNodeChunkSize();
-        int[] po = seedPotentialDB.cacheNodeChunkSize();
-        int[] i = new int[3];
-        i[kelondroRecords.CP_LOW] = (ac[kelondroRecords.CP_LOW] + pa[kelondroRecords.CP_LOW] + po[kelondroRecords.CP_LOW]) / 3;
-        i[kelondroRecords.CP_MEDIUM] = (ac[kelondroRecords.CP_MEDIUM] + pa[kelondroRecords.CP_MEDIUM] + po[kelondroRecords.CP_MEDIUM]) / 3;
-        i[kelondroRecords.CP_HIGH] = (ac[kelondroRecords.CP_HIGH] + pa[kelondroRecords.CP_HIGH] + po[kelondroRecords.CP_HIGH]) / 3;
-        return i;
+    public int dbCacheNodeChunkSize() {
+        int ac = seedActiveDB.cacheNodeChunkSize();
+        int pa = seedPassiveDB.cacheNodeChunkSize();
+        int po = seedPotentialDB.cacheNodeChunkSize();
+
+        return (ac+ pa + po) / 3;
     }
     
     public int[] dbCacheNodeStatus() {

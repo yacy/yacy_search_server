@@ -62,11 +62,12 @@ public class PerformanceMemory_p {
     private static final long MB = 1024 * KB;
     private static Map defaultSettings = null;
         
-    private static int[]    slt,chk;
+    private static int      chk;
+    private static int[]    slt;
     private static String[] ost;
-    private static long     req, usd, bst, god;
+    private static long     req, usd, bst;
     
-    private static long usedTotal, currTotal, dfltTotal, goodTotal, bestTotal;
+    private static long usedTotal, currTotal, dfltTotal, bestTotal;
         
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
@@ -160,7 +161,6 @@ public class PerformanceMemory_p {
         usedTotal = 0;
         currTotal = 0;
         dfltTotal = 0;
-        goodTotal = 0;
         bestTotal = 0;
     
         req = sb.wordIndex.size();
@@ -238,7 +238,6 @@ public class PerformanceMemory_p {
         prop.put("usedTotal", usedTotal / MB);
         prop.put("currTotal", currTotal / MB);
         prop.put("dfltTotal", dfltTotal / MB);
-        prop.put("goodTotal", goodTotal / MB);
         prop.put("bestTotal", bestTotal / MB);
         
         // parse initialization memory settings
@@ -294,17 +293,13 @@ public class PerformanceMemory_p {
     }
     
     private static void putprop(serverObjects prop, serverSwitch env, String db, String set) {
-        usd = ((long) chk[0]) * ((long) slt[3]) + ((long) chk[1]) * ((long) slt[2]) + ((long) chk[2]) * ((long) slt[1]);
-        bst = (((((long) chk[2]) * ((long) req)) >> 10) + 1) << 10;
-        god = (((((long) bst) / ((long) (1+slt[1]+slt[2]+slt[3])) * ((long) slt[1])) >> 10) + 1) << 10;
-        if (set.equals("setGood")) env.setConfig("ramCache" + db, god);
+        usd = ((long) chk) * ((long) slt[1]);
+        bst = (((((long) chk) * ((long) req)) >> 10) + 1) << 10;
         if (set.equals("setBest")) env.setConfig("ramCache" + db, bst);
-        prop.put("chunk" + db, chk[2] + "/" + chk[1] + "/" + chk[0]);
+        prop.put("chunk" + db, chk);
         prop.put("slreq" + db, req);
-        prop.put("slemp" + db, slt[0] - slt[1] - slt[2] - slt[3]);
-        prop.put("slhig" + db, slt[1]);
-        prop.put("slmed" + db, slt[2]);
-        prop.put("sllow" + db, slt[3]);
+        prop.put("slemp" + db, slt[0] - slt[1]);
+        prop.put("slfil" + db, slt[1]);
         prop.put("slhittmiss" + db, slt[4] + ":" + slt[5]);
         prop.put("sluniqdoub" + db, slt[6] + ":" + slt[7]);
         prop.put("slflush" + db, slt[8] + ":" + slt[9]);
@@ -317,14 +312,12 @@ public class PerformanceMemory_p {
         prop.put("nuniqdoub" + db, ost[14] + ":" + ost[15]);
         prop.put("nflush" + db, ost[16] + ":" + ost[17]);
         prop.put("used" + db, usd / KB);
-        prop.put("good" + db, god / KB);
         prop.put("best" + db, bst / KB);
         prop.put("dflt" + db, Long.parseLong((String) defaultSettings.get("ramCache" + db)) / KB);
         prop.put("ramCache" + db, Long.parseLong(env.getConfig("ramCache" + db, "0")) / KB);
         usedTotal += usd;
         currTotal += Long.parseLong(env.getConfig("ramCache" + db, "0"));
         dfltTotal += Long.parseLong((String) defaultSettings.get("ramCache" + db));
-        goodTotal += god;
         bestTotal += bst;
     }
 }

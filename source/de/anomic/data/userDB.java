@@ -92,7 +92,7 @@ public final class userDB {
         }
     }
     
-    public int[] dbCacheNodeChunkSize() {
+    public int dbCacheNodeChunkSize() {
         return userTable.cacheNodeChunkSize();
     }    
     

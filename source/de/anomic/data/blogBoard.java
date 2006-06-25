@@ -97,7 +97,7 @@ public class blogBoard {
         return datbase.size();
     }
     
-    public int[] dbCacheNodeChunkSize() {
+    public int dbCacheNodeChunkSize() {
         return datbase.cacheNodeChunkSize();
     }
     

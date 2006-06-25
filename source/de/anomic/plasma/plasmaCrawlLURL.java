@@ -576,7 +576,7 @@ public final class plasmaCrawlLURL extends indexURL {
                         kelondroBase64Order.enhancedCoder.encodeLong(wordCount, urlWordCountLength).getBytes(),
                     };
                     urlHashCache.put(urlHashCache.row().newEntry(entry));
-                    serverLog.logFine("PLASMA","STORED new LURL " + url.toString());
+                    //serverLog.logFine("PLASMA","STORED new LURL " + url.toString());
                     this.stored = true;
                 } catch (Exception e) {
                     serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString(), e);
