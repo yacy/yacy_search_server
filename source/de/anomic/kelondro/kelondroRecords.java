@@ -550,8 +550,6 @@ public class kelondroRecords {
             this.tailChunk = new byte[tailchunksize];
             for (int i = 0; i < headchunksize; i++) this.headChunk[i] = 0;
             for (int i = 0; i < tailchunksize; i++) this.tailChunk[i] = 0;
-            this.headChanged = true;
-            this.tailChanged = true;
         }
     
         private Node(Handle handle) throws IOException {
@@ -608,7 +606,6 @@ public class kelondroRecords {
                 //System.out.println("**NO CACHE for " + this.handle.index + "**");
                 this.headChunk = new byte[headchunksize];
                 entryFile.readFully(seekpos(this.handle), this.headChunk, 0, this.headChunk.length);
-                this.headChanged = false;
             } else synchronized(cacheHeaders) {
                 byte[] cacheEntry = null;
                 int cp = CP_HIGH;
@@ -621,7 +618,7 @@ public class kelondroRecords {
                     //this.tailChunk = new byte[tailchunksize];
                     entryFile.readFully(seekpos(this.handle), this.headChunk, 0, this.headChunk.length);
 
-                    this.headChanged = true; // provoke a cache store
+                    // calculate cache priority
                     cp = CP_HIGH;
                     if (OHHANDLEC == 3) {
                         Handle l = getOHHandle(1);
@@ -629,6 +626,7 @@ public class kelondroRecords {
                         if ((l == null) && (r == null)) cp = CP_LOW;
                         else if ((l == null) || (r == null)) cp = CP_MEDIUM;
                     }
+                    
                     // if space left in cache, copy these value to the cache
                     update2Cache(cp);
                 } else {
@@ -641,7 +639,6 @@ public class kelondroRecords {
                     //this.headChunk = new byte[headchunksize];
                     //System.arraycopy(cacheEntry, 0, this.headChunk, 0, headchunksize);
                     this.headChunk = cacheEntry;
-                    this.headChanged = false;
                 }
             }
         }
@@ -752,12 +749,14 @@ public class kelondroRecords {
                 //System.out.println("WRITEH(" + filename + ", " + seekpos(this.handle) + ", " + this.headChunk.length + ")");
                 entryFile.write(seekpos(this.handle), this.headChunk);
                 update2Cache(cachePriority);
+                this.headChanged = false;
             }
 
             // save tail
             if ((this.tailChunk != null) && (this.tailChanged)) {
                 //System.out.println("WRITET(" + filename + ", " + (seekpos(this.handle) + headchunksize) + ", " + this.tailChunk.length + ")");
                 entryFile.write(seekpos(this.handle) + headchunksize, this.tailChunk);
+                this.tailChanged = false;
             }
         }
 
@@ -837,7 +836,7 @@ public class kelondroRecords {
                 
                 // store the cache entry
                 boolean upd = false;
-                cacheHeaders.putb(cacheHandle.index, headChunk);
+                upd = (cacheHeaders.putb(cacheHandle.index, headChunk) != null);
                 if (upd) writeDouble++; else writeUnique++;
                 
                 // delete the cache entry buffer
