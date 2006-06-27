@@ -149,6 +149,10 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         ramCache.setMaxWordCount(maxWords);
     }
 
+    public int getMaxWordCount() {
+        return ramCache.getMaxWordCount();
+    }
+
     public void flushControl() {
         // check for forced flush
         synchronized (this) { ramCache.shiftK2W(); }
