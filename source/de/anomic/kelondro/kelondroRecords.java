@@ -415,7 +415,7 @@ public class kelondroRecords {
             this.cacheHeaders = null;
         } else {
             this.cacheSize = (int) (buffersize / cacheNodeChunkSize());
-            this.cacheHeaders = new kelondroIntBytesMap(this.headchunksize, this.cacheSize / 4);
+            this.cacheHeaders = new kelondroIntBytesMap(this.headchunksize, 0);
             this.cacheHeaders.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
         }
         this.readHit = 0;
