@@ -43,11 +43,16 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import de.anomic.kelondro.kelondroMSetTools;
 
 public class plasmaURLPattern {
 
+    private Set cachedUrlHashs = Collections.synchronizedSet(new HashSet());
     private File rootPath = null;
     private HashMap hostpaths = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
 
@@ -85,6 +90,22 @@ public class plasmaURLPattern {
         hostpaths.put(host.toLowerCase(), path);
     }
 
+    public boolean hashInBlacklistedCache(String urlHash) {
+        return cachedUrlHashs.contains(urlHash);
+    }
+
+    public boolean isListed(String urlHash, URL url) {
+        if (!cachedUrlHashs.contains(urlHash)) {
+            boolean temp = isListed(url.getHost().toLowerCase(), url.getFile());
+            if (temp) 
+                {
+                    cachedUrlHashs.add(urlHash);
+                }
+            return temp;   
+        }        
+        return true;  
+    }
+    
     public boolean isListed(URL url) {
         return isListed(url.getHost().toLowerCase(), url.getFile());
     }

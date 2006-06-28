@@ -78,6 +78,7 @@ public final class transferRWI {
         final int entryc      = Integer.parseInt(post.get("entryc", "")); // number of entries in indexes
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
+        boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
         boolean checkLimit    = sb.getConfigBool("indexDistribution.dhtReceiptLimitEnabled", true);
         final long cachelimit = sb.getConfigLong("indexDistribution.dhtReceiptLimit", 1000);
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
@@ -152,7 +153,14 @@ public final class transferRWI {
                     try {
                         if ((!(unknownURL.contains(urlHash))) &&
                             (!(sb.urlPool.loadedURL.exists(urlHash)))) {
-                            unknownURL.add(urlHash);
+                            if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(urlHash))) {
+                                int deleted = sb.wordIndex.tryRemoveURLs(urlHash);
+                                yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
+                                //TODO: set to logFine if it works.
+                            }
+                            else {
+                                unknownURL.add(urlHash);                                
+                            }
                         }
                     } catch (Exception ex) {
                         sb.getLog().logWarning(
