@@ -106,12 +106,13 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         return getHandle(index).hashCode();
     }
 
-    public synchronized int add(kelondroRow.Entry rowinstance) throws IOException {
+    public synchronized int add(kelondroRow.Entry rowentry) throws IOException {
+
         Node n = newNode();
-        n.commit(CP_LOW);
-        int index = n.handle().hashCode();
-        set(index, rowinstance);
-        return index;
+        n.setValueRow(rowentry.bytes());
+        n.commit(CP_NONE);
+
+        return n.handle().hashCode();
     }
 
     public synchronized void remove(int index) throws IOException {
@@ -203,7 +204,24 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     }
 
     public static void main(String[] args) {
-	cmd(args);
+        //cmd(args);
+        File f = new File("d:\\\\mc\\privat\\fixtest.db");
+        f.delete();
+        kelondroFixedWidthArray k = new kelondroFixedWidthArray(f, new kelondroRow(new int[]{12, 4}), 6, true);
+        try {
+            k.set(3, k.row().newEntry(new byte[][]{
+                "test123".getBytes(), "abcd".getBytes()}));
+            k.add(k.row().newEntry(new byte[][]{
+                "test456".getBytes(), "efgh".getBytes()}));
+            k.close();
+            
+            k = new kelondroFixedWidthArray(f);
+            System.out.println(k.get(2).toString());
+            System.out.println(k.get(3).toString());
+            System.out.println(k.get(4).toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
 }

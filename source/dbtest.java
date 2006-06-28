@@ -335,6 +335,8 @@ public class dbtest {
             }
             
             long aftercommand = System.currentTimeMillis();
+            // final report
+            System.out.println("Database size = " + table.size() + " unique entries.");
             
             // finally close the database/table
             if (table instanceof kelondroTree) ((kelondroTree) table).close();
@@ -412,6 +414,10 @@ final class dbTable implements kelondroIndex {
         } catch (Exception e) {
             throw new Exception ("Unable to close the database connection.");
         }
+    }
+    
+    public int size() {
+        return 0; // *** SQL IMPLEMENTATION NEEDED ***
     }
     
     public kelondroRow row() {

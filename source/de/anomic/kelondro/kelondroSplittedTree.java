@@ -132,6 +132,10 @@ public class kelondroSplittedTree implements kelondroIndex {
         for (int i = 0; i < ktfs.length; i++) ktfs[i].close();
     }
     
+    public int size() {
+        return ktfs[0].size();
+    }
+    
     public kelondroRow row() {
         return ktfs[0].row();
     }

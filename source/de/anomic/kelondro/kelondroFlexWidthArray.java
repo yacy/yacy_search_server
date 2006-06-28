@@ -192,4 +192,25 @@ public class kelondroFlexWidthArray implements kelondroArray {
         System.out.println("EndOfTable");
     }
     
+
+    public static void main(String[] args) {
+        File f = new File("d:\\\\mc\\privat\\");
+        try {
+            kelondroFlexWidthArray k = new kelondroFlexWidthArray(f, "flextest", new kelondroRow(new int[]{12, 4}), true);
+            
+            k.set(3, k.row().newEntry(new byte[][]{
+                "test123".getBytes(), "abcd".getBytes()}));
+            k.add(k.row().newEntry(new byte[][]{
+                "test456".getBytes(), "efgh".getBytes()}));
+            k.close();
+            
+            k = new kelondroFlexWidthArray(f, "flextest", new kelondroRow(new int[]{12, 4}), true);
+            System.out.println(k.get(2).toString());
+            System.out.println(k.get(3).toString());
+            System.out.println(k.get(4).toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
 }

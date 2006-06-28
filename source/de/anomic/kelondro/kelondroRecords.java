@@ -536,8 +536,8 @@ public class kelondroRecords {
         private Handle handle = null; // index of the entry, by default NUL means undefined
         private byte[] headChunk = null; // contains ohBytes, ohHandles and the key value
         private byte[] tailChunk = null; // contains all values except the key value
-        private boolean headChanged = false;
-        private boolean tailChanged = false;
+        private boolean headChanged = true;
+        private boolean tailChanged = true;
         
         private Node() throws IOException {
             // create a new empty node and reserve empty space in file for it
@@ -548,8 +548,8 @@ public class kelondroRecords {
             // create empty chunks
             this.headChunk = new byte[headchunksize];
             this.tailChunk = new byte[tailchunksize];
-            for (int i = 0; i < headchunksize; i++) this.headChunk[i] = 0;
-            for (int i = 0; i < tailchunksize; i++) this.tailChunk[i] = 0;
+            for (int i = headchunksize - 1; i >= 0; i--) this.headChunk[i] = 0;
+            for (int i = tailchunksize - 1; i >= 0; i--) this.tailChunk[i] = 0;
         }
     
         private Node(Handle handle) throws IOException {

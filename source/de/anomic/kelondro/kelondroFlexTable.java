@@ -43,7 +43,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         for (int i = 0; i < indexArray.size(); i++) index.put(indexArray.get(i).getColBytes(0), new Integer(i));
         indexArray.close();
         */
-        System.out.print("Loading " + path);
+        System.out.print("*** Loading " + path);
         Iterator content = super.col[0].contentNodes();
         kelondroRecords.Node node;
         int i;
@@ -51,11 +51,17 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             node = (kelondroRecords.Node) content.next();
             i = node.handle().hashCode();
             index.addi(node.getValueRow(), i);
-            if ((i % 10000) == 0) System.out.print('.');
+            if ((i % 10000) == 0) {
+                System.out.print('.');
+                System.out.flush();
+            }
         }
+        System.out.print(" -ordering- ");
+        System.out.flush();
         this.index.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
         index.shape();
-        System.out.println(index.size() + " index entries initialized and sorted");
+        System.out.println(" -done-");
+        System.out.println(index.size() + " index entries initialized and sorted from " + super.col[0].size() + " keys.");
     }
     
     /*

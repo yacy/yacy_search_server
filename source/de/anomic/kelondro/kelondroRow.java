@@ -285,6 +285,17 @@ public class kelondroRow {
             }
             return b;
          }
+        
+        public String toString() {
+            StringBuffer b = new StringBuffer();
+            b.append('{');
+            for (int i = 0; i < columns(); i++) {
+                b.append(getColString(i, null));
+                if (i < columns() - 1) b.append(", ");
+            }
+            b.append('}');
+            return new String(b);
+        }
     }
     
     public final static void long2bytes(long x, byte[] b, int offset, int length) {
