@@ -659,7 +659,7 @@ public final class yacy {
     */
     public static void migrateWords(String homePath) {
         // run with "java -classpath classes yacy -migratewords"
-        try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
+        try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
         serverLog log = new serverLog("WORDMIGRATION");
         log.logInfo("STARTING MIGRATION");
@@ -699,7 +699,7 @@ public final class yacy {
      */
     public static void minimizeUrlDB(String homePath, int dbcache) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
-        try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
+        try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
         serverLog log = new serverLog("URL-CLEANUP");
         try {
@@ -1071,7 +1071,7 @@ public final class yacy {
         serverLog log = new serverLog("HASHLIST");
         File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
         String wordChunkStartHash = "------------";
-        try {serverLog.configureLogging(new File(homePath, "yacy.logging"));} catch (Exception e) {}
+        try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
         File root = new File(homePath);
         try {
