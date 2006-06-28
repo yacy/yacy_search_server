@@ -3,6 +3,18 @@
 	<head>
 		<title>YaCy '#[clientname]#': YPStats</title>
 		#%env/templates/metas.template%#
+		<style><!--
+			select {
+				width: 13em;
+			}
+			input.url {
+				width: 22em;
+			}
+			input.ypsmall {
+				width: 4em;
+			}
+		-->
+		</style>
 	</head>
 	<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 		#%env/templates/header.template%#
@@ -10,7 +22,7 @@
 		<h2>YPStats - Statistics to generate default settings</h2>
 		<p>
 			<form action="#" method="GET">
-				<label for="0">Select submit url: </label><input type="text" name="url" value="#[url]#" />
+				<label for="0">Select submit url: </label><input class="url" type="text" name="url" value="#[url]#" />
 				<input type="submit" name="urlchg" value="change" />
 			</form>
 		</p>
@@ -20,23 +32,43 @@
 				<table>
 					<tr>
 						<td><label for="1">Operating system: </label></td>
-						<td><input type="text" name="OS" value="" id="1" /></td>
+						<td><!--<input type="text" name="OS" value="" id="1" />-->
+							<select name="OS" id="1">
+								<optgroup label="Windows">
+									<option label="Win98/ME" value="Win98">Windows 98/ME</option>
+									<option label="WinXP" value="WinXP">Windows 2000/XP</option>
+								</optgroup>
+								<option label="Linux" value="Linux">GNU Linux</option>
+								<option label="*BSD" value="BSD">Open-/Free-/NetBSD</option>
+								<optgroup label="Mac OS">
+									<option value="MacOS&lt;=X">Mac OS &lt;= X</option>
+									<option value="MacOSX">Mac OS X</option>
+								</optgroup>
+								<option value="Solaris">Solaris</option>
+								<option value="ReactOS">ReactOS</option>
+							</select>
+						</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><label for="2">RAM in machine: </label></td>
-						<td><input type="text" name="RAM" value="" id="2" /> MB</td>
+						<td><input class="ypsmall" type="text" name="RAM" value="" id="2" /> MB</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><label for="3">CPU speed: </label></td>
-						<td><input type="text" name="CPUSpeed" value="" id="3" /> MHz</td>
+						<td><input class="ypsmall" type="text" name="CPUSpeed" value="" id="3" /> MHz</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><label for="5">HDD speed: </label></td>
-						<td><input type="text" name="HDDSpeed" value="" id="5" /> RPM</td>
+						<td><input class="ypsmall" type="text" name="HDDSpeed" value="" id="5" /> RPM</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><label for="6">HDD cache: </label></td>
-						<td><input type="text" name="HDDCache" value="" id="6" /> KB</td>
+						<td><input class="ypsmall" type="text" name="HDDCache" value="" id="6" /> KB</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><label for="7">HDD interface: </label></td>
@@ -49,10 +81,27 @@
 								<option name="else">Other</option>
 							</select>
 						</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><label for="fstype">Filesystem: </label></td>
+						<td>
+							<select name="FSType">
+								<option name="FAT32">FAT32</option>
+								<option name="NTFS">NTFS</option>
+								<option name="Ext2-3">UFS / Ext2 / Ext3</option>
+								<option name="JFS">JFS</option>
+								<option name="XFS">(C)XFS</option>
+								<option name="Reiser">ReiserFS</option>
+								<option name="HFS">HFS / HFS+</option>
+							</select>
+						</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><label for="seperate">YaCy runs on "own" HDD</label></td>
 						<td><input type="checkbox" name="seperateHDD" id="seperate" /></td>
+						<td></td>
 					<tr>
 						<td><label for="8">Peer main usage: </label></td>
 						<td>
@@ -63,10 +112,12 @@
 								<option name="else">No special usage</option>
 							</select>
 						</td>
+						<td></td>
 					</tr>
 					<tr>
-						<td><label for="9">Peer runs 24/7 </label></td>
+						<td><label for="9">PC only for YaCy </label></td>
 						<td><input type="checkbox" name="24-7" id="9" /></td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><label for="10">System slowdown: </label></td>
@@ -79,10 +130,11 @@
 								<option name="4">Working not possible</option>
 							</select>
 						</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><label for="11">Comments: </label></td>
-						<td><textarea name="comment" rows="10" cols="73" id="11"></textarea></td>
+						<td colspan="2"><textarea name="comment" rows="10" cols="73" id="11"></textarea></td>
 					</tr>
 					<tr>
 						<td colspan="3">
