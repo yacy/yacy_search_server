@@ -574,6 +574,9 @@ connectionKeepAliveSupport=true
 # Specifies if the proxy should send the via header according to RFC
 proxy.sendViaHeader=true
 
+# Specifies if the proxy should send the X-Forwarded-For header
+proxy.sendXForwardedForHeader=true
+
 # Configuration options needed to configure server port forwarding
 portForwardingEnabled=false
 portForwardingUseProxy=false

@@ -234,6 +234,10 @@ public class SettingsAck_p {
             env.setConfig("proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader")?"true":"false");
             prop.put("info_proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader")? "on" : "off");
             
+            // setting X-Forwarded-for header property
+            env.setConfig("proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader")?"true":"false");
+            prop.put("info_proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader")? "on" : "off");            
+            
             prop.put("info", 20);             
             return prop;
         }

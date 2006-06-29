@@ -406,7 +406,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             }
             
             // setting the X-Forwarded-For Header
-            requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
+            if (switchboard.getConfigBool("proxy.sendXForwardedForHeader", true)) {
+                requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
+            }
             
             // decide wether to use a cache entry or connect to the network
             File cacheFile = cacheManager.getCachePath(url);
@@ -927,7 +929,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             }
             
             // setting the X-Forwarded-For Header
-            requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));        
+            if (switchboard.getConfigBool("proxy.sendXForwardedForHeader", true)) {
+                requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
+            }
             
             // resolve yacy and yacyh domains
             String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
@@ -1015,7 +1019,9 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             }
             
             // setting the X-Forwarded-For Header
-            requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));            
+            if (switchboard.getConfigBool("proxy.sendXForwardedForHeader", true)) {
+                requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
+            }
             
             // resolve yacy and yacyh domains
             String yAddress = yacyCore.seedDB.resolveYacyAddress(host);

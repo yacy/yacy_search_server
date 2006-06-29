@@ -117,6 +117,7 @@ public final class Settings_p {
         prop.put("isTransparentProxy", env.getConfig("isTransparentProxy", "false").equals("true") ? 1 : 0); 
         prop.put("connectionKeepAliveSupport", env.getConfig("connectionKeepAliveSupport", "false").equals("true") ? 1 : 0);
         prop.put("proxy.sendViaHeader", env.getConfig("proxy.sendViaHeader", "false").equals("true") ? 1 : 0);
+        prop.put("proxy.sendXForwardedForHeader", env.getConfig("proxy.sendXForwardedForHeader", "true").equals("true") ? 1 : 0);
         
         // remote port forwarding settings
         boolean portForwardingAvailable = false;
