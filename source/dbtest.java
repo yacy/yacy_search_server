@@ -416,7 +416,7 @@ final class dbTable implements kelondroIndex {
         }
     }
     
-    public int size() {
+    public int size() throws IOException {
         int size = -1;
         try {
             String sqlQuery = new String
@@ -436,7 +436,7 @@ final class dbTable implements kelondroIndex {
             
             return size;
         } catch (Exception e) {
-            return -1;
+            throw new IOException(e.getMessage());
         }
     }
     

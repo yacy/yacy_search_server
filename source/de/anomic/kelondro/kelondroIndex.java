@@ -54,10 +54,8 @@ import java.io.IOException;
 
 public interface kelondroIndex {
 
-    public int size();
-    
-    public kelondroRow row();
-    
+    public int size() throws IOException;
+    public kelondroRow row() throws IOException;
     public kelondroRow.Entry get(byte[] key) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException;
     public kelondroRow.Entry remove(byte[] key) throws IOException;
