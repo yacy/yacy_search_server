@@ -74,11 +74,11 @@
 						<td><label for="7">HDD interface: </label></td>
 						<td>
 							<select name="HDDInterface" id="7">
-								<option name="P-ATA" selected>P-ATA / IDE</option>
-								<option name="S-ATA">Serial ATA</option>
-								<option name="S-ATA2">Serial ATA 2</option>
-								<option name="SCSI">SCSI</option>
-								<option name="else">Other</option>
+								<option value="P-ATA" selected>P-ATA / IDE</option>
+								<option value="S-ATA">Serial ATA</option>
+								<option value="S-ATA2">Serial ATA 2</option>
+								<option value="SCSI">SCSI</option>
+								<option value="else">Other</option>
 							</select>
 						</td>
 						<td></td>
@@ -87,13 +87,13 @@
 						<td><label for="fstype">Filesystem: </label></td>
 						<td>
 							<select name="FSType">
-								<option name="FAT32">FAT32</option>
-								<option name="NTFS">NTFS</option>
-								<option name="Ext2-3">UFS / Ext2 / Ext3</option>
-								<option name="JFS">JFS</option>
-								<option name="XFS">(C)XFS</option>
-								<option name="Reiser">ReiserFS</option>
-								<option name="HFS">HFS / HFS+</option>
+								<option value="FAT32">FAT32</option>
+								<option value="NTFS">NTFS</option>
+								<option value="Ext2-3">UFS / Ext2 / Ext3</option>
+								<option value="JFS">JFS</option>
+								<option value="XFS">(C)XFS</option>
+								<option value="Reiser">ReiserFS</option>
+								<option value="HFS">HFS / HFS+</option>
 							</select>
 						</td>
 						<td></td>
@@ -106,10 +106,10 @@
 						<td><label for="8">Peer main usage: </label></td>
 						<td>
 							<select name="Usage" id="8">
-								<option name="Proxy" selected>Proxy</option>
-								<option name="DHT">DHT-Peer</option>
-								<option name="Crawler">Crawl-Peer</option>
-								<option name="else">No special usage</option>
+								<option value="0" selected>Proxy</option>
+								<option value="1">DHT-Peer</option>
+								<option value="2">Crawl-Peer</option>
+								<option value="3">No special usage</option>
 							</select>
 						</td>
 						<td></td>
@@ -123,18 +123,18 @@
 						<td><label for="10">System slowdown: </label></td>
 						<td>
 							<select name="Slowdown" id="10">
-								<option name="0" selected>No slowdown noticable</option>
-								<option name="1">Slight slowdown</option>
-								<option name="2">Moderate slowdown</option>
-								<option name="3">Heavy slowdown</option>
-								<option name="4">Working not possible</option>
+								<option value="0" selected>No slowdown noticable</option>
+								<option value="1">Slight slowdown</option>
+								<option value="2">Moderate slowdown</option>
+								<option value="3">Heavy slowdown</option>
+								<option value="4">Working not possible</option>
 							</select>
 						</td>
 						<td></td>
 					</tr>
 					<tr>
 						<td><label for="11">Comments: </label></td>
-						<td colspan="2"><textarea name="comment" rows="10" cols="73" id="11"></textarea></td>
+						<td colspan="2"><textarea name="Comment" rows="10" cols="73" id="11"></textarea></td>
 					</tr>
 					<tr>
 						<td colspan="3">
