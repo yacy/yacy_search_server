@@ -417,7 +417,27 @@ final class dbTable implements kelondroIndex {
     }
     
     public int size() {
-        return 0; // *** SQL IMPLEMENTATION NEEDED ***
+        int size = -1;
+        try {
+            String sqlQuery = new String
+            (
+                "SELECT count(value) from test"
+            );
+            
+            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
+            ResultSet result = sqlStatement.executeQuery();
+            
+            while (result.next()) {
+                size = result.getInt(1);
+            }  
+            
+            result.close();
+            sqlStatement.close();
+            
+            return size;
+        } catch (Exception e) {
+            return -1;
+        }
     }
     
     public kelondroRow row() {
