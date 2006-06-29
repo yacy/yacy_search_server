@@ -24,6 +24,8 @@
 
 package de.anomic.kelondro;
 
+import java.util.Random;
+
 public class kelondroIntBytesMap extends kelondroRowBufferedSet {
 
     public kelondroIntBytesMap(int payloadSize, int initSize) {
@@ -63,6 +65,22 @@ public class kelondroIntBytesMap extends kelondroRowBufferedSet {
         kelondroRow.Entry indexentry = super.removeMarked(kelondroNaturalOrder.encodeLong((long) ii, 4));
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);
+    }
+    
+    public static void main(String[] args) {
+        long start = System.currentTimeMillis();
+        kelondroIntBytesMap c = new kelondroIntBytesMap(30, 0);
+        Random random = new Random(0);
+        int x;
+        for (int i = 0; i < 100000; i++) {
+            //x = random.nextInt(100000);
+            x = i;
+            c.putb(x, new byte[30]);
+            //if (c.getb(x) == null) System.out.println("consistency error at " + i + " with key " + x);
+            if (i % 10000 == 0) System.out.println(i + " entries. ");
+        }
+        System.out.println("RESULT SIZE: " + c.size());
+        System.out.println("Time: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
     }
     
 }

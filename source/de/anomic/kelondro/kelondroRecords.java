@@ -832,16 +832,12 @@ public class kelondroRecords {
                 // generate cache entry
                 //byte[] cacheEntry = new byte[headchunksize];
                 //System.arraycopy(headChunk, 0, cacheEntry, 0, headchunksize);
-                Handle cacheHandle = new Handle(this.handle.index);
                 
                 // store the cache entry
                 boolean upd = false;
-                upd = (cacheHeaders.putb(cacheHandle.index, headChunk) != null);
+                upd = (cacheHeaders.putb(this.handle.index, headChunk) != null);
                 if (upd) writeDouble++; else writeUnique++;
                 
-                // delete the cache entry buffer
-                //cacheEntry = null;
-                cacheHandle = null;
                 //System.out.println("kelondroRecords cache4" + filename + ": cache record size = " + (memBefore - Runtime.getRuntime().freeMemory()) + " bytes" + ((newentry) ? " new" : ""));
                 //printCache();
             }

@@ -24,29 +24,28 @@
 
 package de.anomic.kelondro;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
-import java.util.Random;
+import java.util.TreeMap;
 
 public class kelondroRowBufferedSet extends kelondroRowSet {
 
     private static final long memBlockLimit = 2000000;      // do not fill cache further if the amount of available memory is less that this
     private static final int bufferFlushLimit = 10000;
     private static final int bufferFlushMinimum = 1000; 
-    private final boolean useRowCollection = true;
+    private final boolean useRowCollection = false;
     private kelondroProfile profile;
-    private HashMap buffer;
+    private TreeMap buffer;
 
     public kelondroRowBufferedSet(kelondroRow rowdef) {
         super(rowdef);
-        buffer = new HashMap();
+        buffer = new TreeMap();
         profile = new kelondroProfile();
     }
 
     public kelondroRowBufferedSet(kelondroRow rowdef, int objectCount) {
         super(rowdef, objectCount);
-        buffer = new HashMap();
+        buffer = new TreeMap();
         profile = new kelondroProfile();
     }
     
@@ -142,15 +141,16 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         long handle = profile.startWrite();
         byte[] key = newentry.getColBytes(super.sortColumn);
         kelondroRow.Entry oldentry = null;
+        Integer intk = new Integer((int) kelondroNaturalOrder.decodeLong(key));
         synchronized (buffer) {
             if (useRowCollection) {
-                oldentry = (kelondroRow.Entry) buffer.get(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
+                oldentry = (kelondroRow.Entry) buffer.get(intk);
                 if (oldentry == null) {
                     // try the collection
                     oldentry = super.get(key);
                     if (oldentry == null) {
                         // this was not anywhere
-                        buffer.put(new Integer((int) kelondroNaturalOrder.decodeLong(key)), newentry);
+                        buffer.put(intk, newentry);
                         if (((buffer.size() > bufferFlushMinimum) &&  (kelondroRecords.availableMemory() > memBlockLimit)) ||
                             (buffer.size() > bufferFlushLimit)) flush();
                     } else {
@@ -160,10 +160,10 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
                 } else {
                     // the entry is already in buffer
                     // simply replace old entry
-                    buffer.put(new Integer((int) kelondroNaturalOrder.decodeLong(key)), newentry);
+                    buffer.put(intk, newentry);
                 }
             } else {
-                oldentry = (kelondroRow.Entry) buffer.put(new Integer((int) kelondroNaturalOrder.decodeLong(key)), newentry);
+                oldentry = (kelondroRow.Entry) buffer.put(intk, newentry);
             }
         }
         profile.stopWrite(handle);
@@ -174,14 +174,10 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         long handle = profile.startDelete();
         kelondroRow.Entry oldentry = null;
         synchronized (buffer) {
-            if (useRowCollection) {
-                oldentry = (kelondroRow.Entry) buffer.remove(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
-                if (oldentry == null) {
-                    // try the collection
-                    oldentry = super.removeShift(key);
-                }
-            } else {
-                oldentry = (kelondroRow.Entry) buffer.remove(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
+            oldentry = (kelondroRow.Entry) buffer.remove(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
+            if ((oldentry == null) && (useRowCollection)) {
+                // try the collection
+                oldentry = super.removeShift(key);
             }
         }
         profile.stopDelete(handle);
@@ -192,14 +188,10 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         long handle = profile.startDelete();
         kelondroRow.Entry oldentry = null;
         synchronized (buffer) {
-            if (useRowCollection) {
-                oldentry = (kelondroRow.Entry) buffer.remove(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
-                if (oldentry == null) {
-                    // try the collection
-                    return super.removeMarked(key);
-                }
-            } else {
-                oldentry = (kelondroRow.Entry) buffer.remove(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
+            oldentry = (kelondroRow.Entry) buffer.remove(new Integer((int) kelondroNaturalOrder.decodeLong(key)));
+            if ((oldentry == null) && (useRowCollection)) {
+                // try the collection
+                return super.removeMarked(key);
             }
         }
         profile.stopDelete(handle);
@@ -219,73 +211,4 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         return profile;
     }
     
-    public static void main(String[] args) {
-        String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };
-        kelondroRowBufferedSet c = new kelondroRowBufferedSet(new kelondroRow(new int[]{10, 3}));
-        c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
-        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
-        c.removeMarked("fuenf".getBytes());
-        c.shape();
-        Iterator i = c.elements();
-        String s;
-        System.out.print("INPUT-ITERATOR: ");
-        while (i.hasNext()) {
-            s = new String((byte[]) i.next()).trim();
-            System.out.print(s + ", ");
-            if (s.equals("drei")) i.remove();
-        }
-        System.out.println("");
-        System.out.println("INPUT-TOSTRING: " + c.toString());
-        c.shape();
-        System.out.println("SORTED        : " + c.toString());
-        c.uniq();
-        System.out.println("UNIQ          : " + c.toString());
-        c.trim();
-        System.out.println("TRIM          : " + c.toString());
-        
-        // second test
-        c = new kelondroRowBufferedSet(new kelondroRow(new int[]{10, 3}));
-        c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-        Random rand = new Random(0);
-        long start = System.currentTimeMillis();
-        long t, d = 0;
-        String w;
-        for (long k = 0; k < 60000; k++) {
-            t = System.currentTimeMillis();
-            w = "a" + Long.toString(rand.nextLong());
-            c.add(w.getBytes());
-            if (k % 10000 == 0)
-                System.out.println("added " + k + " entries in " +
-                    ((t - start) / 1000) + " seconds, " +
-                    (((t - start) > 1000) ? (k / ((t - start) / 1000)) : k) +
-                    " entries/second, size = " + c.size());
-        }
-        System.out.println("bevore sort: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-        c.shape();
-        System.out.println("after sort: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-        c.uniq();
-        System.out.println("after uniq: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-        System.out.println("RESULT SIZE: " + c.size());
-        System.out.println();
-        
-        // third test
-        c = new kelondroRowBufferedSet(new kelondroRow(new int[]{10, 3}), 60000);
-        c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-        rand = new Random(0);
-        start = System.currentTimeMillis();
-        d = 0;
-        for (long k = 0; k < 60000; k++) {
-            t = System.currentTimeMillis();
-            w = "a" + Long.toString(rand.nextLong());
-            if (c.get(w.getBytes()) == null) c.add(w.getBytes()); else d++;
-            if (k % 10000 == 0)
-                System.out.println("added " + k + " entries in " +
-                    ((t - start) / 1000) + " seconds, " +
-                    (((t - start) > 1000) ? (k / ((t - start) / 1000)) : k) +
-                    " entries/second, " + d + " double, size = " + c.size() + 
-                    ", sum = " + (c.size() + d));
-        }
-        System.out.println("RESULT SIZE: " + c.size());
-    }
 }

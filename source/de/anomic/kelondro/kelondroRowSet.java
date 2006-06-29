@@ -139,25 +139,6 @@ public class kelondroRowSet extends kelondroRowCollection {
         }
     }
     
-    /*
-    private void resolveMarkedRemoved1() {
-        //long start = System.currentTimeMillis();
-        //int c = removeMarker.size();
-        Integer idx = new Integer(sortBound);
-        while (removeMarker.size() > 0) {
-            idx = (Integer) removeMarker.last();
-            removeMarker.remove(idx);
-            chunkcount--;
-            if (idx.intValue() < chunkcount) {
-                super.swap(idx.intValue(), chunkcount, 0);
-            }
-        }
-        if (idx.intValue() < sortBound) sortBound = idx.intValue();
-        removeMarker.clear();
-        //System.out.println("RESOLVED " + c + " entries in " + (System.currentTimeMillis() - start) + " milliseconds");
-    }
-   */
-    
     private void resolveMarkedRemoved() {
         if (removeMarker.size() == 0) return;
         Integer nxt = (Integer) removeMarker.first();
@@ -295,6 +276,7 @@ public class kelondroRowSet extends kelondroRowCollection {
     }
     
     public static void main(String[] args) {
+        /*
         String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };
         kelondroRowSet c = new kelondroRowSet(new kelondroRow(new int[]{10, 3}));
         c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
@@ -318,7 +300,9 @@ public class kelondroRowSet extends kelondroRowCollection {
         System.out.println("UNIQ          : " + c.toString());
         c.trim();
         System.out.println("TRIM          : " + c.toString());
+        */
         
+        /*
         // second test
         c = new kelondroRowSet(new kelondroRow(new int[]{10, 3}));
         c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
@@ -362,5 +346,28 @@ public class kelondroRowSet extends kelondroRowCollection {
                     ", sum = " + (c.size() + d));
         }
         System.out.println("RESULT SIZE: " + c.size());
+        */
+        
+        long start = System.currentTimeMillis();
+        kelondroRowSet c = new kelondroRowSet(new kelondroRow(new int[]{12, 12}), 0);
+        Random random = new Random(0);
+        byte[] key;
+        for (int i = 0; i < 100000; i++) {
+            key = randomHash(random);
+            c.put(c.rowdef.newEntry(new byte[][]{key, key}));
+            if (i % 1000 == 0) System.out.println(i + " entries. ");
+        }
+        System.out.println("RESULT SIZE: " + c.size());
+        System.out.println("Time: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+    }
+    
+    public static byte[] randomHash(final long r0, final long r1) {
+        // a long can have 64 bit, but a 12-byte hash can have 6 * 12 = 72 bits
+        // so we construct a generic Hash using two long values
+        return (kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r0), 11).substring(5) +
+                kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r1), 11).substring(5)).getBytes();
+    }
+    public static byte[] randomHash(Random r) {
+        return randomHash(r.nextLong(), r.nextLong());
     }
 }
