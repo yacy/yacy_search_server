@@ -62,6 +62,10 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
+    public kelondroRow row() {
+        return this.rowdef;
+    }
+    
     private final void ensureSize(int elements) {
         int needed = elements * rowdef.objectsize();
         if (chunkcache.length >= needed) return;

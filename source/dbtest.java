@@ -187,7 +187,7 @@ public class dbtest {
             }
             if (dbe.equals("kelondroFlexTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), testRow, true);
+                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), buffer, testRow, true);
             }
             if (dbe.equals("mysql")) {
                 table = new dbTable("mysql", testRow);

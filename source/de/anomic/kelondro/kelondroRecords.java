@@ -462,7 +462,7 @@ public class kelondroRecords {
     public String cacheNodeStatusString() {
         return
               "cacheMaxSize=" + cacheSize +
-            ", cacheCurrSize=" + cacheHeaders.size() +
+            ", cacheCurrSize=" + ((cacheHeaders == null) ? 0 : cacheHeaders.size()) +
             ", readHit=" + readHit +
             ", readMiss=" + readMiss +
             ", writeUnique=" + writeUnique +

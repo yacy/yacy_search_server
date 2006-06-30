@@ -33,24 +33,58 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 
     private kelondroBytesIntMap index;
     
-    public kelondroFlexTable(File path, String tablename, kelondroRow rowdef, boolean exitOnFail) throws IOException {
+    public kelondroFlexTable(File path, String tablename, long buffersize, kelondroRow rowdef, boolean exitOnFail) throws IOException {
         super(path, tablename, rowdef, exitOnFail);
-        
-        // fill the index
-        this.index = new kelondroBytesIntMap(super.row().width(0), 0);
-        /*
-        kelondroFixedWidthArray indexArray = new kelondroFixedWidthArray(new File(path, colfilename(0,0)));
-        for (int i = 0; i < indexArray.size(); i++) index.put(indexArray.get(i).getColBytes(0), new Integer(i));
-        indexArray.close();
-        */
-        System.out.print("*** Loading " + path);
+        File newpath = new File(path, tablename + ".table");
+        File indexfile = new File(newpath, "col.000.index");
+        kelondroIndex ki = null;
+        String description = new String(this.col[0].getDescription());
+        System.out.println("*** Last Startup time: " + description.substring(4));
+        long start = System.currentTimeMillis();
+
+        if (indexfile.exists()) {
+            // use existing index file
+            System.out.println("*** Using File index " + indexfile);
+            ki = new kelondroTree(indexfile, buffersize, 10);
+        } else if (size() > 100000) {
+            // generate new index file
+            System.out.print("*** Genrating File index for " + size() + " entries from " + indexfile);
+            ki = initializeTreeIndex(indexfile, buffersize);
+
+            System.out.println(" -done-");
+            System.out.println(ki.size()
+                    + " entries indexed from "
+                    + super.col[0].size() + " keys.");
+        } else {
+            // fill the index
+            System.out.print("*** Loading RAM index for " + size() + " entries from "+ newpath);
+            ki = initializeRamIndex();
+            
+            System.out.println(" -done-");
+            System.out.println(ki.size()
+                    + " index entries initialized and sorted from "
+                    + super.col[0].size() + " keys.");
+        }
+        // assign index to wrapper
+        index = new kelondroBytesIntMap(ki);
+        description = "stt=" + Long.toString(System.currentTimeMillis() - start) + ";";
+        super.col[0].setDescription(description.getBytes());
+    }
+
+    private kelondroIndex initializeRamIndex() throws IOException {
+        kelondroRowBufferedSet ri = new kelondroRowBufferedSet(new kelondroRow(new int[]{super.row().width(0), 4}), 0);
+        ri.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
         Iterator content = super.col[0].contentNodes();
         kelondroRecords.Node node;
+        kelondroRow.Entry indexentry;
         int i;
         while (content.hasNext()) {
             node = (kelondroRecords.Node) content.next();
             i = node.handle().hashCode();
-            index.addi(node.getValueRow(), i);
+            indexentry = ri.rowdef.newEntry();
+            indexentry.setCol(0, node.getValueRow());
+            indexentry.setColLongB256(1, i);
+            ri.add(indexentry);
             if ((i % 10000) == 0) {
                 System.out.print('.');
                 System.out.flush();
@@ -58,33 +92,36 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         }
         System.out.print(" -ordering- ");
         System.out.flush();
-        this.index.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-        index.shape();
-        System.out.println(" -done-");
-        System.out.println(index.size() + " index entries initialized and sorted from " + super.col[0].size() + " keys.");
+        ri.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
+        ri.shape();
+        return ri;
     }
     
-    /*
-    private final static byte[] read(File source) throws IOException {
-        byte[] buffer = new byte[(int) source.length()];
-        InputStream fis = null;
-        try {
-            fis = new FileInputStream(source);
-            int p = 0, c;
-            while ((c = fis.read(buffer, p, buffer.length - p)) > 0) p += c;
-        } finally {
-            if (fis != null) try { fis.close(); } catch (Exception e) {}
+    private kelondroIndex initializeTreeIndex(File indexfile, long buffersize) throws IOException {
+        kelondroTree index = new kelondroTree(indexfile, buffersize, 10, rowdef.width(0), 4, true);
+        Iterator content = super.col[0].contentNodes();
+        kelondroRecords.Node node;
+        kelondroRow.Entry indexentry;
+        int i;
+        while (content.hasNext()) {
+            node = (kelondroRecords.Node) content.next();
+            i = node.handle().hashCode();
+            indexentry = index.row().newEntry();
+            indexentry.setCol(0, node.getValueRow());
+            indexentry.setColLongB256(1, i);
+            index.put(indexentry);
+            if ((i % 10000) == 0) {
+                System.out.print('.');
+                System.out.flush();
+            }
         }
-        return buffer;
+        return index;
     }
-    */
     
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
         synchronized (index) {
             int i = index.geti(key);
-            if (i >= this.size()) {
-                System.out.println("errror");
-            }
+            if (i >= this.size()) System.out.println("error");
             if (i < 0) return null;
             return super.get(i);
         }

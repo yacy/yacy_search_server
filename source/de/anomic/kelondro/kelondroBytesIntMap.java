@@ -24,45 +24,42 @@
 
 package de.anomic.kelondro;
 
-public class kelondroBytesIntMap extends kelondroRowBufferedSet {
-    
-    public kelondroBytesIntMap(int keySize, int initSize) {
-        super(new kelondroRow(new int[]{keySize, 4}), initSize);
-        
-        // initialize ordering
-        super.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-    }
+import java.io.IOException;
 
-    public int geti(byte[] key) {
-        kelondroRow.Entry indexentry = super.get(key);
+public class kelondroBytesIntMap {
+    
+    private kelondroIndex ki;
+    
+    public kelondroBytesIntMap(kelondroIndex ki) throws IOException {
+        assert (ki.row().columns() == 2); // must be a key/index relation
+        assert (ki.row().width(1) == 4);  // the value must be a b256-encoded int, 4 bytes long
+        this.ki = ki;
+    }
+    
+    public int geti(byte[] key) throws IOException {
+        kelondroRow.Entry indexentry = ki.get(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLongB256(1);
     }
     
-    public int puti(byte[] key, int i) {
-        kelondroRow.Entry newentry = rowdef.newEntry();
+    public int puti(byte[] key, int i) throws IOException {
+        kelondroRow.Entry newentry = ki.row().newEntry();
         newentry.setCol(0, key);
         newentry.setColLongB256(1, i);
-        kelondroRow.Entry oldentry = super.put(newentry);
+        kelondroRow.Entry oldentry = ki.put(newentry);
         if (oldentry == null) return -1;
         return (int) oldentry.getColLongB256(1);
     }
-
-    public void addi(byte[] key, int i) {
-        kelondroRow.Entry indexentry = rowdef.newEntry();
-        indexentry.setCol(0, key);
-        indexentry.setColLongB256(1, i);
-        add(indexentry);
-    }
     
-    public int removei(byte[] key) {
-        if (size() == 0) {
-            if (System.currentTimeMillis() - this.lastTimeWrote > 10000) this.trim();
-            return -1;
-        }
-        kelondroRow.Entry indexentry = removeMarked(key);
+    public int removei(byte[] key) throws IOException {
+        if (ki.size() == 0) return -1;
+        kelondroRow.Entry indexentry = ki.remove(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLongB256(1);
     }
 
+    public int size() throws IOException {
+        return ki.size();
+    }
+    
 }

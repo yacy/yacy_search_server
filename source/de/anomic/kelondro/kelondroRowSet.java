@@ -28,7 +28,7 @@ import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.Random;
 
-public class kelondroRowSet extends kelondroRowCollection {
+public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
 
     private static final int collectionReSortLimit = 90;
     private static final int removeMaxSize = 100;
@@ -87,6 +87,10 @@ public class kelondroRowSet extends kelondroRowCollection {
         return super.size() - removeMarker.size();
     }
 
+    public kelondroRow.Entry remove(byte[] a) {
+        return removeMarked(a);
+    }
+    
     public kelondroRow.Entry removeMarked(byte[] a) {
         return removeMarked(a, 0, a.length);
     }
