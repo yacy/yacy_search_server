@@ -86,7 +86,7 @@ public class htmlFilterImageEntry implements Comparable {
         // this is needed if this object is stored in a TreeSet
         assert (url != null);
         assert (h instanceof htmlFilterImageEntry);
-        if (this.url.equals(((htmlFilterImageEntry) h).url)) return 0;
+        if (this.url.toString().equals(((htmlFilterImageEntry) h).url.toString())) return 0;
         int thc = this.hashCode();
         int ohc = ((htmlFilterImageEntry) h).hashCode();
         if (thc < ohc) return -1;
