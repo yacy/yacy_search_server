@@ -70,8 +70,10 @@ public abstract class kelondroAbstractOrder implements kelondroOrder {
             return compare(((Node) a).getKey(), ((Node) b).getKey());
         } else if ((a instanceof String) && (b instanceof String)) {
             return compare(((String) a).getBytes(), ((String) b).getBytes());
-        } else
-            throw new IllegalArgumentException("Object type or Object type combination not supported: a=" + a + ", b=" + b);
+        } /* else if ((a instanceof Integer) && (b instanceof Integer)) {
+            return ((Integer) a).compareTo((Integer) b);
+        } */ else
+            throw new IllegalArgumentException("Object type or Object type combination not supported: a=" + a + "[" + a.getClass().getName() + "], b=" + b + "[" + b.getClass().getName() + "]");
     }
 
     public byte[] zero() {
