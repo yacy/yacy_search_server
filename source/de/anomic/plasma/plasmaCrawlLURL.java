@@ -775,11 +775,11 @@ public final class plasmaCrawlLURL extends indexURL {
         }
 
         public Object next() throws RuntimeException {
-            byte[] e = ((byte[][]) i.next())[0];
+            kelondroRow.Entry e = (kelondroRow.Entry) i.next();
             if (e == null) return null;
             String hash = null;
             try {
-                hash = new String(e);
+                hash = new String(e.getColBytes(0));
                 return new Entry(hash, null);
             } catch (IOException ex) {
                 throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + hash);
