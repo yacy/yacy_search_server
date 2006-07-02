@@ -1062,7 +1062,7 @@ public class kelondroRecords {
             while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
             
             // initialize bulk
-            bulksize = 1000;
+            bulksize = 65536 / recordsize;
             bulkstart = -bulksize;
             bulk = new byte[bulksize * recordsize];
         }
@@ -1075,9 +1075,6 @@ public class kelondroRecords {
             try {
                 // see if the next record is in the bulk, and if not re-fill the bulk
                 if ((pos.index - bulkstart) >= bulksize) {
-                    if (pos.index == 100000) {
-                        System.out.println(pos.index);
-                    }
                     bulkstart = pos.index;
                     int maxlength = Math.min(USAGE.allCount() - bulkstart, bulksize);
                     entryFile.readFully(POS_NODES + bulkstart * recordsize, bulk, 0, maxlength * recordsize);
