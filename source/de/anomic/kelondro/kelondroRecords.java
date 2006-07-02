@@ -484,6 +484,20 @@ public class kelondroRecords {
         return cacheCombinedStatus(cacheCombinedStatus(a, l - 1), a[l - 1]);
     }
     
+    public byte[] bulkRead(int start, int end) throws IOException {
+        // a bulk read simply reads a piece of memory from the record file
+        // this makes only sense if there are no overhead bytes or pointer
+        // the end value is OUTSIDE the record interval
+        assert OHBYTEC == 0;
+        assert OHHANDLEC == 0;
+        assert start >= 0;
+        assert end <= USAGE.allCount();
+        byte[] bulk = new byte[(end - start) * recordsize];
+        long bulkstart = POS_NODES + ((long) recordsize * start);
+        entryFile.readFully(bulkstart, bulk, 0, bulk.length);
+        return bulk;
+    }
+    
     protected Node newNode() throws IOException {
         return new Node();
     }
@@ -552,6 +566,19 @@ public class kelondroRecords {
             for (int i = tailchunksize - 1; i >= 0; i--) this.tailChunk[i] = 0;
         }
     
+        private Node(Handle handle, byte[] bulkchunk, int offset) throws IOException {
+            // create a new empty node and reserve empty space in file for it
+            // use this method only if you want to extend the file with new entries
+            // without the need to have content in it.
+            this.handle = handle;
+
+            // create empty chunks
+            this.headChunk = new byte[headchunksize];
+            this.tailChunk = new byte[tailchunksize];
+            System.arraycopy(bulkchunk, offset, this.headChunk, 0, headchunksize);
+            System.arraycopy(bulkchunk, offset + headchunksize, this.tailChunk, 0, tailchunksize);
+        }
+        /*
         private Node(Handle handle) throws IOException {
             // this creates an entry with an pre-reserved entry position
             // values can be written using the setValues() method
@@ -566,7 +593,7 @@ public class kelondroRecords {
             // init the content
             initContent();
         }
-
+        */
         private Node(Handle handle, Node parentNode, int referenceInParent) throws IOException {
             // this creates an entry with an pre-reserved entry position values can be written
             // using the setValues() method but we expect that values are already there in the file
@@ -1012,9 +1039,14 @@ public class kelondroRecords {
         
         private HashSet markedDeleted;
         private Handle pos;
+        private byte[] bulk;
+        private int bulksize;
+        private int bulkstart;  // the offset of the bulk array to the node position
         
         public contentNodeIterator() throws IOException {
             pos = new Handle(0);
+            
+            // initialize set with deleted nodes
             markedDeleted = new HashSet();
             synchronized (USAGE) {
                 if (USAGE.FREEC != 0) {
@@ -1025,13 +1057,43 @@ public class kelondroRecords {
                     }
                 }
             }
+            
+            // seek first position according the delete node set
             while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
+            
+            // initialize bulk
+            bulksize = 1000;
+            bulkstart = -bulksize;
+            bulk = new byte[bulksize * recordsize];
         }
 
         public boolean hasNext() {
             return pos.index < USAGE.allCount();
         }
 
+        public Object next() {
+            try {
+                // see if the next record is in the bulk, and if not re-fill the bulk
+                if ((pos.index - bulkstart) >= bulksize) {
+                    if (pos.index == 100000) {
+                        System.out.println(pos.index);
+                    }
+                    bulkstart = pos.index;
+                    int maxlength = Math.min(USAGE.allCount() - bulkstart, bulksize);
+                    entryFile.readFully(POS_NODES + bulkstart * recordsize, bulk, 0, maxlength * recordsize);
+                }
+                
+                // read node from bulk
+                Node n = new Node(new Handle(pos.index), bulk, (pos.index - bulkstart) * recordsize);
+                pos.index++;
+                while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
+                return n;
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new kelondroException(filename, e.getMessage());
+            }
+        }
+        /*
         public Object next() {
             try {
                 Node n = new Node(pos);
@@ -1042,7 +1104,7 @@ public class kelondroRecords {
                 throw new kelondroException(filename, e.getMessage());
             }
         }
-
+        */
         public void remove() {
             throw new UnsupportedOperationException();
         }
@@ -1145,7 +1207,7 @@ public class kelondroRecords {
         if (!(records)) return;
         // print also all records
         for (int i = 0; i < USAGE.allCount(); i++)
-            System.out.println("NODE: " + new Node(new Handle(i), null, 0).toString());
+            System.out.println("NODE: " + new Node(new Handle(i), (Node) null, 0).toString());
     }
 
     public String toString() {

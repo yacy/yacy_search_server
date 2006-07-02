@@ -87,6 +87,16 @@ public class kelondroRowCollection {
         }
     }
     
+    public void implantRows(byte[] b) {
+        assert (b.length % rowdef.objectsize() == 0);
+        synchronized (chunkcache) {
+            chunkcache = b;
+            chunkcount = b.length / rowdef.objectsize();
+            sortBound = chunkcount;
+            lastTimeWrote = System.currentTimeMillis();
+        }
+    }
+    
     public final long lastRead() {
         return lastTimeRead;
     }
