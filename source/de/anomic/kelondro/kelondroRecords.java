@@ -1062,7 +1062,7 @@ public class kelondroRecords {
             while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
             
             // initialize bulk
-            bulksize = 65536 / recordsize;
+            bulksize = Math.min(65536 / recordsize, USAGE.allCount());
             bulkstart = -bulksize;
             bulk = new byte[bulksize * recordsize];
         }
