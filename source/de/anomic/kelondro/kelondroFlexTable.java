@@ -48,7 +48,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             ki = new kelondroTree(indexfile, buffersize, 10);
         } else if (size() > 100000) {
             // generate new index file
-            System.out.print("*** Genrating File index for " + size() + " entries from " + indexfile);
+            System.out.print("*** Generating File index for " + size() + " entries from " + indexfile);
             ki = initializeTreeIndex(indexfile, buffersize);
 
             System.out.println(" -done-");
@@ -70,7 +70,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         description = "stt=" + Long.toString(System.currentTimeMillis() - start) + ";";
         super.col[0].setDescription(description.getBytes());
     }
-
+    
     private kelondroIndex initializeRamIndex() throws IOException {
         kelondroRowBufferedSet ri = new kelondroRowBufferedSet(new kelondroRow(new int[]{super.row().width(0), 4}), 0);
         ri.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
@@ -96,6 +96,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         ri.shape();
         return ri;
     }
+    
     
     private kelondroIndex initializeTreeIndex(File indexfile, long buffersize) throws IOException {
         kelondroTree index = new kelondroTree(indexfile, buffersize, 10, rowdef.width(0), 4, true);
