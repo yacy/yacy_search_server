@@ -135,9 +135,19 @@ public class ConfigBasic {
             
             // redirect the browser to the new port
             reconnect = true;
+            
+            String host = null;
+            if (header.containsKey(httpHeader.HOST)) {
+                host = (String)header.get(httpHeader.HOST);
+                int idx = host.indexOf(":");
+                if (idx != -1) host = host.substring(0,idx);
+            } else {
+                host = serverCore.publicLocalIP().getHostAddress();
+            }
+            
             prop.put("reconnect", 1);
-            prop.put("reconnect_host", serverCore.publicLocalIP().getHostAddress());
-            prop.put("nextStep_host", serverCore.publicLocalIP().getHostAddress());
+            prop.put("reconnect_host", host);
+            prop.put("nextStep_host", host);
             prop.put("reconnect_port", port);
             prop.put("nextStep_port", port);            
             prop.put("reconnect_sslSupport", theServerCore.withSSL() ? 1:0);
