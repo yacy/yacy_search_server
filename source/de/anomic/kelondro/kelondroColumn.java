@@ -36,12 +36,20 @@ public class kelondroColumn {
     public static final int celltype_cardinal   = 4;
     public static final int celltype_real       = 5;
     
-    private int celltype, cellwidth;
+    public static final int encoder_none   = 0;
+    public static final int encoder_b64e   = 1;
+    public static final int encoder_string = 2;
+    public static final int encoder_bytes  = 3;
+    public static final int encoder_char   = 4;
+    
+    private int celltype, cellwidth, encoder, encodedwidth;
     private String nickname, description;
     
-    public kelondroColumn(int celltype, int cellwidth, String nickname, String description) {
+    public kelondroColumn(String nickname, int celltype, int cellwidth, int encoder, int encodedwidth, String description) {
         this.celltype = celltype;
         this.cellwidth = cellwidth;
+        this.encoder = encoder;
+        this.encodedwidth = encodedwidth;
         this.nickname = nickname;
         this.description = description;
     }
@@ -52,6 +60,14 @@ public class kelondroColumn {
     
     public int cellwidth() {
         return this.cellwidth;
+    }
+    
+    public int encoder() {
+        return this.encoder;
+    }
+    
+    public int encodedwidth() {
+        return this.encodedwidth;
     }
     
     public String nickname() {

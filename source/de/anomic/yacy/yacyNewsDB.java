@@ -83,11 +83,11 @@ public class yacyNewsDB {
     }
     
     public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
-            new kelondroColumn(kelondroColumn.celltype_string, yacyNewsRecord.idLength(), "newsid", "id = created + originator"),
-            new kelondroColumn(kelondroColumn.celltype_string, yacyNewsRecord.categoryStringLength, "category", ""),
-            new kelondroColumn(kelondroColumn.celltype_string, yacyCore.universalDateShortPattern.length(), "received", ""),
-            new kelondroColumn(kelondroColumn.celltype_string, 2, "", ""),
-            new kelondroColumn(kelondroColumn.celltype_string, attributesMaxLength, "", ""),
+            new kelondroColumn("newsid", kelondroColumn.celltype_string, yacyNewsRecord.idLength(), kelondroColumn.encoder_string, yacyNewsRecord.idLength(), "id = created + originator"),
+            new kelondroColumn("category", kelondroColumn.celltype_string, yacyNewsRecord.categoryStringLength, kelondroColumn.encoder_string, yacyNewsRecord.categoryStringLength, ""),
+            new kelondroColumn("received", kelondroColumn.celltype_string, yacyCore.universalDateShortPattern.length(), kelondroColumn.encoder_string, yacyCore.universalDateShortPattern.length(), ""),
+            new kelondroColumn("", kelondroColumn.celltype_string, 2, kelondroColumn.encoder_string, 2, ""),
+            new kelondroColumn("", kelondroColumn.celltype_string, attributesMaxLength, kelondroColumn.encoder_string, attributesMaxLength, ""),
     });
 
     private static kelondroTree createDB(File path, int bufferkb) {
@@ -184,18 +184,6 @@ public class yacyNewsDB {
         );
     }
 
-    /*
-    private static yacyNewsRecord b2r(byte[][] b) {
-        if (b == null) return null;
-        return new yacyNewsRecord(
-            new String(b[0]),
-            new String(b[1]),
-            (b[2] == null) ? null : yacyCore.parseUniversalDate(new String(b[2]), serverDate.UTCDiffString()),
-            (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(b[3])),
-            serverCodings.string2map(new String(b[4]))
-        );
-    }
-*/
     private kelondroRow.Entry r2b(yacyNewsRecord r) {
         if (r == null) return null;
         String attributes = r.attributes().toString();

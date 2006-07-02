@@ -37,13 +37,19 @@ import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexAbstractEntry;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroColumn;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaWordIndex;
 
 public final class indexURLEntry extends indexAbstractEntry implements Cloneable, indexEntry {
 
-    // an wordEntry can be filled in either of two ways:
-    // by the discrete values of the entry
-    // or by the encoded entry-string
+    public static kelondroRow urlEntryRow = new kelondroRow(new kelondroColumn[]{
+            new kelondroColumn(
+                    "nickname",
+                    kelondroColumn.celltype_undefined, 4 /*cellwidth*/,
+                    kelondroColumn.encoder_none, 0,
+                    "description")
+    });
 
     // the class instantiation can only be done by a plasmaStore method
     // therefore they are all public
