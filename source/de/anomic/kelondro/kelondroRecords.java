@@ -82,6 +82,7 @@ public class kelondroRecords {
     private static final int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
     private static final long memBlock = 500000; // do not fill cache further if the amount of available memory is less that this
     public final static boolean useWriteBuffer = false;
+    public final static long preloadCacheTime = 500; // time that can be wasted to initialize the node cache
     
     // memory calculation
     private static final int element_in_cache = 4; // for kelondroCollectionObjectMap: 4; for HashMap: 52
@@ -202,7 +203,7 @@ public class kelondroRecords {
             kelondroRA raf = new kelondroFileRA(this.filename);
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
-            init(raf, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, buffersize / 10);
+            initNewFile(raf, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, buffersize / 10);
         } catch (IOException e) {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail)
@@ -217,7 +218,7 @@ public class kelondroRecords {
                            boolean exitOnFail) {
         this.filename = null;
         try {
-            init(ra, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, buffersize / 10);
+            initNewFile(ra, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, buffersize / 10);
         } catch (IOException e) {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail) System.exit(-1);
@@ -225,7 +226,7 @@ public class kelondroRecords {
         initCache(buffersize / 10 * 9);
     }
    
-    private void init(kelondroRA ra, short ohbytec, short ohhandlec,
+    private void initNewFile(kelondroRA ra, short ohbytec, short ohhandlec,
                       kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth, long writeBufferSize) throws IOException {
 
         // create new Chunked IO
@@ -313,23 +314,23 @@ public class kelondroRecords {
 
     public void logWarning(String message) {
         if (this.theLogger == null)
-            System.err.println("KELONDRO WARNING for file " + this.filename + ": " + message);
+            System.err.println("KELONDRO WARNING " + this.filename + ": " + message);
         else
-            this.theLogger.warning("KELONDRO WARNING for file " + this.filename + ": " + message);
+            this.theLogger.warning("KELONDRO WARNING " + this.filename + ": " + message);
     }
 
     public void logFailure(String message) {
         if (this.theLogger == null)
-            System.err.println("KELONDRO FAILURE for file " + this.filename + ": " + message);
+            System.err.println("KELONDRO FAILURE " + this.filename + ": " + message);
         else
-            this.theLogger.severe("KELONDRO FAILURE for file " + this.filename + ": " + message);
+            this.theLogger.severe("KELONDRO FAILURE " + this.filename + ": " + message);
     }
 
     public void logFine(String message) {
         if (this.theLogger == null)
-            System.out.println("KELONDRO DEBUG for file " + this.filename + ": " + message);
+            System.out.println("KELONDRO DEBUG " + this.filename + ": " + message);
         else
-            this.theLogger.fine("KELONDRO DEBUG for file " + this.filename + ": " + message);
+            this.theLogger.fine("KELONDRO DEBUG " + this.filename + ": " + message);
     }
     
     public void clear() throws IOException {
@@ -351,17 +352,17 @@ public class kelondroRecords {
         //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
         //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
-        init(raf, buffersize / 10);
+        initExistingFile(raf, buffersize / 10);
         initCache(buffersize / 10 * 9);
     }
     
     public kelondroRecords(kelondroRA ra, long buffersize) throws IOException{
         this.filename = null;
-        init(ra, buffersize / 10);
+        initExistingFile(ra, buffersize / 10);
         initCache(buffersize / 10 * 9);
     }
 
-    private void init(kelondroRA ra, long writeBufferSize) throws IOException {
+    private void initExistingFile(kelondroRA ra, long writeBufferSize) throws IOException {
         // read from Chunked IO
         if (useWriteBuffer) {
             this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), writeBufferSize, 30000 + random.nextLong() % 30000);
@@ -424,8 +425,23 @@ public class kelondroRecords {
         this.writeDouble = 0;
         this.cacheDelete = 0;
         this.cacheFlush = 0;
+        
+        // pre-load node cache
+        if ((preloadCacheTime > 0) && (cacheSize > 0)) {
+            long stop = System.currentTimeMillis() + preloadCacheTime;
+            Iterator i = contentNodes();
+            Node n;
+            int count = 0;
+            while ((System.currentTimeMillis() < stop) && (cacheHeaders.size() < cacheSize) && (i.hasNext())) {
+                n = (Node) i.next();
+                cacheHeaders.addb(n.handle.index, n.headChunk);
+                count++;
+            }
+            cacheHeaders.shape();
+            logFine("preloaded " + count + " records into cache");
+        }
     }
-    
+
     private static final long max = Runtime.getRuntime().maxMemory();
     private static final Runtime runtime = Runtime.getRuntime();
     
@@ -567,9 +583,7 @@ public class kelondroRecords {
         }
     
         private Node(Handle handle, byte[] bulkchunk, int offset) throws IOException {
-            // create a new empty node and reserve empty space in file for it
-            // use this method only if you want to extend the file with new entries
-            // without the need to have content in it.
+            // this initializer is used to create nodes from bulk-read byte arrays
             this.handle = handle;
 
             // create empty chunks
@@ -595,9 +609,9 @@ public class kelondroRecords {
         }
         */
         private Node(Handle handle, Node parentNode, int referenceInParent) throws IOException {
-            // this creates an entry with an pre-reserved entry position values can be written
-            // using the setValues() method but we expect that values are already there in the file
-            // ready to be read which we do not here
+            // this creates an entry with an pre-reserved entry position.
+            // values can be written using the setValues() method,
+            // but we expect that values are already there in the file.
             assert (handle != null): "node handle is null";
             assert (handle.index >= 0): "node handle too low: " + handle.index;
             //assert (handle.index < USAGE.allCount()) : "node handle too high: " + handle.index + ", USEDC=" + USAGE.USEDC + ", FREEC=" + USAGE.FREEC;
