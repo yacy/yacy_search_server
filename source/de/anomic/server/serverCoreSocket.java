@@ -70,6 +70,10 @@ public class serverCoreSocket extends Socket {
         return this.isSSL;
     }
 
+    public String getProtocol() {
+        return this.sslType;
+    }
+    
     private void detectSSL() throws IOException {
         InputStream in = getInputStream();    
         
