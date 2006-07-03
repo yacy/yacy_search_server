@@ -44,8 +44,7 @@
 //if the shell's current path is HTROOT
 
 import java.util.Iterator;
-import java.util.Map;
-import java.io.File;
+
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -55,7 +54,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
-import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyCore;
 
 import de.anomic.yacy.yacySeed;
@@ -63,21 +61,19 @@ import de.anomic.yacy.yacySeed;
 public class YPStats_p {
 
     private static final int KB = 1024;
-    private static final int MB = 1024 * KB;
-    private static Map defaultSettings = null;
         
-    private static long[]    slt,chk;
-    private static String[] ost;
-    private static long     req, usd, bst, god;
+    //private static long[]    slt,chk;
+    //private static String[] ost;
+    private static long     req /*, usd, bst, god*/;
     
-    private static long usedTotal, currTotal, dfltTotal, goodTotal, bestTotal;
+    //private static long usedTotal, currTotal, dfltTotal, goodTotal, bestTotal;
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         serverObjects prop = new serverObjects();
-        File defaultSettingsFile = new File(switchboard.getRootPath(), "yacy.init");
-        Map defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
+        //File defaultSettingsFile = new File(switchboard.getRootPath(), "yacy.init");
+        //Map defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
         
         String url=null;
         if(post!=null && post.containsKey("url")) {
@@ -245,7 +241,9 @@ public class YPStats_p {
         prop.put("ramCache" + db, Long.parseLong(sb.getConfig("ramCache" + db, "0")) / KB);
     }
     
+    /*
     private static String d(String a, String b) {
         return (a == null) ? b : a;
     }
+    */
 }
