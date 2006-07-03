@@ -175,7 +175,10 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
     }
 
     public void intermission(long pause) {
-	this.intermission = System.currentTimeMillis() + pause;
+        if (pause == Long.MAX_VALUE)
+            this.intermission = Long.MAX_VALUE;
+        else
+            this.intermission = System.currentTimeMillis() + pause;
     }
 
     public void terminate(boolean waitFor) {
@@ -245,15 +248,25 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         Runtime rt = Runtime.getRuntime();
                 
         while (running) {
-	    if ((this.intermissionObedient) && (this.intermission > 0)) {
+            if ((this.intermissionObedient) && (this.intermission > 0) && (this.intermission != Long.MAX_VALUE)) {
                 long itime = this.intermission - System.currentTimeMillis();
-		if (itime > 0) {
-                    logSystem("thread '" + this.getName() + "' breaks for intermission: " + (itime / 1000) + " seconds");
-		    ratz(itime);
-		}
-		this.intermission = 0;
-	    }
-            if (rt.freeMemory() > memprereq) try {
+                if (itime > 0) {
+                    if (itime > this.idlePause) itime = this.idlePause;
+                    logSystem("thread '" + this.getName()
+                            + "' breaks for intermission: " + (itime / 1000)
+                            + " seconds");
+                    ratz(itime);
+                }
+                this.intermission = 0;
+            }
+
+            if (this.intermission == Long.MAX_VALUE) {
+                // omit Job, paused
+                logSystem("thread '" + this.getName() + "' paused");
+                timestamp = System.currentTimeMillis();
+                ratz(this.idlePause);
+                idletime += System.currentTimeMillis() - timestamp;
+            } else if (rt.freeMemory() > memprereq) try {
                 // do job
                 timestamp = System.currentTimeMillis();
                 memstamp0 = serverMemory.used();
