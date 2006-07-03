@@ -116,6 +116,10 @@ public class kelondroCollectionIndex {
         throw new kelondroOutOfLimitsException(maxChunks, requestedCapacity);
     }
     
+    public int size() throws IOException {
+        return index.size();
+    }
+    
     public void put(byte[] key, kelondroRowCollection collection) throws IOException, kelondroOutOfLimitsException {
         if (collection.size() > maxChunks) throw new kelondroOutOfLimitsException(maxChunks, collection.size());
 
@@ -210,12 +214,7 @@ public class kelondroCollectionIndex {
         // remove array entry
         array[partitionnumber].remove(rownumber);
     }
-    
-    /*
-    public Iterator collections(boolean up, boolean rotating) throws IOException {
-        // Objects are of type kelondroRowCollection
-    }
-    */
+
     
     public static void main(String[] args) {
         System.out.println(new java.util.Date(10957 * day));

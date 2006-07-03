@@ -18,19 +18,47 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         collectionIndex = new kelondroCollectionIndex(
                 path, filenameStub, 9 /*keyLength*/,
                 kelondroNaturalOrder.naturalOrder, buffersize,
-                1 /*loadfactor*/, rowdef, 8 /*partitions*/);
+                4 /*loadfactor*/, rowdef, 8 /*partitions*/);
     }
     
     public int size() {
-        // TODO Auto-generated method stub
-        return 0;
+        try {
+            return collectionIndex.size();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     public Iterator wordHashes(String startWordHash, boolean rot) {
-        // TODO Auto-generated method stub
-        return null;
+        return new wordHashIterator(startWordHash, rot);
     }
 
+    public class wordHashIterator implements Iterator {
+
+        //private Iterator whi;
+        
+        public wordHashIterator(String startWordHash, boolean rot) {
+
+        }
+        
+        public boolean hasNext() {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        public Object next() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        public void remove() {
+            // TODO Auto-generated method stub
+            
+        }
+
+    }
+     
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime) {
         // TODO Auto-generated method stub
         return null;

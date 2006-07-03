@@ -24,6 +24,7 @@
 
 package de.anomic.kelondro;
 
+import java.io.IOException;
 import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.Random;
@@ -245,6 +246,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     private int binarySearch(byte[] key, int astart, int alength) {
+        // returns the exact position of the key if the key exists,
+        // or -1 if the key does not exist
         assert (this.sortOrder != null);
         int l = 0;
         int rbound = this.sortBound;
@@ -258,6 +261,25 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             else l = p + 1;
         }
         return -1;
+    }
+
+    private int binaryPosition(byte[] key, int astart, int alength) {
+        // returns the exact position of the key if the key exists,
+        // or a position of an entry that is greater than the key if the
+        // key does not exist
+        assert (this.sortOrder != null);
+        int l = 0;
+        int rbound = this.sortBound;
+        int p = 0;
+        int d;
+        while (l < rbound) {
+            p = l + ((rbound - l) >> 1);
+            d = compare(key, astart, alength, p);
+            if (d == 0) return p;
+            else if (d < 0) rbound = p;
+            else l = p + 1;
+        }
+        return l;
     }
 
     private int compare(byte[] a, int astart, int alength, int chunknumber) {
@@ -277,6 +299,54 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
     public kelondroProfile profile() {
         return profile;
+    }
+    
+    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        return new rowIterator(up, rotating, firstKey);
+    }
+    
+    public class rowIterator implements Iterator {
+
+        private boolean up, rot;
+        private byte[] first;
+        private int p, bound;
+        
+        public rowIterator(boolean up, boolean rotating, byte[] firstKey) {
+            this.up = up;
+            this.rot = rotating;
+            this.first = firstKey;
+            this.bound = sortBound;
+            // see that all elements are sorted
+            shape();
+            if (first == null) {
+                p = 0;
+            } else {
+                p = binaryPosition(first, 0, first.length);
+            }
+        }
+        
+        public boolean hasNext() {
+            if (rot) return true;
+            if (up) {
+                return p < bound;
+            } else {
+                return p >= 0;
+            }
+        }
+
+        public Object next() {
+            kelondroRow.Entry entry = get(p);
+            if (up) p++; else p--;
+            if (rot) {
+                if (p == bound) p = 0;
+                if (p < 0) p = bound - 1;
+            }
+            return entry;
+        }
+        
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
     
     public static void main(String[] args) {
