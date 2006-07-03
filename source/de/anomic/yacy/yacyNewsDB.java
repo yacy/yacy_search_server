@@ -61,6 +61,7 @@ public class yacyNewsDB {
 
     private File path;
     private int bufferkb;
+    private long preloadTime;
     private kelondroTree news;
 
     public static final int attributesMaxLength = yacyNewsRecord.maxNewsRecordLength
@@ -69,16 +70,17 @@ public class yacyNewsDB {
                  - yacyCore.universalDateShortPattern.length()
                  - 2;
 
-    public yacyNewsDB(File path, int bufferkb) {
+    public yacyNewsDB(File path, int bufferkb, long preloadTime) {
         this.path = path;
         this.bufferkb = bufferkb;
-
+        this.preloadTime = preloadTime;
+        
         if (path.exists()) try {
-            news = new kelondroTree(path, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent);
+            news = new kelondroTree(path, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
         } catch (IOException e) {
-            news = createDB(path, bufferkb);
+            news = createDB(path, bufferkb, preloadTime);
         } else {
-            news = createDB(path, bufferkb);
+            news = createDB(path, bufferkb, preloadTime);
         }
     }
     
@@ -90,14 +92,14 @@ public class yacyNewsDB {
             new kelondroColumn("", kelondroColumn.celltype_string, attributesMaxLength, kelondroColumn.encoder_string, attributesMaxLength, ""),
     });
 
-    private static kelondroTree createDB(File path, int bufferkb) {
-        return new kelondroTree(path, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, rowdef, true);
+    private static kelondroTree createDB(File path, int bufferkb, long preloadTime) {
+        return new kelondroTree(path, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
     }
 
     private void resetDB() {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
-        news = createDB(path, bufferkb);
+        news = createDB(path, bufferkb, preloadTime);
     }
 
     public int dbCacheNodeChunkSize() {

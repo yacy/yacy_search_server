@@ -16,6 +16,7 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     protected plasmaSwitchboard sb;
     protected File importPath;
     protected int cacheSize;
+    protected long preloadTime;
     
     protected long globalStart = System.currentTimeMillis();
     protected long globalEnd;

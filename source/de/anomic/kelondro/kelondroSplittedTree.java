@@ -73,10 +73,8 @@ public class kelondroSplittedTree implements kelondroIndex {
     }
     
     public kelondroSplittedTree(File pathToFiles, String filenameStub, kelondroOrder objectOrder,
-                            long buffersize,
-                            int forkfactor,
-                            kelondroRow rowdef,
-                            int txtProps, int txtPropsWidth,
+                            long buffersize, long preloadTime,
+                            int forkfactor, kelondroRow rowdef, int txtProps, int txtPropsWidth,
                             boolean exitOnFail) {
         ktfs = new kelondroTree[forkfactor];
         File f;
@@ -84,15 +82,15 @@ public class kelondroSplittedTree implements kelondroIndex {
             f = dbFile(pathToFiles, filenameStub, forkfactor, rowdef.columns(), i);
             if (f.exists()) {
                 try {
-                    ktfs[i] = new kelondroTree(f, buffersize/forkfactor, kelondroTree.defaultObjectCachePercent);
+                    ktfs[i] = new kelondroTree(f, buffersize/forkfactor, preloadTime / forkfactor, kelondroTree.defaultObjectCachePercent);
                     this.order = ktfs[i].order();
                 } catch (IOException e) {
-                    ktfs[i] = new kelondroTree(f, buffersize/forkfactor, kelondroTree.defaultObjectCachePercent,
+                    ktfs[i] = new kelondroTree(f, buffersize/forkfactor, preloadTime / forkfactor, kelondroTree.defaultObjectCachePercent,
                             rowdef, objectOrder, txtProps, txtPropsWidth, exitOnFail);
                     this.order = objectOrder;
                 }
             } else {
-                ktfs[i] = new kelondroTree(f, buffersize/forkfactor, kelondroTree.defaultObjectCachePercent,
+                ktfs[i] = new kelondroTree(f, buffersize/forkfactor, preloadTime / forkfactor, kelondroTree.defaultObjectCachePercent,
                         rowdef, objectOrder, txtProps, txtPropsWidth, exitOnFail);
                 this.order = objectOrder;
             }
@@ -101,29 +99,28 @@ public class kelondroSplittedTree implements kelondroIndex {
     }
 
     public kelondroSplittedTree(File pathToFiles, String filenameStub, kelondroOrder objectOrder,
-                            long buffersize, int forkfactor, int columns) throws IOException {
+                            long buffersize, long preloadTime, int forkfactor, int columns) throws IOException {
         ktfs = new kelondroTree[forkfactor];
         for (int i = 0; i < forkfactor; i++) {
-            ktfs[i] = new kelondroTree(dbFile(pathToFiles, filenameStub, forkfactor, columns, i), buffersize/forkfactor, kelondroTree.defaultObjectCachePercent);
+            ktfs[i] = new kelondroTree(dbFile(pathToFiles, filenameStub, forkfactor, columns, i),
+                                       buffersize/forkfactor, preloadTime / forkfactor, kelondroTree.defaultObjectCachePercent);
         }
         ff = forkfactor;
         this.order = objectOrder;
     }
     
     public static kelondroSplittedTree open(File pathToFiles, String filenameStub, kelondroOrder objectOrder,
-                    long buffersize,
-                    int forkfactor,
-                    kelondroRow rowdef, int txtProps, int txtPropsWidth,
+                    long buffersize, long preloadTime,
+                    int forkfactor, kelondroRow rowdef, int txtProps, int txtPropsWidth,
                     boolean exitOnFail) throws IOException {
         // generated a new splittet tree if it not exists or
         // opens an existing one
         if (existsAll(pathToFiles, filenameStub, forkfactor, rowdef.columns())) {
-            return new kelondroSplittedTree(pathToFiles, filenameStub, objectOrder, buffersize, forkfactor, rowdef.columns());
+            return new kelondroSplittedTree(pathToFiles, filenameStub, objectOrder, buffersize, preloadTime, forkfactor, rowdef.columns());
         } else {
             return new kelondroSplittedTree(pathToFiles, filenameStub, objectOrder,
-                            buffersize,
-                            forkfactor,
-                            rowdef, txtProps, txtPropsWidth,
+                            buffersize, preloadTime,
+                            forkfactor, rowdef, txtProps, txtPropsWidth,
                             exitOnFail);
         }
     }

@@ -93,6 +93,7 @@ public final class yacySeedDB {
 
     private kelondroMap seedActiveDB, seedPassiveDB, seedPotentialDB;
     private int seedDBBufferKB;
+    private long preloadTime;
     
     public  final plasmaSwitchboard sb;
     public  yacySeed mySeed; // my own seed
@@ -104,7 +105,7 @@ public final class yacySeedDB {
             File seedActiveDBFile,
             File seedPassiveDBFile,
             File seedPotentialDBFile,
-            int bufferkb) {
+            int bufferkb, long preloadTime) {
         
         this.seedDBBufferKB = bufferkb;
         this.seedActiveDBFile = seedActiveDBFile;
@@ -112,6 +113,7 @@ public final class yacySeedDB {
         this.seedPotentialDBFile = seedPotentialDBFile;
         this.mySeed = null; // my own seed
         this.sb = sb;
+        this.preloadTime = preloadTime;
         
         // set up seed database
         seedActiveDB = openSeedTable(seedActiveDBFile);
@@ -195,7 +197,7 @@ public final class yacySeedDB {
     private synchronized kelondroMap openSeedTable(File seedDBFile) {
         if (seedDBFile.exists()) try {
             // open existing seed database
-            return new kelondroMap(new kelondroDyn(seedDBFile, (seedDBBufferKB * 0x400) / 3, '#'), sortFields, accFields);
+            return new kelondroMap(new kelondroDyn(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, '#'), sortFields, accFields);
         } catch (kelondroException e) {
             // if we have an error, we start with a fresh database
             if (seedDBFile.exists()) seedDBFile.delete();
@@ -205,7 +207,7 @@ public final class yacySeedDB {
         }
         // create new seed database
         new File(seedDBFile.getParent()).mkdir();
-        return new kelondroMap(new kelondroDyn(seedDBFile, (seedDBBufferKB * 0x400) / 3, commonHashLength, 480, '#', true), sortFields, accFields);
+        return new kelondroMap(new kelondroDyn(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', true), sortFields, accFields);
     }
     
     private synchronized kelondroMap resetSeedTable(kelondroMap seedDB, File seedDBFile) {

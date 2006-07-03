@@ -24,6 +24,6 @@ public interface dbImporter {
     public String getError();
     public String getStatus();
     
-    public void init(File importPath, int cacheSize);
+    public void init(File importPath, int cacheSize, long preloadTime);
     public void startIt();    
 }

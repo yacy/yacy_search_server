@@ -57,7 +57,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     
     public kelondroFixedWidthArray(File file, kelondroRow rowdef, int intprops, boolean exitOnFail) {
         // this creates a new array
-        super(file, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
+        super(file, 0, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
         for (int i = 0; i < intprops; i++) try {
             setHandle(i, new Handle(0));
         } catch (IOException e) {
@@ -69,7 +69,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
 
     public kelondroFixedWidthArray(File file) throws IOException{
         // this opens a file with an existing array
-        super(file, 0);
+        super(file, 0, 0);
     }
     
     public synchronized kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException {

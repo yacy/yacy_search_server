@@ -97,7 +97,7 @@ public final class plasmaHTCache {
     public final serverLog log;
     public static final HashSet filesInUse = new HashSet(); // can we delete this file
 
-    public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb) {
+    public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb, long preloadTime) {
         // this.switchboard = switchboard;
 
         this.log = new serverLog("HTCACHE");
@@ -156,9 +156,9 @@ public final class plasmaHTCache {
         File dbfile = new File(this.cachePath, "responseHeader.db");
         try {
             if (dbfile.exists())
-                this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, '#'));
+                this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, preloadTime, '#'));
             else
-                this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, indexURL.urlHashLength, 150, '#', false));
+                this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, preloadTime, indexURL.urlHashLength, 150, '#', false));
         } catch (IOException e) {
             this.log.logSevere("the request header database could not be opened: " + e.getMessage());
             System.exit(0);

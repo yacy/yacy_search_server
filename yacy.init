@@ -496,43 +496,56 @@ xpstopw=true
 # ram cache for database files
 
 # ram cache for assortment cache cluster (for all 64 files)
-ramCacheRWI     =  8388608
+ramCacheRWI          =  8388608
+ramCacheRWI_time     =    30000
 
 # ram cache for responseHeader.db
-ramCacheHTTP    =  1048576
+ramCacheHTTP         =  1048576
+ramCacheHTTP_time    =     1000
 
 # ram cache for urlHash.db
-ramCacheLURL    =  8388608
+ramCacheLURL         =  8388608
+ramCacheLURL_time    =    10000
 
 # ram cache for urlNotice.db
-ramCacheNURL    =  4194304
+ramCacheNURL         =  4194304
+ramCacheNURL_time    =     2000
 
 # ram cache for urlErr.db 
-ramCacheEURL    =     8192
+ramCacheEURL         =     8192
+ramCacheEURL_time    =     1000
 
 # ram cache for seedDBs
-ramCacheDHT     =   131072
+ramCacheDHT          =   131072
+ramCacheDHT_time     =     1000
 
 # ram cache for message.db
-ramCacheMessage =     8192
+ramCacheMessage      =     8192
+ramCacheMessage_time =      500
 
 # ram cache for wiki.db
-ramCacheWiki    =     8192
+ramCacheWiki         =     8192
+ramCacheWiki_time    =      500
 
 # ram cache for blog.db
-ramCacheBlog    =     2048
+ramCacheBlog         =     2048
+ramCacheBlog_time    =      500
 
 # ram cache for news1.db
-ramCacheNews    =  1048576
+ramCacheNews         =  1048576
+ramCacheNews_time    =     1000
 
 # ram cache for robotsTxt.db
-ramCacheRobots  =  4194304
+ramCacheRobots       =  4194304
+ramCacheRobots_time  =     3000
 
 # ram cache for crawlProfile.db
-ramCacheProfiles  =   8192
+ramCacheProfiles     =     8192
+ramCacheProfiles_time=      500
 
 # ram cache for stack crawl thread db
-ramCachePreNURL = 4194304
+ramCachePreNURL      =  4194304
+ramCachePreNURL_time =     3000
 
 # default memory settings for startup of yacy
 # is only valid in unix/shell environments and

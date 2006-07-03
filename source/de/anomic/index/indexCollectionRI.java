@@ -12,12 +12,12 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
 
     kelondroCollectionIndex collectionIndex;
     
-    public indexCollectionRI(File path, String filenameStub, long buffersize) throws IOException {
+    public indexCollectionRI(File path, String filenameStub, long buffersize, long preloadTime) throws IOException {
         kelondroRow rowdef = new kelondroRow(new int[]{});
         
         collectionIndex = new kelondroCollectionIndex(
                 path, filenameStub, 9 /*keyLength*/,
-                kelondroNaturalOrder.naturalOrder, buffersize,
+                kelondroNaturalOrder.naturalOrder, buffersize, preloadTime,
                 4 /*loadfactor*/, rowdef, 8 /*partitions*/);
     }
     

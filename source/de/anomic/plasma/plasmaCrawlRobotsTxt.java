@@ -65,23 +65,25 @@ public class plasmaCrawlRobotsTxt {
     kelondroMap robotsTable;
     private final File robotsTableFile;
     private int bufferkb;
+    private long preloadTime;
     
-    public plasmaCrawlRobotsTxt(File robotsTableFile, int bufferkb) {
+    public plasmaCrawlRobotsTxt(File robotsTableFile, int bufferkb, long preloadTime) {
         this.robotsTableFile = robotsTableFile;
         this.bufferkb = bufferkb;
+        this.preloadTime = preloadTime;
         if (robotsTableFile.exists()) {
             try {
-                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, '_'));
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, preloadTime, '_'));
             } catch (kelondroException e) {
                 robotsTableFile.delete();
-                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, '_', true));
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, preloadTime, 256, 512, '_', true));
             } catch (IOException e) {
                 robotsTableFile.delete();
-                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, '_', true));
+                robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, preloadTime, 256, 512, '_', true));
             }
         } else {
             robotsTableFile.getParentFile().mkdirs();
-            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, 256, 512, '_', true));
+            robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, bufferkb * 1024, preloadTime, 256, 512, '_', true));
         }
     }
     
@@ -104,7 +106,7 @@ public class plasmaCrawlRobotsTxt {
         } catch (IOException e) {}
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, this.bufferkb, 256, 512, '_', true));
+        robotsTable = new kelondroMap(new kelondroDyn(robotsTableFile, this.bufferkb, preloadTime, 256, 512, '_', true));
     }
     
     public void close() {

@@ -67,13 +67,13 @@ public final class kelondroStack extends kelondroRecords {
     private static int root  = 0; // pointer for FHandles-array: pointer to root node
     private static int toor  = 1; // pointer for FHandles-array: pointer to root node
 
-    public kelondroStack(File file, long buffersize, int key, int value, boolean exitOnFail) {
-        this(file, buffersize, new kelondroRow(new int[] { key, value }), exitOnFail);
+    public kelondroStack(File file, int key, int value, boolean exitOnFail) {
+        this(file, new kelondroRow(new int[] { key, value }), exitOnFail);
     }
 
-    public kelondroStack(File file, long buffersize, kelondroRow rowdef, boolean exitOnFail) {
+    public kelondroStack(File file, kelondroRow rowdef, boolean exitOnFail) {
         // this creates a new stack
-        super(file, buffersize, thisOHBytes, thisOHHandles, rowdef, thisFHandles, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
+        super(file, 0, 0, thisOHBytes, thisOHHandles, rowdef, thisFHandles, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
         try {
             setHandle(root, null); // define the root value
             setHandle(toor, null); // define the toor value
@@ -84,9 +84,9 @@ public final class kelondroStack extends kelondroRecords {
         }
     }
 
-    public kelondroStack(File file, long buffersize) throws IOException{
+    public kelondroStack(File file) throws IOException{
         // this opens a file with an existing stack
-        super(file, buffersize);
+        super(file, 0, 0);
         if ((getHandle(root) == null) && (getHandle(toor) == null)) clear();
     }
 
@@ -99,7 +99,6 @@ public final class kelondroStack extends kelondroRecords {
     public static kelondroStack reset(kelondroStack stack) {
         // memorize settings to this file
         File f = new File(stack.filename);
-        long bz = stack.cacheNodeStatus()[0] * stack.cacheNodeChunkSize();
         kelondroRow row = stack.row();
         
         // close and delete the file
@@ -107,7 +106,7 @@ public final class kelondroStack extends kelondroRecords {
         if (f.exists()) f.delete();
 
         // re-open a database with same settings as before
-        return new kelondroStack(f, bz, row, true);
+        return new kelondroStack(f, row, true);
     }
     
     public class Counter implements Iterator {
@@ -367,12 +366,12 @@ public final class kelondroStack extends kelondroRecords {
 		System.err.println("( create, push, view, (g)pop, imp, shell)");
 		System.exit(0);
 	    } else if (args.length == 2) {
-		kelondroStack fm = new kelondroStack(new File(args[1]), 0x100000);
+		kelondroStack fm = new kelondroStack(new File(args[1]));
 		if (args[0].equals("-v")) {
 		    fm.print();
 		    ret = null;
 		} else if (args[0].equals("-g")) {
-		    fm = new kelondroStack(new File(args[1]), 0x100000);
+		    fm = new kelondroStack(new File(args[1]));
 		    kelondroRow.Entry ret2 = fm.pop();
 		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
@@ -380,7 +379,7 @@ public final class kelondroStack extends kelondroRecords {
 		fm.close();
 	    } else if (args.length == 3) {
 		if (args[0].equals("-i")) {
-		    kelondroStack fm = new kelondroStack(new File(args[2]), 0x100000);
+		    kelondroStack fm = new kelondroStack(new File(args[2]));
 		    int i = fm.imp(new File(args[1]),";");
 		    fm.close();
 		    ret = (i + " records imported").getBytes();
@@ -404,7 +403,7 @@ public final class kelondroStack extends kelondroRecords {
                 if (f != null) try {f.close();}catch(Exception e) {}
             }
 		} else if (args[0].equals("-g")) {
-		    kelondroStack fm = new kelondroStack(new File(args[2]), 0x100000);
+		    kelondroStack fm = new kelondroStack(new File(args[2]));
             kelondroRow.Entry ret2 = fm.pop(Integer.parseInt(args[1]));
 		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
@@ -415,10 +414,10 @@ public final class kelondroStack extends kelondroRecords {
 		    File f = new File(args[3]);
 		    if (f.exists()) f.delete();
 		    kelondroRow lens = new kelondroRow(new int[]{Integer.parseInt(args[1]), Integer.parseInt(args[2])});
-		    kelondroStack fm = new kelondroStack(f, 0x100000, lens, true);
+		    kelondroStack fm = new kelondroStack(f, lens, true);
 		    fm.close();
 		} else if (args[0].equals("-p")) {
-		    kelondroStack fm = new kelondroStack(new File(args[3]), 0x100000);
+		    kelondroStack fm = new kelondroStack(new File(args[3]));
 		    fm.push(fm.row().newEntry(new byte[][] {args[1].getBytes(), args[2].getBytes()}));
 		    fm.close();
 		}

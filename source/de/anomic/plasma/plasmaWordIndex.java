@@ -85,7 +85,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     private final plasmaWordIndexFileCluster backend;    
     private final kelondroOrder indexOrder = new kelondroNaturalOrder(true);
     
-    public plasmaWordIndex(File databaseRoot, int bufferkb, serverLog log) {
+    public plasmaWordIndex(File databaseRoot, int bufferkb, long preloadTime, serverLog log) {
         this.databaseRoot = databaseRoot;
         this.backend = new plasmaWordIndexFileCluster(databaseRoot, log);
         this.ramCache = new indexRAMCacheRI(databaseRoot, log);
@@ -94,7 +94,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         File assortmentClusterPath = new File(databaseRoot, indexAssortmentClusterPath);
         if (!(assortmentClusterPath.exists())) assortmentClusterPath.mkdirs();
         this.assortmentBufferSize = bufferkb;
-        this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, assortmentBufferSize, log);
+        this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, assortmentBufferSize, preloadTime, log);
     }
 
     public File getRoot() {
@@ -673,7 +673,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         // System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
         // System.out.println(new Date(reverseMicroDateDays(microDateDays(System.currentTimeMillis()))));
         
-        plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, new serverLog("TESTAPP"));
+        plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, 1000, new serverLog("TESTAPP"));
         try {
             Iterator iter = index.wordHashes("5A8yhZMh_Kmv", plasmaWordIndex.RL_WORDFILES, true);
             while (iter.hasNext()) {

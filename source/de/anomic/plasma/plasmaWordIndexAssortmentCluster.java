@@ -72,7 +72,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
     private plasmaWordIndexAssortment[] assortments;
     private long completeBufferKB;
 
-    public plasmaWordIndexAssortmentCluster(File assortmentsPath, int clusterCount, int bufferkb, serverLog log) {
+    public plasmaWordIndexAssortmentCluster(File assortmentsPath, int clusterCount, int bufferkb, long preloadTime, serverLog log) {
         // set class variables
         if (!(assortmentsPath.exists())) assortmentsPath.mkdirs();
         this.clusterCount = clusterCount;
@@ -86,7 +86,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         int sumSizes = 1;
         plasmaWordIndexAssortment testAssortment;
         for (int i = 0; i < clusterCount; i++) {
-            testAssortment = new plasmaWordIndexAssortment(assortmentsPath, i + 1, 0, null);
+            testAssortment = new plasmaWordIndexAssortment(assortmentsPath, i + 1, 0, 0, null);
             sizes[i] = testAssortment.size() + clusterCount - i;
             sumSizes += sizes[i];
             testAssortment.close();
@@ -96,7 +96,11 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         // initialize cluster using the cluster elements size for optimal buffer
         // size
         for (int i = 0; i < clusterCount; i++) {
-            assortments[i] = new plasmaWordIndexAssortment(assortmentsPath, i + 1, (int) (completeBufferKB * (long) sizes[i] / (long) sumSizes), log);
+            assortments[i] = new plasmaWordIndexAssortment(
+                    assortmentsPath, i + 1,
+                    (int) (completeBufferKB * (long) sizes[i] / (long) sumSizes),
+                    preloadTime * (long) sizes[i] / (long) sumSizes,
+                    log);
         }
     }
 

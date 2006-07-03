@@ -57,7 +57,8 @@ public class kelondroCollectionIndex {
         return (int) (time / day) - 10957;
     }
     
-    public kelondroCollectionIndex(File path, String filenameStub, int keyLength, kelondroOrder indexOrder, long buffersize,
+    public kelondroCollectionIndex(File path, String filenameStub, int keyLength, kelondroOrder indexOrder,
+                                   long buffersize, long preloadTime,
                                    int loadfactor, kelondroRow rowdef, int partitions) throws IOException {
         this.path = path;
         this.filenameStub = filenameStub;
@@ -73,7 +74,7 @@ public class kelondroCollectionIndex {
         columns[2] = 4; // chunkcount (number of chunks in this collection)
         columns[3] = 4; // index (position in index file)
         columns[4] = 2; // update time in days since 1.1.2000
-        index = new kelondroSplittedTree(path, filenameStub, indexOrder, buffersize, 8, new kelondroRow(columns), 1, 80, true);
+        index = new kelondroSplittedTree(path, filenameStub, indexOrder, buffersize, preloadTime, 8, new kelondroRow(columns), 1, 80, true);
 
         // create array files
         this.array = new kelondroFixedWidthArray[partitions];

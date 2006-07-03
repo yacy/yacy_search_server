@@ -91,12 +91,12 @@ public class plasmaSwitchboardQueue {
                 indexURL.urlDescrLength
             });
         if (sbQueueStackPath.exists()) try {
-            sbQueueStack = new kelondroStack(sbQueueStackPath, 0);
+            sbQueueStack = new kelondroStack(sbQueueStackPath);
         } catch (IOException e) {
             sbQueueStackPath.delete();
-            sbQueueStack = new kelondroStack(sbQueueStackPath, 0, rowdef, true);
+            sbQueueStack = new kelondroStack(sbQueueStackPath, rowdef, true);
         } else {
-            sbQueueStack = new kelondroStack(sbQueueStackPath, 0, rowdef, true);
+            sbQueueStack = new kelondroStack(sbQueueStackPath, rowdef, true);
         }
     }
     

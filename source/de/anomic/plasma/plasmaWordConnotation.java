@@ -58,13 +58,13 @@ public class plasmaWordConnotation {
     private static final int nodesize = 4048;
     private kelondroDynTree refDB;
     
-    public plasmaWordConnotation(File refDBfile, int bufferkb, char fillChar) {
+    public plasmaWordConnotation(File refDBfile, int bufferkb, long preloadTime, char fillChar) {
         if (refDBfile.exists()) try {
-            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, fillChar);
+            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, fillChar);
         } catch (IOException e) {
-            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, wordlength, nodesize, new kelondroRow(new int[] {wordlength, countlength}), fillChar, true);
+            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, wordlength, nodesize, new kelondroRow(new int[] {wordlength, countlength}), fillChar, true);
         } else {
-            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, wordlength, nodesize, new kelondroRow(new int[] {wordlength, countlength}), fillChar, true);
+            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, wordlength, nodesize, new kelondroRow(new int[] {wordlength, countlength}), fillChar, true);
         }
     }
 

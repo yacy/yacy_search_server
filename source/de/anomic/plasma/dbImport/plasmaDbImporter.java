@@ -51,7 +51,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         return theStatus.toString();
     }
     
-    public void init(File theImportPath, int theCacheSize) {
+    public void init(File theImportPath, int theCacheSize, long preloadTime) {
         super.init(theImportPath);
             
         this.homeWordIndex = this.sb.wordIndex;
@@ -75,9 +75,9 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         }         
         
         this.log.logFine("Initializing source word index db.");
-        this.importWordIndex = new plasmaWordIndex(this.importPath, (this.cacheSize/2)/1024, this.log);
+        this.importWordIndex = new plasmaWordIndex(this.importPath, (this.cacheSize/2)/1024, preloadTime / 2, this.log);
         this.log.logFine("Initializing import URL db.");
-        this.importUrlDB = new plasmaCrawlLURL(new File(this.importPath, "urlHash.db"), (this.cacheSize/2)/1024);
+        this.importUrlDB = new plasmaCrawlLURL(new File(this.importPath, "urlHash.db"), (this.cacheSize/2)/1024, preloadTime / 2);
         this.importStartSize = this.importWordIndex.size();
     }
     

@@ -83,6 +83,7 @@ public final class plasmaWordIndexAssortment {
     private serverLog log;
     private kelondroTree assortments;
     private long bufferSize;
+    private long preloadTime;
 
     private static String intx(int x) {
 	String s = Integer.toString(x);
@@ -102,17 +103,18 @@ public final class plasmaWordIndexAssortment {
         return structure;
     }
 
-    public plasmaWordIndexAssortment(File storagePath, int assortmentLength, int bufferkb, serverLog log) {
+    public plasmaWordIndexAssortment(File storagePath, int assortmentLength, int bufferkb, long preloadTime, serverLog log) {
         if (!(storagePath.exists())) storagePath.mkdirs();
         this.assortmentFile = new File(storagePath, assortmentFileName + intx(assortmentLength) + ".db");
         this.assortmentLength = assortmentLength;
 	    //this.bufferStructureLength = 3 + 2 * assortmentLength;
         this.bufferSize = bufferkb * 1024;
+        this.preloadTime = preloadTime;
         this.log = log;
         if (assortmentFile.exists()) {
             // open existing assortment tree file
             try {
-                assortments = new kelondroTree(assortmentFile, bufferSize, kelondroTree.defaultObjectCachePercent);
+                assortments = new kelondroTree(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent);
                 if (log != null) log.logConfig("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentLength + ", " + bufferkb + "kb buffer"); 
                 return;
             } catch (IOException e){
@@ -123,7 +125,7 @@ public final class plasmaWordIndexAssortment {
             assortmentFile.delete(); // make space for new one
         }
         // create new assortment tree file
-        assortments = new kelondroTree(assortmentFile, bufferSize, kelondroTree.defaultObjectCachePercent, new kelondroRow(bufferStructure(assortmentLength)), true);
+        assortments = new kelondroTree(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(bufferStructure(assortmentLength)), true);
         if (log != null) log.logConfig("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer");
     }
 
@@ -243,7 +245,7 @@ public final class plasmaWordIndexAssortment {
             if (!(assortmentFile.delete())) throw new RuntimeException("cannot delete assortment database");
         }
         if (assortmentFile.exists()) assortmentFile.delete();
-        assortments = new kelondroTree(assortmentFile, bufferSize, kelondroTree.defaultObjectCachePercent, new kelondroRow(bufferStructure(assortmentLength)), true);
+        assortments = new kelondroTree(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(bufferStructure(assortmentLength)), true);
     }
     
     public Iterator hashes(String startWordHash, boolean up, boolean rot) throws IOException {

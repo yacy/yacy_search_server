@@ -64,33 +64,38 @@ public class kelondroDynTree {
     //private long maxageCache = 60000, cycletimeCache = 10000;
     private long maxageBuffer = 60000, cycletimeBuffer = 10000;
     private long buffersize = 0;
+    private long preloadTime = 0;
 
     // data structures for the cache and buffer
     private Hashtable buffer, cache;
     private long cycleBuffer;
     
-    public kelondroDynTree(File file, long buffersize, int keylength, int nodesize, kelondroRow rowdef, char fillChar, boolean exitOnFail) {
+    public kelondroDynTree(File file, long buffersize, long preloadTime, int keylength, int nodesize, kelondroRow rowdef, char fillChar, boolean exitOnFail) {
         // creates a new DynTree
         this.file = file;
+        this.buffersize = buffersize;
+        this.preloadTime = preloadTime;
         this.rowdef = rowdef;
         this.buffer = new Hashtable();
         this.cache = new Hashtable();
         //this.cycleCache = Long.MIN_VALUE;
         this.cycleBuffer = Long.MIN_VALUE;
         if (file.exists()) file.delete();
-        this.table = new kelondroDyn(file, buffersize, keylength, nodesize, fillChar, exitOnFail);
+        this.table = new kelondroDyn(file, buffersize, preloadTime, keylength, nodesize, fillChar, exitOnFail);
         this.treeRAHandles = new Hashtable();
     }
 
-    public kelondroDynTree(File file, long buffersize, char fillChar) throws IOException {
+    public kelondroDynTree(File file, long buffersize, long preloadTime, char fillChar) throws IOException {
         // opens an existing DynTree
         this.file = file;
+        this.buffersize = buffersize;
+        this.preloadTime = preloadTime;
         this.buffer = new Hashtable();
         this.cache = new Hashtable();
         //this.cycleCache = Long.MIN_VALUE;
         this.cycleBuffer = Long.MIN_VALUE;
         if (!(file.exists())) throw new IOException("DynTree " + file.toString() + " does not exist");
-        this.table = new kelondroDyn(file, buffersize, fillChar);
+        this.table = new kelondroDyn(file, buffersize, preloadTime, fillChar);
         // read one element to measure the size of columns
         if (table.size() == 0) throw new IOException("DynTree " + file.toString() + " is empty. Should not.");
         this.treeRAHandles = new Hashtable();
@@ -127,7 +132,7 @@ public class kelondroDynTree {
         kelondroRA ra = table.getRA(key); // works always, even with no-existing entry
         treeRAHandles.put(key, ra);
         try {
-            return new kelondroTree(ra, buffersize, kelondroTree.defaultObjectCachePercent, rowdef, false);
+            return new kelondroTree(ra, buffersize, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, false);
         } catch (RuntimeException e) {
             throw new IOException(e.getMessage());
         }
@@ -137,7 +142,7 @@ public class kelondroDynTree {
         if (table.existsDyn(key)) {
             kelondroRA ra = table.getRA(key);
             treeRAHandles.put(key, ra);
-            return new kelondroTree(ra, buffersize, kelondroTree.defaultObjectCachePercent);
+            return new kelondroTree(ra, buffersize, preloadTime, kelondroTree.defaultObjectCachePercent);
         } else {
             return null;
         }
@@ -319,10 +324,10 @@ public class kelondroDynTree {
             System.out.println("start");
             File file = new File("D:\\bin\\testDyn.db");
             if (file.exists()) {
-                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, '_');
+                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, '_');
                 System.out.println("opened: table keylength=" + dt.table.row().width(0) + ", sectorsize=" + dt.table.row().width(1) + ", " + dt.table.size() + " entries.");
             } else {
-                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 16, 512, new kelondroRow(new int[] {10,20,30}), '_', true);
+                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow(new int[] {10,20,30}), '_', true);
                 String name;
                 kelondroTree t;
                 kelondroRow.Entry line;

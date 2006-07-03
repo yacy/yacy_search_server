@@ -22,7 +22,7 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
         this.jobType = "ASSORTMENT";
     }
     
-    public void init(File theImportAssortmentFile, int theCacheSize) {
+    public void init(File theImportAssortmentFile, int theCacheSize, long preloadTime) {
         super.init(theImportAssortmentFile);
         this.importAssortmentFile = theImportAssortmentFile;
         this.cacheSize = theCacheSize;
@@ -61,7 +61,7 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
 
         // initializing the import assortment db
         this.log.logInfo("Initializing source assortment file");
-        this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath,assortmentNr, this.cacheSize/1024, this.log);
+        this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath,assortmentNr, this.cacheSize/1024, preloadTime, this.log);
         this.importStartSize = this.assortmentFile.size();
     }
     

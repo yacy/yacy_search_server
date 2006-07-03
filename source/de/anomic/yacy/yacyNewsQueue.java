@@ -64,7 +64,7 @@ public class yacyNewsQueue {
         this.newsDB = newsDB;
 
         if (path.exists()) try {
-            queueStack = new kelondroStack(path, 0);
+            queueStack = new kelondroStack(path);
         } catch (kelondroException e) {
             path.delete();
             queueStack = createStack(path);
@@ -82,7 +82,7 @@ public class yacyNewsQueue {
     });
 
     private static kelondroStack createStack(File path) {
-        return new kelondroStack(path, 0, rowdef, true);
+        return new kelondroStack(path, rowdef, true);
     }
 
     private void resetDB() {

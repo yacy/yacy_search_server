@@ -11,8 +11,7 @@ import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaCrawlNURL.Entry;
 
-public class plasmaCrawlNURLImporter extends AbstractImporter implements
-        dbImporter {
+public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImporter {
 
     private HashSet importProfileHandleCache = new HashSet();
     private plasmaCrawlProfile importProfileDB;
@@ -47,9 +46,10 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements
         return theStatus.toString();
     }
 
-    public void init(File theImportPath, int theCacheSize) {
+    public void init(File theImportPath, int theCacheSize, long preloadTime) {
         super.init(theImportPath);
         this.cacheSize = theCacheSize;
+        this.preloadTime = preloadTime;
         
         File noticeUrlDbFile = new File(this.importPath,"urlNotice1.db");
         File profileDbFile = new File(this.importPath, "crawlProfiles0.db");
@@ -89,13 +89,13 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements
         
         // init noticeUrlDB
         this.log.logInfo("Initializing the source noticeUrlDB");
-        this.importNurlDB =  new plasmaCrawlNURL(this.importPath, ((this.cacheSize*3)/4)/1024);
+        this.importNurlDB =  new plasmaCrawlNURL(this.importPath, ((this.cacheSize*3)/4)/1024, preloadTime);
         this.importStartSize = this.importNurlDB.size();
         //int stackSize = this.importNurlDB.stackSize();
         
         // init profile DB
         this.log.logInfo("Initializing the source profileDB");
-        this.importProfileDB = new plasmaCrawlProfile(profileDbFile, ((this.cacheSize*1)/4)/1024);
+        this.importProfileDB = new plasmaCrawlProfile(profileDbFile, ((this.cacheSize*1)/4)/1024, 300);
     }
 
     public void run() {

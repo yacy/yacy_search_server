@@ -173,18 +173,20 @@ public class yacyCore {
 
         // create or init seed cache
         int memDHT = Integer.parseInt(switchboard.getConfig("ramCacheDHT", "1024")) / 1024;
+        long memDHT_time = Long.parseLong(switchboard.getConfig("ramCacheDHT_time", "1000"));
         log.logConfig("DHT Cache memory = " + memDHT + " KB");
         seedDB = new yacySeedDB(
                 sb,
                 new File(yacyDBPath, "seed.new.db"),
                 new File(yacyDBPath, "seed.old.db"),
                 new File(yacyDBPath, "seed.pot.db"),
-                memDHT);
+                memDHT, memDHT_time);
 
         // create or init news database
         int memNews = Integer.parseInt(switchboard.getConfig("ramCacheNews", "1024")) / 1024;
+        long memNews_time = Long.parseLong(switchboard.getConfig("ramCacheNews_time", "1000"));
         log.logConfig("News Cache memory = " + memNews + " KB");
-        newsPool = new yacyNewsPool(yacyDBPath, memNews);
+        newsPool = new yacyNewsPool(yacyDBPath, memNews, memNews_time);
 
         loadSeedUploadMethods();
 

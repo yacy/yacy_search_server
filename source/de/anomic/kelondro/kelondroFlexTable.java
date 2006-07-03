@@ -33,7 +33,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 
     private kelondroBytesIntMap index;
     
-    public kelondroFlexTable(File path, String tablename, long buffersize, kelondroRow rowdef, boolean exitOnFail) throws IOException {
+    public kelondroFlexTable(File path, String tablename, long buffersize, long preloadTime, kelondroRow rowdef, boolean exitOnFail) throws IOException {
         super(path, tablename, rowdef, exitOnFail);
         File newpath = new File(path, tablename + ".table");
         File indexfile = new File(newpath, "col.000.index");
@@ -45,11 +45,11 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         if (indexfile.exists()) {
             // use existing index file
             System.out.println("*** Using File index " + indexfile);
-            ki = new kelondroTree(indexfile, buffersize, 10);
+            ki = new kelondroTree(indexfile, buffersize, preloadTime, 10);
         } else if (size() > 100000) {
             // generate new index file
             System.out.print("*** Generating File index for " + size() + " entries from " + indexfile);
-            ki = initializeTreeIndex(indexfile, buffersize);
+            ki = initializeTreeIndex(indexfile, buffersize, preloadTime);
 
             System.out.println(" -done-");
             System.out.println(ki.size()
@@ -98,8 +98,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     
-    private kelondroIndex initializeTreeIndex(File indexfile, long buffersize) throws IOException {
-        kelondroTree index = new kelondroTree(indexfile, buffersize, 10, rowdef.width(0), 4, true);
+    private kelondroIndex initializeTreeIndex(File indexfile, long buffersize, long preloadTime) throws IOException {
+        kelondroTree index = new kelondroTree(indexfile, buffersize, preloadTime, 10, rowdef.width(0), 4, true);
         Iterator content = super.col[0].contentNodes();
         kelondroRecords.Node node;
         kelondroRow.Entry indexentry;

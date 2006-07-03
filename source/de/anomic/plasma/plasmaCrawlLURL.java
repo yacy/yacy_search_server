@@ -94,7 +94,7 @@ public final class plasmaCrawlLURL extends indexURL {
 
     //public static Set damagedURLS = Collections.synchronizedSet(new HashSet());
     
-    public plasmaCrawlLURL(File cachePath, int bufferkb) {
+    public plasmaCrawlLURL(File cachePath, int bufferkb, long preloadTime) {
         super();
         int[] ce = {
             urlHashLength,
@@ -116,15 +116,15 @@ public final class plasmaCrawlLURL extends indexURL {
         if (cachePath.exists()) {
             // open existing cache
             try {
-                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent);
+                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
             } catch (IOException e) {
                 cachePath.getParentFile().mkdirs();
-                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
+                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
             }
         } else {
             // create new cache
             cachePath.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
         }
 
         // init result stacks
@@ -974,7 +974,7 @@ public final class plasmaCrawlLURL extends indexURL {
         } catch (MalformedURLException e) {}
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache
-            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), 1);
+            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), 1, 0);
             final Iterator enu = urls.entries(true, false);
             while (enu.hasNext()) {
                 ((Entry) enu.next()).print();

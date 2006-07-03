@@ -663,7 +663,7 @@ public final class yacy {
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
         serverLog log = new serverLog("WORDMIGRATION");
         log.logInfo("STARTING MIGRATION");
-        plasmaWordIndex wordIndexCache = new plasmaWordIndex(dbroot, 20000, log);
+        plasmaWordIndex wordIndexCache = new plasmaWordIndex(dbroot, 20000, 10000, log);
         enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
         String wordhash;
         File wordfile;
@@ -708,16 +708,16 @@ public final class yacy {
             // db containing all currently loades urls
             int cache = dbcache * 1024; // in KB
             log.logFine("URLDB-Caches: "+cache+" bytes");
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), cache);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), cache, 10000);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.temp.db"), cache);
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.temp.db"), cache, 10000);
             
             Runtime rt = Runtime.getRuntime();
             int cacheMem = (int)((rt.maxMemory()-rt.totalMemory())/1024)-(2*cache + 8*1024);
             if (cacheMem < 2048) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, cacheMem, log);
+            plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, cacheMem, 10000, log);
             Iterator wordHashIterator = wordIndex.wordHashes("------------", plasmaWordIndex.RL_WORDFILES, false);
             
             String wordhash;
@@ -950,7 +950,7 @@ public final class yacy {
     	
     	File root = new File(homePath);
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000);
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000, 10000);
             Iterator eiter = pool.loadedURL.entries(true, false);
             HashSet doms = new HashSet();
             plasmaCrawlLURL.Entry entry;
@@ -1016,7 +1016,7 @@ public final class yacy {
     private static void urllist(String homePath, boolean html, String targetName) {
         File root = new File(homePath);
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000);
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000, 10000);
             Iterator eiter = pool.loadedURL.entries(true, false);
             plasmaCrawlLURL.Entry entry;
             File file = new File(root, targetName);
@@ -1058,7 +1058,7 @@ public final class yacy {
         File dbroot = new File(root, "DATA/PLASMADB");
         serverLog log = new serverLog("URLDBCLEANUP");
         try {
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), 4194304);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), 4194304, 10000);
             currentUrlDB.urldbcleanup();
             currentUrlDB.close();
         } catch (IOException e) {
@@ -1077,14 +1077,14 @@ public final class yacy {
         try {
             Iterator WordHashIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, log);
+                WordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, 3000, log);
                 WordHashIterator = WordIndex.wordHashes(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
             } else if (resource.equals("assortments")) {
-                plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, log);
+                plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, 3000, log);
                 WordHashIterator = assortmentCluster.wordHashes(wordChunkStartHash, true, false);
             } else if (resource.startsWith("assortment")) {
                 int a = Integer.parseInt(resource.substring(10));
-                plasmaWordIndexAssortment assortment = new plasmaWordIndexAssortment(new File(homeDBroot, "ACLUSTER"), a, 8*1024*1024, null);
+                plasmaWordIndexAssortment assortment = new plasmaWordIndexAssortment(new File(homeDBroot, "ACLUSTER"), a, 8*1024*1024, 3000, null);
                 WordHashIterator = assortment.hashes(wordChunkStartHash, true, false);
             } else if (resource.equals("words")) {
                 plasmaWordIndexFileCluster fileDB = new plasmaWordIndexFileCluster(homeDBroot, log);
@@ -1147,7 +1147,7 @@ public final class yacy {
             String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
                 File dbFile = new File(yacyDBPath,dbFileNames[i]);
-                kelondroMap db = new kelondroMap(new kelondroDyn(dbFile, (1024 * 0x400) / 3, '#'), yacySeedDB.sortFields, yacySeedDB.accFields);
+                kelondroMap db = new kelondroMap(new kelondroDyn(dbFile, (1024 * 0x400) / 3, 3000, '#'), yacySeedDB.sortFields, yacySeedDB.accFields);
                 
                 kelondroMap.mapIterator it;
                 it = db.maps(true, false);

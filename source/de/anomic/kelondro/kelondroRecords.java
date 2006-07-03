@@ -82,7 +82,6 @@ public class kelondroRecords {
     private static final int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
     private static final long memBlock = 500000; // do not fill cache further if the amount of available memory is less that this
     public final static boolean useWriteBuffer = false;
-    public final static long preloadCacheTime = 500; // time that can be wasted to initialize the node cache
     
     // memory calculation
     private static final int element_in_cache = 4; // for kelondroCollectionObjectMap: 4; for HashMap: 52
@@ -186,7 +185,7 @@ public class kelondroRecords {
         }
     }
     
-    public kelondroRecords(File file, long buffersize /* bytes */,
+    public kelondroRecords(File file, long buffersize /* bytes */, long preloadTime,
                            short ohbytec, short ohhandlec,
                            kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
                            boolean exitOnFail) {
@@ -209,10 +208,10 @@ public class kelondroRecords {
             if (exitOnFail)
                 System.exit(-1);
         }
-        initCache(buffersize / 10 * 9);
+        initCache(buffersize / 10 * 9, preloadTime);
     }
     
-    public kelondroRecords(kelondroRA ra, long buffersize /* bytes */,
+    public kelondroRecords(kelondroRA ra, long buffersize /* bytes */, long preloadTime,
                            short ohbytec, short ohhandlec,
                            kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
                            boolean exitOnFail) {
@@ -223,7 +222,7 @@ public class kelondroRecords {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail) System.exit(-1);
         }
-        initCache(buffersize / 10 * 9);
+        initCache(buffersize / 10 * 9, preloadTime);
     }
    
     private void initNewFile(kelondroRA ra, short ohbytec, short ohhandlec,
@@ -344,7 +343,7 @@ public class kelondroRecords {
         this.USAGE.write();
     }
 
-    public kelondroRecords(File file, long buffersize) throws IOException{
+    public kelondroRecords(File file, long buffersize, long preloadTime) throws IOException{
         // opens an existing tree
         assert (file.exists()): "file " + file.getAbsoluteFile().toString() + " does not exist";
         this.filename = file.getCanonicalPath();
@@ -353,13 +352,13 @@ public class kelondroRecords {
         //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
         //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
         initExistingFile(raf, buffersize / 10);
-        initCache(buffersize / 10 * 9);
+        initCache(buffersize / 10 * 9, preloadTime);
     }
     
-    public kelondroRecords(kelondroRA ra, long buffersize) throws IOException{
+    public kelondroRecords(kelondroRA ra, long buffersize, long preloadTime) throws IOException{
         this.filename = null;
         initExistingFile(ra, buffersize / 10);
-        initCache(buffersize / 10 * 9);
+        initCache(buffersize / 10 * 9, preloadTime);
     }
 
     private void initExistingFile(kelondroRA ra, long writeBufferSize) throws IOException {
@@ -410,7 +409,7 @@ public class kelondroRecords {
         this.tailchunksize = this.recordsize - this.headchunksize;
     }
     
-    private void initCache(long buffersize) {
+    private void initCache(long buffersize, long preloadTime) {
         if (buffersize <= 0) {
             this.cacheSize = 0;
             this.cacheHeaders = null;
@@ -427,8 +426,8 @@ public class kelondroRecords {
         this.cacheFlush = 0;
         
         // pre-load node cache
-        if ((preloadCacheTime > 0) && (cacheSize > 0)) {
-            long stop = System.currentTimeMillis() + preloadCacheTime;
+        if ((preloadTime > 0) && (cacheSize > 0)) {
+            long stop = System.currentTimeMillis() + preloadTime;
             Iterator i = contentNodes();
             Node n;
             int count = 0;

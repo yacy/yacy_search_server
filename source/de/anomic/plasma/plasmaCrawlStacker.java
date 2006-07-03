@@ -79,10 +79,10 @@ public final class plasmaCrawlStacker {
     //private boolean stopped = false;
     private stackCrawlQueue queue;
     
-    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, int dbCacheSize) {
+    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, int dbCacheSize, long preloadTime) {
         this.sb = sb;
         
-        this.queue = new stackCrawlQueue(dbPath,dbCacheSize);
+        this.queue = new stackCrawlQueue(dbPath, dbCacheSize, preloadTime);
         this.log.logInfo(this.queue.size() + " entries in the stackCrawl queue.");
         this.log.logInfo("STACKCRAWL thread initialized.");
         
@@ -559,7 +559,7 @@ public final class plasmaCrawlStacker {
         private final LinkedList urlEntryHashCache;
         private kelondroTree urlEntryCache;
         
-        public stackCrawlQueue(File cacheStacksPath, int bufferkb) {
+        public stackCrawlQueue(File cacheStacksPath, int bufferkb, long preloadTime) {
             // init the read semaphore
             this.readSync  = new serverSemaphore (0);
             
@@ -576,10 +576,10 @@ public final class plasmaCrawlStacker {
             if (cacheFile.exists()) {
                 // open existing cache
                 try {
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent);
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
                 } catch (IOException e) {
                     cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
                 }
                 try {
                     // loop through the list and fill the messageList with url hashs
@@ -601,7 +601,7 @@ public final class plasmaCrawlStacker {
                     // deleting old db and creating a new db
                     try {this.urlEntryCache.close();}catch(Exception ex){}
                     cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
                 } catch (IOException e) {
                     /* if we have an error, we start with a fresh database */
                     plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, IOException:" + e.getMessage() + ". Reseting DB.\n",e);
@@ -609,12 +609,12 @@ public final class plasmaCrawlStacker {
                     // deleting old db and creating a new db
                     try {this.urlEntryCache.close();}catch(Exception ex){}
                     cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
                 }
             } else {
                 // create new cache
                 cacheFile.getParentFile().mkdirs();
-                this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
+                this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
             }            
         }
         

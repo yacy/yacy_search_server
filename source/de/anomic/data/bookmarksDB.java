@@ -119,7 +119,7 @@ public class bookmarksDB {
     	return new Date();
     }
     
-    public bookmarksDB(File bookmarksFile, File tagsFile, File datesFile, int bufferkb){
+    public bookmarksDB(File bookmarksFile, File tagsFile, File datesFile, int bufferkb, long preloadTime) {
         //bookmarks
         //check if database exists
         tagCache=new HashMap();
@@ -127,37 +127,37 @@ public class bookmarksDB {
         if(bookmarksFile.exists()){
             try {
                 //open it
-                this.bookmarksTable=new kelondroMap(new kelondroDyn(bookmarksFile, 1024*bufferkb, '_'));
+                this.bookmarksTable=new kelondroMap(new kelondroDyn(bookmarksFile, 1024*bufferkb, preloadTime, '_'));
             } catch (IOException e) {
                 //database reset :-((
                 bookmarksFile.delete();
                 bookmarksFile.getParentFile().mkdirs();
                 //urlHash is 12 bytes long
-                this.bookmarksTable = new kelondroMap(new kelondroDyn(bookmarksFile, bufferkb * 1024, 12, 256, '_', true));
+                this.bookmarksTable = new kelondroMap(new kelondroDyn(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true));
             }
         }else{
             //new database
             bookmarksFile.getParentFile().mkdirs();
-            this.bookmarksTable = new kelondroMap(new kelondroDyn(bookmarksFile, bufferkb * 1024, 12, 256, '_', true));
+            this.bookmarksTable = new kelondroMap(new kelondroDyn(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true));
         }
         //tags
         //check if database exists
         if(tagsFile.exists()){
             try {
                 //open it
-                this.tagsTable=new kelondroMap(new kelondroDyn(tagsFile, 1024*bufferkb, '_'));
+                this.tagsTable=new kelondroMap(new kelondroDyn(tagsFile, 1024*bufferkb, preloadTime, '_'));
             } catch (IOException e) {
                 //reset database
                 tagsFile.delete();
                 tagsFile.getParentFile().mkdirs();
                 // max. 128 byte long tags
-                this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, 12, 256, '_', true));
+                this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, preloadTime, 12, 256, '_', true));
                 rebuildTags();
             }
         }else{
             //new database
             tagsFile.getParentFile().mkdirs();
-            this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, 12, 256, '_', true));
+            this.tagsTable = new kelondroMap(new kelondroDyn(tagsFile, bufferkb * 1024, preloadTime, 12, 256, '_', true));
             rebuildTags();
         }
         // dates
@@ -165,19 +165,19 @@ public class bookmarksDB {
         if(datesFile.exists()){
             try {
                 //open it
-                this.datesTable=new kelondroMap(new kelondroDyn(datesFile, 1024*bufferkb, '_'));
+                this.datesTable=new kelondroMap(new kelondroDyn(datesFile, 1024*bufferkb, preloadTime, '_'));
             } catch (IOException e) {
                 //reset database
                 datesFile.delete();
                 datesFile.getParentFile().mkdirs();
                 //YYYY-MM-DDTHH:mm:ssZ = 20 byte. currently used: YYYY-MM-DD = 10 bytes
-                this.datesTable = new kelondroMap(new kelondroDyn(datesFile, bufferkb * 1024, 20, 256, '_', true));
+                this.datesTable = new kelondroMap(new kelondroDyn(datesFile, bufferkb * 1024, preloadTime, 20, 256, '_', true));
                 rebuildDates();
             }
         }else{
             //new database
             datesFile.getParentFile().mkdirs();
-            this.datesTable = new kelondroMap(new kelondroDyn(datesFile, bufferkb * 1024, 20, 256, '_', true));
+            this.datesTable = new kelondroMap(new kelondroDyn(datesFile, bufferkb * 1024, preloadTime, 20, 256, '_', true));
             rebuildDates();
         }
     }

@@ -69,25 +69,25 @@ public class wikiBoard {
     private kelondroMap bkpbase = null;
     private static HashMap authors = new HashMap();
     
-    public wikiBoard(File actpath, File bkppath, int bufferkb) {
+    public wikiBoard(File actpath, File bkppath, int bufferkb, long preloadTime) {
     		new File(actpath.getParent()).mkdir();
         if (datbase == null) {
             if (actpath.exists()) try {
-                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x40, '_'));
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x40, preloadTime, '_'));
             } catch (IOException e) {
-                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, keyLength, recordSize, '_', true));
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, preloadTime, keyLength, recordSize, '_', true));
             } else {
-                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, keyLength, recordSize, '_', true));
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, preloadTime, keyLength, recordSize, '_', true));
             }
         }
         new File(bkppath.getParent()).mkdir();
         if (bkpbase == null) {
             if (bkppath.exists()) try {
-                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, '_'));
+                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, preloadTime, '_'));
             } catch (IOException e) {
-                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, keyLength + dateFormat.length(), recordSize, '_', true));
+                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, preloadTime, keyLength + dateFormat.length(), recordSize, '_', true));
             } else {
-                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, keyLength + dateFormat.length(), recordSize, '_', true));
+                bkpbase = new kelondroMap(new kelondroDyn(bkppath, bufferkb / 2 * 0x400, preloadTime, keyLength + dateFormat.length(), recordSize, '_', true));
             }
         }
     }

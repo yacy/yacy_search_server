@@ -329,33 +329,44 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
 
         // read memory amount
-        int ramLURL    = (int) getConfigLong("ramCacheLURL", 1024) / 1024;
-        int ramNURL    = (int) getConfigLong("ramCacheNURL", 1024) / 1024;
-        int ramEURL    = (int) getConfigLong("ramCacheEURL", 1024) / 1024;
-        int ramRWI     = (int) getConfigLong("ramCacheRWI",  1024) / 1024;
-        int ramHTTP    = (int) getConfigLong("ramCacheHTTP", 1024) / 1024;
-        int ramMessage = (int) getConfigLong("ramCacheMessage", 1024) / 1024;
-        int ramRobots  = (int) getConfigLong("ramCacheRobots",1024) / 1024;
-        int ramProfiles= (int) getConfigLong("ramCacheProfiles",1024) / 1024;
-        int ramPreNURL = (int) getConfigLong("ramCachePreNURL", 1024) / 1024;
-        int ramWiki    = (int) getConfigLong("ramCacheWiki", 1024) / 1024;
-        int ramBlog    = (int) getConfigLong("ramCacheBlog", 1024) / 1024;
-        this.log.logConfig("LURL     Cache memory = " + ppRamString(ramLURL));
-        this.log.logConfig("NURL     Cache memory = " + ppRamString(ramNURL));
-        this.log.logConfig("EURL     Cache memory = " + ppRamString(ramEURL));
-        this.log.logConfig("RWI      Cache memory = " + ppRamString(ramRWI));
-        this.log.logConfig("HTTP     Cache memory = " + ppRamString(ramHTTP));
-        this.log.logConfig("Message  Cache memory = " + ppRamString(ramMessage));
-        this.log.logConfig("Wiki     Cache memory = " + ppRamString(ramWiki));
-        this.log.logConfig("Blog     Cache memory = " + ppRamString(ramBlog));
-        this.log.logConfig("Robots   Cache memory = " + ppRamString(ramRobots));
-        this.log.logConfig("Profiles Cache memory = " + ppRamString(ramProfiles));
-        this.log.logConfig("PreNURL  Cache memory = " + ppRamString(ramPreNURL));
+        int  ramLURL         = (int) getConfigLong("ramCacheLURL", 1024) / 1024;
+        long ramLURL_time    = getConfigLong("ramCacheLURL_time", 1000);
+        int  ramNURL         = (int) getConfigLong("ramCacheNURL", 1024) / 1024;
+        long ramNURL_time    = getConfigLong("ramCacheNURL_time", 1000);
+        int  ramEURL         = (int) getConfigLong("ramCacheEURL", 1024) / 1024;
+        long ramEURL_time    = getConfigLong("ramCacheEURL_time", 1000);
+        int  ramRWI          = (int) getConfigLong("ramCacheRWI",  1024) / 1024;
+        long ramRWI_time     = getConfigLong("ramCacheRWI_time", 1000);
+        int  ramHTTP         = (int) getConfigLong("ramCacheHTTP", 1024) / 1024;
+        long ramHTTP_time    = getConfigLong("ramCacheHTTP_time", 1000);
+        int  ramMessage      = (int) getConfigLong("ramCacheMessage", 1024) / 1024;
+        long ramMessage_time = getConfigLong("ramCacheMessage_time", 1000);
+        int  ramRobots       = (int) getConfigLong("ramCacheRobots",1024) / 1024;
+        long ramRobots_time  = getConfigLong("ramCacheRobots_time",1000);
+        int  ramProfiles     = (int) getConfigLong("ramCacheProfiles",1024) / 1024;
+        long ramProfiles_time= getConfigLong("ramCacheProfiles_time", 1000);
+        int  ramPreNURL      = (int) getConfigLong("ramCachePreNURL", 1024) / 1024;
+        long ramPreNURL_time = getConfigLong("ramCachePreNURL_time", 1000);
+        int  ramWiki         = (int) getConfigLong("ramCacheWiki", 1024) / 1024;
+        long ramWiki_time    = getConfigLong("ramCacheWiki_time", 1000);
+        int  ramBlog         = (int) getConfigLong("ramCacheBlog", 1024) / 1024;
+        long ramBlog_time    = getConfigLong("ramCacheBlog_time", 1000);
+        this.log.logConfig("LURL     Cache memory = " + ppRamString(ramLURL)     + ", preloadTime = " + ramLURL_time);
+        this.log.logConfig("NURL     Cache memory = " + ppRamString(ramNURL)     + ", preloadTime = " + ramNURL_time);
+        this.log.logConfig("EURL     Cache memory = " + ppRamString(ramEURL)     + ", preloadTime = " + ramEURL_time);
+        this.log.logConfig("RWI      Cache memory = " + ppRamString(ramRWI)      + ", preloadTime = " + ramRWI_time);
+        this.log.logConfig("HTTP     Cache memory = " + ppRamString(ramHTTP)     + ", preloadTime = " + ramHTTP_time);
+        this.log.logConfig("Message  Cache memory = " + ppRamString(ramMessage)  + ", preloadTime = " + ramMessage_time);
+        this.log.logConfig("Wiki     Cache memory = " + ppRamString(ramWiki)     + ", preloadTime = " + ramWiki_time);
+        this.log.logConfig("Blog     Cache memory = " + ppRamString(ramBlog)     + ", preloadTime = " + ramBlog_time);
+        this.log.logConfig("Robots   Cache memory = " + ppRamString(ramRobots)   + ", preloadTime = " + ramRobots_time);
+        this.log.logConfig("Profiles Cache memory = " + ppRamString(ramProfiles) + ", preloadTime = " + ramProfiles_time);
+        this.log.logConfig("PreNURL  Cache memory = " + ppRamString(ramPreNURL)  + ", preloadTime = " + ramPreNURL_time);
         
         // make crawl profiles database and default profiles
         this.log.logConfig("Initializing Crawl Profiles");
         File profilesFile = new File(this.plasmaPath, "crawlProfiles0.db");
-        this.profiles = new plasmaCrawlProfile(profilesFile, ramProfiles);
+        this.profiles = new plasmaCrawlProfile(profilesFile, ramProfiles, ramProfiles_time);
         initProfiles();
         log.logConfig("Loaded profiles from file " + profilesFile.getName() +
         ", " + this.profiles.size() + " entries" +
@@ -364,16 +375,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // loading the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
         File robotsDBFile = new File(this.plasmaPath, "crawlRobotsTxt.db");
-        robots = new plasmaCrawlRobotsTxt(robotsDBFile, ramRobots);
+        robots = new plasmaCrawlRobotsTxt(robotsDBFile, ramRobots, ramRobots_time);
         this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() +
         ", " + robots.size() + " entries" +
         ", " + ppRamString(robotsDBFile.length()/1024));
         
         // start indexing management
         log.logConfig("Starting Indexing Management");
-        urlPool = new plasmaURLPool(plasmaPath, ramLURL, ramNURL, ramEURL);
+        urlPool = new plasmaURLPool(plasmaPath, ramLURL, ramNURL, ramEURL, ramLURL_time);
         
-        wordIndex = new plasmaWordIndex(plasmaPath, ramRWI, log);
+        wordIndex = new plasmaWordIndex(plasmaPath, ramRWI, ramRWI_time, log);
         int wordCacheMaxCount = (int) getConfigLong("wordCacheMaxCount", 10000);
         wordIndex.setMaxWordCount(wordCacheMaxCount);
         
@@ -391,7 +402,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         this.log.logInfo("HTCACHE Path = " + htCachePath.getAbsolutePath());
         long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig("proxyCacheSize", "2")); // this is megabyte
-        this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP);
+        this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP, ramHTTP_time);
         
         // make parser
         log.logConfig("Starting Parser");
@@ -460,18 +471,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 Boolean.valueOf(getConfig(CRAWLJOB_GLOBAL_CRAWL_TRIGGER + "_isPaused", "false"))});
         
         // starting  board
-        initMessages(ramMessage);
+        initMessages(ramMessage, ramMessage_time);
         
         // starting wiki
-        initWiki(ramWiki);
+        initWiki(ramWiki, ramWiki_time);
         
         //starting blog
-        initBlog(ramBlog);
+        initBlog(ramBlog, ramBlog_time);
         
         // Init User DB
         this.log.logConfig("Loading User DB");
         File userDbFile = new File(getRootPath(), "DATA/SETTINGS/user.db");
-        this.userDB = new userDB(userDbFile, 512);
+        this.userDB = new userDB(userDbFile, 512, 500);
         this.log.logConfig("Loaded User DB from file " + userDbFile.getName() +
         ", " + this.userDB.size() + " entries" +
         ", " + ppRamString(userDbFile.length()/1024));
@@ -547,7 +558,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         serverInstantThread.oneTimeJob(yc, "loadSeeds", yacyCore.log, 3000);
         
         // initializing the stackCrawlThread
-        this.sbStackCrawlThread = new plasmaCrawlStacker(this,this.plasmaPath,ramPreNURL);
+        this.sbStackCrawlThread = new plasmaCrawlStacker(this, this.plasmaPath, ramPreNURL, ramPreNURL_time);
         //this.sbStackCrawlThread = new plasmaStackCrawlThread(this,this.plasmaPath,ramPreNURL);
         //this.sbStackCrawlThread.start();
         
@@ -613,29 +624,28 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
 
 
-    public void initMessages(int ramMessage) {
+    public void initMessages(int ramMessage, long ramMessage_time) {
         this.log.logConfig("Starting Message Board");
         File messageDbFile = new File(workPath, "message.db");
-        this.messageDB = new messageBoard(messageDbFile, ramMessage);
+        this.messageDB = new messageBoard(messageDbFile, ramMessage, ramMessage_time);
         this.log.logConfig("Loaded Message Board DB from file " + messageDbFile.getName() +
         ", " + this.messageDB.size() + " entries" +
         ", " + ppRamString(messageDbFile.length()/1024));
     }
 
 
-    public void initWiki(int ramWiki) {
+    public void initWiki(int ramWiki, long ramWiki_time) {
         this.log.logConfig("Starting Wiki Board");
         File wikiDbFile = new File(workPath, "wiki.db");
-        this.wikiDB = new wikiBoard(wikiDbFile,
-        new File(workPath, "wiki-bkp.db"), ramWiki);
+        this.wikiDB = new wikiBoard(wikiDbFile, new File(workPath, "wiki-bkp.db"), ramWiki, ramWiki_time);
         this.log.logConfig("Loaded Wiki Board DB from file " + wikiDbFile.getName() +
         ", " + this.wikiDB.size() + " entries" +
         ", " + ppRamString(wikiDbFile.length()/1024));
     }
-    public void initBlog(int ramBlog) {
+    public void initBlog(int ramBlog, long ramBlog_time) {
         this.log.logConfig("Starting Blog");
         File blogDbFile = new File(workPath, "blog.db");
-        this.blogDB = new blogBoard(blogDbFile, ramBlog);
+        this.blogDB = new blogBoard(blogDbFile, ramBlog, ramBlog_time);
         this.log.logConfig("Loaded Blog DB from file " + blogDbFile.getName() +
         ", " + this.blogDB.size() + " entries" +
         ", " + ppRamString(blogDbFile.length()/1024));
@@ -645,7 +655,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         File bookmarksFile = new File(workPath, "bookmarks.db");
         File tagsFile = new File(workPath, "bookmarkTags.db");
         File datesFile = new File(workPath, "bookmarkDates.db");
-        this.bookmarksDB = new bookmarksDB(bookmarksFile, tagsFile, datesFile, 512);
+        this.bookmarksDB = new bookmarksDB(bookmarksFile, tagsFile, datesFile, 512, 500);
         this.log.logConfig("Loaded Bookmarks DB from files "+ bookmarksFile.getName()+ ", "+tagsFile.getName());
         this.log.logConfig(this.bookmarksDB.tagsSize()+" Tag, "+this.bookmarksDB.bookmarksSize()+" Bookmarks");
     }
@@ -709,7 +719,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         final File pdb = new File(plasmaPath, "crawlProfiles0.db");
         if (pdb.exists()) pdb.delete();
         int ramProfiles = (int) getConfigLong("ramCacheProfiles", 1024) / 1024;
-        profiles = new plasmaCrawlProfile(pdb, ramProfiles);
+        long ramProfiles_time = getConfigLong("ramCacheProfiles_time", 1000);
+        profiles = new plasmaCrawlProfile(pdb, ramProfiles, ramProfiles_time);
         initProfiles();
     }
     

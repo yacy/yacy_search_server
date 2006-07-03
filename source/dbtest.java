@@ -30,6 +30,7 @@ public class dbtest {
     public final static int valuelength = 223; // sum of all data length as defined in plasmaURL
     //public final static long buffer = 0;
     public final static long buffer = 8192 * 1024; // 8 MB buffer
+    public final static long preload = 1000; // 1 second
     public static byte[] dummyvalue2 = new byte[valuelength];
     static {
         // fill the dummy value
@@ -171,23 +172,22 @@ public class dbtest {
             if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
                 if (tablefile.exists()) {
-                    table = new kelondroTree(tablefile, buffer, kelondroTree.defaultObjectCachePercent);
+                    table = new kelondroTree(tablefile, buffer, preload, kelondroTree.defaultObjectCachePercent);
                 } else {
-                    table = new kelondroTree(tablefile, buffer, kelondroTree.defaultObjectCachePercent, testRow, true);
+                    table = new kelondroTree(tablefile, buffer, preload, kelondroTree.defaultObjectCachePercent, testRow, true);
                 }
             }
             if (dbe.equals("kelondroSplittedTree")) {
                 File tablepath = new File(tablename).getParentFile();
                 tablename = new File(tablename).getName();
                 table = kelondroSplittedTree.open(tablepath, tablename, kelondroBase64Order.enhancedCoder,
-                                buffer,
-                                8,
-                                testRow, 1, 80,
+                                buffer, preload,
+                                8, testRow, 1, 80,
                                 true);
             }
             if (dbe.equals("kelondroFlexTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), buffer, testRow, true);
+                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), buffer, preload, testRow, true);
             }
             if (dbe.equals("mysql")) {
                 table = new dbTable("mysql", testRow);

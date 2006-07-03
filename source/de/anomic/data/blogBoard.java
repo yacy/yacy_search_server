@@ -80,15 +80,15 @@ public class blogBoard {
 
     private kelondroMap datbase = null;
     
-    public blogBoard(File actpath, int bufferkb) {
+    public blogBoard(File actpath, int bufferkb, long preloadTime) {
     		new File(actpath.getParent()).mkdir();
         if (datbase == null) {
             if (actpath.exists()) try {
-                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x40, '_'));
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x40, preloadTime, '_'));
             } catch (IOException e) {
-                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, keyLength, recordSize, '_', true));
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, preloadTime, keyLength, recordSize, '_', true));
             } else {
-                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, keyLength, recordSize, '_', true));
+                datbase = new kelondroMap(new kelondroDyn(actpath, bufferkb / 2 * 0x400, preloadTime, keyLength, recordSize, '_', true));
             }
         }
     }
