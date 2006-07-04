@@ -151,11 +151,11 @@ public class kelondroRowCollection {
         synchronized(chunkcache) {
             ensureSize(chunkcount + c.size());
         }
-        Iterator i = c.elements();
-        byte[] b;
+        Iterator i = c.rows();
+        kelondroRow.Entry entry;
         while (i.hasNext()) {
-            b = (byte[]) i.next();
-            add(b, 0, b.length);
+            entry = (kelondroRow.Entry) i.next();
+            add(entry);
         }
     }
     
@@ -193,37 +193,34 @@ public class kelondroRowCollection {
         return chunkcount;
     }
     
-    public Iterator elements() {  // iterates byte[] - objects
-        return new chunkIterator();
+    public Iterator rows() {
+        return new rowIterator();
     }
     
-    public class chunkIterator implements Iterator {
+    public class rowIterator implements Iterator {
 
-        int c = 0;
+        private int p;
         
-        public chunkIterator() {
-            c = 0;
+        public rowIterator() {
+            p = 0;
         }
         
         public boolean hasNext() {
-            return c < chunkcount;
+            return p < chunkcount;
         }
 
         public Object next() {
-            byte[] chunk = new byte[rowdef.objectsize()];
-            System.arraycopy(chunkcache, c * rowdef.objectsize(), chunk, 0, rowdef.objectsize());
-            c++;
-            return chunk;
-        }
-
-        public void remove() {
-            c--;
-            System.arraycopy(chunkcache, (c + 1) * rowdef.objectsize(), chunkcache, c * rowdef.objectsize(), (chunkcount - c - 1) * rowdef.objectsize());
-            chunkcount--;
+            return get(p++);
         }
         
+        public void remove() {
+            p--;
+            System.arraycopy(chunkcache, (p + 1) * rowdef.objectsize(), chunkcache, p * rowdef.objectsize(), (chunkcount - p - 1) * rowdef.objectsize());
+            chunkcount--;
+        }
     }
-
+    
+    
     protected final void sort(kelondroOrder newOrder, int newColumn) {
         if ((this.sortOrder == null) ||
             (!(this.sortOrder.signature().equals(newOrder.signature()))) ||
@@ -355,9 +352,9 @@ public class kelondroRowCollection {
     
     public String toString() {
         StringBuffer s = new StringBuffer();
-        Iterator i = elements();
-        if (i.hasNext()) s.append(new String((byte[]) i.next()).trim());
-        while (i.hasNext())  s.append(", " + new String((byte[]) i.next()).trim());
+        Iterator i = rows();
+        if (i.hasNext()) s.append(((kelondroRow.Entry) i.next()).toString());
+        while (i.hasNext()) s.append(", " + ((kelondroRow.Entry) i.next()).toString());
         return new String(s);
     }
     

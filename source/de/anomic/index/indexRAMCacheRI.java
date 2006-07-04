@@ -116,7 +116,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                         Iterator ci = container.entries();
                         while (ci.hasNext()) {
                             wordEntry = (indexURLEntry) ci.next();
-                            row.setCol(0, container.wordHash().getBytes());
+                            row.setCol(0, container.getWordHash().getBytes());
                             row.setCol(1, kelondroNaturalOrder.encodeLong(container.size(), 4));
                             row.setCol(2, kelondroNaturalOrder.encodeLong(container.updated(), 8));
                             row.setCol(3, wordEntry.getUrlHash().getBytes());
@@ -410,7 +410,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             added = container.size();
         } else synchronized (wCache) {
             // put container into wCache
-            String wordHash = container.wordHash();
+            String wordHash = container.getWordHash();
             indexTreeMapContainer entries = (indexTreeMapContainer) wCache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
             if (entries == null) entries = new indexTreeMapContainer(wordHash);
             added = entries.add(container, -1);

@@ -135,7 +135,7 @@ public final class plasmaWordIndexAssortment {
         //log.logDebug("storeAssortment: wordHash=" + wordHash + ", urlHash=" + entry.getUrlHash() + ", time=" + creationTime);
         if (newContainer.size() != assortmentLength) throw new RuntimeException("plasmaWordIndexAssortment.store: wrong container size");
         kelondroRow.Entry row = assortments.row().newEntry();
-        row.setCol(0, newContainer.wordHash().getBytes());
+        row.setCol(0, newContainer.getWordHash().getBytes());
         row.setColLongB256(1, 1);
         row.setColLongB256(2, newContainer.updated());
         Iterator entries = newContainer.entries();

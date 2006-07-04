@@ -251,7 +251,7 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
         // open file
         plasmaWordIndexFile pi = null;
         try {
-            pi = new plasmaWordIndexFile(databaseRoot, container.wordHash(), false);
+            pi = new plasmaWordIndexFile(databaseRoot, container.getWordHash(), false);
             pi.addEntries(container);
             
             // close and return

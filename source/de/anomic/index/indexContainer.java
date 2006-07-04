@@ -34,34 +34,27 @@ import de.anomic.kelondro.kelondroOrder;
 
 public interface indexContainer {
     
-    public void setWordHash(String newWordHash);
-    
     public void clear();
-    
     public int size();
-    
     public long updated();
     
-    public kelondroOrder order();
-    
-    public String wordHash();
+    public void setWordHash(String newWordHash);
+    public String getWordHash();
 
+    public void setOrdering(kelondroOrder newOrder, int newColumn);
+    public kelondroOrder getOrdering();
+    public int getOrderColumn();
+    
     public int add(indexEntry entry);
-    
     public int add(indexEntry entry, long updateTime);
-    
     public int add(indexEntry[] entries, long updateTime);
-    
     public int add(indexContainer c, long maxTime);
 
     public boolean contains(String urlHash) ;
-
     public indexEntry get(String urlHash);
-    
     public indexEntry[] getEntryArray() ;
 
     public indexEntry remove(String urlHash);
-
     public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete);
 
     public Iterator entries();

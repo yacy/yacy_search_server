@@ -188,19 +188,15 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
     public void removeMarkedAll(kelondroRowCollection c) {
         long handle = profile.startDelete();
-        Iterator i = c.elements();
-        byte[] b;
+        Iterator i = c.rows();
+        kelondroRow.Entry entry;
         while (i.hasNext()) {
-            b = (byte[]) i.next();
-            removeMarked(b, 0, b.length);
+            entry = (kelondroRow.Entry) i.next();
+            removeMarked(entry.bytes(), 0, entry.bytes().length);
         }
         profile.stopDelete(handle);
     }
     
-    public kelondroOrder getOrdering() {
-        return this.sortOrder;
-    }
-
     public void setOrdering(kelondroOrder newOrder, int newColumn) {
         if ((this.sortOrder == null) ||
                 (!(this.sortOrder.signature().equals(newOrder.signature()))) ||
@@ -211,6 +207,14 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
     }
     
+    public kelondroOrder getOrdering() {
+        return this.sortOrder;
+    }
+
+    public int getOrderColumn() {
+        return this.sortColumn;
+    }
+
 
     private int find(byte[] a, int astart, int alength) {
         // returns the chunknumber; -1 if not found
@@ -299,6 +303,11 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
     public kelondroProfile profile() {
         return profile;
+    }
+    
+    public Iterator rows() {
+        shape();
+        return super.rows();
     }
     
     public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {

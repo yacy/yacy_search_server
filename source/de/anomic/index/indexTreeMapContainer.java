@@ -51,15 +51,17 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
     private final TreeMap container; // urlHash/plasmaWordIndexEntry - Mapping
     private long updateTime;
     private kelondroOrder ordering;
+    private int order_column;
     
     public indexTreeMapContainer(String wordHash) {
-        this(wordHash, new kelondroNaturalOrder(true));
+        this(wordHash, new kelondroNaturalOrder(true), 0);
     }
     
-    public indexTreeMapContainer(String wordHash, kelondroOrder ordering) {
+    public indexTreeMapContainer(String wordHash, kelondroOrder ordering, int column) {
         this.wordHash = wordHash;
         this.updateTime = 0;
         this.ordering = ordering;
+        this.order_column = column;
         container = new TreeMap(ordering); // a urlhash/plasmaWordIndexEntry - relation
     }
     
@@ -80,11 +82,20 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
         return updateTime;
     }
     
-    public kelondroOrder order() {
-        return ordering;
+    public void setOrdering(kelondroOrder newOrder, int newColumn) {
+        this.ordering = newOrder;
+        this.order_column = newColumn;
     }
     
-    public String wordHash() {
+    public kelondroOrder getOrdering() {
+        return this.ordering;
+    }
+    
+    public int getOrderColumn() {
+        return this.order_column;
+    }
+    
+    public String getWordHash() {
         return wordHash;
     }
 
@@ -261,7 +272,8 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
     private static indexContainer joinConstructiveByEnumeration(indexContainer i1, indexContainer i2, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
         indexTreeMapContainer conj = new indexTreeMapContainer(null); // start with empty search result
-        if (!(i1.order().signature().equals(i2.order().signature()))) return conj; // ordering must be equal
+        if (!((i1.getOrdering().signature().equals(i2.getOrdering().signature())) &&
+              (i1.getOrderColumn() == i2.getOrderColumn()))) return conj; // ordering must be equal
         Iterator e1 = i1.entries();
         Iterator e2 = i2.entries();
         int c;
@@ -273,7 +285,7 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
 
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
-                c = i1.order().compare(ie1.getUrlHash(), ie2.getUrlHash());
+                c = i1.getOrdering().compare(ie1.getUrlHash(), ie2.getUrlHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = (indexURLEntry) e1.next(); else break;

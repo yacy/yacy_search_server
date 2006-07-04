@@ -42,7 +42,7 @@ public abstract class indexAbstractContainer implements indexContainer {
         return updateTime;
     }
     
-    public String wordHash() {
+    public String getWordHash() {
         return wordHash;
     }
 

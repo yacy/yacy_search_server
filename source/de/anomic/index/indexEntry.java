@@ -26,12 +26,15 @@
 
 package de.anomic.index;
 
+import de.anomic.kelondro.kelondroRow;
+
 public interface indexEntry {
 
     public Object clone();
     public String toEncodedStringForm();
-    public byte[] toEncodedByteArrayForm();
+    public byte[] toEncodedByteArrayForm(); // shall be replaced by toKelondroEntry()
     public String toPropertyForm();
+    public kelondroRow.Entry toKelondroEntry();
     
     public String getUrlHash();
     public void combineDistance(indexEntry oe);

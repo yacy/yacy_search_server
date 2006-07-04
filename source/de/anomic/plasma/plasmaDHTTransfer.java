@@ -160,7 +160,7 @@ public class plasmaDHTTransfer extends Thread {
                 this.payloadSize = ((Integer)result.get("payloadSize")).intValue();
                 
                 this.log.logInfo("Index transfer of " + this.dhtChunk.indexCount() + 
-                                 " words [" + this.dhtChunk.firstContainer().wordHash() + " .. " + this.dhtChunk.lastContainer().wordHash() + "]" + 
+                                 " words [" + this.dhtChunk.firstContainer().getWordHash() + " .. " + this.dhtChunk.lastContainer().getWordHash() + "]" + 
                                  " to peer " + this.seed.getName() + ":" + this.seed.hash + 
                                  " in " + (this.transferTime / 1000) + 
                                  " seconds successful ("  + (1000 * this.dhtChunk.indexCount() / (this.transferTime + 1)) + 

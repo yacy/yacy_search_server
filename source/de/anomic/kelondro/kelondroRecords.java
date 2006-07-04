@@ -901,14 +901,14 @@ public class kelondroRecords {
         } else {
             System.out.println("### cache report: " + cacheHeaders.size() + " entries");
             
-                Iterator i = cacheHeaders.elements();
-                byte[] entry;
+                Iterator i = cacheHeaders.rows();
+                kelondroRow.Entry entry;
                 while (i.hasNext()) {
-                    entry = (byte[]) i.next();
+                    entry = (kelondroRow.Entry) i.next();
                     
                     // print from cache
                     System.out.print("#C ");
-                    printChunk((byte[]) entry);
+                    printChunk(entry);
                     System.out.println();
                     
                     // print from  file to compare
@@ -925,8 +925,9 @@ public class kelondroRecords {
         System.out.println("### end report");
     }
     
-    private void printChunk(byte[] chunk) {
-        for (int j = 0; j < chunk.length; j++) System.out.print(chunk[j] + ",");
+    private void printChunk(kelondroRow.Entry chunk) {
+        for (int j = 0; j < chunk.columns(); j++)
+            System.out.print(new String(chunk.getColBytes(j)) + ", ");
     }
 
     public final kelondroRow row() {

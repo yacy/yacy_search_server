@@ -111,7 +111,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         // if storage was successful, NULL is returned.
         if (newContainer.size() > clusterCount) return newContainer; // it will not fit
         indexContainer buffer;
-        while ((buffer = assortments[newContainer.size() - 1].remove(newContainer.wordHash())) != null) {
+        while ((buffer = assortments[newContainer.size() - 1].remove(newContainer.getWordHash())) != null) {
             if (newContainer.add(buffer, -1) == 0) return newContainer; // security check; othervise this loop does not terminate
             if (newContainer.size() > clusterCount) return newContainer; // it will not fit
         }
@@ -153,7 +153,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         indexTreeMapContainer c;
         Iterator i = newContainer.entries();
         for (int j = clusterStart; j >= 1; j--) {
-            c = new indexTreeMapContainer(newContainer.wordHash());
+            c = new indexTreeMapContainer(newContainer.getWordHash());
             for (int k = 0; k < j; k++) {
                 if (i.hasNext()) {
                     c.add((indexURLEntry) i.next(), newContainer.updated());
@@ -183,7 +183,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         int selectedAssortment = testsize - 1;
         while (selectedAssortment >= 0) {
             if (selectedAssortment + 1 <= need) {
-                spaces[selectedAssortment] = (assortments[selectedAssortment].get(newContainer.wordHash()) == null) ? (selectedAssortment + 1) : 0;
+                spaces[selectedAssortment] = (assortments[selectedAssortment].get(newContainer.getWordHash()) == null) ? (selectedAssortment + 1) : 0;
                 need -= spaces[selectedAssortment];
                 assert (need >= 0);
                 if (need == 0) break;
@@ -196,7 +196,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
             Iterator i = newContainer.entries();
             for (int j = testsize - 1; j >= 0; j--) {
                 if (spaces[j] == 0) continue;
-                c = new indexTreeMapContainer(newContainer.wordHash());
+                c = new indexTreeMapContainer(newContainer.getWordHash());
                 for (int k = 0; k <= j; k++) {
                     assert (i.hasNext());
                     c.add((indexURLEntry) i.next(), newContainer.updated());
@@ -210,7 +210,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         if (newContainer == null) return null;
         
         // clean up the whole thing and try to insert the container then
-        newContainer.add(deleteContainer(newContainer.wordHash(), -1), -1);
+        newContainer.add(deleteContainer(newContainer.getWordHash(), -1), -1);
         if (newContainer.size() > clusterCapacity) return newContainer;
         storeStretched(newContainer);
         return null;

@@ -199,7 +199,7 @@ public class plasmaDHTChunk {
             double maximumDistance = ((double) peerRedundancy * 2) / ((double) yacyCore.seedDB.sizeConnected());
             
             while ((maxcount > refcount) && (wordHashIterator.hasNext()) && ((nexthash = (String) wordHashIterator.next()) != null) && (nexthash.trim().length() > 0)
-                            && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(nexthash, ((indexTreeMapContainer) tmpContainers.get(0)).wordHash()) < maximumDistance))) {
+                            && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(nexthash, ((indexTreeMapContainer) tmpContainers.get(0)).getWordHash()) < maximumDistance))) {
                 // make an on-the-fly entity and insert values
                 indexContainer = wordIndex.getContainer(nexthash, true, 10000);
                 int notBoundCounter = 0;
@@ -232,7 +232,7 @@ public class plasmaDHTChunk {
                     }
 
                     // use whats left
-                    log.logFine("Selected partial index (" + indexContainer.size() + " from " + wordIndex.indexSize(nexthash) + " URLs, " + notBoundCounter + " not bound) for word " + indexContainer.wordHash());
+                    log.logFine("Selected partial index (" + indexContainer.size() + " from " + wordIndex.indexSize(nexthash) + " URLs, " + notBoundCounter + " not bound) for word " + indexContainer.getWordHash());
                     tmpContainers.add(indexContainer);
                 } catch (kelondroException e) {
                     log.logSevere("plasmaWordIndexDistribution/2: deleted DB for word " + nexthash, e);
@@ -281,8 +281,8 @@ public class plasmaDHTChunk {
                 indexEntry = (indexURLEntry) urlIter.next();
                 urlHashes[c++] = indexEntry.getUrlHash();
             }
-            count += wordIndex.removeEntries(this.indexContainers[i].wordHash(), urlHashes, true);
-            log.logFine("Deleted partial index (" + c + " URLs) for word " + this.indexContainers[i].wordHash() + "; " + this.wordIndex.indexSize(indexContainers[i].wordHash()) + " entries left");
+            count += wordIndex.removeEntries(this.indexContainers[i].getWordHash(), urlHashes, true);
+            log.logFine("Deleted partial index (" + c + " URLs) for word " + this.indexContainers[i].getWordHash() + "; " + this.wordIndex.indexSize(indexContainers[i].getWordHash()) + " entries left");
             this.indexContainers[i] = null;
         }
         return count;

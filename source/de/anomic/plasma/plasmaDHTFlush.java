@@ -145,7 +145,7 @@ public class plasmaDHTFlush extends Thread {
             plasmaDHTTransfer workerThread = this.worker;
             if (workerThread != null) {
                 return new String[]{"[" + this.oldStartingPointHash + ".." + this.startPointHash + "]",
-                                    "[" + workerThread.dhtChunk.firstContainer().wordHash() + ".." + workerThread.dhtChunk.lastContainer().wordHash() + "]"};
+                                    "[" + workerThread.dhtChunk.firstContainer().getWordHash() + ".." + workerThread.dhtChunk.lastContainer().getWordHash() + "]"};
             }
             return new String[]{"[" + this.oldStartingPointHash + ".." + this.startPointHash + "]","[------------..------------]"};
         }
@@ -189,9 +189,9 @@ public class plasmaDHTFlush extends Thread {
                         
                         // getting start point for next DHT-selection
                         this.oldStartingPointHash = this.startPointHash;
-                        this.startPointHash = newDHTChunk.lastContainer().wordHash(); // DHT targets must have greater hashes
+                        this.startPointHash = newDHTChunk.lastContainer().getWordHash(); // DHT targets must have greater hashes
                         
-                        this.log.logInfo("Index selection of " + newDHTChunk.indexCount() + " words [" + newDHTChunk.firstContainer().wordHash() + " .. " + newDHTChunk.lastContainer().wordHash() + "]" +
+                        this.log.logInfo("Index selection of " + newDHTChunk.indexCount() + " words [" + newDHTChunk.firstContainer().getWordHash() + " .. " + newDHTChunk.lastContainer().getWordHash() + "]" +
                                 " in " +
                                 (newDHTChunk.getSelectionTime() / 1000) + " seconds (" +
                                 (1000 * newDHTChunk.indexCount() / (newDHTChunk.getSelectionTime()+1)) + " words/s)");                     

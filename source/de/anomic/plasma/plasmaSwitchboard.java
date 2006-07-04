@@ -2172,7 +2172,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         try {
             // find a list of DHT-peers
-            ArrayList seeds = new ArrayList(Arrays.asList(yacyCore.dhtAgent.getDHTTargets(log, peerCount, 10, dhtChunk.firstContainer().wordHash(), dhtChunk.lastContainer().wordHash(), 0.4)));
+            ArrayList seeds = new ArrayList(Arrays.asList(yacyCore.dhtAgent.getDHTTargets(log, peerCount, 10, dhtChunk.firstContainer().getWordHash(), dhtChunk.lastContainer().getWordHash(), 0.4)));
             if (seeds.size() < peerCount) {
                 log.logWarning("found not enough (" + seeds.size() + ") peers for distribution");
                 return false;

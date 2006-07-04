@@ -91,11 +91,11 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         }
     }
     
-    public Iterator elements() {
+    public Iterator rows() {
         synchronized (buffer) {
             flush();
         }
-        return super.elements();
+        return super.rows();
     }
     
     public void uniq() {

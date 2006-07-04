@@ -39,6 +39,7 @@ import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.plasma.plasmaWordIndex;
 
 public final class indexURLEntry extends indexAbstractEntry implements Cloneable, indexEntry {
@@ -176,6 +177,11 @@ public final class indexURLEntry extends indexAbstractEntry implements Cloneable
     
     public byte[] toEncodedByteArrayForm() {
         return toEncodedStringForm().getBytes();
+    }
+
+    public Entry toKelondroEntry() {
+        kelondroRow.Entry entry = urlEntryRow.newEntry(toEncodedByteArrayForm());
+        return entry;
     }
     
     public String toPropertyForm() {
