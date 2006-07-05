@@ -115,7 +115,12 @@ public final class plasmaWordIndexAssortment {
             // open existing assortment tree file
             try {
                 assortments = new kelondroTree(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent);
-                if (log != null) log.logConfig("Opened Assortment Database, " + assortments.size() + " entries, width " + assortmentLength + ", " + bufferkb + "kb buffer"); 
+                if (log != null)
+                    log.logConfig("Opened Assortment Database, " +
+                                  assortments.size() + " entries, width " +
+                                  assortmentLength + ", " + bufferkb + "kb buffer, " +
+                                  preloadTime + " ms preloadTime, " +
+                                  assortments.cacheNodeStatus()[1] + " preloaded"); 
                 return;
             } catch (IOException e){
                 serverLog.logSevere("PLASMA", "unable to open assortment database " + assortmentLength + ", creating new: " + e.getMessage(), e);

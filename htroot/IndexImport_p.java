@@ -97,7 +97,7 @@ public final class IndexImport_p {
                     if (startImport) {
                         dbImporter importerThread = switchboard.dbImportManager.getNewImporter(importType);
                         if (importerThread != null) {
-                            importerThread.init(new File(importPath), cacheSize, 3000);
+                            importerThread.init(new File(importPath), cacheSize, 100);
                             importerThread.startIt();                            
                         }
                         prop.put("LOCATION","");
