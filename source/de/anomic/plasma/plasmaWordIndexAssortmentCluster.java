@@ -95,12 +95,19 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
 
         // initialize cluster using the cluster elements size for optimal buffer
         // size
+        long nextTime;
+        long startTime;
+        long sS = (long) sumSizes;
         for (int i = 0; i < clusterCount; i++) {
+            nextTime = Math.max(0, preloadTime * ((long) sizes[i]) / sS);
+            startTime = System.currentTimeMillis();
             assortments[i] = new plasmaWordIndexAssortment(
                     assortmentsPath, i + 1,
                     (int) (completeBufferKB * (long) sizes[i] / (long) sumSizes),
-                    preloadTime * (long) sizes[i] / (long) sumSizes,
+                    nextTime,
                     log);
+            preloadTime -= System.currentTimeMillis() - startTime;
+            sS -= sizes[i];
         }
     }
 

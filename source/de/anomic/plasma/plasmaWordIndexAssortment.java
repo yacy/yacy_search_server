@@ -114,12 +114,15 @@ public final class plasmaWordIndexAssortment {
         if (assortmentFile.exists()) {
             // open existing assortment tree file
             try {
+                long start = System.currentTimeMillis();
                 assortments = new kelondroTree(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent);
+                long stop = System.currentTimeMillis();
                 if (log != null)
-                    log.logConfig("Opened Assortment Database, " +
+                    log.logConfig("Opened Assortment, " +
                                   assortments.size() + " entries, width " +
                                   assortmentLength + ", " + bufferkb + "kb buffer, " +
                                   preloadTime + " ms preloadTime, " +
+                                  (stop - start) + " ms effective, " +
                                   assortments.cacheNodeStatus()[1] + " preloaded"); 
                 return;
             } catch (IOException e){
@@ -131,7 +134,7 @@ public final class plasmaWordIndexAssortment {
         }
         // create new assortment tree file
         assortments = new kelondroTree(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(bufferStructure(assortmentLength)), true);
-        if (log != null) log.logConfig("Created new Assortment Database, width " + assortmentLength + ", " + bufferkb + "kb buffer");
+        if (log != null) log.logConfig("Created new Assortment, width " + assortmentLength + ", " + bufferkb + "kb buffer");
     }
 
     public void store(indexContainer newContainer) {
