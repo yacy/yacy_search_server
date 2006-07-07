@@ -45,11 +45,14 @@ public class plasmaParserConfig {
         // TODO: we need some exceptions here to index URLs like this
         //       http://www.musicabona.com/respighi/12668/cd/index.html.fr
         mimeType = plasmaParser.getRealMimeType(mimeType);
-        if (mimeType.equals("text/html")) {
+        if (
+                mimeType.equals("text/html") ||
+                mimeType.equals("application/xhtml+xml") ||
+                mimeType.equals("text/plain")
+            ) {
             return supportedMimeTypesContains(mimeType);
-        } else {
-            return supportedMimeTypesContains(mimeType) && supportedFileExt(url);
         }
+        return supportedMimeTypesContains(mimeType) && supportedFileExt(url);
     }        
     
     public boolean supportedMimeTypesContains(String mimeType) {
