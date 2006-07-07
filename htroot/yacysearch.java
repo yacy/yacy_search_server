@@ -298,7 +298,7 @@ public class yacysearch {
                 }
             } else {
                 if (global) {
-                    prop.put("type_resultbottomlien", 3);
+                    prop.put("type_resultbottomline", 3);
                 } else {
                     prop.put("type_resultbottomline", 4);
                 }
