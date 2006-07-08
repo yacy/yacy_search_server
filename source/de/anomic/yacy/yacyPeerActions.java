@@ -125,6 +125,8 @@ public class yacyPeerActions {
             //set the PPM
 	        seedDB.mySeed.put(yacySeed.ISPEED, Long.toString(indexedcdiff / uptimediff)); 
 		}
+		sb.setConfig("totalPPM", Long.toString(indexedc / uptime));
+				
         seedDB.mySeed.put(yacySeed.UPTIME, Long.toString(uptime)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
         seedDB.mySeed.put(yacySeed.LCOUNT, Integer.toString(sb.urlPool.loadedURL.size())); // the number of links that the peer has stored (LURL's)
         seedDB.mySeed.put(yacySeed.NCOUNT, Integer.toString(sb.urlPool.noticeURL.stackSize())); // the number of links that the peer has noticed, but not loaded (NURL's)
