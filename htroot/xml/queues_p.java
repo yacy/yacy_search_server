@@ -120,12 +120,12 @@ public class queues_p {
                     totalSize += entrySize;
                     if ((pcentry != null)&&(pcentry.url() != null)) {
                         initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
-                        prop.put("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())));
+                        prop.putNoHTML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())));
                         prop.put("list-indexing_"+i+"_depth", pcentry.depth());
                         prop.put("list-indexing_"+i+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
-                        prop.put("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null)?"":wikiCode.replaceHTML(pcentry.anchorName()));
+                        prop.putNoHTML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null)?"":wikiCode.replaceHTML(pcentry.anchorName()));
                         prop.putNoHTML("list-indexing_"+i+"_url", pcentry.normalizedURLString());
-                        prop.put("list-indexing_"+i+"_size", entrySize);
+                        prop.putNoHTML("list-indexing_"+i+"_size", entrySize);
                         prop.put("list-indexing_"+i+"_inProcess", (inProcess)?1:0);
                         prop.put("list-indexing_"+i+"_hash", pcentry.urlHash());
                     }
