@@ -170,11 +170,12 @@ public class GuiHandler extends Handler{
         
         try {
                 int start = (reversed)?this.start+this.count-1:this.start;
-                for (int i = 0; i < Math.min(this.count,lineCount); i++) {
+                LogRecord record=null;
+                for (int i = 0; i < lineCount; i++) {
                     int ix = (reversed) ?
                                 Math.abs((start-i)%this.buffer.length) :
                                 (start+i)%this.buffer.length;
-                    LogRecord record = this.buffer[ix];
+                    record = this.buffer[ix];
                     logMessages.append(logFormatter.format(record));                
                 }             
             return logMessages.toString();
