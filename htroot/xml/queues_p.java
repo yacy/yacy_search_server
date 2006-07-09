@@ -125,7 +125,7 @@ public class queues_p {
                         prop.put("list-indexing_"+i+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
                         prop.putNoHTML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null)?"":wikiCode.replaceHTML(pcentry.anchorName()));
                         prop.putNoHTML("list-indexing_"+i+"_url", pcentry.normalizedURLString());
-                        prop.putNoHTML("list-indexing_"+i+"_size", entrySize);
+                        prop.put("list-indexing_"+i+"_size", entrySize);
                         prop.put("list-indexing_"+i+"_inProcess", (inProcess)?1:0);
                         prop.put("list-indexing_"+i+"_hash", pcentry.urlHash());
                     }
