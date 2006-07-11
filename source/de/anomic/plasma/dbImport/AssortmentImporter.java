@@ -89,7 +89,7 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
     public void run() {
         try {            
             // getting a content interator
-            Iterator contentIter = this.assortmentFile.content();
+            Iterator contentIter = this.assortmentFile.content(-1);
             while (contentIter.hasNext()) {
                 this.wordEntityCount++;                
                 

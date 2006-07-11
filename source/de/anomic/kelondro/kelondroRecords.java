@@ -428,16 +428,22 @@ public class kelondroRecords {
         // pre-load node cache
         if ((preloadTime > 0) && (cacheSize > 0)) {
             long stop = System.currentTimeMillis() + preloadTime;
-            Iterator i = contentNodes();
-            Node n;
             int count = 0;
-            while ((System.currentTimeMillis() < stop) && (cacheHeaders.size() < cacheSize) && (i.hasNext())) {
-                n = (Node) i.next();
-                cacheHeaders.addb(n.handle.index, n.headChunk);
-                count++;
+            try {
+                Iterator i = contentNodes(preloadTime);
+                Node n;
+                while ((System.currentTimeMillis() < stop) && (cacheHeaders.size() < cacheSize) && (i.hasNext())) {
+                    n = (Node) i.next();
+                    cacheHeaders.addb(n.handle.index, n.headChunk);
+                    count++;
+                }
+                cacheHeaders.shape();
+                logFine("preloaded " + count + " records into cache");
+            } catch (kelondroException e) {
+                // the contentNodes iterator had a time-out; we don't do a preload
+                logFine("could not preload records: " + e.getMessage());
             }
-            cacheHeaders.shape();
-            logFine("preloaded " + count + " records into cache");
+            
         }
     }
 
@@ -1000,10 +1006,10 @@ public class kelondroRecords {
         }
     }
 
-    public Iterator contentRows() {
+    public Iterator contentRows(long maxInitTime) throws kelondroException {
         // returns an iterator of kelondroRow.Entry-objects that are not marked as 'deleted'
         try {
-            return new contentRowIterator();
+            return new contentRowIterator(maxInitTime);
         } catch (IOException e) {
             return new HashSet().iterator();
         }
@@ -1015,8 +1021,8 @@ public class kelondroRecords {
         
         private Iterator nodeIterator;
         
-        public contentRowIterator() throws IOException {
-            nodeIterator = contentNodes();
+        public contentRowIterator(long maxInitTime) throws IOException {
+            nodeIterator = contentNodes(maxInitTime);
         }
 
         public boolean hasNext() {
@@ -1037,10 +1043,10 @@ public class kelondroRecords {
         
     }
     
-    protected Iterator contentNodes() {
+    protected Iterator contentNodes(long maxInitTime) throws kelondroException {
         // returns an iterator of Node-objects that are not marked as 'deleted'
         try {
-            return new contentNodeIterator();
+            return new contentNodeIterator(maxInitTime);
         } catch (IOException e) {
             return new HashSet().iterator();
         }
@@ -1057,17 +1063,21 @@ public class kelondroRecords {
         private int bulksize;
         private int bulkstart;  // the offset of the bulk array to the node position
         
-        public contentNodeIterator() throws IOException {
+        public contentNodeIterator(long maxInitTime) throws IOException, kelondroException {
             pos = new Handle(0);
             
             // initialize set with deleted nodes
+            // this may last only the given maxInitTime
+            // if the initTime is exceeded, the method throws an kelondroException
             markedDeleted = new HashSet();
+            long timeLimit = (maxInitTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxInitTime;
             synchronized (USAGE) {
                 if (USAGE.FREEC != 0) {
                     Handle h = USAGE.FREEH;
                     while (h.index != NUL) {
                         markedDeleted.add(h);
                         h = new Handle(entryFile.readInt(seekpos(h)));
+                        if (System.currentTimeMillis() > timeLimit) throw new kelondroException(filename, "time limit of " + maxInitTime + " exceeded; > " + markedDeleted.size() + " deleted entries");
                     }
                 }
             }

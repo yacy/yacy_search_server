@@ -74,7 +74,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     private kelondroIndex initializeRamIndex() throws IOException {
         kelondroRowBufferedSet ri = new kelondroRowBufferedSet(new kelondroRow(new int[]{super.row().width(0), 4}), 0);
         ri.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-        Iterator content = super.col[0].contentNodes();
+        Iterator content = super.col[0].contentNodes(-1);
         kelondroRecords.Node node;
         kelondroRow.Entry indexentry;
         int i;
@@ -100,7 +100,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
     private kelondroIndex initializeTreeIndex(File indexfile, long buffersize, long preloadTime) throws IOException {
         kelondroTree index = new kelondroTree(indexfile, buffersize, preloadTime, 10, rowdef.width(0), 4, true);
-        Iterator content = super.col[0].contentNodes();
+        Iterator content = super.col[0].contentNodes(-1);
         kelondroRecords.Node node;
         kelondroRow.Entry indexentry;
         int i;
