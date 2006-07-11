@@ -24,7 +24,7 @@ my $help = "/yacy show ppm|peer|version|network\n".
 	   "      help";
 our %cmds = 
 (
-	show => ["ppm","peer","version","network"],
+	show => ["ppm","peer","version","network", "stats"],
 	set => ["user","pass","host","port"],
 	help => []
 );
@@ -43,6 +43,7 @@ sub setting_init() {
 		Irssi::settings_add_int("yacy_script.pl", "yacy_port", 8080);
 		Irssi::settings_add_str("yacy_script.pl", "yacy_user", "admin");
 		Irssi::settings_add_str("yacy_script.pl", "yacy_pass", "");
+		Irssi::settings_add_int("yacy_script.pl", "yacy_statusbarupdate_interval", 60);
 	} elsif ($prog eq "xchat") {
 		if ( ! -e Xchat::get_info('xchatdir')."/yacy.xml" ) {
 			my $data = {
@@ -78,8 +79,20 @@ sub setting_get($) {
 	} 
 }
 
+sub get_network {
+	my $host = setting_get("host");
+	my $port = setting_get("port");
+	my $user = setting_get("user");
+	my $pass = setting_get("pass");
+	my $doc=get('http://'.$user.':'.$pass.'@'.$host.':'.$port.'/Network.xml');
+	if($doc){
+		return XMLin($doc);
+	}
+	return 0;
+}
+
 sub yacy($$$) {
-	my ($host, $port, $user, $pass, $cmd, $arg, $arg2, $prnt, $output);
+	my ($cmd, $arg, $arg2, $prnt, $output);
 	if ($prog eq "irssi") {
 		($cmd,$arg,$arg2)=split / /, shift;
 	} elsif ($prog eq "xchat") {
@@ -87,16 +100,11 @@ sub yacy($$$) {
 		$arg = $_[0][2];
 		$arg2 = $_[0][3];
 	}
-	$host = setting_get("host");
-	$port = setting_get("port");
-	$user = setting_get("user");
-	$pass = setting_get("pass");
 	if ($cmd eq "show") {
-		my $doc=get('http://'.$user.':'.$pass.'@'.$host.':'.$port.'/Network.xml');
-		if ( ! $doc ) { 
+		my $data=get_network();
+		if ( ! $data ) { 
 			$prnt = "Peer is not running.";
 		} else {
-			my $data = XMLin($doc);
 			if ($arg eq "ppm") {
 				$output = "is now crawling with YaCy at $data->{'your'}->{'ppm'} pages per minute.";
 			} elsif ($arg eq "peer") {	
@@ -105,6 +113,8 @@ sub yacy($$$) {
 				$output = "uses YaCy version $data->{'your'}->{'version'}";
 			} elsif ($arg eq "network") {
 				$output = "'s peer currently knows $data->{'active'}->{'count'} senior and $data->{'potential'}->{'count'} junior peers";
+			} elsif ($arg eq "stats") {
+				$output = "'s peer stores $data->{'your'}->{'links'} links and $data->{'your'}->{'words'} words";
 			} else {
 				$prnt="Unknown argument: \"$arg\"\n$help";
 			}
@@ -166,11 +176,57 @@ sub signal_complete_word {
 	}
 }
 
+# this is a irssi only section #
+my ($irssi_links, $irssi_words, $irssi_ppm)=(0,0,0);;
+sub irssi_init_statusbar {
+	my $updateinterval = setting_get("statusbarupdate_interval"); #XXX: this does not work, if the option isn't set manually?!
+	if( $updateinterval > 0 && get_network()){ #only, if Network.xml can be loaded and the interval is not zero
+		Irssi::statusbar_item_register("yacyLinks", undef, "irssi_statusbar_yacyLinks");
+		Irssi::statusbar_item_register("yacyWords", undef, "irssi_statusbar_yacyWords");
+		Irssi::statusbar_item_register("yacyPPM", undef, "irssi_statusbar_yacyPPM");
+		Irssi::timeout_add($updateinterval * 1000, "irssi_update_statusbar", undef);
+		irssi_update_statusbar(); #initial update
+
+		#TODO: Some way to add this to the statusbar (or create a own one), without
+		#beeing obstrusive.
+	}
+}
+
+sub irssi_update_statusbar {
+	$data=get_network();
+	if($data){
+		$irssi_links=$data->{'your'}->{'links'};
+		Irssi::statusbar_items_redraw('yacyLinks');
+		$irssi_words=$data->{'your'}->{'words'};
+		Irssi::statusbar_items_redraw('yacyWords');
+		$irssi_ppm=$data->{'your'}->{'ppm'};
+		Irssi::statusbar_items_redraw('yacyPPM');
+	}
+}
+
+# redraw handlers #
+sub irssi_statusbar_yacyLinks {
+	my ($item, $get_size_only) = @_;
+	$item->default_handler($get_size_only, " ".$irssi_links, undef, 1);
+}
+sub irssi_statusbar_yacyWords {
+	my ($item, $get_size_only) = @_;
+	$item->default_handler($get_size_only, " ".$irssi_words, undef, 1);
+}
+sub irssi_statusbar_yacyPPM {
+	my ($item, $get_size_only) = @_;
+	$item->default_handler($get_size_only, " ".$irssi_ppm, undef, 1);
+}
+# end irssi only #
+
 setting_init();
 if ( $prog eq "irssi" ) {
 	Irssi::command_bind("help","cmd_help", "Irssi commands");
 	Irssi::command_bind('yacy', \&yacy);
 	Irssi::signal_add('complete word', 'signal_complete_word');
+
+	#irssi only
+	irssi_init_statusbar();
 } elsif ( $prog eq "xchat") {
 	Xchat::hook_command("yacy","yacy",{help_text => $help});
 }
