@@ -78,8 +78,10 @@ public class plasmaCrawlBalancer {
     }
     
     public void reset() {
-        stack = kelondroStack.reset(stack);
-        domainStacks = new HashMap();
+        synchronized (domainStacks) {
+            stack = kelondroStack.reset(stack);
+            domainStacks.clear();
+        }
     }
     
     public Iterator iterator() {
@@ -92,8 +94,9 @@ public class plasmaCrawlBalancer {
     }
     
     private int sizeDomainStacks() {
+        if (domainStacks == null) return 0;
         int sum = 0;
-        if (domainStacks != null) synchronized (domainStacks) {
+        synchronized (domainStacks) {
             Iterator i = domainStacks.values().iterator();
             while (i.hasNext()) sum += ((ArrayList) i.next()).size();
         }
@@ -119,17 +122,18 @@ public class plasmaCrawlBalancer {
         while (domainStacks.size() > 0) flushOnce();
     }
     
-    public synchronized void add(String domain, byte[] hash) throws IOException {
-        //stack.push(new byte[][]{hash});
-        ArrayList domainList = (ArrayList) domainStacks.get(domain);
-        if (domainList == null) {
-            // create new list
-            domainList = new ArrayList();
-            domainList.add(hash);
-            domainStacks.put(domain, domainList);
-        } else {
-            // extend existent domain list
-            domainList.add(hash);
+    public void add(String domain, byte[] hash) throws IOException {
+        synchronized (domainStacks) {
+            ArrayList domainList = (ArrayList) domainStacks.get(domain);
+            if (domainList == null) {
+                // create new list
+                domainList = new ArrayList();
+                domainList.add(hash);
+                domainStacks.put(domain, domainList);
+            } else {
+                // extend existent domain list
+                domainList.add(hash);
+            }
         }
         
         // check size of domainStacks and flush
@@ -138,27 +142,33 @@ public class plasmaCrawlBalancer {
         }
     }
     
-    public synchronized Object[] /*String, byte[]*/ get() throws IOException {
+    public Object[] /*String, byte[]*/ get() throws IOException {
         // returns a pair of domain/hash from the stack
         // if the domain is unknown, a null/hash is returned
-        if (stack.size() > 0) {
-            return new Object[]{null, stack.pop().getColBytes(0)};
-        } else if (domainStacks.size() > 0) {
-            flushOnce();
-            return new Object[]{null, stack.pop().getColBytes(0)};
-        } else {
-            return null;
+        synchronized (domainStacks) {
+            if (stack.size() > 0) {
+                return new Object[]{null, stack.pop().getColBytes(0)};
+            } else if (domainStacks.size() > 0) {
+                flushOnce();
+                return new Object[]{null, stack.pop().getColBytes(0)};
+            } else {
+                return null;
+            }
         }
     }
     
-    public synchronized byte[] top(int dist) throws IOException {
+    public byte[] top(int dist) throws IOException {
         flushAll();
-        return stack.top(dist).getColBytes(0);
+        synchronized (domainStacks) {
+            return stack.top(dist).getColBytes(0);
+        }
     }
     
     public void clear() throws IOException {
-        domainStacks.clear();
-        stack.clear();
+        synchronized (domainStacks) {
+            domainStacks.clear();
+            stack.clear();
+        }
     }
     
     public class KeyIterator implements Iterator {
