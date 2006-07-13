@@ -50,7 +50,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URL;
+import de.anomic.net.URL;
 
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.server.logging.serverLog;
@@ -101,7 +101,7 @@ public abstract class AbstractParser implements Parser{
      * and some additional metadata.
 	 * @throws ParserException if the content could not be parsed properly 
 	 * 
-	 * @see de.anomic.plasma.parser.Parser#parse(java.net.URL, java.lang.String, byte[])
+	 * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, byte[])
 	 */
 	public plasmaParserDocument parse(
             URL location, 
@@ -131,7 +131,7 @@ public abstract class AbstractParser implements Parser{
      * and some additional metadata.
 	 * @throws ParserException if the content could not be parsed properly 
 	 * 
-	 * @see de.anomic.plasma.parser.Parser#parse(java.net.URL, java.lang.String, java.io.File)
+	 * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.File)
 	 */
 	public plasmaParserDocument parse(URL location, String mimeType,
 			File sourceFile) throws ParserException {
@@ -155,7 +155,7 @@ public abstract class AbstractParser implements Parser{
      * and some additional metadata.
      * @throws ParserException if the content could not be parsed properly 
      * 
-     * @see de.anomic.plasma.parser.Parser#parse(java.net.URL, java.lang.String, java.io.InputStream)
+     * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.InputStream)
      */
     public abstract plasmaParserDocument parse(URL location, String mimeType,
 			InputStream source) throws ParserException;

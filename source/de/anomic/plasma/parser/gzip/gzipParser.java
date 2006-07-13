@@ -46,7 +46,7 @@ package de.anomic.plasma.parser.gzip;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Hashtable;
 import java.util.zip.GZIPInputStream;
 

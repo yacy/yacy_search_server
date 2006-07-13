@@ -46,7 +46,7 @@ package de.anomic.plasma.parser.rss;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -100,8 +100,7 @@ public class rssParser extends AbstractParser implements Parser {
         parserName = "Rich Site Summary/Atom Feed Parser"; 
 	}
 
-	public plasmaParserDocument parse(URL location, String mimeType,
-			InputStream source) throws ParserException {
+	public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
 
         try {
             LinkedList feedSections = new LinkedList();
@@ -127,7 +126,7 @@ public class rssParser extends AbstractParser implements Parser {
             
             ImageIF channelImage = channel.getImage();
             if (channelImage != null) {
-                images.add(new htmlFilterImageEntry(channelImage.getLocation(), channelImage.getTitle(), -1, -1));
+                images.add(new htmlFilterImageEntry(new URL(channelImage.getLocation().toExternalForm()), channelImage.getTitle(), -1, -1));
             }            
             
             // loop through the feed items
@@ -138,7 +137,7 @@ public class rssParser extends AbstractParser implements Parser {
 					Item item = (Item)feedItemIterator.next();	
                     
         			String itemTitle = item.getTitle();
-        			URL    itemURL   = item.getLink();
+        			URL    itemURL   = new URL(item.getLink().toExternalForm());
         			String itemDescr = item.getDescription();
                     
                     feedSections.add(itemTitle);

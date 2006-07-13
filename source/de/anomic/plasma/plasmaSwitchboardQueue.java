@@ -58,7 +58,7 @@ import de.anomic.yacy.yacySeedDB;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 

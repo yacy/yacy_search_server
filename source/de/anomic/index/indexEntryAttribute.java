@@ -28,7 +28,7 @@
 
 package de.anomic.index;
 
-import java.net.URL;
+import de.anomic.net.URL;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.kelondro.kelondroBase64Order;

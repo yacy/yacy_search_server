@@ -45,7 +45,7 @@ package de.anomic.yacy;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;

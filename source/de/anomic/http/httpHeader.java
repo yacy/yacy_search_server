@@ -60,7 +60,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.text.Collator;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

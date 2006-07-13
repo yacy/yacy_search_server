@@ -27,7 +27,7 @@
 package de.anomic.index;
 
 import java.io.IOException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;

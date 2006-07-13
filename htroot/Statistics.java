@@ -44,7 +44,7 @@
 // if the shell's current path is HTROOT
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 

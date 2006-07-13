@@ -47,7 +47,7 @@
 package xml.util;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 

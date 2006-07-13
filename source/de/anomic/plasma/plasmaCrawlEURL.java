@@ -45,7 +45,7 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;

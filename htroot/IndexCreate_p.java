@@ -47,7 +47,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -217,7 +217,7 @@ public class IndexCreate_p {
                                 byte[] fileContent = (byte[]) post.get("crawlingFile$file");
                                 
                                 // parsing the bookmark file and fetching the headline and contained links
-                                htmlFilterContentScraper scraper = new htmlFilterContentScraper(file.toURL());
+                                htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL(file));
                                 OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
                                 serverFileUtils.write(fileContent,os);
                                 os.close();

@@ -41,7 +41,7 @@
 package de.anomic.net;
 
 import java.net.InetAddress;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.ArrayList;
 
 import de.anomic.http.httpc;

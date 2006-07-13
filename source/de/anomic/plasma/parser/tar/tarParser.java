@@ -45,7 +45,7 @@ package de.anomic.plasma.parser.tar;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -150,7 +150,7 @@ public class tarParser extends AbstractParser implements Parser {
                     
                     // parsing the content
                     
-                    theDoc = theParser.parseSource(tempFile.toURL(),entryMime,tempFile);
+                    theDoc = theParser.parseSource(new URL(tempFile),entryMime,tempFile);
                 } finally {
                     if (tempFile != null) try {tempFile.delete(); } catch(Exception ex){}
                 }

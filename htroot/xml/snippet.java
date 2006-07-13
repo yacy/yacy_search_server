@@ -1,7 +1,7 @@
 package xml;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Set;
 import java.util.TreeSet;
 

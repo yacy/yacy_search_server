@@ -42,7 +42,7 @@
 
 package de.anomic.plasma;
 
-import java.net.URL;
+import de.anomic.net.URL;
 
 public final class plasmaCrawlLoaderMessage {
     public final int crawlingPriority;

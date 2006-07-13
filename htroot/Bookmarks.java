@@ -51,6 +51,7 @@ import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.net.URL;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.bookmarksDB.Tag;
@@ -170,7 +171,7 @@ public class Bookmarks {
             }
             try {
                 File file=new File((String)post.get("bookmarksfile"));
-                switchboard.bookmarksDB.importFromBookmarks(file.toURL() , new String((byte[])post.get("bookmarksfile$file")), tags, isPublic);
+                switchboard.bookmarksDB.importFromBookmarks(new URL(file) , new String((byte[])post.get("bookmarksfile$file")), tags, isPublic);
             } catch (MalformedURLException e) {}
             
         }else if(post.containsKey("xmlfile")){

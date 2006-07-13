@@ -692,7 +692,7 @@ public final class plasmaCondenser {
                     textStream = new FileInputStream(file);
                 } else if (args[0].equals("-html")) {
                     // read a html file
-                    htmlFilterContentScraper cs = new htmlFilterContentScraper(new java.net.URL("http://localhost/"));
+                    htmlFilterContentScraper cs = new htmlFilterContentScraper(new de.anomic.net.URL("http://localhost/"));
                     htmlFilterOutputStream fos = new htmlFilterOutputStream(null, cs, null, false);
                     FileInputStream fis = new FileInputStream(file);
                     byte[] buffer = new byte[512];

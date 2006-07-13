@@ -47,7 +47,7 @@ import de.anomic.htmlFilter.htmlFilterImageEntry;
 
 import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;

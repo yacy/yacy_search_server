@@ -45,7 +45,7 @@ package de.anomic.plasma.parser.mimeType;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Collection;
 import java.util.Hashtable;
 

@@ -44,7 +44,7 @@
 
 package de.anomic.plasma;
 
-import java.net.URL;
+import de.anomic.net.URL;
 import java.io.File;
 import java.io.IOException;
 

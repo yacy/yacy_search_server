@@ -48,7 +48,7 @@
 
 import java.io.File;
 import java.io.OutputStream;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;

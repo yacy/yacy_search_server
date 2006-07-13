@@ -45,9 +45,9 @@ package de.anomic.htmlFilter;
 
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverByteBuffer;
+import de.anomic.net.URL;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;

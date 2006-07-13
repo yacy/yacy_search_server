@@ -43,7 +43,7 @@
 package de.anomic.plasma;
 
 import java.io.IOException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;

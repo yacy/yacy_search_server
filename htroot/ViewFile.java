@@ -46,7 +46,7 @@
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 

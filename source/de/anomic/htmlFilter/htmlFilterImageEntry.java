@@ -40,7 +40,7 @@
 
 package de.anomic.htmlFilter;
 
-import java.net.URL;
+import de.anomic.net.URL;
 
 public class htmlFilterImageEntry implements Comparable {
 

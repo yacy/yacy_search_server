@@ -42,7 +42,7 @@
 package de.anomic.plasma;
 
 import java.io.File;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;

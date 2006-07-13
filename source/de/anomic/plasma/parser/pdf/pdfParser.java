@@ -45,7 +45,7 @@ package de.anomic.plasma.parser.pdf;
 
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Hashtable;
 
 import org.pdfbox.pdfparser.PDFParser;

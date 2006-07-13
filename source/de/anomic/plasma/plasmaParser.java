@@ -53,7 +53,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -699,7 +699,7 @@ public final class plasmaParser {
             String mode = args[0];
             if (mode.equalsIgnoreCase("-f")) {
                 contentFile = new File(args[1]);
-                contentURL = contentFile.toURL();
+                contentURL = new URL(contentFile);
             } else if (mode.equalsIgnoreCase("-u")) {
                 contentURL = new URL(args[1]);
                 

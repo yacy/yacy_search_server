@@ -48,7 +48,7 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.HashMap;

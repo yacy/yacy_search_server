@@ -55,7 +55,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Date;
 import java.util.TreeSet;
-import java.net.URL;
+import de.anomic.net.URL;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexContainer;

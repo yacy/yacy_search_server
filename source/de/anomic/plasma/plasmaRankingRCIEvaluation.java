@@ -47,7 +47,7 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.HashMap;

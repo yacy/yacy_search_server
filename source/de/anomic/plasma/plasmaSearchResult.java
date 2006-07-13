@@ -49,7 +49,7 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.net.MalformedURLException;
 
 import de.anomic.kelondro.kelondroMScoreCluster;

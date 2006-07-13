@@ -44,7 +44,7 @@
 package de.anomic.plasma.parser.doc;
 
 import java.io.InputStream;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.util.Hashtable;
 
 import org.textmining.text.extraction.WordExtractor;

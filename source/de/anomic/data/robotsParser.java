@@ -50,7 +50,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URL;
+import de.anomic.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
