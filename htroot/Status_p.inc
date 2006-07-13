@@ -131,4 +131,15 @@
 	   	[<a href="IndexCreateWWWGlobalQueue_p.html">Details</a>]
 	</td>
 </tr>
+<tr class="TableCellLight"><td>Seed server</td><td>
+	#(seedServer)#
+		Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html#seed">Settings page</a>.
+		::
+			Enabled: Updating periodically to server #[seedServer]#.
+			Last upload: #[lastUpload]# ago.
+		::
+			Enabled: Updating periodically to file #[seedFile]#.
+			Last upload: #[lastUpload]# ago.
+		#(/seedServer)#
+</td></tr>
 </table>
