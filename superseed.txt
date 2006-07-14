@@ -5,7 +5,6 @@ http://www.roland-ramthun.de/seed.txt
 http://home.arcor.de/hermens/yacy/seed.txt
 http://www.blowmymind.de/yacy/seed1.txt
 http://borg-0300.dyndns.org:3000/share/seed.txt
-http://seed.paepstin.info/seed.txt
 http://www-public.tu-bs.de:8080/~y0018680/seed.txt
 http://home.arcor.de/k.c.e/yacy/seed.txt
 http://yacy.christian-schwarz.net/seed.txt
