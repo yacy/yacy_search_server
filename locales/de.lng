@@ -1186,7 +1186,7 @@ A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==Bei ei
 embedded URLs, but since embedded image links are loaded by the browser==die auf dieser Seite verlinkt sind, geladen und indexiert werden; Da Links auf Bilder sowieso schon vom Browser geladen werden,
 this means that only embedded href-anchors are prefetched additionally.==trifft dies nur auf eingebettet HREF-Anker zu.
 Store to Cache==Speicher im Cache
-It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Es wird empfohlen diese Option immer zu aktivieren. Einzige Ausnahme: Sie haben einen zweiten Proxy als Cache laufen und Yacy soll im "Proxy-zu-Proxy"-Modus laufen.
+It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Es wird empfohlen diese Option immer zu aktivieren. Einzige Ausnahme: Sie haben einen zweiten Proxy als Cache laufen und YaCy soll im "Proxy-zu-Proxy"-Modus laufen.
 Do Remote Indexing==Remote Indexierung
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler andere Peers anfragen und als remote Indexierer f&uuml;r Ihren Crawl nutzen.
 If you need your crawling results locally, you should switch this off.==Sollten Sie Ihre Crawling Ergebnisse lokal ben&ouml;tigen, dann deaktivieren Sie diese Funktion.
@@ -1581,7 +1581,7 @@ Enabled: Updating periodically to file==Aktiv: Periodisches Update in Datei
 Last upload:==Letzter Upload:
 Online-mode==Onlinemodus
 You are in <i>Cache-browsing</i> mode.==Sie sind im <i>Cache</i> Modus.
-Only Website from the Proxycache are accessable.==Nur Webseiten aus dem Proxycache sind aufrufbar.
+Only Website from the Proxycache are accessable.==Nur Webseiten aus dem Proxycache sind abrufbar.
 To switch online-mode, press one of the following buttons:==Um den Online Modus zu wechseln, klicken Sie auf einen der folgenden Buttons:
 "event-based Mode"=="aktivit&auml;tsbasierten Modus"
 "Permanent Mode"=="Permanenter Modus"

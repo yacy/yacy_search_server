@@ -16,12 +16,17 @@
 port = 8080
 
 # SSL support:
+#
+# For a German manual see http://yacy-websuche.de/wiki/index.php/De:Interface%C3%9CberHTTPS
+#
+# English speaking user read below:
+#
 # With this you can access your peer using https://localhost:8080
 # 
 # There are two possibilities to specify which certificate should
 # be used by YaCy.
 #
-# 1) Create a new Certificate:
+# 1) Create a new certificate:
 #
 #    *) For testing purposes, you can create a keystore with a self-signed certificate, 
 #       using the following command:
@@ -42,7 +47,7 @@ port = 8080
 #
 #    If the property keyStore is not specified, then a new keystore file 
 #    DATA/SETTINGS/myPeerKeystore will be created.
-#
+
 keyStore =
 keyStorePassword =
 pkcs12ImportFile = 
@@ -130,11 +135,9 @@ htLocaleSelection=default
 fileHost = localpeer
 
 # root path for message files
-messPath = C:/AnomicServer
+# messPath = C:/AnomicServer
 
-# specify the path to the MIME matching file table
-mimeConfig = httpd.mime
-
+# UNUSED:
 # specify the path to message resource file
 messConfig = httpd.messages
 
@@ -293,7 +296,7 @@ adminAccountBase64MD5=
 # - File
 # - Scp (only if you have installed the optional addon)
 #
-seedUploadMethod=
+seedUploadMethod=none
 
 # The URL to the seed list file 
 seedURL=
@@ -690,7 +693,7 @@ CRDist1Method  = 9
 CRDist1Percent = 30
 CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080
 
-#
+# Hash of the peer, you would like to store to the data your installation collected.
 storagePeerHash =
 
 # Search sequence settings

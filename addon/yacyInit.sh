@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# init script for the HTTP Proxy: yacy
+# init script for the HTTP Proxy: YaCy
 #
 # Provided by Matthias Kempka, 26.12.2004
 
@@ -12,7 +12,7 @@ USER=yacy #set to the user whose rights the proxy will gain
 CLASSPATH=$DAEMON_DIR/classes
 DAEMON=$DAEMON_DIR/startYACY.sh
 NAME="yacy"
-DESC="Yacy HTTP Proxy"
+DESC="YaCy HTTP Proxy"
 PID_FILE=/var/run/$NAME.pid
 
 # Don't run if not installed

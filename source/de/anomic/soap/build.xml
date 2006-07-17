@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project name="YACY - SOAP API" default="dist">
     <description>
-            A SOAP API for Yacy
+            A SOAP API for YaCy
     </description>
 
     <property name="addonShortName" value="Soap"/>
