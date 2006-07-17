@@ -1581,7 +1581,7 @@ Enabled: Updating periodically to file==Aktiv: Periodisches Update in Datei
 Last upload:==Letzter Upload:
 Online-mode==Onlinemodus
 You are in <i>Cache-browsing</i> mode.==Sie sind im <i>Cache</i> Modus.
-Only Website from the Proxycache are accessable.==Nur Webseiten aus dem Proxycache sind abrufbar.
+Only websites from the proxy-cache are accessible.==Nur Webseiten aus dem Proxycache sind abrufbar.
 To switch online-mode, press one of the following buttons:==Um den Online Modus zu wechseln, klicken Sie auf einen der folgenden Buttons:
 "event-based Mode"=="aktivit&auml;tsbasierten Modus"
 "Permanent Mode"=="Permanenter Modus"

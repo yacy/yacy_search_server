@@ -134,8 +134,8 @@ htLocaleSelection=default
 # http://localpeer/
 fileHost = localpeer
 
-# root path for message files
-# messPath = C:/AnomicServer
+# specify the path to the MIME matching file table
+mimeConfig = httpd.mime
 
 # UNUSED:
 # specify the path to message resource file
