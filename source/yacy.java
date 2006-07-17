@@ -348,14 +348,6 @@ public final class yacy {
             final File shareDefaultPath = new File(htDocsPath, "share");
             if (!(shareDefaultPath.exists())) shareDefaultPath.mkdir();
 
-            final File shareDefaultClass = new File(shareDefaultPath, "dir.class");
-            //if ((!(shareDefaultClass.exists())) || (shareDefaultClass.length() != (new File(htRootPath, "htdocsdefault/dir.class")).length())) try {
-            if((new File(htRootPath, "htdocsdefault/dir.java")).exists())
-                serverFileUtils.copy(new File(htRootPath, "htdocsdefault/dir.java"), new File(shareDefaultPath, "dir.java"));
-            serverFileUtils.copy(new File(htRootPath, "htdocsdefault/dir.class"), shareDefaultClass);
-            serverFileUtils.copy(new File(htRootPath, "htdocsdefault/dir.html"), new File(shareDefaultPath, "dir.html"));
-            //} catch (IOException e) {}
-
             migration.migrate(sb, oldRev, newRev);
             
             // start main threads

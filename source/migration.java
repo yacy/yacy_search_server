@@ -50,6 +50,7 @@ public class migration {
     //SVN constants
     public static final int USE_WORK_DIR=1389; //wiki & messages in DATA/WORK
     public static final int TAGDB_WITH_TAGHASH=1635; //tagDB keys are tagHashes instead of plain tagname.
+    public static final int NEW_DIRLISTING_OVERLAY=2294;
     public static void main(String[] args) {
 
     }
@@ -62,6 +63,17 @@ public class migration {
     	if(fromRev < toRev){
             if(fromRev < TAGDB_WITH_TAGHASH){
                 migrateBookmarkTagsDB(sb);
+            }
+            if(fromRev < NEW_DIRLISTING_OVERLAY){
+                File file=new File(sb.htDocsPath, "share/dir.html");
+                if(file.exists())
+                    file.delete();
+                file=new File(sb.htDocsPath, "share/dir.class");
+                if(file.exists())
+                    file.delete();
+                file=new File(sb.htDocsPath, "share/dir.java");
+                if(file.exists())
+                    file.delete();
             }
     		serverLog.logInfo("MIGRATION", "Migrating from "+String.valueOf(fromRev)+ " to "+String.valueOf(toRev));
             installSkins(sb);

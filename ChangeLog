@@ -5,6 +5,7 @@ version 0.46
 	* ADDED: Form-Login on User.html
 	* ADDED: nice Errorpage for httpauth-fail.
 	* ADDED: support to generate gettext locales and parse them.
+	* CHANGED: new dirlisting support for empty directories instead of copying dir.* into them.
 
 version 0.45
 	* UPDATED: new Design of search page

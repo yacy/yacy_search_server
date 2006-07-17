@@ -439,15 +439,19 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 // attach default file name
                 for (int i = 0; i < defaultFiles.length; i++) {
                     testpath = path + defaultFiles[i];
-                    targetFile = getLocalizedFile(testpath);
-                    targetClass = rewriteClassFile(new File(htDefaultPath, testpath));
-                    if (!(targetFile.exists())){
-                        targetFile = new File(htDocsPath, testpath);
-                        targetClass = rewriteClassFile(targetFile);
-                    }
+                    targetFile = getOverlayedFile(testpath);
+                    targetClass=getOverlayedClass(testpath);
                     if (targetFile.exists()) {
                         path = testpath;
                         break;
+                    }
+                }
+                //no defaultfile, send a dirlisting
+                if(targetFile == null || !targetFile.exists()){
+                    targetFile = getOverlayedFile("/htdocsdefault/dir.html");
+                    targetClass=getOverlayedClass("/htdocsdefault/dir.html");
+                    if(! (( targetFile != null && targetFile.exists()) && ( targetClass != null && targetClass.exists())) ){
+                        httpd.sendRespondError(this.connectionProperties,out,3,500,"dir.html or dir.class not found.",null,null);
                     }
                 }
             }else{
@@ -572,14 +576,15 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         path.endsWith("rss") || 
                         path.endsWith("csv") ||
                         path.endsWith("pac") ||
-                        path.endsWith("src")) {
+                        path.endsWith("src") ||
+                        path.endsWith("/")) {
                             
-                    targetFile = getLocalizedFile(path);
+                    /*targetFile = getLocalizedFile(path);
 					if (!(targetFile.exists())) {
 		                // try to find that file in the htDocsPath
 				        File trialFile = new File(htDocsPath, path);
 						if (trialFile.exists()) targetFile = trialFile;
-		            }
+		            }*/
             
                     
                     // call rewrite-class
@@ -877,6 +882,25 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 try {Thread.sleep(1000);} catch (InterruptedException e) {}
             }
         }
+    }
+
+    private File getOverlayedClass(String path) {
+        File targetClass;
+        targetClass=rewriteClassFile(new File(htDefaultPath, path)); //works for default and localized files
+        if(targetClass == null || !targetClass.exists()){
+            //works for htdocs
+            targetClass=rewriteClassFile(new File(htDocsPath, path));
+        }
+        return targetClass;
+    }
+
+    private File getOverlayedFile(String path) {
+        File targetFile;
+        targetFile = getLocalizedFile(path);
+        if (!(targetFile.exists())){
+            targetFile = new File(htDocsPath, path);
+        }
+        return targetFile;
     }
     
     private void forceConnectionClose() {
