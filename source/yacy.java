@@ -337,13 +337,6 @@ public final class yacy {
             final File wwwDefaultPath = new File(htDocsPath, "www");
             if (!(wwwDefaultPath.exists())) wwwDefaultPath.mkdir();
 
-            final File wwwDefaultClass = new File(wwwDefaultPath, "welcome.class");
-            //if ((!(wwwDefaultClass.exists())) || (wwwDefaultClass.length() != (new File(htRootPath, "htdocsdefault/welcome.class")).length())) try {
-            if((new File(htRootPath, "htdocsdefault/welcome.java")).exists())
-                serverFileUtils.copy(new File(htRootPath, "htdocsdefault/welcome.java"), new File(wwwDefaultPath, "welcome.java"));
-            serverFileUtils.copy(new File(htRootPath, "htdocsdefault/welcome.class"), wwwDefaultClass);
-            serverFileUtils.copy(new File(htRootPath, "htdocsdefault/welcome.html"), new File(wwwDefaultPath, "welcome.html"));
-            //} catch (IOException e) {}
 
             final File shareDefaultPath = new File(htDocsPath, "share");
             if (!(shareDefaultPath.exists())) shareDefaultPath.mkdir();

@@ -1,3 +1,4 @@
+package www;
 // welcome.java 
 // -----------------------
 // part of the AnomicHTTPD caching proxy

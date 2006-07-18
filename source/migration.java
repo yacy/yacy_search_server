@@ -50,7 +50,7 @@ public class migration {
     //SVN constants
     public static final int USE_WORK_DIR=1389; //wiki & messages in DATA/WORK
     public static final int TAGDB_WITH_TAGHASH=1635; //tagDB keys are tagHashes instead of plain tagname.
-    public static final int NEW_DIRLISTING_OVERLAY=2294;
+    public static final int NEW_OVERLAYS=2299;
     public static void main(String[] args) {
 
     }
@@ -64,21 +64,36 @@ public class migration {
             if(fromRev < TAGDB_WITH_TAGHASH){
                 migrateBookmarkTagsDB(sb);
             }
-            if(fromRev < NEW_DIRLISTING_OVERLAY){
-                File file=new File(sb.htDocsPath, "share/dir.html");
-                if(file.exists())
-                    file.delete();
-                file=new File(sb.htDocsPath, "share/dir.class");
-                if(file.exists())
-                    file.delete();
-                file=new File(sb.htDocsPath, "share/dir.java");
-                if(file.exists())
-                    file.delete();
+            if(fromRev < NEW_OVERLAYS){
+                migrateDefaultFiles(sb);
             }
     		serverLog.logInfo("MIGRATION", "Migrating from "+String.valueOf(fromRev)+ " to "+String.valueOf(toRev));
             installSkins(sb);
     		migrate(sb);
     	}
+    }
+    /*
+     * remove the static defaultfiles. We use them through a overlay now.
+     */
+    public static void migrateDefaultFiles(plasmaSwitchboard sb){
+        File file=new File(sb.htDocsPath, "share/dir.html");
+        if(file.exists())
+            file.delete();
+        file=new File(sb.htDocsPath, "share/dir.class");
+        if(file.exists())
+            file.delete();
+        file=new File(sb.htDocsPath, "share/dir.java");
+        if(file.exists())
+            file.delete();
+        file=new File(sb.htDocsPath, "www/welcome.html");
+        if(file.exists())
+            file.delete();
+        file=new File(sb.htDocsPath, "www/welcome.java");
+        if(file.exists())
+            file.delete();
+        file=new File(sb.htDocsPath, "www/welcome.class");
+        if(file.exists())
+            file.delete();
     }
     public static void installSkins(plasmaSwitchboard sb){
         final File skinsPath = new File(sb.getRootPath(), sb.getConfig("skinsPath", "DATA/SKINS"));
