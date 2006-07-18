@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="source"/>
-	<classpathentry excluding="env/|htdocsdefault/|locale/|proxymsg/|yacy/" output="htroot" kind="src" path="htroot"/>
+	<classpathentry excluding="htdocsdefault/|locale/|proxymsg/|yacy/|env/|env/" output="htroot" kind="src" path="htroot"/>
 	<classpathentry kind="src" path="htroot/htdocsdefault"/>
 	<classpathentry kind="src" path="htroot/yacy"/>
+	<classpathentry kind="src" path="htroot/env"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-collections.jar"/>
 	<classpathentry kind="lib" path="lib/commons-pool-1.2.jar"/>

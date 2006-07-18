@@ -691,7 +691,26 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         } else {
                             fis = new BufferedInputStream(new FileInputStream(targetFile));
                         }
-
+                        
+                        //use the page template
+                        if(sb.getConfig("usePageTemplate", "false").equals("true")){
+                            o = new serverByteBuffer();
+                            File pageFile=getOverlayedFile("/env/page.html");
+                            File pageClass=getOverlayedClass("/env/page.html");
+                            if(pageFile != null && pageFile.exists()){
+                                //warning: o,tp and fis are reused
+                                httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
+                                
+                                if(pageClass != null && pageClass.exists())
+                                    tp = (serverObjects) rewriteMethod(pageClass).invoke(null, new Object[] {requestHeader, args, switchboard});
+                                else
+                                    tp = new serverObjects();
+                                tp.put("page", o.toString());
+                                fis=new BufferedInputStream(new FileInputStream(pageFile));
+                                
+                            }
+                        }
+                            
                         o = new serverByteBuffer();
                         if (zipContent) zippedOut = new GZIPOutputStream(o);
                         httpTemplate.writeTemplate(fis, (zipContent) ? (OutputStream)zippedOut: (OutputStream)o, tp, "-UNRESOLVED_PATTERN-".getBytes());
@@ -701,6 +720,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             zippedOut.close();
                             zippedOut = null;
                         }
+                        
                         result = o.toByteArray();
                         
                         if (this.md5Digest != null) {
