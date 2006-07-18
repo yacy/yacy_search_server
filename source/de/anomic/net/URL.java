@@ -38,6 +38,10 @@ public class URL {
     private int port;
     
     public URL(String url) throws MalformedURLException {
+        parseURLString(url);
+    }
+    
+    public void parseURLString(String url) throws MalformedURLException {
         // identify protocol
         int p = url.indexOf("://");
         if (p < 0) throw new MalformedURLException("protocol is not given in '" + url + "'");
@@ -77,16 +81,19 @@ public class URL {
 
     public URL(URL baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
-        if (relPath.startsWith("/")) relPath = relPath.substring(1);
-        this.protocol = baseURL.protocol;
-        this.host = baseURL.host;
-        this.port = baseURL.port;
-        this.path = (baseURL.path.endsWith("/")) ? (baseURL.path + relPath) : (baseURL.path + "/" + relPath);
-        this.quest = baseURL.quest;
-        this.ref = baseURL.ref;
-        
-        identRef();
-        identQuest();
+        if (relPath.toLowerCase().startsWith("http://")) parseURLString(relPath);
+        else {
+            this.protocol = baseURL.protocol;
+            this.host = baseURL.host;
+            this.port = baseURL.port;
+            if (relPath.startsWith("/")) this.path = relPath;
+            else this.path = (baseURL.path.endsWith("/")) ? (baseURL.path + relPath) : (baseURL.path + "/" + relPath);
+            this.quest = baseURL.quest;
+            this.ref = baseURL.ref;
+
+            identRef();
+            identQuest();
+        }
     }
     
     public URL(String protocol, String host, int port, String path) throws MalformedURLException {
