@@ -222,6 +222,14 @@ public class URL {
                 ((this.port     == other.port    )));
     }
     
+    public int hashCode() {
+        return this.toString().hashCode();
+    }
+    
+    public int compareTo(Object h) {
+        assert (h instanceof URL);
+        return this.toString().compareTo(((URL) h).toString());
+    }
     
     public static void main(String[] args) {
         URL u;
