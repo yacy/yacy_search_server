@@ -86,8 +86,14 @@ public class URL {
             this.protocol = baseURL.protocol;
             this.host = baseURL.host;
             this.port = baseURL.port;
-            if (relPath.startsWith("/")) this.path = relPath;
-            else this.path = (baseURL.path.endsWith("/")) ? (baseURL.path + relPath) : (baseURL.path + "/" + relPath);
+            if (relPath.toLowerCase().startsWith("javascript:")) this.path = baseURL.path;
+            else if (relPath.startsWith("/")) this.path = relPath;
+            else {
+                if (relPath.startsWith("#") || 
+                    relPath.startsWith("?") || 
+                    baseURL.path.endsWith("/")) this.path = baseURL.path + relPath;
+                else this.path = baseURL.path + "/" + relPath;
+            }
             this.quest = baseURL.quest;
             this.ref = baseURL.ref;
 
