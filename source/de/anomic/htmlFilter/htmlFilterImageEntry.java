@@ -76,6 +76,10 @@ public class htmlFilterImageEntry implements Comparable {
     }
 
     public int hashCode() {
+        // if htmlFilterImageEntry elements are stored in a TreeSet, the biggest images shall be listed first
+        // this hash method therefore tries to compute a 'perfect hash' based on the size of the images
+        // unfortunately it can not be ensured that all images get different hashes, but this should appear
+        // only in very rare cases
         if ((width > 0) && (height > 0))
             return ((0xFFFF - (((width * height) >> 8) & 0xFFFF)) << 16) | (url.hashCode() & 0xFFFF);
         else
@@ -84,6 +88,9 @@ public class htmlFilterImageEntry implements Comparable {
     
     public int compareTo(Object h) {
         // this is needed if this object is stored in a TreeSet
+        // this method uses the image-size ordering from the hashCode method
+        // assuming that hashCode would return a 'perfect hash' this method would
+        // create a total ordering on images with respect on the image size
         assert (url != null);
         assert (h instanceof htmlFilterImageEntry);
         if (this.url.toString().equals(((htmlFilterImageEntry) h).url.toString())) return 0;
@@ -91,7 +98,7 @@ public class htmlFilterImageEntry implements Comparable {
         int ohc = ((htmlFilterImageEntry) h).hashCode();
         if (thc < ohc) return -1;
         if (thc > ohc) return 1;
-        return 0;
+        return this.url.toString().compareTo(((htmlFilterImageEntry) h).url.toString());
     }
     
     public boolean equals(Object o) {
