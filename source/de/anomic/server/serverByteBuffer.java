@@ -290,26 +290,44 @@ public final class serverByteBuffer extends OutputStream {
         return trim(l, r);
     }
 
-    public boolean isWhitespace() {
+    public boolean isWhitespace(boolean includeNonLetterBytes) {
         // returns true, if trim() would result in an empty serverByteBuffer
-        for (int i = 0; i < length; i++) {
-            if (buffer[offset + i] > 32) return false;
+        if (includeNonLetterBytes) {
+            byte b;
+            for (int i = 0; i < length; i++) {
+                b = buffer[offset + i];
+                if (((b >= '0') && (b <= '9')) || ((b >= 'A') && (b <= 'Z')) || ((b >= 'a') && (b <= 'z'))) return false;
+            }
+        } else {
+            for (int i = 0; i < length; i++) if (buffer[offset + i] > 32) return false;
         }
         return true;
     }
     
-    public int whitespaceStart() {
+    public int whitespaceStart(boolean includeNonLetterBytes) {
         // returns number of whitespace bytes at the beginning of text
-        for (int i = 0; i < length; i++) {
-            if (buffer[offset + i] > 32) return i;
+        if (includeNonLetterBytes) {
+            byte b;
+            for (int i = 0; i < length; i++) {
+                b = buffer[offset + i];
+                if (((b >= '0') && (b <= '9')) || ((b >= 'A') && (b <= 'Z')) || ((b >= 'a') && (b <= 'z'))) return i;
+            }
+        } else {
+            for (int i = 0; i < length; i++) if (buffer[offset + i] > 32) return i;
         }
         return length;
     }
     
-    public int whitespaceEnd() {
+    public int whitespaceEnd(boolean includeNonLetterBytes) {
         // returns position of whitespace at the end of text
-        for (int i = length - 1; i >= 0; i--) {
-            if (buffer[offset + i] > 32) return i + 1;
+        if (includeNonLetterBytes) {
+            byte b;
+            for (int i = length - 1; i >= 0; i--) {
+                b = buffer[offset + i];
+                if (((b >= '0') && (b <= '9')) || ((b >= 'A') && (b <= 'Z')) || ((b >= 'a') && (b <= 'z'))) return i + 1;
+            }
+        } else {
+            for (int i = length - 1; i >= 0; i--) if (buffer[offset + i] > 32) return i + 1;
         }
         return 0;
     }

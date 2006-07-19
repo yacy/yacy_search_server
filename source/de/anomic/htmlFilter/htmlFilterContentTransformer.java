@@ -143,7 +143,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
             serverByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
             sbb = new serverByteBuffer();
             for (int i = 0; i < sbbs.length; i++) {
-                if (sbbs[i].isWhitespace()) {
+                if (sbbs[i].isWhitespace(true)) {
                     sbb.append(sbbs[i]);
                 } else if ((sbbs[i].byteAt(0) == httpTemplate.hash) ||
                            (sbbs[i].startsWith(httpTemplate.dpdpa))) {
@@ -151,8 +151,8 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
                     sbb.append(sbbs[i]);
                 } else {
                     // this is a text fragment, generate gettext quotation
-                    int ws = sbbs[i].whitespaceStart();
-                    int we = sbbs[i].whitespaceEnd();
+                    int ws = sbbs[i].whitespaceStart(true);
+                    int we = sbbs[i].whitespaceEnd(true);
                     sbb.append(sbbs[i].getBytes(0, ws));
                     sbb.append('_');
                     sbb.append('(');
