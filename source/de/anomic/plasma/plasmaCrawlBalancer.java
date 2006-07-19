@@ -142,15 +142,14 @@ public class plasmaCrawlBalancer {
         }
     }
     
-    public Object[] /*String, byte[]*/ get() throws IOException {
-        // returns a pair of domain/hash from the stack
-        // if the domain is unknown, a null/hash is returned
+    public byte[] get() throws IOException {
+        // returns an url-hash from the stack
         synchronized (domainStacks) {
             if (stack.size() > 0) {
-                return new Object[]{null, stack.pop().getColBytes(0)};
+                return stack.pop().getColBytes(0);
             } else if (domainStacks.size() > 0) {
                 flushOnce();
-                return new Object[]{null, stack.pop().getColBytes(0)};
+                return stack.pop().getColBytes(0);
             } else {
                 return null;
             }

@@ -404,7 +404,7 @@ public class plasmaCrawlNURL extends indexURL {
     private Entry pop(plasmaCrawlBalancer balancer) throws IOException {
         // this is a filo - pop
         if (balancer.size() > 0) {
-            Entry e = new Entry(new String((byte[]) balancer.get()[1]));
+            Entry e = new Entry(new String(balancer.get()));
             stackIndex.remove(e.hash);
             return e;
         } else {
