@@ -1189,61 +1189,61 @@ public final class yacy {
         String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
         //System.out.println("args.length=" + args.length);
         //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
-        if ((args.length >= 1) && ((args[0].equals("-startup")) || (args[0].equals("-start")))) {
+        if ((args.length >= 1) && ((args[0].toLowerCase().equals("-startup")) || (args[0].equals("-start")))) {
             // normal start-up of yacy
             if (args.length == 2) applicationRoot= args[1];
             startup(applicationRoot, startupMemFree, startupMemTotal);
-        } else if ((args.length >= 1) && ((args[0].equals("-shutdown")) || (args[0].equals("-stop")))) {
+        } else if ((args.length >= 1) && ((args[0].toLowerCase().equals("-shutdown")) || (args[0].equals("-stop")))) {
             // normal shutdown of yacy
             if (args.length == 2) applicationRoot= args[1];
             shutdown(applicationRoot);
-        } else if ((args.length >= 1) && (args[0].equals("-migratewords"))) {
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-migratewords"))) {
             // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
             // attention: this may run long and should not be interrupted!
             if (args.length == 2) applicationRoot= args[1];
             migrateWords(applicationRoot);
-        } else if ((args.length >= 1) && (args[0].equals("-minimizeUrlDB"))) {
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-minimizeurldb"))) {
             // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
             // attention: this may run long and should not be interrupted!
             int dbcache = 4;
-            if (args.length >= 3 && args[1].equals("-cache")) {
+            if (args.length >= 3 && args[1].toLowerCase().equals("-cache")) {
                 dbcache = Integer.parseInt(args[2]);
                 args = shift(args, 1, 2);
             }
             if (args.length == 2) applicationRoot= args[1];
             minimizeUrlDB(applicationRoot, dbcache);
-        } else if ((args.length >= 1) && (args[0].equals("-testPeerDB"))) {
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-testpeerdb"))) {
             if (args.length == 2) {
                 applicationRoot= args[1];
             } else if (args.length > 2) {
                 System.err.println("Usage: -testPeerDB [homeDbRoot]");
             }
             testPeerDB(applicationRoot);
-        } else if ((args.length >= 1) && (args[0].equals("-deletestopwords"))) {
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-deletestopwords"))) {
             // delete those words in the index that are listed in the stopwords file
             if (args.length == 2) applicationRoot= args[1];
             deleteStopwords(applicationRoot);
-        } else if ((args.length >= 1) && (args[0].equals("-genwordstat"))) {
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-genwordstat"))) {
             // this can help to create a stop-word list
             // to use this, you need a 'yacy.words' file in the root path
             // start this with "java -classpath classes yacy -genwordstat [<rootdir>]"
             if (args.length == 2) applicationRoot= args[1];
             genWordstat(applicationRoot);
-        } else if ((args.length == 4) && (args[0].equals("-cleanwordlist"))) {
+        } else if ((args.length == 4) && (args[0].toLowerCase().equals("-cleanwordlist"))) {
             // this can be used to organize and clean a word-list
             // start this with "java -classpath classes yacy -cleanwordlist <word-file> <minlength> <maxlength>"
             int minlength = Integer.parseInt(args[2]);
             int maxlength = Integer.parseInt(args[3]);
             cleanwordlist(args[1], minlength, maxlength);
-        } else if ((args.length >= 1) && (args[0].equals("-transfercr"))) {
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-transfercr"))) {
             // transfer a single cr file to a remote peer
             String targetaddress = args[1];
             String crfile = args[2];
             transferCR(targetaddress, crfile);
-        } else if ((args.length >= 1) && (args[0].equals("-domlist"))) {
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-domlist"))) {
             // generate a url list and save it in a file
             String format = "txt";
-            if (args.length >= 3 && args[1].equals("-format")) {
+            if (args.length >= 3 && args[1].toLowerCase().equals("-format")) {
                 if (args[2].equals("html")) format = args[2];
                 if (args[2].equals("zip")) format = args[2];
                 if (args[2].equals("gzip")) format = args[2];
@@ -1252,21 +1252,21 @@ public final class yacy {
             if (args.length == 2) applicationRoot= args[1];
             String outfile = "domlist_" + System.currentTimeMillis();
             domlist(applicationRoot, format, outfile);
-        } else if ((args.length >= 1) && (args[0].equals("-urllist"))) {
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urllist"))) {
             // generate a url list and save it in a file
             boolean html = false;
-            if (args.length >= 3 && args[1].equals("-format")) {
+            if (args.length >= 3 && args[1].toLowerCase().equals("-format")) {
                 if (args[2].equals("html")) html = true;
                 args = shift(args, 1, 2);
             }
             if (args.length == 2) applicationRoot= args[1];
             String outfile = "urllist_" + System.currentTimeMillis() + ((html) ? ".html" : ".txt");
             urllist(applicationRoot, html, outfile);
-        } else if ((args.length >= 1) && (args[0].equals("-urldbcleanup"))) {
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file
             if (args.length == 2) applicationRoot= args[1];
             urldbcleanup(applicationRoot);
-        } else if ((args.length >= 1) && (args[0].equals("-rwihashlist"))) {
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-rwihashlist"))) {
             // generate a url list and save it in a file
             String domain = "all";
             String format = "txt";
