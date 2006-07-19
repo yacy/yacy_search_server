@@ -59,9 +59,9 @@ public final class serverByteBuffer extends OutputStream {
 
     
     public serverByteBuffer() {
-	buffer = new byte[80];
-	length = 0;
-	offset = 0;
+        buffer = new byte[80];
+        length = 0;
+        offset = 0;
     }
     
     public serverByteBuffer(int initLength) {
@@ -71,72 +71,72 @@ public final class serverByteBuffer extends OutputStream {
     }        
     
     public serverByteBuffer(byte[] bb) {
-	buffer = bb;
-	length = bb.length;
-	offset = 0;
+        buffer = bb;
+        length = bb.length;
+        offset = 0;
     }
 
     public serverByteBuffer(byte[] bb, int initLength) {
         this.buffer = new byte[initLength];
         System.arraycopy(bb, 0, buffer, 0, bb.length);
-	length = bb.length;
-	offset = 0;
+        length = bb.length;
+        offset = 0;
     }
     
     public serverByteBuffer(byte[] bb, int of, int le) {
-	if (of * 2 > bb.length) {
-	    buffer = new byte[le];
-	    System.arraycopy(bb, of, buffer, 0, le);
-	    length = le;
-	    offset = 0;
-	} else {
-	    buffer = bb;
-	    length = le;
-	    offset = of;
-	}
+        if (of * 2 > bb.length) {
+            buffer = new byte[le];
+            System.arraycopy(bb, of, buffer, 0, le);
+            length = le;
+            offset = 0;
+        } else {
+            buffer = bb;
+            length = le;
+            offset = of;
+        }
     }
 
     public serverByteBuffer(serverByteBuffer bb) {
-	buffer = bb.buffer;
-	length = bb.length;
-	offset = bb.offset;
+        buffer = bb.buffer;
+        length = bb.length;
+        offset = bb.offset;
     }
 
     public serverByteBuffer(File f) throws IOException {
-	// initially fill the byte buffer with the content of a file
-	if (f.length() > (long) Integer.MAX_VALUE) throw new IOException("file is too large for buffering");
+    // initially fill the byte buffer with the content of a file
+    if (f.length() > (long) Integer.MAX_VALUE) throw new IOException("file is too large for buffering");
 
-	length = (int) f.length();
-	buffer = new byte[length];
-	offset = 0;
+    length = (int) f.length();
+    buffer = new byte[length];
+    offset = 0;
 
-	try {
-	    FileInputStream fis = new FileInputStream(f);
-//	    byte[] buf = new byte[512];
-//	    int p = 0;
-//	    while ((l = fis.read(buf)) > 0) {
-//		System.arraycopy(buf, 0, buffer, p, l);
-//		p += l;
+    try {
+        FileInputStream fis = new FileInputStream(f);
+//        byte[] buf = new byte[512];
+//        int p = 0;
+//        while ((l = fis.read(buf)) > 0) {
+//        System.arraycopy(buf, 0, buffer, p, l);
+//        p += l;
         /*int l =*/ fis.read(buffer);
-//	    }
-	    fis.close();
-	} catch (FileNotFoundException e) {
-	    throw new IOException("File not found: " + f.toString() + "; " + e.getMessage());
-	}
+//        }
+        fis.close();
+    } catch (FileNotFoundException e) {
+        throw new IOException("File not found: " + f.toString() + "; " + e.getMessage());
+    }
     }
 
     public int length() {
-	return length;
+        return length;
     }
 
     private void grow() {
         int newsize = buffer.length * 2 + 1;
         if (newsize < 256) newsize = 256;
         byte[] tmp = new byte[newsize];
-	System.arraycopy(buffer, offset, tmp, 0, length);
-	buffer = tmp;
-	tmp = null;
-	offset = 0;
+        System.arraycopy(buffer, offset, tmp, 0, length);
+        buffer = tmp;
+        tmp = null;
+        offset = 0;
     }
 
     public void write(int b) {
@@ -145,7 +145,7 @@ public final class serverByteBuffer extends OutputStream {
     
     public void write(byte b) {
         if (offset + length + 1 > buffer.length) grow();
-	buffer[offset + length++] = b;
+        buffer[offset + length++] = b;
     }
     
     public void write(byte[] bb) {
@@ -154,18 +154,18 @@ public final class serverByteBuffer extends OutputStream {
     
     public void write(byte[] bb, int of, int le) {
         while (offset + length + le > buffer.length) grow();
-	System.arraycopy(bb, of, buffer, offset + length, le);
-	length += le;
+        System.arraycopy(bb, of, buffer, offset + length, le);
+        length += le;
     }
     
     public serverByteBuffer append(byte b) {
-	write(b);
-	return this;
+        write(b);
+        return this;
     }
 
     public serverByteBuffer append(int i) {
-	write((byte) (i & 0xFF));
-	return this;
+        write((byte) (i & 0xFF));
+        return this;
     }
 
     public serverByteBuffer append(byte[] bb) {
@@ -174,16 +174,16 @@ public final class serverByteBuffer extends OutputStream {
     }
 
     public serverByteBuffer append(byte[] bb, int of, int le) {
-	write(bb, of, le);
-	return this;
+        write(bb, of, le);
+        return this;
     }
 
     public serverByteBuffer append(String s) {
-	return append(s.getBytes());
+        return append(s.getBytes());
     }
 
     public serverByteBuffer append(serverByteBuffer bb) {
-	return append(bb.buffer, bb.offset, bb.length);
+        return append(bb.buffer, bb.offset, bb.length);
     }
 
     public serverByteBuffer append(Object o) {
@@ -193,66 +193,66 @@ public final class serverByteBuffer extends OutputStream {
     }
     
     public byte byteAt(int pos) {
-	if (pos > length) return -1;
-	return buffer[offset + pos];
+        if (pos > length) return -1;
+        return buffer[offset + pos];
     }
 
     public int indexOf(byte b) {
-	return indexOf(b, 0);
+        return indexOf(b, 0);
     }
 
     public int indexOf(byte b, int start) {
-	if (start >= length) return -1;
-	for (int i = start; i < length; i++) if (buffer[offset + i] == b) return i;
-	return -1;
+        if (start >= length) return -1;
+        for (int i = start; i < length; i++) if (buffer[offset + i] == b) return i;
+        return -1;
     }
 
     public int lastIndexOf(byte b) {
-	for (int i = length - 1; i >= 0; i--) if (buffer[offset + i] == b) return i;
-	return -1;
+        for (int i = length - 1; i >= 0; i--) if (buffer[offset + i] == b) return i;
+        return -1;
     }
 
     public byte[] getBytes() {
-	return getBytes(0);
+        return getBytes(0);
     }
 
     public byte[] getBytes(int start) {
-	return getBytes(start, length);
+        return getBytes(start, length);
     }
 
     public byte[] getBytes(int start, int end) {
-	// start is inclusive, end is exclusive
-	if (end > length) throw new IndexOutOfBoundsException("getBytes: end > length");
-	if (start > length) throw new IndexOutOfBoundsException("getBytes: start > length");
-	byte[] tmp = new byte[end - start];
-	System.arraycopy(buffer, offset + start, tmp, 0, end - start);
-	return tmp;
+        // start is inclusive, end is exclusive
+        if (end > length) throw new IndexOutOfBoundsException("getBytes: end > length");
+        if (start > length) throw new IndexOutOfBoundsException("getBytes: start > length");
+        byte[] tmp = new byte[end - start];
+        System.arraycopy(buffer, offset + start, tmp, 0, end - start);
+        return tmp;
     }
 
     /*
     private serverByteBuffer trim(int start) {
-	if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
-	offset = offset + start;
-	length = length - start;
-	return this;
+    if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
+    offset = offset + start;
+    length = length - start;
+    return this;
     }
     */
     
     private serverByteBuffer trim(int start, int end) {
         // the end value is outside (+1) of the wanted target array
-	if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
+        if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
         if (end > length) throw new IndexOutOfBoundsException("trim: end > length");
         if (start > end) throw new IndexOutOfBoundsException("trim: start > end");
         offset = offset + start;
-	length = end - start;
-	return this;
+        length = end - start;
+        return this;
     }
 
     public serverByteBuffer trim() {
         int l = 0; while ((l < length) && (buffer[offset + l] <= 32)) l++;
-	int r = length; while ((r > 0) && (buffer[offset + r - 1] <= 32)) r--;
+        int r = length; while ((r > 0) && (buffer[offset + r - 1] <= 32)) r--;
         if (l > r) r = l;
-	return trim(l, r);
+        return trim(l, r);
     }
 
     public String toString() {
@@ -260,54 +260,55 @@ public final class serverByteBuffer extends OutputStream {
     }
 
     public Properties propParser() {
-	// extract a=b or a="b" - relations from the buffer
-	int pos = offset;
-	int start;
-	String key;
-	Properties p = new Properties();
-	// eat up spaces at beginning
-	while ((pos < length) && (buffer[pos] <= 32)) pos++;
-	while (pos < length) {
-	    // pos is at start of next key
-	    start = pos;
-	    while ((pos < length) && (buffer[pos] != equal)) pos++;
-	    if (pos >= length) break; // this is the case if we found no equal
-	    key = new String(buffer, start, pos - start).trim().toLowerCase();
-	    // we have a key
-	    pos++;
-	    // find start of value
-	    while ((pos < length) && (buffer[pos] <= 32)) pos++;
-	    // doublequotes are obligatory. However, we want to be fuzzy if they are ommittet
-	    if (pos >= length) {
-		// error case: input ended too early
-		break;
-	    } else if (buffer[pos] == doublequote) {
-		// search next doublequote
-		pos++;
-		start = pos;
-		while ((pos < length) && (buffer[pos] != doublequote)) pos++;
-		if (pos >= length) break; // this is the case if we found no parent doublequote
-		p.setProperty(key, new String(buffer, start, pos - start).trim());
-		pos++;
-	    } else if (buffer[pos] == singlequote) {
-		// search next singlequote
-		pos++;
-		start = pos;
-		while ((pos < length) && (buffer[pos] != singlequote)) pos++;
-		if (pos >= length) break; // this is the case if we found no parent singlequote
-		p.setProperty(key, new String(buffer, start, pos - start).trim());
-		pos++;
-	    } else {
-		// search next whitespace
-		start = pos;
-		while ((pos < length) && (buffer[pos] > 32)) pos++;
-		p.setProperty(key, new String(buffer, start, pos - start).trim());
-	    }
-	    // pos should point now to a whitespace: eat up spaces
-	    while ((pos < length) && (buffer[pos] <= 32)) pos++;
-	    // go on with next loop
-	}
-	return p;
+        // extract a=b or a="b" - relations from the buffer
+        int pos = offset;
+        int start;
+        String key;
+        Properties p = new Properties();
+        // eat up spaces at beginning
+        while ((pos < length) && (buffer[pos] <= 32)) pos++;
+        while (pos < length) {
+            // pos is at start of next key
+            start = pos;
+            while ((pos < length) && (buffer[pos] != equal)) pos++;
+            if (pos >= length) break; // this is the case if we found no equal
+            key = new String(buffer, start, pos - start).trim().toLowerCase();
+            // we have a key
+            pos++;
+            // find start of value
+            while ((pos < length) && (buffer[pos] <= 32)) pos++;
+            // doublequotes are obligatory. However, we want to be fuzzy if they
+            // are ommittet
+            if (pos >= length) {
+                // error case: input ended too early
+                break;
+            } else if (buffer[pos] == doublequote) {
+                // search next doublequote
+                pos++;
+                start = pos;
+                while ((pos < length) && (buffer[pos] != doublequote)) pos++;
+                if (pos >= length) break; // this is the case if we found no parent doublequote
+                p.setProperty(key, new String(buffer, start, pos - start).trim());
+                pos++;
+            } else if (buffer[pos] == singlequote) {
+                // search next singlequote
+                pos++;
+                start = pos;
+                while ((pos < length) && (buffer[pos] != singlequote)) pos++;
+                if (pos >= length) break; // this is the case if we found no parent singlequote
+                p.setProperty(key, new String(buffer, start, pos - start).trim());
+                pos++;
+            } else {
+                // search next whitespace
+                start = pos;
+                while ((pos < length) && (buffer[pos] > 32)) pos++;
+                p.setProperty(key, new String(buffer, start, pos - start).trim());
+            }
+            // pos should point now to a whitespace: eat up spaces
+            while ((pos < length) && (buffer[pos] <= 32)) pos++;
+            // go on with next loop
+        }
+        return p;
     }
     
     public static boolean equals(byte[] buffer, byte[] pattern) {
