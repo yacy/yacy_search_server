@@ -139,24 +139,26 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     public byte[] transformText(byte[] text) {
         if (gettext) {
             serverByteBuffer sbb = new serverByteBuffer(text);
-            sbb.trim();
             //if (sbb.length() > 0) System.out.println("   TEXT: " + sbb.toString());
             serverByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
             sbb = new serverByteBuffer();
             for (int i = 0; i < sbbs.length; i++) {
-                sbbs[i].trim();
-                if (sbbs[i].length() == 0) {
-                    sbb.append(' ');
+                if (sbbs[i].isWhitespace()) {
+                    sbb.append(sbbs[i]);
                 } else if ((sbbs[i].byteAt(0) == httpTemplate.hash) ||
                            (sbbs[i].startsWith(httpTemplate.dpdpa))) {
                     // this is a template or a part of a template
                     sbb.append(sbbs[i]);
                 } else {
                     // this is a text fragment, generate gettext quotation
+                    int ws = sbbs[i].whitespaceStart();
+                    int we = sbbs[i].whitespaceEnd();
+                    sbb.append(sbbs[i].getBytes(0, ws));
                     sbb.append('_');
                     sbb.append('(');
-                    sbb.append(sbbs[i]);
+                    sbb.append(sbbs[i].getBytes(ws, we));
                     sbb.append(')');
+                    sbb.append(sbbs[i].getBytes(we));
                 }
             }
             //if (sbb.length() > 0) System.out.println("GETTEXT: " + sbb.toString());

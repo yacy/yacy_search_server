@@ -290,6 +290,31 @@ public final class serverByteBuffer extends OutputStream {
         return trim(l, r);
     }
 
+    public boolean isWhitespace() {
+        // returns true, if trim() would result in an empty serverByteBuffer
+        for (int i = 0; i < length; i++) {
+            if (buffer[offset + i] > 32) return false;
+        }
+        return true;
+    }
+    
+    public int whitespaceStart() {
+        // returns number of whitespace bytes at the beginning of text
+        for (int i = 0; i < length; i++) {
+            if (buffer[offset + i] > 32) return i;
+        }
+        return length;
+    }
+    
+    public int whitespaceEnd() {
+        // returns position of whitespace at the end of text
+        for (int i = length - 1; i >= 0; i--) {
+            if (buffer[offset + i] > 32) return i + 1;
+        }
+        return 0;
+    }
+    
+    
     public String toString() {
         return new String(buffer, offset, length);
     }
