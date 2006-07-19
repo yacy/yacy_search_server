@@ -57,9 +57,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 
+import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
@@ -120,12 +123,15 @@ import de.anomic.server.logging.serverLog;
  */
 public final class httpTemplate {
     
-    private static final byte hash = (byte)'#';
+    public  static final byte hash = (byte)'#';
     private static final byte[] hasha = {hash};
+
+    private static final byte dp = (byte)':';
+    public  static final byte[] dpdpa = {dp, dp};
 
     private static final byte lbr  = (byte)'[';
     private static final byte rbr  = (byte)']';
-    //private static final byte[] pOpen  = {hash, lbr};
+    private static final byte[] pOpen  = {hash, lbr};
     private static final byte[] pClose = {rbr, hash};
 
     private static final byte lcbr  = (byte)'{';
@@ -135,13 +141,65 @@ public final class httpTemplate {
 
     private static final byte lrbr  = (byte)'(';
     private static final byte rrbr  = (byte)')';
-    //private static final byte[] aOpen  = {hash, lrbr};
+    private static final byte[] aOpen  = {hash, lrbr};
     private static final byte[] aClose = {rrbr, hash};
 
     private static final byte ps  = (byte)'%';
-    //private static final byte[] iOpen  = {hash, ps};
+    private static final byte[] iOpen  = {hash, ps};
     private static final byte[] iClose = {ps, hash};
 
+    public static final Object[] meta_quotation = new Object[] {
+        new Object[] {pOpen, pClose},
+        new Object[] {mOpen, mClose},
+        new Object[] {aOpen, aClose},
+        new Object[] {iOpen, iClose}
+        };
+
+    public static serverByteBuffer[] splitQuotations(serverByteBuffer text) {
+        List l = splitQuotation(text, 0);
+        serverByteBuffer[] sbbs = new serverByteBuffer[l.size()];
+        for (int i = 0; i < l.size(); i++) sbbs[i] = (serverByteBuffer) l.get(i);
+        return sbbs;
+    }
+    
+    public static List splitQuotation(serverByteBuffer text, int qoff) {
+        ArrayList l = new ArrayList();
+        if (qoff >= meta_quotation.length) {
+            if (text.length() > 0) l.add(text);
+            return l;
+        }
+        int p = -1, q;
+        byte[] left = (byte[]) ((Object[]) meta_quotation[qoff])[0];
+        byte[] right = (byte[]) ((Object[]) meta_quotation[qoff])[1];
+        qoff++;
+        while ((text.length() > 0) && ((p = text.indexOf(left)) >= 0)) {
+            q = text.indexOf(right, p + 1);
+            if (q >= 0) {
+                // found a pattern
+                l.addAll(splitQuotation(new serverByteBuffer(text.getBytes(0, p)), qoff));
+                l.add(new serverByteBuffer(text.getBytes(p, q + right.length)));
+                text = new serverByteBuffer(text.getBytes(q + right.length));
+            } else {
+                // found only pattern start, no closing parantesis (a syntax error that is silently accepted here)
+                l.addAll(splitQuotation(new serverByteBuffer(text.getBytes(0, p)), qoff));
+                l.addAll(splitQuotation(new serverByteBuffer(text.getBytes(p)), qoff));
+                text.clear();
+            }
+        }
+        
+        // find double-points
+        while ((text.length() > 0) && ((p = text.indexOf(dpdpa)) >= 0)) {
+            l.addAll(splitQuotation(new serverByteBuffer(text.getBytes(0, p)), qoff));
+            l.add(new serverByteBuffer(dpdpa));
+            l.addAll(splitQuotation(new serverByteBuffer(text.getBytes(p + 2)), qoff));
+            text.clear();
+        }
+        
+        // add remaining
+        if (text.length() > 0) l.addAll(splitQuotation(text, qoff));
+        return l;
+    }
+    
 	/**
 	 * transfer until a specified pattern is found; everything but the pattern is transfered so far
 	 * the function returns true, if the pattern is found

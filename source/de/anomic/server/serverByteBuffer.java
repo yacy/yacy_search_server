@@ -59,7 +59,7 @@ public final class serverByteBuffer extends OutputStream {
 
     
     public serverByteBuffer() {
-        buffer = new byte[80];
+        buffer = new byte[10];
         length = 0;
         offset = 0;
     }
@@ -125,6 +125,12 @@ public final class serverByteBuffer extends OutputStream {
     }
     }
 
+    public void clear() {
+        this.buffer = new byte[0];
+        length = 0;
+        offset = 0;
+    }
+    
     public int length() {
         return length;
     }
@@ -201,9 +207,30 @@ public final class serverByteBuffer extends OutputStream {
         return indexOf(b, 0);
     }
 
+    public int indexOf(byte[] bs) {
+        return indexOf(bs, 0);
+    }
+
     public int indexOf(byte b, int start) {
         if (start >= length) return -1;
         for (int i = start; i < length; i++) if (buffer[offset + i] == b) return i;
+        return -1;
+    }
+
+    public int indexOf(byte[] bs, int start) {
+        if (start + bs.length > length) return -1;
+        loop: for (int i = start; i <= length - bs.length; i++) {
+            // first test only first byte
+            if (buffer[offset + i] != bs[0]) continue loop;
+            
+            // then test all remaining bytes
+            for (int j = 1; j < bs.length; j++) {
+                if (buffer[offset + i + j] != bs[j]) continue loop;
+            }
+            
+            // found hit
+            return i;
+        }
         return -1;
     }
 
@@ -212,6 +239,14 @@ public final class serverByteBuffer extends OutputStream {
         return -1;
     }
 
+    public boolean startsWith(byte[] bs) {
+        if (length < bs.length) return false;
+        for (int i = 0; i < bs.length; i++) {
+            if (buffer[offset + i] != bs[i]) return false;
+        }
+        return true;
+    }
+    
     public byte[] getBytes() {
         return getBytes(0);
     }

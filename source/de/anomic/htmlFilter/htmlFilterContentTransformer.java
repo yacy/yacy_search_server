@@ -52,6 +52,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.TreeSet;
+
+import de.anomic.http.httpTemplate;
 import de.anomic.server.serverByteBuffer;
 
 public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer implements htmlFilterTransformer {
@@ -69,20 +71,24 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     static {
         linkTags0 = new TreeSet(insensitiveCollator);
         linkTags0.add("img");
+        linkTags0.add("input");
 
         linkTags1 = new TreeSet(insensitiveCollator);
         linkTags1.add("a");
     }
 
-    private static ArrayList bluelist = null;
+    private ArrayList bluelist = null;
+    private boolean gettext = false;
 
     public htmlFilterContentTransformer() {
         super(linkTags0, linkTags1);
     }
 
     public void init(String initarg) {
-//      System.out.println("Transformer init: " + initarg);
-        if (bluelist == null) {
+        if (initarg.equals("gettext")) {
+            // the initarg declares that the transformer applies a gettext-quotation on strings
+            gettext = true;
+        } else if (bluelist == null) {
             // here, the initarg is used to load a list of bluelisted words
             bluelist = new ArrayList();
             File f = new File(initarg);
@@ -102,7 +108,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     }
 
     public boolean isIdentityTransformer() {
-        return bluelist.size() == 0;
+        return (bluelist.size() == 0) && (!gettext);
     }
 
     private static byte[] genBlueLetters(int length) {
@@ -116,7 +122,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         return bb.getBytes();
     }
 
-    private boolean hit(byte[] text) {
+    private boolean bluelistHit(byte[] text) {
         if (text == null || bluelist == null) return false;
         String lc;
         try {
@@ -131,22 +137,61 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     }
 
     public byte[] transformText(byte[] text) {
-        if (hit(text)) {
-//          System.out.println("FILTERHIT: " + text);
-            return genBlueLetters(text.length);
+        if (gettext) {
+            serverByteBuffer sbb = new serverByteBuffer(text);
+            sbb.trim();
+            //if (sbb.length() > 0) System.out.println("   TEXT: " + sbb.toString());
+            serverByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
+            sbb = new serverByteBuffer();
+            for (int i = 0; i < sbbs.length; i++) {
+                sbbs[i].trim();
+                if (sbbs[i].length() == 0) {
+                    sbb.append(' ');
+                } else if ((sbbs[i].byteAt(0) == httpTemplate.hash) ||
+                           (sbbs[i].startsWith(httpTemplate.dpdpa))) {
+                    // this is a template or a part of a template
+                    sbb.append(sbbs[i]);
+                } else {
+                    // this is a text fragment, generate gettext quotation
+                    sbb.append('_');
+                    sbb.append('(');
+                    sbb.append(sbbs[i]);
+                    sbb.append(')');
+                }
+            }
+            //if (sbb.length() > 0) System.out.println("GETTEXT: " + sbb.toString());
+            return sbb.getBytes();
+        }
+        if (bluelist != null) {
+            if (bluelistHit(text)) {
+                // System.out.println("FILTERHIT: " + text);
+                return genBlueLetters(text.length);
+            } else {
+                return text;
+            }
         }
         return text;
     }
 
     public byte[] transformTag0(String tagname, Properties tagopts, byte quotechar) {
-        if (hit(tagopts.getProperty("src","").getBytes())) return genBlueLetters(5);
-        if (hit(tagopts.getProperty("alt","").getBytes())) return genBlueLetters(5);
+        if (tagname.equals("img")) {
+            // check bluelist
+            if (bluelistHit(tagopts.getProperty("src","").getBytes())) return genBlueLetters(5);
+            if (bluelistHit(tagopts.getProperty("alt","").getBytes())) return genBlueLetters(5);
+            
+            // replace image alternative name
+            tagopts.setProperty("alt", new String(transformText(tagopts.getProperty("alt","").getBytes())));
+        }
+        if ((tagname.equals("input")) && (tagopts.getProperty("type").equals("submit"))) {
+            // rewrite button name
+            tagopts.setProperty("value", new String(transformText(tagopts.getProperty("value","").getBytes())));
+        }
         return htmlFilterOutputStream.genTag0(tagname, tagopts, quotechar);
     }
 
     public byte[] transformTag1(String tagname, Properties tagopts, byte[] text, byte quotechar) {
-        if (hit(tagopts.getProperty("href","").getBytes())) return genBlueLetters(text.length);
-        if (hit(text)) return genBlueLetters(text.length);
+        if (bluelistHit(tagopts.getProperty("href","").getBytes())) return genBlueLetters(text.length);
+        if (bluelistHit(text)) return genBlueLetters(text.length);
         return htmlFilterOutputStream.genTag1(tagname, tagopts, text, quotechar);
     }
 

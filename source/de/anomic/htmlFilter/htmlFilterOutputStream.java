@@ -59,7 +59,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Properties;
 import de.anomic.server.serverByteBuffer;
@@ -491,27 +490,27 @@ public final class htmlFilterOutputStream extends OutputStream {
     }
 
     public static void main(String[] args) {
-        // test app
-        // takes one argument: a file name
+        // takes one argument: a file name 
         if (args.length != 1) return;
         byte[] buffer = new byte[512];
         try {
-            htmlFilterContentScraper lc = new htmlFilterContentScraper(new URL("http://www.anomic.de/"));
-            ArrayList v = new ArrayList();
-            v.add("proxy");
-            htmlFilterTransformer lt = new htmlFilterContentTransformer();
+            htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL("http://localhost:8080"));
+            htmlFilterTransformer transformer = new htmlFilterContentTransformer();
+            transformer.init("gettext");
             InputStream is = new FileInputStream(args[0]);
             FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));
-            OutputStream os = new htmlFilterOutputStream(fos, lc, lt, false);
+            OutputStream os = new htmlFilterOutputStream(fos, scraper, transformer, false);
             int i;
             while ((i = is.read(buffer)) > 0) os.write(buffer, 0, i);
             os.close();
             fos.close();
             is.close();
-            lc.print();
+            scraper.print();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        catch (MalformedURLException e) {}
-        catch (IOException e) {}
     }
 
 }
