@@ -123,7 +123,7 @@ public class plasmaDHTFlush extends Thread {
             else return (this.transferedContainerCount*100/this.initialWordsDBSize);
         }
         
-        public int getTransferedEntitySpeed() {
+        public int getTransferedEntrySpeed() {
             long transferTime = System.currentTimeMillis() - this.startingTime;
             if (transferTime <= 0) transferTime = 1;
             return (int) ((1000 * this.transferedEntryCount) / transferTime);
