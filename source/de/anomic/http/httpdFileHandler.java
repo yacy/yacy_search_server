@@ -693,10 +693,17 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         }
                         
                         //use the page template
-                        if(sb.getConfig("usePageTemplate", "false").equals("true")){
+                        String supertemplate="";
+                        if(tp.containsKey("SUPERTEMPLATE")){
+                            supertemplate=(String) tp.get("SUPERTEMPLATE");
+                        }
+                        //if(sb.getConfig("usePageTemplate", "false").equals("true")){    
+                        if(!supertemplate.equals("")){
                             o = new serverByteBuffer();
-                            File pageFile=getOverlayedFile("/env/page.html");
-                            File pageClass=getOverlayedClass("/env/page.html");
+                            /*File pageFile=getOverlayedFile("/env/page.html");
+                            File pageClass=getOverlayedClass("/env/page.html");*/
+                            File pageFile=getOverlayedFile(supertemplate);
+                            File pageClass=getOverlayedClass(supertemplate);
                             if(pageFile != null && pageFile.exists()){
                                 //warning: o,tp and fis are reused
                                 httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());

@@ -33,8 +33,9 @@ public class page {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         //plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        prop.put("test1", "testit!");
-        prop.put("test2", 1);
+        //prop.put("test1", "testit!");
+        //prop.put("test2", 1);
+        
         return prop;
     }
     

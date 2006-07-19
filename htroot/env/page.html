@@ -1,3 +1,18 @@
-#[test1]#
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+<title>YaCy '#[clientname]#': #[title]#</title>
+<!-- TODO: title cannot be set, yet. -->
+<!-- clientname needs to be set in page.java (this will remove the code in httpdFileHandler, 
+if we use supertemplates for everything -->
+#%env/templates/metas.template%#
+</head>
+<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+#%env/templates/header.template%#
+<br><br>
+
 #[page]#
-#(test2)#zero::one::two#(/test2)#
+
+#%env/templates/footer.template%#
+</body>
+</html>
