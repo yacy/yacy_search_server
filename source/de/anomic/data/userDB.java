@@ -130,7 +130,7 @@ public final class userDB {
     
     public Entry getEntry(String userName) {
         if(userName.length()>128){
-            userName=userName.substring(128);
+            userName=userName.substring(0, 127);
         }
         try {
             Map record = userTable.get(userName);
