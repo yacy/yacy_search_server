@@ -64,8 +64,8 @@ public class URL {
             if ((r = host.indexOf('@')) < 0) {
                 userInfo = null;
             } else {
-                userInfo = host.substring(r + 1);
-                host = host.substring(0, r);
+                userInfo = host.substring(0, r);
+                host = host.substring(r + 1);
             }
             path = url.substring(q);
         }
