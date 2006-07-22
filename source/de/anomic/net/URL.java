@@ -70,7 +70,7 @@ public class URL {
             path = url.substring(q);
         }
         
-        identPort();
+        identPort(url);
         identRef();
         identQuest();
     }
@@ -112,7 +112,7 @@ public class URL {
         identQuest();
     }
 
-    private void identPort() throws MalformedURLException {
+    private void identPort(String inputURL) throws MalformedURLException {
         // identify ref in file
         int r = host.indexOf(':');
         if (r < 0) {
@@ -122,7 +122,7 @@ public class URL {
                 this.port = Integer.parseInt(host.substring(r + 1));
                 this.host = host.substring(0, r);
             } catch (NumberFormatException e) {
-                throw new MalformedURLException("wrong port in " + this.host);
+                throw new MalformedURLException("wrong port in host fragment '" + this.host + "' of input url '" + inputURL + "'");
             }
         }
     }
