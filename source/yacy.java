@@ -947,6 +947,7 @@ public final class yacy {
             System.out.println("i.e.");
             System.out.println("java -Xms900m -Xmx900m -classpath classes yacy -domlist");
             int c = 0;
+            long start = System.currentTimeMillis();
             while (eiter.hasNext()) {
                 try {
                     entry = (plasmaCrawlLURL.Entry) eiter.next();
@@ -956,7 +957,13 @@ public final class yacy {
                     // just ignore
                 }
                 c++;
-                if (c % 10000 == 0) System.out.println(c + " urls checked, " + doms.size() + " domains collected.");
+                if (c % 10000 == 0) {
+                    System.out.println(
+                            c + " urls checked, " +
+                            doms.size() + " domains collected, " +
+                            Runtime.getRuntime().freeMemory() + " freeMem, " + 
+                            ((System.currentTimeMillis() - start) * (pool.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
+                }
             }
             
             

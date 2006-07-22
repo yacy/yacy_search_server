@@ -55,8 +55,8 @@ public class URL {
                 host = url.substring(p + 3);
                 userInfo = null;
             } else {
-                host = url.substring(p + 3, r);
-                userInfo = url.substring(r + 1);
+                host = url.substring(r + 1);
+                userInfo = url.substring(p + 3, r);
             }
             path = "/";
         } else {
