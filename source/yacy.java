@@ -53,6 +53,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+
 import de.anomic.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -940,8 +941,13 @@ public final class yacy {
             HashSet doms = new HashSet();
             plasmaCrawlLURL.Entry entry;
             while (eiter.hasNext()) {
-                entry = (plasmaCrawlLURL.Entry) eiter.next();
-                if ((entry != null) && (entry.url() != null)) doms.add(entry.url().getHost());
+                try {
+                    entry = (plasmaCrawlLURL.Entry) eiter.next();
+                    if ((entry != null) && (entry.url() != null)) doms.add(entry.url().getHost());
+                } catch (Exception e) {
+                    // here an MalformedURLException may occur
+                    // just ignore
+                }
             }
             
             // output file in HTML format
