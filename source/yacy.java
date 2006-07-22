@@ -940,6 +940,13 @@ public final class yacy {
             Iterator eiter = pool.loadedURL.entries(true, false);
             HashSet doms = new HashSet();
             plasmaCrawlLURL.Entry entry;
+            System.out.println("Started domain list extraction from " + pool.loadedURL.size() + " url entries.");
+            System.out.println("a dump will be written after double-check of all extracted domains.");
+            System.out.println("This process may fail in case of too less memory. To increase memory, start with");
+            System.out.println("java -Xms<megabytes>m -Xmx<megabytes>m -classpath classes yacy -domlist [ -format { text | html } ] [ <path to DATA folder> ]");
+            System.out.println("i.e.");
+            System.out.println("java -Xms900m -Xmx900m -classpath classes yacy -domlist");
+            int c = 0;
             while (eiter.hasNext()) {
                 try {
                     entry = (plasmaCrawlLURL.Entry) eiter.next();
@@ -948,12 +955,16 @@ public final class yacy {
                     // here an MalformedURLException may occur
                     // just ignore
                 }
+                c++;
+                if (c % 10000 == 0) System.out.println(c + " urls checked, " + doms.size() + " domains collected.");
             }
             
-            // output file in HTML format
+            
             if (format.equals("html")) {
+                // output file in HTML format
                 File file = new File(root, targetName + ".html");
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                System.out.println("Started domain list dump to file " + file);
                 Iterator i = doms.iterator();
                 String key;
                 bos.write(("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">").getBytes());
@@ -967,11 +978,13 @@ public final class yacy {
                 }
                 bos.write(("</body></html>").getBytes());
                 bos.close();
-            //output file in plain text but compressed with ZIP
+            
             } else if (format.equals("zip")) {
+                // output file in plain text but compressed with ZIP
                 ZipEntry zipEntry = new ZipEntry(targetName + ".txt");
                 File file = new File(root, targetName + ".zip");
                 ZipOutputStream bos = new ZipOutputStream(new FileOutputStream(file));
+                System.out.println("Started domain list dump to file " + file);
                 bos.putNextEntry(zipEntry);
                 Iterator i = doms.iterator();
                 String key;
@@ -981,10 +994,12 @@ public final class yacy {
                     bos.write(serverCore.crlf);
                 }
                 bos.close();
-            //output file in plain text but compressed with GZIP
+            
             } else if (format.equals("gzip")) {
+                // output file in plain text but compressed with GZIP
                 File file = new File(root, targetName + ".txt.gz");
                 GZIPOutputStream bos = new GZIPOutputStream(new FileOutputStream(file));
+                System.out.println("Started domain list dump to file " + file);
                 Iterator i = doms.iterator();
                 String key;
                 while (i.hasNext()) {
