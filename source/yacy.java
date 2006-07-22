@@ -961,7 +961,7 @@ public final class yacy {
                     System.out.println(
                             c + " urls checked, " +
                             doms.size() + " domains collected, " +
-                            Runtime.getRuntime().freeMemory() + " freeMem, " + 
+                            ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() + Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB available, " + 
                             ((System.currentTimeMillis() - start) * (pool.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
                 }
             }
