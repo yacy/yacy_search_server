@@ -153,7 +153,7 @@ public class IndexControl_p {
                 int i = 0;
                 urlx = new String[index.size()];
                 while (en.hasNext()) {
-                    urlx[i++] = ((indexURLEntry) en.next()).getUrlHash();
+                    urlx[i++] = ((indexURLEntry) en.next()).urlHash();
                 }
                 index = null;
             }
@@ -259,15 +259,15 @@ public class IndexControl_p {
             while (urlIter.hasNext()) {
                 indexEntry = (indexURLEntry) urlIter.next();
                 try {
-                    lurl = switchboard.urlPool.loadedURL.getEntry(indexEntry.getUrlHash(), null);
+                    lurl = switchboard.urlPool.loadedURL.getEntry(indexEntry.urlHash(), null);
                     if (lurl.toString() == null) {
-                        unknownURLEntries.add(indexEntry.getUrlHash());
+                        unknownURLEntries.add(indexEntry.urlHash());
                         urlIter.remove();
                     } else {
-                        knownURLs.put(indexEntry.getUrlHash(), lurl);
+                        knownURLs.put(indexEntry.urlHash(), lurl);
                     }
                 } catch (IOException e) {
-                    unknownURLEntries.add(indexEntry.getUrlHash());
+                    unknownURLEntries.add(indexEntry.urlHash());
                 }
             }
             // use whats remaining           
@@ -441,7 +441,7 @@ public class IndexControl_p {
                 indexURLEntry xi;
                 while (en.hasNext()) {
                     xi = (indexURLEntry) en.next();
-                    uh = new String[]{xi.getUrlHash(), Integer.toString(xi.posintext())};
+                    uh = new String[]{xi.urlHash(), Integer.toString(xi.posintext())};
                     try {
                         us = switchboard.urlPool.loadedURL.getEntry(uh[0], null).url().toString();
                         tm.put(us, uh);

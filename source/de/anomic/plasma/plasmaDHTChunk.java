@@ -209,19 +209,19 @@ public class plasmaDHTChunk {
                     while ((urlIter.hasNext()) && (maxcount > refcount)) {
                         indexEntry = (indexURLEntry) urlIter.next();
                         try {
-                            lurl = lurls.getEntry(indexEntry.getUrlHash(), indexEntry);
+                            lurl = lurls.getEntry(indexEntry.urlHash(), indexEntry);
                             if ((lurl == null) || (lurl.url() == null)) {
                                 notBoundCounter++;
                                 urlIter.remove();
-                                wordIndex.removeEntries(nexthash, new String[] { indexEntry.getUrlHash() }, true);
+                                wordIndex.removeEntries(nexthash, new String[] { indexEntry.urlHash() }, true);
                             } else {
-                                urlCache.put(indexEntry.getUrlHash(), lurl);
+                                urlCache.put(indexEntry.urlHash(), lurl);
                                 refcount++;
                             }
                         } catch (IOException e) {
                             notBoundCounter++;
                             urlIter.remove();
-                            wordIndex.removeEntries(nexthash, new String[] { indexEntry.getUrlHash() }, true);
+                            wordIndex.removeEntries(nexthash, new String[] { indexEntry.urlHash() }, true);
                         }
                     }
 
@@ -279,7 +279,7 @@ public class plasmaDHTChunk {
             urlIter = this.indexContainers[i].entries();
             while (urlIter.hasNext()) {
                 indexEntry = (indexURLEntry) urlIter.next();
-                urlHashes[c++] = indexEntry.getUrlHash();
+                urlHashes[c++] = indexEntry.urlHash();
             }
             count += wordIndex.removeEntries(this.indexContainers[i].getWordHash(), urlHashes, true);
             log.logFine("Deleted partial index (" + c + " URLs) for word " + this.indexContainers[i].getWordHash() + "; " + this.wordIndex.indexSize(indexContainers[i].getWordHash()) + " entries left");

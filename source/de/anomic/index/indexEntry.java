@@ -36,7 +36,20 @@ public interface indexEntry {
     public String toPropertyForm();
     public kelondroRow.Entry toKelondroEntry();
     
-    public String getUrlHash();
+    public String urlHash();
+    public int quality();
+    public int virtualAge();
+    public long lastModified();
+    public int hitcount();
+    public int posintext();
+    public int posinphrase();
+    public int posofphrase();
+    public int wordcount();
+    public int phrasecount();
+    public String getLanguage();
+    public char getType();
+    public boolean isLocal();
+    
     public void combineDistance(indexEntry oe);
     public int worddistance();
     public void min(indexEntry other);

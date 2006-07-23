@@ -148,16 +148,16 @@ public final class plasmaWordIndexFile {
     }
     
     public boolean contains(indexURLEntry entry) throws IOException {
-        return (theIndex.get(entry.getUrlHash().getBytes()) != null);
+        return (theIndex.get(entry.urlHash().getBytes()) != null);
     }
     
     public boolean addEntry(indexURLEntry entry) throws IOException {
         if (entry == null) return false;
-        indexURLEntry oldEntry = getEntry(entry.getUrlHash());
+        indexURLEntry oldEntry = getEntry(entry.urlHash());
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this entity
             return false;
         }
-        return (theIndex.put(entry.getUrlHash().getBytes(), entry.toEncodedStringForm().getBytes()) == null);
+        return (theIndex.put(entry.urlHash().getBytes(), entry.toEncodedStringForm().getBytes()) == null);
     }
     
     public int addEntries(indexContainer container) throws IOException {

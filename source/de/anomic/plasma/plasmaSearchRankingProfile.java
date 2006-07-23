@@ -168,9 +168,9 @@ public class plasmaSearchRankingProfile {
         long ranking = 0;
         if (entry instanceof indexURLEntry) {
             indexURLEntry normalizedEntry = (indexURLEntry) entry;
-            ranking += normalizedEntry.getQuality() << ((Integer) coeff.get(ENTROPY)).intValue();
-            ranking += normalizedEntry.getVirtualAge() << ((Integer) coeff.get(DATE)).intValue();
-            ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.getUrlHash()) << ((Integer) coeff.get(YBR)).intValue();
+            ranking += normalizedEntry.quality() << ((Integer) coeff.get(ENTROPY)).intValue();
+            ranking += normalizedEntry.virtualAge() << ((Integer) coeff.get(DATE)).intValue();
+            ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.urlHash()) << ((Integer) coeff.get(YBR)).intValue();
             ranking += (normalizedEntry.posintext() == 0) ? 0 : (255 - normalizedEntry.posintext()) << ((Integer) coeff.get(POSINTEXT)).intValue();
             ranking += (normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance()) << ((Integer) coeff.get(WORDDISTANCE)).intValue();
             ranking += (normalizedEntry.hitcount() == 0) ? 0 : normalizedEntry.hitcount() << ((Integer) coeff.get(HITCOUNT)).intValue();

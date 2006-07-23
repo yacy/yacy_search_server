@@ -85,11 +85,11 @@ public class yacyNewsDB {
     }
     
     public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
-            new kelondroColumn("newsid", kelondroColumn.celltype_string, yacyNewsRecord.idLength(), kelondroColumn.encoder_string, yacyNewsRecord.idLength(), "id = created + originator"),
-            new kelondroColumn("category", kelondroColumn.celltype_string, yacyNewsRecord.categoryStringLength, kelondroColumn.encoder_string, yacyNewsRecord.categoryStringLength, ""),
-            new kelondroColumn("received", kelondroColumn.celltype_string, yacyCore.universalDateShortPattern.length(), kelondroColumn.encoder_string, yacyCore.universalDateShortPattern.length(), ""),
-            new kelondroColumn("", kelondroColumn.celltype_string, 2, kelondroColumn.encoder_string, 2, ""),
-            new kelondroColumn("", kelondroColumn.celltype_string, attributesMaxLength, kelondroColumn.encoder_string, attributesMaxLength, ""),
+            new kelondroColumn("newsid", kelondroColumn.celltype_string, kelondroColumn.encoder_string, yacyNewsRecord.idLength(), "id = created + originator"),
+            new kelondroColumn("category", kelondroColumn.celltype_string, kelondroColumn.encoder_string, yacyNewsRecord.categoryStringLength, ""),
+            new kelondroColumn("received", kelondroColumn.celltype_string, kelondroColumn.encoder_string, yacyCore.universalDateShortPattern.length(), ""),
+            new kelondroColumn("", kelondroColumn.celltype_string, kelondroColumn.encoder_string, 2, ""),
+            new kelondroColumn("", kelondroColumn.celltype_string, kelondroColumn.encoder_string, attributesMaxLength, ""),
     });
 
     private static kelondroTree createDB(File path, int bufferkb, long preloadTime) {

@@ -134,9 +134,9 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
 
     private boolean addi(indexEntry entry) {
         // returns true if the new entry was added, false if it already existed
-        indexURLEntry oldEntry = (indexURLEntry) container.put(entry.getUrlHash(), entry);
+        indexURLEntry oldEntry = (indexURLEntry) container.put(entry.urlHash(), entry);
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this container
-            container.put(entry.getUrlHash(), oldEntry); // put it back
+            container.put(entry.urlHash(), oldEntry); // put it back
             return false;
         }
         return (oldEntry == null);
@@ -259,7 +259,7 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
         long stamp = System.currentTimeMillis();
             while ((se.hasNext()) && ((System.currentTimeMillis() - stamp) < time)) {
                 ie0 = (indexEntry) se.next();
-                ie1 = large.get(ie0.getUrlHash());
+                ie1 = large.get(ie0.urlHash());
                 if (ie1 != null) {
                     // this is a hit. Calculate word distance:
                     ie0.combineDistance(ie1);
@@ -285,7 +285,7 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
 
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
-                c = i1.getOrdering().compare(ie1.getUrlHash(), ie2.getUrlHash());
+                c = i1.getOrdering().compare(ie1.urlHash(), ie2.urlHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = (indexURLEntry) e1.next(); else break;

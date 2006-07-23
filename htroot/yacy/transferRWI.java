@@ -149,7 +149,7 @@ public final class transferRWI {
                     sb.wordIndex.addEntry(wordHash, entry, System.currentTimeMillis(), true);
                     serverCore.checkInterruption();
                     
-                    urlHash = entry.getUrlHash();
+                    urlHash = entry.urlHash();
                     try {
                         if ((!(unknownURL.contains(urlHash))) &&
                             (!(sb.urlPool.loadedURL.exists(urlHash)))) {

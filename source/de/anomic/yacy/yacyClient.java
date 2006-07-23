@@ -893,8 +893,8 @@ public final class yacyClient {
                 eenum = indexes[i].entries();
                 while (eenum.hasNext()) {
                     entry = (indexURLEntry) eenum.next();
-                    if (urlCache.get(entry.getUrlHash()) == null) {
-                        yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.getUrlHash() + "' is not contained in urlCache");
+                    if (urlCache.get(entry.urlHash()) == null) {
+                        yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.urlHash() + "' is not contained in urlCache");
                     }
                 }
             }        

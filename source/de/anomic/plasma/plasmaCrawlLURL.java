@@ -462,25 +462,33 @@ public final class plasmaCrawlLURL extends indexURL {
             this.urlHash = urlHash;
             kelondroRow.Entry entry = plasmaCrawlLURL.this.urlHashCache.get(urlHash.getBytes());
             if (entry == null) throw new IOException("url hash " + urlHash + " not found in LURL");
+            insertEntry(entry, searchedWord);
+        }
+        
+        public Entry(kelondroRow.Entry entry, indexURLEntry searchedWord) throws IOException {
+            assert (entry != null);
+            insertEntry(entry, word);
+        }
+        
+        private void insertEntry(kelondroRow.Entry entry, indexURLEntry searchedWord) throws IOException {
             try {
-                if (entry != null) {
-                    this.url = new URL(entry.getColString(1, "UTF-8").trim());
-                    this.descr = (entry.empty(2)) ? this.url.toString() : entry.getColString(2, "UTF-8").trim();
-                    this.moddate = new Date(86400000 * entry.getColLongB64E(3));
-                    this.loaddate = new Date(86400000 * entry.getColLongB64E(4));
-                    this.referrerHash = (entry.empty(5)) ? dummyHash : entry.getColString(5, "UTF-8");
-                    this.copyCount = (int) entry.getColLongB64E(6);
-                    this.flags = entry.getColString(7, "UTF-8");
-                    this.quality = (int) entry.getColLongB64E(8);
-                    this.language = entry.getColString(9, "UTF-8");
-                    this.doctype = (char) entry.getColByte(10);
-                    this.size = (int) entry.getColLongB64E(11);
-                    this.wordCount = (int) entry.getColLongB64E(12);
-                    this.snippet = null;
-                    this.word = searchedWord;
-                    this.stored = false;
-                    return;
-                }
+                this.urlHash = entry.getColString(0, null);
+                this.url = new URL(entry.getColString(1, "UTF-8").trim());
+                this.descr = (entry.empty(2)) ? this.url.toString() : entry.getColString(2, "UTF-8").trim();
+                this.moddate = new Date(86400000 * entry.getColLongB64E(3));
+                this.loaddate = new Date(86400000 * entry.getColLongB64E(4));
+                this.referrerHash = (entry.empty(5)) ? dummyHash : entry.getColString(5, "UTF-8");
+                this.copyCount = (int) entry.getColLongB64E(6);
+                this.flags = entry.getColString(7, "UTF-8");
+                this.quality = (int) entry.getColLongB64E(8);
+                this.language = entry.getColString(9, "UTF-8");
+                this.doctype = (char) entry.getColByte(10);
+                this.size = (int) entry.getColLongB64E(11);
+                this.wordCount = (int) entry.getColLongB64E(12);
+                this.snippet = null;
+                this.word = searchedWord;
+                this.stored = false;
+                return;
             } catch (Exception e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/1: " + e.toString(), e);
                 throw new IOException("plasmaLURL.entry/1: " + e.toString());
@@ -764,8 +772,8 @@ public final class plasmaCrawlLURL extends indexURL {
         Iterator i;
         boolean error = false;
         
-        public kiter(boolean up, boolean rotating) throws IOException {
-            i = urlHashCache.rows(up, rotating, null);
+        public kiter(boolean up, boolean rotating, String firstHash) throws IOException {
+            i = urlHashCache.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
             error = false;
         }
 
@@ -777,12 +785,10 @@ public final class plasmaCrawlLURL extends indexURL {
         public Object next() throws RuntimeException {
             kelondroRow.Entry e = (kelondroRow.Entry) i.next();
             if (e == null) return null;
-            String hash = null;
             try {
-                hash = new String(e.getColBytes(0));
-                return new Entry(hash, null);
+                return new Entry(e, null);
             } catch (IOException ex) {
-                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + hash);
+                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getColString(0, null));
             }
         }
         
@@ -792,9 +798,9 @@ public final class plasmaCrawlLURL extends indexURL {
         
     }
 
-    public Iterator entries(boolean up, boolean rotating) throws IOException {
+    public Iterator entries(boolean up, boolean rotating, String firstHash) throws IOException {
         // enumerates entry elements
-        return new kiter(up, rotating);
+        return new kiter(up, rotating, firstHash);
     }
     
     /**
@@ -807,7 +813,7 @@ public final class plasmaCrawlLURL extends indexURL {
         serverLog log = new serverLog("URLDBCLEANUP");
         HashSet damagedURLS = new HashSet();
         try {
-            Iterator eiter = entries(true, false);
+            Iterator eiter = entries(true, false, null);
             int iteratorCount = 0;
             while (eiter.hasNext()) try {
                 eiter.next();
@@ -893,7 +899,7 @@ public final class plasmaCrawlLURL extends indexURL {
         public void run() {
             try {
                 serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
-                Iterator eiter = entries(true,false);
+                Iterator eiter = entries(true, false, null);
                 while (eiter.hasNext() && run) {
                     synchronized(this) {
                         if (this.pause) {
@@ -975,7 +981,7 @@ public final class plasmaCrawlLURL extends indexURL {
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache
             final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), 1, 0);
-            final Iterator enu = urls.entries(true, false);
+            final Iterator enu = urls.entries(true, false, null);
             while (enu.hasNext()) {
                 ((Entry) enu.next()).print();
             }

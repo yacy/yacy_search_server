@@ -142,7 +142,7 @@ public final class plasmaSearchPreOrder {
         i = container.entries();
         for (int j = 0; j < count; j++) {
             indexEntry = (indexURLEntry) i.next();
-            pageAcc.put(serverCodings.encodeHex(this.ranking.preRanking(indexEntry.generateNormalized(entryMin, entryMax)), 16) + indexEntry.getUrlHash(), indexEntry);
+            pageAcc.put(serverCodings.encodeHex(this.ranking.preRanking(indexEntry.generateNormalized(entryMin, entryMax)), 16) + indexEntry.urlHash(), indexEntry);
         }
     }
     

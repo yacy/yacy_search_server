@@ -1000,11 +1000,14 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         setOrder.rotate(firstKey);
         TreeMap rows = new TreeMap(setOrder);
         Node n;
+        String key;
         synchronized (this) {
             Iterator i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
             while ((rows.size() < count) && (i.hasNext())) {
                 n = (Node) i.next();
-                if (n != null) rows.put(new String(n.getKey()), row().newEntry(n.getValueRow()));
+                if (n == null) return rows;
+                key = new String(n.getKey());
+                if (rows.put(key, row().newEntry(n.getValueRow())) != null) return rows; // protection against loops
             }
         }
         return rows;
@@ -1080,6 +1083,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             if (!(bufferIterator.hasNext())) {
                 // assign next buffer chunk
                 try {
+                    lastKey[lastKey.length - 1]++;
                     rowBuffer = rowMap(inc, rot, lastKey, false, chunkSize);
                     bufferIterator = rowBuffer.entrySet().iterator();
                 } catch (IOException e) {

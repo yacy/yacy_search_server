@@ -63,6 +63,9 @@ import java.util.Properties;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroRowSet;
+
 public final class serverFileUtils {
 
     /**
@@ -318,6 +321,25 @@ public final class serverFileUtils {
         }
         while (i.hasNext()) {
             key = i.next().toString();
+            if (sep != null) bos.write(sep.getBytes());
+            bos.write(key.getBytes());
+        }
+        bos.close();
+        file.delete();
+        tf.renameTo(file);
+    }
+
+    public static void saveSet(File file, kelondroRowSet set, String sep) throws IOException {
+        File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tf));
+        Iterator i = set.rows();
+        String key;
+        if (i.hasNext()) {
+            key = new String(((kelondroRow.Entry) i.next()).getColBytes(0));
+            bos.write(key.getBytes());
+        }
+        while (i.hasNext()) {
+            key = new String(((kelondroRow.Entry) i.next()).getColBytes(0));
             if (sep != null) bos.write(sep.getBytes());
             bos.write(key.getBytes());
         }

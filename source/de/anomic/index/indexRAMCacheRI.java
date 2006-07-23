@@ -119,7 +119,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                             row.setCol(0, container.getWordHash().getBytes());
                             row.setCol(1, kelondroNaturalOrder.encodeLong(container.size(), 4));
                             row.setCol(2, kelondroNaturalOrder.encodeLong(container.updated(), 8));
-                            row.setCol(3, wordEntry.getUrlHash().getBytes());
+                            row.setCol(3, wordEntry.urlHash().getBytes());
                             row.setCol(4, wordEntry.toEncodedStringForm().getBytes());
                             dumpArray.set((int) urlcount++, row);
                         }
@@ -148,7 +148,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                             row.setCol(0, wordHash.getBytes());
                             row.setCol(1, kelondroNaturalOrder.encodeLong(container.size(), 4));
                             row.setCol(2, kelondroNaturalOrder.encodeLong(updateTime, 8));
-                            row.setCol(3, wordEntry.getUrlHash().getBytes());
+                            row.setCol(3, wordEntry.urlHash().getBytes());
                             row.setCol(4, wordEntry.toEncodedStringForm().getBytes());
                             dumpArray.set((int) urlcount++, row);
                         }

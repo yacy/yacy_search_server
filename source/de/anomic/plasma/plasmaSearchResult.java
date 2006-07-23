@@ -161,7 +161,7 @@ public final class plasmaSearchResult {
 
             // insert value
             //System.out.println("Ranking " + ranking + ", YBR-" + plasmaSearchPreOrder.ybr(indexEntry.getUrlHash()) + " for URL " + page.url());
-            pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.getUrlHash(), page);
+            pageAcc.put(serverCodings.encodeHex(ranking, 16) + indexEntry.urlHash(), page);
         }
         
         // flush memory

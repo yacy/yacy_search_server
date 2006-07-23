@@ -135,7 +135,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
 
                         // getting next word index entry
                         importWordIdxEntry = (indexURLEntry) importWordIdxEntries.next();
-                        String urlHash = importWordIdxEntry.getUrlHash();
+                        String urlHash = importWordIdxEntry.urlHash();
                         entityUrls.add(urlHash);
                     }
 

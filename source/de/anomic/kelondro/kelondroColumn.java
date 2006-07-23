@@ -38,18 +38,18 @@ public class kelondroColumn {
     
     public static final int encoder_none   = 0;
     public static final int encoder_b64e   = 1;
-    public static final int encoder_string = 2;
-    public static final int encoder_bytes  = 3;
-    public static final int encoder_char   = 4;
+    public static final int encoder_b256   = 2;
+    public static final int encoder_string = 3;
+    public static final int encoder_bytes  = 4;
+    public static final int encoder_char   = 5;
     
-    private int celltype, cellwidth, encoder, encodedwidth;
+    private int celltype, cellwidth, encoder;
     private String nickname, description;
     
-    public kelondroColumn(String nickname, int celltype, int cellwidth, int encoder, int encodedwidth, String description) {
+    public kelondroColumn(String nickname, int celltype, int encoder, int cellwidth, String description) {
         this.celltype = celltype;
         this.cellwidth = cellwidth;
         this.encoder = encoder;
-        this.encodedwidth = encodedwidth;
         this.nickname = nickname;
         this.description = description;
     }
@@ -64,10 +64,6 @@ public class kelondroColumn {
     
     public int encoder() {
         return this.encoder;
-    }
-    
-    public int encodedwidth() {
-        return this.encodedwidth;
     }
     
     public String nickname() {

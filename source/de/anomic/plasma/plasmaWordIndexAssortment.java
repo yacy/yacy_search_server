@@ -150,7 +150,7 @@ public final class plasmaWordIndexAssortment {
         indexURLEntry entry;
         for (int i = 0; i < assortmentLength; i++) {
             entry = (indexURLEntry) entries.next();
-            row.setCol(3 + 2 * i, entry.getUrlHash().getBytes());
+            row.setCol(3 + 2 * i, entry.urlHash().getBytes());
             row.setCol(4 + 2 * i, entry.toEncodedStringForm().getBytes());
         }
         kelondroRow.Entry oldrow = null;

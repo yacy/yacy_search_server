@@ -723,7 +723,7 @@ public final class yacy {
                     indexURLEntry wordIdxEntry;
                     while (wordIdxEntries.hasNext()) {
                         wordIdxEntry = (indexURLEntry) wordIdxEntries.next();
-                        String urlHash = wordIdxEntry.getUrlHash();                    
+                        String urlHash = wordIdxEntry.urlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
                             plasmaCrawlLURL.Entry urlEntry = currentUrlDB.getEntry(urlHash, null);                       
                             urlCounter++;
@@ -937,7 +937,7 @@ public final class yacy {
     	File root = new File(homePath);
         try {
             plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000, 10000);
-            Iterator eiter = pool.loadedURL.entries(true, false);
+            Iterator eiter = pool.loadedURL.entries(true, false, null);
             HashSet doms = new HashSet();
             plasmaCrawlLURL.Entry entry;
             System.out.println("Started domain list extraction from " + pool.loadedURL.size() + " url entries.");
@@ -1018,7 +1018,9 @@ public final class yacy {
             }
             else {
                 // plain text list
-                serverFileUtils.saveSet(new File(root, targetName + ".txt"), doms, new String(serverCore.crlf));
+                File file = new File(root, targetName + ".txt");
+                System.out.println("Started domain list dump to file " + file);
+                serverFileUtils.saveSet(file, doms, new String(serverCore.crlf));
             }
             pool.close();
         } catch (IOException e) {
@@ -1030,7 +1032,7 @@ public final class yacy {
         File root = new File(homePath);
         try {
             plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000, 10000);
-            Iterator eiter = pool.loadedURL.entries(true, false);
+            Iterator eiter = pool.loadedURL.entries(true, false, null);
             plasmaCrawlLURL.Entry entry;
             File file = new File(root, targetName);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));

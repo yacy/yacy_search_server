@@ -107,10 +107,10 @@ public abstract class indexAbstractEntry implements indexEntry {
         return e;
     }
     
-    public String getUrlHash() { return urlHash; }
-    public int getQuality() { return quality; }
-    public int getVirtualAge() { return plasmaWordIndex.microDateDays(lastModified); }
-    public long getLastModified() { return lastModified; }
+    public String urlHash() { return urlHash; }
+    public int quality() { return quality; }
+    public int virtualAge() { return plasmaWordIndex.microDateDays(lastModified); }
+    public long lastModified() { return lastModified; }
     public int hitcount() { return hitcount; }
     public int posintext() { return posintext; }
     public int posinphrase() { return posinphrase; }
@@ -125,7 +125,7 @@ public abstract class indexAbstractEntry implements indexEntry {
     public boolean isNewer(indexEntry other) {
         if (other == null) return true;
         if (this.lastModified > ((indexAbstractEntry) other).lastModified) return true;
-        if (this.lastModified == ((indexAbstractEntry) other).getLastModified()) {
+        if (this.lastModified == ((indexAbstractEntry) other).lastModified()) {
             if (this.quality > ((indexAbstractEntry) other).quality) return true;
         }
         return false;
@@ -133,8 +133,8 @@ public abstract class indexAbstractEntry implements indexEntry {
  
     public boolean isOlder(indexEntry other) {
         if (other == null) return false;
-        if (this.lastModified < ((indexAbstractEntry) other).getLastModified()) return true;
-        if (this.lastModified == ((indexAbstractEntry) other).getLastModified()) {
+        if (this.lastModified < ((indexAbstractEntry) other).lastModified()) return true;
+        if (this.lastModified == ((indexAbstractEntry) other).lastModified()) {
             if (this.quality < ((indexAbstractEntry) other).quality) return true;
         }
         return false;
