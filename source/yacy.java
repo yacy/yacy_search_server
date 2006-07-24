@@ -65,7 +65,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import java.util.zip.GZIPOutputStream;
 
 import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
@@ -80,6 +79,7 @@ import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
@@ -932,33 +932,50 @@ public final class yacy {
     * @param format String which determines the format of the file. Possible values: "html", "zip", "gzip" or "plain"
     * @see urllist
     */
-    private static void domlist(String homePath, String format, String targetName) {
+    private static void domlist(String homePath, String source, String format, String targetName) {
     	
     	File root = new File(homePath);
         try {
             plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000, 10000);
-            Iterator eiter = pool.loadedURL.entries(true, false, null);
-            HashSet doms = new HashSet();
-            plasmaCrawlLURL.Entry entry;
+            HashMap doms = new HashMap();
             System.out.println("Started domain list extraction from " + pool.loadedURL.size() + " url entries.");
             System.out.println("a dump will be written after double-check of all extracted domains.");
             System.out.println("This process may fail in case of too less memory. To increase memory, start with");
-            System.out.println("java -Xms<megabytes>m -Xmx<megabytes>m -classpath classes yacy -domlist [ -format { text | html } ] [ <path to DATA folder> ]");
-            System.out.println("i.e.");
-            System.out.println("java -Xms900m -Xmx900m -classpath classes yacy -domlist");
+            System.out.println("java -Xmx<megabytes>m -classpath classes yacy -domlist [ -source { lurl | eurl } ] [ -format { text  | zip | gzip | html } ] [ <path to DATA folder> ]");
             int c = 0;
             long start = System.currentTimeMillis();
-            while (eiter.hasNext()) {
-                try {
-                    entry = (plasmaCrawlLURL.Entry) eiter.next();
-                    if ((entry != null) && (entry.url() != null)) doms.add(entry.url().getHost());
-                } catch (Exception e) {
-                    // here an MalformedURLException may occur
-                    // just ignore
+            if (source.equals("lurl")) {
+                Iterator eiter = pool.loadedURL.entries(true, false, null);
+                plasmaCrawlLURL.Entry entry;
+                while (eiter.hasNext()) {
+                    try {
+                        entry = (plasmaCrawlLURL.Entry) eiter.next();
+                        if ((entry != null) && (entry.url() != null)) doms.put(entry.url().getHost(), null);
+                    } catch (Exception e) {
+                        // here a MalformedURLException may occur
+                        // just ignore
+                    }
+                    c++;
+                    if (c % 10000 == 0) System.out.println(
+                            c + " urls checked, " +
+                            doms.size() + " domains collected, " +
+                            ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() + Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB available, " + 
+                            ((System.currentTimeMillis() - start) * (pool.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
                 }
-                c++;
-                if (c % 10000 == 0) {
-                    System.out.println(
+            }
+            if (source.equals("eurl")) {
+                Iterator eiter = pool.errorURL.entries(true, false, null);
+                plasmaCrawlEURL.Entry entry;
+                while (eiter.hasNext()) {
+                    try {
+                        entry = (plasmaCrawlEURL.Entry) eiter.next();
+                        if ((entry != null) && (entry.url() != null)) doms.put(entry.url().getHost(), entry.failreason());
+                    } catch (Exception e) {
+                        // here a MalformedURLException may occur
+                        // just ignore
+                    }
+                    c++;
+                    if (c % 10000 == 0) System.out.println(
                             c + " urls checked, " +
                             doms.size() + " domains collected, " +
                             ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() + Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB available, " + 
@@ -966,21 +983,24 @@ public final class yacy {
                 }
             }
             
-            
             if (format.equals("html")) {
                 // output file in HTML format
                 File file = new File(root, targetName + ".html");
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
                 System.out.println("Started domain list dump to file " + file);
-                Iterator i = doms.iterator();
+                Iterator i = doms.entrySet().iterator();
+                Map.Entry entry;
                 String key;
                 bos.write(("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">").getBytes());
                 bos.write(serverCore.crlf);
-                bos.write(("<html><head><title>YaCy domainlist</title></head><body>").getBytes());
+                bos.write(("<html><head><title>YaCy " + source + " domainlist</title></head><body>").getBytes());
                 bos.write(serverCore.crlf);
                 while (i.hasNext()) {
-                    key = i.next().toString();
-                    bos.write(("<a href=\"http://" + key + "\">" + key + "</a><br>").getBytes());
+                    entry = (Map.Entry) i.next();
+                    key = (String) entry.getKey();
+                    bos.write(("<a href=\"http://" + key + "\">" + key + "</a>" +
+                              ((entry.getValue() == null) ? "" : ((String) entry.getValue())) + "<br>"
+                             ).getBytes());
                     bos.write(serverCore.crlf);
                 }
                 bos.write(("</body></html>").getBytes());
@@ -988,39 +1008,20 @@ public final class yacy {
             
             } else if (format.equals("zip")) {
                 // output file in plain text but compressed with ZIP
-                ZipEntry zipEntry = new ZipEntry(targetName + ".txt");
                 File file = new File(root, targetName + ".zip");
-                ZipOutputStream bos = new ZipOutputStream(new FileOutputStream(file));
                 System.out.println("Started domain list dump to file " + file);
-                bos.putNextEntry(zipEntry);
-                Iterator i = doms.iterator();
-                String key;
-                while (i.hasNext()) {
-                    key = i.next().toString();
-                    bos.write((key).getBytes());
-                    bos.write(serverCore.crlf);
-                }
-                bos.close();
+                serverFileUtils.saveSet(file, "zip", doms.keySet(), new String(serverCore.crlf));
             
             } else if (format.equals("gzip")) {
                 // output file in plain text but compressed with GZIP
                 File file = new File(root, targetName + ".txt.gz");
-                GZIPOutputStream bos = new GZIPOutputStream(new FileOutputStream(file));
                 System.out.println("Started domain list dump to file " + file);
-                Iterator i = doms.iterator();
-                String key;
-                while (i.hasNext()) {
-                    key = i.next().toString();
-                    bos.write((key).getBytes());
-                    bos.write(serverCore.crlf);
-                }
-                bos.close();
-            }
-            else {
+                serverFileUtils.saveSet(file, "gzip", doms.keySet(), new String(serverCore.crlf));
+            } else {
                 // plain text list
                 File file = new File(root, targetName + ".txt");
                 System.out.println("Started domain list dump to file " + file);
-                serverFileUtils.saveSet(file, doms, new String(serverCore.crlf));
+                serverFileUtils.saveSet(file, "plain", doms.keySet(), new String(serverCore.crlf));
             }
             pool.close();
         } catch (IOException e) {
@@ -1028,23 +1029,42 @@ public final class yacy {
         }
     }
     
-    private static void urllist(String homePath, boolean html, String targetName) {
+    private static void urllist(String homePath, String source, boolean html, String targetName) {
         File root = new File(homePath);
         try {
             plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000, 10000);
-            Iterator eiter = pool.loadedURL.entries(true, false, null);
-            plasmaCrawlLURL.Entry entry;
             File file = new File(root, targetName);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-            while (eiter.hasNext()) {
-                entry = (plasmaCrawlLURL.Entry) eiter.next();
-                if ((entry != null) && (entry.url() != null)) {
-                    if (html) {
-                        bos.write(("<a href=\"" + entry.url() + "\">" + entry.descr() + "</a><br>").getBytes("UTF-8"));
-                        bos.write(serverCore.crlf);
-                    } else {
-                        bos.write(entry.url().toString().getBytes());
-                        bos.write(serverCore.crlf);
+            
+            if (source.equals("lurl")) {
+                Iterator eiter = pool.loadedURL.entries(true, false, null);
+                plasmaCrawlLURL.Entry entry;
+                while (eiter.hasNext()) {
+                    entry = (plasmaCrawlLURL.Entry) eiter.next();
+                    if ((entry != null) && (entry.url() != null)) {
+                        if (html) {
+                            bos.write(("<a href=\"" + entry.url() + "\">" + entry.descr() + "</a><br>").getBytes("UTF-8"));
+                            bos.write(serverCore.crlf);
+                        } else {
+                            bos.write(entry.url().toString().getBytes());
+                            bos.write(serverCore.crlf);
+                        }
+                    }
+                }
+            }
+            if (source.equals("eurl")) {
+                Iterator eiter = pool.errorURL.entries(true, false, null);
+                plasmaCrawlEURL.Entry entry;
+                while (eiter.hasNext()) {
+                    entry = (plasmaCrawlEURL.Entry) eiter.next();
+                    if ((entry != null) && (entry.url() != null)) {
+                        if (html) {
+                            bos.write(("<a href=\"" + entry.url() + "\">" + entry.url() + "</a> " + entry.failreason() + "<br>").getBytes("UTF-8"));
+                            bos.write(serverCore.crlf);
+                        } else {
+                            bos.write(entry.url().toString().getBytes());
+                            bos.write(serverCore.crlf);
+                        }
                     }
                 }
             }
@@ -1272,18 +1292,33 @@ public final class yacy {
             transferCR(targetaddress, crfile);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-domlist"))) {
             // generate a url list and save it in a file
+            String source = "lurl";
+            if (args.length >= 3 && args[1].toLowerCase().equals("-source")) {
+                if ((args[2].equals("lurl")) ||
+                    (args[2].equals("eurl")))
+                    source = args[2];
+                args = shift(args, 1, 2);
+            }
             String format = "txt";
             if (args.length >= 3 && args[1].toLowerCase().equals("-format")) {
-                if (args[2].equals("html")) format = args[2];
-                if (args[2].equals("zip")) format = args[2];
-                if (args[2].equals("gzip")) format = args[2];
+                if ((args[2].equals("html")) ||
+                    (args[2].equals("zip")) ||
+                    (args[2].equals("gzip")))
+                    format = args[2];
                 args = shift(args, 1, 2);
             }
             if (args.length == 2) applicationRoot= args[1];
             String outfile = "domlist_" + System.currentTimeMillis();
-            domlist(applicationRoot, format, outfile);
+            domlist(applicationRoot, source, format, outfile);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urllist"))) {
             // generate a url list and save it in a file
+            String source = "lurl";
+            if (args.length >= 3 && args[1].toLowerCase().equals("-source")) {
+                if ((args[2].equals("lurl")) ||
+                    (args[2].equals("eurl")))
+                    source = args[2];
+                args = shift(args, 1, 2);
+            }
             boolean html = false;
             if (args.length >= 3 && args[1].toLowerCase().equals("-format")) {
                 if (args[2].equals("html")) html = true;
@@ -1291,7 +1326,7 @@ public final class yacy {
             }
             if (args.length == 2) applicationRoot= args[1];
             String outfile = "urllist_" + System.currentTimeMillis() + ((html) ? ".html" : ".txt");
-            urllist(applicationRoot, html, outfile);
+            urllist(applicationRoot, source, html, outfile);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file
             if (args.length == 2) applicationRoot= args[1];

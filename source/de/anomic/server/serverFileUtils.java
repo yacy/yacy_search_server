@@ -55,6 +55,8 @@ import java.io.BufferedOutputStream;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import java.util.Set;
 import java.util.Map;
 import java.util.HashSet;
@@ -310,44 +312,66 @@ public final class serverFileUtils {
         return set;
     }
 
-    public static void saveSet(File file, Set set, String sep) throws IOException {
-        File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tf));
+    public static void saveSet(File file, String format, Set set, String sep) throws IOException {
+        File tf = new File(file.toString() + ".tmp" + (System.currentTimeMillis() % 1000));
+        OutputStream os = null;
+        if ((format == null) || (format.equals("plain"))) {
+            os = new BufferedOutputStream(new FileOutputStream(tf));
+        } else if (format.equals("gzip")) {
+            os = new GZIPOutputStream(new FileOutputStream(tf));
+        } else if (format.equals("zip")) {
+            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
+            String name = file.getName();
+            if (name.endsWith(".zip")) name = name.substring(0, name.length() - 4);
+            zos.putNextEntry(new ZipEntry(name + ".txt"));
+            os = zos;
+        }
         Iterator i = set.iterator();
         String key;
         if (i.hasNext()) {
             key = i.next().toString();
-            bos.write(key.getBytes());
+            os.write(key.getBytes());
         }
         while (i.hasNext()) {
             key = i.next().toString();
-            if (sep != null) bos.write(sep.getBytes());
-            bos.write(key.getBytes());
+            if (sep != null) os.write(sep.getBytes());
+            os.write(key.getBytes());
         }
-        bos.close();
+        os.close();
         file.delete();
         tf.renameTo(file);
     }
 
-    public static void saveSet(File file, kelondroRowSet set, String sep) throws IOException {
-        File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tf));
+    public static void saveSet(File file, String format, kelondroRowSet set, String sep) throws IOException {
+        File tf = new File(file.toString() + ".tmp" + (System.currentTimeMillis() % 1000));
+        OutputStream os = null;
+        if ((format == null) || (format.equals("plain"))) {
+            os = new BufferedOutputStream(new FileOutputStream(tf));
+        } else if (format.equals("gzip")) {
+            os = new GZIPOutputStream(new FileOutputStream(tf));
+        } else if (format.equals("zip")) {
+            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(file));
+            String name = file.getName();
+            if (name.endsWith(".zip")) name = name.substring(0, name.length() - 4);
+            zos.putNextEntry(new ZipEntry(name + ".txt"));
+            os = zos;
+        }
         Iterator i = set.rows();
         String key;
         if (i.hasNext()) {
             key = new String(((kelondroRow.Entry) i.next()).getColBytes(0));
-            bos.write(key.getBytes());
+            os.write(key.getBytes());
         }
         while (i.hasNext()) {
             key = new String(((kelondroRow.Entry) i.next()).getColBytes(0));
-            if (sep != null) bos.write(sep.getBytes());
-            bos.write(key.getBytes());
+            if (sep != null) os.write(sep.getBytes());
+            os.write(key.getBytes());
         }
-        bos.close();
+        os.close();
         file.delete();
         tf.renameTo(file);
     }
-
+    
     /**
     * Moves all files from a directory to another.
     * @param from_dir    Directory which contents will be moved.

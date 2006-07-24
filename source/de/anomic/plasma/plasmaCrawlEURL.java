@@ -46,8 +46,8 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import de.anomic.net.URL;
+
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Iterator;
@@ -115,7 +115,7 @@ public class plasmaCrawlEURL extends indexURL {
     }
 
     public synchronized Entry getEntry(String hash) throws IOException {
-	return new Entry(hash);
+        return new Entry(hash);
     }
 
     public boolean exists(String urlHash) {
@@ -154,21 +154,21 @@ public class plasmaCrawlEURL extends indexURL {
         private String   failreason; // string describing reason for load fail
         private bitfield flags;      // extra space
 
-	public Entry(URL url, String referrer, String initiator, String executor, String name, String failreason, bitfield flags) {
-	    // create new entry and store it into database
-	    this.hash       = urlHash(url);
-	    this.referrer   = (referrer == null) ? dummyHash : referrer;
-            this.initiator  = initiator;
-            this.executor   = executor;
-            this.url        = url;
-	    this.name       = name;
-            this.initdate   = new Date();
-            this.trydate    = new Date();
-	    this.trycount   = 0;
-	    this.failreason = failreason;
-            this.flags      = flags;
-	    
-	}
+        public Entry(URL url, String referrer, String initiator,
+                     String executor, String name, String failreason, bitfield flags) {
+            // create new entry and store it into database
+            this.hash = urlHash(url);
+            this.referrer = (referrer == null) ? dummyHash : referrer;
+            this.initiator = initiator;
+            this.executor = executor;
+            this.url = url;
+            this.name = name;
+            this.initdate = new Date();
+            this.trydate = new Date();
+            this.trycount = 0;
+            this.failreason = failreason;
+            this.flags = flags;
+        }
 
 	    public Entry(String hash) throws IOException {
             // generates an plasmaEURLEntry using the url hash
@@ -181,30 +181,40 @@ public class plasmaCrawlEURL extends indexURL {
             this.hash = hash;
             kelondroRow.Entry entry = urlHashCache.get(hash.getBytes());
             if (entry != null) {
-                this.referrer = entry.getColString(1, "UTF-8");
-                this.initiator = entry.getColString(2, "UTF-8");
-                this.executor = entry.getColString(3, "UTF-8");
-                this.url = new URL(entry.getColString(4, "UTF-8").trim());
-                this.name = entry.getColString(5, "UTF-8").trim();
-                this.initdate = new Date(86400000 * entry.getColLongB64E(6));
-                this.trydate = new Date(86400000 * entry.getColLongB64E(7));
-                this.trycount = (int) entry.getColLongB64E(8);
-                this.failreason = entry.getColString(9, "UTF-8");
-                this.flags = new bitfield(entry.getColBytes(10));
-                return;
+                insertEntry(entry);
             }
         }
+
+        public Entry(kelondroRow.Entry entry) throws IOException {
+            insertEntry(entry);
+        }
         
-	private void store() {
-	    // stores the values from the object variables into the database
+        private void insertEntry(kelondroRow.Entry entry) throws IOException {
+            assert (entry != null);
+            this.hash = entry.getColString(0, null);
+            this.referrer = entry.getColString(1, "UTF-8");
+            this.initiator = entry.getColString(2, "UTF-8");
+            this.executor = entry.getColString(3, "UTF-8");
+            this.url = new URL(entry.getColString(4, "UTF-8").trim());
+            this.name = entry.getColString(5, "UTF-8").trim();
+            this.initdate = new Date(86400000 * entry.getColLongB64E(6));
+            this.trydate = new Date(86400000 * entry.getColLongB64E(7));
+            this.trycount = (int) entry.getColLongB64E(8);
+            this.failreason = entry.getColString(9, "UTF-8");
+            this.flags = new bitfield(entry.getColBytes(10));
+            return;
+        }
+        
+        private void store() {
+	        // stores the values from the object variables into the database
             String initdatestr = kelondroBase64Order.enhancedCoder.encodeLong(initdate.getTime() / 86400000, urlDateLength);
             String trydatestr = kelondroBase64Order.enhancedCoder.encodeLong(trydate.getTime() / 86400000, urlDateLength);
 
-	    // store the hash in the hash cache
-	    try {
-		// even if the entry exists, we simply overwrite it
-		byte[][] entry = new byte[][] {
-		    this.hash.getBytes(),
+            // store the hash in the hash cache
+            try {
+                // even if the entry exists, we simply overwrite it
+                byte[][] entry = new byte[][] {
+                    this.hash.getBytes(),
                     this.referrer.getBytes(),
                     this.initiator.getBytes(),
                     this.executor.getBytes(),
@@ -215,12 +225,12 @@ public class plasmaCrawlEURL extends indexURL {
                     kelondroBase64Order.enhancedCoder.encodeLong(this.trycount, urlRetryLength).getBytes(),
                     this.failreason.getBytes(),
                     this.flags.getBytes()
-		    };
-            urlHashCache.put(urlHashCache.row().newEntry(entry));
-	    } catch (IOException e) {
-		System.out.println("INTERNAL ERROR AT plasmaEURL:url2hash:" + e.toString());
+                };
+                urlHashCache.put(urlHashCache.row().newEntry(entry));
+            } catch (IOException e) {
+                System.out.println("INTERNAL ERROR AT plasmaEURL:url2hash:" + e.toString());
+            }
 	    }
-	}
 
 	public String hash() {
 	    // return a url-hash, based on the md5 algorithm
@@ -267,27 +277,39 @@ public class plasmaCrawlEURL extends indexURL {
 
     }
 
-    public class kenum implements Enumeration {
+    public class kiter implements Iterator {
         // enumerates entry elements
         Iterator i;
-        public kenum(boolean up, boolean rotating) throws IOException {
-            i = urlHashCache.rows(up, rotating, null);
+        boolean error = false;
+        
+        public kiter(boolean up, boolean rotating, String firstHash) throws IOException {
+            i = urlHashCache.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
+            error = false;
         }
-        public boolean hasMoreElements() {
+
+        public boolean hasNext() {
+            if (error) return false;
             return i.hasNext();
         }
-	    public Object nextElement() {
+
+        public Object next() throws RuntimeException {
+            kelondroRow.Entry e = (kelondroRow.Entry) i.next();
+            if (e == null) return null;
             try {
-                return new Entry(new String(((byte[][]) i.next())[0]));
-            } catch (IOException e) {
-                return null;
+                return new Entry(e);
+            } catch (IOException ex) {
+                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getColString(0, null));
             }
         }
+        
+        public void remove() {
+            i.remove();
+        }
+        
     }
-    
-    public Enumeration elements(boolean up, boolean rotating) throws IOException {
-	// enumerates entry elements
-	return new kenum(up, rotating);
+
+    public Iterator entries(boolean up, boolean rotating, String firstHash) throws IOException {
+        // enumerates entry elements
+        return new kiter(up, rotating, firstHash);
     }
-    
 }

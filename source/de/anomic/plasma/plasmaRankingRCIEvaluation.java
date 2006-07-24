@@ -188,7 +188,7 @@ public class plasmaRankingRCIEvaluation {
         if (!(tablePath.exists())) tablePath.mkdirs();
         for (int i = 0; i < ranking.length - 1; i++) {
             filename = "YBR-4-" + serverCodings.encodeHex(i, 2) + ".idx";
-            serverFileUtils.saveSet(new File(tablePath, filename), ranking[i], "");
+            serverFileUtils.saveSet(new File(tablePath, filename), "plain", ranking[i], "");
         }
     }
     
