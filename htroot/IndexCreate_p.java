@@ -59,6 +59,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
@@ -195,8 +196,10 @@ public class IndexCreate_p {
                                 prop.put("error_crawlingURL", wikiCode.replaceHTML(((String) post.get("crawlingURL"))));
                                 prop.put("error_reasonString", reasonString);
                                 
-                                switchboard.urlPool.errorURL.newEntry(crawlingStartURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
-                                                                      crawlingStartURL.getHost(), reasonString, new bitfield(indexURL.urlFlagLength), false);                                
+                                plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(crawlingStartURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
+                                                                                                 crawlingStartURL.getHost(), reasonString, new bitfield(indexURL.urlFlagLength));
+                                ee.store();
+                                switchboard.urlPool.errorURL.stackPushEntry(ee);
                             }
                         } catch (Exception e) {
                             // mist
@@ -259,8 +262,10 @@ public class IndexCreate_p {
                                     if (rejectReason == null) {
                                         c++;
                                     } else {
-                                        switchboard.urlPool.errorURL.newEntry(nexturlURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
-                                       (String) e.getValue(), rejectReason, new bitfield(indexURL.urlFlagLength), false);
+                                        plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(nexturlURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
+                                                                                                         (String) e.getValue(), rejectReason, new bitfield(indexURL.urlFlagLength));
+                                        ee.store();
+                                        switchboard.urlPool.errorURL.stackPushEntry(ee);
                                     }
                                 }                             
                                 

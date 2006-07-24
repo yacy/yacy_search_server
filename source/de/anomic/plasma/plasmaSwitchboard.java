@@ -1563,10 +1563,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 
             } else {
                 log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
-                urlPool.errorURL.newEntry(entry.url(), referrerHash,
+                plasmaCrawlEURL.Entry ee = urlPool.errorURL.newEntry(entry.url(), referrerHash,
                         ((entry.proxy()) ? indexURL.dummyHash : entry.initiator()),
                         yacyCore.seedDB.mySeed.hash,
-                        descr, noIndexReason, new bitfield(indexURL.urlFlagLength), true);
+                        descr, noIndexReason, new bitfield(indexURL.urlFlagLength));
+                ee.store();
+                urlPool.errorURL.stackPushEntry(ee);
                 if ((processCase == 6) && (initiator != null)) {
                     yacyClient.crawlReceipt(initiator, "crawl", "rejected", noIndexReason, null, "");
                 }

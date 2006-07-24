@@ -48,7 +48,6 @@ import java.io.IOException;
 import de.anomic.net.URL;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Iterator;
 
@@ -91,29 +90,24 @@ public class plasmaCrawlEURL extends indexURL {
     }
 
     public synchronized Entry newEntry(URL url, String referrer, String initiator, String executor,
-				       String name, String failreason, bitfield flags, boolean retry) {
+				       String name, String failreason, bitfield flags) {
         if ((referrer == null) || (referrer.length() < urlHashLength)) referrer = dummyHash;
         if ((initiator == null) || (initiator.length() < urlHashLength)) initiator = dummyHash;
         if ((executor == null) || (executor.length() < urlHashLength)) executor = dummyHash;
         if (failreason == null) failreason = "unknown";
-
-        // create a stack entry
-        HashMap map = new HashMap();
-        map.put("url", url);
-        map.put("referrer", referrer);
-        map.put("initiator", initiator);
-        map.put("executor", executor);
-        map.put("name", name);
-        map.put("failreason", failreason);
-        map.put("flags", flags);
-        rejectedStack.add(map);
-        Entry e = new Entry(url, referrer, initiator, executor, name, failreason, flags);
-        
-        // put in table
-        if (retry) e.store();
-        return e;
+        return new Entry(url, referrer, initiator, executor, name, failreason, flags);
     }
 
+    public synchronized void stackPushEntry(Entry e) {
+        rejectedStack.add(e.hash);
+    }
+    
+    public Entry stackPopEntry(int pos) throws IOException {
+        String urlhash = (String) rejectedStack.get(pos);
+        if (urlhash == null) return null;
+        return new Entry(urlhash);
+    }
+   
     public synchronized Entry getEntry(String hash) throws IOException {
         return new Entry(hash);
     }
@@ -134,12 +128,6 @@ public class plasmaCrawlEURL extends indexURL {
         return rejectedStack.size();
     }
     
-    public Entry getStack(int pos) {
-        HashMap m = (HashMap) rejectedStack.get(pos);
-        return new Entry((URL) m.get("url"), (String) m.get("referrer"), (String) m.get("initiator"), (String) m.get("executor"),
-			 (String) m.get("name"), (String) m.get("failreason"), (bitfield) m.get("flags"));
-    }
-    
     public class Entry {
 
         private String   hash;       // the url's hash
@@ -153,10 +141,11 @@ public class plasmaCrawlEURL extends indexURL {
         private int      trycount;   // number of tryings
         private String   failreason; // string describing reason for load fail
         private bitfield flags;      // extra space
+        private boolean  stored;
 
         public Entry(URL url, String referrer, String initiator,
                      String executor, String name, String failreason, bitfield flags) {
-            // create new entry and store it into database
+            // create new entry
             this.hash = urlHash(url);
             this.referrer = (referrer == null) ? dummyHash : referrer;
             this.initiator = initiator;
@@ -168,6 +157,7 @@ public class plasmaCrawlEURL extends indexURL {
             this.trycount = 0;
             this.failreason = failreason;
             this.flags = flags;
+            this.stored = false;
         }
 
 	    public Entry(String hash) throws IOException {
@@ -183,10 +173,12 @@ public class plasmaCrawlEURL extends indexURL {
             if (entry != null) {
                 insertEntry(entry);
             }
+            this.stored = true;
         }
 
         public Entry(kelondroRow.Entry entry) throws IOException {
             insertEntry(entry);
+            this.stored = false;
         }
         
         private void insertEntry(kelondroRow.Entry entry) throws IOException {
@@ -205,8 +197,9 @@ public class plasmaCrawlEURL extends indexURL {
             return;
         }
         
-        private void store() {
+        public void store() {
 	        // stores the values from the object variables into the database
+            if (this.stored) return;
             String initdatestr = kelondroBase64Order.enhancedCoder.encodeLong(initdate.getTime() / 86400000, urlDateLength);
             String trydatestr = kelondroBase64Order.enhancedCoder.encodeLong(trydate.getTime() / 86400000, urlDateLength);
 
@@ -227,6 +220,7 @@ public class plasmaCrawlEURL extends indexURL {
                     this.flags.getBytes()
                 };
                 urlHashCache.put(urlHashCache.row().newEntry(entry));
+                this.stored = true;
             } catch (IOException e) {
                 System.out.println("INTERNAL ERROR AT plasmaEURL:url2hash:" + e.toString());
             }

@@ -64,6 +64,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
@@ -393,7 +394,7 @@ public final class plasmaCrawlStacker {
             this.log.logSevere("URL '" + nexturlString + "' can neither be crawled local nor global.");
         }
         
-        this.sb.urlPool.noticeURL.newEntry(initiatorHash, /* initiator, needed for p2p-feedback */
+        plasmaCrawlNURL.Entry ee = this.sb.urlPool.noticeURL.newEntry(initiatorHash, /* initiator, needed for p2p-feedback */
                 nexturl, /* url clear text string */
                 loadDate, /* load date */
                 referrerHash, /* last url in crawling queue */
@@ -405,7 +406,7 @@ public final class plasmaCrawlStacker {
                 ((global) ? plasmaCrawlNURL.STACK_TYPE_LIMIT :
                 ((local) ? plasmaCrawlNURL.STACK_TYPE_CORE : plasmaCrawlNURL.STACK_TYPE_REMOTE)) /*local/remote stack*/
         );
-        
+        ee.store();
         return null;
     }
     
@@ -937,16 +938,17 @@ public final class plasmaCrawlStacker {
                     String rejectReason = dequeue(this.theMsg);
 
                     if (rejectReason != null) {
-                        plasmaCrawlStacker.this.sb.urlPool.errorURL.newEntry(
+                        plasmaCrawlEURL.Entry ee = sb.urlPool.errorURL.newEntry(
                                 new URL(this.theMsg.url()),
                                 this.theMsg.referrerHash(),
                                 this.theMsg.initiatorHash(),
                                 yacyCore.seedDB.mySeed.hash,
                                 this.theMsg.name,
                                 rejectReason,
-                                new bitfield(indexURL.urlFlagLength),
-                                false
+                                new bitfield(indexURL.urlFlagLength)
                         );
+                        ee.store();
+                        sb.urlPool.errorURL.stackPushEntry(ee);
                     }
                 } catch (Exception e) {
                     plasmaCrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + 

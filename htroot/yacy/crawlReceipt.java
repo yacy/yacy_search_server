@@ -52,6 +52,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -148,7 +149,9 @@ public final class crawlReceipt {
         } else {
             try {
                 plasmaCrawlNURL.Entry en = switchboard.urlPool.noticeURL.getEntry(receivedUrlhash);
-                switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(indexURL.urlFlagLength), false);
+                plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(indexURL.urlFlagLength));
+                ee.store();
+                switchboard.urlPool.errorURL.stackPushEntry(ee);
                 switchboard.urlPool.noticeURL.remove(receivedUrlhash);
             } catch (IOException e) {
 

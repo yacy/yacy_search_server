@@ -460,6 +460,7 @@ public class plasmaCrawlNURL extends indexURL {
         private int      forkfactor;    // sum of anchors of all ancestors
         private bitfield flags;
         private int      handle;
+        private boolean  stored;;
 
         public Entry(String initiator, 
                      URL url, 
@@ -484,22 +485,8 @@ public class plasmaCrawlNURL extends indexURL {
             this.forkfactor    = forkfactor;
             this.flags         = new bitfield(urlFlagLength);
             this.handle        = 0;
+            this.stored        = false;
             store();
-        }
-
-        public String toString() {
-            StringBuffer str = new StringBuffer();
-            str.append("hash: ").append(hash==null ? "null" : hash).append(" | ")
-               .append("initiator: ").append(initiator==null?"null":initiator).append(" | ")
-               .append("url: ").append(url==null?"null":url.toString()).append(" | ")
-               .append("referrer: ").append((referrer == null) ? dummyHash : referrer).append(" | ")
-               .append("name: ").append((name == null) ? "null" : name).append(" | ")
-               .append("loaddate: ").append((loaddate == null) ? new Date() : loaddate).append(" | ")
-               .append("profile: ").append(profileHandle==null?"null":profileHandle).append(" | ")
-               .append("depth: ").append(Integer.toString(depth)).append(" | ")
-               .append("forkfactor: ").append(Integer.toString(forkfactor)).append(" | ")
-               .append("flags: ").append((flags==null) ? "null" : flags.toString());
-               return str.toString();
         }
 
         public Entry(String hash) throws IOException {
@@ -525,6 +512,7 @@ public class plasmaCrawlNURL extends indexURL {
                     this.forkfactor = (int) entry.getColLongB64E(9);
                     this.flags = new bitfield(entry.getColBytes(10));
                     this.handle = Integer.parseInt(entry.getColString(11, null), 16);
+                    this.stored = true;
                     return;
                 //} catch (MalformedURLException e) {
                 //    throw new IOException("plasmaCrawlNURL/Entry: " + e);
@@ -536,8 +524,9 @@ public class plasmaCrawlNURL extends indexURL {
             }
         }
 
-        private void store() {
+        public void store() {
             // stores the values from the object variables into the database
+            if (this.stored) return;
             String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, urlDateLength);
             // store the hash in the hash cache
             try {
@@ -557,6 +546,7 @@ public class plasmaCrawlNURL extends indexURL {
                     normalizeHandle(this.handle).getBytes()
                 };
                 urlHashCache.put(urlHashCache.row().newEntry(entry));
+                this.stored = true;
             } catch (IOException e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", resetting NURL-DB");
                 e.printStackTrace();
@@ -566,6 +556,21 @@ public class plasmaCrawlNURL extends indexURL {
                 e.printStackTrace();
                 resetHashCache();
             }
+        }
+
+        public String toString() {
+            StringBuffer str = new StringBuffer();
+            str.append("hash: ").append(hash==null ? "null" : hash).append(" | ")
+               .append("initiator: ").append(initiator==null?"null":initiator).append(" | ")
+               .append("url: ").append(url==null?"null":url.toString()).append(" | ")
+               .append("referrer: ").append((referrer == null) ? dummyHash : referrer).append(" | ")
+               .append("name: ").append((name == null) ? "null" : name).append(" | ")
+               .append("loaddate: ").append((loaddate == null) ? new Date() : loaddate).append(" | ")
+               .append("profile: ").append(profileHandle==null?"null":profileHandle).append(" | ")
+               .append("depth: ").append(Integer.toString(depth)).append(" | ")
+               .append("forkfactor: ").append(Integer.toString(forkfactor)).append(" | ")
+               .append("flags: ").append((flags==null) ? "null" : flags.toString());
+               return str.toString();
         }
 
         /**

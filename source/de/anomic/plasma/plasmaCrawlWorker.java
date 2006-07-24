@@ -312,16 +312,17 @@ public final class plasmaCrawlWorker extends Thread {
         String hostlow = host.toLowerCase();
         if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, path)) {
             log.logInfo("CRAWLER Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
-            sb.urlPool.errorURL.newEntry(
+            plasmaCrawlEURL.Entry ee = sb.urlPool.errorURL.newEntry(
                     url,
                     referer,
                     initiator,
                     yacyCore.seedDB.mySeed.hash,
                     name,
                     "denied_(url_in_blacklist)",
-                    new bitfield(indexURL.urlFlagLength),
-                    true
+                    new bitfield(indexURL.urlFlagLength)
             );
+            ee.store();
+            sb.urlPool.errorURL.stackPushEntry(ee);
             return null;
         }
 

@@ -196,20 +196,24 @@ public class IndexCreateIndexingQueue_p {
             plasmaCrawlEURL.Entry entry;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
-            for ( int i = switchboard.urlPool.errorURL.stackSize() - 1; i >= (switchboard.urlPool.errorURL.stackSize() - showRejectedCount); i--) {
-                entry = switchboard.urlPool.errorURL.getStack(i);
-                initiatorHash = entry.initiator();
-                executorHash = entry.executor();
-                url = entry.url().toString();
-                initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
-                executorSeed = yacyCore.seedDB.getConnected(executorHash);
-                prop.put("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : wikiCode.replaceHTML(initiatorSeed.getName())));
-                prop.put("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : wikiCode.replaceHTML(executorSeed.getName())));
-                prop.put("rejected_list_"+j+"_url", wikiCode.replaceHTML(url));
-                prop.put("rejected_list_"+j+"_failreason", entry.failreason());
-                prop.put("rejected_list_"+j+"_dark", ((dark) ? 1 : 0));
-                dark = !dark;
-                j++;
+            for (int i = switchboard.urlPool.errorURL.stackSize() - 1; i >= (switchboard.urlPool.errorURL.stackSize() - showRejectedCount); i--) {
+                try {
+                    entry = switchboard.urlPool.errorURL.stackPopEntry(i);
+                    initiatorHash = entry.initiator();
+                    executorHash = entry.executor();
+                    url = entry.url().toString();
+                    initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
+                    executorSeed = yacyCore.seedDB.getConnected(executorHash);
+                    prop.put("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : wikiCode.replaceHTML(initiatorSeed.getName())));
+                    prop.put("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : wikiCode.replaceHTML(executorSeed.getName())));
+                    prop.put("rejected_list_"+j+"_url", wikiCode.replaceHTML(url));
+                    prop.put("rejected_list_"+j+"_failreason", entry.failreason());
+                    prop.put("rejected_list_"+j+"_dark", ((dark) ? 1 : 0));
+                    dark = !dark;
+                    j++;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             prop.put("rejected_list", j);
         }

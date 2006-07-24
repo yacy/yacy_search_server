@@ -463,11 +463,13 @@ public final class plasmaCrawlLURL extends indexURL {
             kelondroRow.Entry entry = plasmaCrawlLURL.this.urlHashCache.get(urlHash.getBytes());
             if (entry == null) throw new IOException("url hash " + urlHash + " not found in LURL");
             insertEntry(entry, searchedWord);
+            this.stored = true;
         }
         
         public Entry(kelondroRow.Entry entry, indexURLEntry searchedWord) throws IOException {
             assert (entry != null);
             insertEntry(entry, word);
+            this.stored = false;
         }
         
         private void insertEntry(kelondroRow.Entry entry, indexURLEntry searchedWord) throws IOException {
