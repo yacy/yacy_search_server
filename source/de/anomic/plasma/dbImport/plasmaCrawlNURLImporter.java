@@ -9,7 +9,6 @@ import java.util.TreeMap;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaCrawlNURL.Entry;
 
 public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImporter {
 
@@ -118,25 +117,25 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                 }
                 
                 // getting an interator and loop through the URL entries
-                Iterator iter = (stackTypes[i] == -1)?this.importNurlDB.urlHashes("------------", true):null;
+                Iterator entryIter = (stackTypes[i] == -1) ? this.importNurlDB.entries(true, false, null) : null;
                 while (true) {
                     
                     String nextHash = null;
-                    Entry urlEntry = null;
+                    plasmaCrawlNURL.Entry nextEntry = null;
                     
                     try {                        
                         if (stackTypes[i] != -1) {
                             if (this.importNurlDB.stackSize(stackTypes[i]) == 0) break;
                             
                             this.urlCount++;
-                            urlEntry = this.importNurlDB.pop(stackTypes[i]);
-                            nextHash = urlEntry.hash();
+                            nextEntry = this.importNurlDB.pop(stackTypes[i]);
+                            nextHash = nextEntry.hash();
                         } else {
-                            if (!iter.hasNext()) break;
+                            if (!entryIter.hasNext()) break;
                             
                             this.urlCount++;
-                            nextHash = (String)iter.next();                            
-                            urlEntry = this.importNurlDB.getEntry(nextHash);                
+                            nextEntry = (plasmaCrawlNURL.Entry) entryIter.next();
+                            nextHash = nextEntry.hash();
                         }
                     } catch (IOException e) {
                         this.log.logWarning("Unable to import entry: " + e.toString());
@@ -147,7 +146,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                     
                     // getting a handler to the crawling profile the url belongs to
                     try {
-                        String profileHandle = urlEntry.profileHandle();
+                        String profileHandle = nextEntry.profileHandle();
                         if (profileHandle == null) {
                             this.log.logWarning("Profile handle of url entry '" + nextHash + "' unknown.");
                             continue;
@@ -176,7 +175,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                         
                         // if the url does not alredy exists in the destination stack we insert it now
                         if (!this.sb.urlPool.noticeURL.existsInStack(nextHash)) {
-                            plasmaCrawlNURL.Entry ne = this.sb.urlPool.noticeURL.newEntry(urlEntry);
+                            plasmaCrawlNURL.Entry ne = this.sb.urlPool.noticeURL.newEntry(nextEntry);
                             ne.store();
                             this.sb.urlPool.noticeURL.push((stackTypes[i] != -1) ? stackTypes[i] : plasmaCrawlNURL.STACK_TYPE_CORE, ne.url().getHost(), ne.hash());
                         }

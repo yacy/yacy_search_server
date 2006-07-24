@@ -334,16 +334,14 @@ public class IndexControl_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator hashIt = switchboard.urlPool.loadedURL.urlHashes(urlhash, true);
-
-                StringBuffer result = new StringBuffer(
-                        "Sequential List of URL-Hashes:<br>");
-                String hash;
+                final Iterator entryIt = switchboard.urlPool.loadedURL.entries(true, true, urlhash); 
+                StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br>");
+                plasmaCrawlLURL.Entry entry;
                 int i = 0;
-                while (hashIt.hasNext() && i < 256) {
-                    hash = (String) hashIt.next();
-                    result.append("<a href=\"/IndexControl_p.html?").append("urlhash=").append(hash).append("&urlhashsearch=")
-                            .append("\" class=\"tt\">").append(hash).append("</a> ").append(((i + 1) % 8 == 0) ? "<br>" : "");
+                while (entryIt.hasNext() && i < 256) {
+                    entry = (plasmaCrawlLURL.Entry) entryIt.next();
+                    result.append("<a href=\"/IndexControl_p.html?").append("urlhash=").append(entry.hash()).append("&urlhashsearch=")
+                            .append("\" class=\"tt\">").append(entry.hash()).append("</a> ").append(((i + 1) % 8 == 0) ? "<br>" : "");
                     i++;
                 }
                 prop.put("result", result.toString());

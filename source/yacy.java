@@ -80,6 +80,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
@@ -941,7 +942,7 @@ public final class yacy {
             System.out.println("Started domain list extraction from " + pool.loadedURL.size() + " url entries.");
             System.out.println("a dump will be written after double-check of all extracted domains.");
             System.out.println("This process may fail in case of too less memory. To increase memory, start with");
-            System.out.println("java -Xmx<megabytes>m -classpath classes yacy -domlist [ -source { lurl | eurl } ] [ -format { text  | zip | gzip | html } ] [ <path to DATA folder> ]");
+            System.out.println("java -Xmx<megabytes>m -classpath classes yacy -domlist [ -source { nurl | lurl | eurl } ] [ -format { text  | zip | gzip | html } ] [ <path to DATA folder> ]");
             int c = 0;
             long start = System.currentTimeMillis();
             if (source.equals("lurl")) {
@@ -982,6 +983,25 @@ public final class yacy {
                             ((System.currentTimeMillis() - start) * (pool.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
                 }
             }
+            if (source.equals("nurl")) {
+                Iterator eiter = pool.noticeURL.entries(true, false, null);
+                plasmaCrawlNURL.Entry entry;
+                while (eiter.hasNext()) {
+                    try {
+                        entry = (plasmaCrawlNURL.Entry) eiter.next();
+                        if ((entry != null) && (entry.url() != null)) doms.put(entry.url().getHost(), "profile=" + entry.profileHandle() + ", depth=" + entry.depth());
+                    } catch (Exception e) {
+                        // here a MalformedURLException may occur
+                        // just ignore
+                    }
+                    c++;
+                    if (c % 10000 == 0) System.out.println(
+                            c + " urls checked, " +
+                            doms.size() + " domains collected, " +
+                            ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() + Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB available, " + 
+                            ((System.currentTimeMillis() - start) * (pool.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
+                }
+            }
             
             if (format.equals("html")) {
                 // output file in HTML format
@@ -999,7 +1019,7 @@ public final class yacy {
                     entry = (Map.Entry) i.next();
                     key = (String) entry.getKey();
                     bos.write(("<a href=\"http://" + key + "\">" + key + "</a>" +
-                              ((entry.getValue() == null) ? "" : ((String) entry.getValue())) + "<br>"
+                              ((entry.getValue() == null) ? "" : (" " + ((String) entry.getValue()))) + "<br>"
                              ).getBytes());
                     bos.write(serverCore.crlf);
                 }
@@ -1060,6 +1080,22 @@ public final class yacy {
                     if ((entry != null) && (entry.url() != null)) {
                         if (html) {
                             bos.write(("<a href=\"" + entry.url() + "\">" + entry.url() + "</a> " + entry.failreason() + "<br>").getBytes("UTF-8"));
+                            bos.write(serverCore.crlf);
+                        } else {
+                            bos.write(entry.url().toString().getBytes());
+                            bos.write(serverCore.crlf);
+                        }
+                    }
+                }
+            }
+            if (source.equals("nurl")) {
+                Iterator eiter = pool.noticeURL.entries(true, false, null);
+                plasmaCrawlNURL.Entry entry;
+                while (eiter.hasNext()) {
+                    entry = (plasmaCrawlNURL.Entry) eiter.next();
+                    if ((entry != null) && (entry.url() != null)) {
+                        if (html) {
+                            bos.write(("<a href=\"" + entry.url() + "\">" + entry.url() + "</a> " + "profile=" + entry.profileHandle() + ", depth=" + entry.depth() + "<br>").getBytes("UTF-8"));
                             bos.write(serverCore.crlf);
                         } else {
                             bos.write(entry.url().toString().getBytes());
@@ -1294,7 +1330,8 @@ public final class yacy {
             // generate a url list and save it in a file
             String source = "lurl";
             if (args.length >= 3 && args[1].toLowerCase().equals("-source")) {
-                if ((args[2].equals("lurl")) ||
+                if ((args[2].equals("nurl")) ||
+                    (args[2].equals("lurl")) ||
                     (args[2].equals("eurl")))
                     source = args[2];
                 args = shift(args, 1, 2);
@@ -1308,13 +1345,14 @@ public final class yacy {
                 args = shift(args, 1, 2);
             }
             if (args.length == 2) applicationRoot= args[1];
-            String outfile = "domlist_" + System.currentTimeMillis();
+            String outfile = "domlist_" + source + "_" + System.currentTimeMillis();
             domlist(applicationRoot, source, format, outfile);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urllist"))) {
             // generate a url list and save it in a file
             String source = "lurl";
             if (args.length >= 3 && args[1].toLowerCase().equals("-source")) {
-                if ((args[2].equals("lurl")) ||
+                if ((args[2].equals("nurl")) ||
+                    (args[2].equals("lurl")) ||
                     (args[2].equals("eurl")))
                     source = args[2];
                 args = shift(args, 1, 2);
@@ -1325,7 +1363,7 @@ public final class yacy {
                 args = shift(args, 1, 2);
             }
             if (args.length == 2) applicationRoot= args[1];
-            String outfile = "urllist_" + System.currentTimeMillis() + ((html) ? ".html" : ".txt");
+            String outfile = "urllist_" + source + "_" + System.currentTimeMillis() + ((html) ? ".html" : ".txt");
             urllist(applicationRoot, source, html, outfile);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file

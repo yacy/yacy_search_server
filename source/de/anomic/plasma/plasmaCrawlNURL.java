@@ -46,6 +46,7 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import de.anomic.net.URL;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -497,23 +498,9 @@ public class plasmaCrawlNURL extends indexURL {
             this.hash = hash;
             kelondroRow.Entry entry = urlHashCache.get(hash.getBytes());
             if (entry != null) {
-                //try {
-                    this.initiator = entry.getColString(1, null);
-                    this.url = new URL(entry.getColString(2, null).trim());
-                    this.referrer = (entry.empty(3)) ? dummyHash : entry.getColString(3, null);
-                    this.name = (entry.empty(4)) ? "" : entry.getColString(4, null).trim();
-                    this.loaddate = new Date(86400000 * entry.getColLongB64E(5));
-                    this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, null).trim();
-                    this.depth = (int) entry.getColLongB64E(7);
-                    this.anchors = (int) entry.getColLongB64E(8);
-                    this.forkfactor = (int) entry.getColLongB64E(9);
-                    this.flags = new bitfield(entry.getColBytes(10));
-                    this.handle = Integer.parseInt(entry.getColString(11, null), 16);
-                    this.stored = true;
-                    return;
-                //} catch (MalformedURLException e) {
-                //    throw new IOException("plasmaCrawlNURL/Entry: " + e);
-                //}
+                insertEntry(entry);
+                this.stored = true;
+                return;
             } else {
                 // show that we found nothing
                 throw new IOException("NURL: hash " + hash + " not found");
@@ -521,6 +508,28 @@ public class plasmaCrawlNURL extends indexURL {
             }
         }
 
+        public Entry(kelondroRow.Entry entry) throws IOException {
+            assert (entry != null);
+            insertEntry(entry);
+            this.stored = false;
+        }
+
+        private void insertEntry(kelondroRow.Entry entry) throws IOException {
+            this.hash = entry.getColString(0, null);
+            this.initiator = entry.getColString(1, null);
+            this.url = new URL(entry.getColString(2, null).trim());
+            this.referrer = (entry.empty(3)) ? dummyHash : entry.getColString(3, null);
+            this.name = (entry.empty(4)) ? "" : entry.getColString(4, null).trim();
+            this.loaddate = new Date(86400000 * entry.getColLongB64E(5));
+            this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, null).trim();
+            this.depth = (int) entry.getColLongB64E(7);
+            this.anchors = (int) entry.getColLongB64E(8);
+            this.forkfactor = (int) entry.getColLongB64E(9);
+            this.flags = new bitfield(entry.getColBytes(10));
+            this.handle = Integer.parseInt(entry.getColString(11, null), 16);
+            return;
+        }
+        
         public void store() {
             // stores the values from the object variables into the database
             if (this.stored) return;
@@ -616,4 +625,40 @@ public class plasmaCrawlNURL extends indexURL {
         }
     }
 
+    public class kiter implements Iterator {
+        // enumerates entry elements
+        Iterator i;
+        boolean error = false;
+        
+        public kiter(boolean up, boolean rotating, String firstHash) throws IOException {
+            i = urlHashCache.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
+            error = false;
+        }
+
+        public boolean hasNext() {
+            if (error) return false;
+            return i.hasNext();
+        }
+
+        public Object next() throws RuntimeException {
+            kelondroRow.Entry e = (kelondroRow.Entry) i.next();
+            if (e == null) return null;
+            try {
+                return new Entry(e);
+            } catch (IOException ex) {
+                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getColString(0, null));
+            }
+        }
+        
+        public void remove() {
+            i.remove();
+        }
+        
+    }
+
+    public Iterator entries(boolean up, boolean rotating, String firstHash) throws IOException {
+        // enumerates entry elements
+        return new kiter(up, rotating, firstHash);
+    }
+    
 }

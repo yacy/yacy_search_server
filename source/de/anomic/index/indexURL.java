@@ -31,7 +31,6 @@ import de.anomic.net.URL;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -536,8 +535,4 @@ public class indexURL {
      return hash;
  }
  
- public Iterator urlHashes(String urlHash, boolean up) throws IOException {
-     return urlHashCache.keys(up, false, urlHash.getBytes());
- }
-
 }
