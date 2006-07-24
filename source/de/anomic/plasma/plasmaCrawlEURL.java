@@ -188,7 +188,8 @@ public class plasmaCrawlEURL extends indexURL {
             this.initiator = entry.getColString(2, "UTF-8");
             this.executor = entry.getColString(3, "UTF-8");
             this.url = new URL(entry.getColString(4, "UTF-8").trim());
-            this.name = entry.getColString(5, "UTF-8").trim();
+            String n = entry.getColString(5, "UTF-8");
+            this.name = (n == null) ? "" : n.trim();
             this.initdate = new Date(86400000 * entry.getColLongB64E(6));
             this.trydate = new Date(86400000 * entry.getColLongB64E(7));
             this.trycount = (int) entry.getColLongB64E(8);

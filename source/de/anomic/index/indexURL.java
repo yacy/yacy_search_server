@@ -49,7 +49,7 @@ public class indexURL {
  public static final int urlStringLength             = 256;// not too short for links without parameters
  public static final int urlDescrLength              = 80; // The headline of a web page (meta-tag or <h1>)
  public static final int urlNameLength               = 40; // the tag content between <a> and </a>
- public static final int urlErrorLength              = 20; // a reason description for unavailable urls
+ public static final int urlErrorLength              = 80; // a reason description for unavailable urls
  public static final int urlDateLength               = 4;  // any date, shortened
  public static final int urlCopyCountLength          = 2;  // counter for numbers of copies of this index
  public static final int urlFlagLength               = 2;  // any stuff

@@ -394,7 +394,7 @@ public final class plasmaCrawlStacker {
             this.log.logSevere("URL '" + nexturlString + "' can neither be crawled local nor global.");
         }
         
-        plasmaCrawlNURL.Entry ee = this.sb.urlPool.noticeURL.newEntry(initiatorHash, /* initiator, needed for p2p-feedback */
+        plasmaCrawlNURL.Entry ne = this.sb.urlPool.noticeURL.newEntry(initiatorHash, /* initiator, needed for p2p-feedback */
                 nexturl, /* url clear text string */
                 loadDate, /* load date */
                 referrerHash, /* last url in crawling queue */
@@ -402,11 +402,14 @@ public final class plasmaCrawlStacker {
                 (profile == null) ? null : profile.handle(),  // profile must not be null!
                 currentdepth, /*depth so far*/
                 0, /*anchors, default value */
-                0, /*forkfactor, default value */
-                ((global) ? plasmaCrawlNURL.STACK_TYPE_LIMIT :
-                ((local) ? plasmaCrawlNURL.STACK_TYPE_CORE : plasmaCrawlNURL.STACK_TYPE_REMOTE)) /*local/remote stack*/
+                0  /*forkfactor, default value */
         );
-        ee.store();
+        ne.store();
+        this.sb.urlPool.noticeURL.push(
+                ((global) ? plasmaCrawlNURL.STACK_TYPE_LIMIT :
+                ((local) ? plasmaCrawlNURL.STACK_TYPE_CORE : plasmaCrawlNURL.STACK_TYPE_REMOTE)) /*local/remote stack*/,
+                nexturl.getHost(),
+                ne.hash());
         return null;
     }
     

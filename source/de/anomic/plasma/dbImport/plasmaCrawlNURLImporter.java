@@ -176,7 +176,9 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                         
                         // if the url does not alredy exists in the destination stack we insert it now
                         if (!this.sb.urlPool.noticeURL.existsInStack(nextHash)) {
-                            this.sb.urlPool.noticeURL.newEntry(urlEntry,(stackTypes[i] != -1)?stackTypes[i]:plasmaCrawlNURL.STACK_TYPE_CORE);
+                            plasmaCrawlNURL.Entry ne = this.sb.urlPool.noticeURL.newEntry(urlEntry);
+                            ne.store();
+                            this.sb.urlPool.noticeURL.push((stackTypes[i] != -1) ? stackTypes[i] : plasmaCrawlNURL.STACK_TYPE_CORE, ne.url().getHost(), ne.hash());
                         }
                         
                         // removing hash from the import db

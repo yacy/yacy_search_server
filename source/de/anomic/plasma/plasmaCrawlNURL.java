@@ -288,30 +288,27 @@ public class plasmaCrawlNURL extends indexURL {
 
     public synchronized Entry newEntry(String initiator, URL url, Date loaddate,
                                        String referrer, String name, String profile,
-                                       int depth, int anchors, int forkfactor, int stackMode) {
-        Entry e = new Entry(initiator, url, referrer, name, loaddate,
+                                       int depth, int anchors, int forkfactor) {
+        return new Entry(initiator, url, referrer, name, loaddate,
                             profile, depth, anchors, forkfactor);
-        push(stackMode, url.getHost(), e.hash);
-        return e;
     }
     
-    public synchronized Entry newEntry(Entry oldEntry, int stackMode) {
+    public synchronized Entry newEntry(Entry oldEntry) {
         if (oldEntry == null) return null;
-        return newEntry(
+        return new Entry(
                 oldEntry.initiator(),
                 oldEntry.url(),
-                oldEntry.loaddate(),
                 oldEntry.referrerHash(),
                 oldEntry.name(),
+                oldEntry.loaddate(),
                 oldEntry.profileHandle(),
                 oldEntry.depth(),
                 oldEntry.anchors,
-                oldEntry.forkfactor,
-                stackMode
+                oldEntry.forkfactor
         );
     }
 
-    private void push(int stackType, String domain, String hash) {
+    public void push(int stackType, String domain, String hash) {
         try {
             switch (stackType) {
                 case STACK_TYPE_CORE:     coreStack.add(domain, hash.getBytes()); break;
