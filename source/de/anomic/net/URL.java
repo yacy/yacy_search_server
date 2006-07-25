@@ -76,7 +76,7 @@ public class URL {
     }
     
     public URL(File file) throws MalformedURLException {
-        this("file", null, -1, file.getAbsolutePath());
+        this("file", "", -1, file.getAbsolutePath());
     }
 
     public URL(URL baseURL, String relPath) throws MalformedURLException {
