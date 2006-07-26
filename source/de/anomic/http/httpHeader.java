@@ -769,6 +769,7 @@ public final class httpHeader extends TreeMap implements Map {
         // and therefor was set to virtualHost by function parseQuery()
         if (!prop.getProperty(CONNECTION_PROP_HOST).equals(virtualHost)) return;
         
+        // TODO: we could have problems with connections from extern here ...
         String dstHostSocket = (String) header.get(httpHeader.HOST);
         prop.setProperty(CONNECTION_PROP_HOST,(httpd.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
     }

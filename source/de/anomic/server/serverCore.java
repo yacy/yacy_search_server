@@ -82,6 +82,7 @@ import de.anomic.http.httpc;
 import de.anomic.icap.icapd;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
+import de.anomic.server.portForwarding.serverPortForwarding;
 import de.anomic.tools.PKCS12Tool;
 import de.anomic.urlRedirector.urlRedirectord;
 import de.anomic.yacy.yacyCore;
@@ -340,19 +341,23 @@ public final class serverCore extends serverAbstractThread implements serverThre
     
     public void initPortForwarding() throws Exception {
         // doing the port forwarding stuff
-        if (this.switchboard.getConfig("portForwardingEnabled","false").equalsIgnoreCase("true")) {
+        if (this.switchboard.getConfigBool("portForwarding.Enabled",false)) {
             this.log.logInfo("Initializing port forwarding ...");
             try {
-                String localHost = this.socket.getInetAddress().getHostName();
-                Integer localPort = new Integer(this.socket.getLocalPort());
-                
-                this.log.logInfo("Trying to load port forwarding class");
+                // getting the port forwarding type to use
+                String forwardingType = this.switchboard.getConfig("portForwarding.Type","none");                               
                 
                 // loading port forwarding class
-                Class forwarderClass = Class.forName("de.anomic.server.serverPortForwardingSch");
+                this.log.logInfo("Trying to load port forwarding class for forwarding type '" + forwardingType + "'.");
+                String forwardingClass = this.switchboard.getConfig("portForwarding." + forwardingType ,"");
+                
+                Class forwarderClass = Class.forName(forwardingClass);
                 serverCore.portForwarding = (serverPortForwarding) forwarderClass.newInstance();                
                 
                 // initializing port forwarding
+                String localHost = this.socket.getInetAddress().getHostName();
+                Integer localPort = new Integer(this.socket.getLocalPort());                
+                
                 serverCore.portForwarding.init(
                         this.switchboard,
                         localHost,
@@ -366,11 +371,11 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(serverCore.portForwarding.getPort()));                               
             } catch (Exception e) {
                 serverCore.portForwardingEnabled = false;
-                this.switchboard.setConfig("portForwardingEnabled", "false");
+                this.switchboard.setConfig("portForwarding.Enabled", "false");
                 throw e;
             } catch (Error e) {
                 serverCore.portForwardingEnabled = false;
-                this.switchboard.setConfig("portForwardingEnabled", "false");
+                this.switchboard.setConfig("portForwarding.Enabled", "false");
                 throw e;                
             }
 

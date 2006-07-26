@@ -94,6 +94,7 @@ public interface serverSwitch {
     public void setConfig(String key, String value);
     public String getConfig(String key, String dflt);
     public long getConfigLong(String key, long dflt);
+    public boolean getConfigBool(String key, boolean dflt);
     public Iterator configKeys();
     public Map getRemoved();
         

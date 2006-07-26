@@ -53,8 +53,10 @@ import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserConfig;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.parser.ParserInfo;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.portForwarding.serverPortForwarding;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedUploader;
 
@@ -120,22 +122,34 @@ public final class Settings_p {
         prop.put("proxy.sendXForwardedForHeader", env.getConfig("proxy.sendXForwardedForHeader", "true").equals("true") ? 1 : 0);
         
         // remote port forwarding settings
+        String[] forwardingMethods = new String[]{"sch","upnp"};
+        String currentForwarder = env.getConfig("portForwarding.Type", "none");
         boolean portForwardingAvailable = false;
-        try {
-            Class.forName("de.anomic.server.serverPortForwardingSch"); 
-            portForwardingAvailable = true;
-        } catch (Exception e) {
-        } catch (Error e) {}
+        int methodCount = 0;
         
-        prop.put("portForwardingAvailable",portForwardingAvailable? 1:0);
-        prop.put("portForwardingEnabled",env.getConfig("portForwardingEnabled","false").equals("true")? 1 : 0);
-        prop.put("portForwardingUseProxy",env.getConfig("portForwardingUseProxy", "false").equals("true")? 1 : 0);
-        prop.put("portForwardingPort",env.getConfig("portForwardingPort", ""));
+        for (int i=0; i < forwardingMethods.length; i++) {
+            try {            
+                Class forwarder = Class.forName(env.getConfig("portForwarding." + forwardingMethods[i],""));
+                prop.put("forwardingMethods_" + methodCount + "_name",forwardingMethods[i]);
+                prop.put("forwardingMethods_" + methodCount + "_selected", forwardingMethods[i].equals(currentForwarder)?1:0);
+                methodCount++;
+            } catch (Exception e) {
+            } catch (Error e) {}
+        }
+        prop.put("forwardingMethods",methodCount);
         
-        prop.put("portForwardingHost",env.getConfig("portForwardingHost", ""));
-        prop.put("portForwardingHostPort",env.getConfig("portForwardingHostPort", ""));
-        prop.put("portForwardingHostUser",env.getConfig("portForwardingHostUser", ""));
-        prop.put("portForwardingHostPwd",env.getConfig("portForwardingHostPwd", ""));
+        if (methodCount > 0) portForwardingAvailable = true;
+        
+        prop.put("portForwarding.Type",currentForwarder);
+        prop.put("portForwarding.Available",portForwardingAvailable? 1:0);
+        prop.put("portForwarding.Enabled",env.getConfig("portForwarding.Enabled","false").equals("true")? 1 : 0);
+        
+        prop.put("portForwarding.sch.UseProxy",env.getConfig("portForwarding.sch.UseProxy", "false").equals("true")? 1 : 0);
+        prop.put("portForwarding.sch.Port",env.getConfig("portForwarding.sch.Port", ""));        
+        prop.put("portForwarding.sch.Host",env.getConfig("portForwarding.sch.Host", ""));
+        prop.put("portForwarding.sch.HostPort",env.getConfig("portForwarding.sch.HostPort", ""));
+        prop.put("portForwarding.sch.HostUser",env.getConfig("portForwarding.sch.HostUser", ""));
+        prop.put("portForwarding.sch.HostPwd",env.getConfig("portForwarding.sch.HostPwd", ""));
         
         // set values
         String s;

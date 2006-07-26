@@ -1260,12 +1260,12 @@ public final class yacy {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
         //which XML Parser?
-        if(System.getProperty("javax.xml.parsers.DocumentBuilderFactory")==null){
-            System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.crimson.jaxp.DocumentBuilderFactoryImpl");
-        }
-        if(System.getProperty("javax.xml.parsers.SAXParserFactory")==null){
-            System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.crimson.jaxp.SAXParserFactoryImpl");
-        }
+//        if(System.getProperty("javax.xml.parsers.DocumentBuilderFactory")==null){
+//            System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.crimson.jaxp.DocumentBuilderFactoryImpl");
+//        }
+//        if(System.getProperty("javax.xml.parsers.SAXParserFactory")==null){
+//            System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.crimson.jaxp.SAXParserFactoryImpl");
+//        }
         
         String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
         //System.out.println("args.length=" + args.length);

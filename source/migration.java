@@ -217,6 +217,8 @@ public class migration {
     }
 
     public static void migrateSwitchConfigSettings(plasmaSwitchboard sb) {
+        
+        // migration for additional parser settings
         String value = "";
         if ((value = sb.getConfig("parseableMimeTypes","")).length() > 0) {
             sb.setConfig("parseableMimeTypes.CRAWLER", value);
@@ -227,6 +229,21 @@ public class migration {
         //Locales in DATA, because DATA must be writable, htroot not.
         if(sb.getConfig("htLocalePath", "htroot/locale").equals("htroot/locale")){
         	sb.setConfig("htLocalePath", "DATA/HTDOCS/locale");
+        }
+        
+        // migration for port forwarding settings
+        if ((value = sb.getConfig("portForwardingHost","")).length() > 0) {
+            sb.setConfig("portForwarding.Enabled", sb.getConfig("portForwardingEnabled",""));
+            if (sb.getConfigBool("portForwardingEnabled", false)) {
+                sb.setConfig("portForwarding.Type", "sch");
+            }
+                        
+            sb.setConfig("portForwarding.sch.UseProxy", sb.getConfig("portForwardingUseProxy",""));
+            sb.setConfig("portForwarding.sch.Port", sb.getConfig("portForwardingPort",""));
+            sb.setConfig("portForwarding.sch.Host", sb.getConfig("portForwardingHost",""));
+            sb.setConfig("portForwarding.sch.HostPort", sb.getConfig("portForwardingHostPort",""));
+            sb.setConfig("portForwarding.sch.HostUser", sb.getConfig("portForwardingHostUser",""));
+            sb.setConfig("portForwarding.sch.HostPwd", sb.getConfig("portForwardingHostPwd",""));
         }
     }
 

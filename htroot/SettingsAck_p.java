@@ -244,14 +244,15 @@ public class SettingsAck_p {
         
         // port forwarding configuration
         if (post.containsKey("portForwarding")) {            
-            env.setConfig("portForwardingEnabled", post.containsKey("portForwardingEnabled")?"true":"false");
-            env.setConfig("portForwardingUseProxy",post.containsKey("portForwardingUseProxy")?"true":"false");
-            env.setConfig("portForwardingPort",    (String)post.get("portForwardingPort"));
-                        
-            env.setConfig("portForwardingHost",    (String)post.get("portForwardingHost"));
-            env.setConfig("portForwardingHostPort",(String)post.get("portForwardingHostPort"));
-            env.setConfig("portForwardingHostUser",(String)post.get("portForwardingHostUser"));
-            env.setConfig("portForwardingHostPwd", (String)post.get("portForwardingHostPwd"));
+            env.setConfig("portForwarding.Enabled", post.containsKey("portForwarding.Enabled")?"true":"false");
+            env.setConfig("portForwarding.Type", (String)post.get("portForwarding.Type"));            
+            
+            env.setConfig("portForwarding.sch.UseProxy",post.containsKey("portForwarding.sch.UseProxy")?"true":"false");
+            env.setConfig("portForwarding.sch.Port",    (String)post.get("portForwarding.sch.Port"));                        
+            env.setConfig("portForwarding.sch.Host",    (String)post.get("portForwarding.sch.Host"));
+            env.setConfig("portForwarding.sch.HostPort",(String)post.get("portForwarding.sch.HostPort"));
+            env.setConfig("portForwarding.sch.HostUser",(String)post.get("portForwarding.sch.HostUser"));
+            env.setConfig("portForwarding.sch.HostPwd", (String)post.get("portForwarding.sch.HostPwd"));
             
             // trying to reconnect the port forwarding channel
             try {
@@ -273,13 +274,15 @@ public class SettingsAck_p {
             }
             
             prop.put("info", 22); 
-            prop.put("info_portForwardingEnabled", post.containsKey("portForwardingEnabled")?"on":"off");  
-            prop.put("info_portForwardingUseProxy",post.containsKey("portForwardingUseProxy")?"on":"off");
-            prop.put("info_portForwardingPort",    (String)post.get("portForwardingPort"));
-            prop.put("info_portForwardingHost",    (String)post.get("portForwardingHost"));
-            prop.put("info_portForwardingHostPort",(String)post.get("portForwardingHostPort"));
-            prop.put("info_portForwardingHostUser",(String)post.get("portForwardingHostUser"));
-            prop.put("info_portForwardingHostPwd", (String)post.get("portForwardingHostPwd"));   
+            prop.put("info_portForwarding.Enabled", post.containsKey("portForwarding.Enabled")?"on":"off");
+            prop.put("info_portForwarding.Type", (String)post.get("portForwarding.Type"));
+            
+            prop.put("info_portForwarding.sch.UseProxy",post.containsKey("portForwarding.sch.UseProxy")?"on":"off");
+            prop.put("info_portForwarding.sch.Port",    (String)post.get("portForwarding.sch.Port"));
+            prop.put("info_portForwarding.sch.Host",    (String)post.get("portForwarding.sch.Host"));
+            prop.put("info_portForwarding.sch.HostPort",(String)post.get("portForwarding.sch.HostPort"));
+            prop.put("info_portForwarding.sch.HostUser",(String)post.get("portForwarding.sch.HostUser"));
+            prop.put("info_portForwarding.sch.HostPwd", (String)post.get("portForwarding.sch.HostPwd"));   
             return prop;
         }
         

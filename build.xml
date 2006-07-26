@@ -208,7 +208,7 @@
 
   <!-- compiling the main sources -->   
   <javac srcdir="${src}/" destdir="${build}"
-         excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,de/anomic/soap/**,yacy.java,de/anomic/server/serverPortForwardingSch.java"
+         excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,de/anomic/soap/**,yacy.java,de/anomic/server/portForwarding/*/*"
          debug="true" debuglevel="lines,vars,source" 
          source="${javacSource}" target="${javacTarget}">
     <classpath refid="project.class.path"/>
@@ -301,27 +301,34 @@
 </target>       
    
 <target name="compilePortForwarding" depends="compileMain" description="Compiling and zipping additional port forwarder"> 
-    <javac srcdir="${src}/de/anomic/server/" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
-        <include name="serverPortForwardingSch.java"/>
+    <javac srcdir="${src}/de/anomic/server/portForwarding" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
+        <exclude name="serverPortForwarding.java"/>
         <classpath>
           <pathelement location="${build}" />   
         
-          <!-- main lib needed to parse rss/atom feed files -->     
+          <!-- libs needed by the sch port forwarder -->     
           <pathelement location="${libx}/jsch-0.1.21.jar" />                    
+        	
+          <!-- libs needed by the upnp port forwarder -->
+          	<pathelement location="${libx}/commons-logging.jar" />
+   			<pathelement location="${libx}/commons-jxpath-1.1.jar" />        	
+      		<pathelement location="${libx}/sbbi-upnplib-1.0.3.jar" />
         </classpath>
     </javac>      
     <copy todir="${release_ext}/libx/">
-         <fileset dir="${libx}" includes="jsch-0.1.21.*"/> 
+        <fileset dir="${libx}" includes="jsch-0.1.21.*"/> 
+	   	<fileset dir="${libx}" includes="commons-logging.*"/>
+        <fileset dir="${libx}" includes="commons-jxpath-1.1.*"/>    	
+        <fileset dir="${libx}" includes="sbbi-upnplib-1.0.3.*"/>
     </copy>
-    <copy todir="${release_ext}/source/de/anomic/server/">
-         <fileset dir="${src}/de/anomic/server/">
-              <include name="serverPortForwardingSch.java"/> 
+    <copy todir="${release_ext}/source/de/anomic/server/portForwarding">
+         <fileset dir="${src}/de/anomic/server/portForwarding">
+              <include name="**/*.java"/> 
          </fileset>   
     </copy>        
-    <copy todir="${release_ext}/classes/de/anomic/server/">
-         <fileset dir="${build}/de/anomic/server/">
-              <include name="serverPortForwardingSch.class"/> 
-              <include name="serverPortForwardingSch$MyUserInfo.class"/>  
+    <copy todir="${release_ext}/classes/de/anomic/server/portForwarding">
+         <fileset dir="${build}/de/anomic/server/portForwarding">
+              <include name="**/*.class"/> 
          </fileset>   
     </copy>      
 </target>   
@@ -368,8 +375,7 @@
 		    <!-- excluding the soap handler --> 
 		    <exclude name="de/anomic/soap/**"/>
 		    <!-- excluding the port forwarder --> 
-		    <exclude name="de/anomic/server/serverPortForwardingSch.class"/> 
-		    <exclude name="de/anomic/server/serverPortForwardingSch$MyUserInfo.class"/>			
+		    <exclude name="de/anomic/server/portForwarding/*/*"/> 
 		</fileset>
 	
 		<!-- copy standard seed uploaders -->
@@ -465,7 +471,7 @@
 	  	<!-- excluding soap -->
 	    <exclude name="de/anomic/soap/**"/> 
 	    <!-- excluding the port forwarder --> 
-	    <exclude name="de/anomic/server/serverPortForwardingSch.java"/> 
+	    <exclude name="de/anomic/server/portForwarding/*/*"/> 
 	  </fileset>
 	  <fileset dir="${src}">
 	    <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java"/>
