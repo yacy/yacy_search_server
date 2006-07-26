@@ -82,30 +82,37 @@ fi
 
 # generating the proper classpath
 CLASSPATH=""
-for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done	
-for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
+prefix=$(dirname $0);
+if [ x$prefix == "x." ];then
+	prefix="";
+else
+	prefix="$prefix/"
+fi
+for N in lib/*.jar; do CLASSPATH="$CLASSPATH$prefix$N:"; done	
+for N in libx/*.jar; do CLASSPATH="$CLASSPATH$prefix$N:"; done
+CLASSPATH="${prefix}classes:$prefix:$CLASSPATH"
 
 
 cmdline="";
 if [ $DEBUG -eq 1 ] #debug
 then
 	if [ $PRINTONLY -eq 1 ];then
-		echo java $JAVA_ARGS -Djava.awt.headless=true -classpath classes:$CLASSPATH yacy
+		echo java $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy
 	else
-		java $JAVA_ARGS -Djava.awt.headless=true -classpath classes:$CLASSPATH yacy
+		java $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy
 	fi
 elif [ $LOGGING -eq 1 ];then #logging
 	if [ $PRINTONLY -eq 1 ];then
-		echo "java $JAVA_ARGS -Djava.awt.headless=true -classpath classes:htroot:$CLASSPATH yacy >> yacy.log"
+		echo "java $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy >> yacy.log"
 	else
-		nohup java $JAVA_ARGS -Djava.awt.headless=true -classpath classes:htroot:$CLASSPATH yacy >> yacy.log &
+		nohup java $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy >> yacy.log &
 	fi
 else
 	if [ $PRINTONLY -eq 1 ];then
-		echo "java $JAVA_ARGS -Djava.awt.headless=true -classpath classes:htroot:$CLASSPATH yacy > /dev/null"
+		echo "java $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy > /dev/null"
 	else
-		nohup java $JAVA_ARGS -Djava.awt.headless=true -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
-		#nohup java -Xms160m -Xmx160m -classpath classes:htroot:$CLASSPATH yacy > /dev/null &
+		nohup java $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy > /dev/null &
+		#nohup java -Xms160m -Xmx160m -classpath $CLASSPATH yacy > /dev/null &
 		echo "****************** YaCy Web Crawler/Indexer & Search Engine *******************"
 		echo "**** (C) by Michael Peter Christen, usage granted under the GPL Version 2  ****"
 		echo "**** USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/yacy ****"
