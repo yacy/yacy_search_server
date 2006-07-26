@@ -25,7 +25,6 @@
 //note: this isn't useful, yet.
 //this is only a basic demonstration, what can be done with the supertemplates.
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

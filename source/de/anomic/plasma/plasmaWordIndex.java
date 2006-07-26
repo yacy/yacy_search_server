@@ -65,6 +65,7 @@ import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexRAMCacheRI;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
+import de.anomic.index.indexRowSetContainer;
 import de.anomic.index.indexTreeMapContainer;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -450,6 +451,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                             ramCache.wordContainers(startWordHash, false),
                             assortmentCluster.wordContainers(startWordHash, true, false),
                             new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                            indexRowSetContainer.containerMergeMethod,
                             true);
         }
         if (resourceLevel == plasmaWordIndex.RL_WORDFILES) {
@@ -458,9 +460,11 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                                      ramCache.wordContainers(startWordHash, false),
                                      assortmentCluster.wordContainers(startWordHash, true, false),
                                      new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                                     indexRowSetContainer.containerMergeMethod,
                                      true),
                             backend.wordContainers(startWordHash, false),
                             new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                            indexRowSetContainer.containerMergeMethod,
                             true);
         }
         return null;

@@ -55,7 +55,7 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
             return 0;
         }
     }
-     
+    
     public Iterator wordContainers(String startWordHash, boolean rot) {
         return new wordContainersIterator(startWordHash, rot);
     }

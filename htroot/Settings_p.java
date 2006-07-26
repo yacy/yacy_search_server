@@ -53,10 +53,8 @@ import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserConfig;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.parser.ParserInfo;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.portForwarding.serverPortForwarding;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedUploader;
 
@@ -129,7 +127,7 @@ public final class Settings_p {
         
         for (int i=0; i < forwardingMethods.length; i++) {
             try {            
-                Class forwarder = Class.forName(env.getConfig("portForwarding." + forwardingMethods[i],""));
+                Class forwarder = Class.forName(env.getConfig("portForwarding." + forwardingMethods[i],"")); // FIXME: why is forwarder declared, but never used?
                 prop.put("forwardingMethods_" + methodCount + "_name",forwardingMethods[i]);
                 prop.put("forwardingMethods_" + methodCount + "_selected", forwardingMethods[i].equals(currentForwarder)?1:0);
                 methodCount++;

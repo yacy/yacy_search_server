@@ -275,7 +275,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
 
     public Iterator wordContainers(String startWordHash, boolean rot) {
         if (rot) throw new UnsupportedOperationException("plasmaWordIndexCache cannot rotate wordContainers");
-        return wCache.tailMap(startWordHash).values().iterator(); // FIXME: check if iteration is in order of keys
+        return wCache.tailMap(startWordHash).values().iterator(); // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
     }
 
     public void shiftK2W() {

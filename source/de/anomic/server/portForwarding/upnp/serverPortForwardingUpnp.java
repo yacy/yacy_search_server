@@ -58,8 +58,6 @@ import de.anomic.server.portForwarding.serverPortForwarding;
 
 public class serverPortForwardingUpnp implements serverPortForwarding {
     private InternetGatewayDevice gateway;
-    
-    private serverSwitch switchboard;
 
     private String localHost;
     private int localHostPort;
@@ -164,7 +162,6 @@ public class serverPortForwardingUpnp implements serverPortForwarding {
             throws Exception {
         try {
             this.log.logFine("Initializing port forwarding via UPnP ...");
-            this.switchboard = switchboard;
             
             if (localHost.equals("0.0.0.0")) {
                 this.localHost = InetAddress.getLocalHost().getHostAddress();

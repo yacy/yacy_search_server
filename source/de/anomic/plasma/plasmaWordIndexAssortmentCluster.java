@@ -55,6 +55,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
+import de.anomic.index.indexRowSetContainer;
 import de.anomic.index.indexTreeMapContainer;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -287,7 +288,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         // iterates indexContainer - Objects
         HashSet containerIterators = new HashSet();
         for (int i = 0; i < clusterCount; i++) containerIterators.add(assortments[i].containers(startWordHash, up, rot));
-        return kelondroMergeIterator.cascade(containerIterators, new indexContainerOrder(kelondroNaturalOrder.naturalOrder), up);
+        return kelondroMergeIterator.cascade(containerIterators, new indexContainerOrder(kelondroNaturalOrder.naturalOrder), indexRowSetContainer.containerMergeMethod, up);
     }
     
     public int size() {

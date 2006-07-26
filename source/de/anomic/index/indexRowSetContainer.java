@@ -26,6 +26,7 @@
 
 package de.anomic.index;
 
+import java.lang.reflect.Method;
 import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroRow;
@@ -102,6 +103,27 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
         return null;
     }
 
+    public static Method containerMergeMethod = null;
+    static {
+        try {
+            Class c = Class.forName("de.anomic.index.indexRowSetContainer");
+            containerMergeMethod = c.getMethod("containerMerge", new Class[]{Object.class, Object.class});
+        } catch (SecurityException e) {
+            System.out.println("Error while initializing containerMerge: " + e.getMessage());
+            containerMergeMethod = null;
+        } catch (ClassNotFoundException e) {
+            System.out.println("Error while initializing containerMerge: " + e.getMessage());
+            containerMergeMethod = null;
+        } catch (NoSuchMethodException e) {
+            System.out.println("Error while initializing containerMerge: " + e.getMessage());
+            containerMergeMethod = null;
+        }
+    }
 
-
+    public static Object containerMerge(Object a, Object b) {
+        indexContainer c = (indexContainer) a;
+        c.add((indexContainer) b, -1);
+        return c;
+    }
+    
 }
