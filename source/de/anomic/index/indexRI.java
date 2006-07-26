@@ -48,7 +48,8 @@ public interface indexRI {
     
     public int size();
     
-    public Iterator wordHashes(String startWordHash, boolean rot);
+    public Iterator wordContainers(String startWordHash, boolean rot); // method to replace wordHashes
+        
     public long getUpdateTime(String wordHash);
     
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime);

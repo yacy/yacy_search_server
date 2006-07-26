@@ -587,15 +587,15 @@ public final class plasmaCrawlStacker {
                 }
                 try {
                     // loop through the list and fill the messageList with url hashs
-                    Iterator iter = this.urlEntryCache.keys(true, false, null);
-                    String urlHash;
-                    while (iter.hasNext()) {
-                        urlHash = (String) iter.next();
-                        if (urlHash == null) {
+                    Iterator rows = this.urlEntryCache.rows(true, false, null);
+                    kelondroRow.Entry entry;
+                    while (rows.hasNext()) {
+                        entry = (kelondroRow.Entry) rows.next();
+                        if (entry == null) {
                             System.out.println("ERROR! null element found");
                             continue;
                         }
-                        this.urlEntryHashCache.add(urlHash);
+                        this.urlEntryHashCache.add(entry.getColString(0, null));
                         this.readSync.V();
                     }
                 } catch (kelondroException e) {

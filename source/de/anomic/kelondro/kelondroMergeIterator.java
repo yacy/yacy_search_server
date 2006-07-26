@@ -50,7 +50,7 @@ public class kelondroMergeIterator implements Iterator {
     
     Comparator comp;
     Iterator a, b;
-    String na, nb;
+    Object na, nb;
     boolean up;
     
     public kelondroMergeIterator(Iterator a, Iterator b, Comparator c, boolean up) {
@@ -92,7 +92,7 @@ public class kelondroMergeIterator implements Iterator {
     }
     
     public Object next() {
-        String s;
+        Object s;
         if (na == null) {
             s = nb;
             nextb();
@@ -103,7 +103,7 @@ public class kelondroMergeIterator implements Iterator {
             nexta();
             return s;
         }
-        // compare the strings
+        // compare the Objects
         int c = comp.compare(na, nb);
         if (c == 0) {
             s = na;

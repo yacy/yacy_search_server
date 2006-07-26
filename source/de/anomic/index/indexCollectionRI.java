@@ -55,16 +55,16 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
             return 0;
         }
     }
-
-    public Iterator wordHashes(String startWordHash, boolean rot) {
-        return new wordHashIterator(startWordHash, rot);
+     
+    public Iterator wordContainers(String startWordHash, boolean rot) {
+        return new wordContainersIterator(startWordHash, rot);
     }
 
-    public class wordHashIterator implements Iterator {
+    public class wordContainersIterator implements Iterator {
 
-        //private Iterator whi;
+        //private Iterator wci;
         
-        public wordHashIterator(String startWordHash, boolean rot) {
+        public wordContainersIterator(String startWordHash, boolean rot) {
 
         }
         

@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
-import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexAssortment;
 
@@ -89,25 +88,13 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
     public void run() {
         try {            
             // getting a content interator
-            Iterator contentIter = this.assortmentFile.content(-1);
-            while (contentIter.hasNext()) {
+            Iterator contentIterator = this.assortmentFile.containers(null, true, false);
+            while (contentIterator.hasNext()) {
                 this.wordEntityCount++;                
                 
                 // getting next entry as byte array
-                kelondroRow.Entry row = (kelondroRow.Entry) contentIter.next();
+                indexContainer container = (indexContainer) contentIterator.next();
                 
-                // getting the word hash
-                String hash = row.getColString(0, null);
-                
-                // creating an word entry container
-                indexContainer container;
-                try {
-                    container = this.assortmentFile.row2container(hash, row);
-                } catch (NullPointerException e) {
-                    this.log.logWarning("NullpointerException detected in row with hash  '" + hash + "'.");
-                    if (this.wordEntityCount < this.importStartSize) continue;
-                    return;
-                }
                 this.wordEntryCount += container.size();
                 
                 // importing entity container to home db

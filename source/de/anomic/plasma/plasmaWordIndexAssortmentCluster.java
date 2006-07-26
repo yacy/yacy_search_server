@@ -52,6 +52,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexTreeMapContainer;
@@ -273,22 +274,22 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         }
         return size;
     }
-    
-    public Iterator wordHashes(String startWordHash, boolean rot) {
+
+    public Iterator wordContainers(String startWordHash, boolean rot) {
         try {
-            return wordHashes(startWordHash, true, rot);
+            return wordContainers(startWordHash, true, rot);
         } catch (IOException e) {
             return new HashSet().iterator();
         }
     }
-        
-    public Iterator wordHashes(String startWordHash, boolean up, boolean rot) throws IOException {
-        HashSet iterators = new HashSet();
-        //if (rot) System.out.println("WARNING: kelondroMergeIterator does not work correctly when individual iterators rotate on their own!");
-        for (int i = 0; i < clusterCount; i++) iterators.add(assortments[i].hashes(startWordHash, up, rot));
-        return kelondroMergeIterator.cascade(iterators, kelondroNaturalOrder.naturalOrder, up);
+    
+    public Iterator wordContainers(String startWordHash, boolean up, boolean rot) throws IOException {
+        // iterates indexContainer - Objects
+        HashSet containerIterators = new HashSet();
+        for (int i = 0; i < clusterCount; i++) containerIterators.add(assortments[i].containers(startWordHash, up, rot));
+        return kelondroMergeIterator.cascade(containerIterators, new indexContainerOrder(kelondroNaturalOrder.naturalOrder), up);
     }
-
+    
     public int size() {
         int total = 0;
         for (int i = 0; i < clusterCount; i++) total += assortments[i].size();

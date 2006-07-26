@@ -102,6 +102,10 @@ public final class plasmaWordIndexAssortment {
         }
         return structure;
     }
+    
+    private static int assortmentCapacity(int rowsize) {
+        return (rowsize - bufferStructureBasis[0] - bufferStructureBasis[1] - bufferStructureBasis[2]) / (bufferStructureBasis[3] + bufferStructureBasis[4]);
+    }
 
     public plasmaWordIndexAssortment(File storagePath, int assortmentLength, int bufferkb, long preloadTime, serverLog log) {
         if (!(storagePath.exists())) storagePath.mkdirs();
@@ -183,7 +187,7 @@ public final class plasmaWordIndexAssortment {
 			resetDatabase();
 			return null;
 		}
-        return row2container(wordHash, row);
+        return row2container(row);
 	}
 
     public boolean contains(String wordHash) {
@@ -220,14 +224,30 @@ public final class plasmaWordIndexAssortment {
             resetDatabase();
             return null;
         }
-        return row2container(wordHash, row);
+        return row2container(row);
     }
     
+    /*
     public indexContainer row2container(String wordHash, kelondroRow.Entry row) {
         if (row == null) return null;
         final long updateTime = row.getColLongB256(2);
         indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
         for (int i = 0; i < assortmentLength; i++) {
+            container.add(
+                    new indexURLEntry[] { new indexURLEntry(
+                            new String(row.getColBytes(3 + 2 * i)), new String(row.getColBytes(4 + 2 * i))) }, updateTime);
+        }
+        return container;
+    }
+    */
+    
+    public final static indexContainer row2container(kelondroRow.Entry row) {
+        if (row == null) return null;
+        String wordHash = row.getColString(0, null);
+        final long updateTime = row.getColLongB256(2);
+        indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
+        int al = assortmentCapacity(row.objectsize());
+        for (int i = 0; i < al; i++) {
             container.add(
                     new indexURLEntry[] { new indexURLEntry(
                             new String(row.getColBytes(3 + 2 * i)), new String(row.getColBytes(4 + 2 * i))) }, updateTime);
@@ -256,9 +276,10 @@ public final class plasmaWordIndexAssortment {
         assortments = new kelondroTree(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(bufferStructure(assortmentLength)), true);
     }
     
-    public Iterator hashes(String startWordHash, boolean up, boolean rot) throws IOException {
+    public Iterator containers(String startWordHash, boolean up, boolean rot) throws IOException {
+        // returns an iteration of indexContainer elements
         try {
-            return assortments.keys(up, rot, startWordHash.getBytes());
+            return new containerIterator(startWordHash, up, rot);
         } catch (kelondroException e) {
             log.logSevere("iterateAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB " + assortments.file(), e);
             resetDatabase();
@@ -266,12 +287,31 @@ public final class plasmaWordIndexAssortment {
         }
     }
     
-    public Iterator content(long maxInitTime) {
-        return this.assortments.contentRows(maxInitTime);
+    public class containerIterator implements Iterator {
+
+        private Iterator rowIterator;
+        
+        public containerIterator(String startWordHash, boolean up, boolean rot) throws IOException {
+            rowIterator = assortments.rows(up, rot, startWordHash.getBytes());
+        }
+        
+        public boolean hasNext() {
+            return rowIterator.hasNext();
+        }
+
+        public Object next() {
+            kelondroRow.Entry entry = (kelondroRow.Entry) rowIterator.next();
+            return row2container(entry);
+        }
+
+        public void remove() {
+            rowIterator.remove();
+        }
+        
     }
 
     public int size() {
-	return assortments.size();
+        return assortments.size();
     }
 
     public int cacheNodeChunkSize() {

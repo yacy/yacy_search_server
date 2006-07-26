@@ -272,10 +272,10 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         if (cacheIndex != null) size += cacheIndex.size();
         return size;
     }
-    
-    public Iterator wordHashes(String startWordHash, boolean rot) {
-        if (rot) throw new UnsupportedOperationException("plasmaWordIndexCache cannot rotate");
-        return wCache.tailMap(startWordHash).keySet().iterator();
+
+    public Iterator wordContainers(String startWordHash, boolean rot) {
+        if (rot) throw new UnsupportedOperationException("plasmaWordIndexCache cannot rotate wordContainers");
+        return wCache.tailMap(startWordHash).values().iterator(); // FIXME: check if iteration is in order of keys
     }
 
     public void shiftK2W() {

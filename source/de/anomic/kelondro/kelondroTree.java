@@ -1038,14 +1038,6 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         return new rowIterator(up, rotating, firstKey, this.size());
     }
     
-    public Iterator keys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        // iterates only the keys of the Nodes
-        // enumerated objects are of type String
-        // iterates the elements in a sorted way.
-        // if iteration should start at smallest element, set firstKey to null
-        return new keyIterator(up, rotating, firstKey, this.size());
-    }
-    
     public class rowIterator implements Iterator {
         
         int chunkSize;
@@ -1101,66 +1093,6 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         public void remove() {
             if (lastKey != null) try {
                 kelondroTree.this.remove(lastKey);
-            } catch (IOException e) {
-                // do nothing
-            }
-        }
-        
-    }
-    
-    public class keyIterator implements Iterator {
-        
-        int chunkSize;
-        byte[] start;
-        boolean inc, rot;
-        long count;
-        String lastKey;
-        TreeSet keyBuffer;
-        Iterator bufferIterator;
-        
-        public keyIterator(boolean up, boolean rotating, byte[] firstKey, long guessedCountLimit) throws IOException {
-            start = firstKey;
-            inc = up;
-            rot = rotating;
-            count = 0;
-            lastKey = null;
-            //System.out.println("*** keyIterator: " + filename + ": readAheadChunkSize = " + readAheadChunkSize + ", lastIteratorCount = " + lastIteratorCount);
-            readAheadChunkSize = Math.min(1000, 3 + (int) ((3 * readAheadChunkSize + lastIteratorCount) / 4));
-            chunkSize = (int) Math.min(readAheadChunkSize / 3, guessedCountLimit);
-            keyBuffer = keySet(inc, rot, start, true, chunkSize);
-            bufferIterator = keyBuffer.iterator();
-            lastIteratorCount = 0;
-        }
-                
-        public boolean hasNext() {
-            return ((bufferIterator != null) && (bufferIterator.hasNext()) && ((rot) || (count < size())));
-        }
-        
-        public Object next() {
-            if (!(bufferIterator.hasNext())) return null;
-            lastKey = (String) bufferIterator.next();
-            
-            // check if this was the last entry in the rowBuffer
-            if (!(bufferIterator.hasNext())) {
-                // assign next buffer chunk
-                try {
-                    keyBuffer = keySet(inc, rot, lastKey.getBytes(), false, chunkSize);
-                    bufferIterator = keyBuffer.iterator();
-                } catch (IOException e) {
-                    keyBuffer = null;
-                    bufferIterator = null;
-                }
-            }
-            
-            // return the row
-            count++;
-            lastIteratorCount++;
-            return lastKey;
-        }
-        
-        public void remove() {
-            if (lastKey != null) try {
-                kelondroTree.this.remove(lastKey.getBytes());
             } catch (IOException e) {
                 // do nothing
             }
@@ -1541,6 +1473,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
     }
     
+    /*
     public static void iterationtest() {
         File f = new File("test.db");
         if (f.exists()) f.delete();
@@ -1571,6 +1504,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             e.printStackTrace();
         }
     }
+    */
     
     public static kelondroTree testTree(File f, String testentities) throws IOException {
         if (f.exists()) f.delete();

@@ -136,6 +136,10 @@ public class kelondroRow {
             return row.length;
         }
         
+        public int objectsize() {
+            return objectsize;
+        }
+        
         public boolean empty(int column) {
             return rowinstance[colstart[column]] == 0;
         }

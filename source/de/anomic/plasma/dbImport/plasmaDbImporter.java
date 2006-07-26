@@ -115,15 +115,15 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
 			
             // iterate over all words from import db
             //Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
-            Iterator importWordHashIterator = this.importWordIndex.wordHashSet(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false, 100).iterator();
-            while (!isAborted() && importWordHashIterator.hasNext()) {
+            Iterator indexContainerIterator = this.importWordIndex.indexContainerSet(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false, 100).iterator();
+            while (!isAborted() && indexContainerIterator.hasNext()) {
                 
                 TreeSet entityUrls = new TreeSet(new kelondroNaturalOrder(true));
                 indexContainer newContainer = null;
                 try {
                     this.wordCounter++;
-                    this.wordHash = (String) importWordHashIterator.next();
-                    newContainer = this.importWordIndex.getContainer(this.wordHash, true, -1);
+                    newContainer = (indexContainer) indexContainerIterator.next();
+                    this.wordHash = newContainer.getWordHash();
                     
                     // loop throug the entities of the container and get the
                     // urlhash
@@ -213,13 +213,13 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                     if (newContainer != null) newContainer.clear();
                 }
 
-                if (!importWordHashIterator.hasNext()) {
+                if (!indexContainerIterator.hasNext()) {
                     // We may not be finished yet, try to get the next chunk of wordHashes
-                    TreeSet wordHashes = this.importWordIndex.wordHashSet(this.wordHash, plasmaWordIndex.RL_WORDFILES, false, 100);
-                    importWordHashIterator = wordHashes.iterator();
+                    TreeSet containers = this.importWordIndex.indexContainerSet(this.wordHash, plasmaWordIndex.RL_WORDFILES, false, 100);
+                    indexContainerIterator = containers.iterator();
                     // Make sure we don't get the same wordhash twice, but don't skip a word
-                    if ((importWordHashIterator.hasNext())&&(!this.wordHash.equals(importWordHashIterator.next()))) {
-                        importWordHashIterator = wordHashes.iterator();
+                    if ((indexContainerIterator.hasNext())&&(!this.wordHash.equals(((indexContainer) indexContainerIterator.next()).getWordHash()))) {
+                        indexContainerIterator = containers.iterator();
                     }
                 }
             }

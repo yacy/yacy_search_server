@@ -84,9 +84,7 @@ import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.plasma.plasmaWordIndexAssortment;
 import de.anomic.plasma.plasmaWordIndexAssortmentCluster;
-import de.anomic.plasma.plasmaWordIndexFileCluster;
 import de.anomic.plasma.plasmaWordIndexFile;
 import de.anomic.index.indexURLEntry;
 import de.anomic.server.serverCore;
@@ -705,19 +703,17 @@ public final class yacy {
             if (cacheMem < 2048) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, cacheMem, 10000, log);
-            Iterator wordHashIterator = wordIndex.wordHashes("------------", plasmaWordIndex.RL_WORDFILES, false);
+            Iterator indexContainerIterator = wordIndex.wordContainers("------------", plasmaWordIndex.RL_WORDFILES, false);
             
-            String wordhash;
             long urlCounter = 0, wordCounter = 0;
             long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
             String wordChunkStartHash = "------------", wordChunkEndHash;
             
-            while (wordHashIterator.hasNext()) {
+            while (indexContainerIterator.hasNext()) {
                 indexContainer wordIdxContainer = null;
                 try {
                     wordCounter++;
-                    wordhash = (String) wordHashIterator.next();
-                    wordIdxContainer = wordIndex.getContainer(wordhash, true, -1);
+                    wordIdxContainer  = (indexContainer) indexContainerIterator.next();
                     
                     // the combined container will fit, read the container
                     Iterator wordIdxEntries = wordIdxContainer.entries();
@@ -735,11 +731,9 @@ public final class yacy {
                             }
                         } catch (IOException e) {}
                     }
-                    // we have read all elements, now we can close it
-                    wordIdxContainer = null;
                     
                     if (wordCounter%500 == 0) {
-                        wordChunkEndHash = wordhash;
+                        wordChunkEndHash = wordIdxContainer.getWordHash();
                         wordChunkEnd = System.currentTimeMillis();
                         long duration = wordChunkEnd - wordChunkStart;
                         log.logInfo(wordCounter + " words scanned " +
@@ -751,6 +745,8 @@ public final class yacy {
                         wordChunkStartHash = wordChunkEndHash;
                     }
                     
+                    // we have read all elements, now we can close it
+                    wordIdxContainer = null;
                     
                 } catch (Exception e) {
                     log.logSevere("Exception", e);
@@ -1146,56 +1142,55 @@ public final class yacy {
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
         File root = new File(homePath);
         try {
-            Iterator WordHashIterator = null;
+            Iterator indexContainerIterator = null;
             if (resource.equals("all")) {
                 WordIndex = new plasmaWordIndex(homeDBroot, 8*1024*1024, 3000, log);
-                WordHashIterator = WordIndex.wordHashes(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
+                indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
             } else if (resource.equals("assortments")) {
                 plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, 3000, log);
-                WordHashIterator = assortmentCluster.wordHashes(wordChunkStartHash, true, false);
-            } else if (resource.startsWith("assortment")) {
+                indexContainerIterator = assortmentCluster.wordContainers(wordChunkStartHash, true, false);
+            } /*else if (resource.startsWith("assortment")) {
                 int a = Integer.parseInt(resource.substring(10));
                 plasmaWordIndexAssortment assortment = new plasmaWordIndexAssortment(new File(homeDBroot, "ACLUSTER"), a, 8*1024*1024, 3000, null);
-                WordHashIterator = assortment.hashes(wordChunkStartHash, true, false);
+                indexContainerIterator = assortment.hashes(wordChunkStartHash, true, false);
             } else if (resource.equals("words")) {
                 plasmaWordIndexFileCluster fileDB = new plasmaWordIndexFileCluster(homeDBroot, log);
-                WordHashIterator = fileDB.wordHashes(wordChunkStartHash, true, false);
-            }
+                indexContainerIterator = fileDB.wordContainers(wordChunkStartHash, true, false);
+            }*/ // *** FIXME ***
             int counter = 0;
-            String wordHash = "";
+            indexContainer container = null;
             if (format.equals("zip")) {
                 log.logInfo("Writing Hashlist to ZIP-file: " + targetName + ".zip");
                 ZipEntry zipEntry = new ZipEntry(targetName + ".txt");
                 File file = new File(root, targetName + ".zip");
                 ZipOutputStream bos = new ZipOutputStream(new FileOutputStream(file));
                 bos.putNextEntry(zipEntry);
-                while (WordHashIterator.hasNext()) {
+                while (indexContainerIterator.hasNext()) {
                     counter++;
-                    wordHash = (String) WordHashIterator.next();
-                    bos.write((wordHash).getBytes());
+                    container = (indexContainer) indexContainerIterator.next();
+                    bos.write((container.getWordHash()).getBytes());
                     bos.write(serverCore.crlf);
                     if (counter % 500 == 0) {
-                        log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + wordHash);
+                        log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
                     }
                 }
                 bos.close();
-            }
-            else {
+            } else {
                 log.logInfo("Writing Hashlist to TXT-file: " + targetName + ".txt");
                 File file = new File(root, targetName + ".txt");
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                while (WordHashIterator.hasNext()) {
+                while (indexContainerIterator.hasNext()) {
                     counter++;
-                    wordHash = (String) WordHashIterator.next();
-                    bos.write((wordHash).getBytes());
+                    container = (indexContainer) indexContainerIterator.next();
+                    bos.write((container.getWordHash()).getBytes());
                     bos.write(serverCore.crlf);
                     if (counter % 500 == 0) {
-                        log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + wordHash);
+                        log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
                     }
                 }
                 bos.close();
             }
-            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + wordHash);
+            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + container.getWordHash());
         } catch (IOException e) {
             log.logSevere("IOException", e);
         }

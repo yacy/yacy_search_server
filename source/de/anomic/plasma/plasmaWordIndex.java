@@ -59,6 +59,7 @@ import de.anomic.net.URL;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexRAMCacheRI;
@@ -407,73 +408,71 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public static final int RL_ASSORTMENTS = 2;
     public static final int RL_WORDFILES   = 3;
     
-    public synchronized TreeSet wordHashSet(String startHash, int resourceLevel, boolean rot, int count) throws IOException {
-        kelondroOrder hashOrder = (kelondroOrder) indexOrder.clone();
-        hashOrder.rotate(startHash.getBytes());
-        TreeSet hashes = new TreeSet(hashOrder);
-        Iterator i = wordHashes(startHash, resourceLevel, rot);
+
+    public synchronized TreeSet indexContainerSet(String startHash, int resourceLevel, boolean rot, int count) throws IOException {
+        // creates a set of indexContainers
+        kelondroOrder containerOrder = new indexContainerOrder((kelondroOrder) indexOrder.clone());
+        containerOrder.rotate(startHash.getBytes());
+        TreeSet containers = new TreeSet(containerOrder);
+        Iterator i = wordContainers(startHash, resourceLevel, rot);
         if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) count = Math.min(ramCache.wSize(), count);
-        String hash;
+        indexContainer container;
         while ((count > 0) && (i.hasNext())) {
-            hash = (String) i.next();
-            if ((hash != null) && (hash.length() > 0)) {
-                hashes.add(hash);
+            container = (indexContainer) i.next();
+            if ((container != null) && (container.size() > 0)) {
+                containers.add(container);
                 count--;
             }
         }
-        return hashes;
+        return containers;
     }
     
-    public Iterator wordHashes(String startHash, boolean rot) {
+    public Iterator wordContainers(String startHash, boolean rot) {
+        // returns an iteration of indexContainers
         try {
-            return wordHashes(startHash, RL_WORDFILES, rot);
+            return wordContainers(startHash, RL_WORDFILES, rot);
         } catch (IOException e) {
             return new HashSet().iterator();
         }
     }
     
-    public Iterator wordHashes(String startHash, int resourceLevel, boolean rot) throws IOException {
-        if (rot) return new rotatingWordIterator(startHash, resourceLevel);
-        else return wordHashes(startHash, resourceLevel);
+    public Iterator wordContainers(String startHash, int resourceLevel, boolean rot) throws IOException {
+        if (rot) return new rotatingContainerIterator(startHash, resourceLevel);
+        else return wordContainers(startHash, resourceLevel);
     }
 
-    private Iterator wordHashes(String startWordHash, int resourceLevel) throws IOException {
+    private Iterator wordContainers(String startWordHash, int resourceLevel) throws IOException {
         if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) {
-            return ramCache.wordHashes(startWordHash, false);
+            return ramCache.wordContainers(startWordHash, false);
         }
-        /*
-        if (resourceLevel == plasmaWordIndex.RL_FILECACHE) {
-            
-        }
-        */
         if (resourceLevel == plasmaWordIndex.RL_ASSORTMENTS) {
             return new kelondroMergeIterator(
-                            ramCache.wordHashes(startWordHash, false),
-                            assortmentCluster.wordHashes(startWordHash, true, false),
-                            kelondroNaturalOrder.naturalOrder,
+                            ramCache.wordContainers(startWordHash, false),
+                            assortmentCluster.wordContainers(startWordHash, true, false),
+                            new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                             true);
         }
         if (resourceLevel == plasmaWordIndex.RL_WORDFILES) {
             return new kelondroMergeIterator(
                             new kelondroMergeIterator(
-                                     ramCache.wordHashes(startWordHash, false),
-                                     assortmentCluster.wordHashes(startWordHash, true, false),
-                                     kelondroNaturalOrder.naturalOrder,
+                                     ramCache.wordContainers(startWordHash, false),
+                                     assortmentCluster.wordContainers(startWordHash, true, false),
+                                     new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                                      true),
-                            backend.wordHashes(startWordHash, true, false),
-                            kelondroNaturalOrder.naturalOrder,
+                            backend.wordContainers(startWordHash, false),
+                            new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                             true);
         }
         return null;
     }
     
-    private class rotatingWordIterator implements Iterator {
+    private class rotatingContainerIterator implements Iterator {
         Iterator i;
         int resourceLevel;
 
-        public rotatingWordIterator(String startWordHash, int resourceLevel) throws IOException {
+        public rotatingContainerIterator(String startWordHash, int resourceLevel) throws IOException {
             this.resourceLevel = resourceLevel;
-            i = wordHashes(startWordHash, resourceLevel);
+            i = wordContainers(startWordHash, resourceLevel);
         }
 
         public void finalize() {
@@ -483,7 +482,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         public boolean hasNext() {
             if (i.hasNext()) return true;
             else try {
-                i = wordHashes("------------", resourceLevel);
+                i = wordContainers("------------", resourceLevel);
                 return i.hasNext();
             } catch (IOException e) {
                 return false;
@@ -497,7 +496,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         public void remove() {
             throw new java.lang.UnsupportedOperationException("rotatingWordIterator does not support remove");
         }
-    } // class rotatingWordIterator
+    } // class rotatingContainerIterator
 
     public Object migrateWords2Assortment(String wordhash) throws IOException {
         // returns the number of entries that had been added to the assortments
@@ -575,19 +574,17 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         
         public void run() {
             serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
-            String wordHash = "";
-            indexContainer wordContainer = null;
+            indexContainer container = null;
             indexURLEntry entry = null;
             URL url = null;
             HashSet urlHashs = new HashSet();
             try {
-                Iterator wordHashIterator = wordHashSet(startHash, plasmaWordIndex.RL_WORDFILES, false, 100).iterator();
-                while (wordHashIterator.hasNext() && run) {
+                Iterator indexContainerIterator = indexContainerSet(startHash, plasmaWordIndex.RL_WORDFILES, false, 100).iterator();
+                while (indexContainerIterator.hasNext() && run) {
                     waiter();
-                    wordHash = (String) wordHashIterator.next();
-                    wordContainer = getContainer(wordHash, true, -1);
-                    Iterator containerIterator = wordContainer.entries();
-                    wordHashNow = wordHash;
+                    container = (indexContainer) indexContainerIterator.next();
+                    Iterator containerIterator = container.entries();
+                    wordHashNow = container.getWordHash();
                     while (containerIterator.hasNext() && run) {
                         waiter();
                         entry = (indexURLEntry) containerIterator.next();
@@ -605,19 +602,19 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                     if (urlHashs.size() > 0) {
                         String[] urlArray;
                         urlArray = (String[]) urlHashs.toArray(new String[0]);
-                        int removed = removeEntries(wordHash, urlArray, true);
-                        serverLog.logFine("INDEXCLEANER", wordHash + ": " + removed + " of " + wordContainer.size() + " URL-entries deleted");
-                        lastWordHash = wordHash;
+                        int removed = removeEntries(container.getWordHash(), urlArray, true);
+                        serverLog.logFine("INDEXCLEANER", container.getWordHash() + ": " + removed + " of " + container.size() + " URL-entries deleted");
+                        lastWordHash = container.getWordHash();
                         lastDeletionCounter = urlHashs.size();
                         urlHashs.clear();
                     }
-                    if (!wordHashIterator.hasNext()) {
+                    if (!containerIterator.hasNext()) {
                         // We may not be finished yet, try to get the next chunk of wordHashes
-                        TreeSet wordHashes = wordHashSet(wordHash, plasmaWordIndex.RL_WORDFILES, false, 100);
-                        wordHashIterator = wordHashes.iterator();
+                        TreeSet containers = indexContainerSet(container.getWordHash(), plasmaWordIndex.RL_WORDFILES, false, 100);
+                        indexContainerIterator = containers.iterator();
                         // Make sure we don't get the same wordhash twice, but don't skip a word
-                        if ((wordHashIterator.hasNext())&&(!wordHash.equals(wordHashIterator.next()))) {
-                            wordHashIterator = wordHashes.iterator();
+                        if ((indexContainerIterator.hasNext())&&(!container.getWordHash().equals(((indexContainer) indexContainerIterator).getWordHash()))) {
+                            indexContainerIterator = containers.iterator();
                         }
                     }
                 }
@@ -675,9 +672,9 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         
         plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, 1000, new serverLog("TESTAPP"));
         try {
-            Iterator iter = index.wordHashes("5A8yhZMh_Kmv", plasmaWordIndex.RL_WORDFILES, true);
-            while (iter.hasNext()) {
-                System.out.println("File: " + (String) iter.next());
+            Iterator containerIter = index.wordContainers("5A8yhZMh_Kmv", plasmaWordIndex.RL_WORDFILES, true);
+            while (containerIter.hasNext()) {
+                System.out.println("File: " + (indexContainer) containerIter.next());
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -186,25 +186,25 @@ public class plasmaDHTChunk {
     private int selectTransferContainersResource(String hash, int resourceLevel, int maxcount) {
         // the hash is a start hash from where the indexes are picked
         ArrayList tmpContainers = new ArrayList(maxcount);
-        String nexthash = "";
         try {
-            Iterator wordHashIterator = wordIndex.wordHashSet(hash, resourceLevel, true, maxcount).iterator();
-            indexContainer indexContainer;
+            Iterator indexContainerIterator = wordIndex.indexContainerSet(hash, resourceLevel, true, maxcount).iterator();
+            indexContainer container;
             Iterator urlIter;
             indexURLEntry indexEntry;
             plasmaCrawlLURL.Entry lurl;
             int refcount = 0;
-
+            int wholesize;
+            
             urlCache = new HashMap();
             double maximumDistance = ((double) peerRedundancy * 2) / ((double) yacyCore.seedDB.sizeConnected());
             
-            while ((maxcount > refcount) && (wordHashIterator.hasNext()) && ((nexthash = (String) wordHashIterator.next()) != null) && (nexthash.trim().length() > 0)
-                            && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(nexthash, ((indexTreeMapContainer) tmpContainers.get(0)).getWordHash()) < maximumDistance))) {
+            while ((maxcount > refcount) && (indexContainerIterator.hasNext()) && ((container = (indexContainer) indexContainerIterator.next()) != null) && (container.size() > 0)
+                            && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(container.getWordHash(), ((indexTreeMapContainer) tmpContainers.get(0)).getWordHash()) < maximumDistance))) {
                 // make an on-the-fly entity and insert values
-                indexContainer = wordIndex.getContainer(nexthash, true, 10000);
                 int notBoundCounter = 0;
                 try {
-                    urlIter = indexContainer.entries();
+                    wholesize = container.size();
+                    urlIter = container.entries();
                     // iterate over indexes to fetch url entries and store them in the urlCache
                     while ((urlIter.hasNext()) && (maxcount > refcount)) {
                         indexEntry = (indexURLEntry) urlIter.next();
@@ -213,7 +213,7 @@ public class plasmaDHTChunk {
                             if ((lurl == null) || (lurl.url() == null)) {
                                 notBoundCounter++;
                                 urlIter.remove();
-                                wordIndex.removeEntries(nexthash, new String[] { indexEntry.urlHash() }, true);
+                                wordIndex.removeEntries(container.getWordHash(), new String[] { indexEntry.urlHash() }, true);
                             } else {
                                 urlCache.put(indexEntry.urlHash(), lurl);
                                 refcount++;
@@ -221,7 +221,7 @@ public class plasmaDHTChunk {
                         } catch (IOException e) {
                             notBoundCounter++;
                             urlIter.remove();
-                            wordIndex.removeEntries(nexthash, new String[] { indexEntry.urlHash() }, true);
+                            wordIndex.removeEntries(container.getWordHash(), new String[] { indexEntry.urlHash() }, true);
                         }
                     }
 
@@ -232,11 +232,11 @@ public class plasmaDHTChunk {
                     }
 
                     // use whats left
-                    log.logFine("Selected partial index (" + indexContainer.size() + " from " + wordIndex.indexSize(nexthash) + " URLs, " + notBoundCounter + " not bound) for word " + indexContainer.getWordHash());
-                    tmpContainers.add(indexContainer);
+                    log.logFine("Selected partial index (" + container.size() + " from " + wholesize + " URLs, " + notBoundCounter + " not bound) for word " + container.getWordHash());
+                    tmpContainers.add(container);
                 } catch (kelondroException e) {
-                    log.logSevere("plasmaWordIndexDistribution/2: deleted DB for word " + nexthash, e);
-                    wordIndex.deleteContainer(nexthash);
+                    log.logSevere("plasmaWordIndexDistribution/2: deleted DB for word " + container.getWordHash(), e);
+                    wordIndex.deleteContainer(container.getWordHash());
                 }
             }
             // create result

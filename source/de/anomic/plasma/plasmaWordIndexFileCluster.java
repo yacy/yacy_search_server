@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
@@ -76,12 +77,18 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
     }
     
     public Iterator wordHashes(String startHash, boolean rot) {
+        // outdated method: to be replaced by wordContainers
         return wordHashes(startHash, true, rot);
     }
     
     public Iterator wordHashes(String startHash, boolean up, boolean rot) {
         if (rot) throw new UnsupportedOperationException("no rot allowed");
         return new iterateFiles(startHash, up);
+    }
+    
+    public Iterator wordContainers(String startHash, boolean rot) {
+        // wordContainers is not supported ** FIXME **
+        return new HashSet().iterator();
     }
     
     public class iterateFiles implements Iterator {
