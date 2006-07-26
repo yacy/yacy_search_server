@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
@@ -35,6 +36,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import de.anomic.htmlFilter.htmlFilterAbstractTransformer;
+import de.anomic.htmlFilter.htmlFilterContentTransformer;
+import de.anomic.server.serverAbstractSwitch;
+import de.anomic.server.logging.serverLog;
 
 public class gettext{
     public static ArrayList createGettextRecursive(File sourceDir, String extensions, String notdir, File oldgettextfile) throws FileNotFoundException{
@@ -121,7 +127,10 @@ public class gettext{
         while(it.hasNext()){
             try {
                 filename=(String)it.next();
-                tmp=getGettextSource(new File(filename), oldgettext);
+                //TODO: better possibility to switch the behaviour
+                //tmp=getGettextSource(new File(filename), oldgettext);
+                tmp=getGettextSourceFromHTML(new File(filename), oldgettext);
+                serverLog.logFinest("Gettext", "Extracting Strings from: "+filename);
             } catch (FileNotFoundException e) {
                 System.out.println("File \""+filename+"\" not found.");
             }
@@ -139,10 +148,27 @@ public class gettext{
         return getGettextSource(inputfile, new HashMap());
     }
     public static ArrayList getGettextSource(File inputfile, Map oldgettextmap) throws FileNotFoundException{
+        ArrayList strings=getGettextItems(inputfile);
+        return getGettextSource(inputfile, oldgettextmap, strings);
+    }
+    public static ArrayList getGettextSourceFromHTML(File inputfile, Map oldgettextmap) throws FileNotFoundException{
+        htmlFilterContentTransformer transformer=new htmlFilterContentTransformer();
+        BufferedReader br=new BufferedReader(new FileReader(inputfile));
+        StringBuffer content=new StringBuffer();
+        String line="";
+        try {
+            while((line=br.readLine())!=null){
+                content.append(line).append("\n");
+            }
+        } catch (IOException e) {}
+        ArrayList strings = transformer.getStrings(content.toString().getBytes());
+        return getGettextSource(inputfile, oldgettextmap, strings);
+    }
+    public static ArrayList getGettextSource(File inputfile, Map oldgettextmap, ArrayList strings) throws FileNotFoundException{
         if(oldgettextmap==null)
             oldgettextmap=new HashMap();
         
-        ArrayList strings=getGettextItems(inputfile);
+        
         ArrayList list=new ArrayList();
         Iterator it=strings.iterator();
         if(strings.isEmpty())

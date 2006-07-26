@@ -136,6 +136,28 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         return false;
     }
 
+    public ArrayList getStrings(byte[] text){
+        ArrayList result=new ArrayList();
+        
+        serverByteBuffer sbb = new serverByteBuffer(text);
+        serverByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
+        //sbb = new serverByteBuffer();
+        for (int i = 0; i < sbbs.length; i++) {
+            if (sbbs[i].isWhitespace(true)) {
+                //sbb.append(sbbs[i]);
+            } else if ((sbbs[i].byteAt(0) == httpTemplate.hash) ||
+                       (sbbs[i].startsWith(httpTemplate.dpdpa))) {
+                // this is a template or a part of a template
+                //sbb.append(sbbs[i]);
+            } else {
+                // this is a text fragment, generate gettext quotation
+                int ws = sbbs[i].whitespaceStart(true);
+                int we = sbbs[i].whitespaceEnd(true);
+                result.add(new String(sbbs[i].getBytes(ws, we)));
+            }
+        }
+        return result;
+    }
     public byte[] transformText(byte[] text) {
         if (gettext) {
             serverByteBuffer sbb = new serverByteBuffer(text);
