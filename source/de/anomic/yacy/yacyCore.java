@@ -570,28 +570,6 @@ public class yacyCore {
                 return newSeeds;
             }
 
-//            // wait
-//            try {
-//                if (i == 0) Thread.currentThread().sleep(2000); // after the first time wait some seconds
-//                Thread.currentThread().sleep(1000 + 500 * v.size()); // wait a while
-//            } catch (InterruptedException e) {}
-//
-//            // check all threads
-//            for (int j = 0; j < v.size(); j++) {
-//                t = (publishThread) v.elementAt(j);
-//                added = t.added;
-//                if (!(t.isAlive())) {
-//                    //log.logDebug("PEER " + seeds[j].get(yacySeed.NAME, "") + " request terminated"); // debug
-//                    if (added >= 0) {
-//                        // success! we have published our peer to a senior peer
-//                        // update latest news from the other peer
-//                        //log.logInfo("publish: handshaked " + t.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + t.seed.getName() + "' at " + t.seed.getAddress());
-//                        peerActions.saveMySeed();
-//                        return added;
-//                    }
-//                }
-//            }
-
             // if we have an address, we do nothing
             if (seedDB.mySeed.isProper() == null && !force) { return 0; }
 
