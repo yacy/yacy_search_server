@@ -53,6 +53,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -185,7 +186,9 @@ public class IndexControl_p {
                     switchboard.urlPool.loadedURL.remove(urlx[i]);
                 }
             }
-            switchboard.wordIndex.removeEntries(keyhash, urlx, true);
+            Set urlHashes = new HashSet();
+            for (int i = 0; i < urlx.length; i++) urlHashes.add(urlx[i]);
+            switchboard.wordIndex.removeEntries(keyhash, urlHashes, true);
             // this shall lead to a presentation of the list; so handle that the remaining program
             // thinks that it was called for a list presentation
             post.remove("keyhashdelete");

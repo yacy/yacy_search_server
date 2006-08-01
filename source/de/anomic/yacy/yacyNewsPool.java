@@ -142,7 +142,7 @@ public class yacyNewsPool {
 
         // check consistency
         if (record.id() == null) return;
-        if (record.id().length() != yacyNewsRecord.idLength()) return;
+        if (record.id().length() != yacyNewsRecord.idLength) return;
         if (record.category() == null) return;
         if (!(categories.contains(record.category()))) return;
         if (record.created().getTime() == 0) return;

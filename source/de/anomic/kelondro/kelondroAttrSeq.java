@@ -249,10 +249,9 @@ public class kelondroAttrSeq {
             if (p < 0) return;
             String pivot = structure.substring(0, p);
             structure = structure.substring(p + 5);
-            Object[] a = atom(pivot);
-            if (a == null) return;
-            pivot_name = (String) a[0];
-            pivot_len = ((Integer) a[1]).intValue();
+            kelondroColumn a = new kelondroColumn(pivot);
+            pivot_name = a.nickname();
+            pivot_len = a.cellwidth();
             
             // parse property part definition:
             p = structure.indexOf(",'|'");
@@ -262,7 +261,7 @@ public class kelondroAttrSeq {
             String seqs = structure.substring(p + 5);
             StringTokenizer st = new StringTokenizer(attr, ",");
             while (st.hasMoreTokens()) {
-                a = atom(st.nextToken());
+                a = new kelondroColumn(st.nextToken());
                 if (a == null) break;
                 l.add(a);
             }
@@ -271,9 +270,9 @@ public class kelondroAttrSeq {
             prop_pos = new int[l.size()];
             p = 0;
             for (int i = 0; i < l.size(); i++) {
-                a = (Object[]) l.get(i);
-                prop_names[i] = (String) a[0];
-                prop_len[i] = ((Integer) a[1]).intValue();
+                a = (kelondroColumn) l.get(i);
+                prop_names[i] = a.nickname();
+                prop_len[i] = a.cellwidth();
                 prop_pos[i] = p;
                 p += prop_len[i];
             }
@@ -283,7 +282,7 @@ public class kelondroAttrSeq {
             l = new ArrayList();
             st = new StringTokenizer(seqs, ",");
             while (st.hasMoreTokens()) {
-                a = atom(st.nextToken());
+                a = new kelondroColumn(st.nextToken());
                 if (a == null) break;
                 l.add(a);
             }
@@ -292,32 +291,14 @@ public class kelondroAttrSeq {
             seq_pos = new int[l.size()];
             p = 0;
             for (int i = 0; i < l.size(); i++) {
-                a = (Object[]) l.get(i);
-                seq_names[i] = (String) a[0];
-                seq_len[i] = ((Integer) a[1]).intValue();
+                a = (kelondroColumn) l.get(i);
+                seq_names[i] = a.nickname();
+                seq_len[i] = a.cellwidth();
                 seq_pos[i] = p;
                 p += seq_len[i];
             }
         }
-        
-        private Object[] atom(String a) {
-            if (a.startsWith("<")) {
-                a = a.substring(1);
-            } else return null;
-            if (a.endsWith(">")) {
-                a = a.substring(0, a.length() - 1);
-            } else return null;
-            int p = a.indexOf('-');
-            if (p < 0) return null;
-            String atomname = a.substring(0, p);
-            try {
-                int x = Integer.parseInt(a.substring(p + 1));
-                return new Object[]{atomname, new Integer(x)};
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-        
+
         public String toString() {
             StringBuffer sb = new StringBuffer(100);
             sb.append('<'); sb.append(pivot_name); sb.append('-'); sb.append(Integer.toString(pivot_len)); sb.append(">,'=',");

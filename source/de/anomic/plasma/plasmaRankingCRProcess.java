@@ -221,7 +221,7 @@ public class plasmaRankingCRProcess {
         int count = 0;
         int size = cr.size();
         long start = System.currentTimeMillis();
-	long l;
+        long l;
         final Iterator i = cr.keys();
         String referee, anchor, anchorDom;
         kelondroAttrSeq.Entry cr_entry, rci_entry;

@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroFixedWidthArray;
@@ -274,10 +275,55 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     }
 
     public Iterator wordContainers(String startWordHash, boolean rot) {
-        if (rot) throw new UnsupportedOperationException("plasmaWordIndexCache cannot rotate wordContainers");
-        return wCache.tailMap(startWordHash).values().iterator(); // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
+        // we return an iterator object that creates top-level-clones of the indexContainers
+        // in the cache, so that manipulations of the iterated objects do not change
+        // objects in the cache.
+        return new wordContainerIterator(startWordHash, rot);
     }
 
+    public class wordContainerIterator implements Iterator {
+
+        // this class exists, because the wCache cannot be iterated with rotation
+        // and because every indeContainer Object that is iterated must be returned as top-level-clone
+        // so this class simulates wCache.tailMap(startWordHash).values().iterator()
+        // plus the mentioned features
+        
+        private boolean rot;
+        private Iterator iterator;
+        private String startHash;
+        
+        public wordContainerIterator(String startWordHash, boolean rot) {
+            this.rot = rot;
+            this.startHash = startWordHash;
+            this.iterator = wCache.tailMap(startWordHash).values().iterator();
+            // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
+        }
+        
+        public boolean hasNext() {
+            if (rot) return true;
+            return iterator.hasNext();
+        }
+
+        public Object next() {
+            if (iterator.hasNext()) {
+                return iterator.next();
+            } else {
+                // rotation iteration
+                if (rot) {
+                    iterator = wCache.tailMap(startHash).values().iterator();
+                    return iterator.next();
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        public void remove() {
+            iterator.remove();
+        }
+        
+    }
+    
     public void shiftK2W() {
         // find entries in kCache that are too old for that place and shift them to the wCache
         long time;
@@ -355,8 +401,19 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         }
     }
 
-    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
-        if (urlHashes.length == 0) return 0;
+    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+        synchronized (wCache) {
+            indexTreeMapContainer c = (indexTreeMapContainer) deleteContainer(wordHash);
+            if (c != null) {
+                if (c.removeEntry(wordHash, urlHash, deleteComplete)) return true;
+                this.addEntries(c, System.currentTimeMillis(), false);
+            }
+        }
+        return false;
+    }
+    
+    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
+        if (urlHashes.size() == 0) return 0;
         int count = 0;
         synchronized (wCache) {
             indexTreeMapContainer c = (indexTreeMapContainer) deleteContainer(wordHash);

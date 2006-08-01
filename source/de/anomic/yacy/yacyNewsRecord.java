@@ -44,6 +44,7 @@
 
 package de.anomic.yacy;
 
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 
@@ -54,6 +55,7 @@ public class yacyNewsRecord {
 
     public static final int maxNewsRecordLength  = 512;
     public static final int categoryStringLength = 8;
+    public static final int idLength = yacyCore.universalDateShortPattern.length() + yacySeedDB.commonHashLength;
 
     private String originator;  // hash of originating peer
     private Date   created;     // Date when news was created by originator
@@ -62,6 +64,20 @@ public class yacyNewsRecord {
     private int    distributed; // counter that counts number of distributions of this news record
     private Map    attributes;  // elemets of the news for a special category
 
+    public static final int attributesMaxLength = maxNewsRecordLength
+                                                  - idLength
+                                                  - categoryStringLength
+                                                  - yacyCore.universalDateShortPattern.length()
+                                                  - 2;
+    
+    public static final kelondroRow rowdef = new kelondroRow(
+            "String idx-" + idLength + " \"id = created + originator\"," +
+            "String cat-" + categoryStringLength + "," +
+            "String rec-" + yacyCore.universalDateShortPattern.length() + "," +
+            "short  dis-2 {b64e}," +
+            "String att-" + attributesMaxLength
+    );
+    
     public yacyNewsRecord(String newsString) {
         this.attributes = serverCodings.string2map(newsString);
         this.received = (attributes.containsKey("rec")) ? yacyCore.parseUniversalDate((String) attributes.get("rec"), serverDate.UTCDiffString()) : new Date();
@@ -116,10 +132,6 @@ public class yacyNewsRecord {
 
     public String id() {
         return yacyCore.universalDateShortString(created) + originator;
-    }
-
-    public static int idLength() {
-        return yacyCore.universalDateShortPattern.length() + yacySeedDB.commonHashLength;
     }
 
     public String originator() {

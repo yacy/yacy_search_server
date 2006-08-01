@@ -65,6 +65,12 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
         container = new TreeMap(ordering); // a urlhash/plasmaWordIndexEntry - relation
     }
     
+    public indexContainer topLevelClone() {
+        indexContainer newContainer = new indexTreeMapContainer(this.wordHash, this.ordering, this.order_column);
+        newContainer.add(this, -1);
+        return newContainer;
+    }
+    
     public void setWordHash(String newWordHash) {
         // this is used to replicate a container for different word indexes during global search
         this.wordHash = newWordHash;
@@ -158,15 +164,21 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
         return (indexURLEntry) container.remove(urlHash);
     }
 
-    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
+    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+        if (!wordHash.equals(this.wordHash)) return false;
+        return remove(urlHash) != null;
+    }
+
+    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
         if (!wordHash.equals(this.wordHash)) return 0;
         int count = 0;
-        for (int i = 0; i < urlHashes.length; i++) count += (remove(urlHashes[i]) == null) ? 0 : 1;
+        Iterator i = urlHashes.iterator();
+        while (i.hasNext()) count += (remove((String) i.next()) == null) ? 0 : 1;
         return count;
     }
 
     public Iterator entries() {
-        // returns an iterator of plasmaWordIndexEntry objects
+        // returns an iterator of indexEntry objects
         return container.values().iterator();
     }
 
@@ -301,6 +313,10 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
             }
         }
         return conj;
+    }
+
+    public Set urlHashes() {
+        return container.keySet();
     }
 
 }

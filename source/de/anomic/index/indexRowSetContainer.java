@@ -28,6 +28,7 @@ package de.anomic.index;
 
 import java.lang.reflect.Method;
 import java.util.Iterator;
+import java.util.Set;
 
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
@@ -40,6 +41,14 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
         super(rowdef);
     }
 
+    public indexContainer topLevelClone() {
+        indexContainer newContainer = new indexRowSetContainer(this.rowdef);
+        newContainer.setWordHash(this.wordHash);
+        newContainer.setOrdering(this.sortOrder, this.sortColumn);
+        newContainer.add(this, -1);
+        return newContainer;
+    }
+    
     public void setWordHash(String newWordHash) {
         this.wordHash = newWordHash;
     }
@@ -93,7 +102,12 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
         return null;
     }
 
-    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
+    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -124,6 +138,11 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
         indexContainer c = (indexContainer) a;
         c.add((indexContainer) b, -1);
         return c;
+    }
+
+    public Set urlHashes() {
+        // TODO Auto-generated method stub
+        return null;
     }
     
 }

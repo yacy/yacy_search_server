@@ -44,6 +44,7 @@ package de.anomic.plasma;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
@@ -211,17 +212,19 @@ public class plasmaDHTChunk {
                         try {
                             lurl = lurls.getEntry(indexEntry.urlHash(), indexEntry);
                             if ((lurl == null) || (lurl.url() == null)) {
+                                yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + indexEntry.urlHash() + "' for word hash " + container.getWordHash());
                                 notBoundCounter++;
                                 urlIter.remove();
-                                wordIndex.removeEntries(container.getWordHash(), new String[] { indexEntry.urlHash() }, true);
+                                wordIndex.removeEntry(container.getWordHash(), indexEntry.urlHash(), true);
                             } else {
                                 urlCache.put(indexEntry.urlHash(), lurl);
+                                yacyCore.log.logFine("DEBUG selectTransferContainersResource: added url hash '" + indexEntry.urlHash() + "' to urlCache for word hash " + container.getWordHash());
                                 refcount++;
                             }
                         } catch (IOException e) {
                             notBoundCounter++;
                             urlIter.remove();
-                            wordIndex.removeEntries(container.getWordHash(), new String[] { indexEntry.urlHash() }, true);
+                            wordIndex.removeEntry(container.getWordHash(), indexEntry.urlHash(), true);
                         }
                     }
 
@@ -270,16 +273,17 @@ public class plasmaDHTChunk {
     public int deleteTransferIndexes() {
         Iterator urlIter;
         indexURLEntry indexEntry;
-        String[] urlHashes;
+        HashSet urlHashes;
         int count = 0;
+        
         for (int i = 0; i < this.indexContainers.length; i++) {
             // delete entries separately
-            int c = 0;
-            urlHashes = new String[this.indexContainers[i].size()];
+            int c = this.indexContainers[i].size();
+            urlHashes = new HashSet(this.indexContainers[i].size());
             urlIter = this.indexContainers[i].entries();
             while (urlIter.hasNext()) {
                 indexEntry = (indexURLEntry) urlIter.next();
-                urlHashes[c++] = indexEntry.urlHash();
+                urlHashes.add(indexEntry.urlHash());
             }
             count += wordIndex.removeEntries(this.indexContainers[i].getWordHash(), urlHashes, true);
             log.logFine("Deleted partial index (" + c + " URLs) for word " + this.indexContainers[i].getWordHash() + "; " + this.wordIndex.indexSize(indexContainers[i].getWordHash()) + " entries left");

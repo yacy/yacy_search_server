@@ -29,10 +29,13 @@
 package de.anomic.index;
 
 import java.util.Iterator;
+import java.util.Set;
 
 import de.anomic.kelondro.kelondroOrder;
 
 public interface indexContainer {
+    
+    public indexContainer topLevelClone();
     
     public void clear();
     public int size();
@@ -50,17 +53,17 @@ public interface indexContainer {
     public int add(indexEntry[] entries, long updateTime);
     public int add(indexContainer c, long maxTime);
 
+    public Set urlHashes();
     public boolean contains(String urlHash) ;
     public indexEntry get(String urlHash);
     public indexEntry[] getEntryArray() ;
 
     public indexEntry remove(String urlHash);
-    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete);
+    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete);
+    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete);
 
-    public Iterator entries();
-
+    public Iterator entries(); // returns an iterator of indexEntry objects
     public String toString();
-    
     public int hashCode();
 
     //public void joinConstructive(indexContainer c, long time, int maxDistance);

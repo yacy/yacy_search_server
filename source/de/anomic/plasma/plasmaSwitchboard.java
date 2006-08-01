@@ -2007,12 +2007,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // returns number of deletions
         Iterator iter = words.iterator();
         String word;
-        final String[] urlEntries = new String[] {urlhash};
         int count = 0;
         while (iter.hasNext()) {
             word = (String) iter.next();
             // delete the URL reference in this word index
-            count += wordIndex.removeEntries(indexEntryAttribute.word2hash(word), urlEntries, true);
+            if (wordIndex.removeEntry(indexEntryAttribute.word2hash(word), urlhash, true)) count++;
         }
         return count;
     }
@@ -2022,13 +2021,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // returns number of deletions
         Map.Entry entry;
         String word;
-        final String[] urlEntries = new String[] {urlhash};
         int count = 0;
         while (wordStatPropIterator.hasNext()) {
             entry = (Map.Entry) wordStatPropIterator.next();
             word = (String) entry.getKey();
             // delete the URL reference in this word index
-            count += wordIndex.removeEntries(indexEntryAttribute.word2hash(word), urlEntries, true);
+            if (wordIndex.removeEntry(indexEntryAttribute.word2hash(word), urlhash, true)) count++;
         }
         return count;
     }

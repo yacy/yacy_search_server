@@ -487,7 +487,7 @@ public class dir {
             Map.Entry entry;
             while (words.hasNext()) {
                 entry = (Map.Entry) words.next();
-                switchboard.wordIndex.removeEntries(indexEntryAttribute.word2hash((String) entry.getKey()), new String[] {urlhash}, true);
+                switchboard.wordIndex.removeEntry(indexEntryAttribute.word2hash((String) entry.getKey()), urlhash, true);
             }
             switchboard.urlPool.loadedURL.remove(urlhash);
         } catch (Exception e) {

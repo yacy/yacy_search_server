@@ -29,6 +29,7 @@ package de.anomic.index;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Set;
 
 import de.anomic.kelondro.kelondroCollectionIndex;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -106,7 +107,12 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         return idx;
     }
 
-    public int removeEntries(String wordHash, String[] referenceHashes, boolean deleteComplete) {
+    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
         // TODO Auto-generated method stub
         return 0;
     }
@@ -120,7 +126,5 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         // TODO Auto-generated method stub
         
     }
-
-
-
+    
 }

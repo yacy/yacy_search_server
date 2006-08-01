@@ -28,12 +28,17 @@
 package de.anomic.kelondro;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 public class kelondroRow {
    
     private   kelondroColumn[] row;
     protected int[]            colstart;
     private   int              objectsize;
+    private   Map              nickref = null;
     
     public kelondroRow(kelondroColumn[] row) {
         this.row = row;
@@ -55,6 +60,56 @@ public class kelondroRow {
             this.colstart[i] = this.objectsize;
             this.objectsize += this.row[i].cellwidth();
         }
+    }
+    
+    public kelondroRow(String structure) {
+        // define row with row syntax
+        // example:
+        //# Structure=<pivot-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>
+
+        // parse a structure string
+        kelondroColumn pivot_col = null;
+
+        // parse pivot definition:
+        int p = structure.indexOf(",'='");
+        if (p >= 0) {
+            String pivot = structure.substring(0, p);
+            structure = structure.substring(p + 5);
+            pivot_col = new kelondroColumn(pivot);
+        }
+        
+        // parse property part definition:
+        p = structure.indexOf(",'|'");
+        if (p < 0) p = structure.length();
+        ArrayList l = new ArrayList();
+        String attr = structure.substring(0, p);
+        StringTokenizer st = new StringTokenizer(attr, ",");
+        while (st.hasMoreTokens()) {
+            l.add(new kelondroColumn(st.nextToken()));
+        }
+        
+        // define columns
+        int piv_offset = (pivot_col == null) ? 0 : 1;
+        this.row = new kelondroColumn[l.size() + piv_offset];
+        this.colstart = new int[row.length];
+        this.objectsize = 0;
+        if (pivot_col != null) {
+            this.colstart[0] = 0;
+            this.row[0] = pivot_col;
+            this.objectsize += this.row[0].cellwidth();
+        }
+        for (int i = 0; i < l.size(); i++) {
+            this.colstart[i + piv_offset] = this.objectsize;
+            this.row[i + piv_offset] = (kelondroColumn) l.get(i);
+            this.objectsize += this.row[i + piv_offset].cellwidth();
+        }
+
+    }
+    
+    private void genNickRef() {
+        if (nickref != null) return;
+        nickref = new HashMap(row.length);
+        for (int i = 0; i < row.length; i++) nickref.put(row[i].nickname(), new Object[]{row[i], new Integer(colstart[i])});
     }
     
     public int columns() {
@@ -94,6 +149,11 @@ public class kelondroRow {
         return new Entry(cells);
     }
     
+    public Entry newEntry(String external) {
+        if (external == null) return null;
+        return new Entry(external);
+    }
+    
     public class Entry {
 
         private byte[] rowinstance;
@@ -125,6 +185,25 @@ public class kelondroRow {
             for (int i = 0; i < objectsize; i++) this.rowinstance[i] = 0;
             for (int i = 0; i < cols.length; i++) {
                 if (cols[i] != null) System.arraycopy(cols[i], 0, rowinstance, colstart[i], Math.min(cols[i].length, row[i].cellwidth()));
+            }
+        }
+        
+        public Entry(String external) {
+            // parse external form
+            if (external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
+            String[] elts = external.split(",");
+            if (nickref == null) genNickRef();
+            String nick;
+            int p;
+            Object[] f;
+            rowinstance = new byte[objectsize];
+            for (int i = 0; i < elts.length; i++) {
+                p = elts[i].indexOf('=');
+                if (p > 0) {
+                    nick = elts[i].substring(0, p).trim();
+                    f = (Object[]) nickref.get(nick);
+                    System.arraycopy(elts[i].substring(p + 1).trim().getBytes(), 0, rowinstance, ((Integer) f[1]).intValue(), ((kelondroColumn) f[0]).cellwidth());
+                }
             }
         }
         
@@ -183,13 +262,8 @@ public class kelondroRow {
             case kelondroColumn.encoder_b256:
                 setColLongB256(column, cell);
                 break;
-            case kelondroColumn.encoder_string:
-                setCol(column, Long.toString(cell).getBytes());
-                break;
             case kelondroColumn.encoder_bytes:
                 throw new kelondroException("ROW", "setColLong of celltype bytes not applicable");
-            case kelondroColumn.encoder_char:
-                throw new kelondroException("ROW", "setColLong of celltype char not applicable");
             }
         }
         
@@ -229,12 +303,8 @@ public class kelondroRow {
                 return getColLongB64E(column);
             case kelondroColumn.encoder_b256:
                 return getColLongB256(column);
-            case kelondroColumn.encoder_string:
-                return Long.parseLong(getColString(column, null));
             case kelondroColumn.encoder_bytes:
                 throw new kelondroException("ROW", "getColLong of celltype bytes not applicable");
-            case kelondroColumn.encoder_char:
-                throw new kelondroException("ROW", "getColLong of celltype char not applicable");
             }
             throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
         }
@@ -258,7 +328,8 @@ public class kelondroRow {
             System.arraycopy(rowinstance, colstart[column], c, 0, row[column].cellwidth());
             return c;
         }
-        
+
+        /*
         public byte[] toEncodedBytesForm() {
             byte[] b = new byte[objectsize];
             int encoder, cellwidth;
@@ -287,16 +358,15 @@ public class kelondroRow {
                         continue;
                     }
                     throw new kelondroException("ROW", "toEncodedForm of celltype cardinal has no encoder (" + encoder + ")");
-                case kelondroColumn.celltype_real:
-                    throw new kelondroException("ROW", "toEncodedForm of celltype real not yet implemented");
                 }
             }
             return b;
          }
+        */
         
-        public String toPropertyForm() {
+        public String toPropertyForm(boolean includeBraces) {
             StringBuffer sb = new StringBuffer();
-            sb.append("{");
+            if (includeBraces) sb.append("{");
             int encoder, cellwidth;
             for (int i = 0; i < row.length; i++) {
                 encoder = row[i].encoder();
@@ -328,12 +398,10 @@ public class kelondroRow {
                         continue;
                     }
                     throw new kelondroException("ROW", "toEncodedForm of celltype cardinal has no encoder (" + encoder + ")");
-                case kelondroColumn.celltype_real:
-                    throw new kelondroException("ROW", "toEncodedForm of celltype real not yet implemented");
                 }
             }
             if (sb.charAt(sb.length() - 1) == ',') sb.deleteCharAt(sb.length() - 1); // remove ',' at end
-            sb.append("}");
+            if (includeBraces) sb.append("}");
             return sb.toString();
         }
         

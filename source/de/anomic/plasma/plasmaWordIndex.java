@@ -290,25 +290,28 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         long start = System.currentTimeMillis();
         
-        indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
         // get from cache
-        // We must not use the container from cache to store everything we find,
-        // as that container remains linked to in the cache and might be changed later
-        // while the returned container is still in use.
-        // e.g. indexTransfer might keep this container for minutes while
-        // several new pages could be added to the index, possibly with the same words that have
-        // been selected for transfer
-        container.add(ramCache.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime / 2), (maxTime < 0) ? -1 : maxTime / 2);
+        indexContainer container = ramCache.getContainer(wordHash, true, -1);
 
         // get from assortments
-        container.add(assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime / 2), (maxTime < 0) ? -1 : maxTime / 2);
-
+        if (container == null) {
+            container = assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime);
+        } else {
+            // We must not use the container from cache to store everything we find,
+            // as that container remains linked to in the cache and might be changed later
+            // while the returned container is still in use.
+            // create a clone from the container
+            container = container.topLevelClone();
+            // add containers from assortment cluster
+            container.add(assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime), -1);
+        }
+        
         // get from backend
         if (maxTime > 0) {
             maxTime = maxTime - (System.currentTimeMillis() - start);
             if (maxTime < 0) maxTime = 100;
         }
-        container.add(backend.getContainer(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime / 2), (maxTime < 0) ? -1 : maxTime / 2);
+        container.add(backend.getContainer(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime), -1);
         return container;
     }
 
@@ -374,25 +377,23 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         return c;
     }
     
-    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
-        int removed;
-        boolean addedEntryToRamCache = false;
+    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
         synchronized (this) {
-            removed = ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
-            if (removed == urlHashes.length) return removed;
-            indexContainer container = assortmentCluster.deleteContainer(wordHash, -1);
-            if (container != null) {
-                removed += container.removeEntries(wordHash, urlHashes, deleteComplete);
-                if (container.size() != 0) {
-                    ramCache.addEntries(container, System.currentTimeMillis(), false);
-                    addedEntryToRamCache = true;
-                }
-            }
-            if (removed != urlHashes.length) {
-                removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
-            }
+            if (ramCache.removeEntry(wordHash, urlHash, deleteComplete)) return true;
+            if (assortmentCluster.removeEntry(wordHash, urlHash, deleteComplete)) return true;
+            return backend.removeEntry(wordHash, urlHash, deleteComplete);
         }
-        if (addedEntryToRamCache) flushControl();
+    }
+    
+    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
+        int removed = 0;;
+        synchronized (this) {
+            removed += ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
+            if (removed == urlHashes.size()) return removed;
+            removed += assortmentCluster.removeEntries(wordHash, urlHashes, deleteComplete);
+            if (removed == urlHashes.size()) return removed;
+            removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
+        }
         return removed;
     }
     
@@ -604,9 +605,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                         }
                     }
                     if (urlHashs.size() > 0) {
-                        String[] urlArray;
-                        urlArray = (String[]) urlHashs.toArray(new String[0]);
-                        int removed = removeEntries(container.getWordHash(), urlArray, true);
+                        int removed = removeEntries(container.getWordHash(), urlHashs, true);
                         serverLog.logFine("INDEXCLEANER", container.getWordHash() + ": " + removed + " of " + container.size() + " URL-entries deleted");
                         lastWordHash = container.getWordHash();
                         lastDeletionCounter = urlHashs.size();

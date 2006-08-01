@@ -169,7 +169,7 @@ public class plasmaDHTFlush extends Thread {
                     
                     // selecting 500 words to transfer
                     this.status = "Running: Selecting chunk " + iteration;
-                    newDHTChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.sb.urlPool.loadedURL, this.chunkSize/3, this.chunkSize, this.startPointHash);
+                    newDHTChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.sb.urlPool.loadedURL, this.chunkSize/3*2, this.chunkSize, this.startPointHash);
                     
                     /* If we havn't selected a word chunk this could be because of
                      * a) no words are left in the index

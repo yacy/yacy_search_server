@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
@@ -256,14 +257,34 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
         return new indexTreeMapContainer(wordHash);
     }
 
-    public int removeEntries(String wordHash, String[] urlHashes, boolean deleteComplete) {
+    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+        // removes all given url hashes from a single word index. Returns number of deletions.
+        plasmaWordIndexFile pi = null;
+        boolean removed = false;
+        try {
+            pi = getEntity(wordHash, true, -1);
+            if (pi.removeEntry(urlHash, deleteComplete)) removed = true;
+            int size = pi.size();
+            pi.close(); pi = null;
+            // check if we can remove the index completely
+            if ((deleteComplete) && (size == 0)) deleteContainer(wordHash);
+            return removed;
+        } catch (IOException e) {
+            log.logSevere("plasmaWordIndexClassic.removeEntries: " + e.getMessage());
+            return false;
+        } finally {
+            if (pi != null) try{pi.close();}catch(Exception e){}
+        }
+    }
+    
+    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
         // removes all given url hashes from a single word index. Returns number of deletions.
         plasmaWordIndexFile pi = null;
         int count = 0;
         try {
             pi = getEntity(wordHash, true, -1);
-            for (int i = 0; i < urlHashes.length; i++)
-                if (pi.removeEntry(urlHashes[i], deleteComplete)) count++;
+            Iterator i = urlHashes.iterator();
+            while (i.hasNext()) if (pi.removeEntry((String) i.next(), deleteComplete)) count++;
             int size = pi.size();
             pi.close(); pi = null;
             // check if we can remove the index completely

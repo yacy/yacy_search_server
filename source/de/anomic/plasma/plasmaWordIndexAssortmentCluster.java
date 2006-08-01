@@ -50,9 +50,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexRowSetContainer;
@@ -243,6 +245,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         return record;
     }
 
+    /*
     public int removeEntries(String wordHash, String[] referenceHashes, boolean deleteComplete) {
         indexContainer c = deleteContainer(wordHash, -1);
         int b = c.size();
@@ -252,7 +255,48 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         }
         return b - c.size();
     }
-    
+    */
+
+    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+        indexContainer buffer, record = new indexTreeMapContainer(wordHash);
+        boolean found = false;
+        for (int i = 0; i < clusterCount; i++) {
+            buffer = assortments[i].remove(wordHash);
+            if ((buffer != null) && (buffer.remove(urlHash) != null)) found = true;
+            record.add(buffer, -1);
+            if (found) break;
+        }
+        // put back remaining
+        if (record.size() != 0) {
+            addEntries(record, record.updated(), false);
+        }
+        return found;
+    }
+
+    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
+        indexContainer buffer, record = new indexTreeMapContainer(wordHash);
+        int initialSize = urlHashes.size();
+        for (int i = 0; i < clusterCount; i++) {
+            buffer = assortments[i].remove(wordHash);
+            if (buffer != null) {
+                // sort out url hashes that shall be deleted
+                Iterator bi = buffer.entries();
+                indexEntry entry;
+                while (bi.hasNext()) {
+                    entry = (indexEntry) bi.next();
+                    if (urlHashes.remove(entry.urlHash())) bi.remove();
+                }
+                record.add(buffer, -1);
+            }
+            if (urlHashes.size() == 0) break;
+        }
+        // put back remaining
+        if (record.size() != 0) {
+            addEntries(record, record.updated(), false);
+        }
+        return initialSize - urlHashes.size();
+    }
+
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         // collect all records from all the assortments and return them
         indexContainer buffer, record = new indexTreeMapContainer(wordHash);

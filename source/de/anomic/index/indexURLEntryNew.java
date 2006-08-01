@@ -35,13 +35,13 @@ import de.anomic.plasma.plasmaWordIndex;
 public class indexURLEntryNew implements Cloneable, indexEntry {
 
     public static kelondroRow urlEntryRow = new kelondroRow(new kelondroColumn[]{
-            new kelondroColumn("h", kelondroColumn.celltype_string,    kelondroColumn.encoder_none, indexURL.urlHashLength, "urlhash"),
+            new kelondroColumn("h", kelondroColumn.celltype_string,    kelondroColumn.encoder_bytes, indexURL.urlHashLength, "urlhash"),
             new kelondroColumn("q", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, indexURL.urlQualityLength, "quality"),
             new kelondroColumn("a", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 3, "lastModified"),
             new kelondroColumn("c", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 2, "hitcount"),
-            new kelondroColumn("l", kelondroColumn.celltype_string,    kelondroColumn.encoder_none, indexURL.urlLanguageLength, "language"),
-            new kelondroColumn("d", kelondroColumn.celltype_binary,    kelondroColumn.encoder_none, 1, "doctype"),
-            new kelondroColumn("f", kelondroColumn.celltype_binary,    kelondroColumn.encoder_none, 1, "localflag"),
+            new kelondroColumn("l", kelondroColumn.celltype_string,    kelondroColumn.encoder_bytes, indexURL.urlLanguageLength, "language"),
+            new kelondroColumn("d", kelondroColumn.celltype_binary,    kelondroColumn.encoder_bytes, 1, "doctype"),
+            new kelondroColumn("f", kelondroColumn.celltype_binary,    kelondroColumn.encoder_bytes, 1, "localflag"),
             new kelondroColumn("t", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 2, "posintext"),
             new kelondroColumn("r", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 2, "posinphrase"),
             new kelondroColumn("o", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 2, "posofphrase"),
@@ -115,14 +115,8 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
     }
     
     public indexURLEntryNew(String external) {
-        
+        this.entry = urlEntryRow.newEntry(external);
     }
-    
-    /*
-    public indexURLEntryNew(kelondroRow.Entry entry) {
-        this.entry = entry;
-    }
-    */
     
     public indexURLEntryNew(byte[] row) {
         this.entry = urlEntryRow.newEntry(row);
@@ -141,7 +135,7 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
     }
 
    public String toPropertyForm() {
-        return entry.toPropertyForm();
+        return entry.toPropertyForm(true);
     }
 
     public Entry toKelondroEntry() {

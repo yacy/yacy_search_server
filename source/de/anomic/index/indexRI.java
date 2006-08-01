@@ -43,6 +43,7 @@
 package de.anomic.index;
 
 import java.util.Iterator;
+import java.util.Set;
 
 public interface indexRI {
     
@@ -55,7 +56,8 @@ public interface indexRI {
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime);
     public indexContainer deleteContainer(String wordHash);
     
-    public int removeEntries(String wordHash, String[] referenceHashes, boolean deleteComplete);
+    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete);
+    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete);
     public indexContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtCase);
     public indexContainer addEntries(indexContainer newEntries, long creationTime, boolean dhtCase);
 

@@ -77,8 +77,8 @@ public class yacyNewsQueue {
     }
     
     public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
-            new kelondroColumn("newsid", kelondroColumn.celltype_string, kelondroColumn.encoder_string, yacyNewsRecord.idLength(), "id = created + originator"),
-            new kelondroColumn("last touched", kelondroColumn.celltype_string, kelondroColumn.encoder_string, yacyCore.universalDateShortPattern.length(), "")
+            new kelondroColumn("newsid", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacyNewsRecord.idLength, "id = created + originator"),
+            new kelondroColumn("last touched", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacyCore.universalDateShortPattern.length(), "")
     });
 
     private static kelondroStack createStack(File path) {

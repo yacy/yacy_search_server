@@ -50,8 +50,12 @@ public class kelondroException extends java.lang.RuntimeException {
         super("unspecific-error");
     }
     
+    public kelondroException(String message) {
+        super(message);
+    }
+    
     public kelondroException(String database, String message) {
         super(message + " in db '" + database + "'");
     }
-    
+
 }
