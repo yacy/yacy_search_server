@@ -68,7 +68,7 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpc.response;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexURL;
-import de.anomic.index.indexURLEntryNew;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
@@ -523,7 +523,7 @@ public final class plasmaCrawlLURL extends indexURL {
                 this.wordCount = Integer.parseInt(prop.getProperty("wc", "0"));
                 this.snippet = prop.getProperty("snippet", "");
                 if (snippet.length() == 0) snippet = null; else snippet = crypt.simpleDecode(snippet, null);
-                this.word = (prop.containsKey("word")) ? new indexURLEntryNew(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word",""))) : null;
+                this.word = (prop.containsKey("word")) ? new indexURLEntry(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word",""))) : null;
                 this.stored = false;
                 //}
             } catch (Exception e) {

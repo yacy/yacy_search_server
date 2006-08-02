@@ -57,7 +57,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexTreeMapContainer;
-import de.anomic.index.indexURLEntryNew;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -488,7 +488,7 @@ public final class yacyClient {
                 final indexEntry entry;
                 if (urlEntry.word() == null) {
                     // the old way to define words
-                    entry = new indexURLEntryNew(
+                    entry = new indexURLEntry(
                                                      urlEntry.hash(),
                                                      urlLength, urlComps,
                                                      urlEntry.descr().length(),

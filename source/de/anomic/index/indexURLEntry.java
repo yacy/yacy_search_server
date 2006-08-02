@@ -32,7 +32,7 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.plasma.plasmaWordIndex;
 
-public class indexURLEntryNew implements Cloneable, indexEntry {
+public class indexURLEntry implements Cloneable, indexEntry {
 
     public static kelondroRow urlEntryRow = new kelondroRow(new kelondroColumn[]{
             new kelondroColumn("h", kelondroColumn.celltype_string,    kelondroColumn.encoder_bytes, indexURL.urlHashLength, "urlhash"),
@@ -67,7 +67,7 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
     
     private kelondroRow.Entry entry;
     
-    public indexURLEntryNew(String  urlHash,
+    public indexURLEntry(String  urlHash,
             int     urlLength,    // byte-length of complete URL
             int     urlComps,     // number of path components
             int     titleLength,  // length of description/length (longer are better?)
@@ -110,20 +110,20 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
         this.entry.setColLong(col_phrasecount, phrasecount);
     }
 
-    public indexURLEntryNew(String urlHash, String code) {
+    public indexURLEntry(String urlHash, String code) {
         // the code is the external form of the row minus the leading urlHash entry
         this.entry = urlEntryRow.newEntry((urlHash + code).getBytes());
     }
     
-    public indexURLEntryNew(String external) {
+    public indexURLEntry(String external) {
         this.entry = urlEntryRow.newEntry(external);
     }
     
-    public indexURLEntryNew(byte[] row) {
+    public indexURLEntry(byte[] row) {
         this.entry = urlEntryRow.newEntry(row);
     }
     
-    public indexURLEntryNew(kelondroRow.Entry rentry) {
+    public indexURLEntry(kelondroRow.Entry rentry) {
         // FIXME: see if cloning is necessary
         this.entry = rentry;
     }
@@ -131,7 +131,7 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
     public Object clone() {
         byte[] b = new byte[urlEntryRow.objectsize()];
         System.arraycopy(entry.bytes(), 0, b, 0, urlEntryRow.objectsize());
-        return new indexURLEntryNew(b);
+        return new indexURLEntry(b);
     }
     
     public static int encodedByteArrayFormLength(boolean includingHeader) {
@@ -206,7 +206,7 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
         return this.entry.getColByte(col_localflag) == indexEntryAttribute.LT_LOCAL;
     }
     
-    public static indexURLEntryNew combineDistance(indexURLEntryNew ie1, indexEntry ie2) {
+    public static indexURLEntry combineDistance(indexURLEntry ie1, indexEntry ie2) {
         // returns a modified entry of the first argument
         ie1.entry.setColLong(col_worddistance, ie1.worddistance() + ie2.worddistance() + Math.abs(ie1.posintext() - ie2.posintext()));
         ie1.entry.setColLong(col_posintext, Math.min(ie1.posintext(), ie2.posintext()));
@@ -224,7 +224,7 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
         return (int) this.entry.getColLong(col_worddistance);
     }
     
-    public static final void min(indexURLEntryNew t, indexEntry other) {
+    public static final void min(indexURLEntry t, indexEntry other) {
         if (t.hitcount() > other.hitcount()) t.entry.setColLong(col_hitcount, other.hitcount());
         if (t.wordcount() > other.wordcount()) t.entry.setColLong(col_wordcount, other.wordcount());
         if (t.phrasecount() > other.phrasecount()) t.entry.setColLong(col_phrasecount, other.phrasecount());
@@ -236,7 +236,7 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
         if (t.quality() > other.quality()) t.entry.setColLong(col_quality, other.quality());
     }
     
-    public static final void max(indexURLEntryNew t, indexEntry other) {
+    public static final void max(indexURLEntry t, indexEntry other) {
         if (t.hitcount() < other.hitcount()) t.entry.setColLong(col_hitcount, other.hitcount());
         if (t.wordcount() < other.wordcount()) t.entry.setColLong(col_wordcount, other.wordcount());
         if (t.phrasecount() < other.phrasecount()) t.entry.setColLong(col_phrasecount, other.phrasecount());
@@ -257,7 +257,7 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
         max(this, other);
     }
 
-    static void normalize(indexURLEntryNew t, indexEntry min, indexEntry max) {
+    static void normalize(indexURLEntry t, indexEntry min, indexEntry max) {
         t.entry.setColLong(col_hitcount     , (t.hitcount()     == 0) ? 0 : 1 + 255 * (t.hitcount()     - min.hitcount()    ) / (1 + max.hitcount()     - min.hitcount()));
         t.entry.setColLong(col_wordcount    , (t.wordcount()    == 0) ? 0 : 1 + 255 * (t.wordcount()    - min.wordcount()   ) / (1 + max.wordcount()    - min.wordcount()));
         t.entry.setColLong(col_phrasecount  , (t.phrasecount()  == 0) ? 0 : 1 + 255 * (t.phrasecount()  - min.phrasecount() ) / (1 + max.phrasecount()  - min.phrasecount()));
@@ -274,7 +274,7 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
     }
 
     public indexEntry generateNormalized(indexEntry min, indexEntry max) {
-        indexURLEntryNew e = (indexURLEntryNew) this.clone();
+        indexURLEntry e = (indexURLEntry) this.clone();
         e.normalize(min, max);
         return e;
     }

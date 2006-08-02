@@ -97,7 +97,7 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
     
     private boolean addi(indexEntry entry) {
         // returns true if the new entry was added, false if it already existed
-        indexEntry oldEntry = new indexURLEntryNew(this.put(entry.toKelondroEntry())); // FIXME: see if cloning is necessary
+        indexEntry oldEntry = new indexURLEntry(this.put(entry.toKelondroEntry())); // FIXME: see if cloning is necessary
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this container
             this.put(oldEntry.toKelondroEntry()); // put it back
             return false;

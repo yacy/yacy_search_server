@@ -67,7 +67,7 @@ import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexRowSetContainer;
 import de.anomic.index.indexTreeMapContainer;
-import de.anomic.index.indexURLEntryNew;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
@@ -263,7 +263,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
             wordHash = indexEntryAttribute.word2hash(word);
-            ientry = new indexURLEntryNew(urlHash,
+            ientry = new indexURLEntry(urlHash,
                                               urlLength, urlComps, (document == null) ? urlLength : document.longTitle.length(),
                                              wprop.count,
                                              condenser.RESULT_SIMI_WORDS,

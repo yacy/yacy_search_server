@@ -193,7 +193,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     if ((row == null) || (row.empty(0)) || (row.empty(3)) || (row.empty(4))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new indexURLEntryNew(row.getColString(3, null), row.getColString(4, null));
+                    wordEntry = new indexURLEntry(row.getColString(3, null), row.getColString(4, null));
                     // store to cache
                     addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;

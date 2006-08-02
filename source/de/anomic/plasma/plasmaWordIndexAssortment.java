@@ -60,7 +60,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexTreeMapContainer;
-import de.anomic.index.indexURLEntryNew;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
@@ -75,7 +75,7 @@ public final class plasmaWordIndexAssortment {
         4,                                              // occurrence counter
         8,                                              // timestamp of last access
         indexEntryAttribute.urlHashLength,              // corresponding URL hash
-        indexURLEntryNew.encodedByteArrayFormLength(false) // URL attributes
+        indexURLEntry.encodedByteArrayFormLength(false) // URL attributes
     };
     
     // class variables
@@ -250,7 +250,7 @@ public final class plasmaWordIndexAssortment {
         int al = assortmentCapacity(row.objectsize());
         for (int i = 0; i < al; i++) {
             container.add(
-                    new indexEntry[] { new indexURLEntryNew(
+                    new indexEntry[] { new indexURLEntry(
                             new String(row.getColBytes(3 + 2 * i)), new String(row.getColBytes(4 + 2 * i))) }, updateTime);
         }
         return container;
