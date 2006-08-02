@@ -66,7 +66,6 @@ import de.anomic.index.indexRAMCacheRI;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexRowSetContainer;
-import de.anomic.index.indexTreeMapContainer;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
@@ -371,7 +370,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     public synchronized indexContainer deleteContainer(String wordHash) {
         indexContainer c = ramCache.deleteContainer(wordHash);
-        if (c == null) c = new indexTreeMapContainer(wordHash);
+        if (c == null) c = new indexRowSetContainer(wordHash);
         c.add(assortmentCluster.deleteContainer(wordHash, -1), -1);
         c.add(backend.deleteContainer(wordHash), -1);
         return c;

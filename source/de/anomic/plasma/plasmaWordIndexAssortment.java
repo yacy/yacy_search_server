@@ -59,7 +59,7 @@ import java.util.Iterator;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexRowSetContainer;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroTree;
@@ -246,7 +246,7 @@ public final class plasmaWordIndexAssortment {
         if (row == null) return null;
         String wordHash = row.getColString(0, null);
         final long updateTime = row.getColLongB256(2);
-        indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
+        indexContainer container = new indexRowSetContainer(wordHash);
         int al = assortmentCapacity(row.objectsize());
         for (int i = 0; i < al; i++) {
             container.add(

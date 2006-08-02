@@ -56,7 +56,7 @@ import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexRowSetContainer;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCrawlLURL;
@@ -468,9 +468,9 @@ public final class yacyClient {
             
             // create containers
             final int words = wordhashes.length() / indexEntryAttribute.wordHashLength;
-            indexTreeMapContainer[] container = new indexTreeMapContainer[words];
+            indexContainer[] container = new indexContainer[words];
             for (int i = 0; i < words; i++) {
-                container[i] = new indexTreeMapContainer(wordhashes.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
+                container[i] = new indexRowSetContainer(wordhashes.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
             }
 
             // insert results to containers

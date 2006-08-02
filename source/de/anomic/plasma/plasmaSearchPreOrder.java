@@ -49,8 +49,8 @@ import java.util.Iterator;
 
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
-import de.anomic.index.indexTreeMapContainer;
 import de.anomic.kelondro.kelondroBinSearch;
 
 public final class plasmaSearchPreOrder {
@@ -123,7 +123,7 @@ public final class plasmaSearchPreOrder {
         return (indexEntry) pageAcc.remove(top);
     }
     
-    public void addContainer(indexTreeMapContainer container, long maxTime) {
+    public void addContainer(indexContainer container, long maxTime) {
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         indexEntry iEntry;
 

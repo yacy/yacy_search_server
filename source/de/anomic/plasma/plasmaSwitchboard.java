@@ -130,9 +130,10 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexRowSetContainer;
 import de.anomic.index.indexURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -1487,7 +1488,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = indexEntryAttribute.word2hash(word);
-                                indexTreeMapContainer wordIdxContainer = new indexTreeMapContainer(wordHash);
+                                indexContainer wordIdxContainer = new indexRowSetContainer(wordHash);
                                 indexEntry wordIdxEntry = new indexURLEntry(urlHash,
                                                                                              urlLength, urlComps,
                                                                                              wordStat.count,
@@ -1517,7 +1518,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             // transfering the index to the storage peer
                             HashMap resultObj = yacyClient.transferIndex(
                                             seed,
-                                            (indexTreeMapContainer[])tmpContainers.toArray(new indexTreeMapContainer[tmpContainers.size()]),
+                                            (indexContainer[]) tmpContainers.toArray(new indexContainer[tmpContainers.size()]),
                                             urlCache,
                                             true,
                                             120000);

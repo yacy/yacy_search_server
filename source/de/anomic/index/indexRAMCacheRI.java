@@ -101,7 +101,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
             Map.Entry entry;
             String wordHash;
-            indexTreeMapContainer container;
+            indexContainer container;
             long updateTime;
             indexEntry iEntry;
             kelondroRow.Entry row = dumpArray.row().newEntry();
@@ -110,7 +110,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             synchronized (kCache) {
                 Iterator i = kCache.values().iterator();
                 while (i.hasNext()) {
-                    container = (indexTreeMapContainer) i.next();
+                    container = (indexContainer) i.next();
 
                     // put entries on stack
                     if (container != null) {
@@ -139,7 +139,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     entry = (Map.Entry) i.next();
                     wordHash = (String) entry.getKey();
                     updateTime = getUpdateTime(wordHash);
-                    container = (indexTreeMapContainer) entry.getValue();
+                    container = (indexContainer) entry.getValue();
 
                     // put entries on stack
                     if (container != null) {
@@ -269,7 +269,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
 
     public int indexSize(String wordHash) {
         int size = 0;
-        indexTreeMapContainer cacheIndex = (indexTreeMapContainer) wCache.get(wordHash);
+        indexContainer cacheIndex = (indexContainer) wCache.get(wordHash);
         if (cacheIndex != null) size += cacheIndex.size();
         return size;
     }
@@ -326,13 +326,13 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         // find entries in kCache that are too old for that place and shift them to the wCache
         long time;
         Long l;
-        indexTreeMapContainer container;
+        indexContainer container;
         synchronized (kCache) {
             while (kCache.size() > 0) {
                 l = (Long) kCache.firstKey();
                 time = l.longValue();
                 if (System.currentTimeMillis() - time < kCacheMaxAge) return;
-                container = (indexTreeMapContainer) kCache.remove(l);
+                container = (indexContainer) kCache.remove(l);
                 addEntries(container, container.updated(), false);
             }
         }
@@ -386,13 +386,13 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     }
     
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime_dummy) {
-        return (indexTreeMapContainer) wCache.get(wordHash);
+        return (indexContainer) wCache.get(wordHash);
     }
 
     public indexContainer deleteContainer(String wordHash) {
         // returns the index that had been deleted
         synchronized (wCache) {
-            indexTreeMapContainer container = (indexTreeMapContainer) wCache.remove(wordHash);
+            indexContainer container = (indexContainer) wCache.remove(wordHash);
             hashScore.deleteScore(wordHash);
             hashDate.deleteScore(wordHash);
             return container;
@@ -401,7 +401,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
         synchronized (wCache) {
-            indexTreeMapContainer c = (indexTreeMapContainer) deleteContainer(wordHash);
+            indexContainer c = (indexContainer) deleteContainer(wordHash);
             if (c != null) {
                 if (c.removeEntry(wordHash, urlHash, deleteComplete)) return true;
                 this.addEntries(c, System.currentTimeMillis(), false);
@@ -414,7 +414,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         if (urlHashes.size() == 0) return 0;
         int count = 0;
         synchronized (wCache) {
-            indexTreeMapContainer c = (indexTreeMapContainer) deleteContainer(wordHash);
+            indexContainer c = (indexContainer) deleteContainer(wordHash);
             if (c != null) {
                 count = c.removeEntries(wordHash, urlHashes, deleteComplete);
                 if (c.size() != 0) this.addEntries(c, System.currentTimeMillis(), false);
@@ -432,13 +432,13 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             Iterator i = kCache.entrySet().iterator();
             Map.Entry entry;
             Long l;
-            indexTreeMapContainer c;
+            indexContainer c;
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
                 l = (Long) entry.getKey();
             
                 // get container
-                c = (indexTreeMapContainer) entry.getValue();
+                c = (indexContainer) entry.getValue();
                 if (c.remove(urlHash) != null) {
                     if (c.size() == 0) {
                         i.remove();
@@ -466,8 +466,8 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         } else synchronized (wCache) {
             // put container into wCache
             String wordHash = container.getWordHash();
-            indexTreeMapContainer entries = (indexTreeMapContainer) wCache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
-            if (entries == null) entries = new indexTreeMapContainer(wordHash);
+            indexContainer entries = (indexContainer) wCache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+            if (entries == null) entries = new indexRowSetContainer(wordHash);
             added = entries.add(container, -1);
             if (added > 0) {
                 wCache.put(wordHash, entries);
@@ -482,15 +482,15 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
         if (dhtCase) synchronized (kCache) {
             // put container into kCache
-            indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
+            indexContainer container = new indexRowSetContainer(wordHash);
             container.add(newEntry);
             kCache.put(new Long(updateTime + kCacheInc), container);
             kCacheInc++;
             if (kCacheInc > 10000) kCacheInc = 0;
             return null;
         } else synchronized (wCache) {
-            indexTreeMapContainer container = (indexTreeMapContainer) wCache.get(wordHash);
-            if (container == null) container = new indexTreeMapContainer(wordHash);
+            indexContainer container = (indexContainer) wCache.get(wordHash);
+            if (container == null) container = new indexRowSetContainer(wordHash);
             indexEntry[] entries = new indexEntry[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
                 wCache.put(wordHash, container);

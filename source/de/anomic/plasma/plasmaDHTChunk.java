@@ -49,7 +49,6 @@ import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
-import de.anomic.index.indexTreeMapContainer;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.serverCodings;
@@ -75,22 +74,22 @@ public class plasmaDHTChunk {
     
     private int status = chunkStatus_UNDEFINED;
     private String startPointHash;
-    private indexTreeMapContainer[] indexContainers = null;
+    private indexContainer[] indexContainers = null;
     private HashMap urlCache; // String (url-hash) / plasmaCrawlLURL.Entry
     private int idxCount;
     
     private long selectionStartTime = 0;
     private long selectionEndTime = 0;
     
-    public indexTreeMapContainer firstContainer() {
+    public indexContainer firstContainer() {
         return indexContainers[0];
     }
     
-    public indexTreeMapContainer lastContainer() {
+    public indexContainer lastContainer() {
         return indexContainers[indexContainers.length - 1];
     }
     
-    public indexTreeMapContainer[] containers() {
+    public indexContainer[] containers() {
         return indexContainers;
     }
     
@@ -200,7 +199,7 @@ public class plasmaDHTChunk {
             double maximumDistance = ((double) peerRedundancy * 2) / ((double) yacyCore.seedDB.sizeConnected());
             
             while ((maxcount > refcount) && (indexContainerIterator.hasNext()) && ((container = (indexContainer) indexContainerIterator.next()) != null) && (container.size() > 0)
-                            && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(container.getWordHash(), ((indexTreeMapContainer) tmpContainers.get(0)).getWordHash()) < maximumDistance))) {
+                            && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(container.getWordHash(), ((indexContainer) tmpContainers.get(0)).getWordHash()) < maximumDistance))) {
                 // make an on-the-fly entity and insert values
                 int notBoundCounter = 0;
                 try {
@@ -243,7 +242,7 @@ public class plasmaDHTChunk {
                 }
             }
             // create result
-            indexContainers = (indexTreeMapContainer[]) tmpContainers.toArray(new indexTreeMapContainer[tmpContainers.size()]);
+            indexContainers = (indexContainer[]) tmpContainers.toArray(new indexContainer[tmpContainers.size()]);
 
             if ((indexContainers == null) || (indexContainers.length == 0)) {
                 log.logFine("No index available for index transfer, hash start-point " + startPointHash);
@@ -256,13 +255,13 @@ public class plasmaDHTChunk {
             return refcount;
         } catch (kelondroException e) {
             log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
-            indexContainers = new indexTreeMapContainer[0];
+            indexContainers = new indexContainer[0];
             urlCache = new HashMap();
             this.status = chunkStatus_FAILED;
             return 0;
         } catch (IOException e) {
             log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
-            indexContainers = new indexTreeMapContainer[0];
+            indexContainers = new indexContainer[0];
             urlCache = new HashMap();
             this.status = chunkStatus_FAILED;
             return 0;

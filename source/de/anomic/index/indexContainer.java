@@ -53,11 +53,8 @@ public interface indexContainer {
     public int add(indexEntry[] entries, long updateTime);
     public int add(indexContainer c, long maxTime);
 
-    public Set urlHashes();
-    public boolean contains(String urlHash) ;
     public indexEntry get(String urlHash);
-    public indexEntry[] getEntryArray() ;
-
+    
     public indexEntry remove(String urlHash);
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete);
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete);
@@ -66,6 +63,4 @@ public interface indexContainer {
     public String toString();
     public int hashCode();
 
-    //public void joinConstructive(indexContainer c, long time, int maxDistance);
-    
 }

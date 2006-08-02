@@ -53,7 +53,7 @@ import de.anomic.server.serverInstantThread;
 import de.anomic.yacy.yacySearch;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
-import de.anomic.index.indexTreeMapContainer;
+import de.anomic.index.indexRowSetContainer;
 
 public final class plasmaSearchEvent extends Thread implements Runnable {
     
@@ -86,8 +86,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.ranking = ranking;
         this.urlStore = urlStore;
         this.snippetCache = snippetCache;
-        this.rcLocal = new indexTreeMapContainer(null);
-        this.rcGlobal = new indexTreeMapContainer(null);
+        this.rcLocal = new indexRowSetContainer(null);
+        this.rcGlobal = new indexRowSetContainer(null);
         this.rcGlobalCount = 0;
         this.profileLocal = localTiming;
         this.profileGlobal = remoteTiming;
@@ -178,13 +178,13 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // since this is a conjunction we return an empty entity if any word
         // is not known
         if (containers == null) {
-            rcLocal = new indexTreeMapContainer(null);
+            rcLocal = new indexRowSetContainer(null);
             return 0;
         }
 
         // join the result
         profileLocal.startTimer();
-        rcLocal = indexTreeMapContainer.joinContainer(containers,
+        rcLocal = indexRowSetContainer.joinContainer(containers,
                 profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN),
                 query.maxDistance);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_JOIN);
@@ -220,7 +220,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
-        indexTreeMapContainer searchResult = new indexTreeMapContainer(null);
+        indexContainer searchResult = new indexRowSetContainer(null);
         long preorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         
         profileLocal.startTimer();
