@@ -94,6 +94,7 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
         // - boolean: URL attributes
 
         if ((language == null) || (language.length() != indexURL.urlLanguageLength)) language = "uk";
+        this.entry = urlEntryRow.newEntry();
         this.entry.setColString(col_urlhash, urlHash, null);
         this.entry.setColLong(col_quality, quality);
         this.entry.setColLong(col_lastModified, lastmodified);
@@ -122,16 +123,27 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
         this.entry = urlEntryRow.newEntry(row);
     }
     
+    public indexURLEntryNew(kelondroRow.Entry rentry) {
+        // FIXME: see if cloning is necessary
+        this.entry = rentry;
+    }
+    
     public Object clone() {
-        return new indexURLEntryNew(toEncodedByteArrayForm());
+        byte[] b = new byte[urlEntryRow.objectsize()];
+        System.arraycopy(entry.bytes(), 0, b, 0, urlEntryRow.objectsize());
+        return new indexURLEntryNew(b);
     }
-
-    public String toEncodedStringForm() {
-        return new String(toEncodedByteArrayForm());
+    
+    public static int encodedByteArrayFormLength(boolean includingHeader) {
+        // the size of the index entry attributes when encoded to string
+        return (includingHeader) ? urlEntryRow.objectsize() : urlEntryRow.objectsize() - indexURL.urlHashLength;
     }
-
-    public byte[] toEncodedByteArrayForm() {
-        return entry.bytes();
+    
+    public byte[] toEncodedByteArrayForm(boolean includeHash) {
+        if (includeHash) return entry.bytes();
+        byte[] b = new byte[urlEntryRow.objectsize() - indexURL.urlLanguageLength];
+        System.arraycopy(entry.bytes(), indexURL.urlLanguageLength, b, 0, b.length);
+        return b;
     }
 
    public String toPropertyForm() {
@@ -278,9 +290,9 @@ public class indexURLEntryNew implements Cloneable, indexEntry {
  
     public boolean isOlder(indexEntry other) {
         if (other == null) return false;
-        if (this.lastModified() < ((indexAbstractEntry) other).lastModified()) return true;
-        if (this.lastModified() == ((indexAbstractEntry) other).lastModified()) {
-            if (this.quality() < ((indexAbstractEntry) other).quality) return true;
+        if (this.lastModified() < other.lastModified()) return true;
+        if (this.lastModified() == other.lastModified()) {
+            if (this.quality() < other.quality()) return true;
         }
         return false;
     }

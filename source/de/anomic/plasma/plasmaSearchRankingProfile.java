@@ -47,7 +47,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.anomic.index.indexEntry;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURL;
 
 public class plasmaSearchRankingProfile {
 
@@ -164,18 +164,16 @@ public class plasmaSearchRankingProfile {
         return new String(ext);
     }
     
-    public long preRanking(indexEntry entry) {
+    public long preRanking(indexEntry normalizedEntry) {
+        // the normalizedEntry must be a normalized indexEntry
         long ranking = 0;
-        if (entry instanceof indexURLEntry) {
-            indexURLEntry normalizedEntry = (indexURLEntry) entry;
-            ranking += normalizedEntry.quality() << ((Integer) coeff.get(ENTROPY)).intValue();
-            ranking += normalizedEntry.virtualAge() << ((Integer) coeff.get(DATE)).intValue();
-            ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.urlHash()) << ((Integer) coeff.get(YBR)).intValue();
-            ranking += (normalizedEntry.posintext() == 0) ? 0 : (255 - normalizedEntry.posintext()) << ((Integer) coeff.get(POSINTEXT)).intValue();
-            ranking += (normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance()) << ((Integer) coeff.get(WORDDISTANCE)).intValue();
-            ranking += (normalizedEntry.hitcount() == 0) ? 0 : normalizedEntry.hitcount() << ((Integer) coeff.get(HITCOUNT)).intValue();
-            ranking += (255 - normalizedEntry.domlengthNormalized()) << ((Integer) coeff.get(DOMLENGTH)).intValue();
-        }
+        ranking += normalizedEntry.quality() << ((Integer) coeff.get(ENTROPY)).intValue();
+        ranking += normalizedEntry.virtualAge() << ((Integer) coeff.get(DATE)).intValue();
+        ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.urlHash()) << ((Integer) coeff.get(YBR)).intValue();
+        ranking += (normalizedEntry.posintext() == 0) ? 0 : (255 - normalizedEntry.posintext()) << ((Integer) coeff.get(POSINTEXT)).intValue();
+        ranking += (normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance()) << ((Integer) coeff.get(WORDDISTANCE)).intValue();
+        ranking += (normalizedEntry.hitcount() == 0) ? 0 : normalizedEntry.hitcount() << ((Integer) coeff.get(HITCOUNT)).intValue();
+        ranking += (255 - indexURL.domLengthNormalized(normalizedEntry.urlHash())) << ((Integer) coeff.get(DOMLENGTH)).intValue();
         return ranking;
     }
     

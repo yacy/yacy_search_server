@@ -31,8 +31,7 @@ import de.anomic.kelondro.kelondroRow;
 public interface indexEntry {
 
     public Object clone();
-    public String toEncodedStringForm();
-    public byte[] toEncodedByteArrayForm(); // shall be replaced by toKelondroEntry()
+    public byte[] toEncodedByteArrayForm(boolean includeUrlHash); // shall be replaced by toKelondroEntry()
     public String toPropertyForm();
     public kelondroRow.Entry toKelondroEntry();
     

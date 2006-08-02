@@ -48,8 +48,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexTreeMapContainer;
-import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.serverCodings;
@@ -191,7 +191,7 @@ public class plasmaDHTChunk {
             Iterator indexContainerIterator = wordIndex.indexContainerSet(hash, resourceLevel, true, maxcount).iterator();
             indexContainer container;
             Iterator urlIter;
-            indexURLEntry indexEntry;
+            indexEntry iEntry;
             plasmaCrawlLURL.Entry lurl;
             int refcount = 0;
             int wholesize;
@@ -208,29 +208,29 @@ public class plasmaDHTChunk {
                     urlIter = container.entries();
                     // iterate over indexes to fetch url entries and store them in the urlCache
                     while ((urlIter.hasNext()) && (maxcount > refcount)) {
-                        indexEntry = (indexURLEntry) urlIter.next();
+                        iEntry = (indexEntry) urlIter.next();
                         try {
-                            lurl = lurls.getEntry(indexEntry.urlHash(), indexEntry);
+                            lurl = lurls.getEntry(iEntry.urlHash(), iEntry);
                             if ((lurl == null) || (lurl.url() == null)) {
-                                yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + indexEntry.urlHash() + "' for word hash " + container.getWordHash());
+                                yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + iEntry.urlHash() + "' for word hash " + container.getWordHash());
                                 notBoundCounter++;
                                 urlIter.remove();
-                                wordIndex.removeEntry(container.getWordHash(), indexEntry.urlHash(), true);
+                                wordIndex.removeEntry(container.getWordHash(), iEntry.urlHash(), true);
                             } else {
-                                urlCache.put(indexEntry.urlHash(), lurl);
-                                yacyCore.log.logFine("DEBUG selectTransferContainersResource: added url hash '" + indexEntry.urlHash() + "' to urlCache for word hash " + container.getWordHash());
+                                urlCache.put(iEntry.urlHash(), lurl);
+                                yacyCore.log.logFine("DEBUG selectTransferContainersResource: added url hash '" + iEntry.urlHash() + "' to urlCache for word hash " + container.getWordHash());
                                 refcount++;
                             }
                         } catch (IOException e) {
                             notBoundCounter++;
                             urlIter.remove();
-                            wordIndex.removeEntry(container.getWordHash(), indexEntry.urlHash(), true);
+                            wordIndex.removeEntry(container.getWordHash(), iEntry.urlHash(), true);
                         }
                     }
 
                     // remove all remaining; we have enough
                     while (urlIter.hasNext()) {
-                        indexEntry = (indexURLEntry) urlIter.next();
+                        iEntry = (indexEntry) urlIter.next();
                         urlIter.remove();
                     }
 
@@ -272,7 +272,7 @@ public class plasmaDHTChunk {
     
     public int deleteTransferIndexes() {
         Iterator urlIter;
-        indexURLEntry indexEntry;
+        indexEntry iEntry;
         HashSet urlHashes;
         int count = 0;
         
@@ -282,8 +282,8 @@ public class plasmaDHTChunk {
             urlHashes = new HashSet(this.indexContainers[i].size());
             urlIter = this.indexContainers[i].entries();
             while (urlIter.hasNext()) {
-                indexEntry = (indexURLEntry) urlIter.next();
-                urlHashes.add(indexEntry.urlHash());
+                iEntry = (indexEntry) urlIter.next();
+                urlHashes.add(iEntry.urlHash());
             }
             count += wordIndex.removeEntries(this.indexContainers[i].getWordHash(), urlHashes, true);
             log.logFine("Deleted partial index (" + c + " URLs) for word " + this.indexContainers[i].getWordHash() + "; " + this.wordIndex.indexSize(indexContainers[i].getWordHash()) + " entries left");

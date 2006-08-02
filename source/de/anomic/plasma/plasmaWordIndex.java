@@ -67,7 +67,7 @@ import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexRowSetContainer;
 import de.anomic.index.indexTreeMapContainer;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLEntryNew;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
@@ -251,7 +251,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         Iterator i = condenser.words();
         Map.Entry wentry;
         String word;
-        indexURLEntry ientry;
+        indexEntry ientry;
         plasmaCondenser.wordStatProp wprop;
         String wordHash;
         int urlLength = url.toString().length();
@@ -263,7 +263,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
             wordHash = indexEntryAttribute.word2hash(word);
-            ientry = new indexURLEntry(urlHash,
+            ientry = new indexURLEntryNew(urlHash,
                                               urlLength, urlComps, (document == null) ? urlLength : document.longTitle.length(),
                                              wprop.count,
                                              condenser.RESULT_SIMI_WORDS,
@@ -529,11 +529,11 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                     // the combined container will fit, read the container
                     try {
                         Iterator entries = entity.elements(true);
-                        indexURLEntry entry;
+                        indexEntry entry;
                         while (entries.hasNext()) {
-                            entry = (indexURLEntry) entries.next();
+                            entry = (indexEntry) entries.next();
                             // System.out.println("ENTRY = " + entry.getUrlHash());
-                            container.add(new indexURLEntry[]{entry}, System.currentTimeMillis());
+                            container.add(new indexEntry[]{entry}, System.currentTimeMillis());
                         }
                         // we have read all elements, now delete the entity
                         entity.deleteComplete();
@@ -580,7 +580,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         public void run() {
             serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             indexContainer container = null;
-            indexURLEntry entry = null;
+            indexEntry entry = null;
             URL url = null;
             HashSet urlHashs = new HashSet();
             try {
@@ -592,7 +592,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                     wordHashNow = container.getWordHash();
                     while (containerIterator.hasNext() && run) {
                         waiter();
-                        entry = (indexURLEntry) containerIterator.next();
+                        entry = (indexEntry) containerIterator.next();
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
                         try {

@@ -66,8 +66,9 @@ import java.util.Properties;
 
 import de.anomic.http.httpc;
 import de.anomic.http.httpc.response;
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexURL;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLEntryNew;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
@@ -161,7 +162,7 @@ public final class plasmaCrawlLURL extends indexURL {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
 
-    public Entry getEntry(String hash, indexURLEntry searchedWord) throws IOException {
+    public Entry getEntry(String hash, indexEntry searchedWord) throws IOException {
         return new Entry(hash, searchedWord);
     }
 
@@ -416,7 +417,7 @@ public final class plasmaCrawlLURL extends indexURL {
         private int size;
         private int wordCount;
         private String snippet;
-        private indexURLEntry word; // this is only used if the url is transported via remote search requests
+        private indexEntry word; // this is only used if the url is transported via remote search requests
         private boolean stored;
         
         // more needed attributes:
@@ -451,7 +452,7 @@ public final class plasmaCrawlLURL extends indexURL {
             this.stored = false;
         }
 
-        public Entry(String urlHash, indexURLEntry searchedWord) throws IOException {
+        public Entry(String urlHash, indexEntry searchedWord) throws IOException {
             // generates an plasmaLURLEntry using the url hash
             // to speed up the access, the url-hashes are buffered
             // in the hash cache.
@@ -466,13 +467,13 @@ public final class plasmaCrawlLURL extends indexURL {
             this.stored = true;
         }
         
-        public Entry(kelondroRow.Entry entry, indexURLEntry searchedWord) throws IOException {
+        public Entry(kelondroRow.Entry entry, indexEntry searchedWord) throws IOException {
             assert (entry != null);
             insertEntry(entry, word);
             this.stored = false;
         }
         
-        private void insertEntry(kelondroRow.Entry entry, indexURLEntry searchedWord) throws IOException {
+        private void insertEntry(kelondroRow.Entry entry, indexEntry searchedWord) throws IOException {
             try {
                 this.urlHash = entry.getColString(0, null);
                 this.url = new URL(entry.getColString(1, "UTF-8").trim());
@@ -522,7 +523,7 @@ public final class plasmaCrawlLURL extends indexURL {
                 this.wordCount = Integer.parseInt(prop.getProperty("wc", "0"));
                 this.snippet = prop.getProperty("snippet", "");
                 if (snippet.length() == 0) snippet = null; else snippet = crypt.simpleDecode(snippet, null);
-                this.word = (prop.containsKey("word")) ? new indexURLEntry(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word",""))) : null;
+                this.word = (prop.containsKey("word")) ? new indexURLEntryNew(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word",""))) : null;
                 this.stored = false;
                 //}
             } catch (Exception e) {
@@ -659,7 +660,7 @@ public final class plasmaCrawlLURL extends indexURL {
             return snippet;
         }
 
-        public indexURLEntry word() {
+        public indexEntry word() {
             return word;
         }
     

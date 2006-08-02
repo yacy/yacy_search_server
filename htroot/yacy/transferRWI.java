@@ -51,8 +51,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexEntry;
+import de.anomic.index.indexURLEntryNew;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.index.indexURLEntry;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -132,7 +133,7 @@ public final class transferRWI {
             int p;
             String wordHash;
             String urlHash;
-            indexURLEntry entry;
+            indexEntry iEntry;
             int wordhashesSize = v.size();
             final HashSet unknownURL = new HashSet();
             String[] wordhashes = new String[v.size()];
@@ -145,11 +146,11 @@ public final class transferRWI {
                 if (p > 0) {
                     wordHash = estring.substring(0, p);
                     wordhashes[received] = wordHash;
-                    entry = new indexURLEntry(estring.substring(p));
-                    sb.wordIndex.addEntry(wordHash, entry, System.currentTimeMillis(), true);
+                    iEntry = new indexURLEntryNew(estring.substring(p));
+                    sb.wordIndex.addEntry(wordHash, iEntry, System.currentTimeMillis(), true);
                     serverCore.checkInterruption();
                     
-                    urlHash = entry.urlHash();
+                    urlHash = iEntry.urlHash();
                     try {
                         if ((!(unknownURL.contains(urlHash))) &&
                             (!(sb.urlPool.loadedURL.exists(urlHash)))) {

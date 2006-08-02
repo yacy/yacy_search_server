@@ -130,10 +130,11 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexTreeMapContainer;
 import de.anomic.index.indexURL;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLEntryNew;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -1487,7 +1488,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = indexEntryAttribute.word2hash(word);
                                 indexTreeMapContainer wordIdxContainer = new indexTreeMapContainer(wordHash);
-                                indexURLEntry wordIdxEntry = new indexURLEntry(urlHash,
+                                indexEntry wordIdxEntry = new indexURLEntryNew(urlHash,
                                                                                              urlLength, urlComps,
                                                                                              wordStat.count,
                                                                                              document.longTitle.length(),

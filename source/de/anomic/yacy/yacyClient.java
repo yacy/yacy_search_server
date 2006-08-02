@@ -54,9 +54,10 @@ import java.util.Iterator;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexTreeMapContainer;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLEntryNew;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -484,10 +485,10 @@ public final class yacyClient {
                 
                 urlManager.stackEntry(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
                 // save the url entry
-                final indexURLEntry entry;
+                final indexEntry entry;
                 if (urlEntry.word() == null) {
                     // the old way to define words
-                    entry = new indexURLEntry(
+                    entry = new indexURLEntryNew(
                                                      urlEntry.hash(),
                                                      urlLength, urlComps,
                                                      urlEntry.descr().length(),
@@ -514,7 +515,7 @@ public final class yacyClient {
                 }
                 // add the url entry to the word indexes
                 for (int m = 0; m < words; m++) {
-                    container[m].add(new indexURLEntry[]{entry}, System.currentTimeMillis());
+                    container[m].add(new indexEntry[]{entry}, System.currentTimeMillis());
                 }
             }
 
@@ -888,11 +889,11 @@ public final class yacyClient {
             
             // check if we got all necessary urls in the urlCache (only for debugging)
             Iterator eenum;
-            indexURLEntry entry;
+            indexEntry entry;
             for (int i = 0; i < indexes.length; i++) {
                 eenum = indexes[i].entries();
                 while (eenum.hasNext()) {
-                    entry = (indexURLEntry) eenum.next();
+                    entry = (indexEntry) eenum.next();
                     if (urlCache.get(entry.urlHash()) == null) {
                         yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.urlHash() + "' is not contained in urlCache");
                     }
@@ -996,11 +997,11 @@ public final class yacyClient {
         int indexcount = 0;
         final StringBuffer entrypost = new StringBuffer(indexes.length*73);
         Iterator eenum;
-        indexURLEntry entry;
+        indexEntry entry;
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].entries();
             while (eenum.hasNext()) {
-                entry = (indexURLEntry) eenum.next();
+                entry = (indexEntry) eenum.next();
                 entrypost.append(indexes[i].getWordHash()) 
                          .append(entry.toPropertyForm()) 
                          .append(serverCore.crlfString);

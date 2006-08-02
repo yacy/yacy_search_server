@@ -59,7 +59,6 @@ import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexRowSetContainer;
 import de.anomic.index.indexTreeMapContainer;
-import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroObjectCache;
 import de.anomic.kelondro.kelondroRecords;
@@ -167,7 +166,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
             c = new indexTreeMapContainer(newContainer.getWordHash());
             for (int k = 0; k < j; k++) {
                 if (i.hasNext()) {
-                    c.add((indexURLEntry) i.next(), newContainer.updated());
+                    c.add((indexEntry) i.next(), newContainer.updated());
                 } else {
                     storeForced(c);
                     return;
@@ -210,7 +209,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
                 c = new indexTreeMapContainer(newContainer.getWordHash());
                 for (int k = 0; k <= j; k++) {
                     assert (i.hasNext());
-                    c.add((indexURLEntry) i.next(), newContainer.updated());
+                    c.add((indexEntry) i.next(), newContainer.updated());
                 }
                 storeForced(c);
             }

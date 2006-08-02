@@ -73,6 +73,7 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroDyn;
@@ -86,7 +87,6 @@ import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexAssortmentCluster;
 import de.anomic.plasma.plasmaWordIndexFile;
-import de.anomic.index.indexURLEntry;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
@@ -717,10 +717,10 @@ public final class yacy {
                     
                     // the combined container will fit, read the container
                     Iterator wordIdxEntries = wordIdxContainer.entries();
-                    indexURLEntry wordIdxEntry;
+                    indexEntry iEntry;
                     while (wordIdxEntries.hasNext()) {
-                        wordIdxEntry = (indexURLEntry) wordIdxEntries.next();
-                        String urlHash = wordIdxEntry.urlHash();                    
+                        iEntry = (indexEntry) wordIdxEntries.next();
+                        String urlHash = iEntry.urlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
                             plasmaCrawlLURL.Entry urlEntry = currentUrlDB.getEntry(urlHash, null);                       
                             urlCounter++;

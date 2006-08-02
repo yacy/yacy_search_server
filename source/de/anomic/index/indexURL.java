@@ -523,6 +523,10 @@ public class indexURL {
      return 20;
  }
  
+ public static int domLengthNormalized(String urlHash) {
+     return 255 * domLengthEstimation(urlHash) / 30;
+ }
+ 
  public static final String oldurlHash(URL url) {
     if (url == null) return null;
      String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(htmlFilterContentScraper.urlNormalform(url))).substring(0, urlHashLength);

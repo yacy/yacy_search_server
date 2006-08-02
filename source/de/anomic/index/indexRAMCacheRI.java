@@ -103,7 +103,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             String wordHash;
             indexTreeMapContainer container;
             long updateTime;
-            indexURLEntry wordEntry;
+            indexEntry iEntry;
             kelondroRow.Entry row = dumpArray.row().newEntry();
             
             // write kCache, this will be melted with the wCache upon load
@@ -116,12 +116,12 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     if (container != null) {
                         Iterator ci = container.entries();
                         while (ci.hasNext()) {
-                            wordEntry = (indexURLEntry) ci.next();
+                            iEntry = (indexEntry) ci.next();
                             row.setCol(0, container.getWordHash().getBytes());
                             row.setCol(1, kelondroNaturalOrder.encodeLong(container.size(), 4));
                             row.setCol(2, kelondroNaturalOrder.encodeLong(container.updated(), 8));
-                            row.setCol(3, wordEntry.urlHash().getBytes());
-                            row.setCol(4, wordEntry.toEncodedStringForm().getBytes());
+                            row.setCol(3, iEntry.urlHash().getBytes());
+                            row.setCol(4, iEntry.toEncodedByteArrayForm(false));
                             dumpArray.set((int) urlcount++, row);
                         }
                     }
@@ -145,12 +145,12 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     if (container != null) {
                         Iterator ci = container.entries();
                         while (ci.hasNext()) {
-                            wordEntry = (indexURLEntry) ci.next();
+                            iEntry = (indexEntry) ci.next();
                             row.setCol(0, wordHash.getBytes());
                             row.setCol(1, kelondroNaturalOrder.encodeLong(container.size(), 4));
                             row.setCol(2, kelondroNaturalOrder.encodeLong(updateTime, 8));
-                            row.setCol(3, wordEntry.urlHash().getBytes());
-                            row.setCol(4, wordEntry.toEncodedStringForm().getBytes());
+                            row.setCol(3, iEntry.urlHash().getBytes());
+                            row.setCol(4, iEntry.toEncodedByteArrayForm(false));
                             dumpArray.set((int) urlcount++, row);
                         }
                     }
@@ -184,7 +184,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                 int i = dumpArray.size();
                 String wordHash;
                 //long creationTime;
-                indexURLEntry wordEntry;
+                indexEntry wordEntry;
                 kelondroRow.Entry row;
                 //Runtime rt = Runtime.getRuntime();
                 while (i-- > 0) {
@@ -193,7 +193,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     if ((row == null) || (row.empty(0)) || (row.empty(3)) || (row.empty(4))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new indexURLEntry(row.getColString(3, "UTF-8"), row.getColString(4, "UTF-8"));
+                    wordEntry = new indexURLEntryNew(row.getColString(3, null), row.getColString(4, null));
                     // store to cache
                     addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;

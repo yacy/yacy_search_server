@@ -57,9 +57,10 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexTreeMapContainer;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLEntryNew;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
@@ -70,11 +71,11 @@ public final class plasmaWordIndexAssortment {
     // environment constants
     private static final String assortmentFileName = "indexAssortment";
     public  static final int[] bufferStructureBasis = new int[]{
-        indexEntryAttribute.wordHashLength,  // a wordHash
-        4,                                   // occurrence counter
-        8,                                   // timestamp of last access
-        indexEntryAttribute.urlHashLength,   // corresponding URL hash
-        indexURLEntry.encodedStringFormLength()       // URL attributes
+        indexEntryAttribute.wordHashLength,             // a wordHash
+        4,                                              // occurrence counter
+        8,                                              // timestamp of last access
+        indexEntryAttribute.urlHashLength,              // corresponding URL hash
+        indexURLEntryNew.encodedByteArrayFormLength(false) // URL attributes
     };
     
     // class variables
@@ -151,11 +152,11 @@ public final class plasmaWordIndexAssortment {
         row.setColLongB256(1, 1);
         row.setColLongB256(2, newContainer.updated());
         Iterator entries = newContainer.entries();
-        indexURLEntry entry;
+        indexEntry entry;
         for (int i = 0; i < assortmentLength; i++) {
-            entry = (indexURLEntry) entries.next();
+            entry = (indexEntry) entries.next();
             row.setCol(3 + 2 * i, entry.urlHash().getBytes());
-            row.setCol(4 + 2 * i, entry.toEncodedStringForm().getBytes());
+            row.setCol(4 + 2 * i, entry.toEncodedByteArrayForm(false));
         }
         kelondroRow.Entry oldrow = null;
         try {
@@ -249,7 +250,7 @@ public final class plasmaWordIndexAssortment {
         int al = assortmentCapacity(row.objectsize());
         for (int i = 0; i < al; i++) {
             container.add(
-                    new indexURLEntry[] { new indexURLEntry(
+                    new indexEntry[] { new indexURLEntryNew(
                             new String(row.getColBytes(3 + 2 * i)), new String(row.getColBytes(4 + 2 * i))) }, updateTime);
         }
         return container;

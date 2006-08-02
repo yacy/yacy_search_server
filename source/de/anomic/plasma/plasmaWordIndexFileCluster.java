@@ -51,10 +51,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexTreeMapContainer;
-import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
@@ -231,10 +231,10 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
         if (plasmaWordIndexFile.wordHash2path(databaseRoot, wordHash).exists()) {
             plasmaWordIndexFile entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
             indexTreeMapContainer container = new indexTreeMapContainer(wordHash);
-            indexURLEntry entry;
+            indexEntry entry;
             Iterator i = entity.elements(true);
             while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) {
-                entry = (indexURLEntry) i.next();
+                entry = (indexEntry) i.next();
                 container.add(entry);
             }
             return container;

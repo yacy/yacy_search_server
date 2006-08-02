@@ -130,7 +130,7 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
             Iterator i = c.entries();
             while ((i.hasNext()) && ((maxTime < 0) || ((startTime + maxTime) > System.currentTimeMillis()))) {
                 try {
-                    if (addi((indexURLEntry) i.next())) x++;
+                    if (addi((indexEntry) i.next())) x++;
                 } catch (ConcurrentModificationException e) {}
             }
         }
@@ -140,7 +140,7 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
 
     private boolean addi(indexEntry entry) {
         // returns true if the new entry was added, false if it already existed
-        indexURLEntry oldEntry = (indexURLEntry) container.put(entry.urlHash(), entry);
+        indexEntry oldEntry = (indexEntry) container.put(entry.urlHash(), entry);
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this container
             container.put(entry.urlHash(), oldEntry); // put it back
             return false;
@@ -153,15 +153,15 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
     }
 
     public indexEntry get(String urlHash) {
-        return (indexURLEntry) container.get(urlHash);
+        return (indexEntry) container.get(urlHash);
     }
     
     public indexEntry[] getEntryArray() {
-        return (indexURLEntry[]) container.values().toArray();
+        return (indexEntry[]) container.values().toArray();
     }
 
     public indexEntry remove(String urlHash) {
-        return (indexURLEntry) container.remove(urlHash);
+        return (indexEntry) container.remove(urlHash);
     }
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
@@ -290,25 +290,25 @@ public final class indexTreeMapContainer extends indexAbstractContainer implemen
         Iterator e2 = i2.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
-            indexURLEntry ie1;
-            indexURLEntry ie2;
-            ie1 = (indexURLEntry) e1.next();
-            ie2 = (indexURLEntry) e2.next();
+            indexEntry ie1;
+            indexEntry ie2;
+            ie1 = (indexEntry) e1.next();
+            ie2 = (indexEntry) e2.next();
 
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
                 c = i1.getOrdering().compare(ie1.urlHash(), ie2.urlHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
-                    if (e1.hasNext()) ie1 = (indexURLEntry) e1.next(); else break;
+                    if (e1.hasNext()) ie1 = (indexEntry) e1.next(); else break;
                 } else if (c > 0) {
-                    if (e2.hasNext()) ie2 = (indexURLEntry) e2.next(); else break;
+                    if (e2.hasNext()) ie2 = (indexEntry) e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
                     ie1.combineDistance(ie2);
                     if (ie1.worddistance() <= maxDistance) conj.add(ie1);
-                    if (e1.hasNext()) ie1 = (indexURLEntry) e1.next(); else break;
-                    if (e2.hasNext()) ie2 = (indexURLEntry) e2.next(); else break;
+                    if (e1.hasNext()) ie1 = (indexEntry) e1.next(); else break;
+                    if (e2.hasNext()) ie2 = (indexEntry) e2.next(); else break;
                 }
             }
         }

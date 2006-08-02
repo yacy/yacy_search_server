@@ -182,9 +182,15 @@ public class kelondroRow {
         
         public Entry(byte[][] cols) {
             rowinstance = new byte[objectsize];
-            for (int i = 0; i < objectsize; i++) this.rowinstance[i] = 0;
-            for (int i = 0; i < cols.length; i++) {
-                if (cols[i] != null) System.arraycopy(cols[i], 0, rowinstance, colstart[i], Math.min(cols[i].length, row[i].cellwidth()));
+            int ll;
+            for (int i = 0; i < row.length; i++) {
+                if ((i >= cols.length) || (cols[i] == null)) {
+                    for (int j = 0; j < row[i].cellwidth(); j++) this.rowinstance[colstart[i] + j] = 0;
+                } else {
+                    ll = Math.min(cols[i].length, row[i].cellwidth());
+                    System.arraycopy(cols[i], 0, rowinstance, colstart[i], ll);
+                    for (int j = ll; j < row[i].cellwidth(); j++) this.rowinstance[colstart[i] + j] = 0;
+                }
             }
         }
         

@@ -59,12 +59,12 @@ import java.util.TreeMap;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.index.indexURLEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -154,7 +154,7 @@ public class IndexControl_p {
                 int i = 0;
                 urlx = new String[index.size()];
                 while (en.hasNext()) {
-                    urlx[i++] = ((indexURLEntry) en.next()).urlHash();
+                    urlx[i++] = ((indexEntry) en.next()).urlHash();
                 }
                 index = null;
             }
@@ -257,20 +257,20 @@ public class IndexControl_p {
             Iterator urlIter = index.entries();
             HashMap knownURLs = new HashMap();
             HashSet unknownURLEntries = new HashSet();
-            indexURLEntry indexEntry;
+            indexEntry iEntry;
             plasmaCrawlLURL.Entry lurl;
             while (urlIter.hasNext()) {
-                indexEntry = (indexURLEntry) urlIter.next();
+                iEntry = (indexEntry) urlIter.next();
                 try {
-                    lurl = switchboard.urlPool.loadedURL.getEntry(indexEntry.urlHash(), null);
+                    lurl = switchboard.urlPool.loadedURL.getEntry(iEntry.urlHash(), null);
                     if (lurl.toString() == null) {
-                        unknownURLEntries.add(indexEntry.urlHash());
+                        unknownURLEntries.add(iEntry.urlHash());
                         urlIter.remove();
                     } else {
-                        knownURLs.put(indexEntry.urlHash(), lurl);
+                        knownURLs.put(iEntry.urlHash(), lurl);
                     }
                 } catch (IOException e) {
-                    unknownURLEntries.add(indexEntry.urlHash());
+                    unknownURLEntries.add(iEntry.urlHash());
                 }
             }
             // use whats remaining           
@@ -439,9 +439,9 @@ public class IndexControl_p {
                 int i = 0;
 
                 final TreeMap tm = new TreeMap();
-                indexURLEntry xi;
+                indexEntry xi;
                 while (en.hasNext()) {
-                    xi = (indexURLEntry) en.next();
+                    xi = (indexEntry) en.next();
                     uh = new String[]{xi.urlHash(), Integer.toString(xi.posintext())};
                     try {
                         us = switchboard.urlPool.loadedURL.getEntry(uh[0], null).url().toString();

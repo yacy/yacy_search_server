@@ -52,8 +52,8 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverInstantThread;
 import de.anomic.yacy.yacySearch;
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexEntry;
 import de.anomic.index.indexTreeMapContainer;
-import de.anomic.index.indexURLEntry;
 
 public final class plasmaSearchEvent extends Thread implements Runnable {
     
@@ -242,7 +242,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         //if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
         //if (searchResult.size() == 0) return acc; // case that we have nothing to do
 
-        indexURLEntry entry;
+        indexEntry entry;
         plasmaCrawlLURL.Entry page;
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {

@@ -27,6 +27,7 @@
 package de.anomic.index;
 
 import java.lang.reflect.Method;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -78,12 +79,34 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
     }
 
     public int add(indexContainer c, long maxTime) {
-        // TODO Auto-generated method stub
-        return 0;
+        // returns the number of new elements
+        long startTime = System.currentTimeMillis();
+        if (c == null) return 0;
+        int x = 0;
+        synchronized (c) {
+            Iterator i = c.entries();
+            while ((i.hasNext()) && ((maxTime < 0) || ((startTime + maxTime) > System.currentTimeMillis()))) {
+                try {
+                    if (addi((indexEntry) i.next())) x++;
+                } catch (ConcurrentModificationException e) {}
+            }
+        }
+        this.lastTimeWrote = java.lang.Math.max(this.lastTimeWrote, c.updated());
+        return x;
+    }
+    
+    private boolean addi(indexEntry entry) {
+        // returns true if the new entry was added, false if it already existed
+        indexEntry oldEntry = new indexURLEntryNew(this.put(entry.toKelondroEntry())); // FIXME: see if cloning is necessary
+        if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this container
+            this.put(oldEntry.toKelondroEntry()); // put it back
+            return false;
+        }
+        return (oldEntry == null);
     }
 
     public boolean contains(String urlHash) {
-        // TODO Auto-generated method stub
+//      TODO Auto-generated method stub
         return false;
     }
 
