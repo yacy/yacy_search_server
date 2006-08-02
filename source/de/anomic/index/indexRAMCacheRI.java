@@ -290,12 +290,10 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         
         private boolean rot;
         private Iterator iterator;
-        private String startHash;
         
         public wordContainerIterator(String startWordHash, boolean rot) {
             this.rot = rot;
-            this.startHash = startWordHash;
-            this.iterator = wCache.tailMap(startWordHash).values().iterator();
+            this.iterator = (startWordHash == null) ? wCache.values().iterator() : wCache.tailMap(startWordHash).values().iterator();
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
         
@@ -306,12 +304,12 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
 
         public Object next() {
             if (iterator.hasNext()) {
-                return iterator.next();
+                return ((indexContainer) iterator.next()).topLevelClone();
             } else {
                 // rotation iteration
                 if (rot) {
-                    iterator = wCache.tailMap(startHash).values().iterator();
-                    return iterator.next();
+                    iterator = wCache.values().iterator();
+                    return ((indexContainer) iterator.next()).topLevelClone();
                 } else {
                     return null;
                 }
