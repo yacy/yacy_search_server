@@ -112,23 +112,6 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         }
     }
     
-    public byte[] toByteArray() {
-        synchronized (buffer) {
-            flush();
-            return super.toByteArray();
-        }
-    }
-    
-    /*
-    public void add(byte[] a) {
-        this.add(super.rowdef.newEntry(a));
-    }
-    
-    public void add(kelondroRow.Entry a) {
-        this.put(a);
-    }
-    */
-    
     public kelondroRow.Entry get(byte[] key) {
         long handle = profile.startRead();
         kelondroRow.Entry entry = null;

@@ -36,7 +36,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
 
     private kelondroProfile profile;
     private TreeSet removeMarker;
-    
+
     public kelondroRowSet(kelondroRow rowdef) {
         super(rowdef);
         this.removeMarker = new TreeSet();
@@ -45,6 +45,12 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
 
     public kelondroRowSet(kelondroRow rowdef, int objectCount) {
         super(rowdef, objectCount);
+        this.removeMarker = new TreeSet();
+        this.profile = new kelondroProfile();
+    }
+    
+    public kelondroRowSet(kelondroRow rowdef, byte[] exportedCollectionRowinstance) {
+        super(rowdef, exportedCollectionRowinstance);
         this.removeMarker = new TreeSet();
         this.profile = new kelondroProfile();
     }
@@ -138,6 +144,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
     public void shape() {
         //System.out.println("SHAPE");
+        if (this.sortOrder == null) return; // we cannot shape without an object order
         synchronized (chunkcache) {
             resolveMarkedRemoved();
             super.sort();
@@ -288,17 +295,17 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
 
     private int compare(byte[] a, int astart, int alength, int chunknumber) {
         assert (chunknumber < chunkcount);
-        int l = Math.min(this.rowdef.width(0), Math.min(a.length - astart, alength));
-        return this.sortOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize(), l);
+        int l = Math.min(this.rowdef.width(this.sortColumn), Math.min(a.length - astart, alength));
+        return this.sortOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[this.sortColumn], this.rowdef.width(this.sortColumn));
     }
     
     private boolean match(byte[] a, int astart, int alength, int chunknumber) {
         if (chunknumber >= chunkcount) return false;
         int i = 0;
         int p = chunknumber * this.rowdef.objectsize();
-        final int len = Math.min(this.rowdef.width(0), Math.min(alength, a.length - astart));
+        final int len = Math.min(this.rowdef.width(this.sortColumn), Math.min(alength, a.length - astart));
         while (i < len) if (a[astart + i++] != chunkcache[p++]) return false;
-        return true;
+        return ((len == this.rowdef.width(this.sortColumn)) || (chunkcache[len] == 0)) ;
     }
     
     public kelondroProfile profile() {
@@ -356,6 +363,10 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         public void remove() {
             throw new UnsupportedOperationException();
         }
+    }
+    
+    public void close() {
+        // just for compatibility with kelondroIndex interface; do nothing
     }
     
     public static void main(String[] args) {

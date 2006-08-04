@@ -35,7 +35,15 @@ public class kelondroRowCollection {
     protected int           sortBound;
     protected kelondroOrder sortOrder;
     protected int           sortColumn;
-    
+
+    private static final int exp_chunkcount  = 0;
+    private static final int exp_last_read   = 1;
+    private static final int exp_last_wrote  = 2;
+    private static final int exp_order_type  = 3;
+    private static final int exp_order_col   = 4;
+    private static final int exp_order_bound = 5;
+    private static final int exp_collection  = 6;
+
     public kelondroRowCollection(kelondroRow rowdef) {
         this(rowdef, 0);
     }
@@ -51,15 +59,70 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public kelondroRowCollection(kelondroRow rowdef, int objectCount, byte[] cache) {
+    public kelondroRowCollection(kelondroRow rowdef, int objectCount, byte[] cache, kelondroOrder sortOrder, int sortColumn, int sortBound) {
         this.rowdef = rowdef;
         this.chunkcache = cache;
         this.chunkcount = objectCount;
-        this.sortColumn = 0;
-        this.sortOrder = null;
-        this.sortBound = 0;
+        this.sortColumn = sortColumn;
+        this.sortOrder = sortOrder;
+        this.sortBound = sortBound;
         this.lastTimeRead = System.currentTimeMillis();
         this.lastTimeWrote = System.currentTimeMillis();
+    }
+    
+    public kelondroRowCollection(kelondroRow rowdef, byte[] exportedCollectionRowinstance) {
+        this.rowdef = rowdef;
+        kelondroRow.Entry exportedCollection = exportRow(exportedCollectionRowinstance.length - exportOverheadSize).newEntry(exportedCollectionRowinstance);
+        this.chunkcount = (int) exportedCollection.getColLongB256(exp_chunkcount);
+        this.lastTimeRead = (exportedCollection.getColLongB256(exp_last_read) + 10957) * day;
+        this.lastTimeWrote = (exportedCollection.getColLongB256(exp_last_wrote) + 10957) * day;
+        String sortOrderKey = exportedCollection.getColString(exp_order_type, null);
+        if (sortOrderKey.equals("__")) {
+            this.sortOrder = null;
+        } else {
+            this.sortOrder = kelondroNaturalOrder.bySignature(sortOrderKey);
+            if (this.sortOrder == null) this.sortOrder = kelondroBase64Order.bySignature(sortOrderKey);
+        }
+        this.sortColumn = (int) exportedCollection.getColLongB256(exp_order_col);
+        this.sortBound = (int) exportedCollection.getColLongB256(exp_order_bound);
+        this.chunkcache = exportedCollection.getColBytes(exp_collection);        
+    }
+    
+    private static final long day = 1000 * 60 * 60 * 24;
+    
+    public static int daysSince2000(long time) {
+        return (int) (time / day) - 10957;
+    }
+    
+    private kelondroRow exportRow(int chunkcachelength) {
+        // find out the size of this collection
+        return new kelondroRow(
+                "int size-4 {b256}," +
+                "short lastread-2 {b256}," + // as daysSince2000
+                "short lastwrote-2 {b256}," + // as daysSince2000
+                "byte[] orderkey-2," +
+                "short ordercol-2 {b256}," +
+                "short orderbound-2 {b256}," +
+                "byte[] collection-" + chunkcachelength
+                );
+    }
+    
+    public static final int exportOverheadSize = 14;
+    
+    public byte[] exportCollection() {
+        // returns null if the collection is empty
+        if (size() == 0) return null;
+        trim();
+        kelondroRow row = exportRow(chunkcache.length);
+        kelondroRow.Entry entry = row.newEntry();
+        entry.setColLongB256(exp_chunkcount, size());
+        entry.setColLongB256(exp_last_read, daysSince2000(this.lastTimeRead));
+        entry.setColLongB256(exp_last_wrote, daysSince2000(this.lastTimeWrote));
+        entry.setCol(exp_order_type, (this.sortOrder == null) ? "__".getBytes() : this.sortOrder.signature().getBytes());
+        entry.setColLongB256(exp_order_col, this.sortColumn);
+        entry.setColLongB256(exp_order_bound, this.sortBound);
+        entry.setCol(exp_collection, chunkcache);
+        return entry.bytes();
     }
     
     public kelondroRow row() {
@@ -357,10 +420,6 @@ public class kelondroRowCollection {
         while (i.hasNext()) s.append(", " + ((kelondroRow.Entry) i.next()).toString());
         return new String(s);
     }
-    
-    public byte[] toByteArray() {
-        return this.chunkcache;
-    }
 
     private final int compare(int i, int j) {
         assert (i < chunkcount);
@@ -385,4 +444,9 @@ public class kelondroRowCollection {
         return c;
     }
 
+    public static void main(String[] args) {
+        System.out.println(new java.util.Date(10957 * day));
+        System.out.println(new java.util.Date(0));
+        System.out.println(daysSince2000(System.currentTimeMillis()));
+    }
 }

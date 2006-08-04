@@ -56,6 +56,7 @@ public class kelondroColumn {
         // example: <UDate-3>
 
         // cut quotes etc.
+        celldef = celldef.trim();
         if (celldef.startsWith("<")) celldef = celldef.substring(1);
         if (celldef.endsWith(">")) celldef = celldef.substring(0, celldef.length() - 1);
         
@@ -200,4 +201,34 @@ public class kelondroColumn {
         return this.description;
     }
     
+    public String toString() {
+        StringBuffer s = new StringBuffer();
+        switch (celltype) {
+        case celltype_boolean:
+            s.append("boolean ");
+            break;
+        case celltype_binary:
+            s.append("byte[] ");
+            break;
+        case celltype_string:
+            s.append("String ");
+            break;
+        case celltype_cardinal:
+            s.append("Cardinal ");
+            break;
+        }
+        s.append(nickname);
+        s.append('-');
+        s.append(cellwidth);
+        s.append(' ');
+        switch (encoder) {
+        case encoder_b64e:
+            s.append(" {b64e}");
+            break;
+        case encoder_b256:
+            s.append(" {b256}");
+            break;
+        }
+        return new String(s);
+    }
 }

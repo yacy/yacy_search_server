@@ -187,7 +187,7 @@ public class dbtest {
             }
             if (dbe.equals("kelondroFlexTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), buffer, preload, testRow, true);
+                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), kelondroBase64Order.enhancedCoder, buffer, preload, testRow, true);
             }
             if (dbe.equals("mysql")) {
                 table = new dbTable("mysql", testRow);
@@ -342,7 +342,7 @@ public class dbtest {
             if (table instanceof kelondroTree) ((kelondroTree) table).close();
             if (table instanceof kelondroFlexTable) ((kelondroFlexTable) table).close();
             if (table instanceof kelondroSplittedTree) ((kelondroSplittedTree) table).close();
-            if (table instanceof dbTable) ((dbTable)table).closeDatabaseConnection();
+            if (table instanceof dbTable) ((dbTable)table).close();
             
             long afterclose = System.currentTimeMillis();
             
@@ -408,11 +408,11 @@ final class dbTable implements kelondroIndex {
         
     }        
     
-    public void closeDatabaseConnection() throws Exception {
+    public void close() throws IOException {
         try {
             this.theDBConnection.close();
         } catch (Exception e) {
-            throw new Exception ("Unable to close the database connection.");
+            throw new IOException("Unable to close the database connection.");
         }
     }
     

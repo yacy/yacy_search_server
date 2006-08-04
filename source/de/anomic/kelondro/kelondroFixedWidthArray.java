@@ -92,7 +92,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     }
     
     public synchronized kelondroRow.Entry get(int index) throws IOException {
-        if (index >= size()) throw new kelondroException(filename, "out of bounds, index=" + index + ", size=" + size());
+        //if (index >= size()) throw new kelondroException(filename, "out of bounds, index=" + index + ", size=" + size());
         return row().newEntry(getNode(new Handle(index)).getValueRow());
     }
 

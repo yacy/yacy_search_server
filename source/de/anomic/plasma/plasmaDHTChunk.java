@@ -211,13 +211,13 @@ public class plasmaDHTChunk {
                         try {
                             lurl = lurls.getEntry(iEntry.urlHash(), iEntry);
                             if ((lurl == null) || (lurl.url() == null)) {
-                                yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + iEntry.urlHash() + "' for word hash " + container.getWordHash());
+                                //yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + iEntry.urlHash() + "' for word hash " + container.getWordHash());
                                 notBoundCounter++;
                                 urlIter.remove();
                                 wordIndex.removeEntry(container.getWordHash(), iEntry.urlHash(), true);
                             } else {
                                 urlCache.put(iEntry.urlHash(), lurl);
-                                yacyCore.log.logFine("DEBUG selectTransferContainersResource: added url hash '" + iEntry.urlHash() + "' to urlCache for word hash " + container.getWordHash());
+                                //yacyCore.log.logFine("DEBUG selectTransferContainersResource: added url hash '" + iEntry.urlHash() + "' to urlCache for word hash " + container.getWordHash());
                                 refcount++;
                             }
                         } catch (IOException e) {

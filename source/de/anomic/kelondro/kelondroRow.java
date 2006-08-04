@@ -130,6 +130,16 @@ public class kelondroRow {
         return w;
     }
     
+    public String toString() {
+        StringBuffer s = new StringBuffer();
+        s.append(row[0].toString());
+        for (int i = 1; i < row.length; i++) {
+            s.append(", ");
+            s.append(row[i].toString());
+        }
+        return new String(s);
+    }
+    
     public Entry newEntry() {
         return new Entry();
     }
@@ -370,7 +380,7 @@ public class kelondroRow {
          }
         */
         
-        public String toPropertyForm(boolean includeBraces) {
+        public String toPropertyForm(boolean includeBraces, boolean decimalCardinal) {
             StringBuffer sb = new StringBuffer();
             if (includeBraces) sb.append("{");
             int encoder, cellwidth;
@@ -395,15 +405,20 @@ public class kelondroRow {
                     sb.append(',');
                     continue;
                 case kelondroColumn.celltype_cardinal:
-                    if (encoder == kelondroColumn.encoder_b64e) {
+                    if (decimalCardinal) {
+                        sb.append(row[i].nickname());
+                        sb.append('=');
+                        sb.append(Long.toString(bytes2long(rowinstance, colstart[i], cellwidth)));
+                        sb.append(',');
+                        continue;
+                    } else if (encoder == kelondroColumn.encoder_b64e) {
                         sb.append(row[i].nickname());
                         sb.append('=');
                         long c = bytes2long(rowinstance, colstart[i], cellwidth);
                         sb.append(kelondroBase64Order.enhancedCoder.encodeLongSmart(c, cellwidth).getBytes());
                         sb.append(',');
                         continue;
-                    }
-                    throw new kelondroException("ROW", "toEncodedForm of celltype cardinal has no encoder (" + encoder + ")");
+                    } else throw new kelondroException("ROW", "toEncodedForm of celltype cardinal has no encoder (" + encoder + ")");
                 }
             }
             if (sb.charAt(sb.length() - 1) == ',') sb.deleteCharAt(sb.length() - 1); // remove ',' at end
@@ -412,14 +427,7 @@ public class kelondroRow {
         }
         
         public String toString() {
-            StringBuffer b = new StringBuffer();
-            b.append('{');
-            for (int i = 0; i < columns(); i++) {
-                b.append(getColString(i, null));
-                if (i < columns() - 1) b.append(", ");
-            }
-            b.append('}');
-            return new String(b);
+            return toPropertyForm(true, true);
         }
     }
     

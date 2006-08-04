@@ -45,7 +45,7 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         collectionIndex = new kelondroCollectionIndex(
                 path, filenameStub, 9 /*keyLength*/,
                 kelondroNaturalOrder.naturalOrder, buffersize, preloadTime,
-                4 /*loadfactor*/, rowdef, 8 /*partitions*/);
+                4 /*loadfactor*/, rowdef);
     }
     
     public int size() {

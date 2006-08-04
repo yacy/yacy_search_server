@@ -186,8 +186,9 @@ public class kelondroFlexWidthArray implements kelondroArray {
         for (int i = 0; i < size(); i++) {
             System.out.print("row " + i + ": ");
             row = get(i);
-            for (int j = 0; j < row().columns(); j++) System.out.print(((row.empty(j)) ? "NULL" : row.getColString(j, "UTF-8")) + ", ");
-            System.out.println();
+            System.out.println(row.toString());
+            //for (int j = 0; j < row().columns(); j++) System.out.print(((row.empty(j)) ? "NULL" : row.getColString(j, "UTF-8")) + ", ");
+            //System.out.println();
         }
         System.out.println("EndOfTable");
     }
