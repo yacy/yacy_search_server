@@ -189,10 +189,6 @@ public class dir {
             if (newdirname != null && newdirname.length() > 0) {
                 final File newdir = new File(dir, newdirname);
                 newdir.mkdir();
-                try {
-                    serverFileUtils.copy(new File(dir,"dir.html"), new File(newdir, "dir.html"));
-                    serverFileUtils.copy(new File(dir,"dir.class"), new File(newdir, "dir.class"));
-                } catch (IOException e) {}
             }
         }
         if (action.equals("delete") && adminAuthorization) {
