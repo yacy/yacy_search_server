@@ -185,8 +185,11 @@ parseableExt=html,htm,txt,php,shtml,asp,aspx,jsp
 # other peer users
 promoteSearchPageGreeting =
 
-# the path to the PLASMA database, especially the reverse word index
+# the path to the PLASMA database of the web spider
 dbPath=DATA/PLASMADB
+
+# the path to the public reverse word index for text files (web pages)
+indexPublicTextPath=DATA/INDEX/PUBLIC/TEXT
 
 # the path to the LISTS files. Most lists are used to filter web content
 listsPath=DATA/LISTS

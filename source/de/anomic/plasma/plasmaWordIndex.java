@@ -58,6 +58,7 @@ import java.util.TreeSet;
 import de.anomic.net.URL;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.index.indexCollectionRI;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexEntry;
@@ -78,28 +79,37 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     private static final String indexAssortmentClusterPath = "ACLUSTER";
     private static final int assortmentCount = 64;
+    private static final boolean useCollectionIndex = false;
     
-    private final File databaseRoot;
-    private final indexRAMCacheRI ramCache;
-    private final plasmaWordIndexAssortmentCluster assortmentCluster;
-    private int assortmentBufferSize; //kb
-    private final plasmaWordIndexFileCluster backend;    
-    private final kelondroOrder indexOrder = new kelondroNaturalOrder(true);
+    private final File                             oldDatabaseRoot;
+    private final kelondroOrder                    indexOrder = new kelondroNaturalOrder(true);
+    private final indexRAMCacheRI                  ramCache;
+    private final indexCollectionRI                collections;          // new database structure to replace AssortmentCluster and FileCluster
+    private int                                    assortmentBufferSize; // kb
+    private final plasmaWordIndexAssortmentCluster assortmentCluster;    // old database structure, to be replaced by CollectionRI
+    private final plasmaWordIndexFileCluster       backend;              // old database structure, to be replaced by CollectionRI
     
-    public plasmaWordIndex(File databaseRoot, int bufferkb, long preloadTime, serverLog log) {
-        this.databaseRoot = databaseRoot;
-        this.backend = new plasmaWordIndexFileCluster(databaseRoot, log);
-        this.ramCache = new indexRAMCacheRI(databaseRoot, log);
+    public plasmaWordIndex(File oldDatabaseRoot, File newIndexRoot, int bufferkb, long preloadTime, serverLog log) {
+        this.oldDatabaseRoot = oldDatabaseRoot;
+        this.backend = new plasmaWordIndexFileCluster(oldDatabaseRoot, log);
+        this.ramCache = new indexRAMCacheRI(oldDatabaseRoot, log);
 
-        // create new assortment cluster path
-        File assortmentClusterPath = new File(databaseRoot, indexAssortmentClusterPath);
+        // create assortment cluster path
+        File assortmentClusterPath = new File(oldDatabaseRoot, indexAssortmentClusterPath);
         if (!(assortmentClusterPath.exists())) assortmentClusterPath.mkdirs();
         this.assortmentBufferSize = bufferkb;
         this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, assortmentBufferSize, preloadTime, log);
+        
+        // create collections storage path
+        if (!(newIndexRoot.exists())) newIndexRoot.mkdirs();
+        if (useCollectionIndex)
+            collections = new indexCollectionRI(newIndexRoot, "test_generation0", bufferkb * 1024, preloadTime);
+        else
+            collections = null;
     }
 
     public File getRoot() {
-        return databaseRoot;
+        return oldDatabaseRoot;
     }
 
     public int maxURLinWCache() {
@@ -203,9 +213,16 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     private synchronized void flushCache(String wordHash) {
         indexContainer c = ramCache.deleteContainer(wordHash);
         if (c != null) {
-            indexContainer feedback = assortmentCluster.addEntries(c, c.updated(), false);
-            if (feedback != null) {
-                backend.addEntries(feedback, System.currentTimeMillis(), true);
+            if (useCollectionIndex) {
+                indexContainer feedback = collections.addEntries(c, c.updated(), false);
+                if (feedback != null) {
+                    throw new RuntimeException("indexCollectionRI shall not return feedback entries; feedback = " + feedback.toString());
+                }
+            } else {
+                indexContainer feedback = assortmentCluster.addEntries(c, c.updated(), false);
+                if (feedback != null) {
+                    backend.addEntries(feedback, System.currentTimeMillis(), true);
+                }
             }
         }
     }
@@ -292,15 +309,25 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         // get from cache
         indexContainer container = ramCache.getContainer(wordHash, true, -1);
 
+        // We must not use the container from cache to store everything we find,
+        // as that container remains linked to in the cache and might be changed later
+        // while the returned container is still in use.
+        // create a clone from the container
+        if (container != null) container = container.topLevelClone();
+        
+        // get from collection index
+        if (useCollectionIndex) {
+            if (container == null) {
+                container = collections.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime);
+            } else {
+                container.add(collections.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime), -1);
+            }
+        }
+        
         // get from assortments
         if (container == null) {
             container = assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime);
         } else {
-            // We must not use the container from cache to store everything we find,
-            // as that container remains linked to in the cache and might be changed later
-            // while the returned container is still in use.
-            // create a clone from the container
-            container = container.topLevelClone();
             // add containers from assortment cluster
             container.add(assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime), -1);
         }
@@ -357,6 +384,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                 entity.close();
             }
         } catch (IOException e) {}
+        if (useCollectionIndex) size += collections.size();
         size += assortmentCluster.indexSize(wordHash);
         size += ramCache.indexSize(wordHash);
         return size;
@@ -364,6 +392,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     public synchronized void close(int waitingBoundSeconds) {
         ramCache.close(waitingBoundSeconds);
+        if (useCollectionIndex) collections.close(-1);
         assortmentCluster.close(-1);
         backend.close(10);
     }
@@ -371,7 +400,8 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public synchronized indexContainer deleteContainer(String wordHash) {
         indexContainer c = ramCache.deleteContainer(wordHash);
         if (c == null) c = new indexRowSetContainer(wordHash);
-        c.add(assortmentCluster.deleteContainer(wordHash, -1), -1);
+        if (useCollectionIndex) c.add(collections.deleteContainer(wordHash), -1);
+        c.add(assortmentCluster.deleteContainer(wordHash), -1);
         c.add(backend.deleteContainer(wordHash), -1);
         return c;
     }
@@ -379,6 +409,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
         synchronized (this) {
             if (ramCache.removeEntry(wordHash, urlHash, deleteComplete)) return true;
+            if (useCollectionIndex) {if (collections.removeEntry(wordHash, urlHash, deleteComplete)) return true;}
             if (assortmentCluster.removeEntry(wordHash, urlHash, deleteComplete)) return true;
             return backend.removeEntry(wordHash, urlHash, deleteComplete);
         }
@@ -389,6 +420,10 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         synchronized (this) {
             removed += ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
             if (removed == urlHashes.size()) return removed;
+            if (useCollectionIndex) {
+                removed += collections.removeEntries(wordHash, urlHashes, deleteComplete);
+                if (removed == urlHashes.size()) return removed;
+            }
             removed += assortmentCluster.removeEntries(wordHash, urlHashes, deleteComplete);
             if (removed == urlHashes.size()) return removed;
             removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
@@ -405,9 +440,9 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
     
     public static final int RL_RAMCACHE    = 0;
-    public static final int RL_COLLECTIONS = 1; // the 'new' index structure
-    public static final int RL_ASSORTMENTS = 2;
-    public static final int RL_WORDFILES   = 3;
+    public static final int RL_COLLECTIONS = 1; // the new index structure
+    public static final int RL_ASSORTMENTS = 2; // (to be) outdated structure
+    public static final int RL_WORDFILES   = 3; // (to be) outdated structure
     
 
     public synchronized TreeSet indexContainerSet(String startHash, int resourceLevel, boolean rot, int count) throws IOException {
@@ -446,16 +481,56 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) {
             return ramCache.wordContainers(startWordHash, false);
         }
-        if (resourceLevel == plasmaWordIndex.RL_ASSORTMENTS) {
+        if ((resourceLevel == plasmaWordIndex.RL_COLLECTIONS) && (useCollectionIndex)) {
             return new kelondroMergeIterator(
+                            ramCache.wordContainers(startWordHash, false),
+                            collections.wordContainers(startWordHash, false),
+                            new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                            indexRowSetContainer.containerMergeMethod,
+                            true);
+        }
+        if (resourceLevel == plasmaWordIndex.RL_ASSORTMENTS) {
+            if (useCollectionIndex) {
+                return new kelondroMergeIterator(
+                        new kelondroMergeIterator(
+                                 ramCache.wordContainers(startWordHash, false),
+                                 collections.wordContainers(startWordHash, false),
+                                 new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                                 indexRowSetContainer.containerMergeMethod,
+                                 true),
+                        assortmentCluster.wordContainers(startWordHash, true, false),
+                        new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                        indexRowSetContainer.containerMergeMethod,
+                        true);
+            } else {
+                return new kelondroMergeIterator(
                             ramCache.wordContainers(startWordHash, false),
                             assortmentCluster.wordContainers(startWordHash, true, false),
                             new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                             indexRowSetContainer.containerMergeMethod,
                             true);
+            }
         }
         if (resourceLevel == plasmaWordIndex.RL_WORDFILES) {
-            return new kelondroMergeIterator(
+            if (useCollectionIndex) {
+                return new kelondroMergeIterator(
+                        new kelondroMergeIterator(
+                         new kelondroMergeIterator(
+                                 ramCache.wordContainers(startWordHash, false),
+                                 collections.wordContainers(startWordHash, false),
+                                 new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                                 indexRowSetContainer.containerMergeMethod,
+                                 true),
+                         assortmentCluster.wordContainers(startWordHash, true, false),
+                         new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                         indexRowSetContainer.containerMergeMethod,
+                         true),
+                        backend.wordContainers(startWordHash, false),
+                        new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                        indexRowSetContainer.containerMergeMethod,
+                        true);
+            } else {
+                return new kelondroMergeIterator(
                             new kelondroMergeIterator(
                                      ramCache.wordContainers(startWordHash, false),
                                      assortmentCluster.wordContainers(startWordHash, true, false),
@@ -466,6 +541,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                             new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                             indexRowSetContainer.containerMergeMethod,
                             true);
+            }
         }
         return null;
     }
@@ -505,11 +581,11 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public Object migrateWords2Assortment(String wordhash) throws IOException {
         // returns the number of entries that had been added to the assortments
         // can be negative if some assortments have been moved to the backend
-        File db = plasmaWordIndexFile.wordHash2path(databaseRoot, wordhash);
+        File db = plasmaWordIndexFile.wordHash2path(oldDatabaseRoot, wordhash);
         if (!(db.exists())) return "not available";
         plasmaWordIndexFile entity = null;
         try {
-            entity =  new plasmaWordIndexFile(databaseRoot, wordhash, true);
+            entity =  new plasmaWordIndexFile(oldDatabaseRoot, wordhash, true);
             int size = entity.size();
             if (size > assortmentCluster.clusterCapacity) {
                 // this will be too big to integrate it
@@ -671,8 +747,9 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public static void main(String[] args) {
         // System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
         // System.out.println(new Date(reverseMicroDateDays(microDateDays(System.currentTimeMillis()))));
-        
-        plasmaWordIndex index = new plasmaWordIndex(new File("D:\\dev\\proxy\\DATA\\PLASMADB"), 555, 1000, new serverLog("TESTAPP"));
+        File plasmadb = new File("D:\\dev\\proxy\\DATA\\PLASMADB");
+        File indexdb = new File("D:\\dev\\proxy\\DATA\\INDEX\\PRIVATE\\TEXT");
+        plasmaWordIndex index = new plasmaWordIndex(plasmadb, indexdb, 555, 1000, new serverLog("TESTAPP"));
         try {
             Iterator containerIter = index.wordContainers("5A8yhZMh_Kmv", plasmaWordIndex.RL_WORDFILES, true);
             while (containerIter.hasNext()) {

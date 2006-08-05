@@ -45,8 +45,8 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         return theStatus.toString();
     }
 
-    public void init(File theImportPath, int theCacheSize, long preloadTime) {
-        super.init(theImportPath);
+    public void init(File theImportPath, File theIndexPath, int theCacheSize, long preloadTime) {
+        super.init(theImportPath, theIndexPath);
         this.cacheSize = theCacheSize;
         this.preloadTime = preloadTime;
         

@@ -14,7 +14,7 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     protected boolean paused = false;
     
     protected plasmaSwitchboard sb;
-    protected File importPath;
+    protected File importPath, indexPath;
     protected int cacheSize;
     protected long preloadTime;
     
@@ -33,9 +33,10 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
         return this.error;
     }    
     
-    public void init(File theImportPath) {
+    public void init(File theImportPath, File theIndexPath) {
         if (theImportPath == null) throw new NullPointerException("The Import path must not be null.");
-        this.importPath = theImportPath;      
+        this.importPath = theImportPath;
+        this.indexPath = theIndexPath;
         
         // getting a job id from the import manager
         this.jobID = this.sb.dbImportManager.getJobID();

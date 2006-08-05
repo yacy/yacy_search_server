@@ -243,7 +243,7 @@ public class plasmaDHTChunk {
             }
             // create result
             indexContainers = (indexContainer[]) tmpContainers.toArray(new indexContainer[tmpContainers.size()]);
-
+//[C[16GwGuFzwffp] has 1 entries, C[16hGKMAl0w97] has 9 entries, C[17A8cDPF6SfG] has 9 entries, C[17Kdj__WWnUy] has 1 entries, C[1
             if ((indexContainers == null) || (indexContainers.length == 0)) {
                 log.logFine("No index available for index transfer, hash start-point " + startPointHash);
                 this.status = chunkStatus_FAILED;
@@ -269,7 +269,7 @@ public class plasmaDHTChunk {
     }
     
     
-    public int deleteTransferIndexes() {
+    public synchronized int deleteTransferIndexes() {
         Iterator urlIter;
         indexEntry iEntry;
         HashSet urlHashes;
@@ -277,6 +277,10 @@ public class plasmaDHTChunk {
         
         for (int i = 0; i < this.indexContainers.length; i++) {
             // delete entries separately
+            if (this.indexContainers[i] == null) {
+                log.logFine("Deletion of partial index #" + i + " not possible, entry is null");
+                continue;
+            }
             int c = this.indexContainers[i].size();
             urlHashes = new HashSet(this.indexContainers[i].size());
             urlIter = this.indexContainers[i].entries();

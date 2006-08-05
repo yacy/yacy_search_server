@@ -180,6 +180,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     // storage management
     public  File                        htCachePath;
     private File                        plasmaPath;
+    public  File                        indexPublicTextPath;
     public  File                        listsPath;
     public  File                        htDocsPath;
     public  File                        rankingPath;
@@ -260,6 +261,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // load values from configs
         this.plasmaPath   = new File(rootPath, getConfig("dbPath", "DATA/PLASMADB"));
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
+        this.indexPublicTextPath = new File(rootPath, getConfig("indexPublicTextPath", "DATA/INDEX/PUBLIC/TEXT"));
+        this.log.logConfig("Index Path: " + this.indexPublicTextPath.toString());
         this.listsPath      = new File(rootPath, getConfig("listsPath", "DATA/LISTS"));
         this.log.logConfig("Lists Path:     " + this.listsPath.toString());
         this.htDocsPath   = new File(rootPath, getConfig("htDocsPath", "DATA/HTDOCS"));
@@ -386,7 +389,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logConfig("Starting Indexing Management");
         urlPool = new plasmaURLPool(plasmaPath, ramLURL, ramNURL, ramEURL, ramLURL_time);
         
-        wordIndex = new plasmaWordIndex(plasmaPath, ramRWI, ramRWI_time, log);
+        wordIndex = new plasmaWordIndex(plasmaPath, indexPublicTextPath, ramRWI, ramRWI_time, log);
         int wordCacheMaxCount = (int) getConfigLong("wordCacheMaxCount", 10000);
         wordIndex.setMaxWordCount(wordCacheMaxCount);
         

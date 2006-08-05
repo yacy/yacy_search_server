@@ -55,7 +55,7 @@ public class kelondroCollectionIndex {
             "int chunksize-4 {b256}," +
             "int chunkcount-4 {b256}," +
             "int indexpos-4 {b256}," +
-            "short lastread-2 {b256}" +
+            "short lastread-2 {b256}, " +
             "short lastwrote-2 {b256}"
             );
     }
@@ -157,7 +157,7 @@ public class kelondroCollectionIndex {
     private int putmergeremove(byte[] key, kelondroRowCollection collection, boolean merge, Set removekeys, boolean deletecomplete) throws IOException, kelondroOutOfLimitsException {
         //if (collection.size() > maxChunks) throw new kelondroOutOfLimitsException(maxChunks, collection.size());
 
-        if ((!merge) && (collection.size() == 0)) {
+        if ((!merge) && (removekeys != null) && (collection != null) && (collection.size() == 0)) {
             // this is not a replacement, it is a deletion
             delete(key);
             return 0;

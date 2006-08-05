@@ -21,8 +21,8 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
         this.jobType = "ASSORTMENT";
     }
     
-    public void init(File theImportAssortmentFile, int theCacheSize, long preloadTime) {
-        super.init(theImportAssortmentFile);
+    public void init(File theImportAssortmentFile, File theIndexFile, int theCacheSize, long preloadTime) {
+        super.init(theImportAssortmentFile, theIndexFile);
         this.importAssortmentFile = theImportAssortmentFile;
         this.cacheSize = theCacheSize;
         if (this.cacheSize < 2*1024*1024) this.cacheSize = 2*1024*1024;

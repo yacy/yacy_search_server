@@ -38,18 +38,27 @@ import de.anomic.kelondro.kelondroOutOfLimitsException;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowCollection;
 import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.server.logging.serverLog;
 
 public class indexCollectionRI extends indexAbstractRI implements indexRI {
 
     kelondroCollectionIndex collectionIndex;
     
-    public indexCollectionRI(File path, String filenameStub, long buffersize, long preloadTime) throws IOException {
-        kelondroRow rowdef = new kelondroRow(new int[]{});
-        
-        collectionIndex = new kelondroCollectionIndex(
-                path, filenameStub, 9 /*keyLength*/,
-                kelondroNaturalOrder.naturalOrder, buffersize, preloadTime,
-                4 /*loadfactor*/, rowdef);
+    public indexCollectionRI(File path, String filenameStub, long buffersize, long preloadTime) {
+        kelondroRow rowdef = indexURLEntry.urlEntryRow;
+        try {
+            collectionIndex = new kelondroCollectionIndex(
+                    path,
+                    filenameStub,
+                    12 /*keyLength*/,
+                    kelondroNaturalOrder.naturalOrder,
+                    buffersize,
+                    preloadTime,
+                    4 /*loadfactor*/,
+                    rowdef);
+        } catch (IOException e) {
+            serverLog.logSevere("PLASMA", "unable to open collection index at " + path.toString() + ":" + e.getMessage());
+        }
     }
     
     public int size() {
@@ -133,7 +142,7 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         String wordHash = newEntries.getWordHash();
         try {
             collectionIndex.merge(wordHash.getBytes(), (kelondroRowCollection) newEntries);
-            return getContainer(wordHash, true, -1); // FIXME: this is not optimal
+            return null; // merge does allways 'eat' up all entries unlike the assortments; they may return an overflow container
         } catch (kelondroOutOfLimitsException e) {
             e.printStackTrace();
             return null;
