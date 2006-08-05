@@ -28,12 +28,16 @@ package de.anomic.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroCollectionIndex;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroOutOfLimitsException;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroRowCollection;
+import de.anomic.kelondro.kelondroRowSet;
 
 public class indexCollectionRI extends indexAbstractRI implements indexRI {
 
@@ -63,68 +67,87 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
 
     public class wordContainersIterator implements Iterator {
 
-        //private Iterator wci;
+        private Iterator wci;
         
         public wordContainersIterator(String startWordHash, boolean rot) {
-
+            wci = collectionIndex.keycollections(startWordHash.getBytes(), rot);
         }
         
         public boolean hasNext() {
-            // TODO Auto-generated method stub
-            return false;
+            return wci.hasNext();
         }
 
         public Object next() {
-            // TODO Auto-generated method stub
-            return null;
+            Object[] oo = (Object[]) wci.next();
+            byte[] key = (byte[]) oo[0];
+            kelondroRowSet collection = (kelondroRowSet) oo[1];
+            if (collection == null) return null;
+            return new indexRowSetContainer(new String(key), collection);
         }
         
         public void remove() {
-            // TODO Auto-generated method stub
-            
+            wci.remove();
         }
 
     }
      
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime) {
         try {
-            indexRowSetContainer idx = (indexRowSetContainer) collectionIndex.get(wordHash.getBytes());
-            idx.setWordHash(wordHash);
-            return idx;
+            kelondroRowSet collection = collectionIndex.get(wordHash.getBytes(), deleteIfEmpty);
+            if (collection == null) return null;
+            return new indexRowSetContainer(wordHash, collection);
         } catch (IOException e) {
-            e.printStackTrace();
             return null;
         }
     }
 
     public indexContainer deleteContainer(String wordHash) {
-        indexContainer idx = getContainer(wordHash, true, -1);
         try {
-            collectionIndex.remove(wordHash.getBytes());
+            kelondroRowSet collection = collectionIndex.delete(wordHash.getBytes());
+            if (collection == null) return null;
+            return new indexRowSetContainer(wordHash, collection);
         } catch (IOException e) {
-            e.printStackTrace();
+            return null;
         }
-        return idx;
     }
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
-        // TODO Auto-generated method stub
-        return false;
+        HashSet hs = new HashSet();
+        hs.add(urlHash.getBytes());
+        return removeEntries(wordHash, hs, deleteComplete) == 1;
     }
     
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
-        // TODO Auto-generated method stub
-        return 0;
+        try {
+            return collectionIndex.remove(wordHash.getBytes(), urlHashes, deleteComplete);
+        } catch (kelondroOutOfLimitsException e) {
+            e.printStackTrace();
+            return 0;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     public indexContainer addEntries(indexContainer newEntries, long creationTime, boolean dhtCase) {
-        // TODO Auto-generated method stub
-        return null;
+        String wordHash = newEntries.getWordHash();
+        try {
+            collectionIndex.merge(wordHash.getBytes(), (kelondroRowCollection) newEntries);
+            return getContainer(wordHash, true, -1); // FIXME: this is not optimal
+        } catch (kelondroOutOfLimitsException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     public void close(int waitingSeconds) {
-        // TODO Auto-generated method stub
-        
+        try {
+            collectionIndex.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
 }

@@ -405,7 +405,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
     
     public static final int RL_RAMCACHE    = 0;
-    public static final int RL_FILECACHE   = 1;
+    public static final int RL_COLLECTIONS = 1; // the 'new' index structure
     public static final int RL_ASSORTMENTS = 2;
     public static final int RL_WORDFILES   = 3;
     

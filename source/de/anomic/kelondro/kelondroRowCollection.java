@@ -48,6 +48,17 @@ public class kelondroRowCollection {
         this(rowdef, 0);
     }
     
+    public kelondroRowCollection(kelondroRowCollection rc) {
+        this.rowdef = rc.rowdef;
+        this.chunkcache = rc.chunkcache;
+        this.chunkcount = rc.chunkcount;
+        this.sortColumn = rc.sortColumn;
+        this.sortOrder = rc.sortOrder;
+        this.sortBound = rc.sortBound;
+        this.lastTimeRead = rc.lastTimeRead;
+        this.lastTimeWrote = rc.lastTimeWrote;
+    }
+    
     public kelondroRowCollection(kelondroRow rowdef, int objectCount) {
         this.rowdef = rowdef;
         this.chunkcache = new byte[objectCount * rowdef.objectsize()];
@@ -111,7 +122,6 @@ public class kelondroRowCollection {
     
     public byte[] exportCollection() {
         // returns null if the collection is empty
-        if (size() == 0) return null;
         trim();
         kelondroRow row = exportRow(chunkcache.length);
         kelondroRow.Entry entry = row.newEntry();

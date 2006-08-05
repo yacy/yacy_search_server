@@ -44,11 +44,16 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         System.out.println("*** Last Startup time: " + stt + " milliseconds");
         long start = System.currentTimeMillis();
 
+        if ((preloadTime < 0) && (indexfile.exists())) {
+            // delete existing index file
+            System.out.println("*** Delete File index " + indexfile);
+            indexfile.delete();
+        }
         if (indexfile.exists()) {
             // use existing index file
             System.out.println("*** Using File index " + indexfile);
             ki = new kelondroTree(indexfile, buffersize, preloadTime, 10);
-        } else if (stt > preloadTime) {
+        } else if ((preloadTime >= 0) && (stt > preloadTime)) {
             // generate new index file
             System.out.print("*** Generating File index for " + size() + " entries from " + indexfile);
             ki = initializeTreeIndex(indexfile, buffersize, preloadTime, objectOrder);
@@ -151,6 +156,39 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             super.remove(i);
             return r;
         }
+    }
+
+    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        return new rowIterator(up, rotating, firstKey);
+    }
+    
+    public class rowIterator implements Iterator {
+
+        Iterator indexIterator;
+        
+        public rowIterator(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+            indexIterator = index.rows(up, rotating, firstKey);
+        }
+        
+        public boolean hasNext() {
+            return indexIterator.hasNext();
+        }
+
+        public Object next() {
+            kelondroRow.Entry idxEntry = (kelondroRow.Entry) indexIterator.next();
+            int idx = (int) idxEntry.getColLongB256(1);
+            try {
+                return get(idx);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        public void remove() {
+            indexIterator.remove();
+        }
+        
     }
 
 }

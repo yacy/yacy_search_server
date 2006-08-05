@@ -46,6 +46,11 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
         this(wordHash, new kelondroNaturalOrder(true), 0);
     }
     
+    public indexRowSetContainer(String wordHash, kelondroRowSet collection) {
+        super(collection);
+        this.wordHash = wordHash;
+    }
+    
     public indexRowSetContainer(String wordHash, kelondroOrder ordering, int column) {
         super(indexURLEntry.urlEntryRow);
         this.wordHash = wordHash;

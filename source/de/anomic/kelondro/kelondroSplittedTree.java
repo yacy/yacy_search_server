@@ -153,9 +153,8 @@ public class kelondroSplittedTree implements kelondroIndex {
     public kelondroRow.Entry remove(byte[] key) throws IOException {
         return ktfs[partition(key)].remove(key);
     }
-
-    public Iterator rows(boolean up, boolean rotating) throws IOException {
-        return new ktfsIterator(up, rotating);
+    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        return new ktfsIterator(up, rotating, firstKey);
     }
     
     public class ktfsIterator implements Iterator {
@@ -164,11 +163,12 @@ public class kelondroSplittedTree implements kelondroIndex {
         Iterator ktfsI;
         boolean up, rot;
         
-        public ktfsIterator(boolean up, boolean rotating) throws IOException {
+        public ktfsIterator(boolean up, boolean rotating, byte[] firstKey) throws IOException {
             this.up = up;
             this.rot = rotating;
             c = (up) ? 0 : (ff - 1);
-            ktfsI = ktfs[c].rows(up, false, null);
+            if (firstKey != null) throw new UnsupportedOperationException("ktfsIterator does not work with a start key");
+            ktfsI = ktfs[c].rows(up, false, firstKey); // FIXME: this works only correct with firstKey == null
         }
         
         public boolean hasNext() {

@@ -138,7 +138,7 @@ public class kelondroColumn {
         }
         
         // check length constraints
-        if (this.cellwidth <= 0) throw new kelondroException("kelondroColumn - no cell width given for " + this.nickname);
+        if (this.cellwidth < 0) throw new kelondroException("kelondroColumn - no cell width given for " + this.nickname);
         if (((typename.equals("boolean")) && (this.cellwidth > 1)) ||
             ((typename.equals("byte")) && (this.cellwidth > 1)) ||
             ((typename.equals("short")) && (this.cellwidth > 2)) ||

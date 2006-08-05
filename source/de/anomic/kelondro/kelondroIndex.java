@@ -51,6 +51,7 @@
 package de.anomic.kelondro;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 public interface kelondroIndex {
 
@@ -59,6 +60,6 @@ public interface kelondroIndex {
     public kelondroRow.Entry get(byte[] key) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException;
     public kelondroRow.Entry remove(byte[] key) throws IOException;
-    //public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException;
+    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException;
     public void close() throws IOException;
 }

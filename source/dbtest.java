@@ -290,7 +290,7 @@ public class dbtest {
             
             if (command.equals("list")) {
                 Iterator i = null;
-                if (table instanceof kelondroSplittedTree) i = ((kelondroSplittedTree) table).rows(true, false);
+                if (table instanceof kelondroSplittedTree) i = ((kelondroSplittedTree) table).rows(true, false, null);
                 if (table instanceof kelondroTree) i = ((kelondroTree) table).rows(true, false, null);
                 if (table instanceof dbTable) i = ((dbTable) table).rows(true, false, null);
                 byte[][] row;
