@@ -273,7 +273,7 @@ public class dir {
                         if (f.isDirectory()) {
                             tree += "<td class=\"tt\" align=\"left\" width=\"20\"><img src=\"/env/grafics/folderIconSmall.gif\" align=\"top\" class=\"small\"></td>";
                             tree += "<td class=\"tt\" align=\"left\" width=\"60\">" + dateString(d) + "</td>";
-                            tree += "<td class=\"tt\" align=\"left\" width=\"150\"><a href=\"" /*+ path*/ + list[i] + "/dir.html\" class=\"tt\">" + list[i] + "</a></td>";
+                            tree += "<td class=\"tt\" align=\"left\" width=\"150\"><a href=\"" /*+ path*/ + list[i] + "/\" class=\"tt\">" + list[i] + "</a></td>";
                             tree += "<td class=\"tt\" align=\"right\" width=\"60\">" + formatLong(0, 10) + "</td>";
                             tree += "<td class=\"tt\" align=\"left\" colspan=\"2\"><i>Directory</i></td>";
                         } else {
@@ -286,7 +286,7 @@ public class dir {
                         }
                         if (adminAuthorization) {
                             tree += "<td class=\"small\" align=\"center\" width=\"50\">" + 
-                                    "<form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                                    "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                                     "<input type=\"hidden\" name=\"action\" value=\"delete\">" +
                                     "<input type=\"hidden\" name=\"file\" value=\"" + list[i] + "\">" +
                                     "<input type=\"submit\" value=\"delete\" class=\"small\"></form></td>";
@@ -310,32 +310,32 @@ public class dir {
         if (adminAuthorization) {
             ident = "Administrator";
             account = "<table border=\"0\" cellpadding=\"0\" cellspacing=\"2\" width=\"100%\">" +
-                      "<tr class=\"TableCellDark\"><td class=\"small\">upload:</td><td><form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                      "<tr class=\"TableCellDark\"><td class=\"small\">upload:</td><td><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "<input type=\"hidden\" name=\"action\" value=\"uploadPassword\">" + 
                       "<input type=\"password\" name=\"password\" size=\"12\">&nbsp;" +
                       "<input type=\"submit\" value=\"Set Password\" class=\"small\">" +
                       "</form></td></tr>" +
-                      "<tr class=\"TableCellLight\"><td class=\"small\">download:</td><td><form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                      "<tr class=\"TableCellLight\"><td class=\"small\">download:</td><td><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "<input type=\"hidden\" name=\"action\" value=\"downloadPassword\">" + 
                       "<input type=\"password\" name=\"password\" size=\"12\">&nbsp;" +
                       "<input type=\"submit\" value=\"Set Password\" class=\"small\">" +
                       "</form></td></tr>" +
                       "</table>";
-            logout = "<form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+            logout = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                      "<input type=\"hidden\" name=\"action\" value=\"logout\">" + 
                      "<input type=\"submit\" value=\"Log-Out Administrator\" class=\"small\">&nbsp;(enter&nbsp;empty&nbsp;account)" +
                      "</form>";
             service = "<table border=\"0\" cellpadding=\"0\" cellspacing=\"2\" width=\"100%\">" +
                       "<tr class=\"TableCellDark\">" +
                       "<td class=\"small\">New Directory:</td>" +
-                      "<td><form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                      "<td><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "<input type=\"hidden\" name=\"action\" value=\"newdir\">" + 
                       "<input type=\"text\" name=\"directory\" size=\"10\" class=\"small\">&nbsp;" +
                       "<input type=\"submit\" value=\"Create\" class=\"small\">" +
                       "</form></td></tr>" +
                       "<tr class=\"TableCellLight\">" +
                       "<td class=\"small\">File Upload:</td>" +
-                      "<td class=\"small\"><form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                      "<td class=\"small\"><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "Resource&nbsp;=&nbsp;<input type=\"hidden\" name=\"action\" value=\"upload\">" + 
                       "<input type=\"file\" name=\"file\" size=\"10\" class=\"small\"><br>" +
                       "Description&nbsp;=&nbsp;<input type=\"text\" name=\"description\" size=\"30\" class=\"small\"><br>" +
@@ -349,14 +349,14 @@ public class dir {
                    "if you want to find files that are indexed in any share zone, add the word 'yacyshare' to the search words.";
         } else if (uploadAuthorization) {
             ident = "Uploader";
-            account = "<form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+            account = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "<input type=\"hidden\" name=\"action\" value=\"authenticateAdmin\">" +
                       "<input type=\"submit\" value=\"Log-In as Administrator\" class=\"small\">" +
                       "</form>";
             if (uploadAccountBase64MD5.length() == 0) {
                 logout = "";
             } else {
-                logout = "<form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                logout = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                          "<input type=\"hidden\" name=\"action\" value=\"logout\">" + 
                          "<input type=\"submit\" value=\"Log-Out 'upload'\" class=\"small\">&nbsp;(enter&nbsp;empty&nbsp;account)" +
                          "</form>";
@@ -364,14 +364,14 @@ public class dir {
             service = "<table border=\"0\" cellpadding=\"0\" cellspacing=\"2\" width=\"100%\">" +
                       "<tr class=\"TableCellDark\">" +
                       "<td class=\"small\">New Directory:</td>" +
-                      "<td class=\"small\"><form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                      "<td class=\"small\"><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "<input type=\"hidden\" name=\"action\" value=\"newdir\">" + 
                       "<input type=\"text\" name=\"directory\" size=\"10\" class=\"small\">&nbsp;" +
                       "<input type=\"submit\" value=\"Create\" class=\"small\">" +
                       "</form></td></tr>" +
                       "<tr class=\"TableCellLight\">" +
                       "<td class=\"small\">File Upload:</td>" +
-                      "<td class=\"small\"><form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                      "<td class=\"small\"><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "Resource&nbsp;=&nbsp;<input type=\"hidden\" name=\"action\" value=\"upload\">" + 
                       "<input type=\"file\" name=\"file\" size=\"10\" class=\"small\"><br>" +
                       "Description&nbsp;=&nbsp;<input type=\"text\" name=\"description\" size=\"30\" class=\"small\"><br>" +
@@ -382,18 +382,18 @@ public class dir {
             info = "Uploaders are not granted to delete files or directories. If you want to do this, log-in as admin.";
         } else if (downloadAuthorization) {
             ident = "Downloader"; 
-            account = "<form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+            account = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "<input type=\"hidden\" name=\"action\" value=\"authenticateAdmin\" class=\"small\">" +
                       "<input type=\"submit\" value=\"Log-In as Administrator\" class=\"small\">" +
                       "</form> " +
-                      "<form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                      "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "<input type=\"hidden\" name=\"action\" value=\"authenticateUpload\" class=\"small\">" +
                       "<input type=\"submit\" value=\"Log-In as user 'upload'\" class=\"small\">" +
                       "</form>";
             if (downloadAccountBase64MD5.length() == 0) {
                 logout = "";
             } else {
-                logout = "<form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                logout = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                          "<input type=\"hidden\" name=\"action\" value=\"logout\">" + 
                          "<input type=\"submit\" value=\"Log-Out 'download'\" class=\"small\">&nbsp;(enter&nbsp;empty&nbsp;account)" +
                          "</form>";
@@ -406,15 +406,15 @@ public class dir {
         } else {
             ident = "not authorized";
             tree = "To inspect this directory you need either an admin, upload or download account. Please log in.";
-            account = "<form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+            account = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "<input type=\"hidden\" name=\"action\" value=\"authenticateAdmin\">" +
                       "<input type=\"submit\" value=\"Log-In as Administrator\" class=\"small\">" +
                       "</form> " +
-                      "<form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                      "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "<input type=\"hidden\" name=\"action\" value=\"authenticateUpload\">" +
                       "<input type=\"submit\" value=\"Log-In as user 'upload'\" class=\"small\">" +
                       "</form> " +
-                      "<form action=\"dir.html\" method=\"post\" enctype=\"multipart/form-data\">" +
+                      "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "<input type=\"hidden\" name=\"action\" value=\"authenticateDownload\">" +
                       "<input type=\"submit\" value=\"Log-In as user 'download'\" class=\"small\">" +
                       "</form>";
