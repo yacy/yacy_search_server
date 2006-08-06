@@ -61,17 +61,17 @@
 	<tr height="10" valign="top">
 		<td>Welcome! You are identified and authorized as "<b>#(ident)#Administrator::Uploader::Downloader::not authorized#(/ident)#</b>".</td>
 		<td align="right">
-			#(logout)#
+			#(logout)#<!-- adminAuthorization -->
 				<form action="#" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="logout"> 
                 	<input type="submit" value="Log-Out Administrator" class="small">&nbsp;(enter&nbsp;empty&nbsp;account)
                 </form>	
-            ::
+            ::<!-- uploadAuthorization -->
 				<form action="#" method="post" enctype="multipart/form-data">
                 	<input type="hidden" name="action" value="logout"> 
                     <input type="submit" value="Log-Out 'upload'" class="small">&nbsp;(enter&nbsp;empty&nbsp;account)
                 </form>            			
-            ::
+            ::<!-- downloadAuthorization -->
 				<form action="#" method="post" enctype="multipart/form-data">
                 	<input type="hidden" name="action" value="logout">
                     <input type="submit" value="Log-Out 'download'" class="small">&nbsp;(enter&nbsp;empty&nbsp;account)
@@ -89,7 +89,7 @@
 				<tr valign="top" class="TableHeader" height="6"><td class="small">Service</td></tr>
 				<tr valign="top" class="TableCellLight">
 					<td class="small">
-						#(service)#
+						#(service)#<!-- adminAuthorization, uploadAuthorization -->
 							<table border="0" cellpadding="0" cellspacing="2" width="100%">
                       			<tr class="TableCellDark">
                       				<td class="small">New Directory:</td>
@@ -113,10 +113,10 @@
                       				</td>
                       			</tr>
                       		</table>
-                      	::
+                      	::<!-- downloadAuthorization -->
 							You are granted to view directory listings and do downloads in this directory.<br>
                           	If you want to upload, please log in as user 'upload'	                      							
-						::					
+						::<!-- not authorized -->					
 							No service available.						
 						#(/service)#
 					</td>
@@ -128,7 +128,7 @@
 				<tr valign="top" class="TableHeader" height="6"><td width="130" class="small">Account</td></tr>
 				<tr valign="top" class="TableCellLight">
 					<td width="130" class="small">
-					#(account)#
+					#(account)#<!-- adminAuthorization -->
 					  	<table border="0" cellpadding="0" cellspacing="2" width="100%">
                       		<tr class="TableCellDark">
                       			<td class="small">upload:</td>
@@ -149,12 +149,12 @@
                       			</td>
                       		</tr>
                       	</table>				
-					::
+					::<!-- uploadAuthorization -->
 						<form action="#" method="post" enctype="multipart/form-data">
                       		<input type="hidden" name="action" value="authenticateAdmin">
                       		<input type="submit" value="Log-In as Administrator" class="small">
                       	</form>						
-						::
+					::<!-- downloadAuthorization -->
 						<form action="#" method="post" enctype="multipart/form-data">
                       		<input type="hidden" name="action" value="authenticateAdmin" class="small">
                       		<input type="submit" value="Log-In as Administrator" class="small">
@@ -163,7 +163,7 @@
                       		<input type="hidden" name="action" value="authenticateUpload" class="small">
                       		<input type="submit" value="Log-In as user 'upload'" class="small">
                       	</form>
-                      ::
+                    :: <!-- not authorized -->
 						<form action="#" method="post" enctype="multipart/form-data">
                       		<input type="hidden" name="action" value="authenticateAdmin">
                       		<input type="submit" value="Log-In as Administrator" class="small">
