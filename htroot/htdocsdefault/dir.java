@@ -67,6 +67,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
@@ -78,7 +79,7 @@ public class dir {
 
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     public static String dateString(Date date) {
-    return SimpleFormatter.format(date);
+        return SimpleFormatter.format(date);
     }
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
@@ -88,7 +89,7 @@ public class dir {
 //      System.out.println("###Header="+ header);
 //      System.out.println("###post=" + post);
         String action = ((post == null) ? "info" : post.get("action", "info"));
-        String tree  = "";
+
         // variables for this path
 //      File   htroot = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath", "htroot"));
         final File   htroot = new File(switchboard.getRootPath(), switchboard.getConfig("htDocsPath", "DATA/HTDOCS"));
@@ -156,14 +157,11 @@ public class dir {
             } else {
                 action = "";
             }
-        }
-        if (action.equals("downloadPassword") && adminAuthorization) {
+        } else if (action.equals("downloadPassword") && adminAuthorization) {
             switchboard.setConfig("downloadAccountBase64MD5", (post.get("password", "").length() == 0) ? "" : serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString("download:" + post.get("password", ""))));
-        }
-        if (action.equals("uploadPassword") && adminAuthorization) {
+        } else if (action.equals("uploadPassword") && adminAuthorization) {
             switchboard.setConfig("uploadAccountBase64MD5", (post.get("password", "").length() == 0) ? "" : serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString("upload:" + post.get("password", ""))));
-        }        
-        if (action.equals("upload") && (uploadAuthorization || adminAuthorization)) {
+        } else if (action.equals("upload") && (uploadAuthorization || adminAuthorization)) {
             String filename = new File(post.get("file", "dummy")).getName();
             String description = post.get("description", "");
             pos = filename.lastIndexOf("\\");
@@ -183,15 +181,13 @@ public class dir {
                     indexPhrase(switchboard, urlstring, phrase, description);
                 }
             } catch (IOException e) {}
-        }
-        if (action.equals("newdir") && (uploadAuthorization || adminAuthorization)) {
+        } else if (action.equals("newdir") && (uploadAuthorization || adminAuthorization)) {
             final String newdirname = post.get("directory", "EmptyDir");
             if (newdirname != null && newdirname.length() > 0) {
                 final File newdir = new File(dir, newdirname);
                 newdir.mkdir();
             }
-        }
-        if (action.equals("delete") && adminAuthorization) {
+        } else if (action.equals("delete") && adminAuthorization) {
             String filename = post.get("file", "foo");
             final File file = new File(dir, filename);
             if (file.exists()) {
@@ -231,16 +227,16 @@ public class dir {
             String md5s, description;
             Date d;
             // tree += "<span class=\"tt\">path&nbsp;=&nbsp;" + path + "</span><br><br>";
-            if (list == null)
-                tree += "This directory is empty.<br>";
-            else {
-                int filecount = 0;
-                tree += "<table border=\"0\" cellpadding=\"2\" cellspacing=\"1\" width=\"100%\">" + 
-                        "<tr height=\"8\" class=\"TableHeader\"><td colspan=\"7\" class=tt>" + path + "</td></tr>";
+            if (list != null) {
+                int filecount = 0, fileIdx = 0;
+                prop.put("path", path);
+                
                 boolean dark = false;
                 for (int i = 0; i < list.length; i++) {
                     if (!((list[i].startsWith("dir.")) || (list[i].endsWith(".md5")))) {
-                        tree += "<tr height=\"8\" class=\"TableCell" + ((dark) ? "Dark" : "Light") + "\" valign=\"top\">";
+                        
+                        prop.put("dirlist_" + fileIdx + "_dark" , dark?1:0);
+                        
                         dark = !dark;
                         filecount++;
                         f = new File(dir, list[i]);
@@ -267,36 +263,44 @@ public class dir {
                         }
                         d = new Date(f.lastModified());
                         if (f.isDirectory()) {
-                            tree += "<td class=\"tt\" align=\"left\" width=\"20\"><img src=\"/env/grafics/folderIconSmall.gif\" align=\"top\" class=\"small\"></td>";
-                            tree += "<td class=\"tt\" align=\"left\" width=\"60\">" + dateString(d) + "</td>";
-                            tree += "<td class=\"tt\" align=\"left\" width=\"150\"><a href=\"" /*+ path*/ + list[i] + "/\" class=\"tt\">" + list[i] + "</a></td>";
-                            tree += "<td class=\"tt\" align=\"right\" width=\"60\">" + formatLong(0, 10) + "</td>";
-                            tree += "<td class=\"tt\" align=\"left\" colspan=\"2\"><i>Directory</i></td>";
+                            prop.put("dirlist_" + fileIdx + "_dir" , 1);                            
+                            prop.put("dirlist_" + fileIdx + "_dir_date" , dateString(d));
+                            prop.put("dirlist_" + fileIdx + "_dir_name" , list[i]);                            
                         } else {
-                            tree += "<td class=\"tt\" align=\"left\" width=\"20\"><img src=\"/env/grafics/fileIconSmall.gif\" align=\"top\">";
-                            tree += "<td class=\"tt\" align=\"left\" width=\"60\">" + dateString(d) + "&nbsp;";
-                            tree += "<td class=\"tt\" align=\"left\" width=\"150\"><a href=\"" /*+ path*/ + list[i] + "\" class=\"tt\">" + list[i] + "</a></td>";
-                            tree += "<td class=\"tt\" align=\"right\" width=\"60\">" + formatLong(f.length(), 10) + "</td>";
-                            tree += "<td class=\"tt\" align=\"left\" width=\"220\"><a href=\"" + yacyhURL(yacyCore.seedDB.mySeed, f.getName(), md5s) + "\" class=\"tt\">" + md5s + "</a></td>";
-                            tree += "<td class=\"small\" align=\"left\">" + (((description.length() == 0) && ((list[i].endsWith(".jpg")) || (list[i].endsWith(".gif")) || (list[i].endsWith(".png")))) ? ("<img src=\"" + list[i] + "\" border=\"0\" height=\"32\" width=\"32\"") : description) + "</td>";
+                            prop.put("dirlist_" + fileIdx + "_dir" , 0);
+                            prop.put("dirlist_" + fileIdx + "_dir_date" , dateString(d));
+                            prop.put("dirlist_" + fileIdx + "_dir_name" , list[i]); 
+                            prop.put("dirlist_" + fileIdx + "_dir_size" , serverMemory.bytesToString(f.length()).replaceAll(" ", "&nbsp;"));
+                            prop.put("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed, f.getName(), md5s));
+                            prop.put("dirlist_" + fileIdx + "_dir_md5s",md5s);
+                            
+                            boolean showImage = (description.length() == 0) && (list[i].endsWith(".jpg") || list[i].endsWith(".gif") || list[i].endsWith(".png"));
+                            prop.put("dirlist_" + fileIdx + "_dir_descriptionMode",showImage?0:1);
+                            if (showImage) {
+                                prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_image",list[i]);
+                            } else {
+                                prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);
+                            }                            
                         }
+                        
+                        prop.put("dirlist_" + fileIdx + "_adminAuthorization",adminAuthorization?1:0);
                         if (adminAuthorization) {
-                            tree += "<td class=\"small\" align=\"center\" width=\"50\">" + 
-                                    "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                                    "<input type=\"hidden\" name=\"action\" value=\"delete\">" +
-                                    "<input type=\"hidden\" name=\"file\" value=\"" + list[i] + "\">" +
-                                    "<input type=\"submit\" value=\"delete\" class=\"small\"></form></td>";
-                        }
+                            prop.put("dirlist_" + fileIdx + "_adminAuthorization_name",list[i]);
+                        }                        
+                        
 //                      if (adminAuthorization) tree += "</form> "; else tree += "<br>";
-                        tree += "</tr>" + serverCore.crlfString; 
+                        fileIdx++;
                     }
                 }
-                tree += "</table>";
-                if (filecount == 0) {
-                    tree += "<b>EMPTY</b><br>";
-                }
+                
+                prop.put("dirlist",filecount);
+                prop.put("emptydir", filecount == 0 ? 1:0);
             }
+            prop.put("authenticated",1);
+        } else {
+            prop.put("authenticated",0);
         }
+        
 
         String ident = "";
         String account = "";
@@ -401,7 +405,6 @@ public class dir {
             }
         } else {
             ident = "not authorized";
-            tree = "To inspect this directory you need either an admin, upload or download account. Please log in.";
             account = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
                       "<input type=\"hidden\" name=\"action\" value=\"authenticateAdmin\">" +
                       "<input type=\"submit\" value=\"Log-In as Administrator\" class=\"small\">" +
@@ -419,7 +422,6 @@ public class dir {
             info = "You must log-in to upload or download.";
         }
         
-        prop.put("dir", tree);
         prop.put("ident", ident);
         prop.put("account", account);
         prop.put("service", service);

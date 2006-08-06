@@ -17,20 +17,21 @@
   <table class="Heading" border="0" cellspacing="0" cellpadding="0" width="100%">
   <tr height="36">
     <td width="240">
-	<a href="http://www.yacy.net">
-	<img width="52" height="33" border="0" src="/env/grafics/yacy.gif" align="top" alt="YaCy-Logo">
-	</a>
+		<a href="http://www.yacy.net">
+		<img width="52" height="33" border="0" src="/env/grafics/yacy.gif" align="top" alt="YaCy-Logo">
+		</a>
     </td>
     <td width="50%" align="center">
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
          <tr><td height="4"></td></tr>
          <tr><td valign="top">
-             <center>
-             <font size="4" face="Helvetica, Arial" color="#ffffff">
-		<b>Public&nbsp;File&nbsp;Directory</b>
-	     </font>
-	     </center>
-         </td></tr>
+             	<center>
+             		<font size="4" face="Helvetica, Arial" color="#ffffff">
+						<b>Public&nbsp;File&nbsp;Directory</b>
+	     			</font>
+	     		</center>
+         	</td>
+         </tr>
       </table>
     </td>
     <td width="240" align="right">
@@ -56,41 +57,82 @@
 <!-- steering elements -->
 
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
-<tr height="8"><td></td><td></td></tr>
-<tr height="10" valign="top">
-<td>Welcome! You are identified and authorized as "<b>#[ident]#</b>".</td>
-<td align="right">#[logout]#</td></tr>
+	<tr height="8"><td></td><td></td></tr>
+	<tr height="10" valign="top">
+		<td>Welcome! You are identified and authorized as "<b>#[ident]#</b>".</td>
+		<td align="right">#[logout]#</td>
+	</tr>
 </table>
 
 <table border="0" cellpadding="0" cellspacing="6" width="100%">
-<tr valign="top"><td width="50%">
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr valign="top" class="TableHeader" height="6"><td class="small">Service</td></tr>
-<tr valign="top" class="TableCellLight"><td class="small">#[service]#</td></tr>
-</table>
-</td><td rowspan="2" width="50%">
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr valign="top" class="TableHeader" height="6"><td width="130" class="small">Account</td></tr>
-<tr valign="top" class="TableCellLight"><td width="130" class="small">#[account]#</td></tr>
-</table>
-</td></tr>
-<tr valign="top">
-<td>
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr valign="top" class="TableHeader" height="6"><td class="small">Info</td></tr>
-<tr valign="top" class="TableCellLight"><td class="small">#[info]#</td></tr>
-</table>
-</td>
-<td></td>
-</tr>
+	<tr valign="top">
+		<td width="50%">
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr valign="top" class="TableHeader" height="6"><td class="small">Service</td></tr>
+				<tr valign="top" class="TableCellLight"><td class="small">#[service]#</td></tr>
+			</table>
+		</td>
+		<td rowspan="2" width="50%">
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr valign="top" class="TableHeader" height="6"><td width="130" class="small">Account</td></tr>
+				<tr valign="top" class="TableCellLight"><td width="130" class="small">#[account]#</td></tr>
+			</table>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td>
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr valign="top" class="TableHeader" height="6"><td class="small">Info</td></tr>
+				<tr valign="top" class="TableCellLight"><td class="small">#[info]#</td></tr>
+			</table>
+		</td>
+		<td></td>
+	</tr>
 </table>
 
 <br>
 
 <!-- directory listing -->
 <hr>
-<p>#[dir]#</p>
+<p>
+<table border="0" cellpadding="2" cellspacing="1" width="100%">
+<tr height="8" class="TableHeader">
+	<td colspan="7" class="tt">#[path]#</td>
+</tr>
+#{dirlist}#
+<tr height="8" class="TableCell#(dark)#Light::Dark#(/dark)#" valign="top">
+#(dir)#<!-- dirlist entry is a file -->
+	<td class="tt" align="left" width="20"><img src="/env/grafics/fileIconSmall.gif" align="top">
+	<td class="tt" align="left" width="60">#[date]#</td>
+	<td class="tt" align="left" width="150"><a href="#[name]#" class="tt">#[name]#</a></td>
+	<td class="tt" align="right" width="60">#[size]#</td>
+    <td class="tt" align="left" width="220"><a href="#[yacyhURL]#" class="tt">#[md5s]#</a></td>
+    <td class="small" align="left">#(descriptionMode)#<img src="#[image]#" border="0" height="32" width="32">::#[text]##(/descriptionMode)#</td>
+::<!-- dirlist entry is a directory -->
+	<td class="tt" align="left" width="20"><img src="/env/grafics/folderIconSmall.gif" align="top" class="small"></td>
+	<td class="tt" align="left" width="60">#[date]#</td>
+	<td class="tt" align="left" width="150"><a href="#[name]#/" class="tt">#[name]#</a></td>
+    <td class="tt" align="right" width="60">&nbsp;</td>
+    <td class="tt" align="left" colspan="2"><i>Directory</i></td>
+#(/dir)#
+#(adminAuthorization)#
+::
+	<td class="small" align="center" width="50">
+		<form action="#" method="post" enctype="multipart/form-data">
+        	<input type="hidden" name="action" value="delete">
+            <input type="hidden" name="file" value="#[name]#">
+			<input type="submit" value="delete" class="small">
+		</form>
+	</td>
+#(/adminAuthorization)#
+</tr>
+#{/dirlist}#
+</table>
+#(emptydir)#::<b>EMPTY</b><br>#(/emptydir)#
+#(authenticated)#To inspect this directory you need either an admin, upload or download account. Please log in.::#(/authenticated)#
+</p>
 <hr>
+
 <p class="small">
 Access of this page with the URLs:
 <a href="http://#[peeraddress]#/share/" class="tt">http://#[peeraddress]#/share/</a>, or
