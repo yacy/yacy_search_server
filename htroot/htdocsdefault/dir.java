@@ -1,6 +1,5 @@
 // dir.java 
 // -----------------------
-// part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
@@ -52,6 +51,7 @@ import java.io.File;
 import java.io.IOException;
 import de.anomic.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -71,6 +71,8 @@ import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.dirlistComparator;
+import de.anomic.tools.md5DirFileFilter;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.data.userDB;
@@ -222,10 +224,14 @@ public class dir {
         // if authorized, generate directory tree listing
         if ((adminAuthorization) || (uploadAuthorization) || (downloadAuthorization)) {
             // generate dir listing
-            final String[] list = dir.list();
-            File f, fmd5;
+            md5DirFileFilter fileFilter = new md5DirFileFilter();
+            final File[] list = dir.listFiles(fileFilter);
+            
+            // sorting the dir list
+            dirlistComparator comparator = new dirlistComparator();
+            Arrays.sort(list,comparator);
+            
             String md5s, description;
-            Date d;
             // tree += "<span class=\"tt\">path&nbsp;=&nbsp;" + path + "</span><br><br>";
             if (list != null) {
                 int filecount = 0, fileIdx = 0;
@@ -233,66 +239,77 @@ public class dir {
                 
                 boolean dark = false;
                 for (int i = 0; i < list.length; i++) {
-                    if (!((list[i].startsWith("dir.")) || (list[i].endsWith(".md5")))) {
-                        
-                        prop.put("dirlist_" + fileIdx + "_dark" , dark?1:0);
-                        
-                        dark = !dark;
-                        filecount++;
-                        f = new File(dir, list[i]);
-                        fmd5 = new File(dir, list[i] + ".md5");
-                        try {
-                            if (fmd5.exists()) {
-                                md5s = new String(serverFileUtils.read(fmd5));
-                                pos = md5s.indexOf('\n');
-                               if (pos >= 0) {
-                                   description = md5s.substring(pos + 1);
-                                   md5s = md5s.substring(0, pos);
-                               } else {
-                                   description = "";
-                               }                
+
+                    filecount++;
+                    File f = list[i];
+                    String fileName = f.getName();
+
+                    // changing table row color
+                    prop.put("dirlist_" + fileIdx + "_dark" , dark?1:0);
+                    dark = !dark;                        
+
+
+                    // reading the content of the md5 file that belongs
+                    // to the file
+                    File fmd5 = new File(dir, fileName + ".md5");
+                    try {
+                        if (fmd5.exists()) {
+                            md5s = new String(serverFileUtils.read(fmd5));
+                            pos = md5s.indexOf('\n');
+                            if (pos >= 0) {
+                                // the second line contains an optional description
+                                description = md5s.substring(pos + 1);
+                                // the first line contains the md5 sum of the file
+                                md5s = md5s.substring(0, pos);
                             } else {
-                                // generate md5 on-the-fly
-                                md5s = serverCodings.encodeMD5Hex(f);
                                 description = "";
-                                serverFileUtils.write((md5s + "\n" + description).getBytes("UTF-8"), fmd5);
-                            }
-                        } catch (IOException e) {
-                            md5s = "";
-                            description = "";
-                        }
-                        d = new Date(f.lastModified());
-                        if (f.isDirectory()) {
-                            prop.put("dirlist_" + fileIdx + "_dir" , 1);                            
-                            prop.put("dirlist_" + fileIdx + "_dir_date" , dateString(d));
-                            prop.put("dirlist_" + fileIdx + "_dir_name" , list[i]);                            
+                            }                
                         } else {
-                            prop.put("dirlist_" + fileIdx + "_dir" , 0);
-                            prop.put("dirlist_" + fileIdx + "_dir_date" , dateString(d));
-                            prop.put("dirlist_" + fileIdx + "_dir_name" , list[i]); 
-                            prop.put("dirlist_" + fileIdx + "_dir_size" , serverMemory.bytesToString(f.length()).replaceAll(" ", "&nbsp;"));
-                            prop.put("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed, f.getName(), md5s));
-                            prop.put("dirlist_" + fileIdx + "_dir_md5s",md5s);
-                            
-                            boolean showImage = (description.length() == 0) && (list[i].endsWith(".jpg") || list[i].endsWith(".gif") || list[i].endsWith(".png"));
-                            prop.put("dirlist_" + fileIdx + "_dir_descriptionMode",showImage?0:1);
-                            if (showImage) {
-                                prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_image",list[i]);
-                            } else {
-                                prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);
-                            }                            
+                            // generate md5 on-the-fly
+                            md5s = serverCodings.encodeMD5Hex(f);
+                            description = "";
+                            serverFileUtils.write((md5s + "\n" + description).getBytes("UTF-8"), fmd5);
                         }
-                        
-                        prop.put("dirlist_" + fileIdx + "_adminAuthorization",adminAuthorization?1:0);
-                        if (adminAuthorization) {
-                            prop.put("dirlist_" + fileIdx + "_adminAuthorization_name",list[i]);
-                        }                        
-                        
-//                      if (adminAuthorization) tree += "</form> "; else tree += "<br>";
-                        fileIdx++;
+                    } catch (IOException e) {
+                        md5s = "";
+                        description = "";
                     }
+
+                    // last modification date if the entry
+                    prop.put("dirlist_" + fileIdx + "_dir_date" , dateString(new Date(f.lastModified())));
+                    // the entry name
+                    prop.put("dirlist_" + fileIdx + "_dir_name" , fileName);                                                    
+
+                    if (f.isDirectory()) {
+                        // the entry is a directory
+                        prop.put("dirlist_" + fileIdx + "_dir" , 1);
+                    } else {
+                        // determine if we should display the description string or a preview image
+                        boolean showImage = (description.length() == 0) && (fileName.endsWith(".jpg") || fileName.endsWith(".gif") || fileName.endsWith(".png"));
+
+                        // the entry is a file
+                        prop.put("dirlist_" + fileIdx + "_dir" , 0);
+                        // the file size
+                        prop.put("dirlist_" + fileIdx + "_dir_size" , serverMemory.bytesToString(f.length()).replaceAll(" ", "&nbsp;"));
+                        // the unique url
+                        prop.put("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed, fileName, md5s));
+                        // the md5 sum of the file
+                        prop.put("dirlist_" + fileIdx + "_dir_md5s",md5s);
+                        // description mode: 0...image preview, 1...description text 
+                        prop.put("dirlist_" + fileIdx + "_dir_descriptionMode",showImage?0:1);
+                        if (showImage) {
+                            prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_image",fileName);
+                        } else {
+                            prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);
+                        }                            
+                    }
+
+                    prop.put("dirlist_" + fileIdx + "_adminAuthorization",adminAuthorization?1:0);
+                    prop.put("dirlist_" + fileIdx + "_adminAuthorization_name",fileName);
+
+                    fileIdx++;
                 }
-                
+
                 prop.put("dirlist",filecount);
                 prop.put("emptydir", filecount == 0 ? 1:0);
             }
@@ -301,150 +318,36 @@ public class dir {
             prop.put("authenticated",0);
         }
         
-
-        String ident = "";
-        String account = "";
-        String service = "";
-        String info = "";
-        String logout = "";
         if (adminAuthorization) {
-            ident = "Administrator";
-            account = "<table border=\"0\" cellpadding=\"0\" cellspacing=\"2\" width=\"100%\">" +
-                      "<tr class=\"TableCellDark\"><td class=\"small\">upload:</td><td><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "<input type=\"hidden\" name=\"action\" value=\"uploadPassword\">" + 
-                      "<input type=\"password\" name=\"password\" size=\"12\">&nbsp;" +
-                      "<input type=\"submit\" value=\"Set Password\" class=\"small\">" +
-                      "</form></td></tr>" +
-                      "<tr class=\"TableCellLight\"><td class=\"small\">download:</td><td><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "<input type=\"hidden\" name=\"action\" value=\"downloadPassword\">" + 
-                      "<input type=\"password\" name=\"password\" size=\"12\">&nbsp;" +
-                      "<input type=\"submit\" value=\"Set Password\" class=\"small\">" +
-                      "</form></td></tr>" +
-                      "</table>";
-            logout = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                     "<input type=\"hidden\" name=\"action\" value=\"logout\">" + 
-                     "<input type=\"submit\" value=\"Log-Out Administrator\" class=\"small\">&nbsp;(enter&nbsp;empty&nbsp;account)" +
-                     "</form>";
-            service = "<table border=\"0\" cellpadding=\"0\" cellspacing=\"2\" width=\"100%\">" +
-                      "<tr class=\"TableCellDark\">" +
-                      "<td class=\"small\">New Directory:</td>" +
-                      "<td><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "<input type=\"hidden\" name=\"action\" value=\"newdir\">" + 
-                      "<input type=\"text\" name=\"directory\" size=\"10\" class=\"small\">&nbsp;" +
-                      "<input type=\"submit\" value=\"Create\" class=\"small\">" +
-                      "</form></td></tr>" +
-                      "<tr class=\"TableCellLight\">" +
-                      "<td class=\"small\">File Upload:</td>" +
-                      "<td class=\"small\"><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "Resource&nbsp;=&nbsp;<input type=\"hidden\" name=\"action\" value=\"upload\">" + 
-                      "<input type=\"file\" name=\"file\" size=\"10\" class=\"small\"><br>" +
-                      "Description&nbsp;=&nbsp;<input type=\"text\" name=\"description\" size=\"30\" class=\"small\"><br>" +
-                      "Indexing&nbsp;:&nbsp;<input type=\"checkbox\" name=\"indexing\" checked><br>" +
-                      "<input type=\"submit\" value=\"Transfer\" class=\"small\">" +
-                      "</form></td></tr>" +
-                      "</table>";
-            info = "Admin and download accounts are necessary to grant their services to clients; " +
-                   "no password is required for the download-account unless you set one. " +
-                   "Files uploaded and indexed here have a special index entry 'yacyshare'; " +
-                   "if you want to find files that are indexed in any share zone, add the word 'yacyshare' to the search words.";
+            prop.put("ident", 0);
+            prop.put("logout", 0);
+            prop.put("account", 0);
+            prop.put("service",0);
+            prop.put("info", 0);
         } else if (uploadAuthorization) {
-            ident = "Uploader";
-            account = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "<input type=\"hidden\" name=\"action\" value=\"authenticateAdmin\">" +
-                      "<input type=\"submit\" value=\"Log-In as Administrator\" class=\"small\">" +
-                      "</form>";
-            if (uploadAccountBase64MD5.length() == 0) {
-                logout = "";
-            } else {
-                logout = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                         "<input type=\"hidden\" name=\"action\" value=\"logout\">" + 
-                         "<input type=\"submit\" value=\"Log-Out 'upload'\" class=\"small\">&nbsp;(enter&nbsp;empty&nbsp;account)" +
-                         "</form>";
-            }
-            service = "<table border=\"0\" cellpadding=\"0\" cellspacing=\"2\" width=\"100%\">" +
-                      "<tr class=\"TableCellDark\">" +
-                      "<td class=\"small\">New Directory:</td>" +
-                      "<td class=\"small\"><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "<input type=\"hidden\" name=\"action\" value=\"newdir\">" + 
-                      "<input type=\"text\" name=\"directory\" size=\"10\" class=\"small\">&nbsp;" +
-                      "<input type=\"submit\" value=\"Create\" class=\"small\">" +
-                      "</form></td></tr>" +
-                      "<tr class=\"TableCellLight\">" +
-                      "<td class=\"small\">File Upload:</td>" +
-                      "<td class=\"small\"><form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "Resource&nbsp;=&nbsp;<input type=\"hidden\" name=\"action\" value=\"upload\">" + 
-                      "<input type=\"file\" name=\"file\" size=\"10\" class=\"small\"><br>" +
-                      "Description&nbsp;=&nbsp;<input type=\"text\" name=\"description\" size=\"30\" class=\"small\"><br>" +
-                      "Indexing&nbsp;:&nbsp;<input type=\"checkbox\" name=\"indexing\"><br>" +
-                      "<input type=\"submit\" value=\"Transfer\" class=\"small\">" +
-                      "</form></td></tr>" +
-                      "</table>";
-            info = "Uploaders are not granted to delete files or directories. If you want to do this, log-in as admin.";
+            prop.put("ident", 1);
+            prop.put("logout", 1);
+            prop.put("account", 1);
+            prop.put("service",0);
+            prop.put("info", 1);
         } else if (downloadAuthorization) {
-            ident = "Downloader"; 
-            account = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "<input type=\"hidden\" name=\"action\" value=\"authenticateAdmin\" class=\"small\">" +
-                      "<input type=\"submit\" value=\"Log-In as Administrator\" class=\"small\">" +
-                      "</form> " +
-                      "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "<input type=\"hidden\" name=\"action\" value=\"authenticateUpload\" class=\"small\">" +
-                      "<input type=\"submit\" value=\"Log-In as user 'upload'\" class=\"small\">" +
-                      "</form>";
-            if (downloadAccountBase64MD5.length() == 0) {
-                logout = "";
-            } else {
-                logout = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                         "<input type=\"hidden\" name=\"action\" value=\"logout\">" + 
-                         "<input type=\"submit\" value=\"Log-Out 'download'\" class=\"small\">&nbsp;(enter&nbsp;empty&nbsp;account)" +
-                         "</form>";
-                service = "You are granted to view directory listings and do downloads in this directory.<br>" +
-                          "If you want to upload, please log in as user 'upload'";
-                info = "Download is granted even if no download account has been defined. " +
-                       "If you are an administrator and you wish to block non-authorized downloades, please log in as user 'admin' " +
-                       "and set a download password.";
-            }
+            prop.put("ident", 2); 
+            prop.put("logout", 2);
+            prop.put("account", 2);
+            prop.put("service",1);
+            prop.put("info", 2);
+
         } else {
-            ident = "not authorized";
-            account = "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "<input type=\"hidden\" name=\"action\" value=\"authenticateAdmin\">" +
-                      "<input type=\"submit\" value=\"Log-In as Administrator\" class=\"small\">" +
-                      "</form> " +
-                      "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "<input type=\"hidden\" name=\"action\" value=\"authenticateUpload\">" +
-                      "<input type=\"submit\" value=\"Log-In as user 'upload'\" class=\"small\">" +
-                      "</form> " +
-                      "<form action=\"#\" method=\"post\" enctype=\"multipart/form-data\">" +
-                      "<input type=\"hidden\" name=\"action\" value=\"authenticateDownload\">" +
-                      "<input type=\"submit\" value=\"Log-In as user 'download'\" class=\"small\">" +
-                      "</form>";
-            logout = "";
-            service = "No service available.";
-            info = "You must log-in to upload or download.";
+            prop.put("ident", 3);
+            prop.put("logout", 3);
+            prop.put("account",3);
+            prop.put("service", 2);
+            prop.put("info", 3);
         }
         
-        prop.put("ident", ident);
-        prop.put("account", account);
-        prop.put("service", service);
-        prop.put("info", info);
-        prop.put("logout", logout);
-//      return rewrite properties
+        // return rewrite properties
         return prop;
     }
-
-    private static String formatLong(long l, int length) {
-        String r = "" + l;
-        for (int i = r.length(); i < length; i++) { r = "&nbsp;" + r; }
-        return r;
-    }
-
-    // rDNS services:
-    // http://www.xdr2.net/reverse_DNS_lookup.asp
-    // http://remote.12dt.com/rns/
-    // http://bl.reynolds.net.au/search/
-    // http://www.declude.com/Articles.asp?ID=97
-    // http://www.dnsstuff.com/
-
-    // listlist: http://www.aspnetimap.com/help/welcome/dnsbl.html
 
     public static String yacyhURL(yacySeed seed, String filename, String md5) {
         return "http://share." + seed.getHexHash() + ".yacyh/" + filename + "?md5=" + md5;

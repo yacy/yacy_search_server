@@ -59,8 +59,26 @@
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
 	<tr height="8"><td></td><td></td></tr>
 	<tr height="10" valign="top">
-		<td>Welcome! You are identified and authorized as "<b>#[ident]#</b>".</td>
-		<td align="right">#[logout]#</td>
+		<td>Welcome! You are identified and authorized as "<b>#(ident)#Administrator::Uploader::Downloader::not authorized#(/ident)#</b>".</td>
+		<td align="right">
+			#(logout)#
+				<form action="#" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="logout"> 
+                	<input type="submit" value="Log-Out Administrator" class="small">&nbsp;(enter&nbsp;empty&nbsp;account)
+                </form>	
+            ::
+				<form action="#" method="post" enctype="multipart/form-data">
+                	<input type="hidden" name="action" value="logout"> 
+                    <input type="submit" value="Log-Out 'upload'" class="small">&nbsp;(enter&nbsp;empty&nbsp;account)
+                </form>            			
+            ::
+				<form action="#" method="post" enctype="multipart/form-data">
+                	<input type="hidden" name="action" value="logout">
+                    <input type="submit" value="Log-Out 'download'" class="small">&nbsp;(enter&nbsp;empty&nbsp;account)
+				</form>             
+			::
+			#(/logout)#
+		</td>
 	</tr>
 </table>
 
@@ -69,13 +87,98 @@
 		<td width="50%">
 			<table border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tr valign="top" class="TableHeader" height="6"><td class="small">Service</td></tr>
-				<tr valign="top" class="TableCellLight"><td class="small">#[service]#</td></tr>
+				<tr valign="top" class="TableCellLight">
+					<td class="small">
+						#(service)#
+							<table border="0" cellpadding="0" cellspacing="2" width="100%">
+                      			<tr class="TableCellDark">
+                      				<td class="small">New Directory:</td>
+                      				<td><form action="#" method="post" enctype="multipart/form-data">
+                      					<input type="hidden" name="action" value="newdir">
+                      					<input type="text" name="directory" size="10" class="small">&nbsp;
+                      					<input type="submit" value="Create" class="small">
+                      					</form>
+                      				</td>
+                      			</tr>
+                      			<tr class="TableCellLight">
+                      				<td class="small">File Upload:</td>
+                      				<td class="small"><form action="#" method="post" enctype="multipart/form-data">
+				                      Resource&nbsp;=&nbsp;
+				                      <input type="hidden" name="action" value="upload"> 
+                      				  <input type="file" name="file" size="10" class="small"><br>
+                      				  Description&nbsp;=&nbsp;<input type="text" name="description" size="30" class="small"><br>
+                      				  Indexing&nbsp;:&nbsp;<input type="checkbox" name="indexing" checked><br>
+				                      <input type="submit" value="Transfer" class="small">
+                      				  </form>
+                      				</td>
+                      			</tr>
+                      		</table>
+                      	::
+							You are granted to view directory listings and do downloads in this directory.<br>
+                          	If you want to upload, please log in as user 'upload'	                      							
+						::					
+							No service available.						
+						#(/service)#
+					</td>
+				</tr>
 			</table>
 		</td>
 		<td rowspan="2" width="50%">
 			<table border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tr valign="top" class="TableHeader" height="6"><td width="130" class="small">Account</td></tr>
-				<tr valign="top" class="TableCellLight"><td width="130" class="small">#[account]#</td></tr>
+				<tr valign="top" class="TableCellLight">
+					<td width="130" class="small">
+					#(account)#
+					  	<table border="0" cellpadding="0" cellspacing="2" width="100%">
+                      		<tr class="TableCellDark">
+                      			<td class="small">upload:</td>
+                      			<td><form action="#" method="post" enctype="multipart/form-data">
+                      				<input type="hidden" name="action" value="uploadPassword"> 
+                      				<input type="password" name="password" size="12">&nbsp;
+                      				<input type="submit" value="Set Password" class="small">
+                      				</form>
+                      			</td>
+                      		</tr>
+                      		<tr class="TableCellLight">
+                      			<td class="small">download:</td>
+                      			<td><form action="#" method="post" enctype="multipart/form-data">
+                      				<input type="hidden" name="action" value="downloadPassword"> 
+                      				<input type="password" name="password" size="12">&nbsp;
+                      				<input type="submit" value="Set Password" class="small">
+                      				</form>
+                      			</td>
+                      		</tr>
+                      	</table>				
+					::
+						<form action="#" method="post" enctype="multipart/form-data">
+                      		<input type="hidden" name="action" value="authenticateAdmin">
+                      		<input type="submit" value="Log-In as Administrator" class="small">
+                      	</form>						
+						::
+						<form action="#" method="post" enctype="multipart/form-data">
+                      		<input type="hidden" name="action" value="authenticateAdmin" class="small">
+                      		<input type="submit" value="Log-In as Administrator" class="small">
+                      	</form>
+                      	<form action="#" method="post" enctype="multipart/form-data">
+                      		<input type="hidden" name="action" value="authenticateUpload" class="small">
+                      		<input type="submit" value="Log-In as user 'upload'" class="small">
+                      	</form>
+                      ::
+						<form action="#" method="post" enctype="multipart/form-data">
+                      		<input type="hidden" name="action" value="authenticateAdmin">
+                      		<input type="submit" value="Log-In as Administrator" class="small">
+                      	</form> 
+                      	<form action="#" method="post" enctype="multipart/form-data">
+                      		<input type="hidden" name="action" value="authenticateUpload">
+                      		<input type="submit" value="Log-In as user 'upload'" class="small">
+                      	</form> 
+                      	<form action="#" method="post" enctype="multipart/form-data">
+                      		<input type="hidden" name="action" value="authenticateDownload">
+                      		<input type="submit" value="Log-In as user 'download'" class="small">
+                      	</form>                      						
+					#(/account)#
+					</td>
+				</tr>
 			</table>
 		</td>
 	</tr>
@@ -83,7 +186,23 @@
 		<td>
 			<table border="0" cellpadding="0" cellspacing="0" width="100%">
 				<tr valign="top" class="TableHeader" height="6"><td class="small">Info</td></tr>
-				<tr valign="top" class="TableCellLight"><td class="small">#[info]#</td></tr>
+				<tr valign="top" class="TableCellLight">
+					<td class="small">
+						#(info)#<!-- adminAuthorization -->
+							Admin and download accounts are necessary to grant their services to clients;
+	                   		no password is required for the download-account unless you set one.
+	                   		Files uploaded and indexed here have a special index entry 'yacyshare';
+	                   		if you want to find files that are indexed in any share zone, add the word 'yacyshare' to the search words.						
+							:: <!-- uploadAuthorization -->
+							Uploaders are not granted to delete files or directories. If you want to do this, log-in as admin.
+							:: <!-- downloadAuthorization -->
+							Download is granted even if no download account has been defined.<br>
+	                       	If you are an administrator and you wish to block non-authorized downloades, please log in as user 'admin' and set a download password.						
+							:: <!-- not authorized -->
+							You must log-in to upload or download.
+						#(/info)#
+					</td>
+				</tr>
 			</table>
 		</td>
 		<td></td>
