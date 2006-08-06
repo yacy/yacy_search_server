@@ -70,6 +70,7 @@
   <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy.net/yacy/News.html" class="MenuItemLink">Project News</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="http://sourceforge.net/forum/?group_id=116142" class="MenuItemLink">English Forum</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy-forum.de" class="MenuItemLink">Deutsches Forum</a></td></tr>
+  <tr><td class="MenuItem">&nbsp;<a href="http://newsletters.yacy-forum.de" class="MenuItemLink">Newsletters</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy.net/yacy/Download.html" class="MenuItemLink">Download YaCy</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy-websuche.de/wiki/index.php/Hauptseite" class="MenuItemLink">YaCy Wiki</a></td></tr>
   <tr><td class="MenuItem">&nbsp;<a href="http://www.yacy.net/yacy/Contact.html" class="MenuItemLink">Contact</a></td></tr>
