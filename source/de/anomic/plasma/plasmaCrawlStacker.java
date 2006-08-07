@@ -231,7 +231,7 @@ public final class plasmaCrawlStacker {
         
         // strange errors
         if (nexturlString == null) {
-            reason = "denied_(url_null)";
+            reason = plasmaCrawlEURL.DENIED_URL_NULL;
             this.log.logSevere("Wrong URL in stackCrawl: url=null");
             return reason;
         }
@@ -256,7 +256,7 @@ public final class plasmaCrawlStacker {
         try {
             nexturl = new URL(nexturlString);
         } catch (MalformedURLException e) {
-            reason = "denied_(url_'" + nexturlString + "'_wrong)";
+            reason = plasmaCrawlEURL.DENIED_MALFORMED_URL;
             this.log.logSevere("Wrong URL in stackCrawl: " + nexturlString + 
                                ". Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -265,17 +265,17 @@ public final class plasmaCrawlStacker {
         // check if ip is local ip address
         InetAddress hostAddress = httpc.dnsResolve(nexturl.getHost());
         if (hostAddress == null) {
-            reason = "denied_(unknown_host)";
+            reason = plasmaCrawlEURL.DENIED_UNKNOWN_HOST;
             this.log.logFine("Unknown host in URL '" + nexturlString + "'. " +
                     "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;                
         } else if (hostAddress.isSiteLocalAddress()) {
-            reason = "denied_(private_ip_address)";
+            reason = plasmaCrawlEURL.DENIED_PRIVATE_IP_ADDRESS;
             this.log.logFine("Host in URL '" + nexturlString + "' has private IP address. " +
                     "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;                
         } else if (hostAddress.isLoopbackAddress()) {
-            reason = "denied_(loopback_ip_address)";
+            reason = plasmaCrawlEURL.DENIED_LOOPBACK_IP_ADDRESS;
             this.log.logFine("Host in URL '" + nexturlString + "' has loopback IP address. " + 
                     "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;                  
@@ -283,7 +283,7 @@ public final class plasmaCrawlStacker {
         
         // check blacklist
         if (plasmaSwitchboard.urlBlacklist.isListed(nexturl)) {
-            reason = "denied_(url_in_blacklist)";
+            reason = plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST;
             this.log.logFine("URL '" + nexturlString + "' is in blacklist. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -291,7 +291,7 @@ public final class plasmaCrawlStacker {
         
         // filter deny
         if ((currentdepth > 0) && (profile != null) && (!(nexturlString.matches(profile.generalFilter())))) {
-            reason = "denied_(does_not_match_filter)";
+            reason = plasmaCrawlEURL.DENIED_URL_DOES_NOT_MATCH_FILTER;
             /*
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
@@ -302,7 +302,7 @@ public final class plasmaCrawlStacker {
         
         // deny cgi
         if (plasmaHTCache.isCGI(nexturlString))  {
-            reason = "denied_(cgi_url)";
+            reason = plasmaCrawlEURL.DENIED_CGI_URL;
             /*
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
@@ -313,7 +313,7 @@ public final class plasmaCrawlStacker {
         
         // deny post properties
         if ((plasmaHTCache.isPOST(nexturlString)) && (profile != null) && (!(profile.crawlingQ())))  {
-            reason = "denied_(post_url)";
+            reason = plasmaCrawlEURL.DENIED_POST_URL;
             /*
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
@@ -329,7 +329,7 @@ public final class plasmaCrawlStacker {
 
         // deny urls that do not match with the profile domain list
         if (!(profile.grantedDomAppearance(nexturl.getHost()))) {
-            reason = "denied_(no_match_with_domain_filter)";
+            reason = plasmaCrawlEURL.DENIED_NO_MATCH_WITH_DOMAIN_FILTER;
             this.log.logFine("URL '" + nexturlString + "' is not listed in granted domains. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -337,7 +337,7 @@ public final class plasmaCrawlStacker {
 
         // deny urls that exceed allowed number of occurrences
         if (!(profile.grantedDomCount(nexturl.getHost()))) {
-            reason = "denied_(domain_count_exceeded)";
+            reason = plasmaCrawlEURL.DENIED_DOMAIN_COUNT_EXCEEDED;
             this.log.logFine("URL '" + nexturlString + "' appeared too often, a maximum of " + profile.domMaxPages() + " is allowed. "+ 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -352,7 +352,7 @@ public final class plasmaCrawlStacker {
         boolean recrawl = (oldEntry != null) &&
                           (((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000) > profile.recrawlIfOlder());
         if ((dbocc != null) && (!(recrawl))) {
-            reason = "double_(registered_in_" + dbocc + ")";
+            reason = plasmaCrawlEURL.DOUBLE_REGISTERED + dbocc + ")";
             /*
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
@@ -363,7 +363,7 @@ public final class plasmaCrawlStacker {
 
         // checking robots.txt
         if (robotsParser.isDisallowed(nexturl)) {
-            reason = "denied_(robots.txt)";
+            reason = plasmaCrawlEURL.DENIED_ROBOTS_TXT;
             /*
              urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
              name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/

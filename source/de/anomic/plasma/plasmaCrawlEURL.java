@@ -6,6 +6,10 @@
 // Frankfurt, Germany, 2004
 // last major change: 09.08.2004
 //
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
+// $LastChangedBy: orbiter $
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -59,6 +63,64 @@ import de.anomic.tools.bitfield;
 
 public class plasmaCrawlEURL extends indexURL {
 
+    /* =======================================================================
+     * Failure reason constants
+     * ======================================================================= */
+    // invalid urls
+    public static final String DENIED_URL_NULL = "denied_(url_null)";
+    public static final String DENIED_MALFORMED_URL = "denied_(malformed_url)";
+    public static final String DENIED_PRIVATE_IP_ADDRESS = "denied_(private_ip_address)";
+    public static final String DENIED_LOOPBACK_IP_ADDRESS = "denied_(loopback_ip_address)";
+    public static final String DENIED_CACHEFILE_PATH_TOO_LONG = "denied_(cachefile_path_too_long)";
+    public static final String DENIED_INVALID_CACHEFILE_PATH = "denied_(invalid_cachefile_path)";    
+    
+    // blacklisted/blocked urls
+    public static final String DENIED_URL_IN_BLACKLIST = "denied_(url_in_blacklist)";
+    public static final String DENIED_URL_DOES_NOT_MATCH_FILTER = "denied_(does_not_match_filter)";
+    public static final String DENIED_CGI_URL = "denied_(cgi_url)";
+    public static final String DENIED_POST_URL = "denied_(post_url)";
+    public static final String DENIED_NO_MATCH_WITH_DOMAIN_FILTER = "denied_(no_match_with_domain_filter)";
+    public static final String DENIED_DOMAIN_COUNT_EXCEEDED = "denied_(domain_count_exceeded)";    
+    public static final String DENIED_ROBOTS_TXT = "denied_(robots.txt)";
+    
+    // wrong content
+    public static final String DENIED_WRONG_MIMETYPE_OR_EXT = "denied_(wrong_mimetype_or_extension)";
+    public static final String DENIED_REDIRECTION_HEADER_EMPTY = "denied_(redirection_header_empty)";
+    public static final String DENIED_REDIRECTION_COUNTER_EXCEEDED = "denied_(redirection_counter_exceeded)";
+    public static final String DENIED_WRONG_HTTP_STATUSCODE = "denied_(wrong_http_status_code_";
+    public static final String DENIED_CONTENT_DECODING_ERROR = "denied_(content_decoding_error)";
+    
+    // network errors
+    public static final String DENIED_UNKNOWN_HOST = "denied_(unknown_host)";
+    public static final String DENIED_NO_ROUTE_TO_HOST = "denied_(no_route_to_host)"; 
+    public static final String DENIED_NETWORK_IS_UNREACHABLE = "denied_(Network_is_unreachable)";    
+    
+    // connection errors
+    public static final String DENIED_CONNECTION_ERROR = "denied_(socket_connection_error)";
+    public static final String DENIED_CONNECTION_BIND_EXCEPTION = "denied_(connection_bind_exception)";
+    public static final String DENIED_CONNECTION_TIMEOUT = "denied_(connection_timeout)";
+    public static final String DENIED_CONNECTION_REFUSED = "denied_(connection_refused)";    
+    public static final String DENIED_SSL_UNTRUSTED_CERT = "denied_(No_trusted_ssl_certificate_found)";
+
+    // double registered errors
+    public static final String DOUBLE_REGISTERED = "double_(registered_in_";
+    
+    // server errors
+    public static final String DENIED_OUT_OF_DISK_SPACE = "denied_(out_of_disk_space)";
+    public static final String DENIED_SERVER_SHUTDOWN = "denied_(server_shutdown)";
+    
+    // Parser errors
+    public static final String DENIED_PARSER_ERROR = "denied_(parser_error)";
+    public static final String DENIED_NOT_PARSEABLE_NO_CONTENT = "denied_(not_parseabel_no_content)";
+    
+    // indexing errors
+    public static final String DENIED_UNSPECIFIED_INDEXING_ERROR = "denied_(unspecified_indexing_error)";
+    public static final String DENIED_UNKNOWN_INDEXING_PROCESS_CASE = "denied_(unknown_indexing_process_case)";
+    
+
+    /* =======================================================================
+     * Other object variables
+     * ======================================================================= */        
     private LinkedList rejectedStack = new LinkedList(); // strings: url
     
     public plasmaCrawlEURL(File cachePath, int bufferkb, long preloadTime) {

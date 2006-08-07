@@ -281,7 +281,7 @@ public final class plasmaCrawlWorker extends Thread {
     private static plasmaHTCache.Entry load(
             URL url,
             String name,
-            String referer,
+            String refererURLString,
             String initiator,
             int depth,
             plasmaCrawlProfile.entry profile,
@@ -308,28 +308,18 @@ public final class plasmaCrawlWorker extends Thread {
         boolean ssl = url.getProtocol().equals("https");
         if (port < 0) port = (ssl) ? 443 : 80;
 
+        refererURLString = (refererURLString == null) ? "" : refererURLString.trim();
+        
         // check if url is in blacklist
         String hostlow = host.toLowerCase();
         if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, path)) {
             log.logInfo("CRAWLER Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
-            plasmaCrawlEURL.Entry ee = sb.urlPool.errorURL.newEntry(
-                    url,
-                    referer,
-                    initiator,
-                    yacyCore.seedDB.mySeed.hash,
-                    name,
-                    "denied_(url_in_blacklist)",
-                    new bitfield(indexURL.urlFlagLength)
-            );
-            ee.store();
-            sb.urlPool.errorURL.stackPushEntry(ee);
+            addURLtoErrorDB(url, refererURLString, initiator, name, plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST, new bitfield(indexURL.urlFlagLength));
             return null;
         }
 
         // TODO: resolve yacy and yacyh domains
         //String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
-
-        referer = (referer == null) ? "" : referer.trim();
 
         // take a file from the net
         httpc remote = null;
@@ -338,7 +328,7 @@ public final class plasmaCrawlWorker extends Thread {
             // create a request header
             httpHeader requestHeader = new httpHeader();
             requestHeader.put(httpHeader.USER_AGENT, httpdProxyHandler.crawlerUserAgent);
-            requestHeader.put(httpHeader.REFERER, referer);
+            requestHeader.put(httpHeader.REFERER, refererURLString);
             requestHeader.put(httpHeader.ACCEPT_LANGUAGE, sb.getConfig("crawler.acceptLanguage","en-us,en;q=0.5"));
             requestHeader.put(httpHeader.ACCEPT_CHARSET, sb.getConfig("crawler.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"));
             if (useContentEncodingGzip) requestHeader.put(httpHeader.ACCEPT_ENCODING, "gzip,deflate");
@@ -358,15 +348,15 @@ public final class plasmaCrawlWorker extends Thread {
 
             if (res.status.startsWith("200") || res.status.startsWith("203")) {
                 // the transfer is ok
-
-                // TODO: aborting download if content is to long ...
-                //long contentLength = res.responseHeader.contentLength();
-
+                
+                // create a new cache entry
                 htCache = cacheManager.newEntry(requestDate, depth, url, name, requestHeader, res.status, res.responseHeader, initiator, profile);
+                
+                // aborting download if content is to long ...
                 if (htCache.cacheFile.getAbsolutePath().length() > serverSystem.maxPathLength) {
                     remote.close();
-                    log.logInfo("REJECTED URL " + url.toString() + " because path too long '" +
-                                cacheManager.cachePath.getAbsolutePath() + "'");
+                    log.logInfo("REJECTED URL " + url.toString() + " because path too long '" + cacheManager.cachePath.getAbsolutePath() + "'");
+                    addURLtoErrorDB(url, refererURLString, initiator, name, plasmaCrawlEURL.DENIED_CACHEFILE_PATH_TOO_LONG, new bitfield(indexURL.urlFlagLength));                    
                     return (htCache = null);
                 }
 
@@ -377,6 +367,7 @@ public final class plasmaCrawlWorker extends Thread {
                     log.logInfo("REJECTED URL " + url.toString() + " because of an invalid file path ('" +
                                 htCache.cacheFile.getCanonicalPath() + "' does not start with '" +
                                 cacheManager.cachePath.getAbsolutePath() + "').");
+                    addURLtoErrorDB(url, refererURLString, initiator, name, plasmaCrawlEURL.DENIED_INVALID_CACHEFILE_PATH, new bitfield(indexURL.urlFlagLength));
                     return (htCache = null);
                 }
 
@@ -408,6 +399,7 @@ public final class plasmaCrawlWorker extends Thread {
                         // if the response has not the right file type then reject file
                         remote.close();
                         log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for URL " + url.toString());
+                        addURLtoErrorDB(url, refererURLString, initiator, name, plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT, new bitfield(indexURL.urlFlagLength));
                         htCache = null;
                     }
                 } catch (SocketException e) {
@@ -418,6 +410,7 @@ public final class plasmaCrawlWorker extends Thread {
                     // and most possible corrupted
                     if (cacheFile.exists()) cacheFile.delete();
                     log.logSevere("CRAWLER LOADER ERROR1: with URL=" + url.toString() + ": " + e.toString());
+                    addURLtoErrorDB(url, refererURLString, initiator, name, plasmaCrawlEURL.DENIED_CONNECTION_ERROR, new bitfield(indexURL.urlFlagLength));
                     htCache = null;
                 }
             } else if (res.status.startsWith("30")) {
@@ -429,6 +422,7 @@ public final class plasmaCrawlWorker extends Thread {
 
                         if (redirectionUrlString.length() == 0) {
                             log.logWarning("CRAWLER Redirection of URL=" + url.toString() + " aborted. Location header is empty.");
+                            addURLtoErrorDB(url, refererURLString, initiator, name, plasmaCrawlEURL.DENIED_REDIRECTION_HEADER_EMPTY, new bitfield(indexURL.urlFlagLength));
                             return null;
                         }
                         
@@ -449,6 +443,7 @@ public final class plasmaCrawlWorker extends Thread {
                         // if we are already doing a shutdown we don't need to retry crawling
                         if (Thread.currentThread().isInterrupted()) {
                             log.logSevere("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
+                            addURLtoErrorDB(url, refererURLString, initiator, name, plasmaCrawlEURL.DENIED_SERVER_SHUTDOWN, new bitfield(indexURL.urlFlagLength));
                             return null;
                         }
 
@@ -461,7 +456,7 @@ public final class plasmaCrawlWorker extends Thread {
                         // retry crawling with new url
                         plasmaHTCache.Entry redirectedEntry = load(redirectionUrl,
                              name,
-                             referer,
+                             refererURLString,
                              initiator,
                              depth,
                              profile,
@@ -492,13 +487,14 @@ public final class plasmaCrawlWorker extends Thread {
                     }
                 } else {
                     log.logInfo("Redirection counter exceeded for URL " + url.toString() + ". Processing aborted.");
+                    addURLtoErrorDB(url, refererURLString, initiator, name, plasmaCrawlEURL.DENIED_REDIRECTION_COUNTER_EXCEEDED, new bitfield(indexURL.urlFlagLength));
                 }
             }else {
                 // if the response has not the right response type then reject file
                 log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for URL " + url.toString());
-                // not processed any further
                 
-                // TODO: add the url into the error url DB
+                // not processed any further
+                addURLtoErrorDB(url, refererURLString, initiator, name, plasmaCrawlEURL.DENIED_WRONG_HTTP_STATUSCODE + res.statusCode +  ")", new bitfield(indexURL.urlFlagLength));
             }
             
             if (remote != null) remote.close();
@@ -506,6 +502,7 @@ public final class plasmaCrawlWorker extends Thread {
         } catch (Exception e) {
             boolean retryCrawling = false;
             String errorMsg = e.getMessage();
+            String failreason = null;
 
             if ((e instanceof IOException) && 
                 (errorMsg != null) && 
@@ -513,47 +510,61 @@ public final class plasmaCrawlWorker extends Thread {
                 (Thread.currentThread().isInterrupted())
             ) {
                 log.logInfo("CRAWLER Interruption detected because of server shutdown.");
+                failreason = plasmaCrawlEURL.DENIED_SERVER_SHUTDOWN;
             } else if (e instanceof MalformedURLException) {
                 log.logWarning("CRAWLER Malformed URL '" + url.toString() + "' detected. ");
+                failreason = plasmaCrawlEURL.DENIED_MALFORMED_URL;
             } else if (e instanceof NoRouteToHostException) {
                 log.logWarning("CRAWLER No route to host found while trying to crawl URL  '" + url.toString() + "'.");
+                failreason = plasmaCrawlEURL.DENIED_NO_ROUTE_TO_HOST;
             } else if ((e instanceof UnknownHostException) ||
                        ((errorMsg != null) && (errorMsg.indexOf("unknown host") >= 0))) {
                 log.logWarning("CRAWLER Unknown host in URL '" + url.toString() + "'. " +
-                        "Referer URL: " + ((referer == null) ?"Unknown":referer));
+                        "Referer URL: " + ((refererURLString == null) ?"Unknown":refererURLString));
+                failreason = plasmaCrawlEURL.DENIED_UNKNOWN_HOST;
             } else if (e instanceof java.net.BindException) {
                 log.logWarning("CRAWLER BindException detected while trying to download content from '" + url.toString() +
                 "'. Retrying request.");
+                failreason = plasmaCrawlEURL.DENIED_CONNECTION_BIND_EXCEPTION;                
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
                 log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + url.toString() +
                 "'. Retrying request without using gzip content encoding.");
+                failreason = plasmaCrawlEURL.DENIED_CONTENT_DECODING_ERROR;
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Read timed out") >= 0)) {
                 log.logWarning("CRAWLER Read timeout while receiving content from '" + url.toString() +
                 "'. Retrying request.");
+                failreason = plasmaCrawlEURL.DENIED_CONNECTION_TIMEOUT;
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("connect timed out") >= 0)) {
                 log.logWarning("CRAWLER Timeout while trying to connect to '" + url.toString() +
                 "'. Retrying request.");
+                failreason = plasmaCrawlEURL.DENIED_CONNECTION_TIMEOUT;
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Connection timed out") >= 0)) {
                 log.logWarning("CRAWLER Connection timeout while receiving content from '" + url.toString() +
                 "'. Retrying request.");
+                failreason = plasmaCrawlEURL.DENIED_CONNECTION_TIMEOUT;
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Connection refused") >= 0)) {
                 log.logWarning("CRAWLER Connection refused while trying to connect to '" + url.toString() + "'.");
+                failreason = plasmaCrawlEURL.DENIED_CONNECTION_REFUSED;
             } else if ((errorMsg != null) && (errorMsg.indexOf("There is not enough space on the disk") >= 0)) {
                 log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + url.toString() + "'. " +
                 "Pausing crawlers. ");
                 plasmaCrawlLoader.switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 plasmaCrawlLoader.switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                failreason = plasmaCrawlEURL.DENIED_OUT_OF_DISK_SPACE;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Network is unreachable") >=0)) {
                 log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + url.toString() + "'. ");
+                failreason = plasmaCrawlEURL.DENIED_NETWORK_IS_UNREACHABLE;
             } else if ((errorMsg != null) && (errorMsg.indexOf("No trusted certificate found")>= 0)) {
-                log.logSevere("CRAWLER No trusted certificate found for URL '" + url.toString() + "'. ");            
+                log.logSevere("CRAWLER No trusted certificate found for URL '" + url.toString() + "'. ");  
+                failreason = plasmaCrawlEURL.DENIED_SSL_UNTRUSTED_CERT;
             } else {
                 log.logSevere("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
+                failreason = plasmaCrawlEURL.DENIED_CONNECTION_ERROR;
             }
 
             if (retryCrawling) {
@@ -573,7 +584,7 @@ public final class plasmaCrawlWorker extends Thread {
                 // retry crawling
                 return load(url,
                      name,
-                     referer,
+                     refererURLString,
                      initiator,
                      depth,
                      profile,
@@ -586,10 +597,43 @@ public final class plasmaCrawlWorker extends Thread {
                      false
                 );
             }
+            if (failreason != null) {
+                addURLtoErrorDB(url, refererURLString, initiator, name, failreason, new bitfield(indexURL.urlFlagLength));
+            }
             return null;
         } finally {
             if (remote != null) httpc.returnInstance(remote);
         }
+    }
+    
+    private static void addURLtoErrorDB(
+            URL url, 
+            String referrerString, 
+            String initiator, 
+            String name, 
+            String failreason, 
+            bitfield flags
+    ) {
+        // getting a reference to the plasmaSwitchboard
+        plasmaSwitchboard sb = plasmaCrawlLoader.switchboard;        
+        
+        // convert the referrer URL into a hash value
+        String referrerHash = (referrerString==null)?null:indexURL.urlHash(referrerString);
+        
+        // create a new errorURL DB entry
+        plasmaCrawlEURL.Entry ee = sb.urlPool.errorURL.newEntry(
+                url,
+                referrerHash,
+                initiator,
+                yacyCore.seedDB.mySeed.hash,
+                name,
+                failreason,
+                flags
+        );
+        // store the entry
+        ee.store();
+        // push it onto the stack
+        sb.urlPool.errorURL.stackPushEntry(ee);
     }
 
 }

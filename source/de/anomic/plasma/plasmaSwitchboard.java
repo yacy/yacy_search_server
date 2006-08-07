@@ -1362,14 +1362,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     document = parser.parseSource(entry.url(), mimeType, entry.cacheFile());
                 } else {
                     log.logFine("(Parser) '" + entry.normalizedURLString() + "' cannot be parsed, no resource available");
+                    addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorHash, entry.anchorName(), plasmaCrawlEURL.DENIED_NOT_PARSEABLE_NO_CONTENT, new bitfield(indexURL.urlFlagLength));
                     return;
                 }
                 if (document == null) {
                     log.logSevere("(Parser) '" + entry.normalizedURLString() + "' parse failure");
+                    addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorHash, entry.anchorName(), plasmaCrawlEURL.DENIED_PARSER_ERROR, new bitfield(indexURL.urlFlagLength));
                     return;
                 }
             } else {
                 log.logFine("(Parser) '" + entry.normalizedURLString() + "'. Unsupported mimeType '" + ((mimeType == null) ? "null" : mimeType) + "'.");
+                addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorHash, entry.anchorName(), plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT, new bitfield(indexURL.urlFlagLength));
                 return;
             }
             parsingEndTime = System.currentTimeMillis();
@@ -1415,7 +1418,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             referrerHash = indexURL.urlHash(referrerURL);
             if (referrerHash == null) referrerHash = indexURL.dummyHash;
 
-            String noIndexReason = "unspecified";
+            String noIndexReason = plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
             if (processCase == 4) {
                 // proxy-load
                 noIndexReason = entry.shallIndexCacheForProxy();
@@ -1558,22 +1561,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         }
                     } else {
                         log.logFine("Not Indexed Resource '" + entry.normalizedURLString() + "': process case=" + processCase);
+                        addURLtoErrorDB(entry.url(), referrerHash, initiatorHash, descr, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new bitfield(indexURL.urlFlagLength));
                     }
                 } catch (Exception ee) {
                     log.logSevere("Could not index URL " + entry.url() + ": " + ee.getMessage(), ee);
                     if ((processCase == 6) && (initiator != null)) {
                         yacyClient.crawlReceipt(initiator, "crawl", "exception", ee.getMessage(), null, "");
                     }
+                    addURLtoErrorDB(entry.url(), referrerHash, initiatorHash, descr, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new bitfield(indexURL.urlFlagLength));
                 }
                 
             } else {
                 log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
-                plasmaCrawlEURL.Entry ee = urlPool.errorURL.newEntry(entry.url(), referrerHash,
-                        ((entry.proxy()) ? indexURL.dummyHash : entry.initiator()),
-                        yacyCore.seedDB.mySeed.hash,
-                        descr, noIndexReason, new bitfield(indexURL.urlFlagLength));
-                ee.store();
-                urlPool.errorURL.stackPushEntry(ee);
+                addURLtoErrorDB(entry.url(), referrerHash, initiatorHash, descr, noIndexReason, new bitfield(indexURL.urlFlagLength));
                 if ((processCase == 6) && (initiator != null)) {
                     yacyClient.crawlReceipt(initiator, "crawl", "rejected", noIndexReason, null, "");
                 }
@@ -1687,6 +1687,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return;
         }
         
+        // convert the referrer hash into the corresponding URL
         URL refererURL = null;
         String refererHash = urlEntry.referrerHash();
         if ((refererHash != null) && (!refererHash.equals(indexURL.dummyHash))) try {
@@ -2245,6 +2246,30 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false;
         }
     }
+    
+    private void addURLtoErrorDB(
+            URL url, 
+            String referrerHash, 
+            String initiator, 
+            String name, 
+            String failreason, 
+            bitfield flags
+    ) {
+        // create a new errorURL DB entry
+        plasmaCrawlEURL.Entry ee = this.urlPool.errorURL.newEntry(
+                url,
+                referrerHash,
+                initiator,
+                yacyCore.seedDB.mySeed.hash,
+                name,
+                failreason,
+                flags
+        );
+        // store the entry
+        ee.store();
+        // push it onto the stack
+        this.urlPool.errorURL.stackPushEntry(ee);
+    }    
     
     public void terminate(long delay) {
         if (delay <= 0) throw new IllegalArgumentException("The shutdown delay must be greater than 0.");

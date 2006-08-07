@@ -334,6 +334,10 @@ public class plasmaSwitchboardQueue {
             }
             return referrerURL;
         }
+        
+        public String referrerHash() {
+            return referrerHash;
+        }
 
         public String anchorName() {
             return anchorName;
