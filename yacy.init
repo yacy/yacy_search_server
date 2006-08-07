@@ -679,7 +679,7 @@ indexDistribution.startChunkSize = 50
 
 # defines if the peer should reject incoming index transfer
 # request if a given limit is reached
-indexDistribution.dhtReceiptLimitEnabled = false
+indexDistribution.dhtReceiptLimitEnabled = true
 
 # defines the word cache for DHT reaches this level
 # the peer reports itself as busy
