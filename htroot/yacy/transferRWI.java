@@ -90,9 +90,16 @@ public final class transferRWI {
         StringBuffer unknownURLs = new StringBuffer();
         int          pause       = 0;
         
+        boolean shortCacheFlush = false;
         if ((granted) && (sb.wordIndex.busyCacheFlush)) {
             // wait a little bit, maybe we got into a short flush slot
-            for (int i = 0; i < 20; i++) if (sb.wordIndex.busyCacheFlush) try {Thread.sleep(100);} catch (InterruptedException e) {}
+            for (int i = 0; i < 20; i++) {
+                if (!(sb.wordIndex.busyCacheFlush)) {
+                    shortCacheFlush = true;
+                    break;
+                }
+                try {Thread.sleep(100);} catch (InterruptedException e) {}
+            }
         }
         
         if (!granted) {
@@ -106,7 +113,7 @@ public final class transferRWI {
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
-        } else if ((checkLimit && sb.wordIndex.wSize() > sb.wordIndex.getMaxWordCount()) || (sb.wordIndex.busyCacheFlush)) {
+        } else if ((checkLimit && sb.wordIndex.wSize() > sb.wordIndex.getMaxWordCount()) || ((sb.wordIndex.busyCacheFlush) && (!shortCacheFlush))) {
             // we are too busy flushing the ramCache to receive indexes
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (wordcachesize=" + sb.wordIndex.wSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
