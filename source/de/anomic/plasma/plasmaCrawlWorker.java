@@ -497,6 +497,8 @@ public final class plasmaCrawlWorker extends Thread {
                 // if the response has not the right response type then reject file
                 log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for URL " + url.toString());
                 // not processed any further
+                
+                // TODO: add the url into the error url DB
             }
             
             if (remote != null) remote.close();

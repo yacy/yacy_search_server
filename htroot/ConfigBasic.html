@@ -52,7 +52,9 @@ Your YaCy Peer needs some basic information to operate properly
  <li>#(statusName)#<img src="/env/grafics/warning.png">&nbsp;Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="32px" width="32px">&nbsp;You have a nice peer name#(/statusName)#<br>
      Peer Name: <input type="text" name="peername" value="#[defaultName]#" size="20" maxlength="32"><br><br></li>
  <li>#(statusPort)#<img src="/env/grafics/warning.png">&nbsp;Your peer cannot be reached from outside (what is not fatal, but would be good for the YaCy network); please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port.::<img src="/env/grafics/ok.png" height="32px" width="32px">&nbsp;Your peer can be reached by other peers#(/statusPort)#<br>
-     Peer Port: <input type="text" name="port" value="#[defaultPort]#" size="5" maxlength="5"><br><br></li>
+     Peer Port: <input type="text" name="port" value="#[defaultPort]#" size="5" maxlength="5"><br>
+     #(upnp)#::Configure your router for yacy:&nbsp;<input type="checkbox" name="enableUpnp" align="top" #(enabled)#::checked#(/enabled)#>#(/upnp)#<br>
+ </li>
  </ol>
 <br>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="set" value="Set Configuration">
 </form>

@@ -57,13 +57,11 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.server.portForwarding.serverPortForwarding;
 
 public class serverPortForwardingUpnp implements serverPortForwarding {
-    private InternetGatewayDevice gateway;
-
-    private String localHost;
-    private int localHostPort;
     
+    private InternetGatewayDevice gateway;
+    private String localHost;
+    private int localHostPort;    
     private String externalAddress = null;
-
     private serverLog log;    
     
     public serverPortForwardingUpnp() {
@@ -124,6 +122,16 @@ public class serverPortForwardingUpnp implements serverPortForwarding {
             this.gateway = null;
             this.log.logSevere("Unable to connect to remote port forwarding host. ",e);
             throw new IOException(e.getMessage());            
+        }
+    }
+    
+    public boolean routerAvailable(int timeout) {       
+        try {
+            InternetGatewayDevice[] IGDs = InternetGatewayDevice.getDevices(timeout);
+            return (IGDs != null) && (IGDs.length > 0);
+        } catch (Exception e) {
+            this.log.logSevere("Unable to determine available routers: " + e.getMessage());
+            return false;
         }
     }
 
