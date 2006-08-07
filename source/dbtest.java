@@ -15,6 +15,8 @@ import java.util.Iterator;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
+import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroProfile;
 import de.anomic.kelondro.kelondroSplittedTree;
 import de.anomic.kelondro.kelondroTree;
@@ -375,7 +377,8 @@ final class dbTable implements kelondroIndex {
     private final String db_usr_str    = "yacy";
     private final String db_pwd_str    = "yacy";
     
-    private Connection theDBConnection = null;  
+    private Connection theDBConnection = null;
+    private final kelondroOrder order = new kelondroNaturalOrder(true);
     private kelondroRow rowdef;
     
     public dbTable(String dbType, kelondroRow rowdef) throws Exception {
@@ -539,6 +542,10 @@ final class dbTable implements kelondroIndex {
     public int columnSize(int column) {
         // TODO Auto-generated method stub
         return 0;
+    }
+
+    public kelondroOrder order() {
+        return this.order;
     }
 }
 

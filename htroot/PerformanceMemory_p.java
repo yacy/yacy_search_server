@@ -287,7 +287,7 @@ public class PerformanceMemory_p {
         prop.put("namecache.hit",Long.toString(amount));
         amount = httpc.nameCacheNoCachingListSize();
         prop.put("namecache.noCache",Long.toString(amount));
-        amount = sb.urlBlacklist.blacklistCacheSize();
+        amount = plasmaSwitchboard.urlBlacklist.blacklistCacheSize();
         prop.put("blacklistcache.size",Long.toString(amount));
         // return rewrite values for templates
         return prop;

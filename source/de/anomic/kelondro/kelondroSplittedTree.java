@@ -231,5 +231,9 @@ public class kelondroSplittedTree implements kelondroIndex {
         
     }
 
+    public kelondroOrder order() {
+        return this.order;
+    }
+
 
 }

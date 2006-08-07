@@ -220,11 +220,11 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
     }
     
-    public kelondroOrder getOrdering() {
+    public kelondroOrder order() {
         return this.sortOrder;
     }
 
-    public int getOrderColumn() {
+    public int orderColumn() {
         return this.sortColumn;
     }
 

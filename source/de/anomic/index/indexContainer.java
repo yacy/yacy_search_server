@@ -45,8 +45,8 @@ public interface indexContainer {
     public String getWordHash();
 
     public void setOrdering(kelondroOrder newOrder, int newColumn);
-    public kelondroOrder getOrdering();
-    public int getOrderColumn();
+    public kelondroOrder order();
+    public int orderColumn();
     
     public int add(indexEntry entry);
     public int add(indexEntry entry, long updateTime);

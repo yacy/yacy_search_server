@@ -55,6 +55,7 @@ import java.util.Iterator;
 
 public interface kelondroIndex {
 
+    public kelondroOrder order();
     public int size() throws IOException;
     public kelondroRow row() throws IOException;
     public kelondroRow.Entry get(byte[] key) throws IOException;

@@ -70,4 +70,8 @@ public class kelondroBytesIntMap {
         return ki.rows(up, rotating, firstKey);
     }
     
+    public kelondroOrder order() {
+        return ki.order();
+    }
+    
 }

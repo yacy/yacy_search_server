@@ -191,4 +191,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         
     }
 
+    public kelondroOrder order() {
+        return index.order();
+    }
+
 }

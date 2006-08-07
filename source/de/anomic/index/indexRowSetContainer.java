@@ -296,8 +296,8 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
     private static indexContainer joinConstructiveByEnumeration(indexContainer i1, indexContainer i2, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
         indexContainer conj = new indexRowSetContainer(null); // start with empty search result
-        if (!((i1.getOrdering().signature().equals(i2.getOrdering().signature())) &&
-              (i1.getOrderColumn() == i2.getOrderColumn()))) return conj; // ordering must be equal
+        if (!((i1.order().signature().equals(i2.order().signature())) &&
+              (i1.orderColumn() == i2.orderColumn()))) return conj; // ordering must be equal
         Iterator e1 = i1.entries();
         Iterator e2 = i2.entries();
         int c;
@@ -309,7 +309,7 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
 
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
-                c = i1.getOrdering().compare(ie1.urlHash(), ie2.urlHash());
+                c = i1.order().compare(ie1.urlHash(), ie2.urlHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = (indexEntry) e1.next(); else break;
