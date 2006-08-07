@@ -79,7 +79,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     private static final String indexAssortmentClusterPath = "ACLUSTER";
     private static final int assortmentCount = 64;
-    private static final boolean useCollectionIndex = false;
+    public  static final boolean useCollectionIndex = false;
     
     private final File                             oldDatabaseRoot;
     private final kelondroOrder                    indexOrder = new kelondroNaturalOrder(true);

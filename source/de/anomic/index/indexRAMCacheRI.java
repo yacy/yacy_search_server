@@ -38,6 +38,7 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexAssortment;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
@@ -46,9 +47,12 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
 
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
-    public static final int  wCacheReferenceLimit = 64;
-    public static final long wCacheMaxAge         = 1000 * 60 * 30; // milliseconds; 30 minutes
-    public static final long kCacheMaxAge         = 1000 * 60 * 2;  // milliseconds; 2 minutes
+    public  static       int  wCacheReferenceLimit = 64;
+    public  static final long wCacheMaxAge         = 1000 * 60 * 30; // milliseconds; 30 minutes
+    public  static final long kCacheMaxAge         = 1000 * 60 * 2;  // milliseconds; 2 minutes
+    static {
+        if (plasmaWordIndex.useCollectionIndex) wCacheReferenceLimit = 256;
+    }
     
     // class variables
     private final File databaseRoot;
@@ -349,7 +353,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             synchronized (wCache) {
                 String hash = null;
                 int count = hashScore.getMaxScore();
-                if ((count > wCacheReferenceLimit) &&
+                if ((count >= wCacheReferenceLimit) &&
                     ((hash = (String) hashScore.getMaxObject()) != null)) {
                     // we MUST flush high-score entries, because a loop deletes entries in cache until this condition fails
                     // in this cache we MUST NOT check wCacheMinAge
