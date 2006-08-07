@@ -51,8 +51,8 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Iterator;
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -156,9 +156,10 @@ public class Blacklist_p {
         // Read the List
         final ArrayList list = listManager.getListArray(new File(listManager.listsPath, filename));
         final StringBuffer out = new StringBuffer(list.size() * 64);
-        final Iterator iter = list.iterator();
-        while (iter.hasNext()){
-            line = (String) iter.next();
+        String[] sortedlist = new String[list.size()];
+        Arrays.sort(list.toArray(sortedlist));
+        for (int j=0;j<sortedlist.length;++j){
+            line = sortedlist[j];
 
             if (!(line.length() == 0 || line.charAt(0) == '#' || line.equals(removeItem))) { //Not the item to remove
                 prop.put("Itemlist_" + numItems + "_item", line);
