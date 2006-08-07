@@ -89,7 +89,12 @@ public final class transferRWI {
         String       result      = "ok";
         StringBuffer unknownURLs = new StringBuffer();
         int          pause       = 0;
-
+        
+        if ((granted) && (sb.wordIndex.busyCacheFlush)) {
+            // wait a little bit, maybe we got into a short flush slot
+            for (int i = 0; i < 20; i++) if (sb.wordIndex.busyCacheFlush) try {Thread.sleep(100);} catch (InterruptedException e) {}
+        }
+        
         if (!granted) {
             // we dont want to receive indexes
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
