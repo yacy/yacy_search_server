@@ -136,8 +136,11 @@ public final class transferRWI {
             indexEntry iEntry;
             int wordhashesSize = v.size();
             final HashSet unknownURL = new HashSet();
+            final HashSet knownURL = new HashSet();
             String[] wordhashes = new String[v.size()];
             int received = 0;
+            int blocked = 0;
+            int receivedURL = 0;
             for (int i = 0; i < wordhashesSize; i++) {
                 serverCore.checkInterruption();
                 
@@ -147,29 +150,31 @@ public final class transferRWI {
                     wordHash = estring.substring(0, p);
                     wordhashes[received] = wordHash;
                     iEntry = new indexURLEntry(estring.substring(p));
-                    sb.wordIndex.addEntry(wordHash, iEntry, System.currentTimeMillis(), true);
-                    serverCore.checkInterruption();
-                    
                     urlHash = iEntry.urlHash();
-                    try {
-                        if ((!(unknownURL.contains(urlHash))) &&
-                            (!(sb.urlPool.loadedURL.exists(urlHash)))) {
-                            if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(urlHash))) {
-                                int deleted = sb.wordIndex.tryRemoveURLs(urlHash);
-                                yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
-                                //TODO: set to logFine if it works.
+                    if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(urlHash))) {
+                        //int deleted = sb.wordIndex.tryRemoveURLs(urlHash);
+                        yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName + "; deleted 1 URL entries from RWIs");
+                        blocked++;
+                    } else {
+                        sb.wordIndex.addEntry(wordHash, iEntry, System.currentTimeMillis(), true);
+                        serverCore.checkInterruption();
+
+                        if (!(knownURL.contains(urlHash)||unknownURL.contains(urlHash))) {
+                            try {
+                                if (sb.urlPool.loadedURL.exists(urlHash)) {
+                                    knownURL.add(urlHash);
+                                } else {
+                                    unknownURL.add(urlHash);
+                                }
+                            } catch (Exception ex) {
+                                sb.getLog().logWarning(
+                                  "transferRWI: DB-Error while trying to determine if URL with hash '" +
+                                  urlHash + "' is known.", ex);
                             }
-                            else {
-                                unknownURL.add(urlHash);                                
-                            }
+                            receivedURL++;
                         }
-                    } catch (Exception ex) {
-                        sb.getLog().logWarning(
-                          "transferRWI: DB-Error while trying to determine if URL with hash '" +
-                          urlHash + "' is known.", ex);
-                        unknownURL.add(urlHash);
+                        received++;
                     }
-                    received++;
                 }
             }
             yacyCore.seedDB.mySeed.incRI(received);
@@ -185,7 +190,7 @@ public final class transferRWI {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
             } else {
                 final double avdist = (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[0]) + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[received - 1])) / 2.0;
-                sb.getLog().logInfo("Received " + received + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs");
+                sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
             }
             result = "ok";
             

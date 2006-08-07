@@ -83,6 +83,7 @@ public final class transferURL {
 
         if (granted) {
             int received = 0;
+            int blocked = 0;
             final int sizeBefore = sb.urlPool.loadedURL.size();
             // read the urls from the other properties and store
             String urls;
@@ -100,6 +101,7 @@ public final class transferURL {
                             int deleted = sb.wordIndex.tryRemoveURLs(lEntry.hash());
                             yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
                             lEntry = null;
+                            blocked++;
                         } else {
                             lEntry.store();
                             sb.urlPool.loadedURL.stackEntry(lEntry, iam, iam, 3);
@@ -121,7 +123,7 @@ public final class transferURL {
             // return rewrite properties
             final int more = sb.urlPool.loadedURL.size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
-            sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms.");
+            sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, Blocked " + blocked + " URLs");
             if ((received - more) > 0) sb.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
             result = "ok";
         } else {
