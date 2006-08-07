@@ -79,7 +79,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     private static final String indexAssortmentClusterPath = "ACLUSTER";
     private static final int assortmentCount = 64;
-    public  static final boolean useCollectionIndex = false;
+    public  static final boolean useCollectionIndex = true;
     
     private final File                             oldDatabaseRoot;
     private final kelondroOrder                    indexOrder = new kelondroNaturalOrder(true);
@@ -88,6 +88,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     private int                                    assortmentBufferSize; // kb
     private final plasmaWordIndexAssortmentCluster assortmentCluster;    // old database structure, to be replaced by CollectionRI
     private final plasmaWordIndexFileCluster       backend;              // old database structure, to be replaced by CollectionRI
+    public        boolean                          busyCacheFlush;       // shows if a cache flush is currently performed
     
     public plasmaWordIndex(File oldDatabaseRoot, File newIndexRoot, int bufferkb, long preloadTime, serverLog log) {
         this.oldDatabaseRoot = oldDatabaseRoot;
@@ -106,6 +107,8 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             collections = new indexCollectionRI(newIndexRoot, "test_generation0", bufferkb * 1024, preloadTime);
         else
             collections = null;
+        
+        busyCacheFlush = false;
     }
 
     public File getRoot() {
@@ -167,13 +170,9 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public void flushControl() {
         // check for forced flush
         synchronized (this) { ramCache.shiftK2W(); }
-        while (ramCache.maxURLinWCache() > indexRAMCacheRI.wCacheReferenceLimit) {
-            flushCache(1);
-        }
+        flushCache(ramCache.maxURLinWCache() - indexRAMCacheRI.wCacheReferenceLimit);
         if (ramCache.wSize() > ramCache.getMaxWordCount()) {
-            while (ramCache.wSize() + 500 > ramCache.getMaxWordCount()) {
-                flushCache(1);
-            }
+            flushCache(ramCache.wSize() + 500 - ramCache.getMaxWordCount());
         }
     }
 
@@ -195,18 +194,26 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public void flushCacheSome() {
+        System.out.println("DEBUG-A"); // some temporary debug lines to identify the outOfMemoryError position
         synchronized (this) { ramCache.shiftK2W(); }
+        System.out.println("DEBUG-B");
         int flushCount = ramCache.wSize() / 500;
         if (flushCount > 70) flushCount = 70;
         if (flushCount < 5) flushCount = 5;
+        System.out.println("DEBUG-C");
         flushCache(flushCount);
+        System.out.println("DEBUG-D");
     }
     
     public void flushCache(int count) {
-        for (int i = 0; i < count; i++) {
-            if (ramCache.wSize() == 0) break;
-            synchronized (this) { flushCache(ramCache.bestFlushWordHash()); }
-            try {Thread.sleep(10);} catch (InterruptedException e) {}
+        synchronized (ramCache) {
+            busyCacheFlush = true;
+            for (int i = 0; i < count; i++) {
+                if (ramCache.wSize() == 0) break;
+                synchronized (this) { flushCache(ramCache.bestFlushWordHash()); }
+                try {Thread.sleep(8);} catch (InterruptedException e) {}
+            }
+            busyCacheFlush = false;
         }
     }
     

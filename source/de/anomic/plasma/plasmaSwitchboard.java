@@ -929,11 +929,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logFiner("deQueue: online caution, omitting resource stack processing");
             return false;
         }
-        
+
         // flush some entries from the RAM cache
         // (new permanent cache flushing)
         wordIndex.flushCacheSome();
-        
+
         boolean doneSomething = false;
         
         // possibly delete entries from last chunk
@@ -955,7 +955,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             dhtTransferChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, minChunkSize, dhtTransferIndexCount);
             doneSomething = true;
         }
-        
+
         synchronized (sbQueue) {
 
             if (sbQueue.size() == 0) {
