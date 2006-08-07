@@ -90,6 +90,10 @@ public class plasmaURLPattern {
         hostpaths.put(host.toLowerCase(), path);
     }
 
+    public int blacklistCacheSize() {
+        return cachedUrlHashs.size();
+    }
+
     public boolean hashInBlacklistedCache(String urlHash) {
         return cachedUrlHashs.contains(urlHash);
     }
