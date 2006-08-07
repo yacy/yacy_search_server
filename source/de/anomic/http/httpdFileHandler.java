@@ -118,7 +118,9 @@ import de.anomic.ymage.ymagePainter;
 
 public final class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
     
-    // class variables   
+    private static final boolean safeServletsMode = false; // if true then all servlets are called synchronized
+    
+    // class variables
     private static final Properties mimeTable = new Properties();
     private static final serverClassLoader provider;
     private static final HashMap templates = new HashMap();
@@ -476,7 +478,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
                     requestHeader.put("PATH", path);
                     // in case that there are no args given, args = null or empty hashmap
-                    img = rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
+                    img = invokeServlet(targetClass, requestHeader, args);
                 } catch (InvocationTargetException e) {
                     this.theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
                     e.getMessage() +
@@ -560,8 +562,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null);                
                 
                 // in case that there are no args given, args = null or empty hashmap
-                /* serverObjects tp = (serverObjects) */ rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
-             
+                /* serverObjects tp = (serverObjects) */ invokeServlet(targetClass, requestHeader, args);
                 this.forceConnectionClose();
                 return;                
             } else if ((targetFile.exists()) && (targetFile.canRead())) {
@@ -597,7 +598,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
                             requestHeader.put("PATH", path);
                             // in case that there are no args given, args = null or empty hashmap
-                            tp = (serverObjects) rewriteMethod(targetClass).invoke(null, new Object[] {requestHeader, args, switchboard});
+                            tp = (serverObjects) invokeServlet(targetClass, requestHeader, args);
                             // if no args given , then tp will be an empty Hashtable object (not null)
                             if (tp == null) tp = new serverObjects();
                             // check if the servlets requests authentification
@@ -708,8 +709,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 //warning: o,tp and fis are reused
                                 httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
                                 
-                                if(pageClass != null && pageClass.exists())
-                                    tp = (serverObjects) rewriteMethod(pageClass).invoke(null, new Object[] {requestHeader, args, switchboard});
+                                if (pageClass != null && pageClass.exists()) 
+                                    tp = (serverObjects) invokeServlet(pageClass, requestHeader, args);
                                 else
                                     tp = new serverObjects();
                                 tp.put("page", o.toString());
@@ -910,7 +911,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             }
         }
     }
-
+    
     private File getOverlayedClass(String path) {
         File targetClass;
         targetClass=rewriteClassFile(new File(htDefaultPath, path)); //works for default and localized files
@@ -994,6 +995,16 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         return m;
     }
     
+    private Object invokeServlet(File targetClass, httpHeader request, serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        Object result;
+        if (safeServletsMode) synchronized (switchboard) {
+            result = rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
+        } else {
+            result = rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
+        }
+        return result;
+    }
+
     public void doConnect(Properties conProp, httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) {
         throw new UnsupportedOperationException();
     }

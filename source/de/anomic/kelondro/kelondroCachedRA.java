@@ -64,7 +64,14 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         this.cacheMaxElements = cachesize / cacheElementSize;
         this.seekpos = 0;
     }
-
+    
+    public long available() throws IOException {
+        synchronized (ra) {
+            ra.seek(seekpos);
+            return ra.available();
+        }
+    }
+    
     private int cacheElementNumber(long address) {
         return (int) address / cacheElementSize;
     }

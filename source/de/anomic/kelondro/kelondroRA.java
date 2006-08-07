@@ -59,6 +59,8 @@ public interface kelondroRA {
     public String name();
     
     // pseudo-native methods:
+    public long available() throws IOException;
+    
     public int read() throws IOException;
     public void write(int b) throws IOException;
 

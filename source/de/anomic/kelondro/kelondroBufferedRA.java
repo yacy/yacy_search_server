@@ -45,6 +45,8 @@ import java.io.IOException;
 
 public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA {
 
+    // FIXME: a lot of synchronization of ra is needed here
+    
     protected kelondroRA ra; 
     protected byte[] buffer;
     protected int bufferPage;
@@ -75,6 +77,13 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
         this.bufferWritten = true;
     }
 
+    public long available() throws IOException {
+        synchronized (ra) {
+            ra.seek(seekpos);
+            return ra.available();
+        }
+    }
+    
     private void readBuffer(int newPageNr) throws IOException {
         if (newPageNr == bufferPage) return;
         bufferPage = newPageNr;

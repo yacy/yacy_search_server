@@ -153,12 +153,14 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
     public void setConfig(String key, String value) {
         // perform action before setting new value
+        Iterator bevore = switchActions.entrySet().iterator();
+        Iterator after  = switchActions.entrySet().iterator();
         synchronized (configProps) {
             Map.Entry entry;
             serverSwitchAction action;
-            Iterator i = switchActions.entrySet().iterator();
-            while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
+            
+            while (bevore.hasNext()) {
+                entry = (Map.Entry) bevore.next();
                 action = (serverSwitchAction) entry.getValue();
                 try {
                     action.doBevoreSetConfig(key, value);
@@ -172,9 +174,8 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             saveConfig();
 
             // perform actions afterwards
-            i = switchActions.entrySet().iterator();
-            while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
+            while (after.hasNext()) {
+                entry = (Map.Entry) after.next();
                 action = (serverSwitchAction) entry.getValue();
                 try {
                     action.doAfterSetConfig(key, value, (oldValue == null) ? null : (String) oldValue);
@@ -186,6 +187,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     }
 
     public String getConfig(String key, String dflt) {
+        Iterator i = switchActions.entrySet().iterator();
         synchronized (configProps) {
             // get the value
             Object s = configProps.get(key);
@@ -193,7 +195,6 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             // do action
             Map.Entry entry;
             serverSwitchAction action;
-            Iterator i = switchActions.entrySet().iterator();
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
                 action = (serverSwitchAction) entry.getValue();

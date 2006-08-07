@@ -69,8 +69,9 @@ public abstract class kelondroAbstractIOChunks {
         if (len < 0) throw new IndexOutOfBoundsException("length is negative:" + len);
         if (b.length < off + len) throw new IndexOutOfBoundsException("bounds do not fit: b.length=" + b.length + ", off=" + off + ", len=" + len);
         while (len > 0) {
-            int r = read(pos, b, off, len);
+            int r = read(pos, b, off, len); // blocks until at least one byte is available
             if (r < 0) throw new IOException("EOF"); // read exceeded EOF
+            if (r == 0) throw new IOException("readFully cannot read remaining " + len + " bytes"); // security exception to prevent endless loops
             pos += r;
             off += r;
             len -= r;

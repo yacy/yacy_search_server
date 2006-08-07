@@ -90,7 +90,7 @@ public class indexURLEntry implements Cloneable, indexEntry {
            ) {
 
         // more needed attributes:
-        // - boolean: appearance attributes: title, appears in header, anchor-descr, image-tag etc
+        // - boolean: appearance attributes: title, appears in header, anchor-descr, image-tag, hervorhebungen, meta-tags, word in link etc
         // - boolean: URL attributes
 
         if ((language == null) || (language.length() != indexURL.urlLanguageLength)) language = "uk";

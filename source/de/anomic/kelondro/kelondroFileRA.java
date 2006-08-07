@@ -60,6 +60,10 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
         RAFile = new RandomAccessFile(file, "rw");
     }
     
+    public long available() throws IOException {
+        return RAFile.length() - RAFile.getFilePointer();
+    }
+    
     // pseudo-native method read
     public int read() throws IOException {
         return RAFile.read();
