@@ -379,7 +379,12 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public int size() {
-        return java.lang.Math.max(assortmentCluster.size(),
+        if (useCollectionIndex)
+            return java.lang.Math.max(collections.size(),
+                    java.lang.Math.max(assortmentCluster.size(),
+                     java.lang.Math.max(backend.size(), ramCache.size())));
+        else
+            return java.lang.Math.max(assortmentCluster.size(),
                         java.lang.Math.max(backend.size(), ramCache.size()));
     }
 

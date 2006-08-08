@@ -315,8 +315,18 @@ public class kelondroCollectionIndex {
         // read the row and define a collection
         kelondroRowSet collection = new kelondroRowSet(this.rowdef, arrayrow.getColBytes(1)); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
         if (index.order().compare(arrayrow.getColBytes(0), indexrow.getColBytes(idx_col_key)) != 0) {
-            // check if we got the right row; this row is wrong
-            throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, partitionnumber, serialnumber).toString(), "array contains wrong row '" + new String(arrayrow.getColBytes(0)) + "', expected is '" + new String(indexrow.getColBytes(idx_col_key)) + "'");
+            // check if we got the right row; this row is wrong. Fix it:
+            index.remove(indexrow.getColBytes(idx_col_key)); // the wrong row cannot be fixed
+            // store the row number in the index; this may be a double-entry, but better than nothing
+            kelondroRow.Entry indexEntry = index.row().newEntry();
+            indexEntry.setCol(idx_col_key, arrayrow.getColBytes(0));
+            indexEntry.setColLongB256(idx_col_chunksize, this.rowdef.objectsize());
+            indexEntry.setColLongB256(idx_col_chunkcount, collection.size());
+            indexEntry.setColLongB256(idx_col_indexpos, (long) rownumber);
+            indexEntry.setColLongB256(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+            indexEntry.setColLongB256(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+            index.put(indexEntry);
+            throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, partitionnumber, serialnumber).toString(), "array contains wrong row '" + new String(arrayrow.getColBytes(0)) + "', expected is '" + new String(indexrow.getColBytes(idx_col_key)) + "', the row has been fixed");
         }
         int chunkcountInArray = collection.size();
         if (chunkcountInArray != chunkcount) {
