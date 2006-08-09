@@ -227,20 +227,21 @@ public final class httpTemplate {
         return false;
     }
     
-    public static void writeTemplate(InputStream in, OutputStream out, Hashtable pattern, byte[] dflt) throws IOException {
-	writeTemplate(in, out, pattern, dflt, "");
+    public static String writeTemplate(InputStream in, OutputStream out, Hashtable pattern, byte[] dflt) throws IOException {
+        return writeTemplate(in, out, pattern, dflt, "");
     }
 
 	/**
 	 * Reads a input stream, and writes the data with replaced templates on a output stream
 	 */
-    public static void writeTemplate(InputStream in, OutputStream out, Hashtable pattern, byte[] dflt, String prefix) throws IOException {
+    public static String writeTemplate(InputStream in, OutputStream out, Hashtable pattern, byte[] dflt, String prefix) throws IOException {
         PushbackInputStream pis = new PushbackInputStream(in, 100);
         ByteArrayOutputStream keyStream;
         String key;
         String multi_key;
         byte[] replacement;
-	int bb;
+        int bb;
+        StringBuffer structure=new StringBuffer();
 	
         while (transferUntil(pis, out, hasha)) {
 	    bb = pis.read();
@@ -286,12 +287,14 @@ public final class httpTemplate {
 			}
 			
                         //Enumeration enx = pattern.keys(); while (enx.hasMoreElements()) System.out.println("KEY=" + enx.nextElement()); // DEBUG
+            structure.append("<"+multi_key+" type=\"multi\" num=\""+num+"\">\n");
 			for(int i=0;i < num;i++ ){
-                            PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
+                PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
 			    //System.out.println("recursing with text(prefix="+ multi_key + "_" + i + "_" +"):"); //DEBUG
 			    //System.out.println(text);
-			    writeTemplate(pis2, out, pattern, dflt, multi_key + "_" + i + "_");
+			    structure.append(writeTemplate(pis2, out, pattern, dflt, multi_key + "_" + i + "_"));
 			}//for
+            structure.append("\n</"+multi_key+">\n");
 		    }else{//transferUntil
 				serverLog.logSevere("TEMPLATE", "No Close Key found for #{"+multi_key+"}#");
 			}
@@ -338,12 +341,12 @@ public final class httpTemplate {
             transferUntil(pis, keyStream, (new String("%%"+patternName)).getBytes());
     		if(pis.available()==0){
     			serverLog.logSevere("TEMPLATE", "No such Template: %%"+patternName);
-                return;
+                return structure.toString();
             }
             keyStream=new ByteArrayOutputStream();
             transferUntil(pis, keyStream, "::".getBytes());
             pis2 = new PushbackInputStream(new ByteArrayInputStream(keyStream.toString().getBytes()));
-            writeTemplate(pis2, out, pattern, dflt, prefix + key + "_");
+            structure.append(writeTemplate(pis2, out, pattern, dflt, prefix + key + "_"));
     		transferUntil(pis, keyStream, (new String("#(/"+key+")#")).getBytes());
     		if(pis.available()==0){
     			serverLog.logSevere("TEMPLATE", "No Close Key found for #("+key+")# (by Name)");
@@ -360,7 +363,9 @@ public final class httpTemplate {
     				if(keyStream.toString().equals("/" + key)){
     					pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
     					//this maybe the wrong, but its the last
-    					writeTemplate(pis2, out, pattern, dflt, prefix + key + "_");
+                        structure.append("<"+key+" type=\"alternative\" which=\""+whichPattern+"\" found=\"0\">\n");
+    					structure.append(writeTemplate(pis2, out, pattern, dflt, prefix + key + "_"));
+                        structure.append("\n</key>\n");
     					found=true;
     				}else if(others >0 && keyStream.toString().startsWith("/")){ //close nested
     					others--;
@@ -381,7 +386,9 @@ public final class httpTemplate {
     			if( (bb & 0xFF) == ':'){
     			    if(currentPattern == whichPattern){ //found the pattern
     				pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
-    				writeTemplate(pis2, out, pattern, dflt, prefix + key + "_");
+                    structure.append("<"+key+" type=\"alternative\" which=\""+whichPattern+"\" found=\"0\">\n");
+    				structure.append(writeTemplate(pis2, out, pattern, dflt, prefix + key + "_"));
+                    structure.append("\n</"+key+">\n");
     
     				transferUntil(pis, keyStream, (new String("#(/"+key+")#")).getBytes());//to #(/key)#.
     
@@ -408,6 +415,9 @@ public final class httpTemplate {
     	            // pattern detected, write replacement
 		    key = prefix + keyStream.toString();
 		    replacement = replacePattern(key, pattern, dflt); //replace
+            structure.append("<"+key+" type=\"normal\">\n");
+            structure.append(new String(replacement));
+            structure.append("\n</"+key+">\n");
 
 			/* DEBUG
 			try{
@@ -421,7 +431,7 @@ public final class httpTemplate {
     	        } else {
 		    // inconsistency, simply finalize this
 		    serverFileUtils.copy(pis, out);
-            	    return;
+            	    return structure.toString();
 		}
 	    }else if( (bb & 0xFF) == ps){ //include
 			String include = "";
@@ -448,7 +458,9 @@ public final class httpTemplate {
                     if (br!=null) try{br.close(); br=null;}catch(Exception e){}
                 }
 				PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
-				writeTemplate(pis2, out, pattern, dflt, prefix);
+                structure.append("<fileinclude file=\""+filename+">\n");
+				structure.append(writeTemplate(pis2, out, pattern, dflt, prefix));
+                structure.append("\n</fileinclude>\n");
 			}
             }
 		}else{ //no match, but a single hash (output # + bb)
@@ -458,6 +470,8 @@ public final class httpTemplate {
 		serverFileUtils.write(tmp, out);
 	    }
         }
+        //System.out.println(structure.toString()); //DEBUG
+        return structure.toString();
     }
 
     public static byte[] replacePattern(String key, Hashtable pattern, byte dflt[]) {
