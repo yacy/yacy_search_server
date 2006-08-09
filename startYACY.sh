@@ -82,15 +82,15 @@ fi
 
 # generating the proper classpath
 CLASSPATH=""
-prefix=$(dirname $0);
-if [ x$prefix == "x." ];then
-	prefix="";
-else
-	prefix="$prefix/"
-fi
-for N in lib/*.jar; do CLASSPATH="$CLASSPATH$prefix$N:"; done	
-for N in libx/*.jar; do CLASSPATH="$CLASSPATH$prefix$N:"; done
-CLASSPATH="${prefix}classes:$prefix:$CLASSPATH"
+#prefix=$(dirname $0);
+#if [ x$prefix == "x." ];then
+#	prefix="";
+#else
+#	prefix="$prefix/"
+#fi
+for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done	
+for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
+CLASSPATH="classes:.:$CLASSPATH"
 
 
 cmdline="";
