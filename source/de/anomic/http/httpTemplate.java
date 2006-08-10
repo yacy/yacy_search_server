@@ -271,12 +271,12 @@ public final class httpTemplate {
 			if((bb & 0xFF) != 10){ //kill newline
 			    pis.unread(bb);
 			}
-			multi_key = prefix + multi_key; //OK, now add the prefix
+
 			String text=keyStream.toString(); //text between #{key}# an #{/key}#
 			int num=0;
-			if(pattern.containsKey(multi_key) && pattern.get(multi_key) != null){
+			if(pattern.containsKey(prefix+multi_key) && pattern.get(prefix+multi_key) != null){
 			    try{
-				num=Integer.parseInt((String)pattern.get(multi_key)); // Key contains the iteration number as string
+				num=Integer.parseInt((String)pattern.get(prefix+multi_key)); // Key contains the iteration number as string
 			    }catch(NumberFormatException e){
 				num=0;
 			    }
@@ -292,11 +292,11 @@ public final class httpTemplate {
                 PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
 			    //System.out.println("recursing with text(prefix="+ multi_key + "_" + i + "_" +"):"); //DEBUG
 			    //System.out.println(text);
-			    structure.append(writeTemplate(pis2, out, pattern, dflt, multi_key + "_" + i + "_"));
+			    structure.append(writeTemplate(pis2, out, pattern, dflt, prefix+multi_key + "_" + i + "_"));
 			}//for
-            structure.append("\n</"+multi_key+">\n");
+            structure.append("</"+multi_key+">\n");
 		    }else{//transferUntil
-				serverLog.logSevere("TEMPLATE", "No Close Key found for #{"+multi_key+"}#");
+				serverLog.logSevere("TEMPLATE", "No Close Key found for #{"+multi_key+"}#"); //prefix here?
 			}
 		}
 	    }else if( (bb & 0xFF) == lrbr ){ //alternatives
@@ -365,7 +365,7 @@ public final class httpTemplate {
     					//this maybe the wrong, but its the last
                         structure.append("<"+key+" type=\"alternative\" which=\""+whichPattern+"\" found=\"0\">\n");
     					structure.append(writeTemplate(pis2, out, pattern, dflt, prefix + key + "_"));
-                        structure.append("\n</key>\n");
+                        structure.append("</"+key+">\n");
     					found=true;
     				}else if(others >0 && keyStream.toString().startsWith("/")){ //close nested
     					others--;
@@ -388,7 +388,7 @@ public final class httpTemplate {
     				pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
                     structure.append("<"+key+" type=\"alternative\" which=\""+whichPattern+"\" found=\"0\">\n");
     				structure.append(writeTemplate(pis2, out, pattern, dflt, prefix + key + "_"));
-                    structure.append("\n</"+key+">\n");
+                    structure.append("</"+key+">\n");
     
     				transferUntil(pis, keyStream, (new String("#(/"+key+")#")).getBytes());//to #(/key)#.
     
@@ -413,11 +413,11 @@ public final class httpTemplate {
 	    }else if( (bb & 0xFF) == lbr ){ //normal
 		if (transferUntil(pis, keyStream, pClose)) {
     	            // pattern detected, write replacement
-		    key = prefix + keyStream.toString();
-		    replacement = replacePattern(key, pattern, dflt); //replace
+		    key = keyStream.toString();
+		    replacement = replacePattern(prefix+key, pattern, dflt); //replace
             structure.append("<"+key+" type=\"normal\">\n");
             structure.append(new String(replacement));
-            structure.append("\n</"+key+">\n");
+            structure.append("</"+key+">\n");
 
 			/* DEBUG
 			try{
@@ -460,7 +460,7 @@ public final class httpTemplate {
 				PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
                 structure.append("<fileinclude file=\""+filename+">\n");
 				structure.append(writeTemplate(pis2, out, pattern, dflt, prefix));
-                structure.append("\n</fileinclude>\n");
+                structure.append("</fileinclude>\n");
 			}
             }
 		}else{ //no match, but a single hash (output # + bb)
