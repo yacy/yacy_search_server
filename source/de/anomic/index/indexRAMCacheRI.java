@@ -38,7 +38,6 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexAssortment;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
@@ -47,12 +46,8 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
 
     // environment constants
     private static final String indexArrayFileName = "indexDump1.array";
-    public  static       int  wCacheReferenceLimit = 64;
     public  static final long wCacheMaxAge         = 1000 * 60 * 30; // milliseconds; 30 minutes
     public  static final long kCacheMaxAge         = 1000 * 60 * 2;  // milliseconds; 2 minutes
-    static {
-        if (plasmaWordIndex.useCollectionIndex) wCacheReferenceLimit = 256;
-    }
     
     // class variables
     private final File databaseRoot;
@@ -63,8 +58,9 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     private long  kCacheInc = 0;
     private long  startTime;
     private int   wCacheMaxCount;
+    public  int   wCacheReferenceLimit;
     private final serverLog log;
-
+    
     // calculated constants
     private static String maxKey;
     static {
@@ -72,7 +68,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         //minKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
 
-    public indexRAMCacheRI(File databaseRoot, serverLog log) {
+    public indexRAMCacheRI(File databaseRoot, int wCacheReferenceLimitInit, serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
@@ -84,6 +80,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         this.kCacheInc = 0;
         this.startTime = System.currentTimeMillis();
         this.wCacheMaxCount = 10000;
+        this.wCacheReferenceLimit = wCacheReferenceLimitInit;
         this.log = log;
         
         // read in dump of last session

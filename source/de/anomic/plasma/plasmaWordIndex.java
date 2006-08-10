@@ -79,7 +79,6 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     private static final String indexAssortmentClusterPath = "ACLUSTER";
     private static final int assortmentCount = 64;
-    public  static final boolean useCollectionIndex = false;
     
     private final File                             oldDatabaseRoot;
     private final kelondroOrder                    indexOrder = new kelondroNaturalOrder(true);
@@ -89,11 +88,12 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     private final plasmaWordIndexAssortmentCluster assortmentCluster;    // old database structure, to be replaced by CollectionRI
     private final plasmaWordIndexFileCluster       backend;              // old database structure, to be replaced by CollectionRI
     public        boolean                          busyCacheFlush;       // shows if a cache flush is currently performed
+    public        boolean                          useCollectionIndex;   // flag for usage of new collectionIndex db
     
-    public plasmaWordIndex(File oldDatabaseRoot, File newIndexRoot, int bufferkb, long preloadTime, serverLog log) {
+    public plasmaWordIndex(File oldDatabaseRoot, File newIndexRoot, int bufferkb, long preloadTime, serverLog log, boolean useCollectionIndex) {
         this.oldDatabaseRoot = oldDatabaseRoot;
         this.backend = new plasmaWordIndexFileCluster(oldDatabaseRoot, log);
-        this.ramCache = new indexRAMCacheRI(oldDatabaseRoot, log);
+        this.ramCache = new indexRAMCacheRI(oldDatabaseRoot, (useCollectionIndex) ? 256 : 64, log);
 
         // create assortment cluster path
         File assortmentClusterPath = new File(oldDatabaseRoot, indexAssortmentClusterPath);
@@ -109,6 +109,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             collections = null;
         
         busyCacheFlush = false;
+        this.useCollectionIndex = useCollectionIndex;
     }
 
     public File getRoot() {
@@ -170,7 +171,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public void flushControl() {
         // check for forced flush
         synchronized (this) { ramCache.shiftK2W(); }
-        flushCache(ramCache.maxURLinWCache() - indexRAMCacheRI.wCacheReferenceLimit);
+        flushCache(ramCache.maxURLinWCache() - ramCache.wCacheReferenceLimit);
         if (ramCache.wSize() > ramCache.getMaxWordCount()) {
             flushCache(ramCache.wSize() + 500 - ramCache.getMaxWordCount());
         }
@@ -762,7 +763,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         // System.out.println(new Date(reverseMicroDateDays(microDateDays(System.currentTimeMillis()))));
         File plasmadb = new File("D:\\dev\\proxy\\DATA\\PLASMADB");
         File indexdb = new File("D:\\dev\\proxy\\DATA\\INDEX\\PRIVATE\\TEXT");
-        plasmaWordIndex index = new plasmaWordIndex(plasmadb, indexdb, 555, 1000, new serverLog("TESTAPP"));
+        plasmaWordIndex index = new plasmaWordIndex(plasmadb, indexdb, 555, 1000, new serverLog("TESTAPP"), false);
         try {
             Iterator containerIter = index.wordContainers("5A8yhZMh_Kmv", plasmaWordIndex.RL_WORDFILES, true);
             while (containerIter.hasNext()) {

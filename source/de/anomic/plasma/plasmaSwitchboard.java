@@ -389,7 +389,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logConfig("Starting Indexing Management");
         urlPool = new plasmaURLPool(plasmaPath, ramLURL, ramNURL, ramEURL, ramLURL_time);
         
-        wordIndex = new plasmaWordIndex(plasmaPath, indexPublicTextPath, ramRWI, ramRWI_time, log);
+        wordIndex = new plasmaWordIndex(plasmaPath, indexPublicTextPath, ramRWI, ramRWI_time, log, getConfigBool("useCollectionIndex", false));
         int wordCacheMaxCount = (int) getConfigLong("wordCacheMaxCount", 10000);
         wordIndex.setMaxWordCount(wordCacheMaxCount);
         
@@ -926,7 +926,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public boolean deQueue() {
         // work off fresh entries from the proxy or from the crawler
         if (onlineCaution()) {
-            log.logFiner("deQueue: online caution, omitting resource stack processing");
+            log.logFine("deQueue: online caution, omitting resource stack processing");
             return false;
         }
 
@@ -959,7 +959,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         synchronized (sbQueue) {
 
             if (sbQueue.size() == 0) {
-                // log.logDebug("DEQUEUE: queue is empty");
+                log.logFine("deQueue: nothing to do, queue is emtpy");
                 return doneSomething; // nothing to do
             }
 
@@ -979,7 +979,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             plasmaSwitchboardQueue.Entry nextentry;
             
             // if we were interrupted we should return now
-            if (Thread.currentThread().isInterrupted()) return false;
+            if (Thread.currentThread().isInterrupted()) {
+                log.logFine("deQueue: thread was interrupted");
+                return false;
+            }
             
             // do one processing step
             log.logFine("DEQUEUE: sbQueueSize=" + sbQueue.size() +
@@ -989,7 +992,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             ", remoteStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE));
             try {
                 nextentry = sbQueue.pop();
-                if (nextentry == null) return false;
+                if (nextentry == null) {
+                    log.logFine("deQueue: null entry on queue stack");
+                    return false;
+                }
             } catch (IOException e) {
                 log.logSevere("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
                 return doneSomething;

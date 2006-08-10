@@ -90,6 +90,8 @@ import de.anomic.plasma.plasmaWordIndexFile;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverPlainSwitch;
+import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
@@ -644,12 +646,13 @@ public final class yacy {
     */
     public static void migrateWords(String homePath) {
         // run with "java -classpath classes yacy -migratewords"
+        final serverSwitch sps = new serverPlainSwitch(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
         File indexRoot = new File(new File(homePath), "DATA/INDEX/PUBLIC/TEXT");
         serverLog log = new serverLog("WORDMIGRATION");
         log.logInfo("STARTING MIGRATION");
-        plasmaWordIndex wordIndexCache = new plasmaWordIndex(dbroot, indexRoot, 20000, 10000, log);
+        plasmaWordIndex wordIndexCache = new plasmaWordIndex(dbroot, indexRoot, 20000, 10000, log, sps.getConfigBool("useCollectionIndex", false));
         enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
         String wordhash;
         File wordfile;
@@ -685,6 +688,7 @@ public final class yacy {
      */
     public static void minimizeUrlDB(String homePath, int dbcache) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
+        final serverSwitch sps = new serverPlainSwitch(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
         File indexRoot = new File(new File(homePath), "DATA/INDEX/PUBLIC/TEXT");
@@ -704,7 +708,7 @@ public final class yacy {
             int cacheMem = (int)((rt.maxMemory()-rt.totalMemory())/1024)-(2*cache + 8*1024);
             if (cacheMem < 2048) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, indexRoot, cacheMem, 10000, log);
+            plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, indexRoot, cacheMem, 10000, log, sps.getConfigBool("useCollectionIndex", false));
             Iterator indexContainerIterator = wordIndex.wordContainers("------------", plasmaWordIndex.RL_WORDFILES, false);
             
             long urlCounter = 0, wordCounter = 0;
@@ -1138,6 +1142,7 @@ public final class yacy {
     private static void RWIHashList(String homePath, String targetName, String resource, String format) {
         plasmaWordIndex WordIndex = null;
         serverLog log = new serverLog("HASHLIST");
+        final serverSwitch sps = new serverPlainSwitch(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
         File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
         File indexRoot = new File(new File(homePath), "DATA/INDEX/PUBLIC/TEXT");
         String wordChunkStartHash = "------------";
@@ -1147,7 +1152,7 @@ public final class yacy {
         try {
             Iterator indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex(homeDBroot, indexRoot, 8*1024*1024, 3000, log);
+                WordIndex = new plasmaWordIndex(homeDBroot, indexRoot, 8*1024*1024, 3000, log, sps.getConfigBool("useCollectionIndex", false));
                 indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
             } else if (resource.equals("assortments")) {
                 plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, 3000, log);
