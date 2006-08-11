@@ -91,6 +91,7 @@ public class plasmaSwitchboardQueue {
             
         if (sbQueueStackPath.exists()) try {
             sbQueueStack = new kelondroStack(sbQueueStackPath);
+            sbQueueStack.assignRowdef(rowdef);
         } catch (IOException e) {
             sbQueueStackPath.delete();
             sbQueueStack = new kelondroStack(sbQueueStackPath, rowdef, true);
