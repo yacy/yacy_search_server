@@ -200,6 +200,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public void flushCacheSome() {
+        synchronized (ramCache) { ramCache.shiftK2W(); }
         int flushCount = ramCache.wSize() / 350;
         if (flushCount > 80) flushCount = 80;
         if (flushCount < 20) flushCount = Math.min(20, ramCache.wSize());
@@ -209,7 +210,6 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public void flushCache(int count) {
         if (count <= 0) return;
         synchronized (ramCache) {
-            ramCache.shiftK2W();
             busyCacheFlush = true;
             String wordHash;
             System.out.println("DEBUG-Started flush of " + count + " entries from RAM to DB");
@@ -418,7 +418,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         return size;
     }
 
-    public synchronized void close(int waitingBoundSeconds) {
+    public void close(int waitingBoundSeconds) {
         synchronized (ramCache) {
             ramCache.close(waitingBoundSeconds);
             if (useCollectionIndex) collections.close(-1);
@@ -427,7 +427,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         }
     }
 
-    public synchronized indexContainer deleteContainer(String wordHash) {
+    public indexContainer deleteContainer(String wordHash) {
         synchronized (ramCache) {
             indexContainer c = ramCache.deleteContainer(wordHash);
             if (c == null) c = new indexRowSetContainer(wordHash);
@@ -479,7 +479,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public static final int RL_WORDFILES   = 3; // (to be) outdated structure
     
 
-    public synchronized TreeSet indexContainerSet(String startHash, int resourceLevel, boolean rot, int count) throws IOException {
+    public TreeSet indexContainerSet(String startHash, int resourceLevel, boolean rot, int count) throws IOException {
         // creates a set of indexContainers
         kelondroOrder containerOrder = new indexContainerOrder((kelondroOrder) indexOrder.clone());
         containerOrder.rotate(startHash.getBytes());
