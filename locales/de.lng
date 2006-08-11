@@ -257,7 +257,7 @@ Source IP\[:Port\]==Quell-IP[:Port]
 Dest. IP\[:Port\]==Ziel-IP[:Port]
 Command==Kommando
 Used==Benutzt
-Close==Schliessen
+Close==Schlie&szlig;en
 Waiting for new request nr.==Warte auf neue Anfrage Nr.
 
 #-------------------------------------------------------
@@ -971,10 +971,10 @@ Published&nbsp;News==ver&ouml;ffentlichte News
 News Overview==News&uuml;berblick
 This is the YaCyNews system \(currently under testing\).==Dies ist das YaCy News-System (zur Zeit noch im Test).
 The news service is controlled by several entry points:==Dieser News Service wird von folgenden Punkten initiiert:
-A crawl start with remote indexing will automatically create a news entry.==Wird ein Crawl von einem anderen Peer initiiert, dann wird automatisch ein News-Eintrag erstellt.
+A crawl start with activated remote-indexing will automatically create a news entry.==Wird ein neuer Crawl mit aktivierter Remote-Crawling-Funktion gestartet, dann wird automatisch ein News-Eintrag erstellt.
 Other peers may use this information to prevent double-crawls from the same start point.==Andere Peers k&ouml;nnen diese Informationen benutzen, um einen doppelten Crawl vom selben Startpunkt zu vermeiden.
 A table with recently started crawls is presented on the Index Create - page==Eine Tabelle mit gerade gestarteten Crawls wird auf der "Index erzeugen"-Seite angezeigt.
-A change in the personal profile will create a news entry. You can see recently made changes of==Durch eine &Auml;nderung im Profil, wird auch ein News-Eintrag erstellt.
+A change in the personal profile will create a news entry. You can see recently made changes of==Bei einer &Auml;nderung im Profil wird auch ein News-Eintrag erstellt.
 profile entries on the Network page, where that profile change is visualized with a '\*' beside the 'P' \(profile\) - selector.==Profil Eintr&auml;ge auf der Netzwerk Seite werden nach einer &Auml;nderung mit einem '*' neben dem 'P' (Profil) gekennzeichnet.
 More news services will follow.==Mehr News Services werden folgen.
 
@@ -1328,7 +1328,7 @@ Enable&nbsp;port&nbsp;forwarding:==Aktiviere Port Weiterleitung:
 Enabling disabling port forwarding via secure channel.==Aktivieren/Deaktivieren von Port Weiterleitung &uuml;ber sicheren Kanal.
 Forwarding&nbsp;via&nbsp;proxy:==Weiterleitung &uuml;ber Proxy:
 Function not available at the moment.==Funktion im Moment nicht verf&uuml;gbar.
-You need to install libx to use this feature==Sie m�ssen die libx installieren, um diese Funktionen benutzen zu k�nnen
+You need to install libx to use this feature==Sie m&uuml;ssen die libx installieren, um diese Funktionen benutzen zu k&ouml;nnen
 Forwarding&nbsp;port:==Weiterleitender Port
 The port on the remote server that should be forwarded via the secure channel to the local host.==Der Port des Remote Servers der mittels sicherem Kanal auf den lokalen Host weitergeleitet werden soll.
 Forwarding&nbsp;host:==Weiterleitender Host
