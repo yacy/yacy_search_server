@@ -140,8 +140,9 @@ public class plasmaCrawlEURL extends indexURL {
 
         if (cachePath.exists()) try {
             // open existing cache
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
-            urlHashCache.assignRowdef(rowdef);
+            kelondroTree tree = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
+            tree.assignRowdef(rowdef);
+            urlHashCache = tree;
         } catch (IOException e) {
             cachePath.delete();
             urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);

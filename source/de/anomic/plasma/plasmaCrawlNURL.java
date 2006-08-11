@@ -168,8 +168,9 @@ public class plasmaCrawlNURL extends indexURL {
         File cacheFile = new File(cacheStacksPath, "urlNotice1.db");
         if (cacheFile.exists()) try {
             // open existing cache
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
-            urlHashCache.assignRowdef(rowdef);
+            kelondroTree tree = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
+            tree.assignRowdef(rowdef);
+            urlHashCache = tree;
         } catch (IOException e) {
             cacheFile.delete();
             urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
@@ -249,15 +250,6 @@ public class plasmaCrawlNURL extends indexURL {
             plasmaCrawlNURL.this.initThead = null;
         }
     }
-
-    /*
-    private static String normalizeHost(String host) {
-        if (host.length() > urlHostLength) host = host.substring(0, urlHostLength);
-        host = host.toLowerCase();
-        while (host.length() < urlHostLength) host = host + " ";
-        return host;
-    }
-    */
     
     private static String normalizeHandle(int h) {
         String d = Integer.toHexString(h);
@@ -484,7 +476,6 @@ public class plasmaCrawlNURL extends indexURL {
             this.flags         = new bitfield(urlFlagLength);
             this.handle        = 0;
             this.stored        = false;
-            store();
         }
 
         public Entry(String hash) throws IOException {

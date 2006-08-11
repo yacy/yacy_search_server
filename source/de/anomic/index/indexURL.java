@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
@@ -405,14 +406,18 @@ public class indexURL {
  
  
  // the class object
- protected kelondroTree urlHashCache;
+ protected kelondroIndex urlHashCache;
  
  public indexURL() {
      urlHashCache = null;
  }
 
  public int size() {
-     return urlHashCache.size();
+     try {
+        return urlHashCache.size();
+    } catch (IOException e) {
+        return 0;
+    }
  }
 
  public boolean remove(String hash) {
@@ -429,15 +434,18 @@ public class indexURL {
  }
 
  public int cacheNodeChunkSize() {
-     return urlHashCache.cacheNodeChunkSize();
+     if (urlHashCache instanceof kelondroTree) return ((kelondroTree) urlHashCache).cacheNodeChunkSize();
+     return 0;
  }
  
  public int[] cacheNodeStatus() {
-     return urlHashCache.cacheNodeStatus();
+     if (urlHashCache instanceof kelondroTree) return ((kelondroTree) urlHashCache).cacheNodeStatus();
+     return null;
  }
  
  public String[] cacheObjectStatus() {
-     return urlHashCache.cacheObjectStatus();
+     if (urlHashCache instanceof kelondroTree) return ((kelondroTree) urlHashCache).cacheObjectStatus();
+     return null;
  }
  
 
