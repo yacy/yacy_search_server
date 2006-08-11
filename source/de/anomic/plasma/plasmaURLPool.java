@@ -59,8 +59,8 @@ public class plasmaURLPool {
     
     public plasmaURLPool(File plasmaPath, int ramLURL, int ramNURL, int ramEURL, long preloadTime) {
         loadedURL = new plasmaCrawlLURL(new File(plasmaPath, "urlHash.db"), ramLURL, preloadTime);
-        noticeURL = new plasmaCrawlNURL(plasmaPath, ramNURL, 0);
-        errorURL = new plasmaCrawlEURL(new File(plasmaPath, "urlErr0.db"), ramEURL, 0);
+        noticeURL = new plasmaCrawlNURL(plasmaPath, ramNURL, -1);
+        errorURL = new plasmaCrawlEURL(new File(plasmaPath, "urlErr0.db"), ramEURL, -1);
     }
     
     public String exists(String hash) {

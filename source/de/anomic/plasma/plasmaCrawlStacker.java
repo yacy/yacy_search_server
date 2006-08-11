@@ -62,6 +62,7 @@ import de.anomic.http.httpc;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.plasma.plasmaCrawlEURL;
@@ -561,7 +562,7 @@ public final class plasmaCrawlStacker {
         private final serverSemaphore readSync;
         private final serverSemaphore writeSync;
         private final LinkedList urlEntryHashCache;
-        private kelondroTree urlEntryCache;
+        private kelondroIndex urlEntryCache;
         
         public stackCrawlQueue(File cacheStacksPath, int bufferkb, long preloadTime) {
             // init the read semaphore
@@ -580,8 +581,9 @@ public final class plasmaCrawlStacker {
             if (cacheFile.exists()) {
                 // open existing cache
                 try {
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
-                    this.urlEntryCache.assignRowdef(plasmaCrawlNURL.rowdef);
+                    kelondroTree tree = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
+                    tree.assignRowdef(plasmaCrawlNURL.rowdef);
+                    this.urlEntryCache = tree;
                 } catch (IOException e) {
                     cacheFile.delete();
                     this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef, true);

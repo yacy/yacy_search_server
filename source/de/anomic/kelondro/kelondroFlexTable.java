@@ -35,7 +35,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
     public kelondroFlexTable(File path, String tablename, kelondroOrder objectOrder, long buffersize, long preloadTime, kelondroRow rowdef, boolean exitOnFail) throws IOException {
         super(path, tablename, rowdef, exitOnFail);
-        File newpath = new File(path, tablename + ".table");
+        File newpath = new File(path, tablename);
         File indexfile = new File(newpath, "col.000.index");
         kelondroIndex ki = null;
         String description = new String(this.col[0].getDescription());
@@ -106,7 +106,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
     private kelondroIndex initializeTreeIndex(File indexfile, long buffersize, long preloadTime, kelondroOrder objectOrder) throws IOException {
         kelondroTree index = new kelondroTree(indexfile, buffersize, preloadTime, 10,
-                new kelondroRow("byte[] key-" + rowdef.width(0) + ", int reference-4"),
+                new kelondroRow("byte[] key-" + rowdef.width(0) + ", int reference-4 {b256}"),
                 objectOrder, 2, 80, true);
         Iterator content = super.col[0].contentNodes(-1);
         kelondroRecords.Node node;

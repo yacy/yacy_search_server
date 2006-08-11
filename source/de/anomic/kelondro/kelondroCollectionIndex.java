@@ -94,7 +94,7 @@ public class kelondroCollectionIndex {
         this.loadfactor = loadfactor;
 
         // create index table
-        index = new kelondroFlexTable(path, filenameStub + ".index", indexOrder, buffersize, preloadTime, indexRow(keyLength), true);
+        index = new kelondroFlexTable(path, filenameStub + ".index.table", indexOrder, buffersize, preloadTime, indexRow(keyLength), true);
 
         // save/check property file for this array
         File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize());

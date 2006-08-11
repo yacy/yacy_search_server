@@ -55,6 +55,7 @@ import java.util.Iterator;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroTree;
@@ -165,19 +166,31 @@ public class plasmaCrawlNURL extends indexURL {
     }
     
     private void openHashCache() {
-        File cacheFile = new File(cacheStacksPath, "urlNotice1.db");
-        if (cacheFile.exists()) try {
+        File oldCacheFile = new File(cacheStacksPath, "urlNotice1.db");
+        File newCacheFile = new File(cacheStacksPath, "urlNotice2.table");
+        if (newCacheFile.exists()) try {
+            urlHashCache = new kelondroFlexTable(cacheStacksPath, "urlNotice2.table", kelondroBase64Order.enhancedCoder, bufferkb * 0x400, preloadTime, rowdef, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            oldCacheFile.delete();
+            urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
+        } else if (oldCacheFile.exists()) try {
             // open existing cache
-            kelondroTree tree = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
+            kelondroTree tree = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
             tree.assignRowdef(rowdef);
             urlHashCache = tree;
         } catch (IOException e) {
-            cacheFile.delete();
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
+            oldCacheFile.delete();
+            urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
         } else {
             // create new cache
-            cacheFile.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
+            oldCacheFile.getParentFile().mkdirs();
+            try {
+                urlHashCache = new kelondroFlexTable(cacheStacksPath, "urlNotice2.table", kelondroBase64Order.enhancedCoder, bufferkb * 0x400, preloadTime, rowdef, true);
+            } catch (IOException e) {
+                e.printStackTrace();
+                urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
+            }
         }
     }
     
@@ -506,9 +519,11 @@ public class plasmaCrawlNURL extends indexURL {
         }
 
         private void insertEntry(kelondroRow.Entry entry) throws IOException {
+            String urlstring = entry.getColString(2, null);
+            if (urlstring == null) throw new IOException ("url string is null");
             this.hash = entry.getColString(0, null);
             this.initiator = entry.getColString(1, null);
-            this.url = new URL(entry.getColString(2, null).trim());
+            this.url = new URL(urlstring);
             this.referrer = (entry.empty(3)) ? dummyHash : entry.getColString(3, null);
             this.name = (entry.empty(4)) ? "" : entry.getColString(4, null).trim();
             this.loaddate = new Date(86400000 * entry.getColLong(5));

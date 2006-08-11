@@ -49,7 +49,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         }
         
         // check if table directory exists
-        File tabledir = new File(path, tablename + ".table");
+        File tabledir = new File(path, tablename);
         if (tabledir.exists()) {
             if (!(tabledir.isDirectory())) throw new IOException("path " + tabledir.toString() + " must be a directory");
         } else {
