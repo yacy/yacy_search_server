@@ -305,6 +305,14 @@ public class kelondroCollectionIndex {
         index.put(indexEntry);
     }
     
+    public int indexSize(byte[] key) throws IOException {
+        synchronized (index) {
+            kelondroRow.Entry indexrow = index.get(key);
+            if (indexrow == null) return 0;
+            return (int) indexrow.getColLong(idx_col_chunkcount);
+        }
+    }
+    
     public kelondroRowSet get(byte[] key, boolean deleteIfEmpty) throws IOException {
         // find an entry, if one exists
         synchronized (index) {

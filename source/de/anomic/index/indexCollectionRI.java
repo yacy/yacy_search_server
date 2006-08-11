@@ -70,6 +70,14 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         }
     }
     
+    public int indexSize(String wordHash) {
+        try {
+            return collectionIndex.indexSize(wordHash.getBytes());
+        } catch (IOException e) {
+            return 0;
+        }
+    }
+
     public Iterator wordContainers(String startWordHash, boolean rot) {
         return new wordContainersIterator(startWordHash, rot);
     }

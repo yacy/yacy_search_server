@@ -398,7 +398,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                 entity.close();
             }
         } catch (IOException e) {}
-        if (useCollectionIndex) size += collections.size();
+        if (useCollectionIndex) size += collections.indexSize(wordHash);
         size += assortmentCluster.indexSize(wordHash);
         size += ramCache.indexSize(wordHash);
         return size;

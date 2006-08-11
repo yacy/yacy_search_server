@@ -288,8 +288,9 @@ public class plasmaDHTChunk {
                 iEntry = (indexEntry) urlIter.next();
                 urlHashes.add(iEntry.urlHash());
             }
+            String wordHash = indexContainers[i].getWordHash();
             count += wordIndex.removeEntries(this.indexContainers[i].getWordHash(), urlHashes, true);
-            log.logFine("Deleted partial index (" + c + " URLs) for word " + this.indexContainers[i].getWordHash() + "; " + this.wordIndex.indexSize(indexContainers[i].getWordHash()) + " entries left");
+            log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash + "; " + this.wordIndex.indexSize(wordHash) + " entries left");
             this.indexContainers[i] = null;
         }
         return count;
