@@ -282,7 +282,7 @@ public final class robotsParser{
             }
         }
         
-        if (robotsTxt4Host.isDisallowed(nexturl.getPath())) {
+        if (robotsTxt4Host.isDisallowed(nexturl.getFile())) {
             return true;        
         }        
         return false;
@@ -327,7 +327,7 @@ public final class robotsParser{
                 
             }
             
-            httpc.response res = con.GET(robotsURL.getPath(), reqHeaders);
+            httpc.response res = con.GET(robotsURL.getFile(), reqHeaders);
             if (res.status.startsWith("2")) {
                 if (!res.responseHeader.mime().startsWith("text/plain")) {
                     robotsTxt = null;
