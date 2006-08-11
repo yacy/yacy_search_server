@@ -177,7 +177,7 @@ public final class crawlOrder {
                     if (!newURL.equals(urlv.get(0))) {
                         env.getLog().logWarning("crawlOrder: Received not normalized URL " + urlv.get(0));    
                     }
-                    String refURL = new URL((String) refv.get(0)).toNormalform();
+                    String refURL = (refv.get(0) == null) ? null : new URL((String) refv.get(0)).toNormalform();
                     if ((refURL != null) && (!refURL.equals(refv.get(0)))) {
                         env.getLog().logWarning("crawlOrder: Received not normalized Referer URL " + refv.get(0) + " of URL " + urlv.get(0));    
                     }

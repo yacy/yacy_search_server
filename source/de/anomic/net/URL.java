@@ -38,6 +38,7 @@ public class URL {
     private int port;
     
     public URL(String url) throws MalformedURLException {
+        if (url == null) throw new MalformedURLException("url string is null");
         parseURLString(url);
     }
     
