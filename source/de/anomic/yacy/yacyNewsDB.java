@@ -70,6 +70,7 @@ public class yacyNewsDB {
         
         if (path.exists()) try {
             news = new kelondroTree(path, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
+            news.assignRowdef(yacyNewsRecord.rowdef);
         } catch (IOException e) {
             news = createDB(path, bufferkb, preloadTime);
         } else {
@@ -166,7 +167,7 @@ public class yacyNewsDB {
             b.getColString(0, null),
             b.getColString(1, null),
             (b.empty(2)) ? null : yacyCore.parseUniversalDate(b.getColString(2, null), serverDate.UTCDiffString()),
-            (int) b.getColLongB64E(3),
+            (int) b.getColLong(3),
             serverCodings.string2map(b.getColString(4, null))
         );
     }

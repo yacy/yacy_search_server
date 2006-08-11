@@ -376,23 +376,23 @@ public class kelondroRecords {
         this.OHBYTEC = entryFile.readShort(POS_OHBYTEC);
         this.OHHANDLEC = entryFile.readShort(POS_OHHANDLEC);
 
-        int[] COLWIDTHS = new int[entryFile.readShort(POS_COLUMNS)];
+        kelondroColumn[] COLDEFS = new kelondroColumn[entryFile.readShort(POS_COLUMNS)];
         this.HANDLES = new Handle[entryFile.readInt(POS_INTPROPC)];
         this.TXTPROPS = new byte[entryFile.readInt(POS_TXTPROPC)][];
         this.TXTPROPW = entryFile.readInt(POS_TXTPROPW);
 
-        if (COLWIDTHS.length == 0) throw new kelondroException(filename, "init: zero columns; strong failure");
+        if (COLDEFS.length == 0) throw new kelondroException(filename, "init: zero columns; strong failure");
         
         // calculate dynamic run-time seek pointers
-        POS_HANDLES = POS_COLWIDTHS + COLWIDTHS.length * 4;
+        POS_HANDLES = POS_COLWIDTHS + COLDEFS.length * 4;
         POS_TXTPROPS = POS_HANDLES + HANDLES.length * 4;
         POS_NODES = POS_TXTPROPS + TXTPROPS.length * TXTPROPW;
 
         // read configuration arrays
-        for (int i = 0; i < COLWIDTHS.length; i++) {
-            COLWIDTHS[i] = entryFile.readInt(POS_COLWIDTHS + 4 * i);
+        for (int i = 0; i < COLDEFS.length; i++) {
+            COLDEFS[i] = new kelondroColumn("col-" + i, kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, entryFile.readInt(POS_COLWIDTHS + 4 * i), "");
         }
-        this.ROW = new kelondroRow(COLWIDTHS);
+        this.ROW = new kelondroRow(COLDEFS);
         for (int i = 0; i < HANDLES.length; i++) {
             HANDLES[i] = new Handle(entryFile.readInt(POS_HANDLES + 4 * i));
         }
@@ -938,6 +938,21 @@ public class kelondroRecords {
 
     public final kelondroRow row() {
         return this.ROW;
+    }
+    
+    public final void assignRowdef(kelondroRow rowdef) {
+        // overwrites a given rowdef
+        // the new rowdef must be compatible
+        if (rowdef.columns() < ROW.columns())
+            throw new kelondroException(this.filename,
+                    "new rowdef '" + rowdef.toString() + "' is not compatible with old rowdef '" + ROW.toString() + "', they have a different number of columns");
+
+        // adopt encoder and cell type
+        kelondroColumn col;
+        for (int i = 0; i < ROW.columns(); i++) {
+            col = rowdef.column(i);
+            ROW.column(i).setAttributes(col.nickname(), col.celltype(), col.encoder());
+        }
     }
 
     private final long seekpos(Handle handle) {

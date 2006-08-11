@@ -40,23 +40,23 @@ public class kelondroBytesIntMap {
     public int geti(byte[] key) throws IOException {
         kelondroRow.Entry indexentry = ki.get(key);
         if (indexentry == null) return -1;
-        return (int) indexentry.getColLongB256(1);
+        return (int) indexentry.getColLong(1);
     }
     
     public int puti(byte[] key, int i) throws IOException {
         kelondroRow.Entry newentry = ki.row().newEntry();
         newentry.setCol(0, key);
-        newentry.setColLongB256(1, i);
+        newentry.setCol(1, i);
         kelondroRow.Entry oldentry = ki.put(newentry);
         if (oldentry == null) return -1;
-        return (int) oldentry.getColLongB256(1);
+        return (int) oldentry.getColLong(1);
     }
     
     public int removei(byte[] key) throws IOException {
         if (ki.size() == 0) return -1;
         kelondroRow.Entry indexentry = ki.remove(key);
         if (indexentry == null) return -1;
-        return (int) indexentry.getColLongB256(1);
+        return (int) indexentry.getColLong(1);
     }
 
     public int size() throws IOException {

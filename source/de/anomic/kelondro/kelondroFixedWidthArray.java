@@ -134,7 +134,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     public static void main(String[] args) {
         File f = new File("d:\\\\mc\\privat\\fixtest.db");
         f.delete();
-        kelondroFixedWidthArray k = new kelondroFixedWidthArray(f, new kelondroRow(new int[]{12, 4}), 6, true);
+        kelondroFixedWidthArray k = new kelondroFixedWidthArray(f, new kelondroRow("byte[] a-12, byte[] b-4"), 6, true);
         try {
             k.set(3, k.row().newEntry(new byte[][]{
                 "test123".getBytes(), "abcd".getBytes()}));

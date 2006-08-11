@@ -84,9 +84,9 @@ public class kelondroRowCollection {
     public kelondroRowCollection(kelondroRow rowdef, byte[] exportedCollectionRowinstance) {
         this.rowdef = rowdef;
         kelondroRow.Entry exportedCollection = exportRow(exportedCollectionRowinstance.length - exportOverheadSize).newEntry(exportedCollectionRowinstance);
-        this.chunkcount = (int) exportedCollection.getColLongB256(exp_chunkcount);
-        this.lastTimeRead = (exportedCollection.getColLongB256(exp_last_read) + 10957) * day;
-        this.lastTimeWrote = (exportedCollection.getColLongB256(exp_last_wrote) + 10957) * day;
+        this.chunkcount = (int) exportedCollection.getColLong(exp_chunkcount);
+        this.lastTimeRead = (exportedCollection.getColLong(exp_last_read) + 10957) * day;
+        this.lastTimeWrote = (exportedCollection.getColLong(exp_last_wrote) + 10957) * day;
         String sortOrderKey = exportedCollection.getColString(exp_order_type, null);
         if (sortOrderKey.equals("__")) {
             this.sortOrder = null;
@@ -94,8 +94,8 @@ public class kelondroRowCollection {
             this.sortOrder = kelondroNaturalOrder.bySignature(sortOrderKey);
             if (this.sortOrder == null) this.sortOrder = kelondroBase64Order.bySignature(sortOrderKey);
         }
-        this.sortColumn = (int) exportedCollection.getColLongB256(exp_order_col);
-        this.sortBound = (int) exportedCollection.getColLongB256(exp_order_bound);
+        this.sortColumn = (int) exportedCollection.getColLong(exp_order_col);
+        this.sortBound = (int) exportedCollection.getColLong(exp_order_bound);
         this.chunkcache = exportedCollection.getColBytes(exp_collection);        
     }
     
@@ -125,12 +125,12 @@ public class kelondroRowCollection {
         trim();
         kelondroRow row = exportRow(chunkcache.length);
         kelondroRow.Entry entry = row.newEntry();
-        entry.setColLongB256(exp_chunkcount, size());
-        entry.setColLongB256(exp_last_read, daysSince2000(this.lastTimeRead));
-        entry.setColLongB256(exp_last_wrote, daysSince2000(this.lastTimeWrote));
+        entry.setCol(exp_chunkcount, size());
+        entry.setCol(exp_last_read, daysSince2000(this.lastTimeRead));
+        entry.setCol(exp_last_wrote, daysSince2000(this.lastTimeWrote));
         entry.setCol(exp_order_type, (this.sortOrder == null) ? "__".getBytes() : this.sortOrder.signature().getBytes());
-        entry.setColLongB256(exp_order_col, this.sortColumn);
-        entry.setColLongB256(exp_order_bound, this.sortBound);
+        entry.setCol(exp_order_col, this.sortColumn);
+        entry.setCol(exp_order_bound, this.sortBound);
         entry.setCol(exp_collection, chunkcache);
         return entry.bytes();
     }

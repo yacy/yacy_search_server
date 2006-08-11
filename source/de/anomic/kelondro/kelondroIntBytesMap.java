@@ -29,7 +29,7 @@ package de.anomic.kelondro;
 public class kelondroIntBytesMap extends kelondroRowBufferedSet {
 
     public kelondroIntBytesMap(int payloadSize, int initSize) {
-        super(new kelondroRow(new int[]{4, payloadSize}), initSize);
+        super(new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize), initSize);
         
         // initialize ordering
         super.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
@@ -43,7 +43,7 @@ public class kelondroIntBytesMap extends kelondroRowBufferedSet {
     
     public byte[] putb(int ii, byte[] value) {
         kelondroRow.Entry newentry = rowdef.newEntry();
-        newentry.setCol(0, kelondroNaturalOrder.encodeLong((long) ii, 4));
+        newentry.setCol(0, (long) ii);
         newentry.setCol(1, value);
         kelondroRow.Entry oldentry = super.put(newentry);
         if (oldentry == null) return null;
@@ -52,7 +52,7 @@ public class kelondroIntBytesMap extends kelondroRowBufferedSet {
     
     public void addb(int ii, byte[] value) {
         kelondroRow.Entry newentry = rowdef.newEntry();
-        newentry.setCol(0, kelondroNaturalOrder.encodeLong((long) ii, 4));
+        newentry.setCol(0, (long) ii);
         newentry.setCol(1, value);
         add(newentry);
     }

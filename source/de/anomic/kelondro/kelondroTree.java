@@ -90,11 +90,6 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     private int readAheadChunkSize = 100;
     private long lastIteratorCount = readAheadChunkSize;
     private kelondroObjectCache objectCache;
-    
-    
-    public kelondroTree(File file, long buffersize, long preloadTime, int objectCachePercent, int key, int value, boolean exitOnFail) {
-        this(file, buffersize, preloadTime, objectCachePercent, new kelondroRow(new int[] { key, value }), new kelondroNaturalOrder(true), 1, 8, exitOnFail);
-    }
 
     public kelondroTree(File file, long buffersize, long preloadTime, int objectCachePercent, kelondroRow rowdef, boolean exitOnFail) {
         // this creates a new tree file
@@ -1235,7 +1230,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     // test script
                     File testFile = new File("test.db");
                     while (testFile.exists()) testFile.delete();
-                    kelondroTree fm = new kelondroTree(testFile, 0x100000, 0, 10, 4, 4, true);
+                    kelondroTree fm = new kelondroTree(testFile, 0x100000, 0, 10, new kelondroRow("byte[] a-4, byte[] b-4"), true);
                     byte[] dummy = "".getBytes();
                     fm.put("abc0".getBytes(), dummy); fm.put("bcd0".getBytes(), dummy);
                     fm.put("def0".getBytes(), dummy); fm.put("bab0".getBytes(), dummy);
@@ -1310,7 +1305,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 		    // create <keylen> <valuelen> <filename>
 		    File f = new File(args[3]);
 		    if (f.exists()) f.delete();
-            kelondroRow lens = new kelondroRow(new int[]{Integer.parseInt(args[1]), Integer.parseInt(args[2])});
+            kelondroRow lens = new kelondroRow("byte[] key-" + Integer.parseInt(args[1]) + ", byte[] value-" + Integer.parseInt(args[2]));
 		    kelondroTree fm = new kelondroTree(f, 0x100000, 0, 10, lens, true);
 		    fm.close();
 		} else if (args[0].equals("-u")) {
@@ -1377,7 +1372,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             int steps = 0;
             while (true) {
                 if (testFile.exists()) testFile.delete();
-                tt = new kelondroTree(testFile, 200, 0, 10, 4 ,4, true);
+                tt = new kelondroTree(testFile, 200, 0, 10, new kelondroRow("byte[] a-4, byte[] b-4"), true);
                 steps = 10 + ((int) System.currentTimeMillis() % 7) * (((int) System.currentTimeMillis() + 17) % 11);
                 t = s;
                 d = "";
@@ -1443,7 +1438,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         File f = new File("test.db");
         if (f.exists()) f.delete();
         try {
-            kelondroTree tt = new kelondroTree(f, 1000, 0, 10, 4, 4, true);
+            kelondroTree tt = new kelondroTree(f, 1000, 0, 10, new kelondroRow("byte[] a-4, byte[] b-4"), true);
             byte[] b;
             b = testWord('B'); tt.put(b, b); //tt.print();
             b = testWord('C'); tt.put(b, b); //tt.print();
@@ -1508,7 +1503,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     
     public static kelondroTree testTree(File f, String testentities) throws IOException {
         if (f.exists()) f.delete();
-        kelondroTree tt = new kelondroTree(f, 0, 0, 10, 4, 4, true);
+        kelondroTree tt = new kelondroTree(f, 0, 0, 10, new kelondroRow("byte[] a-4, byte[] b-4"), true);
         byte[] b;
         for (int i = 0; i < testentities.length(); i++) {
             b = testWord(testentities.charAt(i));

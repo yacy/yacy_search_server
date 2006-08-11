@@ -67,10 +67,6 @@ public final class kelondroStack extends kelondroRecords {
     private static int root  = 0; // pointer for FHandles-array: pointer to root node
     private static int toor  = 1; // pointer for FHandles-array: pointer to root node
 
-    public kelondroStack(File file, int key, int value, boolean exitOnFail) {
-        this(file, new kelondroRow(new int[] { key, value }), exitOnFail);
-    }
-
     public kelondroStack(File file, kelondroRow rowdef, boolean exitOnFail) {
         // this creates a new stack
         super(file, 0, 0, thisOHBytes, thisOHHandles, rowdef, thisFHandles, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
@@ -413,7 +409,7 @@ public final class kelondroStack extends kelondroRecords {
 		    // create <keylen> <valuelen> <filename>
 		    File f = new File(args[3]);
 		    if (f.exists()) f.delete();
-		    kelondroRow lens = new kelondroRow(new int[]{Integer.parseInt(args[1]), Integer.parseInt(args[2])});
+		    kelondroRow lens = new kelondroRow("byte[] key-" + Integer.parseInt(args[1]) + ", byte[] value-" + Integer.parseInt(args[2]));
 		    kelondroStack fm = new kelondroStack(f, lens, true);
 		    fm.close();
 		} else if (args[0].equals("-p")) {

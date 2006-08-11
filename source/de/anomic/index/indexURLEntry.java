@@ -95,19 +95,19 @@ public class indexURLEntry implements Cloneable, indexEntry {
 
         if ((language == null) || (language.length() != indexURL.urlLanguageLength)) language = "uk";
         this.entry = urlEntryRow.newEntry();
-        this.entry.setColString(col_urlhash, urlHash, null);
-        this.entry.setColLong(col_quality, quality);
-        this.entry.setColLong(col_lastModified, lastmodified);
-        this.entry.setColLong(col_hitcount, hitcount);
-        this.entry.setColString(col_language, language, null);
-        this.entry.setColByte(col_doctype, (byte) doctype);
-        this.entry.setColByte(col_localflag, (byte) ((local) ? indexEntryAttribute.LT_LOCAL : indexEntryAttribute.LT_GLOBAL));
-        this.entry.setColLong(col_posintext, posintext);
-        this.entry.setColLong(col_posinphrase, posinphrase);
-        this.entry.setColLong(col_posofphrase, posofphrase);
-        this.entry.setColLong(col_worddistance, worddistance);
-        this.entry.setColLong(col_wordcount, wordcount);
-        this.entry.setColLong(col_phrasecount, phrasecount);
+        this.entry.setCol(col_urlhash, urlHash, null);
+        this.entry.setCol(col_quality, quality);
+        this.entry.setCol(col_lastModified, lastmodified);
+        this.entry.setCol(col_hitcount, hitcount);
+        this.entry.setCol(col_language, language, null);
+        this.entry.setCol(col_doctype, (byte) doctype);
+        this.entry.setCol(col_localflag, (byte) ((local) ? indexEntryAttribute.LT_LOCAL : indexEntryAttribute.LT_GLOBAL));
+        this.entry.setCol(col_posintext, posintext);
+        this.entry.setCol(col_posinphrase, posinphrase);
+        this.entry.setCol(col_posofphrase, posofphrase);
+        this.entry.setCol(col_worddistance, worddistance);
+        this.entry.setCol(col_wordcount, wordcount);
+        this.entry.setCol(col_phrasecount, phrasecount);
     }
 
     public indexURLEntry(String urlHash, String code) {
@@ -208,11 +208,11 @@ public class indexURLEntry implements Cloneable, indexEntry {
     
     public static indexURLEntry combineDistance(indexURLEntry ie1, indexEntry ie2) {
         // returns a modified entry of the first argument
-        ie1.entry.setColLong(col_worddistance, ie1.worddistance() + ie2.worddistance() + Math.abs(ie1.posintext() - ie2.posintext()));
-        ie1.entry.setColLong(col_posintext, Math.min(ie1.posintext(), ie2.posintext()));
-        ie1.entry.setColLong(col_posinphrase, (ie1.posofphrase() == ie2.posofphrase()) ? ie1.posofphrase() : 0 /*unknown*/);
-        ie1.entry.setColLong(col_posofphrase, Math.min(ie1.posofphrase(), ie2.posofphrase()));
-        ie1.entry.setColLong(col_wordcount, (ie1.wordcount() + ie2.wordcount()) / 2);
+        ie1.entry.setCol(col_worddistance, ie1.worddistance() + ie2.worddistance() + Math.abs(ie1.posintext() - ie2.posintext()));
+        ie1.entry.setCol(col_posintext, Math.min(ie1.posintext(), ie2.posintext()));
+        ie1.entry.setCol(col_posinphrase, (ie1.posofphrase() == ie2.posofphrase()) ? ie1.posofphrase() : 0 /*unknown*/);
+        ie1.entry.setCol(col_posofphrase, Math.min(ie1.posofphrase(), ie2.posofphrase()));
+        ie1.entry.setCol(col_wordcount, (ie1.wordcount() + ie2.wordcount()) / 2);
         return ie1;
     }
     
@@ -225,27 +225,27 @@ public class indexURLEntry implements Cloneable, indexEntry {
     }
     
     public static final void min(indexURLEntry t, indexEntry other) {
-        if (t.hitcount() > other.hitcount()) t.entry.setColLong(col_hitcount, other.hitcount());
-        if (t.wordcount() > other.wordcount()) t.entry.setColLong(col_wordcount, other.wordcount());
-        if (t.phrasecount() > other.phrasecount()) t.entry.setColLong(col_phrasecount, other.phrasecount());
-        if (t.posintext() > other.posintext()) t.entry.setColLong(col_posintext, other.posintext());
-        if (t.posinphrase() > other.posinphrase()) t.entry.setColLong(col_posinphrase, other.posinphrase());
-        if (t.posofphrase() > other.posofphrase()) t.entry.setColLong(col_posofphrase, other.posofphrase());
-        if (t.worddistance() > other.worddistance()) t.entry.setColLong(col_worddistance, other.worddistance());
-        if (t.lastModified() > other.lastModified()) t.entry.setColLong(col_lastModified, other.lastModified());
-        if (t.quality() > other.quality()) t.entry.setColLong(col_quality, other.quality());
+        if (t.hitcount() > other.hitcount()) t.entry.setCol(col_hitcount, other.hitcount());
+        if (t.wordcount() > other.wordcount()) t.entry.setCol(col_wordcount, other.wordcount());
+        if (t.phrasecount() > other.phrasecount()) t.entry.setCol(col_phrasecount, other.phrasecount());
+        if (t.posintext() > other.posintext()) t.entry.setCol(col_posintext, other.posintext());
+        if (t.posinphrase() > other.posinphrase()) t.entry.setCol(col_posinphrase, other.posinphrase());
+        if (t.posofphrase() > other.posofphrase()) t.entry.setCol(col_posofphrase, other.posofphrase());
+        if (t.worddistance() > other.worddistance()) t.entry.setCol(col_worddistance, other.worddistance());
+        if (t.lastModified() > other.lastModified()) t.entry.setCol(col_lastModified, other.lastModified());
+        if (t.quality() > other.quality()) t.entry.setCol(col_quality, other.quality());
     }
     
     public static final void max(indexURLEntry t, indexEntry other) {
-        if (t.hitcount() < other.hitcount()) t.entry.setColLong(col_hitcount, other.hitcount());
-        if (t.wordcount() < other.wordcount()) t.entry.setColLong(col_wordcount, other.wordcount());
-        if (t.phrasecount() < other.phrasecount()) t.entry.setColLong(col_phrasecount, other.phrasecount());
-        if (t.posintext() < other.posintext()) t.entry.setColLong(col_posintext, other.posintext());
-        if (t.posinphrase() < other.posinphrase()) t.entry.setColLong(col_posinphrase, other.posinphrase());
-        if (t.posofphrase() < other.posofphrase()) t.entry.setColLong(col_posofphrase, other.posofphrase());
-        if (t.worddistance() < other.worddistance()) t.entry.setColLong(col_worddistance, other.worddistance());
-        if (t.lastModified() < other.lastModified()) t.entry.setColLong(col_lastModified, other.lastModified());
-        if (t.quality() < other.quality()) t.entry.setColLong(col_quality, other.quality());
+        if (t.hitcount() < other.hitcount()) t.entry.setCol(col_hitcount, other.hitcount());
+        if (t.wordcount() < other.wordcount()) t.entry.setCol(col_wordcount, other.wordcount());
+        if (t.phrasecount() < other.phrasecount()) t.entry.setCol(col_phrasecount, other.phrasecount());
+        if (t.posintext() < other.posintext()) t.entry.setCol(col_posintext, other.posintext());
+        if (t.posinphrase() < other.posinphrase()) t.entry.setCol(col_posinphrase, other.posinphrase());
+        if (t.posofphrase() < other.posofphrase()) t.entry.setCol(col_posofphrase, other.posofphrase());
+        if (t.worddistance() < other.worddistance()) t.entry.setCol(col_worddistance, other.worddistance());
+        if (t.lastModified() < other.lastModified()) t.entry.setCol(col_lastModified, other.lastModified());
+        if (t.quality() < other.quality()) t.entry.setCol(col_quality, other.quality());
     }
     
     
@@ -258,15 +258,15 @@ public class indexURLEntry implements Cloneable, indexEntry {
     }
 
     static void normalize(indexURLEntry t, indexEntry min, indexEntry max) {
-        t.entry.setColLong(col_hitcount     , (t.hitcount()     == 0) ? 0 : 1 + 255 * (t.hitcount()     - min.hitcount()    ) / (1 + max.hitcount()     - min.hitcount()));
-        t.entry.setColLong(col_wordcount    , (t.wordcount()    == 0) ? 0 : 1 + 255 * (t.wordcount()    - min.wordcount()   ) / (1 + max.wordcount()    - min.wordcount()));
-        t.entry.setColLong(col_phrasecount  , (t.phrasecount()  == 0) ? 0 : 1 + 255 * (t.phrasecount()  - min.phrasecount() ) / (1 + max.phrasecount()  - min.phrasecount()));
-        t.entry.setColLong(col_posintext    , (t.posintext()    == 0) ? 0 : 1 + 255 * (t.posintext()    - min.posintext()   ) / (1 + max.posintext()    - min.posintext()));
-        t.entry.setColLong(col_posinphrase  , (t.posinphrase()  == 0) ? 0 : 1 + 255 * (t.posinphrase()  - min.posinphrase() ) / (1 + max.posinphrase()  - min.posinphrase()));
-        t.entry.setColLong(col_posofphrase  , (t.posofphrase()  == 0) ? 0 : 1 + 255 * (t.posofphrase()  - min.posofphrase() ) / (1 + max.posofphrase()  - min.posofphrase()));
-        t.entry.setColLong(col_worddistance , (t.worddistance() == 0) ? 0 : 1 + 255 * (t.worddistance() - min.worddistance()) / (1 + max.worddistance() - min.worddistance()));
-        t.entry.setColLong(col_lastModified , (t.lastModified() == 0) ? 0 : 1 + 255 * (t.lastModified() - min.lastModified()) / (1 + max.lastModified() - min.lastModified()));
-        t.entry.setColLong(col_quality      , (t.quality()      == 0) ? 0 : 1 + 255 * (t.quality()      - min.quality()     ) / (1 + max.quality()      - min.quality()));
+        t.entry.setCol(col_hitcount     , (t.hitcount()     == 0) ? 0 : 1 + 255 * (t.hitcount()     - min.hitcount()    ) / (1 + max.hitcount()     - min.hitcount()));
+        t.entry.setCol(col_wordcount    , (t.wordcount()    == 0) ? 0 : 1 + 255 * (t.wordcount()    - min.wordcount()   ) / (1 + max.wordcount()    - min.wordcount()));
+        t.entry.setCol(col_phrasecount  , (t.phrasecount()  == 0) ? 0 : 1 + 255 * (t.phrasecount()  - min.phrasecount() ) / (1 + max.phrasecount()  - min.phrasecount()));
+        t.entry.setCol(col_posintext    , (t.posintext()    == 0) ? 0 : 1 + 255 * (t.posintext()    - min.posintext()   ) / (1 + max.posintext()    - min.posintext()));
+        t.entry.setCol(col_posinphrase  , (t.posinphrase()  == 0) ? 0 : 1 + 255 * (t.posinphrase()  - min.posinphrase() ) / (1 + max.posinphrase()  - min.posinphrase()));
+        t.entry.setCol(col_posofphrase  , (t.posofphrase()  == 0) ? 0 : 1 + 255 * (t.posofphrase()  - min.posofphrase() ) / (1 + max.posofphrase()  - min.posofphrase()));
+        t.entry.setCol(col_worddistance , (t.worddistance() == 0) ? 0 : 1 + 255 * (t.worddistance() - min.worddistance()) / (1 + max.worddistance() - min.worddistance()));
+        t.entry.setCol(col_lastModified , (t.lastModified() == 0) ? 0 : 1 + 255 * (t.lastModified() - min.lastModified()) / (1 + max.lastModified() - min.lastModified()));
+        t.entry.setCol(col_quality      , (t.quality()      == 0) ? 0 : 1 + 255 * (t.quality()      - min.quality()     ) / (1 + max.quality()      - min.quality()));
     }
     
     public void normalize(indexEntry min, indexEntry max) {

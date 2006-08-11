@@ -32,6 +32,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import de.anomic.server.serverFileUtils;
+
 public class kelondroCollectionIndex {
 
     private kelondroIndex index;
@@ -60,19 +62,28 @@ public class kelondroCollectionIndex {
             );
     }
     
+    private static String fillZ(String s, int len) {
+        while (s.length() < len) s = "0" + s;
+        return s;
+    }
+    
     private static File arrayFile(File path, String filenameStub, int loadfactor, int chunksize, int partitionNumber, int serialNumber) {
-
-        String lf = Integer.toHexString(loadfactor).toUpperCase();
-        while (lf.length() < 2) lf = "0" + lf;
-        String cs = Integer.toHexString(chunksize).toUpperCase();
-        while (cs.length() < 4) cs = "0" + cs;
-        String pn = Integer.toHexString(partitionNumber).toUpperCase();
-        while (pn.length() < 2) pn = "0" + pn;
-        String sn = Integer.toHexString(serialNumber).toUpperCase();
-        while (sn.length() < 2) sn = "0" + sn;
+        String lf = fillZ(Integer.toHexString(loadfactor).toUpperCase(), 2);
+        String cs = fillZ(Integer.toHexString(chunksize).toUpperCase(), 4);
+        String pn = fillZ(Integer.toHexString(partitionNumber).toUpperCase(), 2);
+        String sn = fillZ(Integer.toHexString(serialNumber).toUpperCase(), 2);
         return new File(path, filenameStub + "." + lf + "." + cs + "." + pn + "." + sn + ".kca"); // kelondro collection array
     }
 
+    private static File propertyFile(File path, String filenameStub, int loadfactor, int chunksize) {
+        String lf = fillZ(Integer.toHexString(loadfactor).toUpperCase(), 2);
+        String cs = fillZ(Integer.toHexString(chunksize).toUpperCase(), 4);
+        return new File(path, filenameStub + "." + lf + "." + cs + ".properties"); // kelondro collection array
+    }
+    
+    /*
+     
+     */
     public kelondroCollectionIndex(File path, String filenameStub, int keyLength, kelondroOrder indexOrder,
                                    long buffersize, long preloadTime,
                                    int loadfactor, kelondroRow rowdef) throws IOException {
@@ -85,6 +96,21 @@ public class kelondroCollectionIndex {
         // create index table
         index = new kelondroFlexTable(path, filenameStub + ".index", indexOrder, buffersize, preloadTime, indexRow(keyLength), true);
 
+        // save/check property file for this array
+        File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize());
+        Map props = new HashMap();
+        if (propfile.exists()) {
+            props = serverFileUtils.loadHashMap(propfile);
+            String stored_rowdef = (String) props.get("rowdef");
+            if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef))))) {
+                System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
+                        rowdef + "' for array cluster '" + path + "/" + filenameStub + "'");
+                System.exit(-1);
+            }
+        }
+        props.put("rowdef", rowdef.toString());
+        serverFileUtils.saveMap(propfile, props, "CollectionIndex properties");
+        
         // open array files
         this.arrays = new HashMap(); // all entries will be dynamically created with getArray()
     }
@@ -176,9 +202,9 @@ public class kelondroCollectionIndex {
             } else {
                 // overwrite the old collection
                 // read old information
-                int oldchunksize  = (int) oldindexrow.getColLongB256(idx_col_chunksize); // needed only for migration
-                int oldchunkcount = (int) oldindexrow.getColLongB256(idx_col_chunkcount);
-                int oldrownumber  = (int) oldindexrow.getColLongB256(idx_col_indexpos);
+                int oldchunksize  = (int) oldindexrow.getColLong(idx_col_chunksize); // needed only for migration
+                int oldchunkcount = (int) oldindexrow.getColLong(idx_col_chunkcount);
+                int oldrownumber  = (int) oldindexrow.getColLong(idx_col_indexpos);
                 int oldPartitionNumber = arrayIndex(oldchunkcount);
                 int oldSerialNumber = 0;
             
@@ -234,8 +260,8 @@ public class kelondroCollectionIndex {
                     array.set(oldrownumber, arrayEntry);
                 
                     // update the index entry
-                    oldindexrow.setColLongB256(idx_col_chunkcount, collection.size());
-                    oldindexrow.setColLongB256(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+                    oldindexrow.setCol(idx_col_chunkcount, collection.size());
+                    oldindexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
                     index.put(oldindexrow);
                 } else {
                     // we need a new slot, that means we must first delete the old entry
@@ -271,11 +297,11 @@ public class kelondroCollectionIndex {
         // store the new row number in the index
         kelondroRow.Entry indexEntry = index.row().newEntry();
         indexEntry.setCol(idx_col_key, key);
-        indexEntry.setColLongB256(idx_col_chunksize, this.rowdef.objectsize());
-        indexEntry.setColLongB256(idx_col_chunkcount, collection.size());
-        indexEntry.setColLongB256(idx_col_indexpos, (long) newRowNumber);
-        indexEntry.setColLongB256(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
-        indexEntry.setColLongB256(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+        indexEntry.setCol(idx_col_chunksize, this.rowdef.objectsize());
+        indexEntry.setCol(idx_col_chunkcount, collection.size());
+        indexEntry.setCol(idx_col_indexpos, (long) newRowNumber);
+        indexEntry.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+        indexEntry.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
         index.put(indexEntry);
     }
     
@@ -301,9 +327,9 @@ public class kelondroCollectionIndex {
         // call this only within a synchronized(index) environment
         
         // read values
-        int chunksize  = (int) indexrow.getColLongB256(idx_col_chunksize);
-        int chunkcount = (int) indexrow.getColLongB256(idx_col_chunkcount);
-        int rownumber  = (int) indexrow.getColLongB256(idx_col_indexpos);
+        int chunksize  = (int) indexrow.getColLong(idx_col_chunksize);
+        int chunkcount = (int) indexrow.getColLong(idx_col_chunkcount);
+        int rownumber  = (int) indexrow.getColLong(idx_col_indexpos);
         int partitionnumber = arrayIndex(chunkcount);
         int serialnumber = 0;
         
@@ -320,18 +346,18 @@ public class kelondroCollectionIndex {
             // store the row number in the index; this may be a double-entry, but better than nothing
             kelondroRow.Entry indexEntry = index.row().newEntry();
             indexEntry.setCol(idx_col_key, arrayrow.getColBytes(0));
-            indexEntry.setColLongB256(idx_col_chunksize, this.rowdef.objectsize());
-            indexEntry.setColLongB256(idx_col_chunkcount, collection.size());
-            indexEntry.setColLongB256(idx_col_indexpos, (long) rownumber);
-            indexEntry.setColLongB256(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
-            indexEntry.setColLongB256(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+            indexEntry.setCol(idx_col_chunksize, this.rowdef.objectsize());
+            indexEntry.setCol(idx_col_chunkcount, collection.size());
+            indexEntry.setCol(idx_col_indexpos, (long) rownumber);
+            indexEntry.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+            indexEntry.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
             index.put(indexEntry);
             throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, partitionnumber, serialnumber).toString(), "array contains wrong row '" + new String(arrayrow.getColBytes(0)) + "', expected is '" + new String(indexrow.getColBytes(idx_col_key)) + "', the row has been fixed");
         }
         int chunkcountInArray = collection.size();
         if (chunkcountInArray != chunkcount) {
             // fix the entry in index
-            indexrow.setColLong(idx_col_chunkcount, chunkcountInArray);
+            indexrow.setCol(idx_col_chunkcount, chunkcountInArray);
             index.put(indexrow);
             array.logFailure("INCONSISTENCY in " + arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, partitionnumber, serialnumber).toString() + ": array has different chunkcount than index: index = " + chunkcount + ", array = " + chunkcountInArray + "; the index has been auto-fixed");
         }

@@ -102,8 +102,8 @@ public class kelondroDynTree {
         Iterator i = table.dynKeys(true, false);
         String onekey = (String) i.next();
         kelondroTree onetree = getTree(onekey);
-        int[] columns = new int[onetree.row().columns()];
-        for (int j = 0; j < columns.length; j++) columns[j] = onetree.row().width(j);
+        kelondroColumn[] columns = new kelondroColumn[onetree.row().columns()];
+        for (int j = 0; j < columns.length; j++) columns[j] = onetree.row().column(j);
         this.rowdef = new kelondroRow(columns);
         closeTree(onekey);
     }
@@ -327,7 +327,7 @@ public class kelondroDynTree {
                 kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, '_');
                 System.out.println("opened: table keylength=" + dt.table.row().width(0) + ", sectorsize=" + dt.table.row().width(1) + ", " + dt.table.size() + " entries.");
             } else {
-                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow(new int[] {10,20,30}), '_', true);
+                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30"), '_', true);
                 String name;
                 kelondroTree t;
                 kelondroRow.Entry line;

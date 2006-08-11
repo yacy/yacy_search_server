@@ -449,7 +449,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         */
         
         long start = System.currentTimeMillis();
-        kelondroRowSet c = new kelondroRowSet(new kelondroRow(new int[]{12, 12}), 0);
+        kelondroRowSet c = new kelondroRowSet(new kelondroRow("byte[] a-12, byte[] b-12"), 0);
         Random random = new Random(0);
         byte[] key;
         for (int i = 0; i < 100000; i++) {

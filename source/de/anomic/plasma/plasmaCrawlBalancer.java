@@ -63,10 +63,10 @@ public class plasmaCrawlBalancer {
             try {
                 stack = new kelondroStack(stackFile);
             } catch (IOException e) {
-                stack = new kelondroStack(stackFile, new kelondroRow(new int[] {indexURL.urlHashLength}), true);
+                stack = new kelondroStack(stackFile, new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength), true);
             }
         } else {
-            stack = new kelondroStack(stackFile, new kelondroRow(new int[] {indexURL.urlHashLength}), true);
+            stack = new kelondroStack(stackFile, new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength), true);
         }
         domainStacks = new HashMap();
     }

@@ -80,16 +80,16 @@ public class plasmaSwitchboardQueue {
     }
 
     private void initQueueStack() {
-        kelondroRow rowdef = new kelondroRow(new int[] {
-                indexURL.urlStringLength,
-                indexURL.urlHashLength,
-                11,
-                1,
-                yacySeedDB.commonHashLength,
-                indexURL.urlCrawlDepthLength,
-                indexURL.urlCrawlProfileHandleLength,
-                indexURL.urlDescrLength
-            });
+        kelondroRow rowdef = new kelondroRow(
+                "String url-"          + indexURL.urlStringLength             + ", " +        // the url
+                "String refhash-"      + indexURL.urlHashLength               + ", " +        // the url's referrer hash
+                "Cardinal modifiedsince-11"                                   + " {b64e}, " + // from ifModifiedSince
+                "byte[] flags-1"                                              + ", " +        // flags
+                "String initiator-"    + yacySeedDB.commonHashLength          + ", " +        // the crawling initiator
+                "Cardinal depth-"      + indexURL.urlCrawlDepthLength         + " {b64e}, " + // the prefetch depth so far, starts at 0
+                "String profile-"      + indexURL.urlCrawlProfileHandleLength + ", " +        // the name of the prefetch profile handle
+                "String urldescr-"     + indexURL.urlDescrLength);                            //
+            
         if (sbQueueStackPath.exists()) try {
             sbQueueStack = new kelondroStack(sbQueueStackPath);
         } catch (IOException e) {
@@ -217,7 +217,7 @@ public class plasmaSwitchboardQueue {
         }
 
         public Entry(kelondroRow.Entry row) throws IOException {
-            long ims = row.getColLongB64E(2);
+            long ims = row.getColLong(2);
             byte flags = row.getColByte(3);
             try {
                 this.url = new URL(row.getColString(0, "UTF-8"));
@@ -228,7 +228,7 @@ public class plasmaSwitchboardQueue {
             this.ifModifiedSince = (ims == 0) ? null : new Date(ims);
             this.flags = ((flags & 1) == 1) ? (byte) 1 : (byte) 0;
             this.initiator = row.getColString(4, "UTF-8");
-            this.depth = (int) row.getColLongB64E(5);
+            this.depth = (int) row.getColLong(5);
             this.profileHandle = row.getColString(6, "UTF-8");
             this.anchorName = row.getColString(7, "UTF-8");
 

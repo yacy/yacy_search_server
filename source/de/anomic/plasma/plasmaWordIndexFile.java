@@ -96,10 +96,10 @@ public final class plasmaWordIndexFile {
         kt = new kelondroTree(theLocation, cacheSize, 0, kelondroTree.defaultObjectCachePercent);
     } catch (IOException e) {
         theLocation.delete();
-        kt = new kelondroTree(theLocation, cacheSize, 0, kelondroTree.defaultObjectCachePercent, indexURL.urlHashLength, indexURLEntry.encodedByteArrayFormLength(false), false);
+        kt = new kelondroTree(theLocation, cacheSize, 0, kelondroTree.defaultObjectCachePercent, new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength + ", byte[] ba-" + indexURLEntry.encodedByteArrayFormLength(false)), false);
     } else {
         // create new index file
-        kt = new kelondroTree(theLocation, cacheSize, 0, kelondroTree.defaultObjectCachePercent, indexURL.urlHashLength, indexURLEntry.encodedByteArrayFormLength(false), false);
+        kt = new kelondroTree(theLocation, cacheSize, 0, kelondroTree.defaultObjectCachePercent, new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength + ", byte[] ba-" + indexURLEntry.encodedByteArrayFormLength(false)), false);
     }
     return kt; // everyone who get this should close it when finished!
     }

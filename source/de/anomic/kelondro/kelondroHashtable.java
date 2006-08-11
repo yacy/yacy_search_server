@@ -143,7 +143,7 @@ public class kelondroHashtable {
     private static final byte[] dummyKey = kelondroBase64Order.enhancedCoder.encodeLong(0, 5).getBytes();
 
     public kelondroHashtable(File file, kelondroRow rowdef, int offset, int maxsize, int maxrehash, boolean exitOnFail) {
-	// this creates a new hashtable
+        // this creates a new hashtable
         // the key element is not part of the columns array
         // this is unlike the kelondroTree, where the key is part of a row
         // the offset is a number of bits that is omitted in the folded tree hierarchy
@@ -180,9 +180,9 @@ public class kelondroHashtable {
     }
     
     private kelondroRow extCol(kelondroRow rowdef) {
-        int[] newCol = new int[rowdef.columns() + 1];
-        newCol[0] = 4;
-        for (int i = 0; i < rowdef.columns(); i++) newCol[i + 1] = rowdef.width(i);
+        kelondroColumn[] newCol = new kelondroColumn[rowdef.columns() + 1];
+        newCol[0] = new kelondroColumn("Cardinal key-4 {b256}");
+        for (int i = 0; i < rowdef.columns(); i++) newCol[i + 1] = rowdef.column(i);
         return new kelondroRow(newCol);
     } 
     
@@ -219,7 +219,7 @@ public class kelondroHashtable {
         
         // write row
         kelondroRow.Entry newhkrow = hashArray.row().newEntry();
-        newhkrow.setColLongB256(0, hash.key());
+        newhkrow.setCol(0, hash.key());
         newhkrow.setCol(1, rowentry.bytes());
         hashArray.set(rowNumber, newhkrow);
         return hashArray.row().newEntry(oldhkrow.getColBytes(1));
@@ -233,7 +233,7 @@ public class kelondroHashtable {
             rowNumber = hash.node();
             if (rowNumber >= hashArray.size()) return new Object[]{new Integer(rowNumber), null};
             hkrow = hashArray.get(rowNumber);
-            rowKey = (int) hkrow.getColLongB256(0);
+            rowKey = (int) hkrow.getColLong(0);
             if (rowKey == 0) return new Object[]{new Integer(rowNumber), null};
             hash.rehash();
         } while (rowKey != hash.key());

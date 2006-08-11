@@ -467,11 +467,11 @@ public final class plasmaCrawlStacker {
                 this.url           = entry.getColString(2, "UTF-8").trim();
                 this.referrerHash  = (entry.empty(3)) ? indexURL.dummyHash : entry.getColString(3, "UTF-8");
                 this.name          = (entry.empty(4)) ? "" : entry.getColString(4, "UTF-8").trim();
-                this.loaddate      = new Date(86400000 * entry.getColLongB64E(5));
+                this.loaddate      = new Date(86400000 * entry.getColLong(5));
                 this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, "UTF-8").trim();
-                this.depth         = (int) entry.getColLongB64E(7);
-                this.anchors       = (int) entry.getColLongB64E(8);
-                this.forkfactor    = (int) entry.getColLongB64E(9);
+                this.depth         = (int) entry.getColLong(7);
+                this.anchors       = (int) entry.getColLong(8);
+                this.forkfactor    = (int) entry.getColLong(9);
                 this.flags         = new bitfield(entry.getColBytes(10));
                 this.handle        = Integer.parseInt(new String(entry.getColBytes(11), "UTF-8"));
             } catch (Exception e) {
@@ -581,9 +581,10 @@ public final class plasmaCrawlStacker {
                 // open existing cache
                 try {
                     this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
+                    this.urlEntryCache.assignRowdef(plasmaCrawlNURL.rowdef);
                 } catch (IOException e) {
                     cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef, true);
                 }
                 try {
                     // loop through the list and fill the messageList with url hashs
@@ -605,7 +606,7 @@ public final class plasmaCrawlStacker {
                     // deleting old db and creating a new db
                     try {this.urlEntryCache.close();}catch(Exception ex){}
                     cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef, true);
                 } catch (IOException e) {
                     /* if we have an error, we start with a fresh database */
                     plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, IOException:" + e.getMessage() + ". Reseting DB.\n",e);
@@ -613,13 +614,13 @@ public final class plasmaCrawlStacker {
                     // deleting old db and creating a new db
                     try {this.urlEntryCache.close();}catch(Exception ex){}
                     cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
+                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef, true);
                 }
             } else {
                 // create new cache
                 cacheFile.getParentFile().mkdirs();
-                this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(plasmaCrawlNURL.ce), true);
-            }            
+                this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef, true);
+            }
         }
         
         public void close() throws IOException {
@@ -664,18 +665,18 @@ public final class plasmaCrawlStacker {
             this.writeSync.P();
             
             String urlHash = null;
-            kelondroRow.Entry entryBytes = null;
+            kelondroRow.Entry entry = null;
             stackCrawlMessage newMessage = null;
             try {
                 synchronized(this.urlEntryHashCache) {               
                     urlHash = (String) this.urlEntryHashCache.removeFirst();
-                    entryBytes = this.urlEntryCache.remove(urlHash.getBytes());                 
+                    entry = this.urlEntryCache.remove(urlHash.getBytes());                 
                 }
             } finally {
                 this.writeSync.V();
             }
             
-            newMessage = new stackCrawlMessage(urlHash, entryBytes);
+            newMessage = new stackCrawlMessage(urlHash, entry);
             return newMessage;
         }
     }    

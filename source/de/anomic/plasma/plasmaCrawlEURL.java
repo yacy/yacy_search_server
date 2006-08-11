@@ -125,29 +125,30 @@ public class plasmaCrawlEURL extends indexURL {
     
     public plasmaCrawlEURL(File cachePath, int bufferkb, long preloadTime) {
         super();
-        int[] ce = {
-            urlHashLength,           // the url's hash
-            urlHashLength,           // the url's referrer hash
-            urlHashLength,           // the crawling initiator
-            urlHashLength,           // the crawling executor
-            urlStringLength,         // the url as string
-            urlNameLength,           // the name of the url, from anchor tag <a>name</a>
-            urlDateLength,           // the time when the url was first time appeared
-            urlDateLength,           // the time when the url was last time tried to load
-            urlRetryLength,          // number of load retries
-            urlErrorLength,          // string describing load failure
-            urlFlagLength            // extra space
-        };
+        kelondroRow rowdef = new kelondroRow(
+            "String urlhash-"      + urlHashLength   + ", " +        // the url's hash
+            "String refhash-"      + urlHashLength   + ", " +        // the url's referrer hash
+            "String initiator-"    + urlHashLength   + ", " +        // the crawling initiator
+            "String executor-"     + urlHashLength   + ", " +        // the crawling executor
+            "String urlstring-"    + urlStringLength + ", " +        // the url as string
+            "String urlname-"      + urlNameLength   + ", " +        // the name of the url, from anchor tag <a>name</a>
+            "Cardinal appdate-"    + urlDateLength   + " {b64e}, " + // the time when the url was first time appeared
+            "Cardinal loaddate-"   + urlDateLength   + " {b64e}, " + // the time when the url was last time tried to load
+            "Cardinal retrycount-" + urlRetryLength  + " {b64e}, " + // number of load retries
+            "String failcause-"    + urlErrorLength  + ", " +        // string describing load failure
+            "byte[] flags-"        + urlFlagLength);                 // extra space
+
         if (cachePath.exists()) try {
             // open existing cache
             urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
+            urlHashCache.assignRowdef(rowdef);
         } catch (IOException e) {
             cachePath.delete();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
         } else {
             // create new cache
             cachePath.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
         }
     }
 
@@ -252,9 +253,9 @@ public class plasmaCrawlEURL extends indexURL {
             this.url = new URL(entry.getColString(4, "UTF-8").trim());
             String n = entry.getColString(5, "UTF-8");
             this.name = (n == null) ? "" : n.trim();
-            this.initdate = new Date(86400000 * entry.getColLongB64E(6));
-            this.trydate = new Date(86400000 * entry.getColLongB64E(7));
-            this.trycount = (int) entry.getColLongB64E(8);
+            this.initdate = new Date(86400000 * entry.getColLong(6));
+            this.trydate = new Date(86400000 * entry.getColLong(7));
+            this.trycount = (int) entry.getColLong(8);
             this.failreason = entry.getColString(9, "UTF-8");
             this.flags = new bitfield(entry.getColBytes(10));
             return;

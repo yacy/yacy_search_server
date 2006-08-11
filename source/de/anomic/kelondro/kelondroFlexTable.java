@@ -79,7 +79,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     private kelondroIndex initializeRamIndex(kelondroOrder objectOrder) throws IOException {
-        kelondroRowBufferedSet ri = new kelondroRowBufferedSet(new kelondroRow(new int[]{super.row().width(0), 4}), 0);
+        kelondroRowBufferedSet ri = new kelondroRowBufferedSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}), 0);
         ri.setOrdering(objectOrder, 0);
         Iterator content = super.col[0].contentNodes(-1);
         kelondroRecords.Node node;
@@ -90,7 +90,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             i = node.handle().hashCode();
             indexentry = ri.rowdef.newEntry();
             indexentry.setCol(0, node.getValueRow());
-            indexentry.setColLongB256(1, i);
+            indexentry.setCol(1, i);
             ri.add(indexentry);
             if ((i % 10000) == 0) {
                 System.out.print('.');
@@ -117,7 +117,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             i = node.handle().hashCode();
             indexentry = index.row().newEntry();
             indexentry.setCol(0, node.getValueRow());
-            indexentry.setColLongB256(1, i);
+            indexentry.setCol(1, i);
             index.put(indexentry);
             if ((i % 10000) == 0) {
                 System.out.print('.');
@@ -176,7 +176,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 
         public Object next() {
             kelondroRow.Entry idxEntry = (kelondroRow.Entry) indexIterator.next();
-            int idx = (int) idxEntry.getColLongB256(1);
+            int idx = (int) idxEntry.getColLong(1);
             try {
                 return get(idx);
             } catch (IOException e) {

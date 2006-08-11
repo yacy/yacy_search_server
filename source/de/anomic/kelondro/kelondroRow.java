@@ -48,9 +48,9 @@ public class kelondroRow {
             this.colstart[i] = this.objectsize;
             this.objectsize += this.row[i].cellwidth();
         }
-        
     }
 
+    /*
     public kelondroRow(int[] rowi) {
         this.row = new kelondroColumn[rowi.length];
         this.colstart = new int[rowi.length];
@@ -61,7 +61,7 @@ public class kelondroRow {
             this.objectsize += this.row[i].cellwidth();
         }
     }
-    
+    */
     public kelondroRow(String structure) {
         // define row with row syntax
         // example:
@@ -118,6 +118,10 @@ public class kelondroRow {
     
     public int objectsize() {
         return this.objectsize;
+    }
+    
+    public kelondroColumn column(int col) {
+        return row[col];
     }
     
     public int width(int row) {
@@ -252,11 +256,11 @@ public class kelondroRow {
             }
         }
         
-        public void setColByte(int column, byte c) {
+        public void setCol(int column, byte c) {
             rowinstance[colstart[column]] = c;
         }
         
-        public void setColString(int column, String cell, String encoding) {
+        public void setCol(int column, String cell, String encoding) {
             if (encoding == null)
                 setCol(column, cell.getBytes());
             else
@@ -267,30 +271,20 @@ public class kelondroRow {
                 }
         }
         
-        public void setColLong(int column, long cell) {
+        public void setCol(int column, long cell) {
             // uses the column definition to choose the right encoding
             switch (row[column].encoder()) {
             case kelondroColumn.encoder_none:
                 throw new kelondroException("ROW", "setColLong has celltype none, no encoder given");
             case kelondroColumn.encoder_b64e:
-                setColLongB64E(column, cell);
+                kelondroBase64Order.enhancedCoder.encodeLong(cell, rowinstance, colstart[column], row[column].cellwidth());
                 break;
             case kelondroColumn.encoder_b256:
-                setColLongB256(column, cell);
+                kelondroNaturalOrder.encodeLong(cell, rowinstance, colstart[column], row[column].cellwidth());
                 break;
             case kelondroColumn.encoder_bytes:
                 throw new kelondroException("ROW", "setColLong of celltype bytes not applicable");
             }
-        }
-        
-        public void setColLongB256(int column, long cell) {
-            // temporary method, should be replaced by setColLong if all row declarations are complete
-            kelondroNaturalOrder.encodeLong(cell, rowinstance, colstart[column], row[column].cellwidth());
-        }
-        
-        public void setColLongB64E(int column, long cell) {
-            // temporary method, should be replaced by setColLong if all row declarations are complete
-            kelondroBase64Order.enhancedCoder.encodeLong(cell, rowinstance, colstart[column], row[column].cellwidth());
         }
         
         public String getColString(int column, String encoding) {
@@ -316,25 +310,15 @@ public class kelondroRow {
             case kelondroColumn.encoder_none:
                 throw new kelondroException("ROW", "getColLong has celltype none, no encoder given");
             case kelondroColumn.encoder_b64e:
-                return getColLongB64E(column);
+                return kelondroBase64Order.enhancedCoder.decodeLong(rowinstance, colstart[column], row[column].cellwidth());
             case kelondroColumn.encoder_b256:
-                return getColLongB256(column);
+                return kelondroNaturalOrder.decodeLong(rowinstance, colstart[column], row[column].cellwidth());
             case kelondroColumn.encoder_bytes:
                 throw new kelondroException("ROW", "getColLong of celltype bytes not applicable");
             }
             throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
         }
-        
-        public long getColLongB256(int column) {
-            // temporary method, should be replaced by getColLong if all row declarations are complete
-            return kelondroNaturalOrder.decodeLong(rowinstance, colstart[column], row[column].cellwidth());
-        }
-        
-        public long getColLongB64E(int column) {
-            // temporary method, should be replaced by getColLong if all row declarations are complete
-            return kelondroBase64Order.enhancedCoder.decodeLong(rowinstance, colstart[column], row[column].cellwidth());
-        }
-        
+
         public byte getColByte(int column) {
             return rowinstance[colstart[column]];
         }
@@ -344,41 +328,6 @@ public class kelondroRow {
             System.arraycopy(rowinstance, colstart[column], c, 0, row[column].cellwidth());
             return c;
         }
-
-        /*
-        public byte[] toEncodedBytesForm() {
-            byte[] b = new byte[objectsize];
-            int encoder, cellwidth;
-            int p = 0;
-            for (int i = 0; i < row.length; i++) {
-                encoder = row[i].encoder();
-                cellwidth = row[i].cellwidth();
-                switch (row[i].celltype()) {
-                case kelondroColumn.celltype_undefined:
-                    throw new kelondroException("ROW", "toEncodedForm of celltype undefined not possible");
-                case kelondroColumn.celltype_boolean:
-                    throw new kelondroException("ROW", "toEncodedForm of celltype boolean not yet implemented");
-                case kelondroColumn.celltype_binary:
-                    System.arraycopy(rowinstance, colstart[i], b, p, cellwidth);
-                    p += cellwidth;
-                    continue;
-                case kelondroColumn.celltype_string:
-                    System.arraycopy(rowinstance, colstart[i], b, p, cellwidth);
-                    p += cellwidth;
-                    continue;
-                case kelondroColumn.celltype_cardinal:
-                    if (encoder == kelondroColumn.encoder_b64e) {
-                        long c = bytes2long(rowinstance, colstart[i], cellwidth);
-                        System.arraycopy(kelondroBase64Order.enhancedCoder.encodeLongSmart(c, cellwidth).getBytes(), 0, b, p, cellwidth);
-                        p += cellwidth;
-                        continue;
-                    }
-                    throw new kelondroException("ROW", "toEncodedForm of celltype cardinal has no encoder (" + encoder + ")");
-                }
-            }
-            return b;
-         }
-        */
         
         public String toPropertyForm(boolean includeBraces, boolean decimalCardinal) {
             StringBuffer sb = new StringBuffer();
@@ -443,6 +392,16 @@ public class kelondroRow {
         long x = 0;
         for (int i = 0; i < length; i++) x = (x << 8) | (0xff & b[offset + i]);
         return x;
+    }
+    
+    public boolean subsumes(kelondroRow otherRow) {
+        // returns true, if this row has at least all columns as the other row
+        // and possibly some more
+        if (this.objectsize < otherRow.objectsize) return false;
+        for (int i = 0; i < otherRow.row.length; i++) {
+            if (!(this.row[i].equals(otherRow.row[i]))) return false;
+        }
+        return true;
     }
     
 }

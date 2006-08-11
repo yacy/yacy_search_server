@@ -96,7 +96,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (indexDumpFile.exists()) indexDumpFile.delete();
         kelondroFixedWidthArray dumpArray = null;
-            dumpArray = new kelondroFixedWidthArray(indexDumpFile, new kelondroRow(plasmaWordIndexAssortment.bufferStructureBasis), 0, false);
+            dumpArray = new kelondroFixedWidthArray(indexDumpFile, plasmaWordIndexAssortment.bufferStructureBasis, 0, false);
             long startTime = System.currentTimeMillis();
             long messageTime = System.currentTimeMillis() + 5000;
             long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
@@ -119,8 +119,8 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                         while (ci.hasNext()) {
                             iEntry = (indexEntry) ci.next();
                             row.setCol(0, container.getWordHash().getBytes());
-                            row.setCol(1, kelondroNaturalOrder.encodeLong(container.size(), 4));
-                            row.setCol(2, kelondroNaturalOrder.encodeLong(container.updated(), 8));
+                            row.setCol(1, container.size());
+                            row.setCol(2, container.updated());
                             row.setCol(3, iEntry.urlHash().getBytes());
                             row.setCol(4, iEntry.toEncodedByteArrayForm(false));
                             dumpArray.set((int) urlcount++, row);

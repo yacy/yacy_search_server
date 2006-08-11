@@ -62,9 +62,9 @@ public class plasmaWordConnotation {
         if (refDBfile.exists()) try {
             refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, fillChar);
         } catch (IOException e) {
-            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, wordlength, nodesize, new kelondroRow(new int[] {wordlength, countlength}), fillChar, true);
+            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, wordlength, nodesize, new kelondroRow("byte[] word-" + wordlength + ", Cardinal count-" + countlength), fillChar, true);
         } else {
-            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, wordlength, nodesize, new kelondroRow(new int[] {wordlength, countlength}), fillChar, true);
+            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, wordlength, nodesize, new kelondroRow("byte[] word-" + wordlength + ", Cardinal count-" + countlength), fillChar, true);
         }
     }
 
@@ -73,8 +73,8 @@ public class plasmaWordConnotation {
         //reference = reference.toLowerCase();
         kelondroRow.Entry record = refDB.get(word, reference.getBytes());
         long c;
-        if (record == null) c = 0; else c = record.getColLongB64E(1);
-        record.setColLongB64E(1, c++);
+        if (record == null) c = 0; else c = record.getColLong(1);
+        record.setCol(1, c++);
         refDB.put(word, record);
     }
     

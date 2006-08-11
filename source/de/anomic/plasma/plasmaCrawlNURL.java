@@ -76,21 +76,20 @@ public class plasmaCrawlNURL extends indexURL {
     /**
      * column length definition for the {@link plasmaURL#urlHashCache} DB
      */
-    public static final int[] ce = {
-            urlHashLength,               // the url hash
-            urlHashLength,               // initiator
-            urlStringLength,             // the url as string
-            urlHashLength,               // the url's referrer hash
-            urlNameLength,               // the name of the url, from anchor tag <a>name</a>
-            urlDateLength,               // the time when the url was first time appeared
-            urlCrawlProfileHandleLength, // the name of the prefetch profile handle
-            urlCrawlDepthLength,         // the prefetch depth so far, starts at 0
-            urlParentBranchesLength,     // number of anchors of the parent
-            urlForkFactorLength,         // sum of anchors of all ancestors
-            urlFlagLength,               // extra space
-            urlHandleLength              // extra handle
-        };    
-        
+    public final static kelondroRow rowdef = new kelondroRow(
+        "String urlhash-"      + urlHashLength               + ", " +        // the url's hash
+        "String initiator-"    + urlHashLength               + ", " +        // the crawling initiator
+        "String urlstring-"    + urlStringLength             + ", " +        // the url as string
+        "String refhash-"      + urlHashLength               + ", " +        // the url's referrer hash
+        "String urlname-"      + urlNameLength               + ", " +        // the name of the url, from anchor tag <a>name</a>
+        "Cardinal appdate-"    + urlDateLength               + " {b64e}, " + // the time when the url was first time appeared
+        "String profile-"      + urlCrawlProfileHandleLength + ", " +        // the name of the prefetch profile handle
+        "Cardinal depth-"      + urlCrawlDepthLength         + " {b64e}, " + // the prefetch depth so far, starts at 0
+        "Cardinal parentbr-"   + urlParentBranchesLength     + " {b64e}, " + // number of anchors of the parent
+        "Cardinal forkfactor-" + urlForkFactorLength         + " {b64e}, " + // sum of anchors of all ancestors
+        "byte[] flags-"        + urlFlagLength               + ", " +        // flags
+        "String handle-"       + urlHandleLength);                           // extra handle
+    
     private final plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
     private final plasmaCrawlBalancer limitStack;     // links found by crawling at target depth
     private final plasmaCrawlBalancer overhangStack;  // links found by crawling at depth+1
@@ -127,7 +126,7 @@ public class plasmaCrawlNURL extends indexURL {
         limitStack = new plasmaCrawlBalancer(limitStackFile);
         overhangStack = new plasmaCrawlBalancer(overhangStackFile);
         remoteStack = new plasmaCrawlBalancer(remoteStackFile);
-        kelondroRow rowdef = new kelondroRow(new int[] {indexURL.urlHashLength});
+        kelondroRow rowdef = new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength);
         if (imageStackFile.exists()) try {
             imageStack = new kelondroStack(imageStackFile);
         } catch (IOException e) {
@@ -170,13 +169,14 @@ public class plasmaCrawlNURL extends indexURL {
         if (cacheFile.exists()) try {
             // open existing cache
             urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
+            urlHashCache.assignRowdef(rowdef);
         } catch (IOException e) {
             cacheFile.delete();
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
         } else {
             // create new cache
             cacheFile.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
         }
     }
     
@@ -520,11 +520,11 @@ public class plasmaCrawlNURL extends indexURL {
             this.url = new URL(entry.getColString(2, null).trim());
             this.referrer = (entry.empty(3)) ? dummyHash : entry.getColString(3, null);
             this.name = (entry.empty(4)) ? "" : entry.getColString(4, null).trim();
-            this.loaddate = new Date(86400000 * entry.getColLongB64E(5));
+            this.loaddate = new Date(86400000 * entry.getColLong(5));
             this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, null).trim();
-            this.depth = (int) entry.getColLongB64E(7);
-            this.anchors = (int) entry.getColLongB64E(8);
-            this.forkfactor = (int) entry.getColLongB64E(9);
+            this.depth = (int) entry.getColLong(7);
+            this.anchors = (int) entry.getColLong(8);
+            this.forkfactor = (int) entry.getColLong(9);
             this.flags = new bitfield(entry.getColBytes(10));
             this.handle = Integer.parseInt(entry.getColString(11, null), 16);
             return;

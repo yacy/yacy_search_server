@@ -104,7 +104,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         // create collections storage path
         if (!(newIndexRoot.exists())) newIndexRoot.mkdirs();
         if (useCollectionIndex)
-            collections = new indexCollectionRI(newIndexRoot, "test_generation0", bufferkb * 1024, preloadTime);
+            collections = new indexCollectionRI(newIndexRoot, "test_generation1", bufferkb * 1024, preloadTime);
         else
             collections = null;
         

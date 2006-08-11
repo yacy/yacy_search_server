@@ -27,6 +27,10 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import de.anomic.server.serverFileUtils;
 
 public class kelondroFlexWidthArray implements kelondroArray {
 
@@ -44,7 +48,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
             check += '_';
         }
         
-        // check if tabel directory exists
+        // check if table directory exists
         File tabledir = new File(path, tablename + ".table");
         if (tabledir.exists()) {
             if (!(tabledir.isDirectory())) throw new IOException("path " + tabledir.toString() + " must be a directory");
@@ -53,6 +57,21 @@ public class kelondroFlexWidthArray implements kelondroArray {
             tabledir.mkdir();
         }
 
+        // save/check property file for this array
+        File propfile = new File(tabledir, "properties");
+        Map props = new HashMap();
+        if (propfile.exists()) {
+            props = serverFileUtils.loadHashMap(propfile);
+            String stored_rowdef = (String) props.get("rowdef");
+            if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef))))) {
+                System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
+                        rowdef + "' for flex table '" + path + "'");
+                System.exit(-1);
+            }
+        }
+        props.put("rowdef", rowdef.toString());
+        serverFileUtils.saveMap(propfile, props, "FlexWidthArray properties");
+        
         // open existing files
         String[] files = tabledir.list();
         for (int i = 0; i < files.length; i++) {
@@ -78,9 +97,9 @@ public class kelondroFlexWidthArray implements kelondroArray {
                 q--;
             }
             // create new array file
-            int columns[] = new int[q - p + 1];
+            kelondroColumn[] columns = new kelondroColumn[q - p + 1];
             for (int j = p; j <= q; j++) {
-                columns[j - p] = rowdef.width(j);
+                columns[j - p] = rowdef.column(j);
                 check = check.substring(0, j) + "X" + check.substring(j + 1);
             }
             col[p] = new kelondroFixedWidthArray(new File(tabledir, colfilename(p, q)), new kelondroRow(columns), 16, true);
@@ -197,7 +216,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
     public static void main(String[] args) {
         File f = new File("d:\\\\mc\\privat\\");
         try {
-            kelondroFlexWidthArray k = new kelondroFlexWidthArray(f, "flextest", new kelondroRow(new int[]{12, 4}), true);
+            kelondroFlexWidthArray k = new kelondroFlexWidthArray(f, "flextest", new kelondroRow("byte[] a-12, byte[] b-4"), true);
             
             k.set(3, k.row().newEntry(new byte[][]{
                 "test123".getBytes(), "abcd".getBytes()}));
@@ -205,7 +224,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
                 "test456".getBytes(), "efgh".getBytes()}));
             k.close();
             
-            k = new kelondroFlexWidthArray(f, "flextest", new kelondroRow(new int[]{12, 4}), true);
+            k = new kelondroFlexWidthArray(f, "flextest", new kelondroRow("byte[] a-12, byte[] b-4"), true);
             System.out.println(k.get(2).toString());
             System.out.println(k.get(3).toString());
             System.out.println(k.get(4).toString());

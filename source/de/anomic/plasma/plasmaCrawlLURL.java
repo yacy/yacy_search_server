@@ -97,35 +97,34 @@ public final class plasmaCrawlLURL extends indexURL {
     
     public plasmaCrawlLURL(File cachePath, int bufferkb, long preloadTime) {
         super();
-        int[] ce = {
-            urlHashLength,
-            urlStringLength,
-            urlDescrLength,
-            urlDateLength,
-            urlDateLength,
-            urlHashLength,
-            urlCopyCountLength,
-            urlFlagLength,
-            urlQualityLength,
-            urlLanguageLength,
-            urlDoctypeLength,
-            urlSizeLength,
-            urlWordCountLength
-        };
-        int segmentsize = 0;
-        for (int i = 0; i < ce.length; i++) { segmentsize += ce[i]; }
+        kelondroRow rowdef = new kelondroRow(
+            "String urlhash-"      + urlHashLength      + ", " +        // the url's hash
+            "String urlstring-"    + urlStringLength    + ", " +        // the url as string
+            "String urldescr-"     + urlDescrLength     + ", " +        // the description of the url
+            "Cardinal moddate-"    + urlDateLength      + " {b64e}, " + // last-modified from the httpd
+            "Cardinal loaddate-"   + urlDateLength      + " {b64e}, " + // time when the url was loaded
+            "String refhash-"      + urlHashLength      + ", " +        // the url's referrer hash
+            "Cardinal copycount-"  + urlCopyCountLength + " {b64e}, " + //
+            "byte[] flags-"        + urlFlagLength      + ", " +        // flags
+            "Cardinal quality-"    + urlQualityLength   + " {b64e}, " + // 
+            "String language-"     + urlLanguageLength  + ", " +        //
+            "byte[] doctype-"      + urlDoctypeLength   + ", " +        //
+            "Cardinal size-"       + urlSizeLength      + " {b64e}, " + // size of file in bytes
+            "Cardinal wc-"         + urlWordCountLength + " {b64e}");   // word count
+
         if (cachePath.exists()) {
             // open existing cache
             try {
                 urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
+                urlHashCache.assignRowdef(rowdef);
             } catch (IOException e) {
                 cachePath.getParentFile().mkdirs();
-                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
+                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
             }
         } else {
             // create new cache
             cachePath.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, new kelondroRow(ce), true);
+            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
         }
 
         // init result stacks
@@ -284,7 +283,6 @@ public final class plasmaCrawlLURL extends indexURL {
         return false;
     }
 
-
     public boolean exists(String urlHash) {
             try {
                 if (urlHashCache.get(urlHash.getBytes()) != null) {
@@ -296,18 +294,6 @@ public final class plasmaCrawlLURL extends indexURL {
                 return false;
             }
     }
-    
-    /*
-    public long existsIndexSize() {
-        return this.existsIndex.size();
-    }
-
-    public void clearExistsIndex() {
-        synchronized (existsIndex) {
-            existsIndex.clear();
-        }
-    }
-    */
     
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
     private static String daydate(Date date) {
@@ -368,13 +354,6 @@ public final class plasmaCrawlLURL extends indexURL {
 
                 url = urle.url();
                 urlstr = url.toString();
-
-                // Kosmetik, die wirklich benutzte URL behaelt die ':80'
-//              if (txt.endsWith(":80")) txt = txt.substring(0, txt.length() - 3);
-//              if ((p = txt.indexOf(":80/")) != -1) {
-//                  txt = txt.substring(0, p).concat(txt.substring(p + 3)); // den '/' erstmal nicht abschneiden
-//                  serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps Remove ':80' URL=" + txt);
-//              }
                 urltxt = nxTools.cutUrlText(urlstr, 72); // shorten the string text like a URL
                 cachepath = (url == null) ? "-not-cached-" : cacheManager.getCachePath(url).toString().replace('\\', '/').substring(cacheManager.cachePath.toString().length() + 1);
 
@@ -478,16 +457,16 @@ public final class plasmaCrawlLURL extends indexURL {
                 this.urlHash = entry.getColString(0, null);
                 this.url = new URL(entry.getColString(1, "UTF-8").trim());
                 this.descr = (entry.empty(2)) ? this.url.toString() : entry.getColString(2, "UTF-8").trim();
-                this.moddate = new Date(86400000 * entry.getColLongB64E(3));
-                this.loaddate = new Date(86400000 * entry.getColLongB64E(4));
+                this.moddate = new Date(86400000 * entry.getColLong(3));
+                this.loaddate = new Date(86400000 * entry.getColLong(4));
                 this.referrerHash = (entry.empty(5)) ? dummyHash : entry.getColString(5, "UTF-8");
-                this.copyCount = (int) entry.getColLongB64E(6);
+                this.copyCount = (int) entry.getColLong(6);
                 this.flags = entry.getColString(7, "UTF-8");
-                this.quality = (int) entry.getColLongB64E(8);
+                this.quality = (int) entry.getColLong(8);
                 this.language = entry.getColString(9, "UTF-8");
                 this.doctype = (char) entry.getColByte(10);
-                this.size = (int) entry.getColLongB64E(11);
-                this.wordCount = (int) entry.getColLongB64E(12);
+                this.size = (int) entry.getColLong(11);
+                this.wordCount = (int) entry.getColLong(12);
                 this.snippet = null;
                 this.word = searchedWord;
                 this.stored = false;

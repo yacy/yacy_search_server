@@ -170,7 +170,7 @@ public class dbtest {
             profiler.start();
             
             // create the database access
-            kelondroRow testRow = new kelondroRow(new int[]{keylength, keylength, valuelength});
+            kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength);
             if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
                 if (tablefile.exists()) {

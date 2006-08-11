@@ -42,7 +42,7 @@ public class kelondroColumn {
     
     private int celltype, cellwidth, encoder;
     private String nickname, description;
-    
+
     public kelondroColumn(String nickname, int celltype, int encoder, int cellwidth, String description) {
         this.celltype = celltype;
         this.cellwidth = cellwidth;
@@ -108,18 +108,18 @@ public class kelondroColumn {
         if (p < 0) {
             // if the cell was defined with a type, we dont need to give an explicit with definition
             if (this.cellwidth < 0) throw new kelondroException("kelondroColumn - no cell width definition given");
-            p = celldef.indexOf(' ');
-            if (p < 0) {
+            int q = celldef.indexOf(' ');
+            if (q < 0) {
                 this.nickname = celldef;
                 celldef = "";
             } else {
                 this.nickname = celldef.substring(0, p);
-                celldef = celldef.substring(p + 1);
+                celldef = celldef.substring(q + 1);
             }
         } else {
+            this.nickname = celldef.substring(0, p);
             int q = celldef.indexOf(' ');
             if (q < 0) {
-                this.nickname = celldef.substring(0, p);
                 try {
                     this.cellwidth = Integer.parseInt(celldef.substring(p + 1));
                 } catch (NumberFormatException e) {
@@ -127,7 +127,6 @@ public class kelondroColumn {
                 }
                 celldef = "";
             } else {
-                this.nickname = celldef.substring(0, q);
                 try {
                     this.cellwidth = Integer.parseInt(celldef.substring(p + 1, q));
                 } catch (NumberFormatException e) {
@@ -157,8 +156,8 @@ public class kelondroColumn {
             String expf = celldef.substring(1, p);
             celldef = celldef.substring(p + 1).trim();
                  if (expf.equals("b64e")) this.encoder = encoder_b64e;
-            else if (expf.equals("b256")) this.encoder = encoder_b64e;
-            else if (expf.equals("bytes")) this.encoder = encoder_b64e;
+            else if (expf.equals("b256")) this.encoder = encoder_b256;
+            else if (expf.equals("bytes")) this.encoder = encoder_bytes;
             else {
                 if (this.celltype == celltype_undefined)      this.encoder = encoder_bytes;
                 else if (this.celltype == celltype_boolean)   this.encoder = encoder_bytes;
@@ -179,6 +178,12 @@ public class kelondroColumn {
         } else {
             this.description = this.nickname;
         }
+    }
+
+    public void setAttributes(String nickname, int celltype, int encoder) {
+        this.celltype = celltype;
+        this.encoder = encoder;
+        this.nickname = nickname;
     }
 
     public int celltype() {
@@ -206,21 +211,28 @@ public class kelondroColumn {
         switch (celltype) {
         case celltype_boolean:
             s.append("boolean ");
+            s.append(nickname);
             break;
         case celltype_binary:
             s.append("byte[] ");
+            s.append(nickname);
+            s.append('-');
+            s.append(cellwidth);
             break;
         case celltype_string:
             s.append("String ");
+            s.append(nickname);
+            s.append('-');
+            s.append(cellwidth);
             break;
         case celltype_cardinal:
             s.append("Cardinal ");
+            s.append(nickname);
+            s.append('-');
+            s.append(cellwidth);
             break;
         }
-        s.append(nickname);
-        s.append('-');
-        s.append(cellwidth);
-        s.append(' ');
+        
         switch (encoder) {
         case encoder_b64e:
             s.append(" {b64e}");
@@ -231,4 +243,13 @@ public class kelondroColumn {
         }
         return new String(s);
     }
+
+    public boolean equals(kelondroColumn otherCol) {
+        return
+          (this.celltype == otherCol.celltype) &&
+          (this.cellwidth == otherCol.cellwidth) &&
+          (this.encoder == otherCol.encoder) &&
+          (this.nickname.equals(otherCol.nickname));
+    }
+
 }

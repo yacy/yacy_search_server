@@ -76,7 +76,7 @@ public class kelondroDyn extends kelondroTree {
             int nodesize, char fillChar, kelondroOrder objectOrder,
             boolean exitOnFail) {
         // creates a new dynamic tree
-        super(file, buffersize, preloadTime,  kelondroTree.defaultObjectCachePercent, new kelondroRow(new int[] { key + counterlen, nodesize }), objectOrder, 1, 8, exitOnFail);
+        super(file, buffersize, preloadTime,  kelondroTree.defaultObjectCachePercent, new kelondroRow("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize), objectOrder, 1, 8, exitOnFail);
         this.keylen = row().width(0) - counterlen;
         this.reclen = row().width(1);
         this.fillChar = fillChar;
