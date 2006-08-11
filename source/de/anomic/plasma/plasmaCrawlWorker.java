@@ -53,7 +53,6 @@ import java.net.SocketException;
 import de.anomic.net.URL;
 import java.net.UnknownHostException;
 import java.util.Date;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
@@ -427,7 +426,7 @@ public final class plasmaCrawlWorker extends Thread {
                         }
                         
                         // normalizing URL
-                        redirectionUrlString = htmlFilterContentScraper.urlNormalform(url, redirectionUrlString);
+                        redirectionUrlString = new URL(url, redirectionUrlString).toNormalform();
 
                         // generating the new URL object
                         URL redirectionUrl = new URL(redirectionUrlString);

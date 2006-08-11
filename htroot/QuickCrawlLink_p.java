@@ -54,7 +54,6 @@ import de.anomic.net.URL;
 import java.net.URLDecoder;
 import java.util.Date;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlProfile;
@@ -137,7 +136,7 @@ public class QuickCrawlLink_p {
         
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
-            crawlingStart = htmlFilterContentScraper.urlNormalform(null, crawlingStart);
+            try {crawlingStart = new URL(crawlingStart).toNormalform();} catch (MalformedURLException e1) {}
             
             // check if url is proper
             URL crawlingStartURL = null;

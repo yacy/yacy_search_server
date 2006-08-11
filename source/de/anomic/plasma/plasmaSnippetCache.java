@@ -54,7 +54,6 @@ import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 
@@ -438,7 +437,7 @@ public class plasmaSnippetCache {
         while ((acc.hasMoreElements()) && (i < fetchcount) && (System.currentTimeMillis() < limitTime)) {
             urlentry = acc.nextElement();
             if (urlentry.url().getHost().endsWith(".yacyh")) continue;
-            urlstring = htmlFilterContentScraper.urlNormalform(urlentry.url());
+            urlstring = urlentry.url().toNormalform();
             if ((urlstring.matches(urlmask)) &&
                 (!(existsInCache(urlentry.url(), queryhashes)))) {
                 new Fetcher(urlentry.url(), queryhashes).start();

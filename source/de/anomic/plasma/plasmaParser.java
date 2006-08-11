@@ -298,16 +298,10 @@ public final class plasmaParser {
     
     public static String getFileExt(URL url) {
         // getting the file path
-        String name = url.getFile();
-        
-        // chopping http parameters from the url
-        int p = name.lastIndexOf('?');
-        if (p != -1) {
-            name = name.substring(0,p);
-        }
+        String name = url.getPath();
         
         // tetermining last position of / in the file path
-        p = name.lastIndexOf('/');
+        int p = name.lastIndexOf('/');
         if (p != -1) {
             name = name.substring(p);
         }
@@ -574,7 +568,7 @@ public final class plasmaParser {
             String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
             int p = 0;
             for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
-            plasmaParserDocument ppd =  new plasmaParserDocument(new URL(htmlFilterContentScraper.urlNormalform(location)),
+            plasmaParserDocument ppd =  new plasmaParserDocument(new URL(location.toNormalform()),
                                 mimeType, null, null, scraper.getTitle(),
                                 sections, null,
                                 scraper.getText(), scraper.getAnchors(), scraper.getImages());

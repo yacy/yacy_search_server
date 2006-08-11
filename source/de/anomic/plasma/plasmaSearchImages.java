@@ -47,7 +47,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.server.serverDate;
 
@@ -72,10 +71,13 @@ public final class plasmaSearchImages {
                     Iterator i = hl.entrySet().iterator();
                     while (i.hasNext()) {
                         Map.Entry e = (Map.Entry) i.next();
-                        String nexturlstring = htmlFilterContentScraper.urlNormalform(null, (String) e.getKey());
+                        String nexturlstring;
                         try {
+                            nexturlstring = new URL((String) e.getKey()).toNormalform();
                             addAll(new plasmaSearchImages(sc, serverDate.remainingTime(start, maxTime, 10), new URL(nexturlstring), depth - 1));
-                        } catch (MalformedURLException e2) {}
+                        } catch (MalformedURLException e1) {
+                            e1.printStackTrace();
+                        }
                     }
                 }
             }

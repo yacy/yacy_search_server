@@ -107,6 +107,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+
 import de.anomic.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -1402,7 +1404,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 while (i.hasNext()) {
                     e = (Map.Entry) i.next();
                     nexturlstring = (String) e.getKey();
-                    nexturlstring = htmlFilterContentScraper.urlNormalform(null, nexturlstring);
+                    try {nexturlstring = new URL(nexturlstring).toNormalform();} catch (MalformedURLException e1) {}
                     
                     sbStackCrawlThread.enqueue(nexturlstring, entry.url().toString(), initiatorHash, (String) e.getValue(), docDate, entry.depth() + 1, entry.profile());
 
@@ -1883,9 +1885,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         url = new URL("http://" + address + "/" + host.substring(0, p) + filename);
                         urlname = "http://share." + seed.getName() + ".yacy" + filename;
                         if ((p = urlname.indexOf("?")) > 0) urlname = urlname.substring(0, p);
-                        urlstring = htmlFilterContentScraper.urlNormalform(url);
+                        urlstring = url.toNormalform();
                     } else {
-                        urlstring = htmlFilterContentScraper.urlNormalform(url);
+                        urlstring = url.toNormalform();
                         urlname = urlstring;
                     }
                     descr = urlentry.descr();

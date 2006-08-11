@@ -42,7 +42,6 @@
 
 package de.anomic.plasma;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 
 import java.io.ByteArrayInputStream;
@@ -192,7 +191,9 @@ public class plasmaParserDocument {
                     } else {
                         ext = url.substring(extpos).toLowerCase();
                     }
-                    normal = htmlFilterContentScraper.urlNormalform(null, url);
+                    try {normal = new URL(url).toNormalform();} catch (MalformedURLException e1) {
+                        normal = null;
+                    }
                     if (normal != null) { //TODO: extension function is not correct
                         if (plasmaParser.mediaExtContains(ext.substring(1))) {
                             // this is not a normal anchor, its a media link
@@ -216,7 +217,7 @@ public class plasmaParserDocument {
         htmlFilterImageEntry iEntry;
         while (i.hasNext()) {
             iEntry = (htmlFilterImageEntry) i.next();
-            normal = htmlFilterContentScraper.urlNormalform(iEntry.url());
+            normal = iEntry.url().toNormalform();
             if (normal != null) medialinks.put(normal, iEntry.alt()); // avoid NullPointerException
         }
         

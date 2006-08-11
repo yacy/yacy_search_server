@@ -50,18 +50,6 @@ public class kelondroRow {
         }
     }
 
-    /*
-    public kelondroRow(int[] rowi) {
-        this.row = new kelondroColumn[rowi.length];
-        this.colstart = new int[rowi.length];
-        this.objectsize = 0;
-        for (int i = 0; i < rowi.length; i++) {
-            this.row[i] = new kelondroColumn("col_" + i, kelondroColumn.celltype_undefined, kelondroColumn.encoder_none, rowi[i], "");
-            this.colstart[i] = this.objectsize;
-            this.objectsize += this.row[i].cellwidth();
-        }
-    }
-    */
     public kelondroRow(String structure) {
         // define row with row syntax
         // example:

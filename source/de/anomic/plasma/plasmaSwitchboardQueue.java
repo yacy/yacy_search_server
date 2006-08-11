@@ -44,7 +44,6 @@
 
 package de.anomic.plasma;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -276,7 +275,7 @@ public class plasmaSwitchboardQueue {
         }
 
         public String normalizedURLString() {
-            return htmlFilterContentScraper.urlNormalform(url);
+            return url.toNormalform();
         }
 
         public String urlHash() {

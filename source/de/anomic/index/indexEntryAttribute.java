@@ -30,7 +30,6 @@ package de.anomic.index;
 
 import de.anomic.net.URL;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
@@ -93,7 +92,7 @@ public class indexEntryAttribute {
 
     // doctype calculation
     public static char docType(URL url) {
-        String path = htmlFilterContentScraper.urlNormalform(url);
+        String path = url.getPath();
         // serverLog.logFinest("PLASMA", "docType URL=" + path);
         char doctype = doctype = indexEntryAttribute.DT_UNKNOWN;
         if (path.endsWith(".gif"))       { doctype = indexEntryAttribute.DT_IMAGE; }

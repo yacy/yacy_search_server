@@ -56,7 +56,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
@@ -214,7 +213,7 @@ public class IndexControl_p {
             try {
                 plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash, null);
                 URL url = entry.url();
-                urlstring = htmlFilterContentScraper.urlNormalform(url);
+                urlstring = url.toNormalform();
                 prop.put("urlstring", "");
                 switchboard.urlPool.loadedURL.remove(urlhash);
                 prop.put("result", "Removed URL " + urlstring);
@@ -393,7 +392,7 @@ public class IndexControl_p {
         }
         if (url == null) { return "No entry found for URL-hash " + urlhash; }
         String result = "<table>" +
-        "<tr><td class=\"small\">URL String</td><td class=\"tt\">" + htmlFilterContentScraper.urlNormalform(url) + "</td></tr>" +
+        "<tr><td class=\"small\">URL String</td><td class=\"tt\">" + url.toNormalform() + "</td></tr>" +
         "<tr><td class=\"small\">Hash</td><td class=\"tt\">" + urlhash + "</td></tr>" +
         "<tr><td class=\"small\">Description</td><td class=\"tt\">" + entry.descr() + "</td></tr>" +
         "<tr><td class=\"small\">Modified-Date</td><td class=\"tt\">" + entry.moddate() + "</td></tr>" +

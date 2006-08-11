@@ -97,7 +97,7 @@ public class CacheAdmin_p {
             prop.put("info", 0);
             path.append((pathString.length() == 0) ? linkPathString("/", true) : linkPathString(pathString, false));
 
-            urlstr = htmlFilterContentScraper.urlNormalform(url);
+            urlstr = url.toNormalform();
             prop.put("info_url", urlstr);
 
             info.ensureCapacity(40000);

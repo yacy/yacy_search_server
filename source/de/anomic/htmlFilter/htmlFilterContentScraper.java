@@ -43,7 +43,6 @@
 
 package de.anomic.htmlFilter;
 
-import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.net.URL;
 
@@ -55,8 +54,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.TreeSet;
 
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
@@ -117,7 +114,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if ((content.length() != 0) && (content.byteAt(content.length() - 1) != 32)) content.append(32);
         content.append(super.stripAll(new serverByteBuffer(newtext, newtext.length + 1)).trim()).append(32);
     }
-
+/*
     public static String urlNormalform(URL url) {
         boolean defaultPort = false;
         // serverLog.logFinest("htmlFilter", "urlNormalform: '" + url.toString() + "'");
@@ -154,7 +151,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             return null;
         }
     }
-    
+  */  
     public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
     public static String[] urlComps(String normalizedURL) {
         return normalizedURL.toLowerCase().split(splitrex); // word components of the url
@@ -162,7 +159,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     
     private String absolutePath(String relativePath) {
         try {
-            return urlNormalform(new URL(root, relativePath));
+            return new URL(root, relativePath).toString();
         } catch (Exception e) {
             return "";
         }

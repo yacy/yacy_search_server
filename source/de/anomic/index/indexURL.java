@@ -32,7 +32,6 @@ import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
@@ -501,7 +500,7 @@ public class indexURL {
      int domlengthKey = (l <= 8) ? 0 : (l <= 12) ? 1 : (l <= 16) ? 2 : 3;
      byte flagbyte = (byte) (((isHTTP) ? 0 : 32) | (id << 2) | domlengthKey);
      // form the 'local' part of the hash
-     String hash3 = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(htmlFilterContentScraper.urlNormalform(url))).substring(0, 5);
+     String hash3 = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.toNormalform())).substring(0, 5);
      char   hash2 = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
      // form the 'global' part of the hash
      String hash1 = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.getProtocol() + ":" + host + ":" + port)).substring(0, 5);
@@ -529,13 +528,13 @@ public class indexURL {
  
  public static final String oldurlHash(URL url) {
     if (url == null) return null;
-     String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(htmlFilterContentScraper.urlNormalform(url))).substring(0, urlHashLength);
+     String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.toNormalform())).substring(0, urlHashLength);
      return hash;
  }
      
- public static final String oldurlHash(String url) {
+ public static final String oldurlHash(String url) throws MalformedURLException {
     if ((url == null) || (url.length() < 10)) return null;
-     String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(htmlFilterContentScraper.urlNormalform(null, url))).substring(0, urlHashLength);
+     String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(new URL(url).toNormalform())).substring(0, urlHashLength);
      return hash;
  }
  

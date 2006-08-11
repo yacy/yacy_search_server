@@ -150,9 +150,13 @@ public class URL {
     }
     
     public String getFile() {
+        return getFile(true);
+    }
+    
+    public String getFile(boolean includeReference) {
         // this is the path plus quest plus ref
         if (quest != null) return path + "?" + quest;
-        if (ref   != null) return path + "#" + ref;
+        if ((ref   != null) && (includeReference)) return path + "#" + ref;
         return path;
     }
 
@@ -188,7 +192,15 @@ public class URL {
         return quest;
     }
 
+    public String toNormalform() {
+        return toString(false);
+    }
+    
     public String toString() {
+        return toString(true);
+    }
+    
+    public String toString(boolean includeReference) {
         // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("http")) {
@@ -198,7 +210,7 @@ public class URL {
         } else if (this.protocol.equals("https")) {
             if (this.port < 0 || this.port == 443) { defaultPort = true; }
         }
-        String path = this.getFile();
+        String path = this.getFile(includeReference);
 
         if (path.length() == 0 || path.charAt(0) != '/') { path = "/" + path; }
 
@@ -208,8 +220,9 @@ public class URL {
             path = matcher.replaceAll("");
             matcher.reset(path);
         }
-
-        return this.protocol + "://" + this.getHost().toLowerCase() + ((defaultPort) ? "" : (":" + this.port)) + getFile();
+        
+        if (defaultPort) { return this.protocol + "://" + this.getHost().toLowerCase() + path; }
+        return this.protocol + "://" + this.getHost().toLowerCase() + ((defaultPort) ? "" : (":" + this.port)) + path;
     }
     
     public boolean equals(URL other) {
@@ -233,7 +246,8 @@ public class URL {
     
     public static void main(String[] args) {
         URL u;
-        try {u = new URL("http://www.anomic.de/home/test?x=1#home"); System.out.println(u.toString());} catch (MalformedURLException e) {}
-        
+        try {u = new URL("http://www.anomic.de/home/test?x=1#home"); System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform());} catch (MalformedURLException e) {}
+        try {u = new URL("http://www.anomic.de/home/test?x=1"); System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform());} catch (MalformedURLException e) {}
+        try {u = new URL("http://www.anomic.de/home/test#home"); System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform());} catch (MalformedURLException e) {}
     }
 }

@@ -53,7 +53,6 @@
 
 package de.anomic.plasma;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexEntryAttribute;
@@ -727,7 +726,7 @@ public final class plasmaHTCache {
 
         // normalize url
 //      serverLog.logFine("PLASMA", "Entry: URL=" + url.toString());
-        this.nomalizedURLString = htmlFilterContentScraper.urlNormalform(url);
+        this.nomalizedURLString = url.toNormalform();
 
         try {
             this.url            = new URL(this.nomalizedURLString);

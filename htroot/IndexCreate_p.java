@@ -141,7 +141,7 @@ public class IndexCreate_p {
                         if (!(crawlingStart.startsWith("http"))) crawlingStart = "http://" + crawlingStart;
 
                         // normalizing URL
-                        crawlingStart = htmlFilterContentScraper.urlNormalform(null, crawlingStart);
+                        try {crawlingStart = new URL(crawlingStart).toNormalform();} catch (MalformedURLException e1) {}
                         
                         // check if url is proper
                         URL crawlingStartURL = null;
@@ -243,7 +243,7 @@ public class IndexCreate_p {
                                     nexturlstring = nexturlstring.trim();
                                     
                                     // normalizing URL
-                                    nexturlstring = htmlFilterContentScraper.urlNormalform(null, nexturlstring);                                    
+                                    nexturlstring = new URL(nexturlstring).toNormalform();                                    
                                     
                                     // generating an url object
                                     URL nexturlURL = null;
