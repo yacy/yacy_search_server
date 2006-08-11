@@ -200,10 +200,10 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public void flushCacheSome() {
-        int flushCount = ramCache.wSize() / 500;
+        int flushCount = ramCache.wSize() / 350;
         if (flushCount > 80) flushCount = 80;
-        if (flushCount < 10) flushCount = Math.min(10, ramCache.wSize());
-        flushCache(flushCount); 
+        if (flushCount < 20) flushCount = Math.min(20, ramCache.wSize());
+        flushCache(flushCount);
     }
     
     public void flushCache(int count) {
@@ -320,40 +320,42 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         long start = System.currentTimeMillis();
-        
-        // get from cache
-        indexContainer container = ramCache.getContainer(wordHash, true, -1);
 
-        // We must not use the container from cache to store everything we find,
-        // as that container remains linked to in the cache and might be changed later
-        // while the returned container is still in use.
-        // create a clone from the container
-        if (container != null) container = container.topLevelClone();
+        synchronized (ramCache) {
+            // get from cache
+            indexContainer container = ramCache.getContainer(wordHash, true, -1);
+
+            // We must not use the container from cache to store everything we find,
+            // as that container remains linked to in the cache and might be changed later
+            // while the returned container is still in use.
+            // create a clone from the container
+            if (container != null) container = container.topLevelClone();
         
-        // get from collection index
-        if (useCollectionIndex) {
-            if (container == null) {
-                container = collections.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime);
-            } else {
-                container.add(collections.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime), -1);
+            // get from collection index
+            if (useCollectionIndex) {
+                if (container == null) {
+                    container = collections.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime);
+                } else {
+                    container.add(collections.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime), -1);
+                }
             }
-        }
         
-        // get from assortments
-        if (container == null) {
-            container = assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime);
-        } else {
-            // add containers from assortment cluster
-            container.add(assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime), -1);
-        }
+            // get from assortments
+            if (container == null) {
+                container = assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime);
+            } else {
+                // add containers from assortment cluster
+                container.add(assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime), -1);
+            }
         
-        // get from backend
-        if (maxTime > 0) {
-            maxTime = maxTime - (System.currentTimeMillis() - start);
-            if (maxTime < 0) maxTime = 100;
+            // get from backend
+            if (maxTime > 0) {
+                maxTime = maxTime - (System.currentTimeMillis() - start);
+                if (maxTime < 0) maxTime = 100;
+            }
+            container.add(backend.getContainer(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime), -1);
+            return container;
         }
-        container.add(backend.getContainer(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime), -1);
-        return container;
     }
 
     public Set getContainers(Set wordHashes, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
@@ -362,59 +364,67 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         HashSet containers = new HashSet();
         String singleHash;
         indexContainer singleContainer;
-        Iterator i = wordHashes.iterator();
-        long start = System.currentTimeMillis();
-        long remaining;
-        while (i.hasNext()) {
-            // check time
-            remaining = maxTime - (System.currentTimeMillis() - start);
-            //if ((maxTime > 0) && (remaining <= 0)) break;
-            if ((maxTime >= 0) && (remaining <= 0)) remaining = 100;
+        synchronized (ramCache) {
+            Iterator i = wordHashes.iterator();
+            long start = System.currentTimeMillis();
+            long remaining;
+            while (i.hasNext()) {
+                // check time
+                remaining = maxTime - (System.currentTimeMillis() - start);
+                //if ((maxTime > 0) && (remaining <= 0)) break;
+                if ((maxTime >= 0) && (remaining <= 0)) remaining = 100;
             
-            // get next hash:
-            singleHash = (String) i.next();
+                // get next hash:
+                singleHash = (String) i.next();
             
-            // retrieve index
-            singleContainer = getContainer(singleHash, deleteIfEmpty, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - containers.size()));
+                // retrieve index
+                singleContainer = getContainer(singleHash, deleteIfEmpty, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - containers.size()));
             
-            // check result
-            if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashSet();
+                // check result
+                if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashSet();
             
-            containers.add(singleContainer);
+                containers.add(singleContainer);
+            }
         }
         return containers;
     }
 
     public int size() {
-        if (useCollectionIndex)
-            return java.lang.Math.max(collections.size(),
+        synchronized (ramCache) {
+            if (useCollectionIndex)
+                return java.lang.Math.max(collections.size(),
                     java.lang.Math.max(assortmentCluster.size(),
                      java.lang.Math.max(backend.size(), ramCache.size())));
-        else
-            return java.lang.Math.max(assortmentCluster.size(),
+            else
+                return java.lang.Math.max(assortmentCluster.size(),
                         java.lang.Math.max(backend.size(), ramCache.size()));
+        }
     }
 
     public int indexSize(String wordHash) {
         int size = 0;
-        try {
-            plasmaWordIndexFile entity = backend.getEntity(wordHash, true, -1);
-            if (entity != null) {
-                size += entity.size();
-                entity.close();
-            }
-        } catch (IOException e) {}
-        if (useCollectionIndex) size += collections.indexSize(wordHash);
-        size += assortmentCluster.indexSize(wordHash);
-        size += ramCache.indexSize(wordHash);
+        synchronized (ramCache) {
+            try {
+                plasmaWordIndexFile entity = backend.getEntity(wordHash, true, -1);
+                if (entity != null) {
+                    size += entity.size();
+                    entity.close();
+                }
+            } catch (IOException e) {}
+            if (useCollectionIndex) size += collections.indexSize(wordHash);
+            size += assortmentCluster.indexSize(wordHash);
+            size += ramCache.indexSize(wordHash);
+        }
         return size;
     }
 
     public synchronized void close(int waitingBoundSeconds) {
-        ramCache.close(waitingBoundSeconds);
-        if (useCollectionIndex) collections.close(-1);
-        assortmentCluster.close(-1);
-        backend.close(10);
+        synchronized (ramCache) {
+            ramCache.close(waitingBoundSeconds);
+            if (useCollectionIndex) collections.close(-1);
+            assortmentCluster.close(-1);
+            backend.close(10);
+        }
     }
 
     public synchronized indexContainer deleteContainer(String wordHash) {
@@ -458,7 +468,9 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         // urlHash assigned. This can only work if the entry is really fresh
         // and can be found in the RAM cache
         // this returns the number of deletion that had been possible
-        return ramCache.tryRemoveURLs(urlHash);
+        synchronized (ramCache) {
+            return ramCache.tryRemoveURLs(urlHash);
+        }
     }
     
     public static final int RL_RAMCACHE    = 0;
@@ -472,14 +484,16 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         kelondroOrder containerOrder = new indexContainerOrder((kelondroOrder) indexOrder.clone());
         containerOrder.rotate(startHash.getBytes());
         TreeSet containers = new TreeSet(containerOrder);
-        Iterator i = wordContainers(startHash, resourceLevel, rot);
-        if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) count = Math.min(ramCache.wSize(), count);
-        indexContainer container;
-        while ((count > 0) && (i.hasNext())) {
-            container = (indexContainer) i.next();
-            if ((container != null) && (container.size() > 0)) {
-                containers.add(container);
-                count--;
+        synchronized (ramCache) {
+            Iterator i = wordContainers(startHash, resourceLevel, rot);
+            if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) count = Math.min(ramCache.wSize(), count);
+            indexContainer container;
+            while ((count > 0) && (i.hasNext())) {
+                container = (indexContainer) i.next();
+                if ((container != null) && (container.size() > 0)) {
+                    containers.add(container);
+                    count--;
+                }
             }
         }
         return containers;
