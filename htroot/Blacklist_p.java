@@ -306,9 +306,8 @@ public class Blacklist_p {
                 prop.put("Itemlist_" + entryCount + "_item", nextEntry);
                 entryCount++;
             }
-        } else {
-            prop.put("Itemlist", entryCount);            
-        }
+        } 
+        prop.put("Itemlist", entryCount);            
 
 
         // List known hosts for BlackList retrieval

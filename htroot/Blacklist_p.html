@@ -33,7 +33,7 @@ collect blacklist entries from other peers.</p>
 						</select>
 					</td>
 					<td class="TableCellDark"><center>
-						<input type="submit" name="selectList" value="select" disabled="#(disabled)#::disabled#(/disabled)#"/>
+						<input type="submit" name="selectList" value="select" #(disabled)#::disabled="disabled"#(/disabled)#/>
 					</td>
 					<td valign="top" align="left" rowspan="2" class="TableCellDark">
 						<fieldset>
@@ -45,11 +45,11 @@ collect blacklist entries from other peers.</p>
       							</tr>
       							#{/currentActiveFor}#
       							</table>
-							<input type="submit" name="activateList" value="Enable/disable this list" disabled="#(disabled)#::disabled#(/disabled)#"/>       							
+							<input type="submit" name="activateList" value="Enable/disable this list" #(disabled)#::disabled="disabled"#(/disabled)#/>       							
       					</fieldset>      									
 
-						<input type="submit" name="shareList" value="Share/don't share this list" disabled="#(disabled)#::disabled#(/disabled)#"/><br />
-						<input type="submit" name="deleteList" value="Delete this list" disabled="#(disabled)#::disabled#(/disabled)#"/><br /> 
+						<input type="submit" name="shareList" value="Share/don't share this list" #(disabled)#::disabled="disabled"#(/disabled)#/><br />
+						<input type="submit" name="deleteList" value="Delete this list" "#(disabled)#::disabled="disabled"#(/disabled)#/><br /> 
 					</td>					
 				</tr>
 				<tr>
@@ -94,7 +94,7 @@ collect blacklist entries from other peers.</p>
 						#{/Itemlist}#
 					</select>
 					<p />
-					<input type="submit" name="deleteBlacklistEntry" value="Delete URL pattern" disabled="#(disabled)#::disabled#(/disabled)#" />
+					<input type="submit" name="deleteBlacklistEntry" value="Delete URL pattern" #(disabled)#::disabled="disabled"#(/disabled)# />
 			</td>
 		</tr>
 		<tr>
@@ -113,7 +113,7 @@ collect blacklist entries from other peers.</p>
 		<tr>
 			<td  class="TableCellLight">
 				<input type="text" name="newEntry" size="50"><p>
-				<input type="submit" name="addBlacklistEntry" value="Add URL pattern" disabled="#(disabled)#::disabled#(/disabled)#"></p>
+				<input type="submit" name="addBlacklistEntry" value="Add URL pattern" #(disabled)#::disabled="disabled"#(/disabled)#></p>
 				
 			</td>
 		</tr>
@@ -140,7 +140,7 @@ collect blacklist entries from other peers.</p>
 		#{/otherHosts}#
 		</select>
 		<p />
-		<input type="submit" value="Load new blacklist items" disabled="#(disabled)#::disabled#(/disabled)#"/>
+		<input type="submit" value="Load new blacklist items" #(disabled)#::disabled="disabled"#(/disabled)#/>
 		</form>
 	</td>
 </tr>
@@ -156,7 +156,7 @@ collect blacklist entries from other peers.</p>
 		<input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#">
 		URL: <input type="text" name="url">
 		<p>
-		<input type="submit" value="Load new blacklist items" disabled="#(disabled)#::disabled#(/disabled)#"/>
+		<input type="submit" value="Load new blacklist items" #(disabled)#::disabled="disabled"#(/disabled)#/>
 		</form>			
 	</td>		
 </tr>	
@@ -172,7 +172,7 @@ collect blacklist entries from other peers.</p>
 		<input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#">
 		File: <input type="text" name="file">
 		<p>
-		<input type="submit" value="Load new blacklist items" disabled="#(disabled)#::disabled#(/disabled)#"/>		
+		<input type="submit" value="Load new blacklist items" #(disabled)#::disabled="disabled"#(/disabled)#/>		
 		</form>
 	</td>
 </tr>
