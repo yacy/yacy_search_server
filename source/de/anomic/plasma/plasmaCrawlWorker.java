@@ -311,7 +311,7 @@ public final class plasmaCrawlWorker extends Thread {
         
         // check if url is in blacklist
         String hostlow = host.toLowerCase();
-        if (plasmaSwitchboard.urlBlacklist.isListed(hostlow, path)) {
+        if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, hostlow, path)) {
             log.logInfo("CRAWLER Rejecting URL '" + url.toString() + "'. URL is in blacklist.");
             addURLtoErrorDB(url, refererURLString, initiator, name, plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST, new bitfield(indexURL.urlFlagLength));
             return null;

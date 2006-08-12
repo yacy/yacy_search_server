@@ -898,7 +898,7 @@ public final class plasmaCrawlLURL extends indexURL {
                     
                     plasmaCrawlLURL.Entry entry = (plasmaCrawlLURL.Entry) eiter.next();
                     totalSearchedUrls++;
-                    if (plasmaSwitchboard.urlBlacklist.isListed(entry.url())==true) {
+                    if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER,entry.url())==true) {
                         lastBlacklistedUrl = entry.url().toString();
                         lastBlacklistedHash = entry.hash();                        
                         serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " " + entry.url());

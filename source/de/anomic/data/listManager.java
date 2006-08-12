@@ -155,11 +155,13 @@ public class listManager {
 
     // overloaded function to write an array
     public static boolean writeList(File listFile, String[] list){
-        String out = "";
-        for(int i=0;i <= list.length; i++){
-            out += list[i] + serverCore.crlfString;
+        StringBuffer out = new StringBuffer();
+        for(int i=0;i < list.length; i++){
+            out
+            .append(list[i])
+            .append(serverCore.crlfString);
         }
-        return writeList(listFile, out); //(File, String)
+        return writeList(listFile, out.toString()); //(File, String)
     }
 
     public static String getListString(String filename, boolean withcomments){
@@ -194,6 +196,12 @@ public class listManager {
         String[] fileListString;
         File[] fileList;
         final File dir = new File(dirname);
+        return getDirListing(dir);
+    }
+    
+    public static String[] getDirListing(File dir){
+        String[] fileListString;
+        File[] fileList;
 
         if (dir != null ) {
             if (!dir.exists()) {
@@ -207,7 +215,7 @@ public class listManager {
             return fileListString;
         }
         return null;
-    }
+    }    
 
     public static ArrayList getDirsRecursive(File dir, String notdir){
         return getDirsRecursive(dir, notdir, true);
@@ -321,11 +329,21 @@ public class listManager {
 
     // load all active Blacklists in the Proxy
     public static void reloadBlacklists(){
-         final String f = switchboard.getConfig("proxyBlackListsActive", "");
-         de.anomic.plasma.plasmaSwitchboard.urlBlacklist.clear();
-         if (f != "") {
-             de.anomic.plasma.plasmaSwitchboard.urlBlacklist.loadList(f, "/");
-         }
+        String supportedBlacklistTypesStr = switchboard.getConfig("BlackLists.types", "");
+        String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
+        
+        ArrayList blacklistFiles = new ArrayList(supportedBlacklistTypes.length);
+        for (int i=0; i < supportedBlacklistTypes.length; i++) {
+            String[] blacklistFile = new String[]{
+                    supportedBlacklistTypes[i],
+                    switchboard.getConfig(supportedBlacklistTypes[i] + ".BlackLists", "")
+            };
+            blacklistFiles.add(blacklistFile);
+        }
+        
+        de.anomic.plasma.plasmaSwitchboard.urlBlacklist.clear();
+        de.anomic.plasma.plasmaSwitchboard.urlBlacklist.loadList((String[][])blacklistFiles.toArray(new String[blacklistFiles.size()][]), "/");
+
 //       switchboard.urlBlacklist.clear();
 //       if (f != "") switchboard.urlBlacklist.loadLists("black", f, "/");
     }

@@ -49,14 +49,15 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -64,196 +65,273 @@ import de.anomic.yacy.yacySeed;
 
 public class Blacklist_p {
     private final static String BLACKLIST        = "blackLists_";
-    private final static String BLACKLIST_ALL    = "proxyBlackLists";
-    private final static String BLACKLIST_ACTIVE = "proxyBlackListsActive";
-    private final static String BLACKLIST_SHARED = "proxyBlackListsShared";
+    private final static String BLACKLIST_SHARED = "BlackLists.Shared";
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        // return variable that accumulates replacements
+
+        // initialize the list manager
         listManager.switchboard = (plasmaSwitchboard) env;
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-        final serverObjects prop = new serverObjects();
-        String line;
-//      String HTMLout = "";
-
-        String removeItem = "removeme";
-        int numItems = 0;
-        int i; // need below
-
-        String[] filenames = listManager.getListslistArray(BLACKLIST_ALL);
-        String filename = "";
-
+        
+        // getting the list of supported blacklist types
+        String supportedBlacklistTypesStr = env.getConfig("BlackLists.types", "");
+        String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");        
+        
+        String blacklistToUse = null;
+        serverObjects prop = new serverObjects();
+        
+        // do all post operations
         if (post != null) {
-            if (post.containsKey("blackLists")) { // Blacklist selected
-                filename = (String)post.get("blackLists");
-            } else if (post.containsKey("filename")) {
-                filename = (String)post.get("filename");
-            } else if (filenames.length > 0){ // first BlackList
-                filename = filenames[0];
-//          } else { //No BlackList
-//              System.out.println("DEBUG: No Blacklist found");
+            
+            if (post.containsKey("selectList")) {
+                blacklistToUse = (String)post.get("selectedListName"); 
             }
-            prop.put("status", 0); // nothing
+            if (post.containsKey("createNewList")) {
+                /* ===========================================================
+                 * Creation of a new blacklist
+                 * =========================================================== */
+                
+                blacklistToUse = (String)post.get("newListName");
+                if (!blacklistToUse.endsWith(".black")) blacklistToUse += ".black";
 
-            // del list
-            if (post.containsKey("dellistbutton")) {
-                final File BlackListFile = new File(listManager.listsPath, filename);
+                try {
+                    final File newFile = new File(listManager.listsPath, blacklistToUse);
+                    newFile.createNewFile();
+                    
+                    // share the newly created blacklist
+                    listManager.addListToListslist(BLACKLIST_SHARED, blacklistToUse);
+                    
+                    // activate it for all known blacklist types
+                    for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                        listManager.addListToListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);
+                    }                                 
+                } catch (IOException e) {/* */}
+                
+            } else if (post.containsKey("deleteList")) {
+                /* ===========================================================
+                 * Delete a blacklist
+                 * =========================================================== */                
+                
+                blacklistToUse = (String)post.get("selectedListName");
+                
+                File BlackListFile = new File(listManager.listsPath, blacklistToUse);
                 BlackListFile.delete();
 
-                // remove from all BlackLists Lists
-                listManager.removeListFromListslist(BLACKLIST_ALL, filename);
-                listManager.removeListFromListslist(BLACKLIST_ACTIVE, filename);
-                listManager.removeListFromListslist(BLACKLIST_SHARED, filename);
-
+                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                    listManager.removeListFromListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);
+                }                
+                
+                // remove it from the shared list
+                listManager.removeListFromListslist(BLACKLIST_SHARED, blacklistToUse);
+                blacklistToUse = null;
+                
                 // reload Blacklists
                 listManager.reloadBlacklists();
-                filenames = listManager.getListslistArray(BLACKLIST_ALL);
-                if (filenames.length > 0) {
-                    filename = filenames[0];
-                }
 
-            // new list
-            } else if (post.containsKey("newlistbutton")) {
-                String newList = (String)post.get("newlist");
-                if (!newList.endsWith(".black")) {
-                    newList += ".black";
-                }
-                filename = newList; //to select it in the returnes Document
-                try {
-                    final File newFile = new File(listManager.listsPath, newList);
-                    newFile.createNewFile();
-                    listManager.addListToListslist(BLACKLIST_ALL, newList);
-                    listManager.addListToListslist(BLACKLIST_ACTIVE, newList);
-                    listManager.addListToListslist(BLACKLIST_SHARED, newList);
-                } catch (IOException e) {}
+            } else if (post.containsKey("activateList")) {
 
+                /* ===========================================================
+                 * Activate/Deactivate a blacklist
+                 * =========================================================== */                   
+                
+                blacklistToUse = (String)post.get("selectedListName");
+                
+                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {                    
+                    if (post.containsKey("activateList4" + supportedBlacklistTypes[blTypes])) {
+                        listManager.addListToListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);                        
+                    } else {
+                        listManager.removeListFromListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);                        
+                    }                    
+                }                     
 
-            } else if (post.containsKey("activatelistbutton")) { 
-                if( listManager.ListInListslist(BLACKLIST_ACTIVE, filename) ) { 
-                        listManager.removeListFromListslist(BLACKLIST_ACTIVE, filename);
-                } else { // inactive list -> enable 
-                        listManager.addListToListslist(BLACKLIST_ACTIVE, filename);
-             } 
-                    listManager.reloadBlacklists();
+                listManager.reloadBlacklists();                
+                
+            } else if (post.containsKey("shareList")) {
 
-            } else if (post.containsKey("sharelistbutton")) {
-                if (listManager.ListInListslist(BLACKLIST_SHARED, filename)) { 
+                /* ===========================================================
+                 * Share a blacklist
+                 * =========================================================== */                   
+                
+                blacklistToUse = (String)post.get("selectedListName");
+                
+                if (listManager.ListInListslist(BLACKLIST_SHARED, blacklistToUse)) { 
                     // Remove from shared BlackLists
-                    listManager.removeListFromListslist(BLACKLIST_SHARED, filename);
+                    listManager.removeListFromListslist(BLACKLIST_SHARED, blacklistToUse);
                 } else { // inactive list -> enable
-                    listManager.addListToListslist(BLACKLIST_SHARED, filename);
+                    listManager.addListToListslist(BLACKLIST_SHARED, blacklistToUse);
+                }                                
+            } else if (post.containsKey("deleteBlacklistEntry")) {
+                
+                /* ===========================================================
+                 * Delete a blacklist entry
+                 * =========================================================== */                     
+                
+                // get the current selected blacklist name
+                blacklistToUse = (String)post.get("currentBlacklist");
+                
+                // get the entry that should be deleted
+                String oldEntry = (String)post.get("selectedEntry");
+                
+                // load blacklist data from file
+                ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+                
+                // delete the old entry from file
+                if (list != null) {
+                    for (int i=0; i < list.size(); i++) {
+                        if (((String)list.get(i)).equals(oldEntry)) {
+                            list.remove(i);
+                            break;
+                        }
+                    }
+                    listManager.writeList(new File(listManager.listsPath, blacklistToUse), (String[])list.toArray(new String[list.size()]));
                 }
-            } // List Management End
+                
+                // remove the entry from the running blacklist engine
+                int pos = oldEntry.indexOf("/");
+                if (pos < 0) {
+                    // add default empty path pattern
+                    pos = oldEntry.length();
+                    oldEntry = oldEntry + "/.*";
+                }                
+                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
+                        plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],oldEntry.substring(0, pos), oldEntry.substring(pos + 1));
+                    }                
+                }                    
+                
+            } else if (post.containsKey("addBlacklistEntry")) {
+                
+                /* ===========================================================
+                 * Add a new blacklist entry
+                 * =========================================================== */                     
+                
+                blacklistToUse = (String)post.get("currentBlacklist");
+                
+                String newEntry = (String)post.get("newEntry");
+                
+                // TODO: ignore empty entries
+                
+                if (newEntry.startsWith("http://") ){
+                    newEntry = newEntry.substring(7);
+                }
 
-            // remove a Item?
-            if (post.containsKey("delbutton") &&
-                post.containsKey("Itemlist")  &&
-              !((String)post.get("Itemlist")).equals("") ) {
-                removeItem = (String)post.get("Itemlist");
+                int pos = newEntry.indexOf("/");
+                if (pos < 0) {
+                    // add default empty path pattern
+                    pos = newEntry.length();
+                    newEntry = newEntry + "/.*";
+                }
+
+                // append the line to the file
+                PrintWriter pw = null;
+                try {
+                    pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklistToUse), true));
+                    pw.println(newEntry);
+                    pw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (pw != null) try { pw.close(); } catch (Exception e){ /* */}
+                }
+
+                // add to blacklist
+                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
+                        plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newEntry.substring(0, pos), newEntry.substring(pos + 1));
+                    }                
+                }                                         
             }
-        } // post != null   
+            
+        } 
+        
+        // loading all blacklist files located in the directory
+        String[] dirlist = listManager.getDirListing(listManager.listsPath);
+        
+        // if we have not chosen a blacklist until yet we use the first file
+        if (blacklistToUse == null && dirlist != null && dirlist.length > 0) {
+            blacklistToUse = dirlist[0];
+        }
+        
 
-        // Read the List
-        final ArrayList list = listManager.getListArray(new File(listManager.listsPath, filename));
-        final StringBuffer out = new StringBuffer(list.size() * 64);
+        // Read the blacklist items from file
+        final ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+        
+        // sort them
         String[] sortedlist = new String[list.size()];
         Arrays.sort(list.toArray(sortedlist));
+        
+        // display them
+        int entryCount = 0;
         for (int j=0;j<sortedlist.length;++j){
-            line = sortedlist[j];
+            String nextEntry = sortedlist[j];
+            
+            if (nextEntry.length() == 0) continue;
+            if (nextEntry.startsWith("#")) continue;
 
-            if (!(line.length() == 0 || line.charAt(0) == '#' || line.equals(removeItem))) { //Not the item to remove
-                prop.put("Itemlist_" + numItems + "_item", line);
-                numItems++;
-            }
-
-            if (line.equals(removeItem)) {
-                prop.put("status", 1);//removed
-                prop.put("status_item", line);
-//              if (listManager.switchboard.urlBlacklist != null) {
-//                  listManager.switchboard.urlBlacklist.remove(line);
-                if (plasmaSwitchboard.urlBlacklist != null) {
-                    plasmaSwitchboard.urlBlacklist.remove(line);
-                }
-            } else {
-                out.append(line).append(serverCore.crlfString); //full list
-            }
+            prop.put("Itemlist_" + entryCount + "_item", nextEntry);
+            entryCount++;
         }
-        prop.put("Itemlist", numItems);
+        prop.put("Itemlist", entryCount);
 
-        // Add a new Item
-        if (post != null && post.containsKey("addbutton") && !((String)post.get("newItem")).equals("")) {
-            String newItem = (String)post.get("newItem");
-
-            //clean http://
-            if ( newItem.startsWith("http://") ){
-                newItem = newItem.substring(7);
-            }
-
-            //append "/.*"
-            int pos = newItem.indexOf("/");
-            if (pos < 0) {
-                // add default empty path pattern
-                pos = newItem.length();
-                newItem = newItem + "/.*";
-            }
-
-            out.append(newItem).append(serverCore.crlfString);
-
-            prop.put("Itemlist_"+numItems+"_item", newItem);
-            numItems++;
-            prop.put("Itemlist", numItems);
-
-            prop.put("status", 2);//added
-            prop.put("status_item", newItem);//added
-
-            // add to blacklist
-//          if (listManager.switchboard.urlBlacklist != null)
-//              listManager.switchboard.urlBlacklist.add(newItem.substring(0, pos), newItem.substring(pos + 1));
-            if (plasmaSwitchboard.urlBlacklist != null) { 
-                plasmaSwitchboard.urlBlacklist.add(newItem.substring(0, pos), newItem.substring(pos + 1));
-            }
-        }
-        listManager.writeList(new File(listManager.listsPath, filename), out.toString());
 
         // List known hosts for BlackList retrieval
         yacySeed seed;
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) { // no nullpointer error
             final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null);
-            i = 0;
+            int peerCount = 0;
             while (e.hasMoreElements()) {
                 seed = (yacySeed) e.nextElement();
                 if (seed != null) {
                     final String Hash = seed.hash;
                     final String Name = seed.get(yacySeed.NAME, "nameless");
-                    prop.put("otherHosts_" + i + "_hash", Hash);
-                    prop.put("otherHosts_" + i + "_name", Name);
-                    i++;
+                    prop.put("otherHosts_" + peerCount + "_hash", Hash);
+                    prop.put("otherHosts_" + peerCount + "_name", Name);
+                    peerCount++;
                 }
             }
-            prop.put("otherHosts", i);
-//      } else {
-//          System.out.println("BlackList_p: yacy seed not loaded!"); // DEBUG: 
+            prop.put("otherHosts", peerCount);
         }
-
+    
+        
         // List BlackLists
-        final String[] BlackLists = listManager.getListslistArray(BLACKLIST_ALL);
-        for (i = 0; i <= BlackLists.length - 1; i++) {
-            prop.put(BLACKLIST + i + "_name", BlackLists[i]);
-            prop.put(BLACKLIST + i + "_active", 0);
-            prop.put(BLACKLIST + i + "_shared", 0);
-            prop.put(BLACKLIST + i + "_selected", 0);
-            if (BlackLists[i].equals(filename)) { //current List
-                prop.put(BLACKLIST + i + "_selected", 1);
-            }
-            if (listManager.ListInListslist(BLACKLIST_ACTIVE, BlackLists[i])) {
-                prop.put(BLACKLIST + i + "_active", 1);
-            }
-            if (listManager.ListInListslist(BLACKLIST_SHARED, BlackLists[i])) {
-                prop.put(BLACKLIST + i + "_shared", 1);
+        int blacklistCount = 0;
+        if (dirlist != null) {
+            for (int i = 0; i <= dirlist.length - 1; i++) {
+                prop.put(BLACKLIST + blacklistCount + "_name", dirlist[i]);
+                prop.put(BLACKLIST + blacklistCount + "_shared", 0);
+
+                if (dirlist[i].equals(blacklistToUse)) { //current List
+                    prop.put(BLACKLIST + blacklistCount + "_selected", 1);
+
+                    for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                        prop.put("currentActiveFor_" + blTypes + "_blTypeName",supportedBlacklistTypes[blTypes]);
+                        prop.put("currentActiveFor_" + blTypes + "_checked",
+                                listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i])?0:1);
+                    }
+                    prop.put("currentActiveFor",supportedBlacklistTypes.length);
+
+                }
+                
+                if (listManager.ListInListslist(BLACKLIST_SHARED, dirlist[i])) {
+                    prop.put(BLACKLIST + blacklistCount + "_shared", 1);
+                } else {
+                    prop.put(BLACKLIST + blacklistCount + "_selected", 0);
+                }
+
+                int activeCount = 0;
+                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i])) {
+                        prop.put(BLACKLIST + blacklistCount + "_active_" + activeCount + "_blTypeName",supportedBlacklistTypes[blTypes]);
+                        activeCount++;
+                    }                
+                }          
+                prop.put(BLACKLIST + blacklistCount + "_active",activeCount);
+                blacklistCount++;
             }
         }
-        prop.put("blackLists", i);
-        prop.put("filename", filename);
+        prop.put("blackLists", blacklistCount);
+        
+        prop.put("currentBlacklist", blacklistToUse);
         return prop;
     }
 

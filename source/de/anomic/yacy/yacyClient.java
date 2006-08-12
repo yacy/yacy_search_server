@@ -478,7 +478,7 @@ public final class yacyClient {
             for (int n = 0; n < results; n++) {
                 // get one single search result
                 urlEntry = urlManager.newEntry((String) result.get("resource" + n), true);
-                if ((urlEntry == null) || (blacklist.isListed(urlEntry.url()))) { continue; } // block with backlist
+                if ((urlEntry == null) || (blacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, urlEntry.url()))) { continue; } // block with backlist
                 urlEntry.store();
                 int urlLength = urlEntry.url().toString().length();
                 int urlComps = htmlFilterContentScraper.urlComps(urlEntry.url().toString()).length;

@@ -14,151 +14,172 @@ You may also provide your blacklist to other peers by sharing them; in return yo
 collect blacklist entries from other peers.</p>
 
 
-	<table border="0" cellspacing="1" cellpadding="0">
-		<tr>
-		<td colspan="3"  valign="top" class="TableHeader">
-		&nbsp;
-		</td>
-		</tr>
-		<tr>
-		<td colspan="3">
-	    <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
-
+<table border="1" cellspacing="1" cellpadding="0">
+<!-- blacklist selection -->
+<form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+<tr>
+	<td colspan="3"  valign="top" class="TableHeader">&nbsp;</td>
+</tr>
+<tr>
+	<td colspan="3">
 			<table border="0" cellspacing="1" cellpadding="0" width="100%">
 				<tr>
-				<td  class="TableCellDark">
-				Edit list: 
-				<select name="blackLists" size="1">
-				#{blackLists}#
-				<option value="#[name]#" #(selected)#::selected#(/selected)#>#[name]# #(active)#not active::active#(/active)# #(shared)#not shared::shared#(/shared)#</option>
-				#{/blackLists}#
-				</select>
-				</td>
-				<td class="TableCellDark"><center>
-				<input type="submit" name="changelistbutton" value="select"></center>
-				</td>
-				<td valign="top" align="right" rowspan="2" class="TableCellDark">
-				<input type="submit" name="activatelistbutton" value="Enable/disable this list"><br> 
-				<input type="submit" name="sharelistbutton" value="Share/don't share this list"><br>
-				<input type="submit" name="dellistbutton" value="Delete this list"><br> 
-				</td>
+					<td class="TableCellDark">
+						Edit list: 
+						<select name="selectedListName" size="1">
+						#{blackLists}#
+							<option value="#[name]#" #(selected)#::selected#(/selected)#>#[name]# [#(shared)#not shared::shared#(/shared)#] #{active}# #[blTypeName]##{/active}#</option>
+						#{/blackLists}#
+						</select>
+					</td>
+					<td class="TableCellDark"><center>
+						<input type="submit" name="selectList" value="select" />
+					</td>
+					<td valign="top" align="left" rowspan="2" class="TableCellDark">
+						<fieldset>
+    						<legend>Activate this list for ...</legend>
+    							<table>
+	    						#{currentActiveFor}#
+	    						<tr>
+      							<td>#[blTypeName]#</td><td><input type="checkbox" name="activateList4#[blTypeName]#" value="on" #(checked)#checked::#(/checked)#/></td>
+      							</tr>
+      							#{/currentActiveFor}#
+      							</table>
+							<input type="submit" name="activateList" value="Enable/disable this list">       							
+      					</fieldset>      									
+
+						<input type="submit" name="shareList" value="Share/don't share this list" /><br />
+						<input type="submit" name="deleteList" value="Delete this list" /><br /> 
+					</td>					
 				</tr>
 				<tr>
-				<td  class="TableCellDark">
-				New list:
-				<input type="text" name="newlist">
-				</td>
-				<td  class="TableCellDark"><center>
-				<input type="submit" name="newlistbutton" value="create"></center>
-				</td>
-
-				<!--<input type="checkbox" name="proxylist" value="on" />active<br /> 
-				<input type="checkbox" name="sharedlist" value="on" />shared<br />
-				<input type="submit" name="changebutton" value="Change"><br />--> 
-				</td>
+					<td  class="TableCellDark">
+						New list:
+						<input type="text" name="newListName">
+					</td>					
+					<td  class="TableCellDark"><center>
+						<input type="submit" name="createNewList" value="create"></center>
+					</td>											
 				</tr>
 			</table>
-	
-		</form>
-		</td>
-		</tr>
-		<tr>
-		<td colspan="3"  valign="top" class="TableHeader">
-		<h3>Active list: #[filename]#</h3>
-		</td>
-		</tr>
-		<tr>
-		<td rowspan="6">
+	</td>
+</tr>
+</form>
 
-			<table border="0" cellspacing="1" cellpadding="0" width="100%">
-				<tr>
-				<td  class="TableCellDark">
+
+<!-- Blacklist configuration -->
+<tr>
+	<td colspan="3"  valign="top" class="TableHeader">
+		<h3>Active list: <i>#[currentBlacklist]#</i></h3>
+	</td>
+</tr>
+<tr>
+	<td rowspan="6">
+		<form action="Blacklist_p.html" method="post" enctype="multipart/form-data">	
+		<table border="0" cellspacing="1" cellpadding="0" width="100%">
+		<tr>
+			<td  class="TableCellDark">
 				These are the domain name / path patterns in this blacklist:<br>
 				You can select them here for deletion
-				</td>
-				</tr>
-				<tr>
-				<td class="TableCellLight">
-				<form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
-				<input type="hidden" name="filename" value="#[filename]#">
-				<select name="Itemlist" size="8">
-				<!--<option disabled>blocked Sites</option>-->
-				#{Itemlist}#
-				::
-				<option value="#[item]#">#[item]#</option>
-				#{/Itemlist}#
-				</select>
-				<p>
-				<input type="submit" name="delbutton" value="Delete URL pattern">
-				</td>
-				</tr>
-				<tr>
-                <td class="TableCellDark">
+			</td>
+		</tr>			
+		<tr>			
+			<td class="TableCellLight">
+					<input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#">
+					<select name="selectedEntry" size="8">
+						<!--<option disabled>blocked Sites</option>-->
+						#{Itemlist}#
+						::
+						<option value="#[item]#">#[item]#</option>
+						#{/Itemlist}#
+					</select>
+					<p />
+					<input type="submit" name="deleteBlacklistEntry" value="Delete URL pattern">
+			</td>
+		</tr>
+		<tr>
+        	<td class="TableCellDark">
                 Enter new domain name / path pattern in the form:
                 <ul type="square">
-                <li>domain/fullpath</li>
-                <li>domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-                <li>*.domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-                <li>domain.*/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-                <li>*.sub.domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-                <li>sub.domain.*/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li></ul>
-                </td>
-				</tr>
-				<tr>
-				<td  class="TableCellLight">
-				<input type="text" name="newItem" size="50"><p>
-				<input type="submit" name="addbutton" value="Add URL pattern"></p>
-				</form>
-				</td>
-				</tr>
-			</table>
-			
-		<td class="TableHeader" rowspan="6">&nbsp;</td>
-		<td class="TableCellDark">
-		Import blacklist items from other YaCy peers:</td>
+                	<li>domain/fullpath</li>
+                	<li>domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+                	<li>*.domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+                	<li>domain.*/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+                	<li>*.sub.domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+                	<li>sub.domain.*/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
+                </ul>
+			</td>
+		</tr>
 		<tr>
-		<td class="TableCellLight">
+			<td  class="TableCellLight">
+				<input type="text" name="newEntry" size="50"><p>
+				<input type="submit" name="addBlacklistEntry" value="Add URL pattern"></p>
+				
+			</td>
+		</tr>
+		</table>
+		</form>
+	</td>
+</tr>
+<tr>	
+	<!-- spacer between the two columns -->		
+	<td class="TableHeader" rowspan="6">&nbsp;</td>	
+</tr>
+
+<!-- Blacklist import from other peer -->
+<tr>
+	<td class="TableCellDark">Import blacklist items from other YaCy peers:</td>
+</tr>
+<tr>
+	<td class="TableCellLight">
 		<form action="sharedBlacklist_p.html" method="get">
-		<input type="hidden" name="filename" value="#[filename]#">
+		<input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#">
 		Host: <select name="hash">
 		#{otherHosts}#
 		<option value="#[hash]#">#[name]#</option>
 		#{/otherHosts}#
 		</select>
-		<p>
+		<p />
 		<input type="submit" value="Load new blacklist items">
 		</form>
-		</tr>
-		<tr>
-		<td class="TableCellDark">
-		Import blacklist items from URL:</td>
-		</tr>
-		<tr>
-		<td class="TableCellLight">
+	</td>
+</tr>
+
+
+<!-- blacklist import from url -->
+<tr>
+	<td class="TableCellDark">Import blacklist items from URL:</td>
+</tr>
+<tr>
+	<td class="TableCellLight">
 		<form action="sharedBlacklist_p.html" method="get">
-		<input type="hidden" name="filename" value="#[filename]#">
+		<input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#">
 		URL: <input type="text" name="url">
 		<p>
 		<input type="submit" value="Load new blacklist items">
-		</form>
-		</tr>
-		<tr>
-		<td class="TableCellDark">
-		<p>Import blacklist items from file:</td>
-		</tr>
-		<tr>
-		<td class="TableCellLight">
-		<form action="sharedBlacklist_p.html" method="get">
-		<input type="hidden" name="filename" value="#[filename]#">
+		</form>			
+	</td>		
+</tr>	
+		
+		
+<!-- blacklist import from file -->	
+<tr>
+	<td class="TableCellDark"><p>Import blacklist items from file:</td>
+</tr>
+<tr>
+	<td class="TableCellLight">
+		<form action="sharedBlacklist_p.html" method="get">	
+		<input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#">
 		File: <input type="text" name="file">
 		<p>
-		<input type="submit" value="Load new blacklist items">
+		<input type="submit" value="Load new blacklist items">		
 		</form>
-		</td>
-		</tr>
-	</table>
+	</td>
+</tr>
+</table>
 <p>
-#(status)#
+
+#(status)# <!-- 0: -->
 ::
 <b>#[item]#</b> was removed from blacklist
 ::

@@ -245,6 +245,16 @@ public class migration {
             sb.setConfig("portForwarding.sch.HostUser", sb.getConfig("portForwardingHostUser",""));
             sb.setConfig("portForwarding.sch.HostPwd", sb.getConfig("portForwardingHostPwd",""));
         }
+        
+        // migration for blacklists
+        if ((value = sb.getConfig("proxyBlackLists","")).length() > 0) {
+            sb.setConfig("proxy.BlackLists", value);
+            sb.setConfig("crawler.BlackLists", value);
+            sb.setConfig("dht.BlackLists", value);
+            sb.setConfig("search.BlackLists", value);
+            
+            sb.setConfig("BlackLists.Shared",sb.getConfig("proxyBlackListsShared",""));
+        }
     }
 
 }

@@ -63,6 +63,7 @@ import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -462,7 +463,7 @@ public class IndexControl_p {
 
                     } else {
                         url = new URL(us);
-                        if (plasmaSwitchboard.urlBlacklist.isListed(url)) {
+                        if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, url)) {
                             result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" checked value=\"").append(uh[0]).append("\" align=\"top\">");
                         } else {
                             result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" value=\"").append(uh[0]).append("\" align=\"top\">");

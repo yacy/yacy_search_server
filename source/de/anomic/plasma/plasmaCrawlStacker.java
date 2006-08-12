@@ -283,7 +283,7 @@ public final class plasmaCrawlStacker {
         }
         
         // check blacklist
-        if (plasmaSwitchboard.urlBlacklist.isListed(nexturl)) {
+        if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER,nexturl)) {
             reason = plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST;
             this.log.logFine("URL '" + nexturlString + "' is in blacklist. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");

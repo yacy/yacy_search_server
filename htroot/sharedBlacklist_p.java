@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 
+import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -250,8 +251,16 @@ public class sharedBlacklist_p {
 				out += newItem+"\n";
 				prop.put("status_list_"+count+"_entry", newItem);
 				count++;
-				if (plasmaSwitchboard.urlBlacklist != null)
-				    plasmaSwitchboard.urlBlacklist.add(newItem.substring(0, pos), newItem.substring(pos + 1));
+				if (plasmaSwitchboard.urlBlacklist != null) {
+                    String supportedBlacklistTypesStr = env.getConfig("BlackLists.types", "");
+                    String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");  
+                    
+                    for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                        if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",filename)) {
+                            plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newItem.substring(0, pos), newItem.substring(pos + 1));
+                        }                
+                    }                         
+                }
 
 				//write the list
 				try{

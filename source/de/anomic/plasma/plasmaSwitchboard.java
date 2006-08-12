@@ -125,6 +125,7 @@ import java.util.logging.Level;
 
 import de.anomic.data.blogBoard;
 import de.anomic.data.bookmarksDB;
+import de.anomic.data.listManager;
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiBoard;
 import de.anomic.data.userDB;
@@ -302,14 +303,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // load the black-list / inspired by [AS]
         File ulrBlackListFile = new File(getRootPath(), getConfig("listsPath", "DATA/LISTS"));
-        urlBlacklist = new plasmaURLPattern(ulrBlackListFile);
-        String f = getConfig("proxyBlackListsActive", null);
-        if (f != null) {
-            urlBlacklist.loadList(f, "/");
-            this.log.logConfig("loaded black-list from file " + ulrBlackListFile.getName() + ", " +
-            urlBlacklist.size() + " entries, " +
-            ppRamString(ulrBlackListFile.length()/1024));
-        }
+        urlBlacklist = new plasmaURLPattern(ulrBlackListFile);        
+        listManager.switchboard = this;
+        listManager.listsPath = ulrBlackListFile;        
+        listManager.reloadBlacklists();
 
         // load badwords (to filter the topwords)
         if (badwords == null) {

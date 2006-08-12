@@ -205,9 +205,14 @@ proxyYellowList=yacy.yellow
 # the black-list; URLs appearing in this list will not be loaded;
 # instead always a 404 is returned
 # all these files will be placed in the listsPath
-proxyBlackLists=url.default.black
-proxyBlackListsActive=url.default.black
-proxyBlackListsShared=url.default.black
+BlackLists.types=proxy,crawler,dht,search
+BlackLists.Shared=url.default.black
+
+proxy.BlackLists=url.default.black
+crawler.BlackLists=url.default.black
+dht.BlackLists=url.default.black
+search.BlackLists=url.default.black
+
 proxyCookieBlackList=cookie.default.black
 proxyCookieWhiteList=cookie.default.black
 

@@ -54,6 +54,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -163,7 +164,7 @@ public final class transferRWI {
                     wordhashes[received] = wordHash;
                     iEntry = new indexURLEntry(estring.substring(p));
                     urlHash = iEntry.urlHash();
-                    if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(urlHash))) {
+                    if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(plasmaURLPattern.BLACKLIST_DHT, urlHash))) {
                         //int deleted = sb.wordIndex.tryRemoveURLs(urlHash);
                         yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName + "; deleted 1 URL entries from RWIs");
                         blocked++;

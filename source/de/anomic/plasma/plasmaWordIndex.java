@@ -708,7 +708,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                         // "+entry.getUrlHash());
                         try {
                             url = lurl.getEntry(entry.urlHash(), null).url();
-                            if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(url) == true)) {
+                            if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, url) == true)) {
                                 urlHashs.add(entry.urlHash());
                             }
                         } catch (IOException e) {
