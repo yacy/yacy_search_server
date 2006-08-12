@@ -254,24 +254,27 @@ public class Blacklist_p {
         
 
         // Read the blacklist items from file
-        final ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
-        
-        // sort them
-        String[] sortedlist = new String[list.size()];
-        Arrays.sort(list.toArray(sortedlist));
-        
-        // display them
         int entryCount = 0;
-        for (int j=0;j<sortedlist.length;++j){
-            String nextEntry = sortedlist[j];
+        if (blacklistToUse != null) {
+            final ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
             
-            if (nextEntry.length() == 0) continue;
-            if (nextEntry.startsWith("#")) continue;
-
-            prop.put("Itemlist_" + entryCount + "_item", nextEntry);
-            entryCount++;
+            // sort them
+            String[] sortedlist = new String[list.size()];
+            Arrays.sort(list.toArray(sortedlist));
+            
+            // display them
+            for (int j=0;j<sortedlist.length;++j){
+                String nextEntry = sortedlist[j];
+                
+                if (nextEntry.length() == 0) continue;
+                if (nextEntry.startsWith("#")) continue;
+    
+                prop.put("Itemlist_" + entryCount + "_item", nextEntry);
+                entryCount++;
+            }
+        } else {
+            prop.put("Itemlist", entryCount);            
         }
-        prop.put("Itemlist", entryCount);
 
 
         // List known hosts for BlackList retrieval
