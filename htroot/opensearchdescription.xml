@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>#[SearchPageGreeting]#</ShortName>
+  <Description>YaCy Multi-User P2P-based Web Indexing Cluster</Description>
+  <Tags>YaCy P2P Web Search</Tags>
+  <Contact>YaCy P2P Web Indexing Software: yacy.net; Peer Owner '#[clientname]#': see http://#[thisaddress]#/ViewProfile.html?hash=localhash</Contact>
+  <Url type="application/rss+xml" template="http://#[thisaddress]#/yacysearch.rss?search={searchTerms}&amp;Enter=Search" />
+  <Url type="text/html" template="http://#[thisaddress]#/yacysearch.html?search={searchTerms}&amp;Enter=Search" />
+  <LongName>YaCy.net P2P Web Search - this is peer #[clientname]#</LongName>
+  <Image type="image/gif">http://#[thisaddress]#/env/grafics/yacy.gif</Image>
+  <Image type="image/vnd.microsoft.icon">http://#[thisaddress]#/env/grafics/yacy.ico</Image>
+  <Query role="example" searchTerms="cat" />
+  <Developer>YaCy.net Development Team. See http://developer.berlios.de/projects/yacy/</Developer>
+  <Attribution>YaCy P2P WebSearch &amp;copy; 2006, YaCy.net</Attribution>
+  <SyndicationRight>open</SyndicationRight>
+  <AdultContent>true</AdultContent>
+  <Language>en-us</Language>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <InputEncoding>UTF-8</InputEncoding>
+</OpenSearchDescription>
