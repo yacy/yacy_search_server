@@ -78,12 +78,10 @@ public class kelondroFlexWidthArray implements kelondroArray {
             if ((files[i].startsWith("col.") && (files[i].endsWith(".list")))) {
                 int colstart = Integer.parseInt(files[i].substring(4, 7));
                 int colend   = (files[i].charAt(7) == '-') ? Integer.parseInt(files[i].substring(8, 11)) : colstart;
-                /*
-                int columns[] = new int[colend - colstart + 1];
-                for (int j = colstart; j <= colend; j++) columns[j-colstart] = rowdef.width(j);
-                col[colstart] = new kelondroFixedWidthArray(new File(path, files[i]), columns, 0, true);
-                */
-                col[colstart] = new kelondroFixedWidthArray(new File(tabledir, files[i]));
+                
+                kelondroColumn columns[] = new kelondroColumn[colend - colstart + 1];
+                for (int j = colstart; j <= colend; j++) columns[j-colstart] = rowdef.column(j);
+                col[colstart] = new kelondroFixedWidthArray(new File(tabledir, files[i]), new kelondroRow(columns));
                 for (int j = colstart; j <= colend; j++) check = check.substring(0, j) + "X" + check.substring(j + 1);
             }
         }

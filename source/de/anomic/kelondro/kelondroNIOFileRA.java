@@ -113,6 +113,10 @@ public class kelondroNIOFileRA extends kelondroAbstractRA implements kelondroRA 
         return true;
     }
     
+    public long length() throws IOException {
+        return RAFile.length();
+    }
+    
     public long available() throws IOException {
         return RAFile.length() - RAFile.getFilePointer();
     }

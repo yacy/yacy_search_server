@@ -171,9 +171,9 @@ public class kelondroHashtable {
         }
     }
 
-    public kelondroHashtable(File file) throws IOException{
-	// this opens a file with an existing hashtable
-	this.hashArray = new kelondroFixedWidthArray(file);
+    public kelondroHashtable(File file, kelondroRow rowdef) throws IOException{
+        // this opens a file with an existing hashtable
+        this.hashArray = new kelondroFixedWidthArray(file, rowdef);
         this.offset    = hashArray.geti(0);
         this.maxk      = hashArray.geti(1);
         this.maxrehash = hashArray.geti(2);

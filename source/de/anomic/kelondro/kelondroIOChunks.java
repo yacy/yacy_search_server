@@ -49,6 +49,7 @@ public interface kelondroIOChunks {
     public String name();
     
     // pseudo-native methods:
+    public long length() throws IOException;
     public int read(long pos, byte[] b, int off, int len) throws IOException;
     public void write(long pos, byte[] b, int off, int len) throws IOException;
     public void commit() throws IOException;

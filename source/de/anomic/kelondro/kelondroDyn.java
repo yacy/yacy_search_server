@@ -334,6 +334,10 @@ public class kelondroDyn extends kelondroTree {
             this.filekey = filekey;
         }
 
+        public long length() throws IOException {
+            return Long.MAX_VALUE;
+        }
+        
         public long available() throws IOException {
             return Long.MAX_VALUE;
         }

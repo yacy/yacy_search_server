@@ -70,6 +70,10 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         this.lastCommit = System.currentTimeMillis();
     }
 
+    public long length() throws IOException {
+        return ra.length();
+    }
+    
     public int read(long pos, byte[] b, int off, int len) throws IOException {
         assert (b.length >= off + len): "read pos=" + pos  + ", b.length=" + b.length + ", off=" + off + ", len=" + len;
         

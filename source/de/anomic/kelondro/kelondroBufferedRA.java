@@ -77,6 +77,10 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
         this.bufferWritten = true;
     }
 
+    public long length() throws IOException {
+        return ra.length();
+    }
+    
     public long available() throws IOException {
         synchronized (ra) {
             ra.seek(seekpos);

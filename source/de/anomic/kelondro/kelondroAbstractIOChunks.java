@@ -58,6 +58,7 @@ public abstract class kelondroAbstractIOChunks {
     }
     
     // pseudo-native methods:
+    abstract public long length() throws IOException;
     abstract public int read(long pos, byte[] b, int off, int len) throws IOException;
     abstract public void write(long pos, byte[] b, int off, int len) throws IOException;
     abstract public void close() throws IOException;

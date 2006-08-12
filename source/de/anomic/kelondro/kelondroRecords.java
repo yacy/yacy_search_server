@@ -693,12 +693,10 @@ public class kelondroRecords {
         
         private void setValue(byte[] value, int valueoffset, int valuewidth, byte[] targetarray, int targetoffset) {
             if (value == null) {
-                while (valuewidth-- > 0) targetarray[targetoffset + valuewidth] = 0;
+                while (valuewidth-- > 0) targetarray[targetoffset++] = 0;
             } else {
                 System.arraycopy(value, valueoffset, targetarray, targetoffset, Math.min(value.length, valuewidth)); // error?
-                if (value.length < valuewidth) {
-                    while (valuewidth-- > value.length) targetarray[targetoffset + valuewidth] = 0;
-                }
+                while (valuewidth-- > value.length) targetarray[targetoffset + valuewidth] = 0;
             }
         }
         
@@ -1088,12 +1086,15 @@ public class kelondroRecords {
             // if the initTime is exceeded, the method throws an kelondroException
             markedDeleted = new HashSet();
             long timeLimit = (maxInitTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxInitTime;
+            long seekp;
             synchronized (USAGE) {
                 if (USAGE.FREEC != 0) {
                     Handle h = USAGE.FREEH;
                     while (h.index != NUL) {
                         markedDeleted.add(h);
-                        h = new Handle(entryFile.readInt(seekpos(h)));
+                        seekp = seekpos(h);
+                        if (seekp > entryFile.length()) throw new kelondroException("contentNodeIterator: seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
+                        h = new Handle(entryFile.readInt(seekp));
                         if (System.currentTimeMillis() > timeLimit) throw new kelondroException(filename, "time limit of " + maxInitTime + " exceeded; > " + markedDeleted.size() + " deleted entries");
                     }
                 }
@@ -1278,8 +1279,13 @@ public class kelondroRecords {
                         index = USAGE.USEDC - 1;
                     } else {
                         index = USAGE.FREEH.index;
-                        // read link to next element to FREEH chain
-                        USAGE.FREEH.index = entryFile.readInt(seekpos(USAGE.FREEH));
+                        
+                        // check for valid seek position
+                        long seekp = seekpos(USAGE.FREEH);
+                        if (seekp > entryFile.length()) throw new kelondroException("new Handle: seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
+                        
+                        // read link to next element of FREEH chain
+                        USAGE.FREEH.index = entryFile.readInt(seekp);
                     }
                     USAGE.write();
                 }

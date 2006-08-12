@@ -67,9 +67,10 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         }
     }
 
-    public kelondroFixedWidthArray(File file) throws IOException{
+    public kelondroFixedWidthArray(File file, kelondroRow rowdef) throws IOException{
         // this opens a file with an existing array
         super(file, 0, 0);
+        super.assignRowdef(rowdef);
     }
     
     public synchronized kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException {
@@ -92,7 +93,6 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     }
     
     public synchronized kelondroRow.Entry get(int index) throws IOException {
-        //if (index >= size()) throw new kelondroException(filename, "out of bounds, index=" + index + ", size=" + size());
         return row().newEntry(getNode(new Handle(index)).getValueRow());
     }
 
@@ -134,7 +134,8 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     public static void main(String[] args) {
         File f = new File("d:\\\\mc\\privat\\fixtest.db");
         f.delete();
-        kelondroFixedWidthArray k = new kelondroFixedWidthArray(f, new kelondroRow("byte[] a-12, byte[] b-4"), 6, true);
+        kelondroRow rowdef = new kelondroRow("byte[] a-12, byte[] b-4");
+        kelondroFixedWidthArray k = new kelondroFixedWidthArray(f, rowdef, 6, true);
         try {
             k.set(3, k.row().newEntry(new byte[][]{
                 "test123".getBytes(), "abcd".getBytes()}));
@@ -142,7 +143,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
                 "test456".getBytes(), "efgh".getBytes()}));
             k.close();
             
-            k = new kelondroFixedWidthArray(f);
+            k = new kelondroFixedWidthArray(f, rowdef);
             System.out.println(k.get(2).toString());
             System.out.println(k.get(3).toString());
             System.out.println(k.get(4).toString());

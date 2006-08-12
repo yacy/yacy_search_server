@@ -60,6 +60,10 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
         RAFile = new RandomAccessFile(file, "rw");
     }
     
+    public long length() throws IOException {
+        return RAFile.length();
+    }
+    
     public long available() throws IOException {
         return RAFile.length() - RAFile.getFilePointer();
     }

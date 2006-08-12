@@ -55,19 +55,11 @@ public class kelondroRow {
         // example:
         //# Structure=<pivot-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>
 
-        // parse a structure string
-        kelondroColumn pivot_col = null;
-
         // parse pivot definition:
-        int p = structure.indexOf(",'='");
-        if (p >= 0) {
-            String pivot = structure.substring(0, p);
-            structure = structure.substring(p + 5);
-            pivot_col = new kelondroColumn(pivot);
-        }
+        structure.replace('=', ',');
         
         // parse property part definition:
-        p = structure.indexOf(",'|'");
+        int p = structure.indexOf('|');
         if (p < 0) p = structure.length();
         ArrayList l = new ArrayList();
         String attr = structure.substring(0, p);
@@ -77,21 +69,14 @@ public class kelondroRow {
         }
         
         // define columns
-        int piv_offset = (pivot_col == null) ? 0 : 1;
-        this.row = new kelondroColumn[l.size() + piv_offset];
+        this.row = new kelondroColumn[l.size()];
         this.colstart = new int[row.length];
         this.objectsize = 0;
-        if (pivot_col != null) {
-            this.colstart[0] = 0;
-            this.row[0] = pivot_col;
-            this.objectsize += this.row[0].cellwidth();
-        }
         for (int i = 0; i < l.size(); i++) {
-            this.colstart[i + piv_offset] = this.objectsize;
-            this.row[i + piv_offset] = (kelondroColumn) l.get(i);
-            this.objectsize += this.row[i + piv_offset].cellwidth();
+            this.colstart[i] = this.objectsize;
+            this.row[i] = (kelondroColumn) l.get(i);
+            this.objectsize += this.row[i].cellwidth();
         }
-
     }
     
     private void genNickRef() {

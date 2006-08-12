@@ -175,7 +175,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     private long restore() throws IOException {
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (!(indexDumpFile.exists())) return 0;
-        kelondroFixedWidthArray dumpArray = new kelondroFixedWidthArray(indexDumpFile);
+        kelondroFixedWidthArray dumpArray = new kelondroFixedWidthArray(indexDumpFile, plasmaWordIndexAssortment.bufferStructureBasis);
         log.logConfig("restore array dump of index cache, " + dumpArray.size() + " word/URL relations");
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;

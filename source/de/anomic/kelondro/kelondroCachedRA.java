@@ -65,6 +65,10 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         this.seekpos = 0;
     }
     
+    public long length() throws IOException {
+        return ra.available();
+    }
+    
     public long available() throws IOException {
         synchronized (ra) {
             ra.seek(seekpos);

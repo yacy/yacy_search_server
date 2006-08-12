@@ -114,16 +114,15 @@ public class kelondroCollectionIndex {
     
     private kelondroFixedWidthArray openArrayFile(int partitionNumber, int serialNumber, boolean create) throws IOException {
         File f = arrayFile(path, filenameStub, loadfactor, rowdef.objectsize(), partitionNumber, serialNumber);
-        
+        int load = arrayCapacity(partitionNumber);
+        kelondroRow rowdef = new kelondroRow(
+                "byte[] key-" + index.row().width(0) + "," +
+                "byte[] collection-" + (kelondroRowCollection.exportOverheadSize + load * this.rowdef.objectsize())
+                );
         if (f.exists()) {
-            return new kelondroFixedWidthArray(f);
+            return new kelondroFixedWidthArray(f, rowdef);
         } else if (create) {
-            int load = arrayCapacity(partitionNumber);
-            kelondroRow row = new kelondroRow(
-                    "byte[] key-" + index.row().width(0) + "," +
-                    "byte[] collection-" + (kelondroRowCollection.exportOverheadSize + load * this.rowdef.objectsize())
-                    );
-            return new kelondroFixedWidthArray(f, row, 0, true);
+            return new kelondroFixedWidthArray(f, rowdef, 0, true);
         } else {
             return null;
         }

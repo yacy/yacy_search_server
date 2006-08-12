@@ -64,6 +64,7 @@ abstract class kelondroAbstractRA implements kelondroRA {
     }
 
     // pseudo-native methods:
+    abstract public long length() throws IOException;
     abstract public long available() throws IOException;
     
     abstract public int read() throws IOException;
