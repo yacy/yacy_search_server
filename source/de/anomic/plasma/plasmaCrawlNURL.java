@@ -55,7 +55,6 @@ import java.util.Iterator;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroTree;
@@ -185,12 +184,8 @@ public class plasmaCrawlNURL extends indexURL {
         } else {
             // create new cache
             oldCacheFile.getParentFile().mkdirs();
-            try {
-                urlHashCache = new kelondroFlexTable(cacheStacksPath, "urlNotice2.table", kelondroBase64Order.enhancedCoder, bufferkb * 0x400, preloadTime, rowdef, true);
-            } catch (IOException e) {
-                e.printStackTrace();
-                urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
-            }
+            //urlHashCache = new kelondroFlexTable(cacheStacksPath, "urlNotice2.table", kelondroBase64Order.enhancedCoder, bufferkb * 0x400, preloadTime, rowdef, true);
+            urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
         }
     }
     

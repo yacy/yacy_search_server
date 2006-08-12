@@ -421,6 +421,7 @@ public class indexURL {
  }
 
  public boolean remove(String hash) {
+     if (hash == null) return false;
      try {
          urlHashCache.remove(hash.getBytes());
          return true;
@@ -440,7 +441,7 @@ public class indexURL {
  
  public int[] cacheNodeStatus() {
      if (urlHashCache instanceof kelondroTree) return ((kelondroTree) urlHashCache).cacheNodeStatus();
-     return null;
+     return new int[]{0,0,0,0,0,0,0,0,0,0};
  }
  
  public String[] cacheObjectStatus() {
