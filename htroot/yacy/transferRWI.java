@@ -54,7 +54,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURLPattern;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -99,7 +99,7 @@ public final class transferRWI {
                     shortCacheFlush = true;
                     break;
                 }
-                try {Thread.sleep(100);} catch (InterruptedException e) {}
+                try {Thread.sleep(100);} catch (InterruptedException e) {/* */}
             }
         }
         

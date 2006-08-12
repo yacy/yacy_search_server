@@ -79,6 +79,7 @@ public class Blacklist_p {
         
         String blacklistToUse = null;
         serverObjects prop = new serverObjects();
+        prop.put("blacklistEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
         
         // do all post operations
         if (post != null) {
@@ -334,7 +335,7 @@ public class Blacklist_p {
         if (dirlist != null) {
             for (int i = 0; i <= dirlist.length - 1; i++) {
                 prop.put(BLACKLIST + blacklistCount + "_name", dirlist[i]);
-                prop.put(BLACKLIST + blacklistCount + "_shared", 0);
+                prop.put(BLACKLIST + blacklistCount + "_selected", 0);
 
                 if (dirlist[i].equals(blacklistToUse)) { //current List
                     prop.put(BLACKLIST + blacklistCount + "_selected", 1);
@@ -351,7 +352,7 @@ public class Blacklist_p {
                 if (listManager.ListInListslist(BLACKLIST_SHARED, dirlist[i])) {
                     prop.put(BLACKLIST + blacklistCount + "_shared", 1);
                 } else {
-                    prop.put(BLACKLIST + blacklistCount + "_selected", 0);
+                    prop.put(BLACKLIST + blacklistCount + "_shared", 0);
                 }
 
                 int activeCount = 0;

@@ -106,6 +106,7 @@ package de.anomic.plasma;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 
@@ -133,6 +134,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
+import de.anomic.http.httpdHandler;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
@@ -145,6 +147,7 @@ import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroMapTable;
 import de.anomic.plasma.dbImport.dbImportManager;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
@@ -303,7 +306,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // load the black-list / inspired by [AS]
         File ulrBlackListFile = new File(getRootPath(), getConfig("listsPath", "DATA/LISTS"));
-        urlBlacklist = new plasmaURLPattern(ulrBlackListFile);        
+        String blacklistClassName = getConfig("BlackLists.class", "de.anomic.plasma.urlPattern.defaultURLPattern");
+        
+        this.log.logConfig("Starting blacklist engine ...");
+        try {
+            Class blacklistClass = Class.forName(blacklistClassName);
+            Constructor blacklistClassConstr = blacklistClass.getConstructor( new Class[] { File.class } );
+            urlBlacklist = (plasmaURLPattern) blacklistClassConstr.newInstance(new Object[] { ulrBlackListFile });
+            this.log.logFine("Used blacklist engine class: " + blacklistClassName);
+            this.log.logConfig("Using blacklist engine: " + urlBlacklist.getEngineInfo());
+        } catch (Exception e) {
+            this.log.logSevere("Unable to load the blacklist engine",e);
+            System.exit(-1);
+        } catch (Error e) {
+            this.log.logSevere("Unable to load the blacklist engine",e);
+            System.exit(-1);
+        }
+      
+        this.log.logConfig("Loading backlist data ...");
         listManager.switchboard = this;
         listManager.listsPath = ulrBlackListFile;        
         listManager.reloadBlacklists();

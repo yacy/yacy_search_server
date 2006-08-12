@@ -66,6 +66,7 @@ import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;

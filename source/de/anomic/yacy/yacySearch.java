@@ -44,17 +44,17 @@
 package de.anomic.yacy;
 
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.HashMap;
 
 import de.anomic.index.indexContainer;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchRankingProfile;
-import de.anomic.plasma.plasmaURLPattern;
-import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSearchTimingProfile;
+import de.anomic.plasma.plasmaSnippetCache;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.logging.serverLog;
 
 public class yacySearch extends Thread {

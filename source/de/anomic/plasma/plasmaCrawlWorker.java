@@ -51,6 +51,8 @@ import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.SocketException;
 import de.anomic.net.URL;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
+
 import java.net.UnknownHostException;
 import java.util.Date;
 import de.anomic.http.httpHeader;

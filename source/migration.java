@@ -247,7 +247,7 @@ public class migration {
         }
         
         // migration for blacklists
-        if ((value = sb.getConfig("proxyBlackLists","")).length() > 0) {
+        if ((value = sb.getConfig("proxyBlackListsActive","")).length() > 0) {
             sb.setConfig("proxy.BlackLists", value);
             sb.setConfig("crawler.BlackLists", value);
             sb.setConfig("dht.BlackLists", value);

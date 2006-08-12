@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.Date;
 import java.util.TreeSet;
 import de.anomic.net.URL;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexCollectionRI;

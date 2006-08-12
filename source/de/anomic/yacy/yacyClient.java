@@ -45,7 +45,6 @@ package de.anomic.yacy;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import de.anomic.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -59,19 +58,18 @@ import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexRowSetContainer;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchRankingProfile;
+import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURLPattern;
-import de.anomic.plasma.plasmaSearchTimingProfile;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
-import de.anomic.server.serverCodings;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyVersion;
 
 public final class yacyClient {
 

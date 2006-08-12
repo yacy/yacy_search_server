@@ -73,6 +73,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaHTCache;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
