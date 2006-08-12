@@ -85,6 +85,7 @@ public class Blacklist_p {
             
             if (post.containsKey("selectList")) {
                 blacklistToUse = (String)post.get("selectedListName"); 
+                if (blacklistToUse != null && blacklistToUse.length() == 0) blacklistToUse = null;
             }
             if (post.containsKey("createNewList")) {
                 /* ===========================================================
@@ -92,6 +93,11 @@ public class Blacklist_p {
                  * =========================================================== */
                 
                 blacklistToUse = (String)post.get("newListName");
+                if (blacklistToUse.trim().length() == 0) {
+                    prop.put("LOCATION","");
+                    return prop;
+                }   
+                
                 if (!blacklistToUse.endsWith(".black")) blacklistToUse += ".black";
 
                 try {
@@ -113,6 +119,10 @@ public class Blacklist_p {
                  * =========================================================== */                
                 
                 blacklistToUse = (String)post.get("selectedListName");
+                if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+                    prop.put("LOCATION","");
+                    return prop;
+                }                   
                 
                 File BlackListFile = new File(listManager.listsPath, blacklistToUse);
                 BlackListFile.delete();
@@ -135,6 +145,10 @@ public class Blacklist_p {
                  * =========================================================== */                   
                 
                 blacklistToUse = (String)post.get("selectedListName");
+                if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+                    prop.put("LOCATION","");
+                    return prop;
+                }                   
                 
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {                    
                     if (post.containsKey("activateList4" + supportedBlacklistTypes[blTypes])) {
@@ -153,6 +167,10 @@ public class Blacklist_p {
                  * =========================================================== */                   
                 
                 blacklistToUse = (String)post.get("selectedListName");
+                if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+                    prop.put("LOCATION","");
+                    return prop;
+                }                   
                 
                 if (listManager.ListInListslist(BLACKLIST_SHARED, blacklistToUse)) { 
                     // Remove from shared BlackLists
@@ -168,9 +186,17 @@ public class Blacklist_p {
                 
                 // get the current selected blacklist name
                 blacklistToUse = (String)post.get("currentBlacklist");
+                if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+                    prop.put("LOCATION","");
+                    return prop;
+                }                 
                 
                 // get the entry that should be deleted
                 String oldEntry = (String)post.get("selectedEntry");
+                if (oldEntry.trim().length() == 0) {
+                    prop.put("LOCATION",header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse);
+                    return prop;
+                }                
                 
                 // load blacklist data from file
                 ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
@@ -205,9 +231,17 @@ public class Blacklist_p {
                  * Add a new blacklist entry
                  * =========================================================== */                     
                 
-                blacklistToUse = (String)post.get("currentBlacklist");
+                blacklistToUse = (String)post.get("currentBlacklist");   
+                if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+                    prop.put("LOCATION","");
+                    return prop;
+                }                  
                 
                 String newEntry = (String)post.get("newEntry");
+                if (newEntry.trim().length() == 0) {
+                    prop.put("LOCATION",header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse);
+                    return prop;
+                }
                 
                 // TODO: ignore empty entries
                 
@@ -334,7 +368,8 @@ public class Blacklist_p {
         }
         prop.put("blackLists", blacklistCount);
         
-        prop.put("currentBlacklist", blacklistToUse);
+        prop.put("currentBlacklist", (blacklistToUse==null)?"":blacklistToUse);
+        prop.put("disabled", (blacklistToUse==null)?1:0);
         return prop;
     }
 
