@@ -1038,7 +1038,7 @@ Published&nbsp;News==Zverejnene spravy
 News Overview==Prehlad sprav
 This is the YaCyNews system \(currently under testing\).==Toto je YaCy system sprav (momentalne v stave testovania).
 The news service is controlled by several entry points:==Tento servis sprav je kontrolovany z nasledovnych vstupnych bodov:
-A crawl start with remote indexing will automatically create a news entry.==Start procesu preliezania (crawl) so vzdialenym indexovanim vytvori automaticky zaznam v spravach.
+A crawl start with activated remote-indexing will automatically create a news entry.==Start procesu preliezania (crawl) s aktiovanym vzdialenym indexovanim vytvori automaticky zaznam v spravach.
 Other peers may use this information to prevent double-crawls from the same start point.==Ostatni peeri mozu pouzit tuto informaciu aby nevytvorili taky isty proces preliezania (crawl) z rovnakym startovacim bodom.
 A table with recently started crawls is presented on the Index Create - page==Tabulka s prave odstartovanymi procesmi preliezania (crawls) je zobrazena na stranke "Vytvor index".
 A change in the personal profile will create a news entry. You can see recently made changes of==Zmena v profile sposobi vytvorenie zaznamu v spravach. Posledne vykonane zmeny 
@@ -1657,7 +1657,7 @@ Enabled: Updating periodically to file==Aktivovany: Periodicky update voci subor
 Last upload:==Posledny upload:
 Online-mode==Online mod
 You are in <i>Cache-browsing</i> mode.==Nachadzate sa v mode <i>prezeracie cache</i>.
-Only Website from the Proxycache are accessable.==Pristupne su len stranky z Proxycache.
+Only websites from the proxy-cache are accessible.==Pristupne su len stranky z proxy cache.
 To switch online-mode, press one of the following buttons:==Na prechod do online modu kliknite na jedno z nasledujutich tlacidiel:
 "event-based Mode"=="aktivitou riadeny mod"
 "Permanent Mode"=="permanentny mod"
@@ -1908,7 +1908,7 @@ Advanced Settings==Pokrocil&eacute; nastavenia
 Project Home==Domovsk&aacute; str&aacute;nka
 Project News==Nov&eacute;
 English Forum==Anglick&eacute; f&oacute;rum
-
+Newsletters==Newsletter
 #Deutsches Forum==Nemeck&eacute; f&oacute;rum
 Download YaCy==Stiahni YaCy
 #YaCy Wiki==YaCy Wiki
