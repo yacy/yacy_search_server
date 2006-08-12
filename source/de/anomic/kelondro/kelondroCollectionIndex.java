@@ -81,9 +81,6 @@ public class kelondroCollectionIndex {
         return new File(path, filenameStub + "." + lf + "." + cs + ".properties"); // kelondro collection array
     }
     
-    /*
-     
-     */
     public kelondroCollectionIndex(File path, String filenameStub, int keyLength, kelondroOrder indexOrder,
                                    long buffersize, long preloadTime,
                                    int loadfactor, kelondroRow rowdef) throws IOException {

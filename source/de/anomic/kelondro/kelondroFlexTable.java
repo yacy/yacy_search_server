@@ -130,8 +130,10 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
         synchronized (index) {
             int i = index.geti(key);
-            if (i >= this.size()) System.out.println("error");
             if (i < 0) return null;
+            // i may be greater than this.size(), because this table may have deleted entries
+            // the deleted entries are subtracted from the 'real' tablesize, so the size may be
+            // smaller than an index to a row entry
             return super.get(i);
         }
     }

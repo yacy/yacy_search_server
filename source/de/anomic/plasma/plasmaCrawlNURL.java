@@ -167,14 +167,14 @@ public class plasmaCrawlNURL extends indexURL {
     
     private void openHashCache() {
         File oldCacheFile = new File(cacheStacksPath, "urlNotice1.db");
-        File newCacheFile = new File(cacheStacksPath, "urlNotice2.table");
-        if (newCacheFile.exists()) try {
+        //File newCacheFile = new File(cacheStacksPath, "urlNotice2.table");
+        /*if (newCacheFile.exists()) try {
             urlHashCache = new kelondroFlexTable(cacheStacksPath, "urlNotice2.table", kelondroBase64Order.enhancedCoder, bufferkb * 0x400, preloadTime, rowdef, true);
         } catch (IOException e) {
             e.printStackTrace();
             oldCacheFile.delete();
             urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
-        } else if (oldCacheFile.exists()) try {
+        } else*/ if (oldCacheFile.exists()) try {
             // open existing cache
             kelondroTree tree = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
             tree.assignRowdef(rowdef);

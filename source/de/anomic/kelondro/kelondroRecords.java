@@ -536,9 +536,11 @@ public class kelondroRecords {
             synchronized (cacheHeaders) {
                 cacheHeaders.removeb(handle.index);
                 cacheDelete++;
+                dispose(handle);
             }
+        } else {
+            dispose(handle);
         }
-        dispose(handle);
     }
 
     public final class Node {
@@ -740,7 +742,7 @@ public class kelondroRecords {
 
         public byte[] setValueRow(byte[] row) throws IOException {
             // if the index is defined, then write values directly to the file, else only to the object
-            assert row.length == ROW.objectsize();
+            if (row.length != ROW.objectsize()) throw new IOException("setValueRow with wrong (" + row.length + ") row length instead correct: " + ROW.objectsize());
             byte[] result = getValueRow(); // previous value (this loads the values if not already happened)
             
             // set values
