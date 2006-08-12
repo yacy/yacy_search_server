@@ -48,6 +48,7 @@
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaURLPattern;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -97,7 +98,7 @@ public final class transferURL {
                     lEntry = sb.urlPool.loadedURL.newEntry(urls, true);
                     if ((lEntry != null) && (lEntry.url() != null)) {
                         if ((blockBlacklist) &&
-                            (plasmaSwitchboard.urlBlacklist.isListed(lEntry.hash(), lEntry.url()))) {
+                            (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, lEntry.hash(), lEntry.url()))) {
                             int deleted = sb.wordIndex.tryRemoveURLs(lEntry.hash());
                             yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
                             lEntry = null;
