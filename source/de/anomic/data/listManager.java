@@ -193,8 +193,6 @@ public class listManager {
 
     // get a Directory Listing as a String Array
     public static String[] getDirListing(String dirname){
-        String[] fileListString;
-        File[] fileList;
         final File dir = new File(dirname);
         return getDirListing(dir);
     }

@@ -133,6 +133,8 @@ public final class plasmaWordIndexAssortment {
                 return;
             } catch (IOException e){
                 serverLog.logSevere("PLASMA", "unable to open assortment database " + assortmentLength + ", creating new: " + e.getMessage(), e);
+            } catch (IndexOutOfBoundsException e){
+                serverLog.logSevere("PLASMA", "assortment database " + assortmentLength + " corupted, creating new: " + e.getMessage(), e);
             } catch (kelondroException e) {
                 serverLog.logSevere("PLASMA", "assortment database " + assortmentLength + " corupted, creating new: " + e.getMessage(), e);
             }
@@ -163,9 +165,15 @@ public final class plasmaWordIndexAssortment {
         try {
             oldrow = assortments.put(row);
         } catch (IOException e) {
+            e.printStackTrace();
+            log.logSevere("storeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB " + assortments.file(), e);
+            resetDatabase();
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
             log.logSevere("storeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB " + assortments.file(), e);
             resetDatabase();
         } catch (kelondroException e) {
+            e.printStackTrace();
             log.logSevere("storeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB " + assortments.file(), e);
             resetDatabase();
         }

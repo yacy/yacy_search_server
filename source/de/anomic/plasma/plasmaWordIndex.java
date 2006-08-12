@@ -201,8 +201,8 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     public void flushCacheSome() {
         synchronized (ramCache) { ramCache.shiftK2W(); }
-        int flushCount = ramCache.wSize() / 350;
-        if (flushCount > 80) flushCount = 80;
+        int flushCount = ramCache.wSize() / 400;
+        if (flushCount > 200) flushCount = 200;
         if (flushCount < 20) flushCount = Math.min(20, ramCache.wSize());
         flushCache(flushCount);
     }
