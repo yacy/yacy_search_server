@@ -62,21 +62,19 @@ public final class list {
 
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        if (prop == null) { return null; }
         
         final String col = post.get("col", "");
         final File listsPath = new File(ss.getRootPath(),ss.getConfig("listsPath", "DATA/LISTS"));
 
         if (col.equals("black")) {
-            String filename = "";
             final StringBuffer out = new StringBuffer();
 
-            final String filenames=ss.getConfig("proxyBlackListsShared", "");
+            final String filenames=ss.getConfig("BlackLists.Shared", "");
             final String[] filenamesarray = filenames.split(",");
 
-            if(filenamesarray.length >0){
-                for(int i = 0;i <= filenamesarray.length -1; i++){
-                    filename = filenamesarray[i];
+            if(filenamesarray.length > 0){
+                for(int i = 0;i < filenamesarray.length; i++){
+                    String filename = filenamesarray[i];
                     out.append(listManager.getListString(new File(listsPath,filename).toString(), false))
                        .append(serverCore.crlfString);
                 }
