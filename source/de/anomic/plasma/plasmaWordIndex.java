@@ -728,7 +728,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                         TreeSet containers = indexContainerSet(container.getWordHash(), plasmaWordIndex.RL_WORDFILES, false, 100);
                         indexContainerIterator = containers.iterator();
                         // Make sure we don't get the same wordhash twice, but don't skip a word
-                        if ((indexContainerIterator.hasNext())&&(!container.getWordHash().equals(((indexContainer) indexContainerIterator).getWordHash()))) {
+                        if ((indexContainerIterator.hasNext())&&(!container.getWordHash().equals(((indexContainer) indexContainerIterator.next()).getWordHash()))) {
                             indexContainerIterator = containers.iterator();
                         }
                     }
