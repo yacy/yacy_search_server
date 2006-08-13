@@ -1,71 +1,65 @@
-// sharedBlacklist_p.java 
-// -----------------------
-// part of the AnomicHTTPProxy
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
-//
-// This File is contributed by Alexander Schier
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
+//sharedBlacklist_p.java 
+//-----------------------
+//part of the AnomicHTTPProxy
+//(C) by Michael Peter Christen; mc@anomic.de
+//first published on http://www.anomic.de
+//Frankfurt, Germany, 2004
 
-// You must compile this file with
-// javac -classpath .:../Classes Blacklist_p.java
-// if the shell's current path is HTROOT
+//This File is contributed by Alexander Schier
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
+
+//This program is free software; you can redistribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation; either version 2 of the License, or
+//(at your option) any later version.
+
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+//Using this software in any meaning (reading, learning, copying, compiling,
+//running) means that you agree that the Author(s) is (are) not responsible
+//for cost, loss of data or any harm that may be caused directly or indirectly
+//by usage of this softare or this documentation. The usage of this software
+//is on your own risk. The installation and usage (starting/running) of this
+//software may allow other people or application to access your computer and
+//any attached devices and is highly dependent on the configuration of the
+//software which must be done by the user of the software; the author(s) is
+//(are) also not responsible for proper configuration and usage of the
+//software, even if provoked by documentation provided together with
+//the software.
+
+//Any changes to this file according to the GPL as documented in the file
+//gpl.txt aside this file in the shipment you received can be done to the
+//lines that follows this copyright notice here, but changes must not be
+//done inside the copyright notive above. A re-distribution must contain
+//the intact and unchanged copyright notice.
+//Contributions and changes to the program code must be marked as such.
+
+//You must compile this file with
+//javac -classpath .:../Classes Blacklist_p.java
+//if the shell's current path is HTROOT
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import de.anomic.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Arrays;
 import java.util.HashSet;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -73,214 +67,197 @@ import de.anomic.yacy.yacySeed;
 
 public class sharedBlacklist_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	// return variable that accumulates replacements
-	serverObjects prop = new serverObjects();
-	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	File listsPath = new File(switchboard.getRootPath(), env.getConfig("listsPath", "DATA/LISTS"));
-	String filename = "";
- 	String line = "";
-	String out = "";
-	HashSet Blacklist = new HashSet();
-	ArrayList otherBlacklist = new ArrayList();
-	int num = 0;
-	int i = 0; //loop-var
-	int count = 0;
-	String IP = "127.0.0.1"; //should be replaced later
-	String Port = "8080"; //aua!
-	String Name = "";
-	String Hash = "";
-	String address = "";
-
-	if( post != null && post.containsKey("filename") ){
-		filename = (String)post.get("filename");
-	}else{
-		filename = "shared.black";
-	}
+    public static final int STATUS_NONE = 0;
+    public static final int STATUS_ENTRIES_ADDED = 1;
+    public static final int STATUS_FILE_ERROR = 2;
+    public static final int STATUS_PEER_UNKNOWN = 3;
+    public static final int STATUS_URL_PROBLEM = 4;
+    public static final int STATUS_WRONG_INVOCATION = 5;
     
-    BufferedReader br = null;
-	try{
-		//Read the List 
-		br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(listsPath, filename))));
-		while((line = br.readLine()) != null){
-			if(! (line.startsWith("#") || line.equals("")) ){
-				Blacklist.add(line);
-				out += line + serverCore.crlfString;
-			}
-		}
-		br.close();
-	}catch(IOException e){}
-    finally {
-        if (br!=null) try{br.close(); br=null;}catch(Exception e){}
-    }
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        // return variable that accumulates replacements
+        serverObjects prop = new serverObjects();
+        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
 
-	prop.put("page", 0); //checkbox list
-	if( post != null && post.containsKey("hash") ){ //Step 1: retrieve the Items
-		Hash = (String) post.get("hash");
-		prop.put("status", 3);//YaCy-Peer not found
-		prop.put("status_name", Name);
-		
-		yacySeed seed;
-		if( yacyCore.seedDB != null ){ //no nullpointer error..
-		    Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null);
-		    while (e.hasMoreElements()) {
-			seed = (yacySeed) e.nextElement();
-			if (seed != null && seed.hash.equals(Hash) ) {
-			    IP = seed.get(yacySeed.IP, "127.0.0.1"); 
-			    Port = seed.get(yacySeed.PORT, "8080");
-			    Name = seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
-				prop.put("status", 0);//nothing
-			}else{
-			    //status = "No Seed found"; //wrong? The Name not known?
-			}
-		    }
-		}
-		//DEBUG
-		//IP = "217.234.127.107";
-		//Port = "8080";
-		//Name = "RootServer";
-
-		//Make Adresse
-        address = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
-        try {
-            httpHeader reqHeader = new httpHeader();
-            reqHeader.put(httpHeader.PRAGMA,"no-cache");
-            reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
-            
-            // get List
-            URL u = new URL(address);
-            otherBlacklist = httpc.wget(u, u.getHost(), 12000, null, null, switchboard.remoteProxyConfig,reqHeader); 
-        } catch (Exception e) {}
-                
-		//Make HTML-Optionlist with retrieved items
-		for(i = 0; i <= (otherBlacklist.size() -1); i++){
-			String tmp = (String) otherBlacklist.get(i);
-			if( !Blacklist.contains(tmp) && (!tmp.equals("")) ){
-				//newBlacklist.add(tmp);
-				count++;
-				prop.put("page_urllist_"+(count-1)+"_name", Name);
-				prop.put("page_urllist_"+(count-1)+"_url", tmp);
-				prop.put("page_urllist_"+(count-1)+"_count", count);
-			}
-		}
-		prop.put("page_urllist", (count));
-		//write the list
-		try{
-			BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(listsPath, filename))));
-			bw.write(out);
-			bw.close();
-		}catch(IOException e){}
-
-	}else if( post != null && post.containsKey("url") ){
-		//load from URL
-		address = (String)post.get("url");
-		prop.put("status", 4);
-		prop.put("status_address", address);
-		//Name = "&nbsp;"; //No Name
-		Name = address;
-                
-                try {
-                    URL u = new URL(address);
-                    otherBlacklist = httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig); //get List
-                } catch (Exception e) {}
-		prop.put("status", 0); //TODO: check if the wget failed...
-
-                //Make HTML-Optionlist with retrieved items
-                for(i = 0; i <= (otherBlacklist.size() -1); i++){
-                        String tmp = (String) otherBlacklist.get(i);
-                        if( !Blacklist.contains(tmp) && (!tmp.equals("")) && (!tmp.startsWith("#")) ){ //This List may contain comments.
-                                //newBlacklist.add(tmp);
-                                count++;
-								prop.put("page_urllist_"+(count-1)+"_name", Name);
-								prop.put("page_urllist_"+(count-1)+"_url", tmp);
-								prop.put("page_urllist_"+(count-1)+"_count", count);
-                        }
-                }
-				prop.put("page_urllist", (count));
-
-	}else if( post != null && post.containsKey("file") ){
-
-		try{
-			//Read the List
-			br = new BufferedReader(new InputStreamReader(new FileInputStream( (String)post.get("file") )));
-			while((line = br.readLine()) != null){
-				if(! (line.startsWith("#") || line.equals("")) ){
-					otherBlacklist.add(line);
-				}
-			}
-			br.close();
-		}catch(IOException e){
-			prop.put("status", 2); //File Error
-		} finally {
-            if (br != null) try {br.close(); br = null; } catch (Exception e){}
+        // getting the name of the destination blacklist
+        String selectedBlacklistName = "";
+        if( post != null && post.containsKey("currentBlacklist") ){
+            selectedBlacklistName = (String)post.get("currentBlacklist");
+        }else{
+            selectedBlacklistName = "shared.black";
         }
-		Name = (String)post.get("file");
+        
+        prop.put("currentBlacklist", selectedBlacklistName);
+        prop.put("page_target", selectedBlacklistName);
+        
+        if (post != null) {
+            ArrayList otherBlacklist = null;
+            
+            if (post.containsKey("hash")) {
+                /* ======================================================
+                 * Import blacklist from other peer 
+                 * ====================================================== */
+                
+                // getting the source peer hash
+                String Hash = (String) post.get("hash");
+                
+                // generate the download URL
+                String downloadURL = null;
+                if( yacyCore.seedDB != null ){ //no nullpointer error..
+                    yacySeed seed = yacyCore.seedDB.getConnected(Hash); 
+                    if (seed != null) {
+                        String IP = seed.get(yacySeed.IP, "127.0.0.1"); 
+                        String Port = seed.get(yacySeed.PORT, "8080");
+                        String peerName = seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
+                        prop.put("page_source", peerName);
 
-                //Make HTML-Optionlist with retrieved items
-                for(i = 0; i <= (otherBlacklist.size() -1); i++){
-                        String tmp = (String) otherBlacklist.get(i);
-                        if( !Blacklist.contains(tmp) && (!tmp.equals("")) && (!tmp.startsWith("#")) ){ //This List may contain comments.
-                                //newBlacklist.add(tmp);
-                                count++;
-								prop.put("page_urllist_"+(count-1)+"_name", Name);
-								prop.put("page_urllist_"+(count-1)+"_url", tmp);
-								prop.put("page_urllist_"+(count-1)+"_count", count);
-                        }
+                        downloadURL = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
+                    } else {
+                        prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found
+                        prop.put("page", 1);   
+                    }
+                } else {
+                    prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found
+                    prop.put("page", 1);   
                 }
-				prop.put("page_urllist", (count));
+                
+                if (downloadURL != null) {
+                    // download the blacklist
+                    try {
+                        httpHeader reqHeader = new httpHeader();
+                        reqHeader.put(httpHeader.PRAGMA,"no-cache");
+                        reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
 
-	}else if( post != null && post.containsKey("add") ){ //Step 2: Add the Items
-		prop.put("page", 1); //result page
-		num = Integer.parseInt( (String)post.get("num") );
-		prop.put("status", 1); //list of added Entries
-		count = 0;//couter of added entries
-		for(i=1;i <= num; i++){ //count/num starts with 1!
-			if( post.containsKey( String.valueOf(i) ) ){
-				String newItem = (String)post.get( String.valueOf(i) );
-				//This should not be needed...
-				if ( newItem.startsWith("http://") ){
-					newItem = newItem.substring(7);
-				}
-				// separate the newItem into host and path
-				int pos = newItem.indexOf("/");
-				if (pos < 0) {
-				    // add default empty path pattern
-				    pos = newItem.length();
-				    newItem = newItem + "/.*";
-				}
-				out += newItem+"\n";
-				prop.put("status_list_"+count+"_entry", newItem);
-				count++;
-				if (plasmaSwitchboard.urlBlacklist != null) {
-                    String supportedBlacklistTypesStr = env.getConfig("BlackLists.types", "");
-                    String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");  
+                        // get List
+                        URL u = new URL(downloadURL);
+                        otherBlacklist = httpc.wget(u, u.getHost(), 12000, null, null, switchboard.remoteProxyConfig,reqHeader); 
+                    } catch (Exception e) {
+                        prop.put("status", STATUS_PEER_UNKNOWN);
+                        prop.put("page", 1);                      
+                    }        
+                }
+            } else if (post.containsKey("url")) {
+                /* ======================================================
+                 * Download the blacklist from URL
+                 * ====================================================== */                
+                
+                String downloadURL = (String)post.get("url");                
+                prop.put("page_source", downloadURL);
+
+                try {
+                    URL u = new URL(downloadURL);
+                    otherBlacklist = httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig); //get List
+                } catch (Exception e) {
+                    prop.put("status", STATUS_URL_PROBLEM);
+                    prop.put("status_address",downloadURL);
+                    prop.put("page", 1);                    
+                }
+            } else if (post.containsKey("file")) {
+                /* ======================================================
+                 * Import the blacklist from file
+                 * ====================================================== */      
+                String sourceFileName = (String)post.get("file");
+                prop.put("page_source", sourceFileName);
+                
+                File sourceFile = new File(listManager.listsPath, sourceFileName);
+                if (!sourceFile.exists() || !sourceFile.canRead() || !sourceFile.isFile()) {
+                    prop.put("status", STATUS_FILE_ERROR);
+                    prop.put("page", 1);                       
+                } else {                
+                    otherBlacklist = listManager.getListArray(sourceFile);
+                }
+                
+            } else if (post.containsKey("add")) {
+                /* ======================================================
+                 * Add loaded items into blacklist file
+                 * ====================================================== */                  
+                
+                prop.put("page", 1); //result page                
+                prop.put("status", STATUS_ENTRIES_ADDED); //list of added Entries
+                
+                int count = 0;//couter of added entries
+                PrintWriter pw = null;
+                try {
+                    // open the blacklist file
+                    pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, selectedBlacklistName), true));
                     
-                    for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                        if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",filename)) {
-                            plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newItem.substring(0, pos), newItem.substring(pos + 1));
-                        }                
-                    }                         
+                    // loop through the received entry list
+                    int num = Integer.parseInt( (String)post.get("num") );
+                    for(int i=0;i < num; i++){ 
+                        if( post.containsKey("item" + i) ){
+                            String newItem = (String)post.get("item" + i);
+                            
+                            //This should not be needed...
+                            if ( newItem.startsWith("http://") ){
+                                newItem = newItem.substring(7);
+                            }
+                            
+                            // separate the newItem into host and path
+                            int pos = newItem.indexOf("/");
+                            if (pos < 0) {
+                                // add default empty path pattern
+                                pos = newItem.length();
+                                newItem = newItem + "/.*";
+                            }
+                            
+                            // append the item to the file
+                            pw.println(newItem);
+
+                            count++;
+                            if (plasmaSwitchboard.urlBlacklist != null) {
+                                String supportedBlacklistTypesStr = env.getConfig("BlackLists.types", "");
+                                String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");  
+
+                                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",selectedBlacklistName)) {
+                                        plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newItem.substring(0, pos), newItem.substring(pos + 1));
+                                    }                
+                                }                         
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    prop.put("status",1);
+                    prop.put("status_error", e.getLocalizedMessage());
+                } finally {
+                    if (pw != null) try { pw.close(); } catch (Exception e){ /* */}
                 }
-
-				//write the list
-				try{
-					BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(listsPath, filename))));
-					bw.write(out);
-                	                bw.close();
-				}catch(IOException e){}
-
-			}else{
-			}
-		}
-		prop.put("status_list", count);
-	}else{
-		prop.put("status", 5);//Wrong Invokation
-	}
-	
-	prop.put("filename", filename);
-	prop.put("page_name", Name);
-	prop.put("num", String.valueOf(count));
-	return prop;
+                
+                prop.put("LOCATION","Blacklist_p.html?selectedListName=" + selectedBlacklistName + "&selectList=");
+                return prop;                                              
+            }
+            
+            // generate the html list
+            if (otherBlacklist != null) {
+                // loading the current blacklist content
+                HashSet Blacklist = new HashSet(listManager.getListArray(new File(listManager.listsPath, selectedBlacklistName)));
+                
+                // sort the loaded blacklist
+                String[] sortedlist = (String[])otherBlacklist.toArray(new String[otherBlacklist.size()]);
+                Arrays.sort(sortedlist);                             
+                
+                int count = 0;
+                for(int i = 0; i < sortedlist.length; i++){
+                    String tmp = sortedlist[i];
+                    if( !Blacklist.contains(tmp) && (!tmp.equals("")) ){
+                        //newBlacklist.add(tmp);
+                        prop.put("page_urllist_" + count + "_dark", count % 2 == 0 ? 0:1);
+                        prop.put("page_urllist_" + count + "_url", tmp);
+                        prop.put("page_urllist_" + count + "_count", count);
+                        count++;
+                    }
+                }
+                prop.put("page_urllist", (count));       
+                prop.put("num", String.valueOf(count));
+                prop.put("page", 0);
+            }
+                
+                
+        } else {
+            prop.put("page", 1);
+            prop.put("status", 5);//Wrong Invokation
+        }
+        return prop;
     }
 
 }

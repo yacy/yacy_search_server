@@ -164,13 +164,17 @@ public class listManager {
         return writeList(listFile, out.toString()); //(File, String)
     }
 
-    public static String getListString(String filename, boolean withcomments){
+    public static String getListString(String filename, boolean withcomments) {        
+        File listFile = new File(listsPath ,filename);
+        return getListString(listFile, withcomments);
+    }
+    
+    public static String getListString(File listFile, boolean withcomments){
         StringBuffer temp = new StringBuffer();
         
         BufferedReader br = null;        
         try{
-            File listFile;
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile = new File(listsPath ,filename))));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile)));
             temp.ensureCapacity((int) listFile.length());
             
             // Read the List

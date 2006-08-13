@@ -7,7 +7,12 @@
 <!--
 function selectall(){
 	for(i = 1; i<= document.getElementsByName("num")[0].value; i++){
-		document.getElementsByName(i)[0].checked = true;
+		document.getElementsByName("item" + i)[0].checked = true;
+	}
+}
+function deselectall(){
+	for(i = 1; i<= document.getElementsByName("num")[0].value; i++){
+		document.getElementsByName("item" + i)[0].checked = false;
 	}
 }
 -->
@@ -18,44 +23,58 @@ function selectall(){
 <br><br>
 <h2>Add Items to Blacklist</h2>
 
-#(page)#
-<p>This are all new Blacklist Entries from "#[name]#":</p>
-::
-#(/page)#
-<p>
-#(status)#
-::
-#{list}#
-<b>#[entry]#</b> was added to your Blacklist.<br>
-#{/list}#
-::
-File Error! Wrong Path?
-::
-YaCy-Peer &quot;#[name]#&quot; not found.
-::
-URL &quot;#[address]#&quot; not found or empty list.
-::
-Wrong Invocation! Please invoke with sharedBlacklist.html?name=PeerName
+<p class="info">
+#(status)#<!-- [0] -->
+::<!-- [1] -->
+	Unable to store the items into the blacklist file:<br>
+	<font color="red">#[error]#</font>
+::<!-- [2] -->
+	File Error! Wrong Path?
+::<!-- [3] -->
+	YaCy-Peer &quot;<span class="settingsValue">#[name]#</span>&quot; not found.
+::<!-- [4] -->
+	URL &quot;<span class="settingsValue">#[address]#</span>&quot; not found or empty list.
+::<!-- [5] -->
+	Wrong Invocation! Please invoke with sharedBlacklist.html?name=PeerName
 #(/status)#
 </p>
 
 <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data">
 <input type="hidden" name="num" value="#[num]#">
-<input type="hidden" name="filename" value="#[filename]#">
+<input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#">
 <p>
-#(page)#
-<table border="1" cellspacing="1" cellpadding="3">
-<tr><th>Hostname/File/URL</th><th width="100%" align="left">Blocked Server</th><th>&nbsp;</th></tr>
-#{urllist}#
+#(page)#<!-- [0] -->
+<table>
 <tr>
-<td>#[name]#</td>
-<td>#[url]#</td>
-<td><input type="checkbox" name="#[count]#" value="#[url]#"></td>
+	<td><b>Blacklist source:</b></td>
+	<td><span class="settingsValue">#[source]#</span></td>
 </tr>
-#{/urllist}#
-<tr><td colspan="3"><input type="button" onclick="selectall()" value="select all"><br><input type="submit" value="add" name="add"></td></tr>
+<tr>
+	<td><b>Blacklist target:</b></td>
+	<td><span class="settingsValue">#[target]#</span></td>
+</tr>
 </table>
-::
+<p />
+<table border="0" cellspacing="1" cellpadding="3" >
+	<tr class="TableHeader">
+		<th class="small" width="100%" align="left">Blacklist item</th>
+		<th class="small">&nbsp;</th>
+	</tr>
+	#{urllist}#
+	<tr class="TableCell#(dark)#Light::Dark#(/dark)#"  class="small">
+		<td>#[url]#</td>
+		<td><input type="checkbox" name="item#[count]#" value="#[url]#"></td>
+	</tr>
+	#{/urllist}#
+	<tr class="small" style="background-color: #eeeeee">
+		<td colspan="2">
+			<input type="button" onclick="selectall()" value="select all">
+			<input type="button" onclick="deselectall()" value="deselect all">
+			<input type="submit" value="add" name="add">
+		</td>
+	</tr>
+</table>
+::<!-- [1] -->
 #(/page)#
 </p>
 </form>

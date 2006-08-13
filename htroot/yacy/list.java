@@ -75,7 +75,8 @@ public final class list {
             if(filenamesarray.length > 0){
                 for(int i = 0;i < filenamesarray.length; i++){
                     String filename = filenamesarray[i];
-                    out.append(listManager.getListString(new File(listsPath,filename).toString(), false))
+                    File fileObj = new File(listsPath,filename);
+                    out.append(listManager.getListString(fileObj, false))
                        .append(serverCore.crlfString);
                 }
             } // if filenamesarray.length > 0

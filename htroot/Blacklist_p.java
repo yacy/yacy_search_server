@@ -55,6 +55,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.TreeMap;
+
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -312,20 +314,25 @@ public class Blacklist_p {
 
 
         // List known hosts for BlackList retrieval
-        yacySeed seed;
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) { // no nullpointer error
-            final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null);
             int peerCount = 0;
-            while (e.hasMoreElements()) {
-                seed = (yacySeed) e.nextElement();
-                if (seed != null) {
-                    final String Hash = seed.hash;
-                    final String Name = seed.get(yacySeed.NAME, "nameless");
+            try {
+                TreeMap hostList = new TreeMap();
+                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null);
+                while (e.hasMoreElements()) {
+                    yacySeed seed = (yacySeed) e.nextElement();
+                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
+                }
+
+                String peername;
+                while ((peername = (String) hostList.firstKey()) != null) {
+                    final String Hash = (String) hostList.get(peername);
                     prop.put("otherHosts_" + peerCount + "_hash", Hash);
-                    prop.put("otherHosts_" + peerCount + "_name", Name);
+                    prop.put("otherHosts_" + peerCount + "_name", peername);
+                    hostList.remove(peername);
                     peerCount++;
                 }
-            }
+            } catch (Exception e) {/* */}
             prop.put("otherHosts", peerCount);
         }
     
