@@ -912,7 +912,7 @@ public final class plasmaCrawlLURL extends indexURL {
                     lastHash = entry.hash();
                 }
             } catch (RuntimeException e) {
-                if (e.getMessage().indexOf("not found in LURL") != -1) {
+                if (e.getMessage().length() != 0 && e.getMessage().indexOf("not found in LURL") != -1) {
                     serverLog.logWarning("URLDBCLEANER", "urlHash not found in LURL", e);
                 }
                 else {
