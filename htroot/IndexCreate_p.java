@@ -53,6 +53,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import de.anomic.data.wikiCode;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -158,6 +160,10 @@ public class IndexCreate_p {
                             prop.put("error_newcrawlingfilter", newcrawlingfilter);
                             prop.put("error_crawlingStart", crawlingStart);
                         } else try {
+                            
+                            // check if the crawl filter works correctly
+                            Pattern.compile(newcrawlingfilter);
+                            
                             // stack request
                             // first delete old entry, if exists
                             String urlhash = indexURL.urlHash(crawlingStart);
@@ -201,6 +207,10 @@ public class IndexCreate_p {
                                 ee.store();
                                 switchboard.urlPool.errorURL.stackPushEntry(ee);
                             }
+                        } catch (PatternSyntaxException e) {
+                            prop.put("error", 8); //crawlfilter does not match url
+                            prop.put("error_newcrawlingfilter", newcrawlingfilter);
+                            prop.put("error_error", e.getMessage());                                 
                         } catch (Exception e) {
                             // mist
                             prop.put("error", 6);//Error with url
@@ -213,7 +223,11 @@ public class IndexCreate_p {
                         if (post.containsKey("crawlingFile")) {
                             // getting the name of the uploaded file
                             String fileName = (String) post.get("crawlingFile");  
-                            try {                         
+                            try {                     
+                                // check if the crawl filter works correctly
+                                Pattern.compile(newcrawlingfilter);                              
+                                
+                                // loading the file content
                                 File file = new File(fileName);
                                 
                                 // getting the content of the bookmark file
@@ -268,7 +282,12 @@ public class IndexCreate_p {
                                         switchboard.urlPool.errorURL.stackPushEntry(ee);
                                     }
                                 }                             
-                                
+                               
+                            } catch (PatternSyntaxException e) {
+                                // print error message
+                                prop.put("error", 8); //crawlfilter does not match url
+                                prop.put("error_newcrawlingfilter", newcrawlingfilter);
+                                prop.put("error_error", e.getMessage());                            
                             } catch (Exception e) {
                                 // mist
                                 prop.put("error", 7);//Error with file
