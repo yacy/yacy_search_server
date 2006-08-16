@@ -37,9 +37,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.htmlFilter.htmlFilterAbstractTransformer;
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
-import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.logging.serverLog;
 
 public class gettext{
@@ -164,7 +162,7 @@ public class gettext{
         ArrayList strings = transformer.getStrings(content.toString().getBytes());
         return getGettextSource(inputfile, oldgettextmap, strings);
     }
-    public static ArrayList getGettextSource(File inputfile, Map oldgettextmap, ArrayList strings) throws FileNotFoundException{
+    public static ArrayList getGettextSource(File inputfile, Map oldgettextmap, ArrayList strings) {
         if(oldgettextmap==null)
             oldgettextmap=new HashMap();
         

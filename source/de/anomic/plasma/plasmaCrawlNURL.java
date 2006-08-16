@@ -458,7 +458,7 @@ public class plasmaCrawlNURL extends indexURL {
         private int      forkfactor;    // sum of anchors of all ancestors
         private bitfield flags;
         private int      handle;
-        private boolean  stored;;
+        private boolean  stored;
 
         public Entry(String initiator, 
                      URL url, 

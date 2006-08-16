@@ -562,7 +562,7 @@ public class SettingsAck_p {
                     // were changed, we now try to upload the seed list with the new settings
                     if (env.getConfig("seedUploadMethod","none").equalsIgnoreCase(uploaderName)) {
                         String error;
-                        if ((error = ((plasmaSwitchboard)env).yc.saveSeedList(env)) == null) {;
+                        if ((error = ((plasmaSwitchboard)env).yc.saveSeedList(env)) == null) {
                             
                             // we have successfully uploaded the seed file
                             prop.put("info", 13);

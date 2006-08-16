@@ -93,18 +93,16 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
                     this.ra.seek(pos + off);
                     return ra.read(b, off, len);
                 }
-            } else {
-                // use buffered entry
-                if (bb.length >= off + len) {
-                    // the bufferd entry is long enough
-                    System.arraycopy(bb, off, b, off, len);
-                    return len;
-                } else {
-                    // the entry is not long enough. transmit only a part
-                    System.arraycopy(bb, off, b, off, bb.length - off);
-                    return bb.length - off;
-                }
             }
+            // use buffered entry
+            if (bb.length >= off + len) {
+                // the bufferd entry is long enough
+                System.arraycopy(bb, off, b, off, len);
+                return len;
+            }
+            // the entry is not long enough. transmit only a part
+            System.arraycopy(bb, off, b, off, bb.length - off);
+            return bb.length - off;
         }
     }
 

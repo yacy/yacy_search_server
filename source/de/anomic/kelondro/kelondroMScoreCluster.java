@@ -50,8 +50,8 @@ import java.util.Random; // only for testing
 
 public final class kelondroMScoreCluster {
     
-    private final TreeMap refkeyDB; // a mapping from a reference to the cluster key
-    private final TreeMap keyrefDB; // a mapping from the cluster key to the reference
+    protected final TreeMap refkeyDB; // a mapping from a reference to the cluster key
+    protected final TreeMap keyrefDB; // a mapping from the cluster key to the reference
     private long gcount;
     private int encnt;
     

@@ -156,7 +156,7 @@ public final class message {
             } catch (IOException e) {
             	serverLog.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
               
-            };
+            }
         }
 //      System.out.println("respond = " + prop.toString());
 

@@ -31,7 +31,7 @@ import java.util.Iterator;
 
 public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondroIndex {
 
-    private kelondroBytesIntMap index;
+    protected kelondroBytesIntMap index;
     
     public kelondroFlexTable(File path, String tablename, kelondroOrder objectOrder, long buffersize, long preloadTime, kelondroRow rowdef, boolean exitOnFail) throws IOException {
         super(path, tablename, rowdef, exitOnFail);
@@ -103,9 +103,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return ri;
     }
     
-    
-    private kelondroIndex initializeTreeIndex(File indexfile, long buffersize, long preloadTime, kelondroOrder objectOrder) throws IOException {
-        kelondroTree index = new kelondroTree(indexfile, buffersize, preloadTime, 10,
+    private kelondroTree initializeTreeIndex(File indexfile, long buffersize, long preloadTime, kelondroOrder objectOrder) throws IOException {
+        kelondroTree treeindex = new kelondroTree(indexfile, buffersize, preloadTime, 10,
                 new kelondroRow("byte[] key-" + rowdef.width(0) + ", int reference-4 {b256}"),
                 objectOrder, 2, 80, true);
         Iterator content = super.col[0].contentNodes(-1);
@@ -115,16 +114,16 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         while (content.hasNext()) {
             node = (kelondroRecords.Node) content.next();
             i = node.handle().hashCode();
-            indexentry = index.row().newEntry();
+            indexentry = treeindex.row().newEntry();
             indexentry.setCol(0, node.getValueRow());
             indexentry.setCol(1, i);
-            index.put(indexentry);
+            treeindex.put(indexentry);
             if ((i % 10000) == 0) {
                 System.out.print('.');
                 System.out.flush();
             }
         }
-        return index;
+        return treeindex;
     }
     
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
@@ -144,9 +143,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             if (i < 0) {
                 index.puti(row.getColBytes(0), super.add(row));
                 return null;
-            } else {
-                return super.set(i, row);
             }
+            return super.set(i, row);
         }
     }
     

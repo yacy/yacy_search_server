@@ -65,6 +65,10 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
             if (exitOnFail) System.exit(-1);
             throw new RuntimeException("cannot set handle " + i + " / " + e.getMessage());
         }
+        // store column description
+        for (int i = 0; i < rowdef.columns(); i++) {
+            try {super.setText(i, rowdef.column(i).toString().getBytes());} catch (IOException e) {}
+        }
     }
 
     public kelondroFixedWidthArray(File file, kelondroRow rowdef) throws IOException{
@@ -86,7 +90,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         n = getNode(new Handle(index));
 
         // write the row
-        byte[] before = n.setValueRow(rowentry.bytes());
+        byte[] before = n.setValueRow((rowentry == null) ? null : rowentry.bytes());
         n.commit(CP_NONE);
 
         return row().newEntry(before);
@@ -122,7 +126,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     public void print() throws IOException {
         System.out.println("PRINTOUT of table, length=" + size());
         kelondroRow.Entry row;
-        for (int i = 0; i < size(); i++) {
+        for (int i = 0; i < super.USAGE.allCount(); i++) {
             System.out.print("row " + i + ": ");
             row = get(i);
             for (int j = 0; j < row.columns(); j++) System.out.print(((row.empty(j)) ? "NULL" : row.getColString(j, "UTF-8")) + ", ");
@@ -132,11 +136,13 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     }
 
     public static void main(String[] args) {
-        File f = new File("d:\\\\mc\\privat\\fixtest.db");
-        f.delete();
+        //File f = new File("d:\\\\mc\\privat\\fixtest.db");
+        File f = new File("/Users/admin/fixtest.db");
         kelondroRow rowdef = new kelondroRow("byte[] a-12, byte[] b-4");
-        kelondroFixedWidthArray k = new kelondroFixedWidthArray(f, rowdef, 6, true);
         try {
+            System.out.println("erster Test");
+            f.delete();
+            kelondroFixedWidthArray k = new kelondroFixedWidthArray(f, rowdef, 6, true);
             k.set(3, k.row().newEntry(new byte[][]{
                 "test123".getBytes(), "abcd".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{
@@ -147,6 +153,42 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
             System.out.println(k.get(2).toString());
             System.out.println(k.get(3).toString());
             System.out.println(k.get(4).toString());
+            k.close();
+
+            System.out.println("zweiter Test");
+            f.delete();
+            k = new kelondroFixedWidthArray(f, rowdef, 6, true);
+            k.add(k.row().newEntry(new byte[][]{"a".getBytes(), "xxxx".getBytes()}));
+            k.add(k.row().newEntry(new byte[][]{"b".getBytes(), "xxxx".getBytes()}));
+            k.remove(0);
+            
+            k.add(k.row().newEntry(new byte[][]{"c".getBytes(), "xxxx".getBytes()}));
+            k.add(k.row().newEntry(new byte[][]{"d".getBytes(), "xxxx".getBytes()}));
+            k.add(k.row().newEntry(new byte[][]{"e".getBytes(), "xxxx".getBytes()}));
+            k.add(k.row().newEntry(new byte[][]{"f".getBytes(), "xxxx".getBytes()}));
+            k.remove(0);
+            k.remove(1);
+            
+            k.print();
+            k.print(true);
+            k.close();
+            
+            
+            System.out.println("dritter Test");
+            f.delete();
+            k = new kelondroFixedWidthArray(f, rowdef, 6, true);
+            for (int i = 1; i <= 200; i = i * 2) {
+                for (int j = 0; j < i*2; j++) {
+                    k.add(k.row().newEntry(new byte[][]{(Integer.toString(i) + "-" + Integer.toString(j)).getBytes(), "xxxx".getBytes()}));
+                }
+                for (int j = 0; j < i; j++) {
+                    k.remove(j);
+                }
+            }
+            k.print();
+            k.print(true);
+            k.close();
+            
         } catch (IOException e) {
             e.printStackTrace();
         }

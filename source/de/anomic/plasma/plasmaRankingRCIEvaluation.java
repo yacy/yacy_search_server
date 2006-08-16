@@ -73,7 +73,7 @@ public class plasmaRankingRCIEvaluation {
         while (i.hasNext()) {
             key = (String) i.next();
             entry = rci.getEntry(key);
-            c = entry.getSeq().size();
+            c = entry.getSeqSet().size();
             if (c > maxcount) maxcount = c;
             count_key = new Integer(c);
             count_count = (Integer) counts.get(count_key);
@@ -162,7 +162,7 @@ public class plasmaRankingRCIEvaluation {
         while (i.hasNext()) {
             key = (String) i.next();
             entry = rci.getEntry(key);
-            ranked[orderIntoYBI(partition, entry.getSeq().size())].add(key);
+            ranked[orderIntoYBI(partition, entry.getSeqSet().size())].add(key);
         }
         return ranked;
     }

@@ -153,10 +153,8 @@ public class Blog {
 			} catch (UnsupportedEncodingException e) {
 				subject = StrSubject.getBytes();
 			}
-            
-			try {
-				switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content));
-			} catch (IOException e) {}
+         
+			switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content));
             
 			// create a news message
              HashMap map = new HashMap();

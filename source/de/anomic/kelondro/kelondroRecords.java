@@ -72,8 +72,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Iterator;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 
 public class kelondroRecords {
@@ -93,24 +95,24 @@ public class kelondroRecords {
     public static final int CP_HIGH   =  2; // cache priority high; entry must be cached
     
     // static seek pointers
-    public  static int  LEN_DESCR      = 60;
-    private static long POS_MAGIC      = 0;                     // 1 byte, byte: file type magic
-    private static long POS_BUSY       = POS_MAGIC      + 1;    // 1 byte, byte: marker for synchronization
-    private static long POS_PORT       = POS_BUSY       + 1;    // 2 bytes, short: hint for remote db access
-    private static long POS_DESCR      = POS_PORT       + 2;    // 60 bytes, string: any description string
-    private static long POS_COLUMNS    = POS_DESCR      + LEN_DESCR; // 2 bytes, short: number of columns in one entry
-    private static long POS_OHBYTEC    = POS_COLUMNS    + 2;    // 2 bytes, number of extra bytes on each Node
-    private static long POS_OHHANDLEC  = POS_OHBYTEC    + 2;    // 2 bytes, number of Handles on each Node
-    private static long POS_USEDC      = POS_OHHANDLEC  + 2;    // 4 bytes, int: used counter
-    private static long POS_FREEC      = POS_USEDC      + 4;    // 4 bytes, int: free counter
-    private static long POS_FREEH      = POS_FREEC      + 4;    // 4 bytes, int: free pointer (to free chain start)
-    private static long POS_MD5PW      = POS_FREEH      + 4;    // 16 bytes, string (encrypted password to this file)
-    private static long POS_ENCRYPTION = POS_MD5PW      + 16;   // 16 bytes, string (method description)
-    private static long POS_OFFSET     = POS_ENCRYPTION + 16;   // 8 bytes, long (seek position of first record)
-    private static long POS_INTPROPC   = POS_OFFSET     + 8;    // 4 bytes, int: number of INTPROP elements
-    private static long POS_TXTPROPC   = POS_INTPROPC   + 4;    // 4 bytes, int: number of TXTPROP elements
-    private static long POS_TXTPROPW   = POS_TXTPROPC   + 4;    // 4 bytes, int: width of TXTPROP elements
-    private static long POS_COLWIDTHS  = POS_TXTPROPW   + 4;    // array of 4 bytes, int[]: sizes of columns
+    public    static int  LEN_DESCR      = 60;
+    protected static long POS_MAGIC      = 0;                     // 1 byte, byte: file type magic
+    protected static long POS_BUSY       = POS_MAGIC      + 1;    // 1 byte, byte: marker for synchronization
+    protected static long POS_PORT       = POS_BUSY       + 1;    // 2 bytes, short: hint for remote db access
+    protected static long POS_DESCR      = POS_PORT       + 2;    // 60 bytes, string: any description string
+    protected static long POS_COLUMNS    = POS_DESCR      + LEN_DESCR; // 2 bytes, short: number of columns in one entry
+    protected static long POS_OHBYTEC    = POS_COLUMNS    + 2;    // 2 bytes, number of extra bytes on each Node
+    protected static long POS_OHHANDLEC  = POS_OHBYTEC    + 2;    // 2 bytes, number of Handles on each Node
+    protected static long POS_USEDC      = POS_OHHANDLEC  + 2;    // 4 bytes, int: used counter
+    protected static long POS_FREEC      = POS_USEDC      + 4;    // 4 bytes, int: free counter
+    protected static long POS_FREEH      = POS_FREEC      + 4;    // 4 bytes, int: free pointer (to free chain start)
+    protected static long POS_MD5PW      = POS_FREEH      + 4;    // 16 bytes, string (encrypted password to this file)
+    protected static long POS_ENCRYPTION = POS_MD5PW      + 16;   // 16 bytes, string (method description)
+    protected static long POS_OFFSET     = POS_ENCRYPTION + 16;   // 8 bytes, long (seek position of first record)
+    protected static long POS_INTPROPC   = POS_OFFSET     + 8;    // 4 bytes, int: number of INTPROP elements
+    protected static long POS_TXTPROPC   = POS_INTPROPC   + 4;    // 4 bytes, int: number of TXTPROP elements
+    protected static long POS_TXTPROPW   = POS_TXTPROPC   + 4;    // 4 bytes, int: width of TXTPROP elements
+    protected static long POS_COLWIDTHS  = POS_TXTPROPW   + 4;    // array of 4 bytes, int[]: sizes of columns
     // after this configuration field comes:
     // POS_HANDLES: INTPROPC * 4 bytes  : INTPROPC Integer properties, randomly accessible
     // POS_TXTPROPS: TXTPROPC * TXTPROPW : an array of TXTPROPC byte arrays of width TXTPROPW that can hold any string
@@ -119,29 +121,29 @@ public class kelondroRecords {
     // values that are only present at run-time
     protected String     filename;     // the database's file name
     protected kelondroIOChunks entryFile;    // the database file
-    private   int        overhead;     // OHBYTEC + 4 * OHHANDLEC = size of additional control bytes
-    private   int        headchunksize;// overheadsize + key element column size
-    private   int        tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
-    private   int        recordsize;   // (overhead + sum(all: COLWIDTHS)) = the overall size of a record
+    protected int        overhead;     // OHBYTEC + 4 * OHHANDLEC = size of additional control bytes
+    protected int        headchunksize;// overheadsize + key element column size
+    protected int        tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
+    protected int        recordsize;   // (overhead + sum(all: COLWIDTHS)) = the overall size of a record
     
     // dynamic run-time seek pointers
-    private long POS_HANDLES = 0; // starts after end of POS_COLWIDHS which is POS_COLWIDTHS + COLWIDTHS.length * 4
-    private long POS_TXTPROPS = 0; // starts after end of POS_HANDLES which is POS_HANDLES + HANDLES.length * 4
-    private long POS_NODES  = 0; // starts after end of POS_TXTPROPS which is POS_TXTPROPS + TXTPROPS.length * TXTPROPW
+    protected long POS_HANDLES = 0; // starts after end of POS_COLWIDHS which is POS_COLWIDTHS + COLWIDTHS.length * 4
+    protected long POS_TXTPROPS = 0; // starts after end of POS_HANDLES which is POS_HANDLES + HANDLES.length * 4
+    protected long POS_NODES  = 0; // starts after end of POS_TXTPROPS which is POS_TXTPROPS + TXTPROPS.length * TXTPROPW
 
     // dynamic variables that are back-ups of stored values in file; read/defined on instantiation
-    private   usageControl      USAGE;       // counter for used and re-use records and pointer to free-list
-    private   short             OHBYTEC;     // number of extra bytes in each node
-    private   short             OHHANDLEC;   // number of handles in each node
-    private   kelondroRow       ROW;         // array with widths of columns
-    private   Handle            HANDLES[];   // array with handles
-    private   byte[]            TXTPROPS[];  // array with text properties
-    private   int               TXTPROPW;    // size of a single TXTPROPS element
+    protected usageControl      USAGE;       // counter for used and re-use records and pointer to free-list
+    protected short             OHBYTEC;     // number of extra bytes in each node
+    protected short             OHHANDLEC;   // number of handles in each node
+    protected kelondroRow       ROW;         // array with widths of columns
+    protected Handle            HANDLES[];   // array with handles
+    protected byte[]            TXTPROPS[];  // array with text properties
+    protected int               TXTPROPW;    // size of a single TXTPROPS element
 
     // caching buffer
-    private kelondroIntBytesMap   cacheHeaders; // the cache; holds overhead values and key element
-    private int                   cacheSize;    // number of cache records
-    private int readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
+    protected kelondroIntBytesMap   cacheHeaders; // the cache; holds overhead values and key element
+    protected int                   cacheSize;    // number of cache records
+    protected int readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     
     // optional logger
     protected Logger theLogger = null;
@@ -149,10 +151,10 @@ public class kelondroRecords {
     // Random. This is used to shift flush-times of write-buffers to differrent time
     private static Random random = new Random(System.currentTimeMillis());
 
-    private class usageControl {
-        private   int               USEDC;       // counter of used elements
-        private   int               FREEC;       // counter of free elements in list of free Nodes
-        private   Handle            FREEH;       // pointer to first element in list of free Nodes, empty = NUL
+    protected final class usageControl {
+        protected int    USEDC; // counter of used elements
+        protected int    FREEC; // counter of free elements in list of free Nodes
+        protected Handle FREEH; // pointer to first element in list of free Nodes, empty = NUL
 
         public usageControl() throws IOException {
             read();
@@ -464,7 +466,7 @@ public class kelondroRecords {
         return this.headchunksize + element_in_cache;
     }
     
-    public int[] cacheNodeStatus() {
+    public final int[] cacheNodeStatus() {
         if (cacheHeaders == null) return new int[]{0,0,0,0,0,0,0,0,0,0};
         return new int[]{
                 cacheSize,
@@ -480,7 +482,7 @@ public class kelondroRecords {
         };
     }
     
-    public String cacheNodeStatusString() {
+    public final String cacheNodeStatusString() {
         return
               "cacheMaxSize=" + cacheSize +
             ", cacheCurrSize=" + ((cacheHeaders == null) ? 0 : cacheHeaders.size()) +
@@ -492,20 +494,20 @@ public class kelondroRecords {
             ", cacheFlush=" + cacheFlush;
     }
     
-    private static int[] cacheCombinedStatus(int[] a, int[] b) {
+    private final static int[] cacheCombinedStatus(int[] a, int[] b) {
         int[] c = new int[a.length];
         for (int i = a.length - 1; i >= 0; i--) c[i] = a[i] + b[i];
         return c;
     }
     
-    public static int[] cacheCombinedStatus(int[][] a, int l) {
+    public final static int[] cacheCombinedStatus(int[][] a, int l) {
         if ((a == null) || (a.length == 0) || (l == 0)) return null;
         if ((a.length >= 1) && (l == 1)) return a[0];
         if ((a.length >= 2) && (l == 2)) return cacheCombinedStatus(a[0], a[1]);
         return cacheCombinedStatus(cacheCombinedStatus(a, l - 1), a[l - 1]);
     }
     
-    public byte[] bulkRead(int start, int end) throws IOException {
+    public final byte[] bulkRead(int start, int end) throws IOException {
         // a bulk read simply reads a piece of memory from the record file
         // this makes only sense if there are no overhead bytes or pointer
         // the end value is OUTSIDE the record interval
@@ -519,19 +521,19 @@ public class kelondroRecords {
         return bulk;
     }
     
-    protected Node newNode() throws IOException {
+    protected final Node newNode() throws IOException {
         return new Node();
     }
     
-    protected Node getNode(Handle handle) throws IOException {
+    protected final Node getNode(Handle handle) throws IOException {
         return getNode(handle, null, 0);
     }
     
-    protected Node getNode(Handle handle, Node parentNode, int referenceInParent) throws IOException {
+    protected final Node getNode(Handle handle, Node parentNode, int referenceInParent) throws IOException {
         return new Node(handle, parentNode, referenceInParent);
     }
     
-    protected void deleteNode(Handle handle) throws IOException {
+    protected final void deleteNode(Handle handle) throws IOException {
         if (cacheSize != 0) {
             synchronized (cacheHeaders) {
                 cacheHeaders.removeb(handle.index);
@@ -570,13 +572,13 @@ public class kelondroRecords {
         //private byte[]    ohBytes  = null;  // the overhead bytes, OHBYTEC values
         //private Handle[]  ohHandle= null;  // the overhead handles, OHHANDLEC values
         //private byte[][]  values  = null;  // an array of byte[] nodes is the value vector
-        private Handle handle = null; // index of the entry, by default NUL means undefined
-        private byte[] headChunk = null; // contains ohBytes, ohHandles and the key value
-        private byte[] tailChunk = null; // contains all values except the key value
-        private boolean headChanged = true;
-        private boolean tailChanged = true;
+        protected Handle handle = null; // index of the entry, by default NUL means undefined
+        protected byte[] headChunk = null; // contains ohBytes, ohHandles and the key value
+        protected byte[] tailChunk = null; // contains all values except the key value
+        protected boolean headChanged = true;
+        protected boolean tailChanged = true;
         
-        private Node() throws IOException {
+        protected Node() throws IOException {
             // create a new empty node and reserve empty space in file for it
             // use this method only if you want to extend the file with new entries
             // without the need to have content in it.
@@ -589,7 +591,7 @@ public class kelondroRecords {
             for (int i = tailchunksize - 1; i >= 0; i--) this.tailChunk[i] = 0;
         }
     
-        private Node(Handle handle, byte[] bulkchunk, int offset) throws IOException {
+        protected Node(Handle handle, byte[] bulkchunk, int offset) {
             // this initializer is used to create nodes from bulk-read byte arrays
             this.handle = handle;
 
@@ -599,23 +601,8 @@ public class kelondroRecords {
             System.arraycopy(bulkchunk, offset, this.headChunk, 0, headchunksize);
             System.arraycopy(bulkchunk, offset + headchunksize, this.tailChunk, 0, tailchunksize);
         }
-        /*
-        private Node(Handle handle) throws IOException {
-            // this creates an entry with an pre-reserved entry position
-            // values can be written using the setValues() method
-            // but we expect that values are already there in the file ready to
-            // be read which we do not here
-            if (handle == null) throw new kelondroException(filename, "INTERNAL ERROR: node handle is null.");
-            if (handle.index >= USAGE.allCount()) throw new kelondroException(filename, "INTERNAL ERROR: node handle index exceeds size.");
-
-            // use given handle
-            this.handle = new Handle(handle.index);
-
-            // init the content
-            initContent();
-        }
-        */
-        private Node(Handle handle, Node parentNode, int referenceInParent) throws IOException {
+        
+        protected Node(Handle handle, Node parentNode, int referenceInParent) throws IOException {
             // this creates an entry with an pre-reserved entry position.
             // values can be written using the setValues() method,
             // but we expect that values are already there in the file.
@@ -626,16 +613,13 @@ public class kelondroRecords {
             // the parentNode can be given if an auto-fix in the following case is wanted
             if (handle == null) throw new kelondroException(filename, "INTERNAL ERROR: node handle is null.");
             if (handle.index >= USAGE.allCount()) {
-                if (parentNode == null) {
-                    throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. No auto-fix node was submitted. This is a serious failure.");
-                } else {
-                    try {
-                        parentNode.setOHHandle(referenceInParent, null);
-                        parentNode.commit(CP_NONE);
-                        logWarning("INTERNAL ERROR, Node/init in " + filename + ": node handle index " + handle.index + " exceeds size. The bad node has been auto-fixed");
-                    } catch (IOException ee) {
-                        throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. It was tried to fix the bad node, but failed with an IOException: " + ee.getMessage());
-                    }
+                if (parentNode == null) throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. No auto-fix node was submitted. This is a serious failure.");
+                try {
+                    parentNode.setOHHandle(referenceInParent, null);
+                    parentNode.commit(CP_NONE);
+                    logWarning("INTERNAL ERROR, Node/init in " + filename + ": node handle index " + handle.index + " exceeds size. The bad node has been auto-fixed");
+                } catch (IOException ee) {
+                    throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. It was tried to fix the bad node, but failed with an IOException: " + ee.getMessage());
                 }
             }
 
@@ -740,7 +724,7 @@ public class kelondroRecords {
 
         public byte[] setValueRow(byte[] row) throws IOException {
             // if the index is defined, then write values directly to the file, else only to the object
-            if (row.length != ROW.objectsize()) throw new IOException("setValueRow with wrong (" + row.length + ") row length instead correct: " + ROW.objectsize());
+            if ((row != null) && (row.length != ROW.objectsize())) throw new IOException("setValueRow with wrong (" + row.length + ") row length instead correct: " + ROW.objectsize());
             byte[] result = getValueRow(); // previous value (this loads the values if not already happened)
             
             // set values
@@ -848,23 +832,17 @@ public class kelondroRecords {
         
         private boolean cacheSpace() {
             // check for space in cache
-            // should be only called within a synchronized(XcacheHeaders) environment
+            // should be only called within a synchronized(cacheHeaders) environment
             // returns true if it is allowed to add another entry to the cache
             // returns false if the cache is considered to be full
             if (cacheSize == 0) return false; // no caching
             if (cacheHeaders.size() == 0) return true; // nothing there to flush
             if ((cacheHeaders.size() < cacheSize) && (availableMemory() >= memBlock)) return true; // no need to flush cache space
             
-            // delete one entry. distinguish between different priority cases:
-            if (cacheHeaders.size() != 0) {
-                    // just delete any of the  entries
-                    cacheHeaders.removeOne();
-                    cacheFlush++;
-                    return true;
-            } else {
-                    // we cannot delete any entry, therefore there is no space for another entry
-                    return false;
-            }
+            // just delete any of the entries
+            cacheHeaders.removeOne();
+            cacheFlush++;
+            return true;
         }
         
         private void updateNodeCache(int priority) {
@@ -894,12 +872,12 @@ public class kelondroRecords {
     protected void printCache() {
         if (cacheSize == 0) {
             System.out.println("### file report: " + size() + " entries");
-            for (int i = 0; i < size() + 3; i++) {
+            for (int i = 0; i < USAGE.allCount(); i++) {
                 // print from  file to compare
                 System.out.print("#F " + i + ": ");
                 try {
                     for (int j = 0; j < headchunksize; j++) 
-                        System.out.print(entryFile.readByte(j + seekpos(new Handle(i))) + ",");
+                        System.out.print(Integer.toHexString(0xff & entryFile.readByte(j + seekpos(new Handle(i)))) + " ");
                 } catch (IOException e) {}
                 
                 System.out.println();
@@ -955,31 +933,31 @@ public class kelondroRecords {
         }
     }
 
-    private final long seekpos(Handle handle) {
+    protected final long seekpos(Handle handle) {
         assert (handle.index >= 0): "handle index too low: " + handle.index;
         assert (handle.index < USAGE.allCount()): "handle index too high:" + handle.index;
         return POS_NODES + ((long) recordsize * handle.index);
     }
 
     // additional properties
-    public synchronized int handles() {
+    public final synchronized int handles() {
         return this.HANDLES.length;
     }
 
-    protected void setHandle(int pos, Handle handle) throws IOException {
+    protected final void setHandle(int pos, Handle handle) throws IOException {
         if (pos >= HANDLES.length) throw new IllegalArgumentException("setHandle: handle array exceeded");
         if (handle == null) handle = new Handle(NUL);
         HANDLES[pos] = handle;
         entryFile.writeInt(POS_HANDLES + 4 * pos, handle.index);
     }
 
-    protected Handle getHandle(int pos) {
+    protected final Handle getHandle(int pos) {
         if (pos >= HANDLES.length) throw new IllegalArgumentException("getHandle: handle array exceeded");
         return (HANDLES[pos].index == NUL) ? null : HANDLES[pos];
     }
 
     // custom texts
-    public void setText(int pos, byte[] text) throws IOException {
+    public final void setText(int pos, byte[] text) throws IOException {
         if (pos >= TXTPROPS.length) throw new IllegalArgumentException("setText: text array exceeded");
         if (text.length > TXTPROPW) throw new IllegalArgumentException("setText: text lemgth exceeded");
         if (text == null) text = new byte[0];
@@ -987,26 +965,26 @@ public class kelondroRecords {
         entryFile.write(POS_TXTPROPS + TXTPROPW * pos, text);
     }
 
-    public byte[] getText(int pos) {
+    public final byte[] getText(int pos) {
         if (pos >= TXTPROPS.length) throw new IllegalArgumentException("getText: text array exceeded");
         return TXTPROPS[pos];
     }
 
     // Returns true if this map contains no key-value mappings.
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         return (USAGE.USEDC == 0);
     }
 
     // Returns the number of key-value mappings in this map.
-    public int size() {
+    public final int size() {
         return USAGE.USEDC;
     }
 
-    protected int free() {
+    protected final int free() {
         return USAGE.FREEC;
     }
 
-    private void dispose(Handle h) throws IOException {
+    private final void dispose(Handle h) throws IOException {
         // delete element with handle h
         // this element is then connected to the deleted-chain and can be
         // re-used change counter
@@ -1021,22 +999,17 @@ public class kelondroRecords {
         }
     }
 
-    public Iterator contentRows(long maxInitTime) throws kelondroException {
-        // returns an iterator of kelondroRow.Entry-objects that are not marked as 'deleted'
-        try {
-            return new contentRowIterator(maxInitTime);
-        } catch (IOException e) {
-            return new HashSet().iterator();
-        }
+    public final Iterator contentRows(long maxInitTime) throws kelondroException {
+        return new contentRowIterator(maxInitTime);
     }
     
-    public class contentRowIterator implements Iterator {
+    public final class contentRowIterator implements Iterator {
         // iterator that iterates all kelondroRow.Entry-objects in the file
         // all records that are marked as deleted are ommitted
         
         private Iterator nodeIterator;
         
-        public contentRowIterator(long maxInitTime) throws IOException {
+        public contentRowIterator(long maxInitTime) {
             nodeIterator = contentNodes(maxInitTime);
         }
 
@@ -1058,7 +1031,7 @@ public class kelondroRecords {
         
     }
     
-    protected Iterator contentNodes(long maxInitTime) throws kelondroException {
+    protected final Iterator contentNodes(long maxInitTime) throws kelondroException {
         // returns an iterator of Node-objects that are not marked as 'deleted'
         try {
             return new contentNodeIterator(maxInitTime);
@@ -1067,40 +1040,46 @@ public class kelondroRecords {
         }
     }
     
-    protected class contentNodeIterator implements Iterator {
+    protected final Set deletedHandles(long maxTime) throws kelondroException, IOException {
+        // initialize set with deleted nodes; the set contains Handle-Objects
+        // this may last only the given maxInitTime
+        // if the initTime is exceeded, the method throws an kelondroException
+        TreeSet markedDeleted = new TreeSet();
+        long timeLimit = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
+        long seekp;
+        synchronized (USAGE) {
+            if (USAGE.FREEC != 0) {
+                Handle h = USAGE.FREEH;
+                while (h.index != NUL) {
+                    //System.out.println("handle=0x" + Integer.toHexString(h.index));
+                    markedDeleted.add(h);
+                    seekp = seekpos(h);
+                    if (seekp > entryFile.length()) throw new kelondroException("deletedHandles: seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
+                    h = new Handle(entryFile.readInt(seekp));
+                    if (System.currentTimeMillis() > timeLimit) throw new kelondroException(filename, "time limit of " + maxTime + " exceeded; > " + markedDeleted.size() + " deleted entries");
+                }
+            }
+        }
+        return markedDeleted;
+    }
+    
+    protected final class contentNodeIterator implements Iterator {
         // iterator that iterates all Node-objects in the file
         // all records that are marked as deleted are ommitted
         // this is probably also the fastest way to iterate all objects
         
-        private HashSet markedDeleted;
+        private Set markedDeleted;
         private Handle pos;
         private byte[] bulk;
         private int bulksize;
         private int bulkstart;  // the offset of the bulk array to the node position
         
         public contentNodeIterator(long maxInitTime) throws IOException, kelondroException {
-            pos = new Handle(0);
-            
-            // initialize set with deleted nodes
-            // this may last only the given maxInitTime
-            // if the initTime is exceeded, the method throws an kelondroException
-            markedDeleted = new HashSet();
-            long timeLimit = (maxInitTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxInitTime;
-            long seekp;
-            synchronized (USAGE) {
-                if (USAGE.FREEC != 0) {
-                    Handle h = USAGE.FREEH;
-                    while (h.index != NUL) {
-                        markedDeleted.add(h);
-                        seekp = seekpos(h);
-                        if (seekp > entryFile.length()) throw new kelondroException("contentNodeIterator: seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
-                        h = new Handle(entryFile.readInt(seekp));
-                        if (System.currentTimeMillis() > timeLimit) throw new kelondroException(filename, "time limit of " + maxInitTime + " exceeded; > " + markedDeleted.size() + " deleted entries");
-                    }
-                }
-            }
+            // initialize markedDeleted set of deleted Handles
+            markedDeleted = deletedHandles(maxInitTime);
             
             // seek first position according the delete node set
+            pos = new Handle(0);
             while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
             
             // initialize bulk
@@ -1132,18 +1111,7 @@ public class kelondroRecords {
                 throw new kelondroException(filename, e.getMessage());
             }
         }
-        /*
-        public Object next() {
-            try {
-                Node n = new Node(pos);
-                pos.index++;
-                while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
-                return n;
-            } catch (IOException e) {
-                throw new kelondroException(filename, e.getMessage());
-            }
-        }
-        */
+
         public void remove() {
             throw new UnsupportedOperationException();
         }
@@ -1161,7 +1129,7 @@ public class kelondroRecords {
         } catch (IOException e) { }
     }
 
-    protected static String[] line2args(String line) {
+    protected final static String[] line2args(String line) {
         // parse the command line
         if ((line == null) || (line.length() == 0)) return null;
         String args[];
@@ -1175,7 +1143,7 @@ public class kelondroRecords {
         return args;
     }
 
-    protected static boolean equals(byte[] a, byte[] b) {
+    protected final static boolean equals(byte[] a, byte[] b) {
         if (a == b) return true;
         if ((a == null) || (b == null)) return false;
         if (a.length != b.length) return false;
@@ -1231,6 +1199,7 @@ public class kelondroRecords {
         System.out.println("  USEDC      : " + USAGE.USEDC);
         System.out.println("  FREEC      : " + USAGE.FREEC);
         System.out.println("  FREEH      : " + USAGE.FREEH.toString());
+        System.out.println("  NUL repres.: 0x" + Integer.toHexString(NUL));
         System.out.println("  Data Offset: 0x" + Long.toHexString(POS_NODES));
         System.out.println("--");
         System.out.println("RECORDS");
@@ -1240,11 +1209,22 @@ public class kelondroRecords {
         System.out.println("  Overhead   : " + this.overhead + " bytes  (" + OHBYTEC + " OH bytes, " + OHHANDLEC + " OH Handles)");
         System.out.println("  Recordsize : " + this.recordsize + " bytes");
         System.out.println("--");
+        System.out.println("DELETED HANDLES");
+        Set dh =  deletedHandles(-1);
+        Iterator dhi = dh.iterator();
+        Handle h;
+        while (dhi.hasNext()) {
+            h = (Handle) dhi.next();
+            System.out.print(h.index + ", ");
+        }
+        System.out.println("\n--");
+        if (!(records)) return;
+        
+        // print also all records
+        System.out.println("CACHE");
         printCache();
         System.out.println("--");
-
-        if (!(records)) return;
-        // print also all records
+        System.out.println("NODES");
         for (int i = 0; i < USAGE.allCount(); i++)
             System.out.println("NODE: " + new Node(new Handle(i), (Node) null, 0).toString());
     }
@@ -1253,10 +1233,10 @@ public class kelondroRecords {
         return size() + " RECORDS IN FILE " + filename;
     }
     
-    protected class Handle implements Comparable {
-        private int index;
+    protected final class Handle implements Comparable {
+        protected int index;
 
-        private Handle() throws IOException {
+        protected Handle() throws IOException {
             // reserves a new record and returns index of record
             // the return value is not a seek position
             // the seek position can be retrieved using the seekpos() function

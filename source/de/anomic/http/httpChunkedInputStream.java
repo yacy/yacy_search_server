@@ -244,7 +244,6 @@ public final class httpChunkedInputStream extends InputStream {
     static void exhaustInputStream(InputStream inStream) throws IOException {
         byte buffer[] = new byte[1024];
         while (inStream.read(buffer) >= 0) {
-            ;
         }
     }
 }

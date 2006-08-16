@@ -51,8 +51,8 @@ import de.anomic.server.logging.serverLog;
 
 public class yacyDHTAction implements yacyPeerAction {
    
-    private yacySeedDB seedDB;
-    private kelondroMScoreCluster seedCrawlReady;
+    protected yacySeedDB seedDB;
+    protected kelondroMScoreCluster seedCrawlReady;
     
     public yacyDHTAction(yacySeedDB seedDB) {
         this.seedDB = seedDB;

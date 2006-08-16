@@ -50,9 +50,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -67,7 +70,7 @@ public class kelondroAttrSeq {
     // class objects
     private File file;
     private Map entries;
-    private Structure structure;
+    protected Structure structure;
     private String name;
     private long created;
     
@@ -117,8 +120,7 @@ public class kelondroAttrSeq {
         } else {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(loadfile)));
         }
-        String line;
-        String key;
+        String line, key, oldvalue, newvalue;
         while ((line = br.readLine()) != null) {
             line = line.trim();
             if (line.length() == 0) continue;
@@ -136,10 +138,32 @@ public class kelondroAttrSeq {
             }
             if ((p = line.indexOf('=')) > 0) {
                 key = line.substring(0, p).trim();
-                if (entries.containsKey(key)) {
-                    logWarning("read PropFile " + loadfile.toString() + ", key " + key + ": double occurrence");
+                newvalue = line.substring(p + 1).trim();
+                oldvalue = (String) entries.get(key);
+                if (oldvalue != null) {
+                    if (newvalue.equals(oldvalue)) {
+                        //logWarning("key " + key + ": double occurrence. values are equal. second appearance is ignored");
+                    } else {
+                        if (newvalue.length() < oldvalue.length()) {
+                            if (oldvalue.substring(0, newvalue.length()).equals(newvalue)) {
+                                logWarning("key " + key + ": double occurrence. new value is subset of old value. second appearance is ignored");
+                            } else {
+                                logWarning("key " + key + ": double occurrence. new value is shorter than old value, but not a subsequence. old = " + oldvalue + ", new = " + newvalue);
+                            }
+                        } else if (newvalue.length() > oldvalue.length()) {
+                            if (newvalue.substring(0, oldvalue.length()).equals(oldvalue)) {
+                                logWarning("key " + key + ": double occurrence. old value is subset of new value. first appearance is ignored");
+                            } else {
+                                logWarning("key " + key + ": double occurrence. old value is shorter than new value, but not a subsequence. old = " + oldvalue + ", new = " + newvalue);
+                            }
+                            entries.put(key, newvalue);
+                        } else {
+                            logWarning("key " + key + ": double occurrence. old and new value have equal length but are not equal. old = " + oldvalue + ", new = " + newvalue);
+                            //entries.put(key, newvalue);
+                        }
+                    }
                 } else {
-                    entries.put(key, line.substring(p + 1).trim());
+                    entries.put(key, newvalue);
                 }
             }
         }
@@ -189,10 +213,10 @@ public class kelondroAttrSeq {
     }
     
     public Entry newEntry(String pivot, boolean tree) {
-        return new Entry(pivot, new HashMap(), (tree) ? (Map) new TreeMap() : (Map) new HashMap());
+        return new Entry(pivot, new HashMap(), (tree) ? (Set) new TreeSet() : (Set) new HashSet());
     }
     
-    public Entry newEntry(String pivot, HashMap props, Map seq) {
+    public Entry newEntry(String pivot, HashMap props, Set seq) {
         return new Entry(pivot, props, seq);
     }
     
@@ -237,7 +261,7 @@ public class kelondroAttrSeq {
         protected int[]    prop_len = null, prop_pos = null;
         protected String[] seq_names = null;
         protected int[]    seq_len = null, seq_pos = null;
-        
+        protected kelondroRow seqrow;
         // example:
         //# Structure=<pivot-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>,'|',*<Anchor-12>
 
@@ -297,8 +321,23 @@ public class kelondroAttrSeq {
                 seq_pos[i] = p;
                 p += seq_len[i];
             }
+            
+            // generate rowdef for seq row definition
+            StringBuffer rowdef = new StringBuffer();
+            rowdef.append("byte[] ");
+            rowdef.append(seq_names[0]);
+            rowdef.append('-');
+            rowdef.append(seq_len[0]);
+            
+            for (int i = 1; i < seq_names.length; i++) {
+                rowdef.append(", byte[] ");
+                rowdef.append(seq_names[i]);
+                rowdef.append('-');
+                rowdef.append(seq_len[i]);
+            }
+            seqrow = new kelondroRow(new String(rowdef));
         }
-
+        
         public String toString() {
             StringBuffer sb = new StringBuffer(100);
             sb.append('<'); sb.append(pivot_name); sb.append('-'); sb.append(Integer.toString(pivot_len)); sb.append(">,'=',");
@@ -320,9 +359,9 @@ public class kelondroAttrSeq {
     public class Entry {
         String  pivot;
         HashMap attrs;
-        Map     seq;
+        Set     seq;
         
-        public Entry(String pivot, HashMap attrs, Map seq) {
+        public Entry(String pivot, HashMap attrs, Set seq) {
             this.pivot = pivot;
             this.attrs = attrs;
             this.seq = seq;
@@ -331,22 +370,22 @@ public class kelondroAttrSeq {
         public Entry(String pivot, String attrseq, boolean tree) {
             this.pivot = pivot;
             attrs = new HashMap();
-            seq = (tree) ? (Map) new TreeMap() : (Map) new HashMap();
+            seq = (tree) ? (Set) new TreeSet() : (Set) new HashSet();
             for (int i = 0; i < structure.prop_names.length; i++) {
                 attrs.put(structure.prop_names[i], new Long(kelondroBase64Order.enhancedCoder.decodeLong(attrseq.substring(structure.prop_pos[i], structure.prop_pos[i] + structure.prop_len[i]))));
             }
             
             int p = attrseq.indexOf('|') + 1;
-            long[] seqattrs = new long[structure.seq_names.length - 1];
+            //long[] seqattrs = new long[structure.seq_names.length - 1];
             String seqname;
             while (p + structure.seq_len[0] <= attrseq.length()) {
                 seqname = attrseq.substring(p, p + structure.seq_len[0]);
                 p += structure.seq_len[0];
                 for (int i = 1; i < structure.seq_names.length; i++) {
-                    seqattrs[i - 1] = kelondroBase64Order.enhancedCoder.decodeLong(attrseq.substring(p, p + structure.seq_len[i]));
+                    //seqattrs[i - 1] = kelondroBase64Order.enhancedCoder.decodeLong(attrseq.substring(p, p + structure.seq_len[i]));
                     p += structure.seq_len[i];
                 }
-                seq.put(seqname, seqattrs);
+                seq.add(seqname/*, seqattrs*/);
             }
         }
         
@@ -364,16 +403,25 @@ public class kelondroAttrSeq {
             attrs.put(key, new Long(attr));
         }
         
-        public Map getSeq() {
+        public Set getSeqSet() {
             return seq;
         }
         
-        public void setSeq(Map seq) {
+        public kelondroRowCollection getSeqCollection() {
+            kelondroRowCollection collection = new kelondroRowCollection(structure.seqrow, seq.size());
+            Iterator i = seq.iterator();
+            while (i.hasNext()) {
+                collection.add(structure.seqrow.newEntry(((String) i.next()).getBytes()));
+            }
+            return collection;
+        }
+        
+        public void setSeq(Set seq) {
             this.seq = seq;
         }
         
-        public void addSeq(String s, long[] seqattrs) {
-            this.seq.put(s, seqattrs);
+        public void addSeq(String s/*, long[] seqattrs*/) {
+            this.seq.add(s/*, seqattrs*/);
         }
         
         public String toString() {
@@ -385,16 +433,16 @@ public class kelondroAttrSeq {
                 sb.append(kelondroBase64Order.enhancedCoder.encodeLongSmart((val == null) ? 0 : val.longValue(), structure.prop_len[i]));
             }
             sb.append('|');
-            Iterator q = seq.entrySet().iterator();
-            Map.Entry entry;
-            long[] seqattrs;
+            Iterator q = seq.iterator();
+            //long[] seqattrs;
             while (q.hasNext()) {
-                entry = (Map.Entry) q.next();
-                sb.append((String) entry.getKey());
-                seqattrs = (long[]) entry.getValue();
+                sb.append((String) q.next());
+                //seqattrs = (long[]) entry.getValue();
+                /*
                 for (int i = 1; i < structure.seq_names.length; i++) {
                     sb.append(kelondroBase64Order.enhancedCoder.encodeLong(seqattrs[i - 1], structure.seq_len[i]));
                 }
+                */
             }
             return sb.toString();
         }

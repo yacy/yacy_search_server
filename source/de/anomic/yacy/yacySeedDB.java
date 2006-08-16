@@ -89,9 +89,9 @@ public final class yacySeedDB {
     public static final String[]  accFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.ISPEED};
     
     // class objects
-    private File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
+    protected File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
 
-    private kelondroMap seedActiveDB, seedPassiveDB, seedPotentialDB;
+    protected kelondroMap seedActiveDB, seedPassiveDB, seedPotentialDB;
     private int seedDBBufferKB;
     private long preloadTime;
     
@@ -210,7 +210,7 @@ public final class yacySeedDB {
         return new kelondroMap(new kelondroDyn(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', true), sortFields, accFields);
     }
     
-    private synchronized kelondroMap resetSeedTable(kelondroMap seedDB, File seedDBFile) {
+    protected synchronized kelondroMap resetSeedTable(kelondroMap seedDB, File seedDBFile) {
         // this is an emergency function that should only be used if any problem with the
         // seed.db is detected
     yacyCore.log.logFine("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");

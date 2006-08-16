@@ -210,12 +210,11 @@ public class kelondroMHashMap {
         //System.out.println("get " + new String(key) + " from cell " + hash);
         if (hash < 0) {
             return null;
-        } else {
-            // read old entry
-            byte[] value = new byte[valuelen];
-            System.arraycopy(mem, hash * reclen + keylen, value, 0, valuelen);
-            return value;
         }
+        // read old entry
+        byte[] value = new byte[valuelen];
+        System.arraycopy(mem, hash * reclen + keylen, value, 0, valuelen);
+        return value;
     }
     
     public void remove(int key) {
@@ -276,7 +275,7 @@ public class kelondroMHashMap {
         return;
     }
     
-    private int anyhashpos(int start) {
+    protected int anyhashpos(int start) {
         while (start < capacity()) {
             if (mem[start * reclen] != 0) return start;
             start++;

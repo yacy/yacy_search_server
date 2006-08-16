@@ -80,7 +80,7 @@ public abstract class kelondroAbstractOrder implements kelondroOrder {
         return zero;
     }
     
-    public void rotate(byte[] zero) {
-        this.zero = zero;
+    public void rotate(byte[] newzero) {
+        this.zero = newzero;
     }
 }

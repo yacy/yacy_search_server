@@ -135,7 +135,7 @@ public class blogBoard {
         return wikiBoard.guessAuthor(ip);
     }
 
-    public entry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page) throws IOException {
+    public entry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page) {
 	return new entry(normalize(key), subject, author, ip, date, page);
     }
 
@@ -144,7 +144,7 @@ public class blogBoard {
 	String key;
         Map record;
 
-    public entry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page) throws IOException {
+    public entry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page) {
 	    record = new HashMap();
 	    key = nkey;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
@@ -323,10 +323,8 @@ public class blogBoard {
 			} catch (UnsupportedEncodingException e1) {
 				page = StrPage.getBytes();
 			}
-    		
-    		try {
-				write (newEntry(key, subject, author, ip, date, page));
-			} catch (IOException e) { }
+
+		write (newEntry(key, subject, author, ip, date, page));
     	}
     	return true;
     }

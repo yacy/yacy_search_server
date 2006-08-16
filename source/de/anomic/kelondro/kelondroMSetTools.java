@@ -95,13 +95,10 @@ public class kelondroMSetTools {
 
 	// start most efficient method
 	if (stepsEnum > stepsTest) {
-	    if (map.size() < set.size())
-                return joinConstructiveByTestSetInMap(map, set);
-            else
-                return joinConstructiveByTestMapInSet(map, set);
-	} else {
+	    if (map.size() < set.size()) return joinConstructiveByTestSetInMap(map, set);
+        return joinConstructiveByTestMapInSet(map, set);
+	}
 	    return joinConstructiveByEnumeration(map, set);
-        }
     }
 
     private static TreeMap joinConstructiveByTestSetInMap(TreeMap map, TreeSet set) {
@@ -167,13 +164,10 @@ public class kelondroMSetTools {
 
 	// start most efficient method
 	if (stepsEnum > stepsTest) {
-	    if (set1.size() < set2.size())
-                return joinConstructiveByTest(set1, set2);
-            else
-                return joinConstructiveByTest(set2, set1);
-	} else {
-	    return joinConstructiveByEnumeration(set1, set2);
-        }
+	    if (set1.size() < set2.size()) return joinConstructiveByTest(set1, set2);
+        return joinConstructiveByTest(set2, set1);
+	}
+	return joinConstructiveByEnumeration(set1, set2);
     }
 
     private static TreeSet joinConstructiveByTest(TreeSet small, TreeSet large) {

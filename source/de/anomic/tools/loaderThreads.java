@@ -51,10 +51,10 @@ import de.anomic.http.httpc;
 public class loaderThreads {
     
     // global values for loader threads
-    private int timeout;
-    private String user;
-    private String password;
-    private httpRemoteProxyConfig remoteProxyConfig;
+    protected int timeout;
+    protected String user;
+    protected String password;
+    protected httpRemoteProxyConfig remoteProxyConfig;
 
     // management objects for collection of threads
     Hashtable threads;

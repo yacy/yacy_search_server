@@ -163,9 +163,8 @@ public class kelondroFlexWidthArray implements kelondroArray {
                 e = col[c].row().newEntry(
                         rowentry.bytes(),
                         rowdef.colstart[c],
-                        rowdef.colstart[lastcol] - rowdef.colstart[c]
-                                + rowdef.width(lastcol));
-                col[c].set(index, e);
+                        rowdef.colstart[lastcol] + rowdef.width(lastcol) - rowdef.colstart[c]);
+                col[c].set(index,e);
                 c = c + col[c].row().columns();
             }
         }
@@ -190,8 +189,14 @@ public class kelondroFlexWidthArray implements kelondroArray {
     public void remove(int index) throws IOException {
         int r = 0;
         synchronized (col) {
+            
+            // remove only from the first column
+            col[0].remove(index);
+            r = r + col[r].row().columns();
+            
+            // the other columns will be blanked out only
             while (r < rowdef.columns()) {
-                col[r].remove(index);
+                col[r].set(index, null);
                 r = r + col[r].row().columns();
             }
         }
@@ -200,7 +205,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
     public void print() throws IOException {
         System.out.println("PRINTOUT of table, length=" + size());
         kelondroRow.Entry row;
-        for (int i = 0; i < size(); i++) {
+        for (int i = 0; i < col[0].USAGE.allCount(); i++) {
             System.out.print("row " + i + ": ");
             row = get(i);
             System.out.println(row.toString());
@@ -209,26 +214,51 @@ public class kelondroFlexWidthArray implements kelondroArray {
         }
         System.out.println("EndOfTable");
     }
-    
 
     public static void main(String[] args) {
-        File f = new File("d:\\\\mc\\privat\\");
+        //File f = new File("d:\\\\mc\\privat\\fixtest.db");
+        File f = new File("/Users/admin/");
+        kelondroRow rowdef = new kelondroRow("byte[] a-12, byte[] b-4");
+        String testname = "flextest";
         try {
-            kelondroFlexWidthArray k = new kelondroFlexWidthArray(f, "flextest", new kelondroRow("byte[] a-12, byte[] b-4"), true);
+            System.out.println("erster Test");
+            new File(f, testname).delete();
             
-            k.set(3, k.row().newEntry(new byte[][]{
-                "test123".getBytes(), "abcd".getBytes()}));
-            k.add(k.row().newEntry(new byte[][]{
-                "test456".getBytes(), "efgh".getBytes()}));
+            kelondroFlexWidthArray k = new kelondroFlexWidthArray(f, "flextest", rowdef, true);
+            k.add(k.row().newEntry(new byte[][]{"a".getBytes(), "xxxx".getBytes()}));
+            k.add(k.row().newEntry(new byte[][]{"b".getBytes(), "xxxx".getBytes()}));
+            k.remove(0);
+            
+            k.add(k.row().newEntry(new byte[][]{"c".getBytes(), "xxxx".getBytes()}));
+            k.add(k.row().newEntry(new byte[][]{"d".getBytes(), "xxxx".getBytes()}));
+            k.add(k.row().newEntry(new byte[][]{"e".getBytes(), "xxxx".getBytes()}));
+            k.add(k.row().newEntry(new byte[][]{"f".getBytes(), "xxxx".getBytes()}));
+            k.remove(0);
+            k.remove(1);
+            
+            k.print();
+            k.col[0].print(true);
+            k.col[1].print(true);
             k.close();
             
-            k = new kelondroFlexWidthArray(f, "flextest", new kelondroRow("byte[] a-12, byte[] b-4"), true);
-            System.out.println(k.get(2).toString());
-            System.out.println(k.get(3).toString());
-            System.out.println(k.get(4).toString());
+            
+            System.out.println("zweiter Test");
+            new File(f, testname).delete();
+            k = new kelondroFlexWidthArray(f, "flextest", rowdef, true);
+            for (int i = 1; i <= 20; i = i * 2) {
+                for (int j = 0; j < i*2; j++) {
+                    k.add(k.row().newEntry(new byte[][]{(Integer.toString(i) + "-" + Integer.toString(j)).getBytes(), "xxxx".getBytes()}));
+                }
+                for (int j = 0; j < i; j++) {
+                    k.remove(j);
+                }
+            }
+            k.print();
+            k.col[0].print(true);
+            k.close();
+            
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
 }

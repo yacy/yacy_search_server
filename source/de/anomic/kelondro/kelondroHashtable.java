@@ -134,13 +134,13 @@ import java.io.IOException;
 
 public class kelondroHashtable {
     
-    private kelondroFixedWidthArray hashArray;
-    private int offset;
-    private int maxk;
-    private int maxrehash;
-    private kelondroRow.Entry dummyRow;
+    private   kelondroFixedWidthArray hashArray;
+    protected int offset;
+    protected int maxk;
+    private   int maxrehash;
+    private   kelondroRow.Entry dummyRow;
     
-    private static final byte[] dummyKey = kelondroBase64Order.enhancedCoder.encodeLong(0, 5).getBytes();
+    private   static final byte[] dummyKey = kelondroBase64Order.enhancedCoder.encodeLong(0, 5).getBytes();
 
     public kelondroHashtable(File file, kelondroRow rowdef, int offset, int maxsize, int maxrehash, boolean exitOnFail) {
         // this creates a new hashtable

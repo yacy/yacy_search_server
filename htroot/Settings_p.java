@@ -127,7 +127,7 @@ public final class Settings_p {
         
         for (int i=0; i < forwardingMethods.length; i++) {
             try {            
-                Class forwarder = Class.forName(env.getConfig("portForwarding." + forwardingMethods[i],"")); // FIXME: why is forwarder declared, but never used?
+                //Class forwarder = Class.forName(env.getConfig("portForwarding." + forwardingMethods[i],"")); // FIXME: why is forwarder declared, but never used?
                 prop.put("forwardingMethods_" + methodCount + "_name",forwardingMethods[i]);
                 prop.put("forwardingMethods_" + methodCount + "_selected", forwardingMethods[i].equals(currentForwarder)?1:0);
                 methodCount++;

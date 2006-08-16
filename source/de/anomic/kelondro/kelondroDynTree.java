@@ -143,9 +143,8 @@ public class kelondroDynTree {
             kelondroRA ra = table.getRA(key);
             treeRAHandles.put(key, ra);
             return new kelondroTree(ra, buffersize, preloadTime, kelondroTree.defaultObjectCachePercent);
-        } else {
-            return null;
         }
+        return null;
     }
     
     protected void closeTree(String key) throws IOException {
@@ -206,7 +205,7 @@ public class kelondroDynTree {
     protected class treeBuffer {
         
         private String tablename;
-        private Hashtable tbuffer;
+        protected Hashtable tbuffer;
         public long timestamp;
         
         treeBuffer(String tablename) {

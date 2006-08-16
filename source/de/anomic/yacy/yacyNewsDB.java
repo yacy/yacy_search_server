@@ -61,7 +61,7 @@ public class yacyNewsDB {
     private File path;
     private int bufferkb;
     private long preloadTime;
-    private kelondroTree news;
+    protected kelondroTree news;
 
     public yacyNewsDB(File path, int bufferkb, long preloadTime) {
         this.path = path;
@@ -161,7 +161,7 @@ public class yacyNewsDB {
         }
     }
 
-    private static yacyNewsRecord b2r(kelondroRow.Entry b) {
+    protected final static yacyNewsRecord b2r(kelondroRow.Entry b) {
         if (b == null) return null;
         return new yacyNewsRecord(
             b.getColString(0, null),
@@ -172,7 +172,7 @@ public class yacyNewsDB {
         );
     }
 
-    private kelondroRow.Entry r2b(yacyNewsRecord r) {
+    protected final kelondroRow.Entry r2b(yacyNewsRecord r) {
         if (r == null) return null;
         String attributes = r.attributes().toString();
         if (attributes.length() > yacyNewsRecord.attributesMaxLength) throw new IllegalArgumentException("attribute length=" + attributes.length() + " exceeds maximum size=" + yacyNewsRecord.attributesMaxLength);

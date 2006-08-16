@@ -470,11 +470,11 @@ public final class plasmaCondenser {
         writer.close();
     }
 
-    private static boolean punctuation(char c) {
+    protected final static boolean punctuation(char c) {
         return ("!?.".indexOf(c) >= 0);
     }
 
-    public static boolean invisible(char c) {
+    public final static boolean invisible(char c) {
         if ((c < ' ') || (c > 'z')) return true;
         return ("$%&/()=\"$%&/()=`^+*~#'-_:;,|<>[]\\".indexOf(c) >= 0);
     }

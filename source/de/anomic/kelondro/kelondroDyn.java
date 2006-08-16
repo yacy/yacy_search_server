@@ -62,7 +62,7 @@ public class kelondroDyn extends kelondroTree {
 
     private static final int counterlen = 8;
 
-    private int keylen;
+    protected int keylen;
     private int reclen;
     private int segmentCount;
     private char fillChar;
@@ -123,7 +123,7 @@ public class kelondroDyn extends kelondroTree {
         return key.getBytes();
     }
 
-    private String origKey(byte[] rawKey) {
+    protected String origKey(byte[] rawKey) {
         int n = keylen - 1;
         if (n >= rawKey.length) n = rawKey.length - 1;
         while ((n > 0) && (rawKey[n] == (byte) fillChar)) n--;

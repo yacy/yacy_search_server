@@ -449,7 +449,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
     
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
-        int removed = 0;;
+        int removed = 0;
         synchronized (ramCache) {
             removed += ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
             if (removed == urlHashes.size()) return removed;

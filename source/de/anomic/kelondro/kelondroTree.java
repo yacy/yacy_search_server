@@ -63,33 +63,33 @@ import java.util.Map;
 public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	
     // logging (This probably needs someone to initialize the java.util.logging.* facilities);
-    public static Logger log = Logger.getLogger("KELONDRO");
+    public static final Logger log = Logger.getLogger("KELONDRO");
 
     // define the Over-Head-Array
-    private static short thisOHBytes   = 2; // our record definition of two bytes
-    private static short thisOHHandles = 3; // and three handles overhead
-    private static short thisFHandles  = 1; // file handles: one for a root pointer
+    protected static final short thisOHBytes   = 2; // our record definition of two bytes
+    protected static final short thisOHHandles = 3; // and three handles overhead
+    protected static final short thisFHandles  = 1; // file handles: one for a root pointer
 
     // define pointers for OH array access
-    private static int magic      = 0; // pointer for OHByte-array: marker for Node purpose; defaults to 1
-    private static int balance    = 1; // pointer for OHByte-array: balance value of tree node; balanced = 0
+    protected static final int magic      = 0; // pointer for OHByte-array: marker for Node purpose; defaults to 1
+    protected static final int balance    = 1; // pointer for OHByte-array: balance value of tree node; balanced = 0
 
-    private static int parent     = 0; // pointer for OHHandle-array: handle()-Value of parent Node
-    private static int leftchild  = 1; // pointer for OHHandle-array: handle()-Value of left child Node
-    private static int rightchild = 2; // pointer for OHHandle-array: handle()-Value of right child Node
+    protected static final int parent     = 0; // pointer for OHHandle-array: handle()-Value of parent Node
+    protected static final int leftchild  = 1; // pointer for OHHandle-array: handle()-Value of left child Node
+    protected static final int rightchild = 2; // pointer for OHHandle-array: handle()-Value of right child Node
 
-    private static int root       = 0; // pointer for FHandles-array: pointer to root node
+    protected static final int root       = 0; // pointer for FHandles-array: pointer to root node
 
     // calibration of cache
-    public  static int defaultObjectCachePercent = 30;
+    public    static final int defaultObjectCachePercent = 30;
     
     // class variables
-    private Search writeSearchObj = new Search();
-    protected kelondroOrder objectOrder = new kelondroNaturalOrder(true);
-    private final kelondroOrder loopDetectionOrder = new kelondroNaturalOrder(true);
-    private int readAheadChunkSize = 100;
-    private long lastIteratorCount = readAheadChunkSize;
-    private kelondroObjectCache objectCache;
+    private   final Search              writeSearchObj = new Search();
+    protected       kelondroOrder       objectOrder = new kelondroNaturalOrder(true);
+    protected       kelondroOrder       loopDetectionOrder = new kelondroNaturalOrder(true);
+    protected       int                 readAheadChunkSize = 100;
+    protected       long                lastIteratorCount = readAheadChunkSize;
+    private         kelondroObjectCache objectCache;
 
     public kelondroTree(File file, long buffersize, long preloadTime, int objectCachePercent, kelondroRow rowdef, boolean exitOnFail) {
         // this creates a new tree file
@@ -171,13 +171,13 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     
     public String[] cacheObjectStatus() {
         if (this.objectCache == null) return null;
-        else return this.objectCache.status();
+        return this.objectCache.status();
     }
     
     private void writeOrderType() {
         try {
             super.setDescription(objectOrder.signature().getBytes());
-        } catch (IOException e) {};
+        } catch (IOException e) {}
     }
     
     private void readOrderType() {
@@ -185,7 +185,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             byte[] d = super.getDescription();
             String s = new String(d).substring(0, 2);
             this.objectOrder = orderBySignature(s);
-        } catch (IOException e) {};
+        } catch (IOException e) {}
     }
     
     public static kelondroOrder orderBySignature(String signature) {
@@ -292,8 +292,8 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     if (k == null) {
                         found = false;
                         return;
-                    } else {
-                        if (visitedNodeKeys.contains(k)) {
+                    }
+                    if (visitedNodeKeys.contains(k)) {
                             // we have loops in the database.
                             // to fix this, all affected nodes must be patched
                             thenode.setOHByte(magic, (byte) 1);
@@ -305,7 +305,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                             logWarning("kelondroTree.Search.process: database contains loops; the loop-nodes have been auto-fixed");
                             found = false;
                             return;
-                        }
+                    }
                         // System.out.println("Comparing key = '" + new String(key) + "' with '" + otherkey + "':"); // debug
                         c = objectOrder.compare(key, k);
                         // System.out.println(c); // debug
@@ -321,7 +321,6 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                             thisHandle = thenode.getOHHandle(rightchild);
                         }
                         visitedNodeKeys.add(k);
-                    }
                 }
             }
             // System.out.println("DEBUG: search for " + new String(key) + " ended with status=" + ((found) ? "found" : "not-found") + ", node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ", parent=" + ((parentnode == null) ? "NULL" : parentnode.toString()));
@@ -336,26 +335,27 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 
 	public Node getMatcher() {
 	    if (found) return thenode; 
-	    else throw new IllegalArgumentException("wrong access of matcher");
+	    throw new IllegalArgumentException("wrong access of matcher");
 	}
 
 	public Node getParent() {
-	    if (found) return parentnode; else return thenode; 
+	    if (found) return parentnode;
+        return thenode; 
 	}
 
 	public boolean isRoot() {
 	    if (found) throw new IllegalArgumentException("wrong access of isRoot");
-	    else return (child == 0);
+	    return (child == 0);
 	}
 
 	public boolean isLeft() {
 	    if (found) throw new IllegalArgumentException("wrong access of leftchild");
-	    else return (child == -1);
+	    return (child == -1);
 	}
         
     public boolean isRight() {
 	    if (found) throw new IllegalArgumentException("wrong access of leftchild");
-	    else return (child == 1);
+	    return (child == 1);
 	}
     }
 
@@ -493,19 +493,14 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                             break;
                         }
                         break;
-                    } else {
-                        // crawl up the tree
-                        if (parentNode.getOHHandle(parent) == null) {
-                            // root reached: stop
-                            break;
-                        } else {
-                            theNode = parentNode;
-                            parentNode = getNode(parentNode.getOHHandle(parent), null, 0);
-                        }
                     }
+                    // crawl up the tree
+                    if (parentNode.getOHHandle(parent) == null) break; // root reached: stop
+                    theNode = parentNode;
+                    parentNode = getNode(parentNode.getOHHandle(parent), null, 0);
                 }
                 
-                result = null;; // that means: no previous stored value present
+                result = null; // that means: no previous stored value present
             }
         }
         //writeLock.release();
@@ -557,11 +552,13 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     }
 
     private static byte max0(byte b) {
-        if (b > 0) return b; else return 0;
+        if (b > 0) return b;
+        return 0;
     }
 
     private static byte min0(byte b) {
-        if (b < 0) return b; else return 0;
+        if (b < 0) return b;
+        return 0;
     }
 
     private void LL_RightRotation(Node parentNode, Node childNode) throws IOException {
@@ -754,15 +751,15 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	deleteNode(node.handle());
     }
 
-    private Node firstNode() throws IOException {
-	Handle h = getHandle(root);
-	if (h == null) return null;
-	return firstNode(getNode(h, null, 0));
+    protected Node firstNode() throws IOException {
+        Handle h = getHandle(root);
+        if (h == null) return null;
+        return firstNode(getNode(h, null, 0));
     }
     
-    private Node firstNode(Node node) throws IOException {
+    protected Node firstNode(Node node) throws IOException {
         if (node == null) throw new IllegalArgumentException("firstNode: node=null"); 
-	Handle h = node.getOHHandle(leftchild);
+        Handle h = node.getOHHandle(leftchild);
         HashSet visitedNodeKeys = new HashSet(); // to detect loops
         String nodeKey;
         while (h != null) {
@@ -776,22 +773,22 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 return node;
             }
 	    h = node.getOHHandle(leftchild);
-	}
-	return node;
+        }
+        return node;
     }
     
-    private Node lastNode() throws IOException {
-	Handle h = getHandle(root);
-	if (h == null) return null;
-	return lastNode(getNode(h, null, 0));
+    protected Node lastNode() throws IOException {
+        Handle h = getHandle(root);
+        if (h == null) return null;
+        return lastNode(getNode(h, null, 0));
     }
 
-    private Node lastNode(Node node) throws IOException {
-	if (node == null) throw new IllegalArgumentException("lastNode: node=null"); 
+    protected Node lastNode(Node node) throws IOException {
+        if (node == null) throw new IllegalArgumentException("lastNode: node=null"); 
         Handle h = node.getOHHandle(rightchild);
         HashSet visitedNodeKeys = new HashSet(); // to detect loops
         String nodeKey;
-	while (h != null) {
+        while (h != null) {
 	    try {
                 node = getNode(h, node, rightchild);
                 nodeKey = new String(node.getKey());
@@ -802,8 +799,8 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 return node;
             }
 	    h = node.getOHHandle(rightchild);
-	}
-	return node;
+        }
+        return node;
     }
     
     private class nodeIterator implements Iterator {
@@ -1140,14 +1137,16 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     private int height(Node node) throws IOException {
         if (node == null) return 0;
         Handle h = node.getOHHandle(leftchild);
-	int hl = (h == null) ? 0 : height(getNode(h, node, leftchild));
+        int hl = (h == null) ? 0 : height(getNode(h, node, leftchild));
         h = node.getOHHandle(rightchild);
         int hr = (h == null) ? 0 : height(getNode(h, node, rightchild));
-        if (hl > hr) return hl + 1; else return hr + 1;
+        if (hl > hr) return hl + 1;
+        return hr + 1;
     }
         
     public String np(Object n) {
-	if (n == null) return "NULL"; else return n.toString();
+        if (n == null) return "NULL";
+        return n.toString();
     }
 
     public void print() throws IOException {

@@ -150,7 +150,7 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
                         pathc++;
                     }
                 }
-                while (((buffer = next0()) != null) && (comp.compare(buffer, startHash) < 0)) {};
+                while (((buffer = next0()) != null) && (comp.compare(buffer, startHash) < 0)) {}
             } else {
                 hierarchy.add(list);
                 buffer = next0();
@@ -216,7 +216,7 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
         
         public Object next() {
             String r = buffer;
-            while (((buffer = next0()) != null) && (comp.compare(buffer, r) < 0)) {};
+            while (((buffer = next0()) != null) && (comp.compare(buffer, r) < 0)) {}
             return r;
         }
         

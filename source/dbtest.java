@@ -290,6 +290,50 @@ public class dbtest {
                 }
             }
             
+            if (command.equals("ramtest")) {
+                // fill database with random entries and delete them again;
+                // this is repeated without termination; after each loop
+                // the current ram is printed out
+                // args: <number-of-entries> <random-startpoint>
+                long count = Long.parseLong(args[3]);
+                long randomstart = Long.parseLong(args[4]);
+                byte[] key;
+                Random random;
+                long start, write, remove;
+                int loop = 0;
+                while (true) {
+                    // write
+                    random = new Random(randomstart);
+                    start = System.currentTimeMillis();
+                    for (int i = 0; i < count; i++) {
+                        key = randomHash(random);
+                        table.put(table.row().newEntry(new byte[][]{key, key, dummyvalue2}));
+                    }
+                    write = System.currentTimeMillis() - start;
+
+                    // delete
+                    random = new Random(randomstart);
+                    start = System.currentTimeMillis();
+                    for (int i = 0; i < count; i++) {
+                        key = randomHash(random);
+                        table.remove(key);
+                    }
+                    remove = System.currentTimeMillis() - start;
+                    
+                    System.out.println("Loop " + loop + ": Write = " + write + ", Remove = " + remove);
+                    System.out.println(" bevore GC: " +
+                              "free = " + Runtime.getRuntime().freeMemory() +
+                            ", max = " + Runtime.getRuntime().maxMemory() +
+                            ", total = " + Runtime.getRuntime().totalMemory());
+                    System.gc();
+                    System.out.println(" after  GC: " +
+                            "free = " + Runtime.getRuntime().freeMemory() +
+                          ", max = " + Runtime.getRuntime().maxMemory() +
+                          ", total = " + Runtime.getRuntime().totalMemory());
+                  loop++;
+                }
+            }
+            
             if (command.equals("list")) {
                 Iterator i = null;
                 if (table instanceof kelondroSplittedTree) i = ((kelondroSplittedTree) table).rows(true, false, null);
@@ -529,7 +573,7 @@ final class dbTable implements kelondroIndex {
         return null;
     }
 
-    public Iterator keys(boolean up, boolean rotating, byte[] startKey) throws IOException {
+    public Iterator keys(boolean up, boolean rotating, byte[] startKey) {
         // Objects are of type String
         return null;
     }

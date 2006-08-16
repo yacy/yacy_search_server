@@ -216,7 +216,7 @@ public class plasmaSwitchboardQueue {
             this.referrerURL = null;
         }
 
-        public Entry(kelondroRow.Entry row) throws IOException {
+        public Entry(kelondroRow.Entry row) {
             long ims = row.getColLong(2);
             byte flags = row.getColByte(3);
             try {

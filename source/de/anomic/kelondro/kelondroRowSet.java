@@ -280,7 +280,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return -1;
     }
 
-    private int binaryPosition(byte[] key, int astart, int alength) {
+    public int binaryPosition(byte[] key, int astart, int alength) {
         // returns the exact position of the key if the key exists,
         // or a position of an entry that is greater than the key if the
         // key does not exist

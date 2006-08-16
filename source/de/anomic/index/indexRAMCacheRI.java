@@ -51,12 +51,12 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     
     // class variables
     private final File databaseRoot;
-    private final TreeMap wCache; // wordhash-container
+    protected final TreeMap wCache; // wordhash-container
     private final TreeMap kCache; // time-container; for karenz/DHT caching (set with high priority)
     private final kelondroMScoreCluster hashScore;
     private final kelondroMScoreCluster hashDate;
     private long  kCacheInc = 0;
-    private long  startTime;
+    private long  initTime;
     private int   wCacheMaxCount;
     public  int   wCacheReferenceLimit;
     private final serverLog log;
@@ -78,7 +78,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         this.hashScore = new kelondroMScoreCluster();
         this.hashDate  = new kelondroMScoreCluster();
         this.kCacheInc = 0;
-        this.startTime = System.currentTimeMillis();
+        this.initTime = System.currentTimeMillis();
         this.wCacheMaxCount = 10000;
         this.wCacheReferenceLimit = wCacheReferenceLimitInit;
         this.log = log;
@@ -379,11 +379,11 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     }
 
     private int intTime(long longTime) {
-        return (int) Math.max(0, ((longTime - startTime) / 1000));
+        return (int) Math.max(0, ((longTime - initTime) / 1000));
     }
 
     private long longEmit(int intTime) {
-        return (((long) intTime) * (long) 1000) + startTime;
+        return (((long) intTime) * (long) 1000) + initTime;
     }
     
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime_dummy) {

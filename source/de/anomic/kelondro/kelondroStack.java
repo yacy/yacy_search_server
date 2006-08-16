@@ -62,10 +62,10 @@ public final class kelondroStack extends kelondroRecords {
     private static short thisFHandles  = 2; // two file handles for root handle and handle to last lement
 
     // define pointers for OH array access
-    private static int left  = 0; // pointer for OHHandle-array: handle()-Value of left child Node
-    private static int right = 1; // pointer for OHHandle-array: handle()-Value of right child Node
-    private static int root  = 0; // pointer for FHandles-array: pointer to root node
-    private static int toor  = 1; // pointer for FHandles-array: pointer to root node
+    protected static final int left  = 0; // pointer for OHHandle-array: handle()-Value of left child Node
+    protected static final int right = 1; // pointer for OHHandle-array: handle()-Value of right child Node
+    protected static final int root  = 0; // pointer for FHandles-array: pointer to root node
+    protected static final int toor  = 1; // pointer for FHandles-array: pointer to root node
 
     public kelondroStack(File file, kelondroRow rowdef, boolean exitOnFail) {
         // this creates a new stack
@@ -98,7 +98,7 @@ public final class kelondroStack extends kelondroRecords {
         kelondroRow row = stack.row();
         
         // close and delete the file
-        try {stack.close();} catch (Exception e) {};
+        try {stack.close();} catch (Exception e) {}
         if (f.exists()) f.delete();
 
         // re-open a database with same settings as before

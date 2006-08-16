@@ -118,9 +118,8 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
             s.setLength(length);
             while (length > 0) s.setCharAt(--length, alpha[63]);
             return s.toString();
-        } else {
-            return encodeLong(c, length);
         }
+        return encodeLong(c, length);
     }
 
     public final String encodeLong(long c, int length) {

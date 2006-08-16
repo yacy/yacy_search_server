@@ -197,10 +197,10 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             }
         }
         if (tagname.equalsIgnoreCase("area")) {
-            String title = cleanLine(tagopts.getProperty("title",""));
+            String areatitle = cleanLine(tagopts.getProperty("title",""));
             //String alt   = tagopts.getProperty("alt","");
             String href  = tagopts.getProperty("href", "");
-            if (href.length() > 0) anchors.put(absolutePath(href), title);
+            if (href.length() > 0) anchors.put(absolutePath(href), areatitle);
         }
     }
 

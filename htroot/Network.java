@@ -339,7 +339,7 @@ public class Network {
                             }
                             if (((startURL = (String) isCrawling.get(seed.hash)) != null) && (PPM >= 10)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 1);
-                                prop.put(STR_TABLE_LIST + conCount + "_isCrawling_page", startURL);;
+                                prop.put(STR_TABLE_LIST + conCount + "_isCrawling_page", startURL);
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_hash", seed.hash);
                             String shortname = seed.get(yacySeed.NAME, "deadlink");
