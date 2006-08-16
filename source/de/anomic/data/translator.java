@@ -48,9 +48,11 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -144,7 +146,7 @@ public class translator {
 		String line = "";
         BufferedReader br = null;
 		try{
-			br = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile)));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile),"UTF-8"));
 			while( (line = br.readLine()) != null){
 				content += line + de.anomic.server.serverCore.crlfString;
 			}
@@ -158,7 +160,7 @@ public class translator {
 		content = translate(content, translationList);
         BufferedWriter bw = null;
 		try{
-			bw = new BufferedWriter(new FileWriter(destFile));
+			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFile),"UTF-8"));
 			bw.write(content);
 			bw.close();
 		}catch(IOException e){

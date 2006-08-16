@@ -123,7 +123,7 @@ public class listManager {
         int count = 0;
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile)));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile),"UTF-8"));
 
             while((line = br.readLine()) != null){
                 list.add(line);

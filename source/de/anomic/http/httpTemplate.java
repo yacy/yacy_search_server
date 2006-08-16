@@ -301,7 +301,7 @@ public final class httpTemplate {
 		}
 	    }else if( (bb & 0xFF) == lrbr ){ //alternatives
 		int others=0;
-		String text="";
+		serverByteBuffer text= new serverByteBuffer();
 		PushbackInputStream pis2;
 		
 		transferUntil(pis, keyStream, aClose);
@@ -369,10 +369,10 @@ public final class httpTemplate {
     					found=true;
     				}else if(others >0 && keyStream.toString().startsWith("/")){ //close nested
     					others--;
-    					text += "#("+keyStream.toString()+")#";
+                        text.append("#("+keyStream.toString()+")#");
     				}else{ //nested
     					others++;
-    					text += "#("+keyStream.toString()+")#";
+                        text.append("#("+keyStream.toString()+")#");
     				}
     		    	keyStream = new ByteArrayOutputStream(); //reset stream
     				continue;
@@ -395,14 +395,14 @@ public final class httpTemplate {
     				found=true;
     			    }
     			    currentPattern++;
-    			    text="";
+    			    text.clear();
     			    continue;
     			}else{
-    			    text += ":";
+                    text.append(":");
     			}
     		    }
     		    if(!found){
-    			text += (char)bb;
+                    text.append((byte)bb);
     			if(pis.available()==0){
     				serverLog.logSevere("TEMPLATE", "No Close Key found for #("+key+")# (by Index)");
     				found=true;
@@ -479,17 +479,19 @@ public final class httpTemplate {
         Object value;
         if (pattern.containsKey(key)) {
             value = pattern.get(key);
-            try {
+            //try {
                 if (value instanceof byte[]) {
                     replacement = (byte[]) value;
                 } else if (value instanceof String) {
-                    replacement = ((String) value).getBytes("UTF-8");
+                    replacement = ((String) value).getBytes();
+                    //replacement = ((String) value).getBytes("UTF-8");
                 } else {
-                    replacement = value.toString().getBytes("UTF-8");
+                    replacement = value.toString().getBytes();
+                    //replacement = value.toString().getBytes("UTF-8");
                 }
-            } catch (UnsupportedEncodingException e) {
-                replacement = dflt;
-            }
+//            } catch (UnsupportedEncodingException e) {
+//                replacement = dflt;
+//            }
         } else {
             replacement = dflt;
         }
