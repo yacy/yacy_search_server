@@ -265,6 +265,7 @@ public class plasmaCrawlEURL extends indexURL {
         public void store() {
 	        // stores the values from the object variables into the database
             if (this.stored) return;
+            if (this.hash == null) return;
             String initdatestr = kelondroBase64Order.enhancedCoder.encodeLong(initdate.getTime() / 86400000, urlDateLength);
             String trydatestr = kelondroBase64Order.enhancedCoder.encodeLong(trydate.getTime() / 86400000, urlDateLength);
 
