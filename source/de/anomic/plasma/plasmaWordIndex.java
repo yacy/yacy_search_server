@@ -391,7 +391,6 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public int size() {
-        synchronized (ramCache) {
             if (useCollectionIndex)
                 return java.lang.Math.max(collections.size(),
                     java.lang.Math.max(assortmentCluster.size(),
@@ -399,12 +398,10 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             else
                 return java.lang.Math.max(assortmentCluster.size(),
                         java.lang.Math.max(backend.size(), ramCache.size()));
-        }
     }
 
     public int indexSize(String wordHash) {
         int size = 0;
-        synchronized (ramCache) {
             try {
                 plasmaWordIndexFile entity = backend.getEntity(wordHash, true, -1);
                 if (entity != null) {
@@ -415,7 +412,6 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             if (useCollectionIndex) size += collections.indexSize(wordHash);
             size += assortmentCluster.indexSize(wordHash);
             size += ramCache.indexSize(wordHash);
-        }
         return size;
     }
 
