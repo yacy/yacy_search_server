@@ -139,6 +139,7 @@ public class Network {
                 prop.put("table_my-rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
                 prop.put("table_my-rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
                 prop.put("table_my-ppm", myppm);
+                prop.put("table_my-totalppm", sb.getConfig("totalPPM","0"));
                 prop.put("table_my-seeds", seed.get(yacySeed.SCOUNT, "-"));
                 prop.put("table_my-connects", groupDigits(seed.get(yacySeed.CCOUNT, "0")));
             }
