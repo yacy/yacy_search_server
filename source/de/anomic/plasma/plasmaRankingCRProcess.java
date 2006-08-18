@@ -59,6 +59,7 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverDate;
+import de.anomic.server.serverMemory;
 import de.anomic.tools.bitfield;
 
 public class plasmaRankingCRProcess {
@@ -376,7 +377,7 @@ public class plasmaRankingCRProcess {
             count++;
             if ((count % 1000) == 0) {
                 l = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
-                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l)) + " seconds remaining; mem = " + Runtime.getRuntime().freeMemory());  
+                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l)) + " seconds remaining; mem = " + serverMemory.available());  
             }
             i.remove();
         }

@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.TreeMap;
 
+import de.anomic.server.serverMemory;
+
 public class kelondroRowBufferedSet extends kelondroRowSet {
 
     private static final long memBlockLimit = 2000000;      // do not fill cache further if the amount of available memory is less that this
@@ -136,7 +138,7 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
                     if (oldentry == null) {
                         // this was not anywhere
                         buffer.put(key, newentry);
-                        if (((buffer.size() > bufferFlushMinimum) &&  (kelondroRecords.availableMemory() > memBlockLimit)) ||
+                        if (((buffer.size() > bufferFlushMinimum) &&  (serverMemory.available() > memBlockLimit)) ||
                             (buffer.size() > bufferFlushLimit)) flush();
                     } else {
                         // replace old entry

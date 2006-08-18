@@ -90,6 +90,7 @@ import de.anomic.plasma.plasmaWordIndexFile;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverMemory;
 import de.anomic.server.serverPlainSwitch;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
@@ -705,7 +706,7 @@ public final class yacy {
             plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.temp.db"), cache, 10000);
             
             Runtime rt = Runtime.getRuntime();
-            int cacheMem = (int)((rt.maxMemory()-rt.totalMemory())/1024)-(2*cache + 8*1024);
+            int cacheMem = (int)((serverMemory.max-rt.totalMemory())/1024)-(2*cache + 8*1024);
             if (cacheMem < 2048) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, indexRoot, cacheMem, 10000, log, sps.getConfigBool("useCollectionIndex", false));
@@ -1256,15 +1257,10 @@ public final class yacy {
 
         // check memory amount
         System.gc();
-        long startupMemFree  = Runtime.getRuntime().freeMemory(); // the
-                                                                    // amount of
-                                                                    // free
-                                                                    // memory in
-                                                                    // the Java
-                                                                    // Virtual
-                                                                    // Machine
+        long startupMemFree  = Runtime.getRuntime().freeMemory(); // the amount of free memory in the Java Virtual Machine
         long startupMemTotal = Runtime.getRuntime().totalMemory(); // the total amount of memory in the Java virtual machine; may vary over time
-
+        serverMemory.available(); // force initialization of class serverMemory
+        
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
         //which XML Parser?

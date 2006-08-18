@@ -58,6 +58,8 @@ package de.anomic.kelondro;
 
 import java.util.TreeMap;
 
+import de.anomic.server.serverMemory;
+
 public class kelondroObjectCache {
 
     private final  TreeMap cache;
@@ -288,7 +290,7 @@ public class kelondroObjectCache {
                    ((k = (String) ages.getMinObject()) != null) &&
                    ((ages.size() > maxSize) ||
                     (((System.currentTimeMillis() - longEmit(ages.getScore(k))) > maxAge) &&
-                     (Runtime.getRuntime().freeMemory() < minMem)))
+                     (serverMemory.available() < minMem)))
                   ) {
                 cache.remove(k);
                 ages.deleteScore(k);
@@ -304,7 +306,7 @@ public class kelondroObjectCache {
                     ((k = (String) hasnot.getMinObject()) != null) &&
                     ((hasnot.size() > maxSize) ||
                       (((System.currentTimeMillis() - longEmit(hasnot.getScore(k))) > maxAge) &&
-                       (Runtime.getRuntime().freeMemory() < minMem)))
+                       (serverMemory.available() < minMem)))
                    ) {
                  hasnot.deleteScore(k);
                  hasnotFlush++;

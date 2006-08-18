@@ -78,6 +78,8 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
+import de.anomic.server.serverMemory;
+
 public class kelondroRecords {
 
     // constants
@@ -449,14 +451,6 @@ public class kelondroRecords {
         }
     }
 
-    private static final long max = Runtime.getRuntime().maxMemory();
-    private static final Runtime runtime = Runtime.getRuntime();
-    
-    public static long availableMemory() {
-        // memory that is available including increasing total memory up to maximum
-        return max - runtime.totalMemory() + runtime.freeMemory();
-    }
-    
     public File file() {
         if (filename == null) return null;
         return new File(filename);
@@ -837,7 +831,7 @@ public class kelondroRecords {
             // returns false if the cache is considered to be full
             if (cacheSize == 0) return false; // no caching
             if (cacheHeaders.size() == 0) return true; // nothing there to flush
-            if ((cacheHeaders.size() < cacheSize) && (availableMemory() >= memBlock)) return true; // no need to flush cache space
+            if ((cacheHeaders.size() < cacheSize) && (serverMemory.available() >= memBlock)) return true; // no need to flush cache space
             
             // just delete any of the entries
             cacheHeaders.removeOne();

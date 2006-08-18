@@ -50,6 +50,7 @@ import java.io.File;
 import de.anomic.http.httpc;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverFileUtils;
@@ -138,7 +139,7 @@ public class PerformanceMemory_p {
         long memoryTotalAfterInitBGC = Long.parseLong(env.getConfig("memoryTotalAfterInitBGC", "0"));
         long memoryTotalAfterInitAGC = Long.parseLong(env.getConfig("memoryTotalAfterInitAGC", "0"));
         long memoryTotalAfterStartup = Long.parseLong(env.getConfig("memoryTotalAfterStartup", "0"));
-        long memoryMax = Runtime.getRuntime().maxMemory();
+        long memoryMax = serverMemory.max;
         
         prop.put("memoryMax", memoryMax / MB);
         prop.put("memoryAvailAfterStartup", (memoryMax - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);

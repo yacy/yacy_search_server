@@ -64,6 +64,7 @@ import java.util.logging.Logger;
 
 
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverMemory;
 
 public class kelondroAttrSeq {
     
@@ -448,12 +449,11 @@ public class kelondroAttrSeq {
         }
     }
     
-    private static final Runtime runtime = Runtime.getRuntime();
     private static final long cc = 0;
     private static boolean shortmemstate = false;
     private static boolean shortmem() {
         if ((cc % 300) == 0) {
-            shortmemstate = (runtime.freeMemory() < 20000000L);
+            shortmemstate = (serverMemory.available() < 20000000L);
         }
         return shortmemstate;
     }

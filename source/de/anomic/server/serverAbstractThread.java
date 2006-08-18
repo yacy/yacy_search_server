@@ -245,7 +245,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         long timestamp;
         long memstamp0, memstamp1;
         boolean isBusy;
-        Runtime rt = Runtime.getRuntime();
+        //Runtime rt = Runtime.getRuntime();
                 
         while (running) {
             if ((this.intermissionObedient) && (this.intermission > 0) && (this.intermission != Long.MAX_VALUE)) {
@@ -266,7 +266,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 timestamp = System.currentTimeMillis();
                 ratz(this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
-            } else if (rt.freeMemory() > memprereq) try {
+            } else if (serverMemory.available() > memprereq) try {
                 // do job
                 timestamp = System.currentTimeMillis();
                 memstamp0 = serverMemory.used();
@@ -305,7 +305,6 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 ratz(this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
                 outofmemoryCycles++;
-                if (rt.freeMemory() <= memprereq) System.gc(); // give next loop a chance
             }
         }
         this.close();

@@ -49,7 +49,8 @@ import java.text.DecimalFormat;
 
 public class serverMemory {
 
-    public static final long max = Runtime.getRuntime().maxMemory();
+    public static boolean vm15 = System.getProperty("java.vm.version").startsWith("1.5");
+    public static final long max = (vm15) ? Runtime.getRuntime().maxMemory() : computedMaxMemory(); // patch for maxMemory bug in Java 1.4.2
     private static final Runtime runtime = Runtime.getRuntime();
     
     public static long free() {
@@ -90,5 +91,44 @@ public class serverMemory {
         } catch (Exception e) {
             return "unknown";
         }
-    }        
+    }
+    
+    private static int computedMaxMemory() {
+        // there is a bug in java 1.4.2 for maxMemory()
+        // see for bug description:
+        // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4686462
+        // to get the correct maxMemory, we force a OutOfMemoryError here to measure the 'real' maxMemory()
+        int mb = 1024 * 1024;
+        byte[][] x = new byte[2048][];
+        for (int i = 0; i < x.length; i++) {
+            try {
+                x[i] = new byte[mb];
+            } catch (OutOfMemoryError e) {
+                x = null; // free memory
+                //System.out.println("* computed maxMemory = " + i + " mb");
+                return (int) Math.max(i * mb, Runtime.getRuntime().totalMemory());
+            }
+        }
+        return 2048 * mb;
+    }
+    
+    public static void main(String[] args) {
+        // try this with a jvm 1.4.2 and with a jvm 1.5 and compare results
+        int mb = 1024 * 1024;
+        System.out.println("vm: " + System.getProperty("java.vm.version"));
+        System.out.println("computed max = " + (computedMaxMemory() / mb) + " mb");
+        int alloc = 10000;
+        Runtime rt = Runtime.getRuntime();
+        byte[][] x = new byte[100000][];
+        for (int i = 0; i < 100000; i++) {
+            x[i] = new byte[alloc];
+            if (i % 100 == 0) System.out.println("used = " + (i * alloc / mb) +
+                    ", total = " + (rt.totalMemory() / mb) +
+                    ", free = " + (rt.freeMemory() / mb) +
+                    ", max = " + (rt.maxMemory() / mb) +
+                    ", avail = " + ((rt.maxMemory() - rt.totalMemory() + rt.freeMemory()) / mb));
+        }
+
+    }
+    
 }
