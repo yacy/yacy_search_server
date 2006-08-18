@@ -15,10 +15,9 @@
   <center><img src="/env/grafics/kaskelix.png" align="middle" alt="Kaskelix - the YaCy logo"></center><br>
   <center>#[promoteSearchPageGreeting]#</center><br>
 
-  <form action="yacysearch.html" method="get">
+  <form action="yacysearch.html" method="get" name="searchform">
   <input type="hidden" name="display" value="#[display]#">
   <center>
-
   <table border="0" cellspacing="0" cellpadding="0">
    <tr>
     <td colspan=2>
@@ -38,7 +37,7 @@
    <input type="hidden" name="prefermaskfilter" value="">
    <tr align="left">
     <td></td>
-    <td><a href="/index.html?searchoptions=1&display=#[display]#">more options...</a></td>
+    <td><a href="/index.html?searchoptions=1&display=#[display]#" onClick="this.href='/index.html?searchoptions=1&display=#[display]#&handover='+document.searchform.search.value">more options...</a></td>
    </tr>
    ::
    <tr align="left">

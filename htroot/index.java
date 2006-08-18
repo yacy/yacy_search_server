@@ -70,6 +70,7 @@ public class index {
         int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
+        final String handover = (post == null) ? "" : post.get("handover", "");
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
 
         final String referer = (String) header.get("Referer");
@@ -96,7 +97,7 @@ public class index {
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("former", "");
+        prop.put("former", handover);
         prop.put("num-results", 0);
         prop.put("excluded", 0);
         prop.put("combine", 0);
