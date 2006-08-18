@@ -149,8 +149,10 @@ public class plasmaSwitchboardQueue {
         if ((index < 0) || (index >= sbQueueStack.size())) throw new ArrayIndexOutOfBoundsException();
         try {
             ArrayList list = sbQueueStack.botList(index);
+            kelondroRow.Entry entry;
             for (int i = 0; i < list.size(); i++) {
-                list.set(i, new Entry((kelondroRow.Entry) list.get(i)));
+                entry = (kelondroRow.Entry) list.get(i);
+                list.set(i, (entry == null) ? null : new Entry(entry));
             }
             return list;
         } catch (kelondroException e) {

@@ -103,8 +103,8 @@ public class ViewProfile {
         } else {
             // read the profile from remote peer
             yacySeed seed = yacyCore.seedDB.getConnected(hash);
-            if (seed == null) {
-                seed = yacyCore.seedDB.getDisconnected(hash);
+            if (seed == null) seed = yacyCore.seedDB.getDisconnected(hash);
+            if (seed != null) {
                 long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
                 if (lastseen > 120) seed = null; // if contact is too old, we treat it as disconnected
             }

@@ -26,6 +26,7 @@ package de.anomic.kelondro;
 
 import java.util.Map;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import de.anomic.server.serverMemory;
@@ -73,10 +74,10 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         synchronized (buffer) {
             if (buffer.size() == 0) {
                 super.removeOne();
-            } else {
+            } else try {
                 //buffer.remove(buffer.keySet().iterator().next());
                 buffer.remove(buffer.lastKey());
-            }
+            } catch (NoSuchElementException e) {}
         }
     }
     
