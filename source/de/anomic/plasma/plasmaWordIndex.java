@@ -182,22 +182,18 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     public indexContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtCase) {
         indexContainer c;
-        synchronized (ramCache) {
             if ((c = ramCache.addEntry(wordHash, entry, updateTime, dhtCase)) == null) {
                 if (!dhtCase) flushControl();
                 return null;
             }
-        }
         return c;
     }
     
     public indexContainer addEntries(indexContainer entries, long updateTime, boolean dhtCase) {
-        synchronized (ramCache) {
             indexContainer added = ramCache.addEntries(entries, updateTime, dhtCase);
             // force flush
             if (!dhtCase) flushControl();
             return added;
-        }
     }
 
     public void flushCacheSome() {
@@ -322,7 +318,6 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
         long start = System.currentTimeMillis();
 
-        synchronized (ramCache) {
             // get from cache
             indexContainer container = ramCache.getContainer(wordHash, true, -1);
 
@@ -356,7 +351,6 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             }
             container.add(backend.getContainer(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime), -1);
             return container;
-        }
     }
 
     public Set getContainers(Set wordHashes, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
@@ -365,7 +359,6 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         HashSet containers = new HashSet();
         String singleHash;
         indexContainer singleContainer;
-        synchronized (ramCache) {
             Iterator i = wordHashes.iterator();
             long start = System.currentTimeMillis();
             long remaining;
@@ -386,7 +379,6 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             
                 containers.add(singleContainer);
             }
-        }
         return containers;
     }
 
@@ -425,28 +417,23 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public indexContainer deleteContainer(String wordHash) {
-        synchronized (ramCache) {
             indexContainer c = ramCache.deleteContainer(wordHash);
             if (c == null) c = new indexRowSetContainer(wordHash);
             if (useCollectionIndex) c.add(collections.deleteContainer(wordHash), -1);
             c.add(assortmentCluster.deleteContainer(wordHash), -1);
             c.add(backend.deleteContainer(wordHash), -1);
             return c;
-        }
     }
     
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
-        synchronized (ramCache) {
             if (ramCache.removeEntry(wordHash, urlHash, deleteComplete)) return true;
             if (useCollectionIndex) {if (collections.removeEntry(wordHash, urlHash, deleteComplete)) return true;}
             if (assortmentCluster.removeEntry(wordHash, urlHash, deleteComplete)) return true;
             return backend.removeEntry(wordHash, urlHash, deleteComplete);
-        }
     }
     
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
         int removed = 0;
-        synchronized (ramCache) {
             removed += ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
             if (removed == urlHashes.size()) return removed;
             if (useCollectionIndex) {
@@ -456,7 +443,6 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             removed += assortmentCluster.removeEntries(wordHash, urlHashes, deleteComplete);
             if (removed == urlHashes.size()) return removed;
             removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
-        }
         return removed;
     }
     
@@ -465,9 +451,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         // urlHash assigned. This can only work if the entry is really fresh
         // and can be found in the RAM cache
         // this returns the number of deletion that had been possible
-        synchronized (ramCache) {
             return ramCache.tryRemoveURLs(urlHash);
-        }
     }
     
     public static final int RL_RAMCACHE    = 0;
@@ -481,7 +465,6 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         kelondroOrder containerOrder = new indexContainerOrder((kelondroOrder) indexOrder.clone());
         containerOrder.rotate(startHash.getBytes());
         TreeSet containers = new TreeSet(containerOrder);
-        synchronized (ramCache) {
             Iterator i = wordContainers(startHash, resourceLevel, rot);
             if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) count = Math.min(ramCache.wSize(), count);
             indexContainer container;
@@ -492,7 +475,6 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                     count--;
                 }
             }
-        }
         return containers;
     }
     
