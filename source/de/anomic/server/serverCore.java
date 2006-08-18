@@ -493,6 +493,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
         this.log.logConfig("* server started on " + publicLocalIP() + ":" + this.extendedPort);
     }
     
+    public void freemem() {
+        // do nothing; FIXME: can we something here to flush memory?
+    }
+    
     // class body
     public boolean job() throws Exception {
         try {

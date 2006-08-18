@@ -120,12 +120,16 @@ public interface serverThread {
     // the following methods are supposed to be implemented by customization
     
     public void open();
-    // this is called right befor the job queue is started
+    // this is called right before the job queue is started
     
     public boolean job() throws Exception;
     // performes one job procedure; this loopes until terminate() is called
     // job returns true if it has done something
     // it returns false if it is idle and does not expect to work on more for a longer time
+    
+    public void freemem();
+    // is called when an outOfMemoryCycle is performed
+    // this method should try to free some memory, so that the job can be executed
     
     public int getJobCount();
     // returns how many jobs are in the queue

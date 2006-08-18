@@ -302,6 +302,9 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 // omit job, not enough memory
                 // process scheduled pause
                 timestamp = System.currentTimeMillis();
+                // do a clean-up
+                this.freemem();
+                // sleep a while
                 ratz(this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
                 outofmemoryCycles++;

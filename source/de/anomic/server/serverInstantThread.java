@@ -47,14 +47,15 @@ import de.anomic.server.logging.serverLog;
 
 public final class serverInstantThread extends serverAbstractThread implements serverThread {
     
-    private Method jobExecMethod, jobCountMethod;
+    private Method jobExecMethod, jobCountMethod, freememExecMethod;
     private Object environment;
     
     public static int instantThreadCounter = 0;
     
-    public serverInstantThread(Object env, String jobExec, String jobCount) {
+    public serverInstantThread(Object env, String jobExec, String jobCount, String freemem) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
+        // freemem is the name of a method that tries to free memory and returns void
         try {
             this.jobExecMethod = env.getClass().getMethod(jobExec, new Class[0]);
         } catch (NoSuchMethodException e) {
@@ -68,6 +69,15 @@ public final class serverInstantThread extends serverAbstractThread implements s
             
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of jobCount: " + e.getMessage());
+        }
+        try {
+            if (freemem == null)
+                this.freememExecMethod = null;
+            else
+                this.freememExecMethod = env.getClass().getMethod(jobCount, new Class[0]);
+            
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("serverInstantThread, wrong declaration of freemem: " + e.getMessage());
         }
         this.environment = env;
         this.setName(env.getClass().getName() + "." + jobExec);
@@ -114,9 +124,27 @@ public final class serverInstantThread extends serverAbstractThread implements s
         return jobHasDoneSomething;
     }
     
+    public void freemem() {
+        if (freememExecMethod == null) return;
+        try {
+            freememExecMethod.invoke(environment, new Object[0]);
+        } catch (IllegalAccessException e) {
+            serverLog.logSevere("SERVER", "Internal Error in serverInstantThread: " + e.getMessage());
+            serverLog.logSevere("SERVER", "shutting down thread '" + this.getName() + "'");
+            this.terminate(false);
+        } catch (IllegalArgumentException e) {
+            serverLog.logSevere("SERVER", "Internal Error in serverInstantThread: " + e.getMessage());
+            serverLog.logSevere("SERVER", "shutting down thread '" + this.getName() + "'");
+            this.terminate(false);
+        } catch (InvocationTargetException e) {
+            serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + e.getTargetException().getMessage(), e.getTargetException());
+            e.getTargetException().printStackTrace();
+        }
+    }
+    
     public static serverThread oneTimeJob(Object env, String jobExec, serverLog log, long startupDelay) {
         // start the job and execute it once as background process
-        serverThread thread = new serverInstantThread(env, jobExec, null);
+        serverThread thread = new serverInstantThread(env, jobExec, null, null);
         thread.setStartupSleep(startupDelay);
         thread.setIdleSleep(-1);
         thread.setBusySleep(-1);

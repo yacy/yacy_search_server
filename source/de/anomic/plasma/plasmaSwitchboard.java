@@ -595,39 +595,39 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int indexing_cluster = Integer.parseInt(getConfig("80_indexing_cluster", "1"));
         if (indexing_cluster < 1) indexing_cluster = 1;
         deployThread("90_cleanup", "Cleanup", "simple cleaning process for monitoring information", null,
-        new serverInstantThread(this, "cleanupJob", "cleanupJobSize"), 10000); // all 5 Minutes
+        new serverInstantThread(this, "cleanupJob", "cleanupJobSize", null), 10000); // all 5 Minutes
         deployThread("82_crawlstack", "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
-        new serverInstantThread(sbStackCrawlThread, "job", "size"), 8000);
+        new serverInstantThread(sbStackCrawlThread, "job", "size", null), 8000);
 
         deployThread("80_indexing", "Parsing/Indexing", "thread that performes document parsing and indexing", "/IndexCreateIndexingQueue_p.html",
-        new serverInstantThread(this, "deQueue", "queueSize"), 10000);
+        new serverInstantThread(this, "deQueue", "queueSize", "deQueueFreeMem"), 10000);
         for (int i = 1; i < indexing_cluster; i++) {
             setConfig((i + 80) + "_indexing_idlesleep", getConfig("80_indexing_idlesleep", ""));
             setConfig((i + 80) + "_indexing_busysleep", getConfig("80_indexing_busysleep", ""));
             deployThread((i + 80) + "_indexing", "Parsing/Indexing (cluster job)", "thread that performes document parsing and indexing", null,
-            new serverInstantThread(this, "deQueue", "queueSize"), 10000 + (i * 1000),
+            new serverInstantThread(this, "deQueue", "queueSize", "deQueueFreeMem"), 10000 + (i * 1000),
             Long.parseLong(getConfig("80_indexing_idlesleep" , "5000")),
             Long.parseLong(getConfig("80_indexing_busysleep" , "0")),
             Long.parseLong(getConfig("80_indexing_memprereq" , "1000000")));
         }
 
         deployThread("70_cachemanager", "Proxy Cache Enqueue", "job takes new proxy files from RAM stack, stores them, and hands over to the Indexing Stack", null,
-        new serverInstantThread(this, "htEntryStoreJob", "htEntrySize"), 10000);
+        new serverInstantThread(this, "htEntryStoreJob", "htEntrySize", null), 10000);
         deployThread("62_remotetriggeredcrawl", "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
-        new serverInstantThread(this, "remoteTriggeredCrawlJob", "remoteTriggeredCrawlJobSize"), 30000);
+        new serverInstantThread(this, "remoteTriggeredCrawlJob", "remoteTriggeredCrawlJobSize", null), 30000);
         deployThread("61_globalcrawltrigger", "Global Crawl Trigger", "thread that triggeres remote peers for crawling", "/IndexCreateWWWGlobalQueue_p.html",
-        new serverInstantThread(this, "limitCrawlTriggerJob", "limitCrawlTriggerJobSize"), 30000); // error here?
+        new serverInstantThread(this, "limitCrawlTriggerJob", "limitCrawlTriggerJobSize", null), 30000); // error here?
         deployThread("50_localcrawl", "Local Crawl", "thread that performes a single crawl step from the local crawl queue", "/IndexCreateWWWLocalQueue_p.html",
-        new serverInstantThread(this, "coreCrawlJob", "coreCrawlJobSize"), 10000);
+        new serverInstantThread(this, "coreCrawlJob", "coreCrawlJobSize", null), 10000);
         deployThread("40_peerseedcycle", "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account", null,
-        new serverInstantThread(yc, "publishSeedList", null), 180000);
+        new serverInstantThread(yc, "publishSeedList", null, null), 180000);
         serverInstantThread peerPing = null;
         deployThread("30_peerping", "YaCy Core", "this is the p2p-control and peer-ping task", null,
-        peerPing = new serverInstantThread(yc, "peerPing", null), 2000);
+        peerPing = new serverInstantThread(yc, "peerPing", null, null), 2000);
         peerPing.setSyncObject(new Object());
         
         deployThread("20_dhtdistribution", "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
-            new serverInstantThread(this, "dhtTransferJob", null), 60000,
+            new serverInstantThread(this, "dhtTransferJob", null, null), 60000,
             Long.parseLong(getConfig("20_dhtdistribution_idlesleep" , "5000")),
             Long.parseLong(getConfig("20_dhtdistribution_busysleep" , "0")),
             Long.parseLong(getConfig("20_dhtdistribution_memprereq" , "1000000")));
@@ -939,6 +939,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         } catch (IOException e) {
             log.logSevere("IOError in plasmaSwitchboard.enQueue: " + e.getMessage(), e);
         }
+    }
+    
+    public void deQueueFreeMem() {
+        // flush some entries from the RAM cache
+        wordIndex.flushCacheSome();
+        wordIndex.flushCacheSome();
     }
     
     public boolean deQueue() {
