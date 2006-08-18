@@ -1,6 +1,6 @@
 //YPStats_p.java
 //-----------------------
-//Author: Franz Brauﬂe
+//Author: Franz Brausse
 //part of YaCy (C) by Michael Peter Christen; mc@anomic.de
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004, 2005
