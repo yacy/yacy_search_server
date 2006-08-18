@@ -44,46 +44,70 @@ public class URL {
     
     public void parseURLString(String url) throws MalformedURLException {
         // identify protocol
-        int p = url.indexOf("://");
+        int p = url.indexOf(':');
         if (p < 0) throw new MalformedURLException("protocol is not given in '" + url + "'");
         this.protocol = url.substring(0, p).toLowerCase().trim();
 
-        // identify host, userInfo and file
-        int q = url.indexOf('/', p + 3);
-        int r;
-        if (q < 0) {
-            if ((r = url.indexOf('@', p + 3)) < 0) {
-                host = url.substring(p + 3);
-                userInfo = null;
+        if (url.substring(p + 1, p + 3).equals("//")) {
+            // identify host, userInfo and file for http and ftp protocol
+            int q = url.indexOf('/', p + 3);
+            int r;
+            if (q < 0) {
+                if ((r = url.indexOf('@', p + 3)) < 0) {
+                    host = url.substring(p + 3);
+                    userInfo = null;
+                } else {
+                    host = url.substring(r + 1);
+                    userInfo = url.substring(p + 3, r);
+                }
+                path = "/";
             } else {
-                host = url.substring(r + 1);
-                userInfo = url.substring(p + 3, r);
+                host = url.substring(p + 3, q);
+                if ((r = host.indexOf('@')) < 0) {
+                    userInfo = null;
+                } else {
+                    userInfo = host.substring(0, r);
+                    host = host.substring(r + 1);
+                }
+                path = url.substring(q);
             }
-            path = "/";
+            
+            identPort(url);
+            identRef();
+            identQuest();
         } else {
-            host = url.substring(p + 3, q);
-            if ((r = host.indexOf('@')) < 0) {
-                userInfo = null;
+            // this is not a http or ftp url
+            if (protocol.equals("mailto")) {
+                // parse email url
+                int q = url.indexOf('@', p + 3);
+                if (q < 0) {
+                    throw new MalformedURLException("wrong email address: " + url);
+                } else {
+                    userInfo = url.substring(p + 3, q);
+                    host = url.substring(q + 1);
+                    path = null;
+                    port = -1;
+                    quest = null;
+                    ref = null;
+                }
             } else {
-                userInfo = host.substring(0, r);
-                host = host.substring(r + 1);
+                throw new MalformedURLException("unknown protocol: " + url);
             }
-            path = url.substring(q);
         }
         
-        identPort(url);
-        identRef();
-        identQuest();
     }
-    
+
     public URL(File file) throws MalformedURLException {
         this("file", "", -1, file.getAbsolutePath());
     }
 
     public URL(URL baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
-        if (relPath.toLowerCase().startsWith("http://")) parseURLString(relPath);
-        else {
+        int p = relPath.indexOf(':');
+        String relprotocol = (p < 0) ? null : relPath.substring(0, p).toLowerCase();
+        if ((relprotocol != null) && ("http.ftp.mailto".indexOf(relprotocol) >= 0)) {
+            parseURLString(relPath);
+        } else {
             this.protocol = baseURL.protocol;
             this.host = baseURL.host;
             this.port = baseURL.port;
@@ -204,7 +228,9 @@ public class URL {
     public String toString(boolean includeReference) {
         // generates a normal form of the URL
         boolean defaultPort = false;
-        if (this.protocol.equals("http")) {
+        if (this.protocol.equals("mailto")) {
+            return this.protocol + ":" + this.userInfo + "@" + this.host;
+        } else if (this.protocol.equals("http")) {
             if (this.port < 0 || this.port == 80)  { defaultPort = true; }
         } else if (this.protocol.equals("ftp")) {
             if (this.port < 0 || this.port == 21)  { defaultPort = true; }
@@ -246,9 +272,38 @@ public class URL {
     }
     
     public static void main(String[] args) {
-        URL u;
-        try {u = new URL("http://www.anomic.de/home/test?x=1#home"); System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform());} catch (MalformedURLException e) {}
-        try {u = new URL("http://www.anomic.de/home/test?x=1"); System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform());} catch (MalformedURLException e) {}
-        try {u = new URL("http://www.anomic.de/home/test#home"); System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform());} catch (MalformedURLException e) {}
+        URL u, v;
+        try {
+            u = new URL("http://www.anomic.de/home/test?x=1#home");
+            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            
+            u = new URL("http://www.anomic.de/home/test?x=1"); 
+            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            
+            u = new URL("http://www.anomic.de/home/test#home"); 
+            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            
+            u = new URL("ftp://ftp.anomic.de/home/test#home"); 
+            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            
+            u = new URL("mailto:abcdefg@nomailnomail.com"); 
+            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            
+            v = new URL("http://www.anomic.de/home");
+            u = new URL(v, "test"); 
+            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            
+            u = new URL(v, "http://www.yacy.net/test"); 
+            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            
+            u = new URL(v, "ftp://ftp.yacy.net/test"); 
+            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            
+            u = new URL(v, "mailto:abcdefg@nomailnomail.com"); 
+            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 }
