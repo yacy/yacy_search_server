@@ -72,6 +72,7 @@ public class URL {
                 path = url.substring(q);
             }
             
+            resolveBackpath();
             identPort(url);
             identRef();
             identQuest();
@@ -105,23 +106,33 @@ public class URL {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
         int p = relPath.indexOf(':');
         String relprotocol = (p < 0) ? null : relPath.substring(0, p).toLowerCase();
-        if ((relprotocol != null) && ("http.ftp.mailto".indexOf(relprotocol) >= 0)) {
+        if ((relprotocol != null) && ("http.https.ftp.mailto".indexOf(relprotocol) >= 0)) {
             parseURLString(relPath);
         } else {
             this.protocol = baseURL.protocol;
             this.host = baseURL.host;
             this.port = baseURL.port;
-            if (relPath.toLowerCase().startsWith("javascript:")) this.path = baseURL.path;
-            else if (relPath.startsWith("/")) this.path = relPath;
-            else {
-                if (relPath.startsWith("#") || 
-                    relPath.startsWith("?") || 
-                    baseURL.path.endsWith("/")) this.path = baseURL.path + relPath;
-                else this.path = baseURL.path + "/" + relPath;
+            if (relPath.toLowerCase().startsWith("javascript:")) {
+                this.path = baseURL.path;
+            } else if (relPath.startsWith("/")) {
+                this.path = relPath;
+            } else if (!(baseURL.path.endsWith("/"))) {
+                if (relPath.startsWith("#") || relPath.startsWith("?")) {
+                        this.path = baseURL.path + relPath;
+                } else {
+                        this.path = relPath;
+                }
+            } else {
+                if (relPath.startsWith("#") || relPath.startsWith("?")) {
+                    this.path = baseURL.path + relPath;
+                } else {
+                    this.path = baseURL.path + "/" + relPath;
+                }
             }
             this.quest = baseURL.quest;
             this.ref = baseURL.ref;
 
+            resolveBackpath();
             identRef();
             identQuest();
         }
@@ -137,6 +148,16 @@ public class URL {
         identQuest();
     }
 
+    private void resolveBackpath() throws MalformedURLException {
+        // resolve '..'
+        int p;
+        while ((p = path.indexOf("/..")) >= 0) {
+            String head = path.substring(0, p);
+            int q = head.lastIndexOf('/');
+            if (q < 0) throw new MalformedURLException("backpath cannot be resolved in path = " + path);
+            path = head.substring(0, q) + path.substring(p + 3);
+        }
+    }
     private void identPort(String inputURL) throws MalformedURLException {
         // identify ref in file
         int r = host.indexOf(':');
@@ -180,9 +201,8 @@ public class URL {
     
     public String getFile(boolean includeReference) {
         // this is the path plus quest plus ref
-        if (quest != null) return path + "?" + quest;
-        if ((ref   != null) && (includeReference)) return path + "#" + ref;
-        return path;
+        if (quest != null) return ((includeReference) && (ref != null)) ? path + "?" + quest + "#" + ref : path + "?" + quest;
+        return ((includeReference) && (ref != null)) ? path + "#" + ref : path;
     }
 
     public String getPath() {
@@ -274,6 +294,7 @@ public class URL {
     public static void main(String[] args) {
         URL u, v;
         try {
+            
             u = new URL("http://www.anomic.de/home/test?x=1#home");
             System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
             
@@ -286,17 +307,31 @@ public class URL {
             u = new URL("ftp://ftp.anomic.de/home/test#home"); 
             System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
             
+            u = new URL("http://www.anomic.de/home/../abc/"); 
+            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            
             u = new URL("mailto:abcdefg@nomailnomail.com"); 
             System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
             
             v = new URL("http://www.anomic.de/home");
             u = new URL(v, "test"); 
             System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            u = new URL(v, "test/"); 
+            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            
+            v = new URL("http://www.anomic.de/home/");
+            u = new URL(v, "test"); 
+            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            u = new URL(v, "test/"); 
+            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
             
             u = new URL(v, "http://www.yacy.net/test"); 
             System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
             
             u = new URL(v, "ftp://ftp.yacy.net/test"); 
+            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
+            
+            u = new URL(v, "../test"); 
             System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
             
             u = new URL(v, "mailto:abcdefg@nomailnomail.com"); 
