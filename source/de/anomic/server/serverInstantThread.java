@@ -74,7 +74,7 @@ public final class serverInstantThread extends serverAbstractThread implements s
             if (freemem == null)
                 this.freememExecMethod = null;
             else
-                this.freememExecMethod = env.getClass().getMethod(jobCount, new Class[0]);
+                this.freememExecMethod = env.getClass().getMethod(freemem, new Class[0]);
             
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of freemem: " + e.getMessage());
@@ -109,16 +109,20 @@ public final class serverInstantThread extends serverAbstractThread implements s
             if (result == null) jobHasDoneSomething = true;
             else if (result instanceof Boolean) jobHasDoneSomething = ((Boolean) result).booleanValue();
         } catch (IllegalAccessException e) {
-            serverLog.logSevere("SERVER", "Internal Error in serverInstantThread: " + e.getMessage());
+            serverLog.logSevere("SERVER", "Internal Error in serverInstantThread.job: " + e.getMessage());
             serverLog.logSevere("SERVER", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
         } catch (IllegalArgumentException e) {
-            serverLog.logSevere("SERVER", "Internal Error in serverInstantThread: " + e.getMessage());
+            serverLog.logSevere("SERVER", "Internal Error in serverInstantThread.job: " + e.getMessage());
             serverLog.logSevere("SERVER", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
         } catch (InvocationTargetException e) {
-            serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + e.getTargetException().getMessage(), e.getTargetException());
+            serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + e.getTargetException().getMessage(), e.getTargetException());
             e.getTargetException().printStackTrace();
+        } catch (OutOfMemoryError e) {
+            serverLog.logSevere("SERVER", "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
+            e.printStackTrace();
+            freemem();
         }
         instantThreadCounter--;
         return jobHasDoneSomething;
@@ -129,16 +133,19 @@ public final class serverInstantThread extends serverAbstractThread implements s
         try {
             freememExecMethod.invoke(environment, new Object[0]);
         } catch (IllegalAccessException e) {
-            serverLog.logSevere("SERVER", "Internal Error in serverInstantThread: " + e.getMessage());
+            serverLog.logSevere("SERVER", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
             serverLog.logSevere("SERVER", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
         } catch (IllegalArgumentException e) {
-            serverLog.logSevere("SERVER", "Internal Error in serverInstantThread: " + e.getMessage());
+            serverLog.logSevere("SERVER", "Internal Error in serverInstantThread.freemem: " + e.getMessage());
             serverLog.logSevere("SERVER", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
         } catch (InvocationTargetException e) {
-            serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + e.getTargetException().getMessage(), e.getTargetException());
+            serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread.freemem, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + e.getTargetException().getMessage(), e.getTargetException());
             e.getTargetException().printStackTrace();
+        } catch (OutOfMemoryError e) {
+            serverLog.logSevere("SERVER", "OutOfMemory Error in serverInstantThread.freemem, thread '" + this.getName() + "': " + e.getMessage());
+            e.printStackTrace();
         }
     }
     

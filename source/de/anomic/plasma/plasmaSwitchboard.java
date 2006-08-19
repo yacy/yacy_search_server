@@ -944,7 +944,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public void deQueueFreeMem() {
         // flush some entries from the RAM cache
         wordIndex.flushCacheSome();
-        wordIndex.flushCacheSome();
+        // adopt maximum cache size to current size to prevent that further OutOfMemoryErrors occur
+        int newMaxCount = Math.max(2000, Math.min(wordIndex.getMaxWordCount(), wordIndex.wSize()));
+        setConfig("wordCacheMaxCount", Integer.toString(newMaxCount));
+        wordIndex.setMaxWordCount(newMaxCount); 
     }
     
     public boolean deQueue() {

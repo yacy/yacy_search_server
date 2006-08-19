@@ -255,7 +255,7 @@ public class PerformanceQueues_p {
         prop.put("maxAgeOfKCache", "" + (switchboard.wordIndex.maxAgeOfKCache() / 1000 / 60)); // minutes
         prop.put("minAgeOfKCache", "" + (switchboard.wordIndex.minAgeOfKCache() / 1000 / 60)); // minutes
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
-        prop.put("wordCacheMaxCount", switchboard.getConfig("wordCacheMaxCount", "10000"));
+        prop.put("wordCacheMaxCount", switchboard.wordIndex.getMaxWordCount());
         prop.put("onlineCautionDelay", switchboard.getConfig("onlineCautionDelay", "30000"));
         prop.put("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
         
