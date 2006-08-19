@@ -464,24 +464,24 @@ xpstopw=true
 # and another idlesleep is performed
 20_dhtdistribution_idlesleep=30000
 20_dhtdistribution_busysleep=10000
-20_dhtdistribution_memprereq=8388608
+20_dhtdistribution_memprereq=4194304
 30_peerping_idlesleep=120000
 30_peerping_busysleep=120000
 30_peerping_memprereq=1048576
 40_peerseedcycle_idlesleep=1800000
 40_peerseedcycle_busysleep=1200000
-40_peerseedcycle_memprereq=4194304
+40_peerseedcycle_memprereq=2097152
 50_localcrawl_idlesleep=10000
 50_localcrawl_busysleep=300
-50_localcrawl_memprereq=1048576
+50_localcrawl_memprereq=2097152
 50_localcrawl_isPaused=false
 61_globalcrawltrigger_idlesleep=10000
 61_globalcrawltrigger_busysleep=500
-61_globalcrawltrigger_memprereq=1048576
+61_globalcrawltrigger_memprereq=2097152
 61_globalcrawltrigger_isPaused=false
 62_remotetriggeredcrawl_idlesleep=10000
 62_remotetriggeredcrawl_busysleep=1000
-62_remotetriggeredcrawl_memprereq=1048576
+62_remotetriggeredcrawl_memprereq=4194304
 62_remotetriggeredcrawl_isPaused=false
 70_cachemanager_idlesleep=5000
 70_cachemanager_busysleep=0
@@ -508,7 +508,7 @@ xpstopw=true
 # ram cache for database files
 
 # ram cache for assortment cache cluster (for all 64 files)
-ramCacheRWI          =  8388608
+ramCacheRWI          =  4194304
 ramCacheRWI_time     =    30000
 
 # ram cache for responseHeader.db
@@ -516,11 +516,15 @@ ramCacheHTTP         =  1048576
 ramCacheHTTP_time    =     1000
 
 # ram cache for urlHash.db
-ramCacheLURL         =  8388608
+ramCacheLURL         =  4194304
 ramCacheLURL_time    =    10000
 
+# ram cache for stack crawl thread db
+ramCachePreNURL      =  1048576
+ramCachePreNURL_time =     3000
+
 # ram cache for urlNotice.db
-ramCacheNURL         =  4194304
+ramCacheNURL         =  1048576
 ramCacheNURL_time    =     2000
 
 # ram cache for urlErr.db 
@@ -548,16 +552,12 @@ ramCacheNews         =  1048576
 ramCacheNews_time    =     1000
 
 # ram cache for robotsTxt.db
-ramCacheRobots       =  4194304
+ramCacheRobots       =  2097152
 ramCacheRobots_time  =     3000
 
 # ram cache for crawlProfile.db
 ramCacheProfiles     =     8192
 ramCacheProfiles_time=      500
-
-# ram cache for stack crawl thread db
-ramCachePreNURL      =  4194304
-ramCachePreNURL_time =     3000
 
 # default memory settings for startup of yacy
 # is only valid in unix/shell environments and
@@ -577,7 +577,7 @@ javastart_Xms=Xms10m
 # remote index transmissions and search requests
 # maxWaitingWordFlush gives the number of seconds that the shutdown
 # may last for the word flush
-wordCacheMaxCount = 12000
+wordCacheMaxCount = 20000
 
 # Specifies if yacy can be used as transparent http proxy.
 # 

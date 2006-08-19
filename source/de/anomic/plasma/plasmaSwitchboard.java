@@ -406,10 +406,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // start indexing management
         log.logConfig("Starting Indexing Management");
         urlPool = new plasmaURLPool(plasmaPath, ramLURL, ramNURL, ramEURL, ramLURL_time);
-        
         wordIndex = new plasmaWordIndex(plasmaPath, indexPublicTextPath, ramRWI, ramRWI_time, log, getConfigBool("useCollectionIndex", false));
-        int wordCacheMaxCount = (int) getConfigLong("wordCacheMaxCount", 10000);
-        wordIndex.setMaxWordCount(wordCacheMaxCount);
+
+        // set a high maximum cache size to current size; this is adopted later automatically
+        int wordCacheMaxCount = Math.max(20000, (int) getConfigLong("wordCacheMaxCount", 20000));
+        setConfig("wordCacheMaxCount", Integer.toString(wordCacheMaxCount));
+        wordIndex.setMaxWordCount(wordCacheMaxCount); 
         
         // start a cache manager
         log.logConfig("Starting HT Cache Manager");

@@ -62,7 +62,6 @@ import de.anomic.http.httpc;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.plasma.plasmaCrawlEURL;
@@ -151,6 +150,18 @@ public final class plasmaCrawlStacker {
     
     public int size() {
         return this.queue.size();
+    }
+
+    public int cacheNodeChunkSize() {
+        return this.queue.cacheNodeChunkSize();
+    }
+    
+    public int[] cacheNodeStatus() {
+        return this.queue.cacheNodeStatus();
+    }
+    
+    public String[] cacheObjectStatus() {
+        return this.queue.cacheObjectStatus();
     }
     
     public void job() {
@@ -563,7 +574,7 @@ public final class plasmaCrawlStacker {
         private final serverSemaphore readSync;
         private final serverSemaphore writeSync;
         private final LinkedList urlEntryHashCache;
-        private kelondroIndex urlEntryCache;
+        private kelondroTree urlEntryCache;
         
         public stackCrawlQueue(File cacheStacksPath, int bufferkb, long preloadTime) {
             // init the read semaphore
@@ -624,6 +635,18 @@ public final class plasmaCrawlStacker {
                 cacheFile.getParentFile().mkdirs();
                 this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef, true);
             }
+        }
+        
+        public int cacheNodeChunkSize() {
+            return urlEntryCache.cacheNodeChunkSize();
+        }
+        
+        public int[] cacheNodeStatus() {
+            return urlEntryCache.cacheNodeStatus();
+        }
+        
+        public String[] cacheObjectStatus() {
+            return urlEntryCache.cacheObjectStatus();
         }
         
         public void close() throws IOException {

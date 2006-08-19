@@ -93,6 +93,7 @@ public class PerformanceMemory_p {
                 env.setConfig("ramCacheNews", Long.parseLong(post.get("ramCacheNews", "0")) * KB);
                 env.setConfig("ramCacheRobots", Long.parseLong(post.get("ramCacheRobots", "0")) * KB);
                 env.setConfig("ramCacheProfiles", Long.parseLong(post.get("ramCacheProfiles", "0")) * KB);
+                env.setConfig("ramCachePreNURL", Long.parseLong(post.get("ramCachePreNURL", "0")) * KB);
             }
             if (post.containsKey("setDefault")) {
                 env.setConfig("ramCacheRWI", Long.parseLong((String) defaultSettings.get("ramCacheRWI")));
@@ -107,6 +108,7 @@ public class PerformanceMemory_p {
                 env.setConfig("ramCacheNews", Long.parseLong((String) defaultSettings.get("ramCacheNews")));
                 env.setConfig("ramCacheRobots", Long.parseLong((String) defaultSettings.get("ramCacheRobots")));
                 env.setConfig("ramCacheProfiles", Long.parseLong((String) defaultSettings.get("ramCacheProfiles")));
+                env.setConfig("ramCachePreNURL", Long.parseLong((String) defaultSettings.get("ramCachePreNURL")));
             }
             if (post.containsKey("setGood")) set = "setGood";
             if (post.containsKey("setBest")) set = "setBest";
@@ -181,6 +183,12 @@ public class PerformanceMemory_p {
         slt = sb.urlPool.loadedURL.cacheNodeStatus();
         ost = sb.urlPool.loadedURL.cacheObjectStatus();
         putprop(prop, env, "LURL", set);
+        
+        req = sb.sbStackCrawlThread.size();
+        chk = sb.sbStackCrawlThread.cacheNodeChunkSize();
+        slt = sb.sbStackCrawlThread.cacheNodeStatus();
+        ost = sb.sbStackCrawlThread.cacheObjectStatus();
+        putprop(prop, env, "PreNURL", set);
         
         req = sb.urlPool.noticeURL.size();
         chk = sb.urlPool.noticeURL.cacheNodeChunkSize();
