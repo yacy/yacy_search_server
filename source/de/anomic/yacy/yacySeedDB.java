@@ -172,23 +172,30 @@ public final class yacySeedDB {
         } catch (IOException e) {}
     }
     
-    public int dbCacheNodeChunkSize() {
+    public int cacheNodeChunkSize() {
         int ac = seedActiveDB.cacheNodeChunkSize();
         int pa = seedPassiveDB.cacheNodeChunkSize();
         int po = seedPotentialDB.cacheNodeChunkSize();
 
         return (ac+ pa + po) / 3;
     }
+    public int cacheObjectChunkSize() {
+        int ac = seedActiveDB.cacheObjectChunkSize();
+        int pa = seedPassiveDB.cacheObjectChunkSize();
+        int po = seedPotentialDB.cacheObjectChunkSize();
+
+        return (ac+ pa + po) / 3;
+    }
     
-    public int[] dbCacheNodeStatus() {
+    public int[] cacheNodeStatus() {
         int[] ac = seedActiveDB.cacheNodeStatus();
         int[] pa = seedPassiveDB.cacheNodeStatus();
         int[] po = seedPotentialDB.cacheNodeStatus();
         return kelondroRecords.cacheCombinedStatus(new int[][]{ac, pa, po}, 3);
     }
     
-    public String[] dbCacheObjectStatus() {
-        return kelondroObjectCache.combinedStatus(new String[][] {
+    public long[] cacheObjectStatus() {
+        return kelondroObjectCache.combinedStatus(new long[][] {
                 seedActiveDB.cacheObjectStatus(),
                 seedPassiveDB.cacheObjectStatus(),
                 seedPotentialDB.cacheObjectStatus() }, 3);

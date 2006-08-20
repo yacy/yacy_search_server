@@ -65,20 +65,21 @@ public class kelondroObjectCache {
     private final  TreeMap cache;
     private final  kelondroMScoreCluster ages, hasnot;
     private long   startTime;
-    private int    maxSize;
+    private int    maxHitSize, maxMissSize;
     private long   maxAge;
     private long   minMem;
     private int    readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     private int    hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete, hasnotFlush;
     private String name;
     
-    public kelondroObjectCache(String name, int maxSize, long maxAge, long minMem) {
+    public kelondroObjectCache(String name, int maxHitSize, int maxMissSize, long maxAge, long minMem) {
         this.name = name;
         this.cache = new TreeMap();
         this.ages  = new kelondroMScoreCluster();
         this.hasnot  = new kelondroMScoreCluster();
         this.startTime = System.currentTimeMillis();
-        this.maxSize = Math.max(maxSize, 1);
+        this.maxHitSize = Math.max(maxHitSize, 1);
+        this.maxMissSize = Math.max(maxMissSize, 1);
         this.maxAge = Math.max(maxAge, 10000);
         this.minMem = Math.max(minMem, 1024 * 1024);
         this.readHit = 0;
@@ -103,12 +104,20 @@ public class kelondroObjectCache {
         this.maxAge = maxAge;
     }
     
-    public void setMaxSize(int maxSize) {
-        this.maxSize = maxSize;
+    public void setMaxHitSize(int maxSize) {
+        this.maxHitSize = maxSize;
     }
     
-    public int maxSize() {
-        return this.maxSize;
+    public void setMaxMissSize(int maxSize) {
+        this.maxMissSize = maxSize;
+    }
+    
+    public int maxHitSize() {
+        return this.maxHitSize;
+    }
+    
+    public int maxMissSize() {
+        return this.maxMissSize;
     }
     
     public void setMinMem(int minMem) {
@@ -133,53 +142,55 @@ public class kelondroObjectCache {
         return hasnot.size();
     }
     
-    public String[] status() {
-        return new String[]{
-                Integer.toString(maxSize()),
-                Integer.toString(hitsize()),
-                Integer.toString(misssize()),
-                Long.toString(this.maxAge),
-                Long.toString(minAge()),
-                Long.toString(maxAge()),
-                Integer.toString(readHit),
-                Integer.toString(readMiss),
-                Integer.toString(writeUnique),
-                Integer.toString(writeDouble),
-                Integer.toString(cacheDelete),
-                Integer.toString(cacheFlush),
-                Integer.toString(hasnotHit),
-                Integer.toString(hasnotMiss),
-                Integer.toString(hasnotUnique),
-                Integer.toString(hasnotDouble),
-                Integer.toString(hasnotDelete),
-                Integer.toString(hasnotFlush)
+    public long[] status() {
+        return new long[]{
+                (long) maxHitSize(),
+                (long) maxMissSize(),
+                (long) hitsize(),
+                (long) misssize(),
+                this.maxAge,
+                minAge(),
+                maxAge(),
+                (long) readHit,
+                (long) readMiss,
+                (long) writeUnique,
+                (long) writeDouble,
+                (long) cacheDelete,
+                (long) cacheFlush,
+                (long) hasnotHit,
+                (long) hasnotMiss,
+                (long) hasnotUnique,
+                (long) hasnotDouble,
+                (long) hasnotDelete,
+                (long) hasnotFlush
                 };
     }
     
-    private static String[] combinedStatus(String[] a, String[] b) {
-        return new String[]{
-                Integer.toString(Integer.parseInt(a[0]) + Integer.parseInt(b[0])),
-                Integer.toString(Integer.parseInt(a[1]) + Integer.parseInt(b[1])),
-                Integer.toString(Integer.parseInt(a[2]) + Integer.parseInt(b[2])),
-                Long.toString(Math.max(Long.parseLong(a[3]), Long.parseLong(b[3]))),
-                Long.toString(Math.min(Long.parseLong(a[4]), Long.parseLong(b[4]))),
-                Long.toString(Math.max(Long.parseLong(a[5]), Long.parseLong(b[5]))),
-                Integer.toString(Integer.parseInt(a[6]) + Integer.parseInt(b[6])),
-                Integer.toString(Integer.parseInt(a[7]) + Integer.parseInt(b[7])),
-                Integer.toString(Integer.parseInt(a[8]) + Integer.parseInt(b[8])),
-                Integer.toString(Integer.parseInt(a[9]) + Integer.parseInt(b[9])),
-                Integer.toString(Integer.parseInt(a[10]) + Integer.parseInt(b[10])),
-                Integer.toString(Integer.parseInt(a[11]) + Integer.parseInt(b[11])),
-                Integer.toString(Integer.parseInt(a[12]) + Integer.parseInt(b[12])),
-                Integer.toString(Integer.parseInt(a[13]) + Integer.parseInt(b[13])),
-                Integer.toString(Integer.parseInt(a[14]) + Integer.parseInt(b[14])),
-                Integer.toString(Integer.parseInt(a[15]) + Integer.parseInt(b[15])),
-                Integer.toString(Integer.parseInt(a[16]) + Integer.parseInt(b[16])),
-                Integer.toString(Integer.parseInt(a[17]) + Integer.parseInt(b[17]))
+    private static long[] combinedStatus(long[] a, long[] b) {
+        return new long[]{
+                a[0] + b[0],
+                a[1] + b[1],
+                a[2] + b[2],
+                a[3] + b[3],
+                Math.max(a[4], b[4]),
+                Math.min(a[5], b[5]),
+                Math.max(a[6], b[6]),
+                a[7] + b[7],
+                a[8] + b[8],
+                a[9] + b[9],
+                a[10] + b[10],
+                a[11] + b[11],
+                a[12] + b[12],
+                a[13] + b[13],
+                a[14] + b[14],
+                a[15] + b[15],
+                a[16] + b[16],
+                a[17] + b[17],
+                a[18] + b[18]
         };
     }
     
-    public static String[] combinedStatus(String[][] a, int l) {
+    public static long[] combinedStatus(long[][] a, int l) {
         if ((a == null) || (a.length == 0) || (l == 0)) return null;
         if ((a.length >= 1) && (l == 1)) return a[0];
         if ((a.length >= 2) && (l == 2)) return combinedStatus(a[0], a[1]);
@@ -281,6 +292,7 @@ public class kelondroObjectCache {
             ages.deleteScore(key);
             hasnot.setScore(key, intTime(System.currentTimeMillis()));
         }
+        flushh();
     }
     
     public void flushc() {
@@ -288,7 +300,7 @@ public class kelondroObjectCache {
         synchronized(cache) {
             while ((ages.size() > 0) &&
                    ((k = (String) ages.getMinObject()) != null) &&
-                   ((ages.size() > maxSize) ||
+                   ((ages.size() > maxHitSize) ||
                     (((System.currentTimeMillis() - longEmit(ages.getScore(k))) > maxAge) &&
                      (serverMemory.available() < minMem)))
                   ) {
@@ -304,7 +316,7 @@ public class kelondroObjectCache {
         synchronized(cache) {
             while ((hasnot.size() > 0) &&
                     ((k = (String) hasnot.getMinObject()) != null) &&
-                    ((hasnot.size() > maxSize) ||
+                    ((hasnot.size() > maxMissSize) ||
                       (((System.currentTimeMillis() - longEmit(hasnot.getScore(k))) > maxAge) &&
                        (serverMemory.available() < minMem)))
                    ) {
@@ -313,4 +325,15 @@ public class kelondroObjectCache {
              }
         }
     }
+    
+    public static void main(String[] args) {
+        // test to measure memory usage of miss cache
+        kelondroMScoreCluster t = new kelondroMScoreCluster();
+        System.gc(); long s0 = Runtime.getRuntime().freeMemory();
+        int loop = 200000;
+        for (int i = 0; i < loop; i++) t.setScore((Integer.toString(i) + "000000000000").substring(0, 12), i);        
+        System.gc(); long s1 = Runtime.getRuntime().freeMemory();
+        System.out.println((s1 - s0) / loop);
+    }
+    
 }

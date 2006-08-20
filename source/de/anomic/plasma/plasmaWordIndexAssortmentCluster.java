@@ -347,12 +347,19 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
     
     public int cacheChunkSizeAvg() {
         int i = 0;
-        int a;
         for (int j = 0; j < clusterCount; j++) {
-            a = assortments[j].cacheNodeChunkSize();
-            i    += a;
+            i += assortments[j].cacheNodeChunkSize();
         }
         return i / clusterCount;
+    }
+    
+    public int cacheObjectSizeAvg() {
+        long c = 0, k = 0;
+        for (int j = 0; j < clusterCount; j++) {
+            c += assortments[j].size() * assortments[j].cacheObjectChunkSize();
+            k += assortments[j].size();
+        }
+        return (int) (c / k);
     }
     
     public int[] cacheNodeStatus() {
@@ -361,9 +368,9 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         return kelondroRecords.cacheCombinedStatus(a, assortments.length);
     }
     
-    public String[] cacheObjectStatus() {
-        String[][] a = new String[assortments.length][];
-        for (int i = assortments.length - 1; i >= 0; i--) a[i] = assortments[i].dbCacheObjectStatus();
+    public long[] cacheObjectStatus() {
+        long[][] a = new long[assortments.length][];
+        for (int i = assortments.length - 1; i >= 0; i--) a[i] = assortments[i].cacheObjectStatus();
         return kelondroObjectCache.combinedStatus(a, a.length);
     }
     

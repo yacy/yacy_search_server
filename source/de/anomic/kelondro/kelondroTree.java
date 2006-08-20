@@ -81,7 +81,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     protected static final int root       = 0; // pointer for FHandles-array: pointer to root node
 
     // calibration of cache
-    public    static final int defaultObjectCachePercent = 30;
+    public    static final int defaultObjectCachePercent = 10;
     
     // class variables
     private   final Search              writeSearchObj = new Search();
@@ -158,18 +158,21 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     private void initObjectCache(long buffersize, int objectCachePercent) {
         if (objectCachePercent > 0) {
             long objectbuffersize = objectCachePercent * buffersize / 100;
-            long nodecachesize = objectbuffersize / cacheObjectChunkSize();
-            this.objectCache = new kelondroObjectCache(this.filename, (int) nodecachesize, nodecachesize * 3000 , 2*1024*1024);
+            long objecthitcachesize = objectbuffersize * 4 / 5 / cacheObjectChunkSize();
+            long objectmisscachesize = objectbuffersize / 5 / cacheObjectMissSize;
+            this.objectCache = new kelondroObjectCache(this.filename, (int) objecthitcachesize, (int) objectmisscachesize, objecthitcachesize * 3000 , 4*1024*1024);
         } else {
             this.objectCache = null;
         }
     }
     
+    public final static int cacheObjectMissSize = 120;
+    
     public final int cacheObjectChunkSize() {
-        return row().objectsize() + /* overhead */ 8 * super.row().columns();
+        return row().objectsize() + /* overhead */ 16 * super.row().columns();
     }
     
-    public String[] cacheObjectStatus() {
+    public long[] cacheObjectStatus() {
         if (this.objectCache == null) return null;
         return this.objectCache.status();
     }

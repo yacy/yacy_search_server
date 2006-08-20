@@ -153,11 +153,15 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         return assortmentCluster.cacheChunkSizeAvg();
     }
 
+    public int assortmentsCacheObjectSizeAvg() {
+        return assortmentCluster.cacheObjectSizeAvg();
+    }
+
     public int[] assortmentsCacheNodeStatus() {
         return assortmentCluster.cacheNodeStatus();
     }
     
-    public String[] assortmentsCacheObjectStatus() {
+    public long[] assortmentsCacheObjectStatus() {
         return assortmentCluster.cacheObjectStatus();
     }
     

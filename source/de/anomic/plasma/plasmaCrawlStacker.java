@@ -156,11 +156,15 @@ public final class plasmaCrawlStacker {
         return this.queue.cacheNodeChunkSize();
     }
     
+    public int cacheObjectChunkSize() {
+        return this.queue.cacheObjectChunkSize();
+    }
+    
     public int[] cacheNodeStatus() {
         return this.queue.cacheNodeStatus();
     }
     
-    public String[] cacheObjectStatus() {
+    public long[] cacheObjectStatus() {
         return this.queue.cacheObjectStatus();
     }
     
@@ -641,11 +645,15 @@ public final class plasmaCrawlStacker {
             return urlEntryCache.cacheNodeChunkSize();
         }
         
+        public int cacheObjectChunkSize() {
+            return urlEntryCache.cacheObjectChunkSize();
+        }
+        
         public int[] cacheNodeStatus() {
             return urlEntryCache.cacheNodeStatus();
         }
         
-        public String[] cacheObjectStatus() {
+        public long[] cacheObjectStatus() {
             return urlEntryCache.cacheObjectStatus();
         }
         

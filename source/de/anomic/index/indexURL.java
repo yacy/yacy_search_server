@@ -444,12 +444,16 @@ public class indexURL {
      return new int[]{0,0,0,0,0,0,0,0,0,0};
  }
  
- public String[] cacheObjectStatus() {
+ public int cacheObjectChunkSize() {
+     if (urlHashCache instanceof kelondroTree) return ((kelondroTree) urlHashCache).cacheObjectChunkSize();
+     return 0;
+ }
+ 
+ public long[] cacheObjectStatus() {
      if (urlHashCache instanceof kelondroTree) return ((kelondroTree) urlHashCache).cacheObjectStatus();
      return null;
  }
  
-
  public static final int flagTypeID(String hash) {
      return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 32) >> 5;
  }

@@ -100,19 +100,25 @@ public class wikiBoard {
         return datbase.size();
     }
     
-    public int dbCacheNodeChunkSize() {
+    public int cacheNodeChunkSize() {
         int db = datbase.cacheNodeChunkSize();
         int bk = bkpbase.cacheNodeChunkSize();
         return (db + bk) / 2;
     }
     
-    public int[] dbCacheNodeStatus() {
+    public int cacheObjectChunkSize() {
+        int db = datbase.cacheObjectChunkSize();
+        int bk = bkpbase.cacheObjectChunkSize();
+        return (db + bk) / 2;
+    }
+    
+    public int[] cacheNodeStatus() {
         int[] a = datbase.cacheNodeStatus();
         int[] b = bkpbase.cacheNodeStatus();
         return kelondroRecords.cacheCombinedStatus(new int[][]{a, b}, 2);
     }
     
-    public String[] dbCacheObjectStatus() {
+    public long[] cacheObjectStatus() {
         return datbase.cacheObjectStatus();
     }
     

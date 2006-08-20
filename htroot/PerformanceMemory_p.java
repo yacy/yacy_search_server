@@ -49,6 +49,7 @@ import java.io.File;
 
 import de.anomic.http.httpc;
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
@@ -63,10 +64,10 @@ public class PerformanceMemory_p {
     private static final long MB = 1024 * KB;
     private static Map defaultSettings = null;
         
-    private static int      chk;
-    private static int[]    slt;
-    private static String[] ost;
-    private static long     req, usd, bst;
+    private static int    chk, obj;
+    private static int[]  slt;
+    private static long[] ost;
+    private static long   req, usd, bst;
     
     private static long usedTotal, currTotal, dfltTotal, bestTotal;
         
@@ -168,80 +169,93 @@ public class PerformanceMemory_p {
     
         req = sb.wordIndex.size();
         chk = sb.wordIndex.assortmentsCacheChunkSizeAvg();
+        obj = sb.wordIndex.assortmentsCacheObjectSizeAvg();
         slt = sb.wordIndex.assortmentsCacheNodeStatus();
         ost = sb.wordIndex.assortmentsCacheObjectStatus();
         putprop(prop, env, "RWI", set);
         
         req = sb.cacheManager.dbSize();
-        chk = sb.cacheManager.dbCacheChunkSize();
-        slt = sb.cacheManager.dbCacheStatus();
-        ost = sb.cacheManager.dbCacheObjectStatus();
+        chk = sb.cacheManager.cacheNodeChunkSize();
+        obj = sb.cacheManager.cacheObjectChunkSize();
+        slt = sb.cacheManager.cacheNodeStatus();
+        ost = sb.cacheManager.cacheObjectStatus();
         putprop(prop, env, "HTTP", set);
         
         req = sb.urlPool.loadedURL.size();
         chk = sb.urlPool.loadedURL.cacheNodeChunkSize();
+        obj = sb.urlPool.loadedURL.cacheObjectChunkSize();
         slt = sb.urlPool.loadedURL.cacheNodeStatus();
         ost = sb.urlPool.loadedURL.cacheObjectStatus();
         putprop(prop, env, "LURL", set);
         
         req = sb.sbStackCrawlThread.size();
         chk = sb.sbStackCrawlThread.cacheNodeChunkSize();
+        obj = sb.sbStackCrawlThread.cacheObjectChunkSize();
         slt = sb.sbStackCrawlThread.cacheNodeStatus();
         ost = sb.sbStackCrawlThread.cacheObjectStatus();
         putprop(prop, env, "PreNURL", set);
         
         req = sb.urlPool.noticeURL.size();
         chk = sb.urlPool.noticeURL.cacheNodeChunkSize();
+        obj = sb.urlPool.noticeURL.cacheObjectChunkSize();
         slt = sb.urlPool.noticeURL.cacheNodeStatus();
         ost = sb.urlPool.noticeURL.cacheObjectStatus();
         putprop(prop, env, "NURL", set);
         
         req = sb.urlPool.errorURL.size();
         chk = sb.urlPool.errorURL.cacheNodeChunkSize();
+        obj = sb.urlPool.errorURL.cacheObjectChunkSize();
         slt = sb.urlPool.errorURL.cacheNodeStatus();
         ost = sb.urlPool.errorURL.cacheObjectStatus();
         putprop(prop, env, "EURL", set);
         
         req = yacyCore.seedDB.sizeConnected() + yacyCore.seedDB.sizeDisconnected() + yacyCore.seedDB.sizePotential();
-        chk = yacyCore.seedDB.dbCacheNodeChunkSize();
-        slt = yacyCore.seedDB.dbCacheNodeStatus();
-        ost = yacyCore.seedDB.dbCacheObjectStatus();
+        chk = yacyCore.seedDB.cacheNodeChunkSize();
+        obj = yacyCore.seedDB.cacheObjectChunkSize();
+        slt = yacyCore.seedDB.cacheNodeStatus();
+        ost = yacyCore.seedDB.cacheObjectStatus();
         putprop(prop, env, "DHT", set);
         
         req = sb.messageDB.size();
-        chk = sb.messageDB.dbCacheNodeChunkSize();
-        slt = sb.messageDB.dbCacheNodeStatus();
-        ost = sb.messageDB.dbCacheObjectStatus();
+        chk = sb.messageDB.cacheNodeChunkSize();
+        obj = sb.messageDB.cacheObjectChunkSize();
+        slt = sb.messageDB.cacheNodeStatus();
+        ost = sb.messageDB.cacheObjectStatus();
         putprop(prop, env, "Message", set);
         
         req = sb.wikiDB.sizeOfTwo();
-        chk = sb.wikiDB.dbCacheNodeChunkSize();
-        slt = sb.wikiDB.dbCacheNodeStatus();
-        ost = sb.wikiDB.dbCacheObjectStatus();
+        chk = sb.wikiDB.cacheNodeChunkSize();
+        obj = sb.wikiDB.cacheObjectChunkSize();
+        slt = sb.wikiDB.cacheNodeStatus();
+        ost = sb.wikiDB.cacheObjectStatus();
         putprop(prop, env, "Wiki", set);
         
         req = sb.blogDB.size();
-        chk = sb.blogDB.dbCacheNodeChunkSize();
-        slt = sb.blogDB.dbCacheNodeStatus();
-        ost = sb.blogDB.dbCacheObjectStatus();
+        chk = sb.blogDB.cacheNodeChunkSize();
+        obj = sb.blogDB.cacheObjectChunkSize();
+        slt = sb.blogDB.cacheNodeStatus();
+        ost = sb.blogDB.cacheObjectStatus();
         putprop(prop, env, "Blog", set);
         
         req = yacyCore.newsPool.dbSize();
-        chk = yacyCore.newsPool.dbCacheNodeChunkSize();
-        slt = yacyCore.newsPool.dbCacheNodeStatus();
-        ost = yacyCore.newsPool.dbCacheObjectStatus();
+        chk = yacyCore.newsPool.cacheNodeChunkSize();
+        obj = yacyCore.newsPool.cacheObjectChunkSize();
+        slt = yacyCore.newsPool.cacheNodeStatus();
+        ost = yacyCore.newsPool.cacheObjectStatus();
         putprop(prop, env, "News", set);
         
         req = plasmaSwitchboard.robots.size();
-        chk = plasmaSwitchboard.robots.dbCacheNodeChunkSize();
-        slt = plasmaSwitchboard.robots.dbCacheNodeStatus();
-        ost = plasmaSwitchboard.robots.dbCacheObjectStatus();
+        chk = plasmaSwitchboard.robots.cacheNodeChunkSize();
+        obj = plasmaSwitchboard.robots.cacheObjectChunkSize();
+        slt = plasmaSwitchboard.robots.cacheNodeStatus();
+        ost = plasmaSwitchboard.robots.cacheObjectStatus();
         putprop(prop, env, "Robots", set);
         
         req = sb.profiles.size();
-        chk = sb.profiles.dbCacheNodeChunkSize();
-        slt = sb.profiles.dbCacheNodeStatus();
-        ost = sb.profiles.dbCacheObjectStatus();
+        chk = sb.profiles.cacheNodeChunkSize();
+        obj = sb.profiles.cacheObjectChunkSize();
+        slt = sb.profiles.cacheNodeStatus();
+        ost = sb.profiles.cacheObjectStatus();
         putprop(prop, env, "Profiles", set);
         
         prop.put("usedTotal", usedTotal / MB);
@@ -303,10 +317,11 @@ public class PerformanceMemory_p {
     }
     
     private static void putprop(serverObjects prop, serverSwitch env, String db, String set) {
-        usd = ((long) chk) * ((long) slt[1]);
+        usd = chk * slt[1] + obj * ost[2] /*hit*/ + kelondroTree.cacheObjectMissSize * ost[3] /*miss*/;
         bst = (((((long) chk) * ((long) req)) >> 10) + 1) << 10;
         if (set.equals("setBest")) env.setConfig("ramCache" + db, bst);
-        prop.put("chunk" + db, chk);
+        prop.put("nodsz" + db, chk);
+        prop.put("ochunksiz" + db, obj);
         prop.put("slreq" + db, req);
         prop.put("slemp" + db, slt[0] - slt[1]);
         prop.put("slfil" + db, slt[1]);
@@ -314,13 +329,14 @@ public class PerformanceMemory_p {
         prop.put("sluniqdoub" + db, slt[6] + ":" + slt[7]);
         prop.put("slflush" + db, slt[8] + ":" + slt[9]);
         prop.put("ochunkmax" + db, ost[0]);
-        prop.put("ochunkcur" + db, ost[1] + "<br>" + ost[2]);
-        prop.put("ohittmiss" + db, ost[6] + ":" + ost[7]);
-        prop.put("ouniqdoub" + db, ost[8] + ":" + ost[9]);
-        prop.put("oflush" + db, ost[10] + ":" + ost[11]);
-        prop.put("nhittmiss" + db, ost[12] + ":" + ost[13]);
-        prop.put("nuniqdoub" + db, ost[14] + ":" + ost[15]);
-        prop.put("nflush" + db, ost[16] + ":" + ost[17]);
+        prop.put("omisscmax" + db, ost[1]);
+        prop.put("ochunkcur" + db, ost[2] + "<br>" + ost[3]);
+        prop.put("ohittmiss" + db, ost[7] + ":" + ost[8]);
+        prop.put("ouniqdoub" + db, ost[9] + ":" + ost[10]);
+        prop.put("oflush" + db, ost[11] + ":" + ost[12]);
+        prop.put("nhittmiss" + db, ost[13] + ":" + ost[14]);
+        prop.put("nuniqdoub" + db, ost[15] + ":" + ost[16]);
+        prop.put("nflush" + db, ost[17] + ":" + ost[18]);
         prop.put("used" + db, usd / KB);
         prop.put("best" + db, bst / KB);
         prop.put("dflt" + db, Long.parseLong((String) defaultSettings.get("ramCache" + db)) / KB);

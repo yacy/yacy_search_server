@@ -81,15 +81,19 @@ public class plasmaCrawlProfile {
         domsCache = new HashMap();
     }
     
-    public int dbCacheNodeChunkSize() {
+    public int cacheNodeChunkSize() {
         return profileTable.cacheNodeChunkSize();
     }    
     
-    public int[] dbCacheNodeStatus() {
+    public int cacheObjectChunkSize() {
+        return profileTable.cacheObjectChunkSize();
+    }    
+    
+    public int[] cacheNodeStatus() {
         return profileTable.cacheNodeStatus();
     }    
     
-    public String[] dbCacheObjectStatus() {
+    public long[] cacheObjectStatus() {
         return profileTable.cacheObjectStatus();
     }
     
