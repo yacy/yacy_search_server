@@ -53,7 +53,7 @@ Enter new domain name / path pattern in the form:==Geben Sie eine neue Domain/ei
 Add URL pattern==F&uuml;ge URL hinzu
 Import blacklist items from other YaCy peers:==Importiere Blacklist von anderen YaCy Peers:
 Host:==Host:
-"Load new blacklist items"==Lade neue Blacklist
+Load new blacklist items==Lade neue Blacklist
 Import blacklist items from URL:==Importiere Blacklist von URL:
 URL:==URL:
 "Load new blacklist items"==Lade neue Blacklist
@@ -62,6 +62,7 @@ Import blacklist items from file:==Importiere Blacklist aus Datei:
 was removed from blacklist==wurde aus Blacklist entfernt
 was added to the blacklist==wurde zur Blacklist hinzugef&uuml;gt
 File:==Datei:
+Activate this list for==Diese Liste ist g&uuml;ltig f&uuml;r
 
 #-----------------------------------------------------------
 #File: Blog.html
@@ -526,7 +527,7 @@ Do Remote Indexing:==Indexieren auf anderen Peers:
 Describe your intention to start this global crawl \(optional\):==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional):
 This message will appear in the 'Other Peer Crawl Start' table of other peers.==Diese Nachricht wird bei anderen Peers in der 'Anderer Peer Crawl Start' Tabelle angezeigt.
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler mit anderen Peers Kontakt aufnehmen und diese als Remote Indexierer f&uuml;r Ihren Crawl benutzen.
-If you need your crawling results locally, you should switch this off.==Wenn Sie die Crawling Ergebnisse lokal ben&ouml;tigen, sollten Sie diese Funktion aktivieren.
+If you need your crawling results locally, you should switch this off.==Wenn Sie die Crawling Ergebnisse lokal ben&ouml;tigen, sollten Sie diese Funktion deaktivieren.
 Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl initiieren oder erhalten.
 <b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can omit starting a crawl with the same start point.==<b>Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren,</b> damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
 Exclude <i>static</i> Stop-Words==Stop-Words ausschlie&szlig;en:
@@ -1476,6 +1477,8 @@ Only Proxy-cache ist available in this mode.==Nur der Proxy Cache ist in diesem 
 After a short while you should see the effect on the==Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
 You can now go back to the==Sie k&ouml;nnen nun zur&uuml;ck zu den
 Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere &Auml;nderungen vorzunehmen.
+Port rebinding will be done in a few seconds==Der neue Port wird in ein paar Sekunden übernommen.
+You can reach your YaCy server under the new location==Dieser YaCy-Peer kann nun unter seiner neuen Adresse erreicht werden: 
 
 #-------------------------------------------------------
 #File: Settings_Admin.inc
