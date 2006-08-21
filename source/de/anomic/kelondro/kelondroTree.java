@@ -650,7 +650,6 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 remove(result, writeSearchObj.getParent());
                 return values;
             } else {
-                if (objectCache != null) objectCache.hasnot(key);
                 return null;
             }
         }
