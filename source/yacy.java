@@ -1131,6 +1131,7 @@ public final class yacy {
         File root = new File(homePath);
         File dbroot = new File(root, "DATA/PLASMADB");
         serverLog log = new serverLog("URLDBCLEANUP");
+        try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         try {
             plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), 4194304, 10000);
             currentUrlDB.urldbcleanup();

@@ -803,8 +803,12 @@ public final class plasmaCrawlLURL extends indexURL {
                 eiter.next();
                 iteratorCount++;
             } catch (RuntimeException e) {
-                String m = e.getMessage();
-                damagedURLS.add(m.substring(m.length() - 12));
+                if(e.getMessage() != null) {
+                    String m = e.getMessage();
+                    damagedURLS.add(m.substring(m.length() - 12));
+                } else {
+                    log.logSevere("RuntimeException:", e);
+                }
             }
             try { Thread.sleep(1000); } catch (InterruptedException e) { }
             log.logInfo("URLs vorher: " + size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
@@ -899,7 +903,7 @@ public final class plasmaCrawlLURL extends indexURL {
                     
                     plasmaCrawlLURL.Entry entry = (plasmaCrawlLURL.Entry) eiter.next();
                     totalSearchedUrls++;
-                    if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER,entry.url())==true) {
+                    if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER,entry.url())==true || plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT,entry.url())==true) {
                         lastBlacklistedUrl = entry.url().toString();
                         lastBlacklistedHash = entry.hash();                        
                         serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " " + entry.url());
