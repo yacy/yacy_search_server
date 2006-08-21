@@ -106,8 +106,12 @@ public class URL {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
         int p = relPath.indexOf(':');
         String relprotocol = (p < 0) ? null : relPath.substring(0, p).toLowerCase();
-        if ((relprotocol != null) && ("http.https.ftp.mailto".indexOf(relprotocol) >= 0)) {
-            parseURLString(relPath);
+        if (relprotocol != null) {
+            if ("http.https.ftp.mailto".indexOf(relprotocol) >= 0) {
+                parseURLString(relPath);
+            } else {
+                throw new MalformedURLException("unknown protocol: " + relprotocol);
+            }
         } else {
             this.protocol = baseURL.protocol;
             this.host = baseURL.host;
@@ -313,7 +317,9 @@ public class URL {
           new String[]{"http://www.anomic.de/home/index.html", "http://www.yacy.net/test"},
           new String[]{"http://www.anomic.de/home/index.html", "ftp://ftp.yacy.net/test"},
           new String[]{"http://www.anomic.de/home/index.html", "../test"},
-          new String[]{"http://www.anomic.de/home/index.html", "mailto:abcdefg@nomailnomail.com"}
+          new String[]{"http://www.anomic.de/home/index.html", "mailto:abcdefg@nomailnomail.com"},
+          new String[]{null, "news:de.test"},
+          new String[]{"http://www.anomic.de/home", "news:de.test"}
         };
         String environment, url;
         de.anomic.net.URL aURL = null;
@@ -321,19 +327,20 @@ public class URL {
         for (int i = 0; i < test.length; i++) {
             environment = test[i][0];
             url = test[i][1];
-            try {
-                if (environment == null) {
-                    aURL = new de.anomic.net.URL(url);
-                    jURL = new java.net.URL(url);
-                } else {
-                    aURL = new de.anomic.net.URL(new de.anomic.net.URL(environment), url);
-                    jURL = new java.net.URL(new java.net.URL(environment), url);
-                }
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
+            if (environment == null) {
+                try {aURL = new de.anomic.net.URL(url);} catch (MalformedURLException e) {aURL = null;}
+                try {jURL = new java.net.URL(url);} catch (MalformedURLException e) {jURL = null;}
+            } else {
+                try {aURL = new de.anomic.net.URL(new de.anomic.net.URL(environment), url);} catch (MalformedURLException e) {aURL = null;}
+                try {jURL = new java.net.URL(new java.net.URL(environment), url);} catch (MalformedURLException e) {jURL = null;}
             }
-            if (!(aURL.toString().equals(jURL.toString()))) {
-                System.out.println("Difference for environment=" + environment + ", url=" + url + ":\njURL=" + jURL.toString() + "\naURL=" + aURL.toString() + "\n");
+            if (((aURL == null) && (jURL != null)) ||
+                ((aURL != null) && (jURL == null)) ||
+                ((aURL != null) && (jURL != null) && (!(jURL.toString().equals(aURL.toString()))))) {
+                System.out.println("Difference for environment=" + environment + ", url=" + url + ":");
+                System.out.println((jURL == null) ? "jURL rejected input" : "jURL=" + jURL.toString());
+                System.out.println((aURL == null) ? "aURL rejected input" : "aURL=" + aURL.toString());
+                System.out.println();
             }
         }
     }
