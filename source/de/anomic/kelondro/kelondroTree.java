@@ -635,6 +635,12 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     
     // Removes the mapping for this key from this map if present (optional operation).
     public kelondroRow.Entry remove(byte[] key) throws IOException {
+        
+        // check with miss cache of object cache
+        // if we know that the object does not exist, then we don't need to lookup in the file
+        if ((objectCache != null) && (objectCache.has(key) == -1)) return null;
+            
+        // delete from database
         synchronized(writeSearchObj) {
             if (objectCache != null) objectCache.remove(key);
             writeSearchObj.process(key);
@@ -644,6 +650,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 remove(result, writeSearchObj.getParent());
                 return values;
             } else {
+                if (objectCache != null) objectCache.hasnot(key);
                 return null;
             }
         }
