@@ -84,7 +84,7 @@ public class URL {
                 if (q < 0) {
                     throw new MalformedURLException("wrong email address: " + url);
                 } else {
-                    userInfo = url.substring(p + 3, q);
+                    userInfo = url.substring(p + 1, q);
                     host = url.substring(q + 1);
                     path = null;
                     port = -1;
@@ -116,17 +116,22 @@ public class URL {
                 this.path = baseURL.path;
             } else if (relPath.startsWith("/")) {
                 this.path = relPath;
-            } else if (!(baseURL.path.endsWith("/"))) {
+            } else if (baseURL.path.endsWith("/")) {
                 if (relPath.startsWith("#") || relPath.startsWith("?")) {
-                        this.path = baseURL.path + relPath;
+                    throw new MalformedURLException("relative path malformed: " + relPath);
                 } else {
-                        this.path = relPath;
+                    this.path = baseURL.path + relPath;
                 }
             } else {
                 if (relPath.startsWith("#") || relPath.startsWith("?")) {
                     this.path = baseURL.path + relPath;
                 } else {
-                    this.path = baseURL.path + "/" + relPath;
+                    int q = baseURL.path.lastIndexOf('/');
+                    if (q < 0) {
+                        this.path = relPath;
+                    } else {
+                        this.path = baseURL.path.substring(0, q + 1) + relPath;
+                    }
                 }
             }
             this.quest = baseURL.quest;
@@ -158,6 +163,7 @@ public class URL {
             path = head.substring(0, q) + path.substring(p + 3);
         }
     }
+    
     private void identPort(String inputURL) throws MalformedURLException {
         // identify ref in file
         int r = host.indexOf(':');
@@ -292,53 +298,43 @@ public class URL {
     }
     
     public static void main(String[] args) {
-        URL u, v;
-        try {
-            
-            u = new URL("http://www.anomic.de/home/test?x=1#home");
-            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            
-            u = new URL("http://www.anomic.de/home/test?x=1"); 
-            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            
-            u = new URL("http://www.anomic.de/home/test#home"); 
-            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            
-            u = new URL("ftp://ftp.anomic.de/home/test#home"); 
-            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            
-            u = new URL("http://www.anomic.de/home/../abc/"); 
-            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            
-            u = new URL("mailto:abcdefg@nomailnomail.com"); 
-            System.out.println("toString=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            
-            v = new URL("http://www.anomic.de/home");
-            u = new URL(v, "test"); 
-            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            u = new URL(v, "test/"); 
-            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            
-            v = new URL("http://www.anomic.de/home/");
-            u = new URL(v, "test"); 
-            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            u = new URL(v, "test/"); 
-            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            
-            u = new URL(v, "http://www.yacy.net/test"); 
-            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            
-            u = new URL(v, "ftp://ftp.yacy.net/test"); 
-            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            
-            u = new URL(v, "../test"); 
-            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-            
-            u = new URL(v, "mailto:abcdefg@nomailnomail.com"); 
-            System.out.println("toString u=" + u.toString() + "\ntoNormalform=" + u.toNormalform() + "\n");
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        String[][] test = new String[][]{
+          new String[]{null, "http://www.anomic.de/home/test?x=1#home"},
+          new String[]{null, "http://www.anomic.de/home/test?x=1"},
+          new String[]{null, "http://www.anomic.de/home/test#home"},
+          new String[]{null, "ftp://ftp.anomic.de/home/test#home"},
+          new String[]{null, "http://www.anomic.de/home/../abc/"},
+          new String[]{null, "mailto:abcdefg@nomailnomail.com"},
+          new String[]{"http://www.anomic.de/home", "test"},
+          new String[]{"http://www.anomic.de/home", "test/"},
+          new String[]{"http://www.anomic.de/home/", "test"},
+          new String[]{"http://www.anomic.de/home/", "test/"},
+          new String[]{"http://www.anomic.de/home/index.html", "test.htm"},
+          new String[]{"http://www.anomic.de/home/index.html", "http://www.yacy.net/test"},
+          new String[]{"http://www.anomic.de/home/index.html", "ftp://ftp.yacy.net/test"},
+          new String[]{"http://www.anomic.de/home/index.html", "../test"},
+          new String[]{"http://www.anomic.de/home/index.html", "mailto:abcdefg@nomailnomail.com"}
+        };
+        String environment, url;
+        de.anomic.net.URL aURL = null;
+        java.net.URL jURL = null;
+        for (int i = 0; i < test.length; i++) {
+            environment = test[i][0];
+            url = test[i][1];
+            try {
+                if (environment == null) {
+                    aURL = new de.anomic.net.URL(url);
+                    jURL = new java.net.URL(url);
+                } else {
+                    aURL = new de.anomic.net.URL(new de.anomic.net.URL(environment), url);
+                    jURL = new java.net.URL(new java.net.URL(environment), url);
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            if (!(aURL.toString().equals(jURL.toString()))) {
+                System.out.println("Difference for environment=" + environment + ", url=" + url + ":\njURL=" + jURL.toString() + "\naURL=" + aURL.toString() + "\n");
+            }
         }
     }
 }
