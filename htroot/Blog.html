@@ -25,7 +25,9 @@
 <form action="Blog.html" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
 <p>Author:<br><input name="author" type="text" size="20" maxlength="80" value="#[author]#"></p>
 <p>Subject:<br><input name="subject" type="text" size="20" maxlength="80" value="#[subject]#"></p>
-<p>Text:<br><textarea name="content" cols="80" rows="24">#[page-code]#</textarea></p>
+<p>Text:<br><textarea name="content" cols="80" rows="24">#[page-code]#</textarea>
+<br><font size="-1">You can use <a href="WikiHelp.html" target="_blank" onClick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1',width=640,height=480);return false;">Yacy-Wiki Code</a> here.</font>
+</p>
 <input type="hidden" name="page" value="#[pageid]#">
 <input type="submit" name="submit" value="Submit">
 <input type="submit" name="preview" value="Preview">
