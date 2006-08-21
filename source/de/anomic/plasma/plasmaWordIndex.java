@@ -175,12 +175,10 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
     public void flushControl() {
         // check for forced flush
-        synchronized (ramCache) {
-            ramCache.shiftK2W();
-            flushCache(ramCache.maxURLinWCache() - ramCache.wCacheReferenceLimit);
-            if (ramCache.wSize() > ramCache.getMaxWordCount()) {
-                flushCache(ramCache.wSize() + 500 - ramCache.getMaxWordCount());
-            }
+        synchronized (this) { ramCache.shiftK2W(); }
+        flushCache(ramCache.maxURLinWCache() - ramCache.wCacheReferenceLimit);
+        if (ramCache.wSize() > ramCache.getMaxWordCount()) {
+            flushCache(ramCache.wSize() + 500 - ramCache.getMaxWordCount());
         }
     }
 
@@ -201,7 +199,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public void flushCacheSome() {
-        synchronized (ramCache) { ramCache.shiftK2W(); }
+        synchronized (this) { ramCache.shiftK2W(); }
         int flushCount = ramCache.wSize() / 420;
         if (flushCount > 100) flushCount = 100;
         if (flushCount < 10) flushCount = Math.min(10, ramCache.wSize());
@@ -210,13 +208,13 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     
     public void flushCache(int count) {
         if (count <= 0) return;
-        synchronized (ramCache) {
-            busyCacheFlush = true;
-            String wordHash;
-            System.out.println("DEBUG-Started flush of " + count + " entries from RAM to DB");
-            long start = System.currentTimeMillis();
-            for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
-                if (ramCache.wSize() == 0) break;
+        busyCacheFlush = true;
+        String wordHash;
+        System.out.println("DEBUG-Started flush of " + count + " entries from RAM to DB");
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
+            if (ramCache.wSize() == 0) break;
+            synchronized (this) {
                 wordHash = ramCache.bestFlushWordHash();
                 
                 // flush the wordHash
@@ -236,11 +234,11 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                 }
                 
                 // pause to next loop to give other processes a chance to use IO
-                try {Thread.sleep(8);} catch (InterruptedException e) {}
+                try {this.wait(8);} catch (InterruptedException e) {}
             }
-            System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
-            busyCacheFlush = false;
         }
+        System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
+        busyCacheFlush = false;
     }
     
     private static final int hour = 3600000;
@@ -412,7 +410,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public void close(int waitingBoundSeconds) {
-        synchronized (ramCache) {
+        synchronized (this) {
             ramCache.close(waitingBoundSeconds);
             if (useCollectionIndex) collections.close(-1);
             assortmentCluster.close(-1);
@@ -438,15 +436,15 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
         int removed = 0;
-            removed += ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
+        removed += ramCache.removeEntries(wordHash, urlHashes, deleteComplete);
+        if (removed == urlHashes.size()) return removed;
+        if (useCollectionIndex) {
+            removed += collections.removeEntries(wordHash, urlHashes, deleteComplete);
             if (removed == urlHashes.size()) return removed;
-            if (useCollectionIndex) {
-                removed += collections.removeEntries(wordHash, urlHashes, deleteComplete);
-                if (removed == urlHashes.size()) return removed;
-            }
-            removed += assortmentCluster.removeEntries(wordHash, urlHashes, deleteComplete);
-            if (removed == urlHashes.size()) return removed;
-            removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
+        }
+        removed += assortmentCluster.removeEntries(wordHash, urlHashes, deleteComplete);
+        if (removed == urlHashes.size()) return removed;
+        removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
         return removed;
     }
     
