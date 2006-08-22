@@ -52,6 +52,7 @@ import java.lang.reflect.Method;
 
 import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpdFileHandler;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
@@ -198,7 +199,8 @@ public class ConfigBasic {
         boolean properPort = (yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal());
         
         if ((properPW) && (env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
-        		env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
+        	    env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
+            httpdFileHandler.initDefaultPath();
         }
         
         prop.put("statusName", (properName) ? 1 : 0);

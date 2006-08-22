@@ -180,8 +180,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             }
             
             // create default files array
-            defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
-            if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
+            initDefaultPath();
             
             // create a htRootPath: system pages
             if (htRootPath == null) {
@@ -215,6 +214,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         } catch (NoSuchAlgorithmException e) {
             serverLog.logWarning("HTTPDFileHandler", "Content-MD5 support not availabel ...");
         }
+    }
+    
+    public static final void initDefaultPath() {
+        // create default files array
+        defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
+        if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
     }
     
     /*
