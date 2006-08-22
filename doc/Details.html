@@ -48,67 +48,28 @@ globalheader();
 </NOSCRIPT>
 <!-- ----- HERE STARTS CONTENT PART ----- -->
 
+<h2>Technology Details</h2>
 
-<h2>Details</h2>
+<p><img width="480" src="grafics/YaCy_Technology_Methods.png" align="center"></p>
+<p>YaCy has alarge number of document parsers included.</p><br><br>
 
-YaCy supports the following features:<br>
-<table border="0" cellspacing="1" cellpadding="3" width="100%">
+<p><img width="480" src="grafics/YaCy_Technology_IndexDistribution.png" align="center"></p>
+<p>When YaCy has indexed a number of web pages, it starts to distribute parts of the web index
+to other YaCy peers. That causes that all indexes that users of YaCy generate are mixed with each other.
+The indexes are stored to such peers that they can be found efficiently again.</p><br><br>
 
-</td></tr><tr><td valign="top"><b>p2p-Based Global Search Engine</b></td><td>
-YaCy has an index-sharing p2p-based algorithm which creates a global distributed search engine.
-This spawns a world-wide global search index.
+<p><img width="480" src="grafics/YaCy_Technology_IndexSearch.png" align="center"></p>
+<p>When a web search in you local peer is done, it searches not only the own database, but also
+databases of other YaCy peers. Only those peers are searched that should have the specific index.</p><br><br>
 
-</td></tr><tr><td valign="top"><b>Caching HTTP and transparent HTTPS Proxy with page indexing</b></td><td>
-With optional pre-fetching. HTTP 1.1 with GET/HEAD/POST/CONNECT is supported. This is sufficient for nearly all public web pages.
-HTTP headers are transparently forwarded. HTTPS connections through target port 443 are transparently forwarded, non-443 connections are suppressed to enhance security. Both (HTTP and HTTPS) proxies share the same proxy port, which is by default port 8080.
-The proxy 'scrapes' the content that it passes and creates an index that can be shared between every YACY Proxy daemons.
-You can use the indexing feature for intranet indexing:
-you instantly have a search service at hand to index all intranet-served web pages.
-You don't need to set up a separated search service. And the used <a href="http://www.anomic.de/AnomicPlasma/index.html">PLASMA</a>
-indexing is not a naive quick-hack but an <a href="Technology.html">properly engineered and extremely fast algorithm</a>;
-it is capable of indexing a nearly unlimited number of pages, without slowing down the search process.
+<p><img width="480" src="grafics/YaCy_Technology_Workflow.png" align="center"></p>
+<p>The workflow inside YaCy. There is no user action required for steering of the workflow,
+but the user interface offers a large number of monitoring pages that show status information about the queues and stacks.</p>
 
-</td></tr><tr><td valign="top"><b>Privacy</b></td><td>
-YaCy protects your privacy. Please see the
-<a href="Technology.html">privacy secion in the documentation.</a>;
 
-</td></tr><tr><td valign="top"><b>Security</b></td><td>
-YaCy can block unwanted access by setting IP filters and http passwords.
-You can also enhance security by inspecting the source code, which is completely included.
-Check the code and re-build your own YaCy application.
 
-</td></tr><tr><td valign="top"><b>Web/HTTP server</b></td><td>
-The built-in HTTP server is the interface to the local and global search service;
-the server may not only be used to administrate your peer, but also to serve as an intranet/internet web server.
 
-</td></tr><tr><td valign="top"><b>Ideal Internet Cafe Proxy Solution</b></td><td>
-Every Internet Cafe needs a caching proxy instead only a NAT to route the cafe's client traffic from the internet to maximize bandwidth.
-This can only be done using a <i>caching</i> proxy. This is naturally provided by YaCy. Future versions may also include
-billing support functions.
 
-</td></tr><tr><td valign="top"><b>Terminal-Based</b></td><td>
-YaCy does not need to have a window-based environment and can run on a screen-less router;
-it has a user interface based on web pages using its own http server.
-
-</td></tr><tr><td valign="top"><b>Open-Source</b></td><td>
-This is a simple necessity for an application that implements a server.
-Don't use any other server software that does not come with the source code.
-<a href="Volunteers.html">Volunteers</a> to extent YaCy are welcome!
-If you think you have a great idea how to extend/enhance/fix YaCy,
-please let me know.
-
-</td></tr><tr><td valign="top"><b>Easy Installation</b></td><td>
-You just need to decompress the release containter with your favourite decompressor
-(zip, rar, sit, tar etc. will do) and double-click the application wrapper
-for your OS. No restart necessary.
-Just double-click the application wrapper.
-
-<tr><td width="30%" valign="top"><b>Licence Model</b></td><td width="70%">
-This is GPL-based freeware/open-source software!
-The release comes with complete source code.
-See <a href="License.html">the license</a> for details.
-
-</td></tr></table>
 
 <!-- ----- HERE ENDS CONTENT PART ----- -->
 <SCRIPT LANGUAGE="JavaScript1.1"><!--

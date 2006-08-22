@@ -49,9 +49,6 @@ globalheader();
 
 <h2>FAQ</h2>
 
-<p>YaCy is not only a distributed search engine, but also a caching HTTP proxy.
-Both application parts benefit from each other.</p>
-
 <h3>Can I Crawl The Web With YaCy?</h3>
 <p>Yes! You can start your own crawl and you may also trigger distributed crawling,
 which means that your own YaCy peer asks other peers to perform specific crawl tasks.
@@ -59,13 +56,13 @@ You can specify many parameters that focus your crawl to a limited set of web pa
 
 <h3>What do you mean with 'Global Search Engine'?</h3>
 <p>The integrated indexing and search service can not only be used locally, but also <i>globally</i>.
-Each YaCy peer distributes some contact information to all other proxies that can be reached in the internet,
-and proxies exchange <i>but do not copy</i> their indexes to each other.
+Each YaCy peer distributes some contact information to all other peers that can be reached,
+and peers exchange <i>but do not copy</i> their indexes to each other.
 This is done in such a way, that each <i>peer</i> knows how to address the correct other
 <i>peer</i> to retrieve a special search index.
-Therefore the community of all proxies spawns a <i>distributed hash table</i> (DHT)
-which is used to share the <i>reverse word index</i> (RWI) to all operators and users of the proxies.
-The applied logic of distribution and retrieval of RWI's on the DHT combines all participating proxies to
+Therefore the community of all peers spawns a <i>distributed hash table</i> (DHT)
+which is used to share the <i>reverse word index</i> (RWI) to all operators and users of the YaCy peers.
+The applied logic of distribution and retrieval of RWI's on the DHT combines all participating peers to
 a <i>Distributed Search Engine</i>.
 To point out that this is in contrast to local indexing and searching,
 we call it a <i>Global Search Engine</i>.
@@ -88,17 +85,10 @@ Junior peers can contribute to the network by submitting index files to senior/p
 If you run YaCy, you need an average of the same disc memory amount for the index as you need for the cache.
 In fact, the global space for the index may reach the space of Terabytes, but not all of that on your machine!</p>
 
-<h3>Search Engines must do crawling, don't they? Do you?</h3>
-<p>No. They <i>can</i> do, but we collect information by simply using the information that passes the proxy.
-If you <i>want</i> to crawl, you can do so and start your own crawl job with a certain search depth.</p>
-
 <h3>Do I need a fast machine? Search Engines need big server farms, don't they?</h3>
 <p>You don't need a fast machine to run YaCy. You also don't need a lot of space.
 You can configure the amount of Megabytes that you want to spend for the cache.
-Any time-critical task is delayed automatically and takes place
-when you are idle surfing (which works only if you use YaCy as http proxy).
-Whenever internet pages pass YaCy in proxy-mode,
-any indexing (or if wanted: prefetch-crawling) is interrupted and delayed.
+YaCy can also run on a vServer.
 </p>
 
 <h3>I don't want to wait for search results very long. How long does a search take?</h3>
@@ -158,19 +148,6 @@ If your peer is in Senior Mode, it is an access point for index sharing and dist
 Therefore we don't need to give junior peers low priority: they contribute equally, so they may participate equally.
 But enough senior peers are needed to make this architecture functional. Since any peer contributes almost equally, either actively or passively, you should decide to run in Senior Mode if you can.
 </p>
-
-<h3>Why is this Search Engine also a Proxy?</h3>
-<p>
-We wanted to avoid that you start a search service ony for that very time when you submit a search query. This would give the Search Engine too little online time. So we looked for a cause the you would like to run the Search Engine during all the time that you are online. By giving you the additional value of a caching proxy, the reason was found. The built-in blacklist (url filter, useful i.e. to block ads) for the proxy is another increase in value.
-</p>
-
-<h3>Why is this Proxy also a Search Engine?</h3>
-<p>YaCy has a built-in <i>caching</i> proxy, which means that YaCy has a lot of indexing information
-'for free' without crawling. This may not be a very usual function of a proxy, but a very useful one:
-you see a lot of information when you browse the internet and maybe you would like to search exactly
-only what you have seen. Beside this interesting feature, you can use YaCy to index an intranet
-simply by using the proxy; you don't need to additionally set up another search/indexing process or databases.
-YaCy gives you an 'instant' database and an 'instant' search service.</p>
 
 <h3>My YaCy says it runs in 'Junior Mode'. How can I run it in Senior Mode?</h3>
 <p>Open your firewall for port 8080 (or the port you configured) or program your router to act as a <i>virtual server</i>.</p>
