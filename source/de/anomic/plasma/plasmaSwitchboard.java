@@ -2296,7 +2296,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 referrerHash,
                 initiator,
                 yacyCore.seedDB.mySeed.hash,
-                name,
+                (name==null)?"":name,
                 failreason,
                 flags
         );
