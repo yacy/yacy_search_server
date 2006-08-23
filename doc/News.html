@@ -88,34 +88,34 @@ globalheader();
 <ul>
 <li>Web Interface Enhancements</li>
   <ul>
-  <li>added localization: italian language file</li>
-  <li>added localization: slovak language file</li>
+  <li>added localisation: Italian language file</li>
+  <li>added localisation: Slovak language file</li>
   <li>enhancements to YaCyBlog; added news generation in case of new blog entries; added xml export</li>
   <li>enhancements to YaCyWiki</li>
-  <li>added interface for customized blacklist classes</li>
+  <li>added interface for customised blacklist classes</li>
   <li>enhancements for dir.html application: dirlisting for all empty directories, new place in htroot/htdocsdefault</li>
   <li>Interface YPStats_p.html for http://ypstats.yacy-forum.de/index.php to collect statistics</li>
   </ul>
 <li>Enhanced Stability</li>
   <ul>
   <li>enhanced p2p connection stability; no disconnections from peers that are simply busy</li>
-  <li>better synchronization and protection against deadlocks</li>
+  <li>better synchronisation and protection against deadlocks</li>
   <li>better memory management; overall protection against OutOfMemoryError occurrences</li>
   </ul>
 <li>Enhanced Security</li>
   <ul>
   <li>protection against too long authentication strings</li>
   <li>applied blacklists to URLs that are received by DHT</li>
-  <li>added additions user athentication login methods (form-login, html-login) to httpd</li>
+  <li>added additional user authentication login methods (form-login, html-login) to httpd</li>
   <li>added native SSL support to http; implemented PKCS12 certificate support for https</li>
   <li>more restrictions to index receive to get secure against index overload from other peers; overloaded peers send a
-  timeout message which other peer considers until new index transmissions</li>
+  timeout message which the other peer considers until new index transmissions</li>
   </ul>
 <li>Database and Indexing Enhancements</li>
   <ul>
   <li>added new caching structures that use less RAM (row-collections)</li>
   <li>added object hit cache and a key-miss cache to kelondroTree databases</li>
-  <li>better queueing and synchronization of threads to omit database locks</li>
+  <li>better queueing and synchronisation of threads to omit database locks</li>
   <li>bulk read method for database iterators; added pre-load of node cache to kelondroTree databases</li>
   <li>removed high/med/low priority management from node cache management because of too much computing overhead</li>
   <li>refactoring of indexing classes to enable new database structures (to come with release 0.47)</li>
@@ -126,7 +126,7 @@ globalheader();
   <ul>
   <li>added OpenSearch compatibility</li>
   <li>added support for UPnP; added option for router configuration in web interface</li>
-  <li>added virtual host support; YaCy sends <peer-hexhash>.yacyh inside Host tag</li>
+  <li>added virtual host support; YaCy sends &lt;peer-hexhash&gt;.yacyh inside Host tag</li>
   </ul>
 </ul>
 
