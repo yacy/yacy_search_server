@@ -1,12 +1,10 @@
 ;yacy.nsi
 ;--------
-;part of YaCy (C) by Michael Peter Christen
-;this file is contributed by Alexander Schier
-;Cologne, 2005
-;last major change: 22.07.2005
+;(C) 2004-2006 by Alexander Schier
+
 Name "YaCy"
 
-OutFile "yacy_v0.45_20060501_2049.exe"
+OutFile "yacy_v0.46_20060823_2442.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
@@ -19,7 +17,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.45 (Build 20060501) on your computer. Select which optional things you want to be installed."
+ComponentText "This will install YaCy v0.46 (Build 20060823) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old version was installed into another location (eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install into:"
@@ -103,6 +101,10 @@ Section "Binaries (required)"
 	SetOutPath "$INSTDIR\htroot\js"
 	File "htroot\js\*.js"
 
+	SetOutPath "$INSTDIR\htroot\www"
+	File "htroot\www\*.html"
+	File "htroot\www\*.class"
+
 	#yacy xml
     #TODO: Split in source/binary
 	SetOutPath "$INSTDIR\htroot\xml"
@@ -128,9 +130,6 @@ Section "Binaries (required)"
 
 	SetOutPath "$INSTDIR\ranking"
 	File /r "ranking\*"
-
-	SetOutPath "$INSTDIR\doc"
-	File "doc\This_is_a_test_if_the_archive_file_containing_YaCy_was_unpacked_correctly_If_not_please_use_gnu_tar_instead.txt"
 
 	SetOutPath $INSTDIR
 
@@ -174,6 +173,8 @@ Section "Development"
 	File "HTROOT\yacy\*.java"
 	SetOutPath "$INSTDIR\htroot\htdocsdefault"
 	File "htroot\htdocsdefault\*.java"
+	SetOutPath "$INSTDIR\htroot\www"
+	File "htroot\www\*.java"
 SectionEnd
 
 Section "Shortcuts in the Start Menu"
