@@ -5,8 +5,8 @@
 <meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
 <!-- <meta name="Content-Language" content="German, Deutsch, de, at, ch"> -->
 <meta name="Content-Language" content="English, Englisch">
-<meta name="keywords" content="YACY HTTP Proxy search engine spider indexer java network open free download Mac Windwos Software development">
-<meta name="description" content="YACY Software HTTP Proxy Freeware Home Page">
+<meta name="keywords" content="YaCy HTTP Proxy search engine spider indexer java network open free download Mac Windwos Software development">
+<meta name="description" content="YaCy Software HTTP Proxy Freeware Home Page">
 <meta name="copyright" content="Michael Christen">
 <script src="navigation.js" type="text/javascript"></script>
 <link rel="stylesheet" media="all" href="style.css">
@@ -83,6 +83,52 @@ globalheader();
   </ul>
 </ul>
 -->
+
+<br>v0.46_20060823_2442<p>
+<ul>
+<li>Web Interface Enhancements</li>
+  <ul>
+  <li>added localization: italian language file</li>
+  <li>added localization: slovak language file</li>
+  <li>enhancements to YaCyBlog; added news generation in case of new blog entries; added xml export</li>
+  <li>enhancements to YaCyWiki</li>
+  <li>added interface for customized blacklist classes</li>
+  <li>enhancements for dir.html application: dirlisting for all empty directories, new place in htroot/htdocsdefault</li>
+  <li>Interface YPStats_p.html for http://ypstats.yacy-forum.de/index.php to collect statistics</li>
+  </ul>
+<li>Enhanced Stability</li>
+  <ul>
+  <li>enhanced p2p connection stability; no disconnections from peers that are simply busy</li>
+  <li>better synchronization and protection against deadlocks</li>
+  <li>better memory management; overall protection against OutOfMemoryError occurrences</li>
+  </ul>
+<li>Enhanced Security</li>
+  <ul>
+  <li>protection against too long authentication strings</li>
+  <li>applied blacklists to URLs that are received by DHT</li>
+  <li>added additions user athentication login methods (form-login, html-login) to httpd</li>
+  <li>added native SSL support to http; implemented PKCS12 certificate support for https</li>
+  <li>more restrictions to index receive to get secure against index overload from other peers; overloaded peers send a
+  timeout message which other peer considers until new index transmissions</li>
+  </ul>
+<li>Database and Indexing Enhancements</li>
+  <ul>
+  <li>added new caching structures that use less RAM (row-collections)</li>
+  <li>added object hit cache and a key-miss cache to kelondroTree databases</li>
+  <li>better queueing and synchronization of threads to omit database locks</li>
+  <li>bulk read method for database iterators; added pre-load of node cache to kelondroTree databases</li>
+  <li>removed high/med/low priority management from node cache management because of too much computing overhead</li>
+  <li>refactoring of indexing classes to enable new database structures (to come with release 0.47)</li>
+  <li>better abstraction of database entry values</li>
+  <li>replaced java.net.URL by own class de.anomic.net.URL. The original class made DNS lookups which slowed down.</li>
+  </ul>
+<li>New Supported Standards</li>
+  <ul>
+  <li>added OpenSearch compatibility</li>
+  <li>added support for UPnP; added option for router configuration in web interface</li>
+  <li>added virtual host support; YaCy sends <peer-hexhash>.yacyh inside Host tag</li>
+  </ul>
+</ul>
 
 <br><p>v0.45_20060501_2046<ul>
 <li>Enhanced Search Functions</li>

@@ -8,13 +8,18 @@ under certain conditions; see file gpl.txt for details.
 
 This is a P2P-based Web Search Engine
 and also a caching http/https proxy.
+You can use it to set up your own search portal.
 
-The complete documentation can be found inside the 'doc' subdirectory
-in this release. Start browsing the manual by opening the index.html
-file with your web browser.
+The complete documentation can be found at:
+(English)    http://yacy.net/yacy
+(Deutsch)    http://www.yacy-websuche.de
+(Wiki:de/en) http://www.yacy-websuche.de/wiki
 
 YOU NEED JAVA 1.4.2 OR LATER TO RUN THIS APPLICATION!
 PLEASE DOWNLOAD JAVA FROM http://java.sun.com
+
+NO OTHER SOFTWARE IS REQUIRED! (you don't need apache, tomcat or mysql)
+
 
 Startup and Shutdown of YaCy:
 
@@ -63,5 +68,5 @@ feel free to ask the author for a business proposal to customize YaCy
 according to your needs. We also provide integration solutions if the
 software is about to be integrated into your enterprise application.
 
-Germany, Frankfurt a.M., 07.03.2006
+Germany, Frankfurt a.M., 23.08.2006
 Michael Peter Christen

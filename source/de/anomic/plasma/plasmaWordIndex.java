@@ -210,8 +210,8 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         if (count <= 0) return;
         busyCacheFlush = true;
         String wordHash;
-        System.out.println("DEBUG-Started flush of " + count + " entries from RAM to DB");
-        long start = System.currentTimeMillis();
+        //System.out.println("DEBUG-Started flush of " + count + " entries from RAM to DB");
+        //long start = System.currentTimeMillis();
         for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
             if (ramCache.wSize() == 0) break;
             synchronized (this) {
@@ -237,7 +237,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                 try {this.wait(8);} catch (InterruptedException e) {}
             }
         }
-        System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
+        //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
         busyCacheFlush = false;
     }
     

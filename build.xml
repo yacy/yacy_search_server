@@ -173,7 +173,7 @@
   <mkdir dir="${build}/de/anomic/yacy"/>
   <mkdir dir="${build}/de/anomic/yacy/seedUpload"/>   
 
-  <mkdir dir="${doc}"/>
+  <!--<mkdir dir="${doc}"/>-->
   <mkdir dir="${data}"/>
   <mkdir dir="${release}"/>	
 	
@@ -184,7 +184,7 @@
   <!-- deleting old file -->
   <delete file="${build}/yacy.java" failonerror="false"/>
   <copy file="${src}/yacy.java" tofile="${build}/yacy.java" overwrite="true" filtering="true" />
-  <copy file="${doc}/Download.html" tofile="${doc}/Download.html.up" filtering="true" />
+  <!--<copy file="${doc}/Download.html" tofile="${doc}/Download.html.up" filtering="true" />-->
 </target>
   	
 <target name="compileMain" depends="init" description="Compiling the yacy sources ...">
@@ -454,13 +454,15 @@
 		    <include name="ChangeLog"/>
 	  	</fileset>	
   	</copy>
+	<!--
 	<copy todir="${release_main}/doc">
 	  	<fileset dir="${doc}">
 	    	<include name="**/*"/>
 	  	</fileset>
 	</copy>
+	-->
 	
-	  <!-- copy source code -->
+	<!-- copy source code -->
 	<copy todir="${release_main}/source">
 	  <fileset dir="${src}">
 	    <include name="**/*.*"/>
@@ -479,7 +481,7 @@
 	  </fileset>    
 	</copy>
 	
-	  <!-- copy server pages -->
+	<!-- copy server pages -->
 	<copy todir="${release_main}/htroot">
 	  <fileset dir="${htroot}">
 	    <include name="**/*"/>
@@ -538,7 +540,7 @@
   <delete dir="${release_main}"/>
 
   <!-- writing the current release version into a file -->   
-  <echo message="${releaseVersion}" file="${doc}/release.txt"/>
+  <!--<echo message="${releaseVersion}" file="${doc}/release.txt"/>-->
 </target>
 	
 <target name="distAllInOne" depends="copyMain4Dist,compileExtensions">
