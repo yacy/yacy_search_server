@@ -431,7 +431,21 @@ public final class plasmaHTCache {
         int p = s.indexOf("/");
         if (p < 0) p = s.indexOf("\\");
         if (p < 0) return null;
-        return s.substring(0, p);
+        // remove the protokoll
+        s = s.substring(p + 1);
+        p = s.indexOf("/");
+        if (p < 0) p = s.indexOf("\\");
+        if (p < 0) return null;
+        String prefix = new String("");
+        if (s.startsWith("www")) prefix = new String("www.");
+        // remove the www|other|ip directory
+        s = s.substring(p + 1);
+        p = s.indexOf("/");
+        if (p < 0) p = s.indexOf("\\");
+        if (p < 0) return null;
+        int e = s.indexOf("!");
+        if ((e > 0) && (e < p)) p = e; // strip port
+        return prefix + s.substring(0, p);
     }
 
     public httpHeader getCachedResponse(String urlHash) throws IOException {
