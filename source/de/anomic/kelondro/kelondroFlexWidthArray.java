@@ -104,8 +104,41 @@ public class kelondroFlexWidthArray implements kelondroArray {
         }
     }
     
+    public static void delete(File path, String tablename) {
+        File tabledir = new File(path, tablename);
+        if ((tabledir.exists()) && (!(tabledir.isDirectory()))) {
+            tabledir.delete();
+            return;
+        }
+
+        String[] files = tabledir.list();
+        for (int i = 0; i < files.length; i++) {
+            new File(tabledir, files[i]).delete();
+        }
+        
+        tabledir.delete();
+    }
+    
+    public static kelondroFlexWidthArray open(File path, String tablename, kelondroRow rowdef) {
+        try {
+            return new kelondroFlexWidthArray(path, tablename, rowdef);
+        } catch (IOException e) {
+            kelondroFlexWidthArray.delete(path, tablename);
+            try {
+                return new kelondroFlexWidthArray(path, tablename, rowdef);
+            } catch (IOException ee) {
+                e.printStackTrace();
+                ee.printStackTrace();
+                System.exit(-1);
+                return null;
+            }
+        }
+    }
+    
     public void close() throws IOException {
-        for (int i = 0; i < col.length; i++) if (col[i] != null) col[i].close();
+        synchronized (col) {
+            for (int i = 0; i < col.length; i++) if (col[i] != null) col[i].close();
+        }
     }
     
     protected static final String colfilename(int start, int end) {
@@ -222,9 +255,8 @@ public class kelondroFlexWidthArray implements kelondroArray {
         String testname = "flextest";
         try {
             System.out.println("erster Test");
-            new File(f, testname).delete();
-            
-            kelondroFlexWidthArray k = new kelondroFlexWidthArray(f, "flextest", rowdef);
+            kelondroFlexWidthArray.delete(f, testname);
+            kelondroFlexWidthArray k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
             k.add(k.row().newEntry(new byte[][]{"a".getBytes(), "xxxx".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{"b".getBytes(), "xxxx".getBytes()}));
             k.remove(0);
@@ -243,16 +275,22 @@ public class kelondroFlexWidthArray implements kelondroArray {
             
             
             System.out.println("zweiter Test");
-            new File(f, testname).delete();
-            k = new kelondroFlexWidthArray(f, "flextest", rowdef);
+            kelondroFlexWidthArray.delete(f, testname);
+            //k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
             for (int i = 1; i <= 20; i = i * 2) {
+                System.out.println("LOOP: " + i);
+                k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
                 for (int j = 0; j < i*2; j++) {
                     k.add(k.row().newEntry(new byte[][]{(Integer.toString(i) + "-" + Integer.toString(j)).getBytes(), "xxxx".getBytes()}));
                 }
+                k.close();
+                k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
                 for (int j = 0; j < i; j++) {
-                    k.remove(j);
+                    k.remove(i*2 - j - 1);
                 }
+                k.close();
             }
+            k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
             k.print();
             k.col[0].print(true);
             k.close();

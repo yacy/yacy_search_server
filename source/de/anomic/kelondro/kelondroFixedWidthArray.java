@@ -69,6 +69,22 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         }
     }
     
+    public static kelondroFixedWidthArray open(File file, kelondroRow rowdef, int intprops) {
+        try {
+            return new kelondroFixedWidthArray(file, rowdef, intprops);
+        } catch (IOException e) {
+            file.delete();
+            try {
+                return new kelondroFixedWidthArray(file, rowdef, intprops);
+            } catch (IOException ee) {
+                e.printStackTrace();
+                ee.printStackTrace();
+                System.exit(-1);
+                return null;
+            }
+        }
+    }
+    
     public synchronized kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException {
 
         // make room for element

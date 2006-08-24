@@ -96,7 +96,7 @@ public final class plasmaCrawlLURL extends indexURL {
 
     //public static Set damagedURLS = Collections.synchronizedSet(new HashSet());
     
-    public plasmaCrawlLURL(File cachePath, int bufferkb, long preloadTime) {
+    public plasmaCrawlLURL(File cachePath, int bufferkb, long preloadTime, boolean newdb) {
         super();
         kelondroRow rowdef = new kelondroRow(
             "String urlhash-"      + urlHashLength      + ", " +        // the url's hash
@@ -962,7 +962,7 @@ public final class plasmaCrawlLURL extends indexURL {
         } catch (MalformedURLException e) {}
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache
-            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), 1, 0);
+            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), 1, 0, false);
             final Iterator enu = urls.entries(true, false, null);
             while (enu.hasNext()) {
                 ((Entry) enu.next()).print();

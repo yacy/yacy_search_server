@@ -91,7 +91,7 @@ public class kelondroCollectionIndex {
         this.loadfactor = loadfactor;
 
         // create index table
-        index = new kelondroFlexTable(path, filenameStub + ".index.table", indexOrder, buffersize, preloadTime, indexRow(keyLength));
+        index = new kelondroFlexTable(path, filenameStub + ".index.table", buffersize, preloadTime, indexRow(keyLength), indexOrder);
 
         // save/check property file for this array
         File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize());
@@ -455,7 +455,7 @@ public class kelondroCollectionIndex {
             collectionIndex.close();
             
             // printout of index
-            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", kelondroNaturalOrder.naturalOrder, buffersize, preloadTime, indexRow(9));
+            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", buffersize, preloadTime, indexRow(9), kelondroNaturalOrder.naturalOrder);
             index.print();
             index.close();
         } catch (IOException e) {

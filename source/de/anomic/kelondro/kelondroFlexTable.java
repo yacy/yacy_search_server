@@ -32,8 +32,8 @@ import java.util.Iterator;
 public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondroIndex {
 
     protected kelondroBytesIntMap index;
-    
-    public kelondroFlexTable(File path, String tablename, kelondroOrder objectOrder, long buffersize, long preloadTime, kelondroRow rowdef) throws IOException {
+
+    public kelondroFlexTable(File path, String tablename, long buffersize, long preloadTime, kelondroRow rowdef, kelondroOrder objectOrder) throws IOException {
         super(path, tablename, rowdef);
         File newpath = new File(path, tablename);
         File indexfile = new File(newpath, "col.000.index");
@@ -129,35 +129,30 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
-        synchronized (index) {
             int i = index.geti(key);
             if (i < 0) return null;
             // i may be greater than this.size(), because this table may have deleted entries
             // the deleted entries are subtracted from the 'real' tablesize, so the size may be
             // smaller than an index to a row entry
             return super.get(i);
-        }
     }
 
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
-        synchronized (index) {
             int i = index.geti(row.getColBytes(0));
             if (i < 0) {
                 index.puti(row.getColBytes(0), super.add(row));
                 return null;
             }
             return super.set(i, row);
-        }
     }
     
     public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
-        synchronized (index) {
             int i = index.removei(key);
             if (i < 0) return null;
-            kelondroRow.Entry r = super.get(i);
+            kelondroRow.Entry r;
+            r = super.get(i);
             super.remove(i);
             return r;
-        }
     }
 
     public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {

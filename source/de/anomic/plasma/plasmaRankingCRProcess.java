@@ -260,7 +260,7 @@ public class plasmaRankingCRProcess {
         kelondroCollectionIndex newseq = null;
         if (newdb) {
             File path = to_file.getParentFile(); // path to storage place
-            newacc = new kelondroFlexTable(path, CRG_accname, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, CRG_accrow);
+            newacc = new kelondroFlexTable(path, CRG_accname, 128 * 1024 * 1024, -1, CRG_accrow, kelondroBase64Order.enhancedCoder);
             newseq = new kelondroCollectionIndex(path, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, 2, CRG_colrow);
         } else {
             if (!(to_file.exists())) {

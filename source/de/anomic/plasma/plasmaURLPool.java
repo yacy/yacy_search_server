@@ -57,10 +57,14 @@ public class plasmaURLPool {
     public  final plasmaCrawlNURL        noticeURL;
     public  final plasmaCrawlEURL        errorURL;
     
-    public plasmaURLPool(File plasmaPath, int ramLURL, int ramNURL, int ramEURL, long preloadTime) {
-        loadedURL = new plasmaCrawlLURL(plasmaPath, ramLURL, preloadTime);
-        noticeURL = new plasmaCrawlNURL(plasmaPath, ramNURL, -1);
-        errorURL = new plasmaCrawlEURL(plasmaPath, ramEURL, -1);
+    public plasmaURLPool(File plasmaPath,
+                         int ramLURL, boolean newLURL,
+                         int ramNURL, boolean newNURL,
+                         int ramEURL, boolean newEURL,
+                         long preloadTime) {
+        loadedURL = new plasmaCrawlLURL(plasmaPath, ramLURL, preloadTime, newLURL);
+        noticeURL = new plasmaCrawlNURL(plasmaPath, ramNURL, -1, newNURL);
+        errorURL = new plasmaCrawlEURL(plasmaPath, ramEURL, -1, newEURL);
     }
     
     public String exists(String hash) {

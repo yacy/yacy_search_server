@@ -405,7 +405,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // start indexing management
         log.logConfig("Starting Indexing Management");
-        urlPool = new plasmaURLPool(plasmaPath, ramLURL, ramNURL, ramEURL, ramLURL_time);
+        urlPool = new plasmaURLPool(plasmaPath,
+                                    ramLURL, getConfigBool("useFlexTableForLURL", false),
+                                    ramNURL, getConfigBool("useFlexTableForNURL", false),
+                                    ramEURL, getConfigBool("useFlexTableForEURL", true),
+                                    ramLURL_time);
         wordIndex = new plasmaWordIndex(plasmaPath, indexPublicTextPath, ramRWI, ramRWI_time, log, getConfigBool("useCollectionIndex", false));
 
         // set a high maximum cache size to current size; this is adopted later automatically
@@ -583,7 +587,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         serverInstantThread.oneTimeJob(yc, "loadSeeds", yacyCore.log, 3000);
         
         // initializing the stackCrawlThread
-        this.sbStackCrawlThread = new plasmaCrawlStacker(this, this.plasmaPath, ramPreNURL, ramPreNURL_time);
+        this.sbStackCrawlThread = new plasmaCrawlStacker(this, this.plasmaPath, ramPreNURL, ramPreNURL_time, getConfigBool("useFlexTableForPreNURL", false));
         //this.sbStackCrawlThread = new plasmaStackCrawlThread(this,this.plasmaPath,ramPreNURL);
         //this.sbStackCrawlThread.start();
         

@@ -524,14 +524,14 @@ public class kelondroRecords {
     }
     
     protected final void deleteNode(Handle handle) throws IOException {
-        if (cacheSize != 0) {
+        if (cacheSize == 0) {
+            dispose(handle);
+        } else {
             synchronized (cacheHeaders) {
                 cacheHeaders.removeb(handle.index);
                 cacheDelete++;
                 dispose(handle);
             }
-        } else {
-            dispose(handle);
         }
     }
 
@@ -980,11 +980,16 @@ public class kelondroRecords {
         // delete element with handle h
         // this element is then connected to the deleted-chain and can be
         // re-used change counter
+        long sp = seekpos(h);
+        if (sp >= entryFile.length()) {
+            // a deletion of a node that cannot exist is wrong
+            throw new IOException("dispose: handle position " + h.index + "/" + sp + " exceeds file size " + entryFile.length());
+        }
         synchronized (USAGE) {
             USAGE.USEDC--;
             USAGE.FREEC++;
             // change pointer
-            entryFile.writeInt(seekpos(h), USAGE.FREEH.index); // extend free-list
+            entryFile.writeInt(sp, USAGE.FREEH.index); // extend free-list
             // write new FREEH Handle link
             USAGE.FREEH = h;
             USAGE.write();

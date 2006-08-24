@@ -55,6 +55,7 @@ import java.util.Iterator;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroRow;
@@ -102,9 +103,10 @@ public class plasmaCrawlNURL extends indexURL {
     private File cacheStacksPath;
     private int bufferkb;
     private long preloadTime;
+    private boolean newdb;
     initStackIndex initThead;
     
-    public plasmaCrawlNURL(File cachePath, int bufferkb, long preloadTime) {
+    public plasmaCrawlNURL(File cachePath, int bufferkb, long preloadTime, boolean newdb) {
         super();
         this.cacheStacksPath = cachePath;
         this.bufferkb = bufferkb;
@@ -112,7 +114,7 @@ public class plasmaCrawlNURL extends indexURL {
         
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
-
+        this.newdb = newdb;
         openHashCache();
 
         File coreStackFile = new File(cachePath, "urlNoticeLocal0.stack");
@@ -147,21 +149,20 @@ public class plasmaCrawlNURL extends indexURL {
     }
     
     private void openHashCache() {
-        /*
-        String newCacheName = "urlNotice3.table";
-        cacheStacksPath.mkdirs();
-        try {
-            urlHashCache = new kelondroFlexTable(cacheStacksPath, newCacheName, kelondroBase64Order.enhancedCoder, bufferkb * 0x400, preloadTime, rowdef);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(-1);
+        if (newdb) {
+            String newCacheName = "urlNotice4.table";
+            cacheStacksPath.mkdirs();
+            try {
+                urlHashCache = new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
+        } else {
+            File oldCacheFile = new File(cacheStacksPath, "urlNotice1.db");
+            oldCacheFile.getParentFile().mkdirs();
+            urlHashCache = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
         }
-        */
-        
-        File oldCacheFile = new File(cacheStacksPath, "urlNotice1.db");
-        oldCacheFile.getParentFile().mkdirs();
-        urlHashCache = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
-        
     }
     
     private void resetHashCache() {

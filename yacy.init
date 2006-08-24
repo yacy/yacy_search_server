@@ -797,3 +797,6 @@ currentSkin=
 # temporary flag for new database structure. set only true for testing
 # ALL DATA THAT IS CREATED WITH THIS FLAG ON WILL BE VOID IN A FINAL VERSION
 useCollectionIndex=false
+useFlexTableForNURL=false
+useFlexTableForEURL=true
+useFlexTableForPreNURL=false

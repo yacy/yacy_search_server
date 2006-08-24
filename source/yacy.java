@@ -700,10 +700,10 @@ public final class yacy {
             // db containing all currently loades urls
             int cache = dbcache * 1024; // in KB
             log.logFine("URLDB-Caches: "+cache+" bytes");
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), cache, 10000);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), cache, 10000, false);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.temp.db"), cache, 10000);
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.temp.db"), cache, 10000, false);
             
             Runtime rt = Runtime.getRuntime();
             int cacheMem = (int)((serverMemory.max-rt.totalMemory())/1024)-(2*cache + 8*1024);
@@ -940,7 +940,7 @@ public final class yacy {
     	
     	File root = new File(homePath);
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000, 10000);
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, false, 1000, false, 1000, false, 10000);
             HashMap doms = new HashMap();
             System.out.println("Started domain list extraction from " + pool.loadedURL.size() + " url entries.");
             System.out.println("a dump will be written after double-check of all extracted domains.");
@@ -1055,7 +1055,7 @@ public final class yacy {
     private static void urllist(String homePath, String source, boolean html, String targetName) {
         File root = new File(homePath);
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, 1000, 1000, 10000);
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, false, 1000, false, 1000, false, 10000);
             File file = new File(root, targetName);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
             
@@ -1133,7 +1133,7 @@ public final class yacy {
         serverLog log = new serverLog("URLDBCLEANUP");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         try {
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), 4194304, 10000);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), 4194304, 10000, false);
             currentUrlDB.urldbcleanup();
             currentUrlDB.close();
         } catch (IOException e) {

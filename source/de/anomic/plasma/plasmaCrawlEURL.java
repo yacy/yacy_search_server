@@ -59,6 +59,7 @@ import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.tools.bitfield;
 
 public class plasmaCrawlEURL extends indexURL {
@@ -123,7 +124,7 @@ public class plasmaCrawlEURL extends indexURL {
      * ======================================================================= */        
     private LinkedList rejectedStack = new LinkedList(); // strings: url
     
-    public plasmaCrawlEURL(File cachePath, int bufferkb, long preloadTime) {
+    public plasmaCrawlEURL(File cachePath, int bufferkb, long preloadTime, boolean newdb) {
         super();
         kelondroRow rowdef = new kelondroRow(
             "String urlhash-"      + urlHashLength   + ", " +        // the url's hash
@@ -138,32 +139,20 @@ public class plasmaCrawlEURL extends indexURL {
             "String failcause-"    + urlErrorLength  + ", " +        // string describing load failure
             "byte[] flags-"        + urlFlagLength);                 // extra space
 
-       
-        String newCacheName = "urlErr3.table";
-        cachePath.mkdirs();
-        try {
-            urlHashCache = new kelondroFlexTable(cachePath, newCacheName, kelondroBase64Order.enhancedCoder, bufferkb * 0x400, preloadTime, rowdef);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
-        
-        /*
-        File oldCacheFile = new File(cachePath, "urlErr0.db");
-        if (oldCacheFile.exists()) try {
-            // open existing cache
-            kelondroTree tree = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
-            tree.assignRowdef(rowdef);
-            urlHashCache = tree;
-        } catch (IOException e) {
-            oldCacheFile.delete();
-            urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
+        if (newdb) {
+            String newCacheName = "urlErr3.table";
+            cachePath.mkdirs();
+            try {
+                urlHashCache = new kelondroFlexTable(cachePath, newCacheName, bufferkb * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
         } else {
-            // create new cache
+            File oldCacheFile = new File(cachePath, "urlErr0.db");
             oldCacheFile.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
+            urlHashCache = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
         }
-        */
     }
 
     public synchronized Entry newEntry(URL url, String referrer, String initiator, String executor,
