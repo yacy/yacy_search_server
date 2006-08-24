@@ -406,10 +406,12 @@ public class kelondroCollectionIndex {
     }
     
     public void close() throws IOException {
-        this.index.close();
-        Iterator i = arrays.values().iterator();
-        while (i.hasNext()) {
-            ((kelondroFixedWidthArray) i.next()).close();
+        synchronized (index) {
+            this.index.close();
+            Iterator i = arrays.values().iterator();
+            while (i.hasNext()) {
+                ((kelondroFixedWidthArray) i.next()).close();
+            }
         }
     }
     

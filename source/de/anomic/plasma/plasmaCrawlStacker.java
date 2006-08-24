@@ -637,15 +637,19 @@ public final class plasmaCrawlStacker {
         }
         
         private void deleteDB() {
-            File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
-            cacheFile.delete();
+            if (this.newdb) {
+                kelondroFlexTable.delete(cacheStacksPath, "urlPreNotice1.table");
+            } else {
+                File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
+                cacheFile.delete();
+            }
         }
         
         private void openDB() {
             if (!(cacheStacksPath.exists())) cacheStacksPath.mkdir(); // make the path
             
             if (this.newdb) {
-                String newCacheName = "urPreNotice1.table";
+                String newCacheName = "urlPreNotice1.table";
                 cacheStacksPath.mkdirs();
                 try {
                     this.urlEntryCache = new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb * 0x400, preloadTime, plasmaCrawlNURL.rowdef, kelondroBase64Order.enhancedCoder);
@@ -654,8 +658,6 @@ public final class plasmaCrawlStacker {
                     System.exit(-1);
                 }
             } else {
-                
-            
                 File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
                 cacheFile.getParentFile().mkdirs();
                 this.urlEntryCache = kelondroTree.open(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef);
@@ -729,6 +731,7 @@ public final class plasmaCrawlStacker {
             try {
                 synchronized(this.urlEntryHashCache) {               
                     urlHash = (String) this.urlEntryHashCache.removeFirst();
+                    if (urlHash == null) throw new IOException("urlHash is null");
                     entry = this.urlEntryCache.remove(urlHash.getBytes());                 
                 }
             } finally {

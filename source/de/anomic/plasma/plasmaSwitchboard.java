@@ -169,7 +169,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     // load slots
     public static int crawlSlots            = 10;
     public static int indexingSlots         = 100;
-    public static int stackCrawlSlots       = 10000;
+    public static int stackCrawlSlots       = 1000000;
     
     public static int maxCRLDump            = 500000;
     public static int maxCRGDump            = 200000;
@@ -413,7 +413,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         wordIndex = new plasmaWordIndex(plasmaPath, indexPublicTextPath, ramRWI, ramRWI_time, log, getConfigBool("useCollectionIndex", false));
 
         // set a high maximum cache size to current size; this is adopted later automatically
-        int wordCacheMaxCount = Math.max(20000, (int) getConfigLong("wordCacheMaxCount", 20000));
+        int wordCacheMaxCount = Math.max(80000, (int) getConfigLong("wordCacheMaxCount", 80000));
         setConfig("wordCacheMaxCount", Integer.toString(wordCacheMaxCount));
         wordIndex.setMaxWordCount(wordCacheMaxCount); 
         
