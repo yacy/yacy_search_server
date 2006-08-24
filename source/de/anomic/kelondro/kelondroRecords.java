@@ -176,6 +176,7 @@ public class kelondroRecords {
                 entryFile.writeInt(POS_USEDC, USEDC);
                 entryFile.writeInt(POS_FREEC, FREEC);
                 entryFile.writeInt(POS_FREEH, FREEH.index);
+                entryFile.commit();
             }
         }
         
@@ -777,6 +778,8 @@ public class kelondroRecords {
                 entryFile.write(seekpos(this.handle) + headchunksize, this.tailChunk);
                 this.tailChanged = false;
             }
+            
+            entryFile.commit();
         }
 
         public synchronized void collapse() {

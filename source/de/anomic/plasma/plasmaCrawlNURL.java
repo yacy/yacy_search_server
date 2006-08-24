@@ -55,10 +55,10 @@ import java.util.Iterator;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 
@@ -147,6 +147,7 @@ public class plasmaCrawlNURL extends indexURL {
     }
     
     private void openHashCache() {
+        /*
         String newCacheName = "urlNotice3.table";
         cacheStacksPath.mkdirs();
         try {
@@ -155,22 +156,12 @@ public class plasmaCrawlNURL extends indexURL {
             e.printStackTrace();
             System.exit(-1);
         }
-        /*
+        */
+        
         File oldCacheFile = new File(cacheStacksPath, "urlNotice1.db");
-        if (oldCacheFile.exists()) try {
-            // open existing cache
-            kelondroTree tree = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
-            tree.assignRowdef(rowdef);
-            urlHashCache = tree;
-        } catch (IOException e) {
-            oldCacheFile.delete();
-            urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
-        } else {
-            // create new cache
-            oldCacheFile.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
-        }
-         */
+        oldCacheFile.getParentFile().mkdirs();
+        urlHashCache = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
+        
     }
     
     private void resetHashCache() {
@@ -387,7 +378,9 @@ public class plasmaCrawlNURL extends indexURL {
     private Entry pop(plasmaCrawlBalancer balancer) throws IOException {
         // this is a filo - pop
         if (balancer.size() > 0) {
-            Entry e = new Entry(new String(balancer.get()));
+            String hash = new String(balancer.get());
+            if (hash == null) throw new IOException("hash is null");
+            Entry e = new Entry(hash);
             stackIndex.remove(e.hash);
             return e;
         } else {
@@ -480,6 +473,7 @@ public class plasmaCrawlNURL extends indexURL {
             // - look into the filed properties
             // if the url cannot be found, this returns null
             this.hash = hash;
+            if (hash == null) throw new IOException("hash is null");
             kelondroRow.Entry entry = urlHashCache.get(hash.getBytes());
             if (entry != null) {
                 insertEntry(entry);

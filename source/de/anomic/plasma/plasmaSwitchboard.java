@@ -988,7 +988,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         synchronized (sbQueue) {
 
             if (sbQueue.size() == 0) {
-                log.logFine("deQueue: nothing to do, queue is emtpy");
+                //log.logFine("deQueue: nothing to do, queue is emtpy");
                 return doneSomething; // nothing to do
             }
 
