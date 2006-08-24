@@ -116,33 +116,16 @@ public final class plasmaWordIndexAssortment {
         this.bufferSize = bufferkb * 1024;
         this.preloadTime = preloadTime;
         this.log = log;
-        if (assortmentFile.exists()) {
-            // open existing assortment tree file
-            try {
-                long start = System.currentTimeMillis();
-                assortments = new kelondroTree(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent);
-                assortments.assignRowdef(bufferStructure(assortmentLength));
-                long stop = System.currentTimeMillis();
-                if (log != null)
-                    log.logConfig("Opened Assortment, " +
+        // open assortment tree file
+        long start = System.currentTimeMillis();
+        assortments = kelondroTree.open(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent, bufferStructure(assortmentLength));
+        long stop = System.currentTimeMillis();
+        if (log != null) log.logConfig("Opened Assortment, " +
                                   assortments.size() + " entries, width " +
                                   assortmentLength + ", " + bufferkb + "kb buffer, " +
                                   preloadTime + " ms preloadTime, " +
                                   (stop - start) + " ms effective, " +
                                   assortments.cacheNodeStatus()[1] + " preloaded"); 
-                return;
-            } catch (IOException e){
-                serverLog.logSevere("PLASMA", "unable to open assortment database " + assortmentLength + ", creating new: " + e.getMessage(), e);
-            } catch (IndexOutOfBoundsException e){
-                serverLog.logSevere("PLASMA", "assortment database " + assortmentLength + " corupted, creating new: " + e.getMessage(), e);
-            } catch (kelondroException e) {
-                serverLog.logSevere("PLASMA", "assortment database " + assortmentLength + " corupted, creating new: " + e.getMessage(), e);
-            }
-            assortmentFile.delete(); // make space for new one
-        }
-        // create new assortment tree file
-        assortments = new kelondroTree(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent, bufferStructure(assortmentLength), true);
-        if (log != null) log.logConfig("Created new Assortment, width " + assortmentLength + ", " + bufferkb + "kb buffer");
     }
 
     public void store(indexContainer newContainer) {
@@ -269,7 +252,7 @@ public final class plasmaWordIndexAssortment {
             if (!(assortmentFile.delete())) throw new RuntimeException("cannot delete assortment database");
         }
         if (assortmentFile.exists()) assortmentFile.delete();
-        assortments = new kelondroTree(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent, bufferStructure(assortmentLength), true);
+        assortments = kelondroTree.open(assortmentFile, bufferSize, preloadTime, kelondroTree.defaultObjectCachePercent, bufferStructure(assortmentLength));
     }
     
     public Iterator containers(String startWordHash, boolean up, boolean rot) throws IOException {

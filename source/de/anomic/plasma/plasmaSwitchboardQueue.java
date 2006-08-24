@@ -89,15 +89,7 @@ public class plasmaSwitchboardQueue {
                 "String profile-"      + indexURL.urlCrawlProfileHandleLength + ", " +        // the name of the prefetch profile handle
                 "String urldescr-"     + indexURL.urlDescrLength);                            //
             
-        if (sbQueueStackPath.exists()) try {
-            sbQueueStack = new kelondroStack(sbQueueStackPath);
-            sbQueueStack.assignRowdef(rowdef);
-        } catch (IOException e) {
-            sbQueueStackPath.delete();
-            sbQueueStack = new kelondroStack(sbQueueStackPath, rowdef, true);
-        } else {
-            sbQueueStack = new kelondroStack(sbQueueStackPath, rowdef, true);
-        }
+        sbQueueStack = kelondroStack.open(sbQueueStackPath, rowdef);
     }
     
     private void resetQueueStack() {

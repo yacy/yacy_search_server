@@ -173,23 +173,18 @@ public class dbtest {
             kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength);
             if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
-                if (tablefile.exists()) {
-                    table = new kelondroTree(tablefile, buffer, preload, kelondroTree.defaultObjectCachePercent);
-                } else {
-                    table = new kelondroTree(tablefile, buffer, preload, kelondroTree.defaultObjectCachePercent, testRow, true);
-                }
+                table = new kelondroTree(tablefile, buffer, preload, kelondroTree.defaultObjectCachePercent, testRow);
             }
             if (dbe.equals("kelondroSplittedTree")) {
                 File tablepath = new File(tablename).getParentFile();
                 tablename = new File(tablename).getName();
-                table = kelondroSplittedTree.open(tablepath, tablename, kelondroBase64Order.enhancedCoder,
+                table = new kelondroSplittedTree(tablepath, tablename, kelondroBase64Order.enhancedCoder,
                                 buffer, preload,
-                                8, testRow, 1, 80,
-                                true);
+                                8, testRow, 1, 80);
             }
             if (dbe.equals("kelondroFlexTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), kelondroBase64Order.enhancedCoder, buffer, preload, testRow, true);
+                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), kelondroBase64Order.enhancedCoder, buffer, preload, testRow);
             }
             if (dbe.equals("mysql")) {
                 table = new dbTable("mysql", testRow);

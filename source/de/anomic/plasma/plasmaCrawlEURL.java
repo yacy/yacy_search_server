@@ -57,8 +57,8 @@ import java.util.Iterator;
 
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.tools.bitfield;
 
 public class plasmaCrawlEURL extends indexURL {
@@ -138,19 +138,32 @@ public class plasmaCrawlEURL extends indexURL {
             "String failcause-"    + urlErrorLength  + ", " +        // string describing load failure
             "byte[] flags-"        + urlFlagLength);                 // extra space
 
-        if (cachePath.exists()) try {
+       
+        String newCacheName = "urlErr3.table";
+        cachePath.mkdirs();
+        try {
+            urlHashCache = new kelondroFlexTable(cachePath, newCacheName, kelondroBase64Order.enhancedCoder, bufferkb * 0x400, preloadTime, rowdef);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        
+        /*
+        File oldCacheFile = new File(cachePath, "urlErr0.db");
+        if (oldCacheFile.exists()) try {
             // open existing cache
-            kelondroTree tree = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
+            kelondroTree tree = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
             tree.assignRowdef(rowdef);
             urlHashCache = tree;
         } catch (IOException e) {
-            cachePath.delete();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
+            oldCacheFile.delete();
+            urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
         } else {
             // create new cache
-            cachePath.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
+            oldCacheFile.getParentFile().mkdirs();
+            urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
         }
+        */
     }
 
     public synchronized Entry newEntry(URL url, String referrer, String initiator, String executor,

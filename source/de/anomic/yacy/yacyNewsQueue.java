@@ -51,44 +51,28 @@ import java.util.Date;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.kelondroException;
 
 public class yacyNewsQueue {
 
     private File path;
     private kelondroStack queueStack;
     private yacyNewsDB newsDB;
-
-    public yacyNewsQueue(File path, yacyNewsDB newsDB) {
-        this.path = path;
-        this.newsDB = newsDB;
-
-        if (path.exists()) try {
-            queueStack = new kelondroStack(path);
-        } catch (kelondroException e) {
-            path.delete();
-            queueStack = createStack(path);
-        } catch (IOException e) {
-            path.delete();
-            queueStack = createStack(path);
-        } else {
-            queueStack = createStack(path);
-        }
-    }
     
     public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
             new kelondroColumn("newsid", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacyNewsRecord.idLength, "id = created + originator"),
             new kelondroColumn("last touched", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacyCore.universalDateShortPattern.length(), "")
     });
 
-    private static kelondroStack createStack(File path) {
-        return new kelondroStack(path, rowdef, true);
+    public yacyNewsQueue(File path, yacyNewsDB newsDB) {
+        this.path = path;
+        this.newsDB = newsDB;
+        this.queueStack = kelondroStack.open(path, rowdef);
     }
 
     private void resetDB() {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
-        queueStack = createStack(path);
+        queueStack = kelondroStack.open(path, rowdef);
     }
 
     public void clear() {

@@ -202,7 +202,7 @@ public final class plasmaCrawlStacker {
             Date loadDate, 
             int currentdepth, 
             plasmaCrawlProfile.entry profile) {
-        try {            
+        if (profile != null) try {            
             this.queue.addMessage(new stackCrawlMessage(
                     initiatorHash,
                     nexturlString,
@@ -579,6 +579,9 @@ public final class plasmaCrawlStacker {
         private final serverSemaphore writeSync;
         private final LinkedList urlEntryHashCache;
         private kelondroTree urlEntryCache;
+        private File cacheStacksPath;
+        private int bufferkb;
+        private long preloadTime;
         
         public stackCrawlQueue(File cacheStacksPath, int bufferkb, long preloadTime) {
             // init the read semaphore
@@ -591,54 +594,54 @@ public final class plasmaCrawlStacker {
             this.urlEntryHashCache = new LinkedList();
             
             // create a stack for newly entered entries
-            if (!(cacheStacksPath.exists())) cacheStacksPath.mkdir(); // make the path
+            this.cacheStacksPath = cacheStacksPath;
+            this.bufferkb = bufferkb;
+            this.preloadTime = preloadTime;
 
-            File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
-            if (cacheFile.exists()) {
-                // open existing cache
-                try {
-                    kelondroTree tree = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
-                    tree.assignRowdef(plasmaCrawlNURL.rowdef);
-                    this.urlEntryCache = tree;
-                } catch (IOException e) {
-                    cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef, true);
-                }
-                try {
-                    // loop through the list and fill the messageList with url hashs
-                    Iterator rows = this.urlEntryCache.rows(true, false, null);
-                    kelondroRow.Entry entry;
-                    while (rows.hasNext()) {
-                        entry = (kelondroRow.Entry) rows.next();
-                        if (entry == null) {
-                            System.out.println("ERROR! null element found");
-                            continue;
-                        }
-                        this.urlEntryHashCache.add(entry.getColString(0, null));
-                        this.readSync.V();
+            openDB();
+            try {
+                // loop through the list and fill the messageList with url hashs
+                Iterator rows = this.urlEntryCache.rows(true, false, null);
+                kelondroRow.Entry entry;
+                while (rows.hasNext()) {
+                    entry = (kelondroRow.Entry) rows.next();
+                    if (entry == null) {
+                        System.out.println("ERROR! null element found");
+                        continue;
                     }
-                } catch (kelondroException e) {
-                    /* if we have an error, we start with a fresh database */
-                    plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, kelondroException:" + e.getMessage() + ". Reseting DB.\n",e);
-                    
-                    // deleting old db and creating a new db
-                    try {this.urlEntryCache.close();}catch(Exception ex){}
-                    cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef, true);
-                } catch (IOException e) {
-                    /* if we have an error, we start with a fresh database */
-                    plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, IOException:" + e.getMessage() + ". Reseting DB.\n",e);
-                    
-                    // deleting old db and creating a new db
-                    try {this.urlEntryCache.close();}catch(Exception ex){}
-                    cacheFile.delete();
-                    this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef, true);
+                    this.urlEntryHashCache.add(entry.getColString(0, null));
+                    this.readSync.V();
                 }
-            } else {
-                // create new cache
-                cacheFile.getParentFile().mkdirs();
-                this.urlEntryCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef, true);
+            } catch (kelondroException e) {
+                /* if we have an error, we start with a fresh database */
+                plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, kelondroException:" + e.getMessage() + ". Reseting DB.\n", e);
+
+                // deleting old db and creating a new db
+                try {this.urlEntryCache.close();} catch (Exception ex) {}
+                deleteDB();
+                openDB();
+            } catch (IOException e) {
+                /* if we have an error, we start with a fresh database */
+                plasmaCrawlStacker.this.log.logSevere("Unable to initialize crawl stacker queue, IOException:" + e.getMessage() + ". Reseting DB.\n", e);
+
+                // deleting old db and creating a new db
+                try {this.urlEntryCache.close();} catch (Exception ex) {}
+                deleteDB();
+                openDB();
             }
+
+        }
+        
+        private void deleteDB() {
+            File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
+            cacheFile.delete();
+        }
+        
+        private void openDB() {
+            if (!(cacheStacksPath.exists())) cacheStacksPath.mkdir(); // make the path
+            File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
+            cacheFile.getParentFile().mkdirs();
+            this.urlEntryCache = kelondroTree.open(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef);
         }
         
         public int cacheNodeChunkSize() {

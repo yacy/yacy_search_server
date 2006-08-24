@@ -451,7 +451,7 @@ public class indexURL {
  
  public long[] cacheObjectStatus() {
      if (urlHashCache instanceof kelondroTree) return ((kelondroTree) urlHashCache).cacheObjectStatus();
-     return null;
+     return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
  }
  
  public static final int flagTypeID(String hash) {

@@ -202,25 +202,14 @@ public final class yacySeedDB {
     }
     
     private synchronized kelondroMap openSeedTable(File seedDBFile) {
-        if (seedDBFile.exists()) try {
-            // open existing seed database
-            return new kelondroMap(new kelondroDyn(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, '#'), sortFields, accFields);
-        } catch (kelondroException e) {
-            // if we have an error, we start with a fresh database
-            if (seedDBFile.exists()) seedDBFile.delete();
-        } catch (IOException e) {
-            // if we have an error, we start with a fresh database
-            if (seedDBFile.exists()) seedDBFile.delete();
-        }
-        // create new seed database
-        new File(seedDBFile.getParent()).mkdir();
-        return new kelondroMap(new kelondroDyn(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', true), sortFields, accFields);
+        new File(seedDBFile.getParent()).mkdirs();
+        return new kelondroMap(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#'), sortFields, accFields);
     }
     
     protected synchronized kelondroMap resetSeedTable(kelondroMap seedDB, File seedDBFile) {
         // this is an emergency function that should only be used if any problem with the
         // seed.db is detected
-    yacyCore.log.logFine("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
+        yacyCore.log.logFine("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
         try {
             seedDB.close();
             seedDBFile.delete();

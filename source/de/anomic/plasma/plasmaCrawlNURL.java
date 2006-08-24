@@ -55,9 +55,9 @@ import java.util.Iterator;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
@@ -104,50 +104,32 @@ public class plasmaCrawlNURL extends indexURL {
     private long preloadTime;
     initStackIndex initThead;
     
-    public plasmaCrawlNURL(File cacheStacksPath, int bufferkb, long preloadTime) {
+    public plasmaCrawlNURL(File cachePath, int bufferkb, long preloadTime) {
         super();
-        this.cacheStacksPath = cacheStacksPath;
+        this.cacheStacksPath = cachePath;
         this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
         
         // create a stack for newly entered entries
-        if (!(cacheStacksPath.exists())) cacheStacksPath.mkdir(); // make the path
+        if (!(cachePath.exists())) cachePath.mkdir(); // make the path
 
         openHashCache();
 
-        File coreStackFile = new File(cacheStacksPath, "urlNoticeLocal0.stack");
-        File limitStackFile = new File(cacheStacksPath, "urlNoticeLimit0.stack");
-        File overhangStackFile = new File(cacheStacksPath, "urlNoticeOverhang0.stack");
-        File remoteStackFile = new File(cacheStacksPath, "urlNoticeRemote0.stack");
-        File imageStackFile = new File(cacheStacksPath, "urlNoticeImage0.stack");
-        File movieStackFile = new File(cacheStacksPath, "urlNoticeMovie0.stack");
-        File musicStackFile = new File(cacheStacksPath, "urlNoticeMusic0.stack");
+        File coreStackFile = new File(cachePath, "urlNoticeLocal0.stack");
+        File limitStackFile = new File(cachePath, "urlNoticeLimit0.stack");
+        File overhangStackFile = new File(cachePath, "urlNoticeOverhang0.stack");
+        File remoteStackFile = new File(cachePath, "urlNoticeRemote0.stack");
+        File imageStackFile = new File(cachePath, "urlNoticeImage0.stack");
+        File movieStackFile = new File(cachePath, "urlNoticeMovie0.stack");
+        File musicStackFile = new File(cachePath, "urlNoticeMusic0.stack");
         coreStack = new plasmaCrawlBalancer(coreStackFile);
         limitStack = new plasmaCrawlBalancer(limitStackFile);
         overhangStack = new plasmaCrawlBalancer(overhangStackFile);
         remoteStack = new plasmaCrawlBalancer(remoteStackFile);
         kelondroRow rowdef = new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength);
-        if (imageStackFile.exists()) try {
-            imageStack = new kelondroStack(imageStackFile);
-        } catch (IOException e) {
-            imageStack = new kelondroStack(imageStackFile, rowdef, true);
-        } else {
-            imageStack = new kelondroStack(imageStackFile, rowdef, true);
-        }
-        if (movieStackFile.exists()) try {
-            movieStack = new kelondroStack(movieStackFile);
-        } catch (IOException e) {
-            movieStack = new kelondroStack(movieStackFile, rowdef, true);
-        } else {
-            movieStack = new kelondroStack(movieStackFile, rowdef, true);
-        }
-        if (musicStackFile.exists()) try {
-            musicStack = new kelondroStack(musicStackFile);
-        } catch (IOException e) {
-            musicStack = new kelondroStack(musicStackFile, rowdef, true);
-        } else {
-            musicStack = new kelondroStack(musicStackFile, rowdef, true);
-        }
+        imageStack = kelondroStack.open(imageStackFile, rowdef);
+        movieStack = kelondroStack.open(movieStackFile, rowdef);
+        musicStack = kelondroStack.open(musicStackFile, rowdef);
 
         // init stack Index
         stackIndex = new HashSet();
@@ -165,15 +147,17 @@ public class plasmaCrawlNURL extends indexURL {
     }
     
     private void openHashCache() {
-        File oldCacheFile = new File(cacheStacksPath, "urlNotice1.db");
-        //File newCacheFile = new File(cacheStacksPath, "urlNotice2.table");
-        /*if (newCacheFile.exists()) try {
-            urlHashCache = new kelondroFlexTable(cacheStacksPath, "urlNotice2.table", kelondroBase64Order.enhancedCoder, bufferkb * 0x400, preloadTime, rowdef, true);
+        String newCacheName = "urlNotice3.table";
+        cacheStacksPath.mkdirs();
+        try {
+            urlHashCache = new kelondroFlexTable(cacheStacksPath, newCacheName, kelondroBase64Order.enhancedCoder, bufferkb * 0x400, preloadTime, rowdef);
         } catch (IOException e) {
             e.printStackTrace();
-            oldCacheFile.delete();
-            urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
-        } else*/ if (oldCacheFile.exists()) try {
+            System.exit(-1);
+        }
+        /*
+        File oldCacheFile = new File(cacheStacksPath, "urlNotice1.db");
+        if (oldCacheFile.exists()) try {
             // open existing cache
             kelondroTree tree = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
             tree.assignRowdef(rowdef);
@@ -184,9 +168,9 @@ public class plasmaCrawlNURL extends indexURL {
         } else {
             // create new cache
             oldCacheFile.getParentFile().mkdirs();
-            //urlHashCache = new kelondroFlexTable(cacheStacksPath, "urlNotice2.table", kelondroBase64Order.enhancedCoder, bufferkb * 0x400, preloadTime, rowdef, true);
             urlHashCache = new kelondroTree(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
         }
+         */
     }
     
     private void resetHashCache() {
@@ -200,6 +184,7 @@ public class plasmaCrawlNURL extends indexURL {
     }
     
     public void close() {
+        try {urlHashCache.close();} catch (IOException e) {}
         coreStack.close();
         limitStack.close();
         overhangStack.close();
@@ -552,6 +537,8 @@ public class plasmaCrawlNURL extends indexURL {
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
                 };
+                if (urlHashCache == null) System.out.println("urlHashCache is NULL");
+                if ((urlHashCache != null) && (urlHashCache.row() == null)) System.out.println("row() is NULL");
                 urlHashCache.put(urlHashCache.row().newEntry(entry));
                 this.stored = true;
             } catch (IOException e) {

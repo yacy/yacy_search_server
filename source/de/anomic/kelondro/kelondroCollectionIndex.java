@@ -91,7 +91,7 @@ public class kelondroCollectionIndex {
         this.loadfactor = loadfactor;
 
         // create index table
-        index = new kelondroFlexTable(path, filenameStub + ".index.table", indexOrder, buffersize, preloadTime, indexRow(keyLength), true);
+        index = new kelondroFlexTable(path, filenameStub + ".index.table", indexOrder, buffersize, preloadTime, indexRow(keyLength));
 
         // save/check property file for this array
         File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize());
@@ -119,13 +119,8 @@ public class kelondroCollectionIndex {
                 "byte[] key-" + index.row().width(0) + "," +
                 "byte[] collection-" + (kelondroRowCollection.exportOverheadSize + load * this.playloadrow.objectsize())
                 );
-        if (f.exists()) {
-            return new kelondroFixedWidthArray(f, rowdef);
-        } else if (create) {
-            return new kelondroFixedWidthArray(f, rowdef, 0, true);
-        } else {
-            return null;
-        }
+        if ((!(f.exists())) && (!create)) return null;
+        return new kelondroFixedWidthArray(f, rowdef, 0);
     }
     
     private kelondroFixedWidthArray getArray(int partitionNumber, int serialNumber, int chunksize) {
@@ -460,7 +455,7 @@ public class kelondroCollectionIndex {
             collectionIndex.close();
             
             // printout of index
-            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", kelondroNaturalOrder.naturalOrder, buffersize, preloadTime, indexRow(9), true);
+            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", kelondroNaturalOrder.naturalOrder, buffersize, preloadTime, indexRow(9));
             index.print();
             index.close();
         } catch (IOException e) {

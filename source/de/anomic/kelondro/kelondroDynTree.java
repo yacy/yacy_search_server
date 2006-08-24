@@ -48,7 +48,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 
 public class kelondroDynTree {
     
@@ -70,8 +69,8 @@ public class kelondroDynTree {
     private Hashtable buffer, cache;
     private long cycleBuffer;
     
-    public kelondroDynTree(File file, long buffersize, long preloadTime, int keylength, int nodesize, kelondroRow rowdef, char fillChar, boolean exitOnFail) {
-        // creates a new DynTree
+    public kelondroDynTree(File file, long buffersize, long preloadTime, int keylength, int nodesize, kelondroRow rowdef, char fillChar) throws IOException {
+        // creates or opens a DynTree
         this.file = file;
         this.buffersize = buffersize;
         this.preloadTime = preloadTime;
@@ -80,32 +79,8 @@ public class kelondroDynTree {
         this.cache = new Hashtable();
         //this.cycleCache = Long.MIN_VALUE;
         this.cycleBuffer = Long.MIN_VALUE;
-        if (file.exists()) file.delete();
-        this.table = new kelondroDyn(file, buffersize, preloadTime, keylength, nodesize, fillChar, exitOnFail);
+        this.table = new kelondroDyn(file, buffersize, preloadTime, keylength, nodesize, fillChar);
         this.treeRAHandles = new Hashtable();
-    }
-
-    public kelondroDynTree(File file, long buffersize, long preloadTime, char fillChar) throws IOException {
-        // opens an existing DynTree
-        this.file = file;
-        this.buffersize = buffersize;
-        this.preloadTime = preloadTime;
-        this.buffer = new Hashtable();
-        this.cache = new Hashtable();
-        //this.cycleCache = Long.MIN_VALUE;
-        this.cycleBuffer = Long.MIN_VALUE;
-        if (!(file.exists())) throw new IOException("DynTree " + file.toString() + " does not exist");
-        this.table = new kelondroDyn(file, buffersize, preloadTime, fillChar);
-        // read one element to measure the size of columns
-        if (table.size() == 0) throw new IOException("DynTree " + file.toString() + " is empty. Should not.");
-        this.treeRAHandles = new Hashtable();
-        Iterator i = table.dynKeys(true, false);
-        String onekey = (String) i.next();
-        kelondroTree onetree = getTree(onekey);
-        kelondroColumn[] columns = new kelondroColumn[onetree.row().columns()];
-        for (int j = 0; j < columns.length; j++) columns[j] = onetree.row().column(j);
-        this.rowdef = new kelondroRow(columns);
-        closeTree(onekey);
     }
     
     public void close() throws IOException {
@@ -323,10 +298,10 @@ public class kelondroDynTree {
             System.out.println("start");
             File file = new File("D:\\bin\\testDyn.db");
             if (file.exists()) {
-                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, '_');
+                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30"), '_');
                 System.out.println("opened: table keylength=" + dt.table.row().width(0) + ", sectorsize=" + dt.table.row().width(1) + ", " + dt.table.size() + " entries.");
             } else {
-                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30"), '_', true);
+                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30"), '_');
                 String name;
                 kelondroTree t;
                 kelondroRow.Entry line;

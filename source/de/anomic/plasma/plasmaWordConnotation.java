@@ -58,14 +58,8 @@ public class plasmaWordConnotation {
     private static final int nodesize = 4048;
     private kelondroDynTree refDB;
     
-    public plasmaWordConnotation(File refDBfile, int bufferkb, long preloadTime, char fillChar) {
-        if (refDBfile.exists()) try {
-            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, fillChar);
-        } catch (IOException e) {
-            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, wordlength, nodesize, new kelondroRow("byte[] word-" + wordlength + ", Cardinal count-" + countlength), fillChar, true);
-        } else {
-            refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, wordlength, nodesize, new kelondroRow("byte[] word-" + wordlength + ", Cardinal count-" + countlength), fillChar, true);
-        }
+    public plasmaWordConnotation(File refDBfile, int bufferkb, long preloadTime, char fillChar) throws IOException {
+        refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, wordlength, nodesize, new kelondroRow("byte[] word-" + wordlength + ", Cardinal count-" + countlength), fillChar);
     }
 
     private void addSingleRef(String word, String reference) throws IOException {

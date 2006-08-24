@@ -33,8 +33,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 
     protected kelondroBytesIntMap index;
     
-    public kelondroFlexTable(File path, String tablename, kelondroOrder objectOrder, long buffersize, long preloadTime, kelondroRow rowdef, boolean exitOnFail) throws IOException {
-        super(path, tablename, rowdef, exitOnFail);
+    public kelondroFlexTable(File path, String tablename, kelondroOrder objectOrder, long buffersize, long preloadTime, kelondroRow rowdef) throws IOException {
+        super(path, tablename, rowdef);
         File newpath = new File(path, tablename);
         File indexfile = new File(newpath, "col.000.index");
         kelondroIndex ki = null;
@@ -52,7 +52,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         if (indexfile.exists()) {
             // use existing index file
             System.out.println("*** Using File index " + indexfile);
-            ki = new kelondroTree(indexfile, buffersize, preloadTime, 10);
+            ki = kelondroTree.open(indexfile, buffersize, preloadTime, 10, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80);
         } else if ((preloadTime >= 0) && (stt > preloadTime)) {
             // generate new index file
             System.out.print("*** Generating File index for " + size() + " entries from " + indexfile);
@@ -104,9 +104,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     private kelondroTree initializeTreeIndex(File indexfile, long buffersize, long preloadTime, kelondroOrder objectOrder) throws IOException {
-        kelondroTree treeindex = new kelondroTree(indexfile, buffersize, preloadTime, 10,
-                new kelondroRow("byte[] key-" + rowdef.width(0) + ", int reference-4 {b256}"),
-                objectOrder, 2, 80, true);
+        kelondroTree treeindex = new kelondroTree(indexfile, buffersize, preloadTime, 10, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80);
         Iterator content = super.col[0].contentNodes(-1);
         kelondroRecords.Node node;
         kelondroRow.Entry indexentry;
@@ -124,6 +122,10 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             }
         }
         return treeindex;
+    }
+    
+    private static final kelondroRow treeIndexRow(int keywidth) {
+        return new kelondroRow("byte[] key-" + keywidth + ", int reference-4 {b256}");
     }
     
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {

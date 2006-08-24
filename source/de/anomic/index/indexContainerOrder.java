@@ -53,4 +53,8 @@ public class indexContainerOrder implements kelondroOrder {
         return this.embeddedOrder.compare(a, aoffset, alength, b, boffset, blength);
     }
 
+    public boolean equals(kelondroOrder otherOrder) {
+        if (!(otherOrder instanceof indexContainerOrder)) return false;
+        return this.embeddedOrder.equals(((indexContainerOrder) otherOrder).embeddedOrder);
+    }
 }

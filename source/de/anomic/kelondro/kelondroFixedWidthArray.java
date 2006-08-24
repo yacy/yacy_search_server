@@ -55,26 +55,18 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
     private static short thisOHHandles = 0; // and no handles
     
-    public kelondroFixedWidthArray(File file, kelondroRow rowdef, int intprops, boolean exitOnFail) {
+    public kelondroFixedWidthArray(File file, kelondroRow rowdef, int intprops) throws IOException {
         // this creates a new array
-        super(file, 0, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
-        for (int i = 0; i < intprops; i++) try {
-            setHandle(i, new Handle(0));
-        } catch (IOException e) {
-            super.logFailure("cannot set handle " + i + " / " + e.getMessage());
-            if (exitOnFail) System.exit(-1);
-            throw new RuntimeException("cannot set handle " + i + " / " + e.getMessage());
+        super(file, 0, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
+        if (!(super.fileExisted)) {
+            for (int i = 0; i < intprops; i++) {
+                setHandle(i, new Handle(0));
+            }
+            // store column description
+            for (int i = 0; i < rowdef.columns(); i++) {
+                try {super.setText(i, rowdef.column(i).toString().getBytes());} catch (IOException e) {}
+            }
         }
-        // store column description
-        for (int i = 0; i < rowdef.columns(); i++) {
-            try {super.setText(i, rowdef.column(i).toString().getBytes());} catch (IOException e) {}
-        }
-    }
-
-    public kelondroFixedWidthArray(File file, kelondroRow rowdef) throws IOException{
-        // this opens a file with an existing array
-        super(file, 0, 0);
-        super.assignRowdef(rowdef);
     }
     
     public synchronized kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException {
@@ -142,14 +134,14 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         try {
             System.out.println("erster Test");
             f.delete();
-            kelondroFixedWidthArray k = new kelondroFixedWidthArray(f, rowdef, 6, true);
+            kelondroFixedWidthArray k = new kelondroFixedWidthArray(f, rowdef, 6);
             k.set(3, k.row().newEntry(new byte[][]{
                 "test123".getBytes(), "abcd".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{
                 "test456".getBytes(), "efgh".getBytes()}));
             k.close();
             
-            k = new kelondroFixedWidthArray(f, rowdef);
+            k = new kelondroFixedWidthArray(f, rowdef, 6);
             System.out.println(k.get(2).toString());
             System.out.println(k.get(3).toString());
             System.out.println(k.get(4).toString());
@@ -157,7 +149,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
 
             System.out.println("zweiter Test");
             f.delete();
-            k = new kelondroFixedWidthArray(f, rowdef, 6, true);
+            k = new kelondroFixedWidthArray(f, rowdef, 6);
             k.add(k.row().newEntry(new byte[][]{"a".getBytes(), "xxxx".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{"b".getBytes(), "xxxx".getBytes()}));
             k.remove(0);
@@ -176,7 +168,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
             
             System.out.println("dritter Test");
             f.delete();
-            k = new kelondroFixedWidthArray(f, rowdef, 6, true);
+            k = new kelondroFixedWidthArray(f, rowdef, 6);
             for (int i = 1; i <= 200; i = i * 2) {
                 for (int j = 0; j < i*2; j++) {
                     k.add(k.row().newEntry(new byte[][]{(Integer.toString(i) + "-" + Integer.toString(j)).getBytes(), "xxxx".getBytes()}));

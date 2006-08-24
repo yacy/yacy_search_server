@@ -67,16 +67,8 @@ public class plasmaCrawlProfile {
         this.profileTableFile = file;
         this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
-        kelondroDyn dyn = null;
-        if (profileTableFile.exists()) try {
-            dyn = new kelondroDyn(file, bufferkb * 1024, preloadTime, '#');
-        } catch (IOException e) {
-            profileTableFile.delete();
-            dyn = new kelondroDyn(file, bufferkb * 1024, preloadTime, indexURL.urlCrawlProfileHandleLength, 2000, '#', true);
-        } else {
-            profileTableFile.getParentFile().mkdirs();
-            dyn = new kelondroDyn(file, bufferkb * 1024, preloadTime, indexURL.urlCrawlProfileHandleLength, 2000, '#', true);
-        }
+        profileTableFile.getParentFile().mkdirs();
+        kelondroDyn dyn = kelondroDyn.open(profileTableFile, bufferkb * 1024, preloadTime, indexURL.urlCrawlProfileHandleLength, 2000, '#');
         profileTable = new kelondroMap(dyn);
         domsCache = new HashMap();
     }
@@ -102,7 +94,8 @@ public class plasmaCrawlProfile {
         if (profileTable != null) try { profileTable.close(); } catch (IOException e) {}
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
-        profileTable = new kelondroMap(new kelondroDyn(profileTableFile, bufferkb * 1024, preloadTime, indexURL.urlCrawlProfileHandleLength, 2000, '#', true));
+        kelondroDyn dyn = kelondroDyn.open(profileTableFile, bufferkb * 1024, preloadTime, indexURL.urlCrawlProfileHandleLength, 2000, '#');
+        profileTable = new kelondroMap(dyn);
     }
     
     public void close() {

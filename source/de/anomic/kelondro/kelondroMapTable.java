@@ -63,51 +63,35 @@ public class kelondroMapTable {
     
     public void declareMaps(
             String tablename, int keysize, int nodesize,
-            char fillChar, boolean exitOnFail) {
-        declareMaps(tablename, keysize, nodesize, null, null, fillChar, exitOnFail);
+            char fillChar) throws IOException {
+        declareMaps(tablename, keysize, nodesize, null, null, fillChar);
     }
     
     public void declareMaps(
             String tablename, int keysize, int nodesize,
-            String[] sortfields, String[] accfields, char fillChar, boolean exitOnFail) {
-        declareMaps(tablename, keysize, nodesize, sortfields, accfields, fillChar, 0x800, 0, exitOnFail);
+            String[] sortfields, String[] accfields, char fillChar) throws IOException {
+        declareMaps(tablename, keysize, nodesize, sortfields, accfields, fillChar, 0x800, 0);
     }
     
     public void declareMaps(
             String tablename, int keysize, int nodesize,
             String[] sortfields, String[] accfields, char fillChar,
-            long buffersize /*bytes*/, long preloadTime, boolean exitOnFail) {
+            long buffersize /*bytes*/, long preloadTime) throws IOException {
         if (mTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareMap: table '" + tablename + "' declared twice.");
         if (tTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareMap: table '" + tablename + "' declared already in other context.");
         File tablefile = new File(tablesPath, "table." + tablename + ".mdb");
         kelondroDyn dyn;
-        if (tablefile.exists()) try {
-            dyn = new kelondroDyn(tablefile, buffersize, preloadTime, fillChar);
-        } catch (IOException e) {
-            tablefile.getParentFile().mkdirs();
-            dyn = new kelondroDyn(tablefile, buffersize, preloadTime, keysize, nodesize, fillChar, exitOnFail);
-        } else {
-            tablefile.getParentFile().mkdirs();
-            dyn = new kelondroDyn(tablefile, buffersize, preloadTime, keysize, nodesize, fillChar, exitOnFail);
-        }
+        if (!(tablefile.exists())) tablefile.getParentFile().mkdirs();
+        dyn = new kelondroDyn(tablefile, buffersize, preloadTime, keysize, nodesize, fillChar);
         kelondroMap map = new kelondroMap(dyn, sortfields, accfields);
         mTables.put(tablename, map);
     }
     
-    public void declareTree(String tablename, kelondroRow rowdef, long buffersize /*bytes*/, long preloadTime, boolean exitOnFail)  {
+    public void declareTree(String tablename, kelondroRow rowdef, long buffersize /*bytes*/, long preloadTime)  {
         if (mTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareTree: table '" + tablename + "' declared already in other context.");
         if (tTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareTree: table '" + tablename + "' declared twice.");
         File tablefile = new File(tablesPath, "table." + tablename + ".tdb");
-        kelondroTree Tree;
-        if (tablefile.exists()) try {
-            Tree = new kelondroTree(tablefile, buffersize, preloadTime, kelondroTree.defaultObjectCachePercent);
-        } catch (IOException e) {
-            tablefile.getParentFile().mkdirs();
-            Tree = new kelondroTree(tablefile, buffersize, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, exitOnFail);
-        } else {
-            tablefile.getParentFile().mkdirs();
-            Tree = new kelondroTree(tablefile, buffersize, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, exitOnFail);
-        }
+        kelondroTree Tree = kelondroTree.open(tablefile, buffersize, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
         tTables.put(tablename, Tree);
     }
 

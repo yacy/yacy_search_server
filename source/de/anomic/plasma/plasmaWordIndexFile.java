@@ -85,23 +85,13 @@ public final class plasmaWordIndexFile {
 
     private kelondroTree indexFile(File databaseRoot, String wordHash) {
         if (wordHash.length() < 12) throw new RuntimeException("word hash wrong: '" + wordHash + "'");
-    theLocation = wordHash2path(databaseRoot, wordHash);
-    File fp = theLocation.getParentFile();
-    if (fp != null) fp.mkdirs();
-    kelondroTree kt;
-    long cacheSize = theLocation.length();
-    if (cacheSize > 1048576) cacheSize = 1048576;
-    if (theLocation.exists()) try {
-        // open existing index file
-        kt = new kelondroTree(theLocation, cacheSize, 0, kelondroTree.defaultObjectCachePercent);
-    } catch (IOException e) {
-        theLocation.delete();
-        kt = new kelondroTree(theLocation, cacheSize, 0, kelondroTree.defaultObjectCachePercent, new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength + ", byte[] ba-" + indexURLEntry.encodedByteArrayFormLength(false)), false);
-    } else {
-        // create new index file
-        kt = new kelondroTree(theLocation, cacheSize, 0, kelondroTree.defaultObjectCachePercent, new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength + ", byte[] ba-" + indexURLEntry.encodedByteArrayFormLength(false)), false);
-    }
-    return kt; // everyone who get this should close it when finished!
+        theLocation = wordHash2path(databaseRoot, wordHash);
+        File fp = theLocation.getParentFile();
+        if (fp != null) fp.mkdirs();
+        long cacheSize = theLocation.length();
+        if (cacheSize > 1048576) cacheSize = 1048576;
+        return kelondroTree.open(theLocation, cacheSize, 0, kelondroTree.defaultObjectCachePercent,
+                    new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength + ", byte[] ba-" + indexURLEntry.encodedByteArrayFormLength(false)));
     }
 
     public static File wordHash2path(File databaseRoot, String hash) {

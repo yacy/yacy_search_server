@@ -66,4 +66,6 @@ public interface kelondroOrder extends Comparator {
     public byte[] zero(); // returns the zero point of the Ordering; null if not defined
 
     public void rotate(byte[] zero); // defines that the ordering rotates, and sets the zero point for the rotation
+    
+    public boolean equals(kelondroOrder o); // used to compare different order objects; they may define the same ordering
 }

@@ -150,6 +150,9 @@ public class kelondroRecords {
     // optional logger
     protected Logger theLogger = null;
     
+    // tracking of file cration
+    protected boolean fileExisted;
+    
     // Random. This is used to shift flush-times of write-buffers to differrent time
     private static Random random = new Random(System.currentTimeMillis());
 
@@ -191,30 +194,34 @@ public class kelondroRecords {
     
     public kelondroRecords(File file, long buffersize /* bytes */, long preloadTime,
                            short ohbytec, short ohhandlec,
-                           kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
-                           boolean exitOnFail) {
-        // creates a new file
+                           kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth) throws IOException {
+        // opens an existing file or creates a new file
         // file: the file that shall be created
         // oha : overhead size array of four bytes: oha[0]=# of bytes, oha[1]=# of shorts, oha[2]=# of ints, oha[3]=# of longs, 
         // columns: array with size of column width; columns.length is number of columns
         // FHandles: number of integer properties
         // txtProps: number of text properties
 
-        assert (!file.exists()) : "file " + file + " already exist";
-        try {
+        this.fileExisted = file.exists(); // can be used by extending class to track if this class created the file
+        if (file.exists()) {
+            // opens an existing tree
+            this.filename = file.getCanonicalPath();
+            kelondroRA raf = new kelondroFileRA(this.filename);
+            //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
+            //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
+            //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
+            initExistingFile(raf, buffersize / 10);
+        } else {
             this.filename = file.getCanonicalPath();
             kelondroRA raf = new kelondroFileRA(this.filename);
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
             initNewFile(raf, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, buffersize / 10);
-        } catch (IOException e) {
-            logFailure("cannot create / " + e.getMessage());
-            if (exitOnFail)
-                System.exit(-1);
         }
-        initCache(buffersize / 10 * 9, preloadTime);
+        assignRowdef(rowdef);
+        initCache(buffersize / 10 * 9, preloadTime);        
     }
-    
+
     public kelondroRecords(kelondroRA ra, long buffersize /* bytes */, long preloadTime,
                            short ohbytec, short ohhandlec,
                            kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
@@ -347,18 +354,6 @@ public class kelondroRecords {
         this.USAGE.write();
     }
 
-    public kelondroRecords(File file, long buffersize, long preloadTime) throws IOException{
-        // opens an existing tree
-        assert (file.exists()): "file " + file.getAbsoluteFile().toString() + " does not exist";
-        this.filename = file.getCanonicalPath();
-        kelondroRA raf = new kelondroFileRA(this.filename);
-        //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
-        //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
-        //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
-        initExistingFile(raf, buffersize / 10);
-        initCache(buffersize / 10 * 9, preloadTime);
-    }
-    
     public kelondroRecords(kelondroRA ra, long buffersize, long preloadTime) throws IOException{
         this.filename = null;
         initExistingFile(ra, buffersize / 10);
@@ -912,7 +907,7 @@ public class kelondroRecords {
         return this.ROW;
     }
     
-    public final void assignRowdef(kelondroRow rowdef) {
+    private final void assignRowdef(kelondroRow rowdef) {
         // overwrites a given rowdef
         // the new rowdef must be compatible
         if (rowdef.columns() < ROW.columns())

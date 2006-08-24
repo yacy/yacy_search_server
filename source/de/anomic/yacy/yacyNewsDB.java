@@ -67,25 +67,13 @@ public class yacyNewsDB {
         this.path = path;
         this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
-        
-        if (path.exists()) try {
-            news = new kelondroTree(path, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
-            news.assignRowdef(yacyNewsRecord.rowdef);
-        } catch (IOException e) {
-            news = createDB(path, bufferkb, preloadTime);
-        } else {
-            news = createDB(path, bufferkb, preloadTime);
-        }
-    }
-
-    private static kelondroTree createDB(File path, int bufferkb, long preloadTime) {
-        return new kelondroTree(path, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, yacyNewsRecord.rowdef, true);
+        this.news = kelondroTree.open(path, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, yacyNewsRecord.rowdef);
     }
 
     private void resetDB() {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
-        news = createDB(path, bufferkb, preloadTime);
+        this.news = kelondroTree.open(path, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, yacyNewsRecord.rowdef);
     }
 
     public int cacheNodeChunkSize() {

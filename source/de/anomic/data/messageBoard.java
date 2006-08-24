@@ -70,14 +70,7 @@ public class messageBoard {
     public messageBoard(File path, int bufferkb, long preloadTime) {
         new File(path.getParent()).mkdir();
         if (database == null) {
-            if (path.exists()) try {
-                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400, preloadTime, '_'));
-            } catch (IOException e) {
-                path.delete();
-                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400, preloadTime, categoryLength + dateFormat.length() + 2, recordSize, '_', true));
-            } else {
-                database = new kelondroMap(new kelondroDyn(path, bufferkb * 0x400, preloadTime, categoryLength + dateFormat.length() + 2, recordSize, '_', true));
-            }
+            database = new kelondroMap(kelondroDyn.open(path, bufferkb * 0x400, preloadTime, categoryLength + dateFormat.length() + 2, recordSize, '_'));
         }
         sn = 0;
     }

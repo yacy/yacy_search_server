@@ -59,15 +59,7 @@ public class plasmaCrawlBalancer {
     private HashMap domainStacks;
     
     public plasmaCrawlBalancer(File stackFile) {
-        if (stackFile.exists()) {
-            try {
-                stack = new kelondroStack(stackFile);
-            } catch (IOException e) {
-                stack = new kelondroStack(stackFile, new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength), true);
-            }
-        } else {
-            stack = new kelondroStack(stackFile, new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength), true);
-        }
+        stack = kelondroStack.open(stackFile, new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength));
         domainStacks = new HashMap();
     }
 

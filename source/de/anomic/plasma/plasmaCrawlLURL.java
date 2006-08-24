@@ -113,20 +113,14 @@ public final class plasmaCrawlLURL extends indexURL {
             "Cardinal size-"       + urlSizeLength      + " {b64e}, " + // size of file in bytes
             "Cardinal wc-"         + urlWordCountLength + " {b64e}");   // word count
 
-        if (cachePath.exists()) {
-            // open existing cache
-            try {
-                kelondroTree tree = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent);
-                tree.assignRowdef(rowdef);
-                urlHashCache = tree;
-            } catch (IOException e) {
-                cachePath.getParentFile().mkdirs();
-                urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
-            }
-        } else {
-            // create new cache
-            cachePath.getParentFile().mkdirs();
-            urlHashCache = new kelondroTree(cachePath, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, true);
+        File cacheFile = new File(cachePath, "urlHash.db");
+        
+        cacheFile.getParentFile().mkdirs();
+        try {
+            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
         }
 
         // init result stacks

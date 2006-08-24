@@ -83,4 +83,12 @@ public abstract class kelondroAbstractOrder implements kelondroOrder {
     public void rotate(byte[] newzero) {
         this.zero = newzero;
     }
+    
+    public boolean equals(kelondroOrder otherOrder) {
+        String thisSig = this.signature();
+        String otherSig = otherOrder.signature();
+        if ((thisSig == null) || (otherSig == null)) return false;
+        return thisSig.equals(otherSig);
+    }
+    
 }
