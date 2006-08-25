@@ -90,6 +90,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     private final plasmaWordIndexFileCluster       backend;              // old database structure, to be replaced by CollectionRI
     public        boolean                          busyCacheFlush;       // shows if a cache flush is currently performed
     public        boolean                          useCollectionIndex;   // flag for usage of new collectionIndex db
+    private       int idleDivisor, busyDivisor;
     
     public plasmaWordIndex(File oldDatabaseRoot, File newIndexRoot, int bufferkb, long preloadTime, serverLog log, boolean useCollectionIndex) {
         this.oldDatabaseRoot = oldDatabaseRoot;
@@ -111,6 +112,8 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         
         busyCacheFlush = false;
         this.useCollectionIndex = useCollectionIndex;
+        this.busyDivisor = 5000;
+        this.idleDivisor = 420;
     }
 
     public File getRoot() {
@@ -169,8 +172,9 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         ramCache.setMaxWordCount(maxWords);
     }
 
-    public int getMaxWordCount() {
-        return ramCache.getMaxWordCount();
+    public void setWordFlushDivisor(int idleDivisor, int busyDivisor) {
+       this.idleDivisor = idleDivisor;
+       this.busyDivisor = busyDivisor;
     }
 
     public void flushControl() {
@@ -198,10 +202,9 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             return added;
     }
 
-    public void flushCacheSome() {
+    public void flushCacheSome(boolean busy) {
         synchronized (this) { ramCache.shiftK2W(); }
-        //int flushCount = ramCache.wSize() / 420;
-        int flushCount = ramCache.wSize() / 5000; // for testings
+        int flushCount = (busy) ? ramCache.wSize() / busyDivisor : ramCache.wSize() / idleDivisor;
         if (flushCount > 100) flushCount = 100;
         if (flushCount < 1) flushCount = Math.min(1, ramCache.wSize());
         flushCache(flushCount);

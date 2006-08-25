@@ -112,13 +112,32 @@ Changes take effect immediately</td>
   </tr>
   <tr valign="top" class="TableCellDark">
     <td class=small>Maximum number of words in cache:</td>
-    <td class=small><input name="wordCacheMaxCount" type="text" size="20" maxlength="100" value="#[wordCacheMaxCount]#"></td>
-    <td class=small>cannot be set for DHT</td>
-    <td class=small rowspan="2">
+    <td class=small colspan="2"><input name="wordCacheMaxCount" type="text" size="20" maxlength="100" value="#[wordCacheMaxCount]#"></td>
+    <td class=small>
     This is is the number of word indexes that shall be held in the
     ram cache during indexing. When YaCy is shut down, this cache must be
     flushed to disc; this may last some minutes.
     </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>Initial space of words in cache:</td>
+    <td class=small colspan="2"><input name="wordCacheInitCount" type="text" size="20" maxlength="100" value="#[wordCacheInitCount]#"></td>
+    <td class=small>
+    This is is the init size of space for words in cache.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>word-flush idle divisor:</td>
+    <td class=small colspan="2"><input name="wordFlushIdleDivisor" type="text" size="20" maxlength="100" value="#[wordFlushIdleDivisor]#"></td>
+    <td class=small rowspan="2">
+    The word flush divisor is applied when an indexing loop is executed.
+    The divisor is used to divide the number of words in the cache; the result is the number of words that are flushed.
+    The idleDivisor is used if the indexing queue is empty, the busyDivisor is used if the indexing queue contains at least one element.
+    </td>
+  </tr>
+  <tr valign="top" class="TableCellDark">
+    <td class=small>word-flush busy divisor:</td>
+    <td class=small colspan="2"><input name="wordFlushBusyDivisor" type="text" size="20" maxlength="100" value="#[wordFlushBusyDivisor]#"></td>
   </tr>
   <tr valign="top" class="TableCellLight">
     <td class=small colspan="4">

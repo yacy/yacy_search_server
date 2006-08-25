@@ -170,11 +170,21 @@ public class PerformanceQueues_p {
         prop.put("table", c);
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
-            int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 10000);
+            int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
             switchboard.setConfig("wordCacheMaxCount", Integer.toString(wordCacheMaxCount));
             switchboard.wordIndex.setMaxWordCount(wordCacheMaxCount);
+            
+            int wordCacheInitCount = post.getInt("wordCacheInitCount", 30000);
+            switchboard.setConfig("wordCacheInitCount", Integer.toString(wordCacheInitCount));
+            
             int maxWaitingWordFlush = post.getInt("maxWaitingWordFlush", 180);
             switchboard.setConfig("maxWaitingWordFlush", Integer.toString(maxWaitingWordFlush));
+            
+            int wordFlushIdleDivisor = post.getInt("wordFlushIdleDivisor", 420);
+            switchboard.setConfig("wordFlushIdleDivisor", Integer.toString(wordFlushIdleDivisor));
+            int wordFlushBusyDivisor = post.getInt("wordFlushBusyDivisor", 5000);
+            switchboard.setConfig("wordFlushBusyDivisor", Integer.toString(wordFlushBusyDivisor));
+            switchboard.wordIndex.setWordFlushDivisor(wordFlushIdleDivisor, wordFlushBusyDivisor);
         }
         
         if ((post != null) && (post.containsKey("poolConfig"))) {
@@ -255,7 +265,10 @@ public class PerformanceQueues_p {
         prop.put("maxAgeOfKCache", "" + (switchboard.wordIndex.maxAgeOfKCache() / 1000 / 60)); // minutes
         prop.put("minAgeOfKCache", "" + (switchboard.wordIndex.minAgeOfKCache() / 1000 / 60)); // minutes
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
-        prop.put("wordCacheMaxCount", switchboard.wordIndex.getMaxWordCount());
+        prop.put("wordCacheMaxCount", switchboard.getConfigLong("wordCacheMaxCount", 20000));
+        prop.put("wordCacheInitCount", switchboard.getConfigLong("wordCacheInitCount", 30000));
+        prop.put("wordFlushIdleDivisor", switchboard.getConfigLong("wordFlushIdleDivisor", 420));
+        prop.put("wordFlushBusyDivisor", switchboard.getConfigLong("wordFlushBusyDivisor", 5000));
         prop.put("onlineCautionDelay", switchboard.getConfig("onlineCautionDelay", "30000"));
         prop.put("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
         

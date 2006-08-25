@@ -578,6 +578,9 @@ javastart_Xms=Xms10m
 # maxWaitingWordFlush gives the number of seconds that the shutdown
 # may last for the word flush
 wordCacheMaxCount = 20000
+wordCacheInitCount = 30000
+wordFlushIdleDivisor = 420;
+wordFlushBusyDivisor = 5000;
 
 # Specifies if yacy can be used as transparent http proxy.
 # 

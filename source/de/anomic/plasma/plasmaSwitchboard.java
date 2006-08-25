@@ -413,7 +413,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         wordIndex = new plasmaWordIndex(plasmaPath, indexPublicTextPath, ramRWI, ramRWI_time, log, getConfigBool("useCollectionIndex", false));
 
         // set a high maximum cache size to current size; this is adopted later automatically
-        int wordCacheMaxCount = Math.max(80000, (int) getConfigLong("wordCacheMaxCount", 80000));
+        int wordCacheMaxCount = Math.max((int) getConfigLong("wordCacheInitCount", 30000),
+                                         (int) getConfigLong("wordCacheMaxCount", 20000));
         setConfig("wordCacheMaxCount", Integer.toString(wordCacheMaxCount));
         wordIndex.setMaxWordCount(wordCacheMaxCount); 
         
@@ -949,9 +950,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public void deQueueFreeMem() {
         // flush some entries from the RAM cache
-        wordIndex.flushCacheSome();
+        wordIndex.flushCacheSome(false);
         // adopt maximum cache size to current size to prevent that further OutOfMemoryErrors occur
-        int newMaxCount = Math.max(2000, Math.min(wordIndex.getMaxWordCount(), wordIndex.wSize()));
+        int newMaxCount = Math.max(2000, Math.min((int) getConfigLong("wordCacheMaxCount", 20000), wordIndex.wSize()));
         setConfig("wordCacheMaxCount", Integer.toString(newMaxCount));
         wordIndex.setMaxWordCount(newMaxCount); 
     }
@@ -965,7 +966,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         // flush some entries from the RAM cache
         // (new permanent cache flushing)
-        wordIndex.flushCacheSome();
+        wordIndex.flushCacheSome(sbQueue.size() != 0);
 
         boolean doneSomething = false;
         
