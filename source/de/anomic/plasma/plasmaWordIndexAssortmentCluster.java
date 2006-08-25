@@ -359,7 +359,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
             c += assortments[j].size() * assortments[j].cacheObjectChunkSize();
             k += assortments[j].size();
         }
-        return (int) (c / k);
+        return (k > 0) ? (int) (c / k) : 0;
     }
     
     public int[] cacheNodeStatus() {
