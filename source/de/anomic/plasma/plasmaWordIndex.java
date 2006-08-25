@@ -94,7 +94,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public plasmaWordIndex(File oldDatabaseRoot, File newIndexRoot, int bufferkb, long preloadTime, serverLog log, boolean useCollectionIndex) {
         this.oldDatabaseRoot = oldDatabaseRoot;
         this.backend = new plasmaWordIndexFileCluster(oldDatabaseRoot, log);
-        this.ramCache = new indexRAMCacheRI(oldDatabaseRoot, (useCollectionIndex) ? 256 : 64, log);
+        this.ramCache = new indexRAMCacheRI(oldDatabaseRoot, (useCollectionIndex) ? 1024 : 64, log);
 
         // create assortment cluster path
         File assortmentClusterPath = new File(oldDatabaseRoot, indexAssortmentClusterPath);
@@ -201,9 +201,9 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public void flushCacheSome() {
         synchronized (this) { ramCache.shiftK2W(); }
         //int flushCount = ramCache.wSize() / 420;
-        int flushCount = ramCache.wSize() / 3000; // for testings
+        int flushCount = ramCache.wSize() / 5000; // for testings
         if (flushCount > 100) flushCount = 100;
-        if (flushCount < 5) flushCount = Math.min(5, ramCache.wSize());
+        if (flushCount < 1) flushCount = Math.min(1, ramCache.wSize());
         flushCache(flushCount);
     }
     
