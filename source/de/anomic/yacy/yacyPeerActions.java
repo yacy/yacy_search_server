@@ -106,7 +106,8 @@ public class yacyPeerActions {
         } else {
             seedDB.mySeed.put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
         }
-        long uptime = ((System.currentTimeMillis() - Long.parseLong(sb.getConfig("startupTime", "0"))) / 1000) / 60;
+        
+        long uptime = ((System.currentTimeMillis() - Long.parseLong(sb.getConfig("startupTime", "0"))) / 1000);
 		long uptimediff = uptime - Long.parseLong(sb.getConfig("lastseedcheckUptime", "0")); //TODO: Do not use the switchboard?
 		int indexing_cluster = Integer.parseInt(sb.getConfig("80_indexing_cluster", "1"));
         if (indexing_cluster < 1) indexing_cluster = 1;
@@ -114,7 +115,7 @@ public class yacyPeerActions {
         for(int i=0;i<indexing_cluster;++i)
         	indexedc += sb.getThread((80+i)+"_indexing").getBusyCycles();
 		long indexedcdiff = indexedc - Long.parseLong(sb.getConfig("lastseedcheckIndexedc", "0"));
-		if( uptimediff > 5 || ((String)sb.getConfig("lastseedcheckUptime", "-1")).equals("-1") ){
+		if( uptimediff > 300 || ((String)sb.getConfig("lastseedcheckUptime", "-1")).equals("-1") ){
 			sb.setConfig("lastseedcheckUptime", uptime);
 			sb.setConfig("lastseedcheckIndexedc", indexedc);
 		}
@@ -127,14 +128,14 @@ public class yacyPeerActions {
             seedDB.mySeed.put(yacySeed.ISPEED, Long.toString(0));
         }else{
             //set the PPM
-	        seedDB.mySeed.put(yacySeed.ISPEED, Long.toString(indexedcdiff / uptimediff));
+	        seedDB.mySeed.put(yacySeed.ISPEED, Float.toString(Math.round((float)indexedcdiff / ((float)uptimediff/60f))));
 		}
         if(uptime > 0)
         	sb.setConfig("totalPPM", Long.toString(indexedc / uptime));
         else
         	sb.setConfig("totalPPM", Long.toString(indexedc / 1)); //no division by zero
 				
-        seedDB.mySeed.put(yacySeed.UPTIME, Long.toString(uptime)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
+        seedDB.mySeed.put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
         seedDB.mySeed.put(yacySeed.LCOUNT, Integer.toString(sb.urlPool.loadedURL.size())); // the number of links that the peer has stored (LURL's)
         seedDB.mySeed.put(yacySeed.NCOUNT, Integer.toString(sb.urlPool.noticeURL.stackSize())); // the number of links that the peer has noticed, but not loaded (NURL's)
         seedDB.mySeed.put(yacySeed.ICOUNT, Integer.toString(sb.cacheSizeMin())); // the minimum number of words that the peer has indexed (as it says)
