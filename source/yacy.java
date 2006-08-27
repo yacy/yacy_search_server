@@ -175,7 +175,7 @@ public final class yacy {
     * @return String with the combined version.
     */
     public static float versvn2combinedVersion(float v, int svn) {
-        return (float) (((double) v * 100000000.0 + ((double) svn)) / 100000000.0);
+        return (float) (Math.rint((v*100000000.0) + ((float)svn))/100000000);
     }
 
     /**
