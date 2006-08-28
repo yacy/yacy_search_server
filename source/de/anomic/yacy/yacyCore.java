@@ -95,7 +95,7 @@ public class yacyCore {
     public static yacyDHTAction dhtAgent = null;
     public static serverLog log;
     public static long lastOnlineTime = 0;
-    public static float latestVersion = (float) 0.1;
+    public static double latestVersion = 0.1;
     public static long speedKey = 0;
     public static File yacyDBPath;
     public static final Map amIAccessibleDB = Collections.synchronizedMap(new HashMap()); // Holds PeerHash / yacyAccessible Relations

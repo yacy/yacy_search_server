@@ -139,7 +139,7 @@ import de.anomic.yacy.yacySeedDB;
 public final class yacy {
     // static objects
     private static String vString = "@REPL_VERSION@";
-    private static float version = (float) 0.1;
+    private static double version = 0.1;
 
     private static final String vDATE   = "@REPL_DATE@";
     private static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
@@ -174,8 +174,9 @@ public final class yacy {
     * @param svn Current version given from SVN.
     * @return String with the combined version.
     */
-    public static float versvn2combinedVersion(float v, int svn) {
-        return (float) (Math.rint((v*100000000.0) + ((float)svn))/100000000);
+    public static double versvn2combinedVersion(double v, int svn) {
+    	System.out.println("d="+(Math.rint((v*100000000.0) + ((double)svn))/100000000));
+        return (Math.rint((v*100000000.0) + ((double)svn))/100000000);
     }
 
     /**
@@ -284,7 +285,7 @@ public final class yacy {
                     if (matcher.find()) {
                         final String svrReleaseNr = matcher.group(1);
                         try {
-                            try {version = Float.parseFloat(vString);} catch (NumberFormatException e) {version = (float) 0.1;}
+                            try {version = Double.parseDouble(vString);} catch (NumberFormatException e) {version = (float) 0.1;}
                             version = versvn2combinedVersion(version, Integer.parseInt(svrReleaseNr));
                         } catch (NumberFormatException e) {}
                         sb.setConfig("svnRevision", svrReleaseNr);
@@ -295,8 +296,8 @@ public final class yacy {
                 System.err.println("Unable to determine the currently used SVN revision number.");
             }
 
-            sb.setConfig("version", Float.toString(version));
-            sb.setConfig("vString", combinedVersionString2PrettyString(Float.toString(version)));
+            sb.setConfig("version", Double.toString(version));
+            sb.setConfig("vString", combinedVersionString2PrettyString(Double.toString(version)));
             sb.setConfig("vdate", vDATE);
             sb.setConfig("applicationRoot", homePath);
             sb.setConfig("startupTime", Long.toString(startup));

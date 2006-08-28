@@ -137,7 +137,7 @@ public class Status {
         } else {
             prop.put("versioncomment", 0); // no comment
         }
-        prop.put("versioncomment_latestVersion", Float.toString(yacyCore.latestVersion));
+        prop.put("versioncomment_latestVersion", Double.toString(yacyCore.latestVersion));
 
         // hostname and port
         String extendedPortString = env.getConfig("port", "8080");
