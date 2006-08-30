@@ -146,26 +146,23 @@ public final class yacy {
     private static final String hline = "-------------------------------------------------------------------------------";
    
     /**
-    * Convert the combined versionstring into a pretty string.
-    * FIXME: Why is this so complicated?
+    * Converts combined version-string to a pretty string, e.g. "0.435/01818" or "dev/01818" (development version) or "dev/00000" (in case of wrong input)
     *
-    * @param s Combined version string
-    * @return Pretty string where version and SVN-version are separated by a
-    * slash, e.g. "0.435/01818"
+    * @param ver Combined version string matching regular expression:  "\A\d+\.\d{3}\d{5}\z" <br>
+    *  (i.e.: start of input, 1 or more digits in front of decimal point, decimal point followed by 3 digits as major version, 5 digits for SVN-Version, end of input) 
+    * @return If the major version is &lt; 0.11  - major version is separated from SVN-version by '/', e.g. "0.435/01818" <br>
+    *         If the major version is &gt;= 0.11 - major version is replaced by "dev" and separated SVN-version by '/', e.g."dev/01818" <br> 
+    *         "dev/00000" - If the input does not matcht the regular expression above 
     */
-    public static String combinedVersionString2PrettyString(String s) {
-        long svn;
-        try {svn = (long) (100000000.0 * Double.parseDouble(s));} catch (NumberFormatException ee) {svn = 0;}
-        double v = (Math.floor((double) svn / (double) 100000) / (double) 1000);
-        String vStr = (v < 0.11) ? "dev" : Double.toString(v);
-        //while (vStr.length() < 5) vStr = vStr + "0";
-        svn = svn % 100000;
-        if (svn > 4000) svn=svn / 10; // fix a previous bug online
-        String svnStr = Long.toString(svn);
-        while (svnStr.length() < 5) svnStr = "0" + svnStr;
-        return vStr + "/" + svnStr;
+    public static String combinedVersionString2PrettyString(String ver) {
+        final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{3})(\\d{5})\\z").matcher(ver);
+        if (!matcher.find()) { 
+            serverLog.logWarning("STARTUP", "Wrong format of version-string: '" + ver + "'. Using default pretty string 'dev/00000' instead");   
+            return "dev/00000";
+        } 
+        return (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1)) + "/" + matcher.group(2);
     }
-
+       
     /**
     * Combines the version of YaCy with the versionnumber from SVN to a
     * combined version
@@ -175,8 +172,7 @@ public final class yacy {
     * @return String with the combined version.
     */
     public static double versvn2combinedVersion(double v, int svn) {
-    	System.out.println("d="+(Math.rint((v*100000000.0) + ((double)svn))/100000000));
-        return (Math.rint((v*100000000.0) + ((double)svn))/100000000);
+    	return (Math.rint((v*100000000.0) + ((double)svn))/100000000);
     }
 
     /**
