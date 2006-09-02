@@ -148,14 +148,15 @@ public final class yacy {
     /**
     * Converts combined version-string to a pretty string, e.g. "0.435/01818" or "dev/01818" (development version) or "dev/00000" (in case of wrong input)
     *
-    * @param ver Combined version string matching regular expression:  "\A\d+\.\d{3}\d{5}\z" <br>
-    *  (i.e.: start of input, 1 or more digits in front of decimal point, decimal point followed by 3 digits as major version, 5 digits for SVN-Version, end of input) 
+    * @param ver Combined version string matching regular expression:  "\A(\d+\.\d{3})(\d{4}|\d{5})\z" <br>
+    *  (i.e.: start of input, 1 or more digits in front of decimal point, decimal point followed by 3 digits as major version, 4 or 5 digits for SVN-Version, end of input) 
     * @return If the major version is &lt; 0.11  - major version is separated from SVN-version by '/', e.g. "0.435/01818" <br>
     *         If the major version is &gt;= 0.11 - major version is replaced by "dev" and separated SVN-version by '/', e.g."dev/01818" <br> 
     *         "dev/00000" - If the input does not matcht the regular expression above 
     */
     public static String combinedVersionString2PrettyString(String ver) {
-        final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{3})(\\d{5})\\z").matcher(ver);
+        final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{3})(\\d{4}|\\d{5})\\z").matcher(ver); 
+
         if (!matcher.find()) { 
             serverLog.logWarning("STARTUP", "Wrong format of version-string: '" + ver + "'. Using default pretty string 'dev/00000' instead");   
             return "dev/00000";
