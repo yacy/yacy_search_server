@@ -42,7 +42,8 @@ public class snippet {
         plasmaSnippetCache.result snippet = switchboard.snippetCache.retrieve(url, queryHashes, true, 260);
         prop.put("status",snippet.getSource());
         if (snippet.getSource() < 11) {
-            prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
+            //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
+            prop.put("text", (snippet.exists()) ? "<![CDATA["+snippet.getLineMarked(queryHashes)+"]]>" : "unknown"); 
         } else {
             prop.put("text", snippet.getError());
         }
