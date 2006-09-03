@@ -290,7 +290,8 @@ public class plasmaDHTChunk {
             }
             String wordHash = indexContainers[i].getWordHash();
             count += wordIndex.removeEntries(this.indexContainers[i].getWordHash(), urlHashes, true);
-            log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash + "; " + this.wordIndex.indexSize(wordHash) + " entries left");
+            if (log.isFine()) 
+                log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash + "; " + this.wordIndex.indexSize(wordHash) + " entries left");
             this.indexContainers[i] = null;
         }
         return count;
