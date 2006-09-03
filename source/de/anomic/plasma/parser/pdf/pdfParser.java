@@ -85,7 +85,7 @@ public class pdfParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
+    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException, InterruptedException {
         
         
         PDDocument theDocument = null;
@@ -100,9 +100,17 @@ public class pdfParser extends AbstractParser implements Parser {
             
             String docTitle = null, docSubject = null, /*docAuthor = null,*/ docKeyWords = null;
             
+            // check for interruption
+            checkInterruption();
+            
+            // creating a pdf parser
             PDFParser parser = new PDFParser(source);
             parser.parse();
+                        
+            // check for interruption
+            checkInterruption();
             
+            // creating a text stripper
             PDFTextStripper stripper = new PDFTextStripper();
             theDocument = parser.getPDDocument();
             
@@ -155,7 +163,8 @@ public class pdfParser extends AbstractParser implements Parser {
             
             return theDoc;
         }
-        catch (Exception e) {            
+        catch (Exception e) {       
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
             throw new ParserException("Unable to parse the pdf content. " + e.getMessage(),e);
         } finally {
             if (theDocument != null) try { theDocument.close(); } catch (Exception e) {}

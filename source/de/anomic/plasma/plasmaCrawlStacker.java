@@ -69,6 +69,7 @@ import de.anomic.kelondro.kelondroTree;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverSemaphore;
+import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
@@ -168,16 +169,16 @@ public final class plasmaCrawlStacker {
     
     public long[] cacheObjectStatus() {
         return this.queue.cacheObjectStatus();
-    }
+    }    
     
     public void job() {
         try {
             // getting a new message from the crawler queue
-            if (Thread.currentThread().isInterrupted()) return;
+            checkInterruption();
             stackCrawlMessage theMsg = this.queue.waitForMessage();
             
             // getting a free session thread from the pool
-            if (Thread.currentThread().isInterrupted()) return;
+            checkInterruption();
             Worker worker = (Worker) this.theWorkerPool.borrowObject();
             
             // processing the new request
@@ -221,7 +222,7 @@ public final class plasmaCrawlStacker {
         }
     }
     
-    public String dequeue(stackCrawlMessage theMsg) {
+    public String dequeue(stackCrawlMessage theMsg) throws InterruptedException {
         
         plasmaCrawlProfile.entry profile = this.sb.profiles.getEntry(theMsg.profileHandle());
         if (profile == null) {
@@ -240,7 +241,12 @@ public final class plasmaCrawlStacker {
                 profile);
     }
     
-    public String stackCrawl(String nexturlString, String referrerString, String initiatorHash, String name, Date loadDate, int currentdepth, plasmaCrawlProfile.entry profile) {
+    public void checkInterruption() throws InterruptedException {
+        Thread curThread = Thread.currentThread();
+        if (curThread.isInterrupted()) throw new InterruptedException("Shutdown in progress ...");
+    }
+    
+    public String stackCrawl(String nexturlString, String referrerString, String initiatorHash, String name, Date loadDate, int currentdepth, plasmaCrawlProfile.entry profile) throws InterruptedException {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
         this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
@@ -254,15 +260,12 @@ public final class plasmaCrawlStacker {
             this.log.logSevere("Wrong URL in stackCrawl: url=null");
             return reason;
         }
-        /*
-         if (profile == null) {
-         reason = "denied_(profile_null)";
-         log.logError("Wrong Profile for stackCrawl: profile=null");
-         return reason;
-         }
-         */
-        URL nexturl = null, referrerURL = null;
+
+        // getting the initiator peer hash
         if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = indexURL.dummyHash;
+        
+        // getting the referer url and url hash
+        URL nexturl = null, referrerURL = null;
         if (referrerString != null) {
             try {
                 referrerURL = new URL(referrerString);
@@ -272,6 +275,8 @@ public final class plasmaCrawlStacker {
             }
         }
         String referrerHash = (referrerString==null)?null:indexURL.urlHash(referrerString);
+        
+        // check for malformed urls
         try {
             nexturl = new URL(nexturlString);
         } catch (MalformedURLException e) {
@@ -282,6 +287,7 @@ public final class plasmaCrawlStacker {
         }
         
         // check if ip is local ip address
+        checkInterruption();
         InetAddress hostAddress = httpc.dnsResolve(nexturl.getHost());
         if (hostAddress == null) {
             reason = plasmaCrawlEURL.DENIED_UNKNOWN_HOST;
@@ -301,6 +307,7 @@ public final class plasmaCrawlStacker {
         }
         
         // check blacklist
+        checkInterruption();
         if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER,nexturl)) {
             reason = plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST;
             this.log.logFine("URL '" + nexturlString + "' is in blacklist. " +
@@ -311,9 +318,7 @@ public final class plasmaCrawlStacker {
         // filter deny
         if ((currentdepth > 0) && (profile != null) && (!(nexturlString.matches(profile.generalFilter())))) {
             reason = plasmaCrawlEURL.DENIED_URL_DOES_NOT_MATCH_FILTER;
-            /*
-             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
-             name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
+
             this.log.logFine("URL '" + nexturlString + "' does not match crawling filter '" + profile.generalFilter() + "'. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -322,9 +327,7 @@ public final class plasmaCrawlStacker {
         // deny cgi
         if (plasmaHTCache.isCGI(nexturlString))  {
             reason = plasmaCrawlEURL.DENIED_CGI_URL;
-            /*
-             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
-             name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
+
             this.log.logFine("URL '" + nexturlString + "' is CGI URL. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -333,9 +336,7 @@ public final class plasmaCrawlStacker {
         // deny post properties
         if ((plasmaHTCache.isPOST(nexturlString)) && (profile != null) && (!(profile.crawlingQ())))  {
             reason = plasmaCrawlEURL.DENIED_POST_URL;
-            /*
-             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
-             name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
+
             this.log.logFine("URL '" + nexturlString + "' is post URL. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
@@ -362,6 +363,8 @@ public final class plasmaCrawlStacker {
             return reason;
         }
 
+        // check if the url is double registered
+        checkInterruption();
         String nexturlhash = indexURL.urlHash(nexturl);
         String dbocc = this.sb.urlPool.exists(nexturlhash);
         plasmaCrawlLURL.Entry oldEntry = null;
@@ -372,20 +375,17 @@ public final class plasmaCrawlStacker {
                           (((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000) > profile.recrawlIfOlder());
         if ((dbocc != null) && (!(recrawl))) {
             reason = plasmaCrawlEURL.DOUBLE_REGISTERED + dbocc + ")";
-            /*
-             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
-             name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
+
             this.log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
 
         // checking robots.txt
+        checkInterruption();
         if (robotsParser.isDisallowed(nexturl)) {
             reason = plasmaCrawlEURL.DENIED_ROBOTS_TXT;
-            /*
-             urlPool.errorURL.newEntry(nexturl, referrerHash, initiatorHash, yacyCore.seedDB.mySeed.hash,
-             name, reason, new bitfield(plasmaURL.urlFlagLength), false);*/
+
             this.log.logFine("Crawling of URL '" + nexturlString + "' disallowed by robots.txt. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;            
@@ -413,6 +413,8 @@ public final class plasmaCrawlStacker {
             this.log.logSevere("URL '" + nexturlString + "' can neither be crawled local nor global.");
         }
         
+        // add the url into the crawling queue
+        checkInterruption();
         plasmaCrawlNURL.Entry ne = this.sb.urlPool.noticeURL.newEntry(initiatorHash, /* initiator, needed for p2p-feedback */
                 nexturl, /* url clear text string */
                 loadDate, /* load date */
@@ -998,11 +1000,15 @@ public final class plasmaCrawlStacker {
                 }
             }
                 
-            private void execute() {
+            private void execute() throws InterruptedException {
                 try {
                     this.setName("stackCrawlThread_" + this.theMsg.url);
                     String rejectReason = dequeue(this.theMsg);
 
+                    // check for interruption
+                    checkInterruption();
+                    
+                    // if the url was rejected we store it into the error URL db
                     if (rejectReason != null) {
                         plasmaCrawlEURL.Entry ee = sb.urlPool.errorURL.newEntry(
                                 new URL(this.theMsg.url()),
@@ -1017,6 +1023,7 @@ public final class plasmaCrawlStacker {
                         sb.urlPool.errorURL.stackPushEntry(ee);
                     }
                 } catch (Exception e) {
+                    if (e instanceof InterruptedException) throw (InterruptedException) e;
                     plasmaCrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + 
                                    "Entry: " + this.theMsg.toString() + 
                                    "Error: " + e.toString(),e);

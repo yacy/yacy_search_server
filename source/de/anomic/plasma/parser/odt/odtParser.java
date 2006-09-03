@@ -91,7 +91,7 @@ public class odtParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, File dest) throws ParserException {
+    public plasmaParserDocument parse(URL location, String mimeType, File dest) throws ParserException, InterruptedException {
         
         try {          
             byte[] docContent     = null;
@@ -106,6 +106,10 @@ public class odtParser extends AbstractParser implements Parser {
             
             // looping through all containing files
             while (zipEnum.hasMoreElements()) {
+                // check for interruption
+                checkInterruption();
+                
+                // getting the next zip file entry
                 ZipEntry zipEntry= (ZipEntry) zipEnum.nextElement();
                 String entryName = zipEntry.getName();
                 
@@ -129,7 +133,7 @@ public class odtParser extends AbstractParser implements Parser {
                     if (docLongTitle == null) {
                         if (docShortTitle != null) {
                             docLongTitle = docShortTitle;
-                        } else if (docContent.length <= 80) {
+                        } else if (docContent != null && docContent.length <= 80) {
                             docLongTitle = new String(docContent, "UTF-8");
                         } else {
                             byte[] title = new byte[80];
@@ -157,7 +161,7 @@ public class odtParser extends AbstractParser implements Parser {
                     null,
                     null);
         } catch (Exception e) {            
-            e.printStackTrace();
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
             throw new ParserException("Unable to parse the odt content. " + e.getMessage());
         } catch (Error e) {
             throw new ParserException("Unable to parse the odt content. " + e.getMessage());

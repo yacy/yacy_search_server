@@ -53,6 +53,7 @@ import java.io.InputStream;
 import de.anomic.net.URL;
 
 import de.anomic.plasma.plasmaParserDocument;
+import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 
 /**
@@ -92,6 +93,12 @@ public abstract class AbstractParser implements Parser{
         this.libxDependencies = libxDependencies;
 	}
 
+    public static final void checkInterruption() throws InterruptedException {
+        Thread currentThread = Thread.currentThread();
+        if ((currentThread instanceof serverThread) && ((serverThread)currentThread).shutdownInProgress()) throw new InterruptedException("Shutdown in progress ...");
+        if (currentThread.isInterrupted()) throw new InterruptedException("Shutdown in progress ...");    
+    }
+    
 	/**
 	 * Parsing a document available as byte array.
      * @param location the origin of the document 
@@ -107,7 +114,7 @@ public abstract class AbstractParser implements Parser{
             URL location, 
             String mimeType,
             byte[] source
-    ) throws ParserException {
+    ) throws ParserException, InterruptedException {
         ByteArrayInputStream contentInputStream = null;
         try {
             contentInputStream = new ByteArrayInputStream(source);
@@ -134,7 +141,7 @@ public abstract class AbstractParser implements Parser{
 	 * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.File)
 	 */
 	public plasmaParserDocument parse(URL location, String mimeType,
-			File sourceFile) throws ParserException {
+			File sourceFile) throws ParserException, InterruptedException {
         BufferedInputStream contentInputStream = null;
         try {
             contentInputStream = new BufferedInputStream(new FileInputStream(sourceFile));
@@ -158,7 +165,7 @@ public abstract class AbstractParser implements Parser{
      * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.InputStream)
      */
     public abstract plasmaParserDocument parse(URL location, String mimeType,
-			InputStream source) throws ParserException;
+			InputStream source) throws ParserException, InterruptedException;
 
     /**
      * @return Returns a list of library names that are needed by this parser

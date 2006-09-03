@@ -120,12 +120,12 @@ implements Parser {
                 return mimeType;
             }
         } catch (Exception e) {
-            
+            /* ignore this */
         }
         return null;        
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, File sourceFile) throws ParserException {
+    public plasmaParserDocument parse(URL location, String mimeType, File sourceFile) throws ParserException, InterruptedException {
         
         String orgMimeType = mimeType;
         
@@ -162,13 +162,18 @@ implements Parser {
                 // to avoid loops we have to test if the mimetype has changed ...
                 if (this.getSupportedMimeTypes().containsKey(mimeType)) return null;
                 if (orgMimeType.equals(mimeType)) return null;
+                                
+                // check for interruption
+                checkInterruption();
                 
+                // parsing the content using the determined mimetype
                 plasmaParser theParser = new plasmaParser();
                 return theParser.parseSource(location,mimeType,sourceFile);
             }
             return null;
             
         } catch (Exception e) {
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
             return null;
         } finally {
             Integer loopDepth = (Integer) threadLoopDetection.get(Thread.currentThread());                

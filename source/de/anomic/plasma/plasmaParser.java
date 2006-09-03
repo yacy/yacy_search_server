@@ -203,6 +203,10 @@ public final class plasmaParser {
     
     private serverLog theLogger = new serverLog("PARSER");
     
+    public serverLog getLogger() {
+        return this.theLogger;
+    }
+    
     public static HashMap getParserConfigList() {
         return parserConfigList;
     }
@@ -461,13 +465,14 @@ public final class plasmaParser {
         } catch (Exception e) { }
     }    
     
-    public plasmaParserDocument parseSource(URL location, String mimeType, byte[] source) {
+    public plasmaParserDocument parseSource(URL location, String mimeType, byte[] source) throws InterruptedException {
         File tempFile = null;
         try {
             tempFile = File.createTempFile("parseSource", ".tmp");
             serverFileUtils.write(source, tempFile);
             return parseSource(location, mimeType, tempFile);
         } catch (Exception e) {
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
             serverLog.logSevere("PARSER", "parseSource1: " + e.getMessage(), e);
             return null;
         } finally {
@@ -476,7 +481,7 @@ public final class plasmaParser {
         
     }
 
-    public plasmaParserDocument parseSource(URL location, String mimeType, File sourceFile) {
+    public plasmaParserDocument parseSource(URL location, String mimeType, File sourceFile) throws InterruptedException {
 
         Parser theParser = null;
         try {
@@ -554,6 +559,7 @@ public final class plasmaParser {
                 return null;
             }
         } catch (Exception e) {
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
             serverLog.logSevere("PARSER", "parseSource2: " + e.getMessage(), e);
             return null;
         } finally {

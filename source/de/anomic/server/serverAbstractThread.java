@@ -174,6 +174,11 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         this.log = log;
     }
 
+    
+    public boolean shutdownInProgress() {
+        return !this.running || Thread.currentThread().isInterrupted();
+    }    
+    
     public void intermission(long pause) {
         if (pause == Long.MAX_VALUE)
             this.intermission = Long.MAX_VALUE;

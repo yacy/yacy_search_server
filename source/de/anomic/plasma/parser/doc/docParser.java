@@ -79,7 +79,7 @@ implements Parser {
 	}
 
 	public plasmaParserDocument parse(URL location, String mimeType,
-			InputStream source) throws ParserException {
+			InputStream source) throws ParserException, InterruptedException {
 
         
 		try {	
@@ -103,8 +103,8 @@ implements Parser {
                       null);
               
               return theDoc;             
-		}
-		catch (Exception e) {			
+		} catch (Exception e) {			
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
 			throw new ParserException("Unable to parse the doc content. " + e.getMessage());
 		}        
 	}

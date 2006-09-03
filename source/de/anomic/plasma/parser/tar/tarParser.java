@@ -94,7 +94,7 @@ public class tarParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
+    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException, InterruptedException {
         
         try {           
             // creating a new parser class to parse the unzipped content
@@ -122,7 +122,10 @@ public class tarParser extends AbstractParser implements Parser {
             TarEntry entry;
             TarInputStream tin = new TarInputStream(source);                      
             while ((entry = tin.getNextEntry()) !=null) {
+                // check for interruption
+                checkInterruption();
                 
+                // skip directories
                 if (entry.isDirectory()) continue;
                 
                 // Get the entry name
@@ -140,16 +143,16 @@ public class tarParser extends AbstractParser implements Parser {
                 plasmaParserDocument theDoc = null;
                 File tempFile = null;
                 try {
-
-
                     byte[] buf = new byte[(int) entry.getSize()];
                     /*int bytesRead =*/ tin.read(buf);
 
                     tempFile = File.createTempFile("tarParser_" + ((idx>-1)?entryName.substring(0,idx):entryName), (entryExt.length()>0)?"."+entryExt:entryExt);
                     serverFileUtils.write(buf, tempFile);           
                     
-                    // parsing the content
+                    // check for interruption
+                    checkInterruption();
                     
+                    // parsing the content                    
                     theDoc = theParser.parseSource(new URL(tempFile),entryMime,tempFile);
                 } finally {
                     if (tempFile != null) try {tempFile.delete(); } catch(Exception ex){}
@@ -194,7 +197,8 @@ public class tarParser extends AbstractParser implements Parser {
                     docText.toByteArray(),
                     docAnchors,
                     docImages);
-        } catch (Exception e) {            
+        } catch (Exception e) {
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
             throw new ParserException("Unable to parse the zip content. " + e.getMessage());
         }
     }

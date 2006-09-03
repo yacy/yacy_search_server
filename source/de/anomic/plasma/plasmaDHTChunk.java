@@ -122,33 +122,41 @@ public class plasmaDHTChunk {
     }
     
     public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, plasmaCrawlLURL lurls, int minCount, int maxCount) {
-        this.log = log;
-        this.wordIndex = wordIndex;
-        this.lurls = lurls;
-        startPointHash = selectTransferStart();
-        log.logFine("Selected hash " + startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash));
-        selectTransferContainers(startPointHash, minCount, maxCount);
+        try {
+            this.log = log;
+            this.wordIndex = wordIndex;
+            this.lurls = lurls;
+            this.startPointHash = selectTransferStart();
+            log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, this.startPointHash));
+            selectTransferContainers(this.startPointHash, minCount, maxCount);
 
-        // count the indexes, can be smaller as expected
-        this.idxCount = indexCounter();
-        if (idxCount < minCount) {
-            log.logFine("Too few (" + idxCount + ") indexes selected for transfer.");
-            this.status = chunkStatus_FAILED;
+            // count the indexes, can be smaller as expected
+            this.idxCount = indexCounter();
+            if (this.idxCount < minCount) {
+                log.logFine("Too few (" + this.idxCount + ") indexes selected for transfer.");
+                this.status = chunkStatus_FAILED;
+            }
+        } catch (InterruptedException e) {
+            this.status = chunkStatus_INTERRUPTED;
         }
     }
 
     public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, plasmaCrawlLURL lurls, int minCount, int maxCount, String startHash) {
-        this.log = log;
-        this.wordIndex = wordIndex;
-        this.lurls = lurls;
-        log.logFine("Demanded hash " + startHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash));
-        selectTransferContainers(startHash, minCount, maxCount);
+        try {
+            this.log = log;
+            this.wordIndex = wordIndex;
+            this.lurls = lurls;
+            log.logFine("Demanded hash " + startHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, this.startPointHash));
+            selectTransferContainers(startHash, minCount, maxCount);
 
-        // count the indexes, can be smaller as expected
-        this.idxCount = indexCounter();
-        if (idxCount < minCount) {
-            log.logFine("Too few (" + idxCount + ") indexes selected for transfer.");
-            this.status = chunkStatus_FAILED;
+            // count the indexes, can be smaller as expected
+            this.idxCount = indexCounter();
+            if (this.idxCount < minCount) {
+                log.logFine("Too few (" + this.idxCount + ") indexes selected for transfer.");
+                this.status = chunkStatus_FAILED;
+            }
+        } catch (InterruptedException e) {
+            this.status = chunkStatus_INTERRUPTED;
         }
     }
 
@@ -167,7 +175,7 @@ public class plasmaDHTChunk {
         return startPointHash;
     }
 
-    private void selectTransferContainers(String hash, int mincount, int maxcount) {        
+    private void selectTransferContainers(String hash, int mincount, int maxcount) throws InterruptedException {        
         try {
             this.selectionStartTime = System.currentTimeMillis();
             int refcountRAM = selectTransferContainersResource(hash, plasmaWordIndex.RL_RAMCACHE, maxcount);
@@ -183,7 +191,7 @@ public class plasmaDHTChunk {
         }
     }
 
-    private int selectTransferContainersResource(String hash, int resourceLevel, int maxcount) {
+    private int selectTransferContainersResource(String hash, int resourceLevel, int maxcount) throws InterruptedException {
         // the hash is a start hash from where the indexes are picked
         ArrayList tmpContainers = new ArrayList(maxcount);
         try {
@@ -198,8 +206,19 @@ public class plasmaDHTChunk {
             urlCache = new HashMap();
             double maximumDistance = ((double) peerRedundancy * 2) / ((double) yacyCore.seedDB.sizeConnected());
             
-            while ((maxcount > refcount) && (indexContainerIterator.hasNext()) && ((container = (indexContainer) indexContainerIterator.next()) != null) && (container.size() > 0)
-                            && ((tmpContainers.size() == 0) || (yacyDHTAction.dhtDistance(container.getWordHash(), ((indexContainer) tmpContainers.get(0)).getWordHash()) < maximumDistance))) {
+            while (
+                    (maxcount > refcount) && 
+                    (indexContainerIterator.hasNext()) && 
+                    ((container = (indexContainer) indexContainerIterator.next()) != null) && 
+                    (container.size() > 0) && 
+                    (
+                            (tmpContainers.size() == 0) || 
+                            (yacyDHTAction.dhtDistance(container.getWordHash(), ((indexContainer) tmpContainers.get(0)).getWordHash()) < maximumDistance)
+                    )
+            ) {
+                // check for interruption
+                if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
+                
                 // make an on-the-fly entity and insert values
                 int notBoundCounter = 0;
                 try {

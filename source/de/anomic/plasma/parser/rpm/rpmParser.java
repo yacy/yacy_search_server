@@ -105,7 +105,7 @@ public class rpmParser extends AbstractParser implements Parser {
         }        
     }    
     
-    public plasmaParserDocument parse(URL location, String mimeType, File sourceFile) throws ParserException {
+    public plasmaParserDocument parse(URL location, String mimeType, File sourceFile) throws ParserException, InterruptedException {
         RPMFile rpmFile = null;        
         try {
             String summary = null, description = null, name = sourceFile.getName();
@@ -121,6 +121,10 @@ public class rpmParser extends AbstractParser implements Parser {
             // getting all header names
             String[] headerNames = rpmFile.getTagNames();
             for (int i=0; i<headerNames.length; i++) {
+                // check for interruption
+                checkInterruption();
+                
+                // getting the next tag
                 DataTypeIf tag = rpmFile.getTag(headerNames[i]);
                 if (tag != null) {
                     content.append(headerNames[i])
@@ -154,7 +158,7 @@ public class rpmParser extends AbstractParser implements Parser {
             
             return theDoc;
         } catch (Exception e) {
-            e.printStackTrace();
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
             throw new ParserException("Unable to parse the rpm file. " + e.getMessage());
         } finally {
             if (rpmFile != null) try { rpmFile.close(); } catch (Exception e) {}

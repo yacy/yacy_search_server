@@ -184,15 +184,20 @@ public class QuickCrawlLink_p {
             }
             
             // stack URL
-            String reasonString = switchboard.sbStackCrawlThread.stackCrawl(
-                    crawlingStart, 
-                    null, 
-                    yacyCore.seedDB.mySeed.hash, 
-                    (title==null)?"CRAWLING-ROOT":title, 
-                    new Date(), 
-                    0, 
-                    pe
-            );
+            String reasonString = null;
+            try {
+                reasonString = switchboard.sbStackCrawlThread.stackCrawl(
+                        crawlingStart, 
+                        null, 
+                        yacyCore.seedDB.mySeed.hash, 
+                        (title==null)?"CRAWLING-ROOT":title, 
+                                new Date(), 
+                                0, 
+                                pe
+                );
+            } catch (InterruptedException e) {
+                reasonString = "Server shutdown in progess";
+            }
             
             // validate rejection reason
             if (reasonString == null) {

@@ -71,7 +71,7 @@ public interface Parser {
      * @throws ParserException if the content could not be parsed properly 
      */
     public plasmaParserDocument parse(URL location, String mimeType, byte[] source)
-    throws ParserException;
+    throws ParserException, InterruptedException;
     
     /**
      * Parsing a document stored in a {@link File}
@@ -84,7 +84,7 @@ public interface Parser {
      * @throws ParserException if the content could not be parsed properly 
      */    
     public plasmaParserDocument parse(URL location, String mimeType, File sourceFile)
-    throws ParserException;
+    throws ParserException, InterruptedException;
     
     /**
      * Parsing a document available as {@link InputStream}
@@ -97,7 +97,7 @@ public interface Parser {
      * @throws ParserException if the content could not be parsed properly 
      */    
     public plasmaParserDocument parse(URL location, String mimeType, InputStream source) 
-    throws ParserException;
+    throws ParserException, InterruptedException;
             
     /**
      * Can be used to determine the MimeType(s) that are supported by the parser

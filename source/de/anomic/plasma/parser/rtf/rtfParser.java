@@ -81,7 +81,7 @@ implements Parser {
 	}
 
 	public plasmaParserDocument parse(URL location, String mimeType,
-			InputStream source) throws ParserException {
+			InputStream source) throws ParserException, InterruptedException {
 
         
 		try {	
@@ -111,7 +111,8 @@ implements Parser {
             return theDoc;             
 		}
 		catch (Exception e) {			
-			throw new ParserException("Unable to parse the doc content. " + e.getMessage());
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
+			throw new ParserException("Unable to parse the rdf content. " + e.getMessage());
 		}        
 	}
 

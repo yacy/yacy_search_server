@@ -87,7 +87,7 @@ public class bzipParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
+    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException, InterruptedException {
         
         File tempFile = null;
         try {           
@@ -115,17 +115,20 @@ public class bzipParser extends AbstractParser implements Parser {
             FileOutputStream out = new FileOutputStream(tempFile);
             
             // reading gzip file and store it uncompressed
-            while((read = zippedContent.read(data, 0, 1024)) != -1)
-            {
+            while((read = zippedContent.read(data, 0, 1024)) != -1) {
                 out.write(data, 0, read);
             }
             zippedContent.close();
             out.close();
              
+            // check for interruption
+            checkInterruption();
+            
             // creating a new parser class to parse the unzipped content
             plasmaParser theParser = new plasmaParser();
             return theParser.parseSource(location,null,tempFile);
-        } catch (Exception e) {            
+        } catch (Exception e) {  
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
             throw new ParserException("Unable to parse the gzip content. " + e.getMessage());
         } finally {
             if (tempFile != null) tempFile.delete();

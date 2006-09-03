@@ -327,7 +327,13 @@ public final class robotsParser{
                 
             }
             
+            // sending the get request
             httpc.response res = con.GET(robotsURL.getFile(), reqHeaders);
+            
+            // check for interruption
+            if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress.");
+            
+            // check the response status
             if (res.status.startsWith("2")) {
                 if (!res.responseHeader.mime().startsWith("text/plain")) {
                     robotsTxt = null;

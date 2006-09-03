@@ -234,7 +234,12 @@ public final class crawlOrder {
         String response, reason, lurl;
         // stack url
         switchboard.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
-        String reasonString = switchboard.sbStackCrawlThread.stackCrawl(url, referrer, iam, "REMOTE-CRAWLING", new Date(), 0, switchboard.defaultRemoteProfile);
+        String reasonString = null;
+        try {
+            reasonString = switchboard.sbStackCrawlThread.stackCrawl(url, referrer, iam, "REMOTE-CRAWLING", new Date(), 0, switchboard.defaultRemoteProfile);
+        } catch (InterruptedException e) {
+            reasonString = "Shutdown in progress";
+        }
         if (reasonString == null) {
             // liftoff!
             response = "stacked";

@@ -97,7 +97,7 @@ public class vcfParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
+    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException, InterruptedException {
         
         try {
             StringBuffer parsedTitle = new StringBuffer();
@@ -111,6 +111,10 @@ public class vcfParser extends AbstractParser implements Parser {
             String line = null;            
             BufferedReader inputReader = new BufferedReader(new InputStreamReader(source));
             while (true) {
+                // check for interruption
+                checkInterruption();
+                
+                // getting the next line
                 if (!useLastLine) {
                     line = inputReader.readLine();
                 } else {
@@ -244,7 +248,8 @@ public class vcfParser extends AbstractParser implements Parser {
                     anchors,
                     null);    
             return theDoc;
-        } catch (Exception e) {            
+        } catch (Exception e) { 
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
             throw new ParserException("Unable to parse the vcard content. " + e.getMessage());
         } finally {
         }

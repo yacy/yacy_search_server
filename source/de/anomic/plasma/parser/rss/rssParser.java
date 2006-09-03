@@ -100,7 +100,7 @@ public class rssParser extends AbstractParser implements Parser {
         parserName = "Rich Site Summary/Atom Feed Parser"; 
 	}
 
-	public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
+	public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException, InterruptedException {
 
         try {
             LinkedList feedSections = new LinkedList();
@@ -134,6 +134,10 @@ public class rssParser extends AbstractParser implements Parser {
             if (!feedItemCollection.isEmpty()) {
 				Iterator feedItemIterator = feedItemCollection.iterator();
                 while (feedItemIterator.hasNext()) {
+                    // check for interruption
+                    checkInterruption();
+                    
+                    // getting the next item
 					Item item = (Item)feedItemIterator.next();	
                     
         			String itemTitle = item.getTitle();
@@ -198,10 +202,9 @@ public class rssParser extends AbstractParser implements Parser {
             return theDoc;
             
         } catch (Exception e) {
-            
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
+            throw new ParserException("Unable to parse the rss file. " + e.getMessage());
         }
-        
-		return null;
 	}
 
 	public Hashtable getSupportedMimeTypes() {

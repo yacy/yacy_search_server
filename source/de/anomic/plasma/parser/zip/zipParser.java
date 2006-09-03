@@ -91,7 +91,7 @@ public class zipParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
+    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException, InterruptedException {
         
         try {           
             StringBuffer docKeywords = new StringBuffer();
@@ -110,7 +110,7 @@ public class zipParser extends AbstractParser implements Parser {
             ZipEntry entry;
             ZipInputStream zippedContent = new ZipInputStream(source);                      
             while ((entry = zippedContent.getNextEntry()) !=null) {
-                
+                // skip directories
                 if (entry.isDirectory()) continue;
                 
                 // Get the entry name
@@ -127,6 +127,9 @@ public class zipParser extends AbstractParser implements Parser {
                 /*int bytesRead =*/ zippedContent.read(buf);
                 bos.write(buf);
                 byte[] ut = bos.toByteArray();           
+                
+                // check for interruption
+                checkInterruption();
                 
                 // parsing the content
                 plasmaParserDocument theDoc = theParser.parseSource(location,entryMime,ut);
@@ -170,7 +173,8 @@ public class zipParser extends AbstractParser implements Parser {
                     docText.toByteArray(),
                     docAnchors,
                     docImages);
-        } catch (Exception e) {            
+        } catch (Exception e) {  
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
             throw new ParserException("Unable to parse the zip content. " + e.getMessage());
         } catch (Error e) {
             throw new ParserException("Unable to parse the zip content. " + e.getMessage());

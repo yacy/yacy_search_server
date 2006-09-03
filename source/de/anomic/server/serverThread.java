@@ -112,6 +112,8 @@ public interface serverThread {
     // the thread is forced to pause for a specific time
     // if the thread is busy meanwhile, the pause is ommitted
     
+    public boolean shutdownInProgress();
+    
     public void terminate(boolean waitFor);
     // after calling this method, the thread shall terminate
     // if waitFor is true, the method waits until the process has died
