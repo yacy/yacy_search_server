@@ -5,9 +5,9 @@
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2006-08-12 16:28:14 +0200 (Sa, 12 Aug 2006) $
+// $LastChangedRevision: 2397 $
+// $LastChangedBy: theli $
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -42,24 +42,31 @@
 //the intact and unchanged copyright notice.
 //Contributions and changes to the program code must be marked as such.
 
-package de.anomic.plasma;
+package de.anomic.plasma.crawler;
 
-import java.io.File; 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.SocketException;
-import de.anomic.net.URL;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
-
 import java.net.UnknownHostException;
 import java.util.Date;
+
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.index.indexURL;
+import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.plasma.plasmaCrawlLoader;
+import de.anomic.plasma.plasmaCrawlLoaderMessage;
+import de.anomic.plasma.plasmaCrawlProfile;
+import de.anomic.plasma.plasmaHTCache;
+import de.anomic.plasma.plasmaParser;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
@@ -67,10 +74,10 @@ import de.anomic.yacy.yacyCore;
 
 public final class plasmaCrawlWorker extends Thread {
 
-    private static final int DEFAULT_CRAWLING_RETRY_COUNT = 5;   
-    static final String threadBaseName = "CrawlerWorker";
+    public static final int DEFAULT_CRAWLING_RETRY_COUNT = 5;   
+    public static final String threadBaseName = "CrawlerWorker";
 
-    private final CrawlerPool     myPool;
+    private final plasmaCrawlerPool myPool;
     private final plasmaSwitchboard sb;
     private final plasmaHTCache   cacheManager;
     private final serverLog       log;
@@ -91,29 +98,9 @@ public final class plasmaCrawlWorker extends Thread {
     private boolean stopped = false;
     private boolean done = false;   
 
-    //private static boolean doCrawlerLogging = false; 
-    
-    /**
-     * Do logging configuration for special proxy access log file
-     */
-//    static {
-//        try {
-//            Logger crawlerLogger = Logger.getLogger("CRAWLER.access");
-//            crawlerLogger.setUseParentHandlers(false);
-//            FileHandler txtLog = new FileHandler("log/crawlerAccess%u%g.log",1024*1024, 20, true);
-//            txtLog.setFormatter(new serverMiniLogFormatter());
-//            txtLog.setLevel(Level.FINEST);
-//            crawlerLogger.addHandler(txtLog);     
-//            
-//            doAccessLogging = true;
-//        } catch (Exception e) { 
-//            System.err.println("PROXY: Unable to configure proxy access logging.");        
-//        }
-//    }    
-
     public plasmaCrawlWorker(
             ThreadGroup theTG,
-            CrawlerPool thePool,
+            plasmaCrawlerPool thePool,
             plasmaSwitchboard theSb,
             plasmaHTCache theCacheManager,
             serverLog theLog) {
@@ -245,7 +232,7 @@ public final class plasmaCrawlWorker extends Thread {
                 if (closedSockets > 0) {
                     this.log.logInfo(closedSockets + " HTTP-client sockets of thread '" + this.getName() + "' closed.");
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {/* ignore this. shutdown in progress */}
         }
     }
 

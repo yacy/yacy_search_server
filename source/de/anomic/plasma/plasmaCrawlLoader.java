@@ -44,25 +44,24 @@
 
 package de.anomic.plasma;
 
-import de.anomic.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-
 import org.apache.commons.pool.impl.GenericObjectPool;
 
-import de.anomic.server.serverSemaphore;
+import de.anomic.net.URL;
+import de.anomic.plasma.crawler.plasmaCrawlWorker;
+import de.anomic.plasma.crawler.plasmaCrawlerFactory;
+import de.anomic.plasma.crawler.plasmaCrawlerMsgQueue;
+import de.anomic.plasma.crawler.plasmaCrawlerPool;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaCrawlLoader extends Thread {
 
-    static plasmaSwitchboard switchboard;
+    public static plasmaSwitchboard switchboard;
 
     private final plasmaHTCache   cacheManager;
     private final serverLog       log;   
 
-    private final CrawlerMessageQueue theQueue;
-    private final CrawlerPool crawlwerPool;
+    private final plasmaCrawlerMsgQueue theQueue;
+    private final plasmaCrawlerPool crawlwerPool;
     private GenericObjectPool.Config crawlerPoolConfig = null; 
     private final ThreadGroup theThreadGroup = new ThreadGroup("CrawlerThreads");
     private boolean stopped = false;
@@ -77,7 +76,7 @@ public final class plasmaCrawlLoader extends Thread {
         this.log             = theLog;
 
         // configuring the crawler messagequeue
-        this.theQueue = new CrawlerMessageQueue();
+        this.theQueue = new plasmaCrawlerMsgQueue();
 
         // configuring the crawler thread pool
         // implementation of session thread pool
@@ -102,13 +101,13 @@ public final class plasmaCrawlLoader extends Thread {
         //this.crawlerPoolConfig.timeBetweenEvictionRunsMillis = 30000;
 //        config.testOnReturn = true;
 
-        CrawlerFactory theFactory = new CrawlerFactory(
+        plasmaCrawlerFactory theFactory = new plasmaCrawlerFactory(
                 this.theThreadGroup,
                 switchboard,
-                cacheManager,
-                log);
+                this.cacheManager,
+                this.log);
 
-        this.crawlwerPool = new CrawlerPool(theFactory,this.crawlerPoolConfig,this.theThreadGroup);        
+        this.crawlwerPool = new plasmaCrawlerPool(theFactory,this.crawlerPoolConfig,this.theThreadGroup);        
         
         // start the crawl loader
         this.start();
@@ -199,7 +198,7 @@ public final class plasmaCrawlLoader extends Thread {
     }
 
     public int getNumIdleWorker() {
-        return crawlwerPool.getNumIdle();
+        return this.crawlwerPool.getNumIdle();
     }
     
     public int getNumActiveWorker() {
@@ -207,268 +206,11 @@ public final class plasmaCrawlLoader extends Thread {
     }
     
     public int size() {
-        return crawlwerPool.getNumActive();
+        return this.crawlwerPool.getNumActive();
     }
 }
 
-class CrawlerMessageQueue {
-    private final serverSemaphore readSync;
-    private final serverSemaphore writeSync;
-    private final ArrayList messageList;
-    
-    public CrawlerMessageQueue()  {
-        this.readSync  = new serverSemaphore (0);
-        this.writeSync = new serverSemaphore (1);
-        
-        this.messageList = new ArrayList(10);        
-    }
 
-    /**
-     * 
-     * @param newMessage
-     * @throws MessageQueueLockedException
-     * @throws InterruptedException
-     */
-    public void addMessage(plasmaCrawlLoaderMessage newMessage) 
-        throws InterruptedException, NullPointerException 
-    {
-        if (newMessage == null) throw new NullPointerException();
 
-        this.writeSync.P();
 
-            boolean insertionDoneSuccessfully = false;
-            synchronized(this.messageList) {
-                insertionDoneSuccessfully = this.messageList.add(newMessage);
-            }
 
-            if (insertionDoneSuccessfully)  {
-                this.sortMessages();
-                this.readSync.V();              
-            }
-        
-        this.writeSync.V();
-    }
-
-    public plasmaCrawlLoaderMessage waitForMessage() throws InterruptedException {
-        this.readSync.P();         
-        this.writeSync.P();
-
-        plasmaCrawlLoaderMessage newMessage = null;
-        synchronized(this.messageList) {               
-            newMessage = (plasmaCrawlLoaderMessage) this.messageList.remove(0);
-        }
-
-        this.writeSync.V();
-        return newMessage;
-    }
-
-    protected void sortMessages() {
-        Collections.sort(this.messageList, new Comparator()  { 
-            public int compare(Object o1, Object o2)
-            {
-                plasmaCrawlLoaderMessage message1 = (plasmaCrawlLoaderMessage) o1; 
-                plasmaCrawlLoaderMessage message2 = (plasmaCrawlLoaderMessage) o2; 
-                
-                int message1Priority = message1.crawlingPriority;
-                int message2Priority = message2.crawlingPriority;
-                
-                if (message1Priority > message2Priority){ 
-                    return -1; 
-                } else if (message1Priority < message2Priority) { 
-                    return 1; 
-                }  else { 
-                    return 0; 
-                }            
-            } 
-        }); 
-    }
-}
-
-final class CrawlerPool extends GenericObjectPool {
-    private final ThreadGroup theThreadGroup;
-    public boolean isClosed = false;
-
-    public CrawlerPool(CrawlerFactory objFactory,
-                       GenericObjectPool.Config config,
-                       ThreadGroup threadGroup) {
-        super(objFactory, config);
-        this.theThreadGroup = threadGroup;
-        objFactory.setPool(this);
-    }
-
-    public Object borrowObject() throws Exception  {
-       return super.borrowObject();
-    }
-
-    public void returnObject(Object obj) {
-        if (obj == null) return;
-        if (obj instanceof plasmaCrawlWorker) {
-            try {
-                ((plasmaCrawlWorker)obj).setName(plasmaCrawlWorker.threadBaseName + "_inPool");
-                super.returnObject(obj);
-            } catch (Exception e) {
-                ((plasmaCrawlWorker)obj).setStopped(true);
-                serverLog.logSevere("CRAWLER-POOL","Unable to return crawler thread to pool.",e);                
-            }
-        } else {
-            serverLog.logSevere("CRAWLER-POOL","Object of wront type '" + obj.getClass().getName() +
-            "' returned to pool.");            
-        }        
-    }        
-    
-    public void invalidateObject(Object obj) {
-        if (obj == null) return;
-        if (this.isClosed) return;
-        if (obj instanceof plasmaCrawlWorker) {
-            try {
-                ((plasmaCrawlWorker)obj).setName(plasmaCrawlWorker.threadBaseName + "_invalidated");
-                ((plasmaCrawlWorker)obj).setStopped(true);
-                super.invalidateObject(obj);
-            } catch (Exception e) {
-                serverLog.logSevere("CRAWLER-POOL","Unable to invalidate crawling thread.",e); 
-            }
-        }
-    }        
-    
-    public synchronized void close() throws Exception {
-        try {
-            /*
-             * shutdown all still running session threads ...
-             */
-            this.isClosed  = true;
-
-            /* waiting for all threads to finish */
-            int threadCount  = this.theThreadGroup.activeCount();    
-            Thread[] threadList = new Thread[threadCount];     
-            threadCount = this.theThreadGroup.enumerate(threadList);
-
-            // signaling shutdown to all still running or pooled threads ...
-            serverLog.logInfo("CRAWLER","Signaling shutdown to " + threadCount + " remaining crawler threads ...");
-            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                ((plasmaCrawlWorker)threadList[currentThreadIdx]).setStopped(true);
-            }   
-
-            // giving the crawlers some time to finish shutdown
-            try { Thread.sleep(500); } catch(Exception e) {}            
-
-            // sending interrupted signal to all remaining threads
-            serverLog.logInfo("CRAWLER","Sending interruption signal to " + this.theThreadGroup.activeCount() + " remaining crawler threads ...");
-            this.theThreadGroup.interrupt();        
-
-            // aborting all crawlers by closing all still open httpc sockets
-            serverLog.logInfo("CRAWLER","Trying to abort  " + this.theThreadGroup.activeCount() + " remaining crawler threads ...");
-            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                Thread currentThread = threadList[currentThreadIdx];
-                if (currentThread.isAlive()) {
-                    serverLog.logInfo("CRAWLER","Trying to shutdown crawler thread '" + currentThread.getName() + "' [" + currentThreadIdx + "].");
-                    ((plasmaCrawlWorker)currentThread).close();
-                }
-            }            
-
-            serverLog.logInfo("CRAWLER","Waiting for " + this.theThreadGroup.activeCount() + " remaining crawler threads to finish shutdown ...");
-            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                Thread currentThread = threadList[currentThreadIdx];
-                if (currentThread.isAlive()) {
-                    serverLog.logInfo("CRAWLER","Waiting for crawler thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
-                    try { currentThread.join(500); } catch (InterruptedException ex) {}
-                }
-            }
-            serverLog.logWarning("CRAWLER","Shutdown of remaining crawler threads finish.");
-        }
-        catch (Exception e) {
-            serverLog.logWarning("CRAWLER","Unexpected error while trying to shutdown all remaining crawler threads.",e);  
-        }        
-
-        super.close();        
-
-    }
-
-}
-
-final class CrawlerFactory implements org.apache.commons.pool.PoolableObjectFactory {
-
-    private CrawlerPool thePool;
-    private final ThreadGroup theThreadGroup;
-    private final plasmaHTCache   cacheManager;
-    private final serverLog       theLog;
-    private final plasmaSwitchboard sb;
-
-    public CrawlerFactory(           
-            ThreadGroup threadGroup,
-            plasmaSwitchboard theSb,
-            plasmaHTCache theCacheManager,
-            serverLog log) {
-
-        super();  
-
-        if (threadGroup == null)
-            throw new IllegalArgumentException("The threadgroup object must not be null.");
-
-        this.theThreadGroup = threadGroup;
-        this.cacheManager = theCacheManager;
-        this.sb = theSb;  
-        this.theLog = log;
-    }
-
-    public void setPool(CrawlerPool pool) {
-        this.thePool = pool;    
-    }
-
-    /**
-     * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
-     */
-    public Object makeObject() {
-        return new plasmaCrawlWorker(
-                this.theThreadGroup,
-                this.thePool,
-                this.sb,
-                this.cacheManager,
-                this.theLog);
-    }
-
-     /**
-     * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
-     */
-    public void destroyObject(Object obj) {
-        if (obj == null) return;
-        if (obj instanceof plasmaCrawlWorker) {
-            plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;
-            synchronized(theWorker) {
-                theWorker.destroyed = true;
-                theWorker.setName(plasmaCrawlWorker.threadBaseName + "_destroyed");
-                theWorker.setStopped(true);
-                theWorker.interrupt();
-            }
-        }
-    }
-
-    /**
-     * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
-     */
-    public boolean validateObject(Object obj) {
-        return true;
-    }
-
-    /**
-     * @param obj 
-     * 
-     */
-    public void activateObject(Object obj)  {
-        //log.debug(" activateObject...");
-    }
-
-    /**
-     * @param obj 
-     * 
-     */
-    
-    public void passivateObject(Object obj) { 
-        //log.debug(" passivateObject..." + obj);
-    	/*
-        if (obj instanceof plasmaCrawlWorker)  {
-            plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;             
-        }
-     */
-    }
-    
-}

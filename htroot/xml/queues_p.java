@@ -57,7 +57,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
-import de.anomic.plasma.plasmaCrawlWorker;
+import de.anomic.plasma.crawler.plasmaCrawlWorker;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardQueue;
 import de.anomic.server.serverObjects;

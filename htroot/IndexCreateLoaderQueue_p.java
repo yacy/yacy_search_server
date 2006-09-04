@@ -46,8 +46,8 @@
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
-import de.anomic.plasma.plasmaCrawlWorker;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.crawler.plasmaCrawlWorker;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;

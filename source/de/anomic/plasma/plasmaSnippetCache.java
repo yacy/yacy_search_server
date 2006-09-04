@@ -44,6 +44,8 @@ package de.anomic.plasma;
 
 import java.io.IOException;
 import de.anomic.net.URL;
+import de.anomic.plasma.crawler.plasmaCrawlWorker;
+
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
