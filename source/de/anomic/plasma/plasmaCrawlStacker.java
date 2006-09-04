@@ -251,6 +251,9 @@ public final class plasmaCrawlStacker {
         
         long startTime = System.currentTimeMillis();
         String reason = null; // failure reason
+
+        // getting the initiator peer hash
+        if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = indexURL.dummyHash;        
         
         // strange errors
         if (nexturlString == null) {
@@ -258,12 +261,9 @@ public final class plasmaCrawlStacker {
             this.log.logSevere("Wrong URL in stackCrawl: url=null");
             return reason;
         }
-
-        // getting the initiator peer hash
-        if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = indexURL.dummyHash;
         
         // getting the referer url and url hash
-        URL nexturl = null, referrerURL = null;
+        URL referrerURL = null;
         if (referrerString != null) {
             try {
                 referrerURL = new URL(referrerString);
@@ -273,8 +273,9 @@ public final class plasmaCrawlStacker {
             }
         }
         String referrerHash = (referrerString==null)?null:indexURL.urlHash(referrerString);
-        
+
         // check for malformed urls
+        URL nexturl = null;
         try {
             nexturl = new URL(nexturlString);
         } catch (MalformedURLException e) {
@@ -282,6 +283,15 @@ public final class plasmaCrawlStacker {
             this.log.logSevere("Wrong URL in stackCrawl: " + nexturlString + 
                                ". Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
+        }
+
+        // check if the protocol is supported
+        String urlProtocol = nexturl.getProtocol();
+        if (!this.sb.cacheLoader.isSupportedProtocol(urlProtocol)) {
+            reason = plasmaCrawlEURL.DENIED_UNSUPPORTED_PROTOCOL;
+            this.log.logSevere("Unsupported protocol in URL '" + nexturlString + "'. " + 
+                               "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
+            return reason;            
         }
         
         // check if ip is local ip address
@@ -382,9 +392,9 @@ public final class plasmaCrawlStacker {
             return reason;
         }
 
-        // checking robots.txt
+        // checking robots.txt for http(s) resources
         checkInterruption();
-        if (robotsParser.isDisallowed(nexturl)) {
+        if ((urlProtocol.equals("http") || urlProtocol.equals("https")) && robotsParser.isDisallowed(nexturl)) {
             reason = plasmaCrawlEURL.DENIED_ROBOTS_TXT;
 
             this.log.logFine("Crawling of URL '" + nexturlString + "' disallowed by robots.txt. " +

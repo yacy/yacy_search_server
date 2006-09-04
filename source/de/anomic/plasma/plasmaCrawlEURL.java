@@ -70,6 +70,7 @@ public class plasmaCrawlEURL extends indexURL {
     // invalid urls
     public static final String DENIED_URL_NULL = "denied_(url_null)";
     public static final String DENIED_MALFORMED_URL = "denied_(malformed_url)";
+    public static final String DENIED_UNSUPPORTED_PROTOCOL = "denied_(unsupported_protocol)";
     public static final String DENIED_PRIVATE_IP_ADDRESS = "denied_(private_ip_address)";
     public static final String DENIED_LOOPBACK_IP_ADDRESS = "denied_(loopback_ip_address)";
     public static final String DENIED_CACHEFILE_PATH_TOO_LONG = "denied_(cachefile_path_too_long)";

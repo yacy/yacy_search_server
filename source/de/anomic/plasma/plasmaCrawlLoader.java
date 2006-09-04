@@ -121,6 +121,15 @@ public final class plasmaCrawlLoader extends Thread {
     public void setPoolConfig(GenericKeyedObjectPool.Config newConfig) {
         this.crawlwerPool.setConfig(newConfig);
     }
+    
+    public boolean isSupportedProtocol(String protocol) {
+        if ((protocol == null) || (protocol.length() == 0)) return false;
+        
+        // TODO: read the supported protocols out from a config file
+        protocol = protocol.trim().toLowerCase();
+        return protocol.equals("http") ||
+               protocol.equals("https");                
+    }
 
     public void close() {
         try {
