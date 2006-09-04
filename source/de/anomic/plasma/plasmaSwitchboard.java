@@ -542,7 +542,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // clean up profiles
         this.log.logConfig("Cleaning Profiles");
-        cleanProfiles();
+        try { cleanProfiles(); } catch (InterruptedException e) { /* Ignore this here */ }
         
         // init ranking transmission
         /*
@@ -769,13 +769,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         initProfiles();
     }
     
-    public boolean cleanProfiles() {
+    public boolean cleanProfiles() throws InterruptedException {
         if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (urlPool.noticeURL.stackSize() > 0)) return false;
         final Iterator iter = profiles.profiles(true);
         plasmaCrawlProfile.entry entry;
         boolean hasDoneSomething = false;
         try {
             while (iter.hasNext()) {
+                // check for interruption
+                if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
+                
+                // getting next profile
                 entry = (plasmaCrawlProfile.entry) iter.next();
                 if (!((entry.name().equals("proxy")) || (entry.name().equals("remote")))) {
                     iter.remove();
@@ -1085,40 +1089,49 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public boolean cleanupJob() {
-        
-        boolean hasDoneSomething = false;
-        
-        // do transmission of cr-files
-        int count = rankingOwnDistribution.size() / 100;
-        if (count == 0) count = 1;
-        if (count > 5) count = 5;
-        rankingOwnDistribution.transferRanking(count);
-        rankingOtherDistribution.transferRanking(1);
-        
-        // clean up error stack
-        if ((urlPool.errorURL.stackSize() > 1000)) {
-            log.logFine("Cleaning Error-URLs report stack, " + urlPool.errorURL.stackSize() + " entries on stack");
-            urlPool.errorURL.clearStack();
-            hasDoneSomething = true;
-        }
-        // clean up loadedURL stack
-        for (int i = 1; i <= 6; i++) {
-            if (urlPool.loadedURL.getStackSize(i) > 1000) {
-                log.logFine("Cleaning Loaded-URLs report stack, " + urlPool.loadedURL.getStackSize(i) + " entries on stack " + i);
-                urlPool.loadedURL.clearStack(i);
+        try {
+            boolean hasDoneSomething = false;
+
+            // do transmission of cr-files
+            checkInterruption();
+            int count = rankingOwnDistribution.size() / 100;
+            if (count == 0) count = 1;
+            if (count > 5) count = 5;
+            rankingOwnDistribution.transferRanking(count);
+            rankingOtherDistribution.transferRanking(1);
+
+            // clean up error stack
+            checkInterruption();
+            if ((urlPool.errorURL.stackSize() > 1000)) {
+                log.logFine("Cleaning Error-URLs report stack, " + urlPool.errorURL.stackSize() + " entries on stack");
+                urlPool.errorURL.clearStack();
                 hasDoneSomething = true;
             }
-        }
-        // clean up profiles
-        if (cleanProfiles()) hasDoneSomething = true;
+            // clean up loadedURL stack
+            for (int i = 1; i <= 6; i++) {
+                checkInterruption();
+                if (urlPool.loadedURL.getStackSize(i) > 1000) {
+                    log.logFine("Cleaning Loaded-URLs report stack, " + urlPool.loadedURL.getStackSize(i) + " entries on stack " + i);
+                    urlPool.loadedURL.clearStack(i);
+                    hasDoneSomething = true;
+                }
+            }
+            // clean up profiles
+            checkInterruption();
+            if (cleanProfiles()) hasDoneSomething = true;
 
-        // clean up news
-        try {
-            log.logFine("Cleaning Incoming News, " + yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
-            if (yacyCore.newsPool.automaticProcess() > 0) hasDoneSomething = true;
-        } catch (IOException e) {}
-        
-        return hasDoneSomething;
+            // clean up news
+            checkInterruption();
+            try {                
+                log.logFine("Cleaning Incoming News, " + yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
+                if (yacyCore.newsPool.automaticProcess() > 0) hasDoneSomething = true;
+            } catch (IOException e) {}
+
+            return hasDoneSomething;
+        } catch (InterruptedException e) {
+            this.log.logInfo("cleanupJob: Shutdown detected");
+            return false;
+        }
     }
     
     /**

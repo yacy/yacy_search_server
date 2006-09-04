@@ -160,17 +160,21 @@ public class yacyNewsPool {
         return switchQueue(dbKey).size();
     }
     
-    public int automaticProcess() throws IOException {
+    public int automaticProcess() throws IOException, InterruptedException {
         // processes news in the incoming-db
         // returns number of processes
         yacyNewsRecord record;
         int pc = 0;
-        synchronized (incomingNews) {
-            for (int i = incomingNews.size() - 1; i >= 0; i--) {
-                record = incomingNews.top(i);
+        synchronized (this.incomingNews) {
+            for (int i = this.incomingNews.size() - 1; i >= 0; i--) {
+                // check for interruption
+                if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
+                
+                // get next news record
+                record = this.incomingNews.top(i);
                 if ((i > 500) || (automaticProcessP(record))) {
-                    incomingNews.pop(i);
-                    processedNews.push(record);
+                    this.incomingNews.pop(i);
+                    this.processedNews.push(record);
                     //newsDB.remove(id);
                     pc++;
                 }

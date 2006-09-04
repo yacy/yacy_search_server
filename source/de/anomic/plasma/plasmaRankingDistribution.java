@@ -106,7 +106,7 @@ public final class plasmaRankingDistribution {
         if ((sourcePath.exists()) && (sourcePath.isDirectory())) return sourcePath.list().length; else return 0;
     }
 
-    public boolean transferRanking(int count) {
+    public boolean transferRanking(int count) throws InterruptedException {
 
         if (method == METHOD_NONE) {
             log.logFine("no ranking distribution: no transfer method given");
@@ -140,6 +140,10 @@ public final class plasmaRankingDistribution {
         File crfile = null;
         
         for (int i = 0; i < count; i++) {
+            // check for interruption
+            if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
+            
+            // getting the next file to transfer
             crfile = new File(sourcePath, outfiles[i]);
             
             if ((method == METHOD_ANYSENIOR) || (method == METHOD_ANYPRINCIPAL)) {
@@ -161,9 +165,13 @@ public final class plasmaRankingDistribution {
         return false;
     }
     
-    private boolean transferRankingAnySeed(File crfile, int trycount) {
+    private boolean transferRankingAnySeed(File crfile, int trycount) throws InterruptedException {
         yacySeed target = null;
         for (int j = 0; j < trycount; j++) {
+            // check for interruption
+            if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
+            
+            // get next target
             target = yacyCore.seedDB.anySeedVersion(yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION);
             
             if (target == null) continue;
@@ -173,10 +181,14 @@ public final class plasmaRankingDistribution {
         return false;
     }
     
-    private boolean transferRankingAddress(File crfile) {
+    private boolean transferRankingAddress(File crfile) throws InterruptedException {
         // try all addresses
-        for (int i = 0; i < address.length; i++) {
-            if (transferRankingAddress(crfile, address[i])) return true;
+        for (int i = 0; i < this.address.length; i++) {
+            // check for interruption
+            if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
+            
+            // try to transfer ranking address using the next address
+            if (transferRankingAddress(crfile, this.address[i])) return true;
         }
         return false;
     }
