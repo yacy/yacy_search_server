@@ -173,7 +173,7 @@ public class ViewFile {
                 prop.put("viewMode_plainText",content);                     
             } else if (viewMode.equals("parsed") || viewMode.equals("sentences") || viewMode.equals("iframe")) {
                 // parsing the resource content
-                plasmaParserDocument document = sb.snippetCache.parseDocument(url, resource,header);
+                plasmaParserDocument document = sb.snippetCache.parseDocument(url, resource,resHeader);
                 if (document == null) {
                     prop.put("error",5);
                     prop.put("viewMode",VIEW_MODE_NO_TEXT);
