@@ -196,7 +196,7 @@ public class Blacklist_p {
                 
                 // get the entry that should be deleted
                 String oldEntry = (String)post.get("selectedEntry");
-                if (oldEntry.trim().length() == 0) {
+                if (oldEntry == null || oldEntry.trim().length() == 0) {
                     prop.put("LOCATION",header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse);
                     return prop;
                 }                
