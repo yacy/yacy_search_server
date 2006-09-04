@@ -255,6 +255,12 @@ public class migration {
             
             sb.setConfig("BlackLists.Shared",sb.getConfig("proxyBlackListsShared",""));
         }
+        
+        // migration of http specific crawler settings
+        if ((value = sb.getConfig("crawler.acceptLanguage","")).length() > 0) {
+            sb.setConfig("crawler.http.acceptEncoding", sb.getConfig("crawler.acceptEncoding","gzip,deflate"));
+            sb.setConfig("crawler.http.acceptLanguage", sb.getConfig("crawler.acceptLanguage","en-us,en;q=0.5"));
+            sb.setConfig("crawler.http.acceptCharset",  sb.getConfig("crawler.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"));            
+        }        
     }
-
 }

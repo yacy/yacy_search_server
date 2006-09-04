@@ -631,10 +631,12 @@ msgForwardingTo=root@localhost
 onlineCautionDelay=30000
 
 # Some configuration values for the crawler
-crawler.acceptEncoding=gzip,deflate
-crawler.acceptLanguage=en-us,en;q=0.5
-crawler.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
 crawler.clientTimeout=9000
+
+# http crawler specific settings
+crawler.http.acceptEncoding=gzip,deflate
+crawler.http.acceptLanguage=en-us,en;q=0.5
+crawler.http.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
 
 # maximum number of crawler threads
 crawler.MaxActiveThreads = 10

@@ -108,11 +108,6 @@ public final class CrawlWorker extends AbstractCrawlWorker {
         this.protocol = "http";        
     }
 
-    public long getDuration() {
-        final long startDate = this.startdate;
-        return (startDate != 0) ? System.currentTimeMillis() - startDate : 0;
-    }
-
     public void init() {
         // refreshing timeout value        
         if (this.theMsg.timeout < 0) {
@@ -122,9 +117,9 @@ public final class CrawlWorker extends AbstractCrawlWorker {
         }
         
         // some http header values
-        this.acceptEncoding = this.sb.getConfig("crawler.acceptEncoding", "gzip,deflate");
-        this.acceptLanguage = this.sb.getConfig("crawler.acceptLanguage","en-us,en;q=0.5");
-        this.acceptCharset  = this.sb.getConfig("crawler.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");
+        this.acceptEncoding = this.sb.getConfig("crawler.http.acceptEncoding", "gzip,deflate");
+        this.acceptLanguage = this.sb.getConfig("crawler.http.acceptLanguage","en-us,en;q=0.5");
+        this.acceptCharset  = this.sb.getConfig("crawler.http.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");
         
         // getting the http proxy config
         this.remoteProxyConfig = this.sb.remoteProxyConfig;        

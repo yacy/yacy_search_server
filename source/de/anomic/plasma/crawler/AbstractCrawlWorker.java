@@ -99,6 +99,11 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
     
     public abstract void close();
     
+    public long getDuration() {
+        final long startDate = this.startdate;
+        return (startDate != 0) ? System.currentTimeMillis() - startDate : 0;
+    }    
+    
     public void run() {
         this.running = true;
 
