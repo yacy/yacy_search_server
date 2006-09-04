@@ -161,7 +161,7 @@ public class IndexCreateIndexingQueue_p {
                         prop.put("indexing-queue_list_"+entryCount+"_dark", (inProcess)? 2: ((dark) ? 1 : 0));
                         prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())));
                         prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
-                        prop.put("indexing-queue_list_"+entryCount+"_modified", (pcentry.responseHeader() == null) ? "" : daydate(pcentry.responseHeader().lastModified()));
+                        prop.put("indexing-queue_list_"+entryCount+"_modified", pcentry.getModificationDate());
                         prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":wikiCode.replaceHTML(pcentry.anchorName()));
                         prop.put("indexing-queue_list_"+entryCount+"_url", wikiCode.replaceHTML(pcentry.normalizedURLString()));
                         prop.put("indexing-queue_list_"+entryCount+"_size", bytesToString(entrySize));

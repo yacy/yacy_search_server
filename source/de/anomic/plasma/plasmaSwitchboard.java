@@ -1396,11 +1396,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private plasmaParserDocument parseResource(plasmaSwitchboardQueue.Entry entry, String initiatorHash) throws InterruptedException {
         plasmaParserDocument document = null;
 
-        // the http header that belongs to this entry
-        httpHeader entryRespHeader = entry.responseHeader();
-
         // the mimetype of this entry
-        String mimeType = (entryRespHeader == null)?null:entryRespHeader.mime();
+        String mimeType = entry.getMimeType();
 
         // the parser logger
         serverLog parserLogger = parser.getLogger();
@@ -1465,7 +1462,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().generalDepth())) +
                     ", filter=" + ((entry.profile() == null) ? "null" : entry.profile().generalFilter()) +
                     ", initiatorHash=" + initiatorPeerHash +
-                    ", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
+                    //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
                     ", url=" + entry.url()); // DEBUG
             
             /* =========================================================================
@@ -1480,12 +1477,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             parsingEndTime = System.currentTimeMillis();            
             
             // getting the document date
-            Date docDate = null;
-            if (entry.responseHeader() != null) {
-                docDate = entry.responseHeader().lastModified();
-                if (docDate == null) docDate = entry.responseHeader().date();
-            }
-            if (docDate == null) docDate = new Date();
+            Date docDate = entry.getModificationDate();
             
             /* =========================================================================
              * put anchors on crawl stack

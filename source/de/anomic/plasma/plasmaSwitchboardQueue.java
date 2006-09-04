@@ -306,7 +306,7 @@ public class plasmaSwitchboardQueue {
             return profileEntry;
         }
 
-        public httpHeader responseHeader() {
+        private httpHeader responseHeader() {
             if (responseHeader == null) try {
                 responseHeader = htCache.getCachedResponse(indexURL.urlHash(url));
             } catch (IOException e) {
@@ -316,6 +316,24 @@ public class plasmaSwitchboardQueue {
             return responseHeader;
         }
 
+        public String getMimeType() {
+            httpHeader headers = this.responseHeader();
+            return (headers == null) ? null : headers.mime();
+        }
+        
+        public Date getModificationDate() {
+            Date docDate = null;
+            
+            httpHeader headers = this.responseHeader();
+            if (headers != null) {
+                docDate = headers.lastModified();
+                if (docDate == null) docDate = headers.date();
+            }
+            if (docDate == null) docDate = new Date();   
+            
+            return docDate;
+        }
+        
         public URL referrerURL() {
             if (referrerURL == null) {
                 if ((referrerHash == null) || (referrerHash.equals(indexURL.dummyHash))) return null;
