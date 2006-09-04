@@ -44,13 +44,14 @@
 
 package de.anomic.plasma;
 
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.net.URL;
-import de.anomic.plasma.crawler.plasmaCrawlWorker;
 import de.anomic.plasma.crawler.plasmaCrawlerFactory;
 import de.anomic.plasma.crawler.plasmaCrawlerMsgQueue;
 import de.anomic.plasma.crawler.plasmaCrawlerPool;
+import de.anomic.plasma.crawler.http.CrawlWorker;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaCrawlLoader extends Thread {
@@ -62,7 +63,7 @@ public final class plasmaCrawlLoader extends Thread {
 
     private final plasmaCrawlerMsgQueue theQueue;
     private final plasmaCrawlerPool crawlwerPool;
-    private GenericObjectPool.Config crawlerPoolConfig = null; 
+    private GenericKeyedObjectPool.Config crawlerPoolConfig = null; 
     private final ThreadGroup theThreadGroup = new ThreadGroup("CrawlerThreads");
     private boolean stopped = false;
 
@@ -80,7 +81,7 @@ public final class plasmaCrawlLoader extends Thread {
 
         // configuring the crawler thread pool
         // implementation of session thread pool
-        this.crawlerPoolConfig = new GenericObjectPool.Config();
+        this.crawlerPoolConfig = new GenericKeyedObjectPool.Config();
 
         // The maximum number of active connections that can be allocated from pool at the same time,
         // 0 for no limit
@@ -89,7 +90,7 @@ public final class plasmaCrawlLoader extends Thread {
         // The maximum number of idle connections connections in the pool
         // 0 = no limit.        
         this.crawlerPoolConfig.maxIdle = Integer.parseInt(switchboard.getConfig("crawler.MaxIdleThreads","7"));
-        this.crawlerPoolConfig.minIdle = Integer.parseInt(switchboard.getConfig("crawler.MinIdleThreads","5"));    
+        //this.crawlerPoolConfig.minIdle = Integer.parseInt(switchboard.getConfig("crawler.MinIdleThreads","5"));    
 
         // block undefinitely 
         this.crawlerPoolConfig.maxWait = -1; 
@@ -113,11 +114,11 @@ public final class plasmaCrawlLoader extends Thread {
         this.start();
     }
 
-    public GenericObjectPool.Config getPoolConfig() {
+    public GenericKeyedObjectPool.Config getPoolConfig() {
         return this.crawlerPoolConfig;
     }
 
-    public void setPoolConfig(GenericObjectPool.Config newConfig) {
+    public void setPoolConfig(GenericKeyedObjectPool.Config newConfig) {
         this.crawlwerPool.setConfig(newConfig);
     }
 
@@ -148,9 +149,12 @@ public final class plasmaCrawlLoader extends Thread {
                 // getting a new message from the crawler queue
                 plasmaCrawlLoaderMessage theMsg = this.theQueue.waitForMessage();
 
+                // TODO: getting the protocol of the next URL                
+                String protocol = theMsg.url.getProtocol();
+                
                 // getting a new crawler from the crawler pool
-                plasmaCrawlWorker theWorker = (plasmaCrawlWorker) this.crawlwerPool.borrowObject();
-                theWorker.execute(theMsg);
+                CrawlWorker theWorker = (CrawlWorker) this.crawlwerPool.borrowObject(protocol);
+                if (theWorker != null) theWorker.execute(theMsg);
 
             } catch (InterruptedException e) {
                 Thread.interrupted();

@@ -1,49 +1,48 @@
 package de.anomic.plasma.crawler;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 
+import de.anomic.plasma.crawler.http.CrawlWorker;
 import de.anomic.server.logging.serverLog;
 
-public final class plasmaCrawlerPool extends GenericObjectPool {
+public final class plasmaCrawlerPool extends GenericKeyedObjectPool {
     private final ThreadGroup theThreadGroup;
     public boolean isClosed = false;
 
-    public plasmaCrawlerPool(plasmaCrawlerFactory objFactory,
-                       GenericObjectPool.Config config,
-                       ThreadGroup threadGroup) {
+    public plasmaCrawlerPool(plasmaCrawlerFactory objFactory, GenericKeyedObjectPool.Config config, ThreadGroup threadGroup) {
         super(objFactory, config);
         this.theThreadGroup = threadGroup;
         objFactory.setPool(this);
     }
 
-    public Object borrowObject() throws Exception  {
-       return super.borrowObject();
+    public Object borrowObject(Object key) throws Exception  {
+       return super.borrowObject(key);
     }
 
-    public void returnObject(Object obj) {
+    public void returnObject(Object key,Object obj) {
         if (obj == null) return;
-        if (obj instanceof plasmaCrawlWorker) {
+        if (obj instanceof CrawlWorker) {
             try {
-                ((plasmaCrawlWorker)obj).setName(plasmaCrawlWorker.threadBaseName + "_inPool");
-                super.returnObject(obj);
+                ((CrawlWorker)obj).setName(CrawlWorker.threadBaseName + "_inPool");
+                super.returnObject(key,obj);
             } catch (Exception e) {
-                ((plasmaCrawlWorker)obj).setStopped(true);
+                ((CrawlWorker)obj).setStopped(true);
                 serverLog.logSevere("CRAWLER-POOL","Unable to return crawler thread to pool.",e);                
             }
         } else {
-            serverLog.logSevere("CRAWLER-POOL","Object of wront type '" + obj.getClass().getName() +
+            serverLog.logSevere("CRAWLER-POOL","Object of wrong type '" + obj.getClass().getName() +
             "' returned to pool.");            
         }        
     }        
     
-    public void invalidateObject(Object obj) {
+    public void invalidateObject(Object key,Object obj) {
         if (obj == null) return;
         if (this.isClosed) return;
-        if (obj instanceof plasmaCrawlWorker) {
+        if (obj instanceof CrawlWorker) {
             try {
-                ((plasmaCrawlWorker)obj).setName(plasmaCrawlWorker.threadBaseName + "_invalidated");
-                ((plasmaCrawlWorker)obj).setStopped(true);
-                super.invalidateObject(obj);
+                ((CrawlWorker)obj).setName(CrawlWorker.threadBaseName + "_invalidated");
+                ((CrawlWorker)obj).setStopped(true);
+                super.invalidateObject(key,obj);
             } catch (Exception e) {
                 serverLog.logSevere("CRAWLER-POOL","Unable to invalidate crawling thread.",e); 
             }
@@ -65,11 +64,11 @@ public final class plasmaCrawlerPool extends GenericObjectPool {
             // signaling shutdown to all still running or pooled threads ...
             serverLog.logInfo("CRAWLER","Signaling shutdown to " + threadCount + " remaining crawler threads ...");
             for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                ((plasmaCrawlWorker)threadList[currentThreadIdx]).setStopped(true);
+                ((CrawlWorker)threadList[currentThreadIdx]).setStopped(true);
             }   
 
             // giving the crawlers some time to finish shutdown
-            try { Thread.sleep(500); } catch(Exception e) {}            
+            try { Thread.sleep(500); } catch(Exception e) {/* Ignore this. Shutdown in progress */}            
 
             // sending interrupted signal to all remaining threads
             serverLog.logInfo("CRAWLER","Sending interruption signal to " + this.theThreadGroup.activeCount() + " remaining crawler threads ...");
@@ -81,7 +80,7 @@ public final class plasmaCrawlerPool extends GenericObjectPool {
                 Thread currentThread = threadList[currentThreadIdx];
                 if (currentThread.isAlive()) {
                     serverLog.logInfo("CRAWLER","Trying to shutdown crawler thread '" + currentThread.getName() + "' [" + currentThreadIdx + "].");
-                    ((plasmaCrawlWorker)currentThread).close();
+                    ((CrawlWorker)currentThread).close();
                 }
             }            
 
@@ -90,7 +89,7 @@ public final class plasmaCrawlerPool extends GenericObjectPool {
                 Thread currentThread = threadList[currentThreadIdx];
                 if (currentThread.isAlive()) {
                     serverLog.logInfo("CRAWLER","Waiting for crawler thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
-                    try { currentThread.join(500); } catch (InterruptedException ex) {}
+                    try { currentThread.join(500); } catch (InterruptedException ex) {/* Ignore this. Shutdown in progress */}
                 }
             }
             serverLog.logWarning("CRAWLER","Shutdown of remaining crawler threads finish.");

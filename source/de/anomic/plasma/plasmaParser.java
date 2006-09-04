@@ -904,8 +904,7 @@ final class plasmaParserFactory implements KeyedPoolableObjectFactory {
 
 final class plasmaParserPool extends GenericKeyedObjectPool {
 
-    public plasmaParserPool(plasmaParserFactory objFactory,
-            GenericKeyedObjectPool.Config config) {
+    public plasmaParserPool(plasmaParserFactory objFactory, GenericKeyedObjectPool.Config config) {
         super(objFactory, config);
     }
     

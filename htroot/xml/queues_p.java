@@ -57,7 +57,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
-import de.anomic.plasma.crawler.plasmaCrawlWorker;
+import de.anomic.plasma.crawler.http.CrawlWorker;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardQueue;
 import de.anomic.server.serverObjects;
@@ -150,7 +150,7 @@ public class queues_p {
             }
             int i, count = 0;
             for (i = 0; i < size; i++)  {
-                plasmaCrawlWorker theWorker = (plasmaCrawlWorker)threadList[i];
+                CrawlWorker theWorker = (CrawlWorker)threadList[i];
                 plasmaCrawlLoaderMessage theMsg = theWorker.theMsg;
                 if (theMsg == null) continue;
                 

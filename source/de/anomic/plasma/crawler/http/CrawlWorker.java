@@ -42,7 +42,7 @@
 //the intact and unchanged copyright notice.
 //Contributions and changes to the program code must be marked as such.
 
-package de.anomic.plasma.crawler;
+package de.anomic.plasma.crawler.http;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -66,13 +66,14 @@ import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.crawler.plasmaCrawlerPool;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
 
-public final class plasmaCrawlWorker extends Thread {
+public final class CrawlWorker extends Thread {
 
     public static final int DEFAULT_CRAWLING_RETRY_COUNT = 5;   
     public static final String threadBaseName = "CrawlerWorker";
@@ -93,12 +94,12 @@ public final class plasmaCrawlWorker extends Thread {
     private plasmaCrawlProfile.entry profile;
 //  private String error;
 
-    boolean destroyed = false;
+    public boolean destroyed = false;
     private boolean running = false;
     private boolean stopped = false;
     private boolean done = false;   
 
-    public plasmaCrawlWorker(
+    public CrawlWorker(
             ThreadGroup theTG,
             plasmaCrawlerPool thePool,
             plasmaSwitchboard theSb,
@@ -162,7 +163,7 @@ public final class plasmaCrawlWorker extends Thread {
                 if (this.done) {       
                     synchronized (this) { 
                         // return thread back into pool
-                        this.myPool.returnObject(this);
+                        this.myPool.returnObject("http",this);
                         
                         // We are waiting for a new task now.
                         if (!this.stopped && !this.destroyed && !this.isInterrupted()) { 
@@ -182,14 +183,14 @@ public final class plasmaCrawlWorker extends Thread {
             serverLog.logFiner("CRAWLER-POOL","Interruption of thread '" + this.getName() + "' detected."); 
         } finally {
             if (this.myPool != null && !this.destroyed) 
-                this.myPool.invalidateObject(this);
+                this.myPool.invalidateObject("http",this);
         }
     }
 
     public void execute() {
         try {
             // setting threadname
-            this.setName(plasmaCrawlWorker.threadBaseName + "_" + this.url);
+            this.setName(CrawlWorker.threadBaseName + "_" + this.url);
 
             // refreshing timeout value
             this.socketTimeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);

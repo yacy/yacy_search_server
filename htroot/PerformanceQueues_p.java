@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.io.File;
 
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.http.httpHeader;
@@ -193,12 +194,12 @@ public class PerformanceQueues_p {
              * configuring the crawler pool 
              */
             // getting the current crawler pool configuration
-            GenericObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
+            GenericKeyedObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
             int maxActive = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
             int maxIdle = Integer.parseInt(post.get("Crawler Pool_maxIdle","4"));
             int minIdle = Integer.parseInt(post.get("Crawler Pool_minIdle","0"));
             
-            crawlerPoolConfig.minIdle = (minIdle > maxIdle) ? maxIdle/2 : minIdle;
+            //crawlerPoolConfig.minIdle = (minIdle > maxIdle) ? maxIdle/2 : minIdle;
             crawlerPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;
             crawlerPoolConfig.maxActive = maxActive;    
             
@@ -287,11 +288,11 @@ public class PerformanceQueues_p {
         prop.put("assortmentCluster", asizes.length / 8);
         
         // table thread pool settings
-        GenericObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
+        GenericKeyedObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
         prop.put("pool_0_name","Crawler Pool");
         prop.put("pool_0_maxActive",crawlerPoolConfig.maxActive);
         prop.put("pool_0_maxIdle",crawlerPoolConfig.maxIdle);
-        prop.put("pool_0_minIdle",crawlerPoolConfig.minIdle);
+        //prop.put("pool_0_minIdle",crawlerPoolConfig.minIdle);
         prop.put("pool_0_numActive",switchboard.cacheLoader.getNumActiveWorker());
         prop.put("pool_0_numIdle",switchboard.cacheLoader.getNumIdleWorker());
         

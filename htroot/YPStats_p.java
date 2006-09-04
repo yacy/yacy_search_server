@@ -46,6 +46,7 @@
 import java.util.Iterator;
 
 
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.http.httpHeader;
@@ -156,11 +157,11 @@ public class YPStats_p {
         prop.put("wordCacheMaxCount", switchboard.getConfig("wordCacheMaxCount", "10000"));
         
         // table thread pool settings
-        GenericObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
+        GenericKeyedObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
         prop.put("pool_0_name","Crawler Pool");
         prop.put("pool_0_maxActive",crawlerPoolConfig.maxActive);
         prop.put("pool_0_maxIdle",crawlerPoolConfig.maxIdle);
-        prop.put("pool_0_minIdle",crawlerPoolConfig.minIdle);
+        prop.put("pool_0_minIdle",0 /* crawlerPoolConfig.minIdle */);
         
         serverThread httpd = switchboard.getThread("10_httpd");
         GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();

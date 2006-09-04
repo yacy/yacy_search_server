@@ -44,7 +44,7 @@ package de.anomic.plasma;
 
 import java.io.IOException;
 import de.anomic.net.URL;
-import de.anomic.plasma.crawler.plasmaCrawlWorker;
+import de.anomic.plasma.crawler.http.CrawlWorker;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -419,7 +419,7 @@ public class plasmaSnippetCache {
     }
     
     public plasmaHTCache.Entry loadResourceFromWeb(URL url, int socketTimeout) throws IOException {
-        return plasmaCrawlWorker.load(
+        return CrawlWorker.load(
             url,
             "",
             null, 

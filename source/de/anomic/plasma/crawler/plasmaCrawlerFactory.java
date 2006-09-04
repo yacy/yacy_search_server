@@ -1,10 +1,15 @@
 package de.anomic.plasma.crawler;
 
+import java.lang.reflect.Constructor;
+
+import org.apache.commons.pool.KeyedPoolableObjectFactory;
+
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.crawler.http.CrawlWorker;
 import de.anomic.server.logging.serverLog;
 
-public final class plasmaCrawlerFactory implements org.apache.commons.pool.PoolableObjectFactory {
+public final class plasmaCrawlerFactory implements KeyedPoolableObjectFactory {
 
     private plasmaCrawlerPool thePool;
     private final ThreadGroup theThreadGroup;
@@ -16,7 +21,8 @@ public final class plasmaCrawlerFactory implements org.apache.commons.pool.Poola
             ThreadGroup threadGroup,
             plasmaSwitchboard theSb,
             plasmaHTCache theCacheManager,
-            serverLog log) {
+            serverLog log
+    ) {
 
         super();  
 
@@ -36,25 +42,55 @@ public final class plasmaCrawlerFactory implements org.apache.commons.pool.Poola
     /**
      * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
      */
-    public Object makeObject() {
-        return new plasmaCrawlWorker(
-                this.theThreadGroup,
-                this.thePool,
-                this.sb,
-                this.cacheManager,
-                this.theLog);
+    public Object makeObject(Object key) throws Exception {        
+        if (!(key instanceof String))
+            throw new IllegalArgumentException("The object key must be of type string.");        
+        
+        // getting the class name
+        String className = this.getClass().getPackage().getName() + "." + key + ".CrawlWorker";
+        
+        // loading class by name
+        Class moduleClass = Class.forName(className);
+
+        // getting the constructor
+        Constructor classConstructor = moduleClass.getConstructor( new Class[] { 
+                ThreadGroup.class,
+                plasmaCrawlerPool.class,
+                plasmaSwitchboard.class,
+                plasmaHTCache.class,
+                serverLog.class
+        } );
+
+        // instantiating class
+        CrawlWorker theCrawlWorker = (CrawlWorker) classConstructor.newInstance(new Object[] {
+              this.theThreadGroup,
+              this.thePool,
+              this.sb,
+              this.cacheManager,
+              this.theLog
+        });        
+        
+        // return the newly created object
+        return theCrawlWorker;
+        
+//        return new plasmaCrawlWorker(
+//                this.theThreadGroup,
+//                this.thePool,
+//                this.sb,
+//                this.cacheManager,
+//                this.theLog);
     }
 
      /**
      * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
      */
-    public void destroyObject(Object obj) {
+    public void destroyObject(Object key, Object obj) {
         if (obj == null) return;
-        if (obj instanceof plasmaCrawlWorker) {
-            plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;
+        if (obj instanceof CrawlWorker) {
+            CrawlWorker theWorker = (CrawlWorker) obj;
             synchronized(theWorker) {
                 theWorker.destroyed = true;
-                theWorker.setName(plasmaCrawlWorker.threadBaseName + "_destroyed");
+                theWorker.setName(CrawlWorker.threadBaseName + "_destroyed");
                 theWorker.setStopped(true);
                 theWorker.interrupt();
             }
@@ -64,7 +100,7 @@ public final class plasmaCrawlerFactory implements org.apache.commons.pool.Poola
     /**
      * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
      */
-    public boolean validateObject(Object obj) {
+    public boolean validateObject(Object key, Object obj) {
         return true;
     }
 
@@ -72,7 +108,7 @@ public final class plasmaCrawlerFactory implements org.apache.commons.pool.Poola
      * @param obj 
      * 
      */
-    public void activateObject(Object obj)  {
+    public void activateObject(Object key, Object obj)  {
         //log.debug(" activateObject...");
     }
 
@@ -81,7 +117,7 @@ public final class plasmaCrawlerFactory implements org.apache.commons.pool.Poola
      * 
      */
     
-    public void passivateObject(Object obj) { 
+    public void passivateObject(Object key, Object obj) { 
         //log.debug(" passivateObject..." + obj);
         /*
         if (obj instanceof plasmaCrawlWorker)  {
