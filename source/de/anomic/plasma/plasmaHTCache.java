@@ -842,12 +842,31 @@ public final class plasmaHTCache {
         return this.cacheArray;
     }
     
-    public httpHeader requestHeader() {
-        return this.requestHeader;
-    }
+//    public httpHeader requestHeader() {
+//        return this.requestHeader;
+//    }
     
     public httpHeader responseHeader() {
         return this.responseHeader;
+    }
+    
+    public String getMimeType() {
+        return (this.responseHeader == null) ? null : this.responseHeader.mime();
+    }
+    
+    public Date ifModifiedSince() {
+        return (this.requestHeader == null) ? null : this.requestHeader.ifModifiedSince();
+    }
+    
+    public boolean requestWithCookie() {
+        return (this.requestHeader == null) ? false : this.requestHeader.containsKey(httpHeader.COOKIE);
+    }
+    
+    public boolean requestProhibitsIndexing() {
+        return (this.requestHeader == null) 
+        ? false 
+        : this.requestHeader.containsKey(httpHeader.X_YACY_INDEX_CONTROL) &&
+          ((String)this.requestHeader.get(httpHeader.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX");
     }
     
     /*

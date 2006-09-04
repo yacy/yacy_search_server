@@ -813,8 +813,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * 
          * Testing if the content type is supported by the available parsers
          * ========================================================================= */
-        boolean isSupportedContent = (entry.responseHeader() != null) &&
-                                     plasmaParser.supportedContent(entry.url(),entry.responseHeader().mime());
+        boolean isSupportedContent = plasmaParser.supportedContent(entry.url(),entry.getMimeType());
         
         /* =========================================================================
          * INDEX CONTROL HEADER
@@ -823,13 +822,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * yacy to index the response returned as answer to a request
          * ========================================================================= */
         boolean doIndexing = true;        
-        if (entry.requestHeader() != null) {
-            if (
-            (entry.requestHeader().containsKey(httpHeader.X_YACY_INDEX_CONTROL)) &&
-            (((String) entry.requestHeader().get(httpHeader.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX"))
-            ) {
+        if (entry.requestProhibitsIndexing()) {
                 doIndexing = false;
-            }
         }        
         
         /* =========================================================================
@@ -896,8 +890,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             enQueue(this.sbQueue.newEntry(
                     entry.url(), 
                     indexURL.urlHash(entry.referrerURL()),
-                    entry.requestHeader().ifModifiedSince(), 
-                    entry.requestHeader().containsKey(httpHeader.COOKIE),
+                    entry.ifModifiedSince(), 
+                    entry.requestWithCookie(),
                     entry.initiator(), 
                     entry.depth(), 
                     entry.profile().handle(),
