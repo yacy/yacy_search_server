@@ -90,7 +90,7 @@ public final class plasmaCrawlerFactory implements KeyedPoolableObjectFactory {
             CrawlWorker theWorker = (CrawlWorker) obj;
             synchronized(theWorker) {
                 theWorker.destroyed = true;
-                theWorker.setName(CrawlWorker.threadBaseName + "_destroyed");
+                theWorker.setName(plasmaCrawlWorker.threadBaseName + "_destroyed");
                 theWorker.setStopped(true);
                 theWorker.interrupt();
             }

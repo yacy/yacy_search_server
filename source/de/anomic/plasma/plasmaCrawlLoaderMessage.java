@@ -43,15 +43,22 @@
 package de.anomic.plasma;
 
 import de.anomic.net.URL;
+import de.anomic.server.serverSemaphore;
 
 public final class plasmaCrawlLoaderMessage {
     public final int crawlingPriority;
+    
     public final URL url;
     public final String name;
     public final String referer;
     public final String initiator;
     public final int depth;
     public final plasmaCrawlProfile.entry profile;
+    public final boolean acceptAllContent;
+    public final int timeout;
+    
+    private serverSemaphore resultSync  = null;
+    private plasmaHTCache.Entry result;
     
     // loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
     public plasmaCrawlLoaderMessage(
@@ -61,7 +68,10 @@ public final class plasmaCrawlLoaderMessage {
             String initiator, 
             int depth, 
             plasmaCrawlProfile.entry profile,
-            int crawlingPriority) {
+            int crawlingPriority,
+            boolean acceptAllContent,
+            int timeout
+    ) {
         this.url = url;
         this.name = name;
         this.referer = referer;
@@ -69,5 +79,32 @@ public final class plasmaCrawlLoaderMessage {
         this.depth = depth;
         this.profile = profile;
         this.crawlingPriority = crawlingPriority;
+        this.acceptAllContent = acceptAllContent;
+        this.timeout = timeout;
+        
+        this.resultSync  = new serverSemaphore(0);
+        this.result = null;
     } 
+    
+    public void setResult(plasmaHTCache.Entry theResult) {
+        // store the result
+        this.result = theResult;
+        
+        // notify blocking result readers
+        this.resultSync.V();        
+    }
+    
+    public plasmaHTCache.Entry waitForResult() throws InterruptedException {
+        plasmaHTCache.Entry theResult = null;
+        
+        this.resultSync.P();
+        /* =====> CRITICAL SECTION <======== */
+        
+            theResult = this.result;
+        
+        /* =====> CRITICAL SECTION <======== */         
+        this.resultSync.V();
+        
+        return theResult;                
+    }
 }

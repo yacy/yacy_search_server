@@ -23,7 +23,7 @@ public final class plasmaCrawlerPool extends GenericKeyedObjectPool {
         if (obj == null) return;
         if (obj instanceof CrawlWorker) {
             try {
-                ((CrawlWorker)obj).setName(CrawlWorker.threadBaseName + "_inPool");
+                ((CrawlWorker)obj).setName(plasmaCrawlWorker.threadBaseName + "_inPool");
                 super.returnObject(key,obj);
             } catch (Exception e) {
                 ((CrawlWorker)obj).setStopped(true);
@@ -40,7 +40,7 @@ public final class plasmaCrawlerPool extends GenericKeyedObjectPool {
         if (this.isClosed) return;
         if (obj instanceof CrawlWorker) {
             try {
-                ((CrawlWorker)obj).setName(CrawlWorker.threadBaseName + "_invalidated");
+                ((CrawlWorker)obj).setName(plasmaCrawlWorker.threadBaseName + "_invalidated");
                 ((CrawlWorker)obj).setStopped(true);
                 super.invalidateObject(key,obj);
             } catch (Exception e) {

@@ -142,6 +142,15 @@ public final class plasmaCrawlLoader extends Thread {
         return this.theThreadGroup;
     }
     
+    private void execute(plasmaCrawlLoaderMessage theMsg) throws Exception {
+        // getting the protocol of the next URL                
+        String protocol = theMsg.url.getProtocol();
+        
+        // getting a new crawler from the crawler pool
+        CrawlWorker theWorker = (CrawlWorker) this.crawlwerPool.borrowObject(protocol);
+        if (theWorker != null) theWorker.execute(theMsg);        
+    }
+    
     public void run() {
 
         while (!this.stopped && !Thread.interrupted()) {
@@ -149,12 +158,8 @@ public final class plasmaCrawlLoader extends Thread {
                 // getting a new message from the crawler queue
                 plasmaCrawlLoaderMessage theMsg = this.theQueue.waitForMessage();
 
-                // TODO: getting the protocol of the next URL                
-                String protocol = theMsg.url.getProtocol();
-                
-                // getting a new crawler from the crawler pool
-                CrawlWorker theWorker = (CrawlWorker) this.crawlwerPool.borrowObject(protocol);
-                if (theWorker != null) theWorker.execute(theMsg);
+                // start new crawl job
+                this.execute(theMsg);
 
             } catch (InterruptedException e) {
                 Thread.interrupted();
@@ -177,26 +182,81 @@ public final class plasmaCrawlLoader extends Thread {
         }
         
     }
-
-    public void loadParallel(
+    
+    public plasmaHTCache.Entry loadSync(
             URL url, 
-            String name,
+            String urlName,
             String referer, 
             String initiator, 
             int depth, 
-            plasmaCrawlProfile.entry profile) {
+            plasmaCrawlProfile.entry profile,
+            int timeout
+    ) {
+
+        plasmaHTCache.Entry result = null;
+        if (!this.crawlwerPool.isClosed) {            
+            int crawlingPriority = 5;
+
+            // creating a new crawler queue object
+            plasmaCrawlLoaderMessage theMsg = new plasmaCrawlLoaderMessage(
+                    url, 
+                    urlName, 
+                    referer, 
+                    initiator, 
+                    depth, 
+                    profile, 
+                    crawlingPriority,
+                    true,
+                    timeout
+            );
+
+
+            try {
+                // start new crawl job
+                this.execute(theMsg);
+
+                // wait for the crawl job result
+                result = theMsg.waitForResult();
+
+            } catch (Exception e) {
+                this.log.logSevere("plasmaCrawlLoader.loadSync", e);
+            }
+        }        
+
+        // return the result
+        return result;
+    }
+
+    public void loadAsync(
+            URL url, 
+            String urlName,
+            String referer, 
+            String initiator, 
+            int depth, 
+            plasmaCrawlProfile.entry profile
+    ) {
 
         if (!this.crawlwerPool.isClosed) {            
             int crawlingPriority = 5;
             
             // creating a new crawler queue object
-            plasmaCrawlLoaderMessage theMsg = new plasmaCrawlLoaderMessage(url, name, referer, initiator, depth, profile, crawlingPriority);
+            plasmaCrawlLoaderMessage theMsg = new plasmaCrawlLoaderMessage(
+                    url,                // url
+                    urlName,            // url name
+                    referer,            // referer URL
+                    initiator,          // crawling initiator peer
+                    depth,              // crawling depth
+                    profile,            // crawling profile
+                    crawlingPriority,   // crawling priority
+                    false,              // only download documents whose mimetypes are enabled for the crawler
+                    -1                  // use default crawler timeout
+            );
             
             // adding the message to the queue
             try  {
                 this.theQueue.addMessage(theMsg);
             } catch (InterruptedException e) {
-                this.log.logSevere("plasmaCrawlLoader.loadParallel", e);
+                this.log.logSevere("plasmaCrawlLoader.loadAsync", e);
             }
         }
     }

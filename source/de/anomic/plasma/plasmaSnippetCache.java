@@ -419,18 +419,18 @@ public class plasmaSnippetCache {
     }
     
     public plasmaHTCache.Entry loadResourceFromWeb(URL url, int socketTimeout) throws IOException {
-        return CrawlWorker.load(
-            url,
-            "",
-            null, 
-            null, 
-            0, 
-            null,
-            socketTimeout,
-            this.sb.remoteProxyConfig,
-            this.cacheManager,
-            true,
-            this.log);
+        
+        plasmaHTCache.Entry result = this.sb.cacheLoader.loadSync(
+                url, 
+                "",
+                null, 
+                null, 
+                0, 
+                null,
+                socketTimeout
+        );
+        
+        return result;
     }
     
     public void fetch(plasmaSearchResult acc, Set queryhashes, String urlmask, int fetchcount, long maxTime) {
