@@ -285,13 +285,16 @@ public final class plasmaCrawlStacker {
         }
         
         // check if ip is local ip address
-        checkInterruption();
+        checkInterruption();        
         InetAddress hostAddress = httpc.dnsResolve(nexturl.getHost());
         if (hostAddress == null) {
-            reason = plasmaCrawlEURL.DENIED_UNKNOWN_HOST;
-            this.log.logFine("Unknown host in URL '" + nexturlString + "'. " +
-                    "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
-            return reason;                
+            // if a http proxy is configured name resolution may not work
+            if (this.sb.remoteProxyConfig == null || !this.sb.remoteProxyConfig.useProxy()) {
+                reason = plasmaCrawlEURL.DENIED_UNKNOWN_HOST;
+                this.log.logFine("Unknown host in URL '" + nexturlString + "'. " +
+                        "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
+                return reason;                
+            }
         } else if (hostAddress.isSiteLocalAddress()) {
             reason = plasmaCrawlEURL.DENIED_PRIVATE_IP_ADDRESS;
             this.log.logFine("Host in URL '" + nexturlString + "' has private IP address. " +

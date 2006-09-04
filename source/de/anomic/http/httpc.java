@@ -622,21 +622,22 @@ public final class httpc {
             this.adressed_host = server;
             this.adressed_port = port;
             this.target_virtual_host = vhost;
-            InetAddress hostip;
-//            if ((server.equals("localhost")) || (server.equals("127.0.0.1")) || (server.startsWith("192.168.")) || (server.startsWith("10."))) {
-//                hostip = server;
-//            } else {
-                hostip = dnsResolve(server);
-                if (hostip == null) throw new UnknownHostException(server);
-//            }
-
+            
             // creating a socket
             this.socket = (ssl) 
                         ? theSSLSockFactory.createSocket()
                         : new Socket();
             
             // creating a socket address
-            InetSocketAddress address = new InetSocketAddress(hostip, port);
+            InetSocketAddress address = null;
+            if (!this.remoteProxyUse) {
+                // only try to resolve the address if we are not using a proxy
+                InetAddress hostip = dnsResolve(server);
+                if (hostip == null) throw new UnknownHostException(server);
+                address = new InetSocketAddress(hostip, port);
+            } else {
+                address = new InetSocketAddress(server,port);
+            }            
 
             // trying to establish a connection to the address
             this.socket.connect(address,timeout);
