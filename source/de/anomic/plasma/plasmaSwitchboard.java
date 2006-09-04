@@ -839,8 +839,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * ========================================================================= */
         InetAddress hostAddress = httpc.dnsResolve(entry.url.getHost());
         if (hostAddress == null) {
-            this.log.logFine("Unknown host in URL '" + entry.url + "'. Will not be indexed.");
-            doIndexing = false;             
+            if (this.remoteProxyConfig == null || !this.remoteProxyConfig.useProxy()) {
+                this.log.logFine("Unknown host in URL '" + entry.url + "'. Will not be indexed.");
+                doIndexing = false;             
+            }
         } else if (hostAddress.isSiteLocalAddress()) {
             this.log.logFine("Host in URL '" + entry.url + "' has private ip address. Will not be indexed.");
             doIndexing = false;               
