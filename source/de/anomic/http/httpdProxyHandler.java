@@ -629,8 +629,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     res.responseHeader);
             
             String storeError = cacheEntry.shallStoreCacheForProxy();
-            boolean storeHTCache = cacheEntry.profile.storeHTCache();
-            boolean isSupportedContent = plasmaParser.supportedContent(plasmaParser.PARSER_MODE_PROXY,cacheEntry.url(),cacheEntry.responseHeader.mime());
+            boolean storeHTCache = cacheEntry.profile().storeHTCache();
+            boolean isSupportedContent = plasmaParser.supportedContent(plasmaParser.PARSER_MODE_PROXY,cacheEntry.url(),cacheEntry.responseHeader().mime());
             if (
                     /*
                      * Now we store the response into the htcache directory if 
@@ -655,7 +655,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
                         //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                        cacheEntry.cacheArray = cacheArray;
+                        cacheEntry.setCacheArray(cacheArray);
                         cacheManager.push(cacheEntry);
                         conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     } else if (sizeBeforeDelete == cacheArray.length) {
@@ -667,7 +667,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     } else {
                         // before we came here we deleted a cache entry
                         //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                        cacheEntry.cacheArray = cacheArray;
+                        cacheEntry.setCacheArray(cacheArray);
                         cacheManager.push(cacheEntry); // necessary update, write response header to cache
                         conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
                     }

@@ -131,7 +131,7 @@ public class ViewFile {
                     plasmaHTCache.Entry entry = sb.snippetCache.loadResourceFromWeb(url, 5000);                 
                     
                     if (entry != null) {
-                        resHeader = entry.responseHeader;
+                        resHeader = entry.responseHeader();
                     }                    
                     
                     resource = sb.cacheManager.loadResource(url);

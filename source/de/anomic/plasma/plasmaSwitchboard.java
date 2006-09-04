@@ -813,8 +813,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * 
          * Testing if the content type is supported by the available parsers
          * ========================================================================= */
-        boolean isSupportedContent = (entry.responseHeader != null) &&
-                                     plasmaParser.supportedContent(entry.url(),entry.responseHeader.mime());
+        boolean isSupportedContent = (entry.responseHeader() != null) &&
+                                     plasmaParser.supportedContent(entry.url(),entry.responseHeader().mime());
         
         /* =========================================================================
          * INDEX CONTROL HEADER
@@ -863,8 +863,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 (doIndexing && isSupportedContent)
         ) {
             // store response header
-            if (entry.responseHeader != null) {
-                this.cacheManager.storeHeader(entry.urlHash(), entry.responseHeader);
+            if (entry.responseHeader() != null) {
+                this.cacheManager.storeHeader(entry.urlHash(), entry.responseHeader());
                 this.log.logInfo("WROTE HEADER for " + entry.cacheFile());
             }        
             
