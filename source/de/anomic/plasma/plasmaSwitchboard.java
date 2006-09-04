@@ -893,10 +893,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             
             // enqueue for further crawling
-            enQueue(this.sbQueue.newEntry(entry.url, indexURL.urlHash(entry.referrerURL()),
-            entry.requestHeader.ifModifiedSince(), entry.requestHeader.containsKey(httpHeader.COOKIE),
-            entry.initiator(), entry.depth, entry.profile.handle(),
-            entry.name()
+            enQueue(this.sbQueue.newEntry(
+                    entry.url, 
+                    indexURL.urlHash(entry.referrerURL()),
+                    entry.requestHeader.ifModifiedSince(), 
+                    entry.requestHeader.containsKey(httpHeader.COOKIE),
+                    entry.initiator(), 
+                    entry.depth, 
+                    entry.profile.handle(),
+                    entry.name()
             ));
         } else {
             if (!entry.profile.storeHTCache() && entry.cacheFile.exists()) {

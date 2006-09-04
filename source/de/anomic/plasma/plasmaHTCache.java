@@ -733,11 +733,16 @@ public final class plasmaHTCache {
         );
     }
 
-    public Entry(Date initDate, int depth, URL url, String name,
-                 httpHeader requestHeader,
-                 String responseStatus, httpHeader responseHeader,
-                 String initiator,
-                 plasmaCrawlProfile.entry profile) {
+    public Entry(Date initDate, 
+            int depth, 
+            URL url, 
+            String name,
+            httpHeader requestHeader,
+            String responseStatus, 
+            httpHeader responseHeader,
+            String initiator,
+            plasmaCrawlProfile.entry profile
+    ) {
 
         // normalize url
 //      serverLog.logFine("PLASMA", "Entry: URL=" + url.toString());

@@ -3,7 +3,7 @@
 //part of YaCy
 //(C) by Michael Peter Christen; mc@anomic.de
 //first published on http://www.anomic.de
-//Frankfurt, Germany, 2004
+//Frankfurt, Germany, 2006
 //
 // $LastChangedDate: 2006-08-12 16:28:14 +0200 (Sa, 12 Aug 2006) $
 // $LastChangedRevision: 2397 $

@@ -3,7 +3,7 @@
 // part of YACY
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
+// Frankfurt, Germany, 2006
 //
 // This file ist contributed by Martin Thelian
 //

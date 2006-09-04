@@ -83,7 +83,7 @@ public final class plasmaCrawlLoader extends Thread {
 
         // supported protocols 
         // TODO: change this, e.g. by loading settings from file
-        this.supportedProtocols = new HashSet(Arrays.asList(new String[]{"http","https","ftp"}));
+        this.supportedProtocols = new HashSet(Arrays.asList(new String[]{"http","https" /* ,"ftp" */}));
         
         // configuring the crawler messagequeue
         this.theQueue = new plasmaCrawlerMsgQueue();

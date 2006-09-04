@@ -597,7 +597,7 @@ public class ftpc {
     }
   }
 
-    private boolean isFolder(String path) {
+    public boolean isFolder(String path) {
       try {
         send("CWD " + path);
         String reply = receive();
