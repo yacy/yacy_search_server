@@ -319,7 +319,10 @@ public class URL {
           new String[]{"http://www.anomic.de/home/index.html", "../test"},
           new String[]{"http://www.anomic.de/home/index.html", "mailto:abcdefg@nomailnomail.com"},
           new String[]{null, "news:de.test"},
-          new String[]{"http://www.anomic.de/home", "news:de.test"}
+          new String[]{"http://www.anomic.de/home", "news:de.test"},
+          new String[]{"http://www.anomic.de/home", "ftp://ftp.anomic.de/src"},
+          new String[]{null, "ftp://ftp.delegate.org/"},
+          new String[]{"http://www.anomic.de/home", "ftp://ftp.delegate.org/"}
         };
         String environment, url;
         de.anomic.net.URL aURL = null;
