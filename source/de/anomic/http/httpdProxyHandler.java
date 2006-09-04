@@ -630,7 +630,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             String storeError = cacheEntry.shallStoreCacheForProxy();
             boolean storeHTCache = cacheEntry.profile.storeHTCache();
-            boolean isSupportedContent = plasmaParser.supportedContent(plasmaParser.PARSER_MODE_PROXY,cacheEntry.url,cacheEntry.responseHeader.mime());
+            boolean isSupportedContent = plasmaParser.supportedContent(plasmaParser.PARSER_MODE_PROXY,cacheEntry.url(),cacheEntry.responseHeader.mime());
             if (
                     /*
                      * Now we store the response into the htcache directory if 

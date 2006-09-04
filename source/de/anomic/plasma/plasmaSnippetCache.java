@@ -173,7 +173,7 @@ public class plasmaSnippetCache {
             if ((fetchOnline) && (resource == null)) {
                 plasmaHTCache.Entry entry = loadResourceFromWeb(url, 5000);
                 if (entry != null) {
-                    header = entry.responseHeader;
+                    header = entry.responseHeader();
                 }
                 resource = cacheManager.loadResource(url);
                 source = SOURCE_WEB;

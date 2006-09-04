@@ -200,7 +200,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 htCache = createCacheEntry(requestDate, requestHeader, res); 
                 
                 // aborting download if content is to long ...
-                if (htCache.cacheFile.getAbsolutePath().length() > serverSystem.maxPathLength) {
+                if (htCache.cacheFile().getAbsolutePath().length() > serverSystem.maxPathLength) {
                     remote.close();
                     this.log.logInfo("REJECTED URL " + this.url.toString() + " because path too long '" + this.cacheManager.cachePath.getAbsolutePath() + "'");
                     addURLtoErrorDB(plasmaCrawlEURL.DENIED_CACHEFILE_PATH_TOO_LONG);                    
@@ -208,11 +208,11 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 }
 
                 // reserve cache entry
-                if (!htCache.cacheFile.getCanonicalPath().startsWith(this.cacheManager.cachePath.getCanonicalPath())) {
+                if (!htCache.cacheFile().getCanonicalPath().startsWith(this.cacheManager.cachePath.getCanonicalPath())) {
                     // if the response has not the right file type then reject file
                     remote.close();
                     this.log.logInfo("REJECTED URL " + this.url.toString() + " because of an invalid file path ('" +
-                                htCache.cacheFile.getCanonicalPath() + "' does not start with '" +
+                                htCache.cacheFile().getCanonicalPath() + "' does not start with '" +
                                 this.cacheManager.cachePath.getAbsolutePath() + "').");
                     addURLtoErrorDB(plasmaCrawlEURL.DENIED_INVALID_CACHEFILE_PATH);
                     return (htCache = null);
@@ -231,7 +231,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                         try {
                             fos = new FileOutputStream(cacheFile);
                             res.writeContent(fos); // superfluous write to array
-                            htCache.cacheArray = null;
+                            htCache.setCacheArray(null);
                             this.cacheManager.writeFileAnnouncement(cacheFile);
                             //htCache.cacheArray = res.writeContent(fos); // writes in cacheArray and cache file
                         } finally {

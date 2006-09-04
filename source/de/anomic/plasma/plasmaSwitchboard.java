@@ -814,7 +814,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * Testing if the content type is supported by the available parsers
          * ========================================================================= */
         boolean isSupportedContent = (entry.responseHeader != null) &&
-                                     plasmaParser.supportedContent(entry.url,entry.responseHeader.mime());
+                                     plasmaParser.supportedContent(entry.url(),entry.responseHeader.mime());
         
         /* =========================================================================
          * INDEX CONTROL HEADER
@@ -823,10 +823,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * yacy to index the response returned as answer to a request
          * ========================================================================= */
         boolean doIndexing = true;        
-        if (entry.requestHeader != null) {
+        if (entry.requestHeader() != null) {
             if (
-            (entry.requestHeader.containsKey(httpHeader.X_YACY_INDEX_CONTROL)) &&
-            (((String) entry.requestHeader.get(httpHeader.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX"))
+            (entry.requestHeader().containsKey(httpHeader.X_YACY_INDEX_CONTROL)) &&
+            (((String) entry.requestHeader().get(httpHeader.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX"))
             ) {
                 doIndexing = false;
             }
@@ -837,17 +837,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * 
          * check if ip is local ip address
          * ========================================================================= */
-        InetAddress hostAddress = httpc.dnsResolve(entry.url.getHost());
+        InetAddress hostAddress = httpc.dnsResolve(entry.url().getHost());
         if (hostAddress == null) {
             if (this.remoteProxyConfig == null || !this.remoteProxyConfig.useProxy()) {
-                this.log.logFine("Unknown host in URL '" + entry.url + "'. Will not be indexed.");
+                this.log.logFine("Unknown host in URL '" + entry.url() + "'. Will not be indexed.");
                 doIndexing = false;             
             }
         } else if (hostAddress.isSiteLocalAddress()) {
-            this.log.logFine("Host in URL '" + entry.url + "' has private ip address. Will not be indexed.");
+            this.log.logFine("Host in URL '" + entry.url() + "' has private ip address. Will not be indexed.");
             doIndexing = false;               
         } else if (hostAddress.isLoopbackAddress()) {
-            this.log.logFine("Host in URL '" + entry.url + "' has loopback ip address. Will not be indexed.");
+            this.log.logFine("Host in URL '" + entry.url() + "' has loopback ip address. Will not be indexed.");
             doIndexing = false;                  
         }
         
@@ -859,25 +859,25 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * b) the content should be indexed
          * ========================================================================= */        
         if (
-                (entry.profile.storeHTCache()) ||
+                (entry.profile().storeHTCache()) ||
                 (doIndexing && isSupportedContent)
         ) {
             // store response header
             if (entry.responseHeader != null) {
-                this.cacheManager.storeHeader(entry.nomalizedURLHash, entry.responseHeader);
-                this.log.logInfo("WROTE HEADER for " + entry.cacheFile);
+                this.cacheManager.storeHeader(entry.urlHash(), entry.responseHeader);
+                this.log.logInfo("WROTE HEADER for " + entry.cacheFile());
             }        
             
             // work off unwritten files
-            if (entry.cacheArray == null)  {
+            if (entry.cacheArray() == null)  {
                 //this.log.logFine("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
             } else {
                 String error = entry.shallStoreCacheForProxy();
                 if (error == null) {
-                    this.cacheManager.writeFile(entry.url, entry.cacheArray);
-                    this.log.logFine("WROTE FILE (" + entry.cacheArray.length + " bytes) for " + entry.cacheFile);
+                    this.cacheManager.writeFile(entry.url(), entry.cacheArray());
+                    this.log.logFine("WROTE FILE (" + entry.cacheArray().length + " bytes) for " + entry.cacheFile());
                 } else {
-                    this.log.logFine("WRITE OF FILE " + entry.cacheFile + " FORBIDDEN: " + error);
+                    this.log.logFine("WRITE OF FILE " + entry.cacheFile() + " FORBIDDEN: " + error);
                 }
             }
         }
@@ -888,24 +888,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (doIndexing && isSupportedContent){
             
             // registering the cachefile as in use
-            if (entry.cacheFile.exists()) {
-                plasmaHTCache.filesInUse.add(entry.cacheFile);
+            if (entry.cacheFile().exists()) {
+                plasmaHTCache.filesInUse.add(entry.cacheFile());
             }
             
             // enqueue for further crawling
             enQueue(this.sbQueue.newEntry(
-                    entry.url, 
+                    entry.url(), 
                     indexURL.urlHash(entry.referrerURL()),
-                    entry.requestHeader.ifModifiedSince(), 
-                    entry.requestHeader.containsKey(httpHeader.COOKIE),
+                    entry.requestHeader().ifModifiedSince(), 
+                    entry.requestHeader().containsKey(httpHeader.COOKIE),
                     entry.initiator(), 
-                    entry.depth, 
-                    entry.profile.handle(),
+                    entry.depth(), 
+                    entry.profile().handle(),
                     entry.name()
             ));
         } else {
-            if (!entry.profile.storeHTCache() && entry.cacheFile.exists()) {
-                this.cacheManager.deleteFile(entry.url);                
+            if (!entry.profile().storeHTCache() && entry.cacheFile().exists()) {
+                this.cacheManager.deleteFile(entry.url());                
             }
         }
         

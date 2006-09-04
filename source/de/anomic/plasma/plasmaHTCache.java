@@ -701,23 +701,23 @@ public final class plasmaHTCache {
     public final class Entry {
 
     // the class objects
-    public Date                     initDate;       // the date when the request happened; will be used as a key
-    public int                      depth;          // the depth of prefetching
-    public httpHeader               requestHeader;  // we carry also the header to prevent too many file system access
-    public String                   responseStatus;
-    public httpHeader               responseHeader; // we carry also the header to prevent too many file system access
-    public File                     cacheFile;      // the cache file
-    public byte[]                   cacheArray;     // or the cache as byte-array
-    public URL                      url;
-    public String                   name;           // the name of the link, read as anchor from an <a>-tag
-    public String                   nomalizedURLHash;
-    public String                   nomalizedURLString;
-    public int                      status;         // cache load/hit/stale etc status
-    public Date                     lastModified;
-    public char                     doctype;
-    public String                   language;
-    public plasmaCrawlProfile.entry profile;
-    private String                  initiator;
+    private Date                     initDate;       // the date when the request happened; will be used as a key
+    private int                      depth;          // the depth of prefetching
+    private httpHeader               requestHeader;  // we carry also the header to prevent too many file system access
+    private String                   responseStatus;
+    private httpHeader               responseHeader; // we carry also the header to prevent too many file system access
+    private File                     cacheFile;      // the cache file
+    private byte[]                   cacheArray;     // or the cache as byte-array
+    private URL                      url;
+    private String                   name;           // the name of the link, read as anchor from an <a>-tag
+    private String                   nomalizedURLHash;
+    private String                   nomalizedURLString;
+    private int                      status;         // cache load/hit/stale etc status
+    private Date                     lastModified;
+    private char                     doctype;
+    private String                   language;
+    private plasmaCrawlProfile.entry profile;
+    private String                   initiator;
 
     protected Object clone() throws CloneNotSupportedException {
         return new Entry(
@@ -793,6 +793,19 @@ public final class plasmaHTCache {
     public String name() {
         return this.name;
     }
+    
+    public URL url() {
+        return this.url;
+    }
+    
+    public String urlHash() {
+        return this.nomalizedURLHash;
+    }
+    
+    public plasmaCrawlProfile.entry profile() {
+        return this.profile;
+    }
+    
     public String initiator() {
         return this.initiator;
     }
@@ -804,6 +817,10 @@ public final class plasmaHTCache {
         return this.cacheArray.length;
     }
 
+    public int depth() {
+        return this.depth;
+    }
+    
     public URL referrerURL() {
         if (this.requestHeader == null) return null;
         try {
@@ -813,6 +830,26 @@ public final class plasmaHTCache {
         }
     }
 
+    public File cacheFile() {
+        return this.cacheFile;
+    }
+    
+    public void setCacheArray(byte[] data) {
+        this.cacheArray = data;
+    }
+    
+    public byte[] cacheArray() {
+        return this.cacheArray;
+    }
+    
+    public httpHeader requestHeader() {
+        return this.requestHeader;
+    }
+    
+    public httpHeader responseHeader() {
+        return this.responseHeader;
+    }
+    
     /*
     public boolean update() {
         return ((status == CACHE_FILL) || (status == CACHE_STALE_RELOAD_GOOD));
