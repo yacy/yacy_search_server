@@ -92,7 +92,7 @@ public class IndexCreateWWWLocalQueue_p {
                 if (pattern.equals(".*")) {
                     c = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
                     switchboard.urlPool.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
-                    switchboard.cleanProfiles();
+                    try { switchboard.cleanProfiles(); } catch (InterruptedException e) {/* ignore this */}
                 } else{
                     Pattern compiledPattern = null;
                     try {

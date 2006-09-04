@@ -81,7 +81,7 @@ public class IndexCreateWWWGlobalQueue_p {
             if (post.containsKey("clearcrawlqueue")) {
                 int c = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
                 switchboard.urlPool.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
-                switchboard.cleanProfiles();
+                try { switchboard.cleanProfiles(); } catch (InterruptedException e) { /* Ignore this */}
                 /*
                 int c = 0;
                 while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) > 0) {
