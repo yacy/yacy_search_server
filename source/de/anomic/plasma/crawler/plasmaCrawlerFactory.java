@@ -6,7 +6,6 @@ import org.apache.commons.pool.KeyedPoolableObjectFactory;
 
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.crawler.http.CrawlWorker;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaCrawlerFactory implements KeyedPoolableObjectFactory {
@@ -62,7 +61,7 @@ public final class plasmaCrawlerFactory implements KeyedPoolableObjectFactory {
         } );
 
         // instantiating class
-        CrawlWorker theCrawlWorker = (CrawlWorker) classConstructor.newInstance(new Object[] {
+        plasmaCrawlWorker theCrawlWorker = (plasmaCrawlWorker) classConstructor.newInstance(new Object[] {
               this.theThreadGroup,
               this.thePool,
               this.sb,
@@ -86,13 +85,13 @@ public final class plasmaCrawlerFactory implements KeyedPoolableObjectFactory {
      */
     public void destroyObject(Object key, Object obj) {
         if (obj == null) return;
-        if (obj instanceof CrawlWorker) {
-            CrawlWorker theWorker = (CrawlWorker) obj;
+        if (obj instanceof plasmaCrawlWorker) {
+            plasmaCrawlWorker theWorker = (plasmaCrawlWorker) obj;
             synchronized(theWorker) {
-                theWorker.destroyed = true;
-                theWorker.setName(plasmaCrawlWorker.threadBaseName + "_destroyed");
+                theWorker.setDestroyed(true);
+                theWorker.setNameTrailer("_destroyed");
                 theWorker.setStopped(true);
-                theWorker.interrupt();
+                ((Thread)theWorker).interrupt();
             }
         }
     }

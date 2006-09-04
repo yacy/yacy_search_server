@@ -197,7 +197,7 @@ public class PerformanceQueues_p {
             GenericKeyedObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
             int maxActive = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
             int maxIdle = Integer.parseInt(post.get("Crawler Pool_maxIdle","4"));
-            int minIdle = Integer.parseInt(post.get("Crawler Pool_minIdle","0"));
+            int minIdle = 0; // Integer.parseInt(post.get("Crawler Pool_minIdle","0"));
             
             //crawlerPoolConfig.minIdle = (minIdle > maxIdle) ? maxIdle/2 : minIdle;
             crawlerPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;

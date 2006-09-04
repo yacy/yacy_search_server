@@ -48,10 +48,10 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.net.URL;
+import de.anomic.plasma.crawler.plasmaCrawlWorker;
 import de.anomic.plasma.crawler.plasmaCrawlerFactory;
 import de.anomic.plasma.crawler.plasmaCrawlerMsgQueue;
 import de.anomic.plasma.crawler.plasmaCrawlerPool;
-import de.anomic.plasma.crawler.http.CrawlWorker;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaCrawlLoader extends Thread {
@@ -147,8 +147,12 @@ public final class plasmaCrawlLoader extends Thread {
         String protocol = theMsg.url.getProtocol();
         
         // getting a new crawler from the crawler pool
-        CrawlWorker theWorker = (CrawlWorker) this.crawlwerPool.borrowObject(protocol);
-        if (theWorker != null) theWorker.execute(theMsg);        
+        plasmaCrawlWorker theWorker = (plasmaCrawlWorker) this.crawlwerPool.borrowObject(protocol);
+        if (theWorker == null) {
+            this.log.logWarning("Unsupported protocol '" + protocol + "' in url " + theMsg.url);
+        } else {
+            theWorker.execute(theMsg);            
+        }
     }
     
     public void run() {

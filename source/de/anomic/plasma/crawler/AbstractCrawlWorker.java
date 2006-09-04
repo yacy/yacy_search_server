@@ -27,6 +27,9 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
     public boolean destroyed = false;
     protected boolean running = false;
     protected boolean stopped = false;
+    /**
+     * Specifies that the execution of the current crawl job has finished
+     */
     protected boolean done = false;       
     
     /* ============================================================
@@ -86,6 +89,14 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
         this.log = theLog;
     }
         
+    public void setNameTrailer(String trailer) {
+        this.setName(plasmaCrawlWorker.threadBaseName + trailer);
+    }
+    
+    public plasmaCrawlLoaderMessage getMessage() {
+        return this.theMsg;
+    }
+    
     public abstract void close();
     
     public void run() {
@@ -172,6 +183,10 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
     
     public void setStopped(boolean isStopped) {
         this.stopped = isStopped;           
+    }
+    
+    public void setDestroyed(boolean isDestroyed) {
+        this.destroyed = isDestroyed;
     }
 
     public boolean isRunning() {

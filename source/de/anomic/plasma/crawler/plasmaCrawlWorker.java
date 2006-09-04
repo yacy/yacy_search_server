@@ -10,6 +10,13 @@ public interface plasmaCrawlWorker {
 
     public static final String threadBaseName = "CrawlerWorker";
 
+    public void setNameTrailer(String trailer);
+    
+    public void setStopped(boolean isStopped);
+    public void setDestroyed(boolean isDestroyed);
+    
+    public plasmaCrawlLoaderMessage getMessage();
+    
     public void reset();
     public void execute();
     public void execute(plasmaCrawlLoaderMessage theNewMsg);

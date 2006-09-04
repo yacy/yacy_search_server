@@ -47,7 +47,7 @@ import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.crawler.http.CrawlWorker;
+import de.anomic.plasma.crawler.plasmaCrawlWorker;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -74,8 +74,8 @@ public class IndexCreateLoaderQueue_p {
             yacySeed initiator;
             int i, count = 0;
             for (i = 0; i < threadCount; i++)  {
-                CrawlWorker theWorker = (CrawlWorker)threadList[i];
-                plasmaCrawlLoaderMessage theMsg = theWorker.theMsg;
+                plasmaCrawlWorker theWorker = (plasmaCrawlWorker)threadList[i];
+                plasmaCrawlLoaderMessage theMsg = theWorker.getMessage();
                 if (theMsg == null) continue;
                 
                 initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
