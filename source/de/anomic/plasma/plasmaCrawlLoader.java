@@ -44,6 +44,9 @@
 
 package de.anomic.plasma;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -61,6 +64,8 @@ public final class plasmaCrawlLoader extends Thread {
     private final plasmaHTCache   cacheManager;
     private final serverLog       log;   
 
+    private HashSet supportedProtocols;
+    
     private final plasmaCrawlerMsgQueue theQueue;
     private final plasmaCrawlerPool crawlwerPool;
     private GenericKeyedObjectPool.Config crawlerPoolConfig = null; 
@@ -76,6 +81,10 @@ public final class plasmaCrawlLoader extends Thread {
         this.cacheManager    = theCacheManager;
         this.log             = theLog;
 
+        // supported protocols 
+        // TODO: change this, e.g. by loading settings from file
+        this.supportedProtocols = new HashSet(Arrays.asList(new String[]{"http","https","ftp"}));
+        
         // configuring the crawler messagequeue
         this.theQueue = new plasmaCrawlerMsgQueue();
 
@@ -124,11 +133,11 @@ public final class plasmaCrawlLoader extends Thread {
     
     public boolean isSupportedProtocol(String protocol) {
         if ((protocol == null) || (protocol.length() == 0)) return false;
-        
-        // TODO: read the supported protocols out from a config file
-        protocol = protocol.trim().toLowerCase();
-        return protocol.equals("http") ||
-               protocol.equals("https");                
+        return this.supportedProtocols.contains(protocol.trim().toLowerCase());
+    }
+    
+    public HashSet getSupportedProtocols() {
+        return (HashSet) this.supportedProtocols.clone();
     }
 
     public void close() {
@@ -154,6 +163,9 @@ public final class plasmaCrawlLoader extends Thread {
     private void execute(plasmaCrawlLoaderMessage theMsg) throws Exception {
         // getting the protocol of the next URL                
         String protocol = theMsg.url.getProtocol();
+        
+        // TODO: remove this
+        if (protocol.equals("https")) protocol = "http";
         
         // getting a new crawler from the crawler pool
         plasmaCrawlWorker theWorker = (plasmaCrawlWorker) this.crawlwerPool.borrowObject(protocol);

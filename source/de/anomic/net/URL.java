@@ -278,8 +278,8 @@ public class URL {
             matcher.reset(path);
         }
         
-        if (defaultPort) { return this.protocol + "://" + this.getHost().toLowerCase() + path; }
-        return this.protocol + "://" + this.getHost().toLowerCase() + ((defaultPort) ? "" : (":" + this.port)) + path;
+        if (defaultPort) { return this.protocol + "://" + (this.userInfo!=null?this.userInfo+"@":"") + this.getHost().toLowerCase() + path; }
+        return this.protocol + "://" + (this.userInfo!=null?this.userInfo+"@":"")+ this.getHost().toLowerCase() + ((defaultPort) ? "" : (":" + this.port)) + path;
     }
     
     public boolean equals(URL other) {

@@ -140,7 +140,8 @@ public class IndexCreate_p {
                         crawlingStart = crawlingStart.trim();
                         
                         // adding the prefix http:// if necessary
-                        if (!(crawlingStart.startsWith("http"))) crawlingStart = "http://" + crawlingStart;
+                        int pos = crawlingStart.indexOf("://");
+                        if (pos == -1) crawlingStart = "http://" + crawlingStart;
 
                         // normalizing URL
                         try {crawlingStart = new URL(crawlingStart).toNormalform();} catch (MalformedURLException e1) {}
