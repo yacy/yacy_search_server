@@ -49,6 +49,7 @@ package de.anomic.plasma.crawler.ftp;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -147,7 +148,7 @@ public class CrawlWorker extends AbstractCrawlWorker implements
         }
         
         // creating a cache file object
-        File cacheFile = cacheManager.getCachePath(this.url);
+        File cacheFile = this.cacheManager.getCachePath(this.url);
         cacheFile.getParentFile().mkdirs();
         
         ftpClient.exec("cd \"" + fullPath + "\"", false);
@@ -157,8 +158,9 @@ public class CrawlWorker extends AbstractCrawlWorker implements
             StringBuffer dirList = ftpClient.dirhtml(host, (port==-1)?21:port, fullPath, userName, userPwd);
             
             // write it into a file
-            PrintWriter writer = new PrintWriter(cacheFile);
+            PrintWriter writer = new PrintWriter(new FileOutputStream(cacheFile),false);
             writer.write(dirList.toString());
+            writer.flush();
             writer.close();
         } else {
             // download the remote file
