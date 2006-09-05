@@ -114,7 +114,10 @@ public class ftpc {
 
   String[] cmd;
 
+  // session parameters
   File currentPath;
+  String account, password, host, remotemessage, remotegreeting, remotesystem;
+  int port;
   
   public ftpc() {
       this(System.in, System.out, System.err);
@@ -136,6 +139,13 @@ public class ftpc {
 	  this.currentPath = new File(this.currentPath.getCanonicalPath());
       } catch (IOException e) {}
       
+      this.account = null;
+      this.password = null;
+      this.host = null;
+      this.port = -1;
+      this.remotemessage = null;
+      this.remotegreeting = null;
+      this.remotesystem = null;
   }
 
     public void shell(String server) {
@@ -1200,7 +1210,7 @@ cd ..
     return true;
   }
   
-  private String open(String host, int port) throws IOException {
+  private void open(String host, int port) throws IOException {
       if (ControlSocket != null) exec("close",false); // close any existing connections first
 
       ControlSocket = new Socket(host, port);
@@ -1209,7 +1219,10 @@ cd ..
       clientOutput = new DataOutputStream(new BufferedOutputStream(ControlSocket.getOutputStream()));
 
       // read and return server message
-      return receive();
+      this.host = host;
+      this.port = port;
+      this.remotemessage = receive();
+      if ((remotemessage != null) && (remotemessage.length() > 3)) remotemessage = remotemessage.substring(4); 
   }
 
   public boolean PROMPT() {
@@ -1756,14 +1769,19 @@ cd ..
   }
 
 
-  private String login(String account, String password) throws IOException {
+  private void login(String account, String password) throws IOException {
 
     // send user name
     send("USER " + account);
 
     String reply = receive();
     if (Integer.parseInt(reply.substring(0, 1)) == 4) throw new IOException(reply);
-    if (Integer.parseInt(reply.substring(0, 1)) == 2) return reply;
+    if (Integer.parseInt(reply.substring(0, 1)) == 2) {
+        this.account = account;
+        this.password = password;
+        this.remotegreeting = reply;
+        return;
+    }
 
     // send password
     send("PASS " + password);
@@ -1771,10 +1789,12 @@ cd ..
     reply = receive();
     if (Integer.parseInt(reply.substring(0, 1)) != 2) throw new IOException(reply);      
 
-    return reply;
+    this.account = account;
+    this.password = password;
+    this.remotegreeting = reply;
   }
 
-  public String sys() throws IOException {
+  public void sys() throws IOException {
     // send system command
     send("SYST");
 
@@ -1783,7 +1803,7 @@ cd ..
     if (Integer.parseInt(systemType.substring(0, 1)) != 2) throw new IOException(systemType);
 
     // exclude status code from reply 
-    return systemType.substring(4);
+    this.remotesystem = systemType.substring(4);
   }
 
 
@@ -1889,26 +1909,41 @@ cd ..
 	}
     }
     
-    public static StringBuffer dirhtml(String host, String remotePath) {
-        return dirhtml(host, 21, remotePath, "anonymous", "anomic");
+    public StringBuffer dirhtml(String remotePath) {
+        // returns a directory listing using an existing connection
+        try {
+            Vector list = list(remotePath, true);
+            if (this.remotesystem == null) sys();
+            String base = "ftp://" + ((account.equals("anonymous")) ? "" : (account + ":" + password + "@")) + host + ((port == 21) ? "" : (":" + port))  + ((remotePath.charAt(0) == '/') ? "" : "/") + remotePath;
+            
+            return dirhtml(base, this.remotemessage, this.remotegreeting, this.remotesystem, list);
+        } catch (java.security.AccessControlException e) {
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
     }
     
     public static StringBuffer dirhtml(String host, int port, String remotePath, String account, String password) {
+        // opens a new connection and returns a directory listing as html
         try {
             ftpc c = new ftpc(System.in, null, System.err);
-            String servermessage = c.open(host, port);
-            if ((servermessage != null) && (servermessage.length() > 3)) servermessage = servermessage.substring(4); 
-            String greeting = c.login(account, password);
-            String system = c.sys();
-            Vector list = c.list(remotePath, true);
-
+            c.open(host, port);
+            c.login(account, password);
+            c.sys();
+            StringBuffer page = c.dirhtml(remotePath);
             c.quit();
-            
-            //System.out.println("servermessage=" + servermessage);
-            //System.out.println("greeting=" + greeting);
-            
+            return page;
+        } catch (java.security.AccessControlException e) {
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    public static StringBuffer dirhtml(String base, String servermessage, String greeting, String system, Vector list) {
+        // this creates the html output from collected strings
             StringBuffer page = new StringBuffer(1024);
-            String base = "ftp://" + ((account.equals("anonymous")) ? "" : (account + ":" + password + "@")) + host + ((port == 21) ? "" : (":" + port))  + ((remotePath.charAt(0) == '/') ? "" : "/") + remotePath;
             String title = "Index of " + base;
 
             // find position of filename
@@ -1945,16 +1980,10 @@ cd ..
             page.append("  <hr>\n");
             page.append("  <pre>System info: \"" + system + "\"</pre>\n");
             page.append("</body></html>\n");
-            
-            //System.out.println(new String(page));
-            return page;
-        } catch (java.security.AccessControlException e) {
-            return null;
-        } catch (IOException e) {
-            return null;
-        }
-    }
 
+            return page;
+    }
+    
     public static void dirAnonymous(String host,
 				    String remotePath) {
 	dir(host, remotePath, "anonymous", "anomic");
