@@ -2,9 +2,10 @@
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
+// Frankfurt, Germany, 2002, 2004, 2006
 // main implementation finished: 28.05.2002
 // last major change: 06.05.2004
+// added html generation for directories: 5.9.2006
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -107,9 +108,6 @@ public class ftpc {
   // output and input streams for client control connection
   private BufferedReader   clientInput = null;
   private DataOutputStream clientOutput = null;
-
-  // server this client is connected to
-  private String account = null;
   
   // client prompt
   private String prompt = "ftp [local]>";
@@ -496,28 +494,11 @@ public class ftpc {
 
   public boolean DISCONNECT() {
     try {
-      // send delete command
-      send("QUIT");
-      
-      // read status reply
-      String reply = receive();
-      if (Integer.parseInt(reply.substring(0, 1)) != 2) throw new IOException(reply);
-
-      // cleanup
-      if (ControlSocket != null) {
-        clientOutput.close();
-        clientInput.close();
-        ControlSocket.close();
-      }
-
-      if (DataSocketActive != null) DataSocketActive.close();
-      if (DataSocketPassive != null) DataSocketPassive.close();
-      
+        quit();
       out.println(logPrefix + "---- Connection closed.");
     } catch (IOException e) {
       err.println(logPrefix + "---- Connection to server lost.");
     }
-    this.account = null;
     this.ControlSocket = null;
     this.DataSocketActive = null;
     this.DataSocketPassive = null;
@@ -527,6 +508,28 @@ public class ftpc {
     return true;
   }
 
+  private String quit() throws IOException {
+      
+        // send delete command
+        send("QUIT");
+        
+        // read status reply
+        String reply = receive();
+        if (Integer.parseInt(reply.substring(0, 1)) != 2) throw new IOException(reply);
+
+        // cleanup
+        if (ControlSocket != null) {
+          clientOutput.close();
+          clientInput.close();
+          ControlSocket.close();
+        }
+
+        if (DataSocketActive != null) DataSocketActive.close();
+        if (DataSocketPassive != null) DataSocketPassive.close();
+
+        return reply;
+    }
+  
   public boolean EXIT() {
     return QUIT();
   }
@@ -1176,7 +1179,6 @@ cd ..
       err.println(logPrefix + "---- Syntax: OPEN <host> [<port>]");
       return true;
     }
-    if (ControlSocket != null) exec("close",false); // close any existing connections first
     int port = 21;
     if (cmd.length == 3) {
       try {
@@ -1189,19 +1191,25 @@ cd ..
 	cmd[1] = cmd[1].substring(0,cmd[1].indexOf(":"));
     }
     try {
-      ControlSocket = new Socket(cmd[1], port);
-      ControlSocket.setSoTimeout(this.ControlSocketTimeout);
-      clientInput  = new BufferedReader(new InputStreamReader(ControlSocket.getInputStream()));
-      clientOutput = new DataOutputStream(new BufferedOutputStream(ControlSocket.getOutputStream()));
-
-      // read greeting
-      receive();    
+        open(cmd[1], port);
       out.println(logPrefix + "---- Connection to " + cmd[1] + " established.");
       prompt = "ftp [" + cmd[1] + "]>";
     } catch (IOException e) {
       err.println(logPrefix + "---- Error: connecting " + cmd[1] + " on port " + port + " failed.");
     }
     return true;
+  }
+  
+  private String open(String host, int port) throws IOException {
+      if (ControlSocket != null) exec("close",false); // close any existing connections first
+
+      ControlSocket = new Socket(host, port);
+      ControlSocket.setSoTimeout(this.ControlSocketTimeout);
+      clientInput  = new BufferedReader(new InputStreamReader(ControlSocket.getInputStream()));
+      clientOutput = new DataOutputStream(new BufferedOutputStream(ControlSocket.getOutputStream()));
+
+      // read and return server message
+      return receive();
   }
 
   public boolean PROMPT() {
@@ -1296,7 +1304,8 @@ cd ..
       return true;
     }
     try {
-      out.println(logPrefix + "---- Granted access for user " + login(cmd[1], cmd[2]) + ".");
+        login(cmd[1], cmd[2]);
+      out.println(logPrefix + "---- Granted access for user " + cmd[1] + ".");
     } catch (IOException e) {
       err.println(logPrefix + "---- Error: authorization of user " + cmd[1] + " failed.");
     }
@@ -1506,9 +1515,9 @@ cd ..
     clientOutput.write('\n');
     clientOutput.flush();
     if (buf.startsWith("PASS")) {
-	out.println(logPrefix + "> PASS ********");
+	if (out != null) out.println(logPrefix + "> PASS ********");
     } else {
-	out.println(logPrefix + "> " + buf);
+	if (out != null) out.println(logPrefix + "> " + buf);
     }
   }
 
@@ -1522,7 +1531,7 @@ cd ..
       // sanity check
       if (reply == null) throw new IOException("Server has presumably shut down the connection.");
 
-      out.println(logPrefix + "< " + reply);
+      if (out != null) out.println(logPrefix + "< " + reply);
       //serverResponse.addElement(reply);
       
       if (reply.length() >= 4 &&
@@ -1754,7 +1763,7 @@ cd ..
 
     String reply = receive();
     if (Integer.parseInt(reply.substring(0, 1)) == 4) throw new IOException(reply);
-    if (Integer.parseInt(reply.substring(0, 1)) == 2) return this.account = account;
+    if (Integer.parseInt(reply.substring(0, 1)) == 2) return reply;
 
     // send password
     send("PASS " + password);
@@ -1762,18 +1771,7 @@ cd ..
     reply = receive();
     if (Integer.parseInt(reply.substring(0, 1)) != 2) throw new IOException(reply);      
 
-    this.account = account;
-    return account;
-  }
-
-
-  public String login() throws IOException {
-    // force anonymous login if not already connected
-    if (this.account == null) {
-      login("anonymous", "bob@");
-      return this.account;
-    } else
-      return this.account;
+    return reply;
   }
 
   public String sys() throws IOException {
@@ -1890,13 +1888,94 @@ cd ..
 	} catch (java.security.AccessControlException e) {
 	}
     }
+    
+    public static StringBuffer dirhtml(String host, String remotePath) {
+        return dirhtml(host, 21, remotePath, "anonymous", "anomic");
+    }
+    
+    public static StringBuffer dirhtml(String host, int port, String remotePath, String account, String password) {
+        try {
+            ftpc c = new ftpc(System.in, null, System.err);
+            String servermessage = c.open(host, port);
+            if ((servermessage != null) && (servermessage.length() > 3)) servermessage = servermessage.substring(4); 
+            String greeting = c.login(account, password);
+            String system = c.sys();
+            Vector list = c.list(remotePath, true);
+
+            c.quit();
+            
+            //System.out.println("servermessage=" + servermessage);
+            //System.out.println("greeting=" + greeting);
+            
+            StringBuffer page = new StringBuffer(1024);
+            String base = "ftp://" + ((account.equals("anonymous")) ? "" : (account + ":" + password + "@")) + host + ((port == 21) ? "" : (":" + port))  + ((remotePath.charAt(0) == '/') ? "" : "/") + remotePath;
+            String title = "Index of " + base;
+
+            // find position of filename
+            int filemarker = 999;
+            for (int i = 0; i < list.size(); i++) {
+                filemarker = Math.min(filemarker, ((String) list.elementAt(i)).lastIndexOf(' '));
+            }
+            filemarker++;
+            
+            page.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n");
+            page.append("<html><head>\n");
+            page.append("  <title>" + title + "</title>\n");
+            page.append("  <meta name=\"generator\" content=\"YaCy ftpc dirlisting\">\n");
+            page.append("  <base href=\"" + base + "\">\n");            
+            page.append("</head><body>\n");
+            page.append("  <h1>" + title + "</h1>\n");
+            page.append("  <p><pre>Server \"" + servermessage + "\" responded:\n");
+            page.append("  \n");
+            page.append(greeting);
+            page.append("\n");
+            page.append("  </pre></p>\n");
+            page.append("  <hr>\n");
+            page.append("  <pre>\n");
+            for (int i = 0; i < list.size(); i++) {
+                String line = (String) list.elementAt(i);
+                page.append(line.substring(0, filemarker ));
+                page.append(
+                        "<a href=\"" +
+                        line.substring(filemarker) + ((line.charAt(0) == 'd') ? "/" : "") + "\">" +
+                        line.substring(filemarker) +
+                        "</a>\n");
+            }
+            page.append("  </pre>\n");
+            page.append("  <hr>\n");
+            page.append("  <pre>System info: \"" + system + "\"</pre>\n");
+            page.append("</body></html>\n");
+            
+            //System.out.println(new String(page));
+            return page;
+        } catch (java.security.AccessControlException e) {
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
+    }
 
     public static void dirAnonymous(String host,
 				    String remotePath) {
 	dir(host, remotePath, "anonymous", "anomic");
     }
 
-    public static String put(String host,
+    public static void dirAnonymousHtml(String host, int port, String remotePath, String htmloutfile) {
+        StringBuffer page = dirhtml(host, port, remotePath, "anonymous", "anomic");
+        File file = new File(htmloutfile);
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream(file);
+            fos.write((new String(page)).getBytes());
+            fos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+public static String put(String host,
             File localFile, String remotePath, String remoteName,
             String account, String password) throws IOException {
         // returns the log
@@ -2024,10 +2103,12 @@ cd ..
 	} else if (args.length == 3) {
 	    if (args[0].equals("-dir")) {
 		dirAnonymous(args[1], args[2]);
-	    } else {
-		printHelp();
-	    }
-	} else if (args.length == 4) {
+	    } else if (args[0].equals("-htmldir")) {
+        dirAnonymousHtml(args[1], 21, args[2], "dirindex.html");
+        } else {
+        printHelp();
+        }
+    } else if (args.length == 4) {
 	    if (args[0].equals("-get")) {
 		getAnonymous(args[1], args[2], new File(args[3]));
 	    } else {
