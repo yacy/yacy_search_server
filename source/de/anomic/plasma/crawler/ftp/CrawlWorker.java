@@ -51,7 +51,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 
+import de.anomic.net.URL;
 import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -82,8 +84,7 @@ public class CrawlWorker extends AbstractCrawlWorker implements
 
     public Entry load() throws IOException {
                        
-        File cacheFile = cacheManager.getCachePath(url);
-        cacheFile.getParentFile().mkdirs();
+
         
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         PrintStream out = new PrintStream(bout);
@@ -104,27 +105,61 @@ public class CrawlWorker extends AbstractCrawlWorker implements
             userPwd = "anonymous";
         }
         
-        ftpClient.exec("open " + this.url.getHost(), false);
+        String host = this.url.getHost();
+        String fullPath = this.url.getPath();
+        int port = this.url.getPort();
+        
+        if (port == -1) { 
+            ftpClient.exec("open " + this.url.getHost(), false);
+        } else {
+            ftpClient.exec("open " + this.url.getHost() + " " + port, false);
+        }
         ftpClient.exec("user " + userName + " " + userPwd, false);        
         ftpClient.exec("binary", false);
         
         // cd
-        String file = "";
-        String path = this.url.getPath();        
-        int pos = path.lastIndexOf("/");
-        if (pos == -1) {
-            file = path;
-            path = "/";
-        } else {
-            file = path.substring(pos+1);
-            path = path.substring(0,pos);            
-        }
-        ftpClient.exec("cd \"" + path + "\"", false);
+        String file, path;      
         
-        if (ftpClient.isFolder(file)) {
-            ftpClient.exec("cd \"" + file + "\"", false);
+        if (fullPath.endsWith("/")) {
+            file = "";
+            path = fullPath;
+        } else {
+            int pos = fullPath.lastIndexOf("/");
+            if (pos == -1) {
+                file = fullPath;
+                path = "/";
+            } else {            
+                path = fullPath.substring(0,pos+1);
+                file = fullPath.substring(pos+1);
+            }
+        }        
+        
+        if (file.length() > 0) {
+            ftpClient.exec("cd \"" + path + "\"", false);
             
-            // TODO: dirlist
+            // testing if the current name is a directoy
+            boolean isFolder = ftpClient.isFolder(file);
+            if (isFolder) {
+                fullPath = fullPath + "/";
+                file = "";
+                this.url = new URL(this.url,fullPath);
+            }
+        }
+        
+        // creating a cache file object
+        File cacheFile = cacheManager.getCachePath(this.url);
+        cacheFile.getParentFile().mkdirs();
+        
+        ftpClient.exec("cd \"" + fullPath + "\"", false);
+        if (file.length() == 0) {
+            
+            // getting the dirlist
+            StringBuffer dirList = ftpClient.dirhtml(host, (port==-1)?21:port, fullPath, userName, userPwd);
+            
+            // write it into a file
+            PrintWriter writer = new PrintWriter(cacheFile);
+            writer.write(dirList.toString());
+            writer.close();
         } else {
             // download the remote file
             ftpClient.exec("get \"" + file + "\" \"" + cacheFile.getAbsolutePath() + "\"", false);            
@@ -132,6 +167,8 @@ public class CrawlWorker extends AbstractCrawlWorker implements
         
         ftpClient.exec("close", false);
         ftpClient.exec("exit", false);        
+
+        // TODO: do mimetype detection based of file extension                
         
         // TODO: create a new htCache entry ....
         

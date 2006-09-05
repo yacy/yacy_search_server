@@ -116,6 +116,7 @@ public class URL {
             this.protocol = baseURL.protocol;
             this.host = baseURL.host;
             this.port = baseURL.port;
+            this.userInfo = baseURL.userInfo;
             if (relPath.toLowerCase().startsWith("javascript:")) {
                 this.path = baseURL.path;
             } else if (relPath.startsWith("/")) {
