@@ -53,6 +53,9 @@ import java.util.Map;
 
 import de.anomic.net.URL;
 
+/**
+ * A class containing metadata about a downloaded resource
+ */
 public interface IResourceInfo {
     
     /**
