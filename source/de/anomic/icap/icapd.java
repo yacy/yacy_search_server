@@ -64,6 +64,8 @@ import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.cache.http.ResourceInfo;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverHandler;
@@ -385,14 +387,14 @@ public class icapd implements serverHandler {
              * ========================================================================= */
             
             // generating a htcache entry object
+            IResourceInfo resInfo = new ResourceInfo(httpRequestURL,httpReqHeader,httpResHeader);
             plasmaHTCache.Entry cacheEntry = cacheManager.newEntry(
                     new Date(),  
                     0, 
                     httpRequestURL,
                     "",
-                    httpReqHeader, 
-                    httpRespStatusLine, 
-                    httpResHeader, 
+                    httpRespStatusLine,
+                    resInfo,
                     null, 
                     switchboard.defaultProxyProfile
             );

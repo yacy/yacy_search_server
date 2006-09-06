@@ -59,6 +59,7 @@ import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -102,8 +103,8 @@ public class CacheAdmin_p {
 
             info.ensureCapacity(40000);
             try {
-                final httpHeader fileheader = switchboard.cacheManager.getCachedResponse(indexURL.urlHash(url));
-                info.append("<b>HTTP Header:</b><br>").append(formatHeader(fileheader)).append("<br>");
+                final IResourceInfo resInfo = switchboard.cacheManager.loadResourceInfo(url);
+                info.append("<b>HTTP Header:</b><br>").append(formatHeader(resInfo.getMap())).append("<br>");
                 final String ff = file.toString();
                 final int dotpos = ff.lastIndexOf('.');
                 final String ext = (dotpos >= 0) ? ff.substring(dotpos + 1).toLowerCase() : "";
@@ -198,7 +199,7 @@ public class CacheAdmin_p {
         return new String(s);
     }
     
-    private static String formatHeader(httpHeader header) {
+    private static String formatHeader(Map header) {
         final StringBuffer result = new StringBuffer(2048);
         if (header == null) {
             result.append("- no header in header cache -<br>");

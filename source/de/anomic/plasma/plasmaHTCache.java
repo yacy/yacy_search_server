@@ -54,14 +54,12 @@
 package de.anomic.plasma;
 
 import de.anomic.http.httpc;
-import de.anomic.http.httpHeader;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverSystem;
@@ -73,6 +71,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import de.anomic.net.URL;
+import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.cache.ResourceInfoFactory;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -87,7 +88,7 @@ public final class plasmaHTCache {
     private static final int stackLimit = 150; // if we exceed that limit, we do not check idle
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
 
-    private kelondroMap responseHeaderDB = null;
+    kelondroMap responseHeaderDB = null;
     private final LinkedList cacheStack;
     private final TreeMap cacheAge; // a <date+hash, cache-path> - relation
     public long curCacheSize;
@@ -96,11 +97,16 @@ public final class plasmaHTCache {
     public final serverLog log;
     public static final HashSet filesInUse = new HashSet(); // can we delete this file
 
+    private ResourceInfoFactory objFactory;
+    
     public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb, long preloadTime) {
         // this.switchboard = switchboard;
 
         this.log = new serverLog("HTCACHE");
         this.cachePath = htCachePath;
+        
+        // create the object factory
+        this.objFactory = new ResourceInfoFactory();
 
         // reset old HTCache ?
         String[] list = this.cachePath.list();
@@ -229,10 +235,6 @@ public final class plasmaHTCache {
         }
     }
 
-    public void storeHeader(String urlHash, httpHeader responseHeader) throws IOException {
-        this.responseHeaderDB.set(urlHash, responseHeader);
-    }
-
     /**
      * This method changes the HTCache size.<br>
      * @param new cache size in bytes
@@ -249,7 +251,7 @@ public final class plasmaHTCache {
         return (this.curCacheSize >= this.maxCacheSize) ? 0 : this.maxCacheSize - this.curCacheSize;
     }
 
-    public boolean writeFile(URL url, byte[] array) {
+    public boolean writeResourceContent(URL url, byte[] array) {
         if (array == null) return false;
         File file = getCachePath(url);
         try {
@@ -445,10 +447,24 @@ public final class plasmaHTCache {
         return prefix + s.substring(0, p);
     }
 
-    public httpHeader getCachedResponse(String urlHash) throws IOException {
+    /**
+     * Returns an object containing metadata about a cached resource
+     * @param url the url of the resource
+     * @return an {@link IResourceInfo info object}  
+     * @throws Exception of the info object could not be created, e.g. if the protocol is not supported
+     */
+    public IResourceInfo loadResourceInfo(URL url) throws Exception {    
+        
+        // getting the URL hash
+        String urlHash = indexURL.urlHash(url.toNormalform());
+        
+        // loading data from database
         Map hdb = this.responseHeaderDB.get(urlHash);
         if (hdb == null) return null;
-        return new httpHeader(null, hdb);
+        
+        // generate the cached object
+        IResourceInfo cachedObj = this.objFactory.buildResourceInfoObj(url, hdb);
+        return cachedObj;
     }
 
     public boolean full() {
@@ -459,18 +475,17 @@ public final class plasmaHTCache {
         return (this.cacheStack.size() == 0);
     }
 
-    public static boolean isPicture(httpHeader response) {
-        Object ct = response.get(httpHeader.CONTENT_TYPE);
-        if (ct == null) return false;
-        return ((String)ct).toUpperCase().startsWith("IMAGE");
+    public static boolean isPicture(String mimeType) {
+        if (mimeType == null) return false;
+        return mimeType.toUpperCase().startsWith("IMAGE");
     }
 
-    public static boolean isText(httpHeader response) {
+    public static boolean isText(String mimeType) {
 //      Object ct = response.get(httpHeader.CONTENT_TYPE);
 //      if (ct == null) return false;
 //      String t = ((String)ct).toLowerCase();
 //      return ((t.startsWith("text")) || (t.equals("application/xhtml+xml")));
-        return plasmaParser.supportedMimeTypesContains(response.mime());
+        return plasmaParser.supportedMimeTypesContains(mimeType);
     }
 
     public static boolean noIndexingURL(String urlString) {
@@ -568,9 +583,8 @@ public final class plasmaHTCache {
         }
         if (port < 0) {
             return new File(this.cachePath, protocol + "/" + host + path);
-        } else {
-            return new File(this.cachePath, protocol + "/" + host + "!" + port + path);
         }
+        return new File(this.cachePath, protocol + "/" + host + "!" + port + path);
     }
 
     /**
@@ -663,7 +677,7 @@ public final class plasmaHTCache {
         return null;
     }
 
-    public byte[] loadResource(URL url) {
+    public byte[] loadResourceContent(URL url) {
         // load the url as resource from the cache
         File f = getCachePath(url);
         if (f.exists()) try {
@@ -690,12 +704,30 @@ public final class plasmaHTCache {
                 (ls.indexOf("memberlist.php?sid=") >= 0));
     }
 
-    public Entry newEntry(Date initDate, int depth, URL url, String name,
-                          httpHeader requestHeader,
-                          String responseStatus, httpHeader responseHeader,
-                          String initiator,
-                          plasmaCrawlProfile.entry profile) {
-        return new Entry(initDate, depth, url, name, requestHeader, responseStatus, responseHeader, initiator, profile);
+    public Entry newEntry(
+            Date initDate, 
+            int depth, 
+            URL url, 
+            String name,
+            //httpHeader requestHeader,
+            String responseStatus, 
+            //httpHeader responseHeader,
+            IResourceInfo docInfo,            
+            String initiator,
+            plasmaCrawlProfile.entry profile
+    ) {
+        return new Entry(
+                initDate, 
+                depth, 
+                url, 
+                name, 
+                //requestHeader, 
+                responseStatus, 
+                //responseHeader,
+                docInfo,
+                initiator, 
+                profile
+        );
     }
 
     public final class Entry {
@@ -703,9 +735,9 @@ public final class plasmaHTCache {
     // the class objects
     private Date                     initDate;       // the date when the request happened; will be used as a key
     private int                      depth;          // the depth of prefetching
-    private httpHeader               requestHeader;  // we carry also the header to prevent too many file system access
-    private String                   responseStatus;
-    private httpHeader               responseHeader; // we carry also the header to prevent too many file system access
+//    private httpHeader               requestHeader;  // we carry also the header to prevent too many file system access
+//    private httpHeader               responseHeader; // we carry also the header to prevent too many file system access
+    private String                   responseStatus;    
     private File                     cacheFile;      // the cache file
     private byte[]                   cacheArray;     // or the cache as byte-array
     private URL                      url;
@@ -718,6 +750,11 @@ public final class plasmaHTCache {
     private String                   language;
     private plasmaCrawlProfile.entry profile;
     private String                   initiator;
+    
+    /**
+     * protocolspecific information about the resource 
+     */
+    private IResourceInfo              resInfo;
 
     protected Object clone() throws CloneNotSupportedException {
         return new Entry(
@@ -725,9 +762,10 @@ public final class plasmaHTCache {
                 this.depth,
                 this.url,
                 this.name,
-                this.requestHeader,
+                //this.requestHeader,
                 this.responseStatus,
-                this.responseHeader,
+                //this.responseHeader,
+                this.resInfo,
                 this.initiator,
                 this.profile
         );
@@ -737,15 +775,21 @@ public final class plasmaHTCache {
             int depth, 
             URL url, 
             String name,
-            httpHeader requestHeader,
-            String responseStatus, 
-            httpHeader responseHeader,
+            //httpHeader requestHeader,
+            String responseStatus,
+            //httpHeader responseHeader,
+            IResourceInfo resourceInfo,            
             String initiator,
             plasmaCrawlProfile.entry profile
     ) {
-
+        if (resourceInfo == null){
+            System.out.println("Content information object is null. " + url);
+            System.exit(0);            
+        }
+        this.resInfo = resourceInfo;
+        
+        
         // normalize url
-//      serverLog.logFine("PLASMA", "Entry: URL=" + url.toString());
         this.nomalizedURLString = url.toNormalform();
 
         try {
@@ -761,28 +805,17 @@ public final class plasmaHTCache {
        // assigned:
         this.initDate       = initDate;
         this.depth          = depth;
-        this.requestHeader  = requestHeader;
+        //this.requestHeader  = requestHeader;
         this.responseStatus = responseStatus;
-        this.responseHeader = responseHeader;
+        //this.responseHeader = responseHeader;
         this.profile        = profile;
         this.initiator      = (initiator == null) ? null : ((initiator.length() == 0) ? null : initiator);
 
-        // calculated:
-        if (responseHeader == null) {
-           try {
-               throw new RuntimeException("RESPONSE HEADER = NULL");
-           } catch (Exception e) {
-               System.out.println("RESPONSE HEADER = NULL in " + url);
-               e.printStackTrace();
-               System.exit(0);
-           }
-
-            this.lastModified = new Date(serverDate.correctedUTCTime());
-        } else {
-            this.lastModified = responseHeader.lastModified();
-            if (this.lastModified == null) this.lastModified = new Date(serverDate.correctedUTCTime()); // does not exist in header
-        }
-        this.doctype = indexEntryAttribute.docType(responseHeader.mime());
+        // getting the last modified date
+        this.lastModified = resourceInfo.getModificationDate();
+        
+        // getting the doctype
+        this.doctype = indexEntryAttribute.docType(resourceInfo.getMimeType());
         if (this.doctype == indexEntryAttribute.DT_UNKNOWN) this.doctype = indexEntryAttribute.docType(url);
         this.language = indexEntryAttribute.language(url);
 
@@ -822,12 +855,7 @@ public final class plasmaHTCache {
     }
     
     public URL referrerURL() {
-        if (this.requestHeader == null) return null;
-        try {
-            return new URL((String) this.requestHeader.get(httpHeader.REFERER, ""));
-        } catch (Exception e) {
-            return null;
-        }
+        return (this.resInfo==null)?null:this.resInfo.getRefererUrl();
     }
 
     public File cacheFile() {
@@ -846,27 +874,36 @@ public final class plasmaHTCache {
 //        return this.requestHeader;
 //    }
     
-    public httpHeader responseHeader() {
-        return this.responseHeader;
+//    public httpHeader responseHeader() {
+//        return this.responseHeader;        
+//    }
+    
+    public IResourceInfo getDocumentInfo() {
+        return this.resInfo;
     }
     
+    public boolean writeResourceInfo() throws IOException {
+        assert(this.nomalizedURLHash != null) : "URL Hash is null";
+        if (this.resInfo == null) return false;
+        
+        plasmaHTCache.this.responseHeaderDB.set(this.nomalizedURLHash, this.resInfo.getMap());
+        return true;
+    }    
+    
     public String getMimeType() {
-        return (this.responseHeader == null) ? null : this.responseHeader.mime();
+        return (this.resInfo == null) ? null : this.resInfo.getMimeType();
     }
     
     public Date ifModifiedSince() {
-        return (this.requestHeader == null) ? null : this.requestHeader.ifModifiedSince();
+        return (this.resInfo == null) ? null : this.resInfo.ifModifiedSince();
     }
     
     public boolean requestWithCookie() {
-        return (this.requestHeader == null) ? false : this.requestHeader.containsKey(httpHeader.COOKIE);
+        return (this.resInfo == null) ? false : this.resInfo.requestWithCookie();
     }
     
     public boolean requestProhibitsIndexing() {
-        return (this.requestHeader == null) 
-        ? false 
-        : this.requestHeader.containsKey(httpHeader.X_YACY_INDEX_CONTROL) &&
-          ((String)this.requestHeader.get(httpHeader.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX");
+        return (this.resInfo == null) ? false : this.resInfo.requestProhibitsIndexing();
     }
     
     /*
@@ -878,9 +915,10 @@ public final class plasmaHTCache {
     // the following three methods for cache read/write granting shall be as loose as possible
     // but also as strict as necessary to enable caching of most items
 
+    /**
+     * @return NULL if the answer is TRUE, in case of FALSE, the reason as String is returned
+     */
     public String shallStoreCacheForProxy() {
-        // returns NULL if the answer is TRUE
-        // in case of FALSE, the reason as String is returned
 
         // check profile (disabled: we will check this in the plasmaSwitchboard)
         //if (!this.profile.storeHTCache()) { return "storage_not_wanted"; }
@@ -889,8 +927,11 @@ public final class plasmaHTCache {
         // if the storage was requested by prefetching, the request map is null
 
         // check status code
-        if (!(this.responseStatus.startsWith("200") ||
-              this.responseStatus.startsWith("203"))) { return "bad_status_" + this.responseStatus.substring(0,3); }
+        if ((this.resInfo != null) && (!this.resInfo.validResponseStatus(this.responseStatus))) {
+            return "bad_status_" + this.responseStatus.substring(0,3);
+        }        
+//        if (!(this.responseStatus.startsWith("200") ||
+//              this.responseStatus.startsWith("203"))) { return "bad_status_" + this.responseStatus.substring(0,3); }
 
         // check storage location
         // sometimes a file name is equal to a path name in the same directory;
@@ -905,62 +946,10 @@ public final class plasmaHTCache {
         if (isPOST(this.nomalizedURLString) && !this.profile.crawlingQ()) { return "dynamic_post"; }
         if (isCGI(this.nomalizedURLString)) { return "dynamic_cgi"; }
 
-        if (this.requestHeader != null) {
-            // -authorization cases in request
-            // authorization makes pages very individual, and therefore we cannot use the
-            // content in the cache
-            if (this.requestHeader.containsKey(httpHeader.AUTHORIZATION)) { return "personalized"; }
-            // -ranges in request and response
-            // we do not cache partial content
-            if (this.requestHeader.containsKey(httpHeader.RANGE)) { return "partial"; }
+        if (this.resInfo != null) {
+            return this.resInfo.shallStoreCacheForProxy();
         }
-        // -ranges in request and response
-        // we do not cache partial content
-        if (this.responseHeader != null && this.responseHeader.containsKey(httpHeader.CONTENT_RANGE)) { return "partial"; }
-
-        // -if-modified-since in request
-        // we do not care about if-modified-since, because this case only occurres if the
-        // cache file does not exist, and we need as much info as possible for the indexing
-
-        // -cookies in request
-        // we do not care about cookies, because that would prevent loading more pages
-        // from one domain once a request resulted in a client-side stored cookie
-
-        // -set-cookie in response
-        // we do not care about cookies in responses, because that info comes along
-        // any/many pages from a server and does not express the validity of the page
-        // in modes of life-time/expiration or individuality
-
-        // -pragma in response
-        // if we have a pragma non-cache, we don't cache. usually if this is wanted from
-        // the server, it makes sense
-        String cacheControl = (String) this.responseHeader.get(httpHeader.PRAGMA);
-        if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return "controlled_no_cache"; }
-
-        // -expires in response
-        // we do not care about expires, because at the time this is called the data is
-        // obvious valid and that header info is used in the indexing later on
-
-        // -cache-control in response
-        // the cache-control has many value options.
-        cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
-        if (cacheControl != null) {
-            cacheControl = cacheControl.trim().toUpperCase();
-            if (cacheControl.startsWith("MAX-AGE=")) {
-                // we need also the load date
-                Date date = this.responseHeader.date();
-                if (date == null) return "stale_no_date_given_in_response";
-                try {
-                    long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                    if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
-                        //System.out.println("***not indexed because cache-control");
-                        return "stale_expired";
-                    }
-                } catch (Exception e) {
-                    return "stale_error_" + e.getMessage() + ")";
-                }
-            }
-        }
+        
         return null;
     }
 
@@ -971,146 +960,17 @@ public final class plasmaHTCache {
     public boolean shallUseCacheForProxy() {
 //      System.out.println("SHALL READ CACHE: requestHeader = " + requestHeader.toString() + ", responseHeader = " + responseHeader.toString());
 
-        String cacheControl;
-        if (this.requestHeader != null) {
-            // -authorization cases in request
-            if (this.requestHeader.containsKey(httpHeader.AUTHORIZATION)) { return false; }
-
-            // -ranges in request
-            // we do not cache partial content
-            if (this.requestHeader.containsKey(httpHeader.RANGE)) { return false; }
-
-            // if the client requests a un-cached copy of the resource ...
-            cacheControl = (String) this.requestHeader.get(httpHeader.PRAGMA);
-            if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
-
-            cacheControl = (String) this.requestHeader.get(httpHeader.CACHE_CONTROL);
-            if (cacheControl != null) {
-                cacheControl = cacheControl.trim().toUpperCase();
-                if (cacheControl.startsWith("NO-CACHE") || cacheControl.startsWith("MAX-AGE=0")) { return false; }
-            }
-        }
-
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable in caches
         if (isPOST(this.nomalizedURLString)) { return false; }
         if (isCGI(this.nomalizedURLString)) { return false; }
-
-        // -if-modified-since in request
-        // The entity has to be transferred only if it has
-        // been modified since the date given by the If-Modified-Since header.
-        if (this.requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) {
-            // checking this makes only sense if the cached response contains
-            // a Last-Modified field. If the field does not exist, we go the safe way
-            if (!this.responseHeader.containsKey(httpHeader.LAST_MODIFIED)) { return false; }
-            // parse date
-            Date d1, d2;
-            d2 = this.responseHeader.lastModified(); if (d2 == null) { d2 = new Date(serverDate.correctedUTCTime()); }
-            d1 = this.requestHeader.ifModifiedSince(); if (d1 == null) { d1 = new Date(serverDate.correctedUTCTime()); }
-            // finally, we shall treat the cache as stale if the modification time is after the if-.. time
-            if (d2.after(d1)) { return false; }
+        
+        if (this.resInfo != null) {
+            return this.resInfo.shallUseCacheForProxy();
         }
-
-        if (!isPicture(this.responseHeader)) {
-            // -cookies in request
-            // unfortunately, we should reload in case of a cookie
-            // but we think that pictures can still be considered as fresh
-            // -set-cookie in cached response
-            // this is a similar case as for COOKIE.
-            if (this.requestHeader.containsKey(httpHeader.COOKIE) ||
-                this.responseHeader.containsKey(httpHeader.SET_COOKIE) ||
-                this.responseHeader.containsKey(httpHeader.SET_COOKIE2)) {
-                return false; // too strong
-            }
-        }
-
-        // -pragma in cached response
-        // logically, we would not need to care about no-cache pragmas in cached response headers,
-        // because they cannot exist since they are not written to the cache.
-        // So this IF should always fail..
-        cacheControl = (String) this.responseHeader.get(httpHeader.PRAGMA); 
-        if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
-
-        // see for documentation also:
-        // http://www.web-caching.com/cacheability.html
-        // http://vancouver-webpages.com/CacheNow/
-
-        // look for freshnes information
-        // if we don't have any freshnes indication, we treat the file as stale.
-        // no handle for freshness control:
-
-        // -expires in cached response
-        // the expires value gives us a very easy hint when the cache is stale
-        Date expires = this.responseHeader.expires();
-        if (expires != null) {
-//          System.out.println("EXPIRES-TEST: expires=" + expires + ", NOW=" + serverDate.correctedGMTDate() + ", url=" + url);
-            if (expires.before(new Date(serverDate.correctedUTCTime()))) { return false; }
-        }
-        Date lastModified = this.responseHeader.lastModified();
-        cacheControl = (String) this.responseHeader.get(httpHeader.CACHE_CONTROL);
-        if (cacheControl == null && lastModified == null && expires == null) { return false; }
-
-        // -lastModified in cached response
-        // we can apply a TTL (Time To Live)  heuristic here. We call the time delta between the last read
-        // of the file and the last modified date as the age of the file. If we consider the file as
-        // middel-aged then, the maximum TTL would be cache-creation plus age.
-        // This would be a TTL factor of 100% we want no more than 10% TTL, so that a 10 month old cache
-        // file may only be treated as fresh for one more month, not more.
-        Date date = this.responseHeader.date();
-        if (lastModified != null) {
-            if (date == null) { date = new Date(serverDate.correctedUTCTime()); }
-            long age = date.getTime() - lastModified.getTime();
-            if (age < 0) { return false; }
-            // TTL (Time-To-Live) is age/10 = (d2.getTime() - d1.getTime()) / 10
-            // the actual living-time is serverDate.correctedGMTDate().getTime() - d2.getTime()
-            // therefore the cache is stale, if serverDate.correctedGMTDate().getTime() - d2.getTime() > age/10
-            if (serverDate.correctedUTCTime() - date.getTime() > age / 10) { return false; }
-        }
-
-        // -cache-control in cached response
-        // the cache-control has many value options.
-        if (cacheControl != null) {
-            cacheControl = cacheControl.trim().toUpperCase();
-            if (cacheControl.startsWith("PRIVATE") ||
-                cacheControl.startsWith("NO-CACHE") ||
-                cacheControl.startsWith("NO-STORE")) {
-                // easy case
-                return false;
-//          } else if (cacheControl.startsWith("PUBLIC")) {
-//              // ok, do nothing
-            } else if (cacheControl.startsWith("MAX-AGE=")) {
-                // we need also the load date
-                if (date == null) { return false; }
-                try {
-                    final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                    if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
-                        return false;
-                    }
-                } catch (Exception e) {
-                    return false;
-                }
-            }
-        }
+        
         return true;
     }
 
     } // class Entry
-
-    /*
-    public static void main(String[] args) {
-        //String[] s = TimeZone.getAvailableIDs();
-        //for (int i = 0; i < s.length; i++) System.out.println("ZONE=" + s[i]);
-        Calendar c = GregorianCalendar.getInstance();
-        int zoneOffset = c.get(Calendar.ZONE_OFFSET)/(60*60*1000);
-        int DSTOffset = c.get(Calendar.DST_OFFSET)/(60*60*1000);
-        System.out.println("This Offset = " + (zoneOffset + DSTOffset));
-        for (int i = 0; i < 12; i++) {
-            c = new GregorianCalendar(TimeZone.getTimeZone("Etc/GMT-" + i));
-            //c.setTimeZone(TimeZone.getTimeZone("Etc/GMT+0"));
-            System.out.println("Zone offset: "+
-                     c.get(Calendar.ZONE_OFFSET)/(60*60*1000));
-            System.out.println(c.get(GregorianCalendar.HOUR) + ", " + c.getTime() + ", " + c.getTimeInMillis());
-        }
-    }
-     **/
 }

@@ -64,6 +64,8 @@ import de.anomic.plasma.plasmaCrawlLoader;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.cache.http.ResourceInfo;
 import de.anomic.plasma.crawler.AbstractCrawlWorker;
 import de.anomic.plasma.crawler.plasmaCrawlerPool;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
@@ -129,15 +131,15 @@ public final class CrawlWorker extends AbstractCrawlWorker {
         return load(DEFAULT_CRAWLING_RETRY_COUNT);
     }    
 
-    protected plasmaHTCache.Entry createCacheEntry(Date requestDate, httpHeader requestHeader, httpc.response response) {
+    protected plasmaHTCache.Entry createCacheEntry(URL requestUrl, Date requestDate, httpHeader requestHeader, httpc.response response) {
+        IResourceInfo resourceInfo = new ResourceInfo(requestUrl,requestHeader,response.responseHeader);
         return this.cacheManager.newEntry(
                 requestDate, 
                 this.depth, 
                 this.url, 
-                this.name, 
-                requestHeader, 
-                response.status, 
-                response.responseHeader, 
+                this.name,  
+                response.status,
+                resourceInfo, 
                 this.initiator, 
                 this.profile
         );
@@ -197,7 +199,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 // the transfer is ok
                 
                 // create a new cache entry
-                htCache = createCacheEntry(requestDate, requestHeader, res); 
+                htCache = createCacheEntry(this.url,requestDate, requestHeader, res); 
                 
                 // aborting download if content is to long ...
                 if (htCache.cacheFile().getAbsolutePath().length() > serverSystem.maxPathLength) {

@@ -44,28 +44,27 @@
 
 package de.anomic.plasma;
 
-import de.anomic.http.httpHeader;
-import de.anomic.index.indexURL;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverDate;
-import de.anomic.yacy.yacySeedDB;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+
+import de.anomic.index.indexURL;
+import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroStack;
+import de.anomic.net.URL;
+import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacySeedDB;
 
 public class plasmaSwitchboardQueue {
 
     private kelondroStack sbQueueStack;
     private plasmaCrawlProfile profiles;
-    private plasmaHTCache htCache;
+    plasmaHTCache htCache;
     private plasmaCrawlLURL lurls;
     private File sbQueueStackPath;
     
@@ -191,7 +190,7 @@ public class plasmaSwitchboardQueue {
 
         // computed values
         private plasmaCrawlProfile.entry profileEntry;
-        private httpHeader responseHeader;
+        private IResourceInfo contentInfo;
         private URL referrerURL;
 
         public Entry(URL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
@@ -206,7 +205,7 @@ public class plasmaSwitchboardQueue {
             this.anchorName = (anchorName==null)?"":anchorName.trim();
             
             this.profileEntry = null;
-            this.responseHeader = null;
+            this.contentInfo = null;
             this.referrerURL = null;
         }
 
@@ -227,7 +226,7 @@ public class plasmaSwitchboardQueue {
             this.anchorName = row.getColString(7, "UTF-8");
 
             this.profileEntry = null;
-            this.responseHeader = null;
+            this.contentInfo = null;
             this.referrerURL = null;
         }
 
@@ -248,7 +247,7 @@ public class plasmaSwitchboardQueue {
             this.anchorName = (row[7] == null) ? null : (new String(row[7], "UTF-8")).trim();
 
             this.profileEntry = null;
-            this.responseHeader = null;
+            this.contentInfo = null;
             this.referrerURL = null;
         }
 
@@ -306,32 +305,24 @@ public class plasmaSwitchboardQueue {
             return profileEntry;
         }
 
-        private httpHeader responseHeader() {
-            if (responseHeader == null) try {
-                responseHeader = htCache.getCachedResponse(indexURL.urlHash(url));
-            } catch (IOException e) {
+        private IResourceInfo getCachedObjectInfo() {
+            if (this.contentInfo == null) try {
+                this.contentInfo = plasmaSwitchboardQueue.this.htCache.loadResourceInfo(this.url);
+            } catch (Exception e) {
                 serverLog.logSevere("PLASMA", "responseHeader: failed to get header", e);
                 return null;
             }
-            return responseHeader;
+            return this.contentInfo;
         }
 
         public String getMimeType() {
-            httpHeader headers = this.responseHeader();
-            return (headers == null) ? null : headers.mime();
+            IResourceInfo info = this.getCachedObjectInfo();
+            return (info == null) ? null : info.getMimeType();
         }
         
         public Date getModificationDate() {
-            Date docDate = null;
-            
-            httpHeader headers = this.responseHeader();
-            if (headers != null) {
-                docDate = headers.lastModified();
-                if (docDate == null) docDate = headers.date();
-            }
-            if (docDate == null) docDate = new Date();   
-            
-            return docDate;
+            IResourceInfo info = this.getCachedObjectInfo();
+            return (info == null) ? new Date() : info.getModificationDate();            
         }
         
         public URL referrerURL() {
@@ -360,6 +351,8 @@ public class plasmaSwitchboardQueue {
          * this method returns null if the answer is 'YES'!
          * if the answer is 'NO' (do not index), it returns a string with the reason
          * to reject the crawling demand in clear text
+         * 
+         * This function is used by plasmaSwitchboard#processResourceStack
          */
         public final String shallIndexCacheForProxy() {
             if (profile() == null) {
@@ -402,91 +395,8 @@ public class plasmaSwitchboardQueue {
                 return "Dynamic_(Requested_With_Cookie)";
             }
 
-            // -set-cookie in response
-            // the set-cookie from the server does not indicate that the content is special
-            // thus we do not care about it here for indexing
-            if (responseHeader() != null) {
-                // a picture cannot be indexed
-                if (plasmaHTCache.isPicture(responseHeader())) {
-                    return "Media_Content_(Picture)";
-                }
-                if (!plasmaHTCache.isText(responseHeader())) {
-                    return "Media_Content_(not_text)";
-                }
-
-                // -if-modified-since in request
-                // if the page is fresh at the very moment we can index it
-                if ((ifModifiedSince != null) && (responseHeader().containsKey(httpHeader.LAST_MODIFIED))) {
-                    // parse date
-                    Date d = responseHeader().lastModified();
-                    if (d == null) {
-                        d = new Date(serverDate.correctedUTCTime());
-                    }
-                    // finally, we shall treat the cache as stale if the modification time is after the if-.. time
-                    if (d.after(ifModifiedSince)) {
-                        //System.out.println("***not indexed because if-modified-since");
-                        return "Stale_(Last-Modified>Modified-Since)";
-                    }
-                }
-
-                // -pragma in cached response
-                if (responseHeader().containsKey(httpHeader.PRAGMA) &&
-                    ((String) responseHeader().get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE")) {
-                    return "Denied_(pragma_no_cache)";
-                }
-
-                // see for documentation also:
-                // http://www.web-caching.com/cacheability.html
-
-                // look for freshnes information
-
-                // -expires in cached response
-                // the expires value gives us a very easy hint when the cache is stale
-                // sometimes, the expires date is set to the past to prevent that a page is cached
-                // we use that information to see if we should index it
-                final Date expires = responseHeader().expires();
-                if (expires != null && expires.before(new Date(serverDate.correctedUTCTime()))) {
-                    return "Stale_(Expired)";
-                }
-
-                // -lastModified in cached response
-                // this information is too weak to use it to prevent indexing
-                // even if we can apply a TTL heuristic for cache usage
-
-                // -cache-control in cached response
-                // the cache-control has many value options.
-                String cacheControl = (String) responseHeader.get(httpHeader.CACHE_CONTROL);
-                if (cacheControl != null) {
-                    cacheControl = cacheControl.trim().toUpperCase();
-                    /* we have the following cases for cache-control:
-                       "public" -- can be indexed
-                       "private", "no-cache", "no-store" -- cannot be indexed
-                       "max-age=<delta-seconds>" -- stale/fresh dependent on date
-                     */
-                    if (cacheControl.startsWith("PRIVATE") ||
-                        cacheControl.startsWith("NO-CACHE") ||
-                        cacheControl.startsWith("NO-STORE")) {
-                        // easy case
-                        return "Stale_(denied_by_cache-control=" + cacheControl + ")";
-//                  } else if (cacheControl.startsWith("PUBLIC")) {
-//                      // ok, do nothing
-                    } else if (cacheControl.startsWith("MAX-AGE=")) {
-                        // we need also the load date
-                        final Date date = responseHeader().date();
-                        if (date == null) {
-                            return "Stale_(no_date_given_in_response)";
-                        }
-                        try {
-                            final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                            if (serverDate.correctedUTCTime() - date.getTime() > ttl) {
-                                //System.out.println("***not indexed because cache-control");
-                                return "Stale_(expired_by_cache-control)";
-                            }
-                        } catch (Exception e) {
-                            return "Error_(" + e.getMessage() + ")";
-                        }
-                    }
-                }
+            if (getCachedObjectInfo() != null) {
+                return this.getCachedObjectInfo().shallIndexCacheForProxy();
             }
             return null;
         }
@@ -496,6 +406,8 @@ public class plasmaSwitchboardQueue {
          * this method returns null if the answer is 'YES'!
          * if the answer is 'NO' (do not index), it returns a string with the reason
          * to reject the crawling demand in clear text
+         * 
+         * This function is used by plasmaSwitchboard#processResourceStack
          */
         public final String shallIndexCacheForCrawler() {
             if (profile() == null) {
@@ -520,9 +432,9 @@ public class plasmaSwitchboardQueue {
             // we checked that in shallStoreCache
 
             // a picture cannot be indexed
-            if (responseHeader() != null) {
-                if (plasmaHTCache.isPicture(responseHeader())) { return "Media_Content_(Picture)"; }
-                if (!plasmaHTCache.isText(responseHeader())) { return "Media_Content_(not_text)"; }
+            if (getCachedObjectInfo() != null) {
+                String status = this.getCachedObjectInfo().shallIndexCacheForProxy();
+                if (status != null) return status;
             }
             if (plasmaHTCache.noIndexingURL(nURL)) { return "Media_Content_(forbidden)"; }
 

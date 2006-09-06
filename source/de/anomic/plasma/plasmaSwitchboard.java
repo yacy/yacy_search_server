@@ -829,7 +829,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         /* =========================================================================
          * LOCAL IP ADDRESS CHECK
          * 
-         * check if ip is local ip address
+         * check if ip is local ip address // TODO: remove this procotol specific code here
          * ========================================================================= */
         InetAddress hostAddress = httpc.dnsResolve(entry.url().getHost());
         if (hostAddress == null) {
@@ -856,9 +856,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 (entry.profile().storeHTCache()) ||
                 (doIndexing && isSupportedContent)
         ) {
-            // store response header
-            if (entry.responseHeader() != null) {
-                this.cacheManager.storeHeader(entry.urlHash(), entry.responseHeader());
+            // store response header            
+            if (entry.writeResourceInfo()) {
                 this.log.logInfo("WROTE HEADER for " + entry.cacheFile());
             }        
             
@@ -868,7 +867,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } else {
                 String error = entry.shallStoreCacheForProxy();
                 if (error == null) {
-                    this.cacheManager.writeFile(entry.url(), entry.cacheArray());
+                    this.cacheManager.writeResourceContent(entry.url(), entry.cacheArray());
                     this.log.logFine("WROTE FILE (" + entry.cacheArray().length + " bytes) for " + entry.cacheFile());
                 } else {
                     this.log.logFine("WRITE OF FILE " + entry.cacheFile() + " FORBIDDEN: " + error);

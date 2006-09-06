@@ -96,6 +96,8 @@ import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.cache.http.ResourceInfo;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
@@ -413,8 +415,8 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // decide wether to use a cache entry or connect to the network
             File cacheFile = cacheManager.getCachePath(url);
-            String urlHash = indexURL.urlHash(url);
-            httpHeader cachedResponseHeader = cacheManager.getCachedResponse(urlHash);
+            ResourceInfo cachedResInfo = (ResourceInfo) cacheManager.loadResourceInfo(url);
+            httpHeader cachedResponseHeader = (cachedResInfo == null)?null:cachedResInfo.getResponseHeader();
             boolean cacheExists = ((cacheFile.isFile()) && (cachedResponseHeader != null));
             
             // why are files unzipped upon arrival? why not zip all files in cache?
@@ -445,9 +447,10 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     0,                               // crawling depth
                     url,                             // url
                     "",                        // name of the url is unknown
-                    requestHeader,                   // request headers
+                    //requestHeader,                   // request headers
                     "200 OK",                        // request status
-                    cachedResponseHeader,            // response headers
+                    //cachedResponseHeader,            // response headers
+                    cachedResInfo,
                     null,                            // initiator
                     switchboard.defaultProxyProfile  // profile
             );
@@ -579,15 +582,17 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             }            
 
             // reserver cache entry
-            Date requestDate = new Date(((Long)conProp.get(httpHeader.CONNECTION_PROP_REQUEST_START)).longValue()); 
+            Date requestDate = new Date(((Long)conProp.get(httpHeader.CONNECTION_PROP_REQUEST_START)).longValue());
+            IResourceInfo resInfo = new ResourceInfo(url,requestHeader,res.responseHeader);
             plasmaHTCache.Entry cacheEntry = cacheManager.newEntry(
                     requestDate, 
                     0, 
                     url,
                     "",
-                    requestHeader, 
+                    //requestHeader, 
                     res.status, 
-                    res.responseHeader, 
+                    //res.responseHeader,
+                    resInfo,
                     null, 
                     switchboard.defaultProxyProfile
             );

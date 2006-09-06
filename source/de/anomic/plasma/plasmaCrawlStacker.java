@@ -295,7 +295,7 @@ public final class plasmaCrawlStacker {
         }
         
         // check if ip is local ip address
-        checkInterruption();        
+        checkInterruption();        // TODO: this is protocol specific
         InetAddress hostAddress = httpc.dnsResolve(nexturl.getHost());
         if (hostAddress == null) {
             // if a http proxy is configured name resolution may not work
