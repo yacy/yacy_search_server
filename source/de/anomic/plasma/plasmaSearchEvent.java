@@ -49,7 +49,6 @@ import java.io.IOException;
 
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverInstantThread;
 import de.anomic.yacy.yacySearch;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
@@ -67,7 +66,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private plasmaWordIndex wordIndex;
     private plasmaCrawlLURL urlStore;
     private plasmaSnippetCache snippetCache;
-    private indexContainer rcLocal, rcGlobal; // caches for results
+    private indexContainer rcGlobal; // cache for results
     private int rcGlobalCount;
     private plasmaSearchTimingProfile profileLocal, profileGlobal;
     private yacySearch[] searchThreads;
@@ -86,7 +85,6 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.ranking = ranking;
         this.urlStore = urlStore;
         this.snippetCache = snippetCache;
-        this.rcLocal = new indexRowSetContainer(null);
         this.rcGlobal = new indexRowSetContainer(null);
         this.rcGlobalCount = 0;
         this.profileLocal = localTiming;
@@ -121,37 +119,49 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 // remember time
                 long start = System.currentTimeMillis();
 
-                // first trigger a local search within a separate thread
-                serverInstantThread.oneTimeJob(this, "localSearch", log, 0);
-
                 // do a global search
-                int globalContributions = globalSearch(fetchpeers);
+                // the result of the fetch is then in the rcGlobal
+                if (fetchpeers < 10) fetchpeers = 10;
+
+                log.logFine("STARTING " + fetchpeers + " THREADS TO CATCH EACH " + profileGlobal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT) + " URLs WITHIN " + (profileGlobal.duetime() / 1000) + " SECONDS");
+
+                long timeout = System.currentTimeMillis() + profileGlobal.duetime();
+                searchThreads = yacySearch.searchHashes(query.queryHashes, query.prefer, query.urlMask, query.maxDistance, urlStore, rcGlobal, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
+
+                // meanwhile do a local search
+                indexContainer rcLocal = localSearchJoin(localSearchContainers());
+                plasmaSearchResult localResult = orderLocal(rcLocal, timeout);
+                
+                // catch up global results:
+                // wait until wanted delay passed or wanted result appeared
+                while (System.currentTimeMillis() < timeout) {
+                    // check if all threads have been finished or results so far are enough
+                    //if (rcGlobal.size() >= profileGlobal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT) * 5) break; // we have enough
+                    if (yacySearch.remainingWaiting(searchThreads) == 0) break; // we cannot expect more
+                    // wait a little time ..
+                    try {Thread.sleep(100);} catch (InterruptedException e) {}
+                }
+                int globalContributions = rcGlobal.size();
+                
+                // finished searching
                 log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
 
                 // combine the result and order
-                plasmaSearchResult result = order();
+                plasmaSearchResult result = ((globalContributions == 0) && (localResult.sizeOrdered() != 0)) ? localResult : order(rcLocal);
                 result.globalContributions = globalContributions;
                 result.localContributions = rcLocal.size();
-                flushGlobalResults(); // make these values available for immediate next search
-
+                
                 // flush results in a separate thread
                 this.start(); // start to flush results
-                // serverInstantThread.oneTimeJob(this, "flushResults", log, 0);
-
-                // clean up
-                rcLocal = null;
 
                 // return search result
                 log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
                 lastEvent = this;
                 return result;
             } else {
-                localSearch();
-                plasmaSearchResult result = order();
+                indexContainer rcLocal = localSearchJoin(localSearchContainers());
+                plasmaSearchResult result = order(rcLocal);
                 result.localContributions = rcLocal.size();
-
-                // clean up
-                rcLocal = null;
 
                 // return search result
                 log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
@@ -160,9 +170,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             }
         }
     }
-    
-    public int localSearch() {
-        // search for the set of hashes and return an array of urlEntry elements
+
+    public Set localSearchContainers() {
+        // search for the set of hashes and return the set of containers containing the seach result
 
         // retrieve entities that belong to the hashes
         profileLocal.startTimer();
@@ -175,48 +185,29 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_COLLECTION);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_COLLECTION, (containers == null) ? 0 : containers.size());
 
-        // since this is a conjunction we return an empty entity if any word
-        // is not known
+        return containers;
+    }
+    
+    public indexContainer localSearchJoin(Set containers) {
+        // join a search result and return the joincount (number of pages after join)
+
+        // since this is a conjunction we return an empty entity if any word is not known
         if (containers == null) {
-            rcLocal = new indexRowSetContainer(null);
-            return 0;
+            return new indexRowSetContainer(null);
         }
 
         // join the result
         profileLocal.startTimer();
-        rcLocal = indexRowSetContainer.joinContainer(containers,
+        indexContainer rcLocal = indexRowSetContainer.joinContainer(containers,
                 profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN),
                 query.maxDistance);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_JOIN);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_JOIN, rcLocal.size());
 
-        return rcLocal.size();
-
+        return rcLocal;
     }
     
-    public int globalSearch(int fetchpeers) {
-        // do global fetching
-        // the result of the fetch is then in the rcGlobal
-        if (fetchpeers < 10) fetchpeers = 10;
-
-        log.logFine("STARTING " + fetchpeers + " THREADS TO CATCH EACH " + profileGlobal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT) + " URLs WITHIN " + (profileGlobal.duetime() / 1000) + " SECONDS");
-
-        long timeout = System.currentTimeMillis() + profileGlobal.duetime() + 4000;
-        searchThreads = yacySearch.searchHashes(query.queryHashes, query.prefer, query.urlMask, query.maxDistance, urlStore, rcGlobal, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
-
-        // wait until wanted delay passed or wanted result appeared
-        while (System.currentTimeMillis() < timeout) {
-            // check if all threads have been finished or results so far are enough
-            if (rcGlobal.size() >= profileGlobal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT) * 5) break; // we have enough
-            if (yacySearch.remainingWaiting(searchThreads) == 0) break; // we cannot expect more
-            // wait a little time ..
-            try {Thread.sleep(100);} catch (InterruptedException e) {}
-        }
-        
-        return rcGlobal.size();
-    }
-    
-    public plasmaSearchResult order() {
+    public plasmaSearchResult order(indexContainer rcLocal) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
@@ -247,7 +238,66 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {
             while (preorder.hasNext()) {
-                if ((acc.sizeFetched() >= 50) && ((acc.sizeFetched() >= minEntries) || (System.currentTimeMillis() >= postorderLimitTime))) break;
+                //if ((acc.sizeFetched() >= 50) && ((acc.sizeFetched() >= minEntries) || (System.currentTimeMillis() >= postorderLimitTime))) break;
+                if (acc.sizeFetched() >= minEntries) break;
+                if (System.currentTimeMillis() >= postorderLimitTime) break;
+                entry = preorder.next();
+                // find the url entry
+                try {
+                    page = urlStore.getEntry(entry.urlHash(), entry);
+                    // add a result
+                    acc.addResult(entry, page);
+                } catch (IOException e) {
+                    // result was not found
+                }
+            }
+        } catch (kelondroException ee) {
+            serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
+        }
+        profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_URLFETCH);
+        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_URLFETCH, acc.sizeFetched());
+
+        // start postsorting
+        profileLocal.startTimer();
+        acc.sortResults();
+        profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_POSTSORT);
+        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_POSTSORT, acc.sizeOrdered());
+        
+        // apply filter
+        profileLocal.startTimer();
+        //acc.removeRedundant();
+        acc.removeDoubleDom();
+        profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_FILTER);
+        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_FILTER, acc.sizeOrdered());
+        
+        return acc;
+    }
+    
+    private plasmaSearchResult orderLocal(indexContainer rcLocal, long maxtime) {
+        // we collect the urlhashes and construct a list with urlEntry objects
+        // attention: if minEntries is too high, this method will not terminate within the maxTime
+
+        profileLocal.startTimer();
+        if (maxtime < 0) maxtime = 200;
+        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking);
+        preorder.addContainer(rcLocal, maxtime);
+        profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
+        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_PRESORT, rcLocal.size());
+        
+        // start url-fetch
+        maxtime = Math.max(200, maxtime - profileLocal.getYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT));
+        long postorderLimitTime = System.currentTimeMillis() + maxtime;
+        profileLocal.startTimer();
+        plasmaSearchResult acc = new plasmaSearchResult(query, ranking);
+
+        indexEntry entry;
+        plasmaCrawlLURL.Entry page;
+        int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
+        try {
+            while (preorder.hasNext()) {
+                //if ((acc.sizeFetched() >= 50) && ((acc.sizeFetched() >= minEntries) || (System.currentTimeMillis() >= postorderLimitTime))) break;
+                if (acc.sizeFetched() >= minEntries) break;
+                if (System.currentTimeMillis() >= postorderLimitTime) break;
                 entry = preorder.next();
                 // find the url entry
                 try {
@@ -300,7 +350,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 log.logFine("SEARCH FLUSH: " + remaining + " PEERS STILL BUSY; ABANDONED; SEARCH WAS " + query.queryWords);
                 break;
             }
-            log.logFine("FINISHED FLUSH RESULTS PROCESS for query " + query.hashes(","));
+            //log.logFine("FINISHED FLUSH RESULTS PROCESS for query " + query.hashes(","));
         }
         
         serverLog.logFine("PLASMA", "FINISHED FLUSHING " + rcGlobalCount + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
@@ -319,11 +369,13 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             synchronized (rcGlobal) {
                 String wordHash;
                 Iterator hashi = query.queryHashes.iterator();
+                boolean dhtCache = false;
                 while (hashi.hasNext()) {
                     wordHash = (String) hashi.next();
                     rcGlobal.setWordHash(wordHash);
-                    wordIndex.addEntries(rcGlobal, System.currentTimeMillis(), false);
-                    log.logFine("FLUSHED " + wordHash + ": " + rcGlobal.size() + " url entries");
+                    dhtCache = dhtCache | wordIndex.busyCacheFlush;
+                    wordIndex.addEntries(rcGlobal, System.currentTimeMillis(), dhtCache);
+                    log.logFine("FLUSHED " + wordHash + ": " + rcGlobal.size() + " url entries to " + ((dhtCache) ? "DHT cache" : "word cache"));
                 }
                 // the rcGlobal was flushed, empty it
                 count += rcGlobal.size();

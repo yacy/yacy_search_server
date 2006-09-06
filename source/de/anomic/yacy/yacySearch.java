@@ -198,8 +198,7 @@ public class yacySearch extends Thread {
             searchThreads[i]= new yacySearch(wordhashes, prefer, filter, maxDist, true, targetPeers[i],
                     urlManager, containerCache, blacklist, snippetCache, timingProfile, rankingProfile);
             searchThreads[i].start();
-            try {Thread.sleep(20);} catch (InterruptedException e) {}
-
+            //try {Thread.sleep(20);} catch (InterruptedException e) {}
         }
         return searchThreads;
     }

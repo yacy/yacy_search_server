@@ -48,7 +48,11 @@
 // if the shell's current path is htroot/yacy
 
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -117,18 +121,33 @@ public final class search {
         plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
         plasmaSearchTimingProfile remoteTiming = null;
         plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
-        plasmaSearchResult acc = null;
-        int idxc = 0;
-        idxc = theSearch.localSearch();
-        acc = theSearch.order();
+        Set containers = theSearch.localSearchContainers();
+        indexContainer localResults = theSearch.localSearchJoin(containers);
+        int joincount = localResults.size();
+        plasmaSearchResult acc = theSearch.order(localResults);
 
-        // result is a List of urlEntry elements
-        if ((idxc == 0) || (acc == null)) {
-            prop.put("totalcount", "0");
+        // set statistic details of search result
+        prop.put("joincount", Integer.toString(joincount));
+        if (containers == null) {
+            prop.put("indexcount", "");
+        } else {
+            Iterator ci = containers.iterator();
+            StringBuffer indexcount = new StringBuffer();
+            while (ci.hasNext()) {
+                indexContainer container = (indexContainer) ci.next();
+                indexcount.append("indexcount.").append(container.getWordHash()).append('=').append(Integer.toString(container.size())).append(serverCore.crlfString);
+            }
+            prop.put("indexcount", new String(indexcount));
+        }
+        
+        
+        if ((joincount == 0) || (acc == null)) {
+            prop.put("links", "");
             prop.put("linkcount", "0");
             prop.put("references", "");
         } else {
-            prop.put("totalcount", Integer.toString(acc.sizeOrdered()));
+            
+            // result is a List of urlEntry elements
             int i = 0;
             StringBuffer links = new StringBuffer();
             String resource = "";
@@ -147,12 +166,12 @@ public final class search {
                         resource = urlentry.toString();
                     }
                     if (resource != null) {
-                        links.append("resource").append(i).append("=").append(resource).append(serverCore.crlfString);
+                        links.append("resource").append(i).append('=').append(resource).append(serverCore.crlfString);
                         i++;
                     }
                 }
             }
-            prop.put("links", links.toString());
+            prop.put("links", new String(links));
             prop.put("linkcount", Integer.toString(i));
 
             // prepare reference hints
@@ -161,17 +180,15 @@ public final class search {
             for (int j = 0; j < ws.length; j++)
                 refstr.append(",").append((String) ws[j]);
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
-
-            // add information about forward peers
-            prop.put("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
-            prop.put("fwsrc", ""); // peers that helped to construct this result
-            prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
-
-            
         }
         
+        // add information about forward peers
+        prop.put("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
+        prop.put("fwsrc", ""); // peers that helped to construct this result
+        prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
+        
         // log
-        yacyCore.log.logInfo("EXIT HASH SEARCH: " + squery.queryHashes + " - " + idxc + " links found, " + prop.get("linkcount", "?") + " links selected, " + ((System.currentTimeMillis() - timestamp1) / 1000) + " seconds");
+        yacyCore.log.logInfo("EXIT HASH SEARCH: " + squery.queryHashes + " - " + joincount + " links found, " + prop.get("linkcount", "?") + " links selected, " + ((System.currentTimeMillis() - timestamp1) / 1000) + " seconds");
  
         prop.put("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
 
