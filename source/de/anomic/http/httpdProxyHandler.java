@@ -840,18 +840,13 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 
     private void removeHopByHopHeaders(httpHeader headers) {
         /*
-         *       - Connection
-         - Keep-Alive
-         - Proxy-Authenticate
-         - Proxy-Authorization
-         - TE
          - Trailers
-         - Transfer-Encoding
-         - Upgrade 
          */
         
         headers.remove(httpHeader.CONNECTION);
         headers.remove(httpHeader.KEEP_ALIVE);
+        headers.remove(httpHeader.UPGRADE);
+        headers.remove(httpHeader.TE);
         headers.remove(httpHeader.PROXY_CONNECTION);
         headers.remove(httpHeader.PROXY_AUTHENTICATE);
         headers.remove(httpHeader.PROXY_AUTHORIZATION);
