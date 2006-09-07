@@ -692,8 +692,13 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
                         try {
-                            url = lurl.load(entry.urlHash(), null).url();
-                            if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, url) == true)) {
+                            plasmaCrawlLURL.Entry lurlEntry = lurl.load(entry.urlHash(), null);
+                            if (lurlEntry != null) {
+                                url = lurlEntry.url();
+                                if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, url) == true)) {
+                                    urlHashs.add(entry.urlHash());
+                                }
+                            } else {
                                 urlHashs.add(entry.urlHash());
                             }
                         } catch (IOException e) {

@@ -251,9 +251,14 @@ public final class crawlOrder {
             // send lurl-Entry as response
             try {
                 plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(indexURL.urlHash(url), null);
-                response = "double";
-                switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
-                lurl = crypt.simpleEncode(entry.toString());
+                if (entry != null) {
+                    response = "double";
+                    switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
+                    lurl = crypt.simpleEncode(entry.toString());
+                } else {
+                    response = "rejected";
+                    lurl = "";
+                }
             } catch (IOException e) {
                 response = "rejected";
                 lurl = "";

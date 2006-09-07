@@ -2159,6 +2159,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // determine the url string
         try {
             plasmaCrawlLURL.Entry entry = urlPool.loadedURL.load(urlhash, null);
+            if (entry == null)
+                return 0;
             URL url = entry.url();
             if (url == null)
                 return 0;
