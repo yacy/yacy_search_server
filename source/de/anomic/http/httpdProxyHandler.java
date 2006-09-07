@@ -415,9 +415,17 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // decide wether to use a cache entry or connect to the network
             File cacheFile = cacheManager.getCachePath(url);
+            
+            httpHeader cachedResponseHeader = null;
             ResourceInfo cachedResInfo = (ResourceInfo) cacheManager.loadResourceInfo(url);
-            httpHeader cachedResponseHeader = (cachedResInfo == null)?null:cachedResInfo.getResponseHeader();
-            boolean cacheExists = ((cacheFile.isFile()) && (cachedResponseHeader != null));
+            if (cachedResInfo != null) {
+                // set the new request header (needed by function shallUseCacheForProxy)
+                cachedResInfo.setRequestHeader(requestHeader);
+                
+                // get the cached response header
+                cachedResponseHeader = cachedResInfo.getResponseHeader();
+            }
+            boolean cacheExists = cacheFile.isFile() && (cachedResponseHeader != null);
             
             // why are files unzipped upon arrival? why not zip all files in cache?
             // This follows from the following premises
@@ -457,12 +465,10 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             if (yacyCore.getOnlineMode() == 0) {
             	if (cacheExists) {
             		fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,respond);
-            	}
-            	else {
+            	} else {
             		httpd.sendRespondError(conProp,respond,4,404,null,"URL not availabe in Cache",null);
             	}
-            }
-            else if (cacheExists && cacheEntry.shallUseCacheForProxy()) {
+            } else if (cacheExists && cacheEntry.shallUseCacheForProxy()) {
                 fulfillRequestFromCache(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,respond);
             } else {            
                 fulfillRequestFromWeb(conProp,url,ext,requestHeader,cachedResponseHeader,cacheFile,respond);

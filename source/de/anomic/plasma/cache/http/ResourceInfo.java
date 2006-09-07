@@ -148,6 +148,10 @@ public class ResourceInfo implements IResourceInfo {
     public String getUrlHash() {
         return this.urlHash;
     }
+    
+    public void setRequestHeader(httpHeader reqestHeader) {
+        this.requestHeader = reqestHeader;
+    }
 
     /**
      * @see de.anomic.plasma.cache.IResourceInfo#shallIndexCacheForCrawler()
