@@ -70,6 +70,8 @@ import de.anomic.index.indexEntry;
 import de.anomic.index.indexURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroRAMIndex;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaHTCache;
@@ -117,7 +119,8 @@ public final class plasmaCrawlLURL extends indexURL {
         
         cacheFile.getParentFile().mkdirs();
         try {
-            urlHashCache = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
+            urlIndexFile = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
+            urlIndexCache = new kelondroRAMIndex(kelondroNaturalOrder.naturalOrder, rowdef);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);
@@ -132,7 +135,7 @@ public final class plasmaCrawlLURL extends indexURL {
         gcrawlResultStack = new LinkedList();
     }
     
-    public synchronized void stackEntry(Entry e, String initiatorHash, String executorHash, int stackType) {
+    public synchronized void stack(Entry e, String initiatorHash, String executorHash, int stackType) {
         if (e == null) { return; }
         try {
             if (initiatorHash == null) { initiatorHash = dummyHash; }
@@ -157,27 +160,58 @@ public final class plasmaCrawlLURL extends indexURL {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
 
-    public Entry getEntry(String hash, indexEntry searchedWord) throws IOException {
-        return new Entry(hash, searchedWord);
+    public Entry load(String urlHash, indexEntry searchedWord) throws IOException {
+        // generates an plasmaLURLEntry using the url hash
+        // to speed up the access, the url-hashes are buffered
+        // in the hash cache.
+        // we have two options to find the url:
+        // - look into the hash cache
+        // - look into the filed properties
+        // if the url cannot be found, this returns null
+        kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
+        if (entry == null) entry = urlIndexCache.get(urlHash.getBytes());
+        if (entry == null) return null;
+        return new Entry(entry, searchedWord);
     }
 
-    public synchronized Entry newEntry(Entry oldEntry) {
-        if (oldEntry == null) return null;
-        return new Entry(
-                oldEntry.url(),
-                oldEntry.descr(),
-                oldEntry.moddate(),
-                oldEntry.loaddate(),
-                oldEntry.referrerHash(),
-                oldEntry.copyCount(),
-                oldEntry.local(),
-                oldEntry.quality(),
-                oldEntry.language(),
-                oldEntry.doctype(),
-                oldEntry.size(),
-                oldEntry.wordCount());
+    public void store(Entry entry, boolean cached) throws IOException {
+        // Check if there is a more recent Entry already in the DB
+        if (entry.stored) return;
+        Entry oldEntry;
+        try {
+            if (exists(entry.urlHash)) {
+                oldEntry = load(entry.urlHash, null);
+            } else {
+                oldEntry = null;
+            }
+        } catch (Exception e) {
+            oldEntry = null;
+        }
+        if ((oldEntry != null) && (entry.isOlder(oldEntry))) {
+            // the fetched oldEntry is better, so return its properties instead of the new ones
+            // this.urlHash = oldEntry.urlHash; // unnecessary, should be the same
+            // this.url = oldEntry.url; // unnecessary, should be the same
+            entry.descr = oldEntry.descr;
+            entry.moddate = oldEntry.moddate;
+            entry.loaddate = oldEntry.loaddate;
+            entry.referrerHash = oldEntry.referrerHash;
+            entry.copyCount = oldEntry.copyCount;
+            entry.flags = oldEntry.flags;
+            entry.quality = oldEntry.quality;
+            entry.language = oldEntry.language;
+            entry.doctype = oldEntry.doctype;
+            entry.size = oldEntry.size;
+            entry.wordCount = oldEntry.wordCount;
+            // this.snippet // not read from db
+            // this.word // not read from db
+            entry.stored = true;
+            return; // this did not need to be stored, but is updated
+        }
+
+        super.store(entry.toRowEntry(), cached);
+        entry.stored = true;
     }
-    
+
     public synchronized Entry newEntry(String propStr, boolean setGlobal) {
         if (propStr.startsWith("{") && propStr.endsWith("}")) {
             return new Entry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)), setGlobal);
@@ -281,7 +315,7 @@ public final class plasmaCrawlLURL extends indexURL {
 
     public boolean exists(String urlHash) {
             try {
-                if (urlHashCache.get(urlHash.getBytes()) != null) {
+                if (urlIndexFile.get(urlHash.getBytes()) != null) {
                     return true;
                 } else {
                     return false;
@@ -343,7 +377,7 @@ public final class plasmaCrawlLURL extends indexURL {
             urlHash = getUrlHash(tabletype, i);
 //          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
             try {
-                urle = getEntry(urlHash, null);
+                urle = load(urlHash, null);
 //              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
                 initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                 executorSeed = yacyCore.seedDB.getConnected(executorHash);
@@ -374,7 +408,7 @@ public final class plasmaCrawlLURL extends indexURL {
         prop.put("table_indexed", cnt);
         return prop;
     }
-
+    
     public class Entry {
 
         private URL url;
@@ -426,29 +460,8 @@ public final class plasmaCrawlLURL extends indexURL {
             this.word = null;
             this.stored = false;
         }
-
-        public Entry(String urlHash, indexEntry searchedWord) throws IOException {
-            // generates an plasmaLURLEntry using the url hash
-            // to speed up the access, the url-hashes are buffered
-            // in the hash cache.
-            // we have two options to find the url:
-            // - look into the hash cache
-            // - look into the filed properties
-            // if the url cannot be found, this returns null
-            this.urlHash = urlHash;
-            kelondroRow.Entry entry = plasmaCrawlLURL.this.urlHashCache.get(urlHash.getBytes());
-            if (entry == null) throw new IOException("url hash " + urlHash + " not found in LURL");
-            insertEntry(entry, searchedWord);
-            this.stored = true;
-        }
         
         public Entry(kelondroRow.Entry entry, indexEntry searchedWord) throws IOException {
-            assert (entry != null);
-            insertEntry(entry, word);
-            this.stored = false;
-        }
-        
-        private void insertEntry(kelondroRow.Entry entry, indexEntry searchedWord) throws IOException {
             try {
                 this.urlHash = entry.getColString(0, null);
                 this.url = new URL(entry.getColString(1, "UTF-8").trim());
@@ -505,48 +518,12 @@ public final class plasmaCrawlLURL extends indexURL {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/2: " + e.toString(), e);
             }
         }
+        
+        public kelondroRow.Entry toRowEntry() throws IOException {
+            final String moddatestr = kelondroBase64Order.enhancedCoder.encodeLong(moddate.getTime() / 86400000, urlDateLength);
+            final String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, urlDateLength);
 
-        public void store() {
-            // Check if there is a more recent Entry already in the DB
-            if (this.stored) return;
-                Entry oldEntry;
-                try {
-                    if (exists(urlHash)) {
-                        oldEntry = new Entry(urlHash, null);
-                    } else {
-                        oldEntry = null;
-                    }
-                } catch (Exception e) {
-                    oldEntry = null;
-                }
-                if ((oldEntry != null) && (isOlder(oldEntry))) {
-                    // the fetched oldEntry is better, so return its properties instead of the new ones
-                    // this.urlHash = oldEntry.urlHash; // unnecessary, should be the same
-                    // this.url = oldEntry.url; // unnecessary, should be the same
-                    this.descr = oldEntry.descr;
-                    this.moddate = oldEntry.moddate;
-                    this.loaddate = oldEntry.loaddate;
-                    this.referrerHash = oldEntry.referrerHash;
-                    this.copyCount = oldEntry.copyCount;
-                    this.flags =  oldEntry.flags;
-                    this.quality = oldEntry.quality;
-                    this.language = oldEntry.language;
-                    this.doctype = oldEntry.doctype;
-                    this.size = oldEntry.size;
-                    this.wordCount = oldEntry.wordCount;
-                    // this.snippet // not read from db
-                    // this.word // not read from db
-                    return;
-                }
-
-                // stores the values from the object variables into the database
-                final String moddatestr = kelondroBase64Order.enhancedCoder.encodeLong(moddate.getTime() / 86400000, urlDateLength);
-                final String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, urlDateLength);
-
-                // store the hash in the hash cache
-                try {
-                    // even if the entry exists, we simply overwrite it
-                    final byte[][] entry = new byte[][] {
+            final byte[][] entry = new byte[][] {
                         urlHash.getBytes(),
                         url.toString().getBytes(),
                         descr.getBytes(), // null?
@@ -560,13 +537,8 @@ public final class plasmaCrawlLURL extends indexURL {
                         new byte[] {(byte) doctype},
                         kelondroBase64Order.enhancedCoder.encodeLong(size, urlSizeLength).getBytes(),
                         kelondroBase64Order.enhancedCoder.encodeLong(wordCount, urlWordCountLength).getBytes(),
-                    };
-                    urlHashCache.put(urlHashCache.row().newEntry(entry));
-                    //serverLog.logFine("PLASMA","STORED new LURL " + url.toString());
-                    this.stored = true;
-                } catch (Exception e) {
-                    serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaCrawlLURL:store:" + e.toString(), e);
-                }
+            };
+            return urlIndexFile.row().newEntry(entry);
         }
 
         public String hash() {
@@ -751,7 +723,7 @@ public final class plasmaCrawlLURL extends indexURL {
         boolean error = false;
         
         public kiter(boolean up, boolean rotating, String firstHash) throws IOException {
-            i = urlHashCache.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
+            i = urlIndexFile.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
             error = false;
         }
 
@@ -817,7 +789,7 @@ public final class plasmaCrawlLURL extends indexURL {
                 String oldUrlStr = null;
                 try {
                     // getting the url data as byte array
-                    kelondroRow.Entry entry = urlHashCache.get(urlHash.getBytes());
+                    kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
 
                     // getting the wrong url string
                     oldUrlStr = entry.getColString(1, null).trim();
@@ -834,7 +806,7 @@ public final class plasmaCrawlLURL extends indexURL {
 
                         if (res.statusCode == 200) {
                             entry.setCol(1, newUrl.toString().getBytes());
-                            urlHashCache.put(entry);
+                            urlIndexFile.put(entry);
                             log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
                         } else {
                             remove(urlHash);

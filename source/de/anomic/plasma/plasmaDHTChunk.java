@@ -228,7 +228,7 @@ public class plasmaDHTChunk {
                     while ((urlIter.hasNext()) && (maxcount > refcount)) {
                         iEntry = (indexEntry) urlIter.next();
                         try {
-                            lurl = lurls.getEntry(iEntry.urlHash(), iEntry);
+                            lurl = lurls.load(iEntry.urlHash(), iEntry);
                             if ((lurl == null) || (lurl.url() == null)) {
                                 //yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + iEntry.urlHash() + "' for word hash " + container.getWordHash());
                                 notBoundCounter++;

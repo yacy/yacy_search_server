@@ -220,8 +220,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         searchResult.add(rcGlobal, preorderTime);
         preorderTime = preorderTime - (System.currentTimeMillis() - pst);
         if (preorderTime < 0) preorderTime = 200;
-        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking);
-        preorder.addContainer(searchResult, preorderTime);
+        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, searchResult, preorderTime);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_PRESORT, rcLocal.size());
         
@@ -244,9 +243,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 entry = preorder.next();
                 // find the url entry
                 try {
-                    page = urlStore.getEntry(entry.urlHash(), entry);
+                    page = urlStore.load(entry.urlHash(), entry);
                     // add a result
-                    acc.addResult(entry, page);
+                    if (page != null) acc.addResult(entry, page);
                 } catch (IOException e) {
                     // result was not found
                 }
@@ -279,8 +278,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
         profileLocal.startTimer();
         if (maxtime < 0) maxtime = 200;
-        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking);
-        preorder.addContainer(rcLocal, maxtime);
+        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, rcLocal, maxtime);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_PRESORT, rcLocal.size());
         
@@ -301,9 +299,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 entry = preorder.next();
                 // find the url entry
                 try {
-                    page = urlStore.getEntry(entry.urlHash(), entry);
+                    page = urlStore.load(entry.urlHash(), entry);
                     // add a result
-                    acc.addResult(entry, page);
+                    if (page != null) acc.addResult(entry, page);
                 } catch (IOException e) {
                     // result was not found
                 }

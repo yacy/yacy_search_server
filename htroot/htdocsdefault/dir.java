@@ -368,8 +368,8 @@ public class dir {
                 phrase.length(), /*size*/
                 condenser.RESULT_NUMB_WORDS
             );
-            newEntry.store();
-            switchboard.urlPool.loadedURL.stackEntry(
+            switchboard.urlPool.loadedURL.store(newEntry, false);
+            switchboard.urlPool.loadedURL.stack(
                     newEntry,
                     "____________", /*initiator*/
                     yacyCore.seedDB.mySeed.hash, /*executor*/

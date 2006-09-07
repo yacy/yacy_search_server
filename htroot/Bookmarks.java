@@ -136,7 +136,7 @@ public class Bookmarks {
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
                         try {
-                            plasmaCrawlLURL.Entry urlentry = switchboard.urlPool.loadedURL.getEntry(urlHash, null);
+                            plasmaCrawlLURL.Entry urlentry = switchboard.urlPool.loadedURL.load(urlHash, null);
                             prop.put("mode_edit", 0); // create mode
                             prop.put("mode_title", urlentry.descr());
                             prop.put("mode_description", urlentry.descr());

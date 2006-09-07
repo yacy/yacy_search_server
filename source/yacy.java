@@ -727,10 +727,9 @@ public final class yacy {
                         iEntry = (indexEntry) wordIdxEntries.next();
                         String urlHash = iEntry.urlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            plasmaCrawlLURL.Entry urlEntry = currentUrlDB.getEntry(urlHash, null);                       
+                            plasmaCrawlLURL.Entry urlEntry = currentUrlDB.load(urlHash, null);                       
                             urlCounter++;
-                            plasmaCrawlLURL.Entry newEntry = minimizedUrlDB.newEntry(urlEntry);
-                            newEntry.store();
+                            minimizedUrlDB.store(urlEntry, false);
                             if (urlCounter % 500 == 0) {
                                 log.logInfo(urlCounter + " URLs found so far.");
                             }

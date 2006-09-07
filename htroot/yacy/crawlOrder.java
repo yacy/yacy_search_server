@@ -250,7 +250,7 @@ public final class crawlOrder {
             reason = reasonString;
             // send lurl-Entry as response
             try {
-                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(indexURL.urlHash(url), null);
+                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(indexURL.urlHash(url), null);
                 response = "double";
                 switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
                 lurl = crypt.simpleEncode(entry.toString());

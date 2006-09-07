@@ -156,11 +156,10 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                             // we need to import the url
                             try {	
                                 // getting the url entry
-                                plasmaCrawlLURL.Entry urlEntry = this.importUrlDB.getEntry(urlHash, null);
+                                plasmaCrawlLURL.Entry urlEntry = this.importUrlDB.load(urlHash, null);
 
                                 /* write it into the home url db */
-                                plasmaCrawlLURL.Entry homeEntry = this.homeUrlDB.newEntry(urlEntry);
-                                homeEntry.store();
+                                this.homeUrlDB.store(urlEntry, false);
                                 importedUrlBuffer.add(urlHash);
                                 this.urlCounter++;
 

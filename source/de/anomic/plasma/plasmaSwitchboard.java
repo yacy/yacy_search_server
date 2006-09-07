@@ -987,6 +987,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // flush some entries from the RAM cache
             // (new permanent cache flushing)
             wordIndex.flushCacheSome(sbQueue.size() != 0);
+            urlPool.loadedURL.flushCacheSome();
 
             boolean doneSomething = false;
 
@@ -1560,8 +1561,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     /* ========================================================================
                      * STORE URL TO LOADED-URL-DB
                      * ======================================================================== */
-                    newEntry.store();
-                    urlPool.loadedURL.stackEntry(
+                    urlPool.loadedURL.store(newEntry, false);
+                    urlPool.loadedURL.stack(
                             newEntry,                       // loaded url db entry
                             initiatorPeerHash,                  // initiator peer hash
                             yacyCore.seedDB.mySeed.hash,    // executor peer hash
@@ -1942,8 +1943,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if ((lurl != null) && (lurl.length() != 0)) {
                             String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));
                             plasmaCrawlLURL.Entry entry = urlPool.loadedURL.newEntry(propStr, true);
-                            entry.store();
-                            urlPool.loadedURL.stackEntry(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
+                            urlPool.loadedURL.store(entry, false);
+                            urlPool.loadedURL.stack(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
                             urlPool.noticeURL.remove(entry.hash());
                             log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + "). URL IS CONSIDERED AS 'LOADED!'");
                             return true;
@@ -2157,7 +2158,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // determine the url string
         try {
-            plasmaCrawlLURL.Entry entry = urlPool.loadedURL.getEntry(urlhash, null);
+            plasmaCrawlLURL.Entry entry = urlPool.loadedURL.load(urlhash, null);
             URL url = entry.url();
             if (url == null)
                 return 0;

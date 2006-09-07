@@ -348,7 +348,13 @@ public final class yacyClient {
 //          yacyCore.log("DEBUG QUERY: query=" + querystr + "; result = " + result.toString());
             if ((result == null) || (result.size() == 0)) return -1;
             final String resp = (String) result.get("response");
-            if (resp == null) { return -1; } else { return Integer.parseInt(resp); }
+            if (resp == null) {
+                return -1;
+            } else try {
+                return Integer.parseInt(resp);
+            } catch (NumberFormatException e) {
+                return -1;
+            }
         } catch (IOException e) {
             yacyCore.log.logSevere("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
             return -1;
@@ -477,15 +483,16 @@ public final class yacyClient {
                 // get one single search result
                 urlEntry = urlManager.newEntry((String) result.get("resource" + n), true);
                 if ((urlEntry == null) || (blacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, urlEntry.url()))) { continue; } // block with backlist
-                urlEntry.store();
-                int urlLength = urlEntry.url().toString().length();
-                int urlComps = htmlFilterContentScraper.urlComps(urlEntry.url().toString()).length;
-                
-                urlManager.stackEntry(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
+                urlManager.store(urlEntry, true);
+                urlManager.stack(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
+
                 // save the url entry
                 final indexEntry entry;
                 if (urlEntry.word() == null) {
                     // the old way to define words
+                    int urlLength = urlEntry.url().toString().length();
+                    int urlComps = htmlFilterContentScraper.urlComps(urlEntry.url().toString()).length;
+                    
                     entry = new indexURLEntry(
                                                      urlEntry.hash(),
                                                      urlLength, urlComps,

@@ -75,7 +75,7 @@ public class plasmaCrawlNURL extends indexURL {
     public static final int STACK_TYPE_MUSIC    = 13; // put on music stack
 
     /**
-     * column length definition for the {@link plasmaURL#urlHashCache} DB
+     * column length definition for the {@link plasmaURL#urlIndexFile} DB
      */
     public final static kelondroRow rowdef = new kelondroRow(
         "String urlhash-"      + urlHashLength               + ", " +        // the url's hash
@@ -153,7 +153,7 @@ public class plasmaCrawlNURL extends indexURL {
             String newCacheName = "urlNotice4.table";
             cacheStacksPath.mkdirs();
             try {
-                urlHashCache = new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder);
+                urlIndexFile = new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(-1);
@@ -161,14 +161,14 @@ public class plasmaCrawlNURL extends indexURL {
         } else {
             File oldCacheFile = new File(cacheStacksPath, "urlNotice1.db");
             oldCacheFile.getParentFile().mkdirs();
-            urlHashCache = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
+            urlIndexFile = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
         }
     }
     
     private void resetHashCache() {
-        if (urlHashCache != null) {
-            try {urlHashCache.close();} catch (IOException e) {}
-            urlHashCache = null;
+        if (urlIndexFile != null) {
+            try {urlIndexFile.close();} catch (IOException e) {}
+            urlIndexFile = null;
             File cacheFile = new File(cacheStacksPath, "urlNotice1.db");
             cacheFile.delete();
         }
@@ -176,7 +176,7 @@ public class plasmaCrawlNURL extends indexURL {
     }
     
     public void close() {
-        try {urlHashCache.close();} catch (IOException e) {}
+        try {urlIndexFile.close();} catch (IOException e) {}
         coreStack.close();
         limitStack.close();
         overhangStack.close();
@@ -475,7 +475,7 @@ public class plasmaCrawlNURL extends indexURL {
             // if the url cannot be found, this returns null
             this.hash = hash;
             if (hash == null) throw new IOException("hash is null");
-            kelondroRow.Entry entry = urlHashCache.get(hash.getBytes());
+            kelondroRow.Entry entry = urlIndexFile.get(hash.getBytes());
             if (entry != null) {
                 insertEntry(entry);
                 this.stored = true;
@@ -532,9 +532,9 @@ public class plasmaCrawlNURL extends indexURL {
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
                 };
-                if (urlHashCache == null) System.out.println("urlHashCache is NULL");
-                if ((urlHashCache != null) && (urlHashCache.row() == null)) System.out.println("row() is NULL");
-                urlHashCache.put(urlHashCache.row().newEntry(entry));
+                if (urlIndexFile == null) System.out.println("urlHashCache is NULL");
+                if ((urlIndexFile != null) && (urlIndexFile.row() == null)) System.out.println("row() is NULL");
+                urlIndexFile.put(urlIndexFile.row().newEntry(entry));
                 this.stored = true;
             } catch (IOException e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", resetting NURL-DB");
@@ -614,7 +614,7 @@ public class plasmaCrawlNURL extends indexURL {
         boolean error = false;
         
         public kiter(boolean up, boolean rotating, String firstHash) throws IOException {
-            i = urlHashCache.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
+            i = urlIndexFile.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
             error = false;
         }
 

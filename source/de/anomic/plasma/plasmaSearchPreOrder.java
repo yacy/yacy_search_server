@@ -63,6 +63,43 @@ public final class plasmaSearchPreOrder {
     private plasmaSearchQuery query;
     private plasmaSearchRankingProfile ranking;
     
+    public plasmaSearchPreOrder() {
+        this.entryMin = null;
+        this.entryMax = null;
+        this.pageAcc = new TreeMap();
+        this.query = null;
+        this.ranking = null;
+    }
+    
+    public plasmaSearchPreOrder(plasmaSearchQuery query, plasmaSearchRankingProfile ranking, indexContainer container, long maxTime) {
+        this.query = query;
+        this.ranking = ranking;
+        
+        long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
+        indexEntry iEntry;
+
+        // first pass: find min/max to obtain limits for normalization
+        Iterator i = container.entries();
+        int count = 0;
+        this.entryMin = null;
+        this.entryMax = null;
+        while (i.hasNext()) {
+            if (System.currentTimeMillis() > limitTime) break;
+            iEntry = (indexEntry) i.next();
+            if (this.entryMin == null) this.entryMin = (indexEntry) iEntry.clone(); else this.entryMin.min(iEntry);
+            if (this.entryMax == null) this.entryMax = (indexEntry) iEntry.clone(); else this.entryMax.max(iEntry);
+            count++;
+        }
+        
+        // second pass: normalize entries and get ranking
+        i = container.entries();
+        this.pageAcc = new TreeMap();
+        for (int j = 0; j < count; j++) {
+            iEntry = (indexEntry) i.next();
+            pageAcc.put(serverCodings.encodeHex(this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax)), 16) + iEntry.urlHash(), iEntry);
+        }
+    }
+    
     public static void loadYBR(File rankingPath, int count) {
         // load ranking tables
         if (rankingPath.exists()) {
@@ -99,17 +136,11 @@ public final class plasmaSearchPreOrder {
         useYBR = usage;
     }
     
-    public plasmaSearchPreOrder(plasmaSearchQuery query, plasmaSearchRankingProfile ranking) {
-        entryMin = null;
-        entryMax = null;
-        this.pageAcc = new TreeMap();
-        this.query = query;
-        this.ranking = ranking;
-    }
-    
     public plasmaSearchPreOrder cloneSmart() {
         // clones only the top structure
-        plasmaSearchPreOrder theClone = new plasmaSearchPreOrder(query, ranking);
+        plasmaSearchPreOrder theClone = new plasmaSearchPreOrder();
+        theClone.query = this.query;
+        theClone.ranking = this.ranking;
         theClone.pageAcc = (TreeMap) this.pageAcc.clone();
         return theClone;
     }
@@ -121,29 +152,6 @@ public final class plasmaSearchPreOrder {
     public indexEntry next() {
         Object top = pageAcc.lastKey();
         return (indexEntry) pageAcc.remove(top);
-    }
-    
-    public void addContainer(indexContainer container, long maxTime) {
-        long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
-        indexEntry iEntry;
-
-        // first pass: find min/max to obtain limits for normalization
-        Iterator i = container.entries();
-        int count = 0;
-        while (i.hasNext()) {
-            if (System.currentTimeMillis() > limitTime) break;
-            iEntry = (indexEntry) i.next();
-            if (entryMin == null) entryMin = (indexEntry) iEntry.clone(); else entryMin.min(iEntry);
-            if (entryMax == null) entryMax = (indexEntry) iEntry.clone(); else entryMax.max(iEntry);
-            count++;
-        }
-        
-        // second pass: normalize entries and get ranking
-        i = container.entries();
-        for (int j = 0; j < count; j++) {
-            iEntry = (indexEntry) i.next();
-            pageAcc.put(serverCodings.encodeHex(this.ranking.preRanking(iEntry.generateNormalized(entryMin, entryMax)), 16) + iEntry.urlHash(), iEntry);
-        }
     }
     
     public indexEntry[] getNormalizer() {

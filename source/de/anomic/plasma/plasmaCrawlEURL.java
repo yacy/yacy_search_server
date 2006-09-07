@@ -144,7 +144,7 @@ public class plasmaCrawlEURL extends indexURL {
             String newCacheName = "urlErr3.table";
             cachePath.mkdirs();
             try {
-                urlHashCache = new kelondroFlexTable(cachePath, newCacheName, bufferkb * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder);
+                urlIndexFile = new kelondroFlexTable(cachePath, newCacheName, bufferkb * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(-1);
@@ -152,7 +152,7 @@ public class plasmaCrawlEURL extends indexURL {
         } else {
             File oldCacheFile = new File(cachePath, "urlErr0.db");
             oldCacheFile.getParentFile().mkdirs();
-            urlHashCache = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
+            urlIndexFile = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
         }
     }
 
@@ -181,7 +181,7 @@ public class plasmaCrawlEURL extends indexURL {
 
     public boolean exists(String urlHash) {
         try {
-            return (urlHashCache.get(urlHash.getBytes()) != null);
+            return (urlIndexFile.get(urlHash.getBytes()) != null);
         } catch (IOException e) {
             return false;
         }
@@ -236,7 +236,7 @@ public class plasmaCrawlEURL extends indexURL {
             // - look into the filed properties
             // if the url cannot be found, this returns null
             this.hash = hash;
-            kelondroRow.Entry entry = urlHashCache.get(hash.getBytes());
+            kelondroRow.Entry entry = urlIndexFile.get(hash.getBytes());
             if (entry != null) {
                 insertEntry(entry);
             }
@@ -288,7 +288,7 @@ public class plasmaCrawlEURL extends indexURL {
                     this.failreason.getBytes(),
                     this.flags.getBytes()
                 };
-                urlHashCache.put(urlHashCache.row().newEntry(entry));
+                urlIndexFile.put(urlIndexFile.row().newEntry(entry));
                 this.stored = true;
             } catch (IOException e) {
                 System.out.println("INTERNAL ERROR AT plasmaEURL:url2hash:" + e.toString());
@@ -346,7 +346,7 @@ public class plasmaCrawlEURL extends indexURL {
         boolean error = false;
         
         public kiter(boolean up, boolean rotating, String firstHash) throws IOException {
-            i = urlHashCache.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
+            i = urlIndexFile.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
             error = false;
         }
 

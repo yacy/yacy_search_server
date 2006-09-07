@@ -212,7 +212,7 @@ public class IndexControl_p {
 
         if (post.containsKey("urlhashdelete")) {
             try {
-                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash, null);
+                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
                 URL url = entry.url();
                 urlstring = url.toNormalform();
                 prop.put("urlstring", "");
@@ -262,7 +262,7 @@ public class IndexControl_p {
             while (urlIter.hasNext()) {
                 iEntry = (indexEntry) urlIter.next();
                 try {
-                    lurl = switchboard.urlPool.loadedURL.getEntry(iEntry.urlHash(), null);
+                    lurl = switchboard.urlPool.loadedURL.load(iEntry.urlHash(), null);
                     if (lurl.toString() == null) {
                         unknownURLEntries.add(iEntry.urlHash());
                         urlIter.remove();
@@ -311,7 +311,7 @@ public class IndexControl_p {
                 URL url = new URL(urlstring);
             urlhash = indexURL.urlHash(url);
             prop.put("urlhash", urlhash);
-                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash, null);
+                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
                 prop.put("result", genUrlProfile(switchboard, entry, urlhash));
             } catch (MalformedURLException e) {
                 prop.put("urlstring", "bad url: " + urlstring);
@@ -324,7 +324,7 @@ public class IndexControl_p {
 
         if (post.containsKey("urlhashsearch")) {
             try {
-                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.getEntry(urlhash, null);
+                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
                 URL url = entry.url();
                 urlstring = url.toString();
                 prop.put("urlstring", urlstring);
@@ -387,7 +387,7 @@ public class IndexControl_p {
         URL url = entry.url();
         String referrer = null;
         try {
-            referrer = switchboard.urlPool.loadedURL.getEntry(entry.referrerHash(), null).url().toString();
+            referrer = switchboard.urlPool.loadedURL.load(entry.referrerHash(), null).url().toString();
         } catch (IOException e) {
             referrer = "<unknown>";
         }
@@ -444,7 +444,7 @@ public class IndexControl_p {
                     xi = (indexEntry) en.next();
                     uh = new String[]{xi.urlHash(), Integer.toString(xi.posintext())};
                     try {
-                        us = switchboard.urlPool.loadedURL.getEntry(uh[0], null).url().toString();
+                        us = switchboard.urlPool.loadedURL.load(uh[0], null).url().toString();
                         tm.put(us, uh);
                     } catch (IOException e) {
                         tm.put(uh[0], uh);

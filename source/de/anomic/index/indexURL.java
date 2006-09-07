@@ -28,13 +28,17 @@ package de.anomic.index;
 
 import java.io.IOException;
 import de.anomic.net.URL;
+
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroIndex;
+import de.anomic.kelondro.kelondroRAMIndex;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
 
@@ -406,24 +410,57 @@ public class indexURL {
  
  
  // the class object
- protected kelondroIndex urlHashCache;
+ protected kelondroIndex    urlIndexFile = null;
+ protected kelondroRAMIndex urlIndexCache = null;
  
  public indexURL() {
-     urlHashCache = null;
+     urlIndexFile = null;
+     urlIndexCache = null;
  }
 
  public int size() {
      try {
-        return urlHashCache.size();
+        return urlIndexFile.size() + ((urlIndexCache == null) ? 0 : urlIndexCache.size());
     } catch (IOException e) {
         return 0;
     }
  }
 
+ public void store(kelondroRow.Entry entry, boolean cached) throws IOException {
+     if ((cached) && (urlIndexCache != null))
+         synchronized (urlIndexCache) {
+             urlIndexCache.put(entry);
+         }
+     else
+         urlIndexFile.put(entry);
+ }
+ 
+ public void flushCacheSome() {
+     if (urlIndexCache == null) return;
+     if (urlIndexCache.size() == 0) return;
+     int flush = Math.max(1, urlIndexCache.size() / 10);
+     while (flush-- > 0) flushCacheOnce();
+ }
+ 
+ public void flushCacheOnce() {
+     if (urlIndexCache == null) return;
+     if (urlIndexCache.size() == 0) return;
+     synchronized (urlIndexCache) {
+         Iterator i = urlIndexCache.rows(true, false, null);
+         try {
+             urlIndexFile.put((kelondroRow.Entry) i.next());
+             i.remove();
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+     }
+ }
+ 
  public boolean remove(String hash) {
      if (hash == null) return false;
      try {
-         urlHashCache.remove(hash.getBytes());
+         urlIndexFile.remove(hash.getBytes());
+         if (urlIndexCache != null) synchronized (urlIndexCache) {urlIndexCache.remove(hash.getBytes());}
          return true;
      } catch (IOException e) {
          return false;
@@ -431,26 +468,38 @@ public class indexURL {
  }
  
  public void close() throws IOException {
-     if (urlHashCache != null) urlHashCache.close();
+     while ((urlIndexCache != null) && (urlIndexCache.size() > 0)) flushCacheOnce();
+     if (urlIndexFile != null) {
+         urlIndexFile.close();
+         urlIndexFile = null;
+     }
+     if (urlIndexCache != null) {
+         urlIndexCache.close();
+         urlIndexCache = null;
+     }
  }
 
+ public int writeCacheSize() {
+     return (urlIndexCache == null) ? 0 : urlIndexCache.size();
+ }
+ 
  public int cacheNodeChunkSize() {
-     if (urlHashCache instanceof kelondroTree) return ((kelondroTree) urlHashCache).cacheNodeChunkSize();
+     if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeChunkSize();
      return 0;
  }
  
  public int[] cacheNodeStatus() {
-     if (urlHashCache instanceof kelondroTree) return ((kelondroTree) urlHashCache).cacheNodeStatus();
+     if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeStatus();
      return new int[]{0,0,0,0,0,0,0,0,0,0};
  }
  
  public int cacheObjectChunkSize() {
-     if (urlHashCache instanceof kelondroTree) return ((kelondroTree) urlHashCache).cacheObjectChunkSize();
+     if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectChunkSize();
      return 0;
  }
  
  public long[] cacheObjectStatus() {
-     if (urlHashCache instanceof kelondroTree) return ((kelondroTree) urlHashCache).cacheObjectStatus();
+     if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectStatus();
      return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
  }
  

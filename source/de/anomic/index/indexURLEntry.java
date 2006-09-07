@@ -258,13 +258,14 @@ public class indexURLEntry implements Cloneable, indexEntry {
     }
 
     static void normalize(indexURLEntry t, indexEntry min, indexEntry max) {
+        if (1 + max.worddistance() - min.worddistance() == 0) System.out.println("min = " + min.toPropertyForm() + "\nmax=" + max.toPropertyForm());
         t.entry.setCol(col_hitcount     , (t.hitcount()     == 0) ? 0 : 1 + 255 * (t.hitcount()     - min.hitcount()    ) / (1 + max.hitcount()     - min.hitcount()));
         t.entry.setCol(col_wordcount    , (t.wordcount()    == 0) ? 0 : 1 + 255 * (t.wordcount()    - min.wordcount()   ) / (1 + max.wordcount()    - min.wordcount()));
         t.entry.setCol(col_phrasecount  , (t.phrasecount()  == 0) ? 0 : 1 + 255 * (t.phrasecount()  - min.phrasecount() ) / (1 + max.phrasecount()  - min.phrasecount()));
         t.entry.setCol(col_posintext    , (t.posintext()    == 0) ? 0 : 1 + 255 * (t.posintext()    - min.posintext()   ) / (1 + max.posintext()    - min.posintext()));
         t.entry.setCol(col_posinphrase  , (t.posinphrase()  == 0) ? 0 : 1 + 255 * (t.posinphrase()  - min.posinphrase() ) / (1 + max.posinphrase()  - min.posinphrase()));
         t.entry.setCol(col_posofphrase  , (t.posofphrase()  == 0) ? 0 : 1 + 255 * (t.posofphrase()  - min.posofphrase() ) / (1 + max.posofphrase()  - min.posofphrase()));
-        t.entry.setCol(col_worddistance , (t.worddistance() == 0) ? 0 : 1 + 255 * (t.worddistance() - min.worddistance()) / (1 + max.worddistance() - min.worddistance()));
+        t.entry.setCol(col_worddistance , (t.worddistance() == 0) ? 0 : 1 + 255 * (t.worddistance() - min.worddistance()) / (1 + max.worddistance() - min.worddistance())); // FIXME: hier gibts ein division by zero, was nur sein kann wenn die Normalisierung nicht geklappt hat.
         t.entry.setCol(col_lastModified , (t.lastModified() == 0) ? 0 : 1 + 255 * (t.lastModified() - min.lastModified()) / (1 + max.lastModified() - min.lastModified()));
         t.entry.setCol(col_quality      , (t.quality()      == 0) ? 0 : 1 + 255 * (t.quality()      - min.quality()     ) / (1 + max.quality()      - min.quality()));
     }

@@ -45,6 +45,8 @@
 // You must compile this file with
 // javac -classpath .:../classes transferRWI.java
 
+import java.io.IOException;
+
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaCrawlLURL;
@@ -103,13 +105,13 @@ public final class transferURL {
                             yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + lEntry.url() + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
                             lEntry = null;
                             blocked++;
-                        } else {
-                            lEntry.store();
-                            sb.urlPool.loadedURL.stackEntry(lEntry, iam, iam, 3);
-                            yacyCore.log.logFine("transferURL: received URL '"
-                                    + lEntry.url() + "' from peer "
-                                    + otherPeerName);
+                        } else try {
+                            sb.urlPool.loadedURL.store(lEntry, true);
+                            sb.urlPool.loadedURL.stack(lEntry, iam, iam, 3);
+                            yacyCore.log.logFine("transferURL: received URL '" + lEntry.url() + "' from peer " + otherPeerName);
                             received++;
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     } else {
                         yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + 

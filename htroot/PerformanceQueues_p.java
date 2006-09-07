@@ -258,6 +258,7 @@ public class PerformanceQueues_p {
         }
         
         // table cache settings
+        prop.put("urlCacheSize", switchboard.urlPool.loadedURL.writeCacheSize());
         prop.put("wordCacheWSize", switchboard.wordIndex.wSize());
         prop.put("wordCacheKSize", switchboard.wordIndex.kSize());
         prop.put("maxURLinWCache", "" + switchboard.wordIndex.maxURLinWCache());

@@ -128,10 +128,10 @@ public final class crawlReceipt {
             if ((entry == null)||(entry.url()==null)) {
                 log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT for hash " + receivedUrlhash + " from peer " + iam +
                               "\n\tURL properties: "+ propStr);
-            } else {
+            } else try {
                 // put new entry into database
-                entry.store();
-                switchboard.urlPool.loadedURL.stackEntry(entry, youare, iam, 1);
+                switchboard.urlPool.loadedURL.store(entry, false);
+                switchboard.urlPool.loadedURL.stack(entry, youare, iam, 1);
                 
                 // generating url hash
                 String newUrlHash = indexURL.urlHash(entry.url());
@@ -142,6 +142,8 @@ public final class crawlReceipt {
                 switchboard.urlPool.noticeURL.remove(oldUrlHash); 
                 
                 log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + receivedUrlhash + ":" + entry.url());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             
             // ready for more

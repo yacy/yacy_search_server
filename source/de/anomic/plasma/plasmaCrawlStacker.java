@@ -380,7 +380,7 @@ public final class plasmaCrawlStacker {
         String dbocc = this.sb.urlPool.exists(nexturlhash);
         plasmaCrawlLURL.Entry oldEntry = null;
         if (dbocc != null) try {
-            oldEntry = this.sb.urlPool.loadedURL.getEntry(nexturlhash, null);
+            oldEntry = this.sb.urlPool.loadedURL.load(nexturlhash, null);
         } catch (IOException e) {}
         boolean recrawl = (oldEntry != null) &&
                           (((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000) > profile.recrawlIfOlder());
