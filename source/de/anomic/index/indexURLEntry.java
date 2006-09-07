@@ -108,6 +108,7 @@ public class indexURLEntry implements Cloneable, indexEntry {
         this.entry.setCol(col_worddistance, worddistance);
         this.entry.setCol(col_wordcount, wordcount);
         this.entry.setCol(col_phrasecount, phrasecount);
+        //System.out.println("DEBUG-NEWENTRY " + toPropertyForm());
     }
 
     public indexURLEntry(String urlHash, String code) {

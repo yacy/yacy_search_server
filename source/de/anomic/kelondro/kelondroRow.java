@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import de.anomic.server.serverByteBuffer;
+
 public class kelondroRow {
    
     protected kelondroColumn[] row;
@@ -369,49 +371,18 @@ public class kelondroRow {
         }
         
         public String toPropertyForm(boolean includeBraces, boolean decimalCardinal) {
-            StringBuffer sb = new StringBuffer();
-            if (includeBraces) sb.append("{");
-            int encoder, cellwidth;
+            serverByteBuffer bb = new serverByteBuffer();
+            if (includeBraces) bb.append('{');
             for (int i = 0; i < row.length; i++) {
-                encoder = row[i].encoder();
-                cellwidth = row[i].cellwidth();
-                switch (row[i].celltype()) {
-                case kelondroColumn.celltype_undefined:
-                    throw new kelondroException("ROW", "toEncodedForm of celltype undefined not possible");
-                case kelondroColumn.celltype_boolean:
-                    throw new kelondroException("ROW", "toEncodedForm of celltype boolean not yet implemented");
-                case kelondroColumn.celltype_binary:
-                    sb.append(row[i].nickname());
-                    sb.append('=');
-                    for (int j = colstart[i]; j < colstart[i] + cellwidth; j++) sb.append((char) rowinstance[j]);
-                    sb.append(',');
-                    continue;
-                case kelondroColumn.celltype_string:
-                    sb.append(row[i].nickname());
-                    sb.append('=');
-                    for (int j = colstart[i]; j < colstart[i] + cellwidth; j++) sb.append((char) rowinstance[j]);
-                    sb.append(',');
-                    continue;
-                case kelondroColumn.celltype_cardinal:
-                    if (decimalCardinal) {
-                        sb.append(row[i].nickname());
-                        sb.append('=');
-                        sb.append(Long.toString(bytes2long(rowinstance, colstart[i], cellwidth)));
-                        sb.append(',');
-                        continue;
-                    } else if (encoder == kelondroColumn.encoder_b64e) {
-                        sb.append(row[i].nickname());
-                        sb.append('=');
-                        long c = bytes2long(rowinstance, colstart[i], cellwidth);
-                        sb.append(kelondroBase64Order.enhancedCoder.encodeLongSmart(c, cellwidth).getBytes());
-                        sb.append(',');
-                        continue;
-                    } else throw new kelondroException("ROW", "toEncodedForm of celltype cardinal has no encoder (" + encoder + ")");
-                }
+                bb.append(row[i].nickname());
+                bb.append('=');
+                bb.append(rowinstance, colstart[i], row[i].cellwidth());
+                bb.append(',');
             }
-            if (sb.charAt(sb.length() - 1) == ',') sb.deleteCharAt(sb.length() - 1); // remove ',' at end
-            if (includeBraces) sb.append("}");
-            return sb.toString();
+            if (bb.byteAt(bb.length() - 1) == ',') bb.deleteByteAt(bb.length() - 1); // remove ',' at end
+            if (includeBraces) bb.append('}');
+            //System.out.println("DEBUG-ROW " + bb.toString());
+            return bb.toString();
         }
         
         public String toString() {

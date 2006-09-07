@@ -203,6 +203,16 @@ public final class serverByteBuffer extends OutputStream {
         return buffer[offset + pos];
     }
 
+    public void deleteByteAt(int pos) {
+        if (pos < 0) return;
+        if (pos >= length) return;
+        if (pos == length - 1) {
+            length--;
+        } else {
+            System.arraycopy(buffer, offset + pos + 1, buffer, offset + pos, length - pos - 1);
+        }
+    }
+    
     public int indexOf(byte b) {
         return indexOf(b, 0);
     }

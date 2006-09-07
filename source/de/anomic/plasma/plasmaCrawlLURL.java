@@ -168,8 +168,8 @@ public final class plasmaCrawlLURL extends indexURL {
         // - look into the hash cache
         // - look into the filed properties
         // if the url cannot be found, this returns null
-        kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
-        if (entry == null) entry = urlIndexCache.get(urlHash.getBytes());
+        kelondroRow.Entry entry = urlIndexCache.get(urlHash.getBytes());
+        if (entry == null) entry = urlIndexFile.get(urlHash.getBytes());
         if (entry == null) return null;
         return new Entry(entry, searchedWord);
     }
