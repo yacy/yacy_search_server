@@ -1311,6 +1311,34 @@ cd ..
     return GET();
   }
 
+  public int size(String path) throws IOException {   
+      // get the size of a file. If the given path targets to a directory, a -1 is returned
+      // this function is not supported by standard rfc 959. The method is descibed in
+      // http://www.ietf.org/internet-drafts/draft-ietf-ftpext-mlst-16.txt
+      // if the method is not supported by the target server, this throws an IOException with the
+      // server response as exception message
+      
+      // send command to the control port
+      send("SIZE " + path);
+
+      // read status of the command from the control port
+      String reply = receive();
+
+      // get status code
+      int status = Integer.parseInt(reply.substring(0, 3));
+
+      // starting data transaction
+      if (status == 213) {
+          try {
+              return Integer.parseInt(reply.substring(4));
+          } catch (NumberFormatException e) {
+              throw new IOException(reply);
+          }
+      } else {
+       throw new IOException(reply);
+      }
+  }
+  
   public boolean USER() {
     if (cmd.length != 3) {
       err.println(logPrefix + "---- Syntax: USER <user-name> <password>");
