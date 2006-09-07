@@ -223,7 +223,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 // request has been placed and result has been returned. work off response
                 File cacheFile = this.cacheManager.getCachePath(this.url);
                 try {
-                    if ((acceptAllContent) || (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,this.url,res.responseHeader.mime()))) {
+                    if ((this.acceptAllContent) || (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,this.url,res.responseHeader.mime()))) {
                         if (cacheFile.isFile()) {
                             this.cacheManager.deleteFile(this.url);
                         }

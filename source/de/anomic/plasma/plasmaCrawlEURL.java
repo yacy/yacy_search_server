@@ -95,10 +95,10 @@ public class plasmaCrawlEURL extends indexURL {
     // network errors
     public static final String DENIED_UNKNOWN_HOST = "denied_(unknown_host)";
     public static final String DENIED_NO_ROUTE_TO_HOST = "denied_(no_route_to_host)"; 
-    public static final String DENIED_NETWORK_IS_UNREACHABLE = "denied_(Network_is_unreachable)";    
+    public static final String DENIED_NETWORK_IS_UNREACHABLE = "denied_(Network_is_unreachable)"; 
     
     // connection errors
-    public static final String DENIED_CONNECTION_ERROR = "denied_(socket_connection_error)";
+    public static final String DENIED_CONNECTION_ERROR = "denied_(connection_error)";
     public static final String DENIED_CONNECTION_BIND_EXCEPTION = "denied_(connection_bind_exception)";
     public static final String DENIED_CONNECTION_TIMEOUT = "denied_(connection_timeout)";
     public static final String DENIED_CONNECTION_REFUSED = "denied_(connection_refused)";    
@@ -110,6 +110,9 @@ public class plasmaCrawlEURL extends indexURL {
     // server errors
     public static final String DENIED_OUT_OF_DISK_SPACE = "denied_(out_of_disk_space)";
     public static final String DENIED_SERVER_SHUTDOWN = "denied_(server_shutdown)";
+    public static final String DENIED_SERVER_LOGIN_FAILED = "denied_(server_login_failed)";
+    public static final String DENIED_SERVER_TRASFER_MODE_PROBLEM = "denied_(server_transfermode_problem)";
+    public static final String DENIED_SERVER_DOWNLOAD_ERROR = "denied_(server_download_error)";
     
     // Parser errors
     public static final String DENIED_PARSER_ERROR = "denied_(parser_error)";

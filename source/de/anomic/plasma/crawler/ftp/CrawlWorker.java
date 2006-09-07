@@ -53,19 +53,25 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.Date;
 
+import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
 import de.anomic.net.URL;
 import de.anomic.net.ftpc;
+import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaHTCache;
+import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.cache.ftp.ResourceInfo;
 import de.anomic.plasma.crawler.AbstractCrawlWorker;
 import de.anomic.plasma.crawler.plasmaCrawlWorker;
 import de.anomic.plasma.crawler.plasmaCrawlerPool;
 import de.anomic.plasma.plasmaHTCache.Entry;
 import de.anomic.server.logging.serverLog;
 
-public class CrawlWorker extends AbstractCrawlWorker implements
-        plasmaCrawlWorker {
+public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorker {
 
     public CrawlWorker(ThreadGroup theTG, plasmaCrawlerPool thePool, plasmaSwitchboard theSb, plasmaHTCache theCacheManager, serverLog theLog) {
         super(theTG, thePool, theSb, theCacheManager, theLog);
@@ -75,52 +81,87 @@ public class CrawlWorker extends AbstractCrawlWorker implements
     }
 
     public void close() {
-        // TODO Auto-generated method stub
-
+        // TODO: abort a currently established connection
     }
 
     public void init() {
-        // TODO Auto-generated method stub
+        // nothing todo here
     }
 
+    protected plasmaHTCache.Entry createCacheEntry(String mimeType, Date fileDate) {
+        IResourceInfo resourceInfo = new ResourceInfo(
+                this.url,
+                this.refererURLString,
+                mimeType,
+                fileDate
+        );        
+        
+        return this.cacheManager.newEntry(
+                new Date(), 
+                this.depth, 
+                this.url, 
+                this.name,  
+                "OK",
+                resourceInfo, 
+                this.initiator, 
+                this.profile
+        );
+    }        
+    
     public Entry load() throws IOException {
                        
-
-        
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         PrintStream out = new PrintStream(bout);
         
         ByteArrayOutputStream berr = new ByteArrayOutputStream();
         PrintStream err = new PrintStream(berr);            
         
+        // create a new ftp client
         ftpc ftpClient = new ftpc(System.in, out, err);
         
+        // get username and password
         String userInfo = this.url.getUserInfo();
-        String userName, userPwd;
+        String userName = "anonymous", userPwd = "anonymous";
         if (userInfo != null) {
             int pos = userInfo.indexOf(":");
-            userName = userInfo.substring(0,pos);
-            userPwd = userInfo.substring(pos+1);
-        } else {
-            userName = "anonymous";
-            userPwd = "anonymous";
-        }
+            if (pos != -1) {
+                userName = userInfo.substring(0,pos);
+                userPwd = userInfo.substring(pos+1);
+            }
+        } 
         
+        // get server name, port and file path
         String host = this.url.getHost();
         String fullPath = this.url.getPath();
         int port = this.url.getPort();
         
+        // open a connection to the ftp server
         if (port == -1) { 
-            ftpClient.exec("open " + this.url.getHost(), false);
+            ftpClient.exec("open " + host, false);
         } else {
-            ftpClient.exec("open " + this.url.getHost() + " " + port, false);
+            ftpClient.exec("open " + host + " " + port, false);
         }
-        ftpClient.exec("user " + userName + " " + userPwd, false);        
+        if (berr.size() > 0) {
+            this.log.logInfo("Unable to connect to ftp server " + this.url.getHost() + " hosting URL " + this.url.toString() + "\nErrorlog: " + berr.toString());
+            addURLtoErrorDB(plasmaCrawlEURL.DENIED_CONNECTION_ERROR);            
+        }
+        
+        // login to the server
+        ftpClient.exec("user " + userName + " " + userPwd, false);  
+        if (berr.size() > 0) {
+            this.log.logInfo("Unable to login to ftp server " + this.url.getHost() + " hosting URL " + this.url.toString() + "\nErrorlog: " + berr.toString());
+            addURLtoErrorDB(plasmaCrawlEURL.DENIED_SERVER_LOGIN_FAILED);            
+        }        
+        
+        // change transfer mode to binary
         ftpClient.exec("binary", false);
+        if (berr.size() > 0) {
+            this.log.logInfo("Unable to set the file transfer mode to binary for URL " + this.url.toString() + "\nErrorlog: " + berr.toString());
+            addURLtoErrorDB(plasmaCrawlEURL.DENIED_SERVER_TRASFER_MODE_PROBLEM);            
+        }         
         
-        // cd
-        String file, path;      
-        
+        // determine filename and path
+        String file, path;              
         if (fullPath.endsWith("/")) {
             file = "";
             path = fullPath;
@@ -135,6 +176,7 @@ public class CrawlWorker extends AbstractCrawlWorker implements
             }
         }        
         
+        // testing if the specified file is a directory
         if (file.length() > 0) {
             ftpClient.exec("cd \"" + path + "\"", false);
             
@@ -150,12 +192,20 @@ public class CrawlWorker extends AbstractCrawlWorker implements
         // creating a cache file object
         File cacheFile = this.cacheManager.getCachePath(this.url);
         cacheFile.getParentFile().mkdirs();
-        
-        ftpClient.exec("cd \"" + fullPath + "\"", false);
-        if (file.length() == 0) {
-            
+                
+        String mimeType;
+        Date fileDate;
+        plasmaHTCache.Entry htCache = null;
+        if (file.length() == 0) {            
             // getting the dirlist
-            StringBuffer dirList = ftpClient.dirhtml(host, (port==-1)?21:port, fullPath, userName, userPwd);
+            mimeType = "text/html";
+            fileDate = new Date();
+            
+            // create a htcache entry
+            htCache = createCacheEntry(mimeType,fileDate);
+            
+            // generate the dirlist
+            StringBuffer dirList = ftpClient.dirhtml(fullPath);            
             
             // write it into a file
             PrintWriter writer = new PrintWriter(new FileOutputStream(cacheFile),false);
@@ -163,18 +213,55 @@ public class CrawlWorker extends AbstractCrawlWorker implements
             writer.flush();
             writer.close();
         } else {
-            // download the remote file
-            ftpClient.exec("get \"" + file + "\" \"" + cacheFile.getAbsolutePath() + "\"", false);            
+            // determine the mimetype of the resource
+            String extension = plasmaParser.getFileExt(this.url);
+            mimeType = plasmaParser.getMimeTypeByFileExt(extension);
+            
+            // if the mimetype and file extension is supported we start to download the file
+            if ((this.acceptAllContent) || (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,this.url,mimeType))) {
+                
+                // TODO: determine the real file date
+                fileDate = new Date();
+                
+                // create a htcache entry
+                htCache = createCacheEntry(mimeType,fileDate);
+                
+                // change into working directory
+                ftpClient.exec("cd \"" + fullPath + "\"", false);
+
+                // download the remote file
+                ftpClient.exec("get \"" + file + "\" \"" + cacheFile.getAbsolutePath() + "\"", false);
+            } else {
+                // if the response has not the right file type then reject file
+                this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + mimeType + " for URL " + this.url.toString());
+                addURLtoErrorDB(plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
+            }
         }
         
+        // closing connection
         ftpClient.exec("close", false);
         ftpClient.exec("exit", false);        
 
-        // TODO: do mimetype detection based of file extension                
+        // pass the downloaded resource to the cache manager
+        if (berr.size() > 0 || htCache == null) {
+            // if the response has not the right file type then reject file
+            this.log.logInfo("Unable to download URL " + this.url.toString() + "\nErrorlog: " + berr.toString());
+            addURLtoErrorDB(plasmaCrawlEURL.DENIED_SERVER_DOWNLOAD_ERROR);
+            
+            // an error has occured. cleanup
+            if (cacheFile.exists()) cacheFile.delete();            
+        } else {
+            // announce the file
+            this.cacheManager.writeFileAnnouncement(cacheFile);
+            
+            // enQueue new entry with response header
+            if (this.profile != null) {
+                this.cacheManager.push(htCache);
+            }        
+        }
         
-        // TODO: create a new htCache entry ....
-        
-        return null;
+        return htCache;
     }
+
 
 }
