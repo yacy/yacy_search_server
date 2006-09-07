@@ -336,21 +336,21 @@ public class ResourceInfo implements IResourceInfo {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("NO-CACHE") || cacheControl.startsWith("MAX-AGE=0")) { return false; }
             }
-        }
 
-        // -if-modified-since in request
-        // The entity has to be transferred only if it has
-        // been modified since the date given by the If-Modified-Since header.
-        if (this.requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) {
-            // checking this makes only sense if the cached response contains
-            // a Last-Modified field. If the field does not exist, we go the safe way
-            if (!this.responseHeader.containsKey(httpHeader.LAST_MODIFIED)) { return false; }
-            // parse date
-            Date d1, d2;
-            d2 = this.responseHeader.lastModified(); if (d2 == null) { d2 = new Date(serverDate.correctedUTCTime()); }
-            d1 = this.requestHeader.ifModifiedSince(); if (d1 == null) { d1 = new Date(serverDate.correctedUTCTime()); }
-            // finally, we shall treat the cache as stale if the modification time is after the if-.. time
-            if (d2.after(d1)) { return false; }
+            // -if-modified-since in request
+            // The entity has to be transferred only if it has
+            // been modified since the date given by the If-Modified-Since header.
+            if (this.requestHeader.containsKey(httpHeader.IF_MODIFIED_SINCE)) {
+                // checking this makes only sense if the cached response contains
+                // a Last-Modified field. If the field does not exist, we go the safe way
+                if (!this.responseHeader.containsKey(httpHeader.LAST_MODIFIED)) { return false; }
+                // parse date
+                Date d1, d2;
+                d2 = this.responseHeader.lastModified(); if (d2 == null) { d2 = new Date(serverDate.correctedUTCTime()); }
+                d1 = this.requestHeader.ifModifiedSince(); if (d1 == null) { d1 = new Date(serverDate.correctedUTCTime()); }
+                // finally, we shall treat the cache as stale if the modification time is after the if-.. time
+                if (d2.after(d1)) { return false; }
+            }
         }
 
         String mimeType = this.getMimeType();
