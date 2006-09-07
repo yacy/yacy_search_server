@@ -351,19 +351,19 @@ public class ResourceInfo implements IResourceInfo {
                 // finally, we shall treat the cache as stale if the modification time is after the if-.. time
                 if (d2.after(d1)) { return false; }
             }
-        }
 
-        String mimeType = this.getMimeType();
-        if (!plasmaHTCache.isPicture(mimeType)) {
-            // -cookies in request
-            // unfortunately, we should reload in case of a cookie
-            // but we think that pictures can still be considered as fresh
-            // -set-cookie in cached response
-            // this is a similar case as for COOKIE.
-            if (this.requestHeader.containsKey(httpHeader.COOKIE) ||
-                this.responseHeader.containsKey(httpHeader.SET_COOKIE) ||
-                this.responseHeader.containsKey(httpHeader.SET_COOKIE2)) {
-                return false; // too strong
+            String mimeType = this.getMimeType();
+            if (!plasmaHTCache.isPicture(mimeType)) {
+                // -cookies in request
+                // unfortunately, we should reload in case of a cookie
+                // but we think that pictures can still be considered as fresh
+                // -set-cookie in cached response
+                // this is a similar case as for COOKIE.
+                if (this.requestHeader.containsKey(httpHeader.COOKIE) ||
+                    this.responseHeader.containsKey(httpHeader.SET_COOKIE) ||
+                    this.responseHeader.containsKey(httpHeader.SET_COOKIE2)) {
+                    return false; // too strong
+                }
             }
         }
 
