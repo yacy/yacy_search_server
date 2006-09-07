@@ -55,8 +55,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.net.URL;
 import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaCrawlEURL;
@@ -190,8 +188,20 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
         }
         
         // creating a cache file object
-        File cacheFile = this.cacheManager.getCachePath(this.url);
-        cacheFile.getParentFile().mkdirs();
+        File cacheFile = this.cacheManager.getCachePath(this.url);        
+        
+        // TODO: aborting download if content is to long ...
+
+        // TODO: invalid file path check    
+        
+        // testing if the file already exists
+        if (cacheFile.isFile()) {
+            // delete the file if it already exists
+            this.cacheManager.deleteFile(this.url);
+        } else {
+            // create parent directories
+            cacheFile.getParentFile().mkdirs();
+        }
                 
         String mimeType;
         Date fileDate;
