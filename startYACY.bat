@@ -8,6 +8,7 @@ Set CLASSPATH=classes;htroot
 For %%X in (lib/*.jar) Do Call %0 CPGEN lib\%%X
 For %%X in (libx/*.jar) Do Call %0 CPGEN libx\%%X
 
+REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=
 set jms=
 set javacmd=-Xmx64m -Xms10m

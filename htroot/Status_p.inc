@@ -52,7 +52,7 @@
 		-->
 		free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]#
 	</td>
-	<td>&nbsp;</td>
+	<td>[<a href="PerformanceMemory_p.html">Configure</a>]</td>
 </tr>
 <tr class="TableCellDark">
 	<td>Traffic</td>
