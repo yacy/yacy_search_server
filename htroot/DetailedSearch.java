@@ -143,7 +143,7 @@ public class DetailedSearch {
         // remember the last search expression
         env.setConfig("last-search", querystring);
         // process result of search
-        prop.put("resultbottomline", 0);
+        prop.put("type_resultbottomline", 0);
         if (filtered.size() > 0){
             prop.put("excluded", 1);
             prop.put("excluded_stopwords", filtered.toString());
@@ -154,33 +154,32 @@ public class DetailedSearch {
         if (prop == null || prop.size() == 0) {
             prop.put("num-results", 0);
         } else {
-            final int linkcount = Integer.parseInt(prop.get("linkcount", "0"));
-            final int orderedcount = Integer.parseInt(prop.get("orderedcount", "0"));
-            final int totalcount = Integer.parseInt(prop.get("totalcount", "0"));
-
-                final Object[] references = (Object[]) prop.get("references", new String[0]);
-                prop.put("num-results", 1);
-                prop.put("num-results_linkcount", linkcount);
-                prop.put("num-results_orderedcount", orderedcount);
-                prop.put("num-results_totalcount", totalcount);
-                int hintcount = references.length;
-                if (hintcount > 0) {
-                    if (hintcount > 16) { hintcount = 16; }
-                    prop.put("combine", 1);
-                    String word;
-                    for (int i = 0; i < hintcount; i++) {
-                        word = (String) references[i];
-                        if (word != null) {
-                            prop.put("combine_words_" + i + "_word", word);
-                            prop.put("combine_words_" + i + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
-                            prop.put("combine_words_" + i + "_count", count);
-                            prop.put("combine_words_" + i + "_ranking", localRanking.toExternalURLGet("local").toString());
-                            prop.put("combine_words_" + i + "_resource", ((global) ? "global" : "local"));
-                            prop.put("combine_words_" + i + "_time", (searchtime / 1000));
-                        }
-                        prop.put("combine_words", i);
+            final int linkcount = Integer.parseInt(prop.get("type_linkcount", "0"));
+            final int orderedcount = Integer.parseInt(prop.get("type_orderedcount", "0"));
+            final int totalcount = Integer.parseInt(prop.get("type_totalcount", "0"));
+            final Object[] references = (Object[]) prop.get("type_references", new String[0]);
+            prop.put("type_num-results", 1);
+            prop.put("type_num-results_linkcount", linkcount);
+            prop.put("type_num-results_orderedcount", orderedcount);
+            prop.put("type_num-results_totalcount", totalcount);
+            int hintcount = references.length;
+            if (hintcount > 0) {
+                if (hintcount > 16) { hintcount = 16; }
+                prop.put("type_combine", 1);
+                String word;
+                for (int i = 0; i < hintcount; i++) {
+                    word = (String) references[i];
+                    if (word != null) {
+                        prop.put("type_combine_words_" + i + "_word", word);
+                        prop.put("type_combine_words_" + i + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
+                        prop.put("type_combine_words_" + i + "_count", count);
+                        prop.put("type_combine_words_" + i + "_ranking", localRanking.toExternalURLGet("local").toString());
+                        prop.put("type_combine_words_" + i + "_resource", ((global) ? "global" : "local"));
+                        prop.put("type_combine_words_" + i + "_time", (searchtime / 1000));
                     }
+                    prop.put("type_combine_words", i);
                 }
+            }
         }
 
         if (urlmask.equals(".*")) {
@@ -190,7 +189,7 @@ public class DetailedSearch {
         }
 
         prop.put("urlmaskoptions_urlmaskfilter", urlmask);
-
+        prop.put("type", "0");
         prop.put("localCount", count);
         prop.put("localWDist", wdist);
         prop.put("globalChecked", (global) ? "checked" : "");
