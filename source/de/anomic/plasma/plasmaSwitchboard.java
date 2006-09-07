@@ -2157,25 +2157,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // finally, delete the url entry
         
         // determine the url string
-        try {
-            plasmaCrawlLURL.Entry entry = urlPool.loadedURL.load(urlhash, null);
-            if (entry == null)
-                return 0;
-            URL url = entry.url();
-            if (url == null)
-                return 0;
-            // get set of words
-            // Set words = plasmaCondenser.getWords(getText(getResource(url,
-            // fetchOnline)));
-            Iterator witer = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline, 10000)).getText());
-            // delete all word references
-            int count = removeReferences(urlhash, witer);
-            // finally delete the url entry itself
-            urlPool.loadedURL.remove(urlhash);
-            return count;
-        } catch (IOException e) {
-            return 0;
-        }
+        plasmaCrawlLURL.Entry entry = urlPool.loadedURL.load(urlhash, null);
+        if (entry == null) return 0;
+        URL url = entry.url();
+        if (url == null) return 0;
+        // get set of words
+        // Set words = plasmaCondenser.getWords(getText(getResource(url, fetchOnline)));
+        Iterator witer = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline, 10000)).getText());
+        // delete all word references
+        int count = removeReferences(urlhash, witer);
+        // finally delete the url entry itself
+        urlPool.loadedURL.remove(urlhash);
+        return count;
     }
     
     public int removeReferences(URL url, Set words) {

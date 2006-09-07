@@ -211,8 +211,10 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            try {
-                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+            if (entry == null) {
+                prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
+            } else {
                 if (entry != null) {
                     URL url = entry.url();
                     urlstring = url.toNormalform();
@@ -222,8 +224,6 @@ public class IndexControl_p {
                 } else {
                     prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
                 }
-            } catch (IOException e) {
-                prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             }
         }
 
@@ -265,16 +265,12 @@ public class IndexControl_p {
             plasmaCrawlLURL.Entry lurl;
             while (urlIter.hasNext()) {
                 iEntry = (indexEntry) urlIter.next();
-                try {
-                    lurl = switchboard.urlPool.loadedURL.load(iEntry.urlHash(), null);
-                    if ((lurl == null)||(lurl.toString() == null)) {
-                        unknownURLEntries.add(iEntry.urlHash());
-                        urlIter.remove();
-                    } else {
-                        knownURLs.put(iEntry.urlHash(), lurl);
-                    }
-                } catch (IOException e) {
+                lurl = switchboard.urlPool.loadedURL.load(iEntry.urlHash(), null);
+                if (lurl.toString() == null) {
                     unknownURLEntries.add(iEntry.urlHash());
+                    urlIter.remove();
+                } else {
+                    knownURLs.put(iEntry.urlHash(), lurl);
                 }
             }
             // use whats remaining           
@@ -313,22 +309,26 @@ public class IndexControl_p {
         if (post.containsKey("urlstringsearch")) {
             try {
                 URL url = new URL(urlstring);
-            urlhash = indexURL.urlHash(url);
-            prop.put("urlhash", urlhash);
+                urlhash = indexURL.urlHash(url);
+                prop.put("urlhash", urlhash);
                 plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
-                prop.put("result", genUrlProfile(switchboard, entry, urlhash));
+                if (entry == null) {
+                    prop.put("urlstring", "unknown url: " + urlstring);
+                    prop.put("urlhash", "");
+                } else {
+                    prop.put("result", genUrlProfile(switchboard, entry, urlhash));
+                }
             } catch (MalformedURLException e) {
                 prop.put("urlstring", "bad url: " + urlstring);
-                prop.put("urlhash", "");
-            } catch (IOException e) {
-                prop.put("urlstring", "unknown url: " + urlstring);
                 prop.put("urlhash", "");
             }
         }
 
         if (post.containsKey("urlhashsearch")) {
-            try {
-                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+            if (entry == null) {
+                prop.put("result", "No Entry for URL hash " + urlhash);
+            } else {
                 if (entry != null) {
                     URL url = entry.url();
                     urlstring = url.toString();
@@ -337,8 +337,6 @@ public class IndexControl_p {
                 } else {
                     prop.put("result", "No Entry for URL hash " + urlhash);
                 }
-            } catch (IOException e) {
-                prop.put("result", "No Entry for URL hash " + urlhash);
             }
         }
 
@@ -394,15 +392,11 @@ public class IndexControl_p {
         if (entry == null) { return "No entry found for URL-hash " + urlhash; }
         URL url = entry.url();
         String referrer = null;
-        try {
-            plasmaCrawlLURL.Entry referrerEntry = switchboard.urlPool.loadedURL.load(entry.referrerHash(), null);
-            if (referrerEntry != null) {
-                referrer = referrerEntry.url().toString();
-            } else {
-                referrer = "<unknown>";
-            }
-        } catch (IOException e) {
+        plasmaCrawlLURL.Entry le = switchboard.urlPool.loadedURL.load(entry.referrerHash(), null);
+        if (le == null) {
             referrer = "<unknown>";
+        } else {
+            referrer = le.url().toString();
         }
         if (url == null) { return "No entry found for URL-hash " + urlhash; }
         String result = "<table>" +
@@ -456,16 +450,13 @@ public class IndexControl_p {
                 while (en.hasNext()) {
                     xi = (indexEntry) en.next();
                     uh = new String[]{xi.urlHash(), Integer.toString(xi.posintext())};
-                    try {
-                        plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(uh[0], null);
-                        if (entry != null) {
-                            us = entry.url().toString();
-                            tm.put(us, uh);
-                        } else {
-                            tm.put(uh[0], uh);
-                        }
-                    } catch (IOException e) {
+                    plasmaCrawlLURL.Entry le = switchboard.urlPool.loadedURL.load(uh[0], null);
+                    if (le == null) {
                         tm.put(uh[0], uh);
+                    } else {
+                        us = le.url().toString();
+                        tm.put(us, uh);
+
                     }
                 }
 

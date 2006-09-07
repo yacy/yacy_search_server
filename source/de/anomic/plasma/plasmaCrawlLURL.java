@@ -160,7 +160,7 @@ public final class plasmaCrawlLURL extends indexURL {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
 
-    public Entry load(String urlHash, indexEntry searchedWord) throws IOException {
+    public Entry load(String urlHash, indexEntry searchedWord) {
         // generates an plasmaLURLEntry using the url hash
         // to speed up the access, the url-hashes are buffered
         // in the hash cache.
@@ -169,9 +169,13 @@ public final class plasmaCrawlLURL extends indexURL {
         // - look into the filed properties
         // if the url cannot be found, this returns null
         kelondroRow.Entry entry = urlIndexCache.get(urlHash.getBytes());
-        if (entry == null) entry = urlIndexFile.get(urlHash.getBytes());
-        if (entry == null) return null;
-        return new Entry(entry, searchedWord);
+        try {
+            if (entry == null) entry = urlIndexFile.get(urlHash.getBytes());
+            if (entry == null) return null;
+            return new Entry(entry, searchedWord);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     public void store(Entry entry, boolean cached) throws IOException {

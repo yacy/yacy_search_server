@@ -45,7 +45,6 @@ package de.anomic.plasma;
 import java.io.IOException;
 import de.anomic.net.URL;
 import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.crawler.http.CrawlWorker;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -53,7 +52,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;

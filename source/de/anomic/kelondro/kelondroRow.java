@@ -351,6 +351,11 @@ public class kelondroRow {
             case kelondroColumn.encoder_none:
                 throw new kelondroException("ROW", "getColLong has celltype none, no encoder given");
             case kelondroColumn.encoder_b64e:
+                // start - fix for badly stored parameters
+                boolean maxvalue = true;
+                for (int i = 0; i < length; i++) if (rowinstance[offset + i] != '_') {maxvalue = false; break;}
+                if (maxvalue) return 0;
+                // stop - fix for badly stored parameters
                 return kelondroBase64Order.enhancedCoder.decodeLong(rowinstance, offset, length);
             case kelondroColumn.encoder_b256:
                 return kelondroNaturalOrder.decodeLong(rowinstance, offset, length);

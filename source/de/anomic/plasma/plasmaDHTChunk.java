@@ -227,22 +227,16 @@ public class plasmaDHTChunk {
                     // iterate over indexes to fetch url entries and store them in the urlCache
                     while ((urlIter.hasNext()) && (maxcount > refcount)) {
                         iEntry = (indexEntry) urlIter.next();
-                        try {
-                            lurl = lurls.load(iEntry.urlHash(), iEntry);
-                            if ((lurl == null) || (lurl.url() == null)) {
-                                //yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + iEntry.urlHash() + "' for word hash " + container.getWordHash());
-                                notBoundCounter++;
-                                urlIter.remove();
-                                wordIndex.removeEntry(container.getWordHash(), iEntry.urlHash(), true);
-                            } else {
-                                urlCache.put(iEntry.urlHash(), lurl);
-                                //yacyCore.log.logFine("DEBUG selectTransferContainersResource: added url hash '" + iEntry.urlHash() + "' to urlCache for word hash " + container.getWordHash());
-                                refcount++;
-                            }
-                        } catch (IOException e) {
+                        lurl = lurls.load(iEntry.urlHash(), iEntry);
+                        if ((lurl == null) || (lurl.url() == null)) {
+                            //yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + iEntry.urlHash() + "' for word hash " + container.getWordHash());
                             notBoundCounter++;
                             urlIter.remove();
                             wordIndex.removeEntry(container.getWordHash(), iEntry.urlHash(), true);
+                        } else {
+                            urlCache.put(iEntry.urlHash(), lurl);
+                            //yacyCore.log.logFine("DEBUG selectTransferContainersResource: added url hash '" + iEntry.urlHash() + "' to urlCache for word hash " + container.getWordHash());
+                            refcount++;
                         }
                     }
 

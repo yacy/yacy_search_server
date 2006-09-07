@@ -45,7 +45,6 @@ package de.anomic.plasma;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.HashSet;
-import java.io.IOException;
 
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
@@ -242,13 +241,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 if (System.currentTimeMillis() >= postorderLimitTime) break;
                 entry = preorder.next();
                 // find the url entry
-                try {
-                    page = urlStore.load(entry.urlHash(), entry);
-                    // add a result
-                    if (page != null) acc.addResult(entry, page);
-                } catch (IOException e) {
-                    // result was not found
-                }
+                page = urlStore.load(entry.urlHash(), entry);
+                // add a result
+                if (page != null) acc.addResult(entry, page);
             }
         } catch (kelondroException ee) {
             serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
@@ -298,13 +293,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 if (System.currentTimeMillis() >= postorderLimitTime) break;
                 entry = preorder.next();
                 // find the url entry
-                try {
-                    page = urlStore.load(entry.urlHash(), entry);
-                    // add a result
-                    if (page != null) acc.addResult(entry, page);
-                } catch (IOException e) {
-                    // result was not found
-                }
+                page = urlStore.load(entry.urlHash(), entry);
+                // add a result
+                if (page != null) acc.addResult(entry, page);
             }
         } catch (kelondroException ee) {
             serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);

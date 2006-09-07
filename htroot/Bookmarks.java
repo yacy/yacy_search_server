@@ -46,7 +46,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -135,8 +134,8 @@ public class Bookmarks {
                     bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        try {
-                            plasmaCrawlLURL.Entry urlentry = switchboard.urlPool.loadedURL.load(urlHash, null);
+                        plasmaCrawlLURL.Entry urlentry = switchboard.urlPool.loadedURL.load(urlHash, null);
+                        if (urlentry != null) {
                             prop.put("mode_edit", 0); // create mode
                             if (urlentry != null) {
                                 prop.put("mode_title", urlentry.descr());
@@ -145,8 +144,6 @@ public class Bookmarks {
                             }
                             prop.put("mode_tags", "");
                             prop.put("mode_public", 0);
-                        } catch (IOException e) {
-                            e.printStackTrace();
                         }
                     } else {
                         // get from the bookmark database

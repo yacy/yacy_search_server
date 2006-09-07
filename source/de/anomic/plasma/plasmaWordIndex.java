@@ -689,20 +689,15 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                     while (containerIterator.hasNext() && run) {
                         waiter();
                         entry = (indexEntry) containerIterator.next();
-                        // System.out.println("Wordhash: "+wordHash+" UrlHash:
-                        // "+entry.getUrlHash());
-                        try {
-                            plasmaCrawlLURL.Entry lurlEntry = lurl.load(entry.urlHash(), null);
-                            if (lurlEntry != null) {
-                                url = lurlEntry.url();
-                                if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, url) == true)) {
-                                    urlHashs.add(entry.urlHash());
-                                }
-                            } else {
+                        // System.out.println("Wordhash: "+wordHash+" UrlHash: "+entry.getUrlHash());
+                        plasmaCrawlLURL.Entry ue = lurl.load(entry.urlHash(), null);
+                        if (ue == null) {
+                            urlHashs.add(entry.urlHash());
+                        } else {
+                            url = ue.url();
+                            if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, url) == true)) {
                                 urlHashs.add(entry.urlHash());
                             }
-                        } catch (IOException e) {
-                            urlHashs.add(entry.urlHash());
                         }
                     }
                     if (urlHashs.size() > 0) {

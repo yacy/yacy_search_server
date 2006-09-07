@@ -106,9 +106,8 @@ public class ViewFile {
 
                 // getting the urlEntry that belongs to the url hash
                 Entry urlEntry = null;
-                try {
-                    urlEntry = sb.urlPool.loadedURL.load(urlHash, null);
-                } catch (IOException e) {
+                urlEntry = sb.urlPool.loadedURL.load(urlHash, null);
+                if (urlEntry == null) {
                     prop.put("error",2);
                     prop.put("viewMode",VIEW_MODE_NO_TEXT);
                     return prop;
