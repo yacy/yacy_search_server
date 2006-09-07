@@ -153,6 +153,9 @@ public final class httpHeader extends TreeMap implements Map {
     
     public static final String X_YACY_INDEX_CONTROL = "X-YACY-Index-Control";
     
+    public static final String UPGRADE = "Upgrade"; 
+    public static final String TE = "TE";
+    
     /* =============================================================
      * Constants defining http methods
      * ============================================================= */
