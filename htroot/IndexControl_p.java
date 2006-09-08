@@ -215,15 +215,11 @@ public class IndexControl_p {
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
-                if (entry != null) {
-                    URL url = entry.url();
-                    urlstring = url.toNormalform();
-                    prop.put("urlstring", "");
-                    switchboard.urlPool.loadedURL.remove(urlhash);
-                    prop.put("result", "Removed URL " + urlstring);
-                } else {
-                    prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
-                }
+                URL url = entry.url();
+                urlstring = url.toNormalform();
+                prop.put("urlstring", "");
+                switchboard.urlPool.loadedURL.remove(urlhash);
+                prop.put("result", "Removed URL " + urlstring);
             }
         }
 
@@ -266,7 +262,7 @@ public class IndexControl_p {
             while (urlIter.hasNext()) {
                 iEntry = (indexEntry) urlIter.next();
                 lurl = switchboard.urlPool.loadedURL.load(iEntry.urlHash(), null);
-                if (lurl.toString() == null) {
+                if (lurl == null) {
                     unknownURLEntries.add(iEntry.urlHash());
                     urlIter.remove();
                 } else {
@@ -329,14 +325,10 @@ public class IndexControl_p {
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash);
             } else {
-                if (entry != null) {
-                    URL url = entry.url();
-                    urlstring = url.toString();
-                    prop.put("urlstring", urlstring);
-                    prop.put("result", genUrlProfile(switchboard, entry, urlhash));
-                } else {
-                    prop.put("result", "No Entry for URL hash " + urlhash);
-                }
+                URL url = entry.url();
+                urlstring = url.toString();
+                prop.put("urlstring", urlstring);
+                prop.put("result", genUrlProfile(switchboard, entry, urlhash));
             }
         }
 

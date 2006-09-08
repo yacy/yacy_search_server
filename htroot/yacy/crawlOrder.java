@@ -253,14 +253,9 @@ public final class crawlOrder {
                 response = "rejected";
                 lurl = "";
             } else {
-                if (entry != null) {
-                    response = "double";
-                    switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
-                    lurl = crypt.simpleEncode(entry.toString());
-                } else {
-                    response = "rejected";
-                    lurl = "";
-                }
+                response = "double";
+                switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
+                lurl = crypt.simpleEncode(entry.toString());
             }
         } else {
             response = "rejected";

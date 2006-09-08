@@ -137,11 +137,9 @@ public class Bookmarks {
                         plasmaCrawlLURL.Entry urlentry = switchboard.urlPool.loadedURL.load(urlHash, null);
                         if (urlentry != null) {
                             prop.put("mode_edit", 0); // create mode
-                            if (urlentry != null) {
-                                prop.put("mode_title", urlentry.descr());
-                                prop.put("mode_description", urlentry.descr());
-                                prop.put("mode_url", urlentry.url());
-                            }
+                            prop.put("mode_title", urlentry.descr());
+                            prop.put("mode_description", urlentry.descr());
+                            prop.put("mode_url", urlentry.url());
                             prop.put("mode_tags", "");
                             prop.put("mode_public", 0);
                         }
