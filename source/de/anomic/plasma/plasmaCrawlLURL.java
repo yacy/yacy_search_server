@@ -519,7 +519,9 @@ public final class plasmaCrawlLURL extends indexURL {
                 this.stored = false;
                 //}
             } catch (Exception e) {
-                serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/2: " + e.toString(), e);
+                serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/2:" +
+                        "\nProperties: " + ((prop==null)?null:prop.toString()) +
+                        "\nErrorMsg:   " + e.toString(), e);
             }
         }
         
