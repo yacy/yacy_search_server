@@ -190,19 +190,15 @@ public class kelondroRow {
             if (nickref == null) genNickRef();
             String nick;
             int p;
-            Object[] f;
             rowinstance = new byte[objectsize];
             for (int i = 0; i < elts.length; i++) {
                 p = elts[i].indexOf('=');
                 if (p > 0) {
                     nick = elts[i].substring(0, p).trim();
-                    f = (Object[]) nickref.get(nick);
-                    if (f != null) {
-                        System.arraycopy(
-                            elts[i].substring(p + 1).trim().getBytes(), 0,
-                            rowinstance, ((Integer) f[1]).intValue(),
-                            ((kelondroColumn) f[0]).cellwidth());
-                    }
+                    if (p + 1 == elts[i].length())
+                        setCol(nick, null);
+                    else
+                        setCol(nick, elts[i].substring(p + 1).trim().getBytes());
                 }
             }
         }
