@@ -197,7 +197,12 @@ public class kelondroRow {
                 if (p > 0) {
                     nick = elts[i].substring(0, p).trim();
                     f = (Object[]) nickref.get(nick);
-                    System.arraycopy(elts[i].substring(p + 1).trim().getBytes(), 0, rowinstance, ((Integer) f[1]).intValue(), ((kelondroColumn) f[0]).cellwidth());
+                    if (f != null) {
+                        System.arraycopy(
+                            elts[i].substring(p + 1).trim().getBytes(), 0,
+                            rowinstance, ((Integer) f[1]).intValue(),
+                            ((kelondroColumn) f[0]).cellwidth());
+                    }
                 }
             }
         }
@@ -401,7 +406,7 @@ public class kelondroRow {
         }
         
         public String toString() {
-            return toPropertyForm(true, true, true);
+            return toPropertyForm(true, false, false);
         }
     }
     
