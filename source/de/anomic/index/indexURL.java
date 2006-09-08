@@ -563,12 +563,44 @@ public class indexURL {
      byte flagbyte = (byte) (((isHTTP) ? 0 : 32) | (id << 2) | domlengthKey);
      // form the 'local' part of the hash
      String hash3 = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.toNormalform())).substring(0, 5);
-     char   hash2 = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
+     char   hash2 = subdomPortPath(subdom, port, rootpath);
      // form the 'global' part of the hash
-     String hash1 = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.getProtocol() + ":" + host + ":" + port)).substring(0, 5);
+     String hash1 = protocolHostPort(url.getProtocol(), host, port);
      char   hash0 = kelondroBase64Order.enhancedCoder.encodeByte(flagbyte);
      // combine the hashes
      return hash3 + hash2 + hash1 + hash0;
+ }
+ 
+ private static final char[] rootURLFlags = new char[] {
+         subdomPortPath("www", 80, ""),
+         subdomPortPath("", 80, "")
+ };
+ 
+ private static char subdomPortPath(String subdom, int port, String rootpath) {
+     return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
+ }
+ 
+ public static final boolean probablyRootURL(String urlHash) {
+     for (int i = 0; i < rootURLFlags.length; i++) if (urlHash.charAt(6) == rootURLFlags[i]) return true;
+     return false;
+ }
+ 
+ private static String protocolHostPort(String protocol, String host, int port) {
+     return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
+ }
+ 
+ public static final boolean probablyWordURL(String urlHash, String word) {
+     if (word == null) return false;
+     String pattern = urlHash.substring(6, 11);
+     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".com", 80))) return true;
+     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".net", 80))) return true;
+     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".org", 80))) return true;
+     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".uk", 80))) return true;
+     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".fr", 80))) return true;
+     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".de", 80))) return true;
+     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".es", 80))) return true;
+     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".it", 80))) return true;
+     return false;
  }
  
  public static final int domLengthEstimation(String urlHash) {

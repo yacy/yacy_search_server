@@ -164,7 +164,7 @@ public class plasmaSearchRankingProfile {
         return new String(ext);
     }
     
-    public long preRanking(indexEntry normalizedEntry) {
+    public long preRanking(indexEntry normalizedEntry, String searchedWord) {
         // the normalizedEntry must be a normalized indexEntry
         long ranking = 0;
         ranking += normalizedEntry.quality() << ((Integer) coeff.get(ENTROPY)).intValue();
@@ -174,6 +174,12 @@ public class plasmaSearchRankingProfile {
         ranking += (normalizedEntry.worddistance() == 0) ? 0 : (255 - normalizedEntry.worddistance()) << ((Integer) coeff.get(WORDDISTANCE)).intValue();
         ranking += (normalizedEntry.hitcount() == 0) ? 0 : normalizedEntry.hitcount() << ((Integer) coeff.get(HITCOUNT)).intValue();
         ranking += (255 - indexURL.domLengthNormalized(normalizedEntry.urlHash())) << ((Integer) coeff.get(DOMLENGTH)).intValue();
+        ranking += (indexURL.probablyRootURL(normalizedEntry.urlHash())) ? 16 << ((Integer) coeff.get(URLLENGTH)).intValue() : 0;
+        ranking += (indexURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord)) ? 256 << ((Integer) coeff.get(QUERYINURL)).intValue() : 0;
+        if (indexURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord))
+            System.out.println("DEBUG - hash " + normalizedEntry.urlHash() + " contains word " + searchedWord + ", weighted " + ((Integer) coeff.get(QUERYINURL)).intValue() + ", ranking = " + ranking);
+        else
+            System.out.println("DEBUG - hash " + normalizedEntry.urlHash() + " contains not word " + searchedWord + ", ranking = " + ranking);
         return ranking;
     }
     
@@ -219,7 +225,6 @@ public class plasmaSearchRankingProfile {
         ranking += (255 * page.descr().length() / 80) << ((Integer) coeff.get(DESCRLENGTH)).intValue();
         ranking += (255 * (12 - Math.abs(12 - Math.min(12, descrcomps.length))) / 12) << ((Integer) coeff.get(DESCRCOMPS)).intValue();
 
-        
         return ranking;
     }
     

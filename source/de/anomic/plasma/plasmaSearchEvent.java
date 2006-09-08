@@ -242,8 +242,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         try {
             while (preorder.hasNext()) {
                 //if ((acc.sizeFetched() >= 50) && ((acc.sizeFetched() >= minEntries) || (System.currentTimeMillis() >= postorderLimitTime))) break;
-                if (acc.sizeFetched() >= minEntries) break;
-                if (System.currentTimeMillis() >= postorderLimitTime) break;
+                //if (acc.sizeFetched() >= minEntries) break;
+                if ((System.currentTimeMillis() >= postorderLimitTime) && (acc.sizeFetched() >= minEntries)) break;
                 preorderEntry = preorder.next();
                 entry = (indexEntry) preorderEntry[0];
                 preranking = (Long) preorderEntry[1];
@@ -298,8 +298,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         try {
             while (preorder.hasNext()) {
                 //if ((acc.sizeFetched() >= 50) && ((acc.sizeFetched() >= minEntries) || (System.currentTimeMillis() >= postorderLimitTime))) break;
-                if (acc.sizeFetched() >= minEntries) break;
-                if (System.currentTimeMillis() >= postorderLimitTime) break;
+                //if (acc.sizeFetched() >= minEntries) break;
+                if ((System.currentTimeMillis() >= postorderLimitTime) && (acc.sizeFetched() >= minEntries)) break;
                 preorderEntry = preorder.next();
                 entry = (indexEntry) preorderEntry[0];
                 preranking = (Long) preorderEntry[1];

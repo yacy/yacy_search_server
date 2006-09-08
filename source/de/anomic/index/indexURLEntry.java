@@ -148,7 +148,7 @@ public class indexURLEntry implements Cloneable, indexEntry {
     }
 
    public String toPropertyForm(boolean displayFormat) {
-        return entry.toPropertyForm(true, displayFormat, displayFormat);
+        return entry.toPropertyForm(false, displayFormat, displayFormat);
     }
 
     public Entry toKelondroEntry() {
