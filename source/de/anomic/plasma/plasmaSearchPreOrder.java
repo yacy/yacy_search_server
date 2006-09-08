@@ -152,7 +152,7 @@ public final class plasmaSearchPreOrder {
     public Object[] /*{indexEntry, Long}*/ next() {
         String top = (String) pageAcc.firstKey();
         //System.out.println("preorder-key:  " + top);
-        Long preranking = new Long(Long.parseLong(top.substring(0, 16), 16));
+        Long preranking = new Long(Long.MAX_VALUE - Long.parseLong(top.substring(0, 16), 16));
         return new Object[]{(indexEntry) pageAcc.remove(top), preranking};
     }
     

@@ -204,7 +204,7 @@ public final class plasmaSearchResult {
             // scan all subpaths of the url
             while (shorten != null) {
                 if (paths.containsKey(shorten)) {
-                    System.out.println("deleting path from search result: " + path + " is redundant to " + shorten);
+                    //System.out.println("deleting path from search result: " + path + " is redundant to " + shorten);
                     try {
                         i.remove();
                     } catch (IllegalStateException e) {
