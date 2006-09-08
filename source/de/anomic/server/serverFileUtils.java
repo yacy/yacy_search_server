@@ -326,16 +326,9 @@ public final class serverFileUtils {
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
-        Iterator i = set.iterator();
-        String key;
-        if (i.hasNext()) {
-            key = i.next().toString();
-            os.write(key.getBytes());
-        }
-        while (i.hasNext()) {
-            key = i.next().toString();
+        for (Iterator i = set.iterator(); i.hasNext(); ) {
+            os.write((i.next().toString()).getBytes());
             if (sep != null) os.write(sep.getBytes());
-            os.write(key.getBytes());
         }
         os.close();
         file.delete();
