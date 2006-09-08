@@ -131,7 +131,7 @@ public class yacyPeerActions {
 	        seedDB.mySeed.put(yacySeed.ISPEED, Long.toString(Math.round((float)indexedcdiff / ((float)uptimediff/60f))));
 		}
         if(uptime > 0)
-        	sb.setConfig("totalPPM", Long.toString(indexedc / (uptime/60)));
+        	sb.setConfig("totalPPM", Long.toString(indexedc / (1 + (uptime/60))));
         else
         	sb.setConfig("totalPPM", Long.toString(indexedc / 1)); //no division by zero
 				
