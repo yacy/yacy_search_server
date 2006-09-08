@@ -61,6 +61,9 @@ public class ResourceInfoFactory {
         
         String protocString = resourceURL.getProtocol();
         
+        // TODO: remove this
+        if (protocString.equals("https")) protocString = "http";
+        
         // the full qualified class name
         String className = this.getClass().getPackage().getName() + "." + protocString + ".ResourceInfo";
         
