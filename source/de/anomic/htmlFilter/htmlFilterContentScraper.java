@@ -154,6 +154,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
   */  
     public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
     public static String[] urlComps(String normalizedURL) {
+        int p = normalizedURL.indexOf("//");
+        if (p > 0) normalizedURL = normalizedURL.substring(p + 2);
         return normalizedURL.toLowerCase().split(splitrex); // word components of the url
     }
     

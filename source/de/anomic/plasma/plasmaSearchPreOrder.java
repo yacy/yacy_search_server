@@ -96,7 +96,7 @@ public final class plasmaSearchPreOrder {
         this.pageAcc = new TreeMap();
         for (int j = 0; j < count; j++) {
             iEntry = (indexEntry) i.next();
-            pageAcc.put(serverCodings.encodeHex(this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax), query.words("")), 16) + iEntry.urlHash(), iEntry);
+            pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax), query.words("")), 16) + iEntry.urlHash(), iEntry);
         }
     }
     
@@ -150,7 +150,7 @@ public final class plasmaSearchPreOrder {
     }
     
     public Object[] /*{indexEntry, Long}*/ next() {
-        String top = (String) pageAcc.lastKey();
+        String top = (String) pageAcc.firstKey();
         //System.out.println("preorder-key:  " + top);
         Long preranking = new Long(Long.parseLong(top.substring(0, 16), 16));
         return new Object[]{(indexEntry) pageAcc.remove(top), preranking};

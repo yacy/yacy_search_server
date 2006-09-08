@@ -100,7 +100,7 @@ public final class plasmaSearchResult {
     }
     
     public plasmaCrawlLURL.Entry nextElement() {
-        Object top = pageAcc.lastKey();
+        Object top = pageAcc.firstKey();
         //System.out.println("postorder-key: " + ((String) top));
         return (plasmaCrawlLURL.Entry) pageAcc.remove(top);
     }
@@ -154,7 +154,7 @@ public final class plasmaSearchResult {
             
             // insert value
             //System.out.println("Ranking " + ranking + ", YBR-" + plasmaSearchPreOrder.ybr(indexEntry.getUrlHash()) + " for URL " + page.url());
-            pageAcc.put(serverCodings.encodeHex(ranking, 16) + page.hash(), page);
+            pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - ranking, 16) + page.hash(), page);
         }
         
         // flush memory
