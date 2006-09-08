@@ -32,7 +32,7 @@ public interface indexEntry {
 
     public Object clone();
     public byte[] toEncodedByteArrayForm(boolean includeUrlHash); // shall be replaced by toKelondroEntry()
-    public String toPropertyForm();
+    public String toPropertyForm(boolean displayFormat);
     public kelondroRow.Entry toKelondroEntry();
     
     public String urlHash();

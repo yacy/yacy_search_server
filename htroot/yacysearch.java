@@ -201,7 +201,7 @@ public class yacysearch {
             plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile( new String[] { order1, order2, order3 });
             plasmaSearchTimingProfile localTiming = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
             plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-            prop = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming);
+            prop = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true);
 
             /*
              * final serverObjects prop = sb.searchFromLocal(query, order1,

@@ -55,13 +55,11 @@ import java.net.MalformedURLException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.serverCodings;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 
 public final class plasmaSearchResult {
     
-    private indexEntry entryMin, entryMax;
     private TreeMap pageAcc;            // key = order hash; value = plasmaLURL.entry
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
     private ArrayList results;          // this is a buffer for plasmaWordIndexEntry + plasmaCrawlLURL.entry - objects
@@ -78,8 +76,6 @@ public final class plasmaSearchResult {
         this.ranking = ranking;
         this.globalContributions = 0;
         this.localContributions = 0;
-        this.entryMin = null;
-        this.entryMax = null;
     }
     
     public plasmaSearchResult cloneSmart() {
@@ -105,14 +101,11 @@ public final class plasmaSearchResult {
     
     public plasmaCrawlLURL.Entry nextElement() {
         Object top = pageAcc.lastKey();
+        //System.out.println("postorder-key: " + ((String) top));
         return (plasmaCrawlLURL.Entry) pageAcc.remove(top);
     }
     
-    protected void addResult(indexEntry iEntry, plasmaCrawlLURL.Entry page) {
-        
-        // make min/max for normalization
-        if (entryMin == null) entryMin = (indexEntry) iEntry.clone(); else entryMin.min(iEntry);
-        if (entryMax == null) entryMax = (indexEntry) iEntry.clone(); else entryMax.max(iEntry);
+    protected void addResult(plasmaCrawlLURL.Entry page, Long preranking) {
         
         // take out relevant information for reference computation
         URL url = page.url();
@@ -122,15 +115,14 @@ public final class plasmaSearchResult {
         String[] descrcomps = descr.toLowerCase().split(htmlFilterContentScraper.splitrex); // words in the description
         
         // store everything
-        Object[] resultVector = new Object[] {iEntry, page, urlcomps, descrcomps};
-        results.add(resultVector);
+        results.add(new Object[] {page, urlcomps, descrcomps, preranking});
         
         // add references
         addScoreFiltered(urlcomps);
         addScoreFiltered(descrcomps);
     }
     
-    protected void sortResults() {
+    protected void sortResults(boolean postsort) {
         // finally sort the results
         
         // create a commonSense - set that represents a set of words that is
@@ -140,28 +132,29 @@ public final class plasmaSearchResult {
         for (int i = 0; i < references.length; i++) commonSense.add(references[i]);
         
         Object[] resultVector;
-        indexEntry iEntry;
         plasmaCrawlLURL.Entry page;
         long ranking;
         for (int i = 0; i < results.size(); i++) {
             // take out values from result array
             resultVector = (Object[]) results.get(i);
-            iEntry = (indexEntry) resultVector[0];
-            page = (plasmaCrawlLURL.Entry) resultVector[1];
+            page = (plasmaCrawlLURL.Entry) resultVector[0];
             
             // calculate ranking
-            ranking = this.ranking.postRanking(
-                            iEntry,
+            if (postsort)
+                ranking = this.ranking.postRanking(
+                            ((Long) resultVector[3]).longValue(),
                             query,
                             commonSense,
+                            (String[]) resultVector[1],
                             (String[]) resultVector[2],
-                            (String[]) resultVector[3],
                             page
                             );
-
+            else
+                ranking = ((Long) resultVector[3]).longValue();
+            
             // insert value
             //System.out.println("Ranking " + ranking + ", YBR-" + plasmaSearchPreOrder.ybr(indexEntry.getUrlHash()) + " for URL " + page.url());
-            pageAcc.put(serverCodings.encodeHex(ranking, 16) + iEntry.urlHash(), page);
+            pageAcc.put(serverCodings.encodeHex(ranking, 16) + page.hash(), page);
         }
         
         // flush memory

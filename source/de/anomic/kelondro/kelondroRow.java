@@ -347,6 +347,11 @@ public class kelondroRow {
         }
 
         public long getColLong(int encoder, int offset, int length) {
+            // start - fix for badly stored parameters
+            if ((length >= 3) && (rowinstance[offset] == '[') && (rowinstance[offset + 1] == 'B') && (rowinstance[offset + 2] == '@')) return 0;
+            if ((length == 2) && (rowinstance[offset] == '[') && (rowinstance[offset + 1] == 'B')) return 0;
+            if ((length == 1) && (rowinstance[offset] == '[')) return 0;
+            // stop - fix for badly stored parameters
             switch (encoder) {
             case kelondroColumn.encoder_none:
                 throw new kelondroException("ROW", "getColLong has celltype none, no encoder given");
@@ -375,23 +380,28 @@ public class kelondroRow {
             return c;
         }
         
-        public String toPropertyForm(boolean includeBraces, boolean decimalCardinal) {
+        public String toPropertyForm(boolean includeBraces, boolean decimalCardinal, boolean longname) {
             serverByteBuffer bb = new serverByteBuffer();
             if (includeBraces) bb.append('{');
             for (int i = 0; i < row.length; i++) {
-                bb.append(row[i].nickname());
+                bb.append((longname) ? row[i].description() : row[i].nickname());
                 bb.append('=');
-                bb.append(rowinstance, colstart[i], row[i].cellwidth());
-                bb.append(',');
+                if ((row[i].celltype() == kelondroColumn.celltype_cardinal) && (decimalCardinal))
+                    bb.append(Long.toString(getColLong(i)));
+                else
+                    bb.append(rowinstance, colstart[i], row[i].cellwidth());
+                if (i < row.length - 1) {
+                    bb.append(',');
+                    if (longname) bb.append(' ');
+                }
             }
-            if (bb.byteAt(bb.length() - 1) == ',') bb.deleteByteAt(bb.length() - 1); // remove ',' at end
             if (includeBraces) bb.append('}');
             //System.out.println("DEBUG-ROW " + bb.toString());
             return bb.toString();
         }
         
         public String toString() {
-            return toPropertyForm(true, true);
+            return toPropertyForm(true, true, true);
         }
     }
     

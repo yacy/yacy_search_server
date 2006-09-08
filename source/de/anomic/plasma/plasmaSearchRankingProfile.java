@@ -178,7 +178,7 @@ public class plasmaSearchRankingProfile {
     }
     
     public long postRanking(
-                    indexEntry normalizedEntry,
+                    long preranking,
                     plasmaSearchQuery query,
                     Set topwords,
                     String[] urlcomps,
@@ -186,7 +186,7 @@ public class plasmaSearchRankingProfile {
                     plasmaCrawlLURL.Entry page) {
 
         // apply pre-calculated order attributes
-        long ranking = this.preRanking(normalizedEntry);
+        long ranking = preranking;
 
         // prefer hit with 'prefer' pattern
         if (page.url().toString().matches(query.prefer)) ranking += 256 << ((Integer) coeff.get(PREFER)).intValue();

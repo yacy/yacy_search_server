@@ -147,8 +147,8 @@ public class indexURLEntry implements Cloneable, indexEntry {
         return b;
     }
 
-   public String toPropertyForm() {
-        return entry.toPropertyForm(true, false);
+   public String toPropertyForm(boolean displayFormat) {
+        return entry.toPropertyForm(true, displayFormat, displayFormat);
     }
 
     public Entry toKelondroEntry() {
@@ -259,7 +259,10 @@ public class indexURLEntry implements Cloneable, indexEntry {
     }
 
     static void normalize(indexURLEntry t, indexEntry min, indexEntry max) {
-        if (1 + max.worddistance() - min.worddistance() == 0) System.out.println("min = " + min.toPropertyForm() + "\nmax=" + max.toPropertyForm());
+        if (1 + max.worddistance() - min.worddistance() == 0) System.out.println("min = " + min.toPropertyForm(true) + "\nmax=" + max.toPropertyForm(true));
+        //System.out.println("Normalize:\nentry = " + t.toPropertyForm(true));
+        //System.out.println("min   = " + min.toPropertyForm(true));
+        //System.out.println("max   = " + max.toPropertyForm(true));
         t.entry.setCol(col_hitcount     , (t.hitcount()     == 0) ? 0 : 1 + 255 * (t.hitcount()     - min.hitcount()    ) / (1 + max.hitcount()     - min.hitcount()));
         t.entry.setCol(col_wordcount    , (t.wordcount()    == 0) ? 0 : 1 + 255 * (t.wordcount()    - min.wordcount()   ) / (1 + max.wordcount()    - min.wordcount()));
         t.entry.setCol(col_phrasecount  , (t.phrasecount()  == 0) ? 0 : 1 + 255 * (t.phrasecount()  - min.phrasecount() ) / (1 + max.phrasecount()  - min.phrasecount()));
@@ -269,6 +272,7 @@ public class indexURLEntry implements Cloneable, indexEntry {
         t.entry.setCol(col_worddistance , (t.worddistance() == 0) ? 0 : 1 + 255 * (t.worddistance() - min.worddistance()) / (1 + max.worddistance() - min.worddistance())); // FIXME: hier gibts ein division by zero, was nur sein kann wenn die Normalisierung nicht geklappt hat.
         t.entry.setCol(col_lastModified , (t.lastModified() == 0) ? 0 : 1 + 255 * (t.lastModified() - min.lastModified()) / (1 + max.lastModified() - min.lastModified()));
         t.entry.setCol(col_quality      , (t.quality()      == 0) ? 0 : 1 + 255 * (t.quality()      - min.quality()     ) / (1 + max.quality()      - min.quality()));
+        //System.out.println("out   = " + t.toPropertyForm(true));
     }
     
     public void normalize(indexEntry min, indexEntry max) {

@@ -149,9 +149,11 @@ public final class plasmaSearchPreOrder {
         return pageAcc.size() > 0;
     }
     
-    public indexEntry next() {
-        Object top = pageAcc.lastKey();
-        return (indexEntry) pageAcc.remove(top);
+    public Object[] /*{indexEntry, Long}*/ next() {
+        String top = (String) pageAcc.lastKey();
+        //System.out.println("preorder-key:  " + top);
+        Long preranking = new Long(Long.parseLong(top.substring(0, 16), 16));
+        return new Object[]{(indexEntry) pageAcc.remove(top), preranking};
     }
     
     public indexEntry[] getNormalizer() {

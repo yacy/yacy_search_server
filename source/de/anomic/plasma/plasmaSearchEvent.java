@@ -68,12 +68,14 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private indexContainer rcGlobal; // cache for results
     private int rcGlobalCount;
     private plasmaSearchTimingProfile profileLocal, profileGlobal;
+    private boolean postsort;
     private yacySearch[] searchThreads;
     
     public plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaSearchRankingProfile ranking,
                              plasmaSearchTimingProfile localTiming,
                              plasmaSearchTimingProfile remoteTiming,
+                             boolean postsort,
                              serverLog log,
                              plasmaWordIndex wordIndex,
                              plasmaCrawlLURL urlStore,
@@ -88,6 +90,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.rcGlobalCount = 0;
         this.profileLocal = localTiming;
         this.profileGlobal = remoteTiming;
+        this.postsort = postsort;
         this.searchThreads = null;
     }
     
@@ -233,17 +236,21 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
         indexEntry entry;
         plasmaCrawlLURL.Entry page;
+        Long preranking;
+        Object[] preorderEntry;
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {
             while (preorder.hasNext()) {
                 //if ((acc.sizeFetched() >= 50) && ((acc.sizeFetched() >= minEntries) || (System.currentTimeMillis() >= postorderLimitTime))) break;
                 if (acc.sizeFetched() >= minEntries) break;
                 if (System.currentTimeMillis() >= postorderLimitTime) break;
-                entry = preorder.next();
+                preorderEntry = preorder.next();
+                entry = (indexEntry) preorderEntry[0];
+                preranking = (Long) preorderEntry[1];
                 // find the url entry
                 page = urlStore.load(entry.urlHash(), entry);
                 // add a result
-                if (page != null) acc.addResult(entry, page);
+                if (page != null) acc.addResult(page, preranking);
             }
         } catch (kelondroException ee) {
             serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
@@ -253,7 +260,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
         // start postsorting
         profileLocal.startTimer();
-        acc.sortResults();
+        acc.sortResults(postsort);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_POSTSORT, acc.sizeOrdered());
         
@@ -285,17 +292,21 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
         indexEntry entry;
         plasmaCrawlLURL.Entry page;
+        Long preranking;
+        Object[] preorderEntry;
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {
             while (preorder.hasNext()) {
                 //if ((acc.sizeFetched() >= 50) && ((acc.sizeFetched() >= minEntries) || (System.currentTimeMillis() >= postorderLimitTime))) break;
                 if (acc.sizeFetched() >= minEntries) break;
                 if (System.currentTimeMillis() >= postorderLimitTime) break;
-                entry = preorder.next();
+                preorderEntry = preorder.next();
+                entry = (indexEntry) preorderEntry[0];
+                preranking = (Long) preorderEntry[1];
                 // find the url entry
                 page = urlStore.load(entry.urlHash(), entry);
                 // add a result
-                if (page != null) acc.addResult(entry, page);
+                if (page != null) acc.addResult(page, preranking);
             }
         } catch (kelondroException ee) {
             serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
@@ -305,7 +316,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
         // start postsorting
         profileLocal.startTimer();
-        acc.sortResults();
+        acc.sortResults(postsort);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_POSTSORT, acc.sizeOrdered());
         

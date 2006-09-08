@@ -648,7 +648,7 @@ public final class plasmaCrawlLURL extends indexURL {
 
                 if (this.word != null) {
                     // append also word properties
-                    corePropStr.append(",word=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm()));
+                    corePropStr.append(",word=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm(false)));
                 }
                 return corePropStr;
 

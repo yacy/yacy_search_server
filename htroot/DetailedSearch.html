@@ -56,7 +56,7 @@ function checkers(name, n) {
   </tr>
 
   <tr valign="center"><td class="small" colspan="2">&nbsp;</td></tr>
-  <tr valign="center" class="TableHeader" width="600"><td class="small" colspan="2">Local Ranking</td></tr>
+  <tr valign="center" class="TableHeader" width="600"><td class="small" colspan="2">Local Pre-Ranking</td></tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>Entropy</td>
     <td class=small>
@@ -99,6 +99,9 @@ function checkers(name, n) {
       <script type="text/javascript">checkers("localdomlength", #[localdomlength]#)</script>
     </td>
   </tr>
+  
+  <tr valign="center"><td class="small" colspan="2">&nbsp;</td></tr>
+  <tr valign="center" class="TableHeader" width="600"><td class="small" colspan="2">Local Post-Ranking</td></tr>
   <tr valign="center" class="TableCellDark">
     <td class=small>URL Length</td>
     <td class=small>
@@ -147,17 +150,23 @@ function checkers(name, n) {
       <script type="text/javascript">checkers("localdescrcompintoplist", #[localdescrcompintoplist]#)</script>
     </td>
   </tr>
+  
   </table>
   </td>
   <td colspan="2">
   <table border="0" cellpadding="0" cellspacing="1">
-  <tr valign="center" class="TableHeader"><td class="small" colspan="2">Global Query</td></tr>
+  <tr valign="center" class="TableHeader"><td class="small" colspan="2">Query Attributes</td></tr>
   <tr valign="center" class="TableCellDark">
     <td class=small colspan="2">Global:
       <input type="checkbox" name="global" align="top" #[globalChecked]#>
 	</td>
   </tr>
-  <tr valign="top" class="TableCellDark"><td class="small" colspan="2"><i>(to be filled with more global options)</i></td></tr>
+  <tr valign="center" class="TableCellDark">
+    <td class=small colspan="2">Post-Sort:
+      <input type="checkbox" name="postsort" align="top" #[postsortChecked]#>
+	</td>
+  </tr>
+  
   </table></td>
   </tr>
 </table>
@@ -191,6 +200,7 @@ function checkers(name, n) {
 #(snippet)#::<img src="/env/grafics/empty.gif">&nbsp;<i>#[text]#</i><br>#(/snippet)#
 <img src="/env/grafics/empty.gif">&nbsp;<a href="#[url]#">#[urlname]#</a><br>
 <img src="/env/grafics/empty.gif"><span class="ResultDateYBR">&nbsp;#[date]#</span> | <span class="ResultDateYBR">YBR-#[ybr]#</span> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
+<img src="/env/grafics/empty.gif"><span class="ResultDateYBR">#[rankingprops]#</span><br>
 </p>
 <!-- link end -->
 #{/results}#

@@ -1979,7 +1979,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public serverObjects searchFromLocal(plasmaSearchQuery query,
                                          plasmaSearchRankingProfile ranking,
                                          plasmaSearchTimingProfile  localTiming,
-                                         plasmaSearchTimingProfile  remoteTiming) {
+                                         plasmaSearchTimingProfile  remoteTiming,
+                                         boolean postsort) {
         
         // tell all threads to do nothing for a specific time
         intermissionAllThreads(2 * query.maximumTime);
@@ -2002,7 +2003,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             //}
             
             // create a new search event
-            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, log, wordIndex, urlPool.loadedURL, snippetCache);
+            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, postsort, log, wordIndex, urlPool.loadedURL, snippetCache);
             plasmaSearchResult acc = theSearch.search();
             
             // fetch snippets
@@ -2083,6 +2084,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             prop.put("type_results_" + i + "_size", Long.toString(urlentry.size()));
                             prop.put("type_results_" + i + "_words", URLEncoder.encode(query.queryWords.toString(),"UTF-8"));
                             prop.put("type_results_" + i + "_former", formerSearch);
+                            prop.put("type_results_" + i + "_rankingprops", urlentry.word().toPropertyForm(true));
                             // adding snippet if available
                             if (snippet.exists()) {
                                 prop.put("type_results_" + i + "_snippet", 1);

@@ -77,7 +77,9 @@ public class DetailedSearch {
             prop.put("resultbottomline", 0);
             prop.put("localCount", 10);
             prop.put("localWDist", 999);
-            prop.put("globalChecked", "checked");
+            //prop.put("globalChecked", "checked");
+            prop.put("globalChecked", "");
+            prop.put("postsortChecked", "checked");
             prop.put("localTime", 6);
             prop.put("results", "");
             prop.put("urlmaskoptions", 0);
@@ -88,6 +90,7 @@ public class DetailedSearch {
         }
 
         boolean global = (post == null) ? false : post.get("global", "").equals("on");
+        boolean postsort = (post == null) ? false : post.get("postsort", "").equals("on");
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
@@ -138,7 +141,7 @@ public class DetailedSearch {
         plasmaSearchRankingProfile localRanking = new plasmaSearchRankingProfile("local", post.toString());
         plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-        final serverObjects prop = sb.searchFromLocal(thisSearch, localRanking, localTiming, remoteTiming);
+        final serverObjects prop = sb.searchFromLocal(thisSearch, localRanking, localTiming, remoteTiming, postsort);
 
         // remember the last search expression
         env.setConfig("last-search", querystring);
@@ -193,6 +196,7 @@ public class DetailedSearch {
         prop.put("localCount", count);
         prop.put("localWDist", wdist);
         prop.put("globalChecked", (global) ? "checked" : "");
+        prop.put("postsortChecked", (postsort) ? "checked" : "");
         prop.put("localTime", searchtime/1000);
         prop.put("search", post.get("search", ""));
         prop.putAll(localRanking.toExternalMap("local"));

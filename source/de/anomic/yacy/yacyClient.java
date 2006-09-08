@@ -1008,7 +1008,7 @@ public final class yacyClient {
             while (eenum.hasNext()) {
                 entry = (indexEntry) eenum.next();
                 entrypost.append(indexes[i].getWordHash()) 
-                         .append(entry.toPropertyForm()) 
+                         .append(entry.toPropertyForm(false)) 
                          .append(serverCore.crlfString);
                 indexcount++;
             }

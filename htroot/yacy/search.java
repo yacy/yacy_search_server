@@ -120,7 +120,7 @@ public final class search {
         plasmaSearchRankingProfile rankingProfile = new plasmaSearchRankingProfile(new String[]{plasmaSearchRankingProfile.ORDER_YBR, plasmaSearchRankingProfile.ORDER_DATE, plasmaSearchRankingProfile.ORDER_QUALITY});
         plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
         plasmaSearchTimingProfile remoteTiming = null;
-        plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
+        plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
         Set containers = theSearch.localSearchContainers();
         indexContainer localResults = theSearch.localSearchJoin(containers);
         int joincount = localResults.size();
