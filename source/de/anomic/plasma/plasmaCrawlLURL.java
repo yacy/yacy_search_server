@@ -521,6 +521,7 @@ public final class plasmaCrawlLURL extends indexURL {
             } catch (Exception e) {
                 serverLog.logSevere("PLASMA", "INTERNAL ERROR in plasmaLURL.entry/2:" +
                         "\nProperties: " + ((prop==null)?null:prop.toString()) +
+                        ((prop.containsKey("word")) ? "\nWord:       " + kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word","")) : "") +
                         "\nErrorMsg:   " + e.toString(), e);
             }
         }
