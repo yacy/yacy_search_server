@@ -68,7 +68,10 @@ public class getpageinfo_p {
                 actions=(String)post.get("actions");
             ArrayList content;
             String url=(String) post.get("url");
-            if (!url.toLowerCase().startsWith("http://")) {
+			if(url.toLowerCase().startsWith("ftp://")){
+				prop.put("robots-allowed", 1);
+				prop.put("title", "FTP: "+url);
+			}else if (!url.toLowerCase().startsWith("http://")) {
                 url = "http://" + url;
             }
             if (actions.indexOf("title")>=0) {
