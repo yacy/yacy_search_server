@@ -634,14 +634,17 @@ onlineCautionDelay=30000
 crawler.clientTimeout=9000
 
 # http crawler specific settings
-crawler.http.acceptEncoding=gzip,deflate
+crawler.http.acceptEncoding=gzip
 crawler.http.acceptLanguage=en-us,en;q=0.5
 crawler.http.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
+crawler.http.maxFileSize=-1
+
+# ftp crawler specific settings
+crawler.ftp.maxFileSize=-1
 
 # maximum number of crawler threads
 crawler.MaxActiveThreads = 10
 crawler.MaxIdleThreads = 7
-crawler.MinIdleThreads = 5
 
 # maximum number of crawl-stacker threads
 stacker.MaxActiveThreads = 50

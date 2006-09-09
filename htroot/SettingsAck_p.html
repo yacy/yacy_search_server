@@ -182,6 +182,31 @@ This values seems not to be a valid port configuration.
 <b>Error in pattern nr #[nr]#</b> "<tt>#[pattern]#</tt>": #[error]#</tt>
 </font>
 </p> 
+::<!-- 28 : Crawler settings OK -->
+<p><b>Your crawler settings have been changed.</b></p>
+<table>
+<tr><td colspan="2"><p><b>Generic Settings:</b></p></td></tr>
+<tr>
+    <td>Crawler timeout:</td>
+    <td class="settingsValue">#[crawler.clientTimeout]#</td>
+</tr>
+<tr><td colspan="2"><p><b>Http Crawler Settings:</b></p></td></tr>
+<tr>
+    <td>Maximum Filesize:</td>
+    <td class="settingsValue">#[crawler.http.maxFileSize]#</td>
+</tr>
+<tr><td colspan="2"><p><b>Ftp Crawler Settings:</b></p></td></tr>
+<tr>
+    <td>Maximum Filesize:</td>
+    <td class="settingsValue">#[crawler.ftp.maxFileSize]#</td>
+</tr>
+</table>
+::<!-- 29: Crawler settings timeout error -->
+<p><font color="red"><b>Invalid crawler timeout value:</b> <tt>#[crawler.clientTimeout]#</tt></font></p>
+::<!-- 30: Cralwer settings, maxHttpFileSize error -->
+<p><font color="red"><b>Invalid maximum file size for http crawler:</b> <tt>#[crawler.http.maxFileSize]#</tt></font></p>
+::<!-- 31: Cralwer settings, maxFtpFileSize error -->
+<p><font color="red"><b>Invalid maximum file size for ftp crawler:</b> <tt>#[crawler.http.maxFileSize]#</tt></font></p>
 #(/info)#
 </p>
 <p>You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.</p>

@@ -82,6 +82,11 @@ public final class CrawlWorker extends AbstractCrawlWorker {
     private int socketTimeout;
     
     /**
+     * The maximum allowed file size
+     */
+    private long maxFileSize = -1;
+    
+    /**
      * The remote http proxy that should be used
      */
     private httpRemoteProxyConfig remoteProxyConfig;
@@ -117,6 +122,9 @@ public final class CrawlWorker extends AbstractCrawlWorker {
         } else {
             this.socketTimeout = this.theMsg.timeout;
         }
+        
+        // maximum allowed file size
+        this.maxFileSize = this.sb.getConfigLong("crawler.http.maxFileSize", -1);
         
         // some http header values
         this.acceptEncoding = this.sb.getConfig("crawler.http.acceptEncoding", "gzip,deflate");
@@ -197,6 +205,22 @@ public final class CrawlWorker extends AbstractCrawlWorker {
 
             if (res.status.startsWith("200") || res.status.startsWith("203")) {
                 // the transfer is ok
+                
+                // check the maximum allowed file size
+                if (this.maxFileSize > -1) {
+                    long contentLength = (res.isGzipped()) ? res.getGzippedLength() : res.responseHeader.contentLength();
+                    if (contentLength == -1) {
+                        remote.close();
+                        this.log.logInfo("REJECTED URL " + this.url + " because of unknown file size. Max filesize limit can not be checked.");
+                        addURLtoErrorDB(plasmaCrawlEURL.DENIED_FILESIZE_UNKNOWN);                    
+                        return null;                        
+                    } else if (contentLength > this.maxFileSize) {
+                        remote.close();
+                        this.log.logInfo("REJECTED URL " + this.url + " because file size '" + contentLength + "' exceeds max filesize limit.");
+                        addURLtoErrorDB(plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
+                        return null;
+                    }
+                }
                 
                 // create a new cache entry
                 htCache = createCacheEntry(this.url,requestDate, requestHeader, res); 

@@ -683,6 +683,56 @@ public class SettingsAck_p {
 //            return prop;
         }
         
+        // Crawler settings
+        if (post.containsKey("crawlerSettings")) {
+            
+            // getting Crawler Timeout
+            String timeoutStr = (String) post.get("crawler.clientTimeout");
+            if (timeoutStr==null||timeoutStr.length()==0) timeoutStr = "10000";
+            
+            try {
+                int timeout = Integer.valueOf(timeoutStr).intValue();
+                env.setConfig("crawler.clientTimeout", Integer.toString(timeout));
+            } catch (NumberFormatException e) {
+                prop.put("info", 29);
+                prop.put("info_crawler.clientTimeout",post.get("crawler.clientTimeout"));
+                return prop;
+            }
+            
+            // getting maximum http file size
+            String maxSizeStr = (String) post.get("crawler.http.maxFileSize");
+            if (maxSizeStr==null||maxSizeStr.length()==0) timeoutStr = "-1";
+            
+            try {
+                long maxSize = Integer.valueOf(maxSizeStr).intValue();
+                env.setConfig("crawler.http.maxFileSize", Long.toString(maxSize));
+            } catch (NumberFormatException e) {
+                prop.put("info", 30);
+                prop.put("info_crawler.http.maxFileSize",post.get("crawler.http.maxFileSize"));
+                return prop;
+            }
+            
+            // getting maximum ftp file size
+            maxSizeStr = (String) post.get("crawler.ftp.maxFileSize");
+            if (maxSizeStr==null||maxSizeStr.length()==0) timeoutStr = "-1";
+            
+            try {
+                long maxSize = Integer.valueOf(maxSizeStr).intValue();
+                env.setConfig("crawler.ftp.maxFileSize", Long.toString(maxSize));
+            } catch (NumberFormatException e) {
+                prop.put("info", 31);
+                prop.put("info_crawler.ftp.maxFileSize",post.get("crawler.ftp.maxFileSize"));
+                return prop;
+            }                        
+            
+            // everything is ok
+            prop.put("info_crawler.clientTimeout",post.get("crawler.clientTimeout"));
+            prop.put("info_crawler.http.maxFileSize",post.get("crawler.http.maxFileSize"));
+            prop.put("info_crawler.ftp.maxFileSize",post.get("crawler.ftp.maxFileSize"));
+            prop.put("info", 28);
+            return prop;
+        }
+        
         
         // nothing made
         prop.put("info", 1);//no information submitted

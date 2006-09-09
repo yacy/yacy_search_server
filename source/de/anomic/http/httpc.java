@@ -1669,6 +1669,7 @@ do upload
         public int statusCode = 503;
         public String statusText = "internal error";
         private boolean gzip; // for gunzipping on-the-fly
+        private long gzippedLength = -1; // reported content length if content-encoding is set
         
         /**
         * Constructor for this class. Reads in the content for the given outer
@@ -1759,9 +1760,20 @@ do upload
             this.gzip = ((zipped) && (this.responseHeader.gzip()));
 
             if (this.gzip) {
+                if (this.responseHeader.containsKey(httpHeader.CONTENT_LENGTH)) {
+                    this.gzippedLength = this.responseHeader.contentLength(); 
+                }
                 this.responseHeader.remove(httpHeader.CONTENT_ENCODING); // we fake that we don't have encoding, since what comes out does not have gzip and we also don't know what was encoded
                 this.responseHeader.remove(httpHeader.CONTENT_LENGTH); // we cannot use the length during gunzippig yet; still we can hope that it works
             }
+        }
+        
+        public long getGzippedLength() {
+            return this.gzippedLength;
+        }
+        
+        public boolean isGzipped() {
+            return this.gzip;
         }
 
         /**

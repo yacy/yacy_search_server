@@ -101,6 +101,9 @@ public final class Settings_p {
         else if (page.equals("parser")) {
             prop.put("settingsTables", "Settings_Parser.inc");
         }
+        else if (page.equals("crawler")) {
+            prop.put("settingsTables", "Settings_Crawler.inc");
+        }        
         else {
         	prop.put("settingsTables", "Settings_Admin.inc");
         }
@@ -327,6 +330,11 @@ public final class Settings_p {
         prop.put("parserMode",configArray.length);
         prop.put("parser", parserIdx);
         prop.put("parser.colspan", Integer.toString(configArray.length+3));
+        
+        // Crawler settings
+        prop.put("crawler.clientTimeout",sb.getConfig("crawler.clientTimeout", "10000"));
+        prop.put("crawler.http.maxFileSize",sb.getConfig("crawler.http.maxFileSize", "-1"));
+        prop.put("crawler.ftp.maxFileSize",sb.getConfig("crawler.ftp.maxFileSize", "-1"));
         
         // return rewrite properties
         return prop;

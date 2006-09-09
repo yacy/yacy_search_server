@@ -91,6 +91,8 @@ public class plasmaCrawlEURL extends indexURL {
     public static final String DENIED_REDIRECTION_COUNTER_EXCEEDED = "denied_(redirection_counter_exceeded)";
     public static final String DENIED_WRONG_HTTP_STATUSCODE = "denied_(wrong_http_status_code_";
     public static final String DENIED_CONTENT_DECODING_ERROR = "denied_(content_decoding_error)";
+    public static final String DENIED_FILESIZE_LIMIT_EXCEEDED = "denied_(filesize_limit_exceeded)";
+    public static final String DENIED_FILESIZE_UNKNOWN = "denied_(filesize_unknown)";
     
     // network errors
     public static final String DENIED_UNKNOWN_HOST = "denied_(unknown_host)";
