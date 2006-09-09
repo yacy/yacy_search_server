@@ -44,13 +44,16 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.TreeMap;
+import java.util.Map;
 import java.util.Iterator;
 
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBinSearch;
 
 public final class plasmaSearchPreOrder {
@@ -97,6 +100,31 @@ public final class plasmaSearchPreOrder {
         for (int j = 0; j < count; j++) {
             iEntry = (indexEntry) i.next();
             pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax), query.words("")), 16) + iEntry.urlHash(), iEntry);
+        }
+    }
+    
+    public void remove(boolean rootDomExt, boolean doubleDom) {
+        // this removes all refererences to urls that are extended paths of existing 'RootDom'-urls
+        HashSet rootDoms = new HashSet();
+        HashSet doubleDoms = new HashSet();
+        Iterator i = pageAcc.entrySet().iterator();
+        Map.Entry entry;
+        indexEntry iEntry;
+        String hashpart;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            iEntry = (indexEntry) entry.getValue();
+            hashpart = iEntry.urlHash().substring(6);
+            if (((rootDomExt) && (rootDoms.contains(hashpart))) ||
+                ((doubleDom) && (doubleDoms.contains(hashpart)))) {
+                i.remove();
+                if (pageAcc.size() <= query.wantedResults) return;
+            } else {
+                if (indexURL.isWordRootURL(iEntry.urlHash(), query.words(""))) {
+                    rootDoms.add(hashpart);
+                }
+            }
+            doubleDoms.add(hashpart);
         }
     }
     

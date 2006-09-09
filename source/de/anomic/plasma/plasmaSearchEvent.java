@@ -223,6 +223,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         preorderTime = preorderTime - (System.currentTimeMillis() - pst);
         if (preorderTime < 0) preorderTime = 200;
         plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, searchResult, preorderTime);
+        preorder.remove(true, true);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_PRESORT, rcLocal.size());
         
@@ -241,11 +242,10 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {
             while (preorder.hasNext()) {
-                //if ((acc.sizeFetched() >= 50) && ((acc.sizeFetched() >= minEntries) || (System.currentTimeMillis() >= postorderLimitTime))) break;
-                //if (acc.sizeFetched() >= minEntries) break;
                 if ((System.currentTimeMillis() >= postorderLimitTime) && (acc.sizeFetched() >= minEntries)) break;
                 preorderEntry = preorder.next();
                 entry = (indexEntry) preorderEntry[0];
+                // load only urls if there was not yet a root url of that hash
                 preranking = (Long) preorderEntry[1];
                 // find the url entry
                 page = urlStore.load(entry.urlHash(), entry);
@@ -267,7 +267,6 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // apply filter
         profileLocal.startTimer();
         acc.removeRedundant();
-        //acc.removeDoubleDom();
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_FILTER);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_FILTER, acc.sizeOrdered());
         
@@ -281,6 +280,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         profileLocal.startTimer();
         if (maxtime < 0) maxtime = 200;
         plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, rcLocal, maxtime);
+        preorder.remove(true, true);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_PRESORT, rcLocal.size());
         
@@ -320,7 +320,6 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // apply filter
         profileLocal.startTimer();
         acc.removeRedundant();
-        //acc.removeDoubleDom();
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_FILTER);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_FILTER, acc.sizeOrdered());
         

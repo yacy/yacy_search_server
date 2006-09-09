@@ -175,7 +175,7 @@ public class plasmaSearchRankingProfile {
         ranking += (normalizedEntry.hitcount() == 0) ? 0 : normalizedEntry.hitcount() << ((Integer) coeff.get(HITCOUNT)).intValue();
         ranking += (256 - indexURL.domLengthNormalized(normalizedEntry.urlHash())) << ((Integer) coeff.get(DOMLENGTH)).intValue();
         ranking += (indexURL.probablyRootURL(normalizedEntry.urlHash())) ? 16 << ((Integer) coeff.get(URLLENGTH)).intValue() : 0;
-        ranking += (indexURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord)) ? 256 << ((Integer) coeff.get(QUERYINURL)).intValue() : 0;
+        ranking += (indexURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord) != null) ? 256 << ((Integer) coeff.get(QUERYINURL)).intValue() : 0;
         /*
         if (indexURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord))
             System.out.println("DEBUG - hash " + normalizedEntry.urlHash() + " contains word " + searchedWord + ", weighted " + ((Integer) coeff.get(QUERYINURL)).intValue() + ", ranking = " + ranking);

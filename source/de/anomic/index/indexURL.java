@@ -571,36 +571,39 @@ public class indexURL {
      return hash3 + hash2 + hash1 + hash0;
  }
  
- private static final char[] rootURLFlags = new char[] {
-         subdomPortPath("www", 80, ""),
-         subdomPortPath("", 80, "")
- };
- 
  private static char subdomPortPath(String subdom, int port, String rootpath) {
      return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
  }
  
+ private static final char rootURLFlag = subdomPortPath("www", 80, "");
  public static final boolean probablyRootURL(String urlHash) {
-     for (int i = 0; i < rootURLFlags.length; i++) if (urlHash.charAt(6) == rootURLFlags[i]) return true;
-     return false;
+     return (urlHash.charAt(5) == rootURLFlag);
  }
  
  private static String protocolHostPort(String protocol, String host, int port) {
      return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
  }
  
- public static final boolean probablyWordURL(String urlHash, String word) {
-     if (word == null) return false;
+ private static String[] testTLDs = new String[] {"com", "net", "org", "uk", "fr", "de", "es", "it"};
+ public static final URL probablyWordURL(String urlHash, String word) {
+     if (word == null) return null;
      String pattern = urlHash.substring(6, 11);
-     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".com", 80))) return true;
-     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".net", 80))) return true;
-     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".org", 80))) return true;
-     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".uk", 80))) return true;
-     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".fr", 80))) return true;
-     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".de", 80))) return true;
-     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".es", 80))) return true;
-     if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + ".it", 80))) return true;
-     return false;
+     for (int i = 0; i < testTLDs.length; i++) {
+         if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
+            try {
+                return new URL("http://www." + word.toLowerCase() + "." + testTLDs[i]);
+            } catch (MalformedURLException e) {
+                return null;
+            }
+     }
+     return null;
+ }
+ 
+ public static final boolean isWordRootURL(String givenURLHash, String word) {
+     if (!(probablyRootURL(givenURLHash))) return false;
+     URL wordURL = probablyWordURL(givenURLHash, word);
+     if (wordURL == null) return false;
+     return urlHash(wordURL).equals(givenURLHash);
  }
  
  public static final int domLengthEstimation(String urlHash) {

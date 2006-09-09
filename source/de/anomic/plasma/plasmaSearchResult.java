@@ -161,21 +161,6 @@ public final class plasmaSearchResult {
         results = null;
     }
     
-    public void removeDoubleDom() {
-        Iterator i = pageAcc.entrySet().iterator();
-        HashSet doms = new HashSet();
-        Map.Entry entry;
-        String dom;
-        
-        while (i.hasNext()) {
-        		if (pageAcc.size() <= query.wantedResults) return;
-            entry = (Map.Entry) i.next();
-            dom = ((plasmaCrawlLURL.Entry) entry.getValue()).url().getHost();
-            if (doms.contains(dom)) i.remove(); else doms.add(dom);
-        }
-        
-    }
-    
     public void removeRedundant() {
         // remove all urls from the pageAcc structure that occur double by specific redundancy rules
         // a link is redundant, if a sub-path of the url is cited before. redundant urls are removed

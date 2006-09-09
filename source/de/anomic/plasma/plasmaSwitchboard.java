@@ -2068,6 +2068,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                          */
                     //addScoreForked(ref, gs, descr.split(" "));
                     //addScoreForked(ref, gs, urlstring.split("/"));
+                    URL wordURL;
                     if (urlstring.matches(query.urlMask)) { //.* is default
                         snippet = snippetCache.retrieve(url, query.queryHashes, false, 260);
                         if (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH) {
@@ -2086,7 +2087,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             prop.put("type_results_" + i + "_former", formerSearch);
                             prop.put("type_results_" + i + "_rankingprops", urlentry.word().toPropertyForm(true) + ", domLengthEstimated=" + indexURL.domLengthEstimation(urlhash) +
                                     ((indexURL.probablyRootURL(urlhash)) ? ", probablyRootURL" : "") + 
-                                    ((indexURL.probablyWordURL(urlhash, query.words(""))) ? ", probablyWordURL" : ""));
+                                    (((wordURL = indexURL.probablyWordURL(urlhash, query.words(""))) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
                             // adding snippet if available
                             if (snippet.exists()) {
                                 prop.put("type_results_" + i + "_snippet", 1);
