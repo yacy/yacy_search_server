@@ -71,7 +71,8 @@ public class getpageinfo_p {
 			if(url.toLowerCase().startsWith("ftp://")){
 				prop.put("robots-allowed", 1);
 				prop.put("title", "FTP: "+url);
-			}else if (!url.toLowerCase().startsWith("http://")) {
+                return prop;
+			} else if (!(url.toLowerCase().startsWith("http://") || url.toLowerCase().startsWith("https://"))) {
                 url = "http://" + url;
             }
             if (actions.indexOf("title")>=0) {
