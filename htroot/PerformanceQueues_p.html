@@ -174,7 +174,7 @@ Changes take effect immediately</td>
 <td class="small" align="left">#[name]#</td>
 <td class="small" align="right"><input name="#[name]#_maxActive" type="text" size="8" maxlength="8" value="#[maxActive]#"></td>
 <td class="small" align="right"><input name="#[name]#_maxIdle" type="text" size="8" maxlength="8" value="#[maxIdle]#"></td>
-<td class="small" align="right"><input name="#[name]#_minIdle" type="text" size="8" maxlength="8" value="#[minIdle]#"></td>
+<td class="small" align="right"><input name="#[name]#_minIdle" type="text" size="8" maxlength="8" value="#[minIdle]#" #(minIdleConfigurable)#disabled="disabled"::#(/minIdleConfigurable)#></td>
 <td class="small" align="right">#[numActive]#</td>
 <td class="small" align="right">#[numIdle]#</td>
 <td class="small" align="left"></td>
