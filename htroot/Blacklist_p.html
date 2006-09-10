@@ -77,7 +77,6 @@ collect blacklist entries from other peers.</p>
 </tr>
 <tr>
 	<td rowspan="6">
-		<form action="Blacklist_p.html" method="post" enctype="multipart/form-data">	
 		<table border="0" cellspacing="1" cellpadding="0" width="100%">
 		<tr>
 			<td  class="TableCellDark">
@@ -87,6 +86,7 @@ collect blacklist entries from other peers.</p>
 		</tr>			
 		<tr>			
 			<td class="TableCellLight">
+			<form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
 					<input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#">
 					<select name="selectedEntry" size="8">
 						<!--<option disabled>blocked Sites</option>-->
@@ -97,6 +97,7 @@ collect blacklist entries from other peers.</p>
 					</select>
 					<p />
 					<input type="submit" name="deleteBlacklistEntry" value="Delete URL pattern" #(disabled)#::disabled="disabled"#(/disabled)# />
+					</form>
 			</td>
 		</tr>
 		<tr>
@@ -114,13 +115,13 @@ collect blacklist entries from other peers.</p>
 		</tr>
 		<tr>
 			<td  class="TableCellLight">
+			<form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
 				<input type="text" name="newEntry" size="50"><p>
 				<input type="submit" name="addBlacklistEntry" value="Add URL pattern" #(disabled)#::disabled="disabled"#(/disabled)#></p>
-				
+			</form>	
 			</td>
 		</tr>
 		</table>
-		</form>
 	</td>
 </tr>
 <tr>	
