@@ -36,7 +36,7 @@ public abstract class indexAbstractRI implements indexRI {
     }
     
     public long getUpdateTime(String wordHash) {
-        indexContainer entries = getContainer(wordHash, false, -1);
+        indexContainer entries = getContainer(wordHash, null, false, -1);
         if (entries == null) return 0;
         return entries.updated();
     }

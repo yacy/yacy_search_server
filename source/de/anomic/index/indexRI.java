@@ -53,7 +53,7 @@ public interface indexRI {
         
     public long getUpdateTime(String wordHash);
     
-    public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime);
+    public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxtime);
     public indexContainer deleteContainer(String wordHash);
     
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete);

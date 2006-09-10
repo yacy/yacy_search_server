@@ -108,10 +108,11 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
 
     }
      
-    public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime) {
+    public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxtime) {
         try {
             kelondroRowSet collection = collectionIndex.get(wordHash.getBytes(), deleteIfEmpty);
-            if (collection == null) return null;
+            collection.select(urlselection);
+            if ((collection == null) || (collection.size() == 0)) return null;
             return new indexRowSetContainer(wordHash, collection);
         } catch (IOException e) {
             return null;

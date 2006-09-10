@@ -99,7 +99,7 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
         }
 
         public Object next() {
-            return getContainer((String) wordIterator.next(), true, 100);
+            return getContainer((String) wordIterator.next(), null, true, 100);
         }
 
         public void remove() {
@@ -225,7 +225,7 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
         }
     }
 
-    public synchronized indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
+    public synchronized indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxTime) {
         long start = System.currentTimeMillis();
         if ((maxTime < 0) || (maxTime > 60000)) maxTime=60000; // maximum is one minute
         if (plasmaWordIndexFile.wordHash2path(databaseRoot, wordHash).exists()) {
@@ -235,7 +235,7 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
             Iterator i = entity.elements(true);
             while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) {
                 entry = (indexEntry) i.next();
-                container.add(entry);
+                if ((urlselection == null) || (urlselection.contains(entry.urlHash()))) container.add(entry);
             }
             return container;
         } else {

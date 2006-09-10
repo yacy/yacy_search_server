@@ -49,6 +49,7 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashSet;
@@ -321,11 +322,11 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         return condenser.RESULT_SIMI_WORDS;
     }
 
-    public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
+    public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxTime) {
         long start = System.currentTimeMillis();
 
             // get from cache
-            indexContainer container = ramCache.getContainer(wordHash, true, -1);
+            indexContainer container = ramCache.getContainer(wordHash, urlselection, true, -1);
 
             // We must not use the container from cache to store everything we find,
             // as that container remains linked to in the cache and might be changed later
@@ -336,18 +337,18 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             // get from collection index
             if (useCollectionIndex) {
                 if (container == null) {
-                    container = collections.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime);
+                    container = collections.getContainer(wordHash, urlselection, true, (maxTime < 0) ? -1 : maxTime);
                 } else {
-                    container.add(collections.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime), -1);
+                    container.add(collections.getContainer(wordHash, urlselection, true, (maxTime < 0) ? -1 : maxTime), -1);
                 }
             }
         
             // get from assortments
             if (container == null) {
-                container = assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime);
+                container = assortmentCluster.getContainer(wordHash, urlselection, true, (maxTime < 0) ? -1 : maxTime);
             } else {
                 // add containers from assortment cluster
-                container.add(assortmentCluster.getContainer(wordHash, true, (maxTime < 0) ? -1 : maxTime), -1);
+                container.add(assortmentCluster.getContainer(wordHash, urlselection, true, (maxTime < 0) ? -1 : maxTime), -1);
             }
         
             // get from backend
@@ -355,14 +356,14 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                 maxTime = maxTime - (System.currentTimeMillis() - start);
                 if (maxTime < 0) maxTime = 100;
             }
-            container.add(backend.getContainer(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime), -1);
+            container.add(backend.getContainer(wordHash, urlselection, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime), -1);
             return container;
     }
 
-    public Set getContainers(Set wordHashes, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
+    public Map getContainers(Set wordHashes, Set urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
         
         // retrieve entities that belong to the hashes
-        HashSet containers = new HashSet();
+        HashMap containers = new HashMap();
         String singleHash;
         indexContainer singleContainer;
             Iterator i = wordHashes.iterator();
@@ -378,12 +379,12 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                 singleHash = (String) i.next();
             
                 // retrieve index
-                singleContainer = getContainer(singleHash, deleteIfEmpty, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - containers.size()));
+                singleContainer = getContainer(singleHash, urlselection, deleteIfEmpty, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - containers.size()));
             
                 // check result
-                if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashSet();
+                if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap();
             
-                containers.add(singleContainer);
+                containers.put(singleHash, singleContainer);
             }
         return containers;
     }

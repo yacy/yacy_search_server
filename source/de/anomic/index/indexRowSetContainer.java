@@ -27,9 +27,11 @@
 package de.anomic.index;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
@@ -37,6 +39,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.server.serverByteBuffer;
 
 public class indexRowSetContainer extends kelondroRowSet implements indexContainer {
 
@@ -62,6 +65,43 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
         indexContainer newContainer = new indexRowSetContainer(this.wordHash, this.sortOrder, this.sortColumn);
         newContainer.add(this, -1);
         return newContainer;
+    }
+    
+    public serverByteBuffer compressedIndex(long maxtime) {
+        // collect references according to domains
+        long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+        TreeMap doms = new TreeMap();
+        synchronized(this) {
+            Iterator i = entries();
+            indexEntry iEntry;
+            String dom, paths;
+            while (i.hasNext()) {
+                iEntry = (indexEntry) i.next();
+                dom = iEntry.urlHash().substring(6);
+                if ((paths = (String) doms.get(dom)) == null) {
+                    doms.put(dom, iEntry.urlHash().substring(0, 6));
+                } else {
+                    doms.put(dom, paths + iEntry.urlHash().substring(0, 6));
+                }
+                if (System.currentTimeMillis() > timeout) break;
+            }
+        }
+        // construct a result string
+        serverByteBuffer bb = new serverByteBuffer(this.size() * indexURLEntry.urlEntryRow.width(0) / 2);
+        bb.append('{');
+        Iterator i = doms.entrySet().iterator();
+        Map.Entry entry;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            bb.append((String) entry.getKey());
+            bb.append(':');
+            bb.append((String) entry.getValue());
+            if (System.currentTimeMillis() > timeout) break;
+            if (i.hasNext()) bb.append(',');
+        }
+        bb.append('}');
+        bb.trim();
+        return bb;
     }
     
     public void setWordHash(String newWordHash) {
@@ -94,15 +134,18 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
 
     public int add(indexContainer c, long maxTime) {
         // returns the number of new elements
-        long startTime = System.currentTimeMillis();
+        long timeout = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         if (c == null) return 0;
         int x = 0;
         synchronized (c) {
             Iterator i = c.entries();
-            while ((i.hasNext()) && ((maxTime < 0) || ((startTime + maxTime) > System.currentTimeMillis()))) {
+            while (i.hasNext()) {
                 try {
                     if (addi((indexEntry) i.next())) x++;
-                } catch (ConcurrentModificationException e) {}
+                } catch (ConcurrentModificationException e) {
+                    e.printStackTrace();
+                }
+                if (System.currentTimeMillis() > timeout) break;
             }
         }
         this.lastTimeWrote = java.lang.Math.max(this.lastTimeWrote, c.updated());
@@ -202,7 +245,7 @@ public class indexRowSetContainer extends kelondroRowSet implements indexContain
         return c;
     }
     
-    public static indexContainer joinContainer(Set containers, long time, int maxDistance) {
+    public static indexContainer joinContainer(Collection containers, long time, int maxDistance) {
         
         long stamp = System.currentTimeMillis();
         

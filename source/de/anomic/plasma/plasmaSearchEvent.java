@@ -42,9 +42,11 @@
 
 package de.anomic.plasma;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.Map;
 import java.util.HashSet;
+import java.util.Set;
 
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
@@ -131,7 +133,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 searchThreads = yacySearch.searchHashes(query.queryHashes, query.prefer, query.urlMask, query.maxDistance, urlStore, rcGlobal, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
 
                 // meanwhile do a local search
-                indexContainer rcLocal = localSearchJoin(localSearchContainers());
+                indexContainer rcLocal = localSearchJoin(localSearchContainers(null).values());
                 plasmaSearchResult localResult = orderLocal(rcLocal, timeout);
                 
                 // catch up global results:
@@ -161,7 +163,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 lastEvent = this;
                 return result;
             } else {
-                indexContainer rcLocal = localSearchJoin(localSearchContainers());
+                indexContainer rcLocal = localSearchJoin(localSearchContainers(null).values());
                 plasmaSearchResult result = order(rcLocal);
                 result.localContributions = rcLocal.size();
 
@@ -173,13 +175,14 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         }
     }
 
-    public Set localSearchContainers() {
+    public Map localSearchContainers(Set urlselection) {
         // search for the set of hashes and return the set of containers containing the seach result
 
         // retrieve entities that belong to the hashes
         profileLocal.startTimer();
-        Set containers = wordIndex.getContainers(
+        Map containers = wordIndex.getContainers(
                         query.queryHashes,
+                        urlselection,
                         true,
                         true,
                         profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_COLLECTION));
@@ -190,7 +193,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         return containers;
     }
     
-    public indexContainer localSearchJoin(Set containers) {
+    public indexContainer localSearchJoin(Collection containers) {
         // join a search result and return the joincount (number of pages after join)
 
         // since this is a conjunction we return an empty entity if any word is not known

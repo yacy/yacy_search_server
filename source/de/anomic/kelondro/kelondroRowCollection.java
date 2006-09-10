@@ -25,6 +25,7 @@
 package de.anomic.kelondro;
 
 import java.util.Iterator;
+import java.util.Set;
 
 public class kelondroRowCollection {
 
@@ -293,6 +294,18 @@ public class kelondroRowCollection {
         }
     }
     
+    public void select(Set keys) {
+        // removes all entries but the ones given by urlselection
+        if (keys == null) return;
+        synchronized (this) {
+            Iterator i = rows();
+            kelondroRow.Entry row;
+            while (i.hasNext()) {
+                row = (kelondroRow.Entry) i.next();
+                if (!(keys.contains(row.getColString(0, null)))) i.remove();
+            }
+        }
+    }
     
     protected final void sort(kelondroOrder newOrder, int newColumn) {
         if ((this.sortOrder == null) ||

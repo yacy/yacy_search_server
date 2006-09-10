@@ -386,8 +386,14 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         return (((long) intTime) * (long) 1000) + initTime;
     }
     
-    public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxtime_dummy) {
-        return (indexContainer) wCache.get(wordHash);
+    public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxtime_dummy) {
+        if (urlselection == null) {
+            return (indexContainer) wCache.get(wordHash);
+        } else {
+            indexContainer ic = ((indexContainer) wCache.get(wordHash)).topLevelClone();
+            ic.select(urlselection);
+            return ic;
+        }
     }
 
     public indexContainer deleteContainer(String wordHash) {

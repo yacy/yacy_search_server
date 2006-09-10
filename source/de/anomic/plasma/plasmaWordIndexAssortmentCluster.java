@@ -295,17 +295,17 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         return initialSize - urlHashes.size();
     }
 
-    public indexContainer getContainer(String wordHash, boolean deleteIfEmpty, long maxTime) {
+    public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxTime) {
         // collect all records from all the assortments and return them
         indexContainer buffer, record = new indexRowSetContainer(wordHash);
-        long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
-        long remainingTime;
+        long timeout = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         for (int i = 0; i < clusterCount; i++) {
             buffer = assortments[i].get(wordHash);
-            remainingTime = limitTime - System.currentTimeMillis();
-            if (0 > remainingTime) break;
-            if (buffer != null) record.add(buffer, remainingTime);
-            
+            if (buffer != null) {
+                buffer.select(urlselection);
+                record.add(buffer, -1);
+            }
+            if (System.currentTimeMillis() > timeout) break;
         }
         return record;
     }
