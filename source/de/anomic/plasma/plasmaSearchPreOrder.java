@@ -105,22 +105,26 @@ public final class plasmaSearchPreOrder {
     
     public void remove(boolean rootDomExt, boolean doubleDom) {
         // this removes all refererences to urls that are extended paths of existing 'RootDom'-urls
+        if (pageAcc.size() <= query.wantedResults) return;
         HashSet rootDoms = new HashSet();
         HashSet doubleDoms = new HashSet();
         Iterator i = pageAcc.entrySet().iterator();
         Map.Entry entry;
         indexEntry iEntry;
         String hashpart;
+        boolean isWordRootURL;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
             iEntry = (indexEntry) entry.getValue();
             hashpart = iEntry.urlHash().substring(6);
-            if (((rootDomExt) && (rootDoms.contains(hashpart))) ||
-                ((doubleDom) && (doubleDoms.contains(hashpart)))) {
+            isWordRootURL = indexURL.isWordRootURL(iEntry.urlHash(), query.words(""));
+            if ((!(isWordRootURL)) &&
+                (((rootDomExt) && (rootDoms.contains(hashpart))) ||
+                 ((doubleDom) && (doubleDoms.contains(hashpart))))) {
                 i.remove();
                 if (pageAcc.size() <= query.wantedResults) return;
             } else {
-                if (indexURL.isWordRootURL(iEntry.urlHash(), query.words(""))) {
+                if (isWordRootURL) {
                     rootDoms.add(hashpart);
                 }
             }
