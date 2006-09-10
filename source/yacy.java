@@ -156,12 +156,17 @@ public final class yacy {
     */
     public static String combinedVersionString2PrettyString(String ver) {
         final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{3})(\\d{4}|\\d{5})\\z").matcher(ver); 
-
+        
+        String prettyversion = "";
         if (!matcher.find()) { 
             serverLog.logWarning("STARTUP", "Wrong format of version-string: '" + ver + "'. Using default pretty string 'dev/00000' instead");   
-            return "dev/00000";
-        } 
-        return (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1)) + "/" + matcher.group(2);
+            //return "dev/00000";
+            prettyversion = "dev/00000";
+        }
+        //return (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1)) + "/" + matcher.group(2);
+        prettyversion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1)) + "/" + matcher.group(2);
+        serverLog.logInfo("STARTUP", "created Pretty version \""+prettyversion+"\" from \""+ver+"\"");
+        return prettyversion;
     }
        
     /**
