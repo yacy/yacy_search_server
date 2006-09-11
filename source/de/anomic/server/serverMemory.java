@@ -57,6 +57,13 @@ public class serverMemory {
         // memory that is free without increasing of total memory taken from os
         return runtime.freeMemory();
     }
+   
+    public static boolean available(long memory, boolean gciffail) {
+        if (available() >= memory) return true;
+        if (!gciffail) return false;
+        System.gc();
+        return (available() >= memory);
+    }
     
     public static long available() {
         // memory that is available including increasing total memory up to maximum
