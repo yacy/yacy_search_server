@@ -136,7 +136,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 searchThreads = yacySearch.searchHashes(query.queryHashes, query.prefer, query.urlMask, query.maxDistance, urlStore, rcContainers, rcAbstracts, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
 
                 // meanwhile do a local search
-                indexContainer rcLocal = localSearchJoin(localSearchContainers(null).values());
+                Map searchContainerMap = localSearchContainers(null);
+                indexContainer rcLocal = localSearchJoin((searchContainerMap == null) ? null : searchContainerMap.values());
                 plasmaSearchResult localResult = orderLocal(rcLocal, timeout);
                 
                 // catch up global results:
@@ -166,7 +167,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 lastEvent = this;
                 return result;
             } else {
-                indexContainer rcLocal = localSearchJoin(localSearchContainers(null).values());
+                Map searchContainerMap = localSearchContainers(null);
+                indexContainer rcLocal = localSearchJoin((searchContainerMap == null) ? null : searchContainerMap.values());
                 plasmaSearchResult result = order(rcLocal);
                 result.localContributions = rcLocal.size();
 
@@ -179,7 +181,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     }
 
     public Map localSearchContainers(Set urlselection) {
-        // search for the set of hashes and return the set of containers containing the seach result
+        // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
 
         // retrieve entities that belong to the hashes
         profileLocal.startTimer();

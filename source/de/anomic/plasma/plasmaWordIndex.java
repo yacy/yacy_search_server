@@ -361,6 +361,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public Map getContainers(Set wordHashes, Set urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
+        // return map of wordhash:indexContainer
         
         // retrieve entities that belong to the hashes
         HashMap containers = new HashMap();
@@ -375,7 +376,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                 //if ((maxTime > 0) && (remaining <= 0)) break;
                 if ((maxTime >= 0) && (remaining <= 0)) remaining = 100;
             
-                // get next hash:
+                // get next word hash:
                 singleHash = (String) i.next();
             
                 // retrieve index
