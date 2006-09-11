@@ -75,7 +75,7 @@ public class ymageMatrix implements Cloneable {
     private boolean grabComplementary = false;
     
     public ymageMatrix(ymageMatrix matrix) throws RuntimeException {
-        if (serverMemory.available(1024 * 1024 + 3 * width * height, true)) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
+        if (!(serverMemory.available(1024 * 1024 + 3 * width * height, true))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
         // clones the matrix
         this.width = matrix.width;
         this.height = matrix.height;
@@ -93,7 +93,7 @@ public class ymageMatrix implements Cloneable {
     }
     
     public ymageMatrix(int width, int height, long backgroundColor) {
-        if (serverMemory.available(1024 * 1024 + 3 * width * height, true)) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
+        if (!(serverMemory.available(1024 * 1024 + 3 * width * height, true))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
         this.width = width;
         this.height = height;
         this.defaultColR = 0xFF;
