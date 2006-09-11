@@ -67,6 +67,8 @@ import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
+import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
@@ -690,9 +692,11 @@ public class SettingsAck_p {
             String timeoutStr = (String) post.get("crawler.clientTimeout");
             if (timeoutStr==null||timeoutStr.length()==0) timeoutStr = "10000";
             
+            int crawlerTimeout;
             try {
-                int timeout = Integer.valueOf(timeoutStr).intValue();
-                env.setConfig("crawler.clientTimeout", Integer.toString(timeout));
+                crawlerTimeout = Integer.valueOf(timeoutStr).intValue();
+                if (crawlerTimeout < 0) crawlerTimeout = 0;
+                env.setConfig("crawler.clientTimeout", Integer.toString(crawlerTimeout));
             } catch (NumberFormatException e) {
                 prop.put("info", 29);
                 prop.put("info_crawler.clientTimeout",post.get("crawler.clientTimeout"));
@@ -703,9 +707,10 @@ public class SettingsAck_p {
             String maxSizeStr = (String) post.get("crawler.http.maxFileSize");
             if (maxSizeStr==null||maxSizeStr.length()==0) timeoutStr = "-1";
             
+            long maxHttpSize;
             try {
-                long maxSize = Integer.valueOf(maxSizeStr).intValue();
-                env.setConfig("crawler.http.maxFileSize", Long.toString(maxSize));
+                maxHttpSize = Integer.valueOf(maxSizeStr).intValue();
+                env.setConfig("crawler.http.maxFileSize", Long.toString(maxHttpSize));
             } catch (NumberFormatException e) {
                 prop.put("info", 30);
                 prop.put("info_crawler.http.maxFileSize",post.get("crawler.http.maxFileSize"));
@@ -716,9 +721,10 @@ public class SettingsAck_p {
             maxSizeStr = (String) post.get("crawler.ftp.maxFileSize");
             if (maxSizeStr==null||maxSizeStr.length()==0) timeoutStr = "-1";
             
+            long maxFtpSize;
             try {
-                long maxSize = Integer.valueOf(maxSizeStr).intValue();
-                env.setConfig("crawler.ftp.maxFileSize", Long.toString(maxSize));
+                maxFtpSize = Integer.valueOf(maxSizeStr).intValue();
+                env.setConfig("crawler.ftp.maxFileSize", Long.toString(maxFtpSize));
             } catch (NumberFormatException e) {
                 prop.put("info", 31);
                 prop.put("info_crawler.ftp.maxFileSize",post.get("crawler.ftp.maxFileSize"));
@@ -726,9 +732,9 @@ public class SettingsAck_p {
             }                        
             
             // everything is ok
-            prop.put("info_crawler.clientTimeout",post.get("crawler.clientTimeout"));
-            prop.put("info_crawler.http.maxFileSize",post.get("crawler.http.maxFileSize"));
-            prop.put("info_crawler.ftp.maxFileSize",post.get("crawler.ftp.maxFileSize"));
+            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ?"0" :serverDate.intervalToString(crawlerTimeout));
+            prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)?"-1":serverMemory.bytesToString(maxHttpSize));
+            prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ?"-1":serverMemory.bytesToString(maxFtpSize));
             prop.put("info", 28);
             return prop;
         }

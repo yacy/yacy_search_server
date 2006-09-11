@@ -47,6 +47,7 @@ package de.anomic.plasma.crawler.http;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.SocketException;
@@ -56,6 +57,8 @@ import java.util.Date;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
+import de.anomic.http.httpdBoundedSizeOutputStream;
+import de.anomic.http.httpdLimitExceededException;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.index.indexURL;
 import de.anomic.net.URL;
@@ -206,22 +209,6 @@ public final class CrawlWorker extends AbstractCrawlWorker {
             if (res.status.startsWith("200") || res.status.startsWith("203")) {
                 // the transfer is ok
                 
-                // check the maximum allowed file size
-                if (this.maxFileSize > -1) {
-                    long contentLength = (res.isGzipped()) ? res.getGzippedLength() : res.responseHeader.contentLength();
-                    if (contentLength == -1) {
-                        remote.close();
-                        this.log.logInfo("REJECTED URL " + this.url + " because of unknown file size. Max filesize limit can not be checked.");
-                        addURLtoErrorDB(plasmaCrawlEURL.DENIED_FILESIZE_UNKNOWN);                    
-                        return null;                        
-                    } else if (contentLength > this.maxFileSize) {
-                        remote.close();
-                        this.log.logInfo("REJECTED URL " + this.url + " because file size '" + contentLength + "' exceeds max filesize limit.");
-                        addURLtoErrorDB(plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
-                        return null;
-                    }
-                }
-                
                 // create a new cache entry
                 htCache = createCacheEntry(this.url,requestDate, requestHeader, res); 
                 
@@ -248,18 +235,36 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 File cacheFile = this.cacheManager.getCachePath(this.url);
                 try {
                     if ((this.acceptAllContent) || (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,this.url,res.responseHeader.mime()))) {
+                        // delete old content
                         if (cacheFile.isFile()) {
                             this.cacheManager.deleteFile(this.url);
                         }
-                        // we write the new cache entry to file system directly
+                        
+                        // create parent directories
                         cacheFile.getParentFile().mkdirs();
-                        FileOutputStream fos = null;
+                        
+                        OutputStream fos = null;
                         try {
-                            fos = new FileOutputStream(cacheFile);
-                            res.writeContent(fos); // superfluous write to array
+                            // creating an output stream
+                            fos = new FileOutputStream(cacheFile); 
+                            
+                            // check the maximum allowed file size                            
+                            if (this.maxFileSize > -1) {
+                                long contentLength = (res.isGzipped()) ? res.getGzippedLength() : res.responseHeader.contentLength();
+                                if (contentLength == -1) {
+                                    fos = new httpdBoundedSizeOutputStream(fos,this.maxFileSize);                     
+                                } else if (contentLength > this.maxFileSize) {
+                                    remote.close();
+                                    this.log.logInfo("REJECTED URL " + this.url + " because file size '" + contentLength + "' exceeds max filesize limit.");
+                                    addURLtoErrorDB(plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
+                                    return null;
+                                }
+                            }
+
+                            // we write the new cache entry to file system directly
+                            res.writeContent(fos);
                             htCache.setCacheArray(null);
                             this.cacheManager.writeFileAnnouncement(cacheFile);
-                            //htCache.cacheArray = res.writeContent(fos); // writes in cacheArray and cache file
                         } finally {
                             if (fos!=null)try{fos.close();}catch(Exception e){/* ignore this */}
                         }
@@ -372,6 +377,9 @@ public final class CrawlWorker extends AbstractCrawlWorker {
             ) {
                 this.log.logInfo("CRAWLER Interruption detected because of server shutdown.");
                 failreason = plasmaCrawlEURL.DENIED_SERVER_SHUTDOWN;
+            } else if (e instanceof httpdLimitExceededException) {
+                this.log.logWarning("CRAWLER Max file size limit '" + this.maxFileSize + "' exceeded while downloading URL " + this.url);
+                failreason = plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED;                    
             } else if (e instanceof MalformedURLException) {
                 this.log.logWarning("CRAWLER Malformed URL '" + this.url.toString() + "' detected. ");
                 failreason = plasmaCrawlEURL.DENIED_MALFORMED_URL;
@@ -380,58 +388,58 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 failreason = plasmaCrawlEURL.DENIED_NO_ROUTE_TO_HOST;
             } else if ((e instanceof UnknownHostException) ||
                        ((errorMsg != null) && (errorMsg.indexOf("unknown host") >= 0))) {
-                log.logWarning("CRAWLER Unknown host in URL '" + url.toString() + "'. " +
-                        "Referer URL: " + ((refererURLString == null) ?"Unknown":refererURLString));
+                this.log.logWarning("CRAWLER Unknown host in URL '" + this.url.toString() + "'. " +
+                        "Referer URL: " + ((this.refererURLString == null) ?"Unknown":this.refererURLString));
                 failreason = plasmaCrawlEURL.DENIED_UNKNOWN_HOST;
             } else if (e instanceof java.net.BindException) {
-                log.logWarning("CRAWLER BindException detected while trying to download content from '" + url.toString() +
+                this.log.logWarning("CRAWLER BindException detected while trying to download content from '" + this.url.toString() +
                 "'. Retrying request.");
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_BIND_EXCEPTION;                
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
-                log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + url.toString() +
+                this.log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + this.url.toString() +
                 "'. Retrying request without using gzip content encoding.");
                 failreason = plasmaCrawlEURL.DENIED_CONTENT_DECODING_ERROR;
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Read timed out") >= 0)) {
-                log.logWarning("CRAWLER Read timeout while receiving content from '" + url.toString() +
+                this.log.logWarning("CRAWLER Read timeout while receiving content from '" + this.url.toString() +
                 "'. Retrying request.");
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_TIMEOUT;
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("connect timed out") >= 0)) {
-                log.logWarning("CRAWLER Timeout while trying to connect to '" + url.toString() +
+                this.log.logWarning("CRAWLER Timeout while trying to connect to '" + this.url.toString() +
                 "'. Retrying request.");
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_TIMEOUT;
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Connection timed out") >= 0)) {
-                log.logWarning("CRAWLER Connection timeout while receiving content from '" + url.toString() +
+                this.log.logWarning("CRAWLER Connection timeout while receiving content from '" + this.url.toString() +
                 "'. Retrying request.");
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_TIMEOUT;
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Connection refused") >= 0)) {
-                log.logWarning("CRAWLER Connection refused while trying to connect to '" + url.toString() + "'.");
+                this.log.logWarning("CRAWLER Connection refused while trying to connect to '" + this.url.toString() + "'.");
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_REFUSED;
             } else if ((errorMsg != null) && (errorMsg.indexOf("There is not enough space on the disk") >= 0)) {
-                log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + url.toString() + "'. " +
+                this.log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + this.url.toString() + "'. " +
                 "Pausing crawlers. ");
                 plasmaCrawlLoader.switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 plasmaCrawlLoader.switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 failreason = plasmaCrawlEURL.DENIED_OUT_OF_DISK_SPACE;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Network is unreachable") >=0)) {
-                log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + url.toString() + "'. ");
+                this.log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + this.url.toString() + "'. ");
                 failreason = plasmaCrawlEURL.DENIED_NETWORK_IS_UNREACHABLE;
             } else if ((errorMsg != null) && (errorMsg.indexOf("No trusted certificate found")>= 0)) {
-                log.logSevere("CRAWLER No trusted certificate found for URL '" + url.toString() + "'. ");  
+                this.log.logSevere("CRAWLER No trusted certificate found for URL '" + this.url.toString() + "'. ");  
                 failreason = plasmaCrawlEURL.DENIED_SSL_UNTRUSTED_CERT;
             } else {
-                log.logSevere("CRAWLER Unexpected Error with URL '" + url.toString() + "': " + e.toString(),e);
+                this.log.logSevere("CRAWLER Unexpected Error with URL '" + this.url.toString() + "': " + e.toString(),e);
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_ERROR;
             }
 
             if (retryCrawling) {
                 // if we are already doing a shutdown we don't need to retry crawling
                 if (Thread.currentThread().isInterrupted()) {
-                    log.logSevere("CRAWLER Retry of URL=" + url.toString() + " aborted because of server shutdown.");
+                    this.log.logSevere("CRAWLER Retry of URL=" + this.url.toString() + " aborted because of server shutdown.");
                     return null;
                 }
 

@@ -1,12 +1,12 @@
-//httpByteCountOutputStream.java 
+//httpBoundedSizeOutputStream.java 
 //-----------------------
 //(C) by Michael Peter Christen; mc@anomic.de
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //
 // This file is contributed by Martin Thelian
-// last major change: $LastChangedDate$ by $LastChangedBy$
-// Revision: $LastChangedRevision$
+// last major change: $LastChangedDate: 2006-08-16 21:49:31 +0200 (Mi, 16 Aug 2006) $ by $LastChangedBy: orbiter $
+// Revision: $LastChangedRevision: 2414 $
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -41,89 +41,57 @@
 //the intact and unchanged copyright notice.
 //Contributions and changes to the program code must be marked as such.
 
-
 package de.anomic.http;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class httpdByteCountOutputStream extends BufferedOutputStream {
-    
-    private static final Object syncObject = new Object();
-    private static long globalByteCount = 0;    
-    private boolean finished = false;    
-    
-    protected long byteCount;
+public class httpdBoundedSizeOutputStream extends httpdByteCountOutputStream {
 
-    /**
-     * Constructor of this class
-     * @param outputStream the {@link OutputStream} to write to
-     */
-    public httpdByteCountOutputStream(OutputStream outputStream) {
-        this(outputStream,0);
+    protected long maxSize = 0;
+
+    public httpdBoundedSizeOutputStream(OutputStream outputStream, long sizeLimit) {
+        this(outputStream,0,sizeLimit);
     }
     
-    /**
-     * Constructor of this class
-     * @param outputStream the {@link OutputStream} to write to
-     * @param initByteCount to initialize the bytecount with a given value
-     */
-    public httpdByteCountOutputStream(OutputStream outputStream, long initByteCount) {
-        super(outputStream);
-        this.byteCount = initByteCount;
+    public httpdBoundedSizeOutputStream(OutputStream outputStream, long initByteCount, long sizeLimit) {
+        super(outputStream,initByteCount);
+        this.maxSize = sizeLimit;
     }    
 
-    /** @see java.io.OutputStream#write(byte[]) */
     public void write(byte[] b) throws IOException {
+        if (this.byteCount + b.length > this.maxSize) {
+            // write out the rest until we have reached the limit
+            long rest = this.maxSize-this.byteCount;
+            if (rest > 0) this.write(b, 0, (int)rest);
+            
+            // throw an exception
+            throw new httpdLimitExceededException("Limit exceeded",this.maxSize);
+        }
         super.write(b);
-        this.byteCount += b.length;
     }
 
-    /** @see java.io.OutputStream#write(byte[], int, int) */
-    public void write(byte[] b, int off, int len) throws IOException {        
+    public void write(byte[] b, int off, int len) throws IOException {     
+        if (this.byteCount + len > this.maxSize) {
+            // write out the rest until we reach the limit
+            long rest = this.maxSize-this.byteCount;
+            if (rest > 0) this.write(b, 0, (int)rest);
+            
+            // throw an exception
+            throw new httpdLimitExceededException("Limit exceeded",this.maxSize);
+        }
         super.write(b, off, len);
-        this.byteCount += len;
     }
 
-    /** @see java.io.OutputStream#write(int) */
     public void write(int b) throws IOException {
+        if (this.byteCount + 1 > this.maxSize) {
+            // throw an exception
+            throw new httpdLimitExceededException("Limit exceeded",this.maxSize);
+        }
         super.write(b);
-        this.byteCount++;
     }
 
-    /**
-     * The number of bytes that have passed through this stream.
-     * @return the number of bytes accumulated
-     */
-    public long getCount() {
-        return this.byteCount;
+    public long getSizeLimit() {
+        return this.maxSize;
     }
-    
-    public static long getGlobalCount() {
-        synchronized (syncObject) {
-            return globalByteCount;
-        }
-    }
-    
-    public static void resetCount() {
-        synchronized (syncObject) {
-            globalByteCount = 0;
-        }
-    }    
-    
-    public void finish() {
-        if (this.finished) return;
-        
-        this.finished = true;
-        synchronized (syncObject) {
-            globalByteCount += this.byteCount;
-        }        
-    }
-    
-    protected void finalize() throws Throwable {
-        if (!this.finished) 
-            finish();
-        super.finalize();
-    }    
 }
