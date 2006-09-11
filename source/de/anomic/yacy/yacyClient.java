@@ -48,6 +48,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.TreeMap;
+import java.util.Map;
 import java.util.Iterator;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -56,6 +58,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexRowSetContainer;
+import de.anomic.index.indexURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
@@ -65,6 +68,7 @@ import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
+import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -370,6 +374,7 @@ public final class yacyClient {
             yacySeed targetPeer,
             plasmaCrawlLURL urlManager, 
             indexContainer containerCache,
+            Map abstractCache,
             plasmaURLPattern blacklist, 
             plasmaSnippetCache snippets, 
             plasmaSearchTimingProfile timingProfile,
@@ -524,9 +529,25 @@ public final class yacyClient {
                 }
             }
 
-            // finally insert the containers to the index
+            // insert the containers to the index
             for (int m = 0; m < words; m++) { containerCache.add(container[m], -1); }
 
+            // read index abstract
+            Iterator i = result.entrySet().iterator();
+            Map.Entry entry;
+            TreeMap singleAbstract;
+            String wordhash;
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                if (((String) entry.getKey()).startsWith("indexabstract.")) {
+                    wordhash = ((String) entry.getKey()).substring(14);
+                    singleAbstract = (TreeMap) abstractCache.get(wordhash);
+                    if (singleAbstract == null) singleAbstract = new TreeMap();
+                    indexURL.decompressIndex(singleAbstract, new serverByteBuffer(((String) entry.getValue()).getBytes()), targetPeer.hash);
+                    abstractCache.put(wordhash, singleAbstract);
+                }
+            }
+            
             // generate statistics
             long searchtime;
             try {

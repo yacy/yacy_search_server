@@ -55,6 +55,7 @@ import java.util.Set;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -158,8 +159,8 @@ public final class search {
         if ((maxcounthash == null) || (urls.length() != 0)) {
             prop.put("indexabstract","");
         } else {
-            String indexabstract = "indexabstract." + maxcounthash + "=" + ((indexContainer) containers.get(maxcounthash)).compressedIndex(1000);
-            yacyCore.log.logFine("DEBUG HASH SEARCH: " + indexabstract);
+            String indexabstract = "indexabstract." + maxcounthash + "=" + indexURL.compressIndex(((indexContainer) containers.get(maxcounthash)), 1000).toString();
+            //yacyCore.log.logFine("DEBUG HASH SEARCH: " + indexabstract);
             prop.put("indexabstract", indexabstract);
         }
         

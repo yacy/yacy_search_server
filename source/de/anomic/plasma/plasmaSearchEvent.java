@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.logging.serverLog;
@@ -67,8 +68,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private plasmaWordIndex wordIndex;
     private plasmaCrawlLURL urlStore;
     private plasmaSnippetCache snippetCache;
-    private indexContainer rcGlobal; // cache for results
-    private int rcGlobalCount;
+    private indexContainer rcContainers; // cache for results
+    private int rcContainerCount;
+    private Map rcAbstracts; // cache for index abstracts
     private plasmaSearchTimingProfile profileLocal, profileGlobal;
     private boolean postsort;
     private yacySearch[] searchThreads;
@@ -88,8 +90,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.ranking = ranking;
         this.urlStore = urlStore;
         this.snippetCache = snippetCache;
-        this.rcGlobal = new indexRowSetContainer(null);
-        this.rcGlobalCount = 0;
+        this.rcContainers = new indexRowSetContainer(null);
+        this.rcContainerCount = 0;
+        this.rcAbstracts = new TreeMap();
         this.profileLocal = localTiming;
         this.profileGlobal = remoteTiming;
         this.postsort = postsort;
@@ -130,7 +133,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 log.logFine("STARTING " + fetchpeers + " THREADS TO CATCH EACH " + profileGlobal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT) + " URLs WITHIN " + (profileGlobal.duetime() / 1000) + " SECONDS");
 
                 long timeout = System.currentTimeMillis() + profileGlobal.duetime();
-                searchThreads = yacySearch.searchHashes(query.queryHashes, query.prefer, query.urlMask, query.maxDistance, urlStore, rcGlobal, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
+                searchThreads = yacySearch.searchHashes(query.queryHashes, query.prefer, query.urlMask, query.maxDistance, urlStore, rcContainers, rcAbstracts, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
 
                 // meanwhile do a local search
                 indexContainer rcLocal = localSearchJoin(localSearchContainers(null).values());
@@ -145,7 +148,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                     // wait a little time ..
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
-                int globalContributions = rcGlobal.size();
+                int globalContributions = rcContainers.size();
                 
                 // finished searching
                 log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
@@ -222,7 +225,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         profileLocal.startTimer();
         long pst = System.currentTimeMillis();
         searchResult.add(rcLocal, preorderTime);
-        searchResult.add(rcGlobal, preorderTime);
+        searchResult.add(rcContainers, preorderTime);
         preorderTime = preorderTime - (System.currentTimeMillis() - pst);
         if (preorderTime < 0) preorderTime = 200;
         plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, searchResult, preorderTime);
@@ -352,10 +355,10 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             //log.logFine("FINISHED FLUSH RESULTS PROCESS for query " + query.hashes(","));
         }
         
-        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + rcGlobalCount + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
+        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + rcContainerCount + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
             
         // finally delete the temporary index
-        rcGlobal = null;
+        rcContainers = null;
         
         flushThreads.remove(this);
     }
@@ -364,24 +367,24 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // flush the rcGlobal as much as is there so far
         // this must be called sometime after search results had been computed
         int count = 0;
-        if ((rcGlobal != null) && (rcGlobal.size() > 0)) {
-            synchronized (rcGlobal) {
+        if ((rcContainers != null) && (rcContainers.size() > 0)) {
+            synchronized (rcContainers) {
                 String wordHash;
                 Iterator hashi = query.queryHashes.iterator();
                 boolean dhtCache = false;
                 while (hashi.hasNext()) {
                     wordHash = (String) hashi.next();
-                    rcGlobal.setWordHash(wordHash);
+                    rcContainers.setWordHash(wordHash);
                     dhtCache = dhtCache | wordIndex.busyCacheFlush;
-                    wordIndex.addEntries(rcGlobal, System.currentTimeMillis(), dhtCache);
-                    log.logFine("FLUSHED " + wordHash + ": " + rcGlobal.size() + " url entries to " + ((dhtCache) ? "DHT cache" : "word cache"));
+                    wordIndex.addEntries(rcContainers, System.currentTimeMillis(), dhtCache);
+                    log.logFine("FLUSHED " + wordHash + ": " + rcContainers.size() + " url entries to " + ((dhtCache) ? "DHT cache" : "word cache"));
                 }
                 // the rcGlobal was flushed, empty it
-                count += rcGlobal.size();
-                rcGlobal.clear();
+                count += rcContainers.size();
+                rcContainers.clear();
             }
         }
-        rcGlobalCount += count;
+        rcContainerCount += count;
     }
     
 }

@@ -137,6 +137,7 @@ public final class plasmaSearchQuery {
     }
     
     public String words(String separator) {
+        if (queryWords == null) return "";
     		StringBuffer result = new StringBuffer(8 * queryWords.size());
     		Iterator i = queryWords.iterator();
     		if (i.hasNext()) result.append((String) i.next());

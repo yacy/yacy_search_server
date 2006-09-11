@@ -33,12 +33,15 @@ import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRAMIndex;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
 
@@ -586,7 +589,7 @@ public class indexURL {
  
  private static String[] testTLDs = new String[] {"com", "net", "org", "uk", "fr", "de", "es", "it"};
  public static final URL probablyWordURL(String urlHash, String word) {
-     if (word == null) return null;
+     if ((word == null) || (word.length() == 0)) return null;
      String pattern = urlHash.substring(6, 11);
      for (int i = 0; i < testTLDs.length; i++) {
          if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
@@ -633,6 +636,67 @@ public class indexURL {
     if ((url == null) || (url.length() < 10)) return null;
      String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(new URL(url).toNormalform())).substring(0, urlHashLength);
      return hash;
+ }
+ 
+
+ public static final serverByteBuffer compressIndex(indexContainer container, long maxtime) {
+     // collect references according to domains
+     long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+     TreeMap doms = new TreeMap();
+     synchronized(container) {
+         Iterator i = container.entries();
+         indexEntry iEntry;
+         String dom, paths;
+         while (i.hasNext()) {
+             iEntry = (indexEntry) i.next();
+             dom = iEntry.urlHash().substring(6);
+             if ((paths = (String) doms.get(dom)) == null) {
+                 doms.put(dom, iEntry.urlHash().substring(0, 6));
+             } else {
+                 doms.put(dom, paths + iEntry.urlHash().substring(0, 6));
+             }
+             if (System.currentTimeMillis() > timeout) break;
+         }
+     }
+     // construct a result string
+     serverByteBuffer bb = new serverByteBuffer(container.size() * 6);
+     bb.append('{');
+     Iterator i = doms.entrySet().iterator();
+     Map.Entry entry;
+     while (i.hasNext()) {
+         entry = (Map.Entry) i.next();
+         bb.append((String) entry.getKey());
+         bb.append(':');
+         bb.append((String) entry.getValue());
+         if (System.currentTimeMillis() > timeout) break;
+         if (i.hasNext()) bb.append(',');
+     }
+     bb.append('}');
+     bb.trim();
+     return bb;
+ }
+ 
+ public static final void decompressIndex(TreeMap target, serverByteBuffer ci, String peerhash) {
+     // target is a mapping from url-hashes to a string of peer-hashes
+     if ((ci.byteAt(0) == '{') && (ci.byteAt(ci.length() - 1) == '}')) {
+         ci = ci.trim(1, ci.length() - 1);
+         String dom, url, peers;
+         while ((ci.length() >= 13) && (ci.byteAt(6) == ':')) {
+             dom = ci.toString(0, 6);
+             ci.trim(7);
+             while ((ci.length() == 6) || ((ci.length() > 6) && (ci.byteAt(6) != ','))) {
+                 url = ci.toString(0, 6) + dom;
+                 ci.trim(6);
+                 peers = (String) target.get(url);
+                 if (peers == null) {
+                     target.put(url, peerhash);
+                 } else {
+                     target.put(url, peers + peerhash);
+                 }
+             }
+             if (ci.byteAt(0) == ',') ci.trim(1);
+         }
+     }
  }
  
 }

@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroOrder;
-import de.anomic.server.serverByteBuffer;
 
 public interface indexContainer {
     
@@ -44,7 +43,6 @@ public interface indexContainer {
     
     public void setWordHash(String newWordHash);
     public String getWordHash();
-    public serverByteBuffer compressedIndex(long maxtime);
     public void select(Set urlselection);
     
     public void setOrdering(kelondroOrder newOrder, int newColumn);

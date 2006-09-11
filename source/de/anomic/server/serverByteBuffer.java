@@ -274,16 +274,15 @@ public final class serverByteBuffer extends OutputStream {
         return tmp;
     }
 
-    /*
-    private serverByteBuffer trim(int start) {
-    if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
-    offset = offset + start;
-    length = length - start;
-    return this;
+    public serverByteBuffer trim(int start) {
+        // the end value is outside (+1) of the wanted target array
+        if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
+        offset = offset + start;
+        length = length - start;
+        return this;
     }
-    */
-    
-    private serverByteBuffer trim(int start, int end) {
+
+    public serverByteBuffer trim(int start, int end) {
         // the end value is outside (+1) of the wanted target array
         if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
         if (end > length) throw new IndexOutOfBoundsException("trim: end > length");
@@ -345,6 +344,10 @@ public final class serverByteBuffer extends OutputStream {
     
     public String toString() {
         return new String(buffer, offset, length);
+    }
+
+    public String toString(int left, int rightbound) {
+        return new String(buffer, offset + left, rightbound - left);
     }
 
     public Properties propParser() {
