@@ -1,215 +1,165 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
- <head>
-  <title>YaCy '#[clientname]#': Search Page</title>
-  #%env/templates/metas.template%#
- </head>
- <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-  <SCRIPT LANGUAGE="JavaScript">
-picEmpty = new Image(11, 11);
-picEmpty.src = "/env/grafics/empty.gif";
-picMinus = new Image(11, 11);
-picMinus.src = "/env/grafics/minus.gif";
-function checker(name, z1, z2) {
-  if (z1 == z2) {
-    document.write("<input type=\"radio\" name=\"" + name + "\" value=\"" + z2 + "\" checked>");
-  } else {
-    document.write("<input type=\"radio\" name=\"" + name + "\" value=\"" + z2 + "\">");
-  }
-}
-function checkers(name, n) {
-  for (i = 0; i < 16; i++) {
-    checker(name, n, i);
-  }
-  document.write(n);
-}
-  </SCRIPT>
-<form action="DetailedSearch.html" method="get" enctype="multipart/form-data">
-<br><br><h2>Detailed&nbsp;Search</h2><br>
-<table border="0" cellpadding="5" cellspacing="0"> 
-  <tr valign="center">
-    <td colspan="2" align="right"><input type="text" name="search" value="#[search]#" size="50" maxlength="250">&nbsp;<input type="submit" name="Enter" value="Search"></td>
-    <td></td>
-  </tr>
-  <tr valign="top">
-  <td colspan="2">
-  <table border="0" cellpadding="0" cellspacing="1">
-  <tr valign="center" class="TableHeader"><td class="small" colspan="2">Local Query</td></tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Max. number of results:</td>
-    <td class=small>
-      <input type="text" name="localCount" value="#[localCount]#" size="4" maxlength="5">
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Max. search time (seconds):</td>
-    <td class=small>
-      <input type="text" name="localTime" value="#[localTime]#" size="4" maxlength="3">
-	</td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Max. word distance:</td>
-    <td class=small>
-      <input type="text" name="localWDist" value="#[localWDist]#" size="4" maxlength="4">
-	</td>
-  </tr>
-
-  <tr valign="center"><td class="small" colspan="2">&nbsp;</td></tr>
-  <tr valign="center" class="TableHeader" width="600"><td class="small" colspan="2">Local Pre-Ranking</td></tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Entropy</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localentropy", #[localentropy]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Date</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localdate", #[localdate]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>YBR</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localybr", #[localybr]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Position in Text</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localposintext", #[localposintext]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Word Distance</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localworddistance", #[localworddistance]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Word Hit Count</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localhitcount", #[localhitcount]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Domain Length</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localdomlength", #[localdomlength]#)</script>
-    </td>
-  </tr>
-  
-  <tr valign="center"><td class="small" colspan="2">&nbsp;</td></tr>
-  <tr valign="center" class="TableHeader" width="600"><td class="small" colspan="2">Local Post-Ranking</td></tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>URL Length</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localurllength", #[localurllength]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>URL Components</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localurlcomps", #[localurlcomps]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Description Length</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localdescrlength", #[localdescrlength]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Description Components</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localdescrcomps", #[localdescrcomps]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Query appears in URL</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localqueryinurl", #[localqueryinurl]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Query appears in Description</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localqueryindescr", #[localqueryindescr]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>URL Component appears in Toplist</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localurlcompintoplist", #[localurlcompintoplist]#)</script>
-    </td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small>Description Component appears in Toplist</td>
-    <td class=small>
-      <script type="text/javascript">checkers("localdescrcompintoplist", #[localdescrcompintoplist]#)</script>
-    </td>
-  </tr>
-  
-  </table>
-  </td>
-  <td colspan="2">
-  <table border="0" cellpadding="0" cellspacing="1">
-  <tr valign="center" class="TableHeader"><td class="small" colspan="2">Query Attributes</td></tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small colspan="2">Global:
-      <input type="checkbox" name="global" align="top" #[globalChecked]#>
-	</td>
-  </tr>
-  <tr valign="center" class="TableCellDark">
-    <td class=small colspan="2">Post-Sort:
-      <input type="checkbox" name="postsort" align="top" #[postsortChecked]#>
-	</td>
-  </tr>
-  
-  </table></td>
-  </tr>
-</table>
-</form>
-
-#(type)#
-<p>
-#(excluded)#
-::
-<b>The following words are stop-words and had been excluded from the search: #[stopwords]#.</b>
-#(/excluded)#
-#(num-results)#
-::
-<b>#[linkcount]#</b> results from <b>#[orderedcount]#</b> ordered links of a total number of <b>#[totalcount]#</b> known.
-#(/num-results)#
-#(combine)#
-::
-<br><br><b>Topwords</b> (to refine search):
-#{words}#
-<a href="DetailedSearch.html?search=#[newsearch]#&Enter=Search&count=#[count]#&resource=#[resource]#&time=#[time]##[ranking]#">#[word]#</a>
-#{/words}#
-#(/combine)#
-</p>
-<!-- linklist begin -->
-
-#{results}#
-<!-- link begin -->
-<p style="border-bottom:1px #000 dashed; padding-bottom: 1em;">
-<a href="#[delete]#" onMouseover="document.minus_#[urlhexhash]#.src=picMinus.src" onMouseout="document.minus_#[urlhexhash]#.src=picEmpty.src">
-<img src="/env/grafics/empty.gif" title="delete" alt="delete" name="minus_#[urlhexhash]#" border="0"></a>&nbsp;<b><span class="ResultDescription">#[description]#</span></b><br>
-#(snippet)#::<img src="/env/grafics/empty.gif">&nbsp;<i>#[text]#</i><br>#(/snippet)#
-<img src="/env/grafics/empty.gif">&nbsp;<a href="#[url]#">#[urlname]#</a><br>
-<img src="/env/grafics/empty.gif"><span class="ResultDateYBR">&nbsp;#[date]#</span> | <span class="ResultDateYBR">YBR-#[ybr]#</span> | <a href="ViewFile.html?urlHash=#[urlhash]#&words=#[words]#">Info</a><br>
-<img src="/env/grafics/empty.gif"><span class="ResultDateYBR">#[rankingprops]#</span><br>
-</p>
-<!-- link end -->
-#{/results}#
-#(/type)#
-
-<!-- linklist end -->
-<p>
-</p><br>
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Search Page</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="DetailedSearch">
+    #%env/templates/header.template%#
+    <script type="text/javascript">
+      /* <![CDATA[ */
+      function checker(name, z1, z2) {
+        if (z1 == z2) {
+          document.write("<input type=\"radio\" name=\"" + name + "\" value=\"" + z2 + "\" checked=\"checked\" />");
+        } else {
+          document.write("<input type=\"radio\" name=\"" + name + "\" value=\"" + z2 + "\">");
+        }
+      }
+      function checkers(name, n) {
+        for (i = 0; i < 16; i++) {
+          checker(name, n, i);
+        }
+        document.write(n);
+      }
+      /* ]]> */
+    </script>
+    <h2>Detailed&nbsp;Search</h2>
+    <form class="dsearch" action="DetailedSearch.html" method="get" enctype="multipart/form-data">
+      <fieldset>
+        <input type="text" name="search" value="#[search]#" size="50" maxlength="250" />
+        <input type="submit" name="Enter" value="Search" />
+      </fieldset>
+      <fieldset>
+        <legend>Query Attributes</legend>
+        <dl>
+          <dt><label for="global">Global:</label></dt>
+          <dd><input type="checkbox" name="global" id="global" #[globalChecked]# /></dd>
+          <dt><label for="postsort">Post-Sort:</label></dt>
+          <dd><input type="checkbox" name="postsort" id="postsort" #[postsortChecked]# /></dd>
+        </dl>
+      </fieldset>
+      <fieldset>
+        <legend>Local Query</legend>
+        <dl>
+          <dt><label for="localcount">Max. number of results:</label></dt>
+          <dd>
+            <input type="text" name="localcount" id="localcount" value="#[localCount]#" size="4" maxlength="5" />
+          </dd>
+          <dt><label for="localtime">Max. search time (seconds):</label></dt>
+          <dd>
+            <input type="text" name="localtime" id="localtime" value="#[localTime]#" size="4" maxlength="3" />
+          </dd>
+          <dt><label for="localwdist">Max. word distance:</label></dt>
+          <dd>
+            <input type="text" name="localwdist" id="localwdist" value="#[localWDist]#" size="4" maxlength="4" />
+          </dd>
+        </dl>
+      </fieldset>
+      <fieldset>
+        <legend>Local Pre-Ranking</legend>
+        <dl>
+          <dt>Entropy</dt>
+          <dd>
+            <script type="text/javascript">checkers("localentropy", #[localentropy]#)</script>
+          </dd>
+          <dt>Date</dt>
+          <dd>
+            <script type="text/javascript">checkers("localdate", #[localdate]#)</script>
+          </dd>
+          <dt>YBR</dt>
+          <dd>
+            <script type="text/javascript">checkers("localybr", #[localybr]#)</script>
+          </dd>
+          <dt>Position in Text</dt>
+          <dd>
+            <script type="text/javascript">checkers("localposintext", #[localposintext]#)</script>
+          </dd>
+          <dt>Word Distance</dt>
+          <dd>
+            <script type="text/javascript">checkers("localworddistance", #[localworddistance]#)</script>
+          </dd>
+          <dt>Word Hit Count</dt>
+          <dd>
+            <script type="text/javascript">checkers("localhitcount", #[localhitcount]#)</script>
+          </dd>
+          <dt>Domain Length</dt>
+          <dd>
+            <script type="text/javascript">checkers("localdomlength", #[localdomlength]#)</script>
+          </dd>
+        </dl>
+      </fieldset>
+      <fieldset>
+        <legend>Local Post-Ranking</legend>
+        <dl>
+          <dt>URL Length</dt>
+          <dd>
+            <script type="text/javascript">checkers("localurllength", #[localurllength]#)</script>
+          </dd>
+          <dt>URL Components</dt>
+          <dd>
+            <script type="text/javascript">checkers("localurlcomps", #[localurlcomps]#)</script>
+          </dd>
+          <dt>Description Length</dt>
+          <dd>
+            <script type="text/javascript">checkers("localdescrlength", #[localdescrlength]#)</script>
+          </dd>
+          <dt>Description Components</dt>
+          <dd>
+            <script type="text/javascript">checkers("localdescrcomps", #[localdescrcomps]#)</script>
+          </dd>
+          <dt>Query appears in URL</dt>
+          <dd>
+            <script type="text/javascript">checkers("localqueryinurl", #[localqueryinurl]#)</script>
+          </dd>
+          <dt>Query appears in Description</dt>
+          <dd>
+            <script type="text/javascript">checkers("localqueryindescr", #[localqueryindescr]#)</script>
+          </dd>
+          <dt>URL Component appears in Toplist</dt>
+          <dd>
+            <script type="text/javascript">checkers("localurlcompintoplist", #[localurlcompintoplist]#)</script>
+          </dd>
+          <dt>Description Component appears in Toplist</dt>
+          <dd>
+            <script type="text/javascript">checkers("localdescrcompintoplist", #[localdescrcompintoplist]#)</script>
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+    #(type)#
+    #(excluded)#
+    ::
+    <p><strong>The following words are stop-words and had been excluded from the search: #[stopwords]#.</strong></p>
+    #(/excluded)#
+    #(num-results)#
+    ::
+    <strong>#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links of a total number of <strong>#[totalcount]#</strong> known.
+    #(/num-results)#
+    #(combine)#
+    ::
+    <p><strong>Topwords</strong> (to refine search):
+      #{words}#
+      <a href="DetailedSearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;resource=#[resource]#&amp;time=#[time]##[ranking]#">#[word]#</a>
+      #{/words}#
+    </p>
+    #(/combine)#
+    <!-- linklist begin -->
+     #{results}#
+    <!-- link begin -->
+    <div class="searchresults">
+      <div class="urlactions">
+        <a href="#[delete]#" title="delete" class="deletelink" ><img src="/env/grafics/empty.gif" title="delete" alt="delete" class="deleteIcon" /></a>
+      </div>
+      <h4 class="linktitle"><a href="#[url]#">#[description]#</a></h4>
+      #(snippet)#::<p class="snippet"><em>#[text]#</em></p>#(/snippet)#
+      <p class="url"><a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a></p>
+      <p class="urlinfo">#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#">Info</a></p>
+      <p class="urlinfo">#[rankingprops]#</p>
+    </div>
+    <!-- link end -->
+    #{/results}#
+    #(/type)#
+    <!-- linklist end -->
+  #%env/templates/footer.template%#
+  </body>
 </html>

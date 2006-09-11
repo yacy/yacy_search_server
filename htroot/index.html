@@ -1,134 +1,116 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
- <head>
-  <title>YaCy '#[clientname]#': Search Page</title>
-#%env/templates/metas.template%#
-  <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?search=#[former]#">
- </head>
- <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0" onload="document.getElementById('search').focus()">
-#(display)#
-#%env/templates/simpleheader.template%#
-::
-#%env/templates/header.template%#
-#(/display)#
-  <br>
-  <center><img src="/env/grafics/kaskelix.png" align="middle" alt="Kaskelix - the YaCy logo"></center><br>
-  <center>#[promoteSearchPageGreeting]#</center><br>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Search Page</title>
+    #%env/templates/metas.template%#
+    <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?search=#[former]#" />
+  </head>
+  <body id="index" onload="document.getElementById('search').focus()">
+    #(display)#
+    #%env/templates/simpleheader.template%#
+    ::
+    #%env/templates/header.template%#
+    #(/display)#
 
-  <form action="yacysearch.html" method="get" name="searchform">
-  <input type="hidden" name="display" value="#[display]#">
-  <center>
-  <table border="0" cellspacing="0" cellpadding="0">
-   <tr>
-    <td colspan=2>
-	<center>
-     <input name="search" type="text" size="52" maxlength="80" value="#[former]#">
-     <input type="submit" name="Enter" value="Search"><p>
-     <input type="hidden" name="former" value="#[former]#">
-    </center>
-   </td>
-   </tr>
-   #(searchoptions)#
-   <input type="hidden" name="count" value="20">
-   <input type="hidden" name="order" value="Date-YBR-Quality">
-   <input type="hidden" name="resource" value="global">
-   <input type="hidden" name="time" value="6">
-   <input type="hidden" name="urlmaskfilter" value=".*">
-   <input type="hidden" name="prefermaskfilter" value="">
-   <tr align="left">
-    <td></td>
-    <td><a href="/index.html?searchoptions=1&display=#[display]#" onClick="this.href='/index.html?searchoptions=1&display=#[display]#&handover='+document.searchform.search.value">more options...</a></td>
-   </tr>
-   ::
-   <tr align="left">
-    <td>
-     Max. number of results:
-	</td>
-	<td>
-     <select NAME="count">
-     <option #(count-10)#::selected#(/count-10)#>10</option>
-     <option #(count-50)#::selected#(/count-50)#>50</option>
-     <option #(count-100)#::selected#(/count-100)#>100</option>
-     <option #(count-1000)#::selected#(/count-1000)#>1000</option>
-     </select>
-	</td>
-   </tr>
-   <tr align="left">
-    <td>
-     order by:
-    </td>
-	<td>
-    <select NAME="order">
-    <option value="YBR-Date-Quality" #(order-ybr-date-quality)#::selected#(/order-ybr-date-quality)#>YBR-Date-Quality</option>
-    <option value="YBR-Quality-Date" #(order-ybr-quality-date)#::selected#(/order-ybr-quality-date)#>YBR-Quality-Date</option>
-    <option value="Date-YBR-Quality" #(order-date-ybr-quality)#::selected#(/order-date-ybr-quality)#>Date-YBR-Quality</option>
-    <option value="Quality-YBR-Date" #(order-quality-ybr-date)#::selected#(/order-quality-ybr-date)#>Quality-YBR-Date</option>
-    <option value="Date-Quality-YBR" #(order-date-quality-ybr)#::selected#(/order-date-quality-ybr)#>Date-Quality-YBR</option>
-    <option value="Quality-Date-YBR" #(order-quality-date-ybr)#::selected#(/order-quality-date-ybr)#>Quality-Date-YBR</option>
-    </select>
-   </td>
-    </tr>
-    <tr align="left">
-     <td>
-      Resource:
-	 </td>
-	 <td>
-	  <select NAME="resource">
-	  <option value="global" #(resource-global)#::selected#(/resource-global)#>global</option>
-	  <option value="local" #(resource-local)#::selected#(/resource-local)#>local</option>
-	  </select>
-    </td>
-   </tr>
-   <tr align="left">
-    <td>
-	Max. search time (seconds):
-	</td>
-	<td>
-    <select NAME="time">
-	<option #(time-1)#::selected#(/time-1)#>1</option>
-	<option #(time-3)#::selected#(/time-3)#>3</option>
-	<option #(time-6)#::selected#(/time-6)#>6</option>
-	<option #(time-10)#::selected#(/time-10)#>10</option>
-	<option #(time-30)#::selected#(/time-30)#>30</option>
-	<option #(time-60)#::selected#(/time-60)#>60</option>
-	</select>
-   </td>
-  </tr>
-  <tr align="left">
-   <td>
-    URL mask:
-   </td>
-   <td>
-	#(urlmaskoptions)#
-	<input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#">
-	::
-	<input type="radio" name="urlmask" value="yes" checked> restrict on <input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#">
-	<input type="radio" name="urlmask" value="no"> show all
-	#(/urlmaskoptions)#
-   </td>
-  </tr>
-  <tr align="left">
-   <td>
-    Prefer mask:
-   </td>
-   <td>
-	#(prefermaskoptions)#
-	<input name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#">
-	::
-	<input type="radio" name="prefermask" value="yes" checked> restrict on <input name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#">
-	<input type="radio" name="prefermask" value="no"> show all
-	#(/prefermaskoptions)#
-   </td>
-  </tr>
-  #(/searchoptions)#
- </table>
- </center>
- </form>
-
-#(display)#
-#%env/templates/simplefooter.template%#
-::
-#%env/templates/footer.template%#
-#(/display)#
-</body>
+    <h2 class="yacy">
+      #[promoteSearchPageGreeting]#
+    </h2>
+  
+    <form class="search" action="yacysearch.html" method="get" name="searchform">
+      <fieldset class="maininput">
+        <input type="hidden" name="display" value="#[display]#" />
+        <input name="search" type="text" size="52" maxlength="80" value="#[former]#" />
+        <input type="submit" name="Enter" value="Search" />
+        <input type="hidden" name="former" value="#[former]#" />
+        #(searchoptions)#
+        <input type="hidden" name="count" value="20" />
+        <input type="hidden" name="order" value="Date-YBR-Quality" />
+        <input type="hidden" name="resource" value="global" />
+        <input type="hidden" name="time" value="6" />
+        <input type="hidden" name="urlmaskfilter" value=".*" />
+        <input type="hidden" name="prefermaskfilter" value="" />
+      </fieldset>
+      <p><a href="/index.html?searchoptions=1&amp;display=#[display]#" onclick="this.href='/index.html?searchoptions=1&amp;display=#[display]#&amp;handover='+document.searchform.search.value">more options...</a></p>
+      ::
+      </fieldset>
+       
+      <table>
+        <tr>
+          <td>Max. number of results:</td>
+          <td>
+            <select name="count">
+              <option #(count-10)#::selected="selected"#(/count-10)#>10</option>
+              <option #(count-50)#::selected="selected"#(/count-50)#>50</option>
+              <option #(count-100)#::selected="selected"#(/count-100)#>100</option>
+              <option #(count-1000)#::selected="selected"#(/count-1000)#>1000</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>order by:</td>
+          <td>
+            <select name="order">
+              <option value="YBR-Date-Quality" #(order-ybr-date-quality)#::selected="selected"#(/order-ybr-date-quality)#>YBR-Date-Quality</option>
+              <option value="YBR-Quality-Date" #(order-ybr-quality-date)#::selected="selected"#(/order-ybr-quality-date)#>YBR-Quality-Date</option>
+              <option value="Date-YBR-Quality" #(order-date-ybr-quality)#::selected="selected"#(/order-date-ybr-quality)#>Date-YBR-Quality</option>
+              <option value="Quality-YBR-Date" #(order-quality-ybr-date)#::selected="selected"#(/order-quality-ybr-date)#>Quality-YBR-Date</option>
+              <option value="Date-Quality-YBR" #(order-date-quality-ybr)#::selected="selected"#(/order-date-quality-ybr)#>Date-Quality-YBR</option>
+              <option value="Quality-Date-YBR" #(order-quality-date-ybr)#::selected="selected"#(/order-quality-date-ybr)#>Quality-Date-YBR</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Resource:</td>
+          <td>
+            <select name="resource">
+              <option value="global" #(resource-global)#::selected="selected"#(/resource-global)#>global</option>
+              <option value="local" #(resource-local)#::selected="selected"#(/resource-local)#>local</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>Max. search time (seconds):</td>
+            <td>
+              <select name="time">
+                <option #(time-1)#::selected="selected"#(/time-1)#>1</option>
+                <option #(time-3)#::selected="selected"#(/time-3)#>3</option>
+                <option #(time-6)#::selected="selected"#(/time-6)#>6</option>
+                <option #(time-10)#::selected="selected"#(/time-10)#>10</option>
+                <option #(time-30)#::selected="selected"#(/time-30)#>30</option>
+                <option #(time-60)#::selected="selected"#(/time-60)#>60</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+          <td>URL mask:</td>
+          <td>#(urlmaskoptions)#
+            <input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#" />
+            ::
+            <input type="radio" name="urlmask" value="yes" checked /> restrict on <input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#" />
+            <input type="radio" name="urlmask" value="no" /> show all
+            #(/urlmaskoptions)#
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Prefer mask:
+          </td>
+          <td>
+            #(prefermaskoptions)#
+            <input name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#" />
+            ::
+            <input type="radio" name="prefermask" value="yes" checked="checked" /> restrict on <input name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#" />
+            <input type="radio" name="prefermask" value="no" /> show all
+            #(/prefermaskoptions)#
+          </td>
+        </tr>
+      </table>
+      #(/searchoptions)#
+    </form>
+    #(display)#
+    #%env/templates/simplefooter.template%#
+    ::
+    #%env/templates/footer.template%#
+    #(/display)#
+  </body>
 </html>

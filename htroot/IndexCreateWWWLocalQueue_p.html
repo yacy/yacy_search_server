@@ -1,64 +1,69 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Index Creation / WWW Local Crawl Queue</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#%env/templates/submenuIndexCreate.template%#
-<br>
-<h2>Index Creation: WWW Local Crawl Queue</h2>
-<p>
-This queue stores the urls that shall be crawled localy by this peer.
-It may also contain urls that are computed by the proxy-prefetch.
-</p>
-<p>
-#(crawler-queue)#
-The local crawler queue is empty<br><br>
-::
-<form action="IndexCreateWWWLocalQueue_p.html" method="post" enctype="multipart/form-data">
-	Delete Entries:
-	<input type="text" name="pattern" value=".*" size="20" maxlength="200"/>
-	<select name="option" size="1">
-	   <option value="Initiator">Initiator</option>
-	   <option value="Profile">Profile</option>
-	   <option value="Depth">Depth</option>
-	   <option value="ModifiedDate">Modified Date</option>
-	   <option value="AnchorName">Anchor Name</option>
-	   <option value="URL" selected="selected">URL</option>
-	</select>
-	<input type="submit" name="deleteEntries" value="Delete"><i>This may take a quite long time.</i>
-</form>
-<br>
-<hr>
-<p>There are <b>#[num]#</b> entries in the local crawler queue. Showing <b>#[show-num]#</b> most recent entries.</p>
-<p>Show last <a href="IndexCreateWWWLocalQueue_p.html?limit=50">50</a> | <a href="IndexCreateWWWLocalQueue_p.html?limit=100">100</a> | <a href="IndexCreateWWWLocalQueue_p.html?limit=250">250</a> | <a href="IndexCreateWWWLocalQueue_p.html?limit=500">500</a> entries.</p>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader">
-<th class="small">Initiator</th>
-<th class="small">Profile</th>
-<th class="small">Depth</th>
-<th class="small">Modified Date</th>
-<th class="small">Anchor Name</th>
-<th class="small">URL</th>
-<th class="small">Delete</th>
-</tr>
-#{list}#
-<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
-<td width="60" class="small">#[initiator]#</td>
-<td width="60" class="small">#[profile]#</td>
-<td width="10" class="small">#[depth]#</td>
-<td width="80" class="small">#[modified]#</td>
-<td width="180" class="small">#[anchor]#</td>
-<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
-<td width="10" class="small"><a class="small" href="IndexCreateWWWLocalQueue_p.html?deleteEntry=#[hash]#">[Delete]</a></td>
-</tr>
-#{/list}#
-</table>
-#(/crawler-queue)#
-</p>
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Creation / WWW Local Crawl Queue</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexCreateWWwLocalQueue">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Index Creation: WWW Local Crawl Queue</h2>
+    <p>
+    This queue stores the urls that shall be crawled localy by this peer.
+    It may also contain urls that are computed by the proxy-prefetch.
+    </p>
+    
+    #(crawler-queue)#
+    <p>The local crawler queue is empty</p>
+    ::
+    <form action="IndexCreateWWWLocalQueue_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        Delete Entries:
+        <input type="text" name="pattern" value=".*" size="20" maxlength="200" />
+        <select name="option" size="1">
+           <option value="Initiator">Initiator</option>
+           <option value="Profile">Profile</option>
+           <option value="Depth">Depth</option>
+           <option value="ModifiedDate">Modified Date</option>
+           <option value="AnchorName">Anchor Name</option>
+           <option value="URL" selected="selected">URL</option>
+        </select>
+        <input type="submit" name="deleteEntries" value="Delete" /><em>This may take a quite long time.</em>
+      </fieldset>
+    </form>
+    <p>There are <strong>#[num]#</strong> entries in the local crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.</p>
+    <p>Show last <a href="IndexCreateWWWLocalQueue_p.html?limit=50">50</a> | <a href="IndexCreateWWWLocalQueue_p.html?limit=100">100</a> | <a href="IndexCreateWWWLocalQueue_p.html?limit=250">250</a> | <a href="IndexCreateWWWLocalQueue_p.html?limit=500">500</a> entries.</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <colgroup>
+        <col width="60" span="2" />
+        <col width="10" />
+        <col width="80" />
+        <col width="180" />
+        <col />
+        <col width="10" />
+      </colgroup>
+      <tr class="TableHeader">
+        <th>Initiator</th>
+        <th>Profile</th>
+        <th>Depth</th>
+        <th>Modified Date</th>
+        <th>Anchor Name</th>
+        <th>URL</th>
+        <th>Delete</th>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[initiator]#</td>
+        <td>#[profile]#</td>
+        <td>#[depth]#</td>
+        <td>#[modified]#</td>
+        <td>#[anchor]#</td>
+        <td><a href="#[url]#">#[url]#</a></td>
+        <td><a href="IndexCreateWWWLocalQueue_p.html?deleteEntry=#[hash]#">[Delete]</a></td>
+      </tr>
+      #{/list}#
+    </table>
+    #(/crawler-queue)#
+    #%env/templates/footer.template%#
+  </body>
 </html>

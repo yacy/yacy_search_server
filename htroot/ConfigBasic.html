@@ -1,82 +1,99 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Basic Configuration</title>
-#%env/templates/metas.template%#
-<script>
-<!--
-function element_clicked(element){
-document.getElementById("key").value=element.id;
-document.getElementById("value").value=element.value;
-}
--->
-</script>
-	<!-- redirecting browser if port was changed -->
-	#(reconnect)#::<meta http-equiv="refresh" content="10; URL=#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html">#(/reconnect)#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#%env/templates/submenuConfig.template%#
-<br>
-<h2>Basic Configuration</h2>
-<p>
-Your YaCy Peer needs some basic information to operate properly
-</p>
-
-<form action="ConfigBasic.html" method="post" enctype="multipart/form-data">
-<ol>
- <li><img src="/env/grafics/ok.png" height="32px" width="32px">&nbsp;Select a language for the interface:<br>
-    <input type="radio" name="language" value="de" #(langDeutsch)#::checked#(/langDeutsch)#>Deutsch&nbsp;
-    <input type="radio" name="language" value="default" #(langEnglish)#::checked#(/langEnglish)#>English<br><br></li>
- <li>#(statusPassword)#<img src="/env/grafics/warning.png">&nbsp;Please set a password for your peer to protect your settings (> 3 characters); if this is successful you will be asked to log in with these values immediately.::<img src="/env/grafics/ok.png" height="32px" width="32px">&nbsp;Password is set#(/statusPassword)#<br>
-     <table border="0" cellpadding="0" cellspacing="1">
-	 <tr>
-	 <td>Peer User: 
-	 </td>
-	 <td><input type="text" name="adminuser" value="#[defaultUser]#" size="16" maxlength="32">
-	 </tr>
-	 <tr>
-	 <td>Peer Password:
-	 </td>
-	 <td><input type="password" name="adminpw1" value="" size="16" maxlength="32"><br>
-	 </td>
-	 </tr>
-	 <tr>
-	 <td>Peer Password:
-	 </td>
-	 <td><input type="password" name="adminpw2" value="" size="16" maxlength="32">&nbsp;(repeat same password)
-	 </td>
-	 </tr>
-	 </table>
-	 <br></li>
- <li>#(statusName)#<img src="/env/grafics/warning.png">&nbsp;Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="32px" width="32px">&nbsp;You have a nice peer name#(/statusName)#<br>
-     Peer Name: <input type="text" name="peername" value="#[defaultName]#" size="20" maxlength="32"><br><br></li>
- <li>#(statusPort)#<img src="/env/grafics/warning.png">&nbsp;Your peer cannot be reached from outside (what is not fatal, but would be good for the YaCy network); please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port.::<img src="/env/grafics/ok.png" height="32px" width="32px">&nbsp;Your peer can be reached by other peers#(/statusPort)#<br>
-     Peer Port: <input type="text" name="port" value="#[defaultPort]#" size="5" maxlength="5"><br>
-     #(upnp)#::Configure your router for yacy:&nbsp;<input type="checkbox" name="enableUpnp" align="top" #(enabled)#::checked#(/enabled)#>#(/upnp)#<br>
- </li>
- </ol>
-<br>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="set" value="Set Configuration">
-</form>
-
-<p><b>What you should do next:</b><br>
-#(nextStep)#<!-- [0] -->
-Your basic configuration is complete! You can now (for example):
-<ul>
- <li><a href="index.html">start an uncensored search</a>;</li>
- <li><a href="IndexCreate_p.html">start your own crawl</a> and contribute to the global index, or create your own private web index;</li>
- <li><a href="ConfigProfile_p.html">set a personal peer profile</a> (optional settings);</li>
- <li>just <a href="Network.html">monitor at the network page</a> what the other peers are doing</li>
-</ul>::
-<!-- [1]: password not proper -->
-You did not set a user name and/or a password. Some pages are protected by passwords. You should set a password here to secure your YaCy peer.::
-<!-- [2]: peername not proper -->
-Your Peer name is a default name; please set another peer name. If this does not work, the name is probably taken by someone else. Please try to choose another one.::
-<!-- [3]: port not proper -->
-You did not open a port in your firewall or your router does not forward the server port to your peer. This is needed if you want to fully participate in the YaCy network. You can also use your peer without opening it, but this is not recomended.::
-<!-- [4]: reconnect to different port -->
-The peer port was changed successfully. Your browser will be redirected to the new <a href="#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html">location</a> in 10 seconds.
-#(/nextStep)#
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Basic Configuration</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript">
+      <!--
+      function element_clicked(element){
+        document.getElementById("key").value=element.id;
+        document.getElementById("value").value=element.value;
+      }
+      -->
+    </script>
+    <!-- redirecting browser if port was changed -->
+    #(reconnect)#::<meta http-equiv="refresh" content="10; url=#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html" />#(/reconnect)#
+  </head>
+  <body id="ConfigBasic">
+  #%env/templates/header.template%#
+  #%env/templates/submenuConfig.template%#
+    <h2>Basic Configuration</h2>
+    <p>
+      Your YaCy Peer needs some basic information to operate properly
+    </p>
+    
+    <form action="ConfigBasic.html" method="post" enctype="multipart/form-data">
+      <ol>
+        <li>
+          <img src="/env/grafics/ok.png" height="32px" width="32px" alt="ok" />&nbsp;Select a language for the interface:<br />
+          <fieldset>
+            <input type="radio" name="language" id="lang_de" value="de" #(langDeutsch)#::checked="checked"#(/langDeutsch)# /><label for="lang_de">Deutsch</label>&nbsp;
+            <input type="radio" name="language" value="default" id="lang_en" #(langEnglish)#::checked="checked"#(/langEnglish)# /><label for="lang_en">English</label>
+          </fieldset>
+        </li>
+        <li>
+          #(statusPassword)#<img src="/env/grafics/warning.png" alt="warning" />&nbsp;Please set a password for your peer to protect your settings (> 3 characters); if this is successful you will be asked to log in with these values immediately.::<img src="/env/grafics/ok.png" height="32px" width="32px" alt="ok" />&nbsp;Password is set#(/statusPassword)#<br />
+          <fieldset>
+            <dl class="userConfig">
+              <dt><label for="adminuser">Peer User:</label></dt>
+              <dd><input type="text" name="adminuser" id="adminuser" value="#[defaultUser]#" size="16" maxlength="32" /></dd>
+              <dt><label for="adminpw1">Peer Password:</label></dt>
+              <dd><input type="password" name="adminpw1" id="adminpw1" value="" size="16" maxlength="32" /></dd>
+              <dt><label for="adminpw2">Peer Password:</label></dt>
+              <dd><input type="password" name="adminpw2" id="adminpw2" value="" size="16" maxlength="32" /> (repeat same password)</dd>
+            </dl>
+          </fieldset>
+        </li>
+        <li>
+          #(statusName)#<img src="/env/grafics/warning.png" alt="warning" />&nbsp;Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="32px" width="32px" alt="ok" />&nbsp;You have a nice peer name#(/statusName)#<br />
+          <fieldset>
+            <dl>
+              <dt><label for="peername">Peer Name: </label></dt>
+              <dd>
+                <input type="text" name="peername" id="peername" value="#[defaultName]#" size="20" maxlength="32" />
+              </dd>
+            </dl>
+          </fieldset>
+        </li>
+        <li>
+          #(statusPort)#<img src="/env/grafics/warning.png" alt="warning" />&nbsp;Your peer cannot be reached from outside (what is not fatal, but would be good for the YaCy network); please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port.::<img src="/env/grafics/ok.png" height="32px" width="32px" alt="ok" />&nbsp;Your peer can be reached by other peers#(/statusPort)#<br />
+          <fieldset>
+            <dl>
+              <dt><label for="port">Peer Port: </label></dt>
+              <dd>
+                <input type="text" name="port" id="port" value="#[defaultPort]#" size="5" maxlength="5" />
+              </dd>
+              #(upnp)#::<dt>
+                <label for="enableUpnp">Configure your router for yacy:&nbsp;</label>
+              </dt>
+              <dd>
+                <input type="checkbox" name="enableUpnp" id="enableUpnp" align="top" #(enabled)#::checked="checked"#(/enabled)# />
+              </dd>#(/upnp)#
+            </dl>
+          </fieldset>
+        </li>
+      </ol>
+      <fieldset>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="set" value="Set Configuration" /></fieldset>
+    </form>
+    
+    <p><strong>What you should do next:</strong></p>
+    #(nextStep)#<!-- [0] -->
+    <p>Your basic configuration is complete! You can now (for example):</p>
+    <ul>
+      <li><a href="index.html">start an uncensored search</a>;</li>
+      <li><a href="IndexCreate_p.html">start your own crawl</a> and contribute to the global index, or create your own private web index;</li>
+      <li><a href="ConfigProfile_p.html">set a personal peer profile</a> (optional settings);</li>
+      <li>just <a href="Network.html">monitor at the network page</a> what the other peers are doing</li>
+    </ul>::
+    <!-- [1]: password not proper -->
+    <p>You did not set a user name and/or a password. Some pages are protected by passwords. You should set a password here to secure your YaCy peer.</p>::
+    <!-- [2]: peername not proper -->
+    <p>Your Peer name is a default name; please set another peer name. If this does not work, the name is probably taken by someone else. Please try to choose another one.</p>::
+    <!-- [3]: port not proper -->
+    <p>You did not open a port in your firewall or your router does not forward the server port to your peer. This is needed if you want to fully participate in the YaCy network. You can also use your peer without opening it, but this is not recomended.</p>::
+    <!-- [4]: reconnect to different port -->
+    <p>The peer port was changed successfully. Your browser will be redirected to the new <a href="#(sslSupport)#http::https#(/sslSupport)#://#[host]#:#[port]#/ConfigBasic.html">location</a> in 10 seconds.</p>
+    #(/nextStep)#
+    #%env/templates/footer.template%#
+  </body>
 </html>

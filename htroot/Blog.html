@@ -1,86 +1,129 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Blog</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#(mode)#
-<!-- 0: viewing -->
-<center>
-#{entries}#
-<table width="80%" border="1" cellspacing="0">
-<tr class="TableHeader"><td align="left">#[date]#</td><td>by #[author]#</td></tr>
-<tr class="WikiBackground"><td colspan=2 align="left"><div style="padding:5px;"><h2>#[subject]#</h2><br>#[page]#</div></td></tr>
-<tr class="TableHeader"><td colspan=2 align="left"><a href="Blog.html?page=#[pageid]#">link</a>#(admin)#:: - <a href="Blog.html?page=#[pageid]#&edit=true">edit</a> - <a href="Blog.html?page=#[pageid]#&amp;delete=try">delete</a>#(/admin)#</td></tr>
-</table>
-<br>
-#{/entries}#
-#(moreentries)#::<a href="Blog.html?start=#[start]#&amp;num=#[num]#">show more entries...</a>#(/moreentries)#
-<br>
-#(admin)#<a href="Blog.html?login=true">Login</a> - ::<a href="Blog.html?edit=true">new entry</a> - <a href="Blog.html?import=xml">import XML-File</a> - <a href="Blog.xml?xml=1">export as XML</a> - #(/admin)#<a href="Blog.html">Blog-Home</a></center>
-::
-<!-- 1: edit -->
-<form action="Blog.html" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
-<p>Author:<br><input name="author" type="text" size="20" maxlength="80" value="#[author]#"></p>
-<p>Subject:<br><input name="subject" type="text" size="20" maxlength="80" value="#[subject]#"></p>
-<p>Text:<br><textarea name="content" cols="80" rows="24">#[page-code]#</textarea>
-<br><font size="-1">You can use <a href="WikiHelp.html" target="_blank" onClick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Yacy-Wiki Code</a> here.</font>
-</p>
-<input type="hidden" name="page" value="#[pageid]#">
-<input type="submit" name="submit" value="Submit">
-<input type="submit" name="preview" value="Preview">
-<input type="submit" name="view" value="Discard">
-</form>
-::
-<!-- 2: preview -->
-<h2>Preview</h2>
-<p>No changes have been submitted so far!</p>
-<table width="80%" border="1" cellpadding="0" cellspacing="0">
-<tr class="TableHeader"><td align="left">#[date]#</td><td>by #[author]#</td></tr>
-<tr class="WikiBackground"><td colspan=2 align="left"><div style="padding:5px;"><h2>#[subject]#</h2><br>#[page]#</div></td></tr>
-<tr class="TableHeader"><td></td><td></td></tr>
-</table>
-<form action="Blog.html" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
-<p>Author:<br><input name="author" type="text" size="20" maxlength="80" value="#[author]#"></p>
-<p>Subject:<br><input name="subject" type="text" size="20" maxlength="80" value="#[subject]#"></p>
-<p>Text:<br><textarea name="content" cols="80" rows="24">#[page-code]#</textarea></p>
-<input type="hidden" name="page" value="#[pageid]#">
-<input type="submit" name="submit" value="Submit">
-<input type="submit" name="preview" value="Preview">
-<input type="submit" name="view" value="Discard">
-</form>
-::
-<!-- 3: Access Denied (no rights) -->
-<h3>Access denied</h3>
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.
-::
-<!-- 4: Delete Confirmation -->
-<h3>Are you sure...</h3>
-... that you want to delete <b>#[subject]#</b> by #[author]#?<br><br>
-<form action="Blog.html" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
-<input type="hidden" name="delete" value="sure">
-<input type="hidden" name="page" value="#[pageid]#">
-<input type="submit" value="Yes, delete it.">
-</form><br>
-<form action="Blog.html" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
-<input type="submit" value="No, leave it.">
-</form>
-::
-<!-- 5: XML-Import -->
-<h3>XML-Import</h3>
-#(state)#
-::
-Import was successful!<br><br>
-::
-Import failed, maybe the supplied file was no valid blog-backup?<br><br>
-#(/state)#
-Please select the XML-file you want to import:<br>
-<form action="Blog.html" method="POST"  enctype="multipart/form-data">
-<input type="file" size=50 name="xmlfile"> <input type="submit" name="importxml" value="Import">
-</form>
-#(/mode)#
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Blog</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Blog">
+    #%env/templates/header.template%#
+    #(mode)#
+    <!-- 0: viewing -->
+    #{entries}#
+    <div class="Post">
+      <h2 class="PostSubject"><a href="Blog.html?page=#[pageid]#">#[subject]#</a></h2>
+      <div class="PostBody">#[page]#</div>
+      <p class="PostInfo">
+        #[date]# | by #[author]#
+        #(admin)#::| <a href="Blog.html?page=#[pageid]#&amp;edit=true">edit</a>
+        - <a href="Blog.html?page=#[pageid]#&amp;delete=try">delete</a>#(/admin)#
+      </p>
+    </div>
+    #{/entries}#
+    #(moreentries)#::<p class="Navigation"><a href="Blog.html?start=#[start]#&amp;num=#[num]#">show more entries...</a></p>#(/moreentries)#
+    <p class="Navigation">
+      #(admin)#<a href="Blog.html?login=true">Login</a> - ::<a href="Blog.html?edit=true">new entry</a> - <a href="Blog.html?import=xml">import XML-File</a> - <a href="Blog.xml?xml=1">export as XML</a> - #(/admin)#<a href="Blog.html">Blog-Home</a>
+    </p>
+    ::
+    <!-- 1: edit -->
+    <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <dl>
+          <dt><label for="author">Author:</label></dt>
+          <dd>
+            <input name="author" id="author" type="text" size="20" maxlength="80" value="#[author]#" />
+          </dd>
+          <dt><label for="subject">Subject:</label></dt>
+          <dd>
+            <input name="subject" id="subject" type="text" size="20" maxlength="80" value="#[subject]#" />
+          </dd>
+          <dt><label for="content">Text:</label></dt>
+          <dd>
+            <textarea name="content" id="content" cols="80" rows="24">#[page-code]#</textarea>
+            <p class="help">
+              You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Yacy-Wiki Code</a> here.
+            </p>
+          </dd>
+        </dl>
+        <input type="hidden" name="page" value="#[pageid]#" />
+        <input type="submit" name="submit" value="Submit" />
+        <input type="submit" name="preview" value="Preview" />
+        <input type="submit" name="view" value="Discard" />
+      </fieldset>
+    </form>
+    ::
+    <!-- 2: preview -->
+    <h2>Preview</h2>
+    <p>No changes have been submitted so far!</p>
+    <div class="Post">
+      <h2 class="PostSubject">#[subject]#</h2>
+      <div class="PostBody">#[page]#</div>
+      <p class="PostInfo">#[date]# | by #[author]#</p>
+    </div>
+    <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <dl>
+          <dt><label for="author">Author:</label></dt>
+          <dd>
+            <input name="author" id="author" type="text" size="20" maxlength="80" value="#[author]#" />
+          </dd>
+          <dt><label for="subject">Subject:</label></dt>
+          <dd>
+            <input name="subject" id="subject" type="text" size="20" maxlength="80" value="#[subject]#" />
+          </dd>
+          <dt>
+            <label for="content">Text:</label>
+          </dt>
+          <dd>
+            <textarea name="content" id="content" cols="80" rows="24">#[page-code]#</textarea>
+            <p class="help">
+              You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Yacy-Wiki Code</a> here.
+            </p>
+          </dd>
+        </dl>
+        <input type="hidden" name="page" value="#[pageid]#" />
+        <input type="submit" name="submit" value="Submit" />
+        <input type="submit" name="preview" value="Preview" />
+        <input type="submit" name="view" value="Discard" />
+      </fieldset>
+    </form>
+    ::
+    <!-- 3: Access Denied (no rights) -->
+    <h3>Access denied</h3>
+    <p>To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.</p>
+    ::
+    <!-- 4: Delete Confirmation -->
+    <h3>Are you sure...</h3>
+    <p>... that you want to delete <strong>#[subject]#</strong> by #[author]#?</p>
+    <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <input type="hidden" name="delete" value="sure" />
+        <input type="hidden" name="page" value="#[pageid]#" />
+        <input type="submit" value="Yes, delete it." />
+      </fieldset>
+    </form>
+    <br />
+    <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <input type="submit" value="No, leave it." />
+      </fieldset>
+    </form>
+    ::
+    <!-- 5: XML-Import -->
+    <h3>XML-Import</h3>
+    #(state)#
+    ::
+    <p>Import was successful!</p>
+    ::
+    <p>Import failed, maybe the supplied file was no valid blog-backup?</p>
+    #(/state)#
+    <p>Please select the XML-file you want to import:</p>
+    <form action="Blog.html" method="post"  enctype="multipart/form-data">
+      <fieldset>
+        <input type="file" size="50" name="xmlfile" />
+        <input type="submit" name="importxml" value="Import" />
+      </fieldset>
+    </form>
+    #(/mode)#
+  #%env/templates/footer.template%#
+  </body>
 </html>

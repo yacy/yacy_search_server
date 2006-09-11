@@ -1,102 +1,115 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Index Control</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#%env/templates/submenuIndexControl.template%#
-<br>
-<h2>Index Administration</h2>
-
-<form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
-<p>The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references</p>
-<p>
-<table border="0" cellpadding="5" cellspacing="0">
-<tr valign="top" class="TableCellDark">
-<td width="70">Word:</td>
-<td><input type="text" name="keystring" value="#[keystring]#" size="40" maxlength="80"></td>
-<td width="250"><input type="submit" name="keystringsearch" value="Show URL Entries for Word"></td>
-</tr>
-<tr valign="top" class="TableCellLight">
-<td>Word-Hash:</td>
-<td><input type="text" name="keyhash" value="#[keyhash]#" size="16" maxlength="12">
-<input type="submit" name="keyhashsimilar" value="Generate List"></td>
-<td><input type="submit" name="keyhashsearch" value="Show URL Entries for Word-Hash">
-</td>
-</tr>
-<tr valign="top" class="TableCellLight">
-<td></td><td></td>
-<td><input type="submit" name="keyhashtransfer" value="Transfer to other peer">
-<select name="hostHash">
-#{hosts}#
-<option value="#[hosthash]#">#[hostname]#</option>
-#{/hosts}#
-</select>
-</td>
-</tr>
-</table></p>
-
-<p><table border="0" cellpadding="5" cellspacing="0">
-<tr valign="top" class="TableCellDark">
-<td width="70">URL:</td>
-<td><input type="text" name="urlstring" value="#[urlstring]#" size="40" maxlength="250"></td>
-<td width="250"><input type="submit" name="urlstringsearch" value="Show Details for URL"></td>
-</tr>
-<tr valign="top" class="TableCellLight">
-<td>URL-Hash:</td>
-<td><input type="text" name="urlhash" value="#[urlhash]#" size="16" maxlength="12">
-<input type="submit" name="urlhashsimilar" value="Generate List"></td>
-<td><input type="submit" name="urlhashsearch" value="Show Details for URL-Hash">
-</td>
-</tr>
-</table></p>
-
-
-<p>
-<b>DHT Transmission control:</b><br>
-The transmission is necessary for the functionality of global search on other peers.
-If you switch off distribution or receipt of RWIs you will be banned from global search.
-<table border="0" cellpadding="5" cellspacing="0">
-<tr valign="top" class="TableCellDark">
-<td width="100">Index&nbsp;Distribution:</td>
-<td><input type="checkbox" name="indexDistribute" align="top" #[indexDistributeChecked]#></td>
-<td></td>
-<td>This enables automated, DHT-ruled Index Transmission to other peers.
-</td>
-</tr>
-<tr valign="top" class="TableCellDark">
-<td width="100"></td>
-<td>&nbsp;&nbsp;</td>
-<td><input type="checkbox" name="indexDistributeWhileCrawling" align="top" #[indexDistributeWhileCrawling]#></td>
-<td>If checked, DHT-Transmission is enabled even during crawling.</td>
-</tr>
-<tr valign="top" class="TableCellDark">
-<td width="100">Index Receive:</td>
-<td><input type="checkbox" name="indexReceive" align="top" #[indexReceiveChecked]#></td>
-<td></td>
-<td>Accept remote Index Transmissions. This works only if you are a senior peer.
-The DHT-rules do not work without this function.</td>
-</tr>
-<tr valign="top" class="TableCellDark">
-<td width="100"></td>
-<td>&nbsp;&nbsp;</td>
-<td><input type="checkbox" name="indexReceiveBlockBlacklist" align="top" #[indexReceiveBlockBlacklistChecked]#></td>
-<td>If checked, your peer silently ignores transmitted URLs that match your blacklist</td>
-</tr>
-<tr valign="top" class="TableCellLight">
-<td></td>
-<td><input type="submit" name="setIndexTransmission" value="set"></td>
-<td></td>
-<td>Changes will take effect immediately</td>
-</tr>
-</table>
-</p>
-</form>
-
-#[result]#
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Control</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    <h2>Index Administration</h2>
+    
+    <form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
+      <p>The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references</p>
+    
+      <table cellpadding="5" cellspacing="0">
+        <colgroup>
+          <col width="70" />
+          <col />
+          <col width="250" />
+        </colgroup>
+        <tr valign="top" class="TableCellDark">
+          <td>Word:</td>
+          <td><input type="text" name="keystring" value="#[keystring]#" size="40" maxlength="80" /></td>
+          <td><input type="submit" name="keystringsearch" value="Show URL Entries for Word" /></td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td>Word-Hash:</td>
+          <td><input type="text" name="keyhash" value="#[keyhash]#" size="16" maxlength="12" />
+            <input type="submit" name="keyhashsimilar" value="Generate List" /></td>
+          <td><input type="submit" name="keyhashsearch" value="Show URL Entries for Word-Hash" />
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td colspan="2"></td>
+          <td><input type="submit" name="keyhashtransfer" value="Transfer to other peer" />
+            <select name="hostHash">
+              #{hosts}#
+              <option value="#[hosthash]#">#[hostname]#</option>
+              #{/hosts}#
+            </select>
+          </td>
+        </tr>
+      </table>
+      
+      <table border="0" cellpadding="5" cellspacing="0">
+        <colgroup>
+          <col width="70" />
+          <col />
+          <col width="250" />
+        </colgroup>
+        <tr valign="top" class="TableCellDark">
+          <td>URL:</td>
+          <td><input type="text" name="urlstring" value="#[urlstring]#" size="40" maxlength="250" /></td>
+          <td><input type="submit" name="urlstringsearch" value="Show Details for URL" /></td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td>URL-Hash:</td>
+          <td><input type="text" name="urlhash" value="#[urlhash]#" size="16" maxlength="12" />
+            <input type="submit" name="urlhashsimilar" value="Generate List" /></td>
+          <td><input type="submit" name="urlhashsearch" value="Show Details for URL-Hash" />
+          </td>
+        </tr>
+      </table>
+      
+      
+      <p>
+        <strong>DHT Transmission control:</strong><br />
+        The transmission is necessary for the functionality of global search on other peers.
+        If you switch off distribution or receipt of RWIs you will be banned from global search.
+      </p>
+      <table border="0" cellpadding="5" cellspacing="0">
+        <colgroup>
+          <col width="100" />
+          <col span="2"/>
+        </colgroup>
+        <tr valign="top" class="TableCellDark">
+          <td>Index&nbsp;Distribution:</td>
+          <td><input type="checkbox" name="indexDistribute" #[indexDistributeChecked]# /></td>
+          <td></td>
+          <td>This enables automated, DHT-ruled Index Transmission to other peers.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td></td>
+          <td>&nbsp;&nbsp;</td>
+          <td><input type="checkbox" name="indexDistributeWhileCrawling" #[indexDistributeWhileCrawling]# /></td>
+          <td>If checked, DHT-Transmission is enabled even during crawling.</td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td>Index Receive:</td>
+          <td><input type="checkbox" name="indexReceive" #[indexReceiveChecked]# /></td>
+          <td></td>
+          <td>Accept remote Index Transmissions. This works only if you are a senior peer.
+          The DHT-rules do not work without this function.</td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td></td>
+          <td>&nbsp;&nbsp;</td>
+          <td><input type="checkbox" name="indexReceiveBlockBlacklist" #[indexReceiveBlockBlacklistChecked]# /></td>
+          <td>If checked, your peer silently ignores transmitted URLs that match your blacklist</td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td></td>
+          <td><input type="submit" name="setIndexTransmission" value="set" /></td>
+          <td></td>
+          <td>Changes will take effect immediately</td>
+        </tr>
+      </table>
+    </form>
+    
+    #[result]#
+    
+    #%env/templates/footer.template%#
+  </body>
 </html>

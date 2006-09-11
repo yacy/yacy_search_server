@@ -1,35 +1,31 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Incoming Cookies Monitor</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#%env/templates/submenuCookie.template%#
-<br>
-<h2>Cookie Monitor: Incoming Cookies</h2>
-<font size="1">
-<p>This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:<br>
-Showing #[num]# entries from a total of #[total]# Cookies.<br>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader">
-<td class="small">Sending Host</td>
-<td class="small">Date</td>
-<td class="small">Receiving Client</td>
-<td class="small">Cookie</td>
-</tr>
-#{list}#
-<tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-<td class="small">#[host]#</td>
-<td class="small">#[date]#</td>
-<td class="small">#[client]#</td>
-<td class="small">#[cookie]#</td>
-</tr>
-#{/list}#
-</table>
-</p>
-</font>
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+   <title>YaCy '#[clientname]#': Incoming Cookies Monitor</title>
+   #%env/templates/metas.template%#
+  </head>
+  <body id="CookieMonitorIncoming">
+    #%env/templates/header.template%#
+    #%env/templates/submenuCookie.template%#
+    <h2>Cookie Monitor: Incoming Cookies</h2>
+    <p>This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:</p>
+    <p>Showing #[num]# entries from a total of #[total]# Cookies.</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td>Sending Host</td>
+        <td>Date</td>
+        <td>Receiving Client</td>
+        <td>Cookie</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[date]#</td>
+        <td>#[client]#</td>
+        <td>#[cookie]#</td>
+      </tr>
+      #{/list}#
+    </table>
+    #%env/templates/footer.template%#
+  </body>
 </html>

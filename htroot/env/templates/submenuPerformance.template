@@ -1,14 +1,8 @@
-<table width="100%" border="0" cellpadding="0" cellspacing="0" class="SubMenu">
-<tr height="10"><td colspan="17" class="MenuHeader">&nbsp;Performance Menu</td></tr>
-<tr height="2"><td colspan="17"></td></tr>
-<tr class="TableHeader">
-<td width="33%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
-<a href="/PerformanceQueues_p.html" class="MenuItemLink">Queues Performance Settings</a>&nbsp;</td>
-<td class="MenuSubSpacer"></td>
-<td width="33%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
-<a href="/PerformanceMemory_p.html" class="MenuItemLink">Memory Settings for Database Caches</a>&nbsp;</td>
-<td class="MenuSubSpacer"></td>
-<td width="33%" class="MenuSubItem">&nbsp;<img border="0" src="/env/grafics/lock.gif" align="top" alt="password-protected">&nbsp;
-<a href="/PerformanceSearch_p.html" class="MenuItemLink">Timing Settings for Search Sequence</a>&nbsp;</td>
-</tr>
-</table>
+<div class="SubMenu">
+<h3>Performance Menu</h3>
+<ul class="SubMenu">
+<li><a href="/PerformanceQueues_p.html" class="MenuItemLink lock">Queues Performance Settings</a></li>
+<li><a href="/PerformanceMemory_p.html" class="MenuItemLink lock">Memory Settings for Database Caches</a></li>
+<li><a href="/PerformanceSearch_p.html" class="MenuItemLink lock">Timing Settings for Search Sequence</a></li>
+</ul>
+</div>

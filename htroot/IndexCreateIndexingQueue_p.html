@@ -1,84 +1,97 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Index Creation/Indexing Queue</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#%env/templates/submenuIndexCreate.template%#
-<br>
-<h2>Index Creation: Indexing Queue</h2>
-
-<p>
-#(indexing-queue)#
-The indexing queue is empty<br>
-::
-<form action="IndexCreateIndexingQueue_p.html" method="post" enctype="multipart/form-data">
-<input type="submit" name="clearIndexingQueue" value="clear indexing queue">
-</form>
-<br>
-<p>There are <b>#[num]#</b> entries in the indexing queue. Showing <b>#[show]#</b> entries with a total size of <b>#[totalSize]#</b>.</p>
-<p>Show last <a href="IndexCreateIndexingQueue_p.html?limit=50">50</a> | <a href="IndexCreateIndexingQueue_p.html?limit=100">100</a> | <a href="IndexCreateIndexingQueue_p.html?limit=250">250</a> | <a href="IndexCreateIndexingQueue_p.html?limit=500">500</a> entries.</p>
-
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader">
-<th class="small">Initiator</th>
-<th class="small">Depth</th>
-<th class="small">Modified Date</th>
-<td class="small">Anchor Name</th>
-<th class="small">URL</th>
-<th class="small">Size</th>
-<th class="small">Delete</th>
-</tr>
-#{list}#
-<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" class="small">
-<td width="60" class="small">#[initiator]#</td>
-<td width="10" class="small">#[depth]#</td>
-<td width="80" class="small">#[modified]#</td>
-<td width="180" class="small">#[anchor]#</td>
-<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
-<td width="80" class="small" align="right"><nobr>#[size]#</nobr></td>
-<td width="10" class="small" title="#[hash]#">#(inProcess)#<a class="small" href="IndexCreateIndexingQueue_p.html?deleteEntry=#[hash]#">[Delete]</a>::#(/inProcess)#</td>
-</tr>
-#{/list}#
-</table>
-#(/indexing-queue)#
-</p><br>
-
-<p>
-#(rejected)#
-::
-<form action="IndexCreateIndexingQueue_p.html" method="post" enctype="multipart/form-data">
-<b>Rejected URL List:</b>&nbsp;There are #[num]# entries in the rejected-urls list.
-#(only-latest)#
-::
-Showing latest #[num]# entries.
-<input type="hidden" name="showRejected" value="#[newnum]#">
-<input type="submit" name="moreRejected" value="show more">&nbsp;
-#(/only-latest)#
-<input type="submit" name="clearRejected" value="clear list">
-</form>
-There are #[num]# entries in the rejected-queue:<br>
-<table border="0" cellpadding="2" cellspacing="1" width="100%">
-<tr class="TableHeader">
-  <th class="small">Initiator</th>
-  <th class="small">Executor</th>
-  <th class="small">URL</th>
-  <th class="small">Fail-Reason</th>
-</tr>
-#{list}#
-<tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
-<td width="60" class="small">#[initiator]#</td>
-<td width="60" class="small">#[executor]#</td>
-<td class="small"><a class="small" href="#[url]#">#[url]#</a></td>
-<td class="small">#[failreason]#</td>
-</tr>
-#{/list}#
-</table>
-#(/rejected)#
-</p>
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Creation/Indexing Queue</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexCreateIndexingQueue">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Index Creation: Indexing Queue</h2>
+    
+    
+    #(indexing-queue)#
+    <p>The indexing queue is empty</p>
+    ::
+    <form action="IndexCreateIndexingQueue_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <input type="submit" name="clearIndexingQueue" value="clear indexing queue" />
+      </fieldset>
+    </form>
+    <p>There are <strong>#[num]#</strong> entries in the indexing queue. Showing <strong>#[show]#</strong> entries with a total size of <strong>#[totalSize]#</strong>.</p>
+    <p>Show last <a href="IndexCreateIndexingQueue_p.html?limit=50">50</a> | <a href="IndexCreateIndexingQueue_p.html?limit=100">100</a> | <a href="IndexCreateIndexingQueue_p.html?limit=250">250</a> | <a href="IndexCreateIndexingQueue_p.html?limit=500">500</a> entries.</p>
+    
+    <table border="0" cellpadding="2" cellspacing="1">
+      <colgroup>
+        <col width="60" />
+        <col width="10" />
+        <col width="80" />
+        <col width="180" />
+        <col />
+        <col width="80" />
+        <col width="10" />
+      </colgroup>
+      <tr class="TableHeader">
+        <th>Initiator</th>
+        <th>Depth</th>
+        <th>Modified Date</th>
+        <th>Anchor Name</th>
+        <th>URL</th>
+        <th>Size</th>
+        <th>Delete</th>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <td>#[initiator]#</td>
+        <td>#[depth]#</td>
+        <td>#[modified]#</td>
+        <td>#[anchor]#</td>
+        <td><a href="#[url]#">#[url]#</a></td>
+        <td align="right">#[size]#</td>
+        <td title="#[hash]#">#(inProcess)#<a href="IndexCreateIndexingQueue_p.html?deleteEntry=#[hash]#">[Delete]</a>::#(/inProcess)#</td>
+      </tr>
+      #{/list}#
+    </table>
+    #(/indexing-queue)#
+    
+    
+    #(rejected)#
+    ::
+    <form action="IndexCreateIndexingQueue_p.html" method="post" enctype="multipart/form-data">
+      <p><strong>Rejected URL List:</strong>&nbsp;There are #[num]# entries in the rejected-urls list. </p>
+      #(only-latest)#
+      <fieldset>
+      ::
+      <p>Showing latest #[num]# entries.</p>
+      <fieldset>
+        <input type="hidden" name="showRejected" value="#[newnum]#" />
+        <input type="submit" name="moreRejected" value="show more" />&nbsp;
+      #(/only-latest)#
+        <input type="submit" name="clearRejected" value="clear list" />
+      </fieldset>
+    </form>
+    <p>There are #[num]# entries in the rejected-queue:</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <colgroup>
+        <col width="60" span="2" />
+        <col span="2" />
+      </colgroup>
+      <tr class="TableHeader">
+        <th>Initiator</th>
+        <th>Executor</th>
+        <th>URL</th>
+        <th>Fail-Reason</th>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[initiator]#</td>
+        <td>#[executor]#</td>
+        <td><a href="#[url]#">#[url]#</a></td>
+        <td>#[failreason]#</td>
+      </tr>
+      #{/list}#
+    </table>
+    #(/rejected)#
+    #%env/templates/footer.template%#
+  </body>
 </html>

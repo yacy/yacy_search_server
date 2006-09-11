@@ -1,82 +1,67 @@
-<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Your Personal Profile</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#%env/templates/submenuConfig.template%#
-<br>
-<h2>Your Personal Profile</h2>
-<p>
-You can create a personal profile here. Other YaCy users can view these information using a link on the network page.<br>
-You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.
-</p>
-<form action="ConfigProfile_p.html">
-
-
-<table border="0" cellpadding="5" cellspacing="1">
-
-<tr>
-<td colspan="2" valign="top" class="TableHeader">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">Name</td>
-<td valign="top" class="TableCellLight"><input type="text" name="name" maxlength="1000" value="#[name]#" style="width:100%"></td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">Nick Name</td>
-<td valign="top" class="TableCellLight"><input type="text" name="nickname" maxlength="1000" value="#[nickname]#" style="width:100%"></td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">Homepage</td>
-<td valign="top" class="TableCellLight"><input type="text" name="homepage" maxlength="1000" value="#[homepage]#" style="width:100%"></td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">eMail</td>
-<td valign="top" class="TableCellLight"><input type="text" name="email" maxlength="1000" value="#[email]#" style="width:100%"></td>
-</tr>
-
-<tr>
-<td colspan="2" valign="top" class="TableHeader">&nbsp;</td>
-</tr>
-
-<tr>
-<td valign="top" class="TableCellDark">ICQ</td>
-<td valign="top" class="TableCellLight"><input type="text" name="icq" maxlength="9" value="#[icq]#" style="width:100%"></td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">Jabber</td>
-<td valign="top" class="TableCellLight"><input type="text" name="jabber" maxlength="1000" value="#[jabber]#" style="width:100%"></td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">Yahoo!</td>
-<td valign="top" class="TableCellLight"><input type="text" name="yahoo" maxlength="1000" value="#[yahoo]#" style="width:100%"></td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">MSN</td>
-<td valign="top" class="TableCellLight"><input type="text" name="msn" maxlength="1000" value="#[msn]#" style="width:100%"></td>
-</tr>
-
-<tr>
-<td colspan="2" valign="top" class="TableHeader">&nbsp;</td>
-</tr>
-
-<tr>
-<td valign="top" class="TableCellDark">Comment</td>
-<td  valign="top" class="TableCellLight"><textarea name="comment" cols="40" rows="10">#[comment]#</textarea>
-<br><font size="-1">You can use <a href="WikiHelp.html" target="_blank" onClick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Wiki Code</a> here.</font>
-</td>
-</tr>
-
-<tr>
-<td colspan="2" valign="top" class="TableHeader">
-<input type="submit" name="set" value="Save">
-</td>
-</table>
-
-</form>
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Your Personal Profile</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ConfigProfile">
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+    <h2>Your Personal Profile</h2>
+    <p>
+      You can create a personal profile here. Other YaCy users can view these information using a link on the network page.
+    </p>
+    <p>
+      You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.
+    </p>
+    <form action="ConfigProfile_p.html">
+      <fieldset>
+        <dl>
+          <dt><label for="name">Name</label></dt>
+          <dd>
+            <input type="text" name="name" id="name" size="40" maxlength="1000" value="#[name]#" />
+          </dd>
+          <dt><label for="nickname">Nick Name</label></dt>
+          <dd>
+            <input type="text" name="nickname" id="nickname" size="40" maxlength="1000" value="#[nickname]#" />
+          </dd>
+          <dt><label for="homepage">Homepage</label></dt>
+          <dd>
+            <input type="text" name="homepage" id="homepage" size="40" maxlength="1000" value="#[homepage]#" />
+          </dd>
+          <dt><label for="email">eMail</label></dt>
+          <dd>
+            <input type="text" name="email" id="email" size="40" maxlength="1000" value="#[email]#" />
+          </dd>
+        </dl>
+        <dl>
+          <dt><label for="icq">ICQ</label></dt>
+          <dd>
+            <input type="text" name="icq" id="icq" size="20" maxlength="9" value="#[icq]#" />
+          </dd>
+          <dt><label for="jabber">Jabber</label></dt>
+          <dd>
+            <input type="text" name="jabber" id="jabber" size="40" maxlength="1000" value="#[jabber]#" />
+          </dd>
+          <dt><label for="yahoo">Yahoo!</label></dt>
+          <dd>
+            <input type="text" name="yahoo" id="yahoo" size="40" maxlength="1000" value="#[yahoo]#" />
+          </dd>
+          <dt><label for="msn">MSN</label></dt>
+          <dd>
+            <input type="text" name="msn" id="msn" size="40" maxlength="1000" value="#[msn]#" />
+          </dd>
+        </dl>
+        <dl>
+          <dt><label for="comment">Comment</label></dt>
+          <dd>
+            <textarea name="comment" id="comment" cols="40" rows="10">#[comment]#</textarea>
+            <p class="help">You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Wiki Code</a> here.</p>
+          </dd>
+        </dl>
+        <input type="submit" name="set" value="Save" />
+      </fieldset>
+    </form>
+    #%env/templates/footer.template%#
+  </body>
 </html>

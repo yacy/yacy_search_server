@@ -1,239 +1,214 @@
+/* Skin */
+
 body {
   background-color:#F8F8FF;
 }
-h1 {
-font-family:Helvetica, sans-serif;
-font-size:16pt;
-font-style:normal;
-line-height:14pt;
-margin-top:0pt;
-    margin-bottom:0pt;
-}
-h2 {
-font-family:Helvetica, sans-serif;
-font-size:14pt;
-font-style:normal;
-line-height:14pt;
-margin-top:0pt;
-    margin-bottom:0pt;
-}
-h3 {
-font-family:Helvetica, sans-serif;
-font-size:12pt;
-font-style:normal;
-line-height:14pt;
-margin-top:0pt;
-    margin-bottom:0pt;
-}
-h4 {
-font-family:Helvetica, sans-serif;
-font-size:10pt;
-font-style:normal;
-line-height:14pt;
-margin-top:0pt;
-    margin-bottom:0pt;
-}
-a, body, div, li, ol, span, table, td, tr, ul {
-color:#000000;
-font-family:Helvetica, sans-serif;
-font-size:10pt;
-font-style:normal;
-line-height:14px;
-margin-top:0px;
-margin-bottom:0px;
-}
-*.small {
-font-family:Helvetica, sans-serif;
-font-size:8pt;
-font-style:normal;
-line-height:9px;
-margin-top:0px;
-margin-bottom:0px;
-}
-body, div, li, ol, span, table, td, tr, ul {
-      
-text-decoration:none;
-}
-a:hover {
-color:#0000FF;
-}
-a.unknown {
-color:#990000;
-}
-a.known {
-color:#009900;
-}
-a.extern {
-color:#000099;
-}
-*.xxxyellow {
-color:#0000FF;
-font-weight:bold;
-text-decoration:none;
-font-size:11px;
-}
-*.xxxblue {
-color:#556699;
-font-weight:bold;
-text-decoration:none;
-font-size:11px;
-}
-*.tt {
-font-family:Courier,Terminal,sans-serif;
-font-size:8pt;
-line-height:10px;
-vertical-align:top;
-}
-.Menu {
-width: 140;
-}
-.SubMenu {
 
+a:link {
+  color:#00008B;
 }
-.MenuHeader {
-background-color: #4070a0;
-color:white;
-font-size: 9px;
-font-weight:bold;
+
+a:link:hover {
+  color:#0000FF;
 }
-.MenuItem {
-background-color: #bdcdd4;
-font-weight:bold;
-text-decoration:none;
-font-size:11px;
-padding-top: 2;
-padding-bottom: 2;
+
+
+/* Menu */
+
+.menugroup h3, .SubMenugroup h3, .SubMenu h3 {
+  background-color: #4070a0;
+  color:white;
 }
-.MenuTopItem {
-background-color: #bdcdd4;
-font-weight:bold;
-text-decoration:none;
-font-size:11px;
-padding-top: 3;
-padding-bottom: 3;
+
+a.MenuItemLink, ul.SubMenu em {
+  background-color: #bdcdd4;
+  color: black;
 }
-.MenuSubItem {
-background-color: #bdcdd4;
-font-weight:bold;
-text-decoration:none;
-font-size:11px;
-padding-top: 3;
-padding-bottom: 3;
+
+a:hover.MenuItemLink {
+  color:#0088BB;
 }
-.MenuItemLink {
-color: black;
-font-weight:bold;
-text-decoration:none;
-font-size:11px;
+
+/* Head */
+
+div.head h1 {
+  background-color:#4070a0;
+  color:white;
 }
-a.MenuItemLink:hover {
-color:#0088BB;
-font-weight:bold;
-text-decoration:none;
-}
-.MenuSpacer {
-height: 4;
-background-color: #ffffff;
-}
-.MenuSubSpacer {
-padding-left: 2;
-padding-right: 2;
-background-color: #ffffff;
-}
-.Headline {
-color: white;
-font-weight: bold;
-font-size: 160%;
-font-family: Helvetica, Arial;
-text-align: center;
-}
-.Heading {
-background-color: #4070a0;
-height: 36px;
-}
+
+/* Tables */
+
 .TableHeader {
-background-color: #88aaaa;
+  background-color: #88aaaa;
 }
+
 .TableCellDark {
-background-color: #bbcccc;
+  background-color: #bbcccc;
 }
+
 .TableCellLight {
-background-color: #ddeeee;
+  background-color: #ddeeee;
 }
-.TableCellActive {
-background-color: #ffbbaa;
-}
+
 .TableCellSummary {
-background-color: #ffbbaa;
+  background-color: #ffbbaa;
 }
+
 .TableCellPassive {
-background-color: lightgrey;
+  background-color: lightgrey;
 }
-.WikiBackground {
-background-color: #eeeeee;
+
+/* Blog and Wiki*/
+
+.Post {
+  background-color:#eee;
 }
+
+.PostSubject {
+  background-color:#8aa;
+}
+
+.PostSubject a {
+  color:black;
+}
+
+.PostInfo {
+  background-color:#bdcdd4;
+}
+
+/* Wiki */
+
 .WikiTOCBox {
-border: 1px solid #aaa;
-background-color: #F8F8FF;
-padding: 8px;
-}
-.WikiTOC {
-color:#0000FF;
-font-size: 10px;
-text-decoration:underline;
-}
-.MessageBackground {
-background-color: #eeeeee;
-}
-.bookmarkTags{
-color: #007050;
-font-weight:bold;
-text-decoration:none;
-white-space:nowrap;
-}
-.bookmarkTitle{
-line-height: 120%;
-color: #4070a0;
-font-size:17px;
-font-weight:bold;
-text-decoration:none;
-}
-.bookmarkDescription{
-font-style:normal;
-}
-.bookmarkAction{
-color: #999999;
-text-decoration:none;
-}
-img.bookmarkIcon{
-height: 16px;
-width: 16px;
+  border: 1px solid #aaa;
+  background-color: #F8F8FF;
 }
 
-.ResultDescription {
-	color:#4070a0; 
-	font-weight:bold;
+a.unknown {
+  color:#990000;
 }
 
-.ResultDateYBR {
-	color:#007050;
+a.known {
+  color:#009900;
+}
+
+a.extern {
+  color:#000099;
+}
+
+/* in Bookmarks */
+
+.bookmark {
+  border-bottom:1px #000 dashed;
+}
+
+a.bookmarkTitle {
+  color: #4070a0;
+}
+
+a:hover.bookmarkTitle {
+  color: #4070a0;
+}
+
+a.bookmarkTags {
+  color: #007050;
+}
+
+a:hover.bookmarkTags {
+  color: #4070a0;
+}
+
+a.bookmarkAction {
+  color: #999999;
+}
+
+.Tags {
+  border-left: 2px solid black;
+}
+
+
+/* in Status.html */
+
+.ProgressBar {
+  border: #CAD5E3 solid 1px;
+}
+
+/* Copyright info */
+
+.info {
+  border-top:1px solid gray;
+}
+
+/* Searchresults */
+
+.searchresults {
+  border-top:1px #000 dashed;
+}
+
+.searchresults .url a {
+  color:#008000;
 }
 
 .snippetLoading {
-	color:#999999;
-}
-
-.snippetLoaded {
-	color:black;
-	font-style:italic;
+  color:#999999;
 }
 
 .snippetError {
-	color:red;
-	font-style:italic;
+  color:red;
 }
 
+/* other */
+
 .settingsValue {
-	color:#556699; 
-	font-weight:bold;
+  color:#556699;
+}
+
+.Headline {
+  background-color: #4070a0;
+  color: white;
+}
+
+.Heading {
+  background-color: #4070a0;
+}
+
+.error, .warning {
+  color:red;
+}
+
+.success {
+  color:green;
+}
+
+.Message {
+  background-color: #eeeeee;
+}
+
+.example {
+  background-color:#D3D3D3;
+}
+
+
+/* Log */
+
+body#ViewLog pre {
+  background-color:white;
+}
+
+/* Forms */
+
+fieldset {
+  background-color:#ddeeee;
+  border:1px solid #aaa;
+}
+
+legend {
+  background-color:#88aaaa;
+}
+
+form dt, dl.pairs dt {
+  background-color:#bbcccc;
+}
+
+form dd, dl.pairs dd {
+  background-color:#ddeeee;
 }

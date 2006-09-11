@@ -1,17 +1,24 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Local Cache Management</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<table border="0" cellspacing="6" cellpadding="2" width="100%">
-<tr><td><br><h2>Local Cache</h2></td></tr>
-<tr><td>The current cache size is #[cachesize]# KB. The maximum cache size is #[cachemax]# KB.</td></tr>
-<tr><td><a href="CacheAdmin_p.html?action=info&amp;path=" title="Cache Root" class="tt">cache/</a>#[path]#<br><br></td></tr>
-#(info)#<tr><td><a href="#[url]#" class="tt">#[url]#</a><br><br>#[info]#</td></tr>::<tr><td>#[tree]#</td></tr>#(/info)#
-</table>
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+   <title>YaCy '#[clientname]#': Local Cache Management</title>
+   #%env/templates/metas.template%#
+ </head>
+ <body id="CacheAdmin">
+ #%env/templates/header.template%#
+   <h2>Local Cache</h2>
+   <p>The current cache size is #[cachesize]# KB. The maximum cache size is #[cachemax]# KB.</p>
+   <p><a href="CacheAdmin_p.html?action=info&amp;path=" title="Cache Root" class="tt">cache/</a>#[path]#</p>
+   #(info)#
+   <a href="#[url]#" class="tt">#[url]#</a>
+   <div class="CacheAdminInfo">
+     #[info]#
+   </div>
+   ::
+   <div class="CacheAdminTree">
+     #[tree]#
+   </div>
+   #(/info)#
+   #%env/templates/footer.template%#
+  </body>
 </html>

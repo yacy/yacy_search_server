@@ -1,25 +1,24 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Log</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-<h2>Log</h2><br>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Log</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ViewLog">
+    #%env/templates/header.template%#
+    <h2>Log</h2>
+    
+    <form action="ViewLog_p.html" method="get" >
+      <fieldset>
+        <input type="text" name="lines" id="lines" size ="4" value="#[lines]#" maxlength="9" /><label for="lines"> Lines</label>
+        <input type="checkbox" name="mode" id="mode" value="reversed" #(reverseChecked)#::checked="checked"#(/reverseChecked)# /><label for="mode">reversed order</label>
+        <input type="submit" value="refresh" />
+      </fieldset>
+    </form>
+    
+    <pre>#[log]#</pre>
 
-<iframe src="Log_p.html" width="100%" height="480" name="logFrame">
-<a href="Log_p.html">Log</a>
-</iframe>
-<form action="Log_p.html" method="GET" target="logFrame">
-<table border="0"><tr>
-<td><input type="text" name="lines" size ="4" value="50" maxlength="9"> Lines</td>
-<td><input type="checkbox" name="mode" value="reversed">reversed order</td>
-<td><input type="submit" value="refresh"></td>
-</tr></table>
-</form>
-
-#%env/templates/footer.template%#
-</body>
+    
+    #%env/templates/footer.template%#
+  </body>
 </html>

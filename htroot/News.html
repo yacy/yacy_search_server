@@ -1,97 +1,104 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': News</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<table width="100%" border="0" cellpadding="0" cellspacing="0" class="SubMenu">
-<tr height="10"><td colspan="9" class="MenuHeader">&nbsp;Network Menu</td></tr>
-<tr height="2"><td colspan="9"></td></tr>
-<tr class="TableHeader">
-<td width="20%" class="MenuSubItem">&nbsp;&nbsp;<a href="/News.html" class="MenuItemLink">News&nbsp;Overview</a>&nbsp;</td>
-<td class="MenuSubSpacer"></td>
-<td width="20%" class="MenuSubItem">&nbsp;&nbsp;<a href="/News.html?page=1" class="MenuItemLink">Incoming&nbsp;News</a>&nbsp;</td>
-<td class="MenuSubSpacer"></td>
-<td width="20%" class="MenuSubItem">&nbsp;&nbsp;<a href="/News.html?page=2" class="MenuItemLink">Processed&nbsp;News</a>&nbsp;</td>
-<td class="MenuSubSpacer"></td>
-<td width="20%" class="MenuSubItem">&nbsp;&nbsp;<a href="/News.html?page=3" class="MenuItemLink">Outgoing&nbsp;News</a>&nbsp;</td>
-<td class="MenuSubSpacer"></td>
-<td width="20%" class="MenuSubItem">&nbsp;&nbsp;<a href="/News.html?page=4" class="MenuItemLink">Published&nbsp;News</a>&nbsp;</td>
-</tr>
-</table>
-<br>
-#(page)#
-<h2>News Overview</h2>
-::
-<h2>Incoming&nbsp;News</h2>
-::
-<h2>Processed&nbsp;News</h2>
-::
-<h2>Outgoing&nbsp;News</h2>
-::
-<h2>Published&nbsp;News</h2>
-#(/page)#
-<p>
-#(table)#
-<p>
-This is the YaCyNews system (currently under testing).
-</p>
-<p>
-The news service is controlled by several entry points:
-<ul>
-<li>A crawl start with activated remote-indexing will automatically create a news entry.
-Other peers may use this information to prevent double-crawls from the same start point.
-A table with recently started crawls is presented on the Index Create - page</li>
-<li>A change in the personal profile will create a news entry. You can see recently made changes of
-profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.</li>
-</ul><br>
-More news services will follow.</p>
-<p>
-Above you can see four menues:
-<ul>
-<li><b>Incoming News (#[insize]#)</b>: latest news that arrived your peer.
-Only these news will be used to display specific news services as explained above.
-You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page</li>
-<li><b>Processed News (#[prsize]#)</b>: this is simply an archive of incoming news that you removed by processing.</li>
-<li><b>Outgoing News (#[ousize]#)</b>: here your can see news entries that you have created. These news are currently broadcasted to other peers.
-you can stop the broadcast if you want.</li>
-<li><b>Published News (#[pusize]#)</b>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.</li>
-</ul><br>
-</p>
-::
-<p>
-<form action="News.html" method="post" enctype="multipart/form-data">
-<input type="hidden" name="page" value="#[page]#">
-<input type="submit" name="deletespecific" value="#(page)#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News#(/page)#">
-<input type="submit" name="deleteall" value="#(page)#::Process All News::Delete All News::Abort Publication of All News::Delete All News#(/page)#">
-<br><br>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader" valign="bottom">
-<td class="small"></td>
-<td class="small">Originator</td>
-<td class="small">Created</td>
-<td class="small">Category</td>
-<td class="small">Received</td>
-<td class="small">Distributed</td>
-<td class="small">Attributes</td>
-</tr>
-#{list}#
-<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-<td class="small" align="left"><input type="checkbox" name="del_#[id]#"></td>
-<td class="small" align="left">#[ori]#</td>
-<td class="small" align="left">#[cre]#</td>
-<td class="small" align="left">#[cat]#</td>
-<td class="small" align="left">#[rec]#</td>
-<td class="small" align="right">#[dis]#</td>
-<td class="small" align="left">#[att]#</td>
-</tr>
-#{/list}#
-</table>
-</form>
-</p>
-#(/table)#
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': News</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="News">
+    #%env/templates/header.template%#
+    <div class="SubMenu">
+      <h3>Network Menu</h3>
+      <ul class="SubMenu">
+        <li><a href="/News.html" class="MenuItemLink">News&nbsp;Overview</a></li>
+        <li><a href="/News.html?page=1" class="MenuItemLink">Incoming&nbsp;News</a></li>
+        <li><a href="/News.html?page=2" class="MenuItemLink">Processed&nbsp;News</a></li>
+        <li><a href="/News.html?page=3" class="MenuItemLink">Outgoing&nbsp;News</a></li>
+        <li><a href="/News.html?page=4" class="MenuItemLink">Published&nbsp;News</a></li>
+      </ul>
+    </div>
+    #(page)#
+    <h2>News Overview</h2>
+    ::
+    <h2>Incoming&nbsp;News</h2>
+    ::
+    <h2>Processed&nbsp;News</h2>
+    ::
+    <h2>Outgoing&nbsp;News</h2>
+    ::
+    <h2>Published&nbsp;News</h2>
+    #(/page)#
+    #(table)#
+    <p>
+    This is the YaCyNews system (currently under testing).
+    </p>
+    <p>
+    The news service is controlled by several entry points:
+    </p>
+    <ul>
+      <li>
+        A crawl start with activated remote indexing will automatically create a news entry.
+        Other peers may use this information to prevent double-crawls from the same start point.
+        A table with recently started crawls is presented on the Index Create - page
+      </li>
+      <li>
+        A change in the personal profile will create a news entry. You can see recently made changes of
+        profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.
+      </li>
+    </ul>
+    <p>
+      More news services will follow.
+    </p>
+    <p>
+      Above you can see four menues:
+    </p>
+    <ul>
+      <li>
+        <strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.
+        Only these news will be used to display specific news services as explained above.
+        You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page
+      </li>
+      <li>
+        <strong>Processed News (#[prsize]#)</strong>: this is simply an archive of incoming news that you removed by processing.
+      </li>
+      <li>
+        <strong>Outgoing News (#[ousize]#)</strong>: here your can see news entries that you have created. These news are currently broadcasted to other peers.
+        you can stop the broadcast if you want.
+      </li>
+      <li>
+        <strong>Published News (#[pusize]#)</strong>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.
+      </li>
+    </ul>
+    ::
+    <form action="News.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <input type="hidden" name="page" value="#[page]#" />
+        <input type="submit" name="deletespecific" value="#(page)#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News#(/page)#" />
+        <input type="submit" name="deleteall" value="#(page)#::Process All News::Delete All News::Abort Publication of All News::Delete All News#(/page)#" />
+      </fieldset>
+      <table border="0" cellpadding="2" cellspacing="1">
+        <tr class="TableHeader" valign="bottom">
+          <td>&nbsp;</td>
+          <td>Originator</td>
+          <td>Created</td>
+          <td>Category</td>
+          <td>Received</td>
+          <td>Distributed</td>
+          <td>Attributes</td>
+        </tr>
+        #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td align="left"><input type="checkbox" name="del_#[id]#" /></td>
+          <td align="left">#[ori]#</td>
+          <td align="left">#[cre]#</td>
+          <td align="left">#[cat]#</td>
+          <td align="left">#[rec]#</td>
+          <td align="right">#[dis]#</td>
+          <td align="left">#[att]#</td>
+        </tr>
+        #{/list}#
+      </table>
+    </form>
+    #(/table)#
+    #%env/templates/footer.template%#
+  </body>
 </html>

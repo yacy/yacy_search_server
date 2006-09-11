@@ -1,388 +1,415 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Index Creation</title>
-#%env/templates/metas.template%#
-<script src="/js/ajax.js"></script>
-<script src="/js/IndexCreate.js"></script>
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#%env/templates/submenuIndexCreate.template%#
-<br>
-<h2>Index Creation</h2>
-
-<p>
-<div class=small id="startCrawling"><b>Start Crawling Job:</b>&nbsp;
-You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".</p>
-</div>
-
-<table border="0" cellpadding="5" cellspacing="1" width="100%">
-<form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-  <tr class="TableHeader">
-  <td class="small"><b>Attribut</b></td>
-  <td class="small"><b>Value</b></td>
-  <td class="small"><b>Description</b></td>
-  </tr>
-  <tr valign="top" class="TableCellLight">
-    <td class=small>Crawling Depth:</td>
-    <td class=small><input name="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#"></td>
-    <td class=small>
-    This defines how often the Crawler will follow links embedded in websites.<br>
-	A minimum of 1 is recommended and means that the page you enter under "Starting Point" will be added to the index, but no linked content is indexed. 2-4 is good for normal indexing.
-    Be careful with the depth. Consider a branching factor of average 20;
-    A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Crawling Filter:</td>
-    <td class=small><input name="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#"></td>
-    <td class=small >
-    This is an emacs-like regular expression that must match with the URLs which are used to be crawled.
-    Use this i.e. to crawl a single domain. If you set this filter it would make sense to increase
-    the crawling depth.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellLight">
-    <td class=small>Re-Crawl Option:</td>
-    <td class=small>
-    Use:<input type="checkbox" name="crawlingIfOlderCheck" align="top" #(crawlingIfOlderCheck)#::checked#(/crawlingIfOlderCheck)#>&nbsp;&nbsp;
-    Interval:<input name="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#"><br>
-<input type="radio" name="crawlingIfOlderUnit" value="year"  #(crawlingIfOlderUnitYearCheck)#::checked#(/crawlingIfOlderUnitYearCheck)#>Year(s)&nbsp;&nbsp;
-    <input type="radio" name="crawlingIfOlderUnit" value="month" #(crawlingIfOlderUnitMonthCheck)#::checked#(/crawlingIfOlderUnitMonthCheck)#>Month(s)&nbsp;&nbsp;
-    <input type="radio" name="crawlingIfOlderUnit" value="day" #(crawlingIfOlderUnitDayCheck)#::checked#(/crawlingIfOlderUnitDayCheck)#>Day(s)&nbsp;&nbsp;
-    <input type="radio" name="crawlingIfOlderUnit" value="hour" #(crawlingIfOlderUnitHourCheck)#::checked#(/crawlingIfOlderUnitHourCheck)#>Hour(s)&nbsp;&nbsp;
-    <input type="radio" name="crawlingIfOlderUnit" value="minute" #(crawlingIfOlderUnitMinuteCheck)#::checked#(/crawlingIfOlderUnitMinuteCheck)#>Minute(s)</td>
-    <td class=small>
-    If you use this option, web pages that are already existent in your database are crawled and indexed again.
-    It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given
-    date, the page is crawled again, othervise it is treaded as 'double' and not loaded or indexed again.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Auto-Dom-Filter:</td>
-    <td class=small>
-    Use:<input type="checkbox" name="crawlingDomFilterCheck" align="top" #(crawlingDomFilterCheck)#::checked#(/crawlingDomFilterCheck)#>&nbsp;&nbsp;
-    Depth:<input name="crawlingDomFilterDepth" type="text" size="2" maxlength="2" value="#[crawlingDomFilterDepth]#"></td>
-    <td class=small>
-    This option will automatically create a domain-filter which limits the crawl on domains the crawler will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth for this example would be 1.<br>
-    The default value 0 gives no restrictions.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellLight">
-    <td class=small>Maximum Pages per Domain:</td>
-    <td class=small>
-    Use:<input type="checkbox" name="crawlingDomMaxCheck" align="top" #(crawlingDomMaxCheck)#::checked#(/crawlingDomMaxCheck)#>&nbsp;&nbsp;
-    Page-Count:<input name="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#"></td>
-    <td class=small>
-    You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.
-    You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within
-    the given depth. Domains outside the given depth are then sorted-out anyway.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Accept URLs with '?' / dynamic URLs:</td>
-    <td class=small><input type="checkbox" name="crawlingQ" align="top" #(crawlingQChecked)#::checked#(/crawlingQChecked)#></td>
-    <td class=small>
-    A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that
-    is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellLight">
-    <td class=small>Store to Proxy Cache:</td>
-    <td class=small><input type="checkbox" name="storeHTCache" align="top" #(storeHTCacheChecked)#::checked#(/storeHTCacheChecked)#></td>
-    <td class=small>
-    This option is used by default for proxy prefetch, but is not needed for explicit crawling.
-    We recommend to leave this switched off unless you want to control the crawl results with the
-    <a href="CacheAdmin_p.html" class=small>Cache Monitor</a>.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Do Local Indexing:</td>
-    <td class=small><input type="checkbox" name="localIndexing" align="top" #(localIndexingChecked)#::checked#(/localIndexingChecked)#></td>
-    <td class=small>
-    This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
-    <a href="CacheAdmin_p.html" class=small>Proxy Cache</a> without indexing.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellLight">
-    <td class=small>Do Remote Indexing:</td>
-	<td>
-      <table border="0" cellpadding="2" cellspacing="0">
-	   <tr>
-	    <td>
-		 <input type="checkbox" name="crawlOrder" align="top" #(crawlOrderChecked)#::checked#(/crawlOrderChecked)#>
-		</td>
-		<td class=small>
-	  Describe your intention to start this global crawl (optional):<p>
-      <input name="intention" type="text" size="40" maxlength="100" value=""></p>
-      This message will appear in the 'Other Peer Crawl Start' table of other peers.
-	  </td>
-	 </table>
-	</td>
-    <td class=small >
-    If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
-    If you need your crawling results locally, you should switch this off.
-    Only senior and principal peers can initiate or receive remote crawls.
-    <b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can omit starting a crawl with the same start point.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Exclude <i>static</i> Stop-Words</td>
-    <td class=small><input type="checkbox" name="xsstopw" align="top" #(xsstopwChecked)#::checked#(/xsstopwChecked)#></td>
-    <td class=small>
-    This can be useful to circumvent that extremely common words are added to the database, i.e. "the", "he", "she", "it"... To exclude all words given in the file <tt class=small>yacy.stopwords</tt> from indexing,
-    check this box.
-    </td>
-  </tr>
-  <!--
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Exclude <i>dynamic</i> Stop-Words</td>
-    <td class=small><input type="checkbox" name="xdstopw" align="top" #(xdstopwChecked)#::checked#(/xdstopwChecked)#></td>
-    <td class=small colspan="3">
-    Excludes all words from indexing which are listed by statistic rules.
-    <i>THIS IS NOT YET FUNCTIONAL</i>
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Exclude <i>parent-indexed</i> words</td>
-    <td class=small><input type="checkbox" name="xpstopw" align="top" #(xpstopwChecked)#::checked#(/xpstopwChecked)#></td>
-    <td class=small colspan="3">
-    Excludes all words from indexing which had been indexed in the parent web page.
-    <i>THIS IS NOT YET FUNCTIONAL</i>
-    </td>
-  </tr>
-  -->
-  <tr valign="top" class="TableCellLight">
-    <td class="small">Starting Point:</td>
-    <td class="small">
-    	<table cellpadding="0" cellspacing="0">
-    	<tr><td class="small">From&nbsp;File:</td>
-    	    <td class="small"><input type="radio" name="crawlingMode" value="file"></td>
-    	    <td class="small"><input type="file" name="crawlingFile" size="28"></td>
-    	</tr>
-    	<tr><td class="small">From&nbsp;URL:</td>
-    		<td class="small"><input type="radio" name="crawlingMode" value="url" checked="checked"></td>
-    	    <td class="small">
-    	    	<input name="crawlingURL" type="text" size="41" maxlength="256" value="http://" onkeypress="changed()">
-    	      	<span id="robotsOK"></span>
-    	    </td>
-    	</tr>
-    	<tr>
-    		<td colspan="2"><span id="title"></span></td>
-    	</tr>
-    	</table>
-    </td>
-    <td class=small colspan="3">Existing start URLs are re-crawled.
-    Other already visited URLs are sorted out as "double".
-    A complete re-crawl will be available soon.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-  	<td class=small colspan="5"><input type="submit" name="crawlingstart" value="Start New Crawl"></td>
-  </tr>
-</form>
-</table>
-</p>
-
-<p><form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-<div class=small id="distributedIndexing">
-<b>Distributed Indexing: </b>
-Crawling and indexing can be done by remote peers.
-Your peer can search and index for other peers and they can search for you.</div></p>
-
-<table border="0" cellpadding="5" cellspacing="1" width="100%">
-  <tr valign="top" class="TableCellDark">
-    <td class=small width="10%">
-        <input type="radio" name="dcr" value="acceptCrawlMax" align="top" #(acceptCrawlMaxChecked)#::checked#(/acceptCrawlMaxChecked)#>
-    </td><td class=small>
-        Accept remote crawling requests and perform crawl at maximum load
-    </td>
-  </tr><tr valign="top" class="TableCelllight">
-    <td class=small width="10%">
-        <input type="radio" name="dcr" value="acceptCrawlLimited" align="top" #(acceptCrawlLimitedChecked)#::checked#(/acceptCrawlLimitedChecked)#>
-    </td><td class=small>
-        Accept remote crawling requests and perform crawl at maximum of
-        <input name="acceptCrawlLimit" type="text" size="4" maxlength="4" value="#[PPM]#"> Pages Per Minute (minimum is 1, low system load usually at PPM <= 30)
-    </td>
-  </tr><tr valign="top" class="TableCellDark">
-    <td class=small width="10%">
-        <input type="radio" name="dcr" value="acceptCrawlDenied" align="top" #(acceptCrawlDeniedChecked)#::checked#(/acceptCrawlDeniedChecked)#>
-    </td><td class=small>
-        Do not accept remote crawling requests (please set this only if you cannot accept to crawl only one page per minute; see option above)</td>
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellLight">
-    <td width="10%">
-        <input type="submit" name="distributedcrawling" value="set">
-	</td>
-	<td>
-	</td>
-    </tr>
-</table>
-</form></p>
-
-
-<p>
-#(error)#<!-- 0 -->
-::<!-- 1 -->
-Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.
-::<!-- 2 -->
-Error: #[errmsg]#
-::<!-- 3 -->
-Application not yet initialized. Sorry. Please wait some seconds and repeat the request.
-::<!-- 4 -->
-<b>ERROR: Crawl filter "<span class="settingsValue">#[newcrawlingfilter]#</span>" does not match with crawl root "#[crawlingStart]#".</b> Please try again with different filter.</p><br>
-::<!-- 5 -->
-Crawling of "<span class="settingsValue">#[crawlingURL]#</span>" failed. Reason: #[reasonString]#<br>
-::<!-- 6 -->
-Error with URL input "<span class="settingsValue">#[crawlingStart]#</span>": #[error]#
-::<!-- 7 -->
-Error with file input "<span class="settingsValue">#[crawlingStart]#</span>": #[error]#
-::<!-- 8 -->
-Error with Crawling Filter "<span class="settingsValue">#[newcrawlingfilter]#</span>": <span style="color:red">#[error]#</span>
-#(/error)#
-<br>
-#(info)#
-::
-Set new prefetch depth to "#[newproxyPrefetchDepth]#"
-::
-Crawling of "#[crawlingURL]#" started.
-You can monitor the crawling progress either by watching the URL queues
-(<a href="/IndexCreateWWWLocalQueue_p.html">local queue</a>,
-<a href="/IndexCreateWWWGlobalQueue_p.html">global queue</a>,
-<a href="/IndexCreateLoaderQueue_p.html">loader queue</a>,
-<a href="/IndexCreateLoaderQueue_p.html">indexing queue</a>)
-or see the fill/process count of all queues on the
-<a href="/PerformanceQueues_p.html">performance page</a>.
-<b>Please wait some seconds, because the request is enqueued and delayed until the proxy/HTTP-server is idle for a certain time.</b>
-The indexing results are presented on the
-<a href="IndexMonitor.html">Index Monitor</a>-page.
-<b>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</b>
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.<br>
-::
-Removed #[numEntries]# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty.
-::
-Crawling paused successfully.
-::
-Continue crawling.
-#(/info)#
-<br>
-#(refreshbutton)#
-::
-<form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-<input type="submit" name="refreshpage" value="refresh">
-</form>
-<br>
-#(/refreshbutton)#
-<br>
-<form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-#(crawler-paused)#
-<input type="submit" name="continuecrawlqueue" value="continue crawling">
-::
-<input type="submit" name="pausecrawlqueue" value="pause crawling">
-#(/crawler-paused)#
-</form>
-<b id="crawlingProfiles">Crawl Profile List:</b><br>
-<table border="0" cellpadding="2" cellspacing="1" width="100%">
-  <tr class="TableHeader">
-    <td width="120" class="small"><b>Crawl Thread</b></td>
-    <td class="small"><b>Start URL</b></td>
-	<td width="16" class="small"><b>Depth</b></td>
-	<td width="60" class="small"><b>Filter</b></td>
-	<td width="10" class="small"><b>MaxAge</b></td>
-	<td width="10" class="small"><b>Auto Filter Depth</b></td>
-	<td            class="small"><b>Auto Filter Content</b></td>
-	<td width="10" class="small"><b>Max Page Per Domain</b></td>
-	<td width="10" class="small"><b>Accept "?" URLs</b></td>
-	<td width="10" class="small"><b>Fill Proxy Cache</b></td>
-	<td width="10" class="small"><b>Local Indexing</b></td>
-	<td width="10" class="small"><b>Remote Indexing</b></td>
-  </tr>
-#{crawlProfiles}#
-  <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
-    <td class="small">#[name]#</td>
-    <td class="small"><a class="small" href="#[startURL]#">#[startURL]#</a></td>
-    <td class="small">#[depth]#</td>
-    <td class="small">#[filter]#</td>
-    <td class="small">#[crawlingIfOlder]#</td>
-    <td class="small">#[crawlingDomFilterDepth]#</td>
-    <td class="small">#[crawlingDomFilterContent]#</td>
-    <td class="small">#[crawlingDomMaxPages]#</td>
-    <td class="small">#(withQuery)#no::yes#(/withQuery)#</td>
-    <td class="small">#(storeCache)#no::yes#(/storeCache)#</td>
-    <td class="small">#(localIndexing)#no::yes#(/localIndexing)#</td>
-    <td class="small">#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
-  </tr>
-#{/crawlProfiles}#
-</table>
-<br>
-<b id="crawlingStarts">Recently started remote crawls in progress:</b><br>
-<table border="0" cellpadding="2" cellspacing="1" width="100%">
-  <tr class="TableHeader">
-    <td class="small"><b>Start Time</b></td>
-    <td class="small"><b>Peer Name</b></td>
-    <td class="small"><b>Start URL</b></td>
-    <td class="small"><b>Intention/Description</b></td>
-    <td class="small"><b>Depth</b></td>
-    <td class="small"><b>Accept '?' URLs</b></td>
-  </tr>
-#{otherCrawlStartInProgress}#
-  <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
-    <td class="small">#[cre]#</td>
-    <td class="small">#[peername]#</td>
-    <td class="small"><a class="small" href="#[startURL]#">#[startURL]#</a></td>
-    <td class="small">#[intention]#</td>
-    <td class="small">#[generalDepth]#</td>
-    <td class="small">#(crawlingQ)#no::yes#(/crawlingQ)#</td>
-  </tr>
-#{/otherCrawlStartInProgress}#
-</table>
-<br>
-<b>Recently started remote crawls, finished:</b><br>
-<table border="0" cellpadding="2" cellspacing="1" width="100%">
-  <tr class="TableHeader">
-    <td class="small"><b>Start Time</b></td>
-    <td class="small"><b>Peer Name</b></td>
-    <td class="small"><b>Start URL</b></td>
-    <td class="small"><b>Intention/Description</b></td>
-    <td class="small"><b>Depth</b></td>
-    <td class="small"><b>Accept '?' URLs</b></td>
-  </tr>
-#{otherCrawlStartFinished}#
-  <tr class="TableCell#(dark)#Light::Dark#(/dark)#" class="small">
-    <td class="small">#[cre]#</td>
-    <td class="small">#[peername]#</td>
-    <td class="small"><a class="small" href="#[startURL]#">#[startURL]#</a></td>
-    <td class="small">#[intention]#</td>
-    <td class="small">#[generalDepth]#</td>
-    <td class="small">#(crawlingQ)#no::yes#(/crawlingQ)#</td>
-  </tr>
-#{/otherCrawlStartFinished}#
-</table>
-<br>
-<b id="remoteCrawlPeers">Remote Crawling Peers:</b>&nbsp;
-#(remoteCrawlPeers)#
-No remote crawl peers availible.<br>
-::
-#[num]# peers available for remote crawling.
-<table border="0" cellpadding="2" cellspacing="1" width="100%">
-<tr class="TableCellDark">
-  <th width="60" class="small">Idle Peers</th>
-  <td class="small">
-    #{available}##[name]# (#[due]# seconds due)&nbsp;&nbsp; #{/available}#
-  </td>
-</tr>
-<tr class="TableCellLight">
-  <th width="60" class="small">Busy Peers</th>
-  <td class="small">
-    #{busy}##[name]# (#[due]# seconds due)&nbsp;&nbsp;#{/busy}#
-  </td>
-</tr>
-</table>
-#(/remoteCrawlPeers)#
-</p>
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Creation</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript" src="/js/ajax.js"></script>
+    <script type="text/javascript" src="/js/IndexCreate.js"></script>
+  </head>
+  <body id="IndexCreate">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Index Creation</h2>
+    
+    <p id="startCrawling">
+    <strong>Start Crawling Job:</strong>&nbsp;
+    You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".
+    </p>
+    
+    <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
+      <table border="0" cellpadding="5" cellspacing="1">
+        <tr class="TableHeader">
+          <td><strong>Attribut</strong></td>
+          <td><strong>Value</strong></td>
+          <td><strong>Description</strong></td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td>Crawling Depth:</td>
+          <td><input name="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" /></td>
+          <td>
+            This defines how often the Crawler will follow links embedded in websites.<br />
+            A minimum of 1 is recommended and means that the page you enter under "Starting Point" will be added to the index, but no linked content is indexed. 2-4 is good for normal indexing.
+            Be careful with the depth. Consider a branching factor of average 20;
+            A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td>Crawling Filter:</td>
+          <td><input name="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#" /></td>
+          <td>
+            This is an emacs-like regular expression that must match with the URLs which are used to be crawled.
+            Use this i.e. to crawl a single domain. If you set this filter it would make sense to increase
+            the crawling depth.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td>Re-Crawl Option:</td>
+          <td>
+            Use:<input type="checkbox" name="crawlingIfOlderCheck" #(crawlingIfOlderCheck)#::checked="checked"#(/crawlingIfOlderCheck)# />&nbsp;&nbsp;
+            Interval:<input name="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#" /><br />
+            <input type="radio" name="crawlingIfOlderUnit" value="year"  #(crawlingIfOlderUnitYearCheck)#::checked="checked"#(/crawlingIfOlderUnitYearCheck)# />Year(s)&nbsp;&nbsp;
+            <input type="radio" name="crawlingIfOlderUnit" value="month" #(crawlingIfOlderUnitMonthCheck)#::checked="checked"#(/crawlingIfOlderUnitMonthCheck)# />Month(s)&nbsp;&nbsp;
+            <input type="radio" name="crawlingIfOlderUnit" value="day" #(crawlingIfOlderUnitDayCheck)#::checked="checked"#(/crawlingIfOlderUnitDayCheck)# />Day(s)&nbsp;&nbsp;
+            <input type="radio" name="crawlingIfOlderUnit" value="hour" #(crawlingIfOlderUnitHourCheck)#::checked="checked"#(/crawlingIfOlderUnitHourCheck)# />Hour(s)&nbsp;&nbsp;
+            <input type="radio" name="crawlingIfOlderUnit" value="minute" #(crawlingIfOlderUnitMinuteCheck)#::checked="checked"#(/crawlingIfOlderUnitMinuteCheck)# />Minute(s)
+          </td>
+          <td>
+            If you use this option, web pages that are already existent in your database are crawled and indexed again.
+            It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given
+            date, the page is crawled again, othervise it is treaded as 'double' and not loaded or indexed again.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td>Auto-Dom-Filter:</td>
+          <td>
+          Use:<input type="checkbox" name="crawlingDomFilterCheck" #(crawlingDomFilterCheck)#::checked="checked"#(/crawlingDomFilterCheck)# />&nbsp;&nbsp;
+          Depth:<input name="crawlingDomFilterDepth" type="text" size="2" maxlength="2" value="#[crawlingDomFilterDepth]#" /></td>
+          <td>
+            This option will automatically create a domain-filter which limits the crawl on domains the crawler
+            will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while
+            restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth
+            for this example would be 1.<br />
+            The default value 0 gives no restrictions.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td>Maximum Pages per Domain:</td>
+          <td>
+          Use:<input type="checkbox" name="crawlingDomMaxCheck" #(crawlingDomMaxCheck)#::checked="checked"#(/crawlingDomMaxCheck)# />&nbsp;&nbsp;
+          Page-Count:<input name="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#" /></td>
+          <td>
+            You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.
+            You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within
+            the given depth. Domains outside the given depth are then sorted-out anyway.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td>Accept URLs with '?' / dynamic URLs:</td>
+          <td><input type="checkbox" name="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /></td>
+          <td>
+            A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that
+            is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td>Store to Proxy Cache:</td>
+          <td><input type="checkbox" name="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# /></td>
+          <td>
+            This option is used by default for proxy prefetch, but is not needed for explicit crawling.
+            We recommend to leave this switched off unless you want to control the crawl results with the
+            <a href="CacheAdmin_p.html">Cache Monitor</a>.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td>Do Local Indexing:</td>
+          <td><input type="checkbox" name="localIndexing" #(localIndexingChecked)#::checked="checked"#(/localIndexingChecked)# /></td>
+          <td>
+            This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
+            <a href="CacheAdmin_p.html">Proxy Cache</a> without indexing.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td>Do Remote Indexing:</td>
+          <td>
+            <table border="0" cellpadding="2" cellspacing="0">
+              <tr>
+                <td>
+                  <input type="checkbox" name="crawlOrder"  #(crawlOrderChecked)#::checked="checked"#(/crawlOrderChecked)# />
+                </td>
+                <td>
+                  Describe your intention to start this global crawl (optional):<br />
+                  <input name="intention" type="text" size="40" maxlength="100" value="" /><br />
+                  This message will appear in the 'Other Peer Crawl Start' table of other peers.
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
+            If you need your crawling results locally, you should switch this off.
+            Only senior and principal peers can initiate or receive remote crawls.
+            <strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>, so they can omit starting a crawl with the same start point.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td>Exclude <i>static</i> Stop-Words</td>
+          <td><input type="checkbox" name="xsstopw" #(xsstopwChecked)#::checked="checked"#(/xsstopwChecked)# /></td>
+          <td>
+            This can be useful to circumvent that extremely common words are added to the database, i.e. "the", "he", "she", "it"... To exclude all words given in the file <tt >yacy.stopwords</tt> from indexing,
+            check this box.
+          </td>
+        </tr>
+        <!--
+        <tr valign="top" class="TableCellDark">
+          <td>Exclude <em>dynamic</em> Stop-Words</td>
+          <td><input type="checkbox" name="xdstopw" #(xdstopwChecked)#::checked="checked"#(/xdstopwChecked)# /></td>
+          <td colspan="3">
+            Excludes all words from indexing which are listed by statistic rules.
+            <em>THIS IS NOT YET FUNCTIONAL</em>
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td>Exclude <em>parent-indexed</em> words</td>
+          <td><input type="checkbox" name="xpstopw" #(xpstopwChecked)#::checked="checked"#(/xpstopwChecked)# /></td>
+          <td colspan="3">
+            Excludes all words from indexing which had been indexed in the parent web page.
+            <em>THIS IS NOT YET FUNCTIONAL</em>
+          </td>
+        </tr>
+        -->
+        <tr valign="top" class="TableCellLight">
+          <td>Starting Point:</td>
+          <td>
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td>From&nbsp;File:</td>
+                <td><input type="radio" name="crawlingMode" value="file" /></td>
+                <td><input type="file" name="crawlingFile" size="28" /></td>
+              </tr>
+              <tr>
+                <td>From&nbsp;URL:</td>
+                <td><input type="radio" name="crawlingMode" value="url" checked="checked" /></td>
+                <td>
+                  <input name="crawlingURL" type="text" size="41" maxlength="256" value="http://" onkeypress="changed()" />
+                  <span id="robotsOK"></span>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2"><span id="title"></span></td>
+              </tr>
+            </table>
+          </td>
+          <td colspan="3">
+            Existing start URLs are re-crawled.
+            Other already visited URLs are sorted out as "double".
+            A complete re-crawl will be available soon.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td colspan="5"><input type="submit" name="crawlingstart" value="Start New Crawl" /></td>
+        </tr>
+      </table>
+    </form>
+      
+    <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
+      <p id="distributedIndexing">
+        <strong>Distributed Indexing: </strong>
+        Crawling and indexing can be done by remote peers.
+        Your peer can search and index for other peers and they can search for you.
+      </p>
+    
+      <table border="0" cellpadding="5" cellspacing="1">
+        <colgroup>
+          <col width="10%" />
+          <col />
+        </colgroup>
+        <tr valign="top" class="TableCellDark">
+          <td>
+              <input type="radio" name="dcr" value="acceptCrawlMax" #(acceptCrawlMaxChecked)#::checked="checked"#(/acceptCrawlMaxChecked)# />
+          </td>
+          <td>
+              Accept remote crawling requests and perform crawl at maximum load
+          </td>
+        </tr>
+        <tr valign="top" class="TableCelllight">
+          <td>
+              <input type="radio" name="dcr" value="acceptCrawlLimited" #(acceptCrawlLimitedChecked)#::checked="checked"#(/acceptCrawlLimitedChecked)# />
+          </td>
+          <td>
+              Accept remote crawling requests and perform crawl at maximum of
+              <input name="acceptCrawlLimit" type="text" size="4" maxlength="4" value="#[PPM]#" /> Pages Per Minute (minimum is 1, low system load usually at PPM &lt;= 30)
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellDark">
+          <td>
+              <input type="radio" name="dcr" value="acceptCrawlDenied" #(acceptCrawlDeniedChecked)#::checked="checked"#(/acceptCrawlDeniedChecked)# />
+          </td>
+          <td>
+              Do not accept remote crawling requests (please set this only if you cannot accept to crawl only one page per minute; see option above)
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td>
+            <input type="submit" name="distributedcrawling" value="set" />
+          </td>
+          <td>
+          </td>
+        </tr>
+      </table>
+    </form>
+    
+    
+    <p>
+      #(error)#<!-- 0 -->
+      ::<!-- 1 -->
+      Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.
+      ::<!-- 2 -->
+      Error: #[errmsg]#
+      ::<!-- 3 -->
+      Application not yet initialized. Sorry. Please wait some seconds and repeat the request.
+      ::<!-- 4 -->
+      <strong>ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</strong> Please try again with different filter.
+      ::<!-- 5 -->
+      Crawling of "#[crawlingURL]#" failed. Reason: #[reasonString]#<br>
+      ::<!-- 6 -->
+      Error with URL input "#[crawlingStart]#": #[error]#
+      ::<!-- 7 -->
+      Error with file input "#[crawlingStart]#": #[error]#
+      #(/error)#
+    </p>
+    <p>
+      #(info)#
+      ::
+      Set new prefetch depth to "#[newproxyPrefetchDepth]#"
+      ::
+      Crawling of "#[crawlingURL]#" started.
+      You can monitor the crawling progress either by watching the URL queues
+      (<a href="/IndexCreateWWWLocalQueue_p.html">local queue</a>,
+      <a href="/IndexCreateWWWGlobalQueue_p.html">global queue</a>,
+      <a href="/IndexCreateLoaderQueue_p.html">loader queue</a>,
+      <a href="/IndexCreateLoaderQueue_p.html">indexing queue</a>)
+      or see the fill/process count of all queues on the
+      <a href="/PerformanceQueues_p.html">performance page</a>.
+      <strong>Please wait some seconds, because the request is enqueued and delayed until the proxy/HTTP-server is idle for a certain time.</strong>
+      The indexing results are presented on the
+      <a href="IndexMonitor.html">Index Monitor</a>-page.
+      <strong>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</strong>
+      If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.<br>
+      ::
+      Removed #[numEntries]# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty.
+      ::
+      Crawling paused successfully.
+      ::
+      Continue crawling.
+    #(/info)#
+    </p>
+    #(refreshbutton)#
+    ::
+    <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <input type="submit" name="refreshpage" value="refresh" />
+      </fieldset>
+    </form>
+    #(/refreshbutton)#
+    <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        #(crawler-paused)#
+        <input type="submit" name="continuecrawlqueue" value="continue crawling" />
+        ::
+        <input type="submit" name="pausecrawlqueue" value="pause crawling" />
+        #(/crawler-paused)#
+      </fieldset>
+    </form>
+    
+    <p id="crawlingProfiles"><strong>Crawl Profile List:</strong></p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <colgroup>
+        <col width="120" />
+        <col />
+        <col width="16" />
+        <col width="60" />
+        <col width="10" span="2" />
+        <col />
+        <col width="10" span="5" />
+      </colgroup>
+      <tr class="TableHeader">
+        <td><strong>Crawl Thread</strong></td>
+        <td><strong>Start URL</strong></td>
+        <td><strong>Depth</strong></td>
+        <td><strong>Filter</strong></td>
+        <td><strong>MaxAge</strong></td>
+        <td><strong>Auto Filter Depth</strong></td>
+        <td><strong>Auto Filter Content</strong></td>
+        <td><strong>Max Page Per Domain</strong></td>
+        <td><strong>Accept "?" URLs</strong></td>
+        <td><strong>Fill Proxy Cache</strong></td>
+        <td><strong>Local Indexing</strong></td>
+        <td><strong>Remote Indexing</strong></td>
+      </tr>
+    #{crawlProfiles}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[name]#</td>
+        <td><a  href="#[startURL]#">#[startURL]#</a></td>
+        <td>#[depth]#</td>
+        <td>#[filter]#</td>
+        <td>#[crawlingIfOlder]#</td>
+        <td>#[crawlingDomFilterDepth]#</td>
+        <td>#[crawlingDomFilterContent]#</td>
+        <td>#[crawlingDomMaxPages]#</td>
+        <td>#(withQuery)#no::yes#(/withQuery)#</td>
+        <td>#(storeCache)#no::yes#(/storeCache)#</td>
+        <td>#(localIndexing)#no::yes#(/localIndexing)#</td>
+        <td>#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
+      </tr>
+    #{/crawlProfiles}#
+    </table>
+    <p id="crawlingStarts"><strong>Recently started remote crawls in progress:</strong></p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td><strong>Start Time</strong></td>
+        <td><strong>Peer Name</strong></td>
+        <td><strong>Start URL</strong></td>
+        <td><strong>Intention/Description</strong></td>
+        <td><strong>Depth</strong></td>
+        <td><strong>Accept '?' URLs</strong></td>
+      </tr>
+    #{otherCrawlStartInProgress}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#" >
+        <td>#[cre]#</td>
+        <td>#[peername]#</td>
+        <td><a href="#[startURL]#">#[startURL]#</a></td>
+        <td>#[intention]#</td>
+        <td>#[generalDepth]#</td>
+        <td>#(crawlingQ)#no::yes#(/crawlingQ)#</td>
+      </tr>
+    #{/otherCrawlStartInProgress}#
+    </table>
+    <p><strong>Recently started remote crawls, finished:</strong></p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td><strong>Start Time</strong></td>
+        <td><strong>Peer Name</strong></td>
+        <td><strong>Start URL</strong></td>
+        <td><strong>Intention/Description</strong></td>
+        <td><strong>Depth</strong></td>
+        <td><strong>Accept '?' URLs</strong></td>
+      </tr>
+      #{otherCrawlStartFinished}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#" >
+        <td>#[cre]#</td>
+        <td>#[peername]#</td>
+        <td><a href="#[startURL]#">#[startURL]#</a></td>
+        <td>#[intention]#</td>
+        <td>#[generalDepth]#</td>
+        <td>#(crawlingQ)#no::yes#(/crawlingQ)#</td>
+      </tr>
+      #{/otherCrawlStartFinished}#
+    </table>
+    <p id="remoteCrawlPeers"><strong>Remote Crawling Peers:</strong>&nbsp;</p>
+    #(remoteCrawlPeers)#
+    <p>No remote crawl peers availible.</p>
+    ::
+    <p>#[num]# peers available for remote crawling.</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <colgroup>
+        <col width="60" />
+        <col />
+      </colgroup>
+      <tr class="TableCellDark">
+        <th>Idle Peers</th>
+        <td>
+          #{available}##[name]# (#[due]# seconds due)&nbsp;&nbsp; #{/available}#
+        </td>
+      </tr>
+      <tr class="TableCellLight">
+        <th>Busy Peers</th>
+        <td>
+          #{busy}##[name]# (#[due]# seconds due)&nbsp;&nbsp;#{/busy}#
+        </td>
+      </tr>
+    </table>
+    #(/remoteCrawlPeers)#
+    
+    #%env/templates/footer.template%#
+  </body>
 </html>

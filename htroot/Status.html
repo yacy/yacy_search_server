@@ -1,110 +1,99 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Status</title>
-#%env/templates/metas.template%#
-<meta http-equiv="REFRESH" content="30">
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-<h2>System-, Index- and Peer-Status</h2>
-
-<p>Welcome to YaCy!</p>
-
-<form action="Steering.html" method="get">
-<table border="0" cellpadding="5" cellspacing="0" width="100%">
-  <tr valign="top" bgcolor="#DDEEDD">
-    <td class="TableCellLight" align="right">
-<!--  <input type="submit" name="restart" value="Restart"> -->
-      <input type="submit" name="shutdown" value="Shutdown">
-    </td>
-  </tr>
-</table>
-</form>
-
-<p>
-<!-- <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#000000"><tr><td> -->
-<table border="0" cellpadding="2" cellspacing="1" width="100%">
-<tr class="TableHeader"><td colspan="2"><b>Public System Properties</b></td></tr>
-<tr class="TableCellDark"><td>System version</td><td>
-#[versionpp]# #(versioncomment)#:: - the latest public version is #[latestVersion]#. Click here to <a href="http://www.yacy.net/yacy/Download.html">download</a> it.#(/versioncomment)#
-</td></tr>
-<tr class="TableCellLight"><td>This&nbsp;peer's&nbsp;address</td><td>
-#(peerAddress)#
-Not assigned
-::
-Not assigned. The peer must go online to get an address.
-The peer does not go online until you use the proxy to surf the internet,
-thus proving that you <i>want</i> to go online.
-If you don't know how to configure your system to use a proxy,
-see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installation instructions</a>.
-::
-#[address]# ; Your '.yacy' home at http://www.#[peername]#.yacy
-#(/peerAddress)#
-</td></tr>
-<tr class="TableCellDark"><td>This peer's name</td><td>#[peerName]#/#[hash]#</td></tr>
-<tr class="TableCellLight"><td>This peer's statistics</td><td>
-#(peerStatistics)#
-Unknown
-::
-Uptime = #[uptime]#, Links# = #[links]#, RWIs# = #[words]#, PPM = #[pagesperminute]#,
-Connects (#[juniorConnects]#|#[seniorConnects]#|#[principalConnects]#|#[disconnects]#) #[connects]# peers/hour
-#(/peerStatistics)#
-</td></tr>
-<tr class="TableCellDark"><td>This peer's status</td><td>
-#(peerStatus)#
-Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings (see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>), you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!
-::
-Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured (usually: 8080), or to set up a 'virtual server' in your router settings (often called DMZ). Please be fair, contribute your own index to the global index.
-::
-Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!
-::
-Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL <a href="#[seedURL]#">#[seedURL]#</a>.<br>
-You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.
-#(/peerStatus)#
-</td></tr>
-<tr class="TableCellLight"><td>Other peers</td><td>#(otherPeers)#not online::#[num]# other peers online.#(/otherPeers)#</td></tr>
-<tr class="TableCellLight"><td>Online-mode</td><td>
-#(omode)#
-You are in <i>Cache-browsing</i> mode.<br>
-Only websites from the proxy-cache are accessible.
-To switch online-mode, press one of the following buttons:
-<form action="SettingsAck_p.html" method="get">
-<input type="submit" name="emode" value="event-based Mode">
-<input type="submit" name="pmode" value="Permanent Mode">
-</form>
-::
-You are in <i>event-based</i> online mode.<br>
-The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.
-Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.
-Use this only if you have a flatrate or you have an always-on connection.
-To switch online-mode, press one of the following buttons:
-<form action="SettingsAck_p.html" method="get">
-<input type="submit" name="pmode" value="Go on-line">
-<input type="submit" name="cmode" value="Go to Cache-Mode">
-</form>
-::
-You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.
-To switch online-mode, press one of the following buttons:
-<form action="SettingsAck_p.html" method="get">
-<input type="submit" name="emode" value="event-based Mode">
-<input type="submit" name="cmode" value="Go to Cache-Mode">
-</form>
-#(/omode)#
-</td></tr>
-</table>
-<!-- </td></tr></table> -->
-</p>
-<p>
-#(showPrivateTable)#
-	Click <a href="Status.html?login=">here</a> to log in as administrator and see full status. 
-	::
-#(/showPrivateTable)#
-#%[privateStatusTable]%#
-</p>
-<p><font size="-3"><i>Last Refresh:</i> #[date]#</font></p>
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Status</title>
+    #%env/templates/metas.template%#
+    <meta http-equiv="REFRESH" content="30" />
+  </head>
+  <body style="margin:0px;">
+    #%env/templates/header.template%#
+    <h2>System-, Index- and Peer-Status</h2>
+    
+    <p>Welcome to YaCy!</p>
+    
+    <form action="Steering.html" method="get" class="PeerControl">
+      <fieldset>
+    <!--    <input type="submit" name="restart" value="Restart" /> -->
+        <input type="submit" name="shutdown" value="Shutdown" />
+      </fieldset>
+    </form>
+    
+    <table class="StatusTable">
+      <tr class="TableHeader"><td colspan="2"><b>Public System Properties</b></td></tr>
+      <tr class="TableCellLight"><td>System version</td><td>
+      #[versionpp]# #(versioncomment)#:: - the latest public version is #[latestVersion]#. Click here to <a href="http://www.yacy.net/yacy/Download.html">download</a> it.#(/versioncomment)#
+      </td></tr>
+      <tr class="TableCellDark"><td>This&nbsp;peer's&nbsp;address</td><td>
+      #(peerAddress)#
+      Not assigned
+      ::
+      Not assigned. The peer must go online to get an address.
+      The peer does not go online until you use the proxy to surf the internet,
+      thus proving that you <i>want</i> to go online.
+      If you don't know how to configure your system to use a proxy,
+      see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installation instructions</a>.
+      ::
+      #[address]# ; Your '.yacy' home at http://www.#[peername]#.yacy
+      #(/peerAddress)#
+      </td></tr>
+      <tr class="TableCellLight"><td>This peer's name</td><td>#[peerName]#/#[hash]#</td></tr>
+      <tr class="TableCellDark"><td>This peer's statistics</td><td>
+      #(peerStatistics)#
+      Unknown
+      ::
+      Uptime = #[uptime]#, Links# = #[links]#, RWIs# = #[words]#, PPM = #[pagesperminute]#,
+      Connects (#[juniorConnects]#|#[seniorConnects]#|#[principalConnects]#|#[disconnects]#) #[connects]# peers/hour
+      #(/peerStatistics)#
+      </td></tr>
+      <tr class="TableCellLight"><td>This peer's status</td><td>
+      #(peerStatus)#
+      Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings (see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>), you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!
+      ::
+      Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured (usually: 8080), or to set up a 'virtual server' in your router settings (often called DMZ). Please be fair, contribute your own index to the global index.
+      ::
+      Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!
+      ::
+      Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL <a href="#[seedURL]#">#[seedURL]#</a>.<br />
+      You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.
+      #(/peerStatus)#
+      </td></tr>
+      <tr class="TableCellDark"><td>Other peers</td><td>#(otherPeers)#not online::#[num]# other peers online.#(/otherPeers)#</td></tr>
+      <tr class="TableCellLight"><td>Online-mode</td><td>
+      #(omode)#
+      You are in <i>Cache-browsing</i> mode.<br />
+      Only websites from the proxy-cache are accessible.
+      To switch online-mode, press one of the following buttons:
+      <form action="SettingsAck_p.html" method="get">
+        <div><input type="submit" name="emode" value="event-based Mode" />
+        <input type="submit" name="pmode" value="Permanent Mode" /></div>
+      </form>
+      ::
+      You are in <i>event-based</i> online mode.<br />
+      The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.
+      Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.
+      Use this only if you have a flatrate or you have an always-on connection.
+      To switch online-mode, press one of the following buttons:
+      <form action="SettingsAck_p.html" method="get">
+        <div><input type="submit" name="pmode" value="Go on-line" />
+        <input type="submit" name="cmode" value="Go to Cache-Mode" /></div>
+      </form>
+      ::
+      You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.
+      To switch online-mode, press one of the following buttons:
+      <form action="SettingsAck_p.html" method="get">
+        <div><input type="submit" name="emode" value="event-based Mode" />
+        <input type="submit" name="cmode" value="Go to Cache-Mode" /></div>
+      </form>
+      #(/omode)#
+      </td></tr>
+    </table>
+    #(showPrivateTable)#
+    Click <a href="Status.html?login=">here</a> to log in as administrator and see full status. 
+    ::
+    #(/showPrivateTable)#
+    #%[privateStatusTable]%#
+    <p><i>Last Refresh:</i> #[date]#</p>
+    
+    #%env/templates/footer.template%#
+  </body>
 </html>

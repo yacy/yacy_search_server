@@ -1,65 +1,73 @@
-<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Skins</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#%env/templates/submenuConfig.template%#
-<br>
-<h2>Skin Selection</h2>
-<p>
-You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.</p>
-<p>
-		<table border="0" cellpadding="5" cellspacing="1">
-			<tr>
-				<td valign="top" class="TableHeader" colspan="2">&nbsp;</td>
-			</tr>
-			<tr>
-				<td valign="top" class="TableCellDark">
-Current skin: 
-</td>
-				<td  valign="top" class="TableCellLight"> #[currentskin]#
-				</td>
-			</tr>
-			<tr>
-				<td valign="top" class="TableCellDark">
-Available Skins:
-				</td>
-				<td valign="top" class="TableCellLight">
-
-<form action="ConfigSkins_p.html">
-<select size="10" name="skin">
-#{skinlist}#
-<option value="#[file]#">#[name]#</option>
-#{/skinlist}#
-</select>
-<br>
-<input type="submit" name="use_button" value="Use">
-<input type="submit" name="delete" value="Delete"><br>
-</form>
-</td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">
-<form action="ConfigSkins_p.html">
-Install new skin from URL:
-</td>
-<td valign="top" class="TableCellLight">
-<input type="text" name="url" size="30"><br><input type="checkbox" name="use_skin" value="on" checked="true">Use this skin<br><br>
-<input type="submit" value="install">
-</form>
-<br>
-<b>#(status)#
-::
-Unable to get URL: #[url]#
-::
-Error saving the skin.
-#(status)#</b>
-</td>
-</tr>
-</table>
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Skins</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ConfigSkins">
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+    <h2>Skin Selection</h2>
+    <p>
+      You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.
+    </p>
+    <table border="0" cellpadding="5" cellspacing="1">
+      <tr>
+        <td valign="top" class="TableHeader" colspan="2">
+          &nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" class="TableCellDark">
+          Current skin: 
+        </td>
+        <td  valign="top" class="TableCellLight">
+          #[currentskin]#
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" class="TableCellDark">
+          Available Skins:
+        </td>
+        <td valign="top" class="TableCellLight">
+          <form action="ConfigSkins_p.html">
+            <fieldset>
+              <select size="10" name="skin">
+                #{skinlist}#
+                <option value="#[file]#">#[name]#</option>
+                #{/skinlist}#
+              </select>
+            </fieldset>
+            <fieldset>
+              <input type="submit" name="use_button" value="Use" />
+              <input type="submit" name="delete" value="Delete" />
+            </fieldset>
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" class="TableCellDark">
+          Install new skin from URL:
+        </td>
+        <td valign="top" class="TableCellLight">
+          <form action="ConfigSkins_p.html">
+            <fieldset>
+              <input type="text" name="url" size="30" /><br />
+              <input type="checkbox" name="use_skin" value="on" checked="checked" />Use this skin<br /><br />
+              <input type="submit" value="install" />
+            </fieldset>
+          </form>
+          <p>
+            <strong>#(status)#
+            ::
+            Unable to get URL: #[url]#
+            ::
+            Error saving the skin.
+            #(/status)#</strong>
+          </p>
+        </td>
+      </tr>
+    </table>
+    #%env/templates/footer.template%#
+  </body>
 </html>

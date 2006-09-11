@@ -1,247 +1,260 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Index Import</title>
-#%env/templates/metas.template%#
-<meta http-equiv="REFRESH" content="30">
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#%env/templates/submenuIndexControl.template%#
-<br>
-<h2>Index DB Import</h2>
-<p>The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.</p>
-<hr>
-#(error)#<!-- 0 -->
-	::<!-- 1 -->
-		<p><font color="red"><b>#[error_msg]#</b></font></p>
-	::<!-- 2 -->
-		<p><font color="red"><b>Import Job with the same path already started.</b></font></p>
-	::<!-- 3 -->
-		<p><font color="red"><b>#[error_msg]#</b></font></p>
-		<p><font color="red"><code>#[error_stackTrace]#</code></font></p>	
-#(/error)#
-<form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
-<h3>Starting new Job</h3>
-<table>
-<tr><td>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableCellLight">
-	<td>Import&nbsp;Type:</td>
-	<td title="the path to the database that should be imported"><select name="importType" size="1">
-    		<option value="plasmaDB">PLASMA DB Import</option>
-    		<option value="assortment">Assortment File Import</option>
-    		<option value="NURL">Crawling Queue Import</option>
-  		</select>
-  	</td>
-  	<td title="the cache size that should be used for the import db">Cache Size</td>
-  	<td><select name="cacheSize" size="1">
-    		<option value="2097152">2 MB</option>
-    		<option value="4194304">4 MB</option>
-    		<option value="8388608" selected="selected">8 MB</option>
-    		<option value="16777216">16 MB</option>
-    		<option value="33554432">32 MB</option>
-    		<option value="67108864">64 MB</option>
-    		<option value="134217728">128 MB</option>
-  		</select>
-  	</td>
-  	<td><a href="#usage">Usage Examples</a></td>
-</tr>
-<tr class="TableCellLight">
-	<td title="Path to the PLASMADB directory of the foreign peer">Import&nbsp;Path:</td>
-	<td colspan="3"><input name="importPath" type="text" size="50" value=""></td>
-	<td><input type="submit" name="startIndexDbImport" value="Start Import"></td>
-</tr>
-</table>
-</td>
-<td><font color="red"><b>Attention:</b><br>Always do a backup of your source and destination database before starting to use this import function.</font>
-</td>
-</tr>
-</table>
-</form>
-
-<hr>
-<h3>Currently running jobs</h3>
-<p>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader" valign="bottom">
-<td class="small">Job Type</td>
-<td class="small" width="150">Job Name</td>
-<td class="small" >Status</td>
-<td class="small" >%</td>
-<td class="small" >Elapsed<br>Time</td>
-<td class="small" >Time<br>Left</td>
-<td class="small" >Import Status</td>
-<td class="small" >Abort Import</td>
-<td class="small" >Pause Import</td>
-</tr>
-#{running.jobs}#
-<form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
-	<input type="hidden" name="jobNr" value="#[job_nr]#">
-    <tr class="TableCellLight">
-      <td class="small">#[type]#</td>
-      <td class="small" title="#[fullName]#">#[shortName]#</td>
-      <td class="small"><font color="#(runningStatus)#red::green::blue#(/runningStatus)#">#(runningStatus)#Finished::Running::Paused#(/runningStatus)#</font></td>
-      <td class="small" align="right">#[percent]#</td>
-      <td class="small" align="right">#[elapsed]#</td>
-      <td class="small" align="right">#[estimated]#</td>
-      <td class="small" align="left"><tt>#[status]#</tt></td>
-      <td class="small">
-      	#(stopped)#::
-      		<input type="submit" name="stopIndexDbImport" value="Abort">
-      	#(/stopped)#
-	  </td>
-      <td class="small">
-      	#(paused)#
-      	<input type="submit" name="pauseIndexDbImport" value="Pause">
-      	::
-      	<input type="submit" name="continueIndexDbImport" value="Continue">
-      	#(/paused)#
-	  </td>
-    </tr>
-</form>
-#{/running.jobs}#
-  </table>
-
-
-<hr>
-<form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
-<h3>Finished jobs</h3>
-<p>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader" valign="bottom">
-<td class="small">Job Type</td>
-<td class="small" width="150">Path</td>
-<td class="small" >Status</td>
-<td class="small" >%</td>
-<td class="small" >Elapsed<br>Time</td>
-<td class="small" >Import Status</td>
-</tr>
-#{finished.jobs}#
-    <tr class="TableCellLight">
-      <td class="small">#[type]#</td>
-      <td class="small" title="#[fullName]#">#[shortName]#</td>
-      <td class="small"><font color="#(runningStatus)#green::red::blue#(/runningStatus)#">#(runningStatus)#Finished::<b>Error:</b> #[errorMsg]#::Paused#(/runningStatus)#</font></td>
-	  <td class="small" align="right">#[percent]#</td>
-      <td class="small" align="right">#[elapsed]#</td>
-      <td class="small" align="left"><tt>#[status]#</tt></td>
-    </tr>
-#{/finished.jobs}#
-  </table>
-  <input type="submit" name="clearFinishedJobList" value="Clear List">
-</form>
-<p><font size="-3"><i>Last Refresh:</i> #[date]#</font></p>
-<hr>
-<p><div id="usage"><h2>Usage Examples:</h2></div></p>
-
-<p><h3>Plasma DB Import:</h3></p>
-<p>
-	<b>Example Path:</b> <tt>E:\PLASMADB\</tt><br>
-</p>
-<p>
-<b>Requirements:</b><br>
-You need to have at least the following directories and files in this path:
-<table border="1" cellpadding="2" cellspacing="1">
-	<tr style="background-color: lightgrey">
-		<td>Name</td>
-		<td>Type</td>
-		<td>Writeable</td>
-		<td>Description</td>
-	</tr>
-	<tr>
-		<td><tt>urlHash.db</tt></td>
-		<td>File</td>
-		<td>No</td>
-		<td>The LoadedURL Database containing all loaded and indexed URLs</td>
-	</tr>
-	<tr>
-		<td><tt>ACLUSTER</tt></td>
-		<td>Directory</td>
-		<td>Yes</td>
-		<td>The assortment directory containing parts of the word index.</td>
-	</tr>
-	<tr>
-		<td><tt>WORDS</tt></td>
-		<td>Directory</td>
-		<td>Yes</td>
-		<td>The words directory containing parts of the word index.</td>
-	</tr>			
-</table>
-</p>
-
-
-<p><h3>Assortment Import:</h3></p>
-<p>
-	<b>Example Path:</b> <tt>E:\PLASMADB\ACLUSTER\indexAssortment001.db</tt>
-</p>
-<p>
-<b>Requirements:</b><br>
-You need to have at least the following directories and files in this path:
-<table border="1" cellpadding="2" cellspacing="1">
-	<tr style="background-color: lightgrey">
-		<td>Name</td>
-		<td>Type</td>
-		<td>Writeable</td>
-		<td>Description</td>
-	</tr>
-	<tr>
-		<td><tt>indexAssortment001.db</tt></td>
-		<td>File</td>
-		<td>No</td>
-		<td>The assortment file that should be imported.<br>
-			<b>Attention:</b> The assortment file must have the postfix "[0-9]{3}\.db".
-			If you would like to import an assortment file from the <tt>PLASMADB\ACLUSTER\ABKP</tt>
-			you have to rename it first.</td>
-	</tr>
-</table>
-</p>
-<p>
-<b>Notes:</b><br>
-Please note that the imported words are useless if the destination peer doesn't know 
-the URLs the imported words belongs to.
-</p>
-
-<p><h3>Crawling Queue Import:</h3></p>
-<p>
-	<b>Example Path:</b> <tt>E:\PLASMADB\</tt>
-</p>
-<b>Requirements:</b><br>
-You need to have at least the following directories and files in this path:
-<table border="1" cellpadding="2" cellspacing="1">
-	<tr style="background-color: lightgrey">
-		<td>Name</td>
-		<td>Type</td>
-		<td>Writeable</td>
-		<td>Description</td>
-	</tr>
-	<tr>
-		<td><tt>crawlProfiles0.db</tt></td>
-		<td>File</td>
-		<td>No</td>
-		<td>Contains data about the crawljob an URL belongs to</td>
-	</tr>
-	<tr>
-		<td><tt>urlNotice1.db</tt></td>
-		<td>File</td>
-		<td>Yes</td>
-		<td>The crawling queue</td>
-	</tr>	
-	<tr>
-		<td><tt>urlNoticeImage0.stack</tt></td>
-		<td rowspan="8">File</td>
-		<td rowspan="8">Yes</td>
-		<td rowspan="8">Various stack files that belong to the crawling queue</td>
-	</tr>	
-	<tr><td><tt>urlNoticeImage0.stack</tt></td></tr>
-	<tr><td><tt>urlNoticeLimit0.stack</tt></td></tr>
-	<tr><td><tt>urlNoticeLocal0.stack</tt></td></tr>
-	<tr><td><tt>urlNoticeMovie0.stack</tt></td></tr>
-	<tr><td><tt>urlNoticeMusic0.stack</tt></td></tr>
-	<tr><td><tt>urlNoticeOverhang0.stack</tt></td></tr>
-	<tr><td><tt>urlNoticeRemote0.stack</tt></td></tr>		
-</table>
-</p>
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Import</title>
+    #%env/templates/metas.template%#
+    <meta http-equiv="REFRESH" content="30" />
+  </head>
+  <body id="IndexImport">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    <h2>Index DB Import</h2>
+    <p>The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.</p>
+    #(error)#<!-- 0 -->
+      ::<!-- 1 -->
+        <p class="error">#[error_msg]#</p>
+      ::<!-- 2 -->
+        <p class="error">Import Job with the same path already started.</p>
+      ::<!-- 3 -->
+        <p class="error">#[error_msg]#</p>
+        <p class="error"><code>#[error_stackTrace]#</code></p>
+    #(/error)#
+    <form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
+      <h3>Starting new Job</h3>
+      <table border="0" cellpadding="2" cellspacing="1">
+        <tr class="TableCellLight">
+          <td>Import&nbsp;Type:</td>
+          <td title="the path to the database that should be imported">
+            <select name="importType" size="1">
+              <option value="plasmaDB">PLASMA DB Import</option>
+              <option value="assortment">Assortment File Import</option>
+              <option value="NURL">Crawling Queue Import</option>
+            </select>
+          </td>
+          <td title="the cache size that should be used for the import db">Cache Size</td>
+          <td>
+            <select name="cacheSize" size="1">
+              <option value="2097152">2 MB</option>
+              <option value="4194304">4 MB</option>
+              <option value="8388608" selected="selected">8 MB</option>
+              <option value="16777216">16 MB</option>
+              <option value="33554432">32 MB</option>
+              <option value="67108864">64 MB</option>
+              <option value="134217728">128 MB</option>
+            </select>
+          </td>
+          <td><a href="#usage">Usage Examples</a></td>
+        </tr>
+        <tr class="TableCellLight">
+          <td title="Path to the PLASMADB directory of the foreign peer">Import&nbsp;Path:</td>
+          <td colspan="3"><input name="importPath" type="text" size="50" value="" /></td>
+          <td><input type="submit" name="startIndexDbImport" value="Start Import" /></td>
+        </tr>
+      </table>
+      <p class="warning"><strong>Attention:</strong><br />Always do a backup of your source and destination database before starting to use this import function.</p>
+    </form>
+    
+    <hr />
+    <h3>Currently running jobs</h3>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <colgroup>
+        <col />
+        <col width="150" />
+        <col span="7" />
+      </colgroup>
+      <tr class="TableHeader" valign="bottom">
+        <td>Job Type</td>
+        <td>Job Name</td>
+        <td>Status</td>
+        <td>%</td>
+        <td>Elapsed<br />Time</td>
+        <td>Time<br />Left</td>
+        <td>Import Status</td>
+        <td>Abort Import</td>
+        <td>Pause Import</td>
+      </tr>
+      #{running.jobs}#
+      <form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
+        <tr class="TableCellLight">
+          <td>#[type]#</td>
+          <td title="#[fullName]#">#[shortName]#</td>
+          <td style="color:#(runningStatus)#red::green::blue#(/runningStatus)#;">#(runningStatus)#Finished::Running::Paused#(/runningStatus)#</td>
+          <td align="right">#[percent]#</td>
+          <td align="right">#[elapsed]#</td>
+          <td align="right">#[estimated]#</td>
+          <td align="left"><tt>#[status]#</tt></td>
+          <td>
+            <input type="hidden" name="jobNr" value="#[job_nr]#" />
+            #(stopped)#::
+            <input type="submit" name="stopIndexDbImport" value="Abort" />
+            #(/stopped)#
+          </td>
+          <td>
+            #(paused)#
+            <input type="submit" name="pauseIndexDbImport" value="Pause" />
+            ::
+            <input type="submit" name="continueIndexDbImport" value="Continue" />
+            #(/paused)#
+          </td>
+        </tr>
+      </form>
+    #{/running.jobs}#
+    </table>
+    
+    
+    <hr />
+    <form action="IndexImport_p.html" method="post" enctype="multipart/form-data">
+      <h3>Finished jobs</h3>
+      <table border="0" cellpadding="2" cellspacing="1">
+        <colgroup>
+          <col />
+          <col width="150" />
+          <col span="4" />
+        </colgroup>
+        <tr class="TableHeader" valign="bottom">
+          <td>Job Type</td>
+          <td>Path</td>
+          <td>Status</td>
+          <td>%</td>
+          <td>Elapsed<br />Time</td>
+          <td>Import Status</td>
+        </tr>
+      #{finished.jobs}#
+        <tr class="TableCellLight">
+          <td>#[type]#</td>
+          <td title="#[fullName]#">#[shortName]#</td>
+          <td><font color="#(runningStatus)#green::red::blue#(/runningStatus)#">#(runningStatus)#Finished::<b>Error:</b> #[errorMsg]#::Paused#(/runningStatus)#</font></td>
+          <td align="right">#[percent]#</td>
+          <td align="right">#[elapsed]#</td>
+          <td align="left"><tt>#[status]#</tt></td>
+        </tr>
+      #{/finished.jobs}#
+      </table>
+      <fieldset>
+        <input type="submit" name="clearFinishedJobList" value="Clear List" />
+      </fieldset>
+    </form>
+    <p><em>Last Refresh:</em> #[date]#</p>
+    <hr />
+    <h2 id="usage">Usage Examples:</h2>
+    
+    <h3>Plasma DB Import:</h3>
+    <p>
+      <strong>Example Path:</strong> <tt>E:\PLASMADB\</tt>
+    </p>
+    <p>
+      <strong>Requirements:</strong>
+    </p>
+    <p>
+      You need to have at least the following directories and files in this path:
+    </p>
+    <table border="1" cellpadding="2" cellspacing="1">
+      <tr class="example">
+        <td>Name</td>
+        <td>Type</td>
+        <td>Writeable</td>
+        <td>Description</td>
+      </tr>
+      <tr>
+        <td><tt>urlHash.db</tt></td>
+        <td>File</td>
+        <td>No</td>
+        <td>The LoadedURL Database containing all loaded and indexed URLs</td>
+      </tr>
+      <tr>
+        <td><tt>ACLUSTER</tt></td>
+        <td>Directory</td>
+        <td>Yes</td>
+        <td>The assortment directory containing parts of the word index.</td>
+      </tr>
+      <tr>
+        <td><tt>WORDS</tt></td>
+        <td>Directory</td>
+        <td>Yes</td>
+        <td>The words directory containing parts of the word index.</td>
+      </tr>			
+    </table>
+    
+    <h3>Assortment Import:</h3>
+    <p>
+      <strong>Example Path:</strong> <tt>E:\PLASMADB\ACLUSTER\indexAssortment001.db</tt>
+    </p>
+    <p>
+      <strong>Requirements:</strong>
+    </p>
+    <p>
+      You need to have at least the following directories and files in this path:
+    </p>
+    <table border="1" cellpadding="2" cellspacing="1">
+      <tr class="example">
+        <td>Name</td>
+        <td>Type</td>
+        <td>Writeable</td>
+        <td>Description</td>
+      </tr>
+      <tr>
+        <td><tt>indexAssortment001.db</tt></td>
+        <td>File</td>
+        <td>No</td>
+        <td>The assortment file that should be imported.<br />
+          <strong>Attention:</strong> The assortment file must have the postfix "[0-9]{3}\.db".
+          If you would like to import an assortment file from the <tt>PLASMADB\ACLUSTER\ABKP</tt>
+          you have to rename it first.
+        </td>
+      </tr>
+    </table>
+    <p>
+      <strong>Notes:</strong>
+    </p>
+    <p>
+      Please note that the imported words are useless if the destination peer doesn't know 
+      the URLs the imported words belongs to.
+    </p>
+    
+    <h3>Crawling Queue Import:</h3>
+    <p>
+      <strong>Example Path:</strong> <tt>E:\PLASMADB\</tt>
+    </p>
+    <p>
+    <strong>Requirements:</strong>
+    </p>
+    <p>
+      You need to have at least the following directories and files in this path:
+    </p>
+    <table border="1" cellpadding="2" cellspacing="1">
+      <tr class="example">
+        <td>Name</td>
+        <td>Type</td>
+        <td>Writeable</td>
+        <td>Description</td>
+      </tr>
+      <tr>
+        <td><tt>crawlProfiles0.db</tt></td>
+        <td>File</td>
+        <td>No</td>
+        <td>Contains data about the crawljob an URL belongs to</td>
+      </tr>
+      <tr>
+        <td><tt>urlNotice1.db</tt></td>
+        <td>File</td>
+        <td>Yes</td>
+        <td>The crawling queue</td>
+      </tr>	
+      <tr>
+        <td><tt>urlNoticeImage0.stack</tt></td>
+        <td rowspan="8">File</td>
+        <td rowspan="8">Yes</td>
+        <td rowspan="8">Various stack files that belong to the crawling queue</td>
+      </tr>	
+      <tr><td><tt>urlNoticeImage0.stack</tt></td></tr>
+      <tr><td><tt>urlNoticeLimit0.stack</tt></td></tr>
+      <tr><td><tt>urlNoticeLocal0.stack</tt></td></tr>
+      <tr><td><tt>urlNoticeMovie0.stack</tt></td></tr>
+      <tr><td><tt>urlNoticeMusic0.stack</tt></td></tr>
+      <tr><td><tt>urlNoticeOverhang0.stack</tt></td></tr>
+      <tr><td><tt>urlNoticeRemote0.stack</tt></td></tr>		
+    </table>
+    
+    #%env/templates/footer.template%#
+  </body>
 </html>

@@ -1,37 +1,42 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Advanced Config</title>
-#%env/templates/metas.template%#
-<script>
-<!--
-function element_clicked(element){
-document.getElementById("key").value=element.id;
-document.getElementById("value").value=element.value;
-}
--->
-</script>
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-<h2>Advanced Config</h2>
-<p>
-Here are all configuration options from YaCy.<br>
-You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.
-For explanation please look into yacy.init
-</p>
-<select name="options" size="25" style="width: 600">
-#{options}#<option id="#[key]#" value="#[value]#" onclick="element_clicked(this)">#[key]#: #[value]#</option>
-#{/options}#
-</select><br>
-<form action="Config_p.html" method="POST">
-<input type="text" id="key" name="key" size="40">:<input type="text" id="value" name="value" size="40">
-<input type="Submit" value="Save">
-</form>
-
-
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Advanced Config</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript">
+      <!--
+      function element_clicked(element){
+        document.getElementById("key").value=element.id;
+        document.getElementById("value").value=element.value;
+      }
+      -->
+    </script>
+  </head>
+  <body id="Config">
+  #%env/templates/header.template%#
+  
+  <h2>Advanced Config</h2>
+  <p>
+    Here are all configuration options from YaCy.
+  </p>
+  <p>
+    You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.
+  </p>
+  <p>
+    For explanation please look into yacy.init
+  </p>
+  <select name="options" size="25" style="width: 600px">
+    #{options}#
+    <option id="#[key]#" value="#[value]#" onclick="element_clicked(this)">#[key]#: #[value]#</option>
+    #{/options}#
+  </select><br />
+  <form action="Config_p.html" method="post">
+    <fieldset>
+      <input type="text" id="key" name="key" size="40" />:<input type="text" id="value" name="value" size="40" />
+      <input type="submit" value="Save" />
+    </fieldset>
+  </form>
+  
+  #%env/templates/footer.template%#
+  </body>
 </html>

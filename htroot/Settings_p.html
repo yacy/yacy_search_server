@@ -1,65 +1,50 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Settings</title>
-#%env/templates/metas.template%#
-
-<script language="JavaScript">
-
-function ParserCheckboxes(reference)
-{
-	var mode = reference.name.substring(0,reference.name.indexOf("."));
-	for(i=0; i<document.parsersettings.elements.length; i++)
-	{
-		if(document.parsersettings.elements[i].type=="checkbox" && document.parsersettings.elements[i].name.indexOf(mode) >= 0)
-		{
-			document.parsersettings.elements[i].checked=reference.checked;
-		}
-	}
-}
-</script>
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-<h2>Settings</h2>
-<p>This is the configuration page for YaCy. Access to this page should be limited to an administration person only.
-To restrict the access to this page, please set an administrator account and password <a href="#admin">below.</a></p>
-<p>If you want to restore all settings to the default values,
-but <b>forgot your administration password</b>, you must stop the proxy,
-delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.
-<p>
-<table>
-<tr>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=admin">Administration Account Settings</a></td>
-	<td rowspan="6" width="30">&nbsp;</td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=ServerAccess">Server Access Settings</a></td>
-</tr>
-<tr>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=general">General Settings</a></td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=SystemBehaviour">System Behaviour Settings</a></td>
-</tr>
-<tr>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=ProxyAccess">Proxy Access Settings</a></td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=seed">Seed Upload Settings</a></td>
-</tr>
-<tr>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=http">HTTP Networking</a></td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=messageForwarding">Message Forwarding (optional)</a></td>
-</tr>
-<tr>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=proxy">Remote Proxy (optional)</a></td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=parser">Content Parser Settings</a></td>
-</tr>
-<tr>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=portForwarding">Port Forwarding (optional)</a></td>
-	<td><img src="env/grafics/down.gif" alt="down"><a href="?page=crawler">Crawler Settings</a></td>
-</tr>
-
-</table>
-</p>
-#%[settingsTables]%#
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Settings</title>
+    #%env/templates/metas.template%#
+    
+    <script type="text/javascript">
+    /* <![CDATA[ */
+    function ParserCheckboxes(reference)
+    {
+      var mode = reference.name.substring(0,reference.name.indexOf("."));
+      for(i=0; i<document.parsersettings.elements.length; i++)
+      {
+        if(document.parsersettings.elements[i].type=="checkbox" && document.parsersettings.elements[i].name.indexOf(mode) >= 0)
+        {
+          document.parsersettings.elements[i].checked=reference.checked;
+        }
+      }
+    }
+    /* ]]> */
+    </script>
+  </head>
+  <body id="Settings">
+    #%env/templates/header.template%#
+    <h2>Settings</h2>
+    <p>This is the configuration page for YaCy. Access to this page should be limited to an administration person only.
+    To restrict the access to this page, please set an administrator account and password <a href="#admin">below.</a></p>
+    <p>If you want to restore all settings to the default values,
+    but <strong>forgot your administration password</strong>, you must stop the proxy,
+    delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.
+    </p>
+    <ul class="settingsMenu">
+      <li><a href="?page=admin">Administration Account Settings</a></li>
+      <li><a href="?page=general">General Settings</a></li>
+      <li><a href="?page=ProxyAccess">Proxy Access Settings</a></li>
+      <li><a href="?page=http">HTTP Networking</a></li>
+      <li><a href="?page=proxy">Remote Proxy (optional)</a></li>
+      <li><a href="?page=portForwarding">Port Forwarding (optional)</a></li>
+      <li><a href="?page=ServerAccess">Server Access Settings</a></li>
+      <li><a href="?page=SystemBehaviour">System Behaviour Settings</a></li>
+      <li><a href="?page=seed">Seed Upload Settings</a></li>
+      <li><a href="?page=messageForwarding">Message Forwarding (optional)</a></li>
+      <li><a href="?page=parser">Content Parser Settings</a></li>
+      <li><a href="?page=crawler">Crawler Settings</a></li>
+    </ul>
+    #%[settingsTables]%#
+    
+    #%env/templates/footer.template%#
+  </body>
 </html>

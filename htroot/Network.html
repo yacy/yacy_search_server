@@ -1,270 +1,272 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Network Overview</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<table width="100%" border="0" cellpadding="0" cellspacing="0" class="SubMenu">
-<tr height="10"><td colspan="7" class="MenuHeader">&nbsp;Network Menu</td></tr>
-<tr height="2"><td colspan="7"></td></tr>
-<tr class="TableHeader">
-<td width="25%" class="MenuSubItem">&nbsp;&nbsp;<a href="/Network.html" class="MenuItemLink">Network&nbsp;Overview</a>&nbsp;</td>
-<td class="MenuSubSpacer"></td>
-<td width="25%" class="MenuSubItem">&nbsp;&nbsp;<a href="/Network.html?page=1" class="MenuItemLink">Active&nbsp;Peers</a>&nbsp;</td>
-<td class="MenuSubSpacer"></td>
-<td width="25%" class="MenuSubItem">&nbsp;&nbsp;<a href="/Network.html?page=2" class="MenuItemLink">Passive&nbsp;Peers</a>&nbsp;</td>
-<td class="MenuSubSpacer"></td>
-<td width="25%" class="MenuSubItem">&nbsp;&nbsp;<a href="/Network.html?page=3" class="MenuItemLink">Potential&nbsp;Peers</a>&nbsp;</td>
-</tr>
-</table>
-<br>
-#(page)#
-<h2>Network Overview</h2>
-::
-<h2>Active Peers</h2>
-::
-<h2>Passive Peers</h2>
-::
-<h2>Potential Peers</h2>
-::
-<h2>Manually contacting Peer</h2>
-#(/page)#
-<p>
-#(table)#
-<p>no remote #[peertype]# peer for this list known</p>
-::
-<p>Showing #[num]# entries from a total of #[total]# peers.<br>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader" valign="bottom">
-<td class="small">send&nbsp;<b>M</b>essage/<br>show&nbsp;<b>P</b>rofile/<br>edit&nbsp;<b>W</b>iki<br>&nbsp;</td>
-<td class="small"><b>Name</b><br>&nbsp;</td>
-<td class="small"><b>Info</b><br>&nbsp;</td>
-<td class="small"><b>Release/<br>SVN</b><br>&nbsp;</td>
-<td class="small"><b>PPM</b><br>&nbsp;</td>
-<td class="small"><b>Last<br>Seen</b><br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=LastSeen&order=down">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=LastSeen&order=up">&gt;</a></td>
-<td class="small"><b>UTC</b><br>Offset<br>&nbsp;</td>
-<td class="small"><b>Location</b><br><br>&nbsp;</td>
-<td class="small"><b>Uptime</b><br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=Uptime&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=Uptime&order=down">&gt;</a></td>
-<td class="small"><b>#Links</b><br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=LCount&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=LCount&order=down">&gt;</a></td>
-<td class="small"><b>#RWIs</b><br>&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&sort=ICount&order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&sort=ICount&order=down">&gt;</a></td>
-<td class="small"><b>Sent<br>Words</b><br>&nbsp;</td>
-<td class="small"><b>Sent<br>URLs</b><br>&nbsp;</td>
-<td class="small"><b>Received<br>Words</b><br>&nbsp;</td>
-<td class="small"><b>Received<br>URLs</b><br>&nbsp;</td>
-#(complete)#::
-<td class="small"><b>Address</b><br>&nbsp;</td>
-<td class="small"><b>Hash</b><br>&nbsp;</td>
-<td class="small"><b>#CR-<br>Files</b><br>Own/Other</td>
-<td class="small"><b>Age</b><br>&nbsp;</td>
-<td class="small"><b>#Seeds</b><br>&nbsp;</td>
-<td class="small"><b>con/h<br></b><br>&nbsp;</td>
-<td class="small"><b>user agent<br></b><br>&nbsp;</td>
-<td class="small"><b>Peer<br>Ping</b><br>&nbsp;</td>
-#(/complete)#
-</tr>
-#{list}#
-<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-<td class="small">
-  <a href="MessageSend_p.html?hash=#[hash]#" class="small" title="Send message to peer #[fullname]#">m</a>&nbsp;&nbsp;
-  <a href="ViewProfile.html?hash=#[hash]#" class="small" title="View profile of peer #[fullname]#">p</a>&nbsp;&nbsp;
-  <a href="http://#[fullname]#.yacy/Wiki.html" class="small" title="Read and edit wiki on peer #[fullname]#">w</a>&nbsp;&nbsp;
-  #(updatedProfile)#::<a href="ViewProfile.html?hash=#[hash]#"><img border="0" src="/env/grafics/profile.gif" align="bottom"></a>#(/updatedProfile)#
-  #(updatedWiki)#::<a href="http://#[address]#/Wiki.html?page=#[page]#" title="#[page]#"><img border="0" src="/env/grafics/wiki.gif" align="bottom"></a>#(/updatedWiki)#
-  #(updatedBlog)#::<a href="http://#[address]#/Blog.html?page=#[page]#" title="#[subject]#"><img border="0" src="/env/grafics/blog.gif" align="bottom"></a>#(/updatedBlog)#
-  #(isCrawling)#::<a href="#[page]#"><img border="0" src="/env/grafics/crawl.gif" align="bottom"></a>#(/isCrawling)#
-</td>
-<td class="small"><a href="http://www.#[fullname]#.yacy" class="small">#[shortname]#</a></td>
-<td class="small">
-#(type)##(direct)#<img border="0" src="/env/grafics/JuniorPassive.gif" title="Type: Junior | Contact: passive"></img>::<img border="0" src="/env/grafics/JuniorDirect.gif" title="Type: Junior | Contact: direct"></img>::<img border="0" src="/env/grafics/JuniorOffline.gif" title="Type: Junior | Contact: offline"></img>#(/direct)#::#(direct)#<img border="0" src="/env/grafics/SeniorPassive.gif" title="Type: Senior | Contact: passive"></img>::<img border="0" src="/env/grafics/SeniorDirect.gif" title="Type: Senior | Contact: direct"></img>::<img border="0" src="/env/grafics/SeniorOffline.gif" title="Type: Senior | Contact: offline"></img>#(/direct)#::<a href="#[url]#">#(direct)#<img border="0" src="/env/grafics/PrincipalPassive.gif" title="Type: Principal | Contact: passive | Seed download: possible"></img>::<img border="0" src="/env/grafics/PrincipalDirect.gif"  title="Type: Principal | Contact: direct | Seed download: possible"></img>::<img border="0" src="/env/grafics/PrincipalOffline.gif"  title="Type: Principal | Contact: offline | Seed download: ?"></img>#(/direct)#</a>#(/type)##(acceptcrawl)#<img border="0" src="/env/grafics/CrawlNo.gif" title="Accept Crawl: no"></img>::<img border="0" src="/env/grafics/CrawlYes.gif" title="Accept Crawl: yes"></img>::<img border="0" src="/env/grafics/CrawlYesOffline.gif" title="Accept Crawl: yes"></img>#(/acceptcrawl)##(dhtreceive)#<img border="0" src="/env/grafics/DHTReceiveNo.gif" title="DHT Receive: no"></img>::<img border="0" src="/env/grafics/DHTReceiveYes.gif" title="DHT Receive: yes"></img>::<img border="0" src="/env/grafics/DHTReceiveYesOffline.gif" title="DHT Receive: yes"></img>#(/dhtreceive)##(rankingreceive)#<img border="0" src="/env/grafics/RankingReceiveNo.gif" title="Ranking Receive: no"></img>::<img border="0" src="/env/grafics/RankingReceiveYes.gif" title="Ranking Receive: yes"></img>::<img border="0" src="/env/grafics/RankingCollects.gif" title="Ranking Receive: collection"></img>#(/rankingreceive)#</td>
-<td class="small" align="right">#[version]#</td>
-<td class="small" align="right">#[ppm]#</td>
-<td class="small" align="right">#[lastSeen]#</td>
-<td class="small" align="right">#[utc]#</td>
-<td class="small" align="right">#[location]#</td>
-<td class="small" align="right"><NOBR>#[uptime]#</NOBR></td>
-<td class="small" align="right">#[links]#</td>
-<td class="small" align="right">#[words]#</td>
-<td class="small" align="right">#[sI]#</td>
-<td class="small" align="right">#[sU]#</td>
-<td class="small" align="right">#[rI]#</td>
-<td class="small" align="right">#[rU]#</td>
-#(complete)#
-::
-<td class="small"><a href="http://#[ip]#:#[port]#/Network.html?page=1&ip=" class="small">http://#[ip]#:#[port]#</a></td>
-<td class=small>#[hash]#</td>
-<td class="small" align="center">#[CRWCnt]#/#[CRTCnt]#</td>
-<td class=small>#[age]#</td>
-<td class="small" align="right">#[seeds]#</td>
-<td class="small" align="right">#[connects]#</td>
-<td class="small" align="right">#[userAgent]#</td>
-<td class="small" align="right">[<a href="Network.html?page=4&peerHash=#[hash]#&peerIP=#[ip]#&peerPort=#[port]#&addPeer=add+Peer">Ping</a>]</td>
-#(/complete)#
-</tr>
-#{/list}#
-<tr><td colspan="16" align="left"><p><font size="-3"><i>runtime: #[rt]# ms</i></font></p></td></tr>
-</table>
-</p>
-#(progressbar)#::
-Progress towards the next peer: #[percent]#%.<br />
- At current PPM you will reach him #(timemessage)#in an unknown time::in #[time]#::never, because he is faster than you#(/timemessage)#.<br />
-<!--#{percent}#<img src="/env/grafics/green-block.png">#{/percent}##{percent2}#<img src="/env/grafics/red-block.png">#{/percent2}#-->
-<div height="20" style="border-style:solid; border-width:1px; border-color:#CAD5E3">
-	<img src="env/grafics/green_bar.gif" width="#[percent]#%" height="20" alt=""><img src="env/grafics/red_bar.png" width="#[percent2]#%" height="20" alt="">
-</div>
-#(/progressbar)#
-::
-<p><font size="1">All Peers:<br>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader">
-<td class="small">Branch</td>
-<td class="small">#Peers</td>
-<td class="small">#All Links</td>
-<td class="small">#All Words</td>
-</tr>
-<tr class="TableCellDark">
-<td class="small" align="left">Active (connected Senior and Principal)</td>
-<td class="small" align="right">#[active-count]#</td>
-<td class="small" align="right">#[active-links]#</td>
-<td class="small" align="right">#[active-words]#</td>
-</tr>
-<tr class="TableCellDark">
-<td class="small" align="left">Passive (disconnected Senior and Principal)</td>
-<td class="small" align="right">#[passive-count]#</td>
-<td class="small" align="right">#[passive-links]#</td>
-<td class="small" align="right">#[passive-words]#</td>
-</tr>
-<tr class="TableCellDark">
-<td class="small" align="left">Potential (Junior)</td>
-<td class="small" align="right">#[potential-count]#</td>
-<td class="small" align="right">#[potential-links]#</td>
-<td class="small" align="right">#[potential-words]#</td>
-</tr>
-<tr class="TableCellSummary">
-<td class="small" align="left">Network Total</td>
-<td class="small" align="right">#[all-count]#</td>
-<td class="small" align="right">#[all-links]#</td>
-<td class="small" align="right">#[all-words]#</td>
-</tr>
-</table>
-</p>
-<p>
-YaCy Cluster Indexing Speed: #[gppm]# Pages Per Minute (Accumulated PPM over Active Peers).
-</p>
-<p>Your Peer:<br>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader">
-<td class="small">Name</td>
-<td class="small">Info</td>
-<td class="small">Version</td>
-<td class="small">UTC</td>
-<td class="small">Uptime</td>
-<td class="small">#Links</td>
-<td class="small">#RWIs</td>
-<td class="small">Sent<br>Words</td>
-<td class="small">Sent<br>URLs</td>
-<td class="small">Received<br>Words</td>
-<td class="small">Received<br>URLs</td>
-<td class="small">PPM</td>
-<td class="small">total PPM</td>
-<td class="small">#Seeds</td>
-<td class="small">#Connects<br>per hour</td>
-</tr>
-<tr class="TableCellDark">
-<td class="small">#[my-name]#</td>
-<td class="small">#(my-info)#<img border="0" src="/env/grafics/Virgin.gif" title="Type: Virgin"></img>::<img border="0" src="/env/grafics/JuniorDirect.gif" title="Type: Junior"></img>::<img border="0" src="/env/grafics/SeniorDirect.gif" title="Type: Senior"></img>::<img border="0" src="/env/grafics/PrincipalDirect.gif" title="Type: Principal"></img>#(/my-info)##(my-acceptcrawl)#<img border="0" src="/env/grafics/CrawlNo.gif" title="Accept Crawl: no"></img>::<img border="0" src="/env/grafics/CrawlYes.gif" title="Accept Crawl: yes"></img>#(/my-acceptcrawl)##(my-dhtreceive)#<img border="0" src="/env/grafics/DHTReceiveNo.gif" title="DHT Receive: no"></img>::<img border="0" src="/env/grafics/DHTReceiveYes.gif" title="DHT Receive: yes"></img>#(/my-dhtreceive)##(my-rankingreceive)#<img border="0" src="/env/grafics/RankingReceiveNo.gif" title="Ranking Receive: no"></img>::<img border="0" src="/env/grafics/RankingReceiveYes.gif" title="Ranking Receive: yes"></img>#(/my-rankingreceive)#</td>
-<td class="small" align="right">#[my-version]#</td>
-<td class="small" align="right">#[my-utc]#</td>
-<td class="small" align="right">#[my-uptime]#</td>
-<td class="small" align="right">#[my-links]#</td>
-<td class="small" align="right">#[my-words]#</td>
-<td class="small" align="right">#[my-sI]#</td>
-<td class="small" align="right">#[my-sU]#</td>
-<td class="small" align="right">#[my-rI]#</td>
-<td class="small" align="right">#[my-rU]#</td>
-<td class="small" align="right">#[my-ppm]#</td>
-<td class="small" align="right">#[my-totalppm]#</td>
-<td class="small" align="right">#[my-seeds]#</td>
-<td class="small" align="right">#[my-connects]#</td>
-</tr>
-</table>
-</p>
-<p><a href="NetworkPicture.png?width=800&height=600"><img src="NetworkPicture.png"></a></p>
-<p>
-<table border="0">
-	<tr>
-	    <td>&nbsp;</td>
-		<td class="small"><u>Network legend:</u></td>
-		<td></td>
-		<td></td>
-	</tr>
-	<tr>
-		<td bgcolor="#000000">&nbsp;</td>
-		<td class="small">dark font</td>
-		<td class="small">:</td>
-		<td class="small">senior/principal peers</td>
-	</tr>
-	<tr>
-		<td bgcolor="#E7B7AF">&nbsp;</td>
-		<td class="small">lightred font</td>
-		<td class="small">:</td>
-		<td class="small">passiv peers (< 5 hour passiv time)</td>
-	</tr>
-	<tr>
-		<td bgcolor="#A7A75F">&nbsp;</td>
-		<td class="small">turquoise font</td>
-		<td class="small">:</td>
-		<td class="small">junior peers</td>
-	</tr>
-	<tr>
-		<td bgcolor="#C1A77F">&nbsp;</td>
-		<td class="small">red point</td>
-		<td class="small">:</td>
-		<td class="small">this peer</td>
-	</tr>
-</table>
-</p>
-<p>
-#(comment)#
-::
-You are in online mode, but probably no internet resource is available. Please check your internet connection.
-::
-You are either not in online mode or you do not use the proxy option.
-To get connection to the YaCy network, you must use the proxy by setting your browser's settings
-('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>
-for an installation guide) or you can go online by activating the permanent online mode.
-To do this, press this button:
-<form action="SettingsAck_p.html" method="get">
-<input type="submit" name="pmode" value="go online">
-</form>
-#(/comment)#
-</p></font>
-::
-<p>
-#(comment)#
-::
-<font color="red"><code>#[status]#</code></font>
-::
-<font color="green"><code>#[status]#</code></font>
-</p>
-<p>
-<font color="green"><code><small>#[details]#</small></code></font>
-</p>
-#(/comment)#
-</p>
-
-<form action="Network.html" method="get">
-<input name="page" type="hidden" value="4">
-<table>
-<tr><td>Peer Hash</td><td><input name="peerHash" type="text" size="32" maxlength="128" value="#[peerHash]#"></td></tr>
-<tr><td>Peer IP</td><td><input name="peerIP" type="text" size="32" maxlength="128" value="#[peerIP]#"></td></tr>
-<tr><td>Peer Port</td><td><input name="peerPort" type="text" size="32" maxlength="128" value="#[peerPort]#"></td></tr>
-<tr><td>&nbsp;</td><td><input type="submit" name="addPeer" value="add Peer"></td></tr>
-</table>
-</form>
-#(/table)#
-#%env/templates/footer.template%#
-
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Network Overview</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Network">
+    #%env/templates/header.template%#
+    <div class="SubMenu">
+      <h3>Network Menu</h3>
+      <ul class="SubMenu">
+        <li><a href="/Network.html" class="MenuItemLink">Network&nbsp;Overview</a></li>
+        <li><a href="/Network.html?page=1" class="MenuItemLink">Active&nbsp;Peers</a></li>
+        <li><a href="/Network.html?page=2" class="MenuItemLink">Passive&nbsp;Peers</a></li>
+        <li><a href="/Network.html?page=3" class="MenuItemLink">Potential&nbsp;Peers</a></li>
+      </ul>
+    </div>
+    #(page)#
+    <h2>Network Overview</h2>
+    ::
+    <h2>Active Peers</h2>
+    ::
+    <h2>Passive Peers</h2>
+    ::
+    <h2>Potential Peers</h2>
+    ::
+    <h2>Manually contacting Peer</h2>
+    #(/page)#
+    #(table)#
+    <p>no remote #[peertype]# peer for this list known</p>
+    ::
+    <p>Showing #[num]# entries from a total of #[total]# peers.</p>
+    <table class="networkTable" border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>send&nbsp;<strong>M</strong>essage/<br />show&nbsp;<strong>P</strong>rofile/<br />edit&nbsp;<strong>W</strong>iki<br />&nbsp;</td>
+        <td><strong>Name</strong><br />&nbsp;</td>
+        <td><strong>Info</strong><br />&nbsp;</td>
+        <td><strong>Release/<br />SVN</strong><br />&nbsp;</td>
+        <td><strong>PPM</strong><br />&nbsp;</td>
+        <td><strong>Last<br />Seen</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LastSeen&amp;order=down">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LastSeen&amp;order=up">&gt;</a></td>
+        <td><strong>UTC</strong><br />Offset<br />&nbsp;</td>
+        <td><strong>Location</strong><br /><br />&nbsp;</td>
+        <td><strong>Uptime</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=Uptime&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=Uptime&amp;order=down">&gt;</a></td>
+        <td><strong>#Links</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LCount&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LCount&amp;order=down">&gt;</a></td>
+        <td><strong>#RWIs</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=ICount&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=ICount&amp;order=down">&gt;</a></td>
+        <td><strong>Sent<br />Words</strong><br />&nbsp;</td>
+        <td><strong>Sent<br />URLs</strong><br />&nbsp;</td>
+        <td><strong>Received<br />Words</strong><br />&nbsp;</td>
+        <td><strong>Received<br />URLs</strong><br />&nbsp;</td>
+        #(complete)#::
+        <td><strong>Address</strong><br />&nbsp;</td>
+        <td><strong>Hash</strong><br />&nbsp;</td>
+        <td><strong>#CR-<br />Files</strong><br />Own/Other</td>
+        <td><strong>Age</strong><br />&nbsp;</td>
+        <td><strong>#Seeds</strong><br />&nbsp;</td>
+        <td><strong>con/h<br /></strong><br />&nbsp;</td>
+        <td><strong>user agent<br /></strong><br />&nbsp;</td>
+        <td><strong>Peer<br />Ping</strong><br />&nbsp;</td>
+        #(/complete)#
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <td>
+          <a href="MessageSend_p.html?hash=#[hash]#" title="Send message to peer #[fullname]#">m</a>&nbsp;
+          <a href="ViewProfile.html?hash=#[hash]#&amp;display=1" title="View profile of peer #[fullname]#">p</a>&nbsp;
+          <a href="http://#[fullname]#.yacy/Wiki.html" title="Read and edit wiki on peer #[fullname]#">w</a>&nbsp;
+          #(updatedProfile)#::<a href="ViewProfile.html?hash=#[hash]#&amp;display=1"><img src="/env/grafics/profile.gif" alt="Profile updated" /></a>#(/updatedProfile)#
+          #(updatedWiki)#::<a href="http://#[address]#/Wiki.html?page=#[page]#" title="#[page]#"><img src="/env/grafics/wiki.gif" alt="Wiki updated" /></a>#(/updatedWiki)#
+          #(updatedBlog)#::<a href="http://#[address]#/Blog.html?page=#[page]#" title="#[subject]#"><img src="/env/grafics/blog.gif" alt="Blog updated" /></a>#(/updatedBlog)#
+          #(isCrawling)#::<a href="#[page]#"><img src="/env/grafics/crawl.gif" alt="Crawl" /></a>#(/isCrawling)#
+        </td>
+        <td><a href="http://www.#[fullname]#.yacy">#[shortname]#</a></td>
+        <td>#(type)##(direct)#<img src="/env/grafics/JuniorPassive.gif" title="Type: Junior | Contact: passive" alt="Junior passive" />::<img src="/env/grafics/JuniorDirect.gif" title="Type: Junior | Contact: direct" alt="Junior direct" /></img>::<img src="/env/grafics/JuniorOffline.gif" title="Type: Junior | Contact: offline" alt="Junior offline" />#(/direct)#::#(direct)#<img src="/env/grafics/SeniorPassive.gif" title="Type: Senior | Contact: passive" alt="senior passive" />::<img src="/env/grafics/SeniorDirect.gif" title="Type: Senior | Contact: direct" alt="Senior direct" />::<img src="/env/grafics/SeniorOffline.gif" title="Type: Senior | Contact: offline" alt="Senior offline" />#(/direct)#::<a href="#[url]#">#(direct)#<img src="/env/grafics/PrincipalPassive.gif" title="Type: Principal | Contact: passive | Seed download: possible" alt="Principal passive" />::<img src="/env/grafics/PrincipalDirect.gif"  title="Type: Principal | Contact: direct | Seed download: possible" alt="Principal active" />::<img src="/env/grafics/PrincipalOffline.gif"  title="Type: Principal | Contact: offline | Seed download: ?" alt="Principal offline" />#(/direct)#</a>#(/type)##(acceptcrawl)#<img src="/env/grafics/CrawlNo.gif" title="Accept Crawl: no" alt="no crawl" />::<img src="/env/grafics/CrawlYes.gif" title="Accept Crawl: yes" alt="crawl possible" />::<img src="/env/grafics/CrawlYesOffline.gif" title="Accept Crawl: yes" alt="crawl possible" />#(/acceptcrawl)##(dhtreceive)#<img src="/env/grafics/DHTReceiveNo.gif" title="DHT Receive: no" alt="no DHT receive" />::<img src="/env/grafics/DHTReceiveYes.gif" title="DHT Receive: yes" alt="DHT receive enabled" />::<img src="/env/grafics/DHTReceiveYesOffline.gif" title="DHT Receive: yes" alt="DHT receive enabled" />#(/dhtreceive)##(rankingreceive)#<img src="/env/grafics/RankingReceiveNo.gif" title="Ranking Receive: no" alt="no ranking receive" />::<img src="/env/grafics/RankingReceiveYes.gif" title="Ranking Receive: yes" alt="Ranking receive enabled" />::<img  src="/env/grafics/RankingCollects.gif" title="Ranking Receive: collection" alt="ranking collects" />#(/rankingreceive)#</td>
+        <td align="right">#[version]#</td>
+        <td align="right">#[ppm]#</td>
+        <td align="right">#[lastSeen]#</td>
+        <td align="right">#[utc]#</td>
+        <td align="right">#[location]#</td>
+        <td align="right">#[uptime]#</td>
+        <td align="right">#[links]#</td>
+        <td align="right">#[words]#</td>
+        <td align="right">#[sI]#</td>
+        <td align="right">#[sU]#</td>
+        <td align="right">#[rI]#</td>
+        <td align="right">#[rU]#</td>
+        #(complete)#
+        ::
+        <td><a href="http://#[ip]#:#[port]#/Network.html?page=1&amp;ip=">http://#[ip]#:#[port]#</a></td>
+        <td >#[hash]#</td>
+        <td align="center">#[CRWCnt]#/#[CRTCnt]#</td>
+        <td >#[age]#</td>
+        <td align="right">#[seeds]#</td>
+        <td align="right">#[connects]#</td>
+        <td align="right">#[userAgent]#</td>
+        <td align="right">[<a href="Network.html?page=4&amp;peerHash=#[hash]#&amp;peerIP=#[ip]#&amp;peerPort=#[port]#&amp;addPeer=add+Peer">Ping</a>]</td>
+        #(/complete)#
+      </tr>
+      #{/list}#
+    </table>
+    <p>
+      <em>runtime: #[rt]# ms</em>
+    </p>
+    #(progressbar)#::
+    Progress towards the next peer: #[percent]#%.<br />
+    At current PPM you will reach him #(timemessage)#in an unknown time::in #[time]#::never, because he is faster than you#(/timemessage)#.<br />
+    <!--#{percent}#<img src="/env/grafics/green-block.png">#{/percent}##{percent2}#<img src="/env/grafics/red-block.png">#{/percent2}#-->
+    <div style="height:20px; border:1px solid #CAD5E3">
+          <img src="env/grafics/green_bar.gif" width="#[percent]#%" height="20" alt="" /><img src="env/grafics/red_bar.png" width="#[percent2]#%" height="20" alt="" />
+    </div>
+    #(/progressbar)#
+    ::
+    <p>All Peers:</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td>Branch</td>
+        <td>#Peers</td>
+        <td>#All Links</td>
+        <td>#All Words</td>
+      </tr>
+      <tr class="TableCellDark">
+        <td align="left">Active (connected Senior and Principal)</td>
+        <td align="right">#[active-count]#</td>
+        <td align="right">#[active-links]#</td>
+        <td align="right">#[active-words]#</td>
+      </tr>
+      <tr class="TableCellDark">
+        <td align="left">Passive (disconnected Senior and Principal)</td>
+        <td align="right">#[passive-count]#</td>
+        <td align="right">#[passive-links]#</td>
+        <td align="right">#[passive-words]#</td>
+      </tr>
+      <tr class="TableCellDark">
+        <td align="left">Potential (Junior)</td>
+        <td align="right">#[potential-count]#</td>
+        <td align="right">#[potential-links]#</td>
+        <td align="right">#[potential-words]#</td>
+      </tr>
+      <tr class="TableCellSummary">
+        <td align="left">Network Total</td>
+        <td align="right">#[all-count]#</td>
+        <td align="right">#[all-links]#</td>
+        <td align="right">#[all-words]#</td>
+      </tr>
+    </table>
+    <p>
+    YaCy Cluster Indexing Speed: #[gppm]# Pages Per Minute (Accumulated PPM over Active Peers).
+    </p>
+    <p>Your Peer:</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td>Name</td>
+        <td>Info</td>
+        <td>Version</td>
+        <td>UTC</td>
+        <td>Uptime</td>
+        <td>#Links</td>
+        <td>#RWIs</td>
+        <td>Sent<br />Words</td>
+        <td>Sent<br />URLs</td>
+        <td>Received<br />Words</td>
+        <td>Received<br />URLs</td>
+        <td>PPM</td>
+        <td>total PPM</td>
+        <td>#Seeds</td>
+        <td>#Connects<br />per hour</td>
+      </tr>
+      <tr class="TableCellDark">
+        <td>#[my-name]#</td>
+        <td>#(my-info)#<img src="/env/grafics/Virgin.gif" title="Type: Virgin" alt="Virgin" />::<img src="/env/grafics/JuniorDirect.gif" title="Type: Junior" alt="Junior" />::<img src="/env/grafics/SeniorDirect.gif" title="Type: Senior" alt="Senior" />::<img src="/env/grafics/PrincipalDirect.gif" title="Type: Principal" alt="Principal" />#(/my-info)##(my-acceptcrawl)#<img src="/env/grafics/CrawlNo.gif" title="Accept Crawl: no" alt="no crawl" />::<img src="/env/grafics/CrawlYes.gif" title="Accept Crawl: yes" alt="Crawl enabled" />#(/my-acceptcrawl)##(my-dhtreceive)#<img src="/env/grafics/DHTReceiveNo.gif" title="DHT Receive: no" alt="no DHT receive" />::<img src="/env/grafics/DHTReceiveYes.gif" title="DHT Receive: yes" alt="DHT Receive enabled" />#(/my-dhtreceive)##(my-rankingreceive)#<img src="/env/grafics/RankingReceiveNo.gif" title="Ranking Receive: no" alt="no ranking receive" />::<img src="/env/grafics/RankingReceiveYes.gif" title="Ranking Receive: yes" alt="Ranking receive enabled" />#(/my-rankingreceive)#</td>
+        <td align="right">#[my-version]#</td>
+        <td align="right">#[my-utc]#</td>
+        <td align="right">#[my-uptime]#</td>
+        <td align="right">#[my-links]#</td>
+        <td align="right">#[my-words]#</td>
+        <td align="right">#[my-sI]#</td>
+        <td align="right">#[my-sU]#</td>
+        <td align="right">#[my-rI]#</td>
+        <td align="right">#[my-rU]#</td>
+        <td align="right">#[my-ppm]#</td>
+        <td align="right">#[my-totalppm]#</td>
+        <td align="right">#[my-seeds]#</td>
+        <td align="right">#[my-connects]#</td>
+      </tr>
+    </table>
+    <p><a href="NetworkPicture.png?width=800&amp;height=600"><img src="NetworkPicture.png" alt="The yacy Network" /></a></p>
+    <table border="0">
+            <tr>
+                <td>&nbsp;</td>
+                    <td><strong>Network legend:</strong></td>
+                    <td></td>
+                    <td></td>
+            </tr>
+            <tr>
+                    <td style="background-color:#000000">&nbsp;</td>
+                    <td>dark font</td>
+                    <td>:</td>
+                    <td>senior/principal peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#E7B7AF">&nbsp;</td>
+                    <td>lightred font</td>
+                    <td>:</td>
+                    <td>passiv peers ( &lt; 5 hour passiv time)</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#A7A75F">&nbsp;</td>
+                    <td>turquoise font</td>
+                    <td>:</td>
+                    <td>junior peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#C1A77F">&nbsp;</td>
+                    <td>red point</td>
+                    <td>:</td>
+                    <td>this peer</td>
+            </tr>
+    </table>
+    
+    #(comment)#
+    ::
+    <p>You are in online mode, but probably no internet resource is available. Please check your internet connection.</p>
+    ::
+    <p>You are either not in online mode or you do not use the proxy option.
+    To get connection to the YaCy network, you must use the proxy by setting your browser's settings
+    ('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>
+    for an installation guide) or you can go online by activating the permanent online mode.
+    To do this, press this button:</p>
+    <form action="SettingsAck_p.html" method="get">
+      <fieldset>
+        <input type="submit" name="pmode" value="go online" />
+      </fieldset>
+    </form>
+    #(/comment)#
+    ::
+    #(comment)#
+    ::
+    <p style="color:red;">
+      <code>#[status]#</code>
+    </p>
+    ::
+    <p style="color:green">
+      <code>#[status]#</code>
+    </p>
+    <p style="color:green;">
+      <code>[details]#</code>
+    </p>
+    #(/comment)#
+    
+    <form action="Network.html" method="get">
+      <table>
+        <tr>
+          <td>Peer Hash</td>
+          <td><input name="peerHash" type="text" size="32" maxlength="128" value="#[peerHash]#" /></td>
+        </tr>
+        <tr>
+          <td>Peer IP</td>
+          <td><input name="peerIP" type="text" size="32" maxlength="128" value="#[peerIP]#" /></td>
+        </tr>
+        <tr>
+          <td>Peer Port</td>
+          <td><input name="peerPort" type="text" size="32" maxlength="128" value="#[peerPort]#" /></td>
+        </tr>
+        <tr>
+          <td>&nbsp;<input name="page" type="hidden" value="4" /></td>
+          <td><input type="submit" name="addPeer" value="add Peer" /></td>
+        </tr>
+      </table>
+    </form>
+    #(/table)#
+    #%env/templates/footer.template%#
+  </body>
 </html>

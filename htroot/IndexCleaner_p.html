@@ -1,53 +1,51 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Index Control</title>
-#%env/templates/metas.template%#
-<meta http-equiv="REFRESH" content="10">
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#%env/templates/submenuIndexControl.template%#
-<br>
-<h2>Index Cleaner</h2>
-
-#(urldb)#
-::
-<p>
-ThreadAlive: #[threadAlive]#<br>
-ThreadToString: #[threadToString]#<br>
-Total URLs searched: #[total]# (#[percentUrls]#%)<br>
-Blacklisted URLs found: #[blacklisted]#<br>
-Percentage blacklisted: #[percent]#%<br>
-last searched URL: #[lastUrl]# (#[lastHash]#)<br>
-last blacklisted URL found: #[lastBlacklistedUrl]# (#[lastBlacklistedHash]#)<br>
-</p>
-#(/urldb)#
-#(rwidb)#
-::
-<p>
-ThreadAlive: #[threadAlive]#<br>
-ThreadToString: #[threadToString]#<br>
-RWIs at Start: #[RWIcountstart]#<br>
-RWIs now: #[RWIcountnow]#<br>
-wordHash in Progress: #[wordHashNow]#<br>
-last wordHash with deleted URLs: #[lastWordHash]#<br>
-Number of deleted URLs in on this Hash: #[lastDeletionCounter]#<br>
-</p>
-#(/rwidb)#
-<p>
-UrldbCleaner - Clean up the database by deletion of blacklisted urls:<br>
-<a href="IndexCleaner_p.html?action=ustart">Start/Resume</a>
-<a href="IndexCleaner_p.html?action=ustop">Stop</a>
-<a href="IndexCleaner_p.html?action=upause">Pause</a>
-</p>
-<p>
-RWIDbCleaner - Clean up the database by deletion of words with reference to blacklisted urls:<br>
-<a href="IndexCleaner_p.html?action=rstart">Start/Resume</a>
-<a href="IndexCleaner_p.html?action=rstop">Stop</a>
-<a href="IndexCleaner_p.html?action=rpause">Pause</a>
-</p>
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Control</title>
+    #%env/templates/metas.template%#
+    <meta http-equiv="REFRESH" content="10" />
+  </head>
+  <body id="IndexCleaner">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    <h2>Index Cleaner</h2>
+    
+    #(urldb)#
+    ::
+    <p>
+      ThreadAlive: #[threadAlive]#<br />
+      ThreadToString: #[threadToString]#<br />
+      Total URLs searched: #[total]# (#[percentUrls]#%)<br />
+      Blacklisted URLs found: #[blacklisted]#<br />
+      Percentage blacklisted: #[percent]#%<br />
+      last searched URL: #[lastUrl]# (#[lastHash]#)<br />
+      last blacklisted URL found: #[lastBlacklistedUrl]# (#[lastBlacklistedHash]#)<br />
+    </p>
+    #(/urldb)#
+    #(rwidb)#
+    ::
+    <p>
+      ThreadAlive: #[threadAlive]#<br />
+      ThreadToString: #[threadToString]#<br />
+      RWIs at Start: #[RWIcountstart]#<br />
+      RWIs now: #[RWIcountnow]#<br />
+      wordHash in Progress: #[wordHashNow]#<br />
+      last wordHash with deleted URLs: #[lastWordHash]#<br />
+      Number of deleted URLs in on this Hash: #[lastDeletionCounter]#<br />
+    </p>
+    #(/rwidb)#
+    <p>
+      UrldbCleaner - Clean up the database by deletion of blacklisted urls:<br />
+      <a href="IndexCleaner_p.html?action=ustart">Start/Resume</a>
+      <a href="IndexCleaner_p.html?action=ustop">Stop</a>
+      <a href="IndexCleaner_p.html?action=upause">Pause</a>
+    </p>
+    <p>
+    RWIDbCleaner - Clean up the database by deletion of words with reference to blacklisted urls:<br />
+      <a href="IndexCleaner_p.html?action=rstart">Start/Resume</a>
+      <a href="IndexCleaner_p.html?action=rstop">Stop</a>
+      <a href="IndexCleaner_p.html?action=rpause">Pause</a>
+    </p>
+    #%env/templates/footer.template%#
+  </body>
 </html>

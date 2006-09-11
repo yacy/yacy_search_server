@@ -1,79 +1,91 @@
-<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-	<head>
-		<title>YaCy '#[clientname]#': Language selection</title>
-		#%env/templates/metas.template%#
-	</head>
-	<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-	#%env/templates/header.template%#
-	#%env/templates/submenuConfig.template%#
-	<br>
-		<h2>Language selection</h2>
-	<p>
-	You can change the language of the YaCy-webinterface with translation files. 
-	<p>
-		<table border="0" cellpadding="5" cellspacing="1">
-			<tr>
-				<td valign="top" class="TableHeader" colspan="2">&nbsp;</td>
-			</tr>
-			<tr>
-				<td valign="top" class="TableCellDark">
-			Current language:
-				</td>
-				<td  valign="top" class="TableCellLight"> <!-- lang -->default(english)
-				</td>
-			</tr>
-			<tr>
-				<td valign="top" class="TableCellDark">
-			Languagefile Author(s) (chronological):
-				</td>
-				<td valign="top" class="TableCellLight"> <!-- author -->
-				</td>
-			</tr>
-			<tr>
-				<td valign="top" class="TableCellDark">
-				<i>Send additions to maintainer:</i>
-				</td>
-				<td valign="top" class="TableCellLight"> <!-- maintainer -->
-				</td>
-			</tr>
-			<tr>
-				<td valign="top" class="TableCellDark">
-				Available Languages:
-				</td>
-				<td valign="top" class="TableCellLight">
-<form action="ConfigLanguage_p.html">
-<select size="10" name="lang">
-#{langlist}#
-<option value="#[file]#">#[name]#</option>
-#{/langlist}#
-</select><br>
-<input type="submit" name="use_button" value="Use">
-<input type="submit" name="delete" value="Delete"><br>
-</form>
-</td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">
-<form action="ConfigLanguage_p.html">
-Install new language from URL:
-</td>
-<td valign="top" class="TableCellLight">
-<input type="text" name="url" size="30"><br>
-<input type="checkbox" name="use_lang" value="on" checked="true">Use this language<br>
-<input type="submit" value="Install">
-</form>
-</td>
-<tr>
-</table>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Language selection</title>
+  	#%env/templates/metas.template%#
+  </head>
+  <body id="ConfigLanguage">
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+    <h2>Language selection</h2>
+    <p>
+      You can change the language of the YaCy-webinterface with translation files. 
+    </p>
+    <table border="0" cellpadding="5" cellspacing="1">
+      <tr>
+        <td valign="top" class="TableHeader" colspan="2">
+          &nbsp;
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" class="TableCellDark">
+          Current language:
+        </td>
+        <td  valign="top" class="TableCellLight">
+          <!-- lang -->default(english)
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" class="TableCellDark">
+          Languagefile Author(s) (chronological):
+        </td>
+        <td valign="top" class="TableCellLight">
+          <!-- author -->
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" class="TableCellDark">
+          <em>Send additions to maintainer:</em>
+        </td>
+        <td valign="top" class="TableCellLight">
+          <!-- maintainer -->
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" class="TableCellDark">
+          Available Languages:
+        </td>
+        <td valign="top" class="TableCellLight">
+          <form action="ConfigLanguage_p.html">
+            <fieldset>
+              <select size="10" name="lang">
+                #{langlist}#
+                  <option value="#[file]#">#[name]#</option>
+                #{/langlist}#
+              </select>
+            </fieldset>
+            <fieldset>
+              <input type="submit" name="use_button" value="Use" />
+              <input type="submit" name="delete" value="Delete" />
+            </fieldset>
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" class="TableCellDark">
+            Install new language from URL:
+        </td>
+        <td valign="top" class="TableCellLight">
+          <form action="ConfigLanguage_p.html">
+            <fieldset>
+              <input type="text" name="url" size="30" /><br />
+              <input type="checkbox" name="use_lang" value="on" checked="checked" />Use this language<br />
+              <input type="submit" value="Install" />
+            </fieldset>
+          </form>
+        </td>
+      </tr>
+    </table>
 
-<b>#(status)#
-::
-Unable to get URL: #[url]#
-::
-Error saving the language file.
-#(status)#</b>
+    <p>
+      <strong>#(status)#
+      ::
+      Unable to get URL: #[url]#
+      ::
+      Error saving the language file.
+      #(/status)#</strong>
+    </p>
 
-#%env/templates/footer.template%#
-</body>
+    #%env/templates/footer.template%#
+  </body>
 </html>

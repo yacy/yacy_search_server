@@ -1,42 +1,39 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Connection Tracking</title>
-#%env/templates/metas.template%#
-<meta http-equiv="REFRESH" content="3">
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-<h2>Connection Tracking</h2>
-<p>
-<h3>Incoming Connections</h3>
-Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.<br>
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader" valign="bottom">
-	<td class="small">Protocol</td>
-	<td class="small">Duration</td>
-	<td class="small">Source IP[:Port]</td>
-	<td class="small">Dest. IP[:Port]</td>
-	<td class="small">Command</td>
-	<td class="small">Used</td>
-	<td class="small">Close</td>
-</tr>
-#{list}#
-<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" title="#[sessionName]#">
-	<td class="small">#[proto]#</td>
-	<td class="small">#(ms)##[duration]#::#[duration]# ms#(/ms)#</td>
-	<td class="small">#[source]#</td>
-	<td class="small">#[dest]#</td>
-	<td class="small">#(running)#Waiting for new request nr. # #[reqNr]#::#[command]##(/running)#</td>
-	<td class="small">#[used]#</td>
-	<td class="small"><a href="Connections_p.html?closeSession=#[sessionID]#"><font class="small">[Close]</font></a></td>
-</tr>
-#{/list}#
-</table>
-</p>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Connection Tracking</title>
+    #%env/templates/metas.template%#
+    <meta http-equiv="REFRESH" content="3" />
+  </head>
+  <body id="Connections">
+    #%env/templates/header.template%#
+    <h2>Connection Tracking</h2>
+    <h3>Incoming Connections</h3>
+    <p>Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>Protocol</td>
+        <td>Duration</td>
+        <td>Source IP[:Port]</td>
+        <td>Dest. IP[:Port]</td>
+        <td>Command</td>
+        <td>Used</td>
+        <td>Close</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" title="#[sessionName]#">
+        <td>#[proto]#</td>
+        <td>#(ms)##[duration]#::#[duration]# ms#(/ms)#</td>
+        <td>#[source]#</td>
+        <td>#[dest]#</td>
+        <td>#(running)#Waiting for new request nr. # #[reqNr]#::#[command]##(/running)#</td>
+        <td>#[used]#</td>
+        <td><a href="Connections_p.html?closeSession=#[sessionID]#">[Close]</a></td>
+      </tr>
+      #{/list}#
+    </table>
 
-#%env/templates/footer.template%#
+    #%env/templates/footer.template%#
 
-</body>
+  </body>
 </html>

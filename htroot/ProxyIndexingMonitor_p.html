@@ -1,100 +1,101 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Proxy Index Monitor</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-<h2>Index Monitor for Proxy Indexing</h2>
-<p>
-This is the control page for web pages that your peer has indexed during the current application run-time
-as result of proxy fetch/prefetch.
-<b>No personal or protected page is indexed</b>;
-those pages are detected by properties in the HTTP header (like Cookie-Use, or HTTP Authorization)
-or by POST-Parameters (either in URL or as HTTP protocol)
-and automatically excluded from indexing.
-</p>
-
-<p><form action="ProxyIndexingMonitor_p.html" method="post" enctype="multipart/form-data">
-
-<table border="0" cellpadding="5" cellspacing="1" width="100%">
-  <tr class="TableCellDark">
-  <td colspan="3"><div class=small><b>Proxy pre-fetch setting:</b>
-this is an automated html page loading procedure that takes actual proxy-requested
-URLs as crawling start points for crawling.</div></td> 
-  </tr>
-
-  <tr valign="top" class="TableCellLight">
-    <td class=small>Prefetch Depth</td>
-    <td class=small><input name="proxyPrefetchDepth" type="text" size="2" maxlength="2" value="#[proxyPrefetchDepth]#"></td>
-    <td class=small>
-        A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all
-        embedded URLs, but since embedded image links are loaded by the browser
-        this means that only embedded href-anchors are prefetched additionally.</td>
-  </tr>
-  <tr valign="top" class="TableCellLight">
-    <td class=small>Store to Cache</td>
-    <td class=small><input type="checkbox" name="proxyStoreHTCache" align="top" #(proxyStoreHTCacheChecked)#::checked#(/proxyStoreHTCacheChecked)#></td>
-    <td class=small>It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.</td>
-  </tr>
-  <tr valign="top" class="TableCellLight">
-    <td class=small>Do Remote Indexing</td>
-    <td class=small><input type="checkbox" name="proxyCrawlOrder" align="top" #(proxyCrawlOrder)#::checked#(/proxyCrawlOrder)#></td>
-    <td class=small>If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
-    If you need your crawling results locally, you should switch this off.
-    Only senior and principal peers can initiate or receive remote crawls.
-    Please note that this setting only take effect for a prefetch depth greater than 0.</td>
-  </tr>
-
-  <tr class="TableCellDark">
-  <td colspan="3"><div class=small><b>Proxy generally</b></div></td> 
-  </tr>
-
-  <tr valign="top" class="TableCellLight">
-    <td class=small>Path</td>
-    <td class=small><input name="proxyCache" type="text" size="20" maxlength="300" value="#[proxyCache]#"></td>
-    <td class=small>The path where the pages are stored (max. length 300)</td>
-  </tr>
-  <tr valign="top" class="TableCellLight">
-    <td class=small>Size</td>
-    <td class=small><input name="proxyCacheSize" type="text" size="8" maxlength="24" value="#[proxyCacheSize]#"></td>
-    <td class=small>The size in MB of the cache.</td>
-  </tr>
-
-  <tr valign="top" class="TableCellDark">
-    <td class=small colspan="1">&nbsp;</td>
-    <td class=small colspan="2"><input type="submit" name="proxyprofileset" value="Set proxy profile"></td>
-  </tr>
-</table>
-</form></p>
-
-<p>
-#(info)#
-<!-- info 0 -->
-::
-<!-- info 1 -->
-<b>The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.
-Please delete that file and restart.</b><br>
-::
-<!-- info 2 -->
-<b>Pre-fetch is now set to depth-#[message]#.</b><br>
-<b>Caching is now #(caching)#off::on#(/caching)#.</b><br>
-<b>Remote Indexing is now #(crawlOrder)#off::on#(/crawlOrder)#.</b><br>
-#(path)#::<b>Cachepath is now set to '#[return]#'.</b> Please move the old data in the new directory.<br>#(/path)#
-#(size)#::<b>Cachesize is now set to #[return]#MB.</b><br>#(/size)#
-#(restart)#::<br><font color="red"><b>Changes will take effect after restart only.</b></font><br>#(/restart)#
-::
-<!-- info 3 -->
-<b>An error has occurred: #[error]#.</b><br>
-#(/info)#
-</p>
-
-<p>You can see a snapshot of recently indexed pages
-on the <a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a> Page.
-</p>
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Proxy Index Monitor</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ProxyIndexingMonitor">
+    #%env/templates/header.template%#
+    <h2>Index Monitor for Proxy Indexing</h2>
+    <p>
+      This is the control page for web pages that your peer has indexed during the current application run-time
+      as result of proxy fetch/prefetch.
+      <strong>No personal or protected page is indexed</strong>;
+      those pages are detected by properties in the HTTP header (like Cookie-Use, or HTTP Authorization)
+      or by POST-Parameters (either in URL or as HTTP protocol)
+      and automatically excluded from indexing.
+    </p>
+    
+    <form action="ProxyIndexingMonitor_p.html" method="post" enctype="multipart/form-data">
+      <table border="0" cellpadding="5" cellspacing="1">
+        <tr class="TableCellDark">
+          <td colspan="3"><strong>Proxy pre-fetch setting:</strong>
+          this is an automated html page loading procedure that takes actual proxy-requested
+          URLs as crawling start points for crawling.</td> 
+        </tr>
+      
+        <tr valign="top" class="TableCellLight">
+          <td>Prefetch Depth</td>
+          <td><input name="proxyPrefetchDepth" type="text" size="2" maxlength="2" value="#[proxyPrefetchDepth]#" /></td>
+          <td>
+            A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all
+            embedded URLs, but since embedded image links are loaded by the browser
+            this means that only embedded href-anchors are prefetched additionally.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td>Store to Cache</td>
+          <td><input type="checkbox" name="proxyStoreHTCache" #(proxyStoreHTCacheChecked)#::checked="checked"#(/proxyStoreHTCacheChecked)# /></td>
+          <td>It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.</td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td>Do Remote Indexing</td>
+          <td><input type="checkbox" name="proxyCrawlOrder" #(proxyCrawlOrder)#::checked="checked"#(/proxyCrawlOrder)# /></td>
+          <td>
+            If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
+            If you need your crawling results locally, you should switch this off.
+            Only senior and principal peers can initiate or receive remote crawls.
+            Please note that this setting only take effect for a prefetch depth greater than 0.
+          </td>
+        </tr>
+      
+        <tr class="TableCellDark">
+          <td colspan="3"><strong>Proxy generally</strong></td> 
+        </tr>
+      
+        <tr valign="top" class="TableCellLight">
+          <td>Path</td>
+          <td><input name="proxyCache" type="text" size="20" maxlength="300" value="#[proxyCache]#" /></td>
+          <td>The path where the pages are stored (max. length 300)</td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td>Size</td>
+          <td><input name="proxyCacheSize" type="text" size="8" maxlength="24" value="#[proxyCacheSize]#" /></td>
+          <td>The size in MB of the cache.</td>
+        </tr>
+      
+        <tr valign="top" class="TableCellDark">
+          <td colspan="1">&nbsp;</td>
+          <td colspan="2"><input type="submit" name="proxyprofileset" value="Set proxy profile" /></td>
+        </tr>
+      </table>
+    </form>
+    
+    
+    #(info)#
+    <!-- info 0 -->
+    ::
+    <!-- info 1 -->
+    <p><strong>The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.
+    Please delete that file and restart.</strong></p>
+    ::
+    <!-- info 2 -->
+    <p><strong>Pre-fetch is now set to depth-#[message]#.</strong></p>
+    <p><strong>Caching is now #(caching)#off::on#(/caching)#.</strong></p>
+    <p><strong>Remote Indexing is now #(crawlOrder)#off::on#(/crawlOrder)#.</strong></p>
+    #(path)#::<p><strong>Cachepath is now set to '#[return]#'.</strong> Please move the old data in the new directory.</p>#(/path)#
+    #(size)#::<p><strong>Cachesize is now set to #[return]#MB.</strong></p>#(/size)#
+    #(restart)#::<p style="color:red;"><strong>Changes will take effect after restart only.</strong></p>#(/restart)#
+    ::
+    <!-- info 3 -->
+    <p><strong>An error has occurred: #[error]#.</strong></p>
+    #(/info)#
+    
+    <p>
+      You can see a snapshot of recently indexed pages
+      on the <a href="/IndexMonitor.html?process=4">Proxy Index Monitor</a> Page.
+    </p>
+    
+    #%env/templates/footer.template%#
+  </body>
 </html>

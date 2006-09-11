@@ -1,98 +1,65 @@
-<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Remote Peer Profile</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#(display)#
-#%env/templates/simpleheader.template%#
-::
-#%env/templates/header.template%#
-#(/display)#
-<br><br>
-#(localremotepeer)#
-<h2>Local Peer Profile:</h2>
-::
-<h2>Remote Peer Profile:</h2>
-#(/localremotepeer)#
-<p>
-#(success)#
-Wrong access of this page
-::
-The requested peer is unknown or a potential peer.<br>
-The profile can't be fetched.
-::
-The peer #[peername]# is not online.
-::
-<br><h3>This is #[peername]#'s Profile:</h3>
-<table border="0" cellpadding="5" cellspacing="1">
-
-<tr>
-<td colspan="2" valign="top" class="TableHeader">&nbsp;</td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">Name</td>
-<td valign="top" class="TableCellLight">#(name)#&nbsp;::#[value]##(/name)#</td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">Nick Name</td>
-<td valign="top" class="TableCellLight">#(nickname)#&nbsp;::#[value]##(/nickname)#</td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">Homepage</td>
-<td valign="top" class="TableCellLight">#(homepage)#&nbsp;::<a href="#[value]#">#[value]#</a>#(/homepage)#</td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">eMail</td>
-<td valign="top" class="TableCellLight">#(email)#&nbsp;::<a href="mailto:#[value]#">#[value]#</a>#(/email)#</td>
-</tr>
-
-<tr>
-<td colspan="2"  valign="top" class="TableHeader">&nbsp;</td>
-</tr>
-
-<tr>
-<td valign="top" class="TableCellDark">ICQ</td>
-<td valign="top" class="TableCellLight">#(icq)#&nbsp;::<img src="http://web.icq.com/whitepages/online?icq=#[value]#&img=5"><a href="http://wwp.icq.com/scripts/search.dll?to=#[value]#">#[value]#</a>#(/icq)#</td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">Jabber</td>
-<td valign="top" class="TableCellLight">#(jabber)#&nbsp;::<img src="http://edgar.netflint.net/status.php?jid=#[value]#&type=image&iconset=gabber">#[value]##(/jabber)#</td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">Yahoo!</td>
-<td valign="top" class="TableCellLight">#(yahoo)#&nbsp;::#[value]##(/yahoo)#</td>
-</tr>
-<tr>
-<td valign="top" class="TableCellDark">MSN</td>
-<td valign="top" class="TableCellLight">#(msn)#&nbsp;::#[value]##(/msn)#</td>
-</tr>
-
-<tr>
-<td colspan="2"  valign="top" class="TableHeader">&nbsp;</td>
-</tr>
-
-<tr>
-<td valign="top" class="TableCellDark">Comment</td>
-<td valign="top" class="TableCellLight">#(comment)#&nbsp;::#[value]##(/comment)#</td>
-</tr>
-#{other}#
-<tr>
-<td valign="top" class="TableCellDark">#[key]#</td>
-<td valign="top" class="TableCellLight">#[value]#</td>
-</tr>
-#{/other}#
-<tr>
-<td colspan="2" valign="top" class="TableHeader">&nbsp;</td>
-</tr>
-
-</table>
-#(/success)#
-#(display)#
-#%env/templates/simplefooter.template%#
-::
-#%env/templates/footer.template%#
-#(/display)#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Remote Peer Profile</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ViewProfile">
+    #(display)#
+    #%env/templates/simpleheader.template%#
+    ::
+    #%env/templates/header.template%#
+    #(/display)#
+    #(localremotepeer)#
+    <h2>Local Peer Profile:</h2>
+    ::
+    <h2>Remote Peer Profile:</h2>
+    #(/localremotepeer)#
+    #(success)#
+    <p class="error">Wrong access of this page</p>
+    ::
+    <p class="error">The requested peer is unknown or a potential peer.<br />
+    The profile can't be fetched.</p>
+    ::
+    <p class="error">The peer #[peername]# is not online.</p>
+    ::
+    <h3>This is #[peername]#'s Profile:</h3>
+    
+    <dl class="pairs">
+      <dt>Name</dt>
+      <dd>#(name)#&nbsp;::#[value]##(/name)#</dd>
+      <dt>Nick Name</dt>
+      <dd>#(nickname)#&nbsp;::#[value]##(/nickname)#</dd>
+      <dt>Homepage</dt>
+      <dd>#(homepage)#&nbsp;::<a href="#[value]#">#[value]#</a>#(/homepage)#</dd>
+      <dt>eMail</dt>
+      <dd>#(email)#&nbsp;::<a href="mailto:#[value]#">#[value]#</a>#(/email)#</dd>
+    </dl>
+  
+    <dl class="pairs">
+      <dt>ICQ</dt>
+      <dd>#(icq)#&nbsp;::<img src="http://web.icq.com/whitepages/online?icq=#[value]#&amp;img=5" alt="Onlinestatus" /><a href="http://wwp.icq.com/scripts/search.dll?to=#[value]#">#[value]#</a>#(/icq)#</dd>
+      <dt>Jabber</dt>
+      <dd>#(jabber)#&nbsp;::<img src="http://edgar.netflint.net/status.php?jid=#[value]#&amp;type=image&amp;iconset=gabber" alt="Onlinestatus" />#[value]##(/jabber)#</dd>
+      <dt>Yahoo!</dt>
+      <dd>#(yahoo)#&nbsp;::#[value]##(/yahoo)#</dd>
+      <dt>MSN</dt>
+      <dd>#(msn)#&nbsp;::#[value]##(/msn)#</dd>
+    </dl>
+  
+    <dl class="pairs">
+      <dt>Comment</dt>
+      <dd>#(comment)#&nbsp;::#[value]##(/comment)#</dd>
+      #{other}#
+      <dt>#[key]#</dt>
+      <dd>#[value]#&nbsp;</dd>
+      #{/other}#
+    </dl>
+    #(/success)#
+    #(display)#
+    #%env/templates/simplefooter.template%#
+    ::
+    #%env/templates/footer.template%#
+    #(/display)#
+  </body>
 </html>

@@ -1,96 +1,85 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Messages</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-<h2>Messages</h2><br>
-
-<p>
-#(mode)#
-<!-- List -->
-<table border="0" cellpadding="2" cellspacing="1">
-  <tr class="MenuHeader">
-    <td>Date</td>
-    <td>From</td>
-    <td>To</td>
-    <td>Subject</td>
-    <td>Action</td>
-  </tr>
-#{messages}#
-  <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-    <td>#[date]#</td>
-    <td><a href="ViewProfile.html?hash=#[hash]#" title="View profile of peer #[from]#">#[from]#</a></td>
-    <td>#[to]#</td>
-    <td>#[subject]#</td>
-    <td>
-      <a href="Messages_p.html?action=view&object=#[key]#">view</a>
-      &nbsp;/&nbsp;
-      <a href="MessageSend_p.html?hash=#[hash]#&subject=Re: #[subject]#">reply</a>
-      &nbsp;/&nbsp;
-      <a href="Messages_p.html?action=delete&object=#[key]#">delete</a>
-    </td>
-  </tr>
-#{/messages}#
-#(error)#::I/O error reading message table: #[message]##(/error)#
-::
-<!-- View -->
-<table border="0" cellpadding="2" cellspacing="1">
-  <tr>
-    <td class="MenuHeader">
-      From:
-    </td>
-    <td class="MessageBackground">
-      <a href="ViewProfile.html?hash=#[hash]#" title="View profile of peer #[from]#">#[from]#</a>
-    </td>
-  </tr>
-  <tr>
-    <td class="MenuHeader">
-      To:
-    </td>
-    <td class="MessageBackground">
-      #[to]#
-    </td>
-  </tr>
-  <tr>
-    <td class="MenuHeader">
-      Date:
-    </td>
-    <td class="MessageBackground">
-      #[date]#
-    </td>
-  </tr>
-  <tr>
-    <td class="MenuHeader">
-      Subject:
-    </td>
-    <td class="MessageBackground">
-      #[subject]#
-    </td>
-  </tr>
-  
-  <tr>
-    <td class="MessageBackground" colspan="2">
-      #[message]#
-    </td>
-  </tr>
-  <tr>
-    <td class="MenuHeader">Action:</td>
-    <td class="MessageBackground">
-      <a href="Messages_p.html">inbox</a>
-      &nbsp;/&nbsp;
-      <a href="MessageSend_p.html?hash=#[hash]#&subject=Re: #[subject]#">reply</a>
-      &nbsp;/&nbsp;
-      <a href="Messages_p.html?action=delete&object=#[key]#">delete</a>
-    </td>
-  </tr>
-</table>
-#(/mode)#
-</p>
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Messages</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Messages">
+    #%env/templates/header.template%#
+    <h2>Messages</h2>
+    #(mode)#
+    <!-- List -->
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td>Date</td>
+        <td>From</td>
+        <td>To</td>
+        <td>Subject</td>
+        <td>Action</td>
+      </tr>
+    #{messages}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[date]#</td>
+        <td><a href="ViewProfile.html?hash=#[hash]#&amp;display=1" title="View profile of peer #[from]#">#[from]#</a></td>
+        <td>#[to]#</td>
+        <td>#[subject]#</td>
+        <td>
+          <a href="Messages_p.html?action=view&amp;object=#[key]#">view</a>
+          &nbsp;/&nbsp;
+          <a href="MessageSend_p.html?hash=#[hash]#&amp;subject=Re: #[subject]#">reply</a>
+          &nbsp;/&nbsp;
+          <a href="Messages_p.html?action=delete&amp;object=#[key]#">delete</a>
+        </td>
+      </tr>
+    #{/messages}#
+    </table>
+    #(error)#::<p class="error">I/O error reading message table: #[message]#</p>#(/error)#
+    ::
+    <!-- View -->
+    <dl class="pairs">
+      <dt>
+        From:
+      </dt>
+      <dd>
+        <a href="ViewProfile.html?hash=#[hash]#&amp;display=1" title="View profile of peer #[from]#">#[from]#</a>
+      </dd>
+      <dt>
+        To:
+      </dt>
+      <dd>
+        #[to]#
+      </dd>
+      <dt>
+        Date:
+      </dt>
+      <dd>
+        #[date]#
+      </dd>
+      <dt>
+        Subject:
+      </dt>
+      <dd>
+        #[subject]#
+      </dd>
+      <dt>
+        Message:
+      </dt>
+      <dd>
+        #[message]#
+      </dd>
+      <dt>
+        Action:
+      </dt>
+      <dd>
+        <a href="Messages_p.html">inbox</a>
+        &nbsp;/&nbsp;
+        <a href="MessageSend_p.html?hash=#[hash]#&amp;subject=Re: #[subject]#">reply</a>
+        &nbsp;/&nbsp;
+        <a href="Messages_p.html?action=delete&amp;object=#[key]#">delete</a>
+      </dd>
+    </dl>
+    #(/mode)#
+    
+    #%env/templates/footer.template%#
+  </body>
 </html>

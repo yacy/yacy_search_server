@@ -1,234 +1,247 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Performance Settings of Queues and Processes</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-#%env/templates/submenuPerformance.template%#
-<br>
-<h2>Performance Settings of Queues and Processes</h2>
-
-<p>
-<div class=small><b>Scheduled tasks overview and waiting time settings:</b></div>
-<table border="0" cellpadding="2" cellspacing="1">
-<form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
-<tr class="TableHeader" valign="bottom">
-<td class="small">Thread</td>
-<td class="small">Queue Size</td>
-<td class="small" colspan="2">Total<br>Block Time</td>
-<td class="small" colspan="2">Total<br>Sleep Time</td>
-<td class="small" colspan="2">Total<br>Exec Time</td>
-<td class="small">Total<br>Cycles</td>
-<td class="small">Idle<br>Cycles</td>
-<td class="small">Busy<br>Cycles</td>
-<td class="small">Short Mem<br>Cycles</td>
-<td class="small">Sleep Time<br>per Cycle<br>(millis)</td>
-<td class="small">Exec Time<br>per Busy-Cycle<br>(millis)</td>
-<td class="small">Memoy Use<br>per Busy-Cycle<br>(kbytes)</td>
-<td class="small">Delay between<br>idle loops</td>
-<td class="small">Delay between<br>busy loops</td>
-<td class="small">Minimum of<br>Required Memory</td>
-<td class="small">Full Description</td>
-</tr>
-#{table}#
-<tr class="TableCellDark">
-<td class="small" align="left">#[shortdescr]#</td>
-<td class="small" align="right">#[queuesize]#</td>
-<td class="small" align="right">#[blocktime]#&nbsp;sec</td>
-<td class="small" align="right">#[blockpercent]#%</td>
-<td class="small" align="right">#[sleeptime]#&nbsp;sec</td>
-<td class="small" align="right">#[sleeppercent]#%</td>
-<td class="small" align="right">#[exectime]#&nbsp;sec</td>
-<td class="small" align="right">#[execpercent]#%</td>
-<td class="small" align="right">#[totalcycles]#</td>
-<td class="small" align="right">#[idlecycles]#</td>
-<td class="small" align="right">#[busycycles]#</td>
-<td class="small" align="right">#[memscycles]#</td>
-<td class="small" align="right">#[sleeppercycle]#</td>
-<td class="small" align="right">#[execpercycle]#</td>
-<td class="small" align="right">#[memusepercycle]#</td>
-<td class="small" align="right"><input name="#[threadname]#_idlesleep" type="text" align="right" size="7" maxlength="7" value="#[idlesleep]#"> milliseconds</td>
-<td class="small" align="right"><input name="#[threadname]#_busysleep" type="text" align="right" size="7" maxlength="7" value="#[busysleep]#"> milliseconds</td>
-<td class="small" align="right"><input name="#[threadname]#_memprereq" type="text" align="right" size="5" maxlength="5" value="#[memprereq]#"> kbytes</td>
-<td class="small" align="left">#[longdescr]#</td>
-</tr>
-#{/table}#
-<tr class="TableCellLight">
-<td class="small" align="left" colspan="19">
-<input type="submit" name="submitdelay" value="Submit New Delay Values">&nbsp;&nbsp;&nbsp;
-<input type="submit" name="submitdefault" value="Reset To Default Values">&nbsp;&nbsp;&nbsp;
-Changes take effect immediately</td>
-</tr>
-</form>
-</table>
-</p>
-
-<p>
-<div class=small><b>Cache Settings:</b></div>
-<form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
-<table border="0" cellpadding="5" cellspacing="1" width="100%">
-  <tr valign="top" class="TableHeader">
-    <td class=small>Cache Type</td>
-    <td class=small>Indexing</td>
-    <td class=small>DHT</td>
-    <td class=small>Description</td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>URLs in RAM cache:</td>
-    <td class=small colspan="2" align="center">#[urlCacheSize]#</td>
-    <td class=small>
-    This is the size of the URL cache. Its purpose is to buffer incoming URLs
-    in case of search result transmission and during DHT transfer.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Words in RAM cache:</td>
-    <td class=small>#[wordCacheWSize]#</td>
-    <td class=small>#[wordCacheKSize]#</td>
-    <td class=small>
-    This is the current size of the word caches.
-    The indexing cache speeds up the indexing process, the DHT cache holds indexes temporary for approval.
-    The maximum of this caches can be set below.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Maximum URLs currently assigned<br>to one cached word:</td>
-    <td class=small>#[maxURLinWCache]#</td>
-    <td class=small>not controlled<br>for DHT cache</td>
-    <td class=small>
-    This is the maximum size of URLs assigned to a single word cache entry.
-    If this is a big number, it shows that the caching works efficiently.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Maximum age of a word:</td>
-    <td class=small>#[maxAgeOfWCache]#</td>
-    <td class=small>#[maxAgeOfKCache]#</td>
-    <td class=small>
-    This is the maximum age of a word in an index in minutes.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Minimum age of a word:</td>
-    <td class=small>#[minAgeOfWCache]#</td>
-    <td class=small>#[minAgeOfKCache]#</td>
-    <td class=small>
-    This is the minimum age of a word in an index in minutes.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Maximum number of words in cache:</td>
-    <td class=small colspan="2"><input name="wordCacheMaxCount" type="text" size="20" maxlength="100" value="#[wordCacheMaxCount]#"></td>
-    <td class=small>
-    This is is the number of word indexes that shall be held in the
-    ram cache during indexing. When YaCy is shut down, this cache must be
-    flushed to disc; this may last some minutes.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Initial space of words in cache:</td>
-    <td class=small colspan="2"><input name="wordCacheInitCount" type="text" size="20" maxlength="100" value="#[wordCacheInitCount]#"></td>
-    <td class=small>
-    This is is the init size of space for words in cache.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>word-flush idle divisor:</td>
-    <td class=small colspan="2"><input name="wordFlushIdleDivisor" type="text" size="20" maxlength="100" value="#[wordFlushIdleDivisor]#"></td>
-    <td class=small rowspan="2">
-    The word flush divisor is applied when an indexing loop is executed.
-    The divisor is used to divide the number of words in the cache; the result is the number of words that are flushed.
-    The idleDivisor is used if the indexing queue is empty, the busyDivisor is used if the indexing queue contains at least one element.
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellDark">
-    <td class=small>word-flush busy divisor:</td>
-    <td class=small colspan="2"><input name="wordFlushBusyDivisor" type="text" size="20" maxlength="100" value="#[wordFlushBusyDivisor]#"></td>
-  </tr>
-  <tr valign="top" class="TableCellLight">
-    <td class=small colspan="4">
-    <input type="submit" name="cacheSizeSubmit" value="Enter New Cache Size">
-    Changes take effect immediately</td>
-  </tr>
-</table>
-</form>
-</p>
-
-<p>
-<div class=small><b>Thread pool settings:</b></div>
-<form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
-<table border="0" cellpadding="2" cellspacing="1" width="100%">
-<tr class="TableHeader" valign="bottom">
-<td class="small" width="150">Thread Pool</td>
-<td class="small" width="80">maximum Active</td>
-<td class="small" width="80">maximum Idle</td>
-<td class="small" width="80">minimum Idle</td>
-<td class="small" width="80">current Active</td>
-<td class="small" width="80">current Idle</td>
-<td class="small">Full Description</td>
-</tr>
-#{pool}#
-<tr class="TableCellDark">
-<td class="small" align="left">#[name]#</td>
-<td class="small" align="right"><input name="#[name]#_maxActive" type="text" size="8" maxlength="8" value="#[maxActive]#"></td>
-<td class="small" align="right"><input name="#[name]#_maxIdle" type="text" size="8" maxlength="8" value="#[maxIdle]#"></td>
-<td class="small" align="right"><input name="#[name]#_minIdle" type="text" size="8" maxlength="8" value="#[minIdle]#" #(minIdleConfigurable)#disabled="disabled"::#(/minIdleConfigurable)#></td>
-<td class="small" align="right">#[numActive]#</td>
-<td class="small" align="right">#[numIdle]#</td>
-<td class="small" align="left"></td>
-</tr>
-#{/pool}#
-<tr class="TableCellLight">
-<td class="small" align="left" colspan="7">
-<input type="submit" name="poolConfig" value="Enter new Threadpool Configuration">
-Changes take effect immediately</td>
-</tr>
-</table>
-</p></form>
-
-<p>
-<div class=small><b>Index Assortments:</b></div>
-<table border="0" cellpadding="5" cellspacing="1" width="100%">
-  #{assortmentCluster}#
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Assortments #[assortmentSlots]#:</td>
-    <td class=small align="right">#[assortmentSizeA]#</td>
-    <td class=small align="right">#[assortmentSizeB]#</td>
-    <td class=small align="right">#[assortmentSizeC]#</td>
-    <td class=small align="right">#[assortmentSizeD]#</td>
-    <td class=small align="right">#[assortmentSizeE]#</td>
-    <td class=small align="right">#[assortmentSizeF]#</td>
-    <td class=small align="right">#[assortmentSizeG]#</td>
-    <td class=small align="right">#[assortmentSizeH]#</td>
-  </tr>
-  #{/assortmentCluster}#
-</table>
-</p>
-
-<p>
-<div class=small><b>Proxy Performance Settings:</b></div>
-<form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
-<table border="0" cellpadding="5" cellspacing="1" width="100%">
-  <tr valign="top" class="TableCellDark">
-    <td class=small>Online Caution Delay (milliseconds):</td>
-    <td class=small><input name="onlineCautionDelay" type="text" size="20" maxlength="100" value="#[onlineCautionDelay]#"></td>
-    <td class=small>
-    This is the time that the crawler idles when the proxy is accessed. The delay is extended by this time
-    each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.
-    (current delta is #[onlineCautionDelayCurrent]# milliseconds since last proxy access.)
-    </td>
-  </tr>
-  <tr valign="top" class="TableCellLight">
-    <td class=small colspan="3">
-    <input type="submit" name="proxyControlSubmit" value="Enter New Parameters">
-    Changes take effect immediately</td>
-  </tr>
-</table>
-</form>
-</p>
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+  <title>YaCy '#[clientname]#': Performance Settings of Queues and Processes</title>
+  #%env/templates/metas.template%#
+  </head>
+  <body id="PerformanceQueues">
+  #%env/templates/header.template%#
+  #%env/templates/submenuPerformance.template%#
+  <h2>Performance Settings of Queues and Processes</h2>
+  
+  <p>
+    <strong>Scheduled tasks overview and waiting time settings:</strong>
+  </p>
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>Thread</td>
+        <td>Queue Size</td>
+        <td colspan="2">Total<br />Block Time</td>
+        <td colspan="2">Total<br />Sleep Time</td>
+        <td colspan="2">Total<br />Exec Time</td>
+        <td>Total<br />Cycles</td>
+        <td>Idle<br />Cycles</td>
+        <td>Busy<br />Cycles</td>
+        <td>Short Mem<br />Cycles</td>
+        <td>Sleep Time<br />per Cycle<br />(millis)</td>
+        <td>Exec Time<br />per Busy-Cycle<br />(millis)</td>
+        <td>Memoy Use<br />per Busy-Cycle<br />(kbytes)</td>
+        <td>Delay between<br />idle loops</td>
+        <td>Delay between<br />busy loops</td>
+        <td>Minimum of<br />Required Memory</td>
+        <td>Full Description</td>
+      </tr>
+      #{table}#
+      <tr class="TableCellDark">
+        <td align="left">#[shortdescr]#</td>
+        <td align="right">#[queuesize]#</td>
+        <td align="right">#[blocktime]#&nbsp;sec</td>
+        <td align="right">#[blockpercent]#%</td>
+        <td align="right">#[sleeptime]#&nbsp;sec</td>
+        <td align="right">#[sleeppercent]#%</td>
+        <td align="right">#[exectime]#&nbsp;sec</td>
+        <td align="right">#[execpercent]#%</td>
+        <td align="right">#[totalcycles]#</td>
+        <td align="right">#[idlecycles]#</td>
+        <td align="right">#[busycycles]#</td>
+        <td align="right">#[memscycles]#</td>
+        <td align="right">#[sleeppercycle]#</td>
+        <td align="right">#[execpercycle]#</td>
+        <td align="right">#[memusepercycle]#</td>
+        <td align="right"><input name="#[threadname]#_idlesleep" size="7" maxlength="7" value="#[idlesleep]#" /> milliseconds</td>
+        <td align="right"><input name="#[threadname]#_busysleep" size="7" maxlength="7" value="#[busysleep]#" /> milliseconds</td>
+        <td align="right"><input name="#[threadname]#_memprereq" size="5" maxlength="5" value="#[memprereq]#" /> kbytes</td>
+        <td align="left">#[longdescr]#</td>
+      </tr>
+      #{/table}#
+      <tr class="TableCellLight">
+        <td align="left" colspan="19">
+        <input type="submit" name="submitdelay" value="Submit New Delay Values" />&nbsp;&nbsp;&nbsp;
+        <input type="submit" name="submitdefault" value="Reset To Default Values" />&nbsp;&nbsp;&nbsp;
+        Changes take effect immediately</td>
+      </tr>
+    </table>
+  </form>
+  
+  <p>
+    <strong>Cache Settings:</strong>
+  </p>
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
+    <table border="0" cellpadding="5" cellspacing="1">
+      <tr valign="top" class="TableHeader">
+        <td>Cache Type</td>
+        <td>Indexing</td>
+        <td>DHT</td>
+        <td>Description</td>
+      </tr>
+      <tr valign="top" class="TableCellDark">
+        <td>URLs in RAM cache:</td>
+        <td colspan="2" align="center">#[urlCacheSize]#</td>
+        <td>
+          This is the size of the URL cache. Its purpose is to buffer incoming URLs
+          in case of search result transmission and during DHT transfer.
+        </td>
+      </tr>
+      <tr valign="top" class="TableCellDark">
+        <td>Words in RAM cache:</td>
+        <td>#[wordCacheWSize]#</td>
+        <td>#[wordCacheKSize]#</td>
+        <td>
+        This is the current size of the word caches.
+        The indexing cache speeds up the indexing process, the DHT cache holds indexes temporary for approval.
+        The maximum of this caches can be set below.
+        </td>
+      </tr>
+      <tr valign="top" class="TableCellDark">
+        <td>Maximum URLs currently assigned<br />to one cached word:</td>
+        <td>#[maxURLinWCache]#</td>
+        <td>not controlled<br />for DHT cache</td>
+        <td>
+        This is the maximum size of URLs assigned to a single word cache entry.
+        If this is a big number, it shows that the caching works efficiently.
+        </td>
+      </tr>
+      <tr valign="top" class="TableCellDark">
+        <td>Maximum age of a word:</td>
+        <td>#[maxAgeOfWCache]#</td>
+        <td>#[maxAgeOfKCache]#</td>
+        <td>
+        This is the maximum age of a word in an index in minutes.
+        </td>
+      </tr>
+      <tr valign="top" class="TableCellDark">
+        <td>Minimum age of a word:</td>
+        <td>#[minAgeOfWCache]#</td>
+        <td>#[minAgeOfKCache]#</td>
+        <td>
+        This is the minimum age of a word in an index in minutes.
+        </td>
+      </tr>
+      <tr valign="top" class="TableCellDark">
+        <td>Maximum number of words in cache:</td>
+        <td colspan="2">
+          <input name="wordCacheMaxCount" type="text" size="20" maxlength="100" value="#[wordCacheMaxCount]#" />
+        </td>
+        <td>
+          This is is the number of word indexes that shall be held in the
+          ram cache during indexing. When YaCy is shut down, this cache must be
+          flushed to disc; this may last some minutes.
+        </td>
+      </tr>
+      <tr valign="top" class="TableCellDark">
+        <td>Initial space of words in cache:</td>
+        <td colspan="2">
+          <input name="wordCacheInitCount" type="text" size="20" maxlength="100" value="#[wordCacheInitCount]#" />
+        </td>
+        <td>
+          This is is the init size of space for words in cache.
+        </td>
+      </tr>
+      <tr valign="top" class="TableCellDark">
+        <td>word-flush idle divisor:</td>
+        <td colspan="2">
+          <input name="wordFlushIdleDivisor" type="text" size="20" maxlength="100" value="#[wordFlushIdleDivisor]#" />
+        </td>
+        <td rowspan="2">
+          The word flush divisor is applied when an indexing loop is executed.
+          The divisor is used to divide the number of words in the cache; the result is the number of words that are flushed.
+          The idleDivisor is used if the indexing queue is empty, the busyDivisor is used if the indexing queue contains at least one element.
+        </td>
+      </tr>
+      <tr valign="top" class="TableCellDark">
+        <td>word-flush busy divisor:</td>
+        <td colspan="2">
+          <input name="wordFlushBusyDivisor" type="text" size="20" maxlength="100" value="#[wordFlushBusyDivisor]#" />
+        </td>
+      </tr>
+      <tr valign="top" class="TableCellLight">
+        <td colspan="4">
+        <input type="submit" name="cacheSizeSubmit" value="Enter New Cache Size" />
+        Changes take effect immediately</td>
+      </tr>
+    </table>
+  </form>
+  
+  <p>
+    <strong>Thread pool settings:</strong>
+  </p>
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
+    <table border="0" cellpadding="2" cellspacing="1">
+      <colgroup>
+        <col width="150" />
+        <col width="80" span="5" />
+        <col />
+      </colgroup>
+      <tr class="TableHeader" valign="bottom">
+        <td>Thread Pool</td>
+        <td>maximum Active</td>
+        <td>maximum Idle</td>
+        <td>minimum Idle</td>
+        <td>current Active</td>
+        <td>current Idle</td>
+        <td>Full Description</td>
+      </tr>
+      #{pool}#
+      <tr class="TableCellDark">
+        <td align="left">#[name]#</td>
+        <td align="right"><input name="#[name]#_maxActive" type="text" size="8" maxlength="8" value="#[maxActive]#" /></td>
+        <td align="right"><input name="#[name]#_maxIdle" type="text" size="8" maxlength="8" value="#[maxIdle]#" /></td>
+        <td align="right"><input name="#[name]#_minIdle" type="text" size="8" maxlength="8" value="#[minIdle]#" #(minIdleConfigurable)#disabled="disabled"::#(/minIdleConfigurable)# /></td>
+        <td align="right">#[numActive]#</td>
+        <td align="right">#[numIdle]#</td>
+        <td align="left"></td>
+      </tr>
+      #{/pool}#
+      <tr class="TableCellLight">
+        <td align="left" colspan="7">
+        <input type="submit" name="poolConfig" value="Enter new Threadpool Configuration" />
+        Changes take effect immediately</td>
+      </tr>
+    </table>
+  </form>
+  
+  <p>
+    <strong>Index Assortments:</strong>
+  </p>
+  <table border="0" cellpadding="5" cellspacing="1">
+    #{assortmentCluster}#
+    <tr valign="top" class="TableCellDark">
+      <td>Assortments #[assortmentSlots]#:</td>
+      <td align="right">#[assortmentSizeA]#</td>
+      <td align="right">#[assortmentSizeB]#</td>
+      <td align="right">#[assortmentSizeC]#</td>
+      <td align="right">#[assortmentSizeD]#</td>
+      <td align="right">#[assortmentSizeE]#</td>
+      <td align="right">#[assortmentSizeF]#</td>
+      <td align="right">#[assortmentSizeG]#</td>
+      <td align="right">#[assortmentSizeH]#</td>
+    </tr>
+    #{/assortmentCluster}#
+  </table>
+  
+  <p>
+    <strong>Proxy Performance Settings:</strong>
+  </p>
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
+    <table border="0" cellpadding="5" cellspacing="1">
+      <tr valign="top" class="TableCellDark">
+        <td>Online Caution Delay (milliseconds):</td>
+        <td><input name="onlineCautionDelay" type="text" size="20" maxlength="100" value="#[onlineCautionDelay]#" /></td>
+        <td>
+        This is the time that the crawler idles when the proxy is accessed. The delay is extended by this time
+        each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.
+        (current delta is #[onlineCautionDelayCurrent]# milliseconds since last proxy access.)
+        </td>
+      </tr>
+      <tr valign="top" class="TableCellLight">
+        <td colspan="3">
+        <input type="submit" name="proxyControlSubmit" value="Enter New Parameters" />
+        Changes take effect immediately</td>
+      </tr>
+    </table>
+  </form>
+  
+  #%env/templates/footer.template%#
+  </body>
 </html>

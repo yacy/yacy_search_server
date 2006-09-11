@@ -97,7 +97,7 @@ public class PerformanceQueues_p {
             
             // set values to templates
             prop.put("table_" + c + "_threadname", threadName);
-            prop.put("table_" + c + "_shortdescr", (thread.getMonitorURL() == null) ? thread.getShortDescription() : "<a href=\"" + thread.getMonitorURL() + "\" class=?\"small\">" + thread.getShortDescription() + "</a>");
+            prop.put("table_" + c + "_shortdescr", (thread.getMonitorURL() == null) ? thread.getShortDescription() : "<a href=\"" + thread.getMonitorURL() + "\">" + thread.getShortDescription() + "</a>");
             prop.put("table_" + c + "_longdescr", thread.getLongDescription());
             queuesize = thread.getJobCount();
             prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(queuesize));
@@ -258,7 +258,7 @@ public class PerformanceQueues_p {
         }
         
         // table cache settings
-        prop.put("urlCacheSize", switchboard.urlPool.loadedURL.writeCacheSize());
+        prop.put("urlCacheSize", switchboard.urlPool.loadedURL.writeCacheSize());  
         prop.put("wordCacheWSize", switchboard.wordIndex.wSize());
         prop.put("wordCacheKSize", switchboard.wordIndex.kSize());
         prop.put("maxURLinWCache", "" + switchboard.wordIndex.maxURLinWCache());
@@ -313,7 +313,7 @@ public class PerformanceQueues_p {
         prop.put("pool_2_maxActive",stackerPoolConfig.maxActive);
         prop.put("pool_2_maxIdle",stackerPoolConfig.maxIdle);
         prop.put("pool_2_minIdleConfigurable",1);
-        prop.put("pool_2_minIdle",stackerPoolConfig.minIdle);   
+        prop.put("pool_2_minIdle",stackerPoolConfig.minIdle);  
         prop.put("pool_2_numActive",switchboard.sbStackCrawlThread.getNumActiveWorker());
         prop.put("pool_2_numIdle",switchboard.sbStackCrawlThread.getNumIdleWorker());
         prop.put("pool",3);        

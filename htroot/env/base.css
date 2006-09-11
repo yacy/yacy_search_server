@@ -1,0 +1,402 @@
+/* Layout and general style */
+
+body, table, textarea {
+  font-size: 12px;
+}
+
+* {
+  font-family:Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin:0;
+  padding:0;
+}
+
+img {
+  border:0;
+}
+
+h1, h2, h3, h4 {
+  font-style:normal;
+}
+
+h1 {
+  font-size:2em;
+}
+h2 {
+  font-size:1.6em;
+  clear:left; /* The heading after the submenu has to be left again */
+}
+
+h3 {
+  font-size:1.3em;
+}
+h4 {
+  font-size:1.1em;
+}
+
+a:link {
+  text-decoration:none;
+}
+
+a:visited {
+  text-decoration:none;
+}
+
+a:hover {
+  text-decoration:underline;
+}
+
+*.tt {
+  font-family:Courier,Terminal,sans-serif;
+}
+
+td {
+  padding:1px 2px;
+}
+
+/* Head */
+
+div.head h1 {
+  padding:4px;
+  background:url(/env/grafics/yacy.gif) 10px center no-repeat;
+  font-weight: bold;
+  font-size: 1.6em;
+  text-align: center;
+  margin:0;
+}
+
+/* Menu*/
+
+ul#menu {
+  padding:0;
+  margin:0;
+  margin-left:1px;
+  position:absolute;
+  top:3em;
+  left:0;
+  width:11em;
+  overflow:hidden;
+}
+
+ul.menu, ul.SubMenu {
+  padding:0;
+  margin:0;
+}
+
+ul.menu li, ul.SubMenu li {
+  list-style:none;
+  margin:0;
+  margin-top:1px;
+  padding:0;
+}
+
+li.menugroup {
+  margin-left:5px;
+  margin-bottom:10px;
+  list-style:none;
+}
+li.menugroup h3, div.SubMenugroup h3, div.SubMenu h3 {
+  font-size:1em;
+  font-weight:bold;
+  margin:0;
+  padding:1px 10px;
+}
+
+div.SubMenu h3 {
+  margin-bottom:1px;
+}
+
+div.SubMenugroup, ul.SubMenu li {
+  float:left;
+  margin-right:1px;
+  margin-top:0;
+}
+
+a.MenuItemLink, ul.SubMenu em {
+  display:block;
+  text-decoration:none;
+  margin-top:1px;
+  margin-bottom:1px;
+  padding:1px 10px 1px 15px;
+  font-size:0.9em;
+}
+
+ul#menu a.MenuItemLink {
+  width:80%;
+  padding:1px 5% 1px 15%;
+}
+
+ul.SubMenu a.MenuItemLink, ul.SubMenu em {
+  margin-top:0;
+}
+
+a:hover.MenuItemLink {
+  text-decoration:none;
+}
+
+a.MenuItemLink.lock, ul.SubMenu em.lock {
+  background-image:url(/env/grafics/lock.gif);
+  background-position:2px center;
+  background-repeat:no-repeat;
+}
+
+/* Content */
+
+div.content {
+  position:absolute;
+  top:3em;
+  left:12em;
+  right:10px;
+  margin:0;
+}
+
+/* Searchpages */
+
+form.search {
+  text-align:center;
+  margin:0;
+}
+
+form.search table {
+  margin:0 auto;
+  text-align:left;
+}
+
+h2.yacy { /* The heading in index.html */
+  margin:10px auto;
+  text-align:center;
+  padding-top:130px;
+  width:256px;
+  min-width:256px;
+  background:url(/env/grafics/kaskelix.png) top center no-repeat;
+}
+
+form.search.small p.yacylogo { /* The logo in yacysearch.html */
+  display:block;
+  float:left;
+  padding:0;
+  width:70px;
+}
+
+form.search.small h2 {
+  clear:none;
+}
+
+div.urlactions {
+  float:left;
+}
+
+div.urlactions a {
+  display:block;
+}
+
+img.bookmarkIcon, img.deleteIcon {
+  height: 16px;
+  width: 16px;
+}
+
+a.deletelink:hover {
+  background:url(/env/grafics/minus.gif) center center no-repeat;
+}
+
+a.bookmarklink:hover {
+  background:url(/env/grafics/plus.gif) center center no-repeat;
+}
+
+div.searchresults p, div.searchresults h4 {
+  margin:2px 2px 2px 22px;
+}
+
+.snippetLoaded {
+  font-style:italic;
+}
+
+.snippetError {
+  font-style:italic;
+}
+
+div.searchresults {
+  padding-top:1em;
+  margin-bottom:1em;
+}
+
+/* Bookmarks */
+
+div.Tags {
+  float:right;
+  width:12em;
+  text-align:right;
+  padding-left: 5px;
+}
+
+ul.tagList {
+  list-style:none;
+  padding:0;
+  margin-left:0;
+}
+
+div.bookmarkList, div.Tags {
+  margin-top:1em;
+}
+
+div.bookmark {
+  margin-top:1em;
+  margin-right:13em;
+  padding-bottom:1em;
+}
+
+div.bookmark p {
+  margin:1px;
+}
+
+a.bookmarkTags {
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+h4.bookmarkTitle {
+  margin:0;
+}
+
+a.bookmarkTitle {
+  font-size:17px;
+  font-weight:bold;
+}
+
+a.BookmarkLink {
+  background:url(/env/grafics/addlink.png) left center no-repeat;
+  padding-left:15px;
+}
+
+/* Blog and Wiki */
+
+.Post {
+  padding:10px;
+  margin-bottom:10px;
+}
+.PostSubject {
+  padding:5px;
+  margin:0;
+}
+.PostBody {
+  margin:10px;
+}
+.PostInfo {
+  padding:1px 10px;
+}
+
+.WikiTOCBox {
+  padding: 8px;
+}
+
+/* Forms and key-value pairs with dl */
+
+fieldset {
+  margin:1em 0.4em;
+  padding:5px;
+}
+
+legend {
+  font-size:1.2em;
+  padding:0.2em;
+  text-align:center;
+}
+
+form dt, dl.pairs dt {
+  float:left;
+  clear:left;
+  width:17em;
+  margin:0 0.25em;
+  padding:0.2em 1em;
+  text-align:right;
+}
+
+form dd, dl.pairs dd {
+  margin:0 0 0.5em 0.25em;
+}
+
+dl.pairs dd {
+  padding:2px 1em;
+  margin-left:20em;
+}
+
+/* for pages: */
+
+body#ViewLog pre {
+  width:100%; /* TODO: fix width in IE */
+  height:480px;
+  overflow:scroll;
+}
+body#QuickCrawlLink p, body#QuickCrawlLink h4 {
+  padding:0 5%;
+}
+
+form.PeerControl fieldset { /* on Status.html */
+	text-align:right;
+}
+
+body#Settings ul.settingsMenu li {
+  list-style-image:url(/env/grafics/down.gif);
+}
+
+body#help dt {
+  margin-top:0.2em;
+  font-weight:bold;
+}
+
+table.networkTable {
+  font-size:90%;
+}
+
+table.StatusTable {
+	border-width:0px;
+	border-spacing:1px;
+}
+
+/* other */
+
+div.ProgressBarCaption {
+	float:left;
+	width:70px;
+}
+div.ProgressBar {
+	float:left;
+	width:150px;
+	height:10px;
+}
+
+p.info {
+  margin-top:5em;
+  padding-top:5px;
+  text-align:center;
+}
+
+.settingsValue {
+  font-weight:bold;
+}
+
+.Headline {
+  font-weight: bold;
+  font-size: 160%;
+  text-align: center;
+  height: 36px;
+  width:100%;
+}
+
+.Heading {
+  height: 36px;
+}
+
+div.CacheAdminInfo {
+  margin-top:1em;
+}
+
+.error {
+  font-weight:bold;
+}
+
+.help {
+  font-size:90%;
+}
