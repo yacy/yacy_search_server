@@ -1,4 +1,4 @@
-//autoconfig.pac 
+//YaCySearchPluginFF.pac 
 //-----------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@anomic.de
@@ -46,12 +46,11 @@
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
 
 public class YaCySearchPluginFF {
     
     /**
-     * Generates a proxy-autoconfig-file (application/x-ns-proxy-autoconfig) 
-     * See: <a href="http://wp.netscape.com/eng/mozilla/2.0/relnotes/demo/proxy-live.html">Proxy Auto-Config File Format</a> 
      * @param header
      * @param post
      * @param env
@@ -73,6 +72,7 @@ public class YaCySearchPluginFF {
         
         prop.put("host", host);
         prop.put("port", Integer.toString(port));
+        prop.put("name", yacyCore.seedDB.mySeed.getName());
         
         return prop;
     }
