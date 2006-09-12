@@ -651,7 +651,8 @@ public final class yacy {
         File indexRoot = new File(new File(homePath), "DATA/INDEX/PUBLIC/TEXT");
         serverLog log = new serverLog("WORDMIGRATION");
         log.logInfo("STARTING MIGRATION");
-        plasmaWordIndex wordIndexCache = new plasmaWordIndex(dbroot, indexRoot, 20000, 10000, log, sps.getConfigBool("useCollectionIndex", false));
+        boolean useCollectionIndex = sps.getConfigBool("useCollectionIndex", false);
+        plasmaWordIndex wordIndexCache = new plasmaWordIndex(dbroot, indexRoot, 20000, 10000, log, useCollectionIndex);
         enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
         String wordhash;
         File wordfile;
@@ -661,7 +662,10 @@ public final class yacy {
                 wordfile = (File) words.nextElement();
                 wordhash = wordfile.getName().substring(0, 12);
                 // System.out.println("NOW: " + wordhash);
-                migrationStatus = wordIndexCache.migrateWords2Assortment(wordhash);
+                if (useCollectionIndex)
+                    migrationStatus = wordIndexCache.migrateWords2index(wordhash);
+                else
+                    migrationStatus = wordIndexCache.migrateWords2Assortment(wordhash);
                 if (migrationStatus instanceof Integer) {
                     int migrationCount = ((Integer) migrationStatus).intValue();
                     if (migrationCount == 0)

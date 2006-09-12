@@ -652,6 +652,45 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         }
     }
 
+    public Object migrateWords2index(String wordhash) throws IOException {
+        // returns the number of entries that had been added to the assortments
+        // can be negative if some assortments have been moved to the backend
+        File db = plasmaWordIndexFile.wordHash2path(oldDatabaseRoot, wordhash);
+        if (!(db.exists())) return "not available";
+        plasmaWordIndexFile entity = null;
+        try {
+            entity = new plasmaWordIndexFile(oldDatabaseRoot, wordhash, true);
+            int size = entity.size();
+            indexContainer container = new indexRowSetContainer(wordhash);
+
+            try {
+                Iterator entries = entity.elements(true);
+                indexEntry entry;
+                while (entries.hasNext()) {
+                    entry = (indexEntry) entries.next();
+                    // System.out.println("ENTRY = " + entry.getUrlHash());
+                    container.add(new indexEntry[] { entry }, System.currentTimeMillis());
+                }
+                // we have read all elements, now delete the entity
+                entity.deleteComplete();
+                entity.close();
+                entity = null;
+
+                indexContainer feedback = collections.addEntries(container, container.updated(), false);
+                if (feedback != null) return feedback;
+                return new Integer(size);
+            } catch (kelondroException e) {
+                // database corrupted, we simply give up the database and delete it
+                try { entity.close(); } catch (Exception ee) { }
+                entity = null;
+                try { db.delete(); } catch (Exception ee) { }
+                return "database corrupted; deleted";
+            }
+        } finally {
+            if (entity != null) try {entity.close();}catch(Exception e){}
+        }
+    }
+    
     //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
     //  see http://www.yacy-forum.de/viewtopic.php?p=18093#18093
     public Cleaner makeCleaner(plasmaCrawlLURL lurl, String startHash) {
