@@ -537,14 +537,19 @@ public final class yacyClient {
             Map.Entry entry;
             TreeMap singleAbstract;
             String wordhash;
+            serverByteBuffer ci;
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
                 if (((String) entry.getKey()).startsWith("indexabstract.")) {
                     wordhash = ((String) entry.getKey()).substring(14);
-                    singleAbstract = (TreeMap) abstractCache.get(wordhash);
-                    if (singleAbstract == null) singleAbstract = new TreeMap();
-                    indexURL.decompressIndex(singleAbstract, new serverByteBuffer(((String) entry.getValue()).getBytes()), targetPeer.hash);
-                    abstractCache.put(wordhash, singleAbstract);
+                    synchronized (abstractCache) {
+                        singleAbstract = (TreeMap) abstractCache.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
+                        if (singleAbstract == null) singleAbstract = new TreeMap();
+                        ci = new serverByteBuffer(((String) entry.getValue()).getBytes());
+                        System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
+                        indexURL.decompressIndex(singleAbstract, ci, targetPeer.hash);
+                        abstractCache.put(wordhash, singleAbstract);
+                    }
                 }
             }
             

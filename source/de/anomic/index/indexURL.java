@@ -679,12 +679,13 @@ public class indexURL {
  public static final void decompressIndex(TreeMap target, serverByteBuffer ci, String peerhash) {
      // target is a mapping from url-hashes to a string of peer-hashes
      if ((ci.byteAt(0) == '{') && (ci.byteAt(ci.length() - 1) == '}')) {
+         //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
          ci = ci.trim(1, ci.length() - 1);
          String dom, url, peers;
          while ((ci.length() >= 13) && (ci.byteAt(6) == ':')) {
              dom = ci.toString(0, 6);
              ci.trim(7);
-             while ((ci.length() == 6) || ((ci.length() > 6) && (ci.byteAt(6) != ','))) {
+             while ((ci.length() > 0) && (ci.byteAt(0) != ',')) {
                  url = ci.toString(0, 6) + dom;
                  ci.trim(6);
                  peers = (String) target.get(url);
@@ -693,6 +694,7 @@ public class indexURL {
                  } else {
                      target.put(url, peers + peerhash);
                  }
+                 //System.out.println("DEBUG-DECOMPRESS: " + url + ":" + target.get(url));
              }
              if (ci.byteAt(0) == ',') ci.trim(1);
          }

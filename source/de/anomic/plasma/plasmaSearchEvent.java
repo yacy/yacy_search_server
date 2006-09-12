@@ -70,7 +70,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private plasmaSnippetCache snippetCache;
     private indexContainer rcContainers; // cache for results
     private int rcContainerCount;
-    private Map rcAbstracts; // cache for index abstracts
+    private Map rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private plasmaSearchTimingProfile profileLocal, profileGlobal;
     private boolean postsort;
     private yacySearch[] searchThreads;
@@ -132,21 +132,34 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
                 log.logFine("STARTING " + fetchpeers + " THREADS TO CATCH EACH " + profileGlobal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT) + " URLs WITHIN " + (profileGlobal.duetime() / 1000) + " SECONDS");
 
-                long timeout = System.currentTimeMillis() + profileGlobal.duetime();
+                long secondaryTimeout = System.currentTimeMillis() + profileGlobal.duetime() / 2;
+                long primaryTimeout = System.currentTimeMillis() + profileGlobal.duetime();
                 searchThreads = yacySearch.searchHashes(query.queryHashes, query.prefer, query.urlMask, query.maxDistance, urlStore, rcContainers, rcAbstracts, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
 
                 // meanwhile do a local search
                 Map searchContainerMap = localSearchContainers(null);
                 indexContainer rcLocal = localSearchJoin((searchContainerMap == null) ? null : searchContainerMap.values());
-                plasmaSearchResult localResult = orderLocal(rcLocal, timeout);
+                plasmaSearchResult localResult = orderLocal(rcLocal, secondaryTimeout);
+                
+                // evaluate index abstracts and start a secondary search
+                // this is temporary debugging code to learn that the index abstracts are fetched correctly
+                while (System.currentTimeMillis() < secondaryTimeout + 10000) {
+                    if (yacySearch.remainingWaiting(searchThreads) == 0) break; // all threads have finished
+                    try {Thread.sleep(100);} catch (InterruptedException e) {}
+                }
+                System.out.println("DEBUG-INDEXABSTRACT: " + rcAbstracts.size() + " word references catched, " + query.size() + " needed");
+                Iterator i = rcAbstracts.entrySet().iterator();
+                Map.Entry entry;
+                while (i.hasNext()) {
+                    entry = (Map.Entry) i.next();
+                    System.out.println("DEBUG-INDEXABSTRACT: hash " + (String) entry.getKey() + ": " + ((query.queryHashes.contains((String) entry.getKey())) ? "NEEDED" : "NOT NEEDED") + "; " + ((TreeMap) entry.getValue()).size() + " entries");
+                }
+                
                 
                 // catch up global results:
-                // wait until wanted delay passed or wanted result appeared
-                while (System.currentTimeMillis() < timeout) {
-                    // check if all threads have been finished or results so far are enough
-                    //if (rcGlobal.size() >= profileGlobal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT) * 5) break; // we have enough
-                    if (yacySearch.remainingWaiting(searchThreads) == 0) break; // we cannot expect more
-                    // wait a little time ..
+                // wait until primary timeout passed
+                while (System.currentTimeMillis() < primaryTimeout) {
+                    if (yacySearch.remainingWaiting(searchThreads) == 0) break; // all threads have finished
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
                 int globalContributions = rcContainers.size();

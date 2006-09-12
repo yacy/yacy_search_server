@@ -68,6 +68,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacySeed;
 
 public final class search {
@@ -135,20 +136,29 @@ public final class search {
         Map containers = theSearch.localSearchContainers(urlselection);
         
         // set statistic details of search result and find best result index set
-        String maxcounthash = null;
+        String maxcounthash = null, neardhthash = null;
         if (containers == null) {
             prop.put("indexcount", "");
         } else {
             Iterator ci = containers.entrySet().iterator();
             StringBuffer indexcount = new StringBuffer();
             Map.Entry entry;
-            String wordhash;
             int maxcount = -1;
+            double mindhtdistance = 1.1, d;
+            String wordhash;
             while (ci.hasNext()) {
                 entry = (Map.Entry) ci.next();
                 wordhash = (String) entry.getKey();
                 indexContainer container = (indexContainer) entry.getValue();
-                if (container.size() > maxcount) maxcounthash = wordhash;
+                if (container.size() > maxcount) {
+                    maxcounthash = wordhash;
+                    maxcount = container.size();
+                }
+                d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhash);
+                if (d < mindhtdistance) {
+                    mindhtdistance = d;
+                    neardhthash = wordhash;
+                }
                 indexcount.append("indexcount.").append(container.getWordHash()).append('=').append(Integer.toString(container.size())).append(serverCore.crlfString);
             }
             prop.put("indexcount", new String(indexcount));
@@ -159,7 +169,10 @@ public final class search {
         if ((maxcounthash == null) || (urls.length() != 0)) {
             prop.put("indexabstract","");
         } else {
-            String indexabstract = "indexabstract." + maxcounthash + "=" + indexURL.compressIndex(((indexContainer) containers.get(maxcounthash)), 1000).toString();
+            String indexabstract = "indexabstract." + maxcounthash + "=" + indexURL.compressIndex(((indexContainer) containers.get(maxcounthash)), 1000).toString() + serverCore.crlfString;
+            if ((neardhthash != null) && (!(neardhthash.equals(maxcounthash)))) {
+                indexabstract += "indexabstract." + neardhthash + "=" + indexURL.compressIndex(((indexContainer) containers.get(neardhthash)), 1000).toString() + serverCore.crlfString;
+            }
             //yacyCore.log.logFine("DEBUG HASH SEARCH: " + indexabstract);
             prop.put("indexabstract", indexabstract);
         }
