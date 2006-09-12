@@ -300,8 +300,8 @@ a.BookmarkLink {
 /* Forms and key-value pairs with dl */
 
 fieldset {
-  margin:5px;
-  padding:5px;
+  margin:10px 5px;
+  padding:10px;
 }
 
 legend {
@@ -359,6 +359,11 @@ table.networkTable {
 table.StatusTable {
 	border-width:0px;
 	border-spacing:1px;
+}
+
+body#Blacklist fieldset.editList {
+  float:left;
+  margin-top:0;
 }
 
 /* other */

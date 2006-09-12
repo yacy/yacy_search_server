@@ -14,64 +14,62 @@
       You may also provide your blacklist to other peers by sharing them; in return you may
       collect blacklist entries from other peers.
     </p>
+    <h3>Active list: <em>#[currentBlacklist]#</em> #(disabled)#::<span class="error">No blacklist selected</span>#(/disabled)#</h3>
     <!-- blacklist selection -->
     <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
-      <fieldset>
-        <legend>Edit list:</legend>
+      <fieldset class="selectList">
+        <legend>Select list:</legend>
         <select name="selectedListName" size="1">
           #{blackLists}#
           <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]# [#(shared)#not shared::shared#(/shared)#] #{active}# #[blTypeName]##{/active}#</option>
           #{/blackLists}#
         </select>
         <input type="submit" name="selectList" value="select" #(disabled)#::disabled="disabled"#(/disabled)# />
-      </fieldset>
-      <fieldset>
-        <legend>New list:</legend>
+        New list:
         <input type="text" name="newListName" />
         <input type="submit" name="createNewList" value="create" />
       </fieldset>
-      <h3>Active list: <em>#[currentBlacklist]#</em> #(disabled)#::<span class="error">No blacklist selected</span>#(/disabled)#</h3>
 
-      <fieldset>
-        <legend>Activate this list for ...</legend>
-        <dl>
-          #{currentActiveFor}#
-          <dt><label for="activateList4#[blTypeName]#">#[blTypeName]#</label></dt>
-          <dd>
-            <input type="checkbox" id="activateList4#[blTypeName]#" name="activateList4#[blTypeName]#" value="on" #(checked)#checked="checked"::#(/checked)# />
-          </dd>
-        #{/currentActiveFor}#
-        </dl>
-        <input type="submit" name="activateList" value="Enable/disable this list" #(disabled)#::disabled="disabled"#(/disabled)# />
-      </fieldset>
-      <fieldset>
+      <fieldset class="listSettings">
+        <legend>Settings for this list</legend>
         <input type="submit" name="shareList" value="Share/don't share this list" #(disabled)#::disabled="disabled"#(/disabled)# />
         <input type="submit" name="deleteList" value="Delete this list" #(disabled)#::disabled="disabled"#(/disabled)# />
+        <fieldset>
+          <legend>Activate this list for ...</legend>
+          <dl>
+            #{currentActiveFor}#
+            <dt><label for="activateList4#[blTypeName]#">#[blTypeName]#</label></dt>
+            <dd>
+              <input type="checkbox" id="activateList4#[blTypeName]#" name="activateList4#[blTypeName]#" value="on" #(checked)#checked="checked"::#(/checked)# />
+            </dd>
+          #{/currentActiveFor}#
+          </dl>        
+          <input type="submit" name="activateList" value="Enable/disable this list" #(disabled)#::disabled="disabled"#(/disabled)# />
+        </fieldset>
       </fieldset>
     </form>
 
-
-    <!-- Blacklist configuration -->
-    <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">	
-
-      <fieldset>
+    <fieldset class="editList">
+      <legend>Edit this list</legend>
+      <!-- Blacklist configuration -->
+      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">	
         <p>
           These are the domain name / path patterns in this blacklist:<br />
           You can select them here for deletion
         </p>
-        <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
-        <select name="selectedEntry" size="8">
-          <!--<option disabled>blocked Sites</option>-->
-          #{Itemlist}#
-          <option value="#[item]#">#[item]#</option>
-          #{/Itemlist}#
-        </select>
-        <br />
-        <input type="submit" name="deleteBlacklistEntry" value="Delete URL pattern" #(disabled)#::disabled="disabled"#(/disabled)# />
-      </fieldset>
-    </form>
-    <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
-      <fieldset>
+        <div>
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <select name="selectedEntry" size="8">
+            <!--<option disabled>blocked Sites</option>-->
+            #{Itemlist}#
+            <option value="#[item]#">#[item]#</option>
+            #{/Itemlist}#
+          </select>
+          <br />
+          <input type="submit" name="deleteBlacklistEntry" value="Delete URL pattern" #(disabled)#::disabled="disabled"#(/disabled)# />
+        </div>
+      </form>
+      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
         <ul>
           <li>domain/fullpath</li>
           <li>domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
@@ -80,55 +78,58 @@
           <li>*.sub.domain/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
           <li>sub.domain.*/.* or <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
         </ul>
-        <input type="text" name="newEntry" size="50" />
-        <input type="submit" name="addBlacklistEntry" value="Add URL pattern" #(disabled)#::disabled="disabled"#(/disabled)# />
-      </fieldset>
-    </form>
+        <div>
+          <input type="text" name="newEntry" size="50" />
+          <input type="submit" name="addBlacklistEntry" value="Add URL pattern" 
+          #(disabled)#::disabled="disabled"#(/disabled)# />
+          <p>
+            #(status)# <!-- 0: -->
+            ::
+            <strong>#[item]#</strong> was removed from blacklist
+            ::
+            <strong>#[item]#</strong> was added to the blacklist
+            #(/status)#
+          </p>
+        </div>
+      </form>
+    </fieldset>
     
-    <!-- Blacklist import from other peer -->
-    <form action="sharedBlacklist_p.html" method="get">
-      <fieldset>
-        <legend>Import blacklist items from other YaCy peers:</legend>
-       	<input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
-        Host: <select name="hash">
-          #{otherHosts}#
-          <option value="#[hash]#">#[name]#</option>
-          #{/otherHosts}#
-        </select>
-        <br />
-        <input type="submit" value="Load new blacklist items" #(disabled)#::disabled="disabled"#(/disabled)# />
-      </fieldset>
-    </form>
+    <fieldset class="importListItems">
+      <legend>Import blacklist items from...</legend>
+      <!-- Blacklist import from other peer -->
+      <form action="sharedBlacklist_p.html" method="get">
+        <fieldset>
+          <legend>other YaCy peers:</legend>
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          Host: <select name="hash">
+            #{otherHosts}#
+            <option value="#[hash]#">#[name]#</option>
+            #{/otherHosts}#
+          </select>
+          <input type="submit" value="Load new blacklist items" #(disabled)#::disabled="disabled"#(/disabled)# />
+        </fieldset>
+      </form>
 
-    <!-- blacklist import from url -->
-    <form action="sharedBlacklist_p.html" method="get">
-      <fieldset>
-        <legend>Import blacklist items from URL:</legend>
-        <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
-        URL: <input type="text" name="url" /><br />
-        <input type="submit" value="Load new blacklist items" #(disabled)#::disabled="disabled"#(/disabled)# />
-      </fieldset>
-    </form>
+      <!-- blacklist import from url -->
+      <form action="sharedBlacklist_p.html" method="get">
+        <fieldset>
+          <legend>URL:</legend>
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          URL: <input type="text" name="url" />
+          <input type="submit" value="Load new blacklist items" #(disabled)#::disabled="disabled"#(/disabled)# />
+        </fieldset>
+      </form>
     
-    <!-- blacklist import from file -->	
-    <form action="sharedBlacklist_p.html" method="get">	
-      <fieldset>
-        <legend>Import blacklist items from file:</legend>
-        <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
-        File: <input type="text" name="file" />
-        <input type="submit" value="Load new blacklist items" #(disabled)#::disabled="disabled"#(/disabled)# />
-      </fieldset>
-    </form>
-
-    <p>
-    #(status)# <!-- 0: -->
-    ::
-    <strong>#[item]#</strong> was removed from blacklist
-    ::
-    <strong>#[item]#</strong> was added to the blacklist
-    #(/status)#
-    </p>
-    
+      <!-- blacklist import from file -->	
+      <form action="sharedBlacklist_p.html" method="get">	
+        <fieldset>
+          <legend>file:</legend>
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          File: <input type="text" name="file" />
+          <input type="submit" value="Load new blacklist items" #(disabled)#::disabled="disabled"#(/disabled)# />
+        </fieldset>
+      </form>
+    </fieldset>   
     #%env/templates/footer.template%#
   </body>
 </html>
