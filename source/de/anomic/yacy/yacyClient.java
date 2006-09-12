@@ -57,7 +57,6 @@ import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexRowSetContainer;
 import de.anomic.index.indexURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -479,7 +478,7 @@ public final class yacyClient {
             final int words = wordhashes.length() / indexEntryAttribute.wordHashLength;
             indexContainer[] container = new indexContainer[words];
             for (int i = 0; i < words; i++) {
-                container[i] = new indexRowSetContainer(wordhashes.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
+                container[i] = new indexContainer(wordhashes.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
             }
 
             // insert results to containers
@@ -546,7 +545,7 @@ public final class yacyClient {
                         singleAbstract = (TreeMap) abstractCache.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
                         if (singleAbstract == null) singleAbstract = new TreeMap();
                         ci = new serverByteBuffer(((String) entry.getValue()).getBytes());
-                        System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
+                        //System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
                         indexURL.decompressIndex(singleAbstract, ci, targetPeer.hash);
                         abstractCache.put(wordhash, singleAbstract);
                     }

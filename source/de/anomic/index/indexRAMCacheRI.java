@@ -474,7 +474,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             // put container into wCache
             String wordHash = container.getWordHash();
             indexContainer entries = (indexContainer) wCache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
-            if (entries == null) entries = new indexRowSetContainer(wordHash);
+            if (entries == null) entries = new indexContainer(wordHash);
             added = entries.add(container, -1);
             if (added > 0) {
                 wCache.put(wordHash, entries);
@@ -489,7 +489,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
         if (dhtCase) synchronized (kCache) {
             // put container into kCache
-            indexContainer container = new indexRowSetContainer(wordHash);
+            indexContainer container = new indexContainer(wordHash);
             container.add(newEntry);
             kCache.put(new Long(updateTime + kCacheInc), container);
             kCacheInc++;
@@ -497,7 +497,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             return null;
         } else synchronized (wCache) {
             indexContainer container = (indexContainer) wCache.get(wordHash);
-            if (container == null) container = new indexRowSetContainer(wordHash);
+            if (container == null) container = new indexContainer(wordHash);
             indexEntry[] entries = new indexEntry[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
                 wCache.put(wordHash, container);

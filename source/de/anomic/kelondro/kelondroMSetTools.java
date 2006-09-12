@@ -45,8 +45,11 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.FileInputStream;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -81,6 +84,49 @@ public class kelondroMSetTools {
     // - join by pairvise enumeration
     // - join by iterative tests (where we distinguish left-right and right-left tests)
 
+    
+    public static TreeMap joinConstructive(Collection maps) {
+        // this joins all TreeMap(s) contained in maps
+        
+        // first order entities by their size
+        TreeMap orderMap = new TreeMap();
+        TreeMap singleMap;
+        Iterator i = maps.iterator();
+        int count = 0;
+        while (i.hasNext()) {
+            // get next entity:
+            singleMap = (TreeMap) i.next();
+            
+            // check result
+            if ((singleMap == null) || (singleMap.size() == 0)) return new TreeMap();
+            
+            // store result in order of result size
+            orderMap.put(new Long(singleMap.size() * 1000 + count), singleMap);
+            count++;
+        }
+        
+        // check if there is any result
+        if (orderMap.size() == 0) return new TreeMap();
+        
+        // we now must pairwise build up a conjunction of these maps
+        Long k = (Long) orderMap.firstKey(); // the smallest, which means, the one with the least entries
+        TreeMap mapA, mapB, joinResult = (TreeMap) orderMap.remove(k);
+        while ((orderMap.size() > 0) && (joinResult.size() > 0)) {
+            // take the first element of map which is a result and combine it with result
+            k = (Long) orderMap.firstKey(); // the next smallest...
+            mapA = joinResult;
+            mapB = (TreeMap) orderMap.remove(k);
+            joinResult = joinConstructiveByTestSetInMap(mapB, mapA.keySet());
+            // free resources
+            mapA = null;
+            mapB = null;
+        }
+
+        // in 'searchResult' is now the combined search result
+        if (joinResult.size() == 0) return new TreeMap();
+        return joinResult;
+    }
+    
     public static TreeMap joinConstructive(TreeMap map, TreeSet set) {
 	// comparators must be equal
         if ((map == null) || (set == null)) return null;
@@ -95,13 +141,13 @@ public class kelondroMSetTools {
 
 	// start most efficient method
 	if (stepsEnum > stepsTest) {
-	    if (map.size() < set.size()) return joinConstructiveByTestSetInMap(map, set);
+	    if (map.size() > set.size()) return joinConstructiveByTestSetInMap(map, set);
         return joinConstructiveByTestMapInSet(map, set);
 	}
 	    return joinConstructiveByEnumeration(map, set);
     }
 
-    private static TreeMap joinConstructiveByTestSetInMap(TreeMap map, TreeSet set) {
+    private static TreeMap joinConstructiveByTestSetInMap(TreeMap map, Set set) {
 	Iterator si = set.iterator();
 	TreeMap result = new TreeMap(map.comparator());
 	Object o;
@@ -112,9 +158,9 @@ public class kelondroMSetTools {
 	return result;
     }
 
-    private static TreeMap joinConstructiveByTestMapInSet(TreeMap map, TreeSet set) {
+    private static TreeMap joinConstructiveByTestMapInSet(Map map, TreeSet set) {
 	Iterator mi = map.keySet().iterator();
-	TreeMap result = new TreeMap(map.comparator());
+	TreeMap result = new TreeMap(set.comparator());
 	Object o;
 	while (mi.hasNext()) {
 	    o = mi.next();

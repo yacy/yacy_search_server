@@ -54,7 +54,6 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
-import de.anomic.index.indexRowSetContainer;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
@@ -230,7 +229,7 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
         if ((maxTime < 0) || (maxTime > 60000)) maxTime=60000; // maximum is one minute
         if (plasmaWordIndexFile.wordHash2path(databaseRoot, wordHash).exists()) {
             plasmaWordIndexFile entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
-            indexContainer container = new indexRowSetContainer(wordHash);
+            indexContainer container = new indexContainer(wordHash);
             indexEntry entry;
             Iterator i = entity.elements(true);
             while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) {
@@ -239,7 +238,7 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
             }
             return container;
         } else {
-            return new indexRowSetContainer(wordHash);
+            return new indexContainer(wordHash);
         }
     }
     
@@ -254,7 +253,7 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
     
     public indexContainer deleteContainer(String wordHash) {
         plasmaWordIndexFile.removePlasmaIndex(databaseRoot, wordHash);
-        return new indexRowSetContainer(wordHash);
+        return new indexContainer(wordHash);
     }
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {

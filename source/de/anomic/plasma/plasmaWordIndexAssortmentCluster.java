@@ -57,7 +57,6 @@ import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexAbstractRI;
-import de.anomic.index.indexRowSetContainer;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroObjectCache;
 import de.anomic.kelondro.kelondroRecords;
@@ -162,7 +161,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         indexContainer c;
         Iterator i = newContainer.entries();
         for (int j = clusterStart; j >= 1; j--) {
-            c = new indexRowSetContainer(newContainer.getWordHash());
+            c = new indexContainer(newContainer.getWordHash());
             for (int k = 0; k < j; k++) {
                 if (i.hasNext()) {
                     c.add((indexEntry) i.next(), newContainer.updated());
@@ -205,7 +204,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
             Iterator i = newContainer.entries();
             for (int j = testsize - 1; j >= 0; j--) {
                 if (spaces[j] == 0) continue;
-                c = new indexRowSetContainer(newContainer.getWordHash());
+                c = new indexContainer(newContainer.getWordHash());
                 for (int k = 0; k <= j; k++) {
                     assert (i.hasNext());
                     c.add((indexEntry) i.next(), newContainer.updated());
@@ -231,7 +230,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
     
     public indexContainer deleteContainer(String wordHash, long maxTime) {
         // removes all records from all the assortments and return them
-        indexContainer buffer, record = new indexRowSetContainer(wordHash);
+        indexContainer buffer, record = new indexContainer(wordHash);
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         long remainingTime;
         for (int i = 0; i < clusterCount; i++) {
@@ -256,7 +255,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
     */
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
-        indexContainer buffer, record = new indexRowSetContainer(wordHash);
+        indexContainer buffer, record = new indexContainer(wordHash);
         boolean found = false;
         for (int i = 0; i < clusterCount; i++) {
             buffer = assortments[i].remove(wordHash);
@@ -272,7 +271,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
     }
 
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
-        indexContainer buffer, record = new indexRowSetContainer(wordHash);
+        indexContainer buffer, record = new indexContainer(wordHash);
         int initialSize = urlHashes.size();
         for (int i = 0; i < clusterCount; i++) {
             buffer = assortments[i].remove(wordHash);
@@ -297,7 +296,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
 
     public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxTime) {
         // collect all records from all the assortments and return them
-        indexContainer buffer, record = new indexRowSetContainer(wordHash);
+        indexContainer buffer, record = new indexContainer(wordHash);
         long timeout = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         for (int i = 0; i < clusterCount; i++) {
             buffer = assortments[i].get(wordHash);
@@ -330,7 +329,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         // iterates indexContainer - Objects
         HashSet containerIterators = new HashSet();
         for (int i = 0; i < clusterCount; i++) containerIterators.add(assortments[i].containers(startWordHash, up, rot));
-        return kelondroMergeIterator.cascade(containerIterators, new indexContainerOrder(kelondroNaturalOrder.naturalOrder), indexRowSetContainer.containerMergeMethod, up);
+        return kelondroMergeIterator.cascade(containerIterators, new indexContainerOrder(kelondroNaturalOrder.naturalOrder), indexContainer.containerMergeMethod, up);
     }
     
     public int size() {

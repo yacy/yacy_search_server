@@ -164,25 +164,27 @@ public final class search {
             prop.put("indexcount", new String(indexcount));
         }
         
-        // generate compressed index for maxcounthash
-        // this is not needed if the search is restricted to specific urls, because it is a re-search
-        if ((maxcounthash == null) || (urls.length() != 0)) {
-            prop.put("indexabstract","");
-        } else {
-            String indexabstract = "indexabstract." + maxcounthash + "=" + indexURL.compressIndex(((indexContainer) containers.get(maxcounthash)), 1000).toString() + serverCore.crlfString;
-            if ((neardhthash != null) && (!(neardhthash.equals(maxcounthash)))) {
-                indexabstract += "indexabstract." + neardhthash + "=" + indexURL.compressIndex(((indexContainer) containers.get(neardhthash)), 1000).toString() + serverCore.crlfString;
-            }
-            //yacyCore.log.logFine("DEBUG HASH SEARCH: " + indexabstract);
-            prop.put("indexabstract", indexabstract);
-        }
-        
         // join and order the result
         indexContainer localResults = theSearch.localSearchJoin(containers.values());
         int joincount = localResults.size();
         prop.put("joincount", Integer.toString(joincount));
         plasmaSearchResult acc = theSearch.order(localResults);
 
+        // generate compressed index for maxcounthash
+        // this is not needed if the search is restricted to specific urls, because it is a re-search
+        if ((maxcounthash == null) || (urls.length() != 0) || (keyhashes.size() == 1)) {
+            prop.put("indexabstract","");
+        } else {
+            String indexabstract = "indexabstract." + maxcounthash + "=" + indexURL.compressIndex(((indexContainer) containers.get(maxcounthash)), localResults, 1000).toString() + serverCore.crlfString;
+            if ((neardhthash != null) && (!(neardhthash.equals(maxcounthash)))) {
+                indexabstract += "indexabstract." + neardhthash + "=" + indexURL.compressIndex(((indexContainer) containers.get(neardhthash)), localResults, 1000).toString() + serverCore.crlfString;
+            }
+            System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
+            System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = " + neardhthash);
+            //yacyCore.log.logFine("DEBUG HASH SEARCH: " + indexabstract);
+            prop.put("indexabstract", indexabstract);
+        }
+        
         // prepare result
         if ((joincount == 0) || (acc == null)) {
             

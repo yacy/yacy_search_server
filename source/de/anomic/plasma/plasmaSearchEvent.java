@@ -50,11 +50,11 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
-import de.anomic.index.indexRowSetContainer;
 
 public final class plasmaSearchEvent extends Thread implements Runnable {
     
@@ -90,7 +90,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.ranking = ranking;
         this.urlStore = urlStore;
         this.snippetCache = snippetCache;
-        this.rcContainers = new indexRowSetContainer(null);
+        this.rcContainers = new indexContainer(null);
         this.rcContainerCount = 0;
         this.rcAbstracts = new TreeMap();
         this.profileLocal = localTiming;
@@ -148,13 +148,26 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
                 System.out.println("DEBUG-INDEXABSTRACT: " + rcAbstracts.size() + " word references catched, " + query.size() + " needed");
+                /*
                 Iterator i = rcAbstracts.entrySet().iterator();
                 Map.Entry entry;
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
                     System.out.println("DEBUG-INDEXABSTRACT: hash " + (String) entry.getKey() + ": " + ((query.queryHashes.contains((String) entry.getKey())) ? "NEEDED" : "NOT NEEDED") + "; " + ((TreeMap) entry.getValue()).size() + " entries");
                 }
-                
+                */
+                TreeMap abstractJoin = (rcAbstracts.size() == query.size()) ? kelondroMSetTools.joinConstructive(rcAbstracts.values()) : new TreeMap();
+                if (abstractJoin.size() == 0) {
+                    System.out.println("DEBUG-INDEXABSTRACT: no success using index abstracts from remote peers");
+                } else {
+                    System.out.println("DEBUG-INDEXABSTRACT: index abstracts delivered " + abstractJoin.size() + " additional results for secondary search");
+                    Iterator i = abstractJoin.entrySet().iterator();
+                    Map.Entry entry;
+                    while (i.hasNext()) {
+                        entry = (Map.Entry) i.next();
+                        System.out.println("DEBUG-INDEXABSTRACT: url " + (String) entry.getKey() + ": from peers " + (String) entry.getValue());
+                    }
+                }
                 
                 // catch up global results:
                 // wait until primary timeout passed
@@ -216,12 +229,12 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
         // since this is a conjunction we return an empty entity if any word is not known
         if (containers == null) {
-            return new indexRowSetContainer(null);
+            return new indexContainer(null);
         }
 
         // join the result
         profileLocal.startTimer();
-        indexContainer rcLocal = indexRowSetContainer.joinContainer(containers,
+        indexContainer rcLocal = indexContainer.joinContainer(containers,
                 profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN),
                 query.maxDistance);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_JOIN);
@@ -234,7 +247,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
-        indexContainer searchResult = new indexRowSetContainer(null);
+        indexContainer searchResult = new indexContainer(null);
         long preorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         
         profileLocal.startTimer();

@@ -639,16 +639,17 @@ public class indexURL {
  }
  
 
- public static final serverByteBuffer compressIndex(indexContainer container, long maxtime) {
+ public static final serverByteBuffer compressIndex(indexContainer inputContainer, indexContainer excludeContainer, long maxtime) {
      // collect references according to domains
      long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
      TreeMap doms = new TreeMap();
-     synchronized(container) {
-         Iterator i = container.entries();
+     synchronized(inputContainer) {
+         Iterator i = inputContainer.entries();
          indexEntry iEntry;
          String dom, paths;
          while (i.hasNext()) {
              iEntry = (indexEntry) i.next();
+             if (excludeContainer.get(iEntry.urlHash()) != null) continue; // do not include urls that are in excludeContainer
              dom = iEntry.urlHash().substring(6);
              if ((paths = (String) doms.get(dom)) == null) {
                  doms.put(dom, iEntry.urlHash().substring(0, 6));
@@ -659,7 +660,7 @@ public class indexURL {
          }
      }
      // construct a result string
-     serverByteBuffer bb = new serverByteBuffer(container.size() * 6);
+     serverByteBuffer bb = new serverByteBuffer(inputContainer.size() * 6);
      bb.append('{');
      Iterator i = doms.entrySet().iterator();
      Map.Entry entry;

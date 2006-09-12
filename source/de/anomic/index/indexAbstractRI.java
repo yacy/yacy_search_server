@@ -30,7 +30,7 @@ package de.anomic.index;
 public abstract class indexAbstractRI implements indexRI {
 
     public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
-        indexContainer container = new indexRowSetContainer(wordHash);
+        indexContainer container = new indexContainer(wordHash);
         container.add(newEntry);
         return addEntries(container, updateTime, dhtCase);
     }
