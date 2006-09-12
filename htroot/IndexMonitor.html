@@ -94,12 +94,12 @@
         <col />
       </colgroup>
       <tr class="TableHeader">
-        <td>
+        <td align="center">
           <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
-            <fieldset>
+            <div>
               <input type="hidden" name="process" value="#[tabletype]#" />
               <input type="submit" name="clearlist" value="clear list" />
-            </fieldset>
+            </div>
           </form>
         </td>
         #(showInit)#::<td><strong>Initiator</strong></td>#(/showInit)#
@@ -111,13 +111,13 @@
       </tr>
       #{indexed}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-        <td>
+        <td align="center">
           <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
-            <fieldset>
+            <div>
               <input type="hidden" name="process" value="#[tabletype]#" />
               <input type="hidden" name="hash" value="#[urlhash]#" />
               <input type="submit" name="deleteentry" value="delete" />
-            </fieldset>
+            </div>
           </form>
         </td>
         #(showInit)#::<td>#[initiatorSeed]#</td>#(/showInit)#
