@@ -352,7 +352,7 @@ body#help dt {
   font-weight:bold;
 }
 
-table.networkTable {
+table.networkTable, body#PerformanceQueues table, body#PerformanceQueues table input, body#PerformanceMemory table, body#PerformanceMemory table input {
   font-size:90%;
 }
 
