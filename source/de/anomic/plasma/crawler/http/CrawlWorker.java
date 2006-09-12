@@ -454,6 +454,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 return load(crawlingRetryCount - 1);
             }
             if (failreason != null) {
+                // add url into error db
                 addURLtoErrorDB(failreason);
             }
             return null;

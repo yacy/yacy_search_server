@@ -47,6 +47,7 @@
 
 package de.anomic.plasma.crawler;
 
+import java.io.File;
 import java.io.IOException;
 
 import de.anomic.index.indexURL;
@@ -277,5 +278,9 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
         
         // push it onto the stack
         this.sb.urlPool.errorURL.stackPushEntry(ee);
+        
+        // delete the cache file
+        File cacheFile = this.cacheManager.getCachePath(this.url);
+        if (cacheFile.exists()) cacheFile.delete();
     }    
 }
