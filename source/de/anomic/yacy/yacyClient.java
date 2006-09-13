@@ -563,7 +563,7 @@ public final class yacyClient {
             return results;
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.search error: '" + targetPeer.get(yacySeed.NAME, "anonymous") + "' failed - " + e);
-            //e.printStackTrace();
+            e.printStackTrace();
             return 0;
         }
     }
