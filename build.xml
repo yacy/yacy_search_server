@@ -89,28 +89,13 @@
 <!-- 
     if the .svn directory exists we try to determine the real
     svn revision number of the working base now
--->
+-->	
 <target name="determineRevisionNr" if="svnEntriesFileExists">
-    <!-- loading the entries file containing the revision number of the root directory -->
-    <xmlproperty file=".svn/entries" rootdirectory="false"/>
- 
-    <!-- storing the list of read revision numbers into file -->   
-    <tempfile property="temp.file" prefix="svnRevNr" suffix=".properties" />   
-    <echo message="baseRevisionNr=${wc-entries.entry(revision)}" file="${temp.file}"/>          
- 
-    <!-- reading out the first entry of the stored revision numbers-->   
-    <loadproperties srcFile="${temp.file}"> 
-        <filterchain>           
-            <tokenfilter>
-                <containsregex 
-                    pattern="^baseRevisionNr=([^,]*)(.*)$"
-                    replace="baseRevisionNr=\1"/>
-            </tokenfilter>
-         </filterchain>   
-    </loadproperties>         
- 
-    <!-- deleting the temp file -->   
-    <delete file="${temp.file}"/>   
+	<!-- define a custom ant task to read the revision number from file -->
+	<taskdef resource="svnRevNrParser.properties" classpath="${lib}/svnRevNr.jar"/>
+	
+	<!-- determine the revision number -->
+	<svnrevnr file=".svn/entries" property="baseRevisionNr"/>
  
     <!-- replacing the old with the new revision number -->   
     <copy file="build.properties" tofile="build.properties.new">  
