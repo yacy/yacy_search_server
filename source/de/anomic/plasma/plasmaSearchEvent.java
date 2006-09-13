@@ -73,7 +73,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private Map rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private plasmaSearchTimingProfile profileLocal, profileGlobal;
     private boolean postsort;
-    private yacySearch[] searchThreads;
+    private yacySearch[] primarySearchThreads, secondarySearchThreads;
     
     public plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaSearchRankingProfile ranking,
@@ -96,7 +96,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.profileLocal = localTiming;
         this.profileGlobal = remoteTiming;
         this.postsort = postsort;
-        this.searchThreads = null;
+        this.primarySearchThreads = null;
+        this.secondarySearchThreads = null;
     }
     
     public plasmaSearchQuery getQuery() {
@@ -107,8 +108,11 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         return profileLocal;
     }
     
-    public yacySearch[] getSearchThreads() {
-        return searchThreads;
+    public yacySearch[] getPrimarySearchThreads() {
+        return primarySearchThreads;
+    }
+    public yacySearch[] getSecondarySearchThreads() {
+        return secondarySearchThreads;
     }
     
     public plasmaSearchResult search() {
@@ -134,7 +138,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
                 long secondaryTimeout = System.currentTimeMillis() + profileGlobal.duetime() / 2;
                 long primaryTimeout = System.currentTimeMillis() + profileGlobal.duetime();
-                searchThreads = yacySearch.searchHashes(query.queryHashes, query.prefer, query.urlMask, query.maxDistance, urlStore, rcContainers, rcAbstracts, fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
+                primarySearchThreads = yacySearch.primaryRemoteSearches(plasmaSearchQuery.hashSet2hashString(query.queryHashes), "",
+                        query.prefer, query.urlMask, query.maxDistance, urlStore, rcContainers, rcAbstracts,
+                        fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
 
                 // meanwhile do a local search
                 Map searchContainerMap = localSearchContainers(null);
@@ -144,35 +150,16 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 // evaluate index abstracts and start a secondary search
                 // this is temporary debugging code to learn that the index abstracts are fetched correctly
                 while (System.currentTimeMillis() < secondaryTimeout + 10000) {
-                    if (yacySearch.remainingWaiting(searchThreads) == 0) break; // all threads have finished
+                    if (yacySearch.remainingWaiting(primarySearchThreads) == 0) break; // all threads have finished
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
-                System.out.println("DEBUG-INDEXABSTRACT: " + rcAbstracts.size() + " word references catched, " + query.size() + " needed");
-                /*
-                Iterator i = rcAbstracts.entrySet().iterator();
-                Map.Entry entry;
-                while (i.hasNext()) {
-                    entry = (Map.Entry) i.next();
-                    System.out.println("DEBUG-INDEXABSTRACT: hash " + (String) entry.getKey() + ": " + ((query.queryHashes.contains((String) entry.getKey())) ? "NEEDED" : "NOT NEEDED") + "; " + ((TreeMap) entry.getValue()).size() + " entries");
-                }
-                */
-                TreeMap abstractJoin = (rcAbstracts.size() == query.size()) ? kelondroMSetTools.joinConstructive(rcAbstracts.values()) : new TreeMap();
-                if (abstractJoin.size() == 0) {
-                    System.out.println("DEBUG-INDEXABSTRACT: no success using index abstracts from remote peers");
-                } else {
-                    System.out.println("DEBUG-INDEXABSTRACT: index abstracts delivered " + abstractJoin.size() + " additional results for secondary search");
-                    Iterator i = abstractJoin.entrySet().iterator();
-                    Map.Entry entry;
-                    while (i.hasNext()) {
-                        entry = (Map.Entry) i.next();
-                        System.out.println("DEBUG-INDEXABSTRACT: url " + (String) entry.getKey() + ": from peers " + (String) entry.getValue());
-                    }
-                }
+                prepareSecondarySearch();
                 
                 // catch up global results:
                 // wait until primary timeout passed
                 while (System.currentTimeMillis() < primaryTimeout) {
-                    if (yacySearch.remainingWaiting(searchThreads) == 0) break; // all threads have finished
+                    if ((yacySearch.remainingWaiting(primarySearchThreads) == 0) &&
+                        ((secondarySearchThreads == null) || (yacySearch.remainingWaiting(secondarySearchThreads) == 0))) break; // all threads have finished
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
                 int globalContributions = rcContainers.size();
@@ -181,7 +168,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
 
                 // combine the result and order
-                plasmaSearchResult result = ((globalContributions == 0) && (localResult.sizeOrdered() != 0)) ? localResult : order(rcLocal);
+                plasmaSearchResult result = ((globalContributions == 0) && (localResult.sizeOrdered() != 0)) ? localResult : orderFinal(rcLocal);
                 result.globalContributions = globalContributions;
                 result.localContributions = rcLocal.size();
                 
@@ -195,7 +182,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             } else {
                 Map searchContainerMap = localSearchContainers(null);
                 indexContainer rcLocal = localSearchJoin((searchContainerMap == null) ? null : searchContainerMap.values());
-                plasmaSearchResult result = order(rcLocal);
+                plasmaSearchResult result = orderFinal(rcLocal);
                 result.localContributions = rcLocal.size();
 
                 // return search result
@@ -206,6 +193,91 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         }
     }
 
+    private void prepareSecondarySearch() {
+        // catch up index abstracts and join them; then call peers again to submit their urls
+        System.out.println("DEBUG-INDEXABSTRACT: " + rcAbstracts.size() + " word references catched, " + query.size() + " needed");
+        
+        if (rcAbstracts.size() != query.size()) return; // secondary search not possible
+        
+        Iterator i = rcAbstracts.entrySet().iterator();
+        Map.Entry entry;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            System.out.println("DEBUG-INDEXABSTRACT: hash " + (String) entry.getKey() + ": " + ((query.queryHashes.contains((String) entry.getKey())) ? "NEEDED" : "NOT NEEDED") + "; " + ((TreeMap) entry.getValue()).size() + " entries");
+        }
+        
+        TreeMap abstractJoin = (rcAbstracts.size() == query.size()) ? kelondroMSetTools.joinConstructive(rcAbstracts.values(), true) : new TreeMap();
+        if (abstractJoin.size() == 0) {
+            System.out.println("DEBUG-INDEXABSTRACT: no success using index abstracts from remote peers");
+        } else {
+            System.out.println("DEBUG-INDEXABSTRACT: index abstracts delivered " + abstractJoin.size() + " additional results for secondary search");
+            // generate query for secondary search
+            TreeMap secondarySearchURLs = new TreeMap(); // a (peerhash:urlhash-liststring) mapping
+            Iterator i1 = abstractJoin.entrySet().iterator();
+            Map.Entry entry1;
+            String url, urls, peer, peers;
+            while (i1.hasNext()) {
+                entry1 = (Map.Entry) i1.next();
+                url = (String) entry1.getKey();
+                peers = (String) entry1.getValue();
+                System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peers);
+                for (int j = 0; j < peers.length(); j = j + 12) {
+                    peer = peers.substring(j, j + 12);
+                    if (peers.indexOf(peer) < j) continue; // avoid doubles that may appear in the abstractJoin
+                    urls = (String) secondarySearchURLs.get(peer);
+                    urls = (urls == null) ? url : urls + url;
+                    secondarySearchURLs.put(peer, urls);
+                }
+            }
+            
+            // compute words for secondary search and start the secondary searches
+            i1 = secondarySearchURLs.entrySet().iterator();
+            String words;
+            secondarySearchThreads = new yacySearch[secondarySearchURLs.size()];
+            int c = 0;
+            while (i1.hasNext()) {
+                entry1 = (Map.Entry) i1.next();
+                peer = (String) entry1.getKey();
+                urls = (String) entry1.getValue();
+                words = wordsFromPeer(peer, urls);
+                System.out.println("DEBUG-INDEXABSTRACT: peer " + peer + "   has urls: " + urls);
+                System.out.println("DEBUG-INDEXABSTRACT: peer " + peer + " from words: " + words);
+                secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
+                        words, urls, urlStore, rcContainers, peer, plasmaSwitchboard.urlBlacklist, snippetCache,
+                        profileGlobal, ranking);
+
+            }
+        }
+    }
+    
+    private String wordsFromPeer(String peerhash, String urls) {
+        Map.Entry entry;
+        String word, peerlist, url, wordlist = "";
+        TreeMap urlPeerlist;
+        int p;
+        boolean hasURL;
+        synchronized (rcAbstracts) {
+            Iterator i = rcAbstracts.entrySet().iterator();
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                word = (String) entry.getKey();
+                urlPeerlist = (TreeMap) entry.getValue();
+                hasURL = true;
+                for (int j = 0; j < urls.length(); j = j + 12) {
+                    url = urls.substring(j, j + 12);
+                    peerlist = (String) urlPeerlist.get(url);
+                    p = (peerlist == null) ? -1 : peerlist.indexOf(peerhash);
+                    if ((p < 0) || (p % 12 != 0)) {
+                        hasURL = false;
+                        break;
+                    }
+                }
+                if (hasURL) wordlist += word;
+            }
+        }
+        return wordlist;
+    }
+    
     public Map localSearchContainers(Set urlselection) {
         // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
 
@@ -243,7 +315,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         return rcLocal;
     }
     
-    public plasmaSearchResult order(indexContainer rcLocal) {
+    public plasmaSearchResult orderFinal(indexContainer rcLocal) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
@@ -263,6 +335,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         
         // start url-fetch
         long postorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_POSTSORT);
+        System.out.println("DEBUG: postorder-final (urlfetch) maxtime = " + postorderTime);
         long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : (System.currentTimeMillis() + postorderTime);
         profileLocal.startTimer();
         plasmaSearchResult acc = new plasmaSearchResult(query, ranking);
@@ -307,20 +380,17 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         return acc;
     }
     
-    private plasmaSearchResult orderLocal(indexContainer rcLocal, long maxtime) {
+    private plasmaSearchResult orderLocal(indexContainer rcLocal, long timeout) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
         profileLocal.startTimer();
-        if (maxtime < 0) maxtime = 200;
-        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, rcLocal, maxtime);
+        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, rcLocal, timeout - System.currentTimeMillis());
         preorder.remove(true, true);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_PRESORT, rcLocal.size());
         
         // start url-fetch
-        maxtime = Math.max(200, maxtime - profileLocal.getYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT));
-        long postorderLimitTime = System.currentTimeMillis() + maxtime;
         profileLocal.startTimer();
         plasmaSearchResult acc = new plasmaSearchResult(query, ranking);
 
@@ -330,7 +400,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         Object[] preorderEntry;
         try {
             while (preorder.hasNext()) {
-                if (System.currentTimeMillis() >= postorderLimitTime) break;
+                if (System.currentTimeMillis() >= timeout) break;
                 preorderEntry = preorder.next();
                 entry = (indexEntry) preorderEntry[0];
                 preranking = (Long) preorderEntry[1];
@@ -368,15 +438,21 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // it is wise to call this within a separate thread because
         // this method waits until all threads are finished
 
-        int remaining;
+        int remaining = 0;
+        if (primarySearchThreads == null) return;
         long starttime = System.currentTimeMillis();
-        while ((searchThreads != null) && ((remaining = yacySearch.remainingWaiting(searchThreads)) > 0)) {
+        while (true) {
+            remaining = yacySearch.remainingWaiting(primarySearchThreads);
+            if (secondarySearchThreads != null) remaining += yacySearch.remainingWaiting(secondarySearchThreads);
+            if (remaining == 0) break;
+
             flushGlobalResults();
   
             // wait a little bit before trying again
-            try {Thread.sleep(3000);} catch (InterruptedException e) {}
+            try {Thread.sleep(1000);} catch (InterruptedException e) {}
             if (System.currentTimeMillis() - starttime > 90000) {
-                yacySearch.interruptAlive(searchThreads);
+                yacySearch.interruptAlive(primarySearchThreads);
+                if (secondarySearchThreads != null) yacySearch.interruptAlive(secondarySearchThreads);
                 log.logFine("SEARCH FLUSH: " + remaining + " PEERS STILL BUSY; ABANDONED; SEARCH WAS " + query.queryWords);
                 break;
             }

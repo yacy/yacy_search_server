@@ -48,8 +48,8 @@ import java.io.FileInputStream;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -85,7 +85,7 @@ public class kelondroMSetTools {
     // - join by iterative tests (where we distinguish left-right and right-left tests)
 
     
-    public static TreeMap joinConstructive(Collection maps) {
+    public static TreeMap joinConstructive(Collection maps, boolean concatStrings) {
         // this joins all TreeMap(s) contained in maps
         
         // first order entities by their size
@@ -116,7 +116,7 @@ public class kelondroMSetTools {
             k = (Long) orderMap.firstKey(); // the next smallest...
             mapA = joinResult;
             mapB = (TreeMap) orderMap.remove(k);
-            joinResult = joinConstructiveByTestSetInMap(mapB, mapA.keySet());
+            joinResult = joinConstructiveByTest(mapA, mapB, concatStrings);
             // free resources
             mapA = null;
             mapB = null;
@@ -127,72 +127,63 @@ public class kelondroMSetTools {
         return joinResult;
     }
     
-    public static TreeMap joinConstructive(TreeMap map, TreeSet set) {
-	// comparators must be equal
-        if ((map == null) || (set == null)) return null;
-	if (map.comparator() != set.comparator()) return null;
-        if ((map.size() == 0) || (set.size() == 0)) return new TreeMap(map.comparator());
+    public static TreeMap joinConstructive(TreeMap map1, TreeMap map2, boolean concatStrings) {
+        // comparators must be equal
+        if ((map1 == null) || (map2 == null)) return null;
+        if (map1.comparator() != map2.comparator()) return null;
+        if ((map1.size() == 0) || (map2.size() == 0)) return new TreeMap(map1.comparator());
 
-	// decide which method to use
-	int high = ((map.size() > set.size()) ? map.size() : set.size());
-	int low  = ((map.size() > set.size()) ? set.size() : map.size());
-	int stepsEnum = 10 * (high + low - 1);
-	int stepsTest = 12 * log2a(high) * low;
+        // decide which method to use
+        int high = ((map1.size() > map2.size()) ? map1.size() : map2.size());
+        int low = ((map1.size() > map2.size()) ? map2.size() : map1.size());
+        int stepsEnum = 10 * (high + low - 1);
+        int stepsTest = 12 * log2a(high) * low;
 
-	// start most efficient method
-	if (stepsEnum > stepsTest) {
-	    if (map.size() > set.size()) return joinConstructiveByTestSetInMap(map, set);
-        return joinConstructiveByTestMapInSet(map, set);
-	}
-	    return joinConstructiveByEnumeration(map, set);
+        // start most efficient method
+        if (stepsEnum > stepsTest) {
+            if (map1.size() > map2.size()) return joinConstructiveByTest(map2, map1, concatStrings);
+            return joinConstructiveByTest(map1, map2, concatStrings);
+        }
+        return joinConstructiveByEnumeration(map1, map2, concatStrings);
+    }
+    
+    private static TreeMap joinConstructiveByTest(TreeMap small, TreeMap large, boolean concatStrings) {
+        Iterator mi = small.entrySet().iterator();
+        TreeMap result = new TreeMap(large.comparator());
+        Map.Entry mentry1;
+        Object mobj2;
+        while (mi.hasNext()) {
+            mentry1 = (Map.Entry) mi.next();
+            mobj2 = large.get(mentry1.getKey());
+            if (mobj2 != null) result.put(mentry1.getKey(), (concatStrings) ? ((String) mentry1.getValue() + (String) mobj2) : mentry1.getValue());
+        }
+        return result;
     }
 
-    private static TreeMap joinConstructiveByTestSetInMap(TreeMap map, Set set) {
-	Iterator si = set.iterator();
-	TreeMap result = new TreeMap(map.comparator());
-	Object o;
-	while (si.hasNext()) {
-	    o = si.next();
-	    if (map.containsKey(o)) result.put(o, map.get(o));
-	}
-	return result;
-    }
-
-    private static TreeMap joinConstructiveByTestMapInSet(Map map, TreeSet set) {
-	Iterator mi = map.keySet().iterator();
-	TreeMap result = new TreeMap(set.comparator());
-	Object o;
-	while (mi.hasNext()) {
-	    o = mi.next();
-	    if (set.contains(o)) result.put(o, map.get(o));
-	}
-	return result;
-    }
-
-    private static TreeMap joinConstructiveByEnumeration(TreeMap map, TreeSet set) {
-	// implement pairvise enumeration
-	Comparator comp = map.comparator();
-	Iterator mi = map.keySet().iterator();
-	Iterator si = set.iterator();
-	TreeMap result = new TreeMap(map.comparator());
-	int c;
-	if ((mi.hasNext()) && (si.hasNext())) {
-	    Object mobj = mi.next();
-	    Object sobj = si.next();
-	    while (true) {
-		c = compare(mobj, sobj, comp);
-		if (c < 0) {
-		    if (mi.hasNext()) mobj = mi.next(); else break;
-		} else if (c > 0) {
-		    if (si.hasNext()) sobj = si.next(); else break;
-		} else {
-		    result.put(mobj, map.get(mobj));
-		    if (mi.hasNext()) mobj = mi.next(); else break;
-		    if (si.hasNext()) sobj = si.next(); else break;
-		}
-	    }
-	}
-	return result;
+    private static TreeMap joinConstructiveByEnumeration(TreeMap map1, TreeMap map2, boolean concatStrings) {
+        // implement pairvise enumeration
+        Comparator comp = map1.comparator();
+        Iterator mi1 = map1.entrySet().iterator();
+        Iterator mi2 = map2.entrySet().iterator();
+        TreeMap result = new TreeMap(map1.comparator());
+        int c;
+        if ((mi1.hasNext()) && (mi2.hasNext())) {
+            Map.Entry mentry1 = (Map.Entry) mi1.next();
+            Map.Entry mentry2 = (Map.Entry) mi2.next();
+            while (true) {
+                c = compare(mentry1.getKey(), mentry2.getKey(), comp);
+                if (c < 0) {
+                    if (mi1.hasNext()) mentry1 = (Map.Entry) mi1.next(); else break;
+                } else if (c > 0) {
+                    if (mi2.hasNext()) mentry2 = (Map.Entry) mi2.next(); else break;
+                } else {
+                    result.put(mentry1.getKey(), (concatStrings) ? ((String) mentry1.getValue() + (String) mentry2.getValue()) : mentry1.getValue());
+                    if (mi1.hasNext()) mentry1 = (Map.Entry) mi1.next(); else break;
+                    if (mi2.hasNext()) mentry2 = (Map.Entry) mi2.next(); else break;
+                }
+            }
+        }
+        return result;
     }
     
     // now the same for set-set
@@ -268,7 +259,7 @@ public class kelondroMSetTools {
         // return excludeConstructiveByEnumeration(map, set);
     }
     
-    private static TreeMap excludeConstructiveByTestMapInSet(TreeMap map, TreeSet set) {
+    private static TreeMap excludeConstructiveByTestMapInSet(TreeMap map, Set set) {
         Iterator mi = map.keySet().iterator();
         TreeMap result = new TreeMap(map.comparator());
         Object o;
@@ -279,7 +270,8 @@ public class kelondroMSetTools {
         return result;
     }
 
-    private static TreeMap excludeConstructiveByEnumeration(TreeMap map,  TreeSet set) {
+    /*
+    private static TreeMap excludeConstructiveByEnumeration(TreeMap map, TreeSet set) {
         // returns map without the elements in set
         // enumerates objects
         Comparator comp = map.comparator();
@@ -317,7 +309,7 @@ public class kelondroMSetTools {
         }
         return result;
     }
-    
+    */
     public static void excludeDestructive(TreeMap map, TreeSet set) {
         // comparators must be equal
         if (map == null) return;
@@ -411,7 +403,7 @@ public class kelondroMSetTools {
     
     public static void main(String[] args) {
 	TreeMap m = new TreeMap();
-	TreeSet s = new TreeSet();
+	TreeMap s = new TreeMap();
 	m.put("a", "a");
 	m.put("x", "x");
 	m.put("f", "f");
@@ -422,26 +414,26 @@ public class kelondroMSetTools {
 	m.put("k", "k");
 	m.put("y", "y");
 	m.put("z", "z");
-	s.add("a");
-	s.add("b");
-	s.add("c");
-	s.add("k");
-	s.add("l");
-	s.add("m");
-	s.add("n");
-	s.add("o");
-	s.add("p");
-	s.add("q");
-	s.add("r");
-	s.add("s");
-	s.add("t");
-	s.add("x");
+	s.put("a", "a");
+	s.put("b", "b");
+	s.put("c", "c");
+	s.put("k", "k");
+	s.put("l", "l");
+	s.put("m", "m");
+	s.put("n", "n");
+	s.put("o", "o");
+	s.put("p", "p");
+	s.put("q", "q");
+	s.put("r", "r");
+	s.put("s", "s");
+	s.put("t", "t");
+	s.put("x", "x");
 	System.out.println("Compare " + m.toString() + " with " + s.toString());
-	System.out.println("Join=" + joinConstructiveByEnumeration(m, s));
-	System.out.println("Join=" + joinConstructiveByTestMapInSet(m, s));
-	System.out.println("Join=" + joinConstructiveByTestSetInMap(m, s));
-	System.out.println("Join=" + joinConstructive(m, s));
-	System.out.println("Exclude=" + excludeConstructiveByEnumeration(m, s));
+	System.out.println("Join=" + joinConstructiveByEnumeration(m, s, true));
+	System.out.println("Join=" + joinConstructiveByTest(m, s, true));
+	System.out.println("Join=" + joinConstructiveByTest(m, s, true));
+	System.out.println("Join=" + joinConstructive(m, s, true));
+	System.out.println("Exclude=" + excludeConstructiveByTestMapInSet(m, s.keySet()));
 
 	/*
 	for (int low = 0; low < 10; low++)

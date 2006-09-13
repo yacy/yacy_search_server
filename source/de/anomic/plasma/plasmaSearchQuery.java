@@ -42,6 +42,7 @@
 
 package de.anomic.plasma;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Iterator;
@@ -59,8 +60,7 @@ public final class plasmaSearchQuery {
     public static final int SEARCHDOM_GLOBALDHT = 3;
     public static final int SEARCHDOM_GLOBALALL = 4;
     
-    public Set queryWords;
-    public Set queryHashes;
+    public Set queryWords, queryHashes;
     public int wantedResults;
     public String prefer;
     public long maximumTime;
@@ -99,10 +99,16 @@ public final class plasmaSearchQuery {
         this.domMaxTargets = -1;
     }
 
-    public static Set words2hashes(String[] words) {
+    public static Set words2hashSet(String[] words) {
         TreeSet hashes = new TreeSet();
         for (int i = 0; i < words.length; i++) hashes.add(indexEntryAttribute.word2hash(words[i]));
         return hashes;
+    }
+
+    public static String words2hashString(String[] words) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < words.length; i++) sb.append(indexEntryAttribute.word2hash(words[i]));
+        return new String(sb);
     }
 
     public static Set words2hashes(Set words) {
@@ -110,6 +116,22 @@ public final class plasmaSearchQuery {
         TreeSet hashes = new TreeSet();
         while (i.hasNext()) hashes.add(indexEntryAttribute.word2hash((String) i.next()));
         return hashes;
+    }
+    
+    public static Set hashes2Set(String query) {
+        if (query == null) return new HashSet();
+        final HashSet keyhashes = new HashSet(query.length() / indexEntryAttribute.wordHashLength);
+        for (int i = 0; i < (query.length() / indexEntryAttribute.wordHashLength); i++) {
+            keyhashes.add(query.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
+        }
+        return keyhashes;
+    }
+    
+    public static String hashSet2hashString(Set words) {
+        Iterator i = words.iterator();
+        StringBuffer sb = new StringBuffer(words.size() * indexEntryAttribute.wordHashLength);
+        while (i.hasNext()) sb.append((String) i.next());
+        return new String(sb);
     }
     
     public static TreeSet cleanQuery(String words) {
@@ -148,6 +170,7 @@ public final class plasmaSearchQuery {
     		return result.toString();
     }
     
+    /*
     public String hashes(String separator) {
 		StringBuffer result = new StringBuffer(8 * queryHashes.size());
 		Iterator i = queryHashes.iterator();
@@ -158,7 +181,8 @@ public final class plasmaSearchQuery {
 		}
 		return result.toString();
     }
-
+   */
+    
     public void filterOut(Set blueList) {
         // filter out words that appear in this set
         Iterator it = queryWords.iterator();

@@ -366,6 +366,7 @@ public final class yacyClient {
 
     public static int search(
             String wordhashes,
+            String urlhashes,
             String prefer,
             String filter,
             int maxDistance,
@@ -422,6 +423,7 @@ public final class yacyClient {
             obj.put("count", timingProfile.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT));
             obj.put("resource", ((global) ? "global" : "local"));
             obj.put("query", wordhashes);
+            obj.put("urls", urlhashes);
             obj.put("prefer", prefer);
             obj.put("filter", filter);
             obj.put("ttl", "0");
@@ -448,6 +450,11 @@ public final class yacyClient {
                     )
             );
 
+            if (result.size() == 0) {
+                yacyCore.log.logFine("SEARCH failed FROM " + targetPeer.hash + ":" + targetPeer.getName() + ", score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes));
+                return 0;
+            }
+            
             // compute all computation times
             final long totalrequesttime = System.currentTimeMillis() - timestamp;
             String returnProfile = (String) result.get("profile");
@@ -470,7 +477,7 @@ public final class yacyClient {
             // references  : references (search hints) that was calculated during search
 
             // now create a plasmaIndex out of this result
-            //System.out.println("yacyClient: search result = " + result.toString()); // debug
+            System.out.println("yacyClient: " + ((urlhashes.length() == 0) ? "primary" : "secondary")+ " search result = " + result.toString()); // debug
             final int results = Integer.parseInt((String) result.get("count"));
             //System.out.println("***result count " + results);
             

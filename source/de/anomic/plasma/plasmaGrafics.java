@@ -67,8 +67,9 @@ public class plasmaGrafics {
 
     public static ymagePainter getSearchEventPicture() {
         if (plasmaSearchEvent.lastEvent == null) return null;
-        yacySearch[] searches = plasmaSearchEvent.lastEvent.getSearchThreads();
-        if (searches == null) return null; // this was a local search and there are no threads
+        yacySearch[] primarySearches = plasmaSearchEvent.lastEvent.getPrimarySearchThreads();
+        yacySearch[] secondarySearches = plasmaSearchEvent.lastEvent.getSecondarySearchThreads();
+        if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
         ymagePainter eventPicture = getNetworkPicture(120000);
@@ -82,14 +83,25 @@ public class plasmaGrafics {
         String hash;
         int angle;
 
-        // draw in the search peers
-        for (int j = 0; j < searches.length; j++) {
-            eventPicture.setColor((searches[j].isAlive()) ? ymageMatrix.ADDITIVE_RED : ymageMatrix.ADDITIVE_GREEN);
-            hash = searches[j].target().hash;
+        // draw in the primary search peers
+        for (int j = 0; j < primarySearches.length; j++) {
+            eventPicture.setColor((primarySearches[j].isAlive()) ? ymageMatrix.ADDITIVE_RED : ymageMatrix.ADDITIVE_GREEN);
+            hash = primarySearches[j].target().hash;
             angle = (int) ((long) 360 * (yacySeed.dhtPosition(hash) / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
         }
 
+        // draw in the secondary search peers
+        if (secondarySearches != null) {
+            for (int j = 0; j < secondarySearches.length; j++) {
+                eventPicture.setColor((secondarySearches[j].isAlive()) ? ymageMatrix.ADDITIVE_RED : ymageMatrix.ADDITIVE_GREEN);
+                hash = secondarySearches[j].target().hash;
+                angle = (int) ((long) 360 * (yacySeed.dhtPosition(hash) / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
+                eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1);
+                eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1);
+            }
+        }
+        
         // draw in the search target
         plasmaSearchQuery query = plasmaSearchEvent.lastEvent.getQuery();
         Iterator i = query.queryHashes.iterator();

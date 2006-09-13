@@ -47,14 +47,12 @@
 // javac -classpath .:../../Classes search.java
 // if the shell's current path is htroot/yacy
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -108,10 +106,7 @@ public final class search {
         }
 
         // prepare search
-        final HashSet keyhashes = new HashSet(query.length() / indexEntryAttribute.wordHashLength);
-        for (int i = 0; i < (query.length() / indexEntryAttribute.wordHashLength); i++) {
-            keyhashes.add(query.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
-        }
+        final Set keyhashes = plasmaSearchQuery.hashes2Set(query);
         final long timestamp = System.currentTimeMillis();
         
         plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, maxdist, prefer, count, duetime, filter);
@@ -129,11 +124,7 @@ public final class search {
 
         // retrieve index containers from search request
         plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
-        Set urlselection = null;
-        if ((urls.length() > 0) && (urls.length() % 12 == 0)) {
-            for (int i = 0; i < (urls.length() / 12); i++) urlselection.add(urls.substring(i * 12, (i + 1 * 12)));
-        }
-        Map containers = theSearch.localSearchContainers(urlselection);
+        Map containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
         
         // set statistic details of search result and find best result index set
         String maxcounthash = null, neardhthash = null;
@@ -168,7 +159,7 @@ public final class search {
         indexContainer localResults = theSearch.localSearchJoin(containers.values());
         int joincount = localResults.size();
         prop.put("joincount", Integer.toString(joincount));
-        plasmaSearchResult acc = theSearch.order(localResults);
+        plasmaSearchResult acc = theSearch.orderFinal(localResults);
 
         // generate compressed index for maxcounthash
         // this is not needed if the search is restricted to specific urls, because it is a re-search
