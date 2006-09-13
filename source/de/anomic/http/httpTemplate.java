@@ -492,19 +492,19 @@ public final class httpTemplate {
         Object value;
         if (pattern.containsKey(key)) {
             value = pattern.get(key);
-            //try {
-            if (value instanceof byte[]) {
-                replacement = (byte[]) value;
-            } else if (value instanceof String) {
-                replacement = ((String) value).getBytes();
-                //replacement = ((String) value).getBytes("UTF-8");
-            } else {
-                replacement = value.toString().getBytes();
-                //replacement = value.toString().getBytes("UTF-8");
+            try {
+                if (value instanceof byte[]) {
+                    replacement = (byte[]) value;
+                } else if (value instanceof String) {
+                    //replacement = ((String) value).getBytes();
+                    replacement = ((String) value).getBytes("UTF-8");
+                } else {
+                    //replacement = value.toString().getBytes();
+                    replacement = value.toString().getBytes("UTF-8");
+                }
+            } catch (UnsupportedEncodingException e) {
+                replacement = dflt;
             }
-//          } catch (UnsupportedEncodingException e) {
-//          replacement = dflt;
-//          }
         } else {
             replacement = dflt;
         }

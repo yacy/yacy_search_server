@@ -726,7 +726,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             
                         o = new serverByteBuffer();
                         if (zipContent) zippedOut = new GZIPOutputStream(o);
-                        httpTemplate.writeTemplate(fis, (zipContent) ? (OutputStream)zippedOut: (OutputStream)o, tp, "-UNRESOLVED_PATTERN-".getBytes());
+                        httpTemplate.writeTemplate(fis, (zipContent) ? (OutputStream)zippedOut: (OutputStream)o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         if (zipContent) {
                             zippedOut.finish();
                             zippedOut.flush();
