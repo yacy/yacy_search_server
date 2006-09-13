@@ -46,14 +46,14 @@ function handleState(req) {
 	var tmpNode=null;
 	var tmpNode2=null;
 	while(pos >= 0 && pos2 > pos){
-		tmpNode = document.createTextNode(snippetText.substring(0, pos); //other text
+		tmpNode = document.createTextNode(snippetText.substring(0, pos)); //other text
 		if(tmpNode != ""){
 			span.appendChild(tmpNode);
 		}
 		//add the bold text
 		tmpNode=document.createElement("strong")
-		tmpNode2=document.createTextNode(snippetText.substring(pos+3,pos2);
-		tmpNode.append(tmpNode2);
+		tmpNode2=document.createTextNode(snippetText.substring(pos+3,pos2));
+		tmpNode = tmpNode + tmpNode2;
 		span.appendChild(tmpNode)
 		
 		snippetText=substring(pos2+4)
@@ -61,7 +61,7 @@ function handleState(req) {
 		var pos2=snippetText.indexOf("</b>");
 	}
 	if(snippetText != ""){
-		tmpNode = document.createTextNode(snippetText.substring(0, pos); //other text
+		tmpNode = document.createTextNode(snippetText.substring(0, pos)); //other text
 		span.appendChild(tmpNode);
 	}
 }
