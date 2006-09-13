@@ -390,8 +390,11 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         if (urlselection == null) {
             return (indexContainer) wCache.get(wordHash);
         } else {
-            indexContainer ic = ((indexContainer) wCache.get(wordHash)).topLevelClone();
-            ic.select(urlselection);
+            indexContainer ic = (indexContainer) wCache.get(wordHash);
+            if (ic != null) {
+                ic = ic.topLevelClone();
+                ic.select(urlselection);
+            }
             return ic;
         }
     }

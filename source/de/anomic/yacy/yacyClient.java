@@ -437,7 +437,9 @@ public final class yacyClient {
             final long timestamp = System.currentTimeMillis();
             
             // sending request
-            final HashMap result = nxTools.table(
+            HashMap result = null;
+            try {
+                result = nxTools.table(
                     httpc.wput(
                             new URL(url),
                             targetPeer.getHexHash() + ".yacyh",
@@ -448,10 +450,15 @@ public final class yacyClient {
                             obj,
                             null
                     )
-            );
+                );
+            } catch (IOException e) {
+                yacyCore.log.logFine("SEARCH failed FROM " + targetPeer.hash + ":" + targetPeer.getName() + " (" + e.getMessage() + "), score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes));
+                yacyCore.peerActions.peerDeparture(targetPeer);
+                return 0;
+            }
 
             if (result.size() == 0) {
-                yacyCore.log.logFine("SEARCH failed FROM " + targetPeer.hash + ":" + targetPeer.getName() + ", score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes));
+                yacyCore.log.logFine("SEARCH failed FROM " + targetPeer.hash + ":" + targetPeer.getName() + " (zero response), score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes));
                 return 0;
             }
             

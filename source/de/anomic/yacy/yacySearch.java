@@ -82,6 +82,7 @@ public class yacySearch extends Thread {
                       plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
                       plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile) {
         super("yacySearch_" + targetPeer.getName());
+        System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.length() == 0) ? "(primary)" : "(secondary)"));
         this.wordhashes = wordhashes;
         this.urlhashes = urlhashes;
         this.prefer = prefer;
@@ -101,8 +102,8 @@ public class yacySearch extends Thread {
 
     public void run() {
         this.links = yacyClient.search(wordhashes, urlhashes, prefer, filter, maxDistance, global, targetPeer, urlManager, containerCache, abstractCache, blacklist, snippetCache, timingProfile, rankingProfile);
+        yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + links + " links for word hash " + wordhashes);
         if (links != 0) {
-            //yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + links + " links for word hash " + wordhashes);
             yacyCore.seedDB.mySeed.incRI(links);
             yacyCore.seedDB.mySeed.incRU(links);
         }

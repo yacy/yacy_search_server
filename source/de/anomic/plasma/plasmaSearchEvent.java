@@ -153,7 +153,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                     if (yacySearch.remainingWaiting(primarySearchThreads) == 0) break; // all threads have finished
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
-                prepareSecondarySearch();
+                if (query.size() > 1) prepareSecondarySearch();
                 
                 // catch up global results:
                 // wait until primary timeout passed
