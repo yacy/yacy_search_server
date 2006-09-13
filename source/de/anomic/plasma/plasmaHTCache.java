@@ -328,6 +328,7 @@ public final class plasmaHTCache {
 
     private void cleanupDoIt(long newCacheSize) {
         File obj;
+        synchronized (cacheAge) {
         Iterator iter = this.cacheAge.keySet().iterator();
         while (iter.hasNext() && this.curCacheSize >= newCacheSize) {
             Object key = iter.next();
@@ -348,6 +349,7 @@ public final class plasmaHTCache {
                 }
             }
             iter.remove();
+        }
         }
     }
 
