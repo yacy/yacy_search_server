@@ -53,7 +53,7 @@ function handleState(req) {
 		//add the bold text
 		tmpNode=document.createElement("strong")
 		tmpNode2=document.createTextNode(snippetText.substring(pos+3,pos2));
-		tmpNode = tmpNode + tmpNode2;
+		tmpNode.appendChild(tmpNode2);
 		span.appendChild(tmpNode)
 		
 		snippetText=substring(pos2+4)
