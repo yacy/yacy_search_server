@@ -1013,29 +1013,29 @@ public final class httpc {
             Enumeration e = args.keys();
             while (e.hasMoreElements()) {
                 // start with a boundary
-                out.write(boundary.getBytes());
+                out.write(boundary.getBytes("UTF-8"));
                 out.write(serverCore.crlf);
                 // write value
                 key = (String) e.nextElement();
                 value = args.get(key, "");
                 if ((files != null) && (files.containsKey(key))) {
                     // we are about to write a file
-                    out.write(("Content-Disposition: form-data; name=" + '"' + key + '"' + "; filename=" + '"' + value + '"').getBytes());
+                    out.write(("Content-Disposition: form-data; name=" + '"' + key + '"' + "; filename=" + '"' + value + '"').getBytes("UTF-8"));
                     out.write(serverCore.crlf);
                     out.write(serverCore.crlf);
                     out.write((byte[]) files.get(key));
                     out.write(serverCore.crlf);
                 } else {
                     // write a single value
-                    out.write(("Content-Disposition: form-data; name=" + '"' + key + '"').getBytes());
+                    out.write(("Content-Disposition: form-data; name=" + '"' + key + '"').getBytes("UTF-8"));
                     out.write(serverCore.crlf);
                     out.write(serverCore.crlf);
-                    out.write(value.getBytes());
+                    out.write(value.getBytes("UTF-8"));
                     out.write(serverCore.crlf);
                 }
             }
             // finish with a boundary
-            out.write(boundary.getBytes());
+            out.write(boundary.getBytes("UTF-8"));
             out.write(serverCore.crlf);
         }
         // create body array

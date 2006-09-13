@@ -1118,14 +1118,14 @@ public final class httpd implements serverHandler {
                 tp.put("printStackTrace",1);
                 
                 serverByteBuffer errorMsg = new serverByteBuffer(100);
-                errorMsg.append("<i>Exception occurred:</i>&nbsp;<b>")
-                        .append(stackTrace.toString())
-                        .append("</b>\r\n\r\n")
-                        .append("</i>TRACE:</i>\r\n");
+                errorMsg.append("<i>Exception occurred:</i>&nbsp;<b>".getBytes("UTF-8"))
+                        .append(stackTrace.toString().getBytes("UTF-8"))
+                        .append("</b>\r\n\r\n".getBytes("UTF-8"))
+                        .append("</i>TRACE:</i>\r\n".getBytes("UTF-8"));
                 stackTrace.printStackTrace(new PrintStream(errorMsg));
-                errorMsg.append("\r\n");
+                errorMsg.append("\r\n".getBytes("UTF-8"));
                 
-                tp.put("printStackTrace_stacktrace",errorMsg.toString().replaceAll("\n","<br>"));
+                tp.put("printStackTrace_stacktrace",(new String(errorMsg.getBytes(),"UTF-8")).replaceAll("\n","<br>"));
             } else {
                 tp.put("printStackTrace",0);
             }
