@@ -702,10 +702,10 @@ public final class yacy {
             // db containing all currently loades urls
             int cache = dbcache * 1024; // in KB
             log.logFine("URLDB-Caches: "+cache+" bytes");
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), cache, 10000, false);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(dbroot, cache, 10000, false);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.temp.db"), cache, 10000, false);
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "minimized"), cache, 10000, false);
             
             Runtime rt = Runtime.getRuntime();
             int cacheMem = (int)((serverMemory.max-rt.totalMemory())/1024)-(2*cache + 8*1024);
@@ -772,7 +772,7 @@ public final class yacy {
             // TODO: rename the mimimized UrlDB to the name of the previous UrlDB            
             
             log.logInfo("FINISHED URL CLEANUP, WAIT FOR DUMP");
-            log.logInfo("You can now backup your old URL DB and rename urlHash.temp.db to urlHash.db");
+            log.logInfo("You can now backup your old URL DB and rename minimized/urlHash.db to urlHash.db");
             
             log.logInfo("TERMINATED URL CLEANUP");
         } catch (Exception e) {
@@ -1134,7 +1134,7 @@ public final class yacy {
         serverLog log = new serverLog("URLDBCLEANUP");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         try {
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(new File(dbroot, "urlHash.db"), 4194304, 10000, false);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(dbroot, 4194304, 10000, false);
             currentUrlDB.urldbcleanup();
             currentUrlDB.close();
         } catch (IOException e) {
