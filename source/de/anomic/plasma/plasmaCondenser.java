@@ -190,7 +190,7 @@ public final class plasmaCondenser {
         // read source
         sievedWordsEnum wordenum = new sievedWordsEnum(is, wordminsize);
         while (wordenum.hasMoreElements()) {
-            word = ((String) wordenum.nextElement()).toLowerCase();
+            word = ((String) wordenum.nextElement()).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             // System.out.println("PARSED-WORD " + word);
             wordlen = word.length();
             if ((wordlen == 1) && (punctuation(word.charAt(0)))) {
@@ -389,6 +389,7 @@ public final class plasmaCondenser {
         String s;
         for (int i = 0; i < orderedSentences.length; i++) {
             if (orderedSentences[i] != null) {
+                // TODO: bugfix for UTF-8: avoid this form of string concatenation
                 s = "";
                 for (int j = 2; j < ((String[]) orderedSentences[i]).length; j++) {
                     s += " " + orderedWords[Integer.parseInt(((String[]) orderedSentences[i])[j])];
@@ -455,7 +456,7 @@ public final class plasmaCondenser {
         it = sortedWords.entrySet().iterator(); // enumerates the keys in descending order
         while (it.hasNext()) {
             entry = (Map.Entry) it.next();
-            k = (String) entry.getKey();
+            k = (String) entry.getKey();            
             writer.write("#W " + k.substring(numlength) + " " + k.substring(0, numlength) + " " + ((String) entry.getValue()) + "\r\n");
         }
         for (int i = 0; i < orderedSentences.length; i++) {
@@ -475,12 +476,14 @@ public final class plasmaCondenser {
     }
 
     public final static boolean invisible(char c) {
+        // TODO: Bugfix for UTF-8: does this work for non ISO-8859-1 chars?
         if ((c < ' ') || (c > 'z')) return true;
         return ("$%&/()=\"$%&/()=`^+*~#'-_:;,|<>[]\\".indexOf(c) >= 0);
     }
 
     public static Enumeration wordTokenizer(String s, int minLength) {
         try {
+            // TODO: Bugfix for UTF-8 needed
             return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), minLength);
         } catch (Exception e) {
             return null;
@@ -509,6 +512,7 @@ public final class plasmaCondenser {
                 if (s.length() < ml) continue loop;
                 for (int i = 0; i < s.length(); i++) {
                     c = s.charAt(i);
+                    // TODO: Bugfix needed for UTF-8
                     if (((c < 'a') || (c > 'z')) &&
                         ((c < 'A') || (c > 'Z')) &&
                         ((c < '0') || (c > '9')))
@@ -558,11 +562,11 @@ public final class plasmaCondenser {
                     sb = new StringBuffer(r.length() * 2);
                     for (int i = 0; i < r.length(); i++) {
                         c = r.charAt(i);
-                        if (invisible(c)) sb = sb.append(' ');
+                        if (invisible(c)) sb = sb.append(' '); // TODO: Bugfix needed for UTF-8
                         else if (punctuation(c)) sb = sb.append(' ').append(c).append(' ');
                         else sb = sb.append(c);
                     }
-                    s = sb.toString().trim();
+                    s = sb.toString().trim(); 
                     //System.out.println("PARSING-LINE '" + r + "'->'" + s + "'");
                 } else {
                     return null;
@@ -603,7 +607,7 @@ public final class plasmaCondenser {
         int counter = 0;
 
         public linesFromFileEnum(InputStream is) {
-            raf = new BufferedReader(new InputStreamReader(is));
+            raf = new BufferedReader(new InputStreamReader(is)); // TODO: bugfix needed for UTF-8, use charset for reader
             buffer = nextElement0();
             counter = 0;
         }
