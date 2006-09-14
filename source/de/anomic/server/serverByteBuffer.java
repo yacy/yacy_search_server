@@ -45,6 +45,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 public final class serverByteBuffer extends OutputStream {
@@ -379,7 +380,11 @@ public final class serverByteBuffer extends OutputStream {
                 start = pos;
                 while ((pos < length) && (buffer[pos] != doublequote)) pos++;
                 if (pos >= length) break; // this is the case if we found no parent doublequote
-                p.setProperty(key, new String(buffer, start, pos - start).trim());
+                try {
+                    p.setProperty(key, new String(buffer, start, pos - start,"UTF-8").trim());
+                } catch (UnsupportedEncodingException e) {
+                    p.setProperty(key, new String(buffer, start, pos - start).trim());
+                } 
                 pos++;
             } else if (buffer[pos] == singlequote) {
                 // search next singlequote

@@ -214,22 +214,22 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
         String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString()); // TODO: bugfix needed for UTF-8
             if (h.length() > 0) headlines[0].add(h);
         }
         if ((tagname.equalsIgnoreCase("h2")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString()); // TODO: bugfix needed for UTF-8
             if (h.length() > 0) headlines[1].add(h);
         }
         if ((tagname.equalsIgnoreCase("h3")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString()); // TODO: bugfix needed for UTF-8
             if (h.length() > 0) headlines[2].add(h);
         }
         if ((tagname.equalsIgnoreCase("h4")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString()); // TODO: bugfix needed for UTF-8
             if (h.length() > 0) headlines[3].add(h);
         }
-        if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) title = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());        
+        if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) title = cleanLine(super.stripAll(new serverByteBuffer(text)).toString()); // TODO: bugfix needed for UTF-8       
     }
 
     private static String cleanLine(String s) {

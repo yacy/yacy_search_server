@@ -58,6 +58,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -157,7 +158,13 @@ public final class htmlFilterOutputStream extends OutputStream {
         while (e.hasMoreElements()) {
             key = (String) e.nextElement();
             bb = bb.append((byte) 32).append(key.getBytes()).append((byte) '=');
-            bb = bb.append(quotechar).append(prop.getProperty(key).getBytes()).append(quotechar);
+            bb = bb.append(quotechar);
+            try {
+                bb.append(prop.getProperty(key).getBytes("UTF-8"));
+            } catch (UnsupportedEncodingException e1) {
+                bb.append(prop.getProperty(key).getBytes());
+            }
+            bb.append(quotechar); 
         }
         if (bb.length() > 0) return bb.getBytes(1);
         return bb.getBytes();
