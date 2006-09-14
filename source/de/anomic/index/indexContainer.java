@@ -186,7 +186,7 @@ public class indexContainer extends kelondroRowSet {
     public static Method containerMergeMethod = null;
     static {
         try {
-            Class c = Class.forName("de.anomic.index.indexRowSetContainer");
+            Class c = Class.forName("de.anomic.index.indexContainer");
             containerMergeMethod = c.getMethod("containerMerge", new Class[]{Object.class, Object.class});
         } catch (SecurityException e) {
             System.out.println("Error while initializing containerMerge: " + e.getMessage());
