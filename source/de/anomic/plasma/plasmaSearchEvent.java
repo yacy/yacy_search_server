@@ -475,13 +475,11 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             synchronized (rcContainers) {
                 String wordHash;
                 Iterator hashi = query.queryHashes.iterator();
-                boolean dhtCache = false;
                 while (hashi.hasNext()) {
                     wordHash = (String) hashi.next();
                     rcContainers.setWordHash(wordHash);
-                    dhtCache = dhtCache | wordIndex.busyCacheFlush;
-                    wordIndex.addEntries(rcContainers, System.currentTimeMillis(), dhtCache);
-                    log.logFine("FLUSHED " + wordHash + ": " + rcContainers.size() + " url entries to " + ((dhtCache) ? "DHT cache" : "word cache"));
+                    wordIndex.addEntries(rcContainers, System.currentTimeMillis(), true);
+                    log.logFine("FLUSHED " + wordHash + ": " + rcContainers.size() + " url entries");
                 }
                 // the rcGlobal was flushed, empty it
                 count += rcContainers.size();

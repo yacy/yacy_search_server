@@ -108,15 +108,15 @@ public final class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "not_granted";
             pause = 0;
-        } else if (checkLimit && sb.wordIndex.kSize() > cachelimit) {
+        } else if (checkLimit && sb.wordIndex.dhtInCacheSize() > cachelimit) {
             // we are too busy to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.wordIndex.kSize() + ").");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.wordIndex.dhtInCacheSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
-        } else if ((checkLimit && sb.wordIndex.wSize() > sb.getConfigLong("wordCacheMaxCount", 20000)) || ((sb.wordIndex.busyCacheFlush) && (!shortCacheFlush))) {
+        } else if ((checkLimit && sb.wordIndex.dhtOutCacheSize() > sb.getConfigLong("wordCacheMaxCount", 20000)) || ((sb.wordIndex.busyCacheFlush) && (!shortCacheFlush))) {
             // we are too busy flushing the ramCache to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (wordcachesize=" + sb.wordIndex.wSize() + ").");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (wordcachesize=" + sb.wordIndex.dhtOutCacheSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 300000;
@@ -165,8 +165,8 @@ public final class transferRWI {
                     iEntry = new indexURLEntry(estring.substring(p));
                     urlHash = iEntry.urlHash();
                     if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(plasmaURLPattern.BLACKLIST_DHT, urlHash))) {
-                        //int deleted = sb.wordIndex.tryRemoveURLs(urlHash);
-                        yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName + "; deleted 1 URL entries from RWIs");
+                        int deleted = sb.wordIndex.tryRemoveURLs(urlHash);
+                        yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
                         blocked++;
                     } else {
                         sb.wordIndex.addEntry(wordHash, iEntry, System.currentTimeMillis(), true);
@@ -208,7 +208,7 @@ public final class transferRWI {
             result = "ok";
             
             if (checkLimit) {
-                pause = (sb.wordIndex.kSize() < 500) ? 0 : 60 * sb.wordIndex.kSize(); // estimation of necessary pause time
+                pause = (sb.wordIndex.dhtInCacheSize() < 500) ? 0 : 60 * sb.wordIndex.dhtInCacheSize(); // estimation of necessary pause time
             }
         }
 

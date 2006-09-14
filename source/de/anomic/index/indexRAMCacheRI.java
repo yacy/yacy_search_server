@@ -45,21 +45,18 @@ import de.anomic.yacy.yacySeedDB;
 public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
 
     // environment constants
-    private static final String indexArrayFileName = "indexDump1.array";
     public  static final long wCacheMaxAge         = 1000 * 60 * 30; // milliseconds; 30 minutes
-    public  static final long kCacheMaxAge         = 1000 * 60 * 2;  // milliseconds; 2 minutes
     
     // class variables
     private final File databaseRoot;
-    protected final TreeMap wCache; // wordhash-container
-    private final TreeMap kCache; // time-container; for karenz/DHT caching (set with high priority)
+    protected final TreeMap cache; // wordhash-container
     private final kelondroMScoreCluster hashScore;
     private final kelondroMScoreCluster hashDate;
-    private long  kCacheInc = 0;
     private long  initTime;
-    private int   wCacheMaxCount;
-    public  int   wCacheReferenceLimit;
+    private int   cacheMaxCount;
+    public  int   cacheReferenceLimit;
     private final serverLog log;
+    private String indexArrayFileName;
     
     // calculated constants
     private static String maxKey;
@@ -68,20 +65,19 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         //minKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
 
-    public indexRAMCacheRI(File databaseRoot, int wCacheReferenceLimitInit, serverLog log) {
+    public indexRAMCacheRI(File databaseRoot, int wCacheReferenceLimitInit, String dumpname, serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
         this.databaseRoot = databaseRoot;
-        this.wCache = new TreeMap();
-        this.kCache = new TreeMap();
+        this.cache = new TreeMap();
         this.hashScore = new kelondroMScoreCluster();
         this.hashDate  = new kelondroMScoreCluster();
-        this.kCacheInc = 0;
         this.initTime = System.currentTimeMillis();
-        this.wCacheMaxCount = 10000;
-        this.wCacheReferenceLimit = wCacheReferenceLimitInit;
+        this.cacheMaxCount = 10000;
+        this.cacheReferenceLimit = wCacheReferenceLimitInit;
         this.log = log;
+        indexArrayFileName = dumpname;
         
         // read in dump of last session
         try {
@@ -92,7 +88,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     }
 
     private void dump(int waitingSeconds) throws IOException {
-        log.logConfig("creating dump for index cache, " + wCache.size() + " words (and much more urls)");
+        log.logConfig("creating dump for index cache '" + indexArrayFileName + "', " + cache.size() + " words (and much more urls)");
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (indexDumpFile.exists()) indexDumpFile.delete();
         kelondroFixedWidthArray dumpArray = null;
@@ -106,35 +102,10 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             long updateTime;
             indexEntry iEntry;
             kelondroRow.Entry row = dumpArray.row().newEntry();
-            
-            // write kCache, this will be melted with the wCache upon load
-            synchronized (kCache) {
-                Iterator i = kCache.values().iterator();
-                while (i.hasNext()) {
-                    container = (indexContainer) i.next();
-
-                    // put entries on stack
-                    if (container != null) {
-                        Iterator ci = container.entries();
-                        while (ci.hasNext()) {
-                            iEntry = (indexEntry) ci.next();
-                            row.setCol(0, container.getWordHash().getBytes());
-                            row.setCol(1, container.size());
-                            row.setCol(2, container.updated());
-                            row.setCol(3, iEntry.urlHash().getBytes());
-                            row.setCol(4, iEntry.toEncodedByteArrayForm(false));
-                            dumpArray.set((int) urlcount++, row);
-                        }
-                    }
-                    wordcount++;
-                    i.remove(); // free some mem
-                    
-                }
-            }
-            
+      
             // write wCache
-            synchronized (wCache) {
-                Iterator i = wCache.entrySet().iterator();
+            synchronized (cache) {
+                Iterator i = cache.entrySet().iterator();
                 while (i.hasNext()) {
                     // get entries
                     entry = (Map.Entry) i.next();
@@ -162,7 +133,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     if (System.currentTimeMillis() > messageTime) {
                         // System.gc(); // for better statistic
                         wordsPerSecond = wordcount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                        log.logInfo("dumping status: " + wordcount + " words done, " + (wCache.size() / (wordsPerSecond + 1)) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
+                        log.logInfo("dumping status: " + wordcount + " words done, " + (cache.size() / (wordsPerSecond + 1)) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
                         messageTime = System.currentTimeMillis() + 5000;
                     }
                 }
@@ -176,12 +147,12 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (!(indexDumpFile.exists())) return 0;
         kelondroFixedWidthArray dumpArray = new kelondroFixedWidthArray(indexDumpFile, plasmaWordIndexAssortment.bufferStructureBasis, 0);
-        log.logConfig("restore array dump of index cache, " + dumpArray.size() + " word/URL relations");
+        log.logConfig("restore array dump of index cache '" + indexArrayFileName + "', " + dumpArray.size() + " word/URL relations");
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;
         long urlCount = 0, urlsPerSecond = 0;
         try {
-            synchronized (wCache) {
+            synchronized (cache) {
                 int i = dumpArray.size();
                 String wordHash;
                 //long creationTime;
@@ -211,7 +182,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             }
 
             dumpArray.close();
-            log.logConfig("restored " + wCache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+            log.logConfig("restored " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
         } catch (kelondroException e) {
             // restore failed
             log.logSevere("restore of indexCache array dump failed: " + e.getMessage(), e);
@@ -223,54 +194,36 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
 
     // cache settings
 
-    public int maxURLinWCache() {
+    public int maxURLinCache() {
         if (hashScore.size() == 0) return 0;
         return hashScore.getMaxScore();
     }
 
-    public long minAgeOfWCache() {
+    public long minAgeOfCache() {
         if (hashDate.size() == 0) return 0;
         return System.currentTimeMillis() - longEmit(hashDate.getMaxScore());
     }
 
-    public long maxAgeOfWCache() {
+    public long maxAgeOfCache() {
         if (hashDate.size() == 0) return 0;
         return System.currentTimeMillis() - longEmit(hashDate.getMinScore());
     }
 
-    public long minAgeOfKCache() {
-        if (kCache.size() == 0) return 0;
-        return System.currentTimeMillis() - ((Long) kCache.lastKey()).longValue();
-    }
-
-    public long maxAgeOfKCache() {
-        if (kCache.size() == 0) return 0;
-        return System.currentTimeMillis() - ((Long) kCache.firstKey()).longValue();
-    }
-
     public void setMaxWordCount(int maxWords) {
-        this.wCacheMaxCount = maxWords;
+        this.cacheMaxCount = maxWords;
     }
     
     public int getMaxWordCount() {
-        return this.wCacheMaxCount;
+        return this.cacheMaxCount;
     }
     
-    public int wSize() {
-        return wCache.size();
-    }
-
-    public int kSize() {
-        return kCache.size();
-    }
-
     public int size() {
-        return wCache.size() + kCache.size();
+        return cache.size();
     }
 
     public int indexSize(String wordHash) {
         int size = 0;
-        indexContainer cacheIndex = (indexContainer) wCache.get(wordHash);
+        indexContainer cacheIndex = (indexContainer) cache.get(wordHash);
         if (cacheIndex != null) size += cacheIndex.size();
         return size;
     }
@@ -294,7 +247,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         
         public wordContainerIterator(String startWordHash, boolean rot) {
             this.rot = rot;
-            this.iterator = (startWordHash == null) ? wCache.values().iterator() : wCache.tailMap(startWordHash).values().iterator();
+            this.iterator = (startWordHash == null) ? cache.values().iterator() : cache.tailMap(startWordHash).values().iterator();
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
         
@@ -309,7 +262,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             } else {
                 // rotation iteration
                 if (rot) {
-                    iterator = wCache.values().iterator();
+                    iterator = cache.values().iterator();
                     return ((indexContainer) iterator.next()).topLevelClone();
                 } else {
                     return null;
@@ -322,35 +275,18 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         }
         
     }
-    
-    public void shiftK2W() {
-        // find entries in kCache that are too old for that place and shift them to the wCache
-        long time;
-        Long l;
-        indexContainer container;
-        synchronized (kCache) {
-            while (kCache.size() > 0) {
-                l = (Long) kCache.firstKey();
-                time = l.longValue();
-                if (System.currentTimeMillis() - time < kCacheMaxAge) return;
-                container = (indexContainer) kCache.remove(l);
-                addEntries(container, container.updated(), false);
-            }
-        }
-    }
-    
+
     public String bestFlushWordHash() {
         // select appropriate hash
         // we have 2 different methods to find a good hash:
         // - the oldest entry in the cache
         // - the entry with maximum count
-        shiftK2W();
-        if (wCache.size() == 0) return null;
+        if (cache.size() == 0) return null;
         try {
-            synchronized (wCache) {
+            synchronized (cache) {
                 String hash = null;
                 int count = hashScore.getMaxScore();
-                if ((count >= wCacheReferenceLimit) &&
+                if ((count >= cacheReferenceLimit) &&
                     ((hash = (String) hashScore.getMaxObject()) != null)) {
                     // we MUST flush high-score entries, because a loop deletes entries in cache until this condition fails
                     // in this cache we MUST NOT check wCacheMinAge
@@ -363,7 +299,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     return hash;
                 }
                 // cases with respect to memory situation
-                if (Runtime.getRuntime().freeMemory() < 1000000) {
+                if (Runtime.getRuntime().freeMemory() < 100000) {
                     // urgent low-memory case
                     hash = (String) hashScore.getMaxObject(); // flush high-score entries (saves RAM)
                 } else {
@@ -387,22 +323,26 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     }
     
     public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxtime_dummy) {
-        if (urlselection == null) {
-            return (indexContainer) wCache.get(wordHash);
-        } else {
-            indexContainer ic = (indexContainer) wCache.get(wordHash);
-            if (ic != null) {
-                ic = ic.topLevelClone();
-                ic.select(urlselection);
-            }
-            return ic;
-        }
+
+        // retrieve container
+        indexContainer container = (indexContainer) cache.get(wordHash);
+        
+        // We must not use the container from cache to store everything we find,
+        // as that container remains linked to in the cache and might be changed later
+        // while the returned container is still in use.
+        // create a clone from the container
+        if (container != null) container = container.topLevelClone();
+        
+        // select the urlselection
+        if ((urlselection != null) && (container != null)) container.select(urlselection);
+
+        return container;
     }
 
     public indexContainer deleteContainer(String wordHash) {
         // returns the index that had been deleted
-        synchronized (wCache) {
-            indexContainer container = (indexContainer) wCache.remove(wordHash);
+        synchronized (cache) {
+            indexContainer container = (indexContainer) cache.remove(wordHash);
             hashScore.deleteScore(wordHash);
             hashDate.deleteScore(wordHash);
             return container;
@@ -410,7 +350,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     }
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
-        synchronized (wCache) {
+        synchronized (cache) {
             indexContainer c = (indexContainer) deleteContainer(wordHash);
             if (c != null) {
                 if (c.removeEntry(wordHash, urlHash, deleteComplete)) return true;
@@ -423,7 +363,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
         if (urlHashes.size() == 0) return 0;
         int count = 0;
-        synchronized (wCache) {
+        synchronized (cache) {
             indexContainer c = (indexContainer) deleteContainer(wordHash);
             if (c != null) {
                 count = c.removeEntries(wordHash, urlHashes, deleteComplete);
@@ -432,14 +372,14 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         }
         return count;
     }
-    
+ 
     public int tryRemoveURLs(String urlHash) {
         // this tries to delete an index from the cache that has this
         // urlHash assigned. This can only work if the entry is really fresh
         // Such entries must be searched in the latest entries
         int delCount = 0;
-        synchronized (kCache) {
-            Iterator i = kCache.entrySet().iterator();
+        synchronized (cache) {
+            Iterator i = cache.entrySet().iterator();
             Map.Entry entry;
             Long l;
             indexContainer c;
@@ -453,7 +393,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     if (c.size() == 0) {
                         i.remove();
                     } else {
-                        kCache.put(l, c); // superfluous?
+                        cache.put(l, c); // superfluous?
                     }
                     delCount++;
                 }
@@ -467,20 +407,14 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         int added = 0;
 
         // put new words into cache
-        if (dhtCase) synchronized (kCache) {
-            // put container into kCache
-            kCache.put(new Long(updateTime + kCacheInc), container);
-            kCacheInc++;
-            if (kCacheInc > 10000) kCacheInc = 0;
-            added = container.size();
-        } else synchronized (wCache) {
+        synchronized (cache) {
             // put container into wCache
             String wordHash = container.getWordHash();
-            indexContainer entries = (indexContainer) wCache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+            indexContainer entries = (indexContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
             if (entries == null) entries = new indexContainer(wordHash);
             added = entries.add(container, -1);
             if (added > 0) {
-                wCache.put(wordHash, entries);
+                cache.put(wordHash, entries);
                 hashScore.addScore(wordHash, added);
                 hashDate.setScore(wordHash, intTime(updateTime));
             }
@@ -490,20 +424,12 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
     }
 
     public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
-        if (dhtCase) synchronized (kCache) {
-            // put container into kCache
-            indexContainer container = new indexContainer(wordHash);
-            container.add(newEntry);
-            kCache.put(new Long(updateTime + kCacheInc), container);
-            kCacheInc++;
-            if (kCacheInc > 10000) kCacheInc = 0;
-            return null;
-        } else synchronized (wCache) {
-            indexContainer container = (indexContainer) wCache.get(wordHash);
+        synchronized (cache) {
+            indexContainer container = (indexContainer) cache.get(wordHash);
             if (container == null) container = new indexContainer(wordHash);
             indexEntry[] entries = new indexEntry[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
-                wCache.put(wordHash, container);
+                cache.put(wordHash, container);
                 hashScore.incScore(wordHash);
                 hashDate.setScore(wordHash, intTime(updateTime));
                 return null;

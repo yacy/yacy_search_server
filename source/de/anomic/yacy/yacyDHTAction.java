@@ -231,7 +231,12 @@ public class yacyDHTAction implements yacyPeerAction {
     public void processPeerPing(yacySeed peer) {
     }
     
-    
+    public static boolean shallBeOwnWord(String wordhash) {
+        final double distance = dhtDistance(yacyCore.seedDB.mySeed.hash, wordhash);
+        final double max = 1.2 / yacyCore.seedDB.sizeConnected();
+        //System.out.println("Distance for " + wordhash + ": " + distance + "; max is " + max);
+        return (distance > 0) && (distance <= max);
+    }
     
     public static double dhtDistance(String peer, String word) {
         // the dht distance is a positive value between 0 and 1
