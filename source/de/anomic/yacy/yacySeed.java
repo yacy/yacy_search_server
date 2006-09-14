@@ -441,11 +441,17 @@ public class yacySeed {
     public void setUnusedFlags() {
         for (int i = 4; i < 24; i++) setFlag(i, true);
     }
+    public boolean isPotential() {
+        return isVirgin() || isJunior();
+    }
     public boolean isVirgin() {
         return get(PEERTYPE, "").equals(PEERTYPE_VIRGIN);
     }
     public boolean isJunior() {
         return get(PEERTYPE, "").equals(PEERTYPE_JUNIOR);
+    }
+    public boolean isActive() {
+        return isSenior() || isPrincipal();
     }
     public boolean isSenior() {
         return get(PEERTYPE, "").equals(PEERTYPE_SENIOR);

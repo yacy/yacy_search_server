@@ -232,6 +232,7 @@ public class yacyDHTAction implements yacyPeerAction {
     }
     
     public static boolean shallBeOwnWord(String wordhash) {
+        if (yacyCore.seedDB.mySeed.isPotential()) return false;
         final double distance = dhtDistance(yacyCore.seedDB.mySeed.hash, wordhash);
         final double max = 1.2 / yacyCore.seedDB.sizeConnected();
         //System.out.println("Distance for " + wordhash + ": " + distance + "; max is " + max);
