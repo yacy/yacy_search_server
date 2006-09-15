@@ -272,7 +272,7 @@ public final class htmlFilterOutputStream extends OutputStream {
             if (in[1] == '/') {
                 // a closing tag
                 tagend = tagEnd(in, 2);
-                tag = new String(in, 2, tagend - 2);
+                tag = new String(in, 2, tagend - 2); // TODO: bugfix needed for other charsets
                 byte[] text = new byte[in.length - tagend - 1];
                 System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
                 return filterTag(tag, false, text, quotechar);
@@ -280,7 +280,7 @@ public final class htmlFilterOutputStream extends OutputStream {
             
             // an opening tag
             tagend = tagEnd(in, 1);
-            tag = new String(in, 1, tagend - 1);
+            tag = new String(in, 1, tagend - 1);    // TODO: bugfix needed for other charsets
             byte[] text = new byte[in.length - tagend - 1];
             System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
             return filterTag(tag, true, text, quotechar);
