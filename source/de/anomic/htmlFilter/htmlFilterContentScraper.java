@@ -211,7 +211,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
             if (h.length() > 0) headlines[3].add(h);
         }
-        if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) title = cleanLine(super.stripAll(new serverByteBuffer(text)).toString()); // TODO: bugfix needed for UTF-8       
+        if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) 
+            title = cleanLine(super.stripAll(new serverByteBuffer(text)).toString(this.charset));        
     }
 
     private static String cleanLine(String s) {

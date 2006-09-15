@@ -725,11 +725,11 @@ public final class plasmaParser {
                 serverFileUtils.write(contentBytes, contentFile);
             }
             
-            if ((args.length == 4)&&(args[2].equalsIgnoreCase("-m"))) {
+            if ((args.length >= 4)&&(args[2].equalsIgnoreCase("-m"))) {
                 contentMimeType = args[3];
             }
             
-            if ((args.length == 6)&&(args[4].equalsIgnoreCase("-c"))) {
+            if ((args.length >= 6)&&(args[4].equalsIgnoreCase("-c"))) {
                 charSet = args[5];
             }            
             
@@ -747,6 +747,9 @@ public final class plasmaParser {
 
             // printing out all parsed sentences
             if (document != null) {
+                System.out.print("Document titel: ");
+                System.out.println(document.getMainLongTitle());
+                
                 // found text
                 String[] sentences = document.getSentences();
                 if (sentences != null) {
