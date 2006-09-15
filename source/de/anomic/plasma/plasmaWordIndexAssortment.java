@@ -270,7 +270,7 @@ public final class plasmaWordIndexAssortment {
         private Iterator rowIterator;
         
         public containerIterator(String startWordHash, boolean up, boolean rot) throws IOException {
-            rowIterator = assortments.rows(up, rot, startWordHash.getBytes());
+            rowIterator = assortments.rows(up, rot, (startWordHash == null) ? null : startWordHash.getBytes());
         }
         
         public boolean hasNext() {
