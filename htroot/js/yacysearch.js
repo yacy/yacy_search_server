@@ -41,27 +41,26 @@ function handleState(req) {
 		//span.setAttribute("class", "snippetError");
 	}
 	
-	var pos=snippetText.indexOf("<b>");
+	// replace "<b>" text by <strong> node
+	var pos1=snippetText.indexOf("<b>");
 	var pos2=snippetText.indexOf("</b>");
-	var tmpNode=null;
-	var tmpNode2=null;
-	while(pos >= 0 && pos2 > pos){
-		tmpNode = document.createTextNode(snippetText.substring(0, pos)); //other text
-		if(tmpNode != ""){
-			span.appendChild(tmpNode);
-		}
+	while (pos1 >= 0 && pos2 > pos1) {
+		leftString = document.createTextNode(snippetText.substring(0, pos1)); //other text
+		if (leftString != "") span.appendChild(leftString);
+
 		//add the bold text
-		tmpNode=document.createElement("strong")
-		tmpNode2=document.createTextNode(snippetText.substring(pos+3,pos2));
-		tmpNode.appendChild(tmpNode2);
-		span.appendChild(tmpNode)
+		strongNode=document.createElement("strong");
+		middleString=document.createTextNode(snippetText.substring(pos1 + 3, pos2));
+		strongNode.appendChild(middleString);
+		span.appendChild(strongNode);
 		
-		snippetText=snippetText.substring(pos2+4)
-		var pos=snippetText.indexOf("<b>");
-		var pos2=snippetText.indexOf("</b>");
+		// cut out left and middle and go on with remaining text
+		snippetText=snippetText.substring(pos2 + 4);
+		pos1=snippetText.indexOf("<b>");
+		pos2=snippetText.indexOf("</b>");
 	}
-	if(snippetText != ""){
-		tmpNode = document.createTextNode(snippetText.substring(0, pos)); //other text
-		span.appendChild(tmpNode);
+	// add remaining string
+	if (snippetText != "") {
+		span.appendChild(document.createTextNode(snippetText));
 	}
 }
