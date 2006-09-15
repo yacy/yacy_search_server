@@ -1,88 +1,87 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy Watch Crawler</title>
-#%env/templates/metas.template%#
-<script src="/js/ajax.js"></script>
-<script src="/js/xml.js"></script>
-<script src="/js/html.js"></script>
-<script src="/js/WatchCrawler.js"></script>
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br>
-<h2>Crawler Monitor</h2>
-<p />
-<div>
-Next update in <span id="nextUpdate" onclick="changeInterval()"></span> seconds.<br />
-PPM: <span id="ppm">&nbsp;&nbsp;&nbsp;</span><br />
-wordcaches: <span id="wordcache">&nbsp;</span>
-</div>
-<p />
-<div>
-Loader:
-<br />
-Size: <span id="loaderqueuesize">&nbsp;&nbsp;&nbsp;</span><br />
-Max: <span id="loaderqueuemax">&nbsp;&nbsp;&nbsp;</span><br />
-</div>
-<table border="0" cellpadding="2" cellspacing="1" id="loaderTable" width="100%">
-  <tbody>
-  <tr class="TableHeader">
-    <th class="small">Initiator</th>
-    <th class="small">Depth</th>
-    <th class="small">Modified Date</th>
-    <th class="small">Anchor Name</th>
-    <th class="small" width="100%">URL</th>
-  </tr>
-  </tbody>
-</table>
-<div>
-Indexing Queue:<br />
-Size: <span id="indexingqueuesize">&nbsp;&nbsp;&nbsp;</span><br />
-Max: <span id="indexingqueuemax">&nbsp;&nbsp;&nbsp;</span><br />
-</div>
-<table border="0" cellpadding="2" cellspacing="1" id="indexingTable" width="100%">
-  <tbody>
-  <tr class="TableHeader">
-    <th class="small">Initiator</th>
-    <th class="small">Depth</th>
-    <th class="small">Modified Date</th>
-    <th class="small">Anchor Name</th>
-    <th class="small" width="100%">URL</th>
-    <th class="small">Size</th>
-    <th class="small">Delete</th>
-  </tr>
-  </tbody>
-</table>
-<div>Local Crawler<br />
-Size: <span id="localcrawlerqueuesize">&nbsp;&nbsp;&nbsp;</span><br />
-</div>
-<table border="0" cellpadding="2" cellspacing="1" id="localCrawlerTable" width="100%">
-  <tbody>
-  <tr class="TableHeader">
-    <th class="small">Initiator</th>
-    <th class="small">Depth</th>
-    <th class="small">Modified Date</th>
-    <th class="small">Anchor Name</th>
-    <th class="small" width="100%">URL</th>
-  </tr>
-  </tbody>
-</table>
-<div>Remote Crawler<br />
-Size: <span id="remotecrawlerqueuesize">&nbsp;&nbsp;&nbsp;</span><br />
-</div>
-<table border="0" cellpadding="2" cellspacing="1" id="remoteCrawlerTable" width="100%">
-  <tbody>
-  <tr class="TableHeader">
-    <th class="small">Profile</th>
-    <th class="small">Depth</th>
-    <th class="small">Modified Date</th>
-    <th class="small">Anchor Name</th>
-    <th class="small" width="100%">URL</th>
-  </tr>
-  </tbody>
-</table>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy Watch Crawler</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript" src="/js/ajax.js"></script>
+    <script type="text/javascript" src="/js/xml.js"></script>
+    <script type="text/javascript" src="/js/html.js"></script>
+    <script type="text/javascript" src="/js/WatchCrawler.js"></script>
+  </head>
+  <body>
+    #%env/templates/header.template%#
+    <h2>Crawler Monitor</h2>
+    <p>
+      Next update in <span id="nextUpdate" onclick="changeInterval()"></span> seconds.<br />
+      PPM: <span id="ppm">&nbsp;&nbsp;&nbsp;</span><br />
+      wordcaches: <span id="wordcache">&nbsp;</span>
+    </p>
+    <p>
+      Loader:
+      <br />
+      Size: <span id="loaderqueuesize">&nbsp;&nbsp;&nbsp;</span><br />
+      Max: <span id="loaderqueuemax">&nbsp;&nbsp;&nbsp;</span><br />
+    </p>
+    <table border="0" cellpadding="2" cellspacing="1" id="loaderTable">
+      <tbody>
+        <tr class="TableHeader">
+          <th>Initiator</th>
+          <th>Depth</th>
+          <th>Modified Date</th>
+          <th>Anchor Name</th>
+          <th>URL</th>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Indexing Queue:<br />
+      Size: <span id="indexingqueuesize">&nbsp;&nbsp;&nbsp;</span><br />
+      Max: <span id="indexingqueuemax">&nbsp;&nbsp;&nbsp;</span><br />
+    </p>
+    <table border="0" cellpadding="2" cellspacing="1" id="indexingTable">
+      <tbody>
+        <tr class="TableHeader">
+          <th>Initiator</th>
+          <th>Depth</th>
+          <th>Modified Date</th>
+          <th>Anchor Name</th>
+          <th>URL</th>
+          <th>Size</th>
+          <th>Delete</th>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Local Crawler<br />
+      Size: <span id="localcrawlerqueuesize">&nbsp;&nbsp;&nbsp;</span><br />
+    </p>
+    <table border="0" cellpadding="2" cellspacing="1" id="localCrawlerTable" >
+      <tbody>
+        <tr class="TableHeader">
+          <th>Initiator</th>
+          <th>Depth</th>
+          <th>Modified Date</th>
+          <th>Anchor Name</th>
+          <th>URL</th>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Remote Crawler<br />
+      Size: <span id="remotecrawlerqueuesize">&nbsp;&nbsp;&nbsp;</span><br />
+    </p>
+    <table border="0" cellpadding="2" cellspacing="1" id="remoteCrawlerTable">
+      <tbody>
+        <tr class="TableHeader">
+          <th>Profile</th>
+          <th>Depth</th>
+          <th>Modified Date</th>
+          <th>Anchor Name</th>
+          <th>URL</th>
+        </tr>
+      </tbody>
+    </table>
 
-#%env/templates/footer.template%#
-</body>
+    #%env/templates/footer.template%#
+  </body>
 </html>

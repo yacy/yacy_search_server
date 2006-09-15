@@ -58,6 +58,10 @@ div.head h1 {
   background-color: lightgrey;
 }
 
+.TableCellActive {  	 
+  background-color: #ffbbaa; 	 
+}
+
 /* Blog and Wiki*/
 
 .Post {
