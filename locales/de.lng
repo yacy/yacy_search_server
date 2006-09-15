@@ -56,7 +56,7 @@ Host:==Host:
 Load new blacklist items==Lade neue Blacklist
 Import blacklist items from URL:==Importiere Blacklist von URL:
 URL:==URL:
-"Load new blacklist items"==Lade neue Blacklist
+Load new blacklist items==Lade neue Blacklist
 Import blacklist items from file:==Importiere Blacklist aus Datei:
 "Load new blacklist items"==Lade neue Blacklist
 was removed from blacklist==wurde aus Blacklist entfernt
@@ -692,7 +692,7 @@ Import Job with the same path already started.==Ein Import mit dem selben Pfad i
 Starting new Job==Neuen Import starten
 Import&nbsp;Type:==Import-Typ:
 Cache Size==Cachegr&ouml;&szlig;e
-Usage Examples==Benutzungs-<br>beispiele
+Usage Examples==Benutzungs-<br />beispiele
 "Path to the PLASMADB directory of the foreign peer"=="Pfad zum PLASMADB Verzeichnis des fremden Peer"
 Import&nbsp;Path:==Import-Pfad:
 "Start Import"=="Import starten"
@@ -703,7 +703,7 @@ Job Type==Job-Typ
 >Path==>Pfad
 Status==Status
 Elapsed<br>Time==Verstrichene Zeit
-Time<br>Left==verbl.<br>Zeit
+Time<br>Left==verbl.<br />Zeit
 Abort Import==Import abbrechen
 Pause Import==Import pausieren
 Finished::Running::Paused==Fertig::Laufend::Pausiert
@@ -807,10 +807,10 @@ Title==Titel
 #Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==Der lokale Index besteht zur Zeit aus (ungef&auml;hr) #[wcount]# W&ouml;rtern und #[ucount]# URLs.
-Chunk Size<br>\(Word Entries\)==Chunk-Gr&ouml;sse<br>(Wort Eintr&auml;ge)
+Chunk Size<br>\(Word Entries\)==Chunk-Gr&ouml;sse<br />(Wort Eintr&auml;ge)
 Words Range==Worte-Bereich
 Transfered Words==&Uuml;bertragene W&ouml;rter
-Delete<br>Index==Index<br>l&ouml;schen
+Delete<br>Index==Index<br />l&ouml;schen
 true==ja
 false==nein
 Selection==Auswahl
@@ -896,27 +896,27 @@ Potential Peers==Potenzielle Peers
 Manually contacting Peer==Kontaktiere Peer manuell
 no remote \#\[peertype\]\# peer for this list known==Kein remote Peer #[peertype]# bekannt oder online.
 Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Gezeigt werden #[num]# Eintr&auml;ge von insgesamt #[total]# Peers.
-send&nbsp;<b>M</b>essage/<br>show&nbsp;<b>P</b>rofile/<br>edit&nbsp;<b>W</b>iki==Sende Nachricht (<b>m</b>)/<br>Zeige Profil (<b>p</b>)/<br>&Auml;ndere Wiki (<b>w</b>)
+send&nbsp;<b>M</b>essage/<br>show&nbsp;<b>P</b>rofile/<br>edit&nbsp;<b>W</b>iki==Sende Nachricht (<b>m</b>)/<br />Zeige Profil (<b>p</b>)/<br />&Auml;ndere Wiki (<b>w</b>)
 Name==Name
 Address==Adresse
 Hash==Hash
 Type==Typ
-Release/<br>SVN==YaCy Version/<br>SVN
+Release/<br>SVN==YaCy Version/<br />SVN
 Contact==Kontakt
-Last<br>Seen==Zuletzt<br>online
+Last<br>Seen==Zuletzt<br />online
 Location==Ort
 Offset==Versatz
 Uptime==Uptime
 Links==Links
 RWIs==RWIs
-Sent<br>Words==Gesendete<br>W&ouml;rter
+Sent<br>Words==Gesendete<br />W&ouml;rter
 
-Sent<br>URLs==Gesendete<br>URLs
-Received<br>Words==Empfangene<br>W&ouml;rter
-Received<br>URLs==Empfangene<br>URLs
+Sent<br>URLs==Gesendete<br />URLs
+Received<br>Words==Empfangene<br />W&ouml;rter
+Received<br>URLs==Empfangene<br />URLs
 PPM==PPM
 Seeds==Seeds
-Connects<br>per hour==Verbindungen<br>pro Stunde
+Connects<br>per hour==Verbindungen<br />pro Stunde
 Send message to peer==Sende Nachricht an Peer
 View profile of peer==Zeige Profil des Peers
 Read and edit wiki on peer==Lese und &auml;ndere Wiki des Peers
@@ -935,13 +935,13 @@ Your Peer:==Ihr Peer:
 Version==Version
 Own/Other==Eigene/Andere
 Accept Crawl==Akzeptiert Crawl
-Sent<br>Words==Gesendete<br>W&ouml;rter
-Sent<br>URLs==Gesendete<br>URLs
-Received<br>Words==Empfangene<br>W&ouml;rter
-Received<br>URLs==Empfangene<br>URLs
+Sent<br>Words==Gesendete<br />W&ouml;rter
+Sent<br>URLs==Gesendete<br />URLs
+Received<br>Words==Empfangene<br />W&ouml;rter
+Received<br>URLs==Empfangene<br />URLs
 PPM==PPM
 Seeds==Seeds
-Connects<br>per hour==Verbindungen<br>pro Stunde
+Connects<br>per hour==Verbindungen<br />pro Stunde
 Network legend:==Netzwerklegende:
 dark font==schwarze Schrift
 senior/principal peers==Senior/Principal Peers
@@ -1000,7 +1000,7 @@ Attributes==Attribute
 #File: PerformanceQueues_p.html
 Performance Settings of Queues and Processes==Performanceeinstellungen f&uuml;r Warteschlangen und Prozesse
 Scheduled tasks overview and waiting time settings:==&Uuml;bersicht geplanter Aufgaben und Wartezeiteinstellungen:
-Queue Size==Warteschl.-<br>l&auml;nge
+Queue Size==Warteschl.-<br />l&auml;nge
 >Total==>gesamte
 #Block Time==
 #Sleep Time==
@@ -1011,7 +1011,7 @@ Queue Size==Warteschl.-<br>l&auml;nge
 Short Mem<br>Cycles==Durchl. ohne ausr. Speicher
 >per Cycle==>pro Durchlauf
 >per Busy-Cycle==>pro besch&auml;ft. Durchl.
->Memoy Use==>Speicher-<br>nutzung
+>Memoy Use==>Speicher-<br />nutzung
 >Delay between==>Verz&ouml;gerung zwischen
 >idle loops==>unt&auml;t. Durchl.
 >busy loops==>besch&auml;ft. Durchl.
@@ -1067,7 +1067,7 @@ before GC==vor GC
 after GC==nach GC
 >Now==>Jetzt
 before <==vor <
-Next<br>Startup==N&auml;chster<br>Start
+Next<br>Startup==N&auml;chster<br />Start
 Description==Beschreibung
 maximum memory that the JVM will attempt to use==maximaler Speicher den die JVM nutzen wird
 >Available<==>Verf&uuml;gbar<
@@ -1084,7 +1084,7 @@ RAM Cache for Database Files:==RAM-Cache f&uuml;r Datenbank-Dateien:
 Chunk Size==Chunk Gr&ouml;&szlig;e
 #Slots==
 Memory Occupation==Speicherbeanspruchung
-Needed<br>==Ben&ouml;tigt<br>
+Needed<br>==Ben&ouml;tigt<br />
 &nbsp;DB&nbsp;Size==&nbsp;DB&nbsp;Gr&ouml;&szlig;e
 >Empty==>Frei
 High Prio==hohe Prio
@@ -1133,10 +1133,10 @@ Increasing this cache may speed up crawling, but not much space is needed, so th
 Sum of memory amounts==Summe der Speichermengen
 Re-Configuration:==Neukonfiguration:
 "Set"=="Setzen"
-these<br>custom<br>values==dieser<br>nutzerdef.<br>Werte
-all<br>default<br>values==aller<br>Standard-<br>werte
-all<br>recom-<br>mended values==aller<br>empfohlenen<br>Werte
-all<br>optimum<br>values==aller<br>Optimal-<br>werte
+these<br>custom<br>values==dieser<br />nutzerdef.<br />Werte
+all<br>default<br>values==aller<br />Standard-<br />werte
+all<br>recom-<br>mended values==aller<br />empfohlenen<br />Werte
+all<br>optimum<br>values==aller<br />Optimal-<br />werte
 #Write Cache Object Allocation:==
 #now alive in write cache==
 #currently held in write buffer heap==
@@ -1240,7 +1240,7 @@ YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Einstellungen
 This is the configuration page for YaCy. Access to this page should be limited to an administration person only.==Dies ist die Konfigurationsseite f&uuml;r YaCy. Zugriff auf diese Seite sollte nur der Administrator haben.
 To restrict the access to this page, please set an administrator account and password <a href="#admin">below.</a>==Um den Zugriff auf diese Seite zu beschr&auml;nken, richten Sie bitte <a href="#admin">hier</a> ein Administrator Konto mit Passwort ein.
 If you want to restore all settings to the default values,==Wenn Sie alle Einstellungen auf die urspr&uuml;nglichen Werte zur&uuml;cksetzen wollen,
-but <b>forgot your administration password</b>, you must stop the proxy,==aber Ihr <b>Administatorpasswort vergessen haben</b>, m&uuml;ssen Sie YaCy stoppen,
+but <strong>forgot your administration password</strong>, you must stop the proxy,==aber Ihr <strong>Administatorpasswort vergessen haben</strong>, m&uuml;ssen Sie YaCy stoppen,
 delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/httpProxy.conf' im YaCy Hauptordner l&ouml;schen und YaCy neu starten.
 Administration Account Settings==Administrations Konto Einstellungen
 Server Access Settings==Server Zugangs-Einstellungen
@@ -1395,9 +1395,9 @@ With this settings you can activate or deactivate forwarding of yacy-messages vi
 Enable message forwarding:==Aktiviere Nachrichten Weiterleitung:
 Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
 Forwarding Command:==Weiterleitungskommando:
-The command-line program that should be used to forward the message.<br>e.g.:==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br>z.B.:
+The command-line program that should be used to forward the message.<br>e.g.:==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />z.B.:
 Forwarding To:==Weiterleiten An:
-The recipient email-address.<br> e.g.:==Die E-Mail Adresse des Empf&auml;ngers.<br>z.B.:
+The recipient email-address.<br> e.g.:==Die E-Mail Adresse des Empf&auml;ngers.<br />z.B.:
 Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
 
 #-------------------------------------------------------
@@ -1409,6 +1409,19 @@ http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignment
 Changes take effect immediately==&Auml;nderungen sind sofort wirksam
 
 #-------------------------------------------------------
+#File: Settings_Crawler.inc
+Generic Crawler Settings==Allgemeine Crawler Einstellungen
+Connection timeout in ms==Verbindungs-Timeout in ms
+means unlimited==schaltet die Begrenzung ab
+Crawler Settings==Crawler Einstellungen
+Maximum&nbsp;Filesize==Maximale&nbsp;Dateigröße
+Maximum allowed file size in bytes that should be downloaded==Maximale Größe der herunterzuladenden Dateien
+Larger files will be skipped==Größere Dateien werden übersprungen
+Please note that if the crawler uses content compression, this limit is used to check the compressed content size==Beachten Sie, dass beim Herunterladen der Dateien mittels "Content-Compression" die komprimierte Dateigröße maßgeblich ist
+Submit==Speichern
+Changes will take effect immediately==Änderungen sind sofort aktiv
+
+#-------------------------------------------------------
 #File: SettingsAck_p.html
 
 YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': Einstellung Verarbeitung
@@ -1418,11 +1431,11 @@ Nothing changed==Nichts wurde ver&auml;ndert.
 Error with submitted information.==Es gab einen Fehler bei der &Uuml;bertragung der Informationen.
 Nothing changed.==Nichts wurde ver&auml;ndert.
 The user name must be given.==Der User Name muss angegeben werden
-Your request cannot be processed.<br>Nothing changed.==Ihre Anfrage konnte nicht bearbeitet werden.<br>Nichts wurde ver&auml;ndert.
+Your request cannot be processed.<br>Nothing changed.==Ihre Anfrage konnte nicht bearbeitet werden.<br />Nichts wurde ver&auml;ndert.
 The password redundancy check failed. You have probably misstyped your password.==Die Passwort&uuml;berpr&uuml;fung schlug fehl. Sie haben sich wahrscheinlich vertippt.
-Shutting down.</b><br>Application will terminate after working off all crawling tasks.==Runterfahren</b><br>Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
+Shutting down.</b><br>Application will terminate after working off all crawling tasks.==Runterfahren</b><br />Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
 Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
-Your new administration account name is \#\[user\]\#. The password has been accepted.<br>If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br>Wenn Sie zur&uuml;ck zu den Einstellungen gehen wollen, m&uuml;ssen Sie sich neu einloggen.
+Your new administration account name is \#\[user\]\#. The password has been accepted.<br>If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br />Wenn Sie zur&uuml;ck zu den Einstellungen gehen wollen, m&uuml;ssen Sie sich neu einloggen.
 Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden ge&auml;ndert.
 Your proxy account check has been disabled, since you did not supply a password.==
 The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
@@ -1823,7 +1836,7 @@ Proxy Indexing==Proxy Indexierung
 File&nbsp;Share==Dateifreigabe
 #Wiki==Wiki
 >Messages==>Nachrichten
-Basic Configuration==Grund-<br>einstellungen
+Basic Configuration==Grund-<br />einstellungen
 Advanced Settings==erweiterte Einstellungen
 #Status==Status
 >Network==>Netzwerk
@@ -1907,7 +1920,7 @@ Welcome! You are identified and authorized as==Willkommen! Sie sind identifizier
 #File: htdocsdefault/welcome.html
 YACY: Default Page for Individual Peer Content==YACY: Standardseite f&uuml;r eigene Peer-Inhalte
 Individual&nbsp;Web&nbsp;Page==eigene Webseite
-Welcome to your own web page<br>in the <b>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br>im <b>YaCy-Netzwerk
+Welcome to your own web page<br>in the <b>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br />im <b>YaCy-Netzwerk
 THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE F&Uuml;R IHREN EIGENEN WEB SERVER!
 PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
 &lt;YaCy-application-home&gt;<b>\#\[wwwpath\]\#</b>==&lt;YaCy-Programmpfad&gt;<b>#[wwwpath]#</b> ABLEGEN.
