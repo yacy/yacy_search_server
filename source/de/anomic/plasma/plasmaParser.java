@@ -554,14 +554,14 @@ public final class plasmaParser {
                 htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
                 
                 // set the charset if known
-                if (charset != null) {
+                /*if (charset != null) {
                     try {
                     scraper.setCharset(charset);
                     } catch (UnsupportedCharsetException e) {
                         serverLog.logWarning("PARSER", "parseSource2: unknown or unsupported charset '" + charset + "'");
                         return null;                        
                     }
-                }                
+                }*/               
                 
                 OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
                 serverFileUtils.copy(sourceFile, hfos);
