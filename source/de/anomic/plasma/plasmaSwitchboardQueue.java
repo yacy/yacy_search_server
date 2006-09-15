@@ -429,7 +429,7 @@ public class plasmaSwitchboardQueue {
 
             // a picture cannot be indexed
             if (getCachedObjectInfo() != null) {
-                String status = this.getCachedObjectInfo().shallIndexCacheForProxy();
+                String status = this.getCachedObjectInfo().shallIndexCacheForCrawler();
                 if (status != null) return status;
             }
             if (plasmaHTCache.noIndexingURL(nURL)) { return "Media_Content_(forbidden)"; }
