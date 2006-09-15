@@ -56,6 +56,7 @@ public class plasmaParserDocument {
     
     URL location;       // the source url
     String mimeType;    // mimeType as taken from http header
+    String charset;     // the charset of the document
     String keywords;    // most resources provide a keyword field
     String shortTitle;  // a shortTitle mostly appears in the window header (border)
     String longTitle;   // the real title of the document, commonly h1-tags
@@ -73,12 +74,13 @@ public class plasmaParserDocument {
     plasmaCondenser condenser;
     boolean resorted;
                     
-    public plasmaParserDocument(URL location, String mimeType,
+    public plasmaParserDocument(URL location, String mimeType, String charset,
                     String keywords, String shortTitle, String longTitle,
                     String[] sections, String abstrct,
                     byte[] text, Map anchors, TreeSet images) {
         this.location = location;
         this.mimeType = (mimeType==null)?"application/octet-stream":mimeType;
+        this.charset = charset;
         this.keywords = (keywords==null)?"":keywords;
         this.shortTitle = (shortTitle==null)?"":shortTitle;
         this.longTitle = (longTitle==null)?"":longTitle;
@@ -96,6 +98,13 @@ public class plasmaParserDocument {
 
     public String getMimeType() {
         return this.mimeType;
+    }
+    
+    /**
+     * @return the supposed charset of this document or <code>null</code> if unknown
+     */
+    public String getCharset() {
+        return this.charset;
     }
     
     public String getMainShortTitle() {

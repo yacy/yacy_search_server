@@ -346,6 +346,14 @@ public final class serverByteBuffer extends OutputStream {
     public String toString() {
         return new String(buffer, offset, length);
     }
+    
+    public String toString(String charsetName) {
+        try {
+            return new String(this.getBytes(),charsetName);
+        } catch (UnsupportedEncodingException e) {
+            return new String(this.getBytes());
+        }
+    }
 
     public String toString(int left, int rightbound) {
         return new String(buffer, offset + left, rightbound - left);

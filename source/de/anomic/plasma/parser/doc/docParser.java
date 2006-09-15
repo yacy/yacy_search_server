@@ -89,6 +89,7 @@ implements Parser {
               plasmaParserDocument theDoc = new plasmaParserDocument(
                       location,
                       mimeType,
+                      "UTF-8",
                       null,
                       ((contents.length() > 80)? contents.substring(0, 80):contents.trim()).
                           replaceAll("\r\n"," ").

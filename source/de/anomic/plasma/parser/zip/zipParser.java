@@ -165,6 +165,7 @@ public class zipParser extends AbstractParser implements Parser {
             return new plasmaParserDocument(
                     location,
                     mimeType,
+                    null,
                     docKeywords.toString(),
                     docShortTitle.toString(), 
                     docLongTitle.toString(),

@@ -243,6 +243,7 @@ public class vcfParser extends AbstractParser implements Parser {
             plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,                   // url of the source document
                     mimeType,                   // the documents mime type
+                    null,
                     null,                       // a list of extracted keywords
                     null,                       // a short document title
                     parsedTitle.toString(),     // a long document title

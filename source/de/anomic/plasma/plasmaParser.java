@@ -588,7 +588,7 @@ public final class plasmaParser {
             int p = 0;
             for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
             plasmaParserDocument ppd =  new plasmaParserDocument(new URL(location.toNormalform()),
-                                mimeType, null, null, scraper.getTitle(),
+                                mimeType, scraper.getCharset(), null, null, scraper.getTitle(),
                                 sections, null,
                                 scraper.getText(), scraper.getAnchors(), scraper.getImages());
             //scraper.close();
@@ -749,7 +749,12 @@ public final class plasmaParser {
             if (document != null) {
                 // found text
                 String[] sentences = document.getSentences();
-                if (sentences != null) for (int i = 0; i < sentences.length; i++) System.out.println("line " + i + ":" + sentences[i]);
+                if (sentences != null) {
+                    for (int i = 0; i < sentences.length; i++) {
+                        System.out.print("line " + i + ": ");
+                        System.out.println(sentences[i]);
+                    }
+                }
                 
                 // found links
                 int anchorNr = 0;

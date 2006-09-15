@@ -152,6 +152,7 @@ public class odtParser extends AbstractParser implements Parser {
             return new plasmaParserDocument(
                     location,
                     mimeType,
+                    "UTF-8",
                     docKeywords,
                     docShortTitle, 
                     docLongTitle,

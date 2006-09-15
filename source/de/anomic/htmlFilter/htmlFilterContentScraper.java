@@ -46,6 +46,7 @@ package de.anomic.htmlFilter;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.net.URL;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
@@ -121,6 +122,10 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         
         // remember it
         this.charset = charset;
+    }
+    
+    public String getCharset() {
+        return this.charset;
     }
     
     public void scrapeText(byte[] newtext) {
@@ -243,8 +248,14 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (s.length() > 0) return s;
         
         // extract headline from content
-        if (content.length() > 80) return cleanLine(new String(content.getBytes(), 0, 80));
-        return cleanLine(content.trim().toString());
+        if (content.length() > 80) {
+            try {
+                return cleanLine(new String(content.getBytes(), 0, 80,this.charset));
+            } catch (UnsupportedEncodingException e) {
+                return cleanLine(new String(content.getBytes(), 0, 80));
+            }
+        }
+        return cleanLine(content.trim().toString(this.charset));
     }
     
     public String[] getHeadlines(int i) {

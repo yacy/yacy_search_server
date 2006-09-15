@@ -152,6 +152,7 @@ public class pdfParser extends AbstractParser implements Parser {
             plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,
                     mimeType,
+                    "UTF-8",
                     docKeyWords,
                     docSubject,
                     docTitle,

@@ -147,6 +147,7 @@ public class rpmParser extends AbstractParser implements Parser {
             plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,
                     mimeType,
+                    "UTF-8",
                     null,
                     name,
                     summary,
