@@ -114,44 +114,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if ((content.length() != 0) && (content.byteAt(content.length() - 1) != 32)) content.append(32);
         content.append(super.stripAll(new serverByteBuffer(newtext, newtext.length + 1)).trim()).append(32);
     }
-/*
-    public static String urlNormalform(URL url) {
-        boolean defaultPort = false;
-        // serverLog.logFinest("htmlFilter", "urlNormalform: '" + url.toString() + "'");
-        if (url.getProtocol().equals("http")) {
-            if (url.getPort() < 0 || url.getPort() == 80)  { defaultPort = true; }
-        } else if (url.getProtocol().equals("ftp")) {
-            if (url.getPort() < 0 || url.getPort() == 21)  { defaultPort = true; }
-        } else if (url.getProtocol().equals("https")) {
-            if (url.getPort() < 0 || url.getPort() == 443) { defaultPort = true; }
-        }
-        String path = url.getFile();
 
-        // (this is different from previous normal forms where a '/' must not appear in root paths; here it must appear. Makes everything easier.)
-        if (path.length() == 0 || path.charAt(0) != '/') { path = "/" + path; }
-
-        Pattern pathPattern = Pattern.compile("(/[^/\\.]+/)[.]{2}(?=/)|/\\.(?=/)|/(?=/)");
-        Matcher matcher = pathPattern.matcher(path);
-        while (matcher.find()) {
-            path = matcher.replaceAll("");
-            matcher.reset(path);
-        }
-
-        if (defaultPort) { return url.getProtocol() + "://" + url.getHost().toLowerCase() + path; }
-        return url.getProtocol() + "://" + url.getHost().toLowerCase() + ":" + url.getPort() + path;
-    }
-
-    public static String urlNormalform(URL baseURL, String us) {
-        if (us == null || us.length() == 0) { return null; }
-        try {
-            if (baseURL == null) return urlNormalform(new URL(us));
-            return urlNormalform(new URL(baseURL, us));
-        } catch (MalformedURLException e) {
-            serverLog.logSevere("urlNormalform", e.toString());
-            return null;
-        }
-    }
-  */  
     public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
     public static String[] urlComps(String normalizedURL) {
         int p = normalizedURL.indexOf("//");
@@ -214,29 +177,31 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
         String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString()); // TODO: bugfix needed for UTF-8
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
             if (h.length() > 0) headlines[0].add(h);
         }
         if ((tagname.equalsIgnoreCase("h2")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString()); // TODO: bugfix needed for UTF-8
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
             if (h.length() > 0) headlines[1].add(h);
         }
         if ((tagname.equalsIgnoreCase("h3")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString()); // TODO: bugfix needed for UTF-8
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
             if (h.length() > 0) headlines[2].add(h);
         }
         if ((tagname.equalsIgnoreCase("h4")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString()); // TODO: bugfix needed for UTF-8
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
             if (h.length() > 0) headlines[3].add(h);
         }
         if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) title = cleanLine(super.stripAll(new serverByteBuffer(text)).toString()); // TODO: bugfix needed for UTF-8       
     }
 
     private static String cleanLine(String s) {
+        /*
         // may contain too many funny symbols
         for (int i = 0; i < s.length(); i++)
             if (s.charAt(i) < ' ') s = s.substring(0, i) + " " + s.substring(i + 1);
-
+        */
+        
         // remove double-spaces
         int p;
         while ((p = s.indexOf("  ")) >= 0) s = s.substring(0, p) + s.substring(p + 1);        
