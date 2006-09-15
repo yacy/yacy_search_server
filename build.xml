@@ -71,6 +71,7 @@
 <property name="htdocsWWW" location="${data}/HTDOCS/www"/>
 <property name="release_main" location="${release}/MAIN"/>
 <property name="release_ext" location="${release}/EXT"/>	
+<property name="svnEntriesFile" location=".svn/entries"/>
 
 <!-- determining if the sourcecode of the yacybar is available -->   
 <condition property="yacyBarDirExists">
@@ -83,7 +84,7 @@
 
 <!-- determining if the .svn directory exists -->   
 <condition property="svnEntriesFileExists">
-    <available file=".svn/entries" />        
+    <available file="${svnEntriesFile}" />        
 </condition> 
 
 <!-- 
@@ -95,7 +96,7 @@
 	<taskdef resource="svnRevNrParser.properties" classpath="${lib}/svnRevNr.jar"/>
 	
 	<!-- determine the revision number -->
-	<svnrevnr file=".svn/entries" property="baseRevisionNr"/>
+	<svnrevnr file="${svnEntriesFile}" property="baseRevisionNr"/>
  
     <!-- replacing the old with the new revision number -->   
     <copy file="build.properties" tofile="build.properties.new">  
