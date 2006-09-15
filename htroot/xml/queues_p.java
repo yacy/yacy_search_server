@@ -56,7 +56,6 @@ import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
 import de.anomic.plasma.plasmaCrawlNURL;
-import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.crawler.http.CrawlWorker;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardQueue;
@@ -164,67 +163,46 @@ public class queues_p {
         }
         
         //local crawl queue
-        prop.put("localCrawlSize", Integer.toString(switchboard.getThread("50_localcrawl").getJobCount()));       
-        
-        plasmaCrawlNURL.Entry urle;
-        String profileHandle;
-        plasmaCrawlProfile.entry profileEntry;
-        int i;
-        int showNum=0;
-        int size=10;
+        prop.put("localCrawlSize", Integer.toString(switchboard.getThread("50_localcrawl").getJobCount()));
         int stackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
-        plasmaCrawlNURL.Entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, (int) (size * 1.20));
-        for (i = 0; (i < crawlerList.length) && (showNum < size); i++) {
-            urle = crawlerList[i];
-            if ((urle != null)&&(urle.url()!=null)) {
-                initiator = yacyCore.seedDB.getConnected(urle.initiator());
-                profileHandle = urle.profileHandle();
-                profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
-                prop.put("list-local_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
-                prop.putNoHTML("list-local_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
-                prop.put("list-local_"+showNum+"_depth", urle.depth());
-                prop.put("list-local_"+showNum+"_modified", daydate(urle.loaddate()) );
-                prop.putNoHTML("list-local_"+showNum+"_anchor", urle.name());
-                prop.putNoHTML("list-local_"+showNum+"_url", urle.url().toString());
-                prop.put("list-local_"+showNum+"_hash", urle.hash());
-                showNum++;
-            } else {
-                stackSize--;
-            }
-        }
-        prop.put("list-local", showNum);
+        addNTable(prop, "list-local", switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
         
         //global crawl queue
         prop.put("remoteCrawlSize", Integer.toString(switchboard.getThread("61_globalcrawltrigger").getJobCount()));
         //prop.put("remoteCrawlSize", Integer.toString(switchboard.getThread("62_remotetriggeredcrawl").getJobCount()));
-        size=10;
         stackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
         if (stackSize == 0) {
             prop.put("list-remote", 0);
         } else {
-            crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, size);
-            showNum = 0;
-            for (i = 0; (i < crawlerList.length) && (showNum < size); i++) {
-                urle = crawlerList[i];
-                if ((urle != null)&&(urle.url()!=null)) {
-                    initiator = yacyCore.seedDB.getConnected(urle.initiator());
-                    profileHandle = urle.profileHandle();
-                    profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
-                    prop.putNoHTML("list-remote_"+i+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
-                    prop.put("list-remote_"+i+"_depth", urle.depth());
-                    prop.put("list-remote_"+i+"_modified", daydate(urle.loaddate()) );
-                    prop.putNoHTML("list-remote_"+i+"_anchor", urle.name());
-                    prop.putNoHTML("list-remote_"+i+"_url", urle.url().toString());
-                    showNum++;
-                }
-            }
-            prop.put("list-remote", showNum);
+            addNTable(prop, "list-remote", switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, Math.min(10, stackSize)));
         }
 
         // return rewrite properties
         return prop;
     }
     
+    
+    public static final void addNTable(serverObjects prop, String tableName, plasmaCrawlNURL.Entry[] crawlerList) {
+
+        int showNum = 0;
+        plasmaCrawlNURL.Entry urle;
+        yacySeed initiator;
+        for (int i = 0; i < crawlerList.length; i++) {
+            urle = crawlerList[i];
+            if ((urle != null) && (urle.url() != null)) {
+                initiator = yacyCore.seedDB.getConnected(urle.initiator());
+                prop.put(tableName + "_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
+                prop.put(tableName + "_" + showNum + "_depth", urle.depth());
+                prop.put(tableName + "_" + showNum + "_modified", daydate(urle.loaddate()));
+                prop.putNoHTML(tableName + "_" + showNum + "_anchor", urle.name());
+                prop.putNoHTML(tableName + "_" + showNum + "_url", urle.url().toString());
+                prop.put(tableName + "_" + showNum + "_hash", urle.hash());
+                showNum++;
+            }
+        }
+        prop.put(tableName, showNum);
+
+    }
 }
 
 

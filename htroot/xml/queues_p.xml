@@ -44,11 +44,12 @@
   <size>#[remoteCrawlSize]#</size>
 #{list-remote}#
   <entry>
-    <profile>#[profile]#</profile>
+	<initiator>#[initiator]#</initiator>
     <depth>#[depth]#</depth>
     <modified>#[modified]#</modified>
     <anchor>#[anchor]#</anchor>
     <url>#[url]#</url>
+    <hash>#[hash]#</hash>
     <inProcess>#(inProcess)#false::true#(/inProcess)#</inProcess>
   </entry>
 #{/list-remote}#

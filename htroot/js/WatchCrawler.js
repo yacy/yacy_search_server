@@ -56,8 +56,6 @@ function requestQueues(){
 
 }
 
-
-
 function handleStatus(){
     if(statusRPC.readyState != 4){
 		return;
@@ -100,7 +98,6 @@ function handleStatus(){
 	}
 }
 
-
 function handleQueues(){
     if(queuesRPC.readyState != 4){
 		return;
@@ -109,14 +106,14 @@ function handleQueues(){
 	xml=getFirstChild(queuesResponse);
 	if(queuesResponse != null){
 		indexingqueue=getFirstChild(xml, "indexingqueue");
-		createIndexingTable(indexingqueue);
+		createIndexingTable(indexingqueue, "indexingTable");
 		indexingqueue_size=getValue(getFirstChild(indexingqueue, "size"));
 		indexingqueue_max=getValue(getFirstChild(indexingqueue, "max"));
 		document.getElementById("indexingqueuesize").firstChild.nodeValue=indexingqueue_size;
 		document.getElementById("indexingqueuemax").firstChild.nodeValue=indexingqueue_max;
 		
 		loaderqueue=getFirstChild(xml, "loaderqueue");
-		createLoaderTable(getFirstChild(xml, "loaderqueue"));
+		createIndexingTable(loaderqueue, "loaderTable");
 		loaderqueue_size=getValue(getFirstChild(loaderqueue, "size"));
 		loaderqueue_max=getValue(getFirstChild(loaderqueue, "max"));
 		document.getElementById("loaderqueuesize").firstChild.nodeValue=loaderqueue_size;
@@ -125,42 +122,18 @@ function handleQueues(){
 		localcrawlerqueue=getFirstChild(xml, "localcrawlerqueue");
 		localcrawlerqueue_size=getValue(getFirstChild(localcrawlerqueue, "size"));
 		document.getElementById("localcrawlerqueuesize").firstChild.nodeValue=localcrawlerqueue_size;
-		createLocalCrawlerTable(localcrawlerqueue);
+		createIndexingTable(localcrawlerqueue, "localCrawlerTable");
 		
 		remotecrawlerqueue=getFirstChild(xml, "remotecrawlerqueue");
-		createRemoteCrawlerTable(remotecrawlerqueue);
+		createIndexingTable(remotecrawlerqueue, "remoteCrawlerTable");
 		remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
 		document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
 		createRemoteCrawlerTable(remotecrawlerqueue);
 	}
 }
 
-function createLoaderTable(loaderqueue){
-	entries=loaderqueue.getElementsByTagName("entry");
-	loaderTable=document.getElementById("loaderTable");
-	clearTable(loaderTable, 1);
-	dark=false;
-    for(i=0;i<entries.length;i++){
-		initiator=getValue(getFirstChild(entries[i], "initiator"));
-		depth=getValue(getFirstChild(entries[i], "depth"));
-		modified=getValue(getFirstChild(entries[i], "modified"));
-		anchor=getValue(getFirstChild(entries[i], "anchor"));
-		url=getValue(getFirstChild(entries[i], "url"));
-		
-		row=createLoaderRow(initiator, depth, modified, anchor, url);
-		
-		//create row
-		if(dark){
-            row.setAttribute("class", "TableCellDark");
-        }else{
-            row.setAttribute("class", "TableCellLight");
-        }
-        getFirstChild(loaderTable, "tbody").appendChild(row);
-        dark=!dark;
-    }	
-}
-function createIndexingTable(indexingqueue){
-	indexingTable=document.getElementById("indexingTable");
+function createIndexingTable(indexingqueue, tablename){
+	indexingTable=document.getElementById(tablename);
 	entries=indexingqueue.getElementsByTagName("entry");
     clearTable(indexingTable, 1);
         
@@ -177,8 +150,11 @@ function createIndexingTable(indexingqueue){
 		if(getValue(getFirstChild(entries[i], "inProcess"))=="true"){
 			inProcess=true;
 		}
-		
-		row=createIndexingRow(initiator, depth, modified, anchor, url, size, hash);
+		if (tablename=="indexingTable")
+			deletebutton=createLinkCol("IndexCreateIndexingQueue_p.html?deleteEntry="+hash, DELETE_STRING);
+		else
+			deletebutton=createCol("");
+		row=createIndexingRow(initiator, depth, modified, anchor, url, size, deletebutton);
 		
 		//create row
 		if(inProcess){
@@ -191,108 +167,22 @@ function createIndexingTable(indexingqueue){
         getFirstChild(indexingTable, "tbody").appendChild(row);
         dark=!dark;
     }
-}
-function createLocalCrawlerTable(localcrawlerqueue){
-	localCrawlerTable=document.getElementById("localCrawlerTable");
-	entries=localcrawlerqueue.getElementsByTagName("entry");
-    clearTable(localCrawlerTable, 1);
-        
-    dark=false;
-    for(i=0;i<entries.length;i++){
-		initiator=getValue(getFirstChild(entries[i], "initiator"));
-		depth=getValue(getFirstChild(entries[i], "depth"));
-		modified=getValue(getFirstChild(entries[i], "modified"));
-		anchor=getValue(getFirstChild(entries[i], "anchor"));
-		url=getValue(getFirstChild(entries[i], "url"));
-		//hash=getValue(getFirstChild(entries[i], "hash"));
-		inProcess=false;
-		if(getValue(getFirstChild(entries[i], "inProcess"))=="true"){
-			inProcess=true;
-		}
-		
-		row=createLocalCrawlerRow(initiator, depth, modified, anchor, url);
-		
-		//create row
-		if(inProcess){
-            row.setAttribute("class", "TableCellActive");
-        }else if(dark){
-            row.setAttribute("class", "TableCellDark");
-        }else{
-            row.setAttribute("class", "TableCellLight");
-        }
-        getFirstChild(localCrawlerTable, "tbody").appendChild(row);
+    while(i++ <= 10) {
+    		row=createIndexingRow("", "", "", "", "", "", createCol(""));
+		if(dark) {row.setAttribute("class", "TableCellDark");} else {row.setAttribute("class", "TableCellLight");}
+        getFirstChild(indexingTable, "tbody").appendChild(row);
         dark=!dark;
     }
 }
-function createRemoteCrawlerTable(remotecrawlerqueue){
-	remoteCrawlerTable=document.getElementById("remoteCrawlerTable");
-	entries=remotecrawlerqueue.getElementsByTagName("entry");
-    clearTable(remoteCrawlerTable, 1);
-        
-    dark=false;
-    for(i=0;i<entries.length;i++){
-		profile=getValue(getFirstChild(entries[i], "profile"));
-		depth=getValue(getFirstChild(entries[i], "depth"));
-		modified=getValue(getFirstChild(entries[i], "modified"));
-		anchor=getValue(getFirstChild(entries[i], "anchor"));
-		url=getValue(getFirstChild(entries[i], "url"));
-		//hash=getValue(getFirstChild(entries[i], "hash"));
-		inProcess=false;
-		if(getValue(getFirstChild(entries[i], "inProcess"))=="true"){
-			inProcess=true;
-		}
-		
-		row=createRemoteCrawlerRow(profile, depth, modified, anchor, url);
-		
-		//create row
-		if(inProcess){
-            row.setAttribute("class", "TableCellActive");
-        }else if(dark){
-            row.setAttribute("class", "TableCellDark");
-        }else{
-            row.setAttribute("class", "TableCellLight");
-        }
-        getFirstChild(remoteCrawlerTable, "tbody").appendChild(row);
-        dark=!dark;
-    }
-}
-
-function createIndexingRow(initiator, depth, modified, anchor, url, size, hash){
+function createIndexingRow(initiator, depth, modified, anchor, url, size, deletebutton){
     row=document.createElement("tr");
+    row.setAttribute("height", 10);
 	row.appendChild(createCol(initiator));
 	row.appendChild(createCol(depth));
 	row.appendChild(createCol(modified));
 	row.appendChild(createCol(anchor));
 	row.appendChild(createLinkCol(url, url));
 	row.appendChild(createCol(size));
-	row.appendChild(createLinkCol("IndexCreateIndexingQueue_p.html?deleteEntry="+hash, DELETE_STRING));
+	row.appendChild(deletebutton);
 	return row;
 }
-function createLoaderRow(initiator, depth, modified, anchor, url){
-    row=document.createElement("tr");
-	row.appendChild(createCol(initiator));
-	row.appendChild(createCol(depth));
-	row.appendChild(createCol(modified));
-	row.appendChild(createCol(anchor));
-	row.appendChild(createLinkCol(url, url));
-	return row;
-}
-function createLocalCrawlerRow(initiator, depth, modified, anchor, url){
-    row=document.createElement("tr");
-	row.appendChild(createCol(initiator));
-	row.appendChild(createCol(depth));
-	row.appendChild(createCol(modified));
-	row.appendChild(createCol(anchor));
-	row.appendChild(createLinkCol(url, url));
-	return row;
-}
-function createRemoteCrawlerRow(profile, depth, modified, anchor, url){
-    row=document.createElement("tr");
-	row.appendChild(createCol(profile));
-	row.appendChild(createCol(depth));
-	row.appendChild(createCol(modified));
-	row.appendChild(createCol(anchor));
-	row.appendChild(createLinkCol(url, url));
-	return row;
-}
-
