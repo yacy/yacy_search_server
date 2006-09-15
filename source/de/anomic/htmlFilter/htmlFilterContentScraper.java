@@ -192,23 +192,23 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
         if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) {
             String href = tagopts.getProperty("href", "");
-            if (href.length() > 0) anchors.put(absolutePath(href), super.stripAll(new serverByteBuffer(text)).trim().toString());
+            if (href.length() > 0) anchors.put(absolutePath(href), super.stripAll(new serverByteBuffer(text)).trim().toString(this.charset));
         }
         String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString(this.charset));
             if (h.length() > 0) headlines[0].add(h);
         }
         if ((tagname.equalsIgnoreCase("h2")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString(this.charset));
             if (h.length() > 0) headlines[1].add(h);
         }
         if ((tagname.equalsIgnoreCase("h3")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString(this.charset));
             if (h.length() > 0) headlines[2].add(h);
         }
         if ((tagname.equalsIgnoreCase("h4")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString());
+            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString(this.charset));
             if (h.length() > 0) headlines[3].add(h);
         }
         if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) 
