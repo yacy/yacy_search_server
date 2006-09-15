@@ -56,7 +56,7 @@ function handleState(req) {
 		tmpNode.appendChild(tmpNode2);
 		span.appendChild(tmpNode)
 		
-		snippetText=substring(pos2+4)
+		snippetText=snippetText.substring(pos2+4)
 		var pos=snippetText.indexOf("<b>");
 		var pos2=snippetText.indexOf("</b>");
 	}
