@@ -114,6 +114,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public void setCharset(String charset) throws UnsupportedCharsetException {
+        if (charset == null) return;
+        
         // testing if charset exists
         Charset.forName(charset);
         

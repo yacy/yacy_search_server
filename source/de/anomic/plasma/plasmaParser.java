@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.nio.charset.UnsupportedCharsetException;
+
 import de.anomic.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -550,7 +552,16 @@ public final class plasmaParser {
             } else if (realtimeParsableMimeTypesContains(mimeType)) {                      
                 // ...otherwise we make a scraper and transformer
                 htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
-                scraper.setCharset(PARSER_MODE_URLREDIRECTOR);
+                
+                // set the charset if known
+                if (charset != null) {
+                    try {
+                    scraper.setCharset(charset);
+                    } catch (UnsupportedCharsetException e) {
+                        serverLog.logWarning("PARSER", "parseSource2: unknown or unsupported charset '" + charset + "'");
+                        return null;                        
+                    }
+                }                
                 
                 OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
                 serverFileUtils.copy(sourceFile, hfos);
