@@ -320,17 +320,17 @@ public final class serverByteBuffer extends OutputStream {
         if ((start < length) &&
             ((buffer[offset + start] & 0x80) != 0)) return 1;
         if ((start < length - 1) &&
-            ((buffer[offset + start    ] & 0xF0) == 0xC0) &&
-            ((buffer[offset + start + 1] & 0xF0) == 0x80)) return 2;
+            ((buffer[offset + start    ] & 0xE0) == 0xC0) &&
+            ((buffer[offset + start + 1] & 0xC0) == 0x80)) return 2;
         if ((start < length - 2) &&
             ((buffer[offset + start    ] & 0xF0) == 0xE0) &&
-            ((buffer[offset + start + 1] & 0xF0) == 0x80) &&
-            ((buffer[offset + start + 2] & 0xF0) == 0x80)) return 3;
+            ((buffer[offset + start + 1] & 0xC0) == 0x80) &&
+            ((buffer[offset + start + 2] & 0xC0) == 0x80)) return 3;
         if ((start < length - 3) &&
             ((buffer[offset + start    ] & 0xF8) == 0xF0) &&
-            ((buffer[offset + start + 1] & 0xF0) == 0x80) &&
-            ((buffer[offset + start + 2] & 0xF0) == 0x80) &&
-            ((buffer[offset + start + 3] & 0xF0) == 0x80)) return 4;
+            ((buffer[offset + start + 1] & 0xC0) == 0x80) &&
+            ((buffer[offset + start + 2] & 0xC0) == 0x80) &&
+            ((buffer[offset + start + 3] & 0xC0) == 0x80)) return 4;
         return -1;
     }
 
