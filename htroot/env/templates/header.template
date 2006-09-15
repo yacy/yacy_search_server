@@ -17,7 +17,8 @@
       <li><a href="/IndexCreate_p.html" class="MenuItemLink lock">Index Create</a></li>
       <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Index Control</a></li>
       <li><a href="/IndexMonitor.html" class="MenuItemLink">Index Monitor</a></li>
-      <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Blacklist</a></li>
+      <li><a href="/WatchCrawler.html" class="MenuItemLink lock">Crawler Monitor</a></li>
+      <li><a href="/Blacklist_p.html" class="MenuItemLink lock">URL Blacklist</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupCommunicationPublication">
