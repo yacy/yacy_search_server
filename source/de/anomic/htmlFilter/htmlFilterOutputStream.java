@@ -185,16 +185,16 @@ public final class htmlFilterOutputStream extends OutputStream {
             if (opening) {
                 if ((scraper != null) && (scraper.isTag0(tag))) {
                     // this single tag is collected at once here
-                    scraper.scrapeTag0(tag, new serverByteBuffer(content).propParser());
+                    scraper.scrapeTag0(tag, new serverByteBuffer(content).propParser(scraper.getCharset()));
                 }
                 if ((transformer != null) && (transformer.isTag0(tag))) {
                     // this single tag is collected at once here
-                    return transformer.transformTag0(tag, new serverByteBuffer(content).propParser(), quotechar);
+                    return transformer.transformTag0(tag, new serverByteBuffer(content).propParser(scraper.getCharset()), quotechar);
                 } else if (((scraper != null) && (scraper.isTag1(tag))) ||
                            ((transformer != null) && (transformer.isTag1(tag)))) {
                     // ok, start collecting
                     filterTag = tag;
-                    filterOpts = new serverByteBuffer(content).propParser();
+                    filterOpts = new serverByteBuffer(content).propParser(scraper.getCharset());
                     filterCont = new serverByteBuffer();
                     return new byte[0];
                 } else {

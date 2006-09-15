@@ -359,7 +359,7 @@ public final class serverByteBuffer extends OutputStream {
         return new String(buffer, offset + left, rightbound - left);
     }
 
-    public Properties propParser() {
+    public Properties propParser(String charset) {
         // extract a=b or a="b" - relations from the buffer
         int pos = offset;
         int start;
@@ -372,7 +372,11 @@ public final class serverByteBuffer extends OutputStream {
             start = pos;
             while ((pos < length) && (buffer[pos] != equal)) pos++;
             if (pos >= length) break; // this is the case if we found no equal
-            key = new String(buffer, start, pos - start).trim().toLowerCase();
+            try {
+                key = new String(buffer, start, pos - start,charset).trim().toLowerCase();
+            } catch (UnsupportedEncodingException e1) {
+                key = new String(buffer, start, pos - start).trim().toLowerCase();
+            }
             // we have a key
             pos++;
             // find start of value
@@ -389,7 +393,7 @@ public final class serverByteBuffer extends OutputStream {
                 while ((pos < length) && (buffer[pos] != doublequote)) pos++;
                 if (pos >= length) break; // this is the case if we found no parent doublequote
                 try {
-                    p.setProperty(key, new String(buffer, start, pos - start,"UTF-8").trim());
+                    p.setProperty(key, new String(buffer, start, pos - start,charset).trim());
                 } catch (UnsupportedEncodingException e) {
                     p.setProperty(key, new String(buffer, start, pos - start).trim());
                 } 
@@ -400,13 +404,21 @@ public final class serverByteBuffer extends OutputStream {
                 start = pos;
                 while ((pos < length) && (buffer[pos] != singlequote)) pos++;
                 if (pos >= length) break; // this is the case if we found no parent singlequote
-                p.setProperty(key, new String(buffer, start, pos - start).trim());
+                try {
+                    p.setProperty(key, new String(buffer, start, pos - start,charset).trim());
+                } catch (UnsupportedEncodingException e) {
+                    p.setProperty(key, new String(buffer, start, pos - start).trim());
+                }
                 pos++;
             } else {
                 // search next whitespace
                 start = pos;
                 while ((pos < length) && (buffer[pos] > 32)) pos++;
-                p.setProperty(key, new String(buffer, start, pos - start).trim());
+                try {
+                    p.setProperty(key, new String(buffer, start, pos - start,charset).trim());
+                } catch (UnsupportedEncodingException e) {
+                    p.setProperty(key, new String(buffer, start, pos - start).trim());
+                }
             }
             // pos should point now to a whitespace: eat up spaces
             while ((pos < length) && (buffer[pos] <= 32)) pos++;
