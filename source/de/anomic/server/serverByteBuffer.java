@@ -294,10 +294,44 @@ public final class serverByteBuffer extends OutputStream {
     }
 
     public serverByteBuffer trim() {
-        int l = 0; while ((l < length) && (buffer[offset + l] <= 32)) l++;
-        int r = length; while ((r > 0) && (buffer[offset + r - 1] <= 32)) r--;
+        int l = 0;
+        while ((l < length) && (buffer[offset + l] <= 32)) l++;
+        int r = length;
+        int u;
+        while ((r > 0) && (buffer[offset + r - 1] <= 32)) {
+            u = isUTF8char(r - 1);
+            if (u > 0) {
+                r += u - 1;
+                break;
+            }
+            r--;
+        }
         if (l > r) r = l;
         return trim(l, r);
+    }
+    
+    public int isUTF8char(int start) {
+        // a sequence of bytes is a utf-8 character, if one of the following 4 conditions is true:
+        // - ASCII equivalence range; (first) byte begins with zero
+        // - first byte begins with 110, the following byte begins with 10
+        // - first byte begins with 1110, the following two bytes begin with 10
+        // - First byte begins with 11110, the following three bytes begin with 10
+        // if an utf-8 sequence is detected, the length of the sequence is returned. -1 othervise
+        if ((start < length) &&
+            ((buffer[offset + start] & 0x80) != 0)) return 1;
+        if ((start < length - 1) &&
+            ((buffer[offset + start    ] & 0xF0) == 0xC0) &&
+            ((buffer[offset + start + 1] & 0xF0) == 0x80)) return 2;
+        if ((start < length - 2) &&
+            ((buffer[offset + start    ] & 0xF0) == 0xE0) &&
+            ((buffer[offset + start + 1] & 0xF0) == 0x80) &&
+            ((buffer[offset + start + 2] & 0xF0) == 0x80)) return 3;
+        if ((start < length - 3) &&
+            ((buffer[offset + start    ] & 0xF8) == 0xF0) &&
+            ((buffer[offset + start + 1] & 0xF0) == 0x80) &&
+            ((buffer[offset + start + 2] & 0xF0) == 0x80) &&
+            ((buffer[offset + start + 3] & 0xF0) == 0x80)) return 4;
+        return -1;
     }
 
     public boolean isWhitespace(boolean includeNonLetterBytes) {
