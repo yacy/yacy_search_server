@@ -94,7 +94,7 @@ public class tarParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         
         try {           
             // creating a new parser class to parse the unzipped content
@@ -153,7 +153,7 @@ public class tarParser extends AbstractParser implements Parser {
                     checkInterruption();
                     
                     // parsing the content                    
-                    theDoc = theParser.parseSource(new URL(tempFile),entryMime,tempFile);
+                    theDoc = theParser.parseSource(new URL(tempFile),entryMime,null,tempFile);
                 } finally {
                     if (tempFile != null) try {tempFile.delete(); } catch(Exception ex){}
                 }

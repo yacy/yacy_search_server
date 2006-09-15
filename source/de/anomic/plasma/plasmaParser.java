@@ -465,12 +465,12 @@ public final class plasmaParser {
         } catch (Exception e) { }
     }    
     
-    public plasmaParserDocument parseSource(URL location, String mimeType, byte[] source) throws InterruptedException {
+    public plasmaParserDocument parseSource(URL location, String mimeType, String charset, byte[] source) throws InterruptedException {
         File tempFile = null;
         try {
             tempFile = File.createTempFile("parseSource", ".tmp");
             serverFileUtils.write(source, tempFile);
-            return parseSource(location, mimeType, tempFile);
+            return parseSource(location, mimeType, charset, tempFile);
         } catch (Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             serverLog.logSevere("PARSER", "parseSource1: " + e.getMessage(), e);
@@ -481,7 +481,7 @@ public final class plasmaParser {
         
     }
 
-    public plasmaParserDocument parseSource(URL location, String mimeType, File sourceFile) throws InterruptedException {
+    public plasmaParserDocument parseSource(URL location, String mimeType, String charset, File sourceFile) throws InterruptedException {
 
         Parser theParser = null;
         try {
@@ -546,10 +546,12 @@ public final class plasmaParser {
             
             // if a parser was found we use it ...
             if (theParser != null) {
-                return theParser.parse(location, mimeType,sourceFile);
+                return theParser.parse(location, mimeType,charset,sourceFile);
             } else if (realtimeParsableMimeTypesContains(mimeType)) {                      
                 // ...otherwise we make a scraper and transformer
                 htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
+                scraper.setCharset(PARSER_MODE_URLREDIRECTOR);
+                
                 OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
                 serverFileUtils.copy(sourceFile, hfos);
                 hfos.close();
@@ -691,6 +693,7 @@ public final class plasmaParser {
             File contentFile = null;
             URL contentURL = null;
             String contentMimeType = "application/octet-stream";
+            String charSet = "UTF-8";
             
             if (args.length < 2) {
                 System.err.println("Usage: java de.anomic.plasma.plasmaParser (-f filename|-u URL) [-m mimeType]");
@@ -715,6 +718,10 @@ public final class plasmaParser {
                 contentMimeType = args[3];
             }
             
+            if ((args.length == 6)&&(args[4].equalsIgnoreCase("-c"))) {
+                charSet = args[5];
+            }            
+            
             // creating a plasma parser
             plasmaParser theParser = new plasmaParser();
             
@@ -725,7 +732,7 @@ public final class plasmaParser {
             plasmaParser.enableAllParsers(PARSER_MODE_PROXY);
 
             // parsing the content
-            plasmaParserDocument document = theParser.parseSource(contentURL, contentMimeType, contentFile);
+            plasmaParserDocument document = theParser.parseSource(contentURL, contentMimeType, charSet, contentFile);
 
             // printing out all parsed sentences
             if (document != null) {

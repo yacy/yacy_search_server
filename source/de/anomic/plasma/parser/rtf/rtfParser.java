@@ -80,7 +80,7 @@ implements Parser {
         parserName = "Rich Text Format Parser";  
 	}
 
-	public plasmaParserDocument parse(URL location, String mimeType,
+	public plasmaParserDocument parse(URL location, String mimeType, String charset,
 			InputStream source) throws ParserException, InterruptedException {
 
         

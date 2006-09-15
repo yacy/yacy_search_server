@@ -83,6 +83,12 @@ public interface IResourceInfo {
     public String getMimeType();
     
     /**
+     * Returns the charset of the resource
+     * @return returns the name of the charset or <code>null</code> if unknown
+     */
+    public String getCharSet();
+    
+    /**
      * Returns the modification date of the cached object
      * @return the modifiaction date
      */

@@ -91,7 +91,7 @@ public class odtParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, File dest) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(URL location, String mimeType, String charset, File dest) throws ParserException, InterruptedException {
         
         try {          
             byte[] docContent     = null;
@@ -168,7 +168,7 @@ public class odtParser extends AbstractParser implements Parser {
         }
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException {
+    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException {
         File dest = null;
         try {
             // creating a tempfile
@@ -179,7 +179,7 @@ public class odtParser extends AbstractParser implements Parser {
             serverFileUtils.copy(source, dest);
             
             // parsing the content
-            return parse(location, mimeType, dest);
+            return parse(location, mimeType, charset, dest);
         } catch (Exception e) {
             throw new ParserException("Unable to parse the odt document. " + e.getMessage());
         } finally {
@@ -210,7 +210,7 @@ public class odtParser extends AbstractParser implements Parser {
             ByteArrayInputStream input = new ByteArrayInputStream(content);
             
             // parsing the document
-            testParser.parse(contentUrl, "application/vnd.oasis.opendocument.text", input);            
+            testParser.parse(contentUrl, "application/vnd.oasis.opendocument.text", null, input);            
         } catch (Exception e) {
             e.printStackTrace();
         }

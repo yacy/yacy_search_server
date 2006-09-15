@@ -125,7 +125,7 @@ implements Parser {
         return null;        
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, File sourceFile) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(URL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
         
         String orgMimeType = mimeType;
         
@@ -168,7 +168,7 @@ implements Parser {
                 
                 // parsing the content using the determined mimetype
                 plasmaParser theParser = new plasmaParser();
-                return theParser.parseSource(location,mimeType,sourceFile);
+                return theParser.parseSource(location,mimeType,charset,sourceFile);
             }
             return null;
             
@@ -185,13 +185,13 @@ implements Parser {
         }
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType,
+    public plasmaParserDocument parse(URL location, String mimeType,String charset,
             InputStream source) throws ParserException {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("mimeTypeParser",".tmp");
             serverFileUtils.copy(source,dstFile);
-            return parse(location,mimeType,dstFile);
+            return parse(location,mimeType,charset,dstFile);
         } catch (Exception e) {            
             return null;
         } finally {

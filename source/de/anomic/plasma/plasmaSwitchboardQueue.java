@@ -320,6 +320,11 @@ public class plasmaSwitchboardQueue {
             return (info == null) ? null : info.getMimeType();
         }
         
+        public String getCharSet() {
+            IResourceInfo info = this.getCachedObjectInfo();
+            return (info == null) ? null : info.getCharSet();
+        }
+        
         public Date getModificationDate() {
             IResourceInfo info = this.getCachedObjectInfo();
             return (info == null) ? new Date() : info.getModificationDate();            

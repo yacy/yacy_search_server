@@ -91,13 +91,13 @@ public class rpmParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType,
+    public plasmaParserDocument parse(URL location, String mimeType, String charset,
             InputStream source) throws ParserException {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("rpmParser",".tmp");
             serverFileUtils.copy(source,dstFile);
-            return parse(location,mimeType,dstFile);
+            return parse(location,mimeType,charset,dstFile);
         } catch (Exception e) {            
             return null;
         } finally {
@@ -105,7 +105,7 @@ public class rpmParser extends AbstractParser implements Parser {
         }        
     }    
     
-    public plasmaParserDocument parse(URL location, String mimeType, File sourceFile) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(URL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
         RPMFile rpmFile = null;        
         try {
             String summary = null, description = null, name = sourceFile.getName();
@@ -177,7 +177,7 @@ public class rpmParser extends AbstractParser implements Parser {
             rpmParser testParser = new rpmParser();
             byte[] content = httpc.singleGET(contentUrl, contentUrl.getHost(), 10000, null, null, null);
             ByteArrayInputStream input = new ByteArrayInputStream(content);
-            testParser.parse(contentUrl, "application/x-rpm", input);
+            testParser.parse(contentUrl, "application/x-rpm", null, input);
         } catch (Exception e) {
             e.printStackTrace();
         }

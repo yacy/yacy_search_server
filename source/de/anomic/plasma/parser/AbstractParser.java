@@ -103,6 +103,7 @@ public abstract class AbstractParser implements Parser{
 	 * Parsing a document available as byte array.
      * @param location the origin of the document 
      * @param mimeType the mimetype of the document
+     * @param charset the supposed charset of the document or <code>null</code> if unkown
      * @param source the content byte array
      * @return a {@link plasmaParserDocument} containing the extracted plain text of the document
      * and some additional metadata.
@@ -113,12 +114,13 @@ public abstract class AbstractParser implements Parser{
 	public plasmaParserDocument parse(
             URL location, 
             String mimeType,
+            String charset,
             byte[] source
     ) throws ParserException, InterruptedException {
         ByteArrayInputStream contentInputStream = null;
         try {
             contentInputStream = new ByteArrayInputStream(source);
-            return this.parse(location,mimeType,contentInputStream); 
+            return this.parse(location,mimeType,charset,contentInputStream); 
         } finally {
             if (contentInputStream != null) {
                 try {
@@ -133,6 +135,7 @@ public abstract class AbstractParser implements Parser{
 	 * Parsing a document stored in a {@link File}
      * @param location the origin of the document 
      * @param mimeType the mimetype of the document
+     * @param charset the supposed charset of the document or <code>null</code> if unkown
      * @param sourceFile the file containing the content of the document
      * @return a {@link plasmaParserDocument} containing the extracted plain text of the document
      * and some additional metadata.
@@ -140,12 +143,16 @@ public abstract class AbstractParser implements Parser{
 	 * 
 	 * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.File)
 	 */
-	public plasmaParserDocument parse(URL location, String mimeType,
-			File sourceFile) throws ParserException, InterruptedException {
+	public plasmaParserDocument parse(
+            URL location, 
+            String mimeType,
+            String charset,
+			File sourceFile
+	) throws ParserException, InterruptedException {
         BufferedInputStream contentInputStream = null;
         try {
             contentInputStream = new BufferedInputStream(new FileInputStream(sourceFile));
-            return this.parse(location, mimeType, contentInputStream);
+            return this.parse(location, mimeType, charset, contentInputStream);
         } catch (FileNotFoundException e) {
             throw new ParserException(e.getMessage());
         } finally {
@@ -157,6 +164,7 @@ public abstract class AbstractParser implements Parser{
      * Parsing a document available as {@link InputStream}
      * @param location the origin of the document 
      * @param mimeType the mimetype of the document
+     * @param charset the supposed charset of the document or <code>null</code> if unkown
      * @param source the {@link InputStream} containing the document content
      * @return a {@link plasmaParserDocument} containing the extracted plain text of the document
      * and some additional metadata.
@@ -164,8 +172,7 @@ public abstract class AbstractParser implements Parser{
      * 
      * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.InputStream)
      */
-    public abstract plasmaParserDocument parse(URL location, String mimeType,
-			InputStream source) throws ParserException, InterruptedException;
+    public abstract plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException;
 
     /**
      * @return Returns a list of library names that are needed by this parser

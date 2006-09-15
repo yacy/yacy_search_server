@@ -90,14 +90,14 @@ public class vcfParser extends AbstractParser implements Parser {
     
     public vcfParser() {        
         super(LIBX_DEPENDENCIES);
-        parserName = "vCard Parser"; 
+        this.parserName = "vCard Parser"; 
     }
     
     public Hashtable getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         
         try {
             StringBuffer parsedTitle = new StringBuffer();
@@ -109,7 +109,9 @@ public class vcfParser extends AbstractParser implements Parser {
             boolean useLastLine = false;
             int lineNr = 0;
             String line = null;            
-            BufferedReader inputReader = new BufferedReader(new InputStreamReader(source));
+            BufferedReader inputReader = (charset!=null)
+                                       ? new BufferedReader(new InputStreamReader(source,charset))
+                                       : new BufferedReader(new InputStreamReader(source));
             while (true) {
                 // check for interruption
                 checkInterruption();
@@ -236,21 +238,26 @@ public class vcfParser extends AbstractParser implements Parser {
                 }
             }
 
+            String[] sections = (String[]) parsedNames.toArray(new String[parsedNames.size()]);
+            byte[] text = parsedDataText.toString().getBytes();
             plasmaParserDocument theDoc = new plasmaParserDocument(
-                    location,
-                    mimeType,
-                    null,
-                    null,
-                    parsedTitle.toString(),
-                    (String[]) parsedNames.toArray(new String[parsedNames.size()]),
-                    "vCard",
-                    parsedDataText.toString().getBytes(),
-                    anchors,
-                    null);    
+                    location,                   // url of the source document
+                    mimeType,                   // the documents mime type
+                    null,                       // a list of extracted keywords
+                    null,                       // a short document title
+                    parsedTitle.toString(),     // a long document title
+                    sections,                   // an array of section headlines
+                    "vCard",                    // an abstract
+                    text,                       // the parsed document text
+                    anchors,                    // a map of extracted anchors
+                    null);                      // a treeset of image URLs
             return theDoc;
         } catch (Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            throw new ParserException("Unable to parse the vcard content. " + e.getMessage());
+            
+            String errorMsg = "Unable to parse the vcard content. " + e.getMessage();
+            this.theLogger.logSevere(errorMsg);            
+            throw new ParserException(errorMsg);
         } finally {
         }
     }
@@ -267,7 +274,7 @@ public class vcfParser extends AbstractParser implements Parser {
             vcfParser testParser = new vcfParser();
             byte[] content = httpc.singleGET(contentUrl, contentUrl.getHost(), 10000, null, null, null);
             ByteArrayInputStream input = new ByteArrayInputStream(content);
-            testParser.parse(contentUrl, "text/x-vcard", input);
+            testParser.parse(contentUrl, "text/x-vcard", "UTF-8",input);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -91,7 +91,7 @@ public class zipParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         
         try {           
             StringBuffer docKeywords = new StringBuffer();
@@ -132,7 +132,7 @@ public class zipParser extends AbstractParser implements Parser {
                 checkInterruption();
                 
                 // parsing the content
-                plasmaParserDocument theDoc = theParser.parseSource(location,entryMime,ut);
+                plasmaParserDocument theDoc = theParser.parseSource(location,entryMime,null, ut);
                 if (theDoc == null) continue;
                 
                 // merging all documents together

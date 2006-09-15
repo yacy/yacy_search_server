@@ -78,7 +78,7 @@ implements Parser {
         parserName = "Word Document Parser";
 	}
 
-	public plasmaParserDocument parse(URL location, String mimeType,
+	public plasmaParserDocument parse(URL location, String mimeType, String charset,
 			InputStream source) throws ParserException, InterruptedException {
 
         

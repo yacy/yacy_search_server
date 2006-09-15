@@ -64,39 +64,42 @@ public interface Parser {
      * Parsing a document available as byte array
      * @param location the origin of the document 
      * @param mimeType the mimetype of the document
+     * @param charset the supposed charset of the document or <code>null</code> if unkown
      * @param source the content byte array
      * @return a {@link plasmaParserDocument} containing the extracted plain text of the document
      * and some additional metadata.
      *  
      * @throws ParserException if the content could not be parsed properly 
      */
-    public plasmaParserDocument parse(URL location, String mimeType, byte[] source)
+    public plasmaParserDocument parse(URL location, String mimeType, String charset, byte[] source)
     throws ParserException, InterruptedException;
     
     /**
      * Parsing a document stored in a {@link File}
      * @param location the origin of the document 
      * @param mimeType the mimetype of the document
+     * @param charset the supposed charset of the document or <code>null</code> if unkown 
      * @param sourceFile the file containing the content of the document
      * @return a {@link plasmaParserDocument} containing the extracted plain text of the document
      * and some additional metadata.
      *  
      * @throws ParserException if the content could not be parsed properly 
      */    
-    public plasmaParserDocument parse(URL location, String mimeType, File sourceFile)
+    public plasmaParserDocument parse(URL location, String mimeType, String charset, File sourceFile)
     throws ParserException, InterruptedException;
     
     /**
      * Parsing a document available as {@link InputStream}
      * @param location the origin of the document 
      * @param mimeType the mimetype of the document
+     * @param charset the supposed charset of the document or <code>null</code> if unkown 
      * @param source the {@link InputStream} containing the document content
      * @return a {@link plasmaParserDocument} containing the extracted plain text of the document
      * and some additional metadata.
      *  
      * @throws ParserException if the content could not be parsed properly 
      */    
-    public plasmaParserDocument parse(URL location, String mimeType, InputStream source) 
+    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) 
     throws ParserException, InterruptedException;
             
     /**

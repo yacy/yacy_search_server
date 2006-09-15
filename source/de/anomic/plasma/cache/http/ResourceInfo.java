@@ -110,6 +110,15 @@ public class ResourceInfo implements IResourceInfo {
         int pos = mimeType.indexOf(';');
         return ((pos < 0) ? mimeType : mimeType.substring(0, pos));          
     }
+    
+    public String getCharSet() {
+        if (this.responseHeader == null) return null;
+        
+        String mimeType = this.responseHeader.mime();
+        
+        int pos = mimeType.indexOf(';');
+        return ((pos < 0) ? null : mimeType.substring(pos));          
+    }
 
     /**
      * @see de.anomic.plasma.cache.IResourceInfo#getModificationDate()

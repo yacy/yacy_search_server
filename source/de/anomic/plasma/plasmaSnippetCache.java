@@ -389,12 +389,12 @@ public class plasmaSnippetCache {
                         supposedMime = plasmaParser.getMimeTypeByFileExt(filename.substring(p + 1));
                     }
 
-                    return this.parser.parseSource(url, supposedMime, resource);
+                    return this.parser.parseSource(url, supposedMime, null, resource);
                 }
                 return null;
             }
             if (plasmaParser.supportedMimeTypesContains(docInfo.getMimeType())) {
-                return this.parser.parseSource(url, docInfo.getMimeType(), resource);
+                return this.parser.parseSource(url, docInfo.getMimeType(), docInfo.getCharSet(), resource);
             }
             return null;
         } catch (InterruptedException e) {

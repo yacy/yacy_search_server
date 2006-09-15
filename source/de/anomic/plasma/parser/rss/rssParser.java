@@ -100,7 +100,7 @@ public class rssParser extends AbstractParser implements Parser {
         parserName = "Rich Site Summary/Atom Feed Parser"; 
 	}
 
-	public plasmaParserDocument parse(URL location, String mimeType, InputStream source) throws ParserException, InterruptedException {
+	public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
 
         try {
             LinkedList feedSections = new LinkedList();

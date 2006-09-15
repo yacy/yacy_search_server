@@ -47,6 +47,8 @@ import de.anomic.server.serverByteBuffer;
 import de.anomic.net.URL;
 
 import java.net.MalformedURLException;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,7 +95,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     //private String headline;
     private List[] headlines;
     private serverByteBuffer content;
+    
     private URL root;
+    private String charset = "UTF-8";
 
     public htmlFilterContentScraper(URL root) {
         // the root value here will not be used to load the resource.
@@ -109,6 +113,14 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         this.content = new serverByteBuffer(1024);
     }
 
+    public void setCharset(String charset) throws UnsupportedCharsetException {
+        // testing if charset exists
+        Charset.forName(charset);
+        
+        // remember it
+        this.charset = charset;
+    }
+    
     public void scrapeText(byte[] newtext) {
         // System.out.println("SCRAPE: " + new String(newtext));
         if ((content.length() != 0) && (content.byteAt(content.length() - 1) != 32)) content.append(32);

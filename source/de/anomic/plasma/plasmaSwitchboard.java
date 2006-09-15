@@ -1398,6 +1398,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         // the mimetype of this entry
         String mimeType = entry.getMimeType();
+        String charset = entry.getCharSet();        
 
         // the parser logger
         serverLog parserLogger = parser.getLogger();
@@ -1409,7 +1410,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         ){
             if ((entry.cacheFile().exists()) && (entry.cacheFile().length() > 0)) {
                 parserLogger.logFine("'" + entry.normalizedURLString() + "' is not parsed yet, parsing now from File");
-                document = parser.parseSource(entry.url(), mimeType, entry.cacheFile());
+                document = parser.parseSource(entry.url(), mimeType, charset, entry.cacheFile());
             } else {
                 parserLogger.logFine("'" + entry.normalizedURLString() + "' cannot be parsed, no resource available");
                 addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorHash, entry.anchorName(), plasmaCrawlEURL.DENIED_NOT_PARSEABLE_NO_CONTENT, new bitfield(indexURL.urlFlagLength));
