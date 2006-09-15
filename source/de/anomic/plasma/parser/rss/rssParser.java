@@ -148,14 +148,14 @@ public class rssParser extends AbstractParser implements Parser {
                     anchors.put(itemURL.toString(),itemTitle);
                     
                 	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
-                	text.append(new serverByteBuffer(htmlFilterAbstractScraper.stripAll(new serverByteBuffer(itemDescr.getBytes()))).trim()).append((byte) ' ');
+                	text.append(new serverByteBuffer(htmlFilterAbstractScraper.stripAll(new serverByteBuffer(itemDescr.getBytes("UTF-8")))).trim()).append((byte) ' '); // TODO: this does not work for utf-8
                     
                     String itemContent = item.getElementValue("content");
                     if ((itemContent != null) && (itemContent.length() > 0)) {
                         
                         htmlFilterContentScraper scraper = new htmlFilterContentScraper(itemURL);
                         OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                        serverFileUtils.copy(new ByteArrayInputStream(itemContent.getBytes()), os);
+                        serverFileUtils.copy(new ByteArrayInputStream(itemContent.getBytes("UTF-8")), os);
                         
                         String itemHeadline = scraper.getTitle();     
                         if ((itemHeadline != null) && (itemHeadline.length() > 0)) {

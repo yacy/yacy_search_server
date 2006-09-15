@@ -146,6 +146,7 @@ import de.anomic.kelondro.kelondroMapTable;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
+import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverInstantThread;
@@ -1700,6 +1701,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         storageEndTime = System.currentTimeMillis();
                         
                         if (log.isInfo()) {
+                            // TODO: UTF-8 docDescription seems not to be displayed correctly because
+                            // of string concatenation
                             log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
                                     " [" + entry.urlHash() + "]" +
                                     "\n\tDescription:  " + docDescription +
