@@ -114,6 +114,7 @@ public final class plasmaSearchPreOrder {
         String hashpart;
         boolean isWordRootURL;
         while (i.hasNext()) {
+            if (pageAcc.size() <= query.wantedResults) break;
             entry = (Map.Entry) i.next();
             iEntry = (indexEntry) entry.getValue();
             hashpart = iEntry.urlHash().substring(6);
