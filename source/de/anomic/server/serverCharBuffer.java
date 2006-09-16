@@ -110,13 +110,16 @@ public final class serverCharBuffer extends Writer {
         if (f.length() > Integer.MAX_VALUE) throw new IOException("file is too large for buffering");
 
         length = (int) f.length();
-        buffer = new char[length];
+        buffer = new char[length*2];
         offset = 0;
 
         try {
             FileReader fr = new FileReader(f);
-            fr.read(buffer);
-            fr.close();
+            char[] temp = new char[256];
+            int c;
+            while ((c = fr.read(temp)) > 0) {
+                this.append(temp,0,c);
+            }
         } catch (FileNotFoundException e) {
             throw new IOException("File not found: " + f.toString() + "; " + e.getMessage());
         }
