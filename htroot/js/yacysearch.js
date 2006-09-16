@@ -64,3 +64,20 @@ function handleState(req) {
 		span.appendChild(document.createTextNode(snippetText));
 	}
 }
+
+function addHover() {
+  if (document.all&&document.getElementById) {
+    var divs = document.getElementsByTagName("div");
+    for (i=0; i<divs.length; i++) {
+      var node = divs[i];
+      if (node.className=="searchresults") {
+        node.onmouseover=function() {
+          this.className+=" hover";
+        }
+        node.onmouseout=function() {
+          this.className=this.className.replace(" hover", "");
+        }
+      }
+    }
+  }
+}

@@ -203,11 +203,11 @@ img.bookmarkIcon, img.deleteIcon {
   width: 16px;
 }
 
-a.deletelink:hover {
+a.deletelink:hover, div.searchresults:hover a.deletelink, div.searchresults.hover a.deletelink {
   background:url(/env/grafics/minus.gif) center center no-repeat;
 }
 
-a.bookmarklink:hover {
+a.bookmarklink:hover, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
   background:url(/env/grafics/plus.gif) center center no-repeat;
 }
 
