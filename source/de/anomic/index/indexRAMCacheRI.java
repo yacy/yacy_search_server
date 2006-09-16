@@ -381,11 +381,11 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         synchronized (cache) {
             Iterator i = cache.entrySet().iterator();
             Map.Entry entry;
-            Long l;
+            String wordhash;
             indexContainer c;
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
-                l = (Long) entry.getKey();
+                wordhash = (String) entry.getKey();
             
                 // get container
                 c = (indexContainer) entry.getValue();
@@ -393,7 +393,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     if (c.size() == 0) {
                         i.remove();
                     } else {
-                        cache.put(l, c); // superfluous?
+                        cache.put(wordhash, c); // superfluous?
                     }
                     delCount++;
                 }
