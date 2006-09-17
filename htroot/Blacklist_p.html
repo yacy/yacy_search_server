@@ -114,7 +114,7 @@
         <fieldset>
           <legend>other YaCy peers:</legend>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
-          Host: <select name="hash">
+          <select name="hash">
             #{otherHosts}#
             <option value="#[hash]#">#[name]#</option>
             #{/otherHosts}#
@@ -128,7 +128,7 @@
         <fieldset>
           <legend>URL:</legend>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
-          URL: <input type="text" name="url" />
+          <input type="text" name="url" />
           <input type="submit" value="Load new blacklist items" #(disabled)#::disabled="disabled"#(/disabled)# />
         </fieldset>
       </form>
@@ -138,7 +138,7 @@
         <fieldset>
           <legend>file:</legend>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
-          File: <input type="text" name="file" />
+          <input type="text" name="file" />
           <input type="submit" value="Load new blacklist items" #(disabled)#::disabled="disabled"#(/disabled)# />
         </fieldset>
       </form>
