@@ -3,7 +3,7 @@
 // part of YACY
 //
 // (C) 2005, 2006 by Alexander Schier 
-//                   Marc Nause
+//                   Marc Nause, Franz Brausse
 //
 //
 // last change: $LastChangedDate: $ by $LastChangedBy: $
@@ -383,8 +383,13 @@ public class wikiCode {
             // both point at same place => new line
             if (propEnd==cellEnd) {
                 propEnd=lenCellDivider;
-            } else {
+            }
+            else {
                 line+=parseTableProperties(result.substring(lenCellDivider,propEnd-lenAttribDivider).trim());
+            }
+            // quick&dirty fix for http://www.yacy-forum.de/viewtopic.php?t=2825 [MN]
+            if(propEnd > cellEnd){
+                propEnd = lenCellDivider;
             }
             table=false; cellprocessing=true;
             line+=">"+processTable(result.substring(propEnd,cellEnd).trim(), switchboard)+"</td>";
@@ -814,7 +819,7 @@ public class wikiCode {
         //end =]
         else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)&&(!preformatted)){
             escapeSpan = false;
-            String bq = ""; //gets filled with </blockquote>s as neede
+            String bq = ""; //gets filled with </blockquote>s as needed
             String escapeText = result.substring(0,p0);
             //taking care of indented lines
             while(escindented > 0){
@@ -890,7 +895,7 @@ public class wikiCode {
             }
             result = transformLine("!pre!txt!"+result.substring(p0+12).replaceAll("!pre!", "!pre!!"), switchboard);
             result = result.replaceAll("!pre!txt!", preformattedText) + bq;
-            result = result.replaceAll("!pre!!", "!pre!");
+            //result = result.replaceAll("!pre!!", "!pre!");
             preformatted = false;
         }
         //Getting rid of surplus </pre>
