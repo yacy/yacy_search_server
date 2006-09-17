@@ -782,6 +782,7 @@ public class wikiCode {
         if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>0)&&(!(preformatted))){
             if(p0<p1){
                 String escapeText = result.substring(p0+2,p1);
+                escapeText = escapeText.replaceAll("!esc!", "!esc!!");
                 result = transformLine(result.substring(0,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!"+result.substring(p1+2).replaceAll("!esc!", "!esc!!"), switchboard);
                 result = result.replaceAll("!esc!txt!", escapeText);
                 result = result.replaceAll("!esc!!", "!esc!");
@@ -805,6 +806,7 @@ public class wikiCode {
             escaped = true;   //prevents <pre> being parsed
             String bq = "";   //gets filled with <blockquote>s as needed
             String escapeText = result.substring(p0+2);
+            escapeText = escapeText.replaceAll("!esc!", "!esc!!");
             //taking care of indented lines
             while(result.substring(escindented,p0).startsWith(":")){
                 escindented++;
@@ -812,6 +814,7 @@ public class wikiCode {
             }
             result = transformLine(result.substring(escindented,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!", switchboard);
             result = bq + result.replaceAll("!esc!txt!", escapeText);
+            result = result.replaceAll("!esc!!", "!esc!");
             escape = false;
             escapeSpan = true;
         }
@@ -821,6 +824,7 @@ public class wikiCode {
             escapeSpan = false;
             String bq = ""; //gets filled with </blockquote>s as needed
             String escapeText = result.substring(0,p0);
+            escapeText = escapeText.replaceAll("!esc!", "!esc!!");
             //taking care of indented lines
             while(escindented > 0){
                 bq = bq + "</blockquote>";
@@ -828,6 +832,7 @@ public class wikiCode {
             }
             result = transformLine("!esc!txt!"+result.substring(p0+2).replaceAll("!esc!", "!esc!!"), switchboard);
             result = result.replaceAll("!esc!txt!", escapeText) + bq;
+            result = result.replaceAll("!esc!!", "!esc!");
             escaped = false;
         }
         //Getting rid of surplus =]
@@ -850,6 +855,7 @@ public class wikiCode {
         if(((p0=result.indexOf("&lt;pre&gt;"))>=0)&&((p1=result.indexOf("&lt;/pre&gt;"))>0)&&(!(escaped))){
             if(p0<p1){
                 String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11,p1)+"</pre>";
+                preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
                 result = transformLine(result.substring(0,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!"+result.substring(p1+12).replaceAll("!pre!", "!pre!!"), switchboard);
                 result = result.replaceAll("!pre!txt!", preformattedText);
                 result = result.replaceAll("!pre!!", "!pre!");
@@ -872,6 +878,7 @@ public class wikiCode {
             preformatted = true;    //prevent surplus line breaks
             String bq ="";  //gets filled with <blockquote>s as needed
             String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11);
+            preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
             //taking care of indented lines
             while(result.substring(preindented,p0).startsWith(":")){
                 preindented++;
@@ -888,6 +895,7 @@ public class wikiCode {
             preformattedSpan = false;
             String bq = ""; //gets filled with </blockquote>s as needed
             String preformattedText = result.substring(0,p0)+"</pre>";
+            preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
                 //taking care of indented lines
             while (preindented > 0){
                 bq = bq + "</blockquote>";
@@ -895,7 +903,7 @@ public class wikiCode {
             }
             result = transformLine("!pre!txt!"+result.substring(p0+12).replaceAll("!pre!", "!pre!!"), switchboard);
             result = result.replaceAll("!pre!txt!", preformattedText) + bq;
-            //result = result.replaceAll("!pre!!", "!pre!");
+            result = result.replaceAll("!pre!!", "!pre!");
             preformatted = false;
         }
         //Getting rid of surplus </pre>
