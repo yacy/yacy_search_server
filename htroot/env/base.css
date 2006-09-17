@@ -315,17 +315,17 @@ form dt, dl.pairs dt {
   clear:left;
   width:17em;
   margin:0 2px;
-  padding:0.2em 1em;
+  padding:0.2em 0.5em;
   text-align:right;
 }
 
-form dd, dl.pairs dd {
+form dd {
   margin:0 0 0.5em 0.25em;
 }
 
 dl.pairs dd {
-  padding:2px 1em;
-  margin-left:20em;
+  padding:0.2em 0.5em;
+  margin:2px 0 2px 18.3em;
 }
 
 /* for pages: */
