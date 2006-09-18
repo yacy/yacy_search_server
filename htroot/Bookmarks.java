@@ -47,6 +47,7 @@
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -56,9 +57,12 @@ import de.anomic.data.listManager;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsRecord;
 
 public class Bookmarks {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
@@ -110,12 +114,21 @@ public class Bookmarks {
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
                 if(((String) post.get("public")).equals("public")){
-                	bookmark.setPublic(true);
+                    bookmark.setPublic(true);
+                    
+                    // create a news message
+                    HashMap map = new HashMap();
+                    map.put("url", url.replace(',', '|'));
+                    map.put("title", title.replace(',', ' '));
+                    map.put("description", description.replace(',', ' '));
+                    map.put("tags", tagsString.replace(',', ' '));
+                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord("bkmrkadd", map));
                 }else{
-                	bookmark.setPublic(false);
+                    bookmark.setPublic(false);
                 }
                 bookmark.setTags(tags, true);
                 switchboard.bookmarksDB.saveBookmark(bookmark);
+                
                 
             }else{
                 //ERROR
@@ -135,12 +148,13 @@ public class Bookmarks {
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
                         plasmaCrawlLURL.Entry urlentry = switchboard.urlPool.loadedURL.load(urlHash, null);
+                        plasmaParserDocument document = switchboard.snippetCache.retrieveDocument(urlentry.url(), true);
                         if (urlentry != null) {
                             prop.put("mode_edit", 0); // create mode
                             prop.put("mode_title", urlentry.descr());
-                            prop.put("mode_description", urlentry.descr());
+                            prop.put("mode_description", (document == null) ? urlentry.descr() : document.getMainLongTitle());
                             prop.put("mode_url", urlentry.url());
-                            prop.put("mode_tags", "");
+                            prop.put("mode_tags", (document == null) ? "" : document.getKeywords(','));
                             prop.put("mode_public", 0);
                         }
                     } else {

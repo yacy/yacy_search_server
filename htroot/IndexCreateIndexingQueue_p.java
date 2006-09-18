@@ -44,10 +44,7 @@
 // if the shell's current path is HTROOT
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 import java.io.IOException;
 
 import de.anomic.data.wikiCode;
@@ -61,12 +58,6 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class IndexCreateIndexingQueue_p {
-    
-    private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
-    private static String daydate(Date date) {
-        if (date == null) return "";
-        return dayFormatter.format(date);
-    }
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements

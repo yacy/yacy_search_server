@@ -146,7 +146,6 @@ import de.anomic.kelondro.kelondroMapTable;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
-import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverInstantThread;
@@ -2033,7 +2032,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 String urlstring, urlname, filename, urlhash;
                 String host, hash, address, descr = "";
                 yacySeed seed;
-                plasmaSnippetCache.result snippet;
+                plasmaSnippetCache.Snippet snippet;
                 String formerSearch = query.words(" ");
                 long targetTime = timestamp + query.maximumTime;
                 if (targetTime < System.currentTimeMillis()) targetTime = System.currentTimeMillis() + 5000;
@@ -2077,11 +2076,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     //addScoreForked(ref, gs, urlstring.split("/"));
                     URL wordURL;
                     if (urlstring.matches(query.urlMask)) { //.* is default
-                        snippet = snippetCache.retrieve(url, query.queryHashes, false, 260);
+                        snippet = snippetCache.retrieveSnippet(url, query.queryHashes, false, 260);
                         if (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH) {
                             // suppress line: there is no match in that resource
                         } else {
-                            prop.put("type_results_" + i + "_delete", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
+                            prop.put("type_results_" + i + "_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", urlstring) == null) ? 1 : 0);
+                            prop.put("type_results_" + i + "_recommend_deletelink", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
+                            prop.put("type_results_" + i + "_recommend_recommendlink", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
                             prop.put("type_results_" + i + "_description", descr);
                             prop.put("type_results_" + i + "_url", urlstring);
                             prop.put("type_results_" + i + "_urlhash", urlhash);

@@ -104,11 +104,8 @@ public class Wiki {
             // create a news message
             HashMap map = new HashMap();
             map.put("page", pagename);
-            map.put("author", author);
-            map.put("ip", ip);
-            try {
-                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("wiki_upd", map));
-            } catch (IOException e) {}
+            map.put("author", author.replace(',', ' '));
+            yacyCore.newsPool.publishMyNews(new yacyNewsRecord("wiki_upd", map));
         }
 
         wikiBoard.entry page = switchboard.wikiDB.read(pagename);

@@ -310,7 +310,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (s.length() == 0) {
             return getTitle().toLowerCase().split(splitrex);
         } else {
-        return s.split(" |,");
+            return s.split(" |,");
         }
     }
     

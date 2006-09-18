@@ -97,8 +97,8 @@ public class odtParser extends AbstractParser implements Parser {
             byte[] docContent     = null;
             String docDescription = null;
             String docKeywords    = null;
-            String docShortTitle       = null;
-            String docLongTitle     = null;
+            String docShortTitle  = null;
+            String docLongTitle   = null;
             
             // opening the file as zip file
             ZipFile zipFile= new ZipFile(dest);
@@ -153,7 +153,7 @@ public class odtParser extends AbstractParser implements Parser {
                     location,
                     mimeType,
                     "UTF-8",
-                    docKeywords,
+                    docKeywords.split(" |,"),
                     docShortTitle, 
                     docLongTitle,
                     null,

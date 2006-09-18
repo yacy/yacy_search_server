@@ -160,8 +160,8 @@ public class tarParser extends AbstractParser implements Parser {
                 if (theDoc == null) continue;
                 
                 // merging all documents together
-                if (docKeywords.length() > 0) docKeywords.append("\n");
-                docKeywords.append(theDoc.getKeywords());
+                if (docKeywords.length() > 0) docKeywords.append(",");
+                docKeywords.append(theDoc.getKeywords(','));
                 
                 if (docLongTitle.length() > 0) docLongTitle.append("\n");
                 docLongTitle.append(theDoc.getMainLongTitle());
@@ -190,7 +190,7 @@ public class tarParser extends AbstractParser implements Parser {
                     location,
                     mimeType,
                     null,
-                    docKeywords.toString(),
+                    docKeywords.toString().split(" |,"),
                     docShortTitle.toString(), 
                     docLongTitle.toString(),
                     (String[])docSections.toArray(new String[docSections.size()]),

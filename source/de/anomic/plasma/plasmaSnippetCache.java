@@ -96,11 +96,11 @@ public class plasmaSnippetCache {
         this.snippetsCache = new HashMap();        
     }
     
-    public class result {
+    public class Snippet {
         private String line;
         private String error;
         private int source;
-        public result(String line, int source, String errortext) {
+        public Snippet(String line, int source, String errortext) {
             this.line = line;
             this.source = source;
             this.error = errortext;
@@ -147,11 +147,11 @@ public class plasmaSnippetCache {
         return retrieveFromCache(hashes, indexURL.urlHash(url)) != null;
     }
     
-    public result retrieve(URL url, Set queryhashes, boolean fetchOnline, int snippetMaxLength) {
+    public Snippet retrieveSnippet(URL url, Set queryhashes, boolean fetchOnline, int snippetMaxLength) {
         // heise = "0OQUNU3JSs05"
         if (queryhashes.size() == 0) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
-            return new result(null, ERROR_NO_HASH_GIVEN, "no query hashes given");
+            return new Snippet(null, ERROR_NO_HASH_GIVEN, "no query hashes given");
         }
         String urlhash = indexURL.urlHash(url);
         
@@ -161,7 +161,7 @@ public class plasmaSnippetCache {
         String line = retrieveFromCache(wordhashes, urlhash);
         if (line != null) {
             //System.out.println("found snippet for URL " + url + " in cache: " + line);
-            return new result(line, source, null);
+            return new Snippet(line, source, null);
         }
         
         // if the snippet is not in the cache, we can try to get it from the htcache
@@ -178,32 +178,51 @@ public class plasmaSnippetCache {
                 source = SOURCE_WEB;
             }
         } catch (IOException e) {
-            return new result(null, ERROR_SOURCE_LOADING, "error loading resource from web: " + e.getMessage());
+            e.printStackTrace();
+            return new Snippet(null, ERROR_SOURCE_LOADING, "error loading resource from web: " + e.getMessage());
         }
         if (resource == null) {
             //System.out.println("cannot load document for URL " + url);
-            return new result(null, ERROR_RESOURCE_LOADING, "error loading resource from web, cacheManager returned NULL");
+            return new Snippet(null, ERROR_RESOURCE_LOADING, "error loading resource from web, cacheManager returned NULL");
         }
         plasmaParserDocument document = parseDocument(url, resource, docInfo);
         
-        if (document == null) return new result(null, ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
+        if (document == null) return new Snippet(null, ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
         //System.out.println("loaded document for URL " + url);
         String[] sentences = document.getSentences();
         //System.out.println("----" + url.toString()); for (int l = 0; l < sentences.length; l++) System.out.println(sentences[l]);
         if ((sentences == null) || (sentences.length == 0)) {
             //System.out.println("found no sentences in url " + url);
-            return new result(null, ERROR_PARSER_NO_LINES, "parser returned no sentences");
+            return new Snippet(null, ERROR_PARSER_NO_LINES, "parser returned no sentences");
         }
 
         // we have found a parseable non-empty file: use the lines
         line = computeSnippet(sentences, queryhashes, 8 + 6 * queryhashes.size(), snippetMaxLength);
         //System.out.println("loaded snippet for URL " + url + ": " + line);
-        if (line == null) return new result(null, ERROR_NO_MATCH, "no matching snippet found");
+        if (line == null) return new Snippet(null, ERROR_NO_MATCH, "no matching snippet found");
         if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
         storeToCache(wordhashes, urlhash, line);
-        return new result(line, source, null);
+        return new Snippet(line, source, null);
+    }
+
+    public plasmaParserDocument retrieveDocument(URL url, boolean fetchOnline) {
+        byte[] resource = null;
+        IResourceInfo docInfo = null;
+        try {
+            resource = this.cacheManager.loadResourceContent(url);
+            if ((fetchOnline) && (resource == null)) {
+                plasmaHTCache.Entry entry = loadResourceFromWeb(url, 5000);
+                if (entry != null) docInfo = entry.getDocumentInfo();
+                resource = this.cacheManager.loadResourceContent(url);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        if (resource == null) return null;
+        return parseDocument(url, resource, docInfo);
     }
     
     public void storeToCache(String wordhashes, String urlhash, String snippet) {
@@ -460,7 +479,7 @@ public class plasmaSnippetCache {
         }
         public void run() {
             log.logFine("snippetFetcher: try to get URL " + url);
-            plasmaSnippetCache.result snippet = retrieve(url, queryhashes, true, 260);
+            plasmaSnippetCache.Snippet snippet = retrieveSnippet(url, queryhashes, true, 260);
             if (snippet.line == null)
                 log.logFine("snippetFetcher: cannot get URL " + url + ". error(" + snippet.source + "): " + snippet.error);
             else

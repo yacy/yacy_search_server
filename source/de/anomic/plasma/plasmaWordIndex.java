@@ -463,11 +463,13 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
     
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
-            if (dhtInCache.removeEntry(wordHash, urlHash, deleteComplete)) return true;
-            if (dhtOutCache.removeEntry(wordHash, urlHash, deleteComplete)) return true;
-            if (useCollectionIndex) {if (collections.removeEntry(wordHash, urlHash, deleteComplete)) return true;}
-            if (assortmentCluster.removeEntry(wordHash, urlHash, deleteComplete)) return true;
-            return backend.removeEntry(wordHash, urlHash, deleteComplete);
+        boolean removed = false;
+            removed = removed | (dhtInCache.removeEntry(wordHash, urlHash, deleteComplete));
+            removed = removed | (dhtOutCache.removeEntry(wordHash, urlHash, deleteComplete));
+            if (useCollectionIndex) {removed = removed | (collections.removeEntry(wordHash, urlHash, deleteComplete));}
+            removed = removed | (assortmentCluster.removeEntry(wordHash, urlHash, deleteComplete));
+            removed = removed | backend.removeEntry(wordHash, urlHash, deleteComplete);
+            return removed;
     }
     
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {

@@ -57,7 +57,7 @@ public class plasmaParserDocument {
     URL location;       // the source url
     String mimeType;    // mimeType as taken from http header
     String charset;     // the charset of the document
-    String keywords;    // most resources provide a keyword field
+    String[] keywords;  // most resources provide a keyword field
     String shortTitle;  // a shortTitle mostly appears in the window header (border)
     String longTitle;   // the real title of the document, commonly h1-tags
     String[] sections;  // if present: more titles/headlines appearing in the document
@@ -75,13 +75,13 @@ public class plasmaParserDocument {
     boolean resorted;
                     
     public plasmaParserDocument(URL location, String mimeType, String charset,
-                    String keywords, String shortTitle, String longTitle,
+                    String[] keywords, String shortTitle, String longTitle,
                     String[] sections, String abstrct,
                     byte[] text, Map anchors, TreeSet images) {
         this.location = location;
         this.mimeType = (mimeType==null)?"application/octet-stream":mimeType;
         this.charset = charset;
-        this.keywords = (keywords==null)?"":keywords;
+        this.keywords = (keywords==null) ? new String[0] : keywords;
         this.shortTitle = (shortTitle==null)?"":shortTitle;
         this.longTitle = (longTitle==null)?"":longTitle;
         this.sections = (sections==null)?new String[0]:sections;
@@ -137,8 +137,21 @@ public class plasmaParserDocument {
         return getCondenser().sentences();
     }
     
-    public String getKeywords() {
-        return this.keywords;
+    public String getKeywords(char separator) {
+        // sort out doubles and empty words
+        TreeSet hs = new TreeSet();
+        String s;
+        for (int i = 0; i < this.keywords.length; i++) {
+            if (this.keywords[i] == null) continue;
+            s = this.keywords[i].trim();
+            if (s.length() > 0) hs.add(s.toLowerCase());
+        }
+        if (hs.size() == 0) return "";
+        // generate a new list
+        StringBuffer sb = new StringBuffer(this.keywords.length * 6);
+        Iterator i = hs.iterator();
+        while (i.hasNext()) sb.append((String) i.next()).append(separator);
+        return sb.substring(0, sb.length() - 1);
     }
     
     public Map getAnchors() {

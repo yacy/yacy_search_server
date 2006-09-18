@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.nio.charset.UnsupportedCharsetException;
 
 import de.anomic.net.URL;
 import java.util.Arrays;
@@ -588,8 +587,9 @@ public final class plasmaParser {
             int p = 0;
             for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
             plasmaParserDocument ppd =  new plasmaParserDocument(new URL(location.toNormalform()),
-                                mimeType, scraper.getCharset(), null, null, scraper.getTitle(),
-                                sections, null,
+                                mimeType, scraper.getCharset(), scraper.getKeywords(),
+                                scraper.getTitle(), scraper.getTitle(),
+                                sections, scraper.getDescription(),
                                 scraper.getText(), scraper.getAnchors(), scraper.getImages());
             //scraper.close();
             return ppd;

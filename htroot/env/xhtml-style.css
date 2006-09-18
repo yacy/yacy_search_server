@@ -196,7 +196,7 @@ font-style:normal;
 color: #999999;
 text-decoration:none;
 }
-img.bookmarkIcon, img.deleteIcon {
+img.bookmarkIcon, img.deleteIcon, img.recommendIcon {
 height: 16px;
 width: 16px;
 }

@@ -198,17 +198,21 @@ div.urlactions a {
   display:block;
 }
 
-img.bookmarkIcon, img.deleteIcon {
+img.bookmarkIcon, img.deleteIcon, img.recommendIcon {
   height: 16px;
   width: 16px;
 }
 
-a.deletelink:hover, div.searchresults:hover a.deletelink, div.searchresults.hover a.deletelink {
-  background:url(/env/grafics/minus.gif) center center no-repeat;
+a.bookmarklink:hover, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
+  background:url(/env/grafics/bookmark.gif) center center no-repeat;
 }
 
-a.bookmarklink:hover, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
+a.recommendlink:hover, div.searchresults:hover a.recommendlink, div.searchresults.hover a.recommendlink {
   background:url(/env/grafics/plus.gif) center center no-repeat;
+}
+
+a.deletelink:hover, div.searchresults:hover a.deletelink, div.searchresults.hover a.deletelink {
+  background:url(/env/grafics/minus.gif) center center no-repeat;
 }
 
 div.searchresults p, div.searchresults h4 {

@@ -153,7 +153,7 @@ public class pdfParser extends AbstractParser implements Parser {
                     location,
                     mimeType,
                     "UTF-8",
-                    docKeyWords,
+                    docKeyWords.split(" |,"),
                     docSubject,
                     docTitle,
                     null,

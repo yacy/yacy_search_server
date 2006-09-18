@@ -83,7 +83,7 @@ public final class search {
 //      final String  youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
         final String  key    = post.get("key", "");    // transmission key for response
         final String  query  = post.get("query", "");  // a string of word hashes that shall be searched and combined
-        final String  urls   = post.get("urls", "");   // a string of url hashes that are preselected for the search: no other may be returned
+        String  urls   = post.get("urls", "");   // a string of url hashes that are preselected for the search: no other may be returned
 //      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
 //      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
         final long    duetime= post.getLong("duetime", 3000);
@@ -94,6 +94,7 @@ public final class search {
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
+        //urls = "nQoUx975gJ5C"; // ONLY FOR TESTS!
         
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(2 * duetime);
@@ -196,10 +197,10 @@ public final class search {
             String resource = "";
             //plasmaIndexEntry pie;
             plasmaCrawlLURL.Entry urlentry;
-            plasmaSnippetCache.result snippet;
+            plasmaSnippetCache.Snippet snippet;
             while ((acc.hasMoreElements()) && (i < squery.wantedResults)) {
                 urlentry = acc.nextElement();
-                snippet = sb.snippetCache.retrieve(urlentry.url(), squery.queryHashes, false, 260);
+                snippet = sb.snippetCache.retrieveSnippet(urlentry.url(), squery.queryHashes, false, 260);
                 if (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH) {
                     // suppress line: there is no match in that resource
                 } else {

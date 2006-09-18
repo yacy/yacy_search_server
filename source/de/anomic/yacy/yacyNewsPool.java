@@ -67,20 +67,18 @@ public class yacyNewsPool {
         "flshradd", // a file was added to the file share
         "flshrdel", // a file was added to the file share
         "flshrcom", // a comment to a file share entry
-        "brdcstin", // a broadcast news in rss format
-        "brdcstup", // an update to a broadcast
-        "brdcstvt", // a vote on a broadcast
-        "brdcstco", // a comment on a broadcast
         "bkmrkadd", // a bookmark was added/created
         "bkmrkavt", // a vote and comment on a bookmark add
         "bkmrkmov", // a bookmark was moved
         "bkmrkmvt", // a vote and comment on a bookmark move
         "bkmrkdel", // a bookmark was deleted
         "bkmrkdvt", // a vote and comment on a bookmark delete
-        "wiki_add", // a wiki page was created
+        "stippadd", // a surf tipp was added
+        "stippavt", // a vote and comment on a surf tipp
         "wiki_upd", // a wiki page was updated
         "wiki_del", // a wiki page das deleted
-        "blog_add"  // a blog entry was added
+        "blog_add", // a blog entry was added
+        "blog_del"  // a blog page das deleted
     };
     public static HashSet categories;
     static {
@@ -122,12 +120,14 @@ public class yacyNewsPool {
         return newsDB.cacheObjectStatus();
     }
     
-    public void publishMyNews(yacyNewsRecord record) throws IOException {
+    public void publishMyNews(yacyNewsRecord record) {
         // this shall be called if our peer generated a new news record and wants to publish it
-        if (newsDB.get(record.id()) == null) {
-            incomingNews.push(record); // we want to see our own news..
-            outgoingNews.push(record); // .. and put it on the publishing list
-        }
+        try {
+            if (newsDB.get(record.id()) == null) {
+                incomingNews.push(record); // we want to see our own news..
+                outgoingNews.push(record); // .. and put it on the publishing list
+            }
+        } catch (IOException e) {}
     }
     
     public yacyNewsRecord myPublication() throws IOException {
@@ -183,23 +183,28 @@ public class yacyNewsPool {
         return pc;
     }
     
+    long day = 1000 * 60 * 60 * 24;
     private boolean automaticProcessP(yacyNewsRecord record) {
         if (record == null) return false;
         if (record.category() == null) return true;
-        if ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24 * 7) /* 1 Week */) {
+        if ((System.currentTimeMillis() - record.created().getTime()) > (14 * day)) {
             // remove everything after 1 week
             return true;
         }
-        if (((record.category().equals("wiki_add")) || (record.category().equals("wiki_upd"))) &&
-            ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24 * 3) /* 3 Days */)) {
-            return true;
-        }
+        if ((record.category().equals("wiki_upd")) &&
+                ((System.currentTimeMillis() - record.created().getTime()) > (3 * day))) {
+                return true;
+            }
         if ((record.category().equals("blog_add")) &&
-                ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24 * 3) /* 3 Days */)) {
+                ((System.currentTimeMillis() - record.created().getTime()) > (3 * day))) {
+                return true;
+            }
+        if ((record.category().equals("prfleupd")) &&
+                ((System.currentTimeMillis() - record.created().getTime()) > (7 * day))) {
                 return true;
             }
         if ((record.category().equals("crwlstrt")) &&
-            ((System.currentTimeMillis() - record.created().getTime()) > (1000 * 60 * 60 * 24 * 2) /* 2 Days */)) {
+            ((System.currentTimeMillis() - record.created().getTime()) > (2 * day))) {
             yacySeed seed = yacyCore.seedDB.get(record.originator());
             if (seed == null) return false;
             try {

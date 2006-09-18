@@ -303,7 +303,6 @@ public final class serverCharBuffer extends Writer {
         int l = 0;
         while ((l < length) && (buffer[offset + l] <= ' ')) l++;
         int r = length;
-        int u;
         while ((r > 0) && (buffer[offset + r - 1] <= ' ')) r--;
         if (l > r) r = l;
         return trim(l, r);

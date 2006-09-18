@@ -158,13 +158,10 @@ public class Blog {
             
 			// create a news message
              HashMap map = new HashMap();
-             map.put("subject", StrSubject);
              map.put("page", pagename);
-             map.put("author", StrAuthor);
-             map.put("ip", ip);
-             try {
-                 yacyCore.newsPool.publishMyNews(new yacyNewsRecord("blog_add", map));
-             } catch (IOException e) {}
+             map.put("subject", StrSubject.replace(',', ' '));
+             map.put("author", StrAuthor.replace(',', ' '));
+             yacyCore.newsPool.publishMyNews(new yacyNewsRecord("blog_add", map));
 		}
 
 		page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
