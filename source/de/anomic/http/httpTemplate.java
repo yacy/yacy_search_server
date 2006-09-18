@@ -303,7 +303,7 @@ public final class httpTemplate {
                         }//for
                         structure.append("</".getBytes("UTF-8")).append(multi_key).append(">\n".getBytes("UTF-8"));
                     }else{//transferUntil
-                        serverLog.logSevere("TEMPLATE", "No Close Key found for #{"+multi_key+"}#"); //prefix here?
+                        serverLog.logSevere("TEMPLATE", "No Close Key found for #{"+new String(multi_key)+"}#"); //prefix here?
                     }
                 }
             }else if( (bb & 0xFF) == lrbr ){ //alternatives
@@ -357,7 +357,7 @@ public final class httpTemplate {
                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
                     transferUntil(pis, keyStream, appendBytes("#(/".getBytes("UTF-8"),key,")#".getBytes("UTF-8"),null));
                     if(pis.available()==0){
-                        serverLog.logSevere("TEMPLATE", "No Close Key found for #("+key+")# (by Name)");
+                        serverLog.logSevere("TEMPLATE", "No Close Key found for #("+new String(key)+")# (by Name)");
                     }
                 }else{
                     while(!found){
@@ -412,7 +412,7 @@ public final class httpTemplate {
                         if(!found){
                             text.append((byte)bb);
                             if(pis.available()==0){
-                                serverLog.logSevere("TEMPLATE", "No Close Key found for #("+key+")# (by Index)");
+                                serverLog.logSevere("TEMPLATE", "No Close Key found for #("+new String(key)+")# (by Index)");
                                 found=true;
                             }
                         }

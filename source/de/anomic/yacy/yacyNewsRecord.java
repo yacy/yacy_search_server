@@ -161,6 +161,12 @@ public class yacyNewsRecord {
     public Map attributes() {
         return attributes;
     }
+    
+    public String attribute(String key, String dflt) {
+        String s = (String) attributes.get(key);
+        if ((s == null) || (s.length() == 0)) return dflt;
+        return s;
+    }
 
     public static void main(String[] args) {
         System.out.println((new yacyNewsRecord(args[0])).toString());

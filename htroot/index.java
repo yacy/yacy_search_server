@@ -48,16 +48,25 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.nxTools;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsPool;
+import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacySeed;
+import de.anomic.net.URL;
 
 public class index {
 
@@ -131,7 +140,97 @@ public class index {
         prop.put("depth", "0");
         prop.put("display", display);
         prop.put("searchoptions_display", display);
+        
+        
+        // create surftipps
+        int maxCount = yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB);
+        if (maxCount > 300) maxCount = 300;
+        kelondroMScoreCluster surftipps = new kelondroMScoreCluster();
+        yacyNewsRecord record;
+        kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120");
+        for (int j = 0; j < maxCount; j++) try {
+            record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, j);
+            if (record == null) continue;
+            
+            if (record.category().equals("crwlstrt")) {
+                String intention = record.attribute("intention", "");
+                surftipps.setScore(
+                        rowdef.newEntry(new byte[][]{
+                                record.attribute("startURL", "").getBytes(),
+                                ((intention.length() == 0) ? record.attribute("startURL", "") : intention).getBytes(),
+                                ("Crawl Start Point").getBytes()
+                        }), 2 + Math.min(10, intention.length() / 4) + timeFactor(record.created()));
+            }
+            
+            if (record.category().equals("prfleupd")) {
+                surftipps.setScore(
+                        rowdef.newEntry(new byte[][]{
+                                record.attribute("homepage", "").getBytes(),
+                                ("Home Page of " + record.attribute("nickname", "")).getBytes(),
+                                ("Profile Update").getBytes()
+                        }), 1 + timeFactor(record.created()));
+            }
+            
+            if (record.category().equals("bkmrkadd")) {
+                surftipps.setScore(
+                        rowdef.newEntry(new byte[][]{
+                                record.attribute("url", "").getBytes(),
+                                (record.attribute("title", "")).getBytes(),
+                                ("Bookmark: " + record.attribute("description", "")).getBytes()
+                        }), 8 + timeFactor(record.created()));
+            }
+            
+            if (record.category().equals("stippadd")) {
+                surftipps.setScore(
+                        rowdef.newEntry(new byte[][]{
+                                record.attribute("url", "").getBytes(),
+                                (record.attribute("title", "")).getBytes(),
+                                ("Surf Tipp: " + record.attribute("description", "")).getBytes()
+                        }), 5 + timeFactor(record.created()));
+            }
+            
+            if (record.category().equals("wiki_upd")) {
+                yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
+                if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
+                if (seed != null) surftipps.setScore(
+                        rowdef.newEntry(new byte[][]{
+                                ("http://" + seed.getAddress() + "/Wiki.html?page=" + record.attribute("page", "")).getBytes(),
+                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes(),
+                                ("Wiki Update: " + record.attribute("description", "")).getBytes()
+                        }), 4 + timeFactor(record.created()));
+            }
+            
+        } catch (IOException e) {e.printStackTrace();}
+        
+        // read out surftipp array and create property entries
+        Iterator k = surftipps.scores(false);
+        int i = 0;
+        kelondroRow.Entry row;
+        while (k.hasNext()) {
+            row = (kelondroRow.Entry) k.next();
+            try {
+                prop.put("surftipps_results_" + i + "_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", row.getColString(1, null)) == null) ? 1 : 0);
+                prop.put("surftipps_results_" + i + "_recommend_deletelink", "/index.html?");
+                prop.put("surftipps" + i + "_recommend_recommendlink", "/index.html?");
+                prop.put("surftipps_results_" + i + "_url", row.getColString(0, null));
+                prop.put("surftipps_results_" + i + "_urlname", nxTools.cutUrlText(row.getColString(0, null), 60));
+                prop.put("surftipps_results_" + i + "_title", row.getColString(1, null));
+                prop.put("surftipps_results_" + i + "_description", row.getColString(2, null));
+                i++;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (i >= 50) break;
+        }
+        prop.put("surftipps_results", i);
+        prop.put("surftipps", 1);
+        
+        
         return prop;
     }
 
+    private static int timeFactor(Date created) {
+        return (int) Math.max(0, 10 - ((System.currentTimeMillis() - created.getTime()) / 24 / 60 / 60 / 1000));
+    }
+    
 }

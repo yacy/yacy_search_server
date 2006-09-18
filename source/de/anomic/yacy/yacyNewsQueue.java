@@ -116,6 +116,15 @@ public class yacyNewsQueue {
         return entry;
     }
 
+    public synchronized yacyNewsRecord get(String id) throws IOException {
+        yacyNewsRecord record;
+        for (int i = 0; i < size(); i++) {
+            record = top(i);
+            if ((record != null) && (record.id().equals(id))) return record;
+        }
+        return null;
+    }
+
     public synchronized yacyNewsRecord remove(String id) throws IOException {
         yacyNewsRecord record;
         for (int i = 0; i < size(); i++) {

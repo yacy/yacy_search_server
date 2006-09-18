@@ -239,7 +239,7 @@ public class yacyNewsPool {
         }
         return null;
     }
-    
+
     public synchronized yacyNewsRecord getByOriginator(int dbKey, String category, String originatorHash) throws IOException {
         yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsRecord record;
@@ -253,7 +253,17 @@ public class yacyNewsPool {
         }
         return null;
     }
-    
+
+    public synchronized yacyNewsRecord getByID(int dbKey, String id) throws IOException {
+        switch (dbKey) {
+            case INCOMING_DB:   return incomingNews.get(id);
+            case PROCESSED_DB:  return processedNews.get(id);
+            case OUTGOING_DB:   return outgoingNews.get(id);
+            case PUBLISHED_DB:  return publishedNews.get(id);
+        }
+        return null;
+    }
+
     private yacyNewsQueue switchQueue(int dbKey) {
         switch (dbKey) {
             case INCOMING_DB:	return incomingNews;
@@ -279,7 +289,7 @@ public class yacyNewsPool {
         // this is called if a queue element shall be moved to another queue or off the queue
         // it depends on the dbKey how the record is handled
         switch (dbKey) {
-            case INCOMING_DB:	moveOff(incomingNews, processedNews, id); break;
+            case INCOMING_DB:   moveOff(incomingNews, processedNews, id); break;
             case PROCESSED_DB:  moveOff(processedNews, null,id); break;
             case OUTGOING_DB:   moveOff(outgoingNews, publishedNews, id); break;
             case PUBLISHED_DB:  moveOff(publishedNews, null, id); break;

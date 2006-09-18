@@ -143,7 +143,7 @@ public class kelondroRow {
         return new Entry(external);
     }
     
-    public class Entry {
+    public class Entry implements Comparable {
 
         private byte[] rowinstance;
         
@@ -201,6 +201,13 @@ public class kelondroRow {
                         setCol(nick, elts[i].substring(p + 1).trim().getBytes());
                 }
             }
+        }
+        
+        public int compareTo(Object o) {
+            if (o instanceof Entry) {
+                return kelondroNaturalOrder.naturalOrder.compare(this.rowinstance, ((Entry) o).rowinstance);
+            }
+            throw new UnsupportedOperationException("works only for Entry objects");
         }
         
         public byte[] bytes() {
@@ -404,6 +411,7 @@ public class kelondroRow {
         public String toString() {
             return toPropertyForm(true, false, false);
         }
+
     }
     
     public final static void long2bytes(long x, byte[] b, int offset, int length) {
