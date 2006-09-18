@@ -5,8 +5,10 @@
 //Frankfurt, Germany, 2004
 //
 // This file is contributed by Martin Thelian
-// last major change: $LastChangedDate$ by $LastChangedBy$
-// Revision: $LastChangedRevision$
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -49,16 +51,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
-public final class httpdByteCountInputStream extends FilterInputStream {
+public class httpdByteCountInputStream extends FilterInputStream {
     
     private static final Object syncObject = new Object();
     private static final HashMap byteCountInfo = new HashMap(2);
     private static long globalByteCount = 0;
     
     private boolean finished = false;
-    private long byteCount;
+    protected long byteCount;
     private String byteCountAccountName = null; 
 
+    protected httpdByteCountInputStream(InputStream inputStream) {
+        this(inputStream,null);
+    }
+    
     /**
      * Constructor of this class
      * @param inputStream the {@link InputStream} to read from
@@ -81,19 +87,25 @@ public final class httpdByteCountInputStream extends FilterInputStream {
     
     public int read(byte[] b) throws IOException {
         int readCount = super.read(b);
-        this.byteCount += readCount;
+        if (readCount > 0) this.byteCount += readCount;
         return readCount;
     }
 
     public int read(byte[] b, int off, int len) throws IOException {
         int readCount = super.read(b, off, len);
-        this.byteCount += readCount;
+        if (readCount > 0) this.byteCount += readCount;
         return readCount;
     }
 
     public int read() throws IOException {
         this.byteCount++;
         return super.read();
+    }
+    
+    public long skip(long len) throws IOException {
+        long skipCount = super.skip(len);
+        if (skipCount > 0) this.byteCount += skipCount; 
+        return skipCount;
     }
 
     public long getCount() {

@@ -430,6 +430,18 @@ public final class httpHeader extends TreeMap implements Map {
         return (String) get(httpHeader.CONTENT_TYPE, "application/octet-stream");
     }
     
+    public String getCharacterEncoding() {
+        String mimeType = mime();
+        
+        int idx = mimeType.indexOf(";");
+        if (idx == -1) return null;
+        
+        String encoding = mimeType.substring(idx + 1);
+        if (!encoding.startsWith("charset=")) return null;
+        
+        return encoding.substring("charset=".length()).trim();           
+    }    
+    
     public Date date() {
         return headerDate(httpHeader.DATE);
     }
