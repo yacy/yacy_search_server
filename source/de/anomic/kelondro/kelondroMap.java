@@ -103,9 +103,9 @@ public class kelondroMap {
             Map map;
             while (it.hasNext()) {
                 key = (String) it.next();
-//              System.out.println("kelondroMap: enumerating key " + key);
                 map = get(key);
-
+                if (map == null) break;
+                
                 if (sortfields != null) for (int i = 0; i < sortfields.length; i++) {
                     value = (String) map.get(sortfields[i]);
                     if (value != null) cluster[i].setScore(key, kelondroMScoreCluster.string2score(value));
