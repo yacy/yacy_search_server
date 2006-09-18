@@ -45,8 +45,7 @@ package de.anomic.plasma.parser.rss;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
-import de.anomic.net.URL;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -58,12 +57,14 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
-import de.anomic.htmlFilter.htmlFilterOutputStream;
+import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
 import de.nava.informa.core.ChannelIF;
 import de.nava.informa.core.ImageIF;
@@ -148,14 +149,14 @@ public class rssParser extends AbstractParser implements Parser {
                     anchors.put(itemURL.toString(),itemTitle);
                     
                 	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
-                	text.append(new serverByteBuffer(htmlFilterAbstractScraper.stripAll(new serverByteBuffer(itemDescr.getBytes("UTF-8")))).trim()).append((byte) ' '); // TODO: this does not work for utf-8
+                	text.append(new serverCharBuffer(htmlFilterAbstractScraper.stripAll(new serverCharBuffer(itemDescr.toCharArray()))).trim()).append(' '); // TODO: this does not work for utf-8
                     
                     String itemContent = item.getElementValue("content");
                     if ((itemContent != null) && (itemContent.length() > 0)) {
                         
                         htmlFilterContentScraper scraper = new htmlFilterContentScraper(itemURL);
-                        OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                        serverFileUtils.copy(new ByteArrayInputStream(itemContent.getBytes("UTF-8")), os);
+                        Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
+                        serverFileUtils.copy(new ByteArrayInputStream(itemContent.getBytes("UTF-8")), writer, "UTF-8");
                         
                         String itemHeadline = scraper.getTitle();     
                         if ((itemHeadline != null) && (itemHeadline.length() > 0)) {

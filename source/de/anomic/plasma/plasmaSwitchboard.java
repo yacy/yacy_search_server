@@ -1397,7 +1397,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         // the mimetype of this entry
         String mimeType = entry.getMimeType();
-        String charset = entry.getCharSet();        
+        String charset = entry.getCharacterEncoding();        
 
         // the parser logger
         serverLog parserLogger = parser.getLogger();

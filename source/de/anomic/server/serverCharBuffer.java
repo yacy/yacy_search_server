@@ -50,7 +50,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Properties;
 
-public final class serverCharBuffer extends Writer {
+public final class serverCharBuffer /* extends Writer */ {
     
     public static final char singlequote = '\'';
     public static final char doublequote = '"';
@@ -164,12 +164,12 @@ public final class serverCharBuffer extends Writer {
         length += le;
     }
     
-    public Writer append(char b) {
+    public serverCharBuffer append(char b) {
         write(b);
         return this;
     }
 
-    public Writer append(int i) {
+    public serverCharBuffer append(int i) {
         write((char) (i));
         return this;
     }
@@ -198,11 +198,11 @@ public final class serverCharBuffer extends Writer {
         return append(bb.buffer, bb.offset, bb.length);
     }
 
-    public serverCharBuffer append(Object o) {
-        if (o instanceof String) return append((String) o);
-        if (o instanceof char[]) return append((char[]) o);
-        return null;
-    }
+//    public serverCharBuffer append(Object o) {
+//        if (o instanceof String) return append((String) o);
+//        if (o instanceof char[]) return append((char[]) o);
+//        return null;
+//    }
     
     public char charAt(int pos) {
         if (pos < 0) throw new IndexOutOfBoundsException();

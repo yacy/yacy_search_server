@@ -51,6 +51,7 @@ import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverCharBuffer;
 
 public final class plasmaSearchQuery {
     
@@ -136,7 +137,7 @@ public final class plasmaSearchQuery {
     
     public static TreeSet cleanQuery(String words) {
         // convert Umlaute
-        words = htmlFilterAbstractScraper.convertUmlaute(new serverByteBuffer(words.getBytes())).toString();
+        words = htmlFilterAbstractScraper.convertUmlaute(new serverCharBuffer(words.toCharArray())).toString();
         
         // remove funny symbols
         final String seps = "' .,:/-&";

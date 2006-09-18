@@ -46,7 +46,6 @@ package de.anomic.htmlFilter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.UnsupportedEncodingException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -55,6 +54,7 @@ import java.util.TreeSet;
 
 import de.anomic.http.httpTemplate;
 import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverCharBuffer;
 
 public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer implements htmlFilterTransformer {
 
@@ -111,25 +111,20 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         return (bluelist.size() == 0) && (!gettext);
     }
 
-    private static byte[] genBlueLetters(int length) {
-        serverByteBuffer bb = new serverByteBuffer(" <FONT COLOR=#0000FF>".getBytes());
+    private static char[] genBlueLetters(int length) {
+        serverCharBuffer bb = new serverCharBuffer(" <FONT COLOR=#0000FF>".toCharArray());
         length = length / 2;
         if (length > 10) length = 7;
         while (length-- > 0) {
-            bb.append((byte) 'X');
+            bb.append('X');
         }
-        bb.append("</FONT> ".getBytes());
-        return bb.getBytes();
+        bb.append("</FONT> ");
+        return bb.getChars();
     }
 
-    private boolean bluelistHit(byte[] text) {
+    private boolean bluelistHit(char[] text) {
         if (text == null || bluelist == null) return false;
-        String lc;
-        try {
-            lc = new String(text, "UTF-8").toLowerCase();
-        } catch (UnsupportedEncodingException e) {
-            lc = new String(text).toLowerCase();
-        }
+        String lc = new String(text).toLowerCase();
         for (int i = 0; i < bluelist.size(); i++) {
             if (lc.indexOf((String) bluelist.get(i)) >= 0) return true;
         }
@@ -158,65 +153,64 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         }
         return result;
     }
-    public byte[] transformText(byte[] text) {
+    public char[] transformText(char[] text) {
         if (gettext) {
-            serverByteBuffer sbb = new serverByteBuffer(text);
-            //if (sbb.length() > 0) System.out.println("   TEXT: " + sbb.toString());
-            serverByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
-            sbb = new serverByteBuffer();
-            for (int i = 0; i < sbbs.length; i++) {
-                if (sbbs[i].isWhitespace(true)) {
-                    sbb.append(sbbs[i]);
-                } else if ((sbbs[i].byteAt(0) == httpTemplate.hash) ||
-                           (sbbs[i].startsWith(httpTemplate.dpdpa))) {
-                    // this is a template or a part of a template
-                    sbb.append(sbbs[i]);
-                } else {
-                    // this is a text fragment, generate gettext quotation
-                    int ws = sbbs[i].whitespaceStart(true);
-                    int we = sbbs[i].whitespaceEnd(true);
-                    sbb.append(sbbs[i].getBytes(0, ws));
-                    sbb.append('_');
-                    sbb.append('(');
-                    sbb.append(sbbs[i].getBytes(ws, we));
-                    sbb.append(')');
-                    sbb.append(sbbs[i].getBytes(we));
-                }
-            }
-            //if (sbb.length() > 0) System.out.println("GETTEXT: " + sbb.toString());
-            return sbb.getBytes();
+//            serverCharBuffer sbb = new serverCharBuffer(text);
+//            //if (sbb.length() > 0) System.out.println("   TEXT: " + sbb.toString());
+//            serverCharBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
+//            sbb = new serverCharBuffer();
+//            for (int i = 0; i < sbbs.length; i++) {
+//                if (sbbs[i].isWhitespace(true)) {
+//                    sbb.append(sbbs[i]);
+//                } else if ((sbbs[i].byteAt(0) == httpTemplate.hash) ||
+//                           (sbbs[i].startsWith(httpTemplate.dpdpa))) {
+//                    // this is a template or a part of a template
+//                    sbb.append(sbbs[i]);
+//                } else {
+//                    // this is a text fragment, generate gettext quotation
+//                    int ws = sbbs[i].whitespaceStart(true);
+//                    int we = sbbs[i].whitespaceEnd(true);
+//                    sbb.append(sbbs[i].getBytes(0, ws));
+//                    sbb.append('_');
+//                    sbb.append('(');
+//                    sbb.append(sbbs[i].getBytes(ws, we));
+//                    sbb.append(')');
+//                    sbb.append(sbbs[i].getBytes(we));
+//                }
+//            }
+//            //if (sbb.length() > 0) System.out.println("GETTEXT: " + sbb.toString());
+//            return sbb.getChars();
         }
         if (bluelist != null) {
             if (bluelistHit(text)) {
                 // System.out.println("FILTERHIT: " + text);
                 return genBlueLetters(text.length);
-            } else {
-                return text;
             }
+            return text;
         }
         return text;
     }
 
-    public byte[] transformTag0(String tagname, Properties tagopts, byte quotechar) {
+    public char[] transformTag0(String tagname, Properties tagopts, char quotechar) {
         if (tagname.equals("img")) {
             // check bluelist
-            if (bluelistHit(tagopts.getProperty("src","").getBytes())) return genBlueLetters(5);
-            if (bluelistHit(tagopts.getProperty("alt","").getBytes())) return genBlueLetters(5);
+            if (bluelistHit(tagopts.getProperty("src","").toCharArray())) return genBlueLetters(5);
+            if (bluelistHit(tagopts.getProperty("alt","").toCharArray())) return genBlueLetters(5);
             
             // replace image alternative name
-            tagopts.setProperty("alt", new String(transformText(tagopts.getProperty("alt","").getBytes())));
+            tagopts.setProperty("alt", new String(transformText(tagopts.getProperty("alt","").toCharArray())));
         }
         if ((tagname.equals("input")) && (tagopts.getProperty("type").equals("submit"))) {
             // rewrite button name
-            tagopts.setProperty("value", new String(transformText(tagopts.getProperty("value","").getBytes())));
+            tagopts.setProperty("value", new String(transformText(tagopts.getProperty("value","").toCharArray())));
         }
-        return htmlFilterOutputStream.genTag0(tagname, tagopts, quotechar);
+        return htmlFilterWriter.genTag0(tagname, tagopts, quotechar);
     }
 
-    public byte[] transformTag1(String tagname, Properties tagopts, byte[] text, byte quotechar) {
-        if (bluelistHit(tagopts.getProperty("href","").getBytes())) return genBlueLetters(text.length);
+    public char[] transformTag1(String tagname, Properties tagopts, char[] text, char quotechar) {
+        if (bluelistHit(tagopts.getProperty("href","").toCharArray())) return genBlueLetters(text.length);
         if (bluelistHit(text)) return genBlueLetters(text.length);
-        return htmlFilterOutputStream.genTag1(tagname, tagopts, text, quotechar);
+        return htmlFilterWriter.genTag1(tagname, tagopts, text, quotechar);
     }
 
     public void close() {

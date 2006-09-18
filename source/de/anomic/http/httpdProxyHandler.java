@@ -70,6 +70,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.PushbackInputStream;
+import java.io.Writer;
 import java.net.BindException;
 import java.net.ConnectException;
 import java.net.InetAddress;
@@ -77,7 +78,6 @@ import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import de.anomic.net.URL;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
@@ -89,9 +89,11 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
+
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
-import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.htmlFilter.htmlFilterTransformer;
+import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -225,7 +227,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 //            remoteProxyNoProxyPatterns = remoteProxyNoProxy.split(",");
             
             // set timeout
-            timeout = Integer.parseInt(switchboard.getConfig("clientTimeout", "10000"));
+            timeout = Integer.parseInt(switchboard.getConfig("proxy.clientTimeout", "10000"));
             
             // create a htRootPath: system pages
             if (htRootPath == null) {
@@ -502,7 +504,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         
         GZIPOutputStream gzippedOut = null; 
         httpChunkedOutputStream chunkedOut = null;
-        OutputStream hfos = null;
+        Object hfos = null;
         
         httpc remote = null;
         httpc.response res = null;                
@@ -562,7 +564,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     res.status.startsWith("304")) {
                     res.responseHeader.put(httpHeader.CONTENT_LENGTH,"0");
                 } else {
-                    if (httpVer.equals("HTTP/0.9") || httpVer.equals("HTTP/1.0")) {
+                    if (httpVer.equals(httpHeader.HTTP_VERSION_0_9) || httpVer.equals(httpHeader.HTTP_VERSION_1_0)) {
                         conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
                     } else {
                         chunkedOut = new httpChunkedOutputStream(respond);
@@ -609,7 +611,10 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 ) {
                 // make a transformer
                 this.theLogger.logFine("create transformer for URL " + url);
-                hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
+                //hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
+                String charSet = res.responseHeader.getCharacterEncoding();
+                if (charSet == null) charSet = "UTF-8";
+                hfos = new htmlFilterWriter((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond),charSet, null, transformer, (ext.length() == 0));
             } else {
                 // simply pass through without parsing
                 this.theLogger.logFine("create passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + res.responseHeader.mime() + "'");
@@ -660,7 +665,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     byte[] cacheArray = res.writeContent(hfos);
                     this.theLogger.logFine("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
 
-                    if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
+                    if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
 
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
@@ -686,7 +691,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     // write to file right here.
                     cacheFile.getParentFile().mkdirs();
                     res.writeContent(hfos, cacheFile);
-                    if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
+                    if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
                     this.theLogger.logFine("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                     cacheManager.writeFileAnnouncement(cacheFile);
                     if (sizeBeforeDelete == -1) {
@@ -716,7 +721,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                         " SupportetContent=" + isSupportedContent);
 
                 res.writeContent(hfos, null);
-                if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
+                if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
                 if (sizeBeforeDelete == -1) {
                     // no old file and no load. just data passing
                     //cacheEntry.status = plasmaHTCache.CACHE_PASSING;
@@ -760,7 +765,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         
         httpChunkedOutputStream chunkedOut = null;
         GZIPOutputStream gzippedOut = null;
-        OutputStream hfos = null;
+        Object hfos = null;
         
         // we respond on the request by using the cache, the cache is fresh        
         try {
@@ -809,20 +814,28 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 httpd.sendRespondHeader(conProp,respond,httpVer,203,cachedResponseHeader);
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
                 
+                // determine the content charset
+                String charSet = cachedResponseHeader.getCharacterEncoding();
+                if (charSet == null) charSet = "UTF-8";
+                
                 // make a transformer
                 if ((!(transformer.isIdentityTransformer())) &&
                         ((ext == null) || (!(plasmaParser.supportedRealtimeFileExtContains(url)))) &&
                         ((cachedResponseHeader == null) || (plasmaParser.realtimeParsableMimeTypesContains(cachedResponseHeader.mime())))) {
-                    hfos = new htmlFilterOutputStream((chunkedOut != null) ? chunkedOut : respond, null, transformer, (ext.length() == 0));
+                    hfos = new htmlFilterWriter((chunkedOut != null) ? chunkedOut : respond, charSet, null, transformer, (ext.length() == 0));
                 } else {
                     hfos = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
                 }
                 
                 // send also the complete body now from the cache
                 // simply read the file and transfer to out socket
-                serverFileUtils.copy(cacheFile,hfos);
+                if (hfos instanceof OutputStream) {
+                    serverFileUtils.copy(cacheFile,(OutputStream)hfos);
+                } else if (hfos instanceof Writer) {
+                    serverFileUtils.copy(cacheFile,charSet,(Writer)hfos);
+                }
                 
-                if (hfos instanceof htmlFilterOutputStream) ((htmlFilterOutputStream) hfos).finalize();
+                if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
                 if (gzippedOut != null) gzippedOut.finish();
                 if (chunkedOut != null) chunkedOut.finish();
             }

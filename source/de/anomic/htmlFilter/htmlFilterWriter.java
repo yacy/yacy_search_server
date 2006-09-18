@@ -4,9 +4,9 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2006-09-15 17:01:25 +0200 (Fr, 15 Sep 2006) $
+// $LastChangedRevision: 2598 $
+// $LastChangedBy: theli $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,34 +50,37 @@
 
 package de.anomic.htmlFilter;
 
-import de.anomic.net.URL;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.Properties;
-import de.anomic.server.serverByteBuffer;
 
-public final class htmlFilterOutputStream extends OutputStream {
+import de.anomic.net.URL;
+import de.anomic.server.serverCharBuffer;
 
-    public static final byte lb = (byte) '<';
-    public static final byte rb = (byte) '>';
-    public static final byte dash = (byte) '-';
-    public static final byte excl = (byte) '!';
-    public static final byte singlequote = (byte) 39;
-    public static final byte doublequote = (byte) 34;
+public final class htmlFilterWriter extends Writer {
 
-    private OutputStream out;
-    private serverByteBuffer buffer;
+    public static final char lb = '<';
+    public static final char rb = '>';
+    public static final char dash = '-';
+    public static final char excl = '!';
+    public static final char singlequote = '\'';
+    public static final char doublequote = '"';
+
+    private OutputStream outStream;
+    private OutputStreamWriter out;
+    private serverCharBuffer buffer;
     private String       filterTag;
     private Properties   filterOpts;
-    private serverByteBuffer filterCont;
+    private serverCharBuffer filterCont;
     private htmlFilterScraper scraper;
     private htmlFilterTransformer transformer;
     private boolean inSingleQuote;
@@ -87,13 +90,17 @@ public final class htmlFilterOutputStream extends OutputStream {
     private boolean binaryUnsuspect;
     private boolean passbyIfBinarySuspect;
 
-    public htmlFilterOutputStream(OutputStream out, htmlFilterScraper scraper,
-                                  htmlFilterTransformer transformer,
-                                  boolean passbyIfBinarySuspect) {
-        this.out           = out;
+    public htmlFilterWriter(
+            OutputStream outStream,
+            String outputStreamCharset,
+            htmlFilterScraper scraper,
+            htmlFilterTransformer transformer,
+            boolean passbyIfBinarySuspect
+    ) throws UnsupportedEncodingException {
+        this.outStream     = outStream;
         this.scraper       = scraper;
         this.transformer   = transformer;
-        this.buffer        = new serverByteBuffer(1024);
+        this.buffer        = new serverCharBuffer(1024);
         this.filterTag     = null;
         this.filterOpts    = null;
         this.filterCont    = null;
@@ -103,74 +110,77 @@ public final class htmlFilterOutputStream extends OutputStream {
         this.inScript      = false;
         this.binaryUnsuspect = true;
         this.passbyIfBinarySuspect = passbyIfBinarySuspect;
+        
+        if (this.outStream != null) {
+            this.out = new OutputStreamWriter(this.outStream,(outputStreamCharset == null)?"UTF-8":outputStreamCharset);
+        }        
     }
 
-    public static byte[] genTag0raw(String tagname, boolean opening, byte[] tagopts) {
-        serverByteBuffer bb = new serverByteBuffer(tagname.length() + tagopts.length + 3);
-        bb.append((byte) '<');
+    public static char[] genTag0raw(String tagname, boolean opening, char[] tagopts) {
+        serverCharBuffer bb = new serverCharBuffer(tagname.length() + tagopts.length + 3);
+        bb.append('<');
         if (!opening) {
-            bb.append((byte) '/');
+            bb.append('/');
         }
-        bb.append(tagname.getBytes());
+        bb.append(tagname);
         if (tagopts.length > 0) {
 //          if (tagopts[0] == (byte) 32)
             bb.append(tagopts);
 //          else bb.append((byte) 32).append(tagopts);
         }
-        bb.append((byte) '>');
-        return bb.getBytes();
+        bb.append('>');
+        return bb.getChars();
     }
 
-    public static byte[] genTag1raw(String tagname, byte[] tagopts, byte[] text) {
-        serverByteBuffer bb = new serverByteBuffer(2 * tagname.length() + tagopts.length + text.length + 5);
-        bb.append((byte) '<').append(tagname.getBytes());
+    public static char[] genTag1raw(String tagname, char[] tagopts, char[] text) {
+        serverCharBuffer bb = new serverCharBuffer(2 * tagname.length() + tagopts.length + text.length + 5);
+        bb.append('<').append(tagname);
         if (tagopts.length > 0) {
 //          if (tagopts[0] == (byte) 32)
             bb.append(tagopts);
 //          else bb.append((byte) 32).append(tagopts);
         }
-        bb.append((byte) '>');
+        bb.append('>');
         bb.append(text);
-        bb.append((byte) '<').append((byte) '/').append(tagname.getBytes()).append((byte) '>');
-        return bb.getBytes();
+        bb.append('<').append('/').append(tagname).append('>');
+        return bb.getChars();
     }
 
-    public static byte[] genTag0(String tagname, Properties tagopts, byte quotechar) {
-        byte[] tagoptsx = (tagopts.size() == 0) ? null : genOpts(tagopts, quotechar);
-        serverByteBuffer bb = new serverByteBuffer(tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2).append((byte) '<').append(tagname.getBytes());
+    public static char[] genTag0(String tagname, Properties tagopts, char quotechar) {    
+        char[] tagoptsx = (tagopts.size() == 0) ? null : genOpts(tagopts, quotechar);
+        serverCharBuffer bb = new serverCharBuffer(tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
+        bb.append('<').append(tagname);
         if (tagoptsx != null) {
-            bb = bb.append((byte) 32).append(tagoptsx);
+            bb.append(32);
+            bb.append(tagoptsx);
         }
-        bb = bb.append((byte) '>');
-        return bb.getBytes();
+        bb.append('>');
+        return bb.getChars();    
     }
 
-    public static byte[] genTag1(String tagname, Properties tagopts, byte[] text, byte quotechar) {
-        byte[] gt0 = genTag0(tagname, tagopts, quotechar);
-        return new serverByteBuffer(gt0, gt0.length + text.length + tagname.length() + 3).append(text).append(("</" + tagname + ">").getBytes()).getBytes();
+    public static char[] genTag1(String tagname, Properties tagopts, char[] text, char quotechar) {        
+        char[] gt0 = genTag0(tagname, tagopts, quotechar);
+        serverCharBuffer cb = new serverCharBuffer(gt0, gt0.length + text.length + tagname.length() + 3);
+        cb.append(text).append('<').append('/').append(tagname).append('>');
+        return cb.getChars();        
     }
 
     // a helper method for pretty-printing of properties for html tags
-    public static byte[] genOpts(Properties prop, byte quotechar) {
+    public static char[] genOpts(Properties prop, char quotechar) {      
         Enumeration e = prop.propertyNames();
-        serverByteBuffer bb = new serverByteBuffer(prop.size() * 40);
+        serverCharBuffer bb = new serverCharBuffer(prop.size() * 40);
         String key;
         while (e.hasMoreElements()) {
             key = (String) e.nextElement();
-            bb = bb.append((byte) 32).append(key.getBytes()).append((byte) '=');
-            bb = bb.append(quotechar);
-            try {
-                bb.append(prop.getProperty(key).getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e1) {
-                bb.append(prop.getProperty(key).getBytes());
-            }
+            bb.append(32).append(key).append('=').append(quotechar);
+            bb.append(prop.getProperty(key));
             bb.append(quotechar); 
         }
-        if (bb.length() > 0) return bb.getBytes(1);
-        return bb.getBytes();
+        if (bb.length() > 0) return bb.getChars(1);
+        return bb.getChars();      
     }
 
-    private byte[] filterTag(String tag, boolean opening, byte[] content, byte quotechar) {
+    private char[] filterTag(String tag, boolean opening, char[] content, char quotechar) {
 //      System.out.println("FILTER1: filterTag=" + ((filterTag == null) ? "null" : filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + new String(content)); // debug
         if (filterTag == null) {
             // we are not collection tag text
@@ -185,18 +195,18 @@ public final class htmlFilterOutputStream extends OutputStream {
             if (opening) {
                 if ((scraper != null) && (scraper.isTag0(tag))) {
                     // this single tag is collected at once here
-                    scraper.scrapeTag0(tag, new serverByteBuffer(content).propParser(scraper.getCharset()));
+                    scraper.scrapeTag0(tag, new serverCharBuffer(content).propParser());
                 }
                 if ((transformer != null) && (transformer.isTag0(tag))) {
                     // this single tag is collected at once here
-                    return transformer.transformTag0(tag, new serverByteBuffer(content).propParser(scraper.getCharset()), quotechar);
+                    return transformer.transformTag0(tag, new serverCharBuffer(content).propParser(), quotechar);
                 } else if (((scraper != null) && (scraper.isTag1(tag))) ||
                            ((transformer != null) && (transformer.isTag1(tag)))) {
                     // ok, start collecting
                     filterTag = tag;
-                    filterOpts = new serverByteBuffer(content).propParser(scraper.getCharset());
-                    filterCont = new serverByteBuffer();
-                    return new byte[0];
+                    filterOpts = new serverCharBuffer(content).propParser();
+                    filterCont = new serverCharBuffer();
+                    return new char[0];
                 } else {
                      // we ignore that thing and return it again
                      return genTag0raw(tag, true, content);
@@ -217,23 +227,23 @@ public final class htmlFilterOutputStream extends OutputStream {
             } else {
                 filterCont.append(content);
             }
-            return new byte[0];
+            return new char[0];
         }
         
         // it's a tag! which one?
         if ((opening) || (!(tag.equals(filterTag)))) {
             // this tag is not our concern. just add it
             filterCont.append(genTag0raw(tag, opening, content));
-            return new byte[0];
+            return new char[0];
         }
         
         // it's our closing tag! return complete result.
-        byte[] ret;
-        if (scraper != null) scraper.scrapeTag1(filterTag, filterOpts, filterCont.getBytes());
+        char[] ret;
+        if (scraper != null) scraper.scrapeTag1(filterTag, filterOpts, filterCont.getChars());
         if (transformer != null) {
-            ret = transformer.transformTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
+            ret = transformer.transformTag1(filterTag, filterOpts, filterCont.getChars(), quotechar);
         } else {
-            ret = genTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
+            ret = genTag1(filterTag, filterOpts, filterCont.getChars(), quotechar);
         }
         filterTag = null;
         filterOpts = null;
@@ -241,18 +251,18 @@ public final class htmlFilterOutputStream extends OutputStream {
         return ret;
     }
 
-    private byte[] filterFinalize(byte quotechar) {
+    private char[] filterFinalize(char quotechar) {
         if (filterTag == null) {
-            return new byte[0];
+            return new char[0];
         }
         
         // it's our closing tag! return complete result.
-        byte[] ret;
-        if (scraper != null) scraper.scrapeTag1(filterTag, filterOpts, filterCont.getBytes());
+        char[] ret;
+        if (scraper != null) scraper.scrapeTag1(filterTag, filterOpts, filterCont.getChars());
         if (transformer != null) {
-            ret = transformer.transformTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
+            ret = transformer.transformTag1(filterTag, filterOpts, filterCont.getChars(), quotechar);
         } else {
-            ret = genTag1(filterTag, filterOpts, filterCont.getBytes(), quotechar);
+            ret = genTag1(filterTag, filterOpts, filterCont.getChars(), quotechar);
         }
         filterTag = null;
         filterOpts = null;
@@ -260,7 +270,7 @@ public final class htmlFilterOutputStream extends OutputStream {
         return ret;
     }
 
-    private byte[] filterSentence(byte[] in, byte quotechar) {
+    private char[] filterSentence(char[] in, char quotechar) {
         if (in.length == 0) return in;
 //      System.out.println("FILTER0: " + new String(in)); // debug
         // scan the string and parse structure
@@ -272,16 +282,16 @@ public final class htmlFilterOutputStream extends OutputStream {
             if (in[1] == '/') {
                 // a closing tag
                 tagend = tagEnd(in, 2);
-                tag = new String(in, 2, tagend - 2); // TODO: bugfix needed for other charsets
-                byte[] text = new byte[in.length - tagend - 1];
+                tag = new String(in, 2, tagend - 2); 
+                char[] text = new char[in.length - tagend - 1];
                 System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
                 return filterTag(tag, false, text, quotechar);
             }
             
             // an opening tag
             tagend = tagEnd(in, 1);
-            tag = new String(in, 1, tagend - 1);    // TODO: bugfix needed for other charsets
-            byte[] text = new byte[in.length - tagend - 1];
+            tag = new String(in, 1, tagend - 1);    
+            char[] text = new char[in.length - tagend - 1];
             System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
             return filterTag(tag, true, text, quotechar);
         }
@@ -290,10 +300,10 @@ public final class htmlFilterOutputStream extends OutputStream {
         return filterTag(null, true, in, quotechar);
     }
 
-    private static int tagEnd(byte[] tag, int start) {
+    private static int tagEnd(char[] tag, int start) {
         char c;
         for (int i = start; i < tag.length; i++) {
-            c = (char) tag[i];
+            c = tag[i];
             if (c != '!' && c != '-' &&
                 (c < '0' || c > '9') &&
                 (c < 'a' || c > 'z') &&
@@ -303,145 +313,141 @@ public final class htmlFilterOutputStream extends OutputStream {
         return tag.length - 1;
     }
 
-    public void write(int b) throws IOException {
-        write((byte) (b & 0xff));
-    }
-
-    private void write(byte b) throws IOException {
+    public void write(int c) throws IOException {
 //      System.out.println((char) b);
-        if ((binaryUnsuspect) && (binaryHint(b))) {
+        if ((binaryUnsuspect) && (binaryHint((char)c))) {
             binaryUnsuspect = false;
             if (passbyIfBinarySuspect) finalize();
         }
 
         if (binaryUnsuspect || !passbyIfBinarySuspect) {
-            byte[] filtered;
+            char[] filtered;
             if (inSingleQuote) {
-                buffer.append(b);
-                if (b == singlequote) inSingleQuote = false;
+                buffer.append(c);
+                if (c == singlequote) inSingleQuote = false;
                 // check error cases
-                if ((b == rb) && (buffer.byteAt(0) == lb)) {
+                if ((c == rb) && (buffer.charAt(0) == lb)) {
                     inSingleQuote = false;
                     // the tag ends here. after filtering: pass on
-                    filtered = filterSentence(buffer.getBytes(), singlequote);
+                    filtered = filterSentence(buffer.getChars(), singlequote);
                     if (out != null) { out.write(filtered); }
                     // buffer = new serverByteBuffer();
                     buffer.reset();
                 }
             } else if (inDoubleQuote) {
-                buffer.append(b);
-                if (b == doublequote) inDoubleQuote = false;
+                buffer.append(c);
+                if (c == doublequote) inDoubleQuote = false;
                 // check error cases
-                if (b == rb && buffer.byteAt(0) == lb) {
+                if (c == rb && buffer.charAt(0) == lb) {
                     inDoubleQuote = false;
                     // the tag ends here. after filtering: pass on
-                    filtered = filterSentence(buffer.getBytes(), doublequote);
+                    filtered = filterSentence(buffer.getChars(), doublequote);
                     if (out != null) out.write(filtered);
                     // buffer = new serverByteBuffer();
                     buffer.reset();
                 }
             } else if (inComment) {
-                buffer.append(b);
-                if (b == rb &&
+                buffer.append(c);
+                if (c == rb &&
                     buffer.length() > 6 &&
-                    buffer.byteAt(buffer.length() - 3) == dash) {
+                    buffer.charAt(buffer.length() - 3) == dash) {
                     // comment is at end
                     inComment = false;
-                    if (out != null) out.write(buffer.getBytes());
+                    if (out != null) out.write(buffer.getChars());
                     // buffer = new serverByteBuffer();
                     buffer.reset();
                 }
             } else if (inScript) {
-                buffer.append(b);
+                buffer.append(c);
                 int bufferLength = buffer.length();
-                if ((b == rb) && (bufferLength > 14) &&
-                    (buffer.byteAt(bufferLength - 8) == (byte) '/') &&
-                    (buffer.byteAt(bufferLength - 7) == (byte) 's') &&
-                    (buffer.byteAt(bufferLength - 6) == (byte) 'c') &&
-                    (buffer.byteAt(bufferLength - 5) == (byte) 'r') &&
-                    (buffer.byteAt(bufferLength - 4) == (byte) 'i') &&
-                    (buffer.byteAt(bufferLength - 3) == (byte) 'p') &&
-                    (buffer.byteAt(bufferLength - 2) == (byte) 't')) {
+                if ((c == rb) && (bufferLength > 14) &&
+                    (buffer.charAt(bufferLength - 8) == '/') &&
+                    (buffer.charAt(bufferLength - 7) == 's') &&
+                    (buffer.charAt(bufferLength - 6) == 'c') &&
+                    (buffer.charAt(bufferLength - 5) == 'r') &&
+                    (buffer.charAt(bufferLength - 4) == 'i') &&
+                    (buffer.charAt(bufferLength - 3) == 'p') &&
+                    (buffer.charAt(bufferLength - 2) == 't')) {
                     // script is at end
                     inScript = false;
-                    if (out != null) out.write(buffer.getBytes());
+                    if (out != null) out.write(buffer.getChars());
                     // buffer = new serverByteBuffer();
                     buffer.reset();
                 }
             } else {
                 if (buffer.length() == 0) {
-                    if (b == rb) {
+                    if (c == rb) {
                         // very strange error case; we just let it pass
-                        if (out != null) out.write(b);
+                        if (out != null) out.write(c);
                     } else {
-                        buffer.append(b);
+                        buffer.append(c);
                     }
-                } else if (buffer.byteAt(0) == lb) {
-                    if (b == singlequote) inSingleQuote = true;
-                    if (b == doublequote) inDoubleQuote = true;
+                } else if (buffer.charAt(0) == lb) {
+                    if (c == singlequote) inSingleQuote = true;
+                    if (c == doublequote) inDoubleQuote = true;
                     // fill in tag text
-                    if ((buffer.length() == 3) && (buffer.byteAt(1) == excl) &&
-                        (buffer.byteAt(2) == dash) && (b == dash)) {
+                    if ((buffer.length() == 3) && (buffer.charAt(1) == excl) &&
+                        (buffer.charAt(2) == dash) && (c == dash)) {
                         // this is the start of a comment
                         inComment = true;
-                        buffer.append(b);
+                        buffer.append(c);
                     } else if ((buffer.length() == 6) &&
-                               (buffer.byteAt(1) == (byte) 's') &&
-                               (buffer.byteAt(2) == (byte) 'c') &&
-                               (buffer.byteAt(3) == (byte) 'r') &&
-                               (buffer.byteAt(4) == (byte) 'i') &&
-                               (buffer.byteAt(5) == (byte) 'p') &&
-                                             (b  == (byte) 't')) {
+                               (buffer.charAt(1) == 's') &&
+                               (buffer.charAt(2) == 'c') &&
+                               (buffer.charAt(3) == 'r') &&
+                               (buffer.charAt(4) == 'i') &&
+                               (buffer.charAt(5) == 'p') &&
+                                             (c  == 't')) {
                         // this is the start of a comment
                         inScript = true;
-                        buffer.append(b);
-                    } else if (b == rb) {
-                        buffer.append(b);
+                        buffer.append(c);
+                    } else if (c == rb) {
+                        buffer.append(c);
                         // the tag ends here. after filtering: pass on
-                        filtered = filterSentence(buffer.getBytes(), doublequote);
+                        filtered = filterSentence(buffer.getChars(), doublequote);
                         if (out != null) out.write(filtered);
                         // buffer = new serverByteBuffer();
                         buffer.reset();
-                    } else if (b == lb) {
+                    } else if (c == lb) {
                         // this is an error case
                         // we consider that there is one rb missing
                         if (buffer.length() > 0) {
-                            filtered = filterSentence(buffer.getBytes(), doublequote);
+                            filtered = filterSentence(buffer.getChars(), doublequote);
                             if (out != null) out.write(filtered);
                         }
                         // buffer = new serverByteBuffer();
                         buffer.reset();
-                        buffer.append(b);
+                        buffer.append(c);
                     } else {
-                        buffer.append(b);
+                        buffer.append(c);
                     }
                 } else {
                     // fill in plain text
-                    if (b == lb) {
+                    if (c == lb) {
                         // the text ends here
                         if (buffer.length() > 0) {
-                            filtered = filterSentence(buffer.getBytes(), doublequote);
+                            filtered = filterSentence(buffer.getChars(), doublequote);
                             if (out != null) out.write(filtered);
                         }
                         // buffer = new serverByteBuffer();
                         buffer.reset();
-                        buffer.append(b);
+                        buffer.append(c);
                     } else {
                         // simply append
-                        buffer.append(b);
+                        buffer.append(c);
                     }
                 }
             }
         } else {
-            out.write(b);
+            out.write(c);
         }
     }
 
-    public void write(byte b[]) throws IOException {
-        this.write(b, 0, b.length);
+    public void write(char b[]) throws IOException {
+        write(b, 0, b.length);
     }
 
-    public void write(byte b[], int off, int len) throws IOException {
+    public void write(char b[], int off, int len) throws IOException {
 //      System.out.println(new String(b, off, len));
         if ((off | len | (b.length - (len + off)) | (off + len)) < 0) throw new IndexOutOfBoundsException();
         for (int i = off ; i < (len - off) ; i++) this.write(b[i]);
@@ -462,15 +468,15 @@ public final class htmlFilterOutputStream extends OutputStream {
     }
 
     public void close() throws IOException {
-        byte quotechar = (inSingleQuote) ? singlequote : doublequote;
+        char quotechar = (inSingleQuote) ? singlequote : doublequote;
         if (buffer != null) {
             if (buffer.length() > 0) {
-                byte[] filtered = filterSentence(buffer.getBytes(), quotechar);
+                char[] filtered = filterSentence(buffer.getChars(), quotechar);
                 if (out != null) out.write(filtered);
             }
             buffer = null;
         }
-        byte[] finalized = filterFinalize(quotechar);
+        char[] finalized = filterFinalize(quotechar);
         if (out != null) {
             if (finalized != null) out.write(finalized);
             out.flush();
@@ -483,10 +489,11 @@ public final class htmlFilterOutputStream extends OutputStream {
 //      if (transformer != null) {transformer.close(); transformer = null;}
     }
 
-    private static boolean binaryHint(byte b) {
-        if (b < 0) return false;
-        if (b > 31) return false;
-        if ((b == 8) || (b == 9) || (b == 10) || (b == 13)) return false;
+    private static boolean binaryHint(char c) {
+//        return Character.isDefined(c);
+        if (c < 0) return false;
+        if (c > 31) return false;
+        if ((c == 8) || (c == 9) || (c == 10) || (c == 13)) return false;
 //      return false;
 //      System.out.println("BINARY HINT: " + (int) b);
         return true;
@@ -499,14 +506,16 @@ public final class htmlFilterOutputStream extends OutputStream {
     public static void main(String[] args) {
         // takes one argument: a file name 
         if (args.length != 1) return;
-        byte[] buffer = new byte[512];
+        char[] buffer = new char[512];
         try {
             htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL("http://localhost:8080"));
-            htmlFilterTransformer transformer = new htmlFilterContentTransformer();
+            htmlFilterTransformer transformer = new htmlFilterContentTransformer();            
+            // TODO: this does not work at the moment
+            System.exit(0);
             transformer.init("gettext");
-            InputStream is = new FileInputStream(args[0]);
+            Reader is = new FileReader(args[0]);
             FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));
-            OutputStream os = new htmlFilterOutputStream(fos, scraper, transformer, false);
+            Writer os = new htmlFilterWriter(fos, "UTF-8",scraper, transformer, false);
             int i;
             while ((i = is.read(buffer)) > 0) os.write(buffer, 0, i);
             os.close();

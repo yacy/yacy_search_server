@@ -62,7 +62,7 @@ public abstract class htmlFilterAbstractTransformer implements htmlFilterTransfo
     }
 
     //the 'missing' method that shall be implemented:
-    public abstract byte[] transformText(byte[] text);
+    public abstract char[] transformText(char[] text);
     /* could be easily implemented as:
     {
 	return text;
@@ -70,12 +70,12 @@ public abstract class htmlFilterAbstractTransformer implements htmlFilterTransfo
     */
 
     // the other methods must take into account to construct the return value correctly
-    public byte[] transformTag0(String tagname, Properties tagopts, byte quotechar) {
-	return htmlFilterOutputStream.genTag0(tagname, tagopts, quotechar);
+    public char[] transformTag0(String tagname, Properties tagopts, char quotechar) {
+	return htmlFilterWriter.genTag0(tagname, tagopts, quotechar);
     }
 
-    public byte[] transformTag1(String tagname, Properties tagopts, byte[] text, byte quotechar) {
-	return htmlFilterOutputStream.genTag1(tagname, tagopts, text, quotechar);
+    public char[] transformTag1(String tagname, Properties tagopts, char[] text, char quotechar) {
+	return htmlFilterWriter.genTag1(tagname, tagopts, text, quotechar);
     }
 
     public void close() {

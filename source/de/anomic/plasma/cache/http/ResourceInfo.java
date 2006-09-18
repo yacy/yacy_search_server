@@ -111,13 +111,9 @@ public class ResourceInfo implements IResourceInfo {
         return ((pos < 0) ? mimeType : mimeType.substring(0, pos));          
     }
     
-    public String getCharSet() {
+    public String getCharacterEncoding() {
         if (this.responseHeader == null) return null;
-        
-        String mimeType = this.responseHeader.mime();
-        
-        int pos = mimeType.indexOf(';');
-        return ((pos < 0) ? null : mimeType.substring(pos));          
+        return this.responseHeader.getCharacterEncoding();      
     }
 
     /**

@@ -52,8 +52,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.StringTokenizer;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -92,6 +96,75 @@ public final class serverFileUtils {
         dest.flush();
         
         return total;
+    }
+    
+    public static void writeX(InputStream source, OutputStream procOS, OutputStream bufferOS) throws IOException {
+        byte[] buffer = new byte[2048];
+        int l;
+
+        while ((l = source.read(buffer, 0, buffer.length)) >= 0) {
+            if (procOS != null) procOS.write(buffer, 0, l);
+            if (bufferOS != null) bufferOS.write(buffer, 0, l);
+        }
+        
+        // flush the streams
+        if (procOS != null) procOS.flush();
+        if (bufferOS != null) bufferOS.flush();
+        buffer = null;
+    }
+    
+    public static void writeX(Reader source, Writer procOS, Writer bufferOS) throws IOException {
+        char[] buffer = new char[2048];
+        int l;
+
+        while ((l = source.read(buffer, 0, buffer.length)) >= 0) {
+            if (procOS != null) procOS.write(buffer, 0, l);
+            if (bufferOS != null) bufferOS.write(buffer, 0, l);
+        }
+        
+        // flush the streams
+        if (procOS != null) procOS.flush();
+        if (bufferOS != null) bufferOS.flush();
+        buffer = null;
+    }      
+    
+    public static void writeX(InputStream source, String inputCharset, Writer procOS, OutputStream bufferOS, String outputCharset) throws IOException {
+        InputStreamReader sourceReader = new InputStreamReader(source,inputCharset);
+        OutputStreamWriter bufferOSWriter = new OutputStreamWriter(bufferOS,outputCharset);
+        writeX(sourceReader,procOS,bufferOSWriter);
+    }    
+
+    
+    public static int copy (File source, String inputCharset, Writer dest) throws IOException {
+        InputStream fis = null;
+        try {
+            fis = new FileInputStream(source);
+            return copy(fis, dest, inputCharset);
+        } finally {
+            if (fis != null) try { fis.close(); } catch (Exception e) {}
+        }
+    }    
+    
+    public static int copy (InputStream source, Writer dest, String inputCharset) throws IOException {
+        InputStreamReader reader = new InputStreamReader(source,inputCharset);
+        return copy(reader,dest);
+    }
+    
+    public static int copy (String source, Writer dest) throws IOException {
+        dest.write(source);
+        dest.flush();
+        return source.length();
+    }
+    
+    public static int copy (Reader source, Writer dest) throws IOException {        
+        char[] buffer = new char[4096];
+        int count = 0;
+        int n = 0;
+        while (-1 != (n = source.read(buffer))) {
+            dest.write(buffer, 0, n);
+            count += n;
+        }
+        return count;
     }
 
     /**
@@ -230,6 +303,10 @@ public final class serverFileUtils {
         } finally {
             if (zipOut != null) try { zipOut.close(); } catch (Exception e) {}
         }
+    }
+    
+    public static void write(String source, Writer dest) throws IOException {
+        copy(source,dest);
     }
 
     public static void write(byte[] source, OutputStream dest) throws IOException {

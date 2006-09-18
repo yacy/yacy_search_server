@@ -47,7 +47,6 @@ package de.anomic.plasma;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,8 +59,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterOutputStream;
 import de.anomic.kelondro.kelondroMSetTools;
 
 public final class plasmaCondenser {
@@ -682,47 +679,47 @@ public final class plasmaCondenser {
     }
         
     public static void main(String[] args) {
-        if ((args.length == 0) || (args.length > 3))
-            System.out.println("wrong number of arguments: plasmaCondenser -text|-html <infile> <outfile>");
-        else
-            try {
-                plasmaCondenser pc = null;
-
-                // read and analyse file
-                File file = new File(args[1]);
-                InputStream textStream = null;
-                if (args[0].equals("-text")) {
-                    // read a text file
-                    textStream = new FileInputStream(file);
-                } else if (args[0].equals("-html")) {
-                    // read a html file
-                    htmlFilterContentScraper cs = new htmlFilterContentScraper(new de.anomic.net.URL("http://localhost/"));
-                    htmlFilterOutputStream fos = new htmlFilterOutputStream(null, cs, null, false);
-                    FileInputStream fis = new FileInputStream(file);
-                    byte[] buffer = new byte[512];
-                    int i;
-                    while ((i = fis.read(buffer)) > 0) fos.write(buffer, 0, i);
-                    fis.close();
-                    fos.close();
-                    // cs.print();
-                    // System.out.println("TEXT:" + new String(cs.getText()));
-                    textStream = new ByteArrayInputStream(cs.getText());
-                } else {
-                    System.out.println("first argument must be either '-text' or '-html'");
-                    System.exit(-1);
-                }
-                
-                // call condenser
-                pc = new plasmaCondenser(textStream, 1, 0);
-                textStream.close();
-                
-                // output result
-                pc.writeMapToFile(new File(args[2]));
-                pc.print();
-                //System.out.println("ANALYSIS:" + pc.getAnalysis().toString());
-            } catch (IOException e) {
-                System.out.println("Problem with input file: " + e.getMessage());
-            }
+//        if ((args.length == 0) || (args.length > 3))
+//            System.out.println("wrong number of arguments: plasmaCondenser -text|-html <infile> <outfile>");
+//        else
+//            try {
+//                plasmaCondenser pc = null;
+//
+//                // read and analyse file
+//                File file = new File(args[1]);
+//                InputStream textStream = null;
+//                if (args[0].equals("-text")) {
+//                    // read a text file
+//                    textStream = new FileInputStream(file);
+//                } else if (args[0].equals("-html")) {
+//                    // read a html file
+//                    htmlFilterContentScraper cs = new htmlFilterContentScraper(new de.anomic.net.URL("http://localhost/"));
+//                    htmlFilterOutputStream fos = new htmlFilterOutputStream(null, cs, null, false);
+//                    FileInputStream fis = new FileInputStream(file);
+//                    byte[] buffer = new byte[512];
+//                    int i;
+//                    while ((i = fis.read(buffer)) > 0) fos.write(buffer, 0, i);
+//                    fis.close();
+//                    fos.close();
+//                    // cs.print();
+//                    // System.out.println("TEXT:" + new String(cs.getText()));
+//                    textStream = new ByteArrayInputStream(cs.getText());
+//                } else {
+//                    System.out.println("first argument must be either '-text' or '-html'");
+//                    System.exit(-1);
+//                }
+//                
+//                // call condenser
+//                pc = new plasmaCondenser(textStream, 1, 0);
+//                textStream.close();
+//                
+//                // output result
+//                pc.writeMapToFile(new File(args[2]));
+//                pc.print();
+//                //System.out.println("ANALYSIS:" + pc.getAnalysis().toString());
+//            } catch (IOException e) {
+//                System.out.println("Problem with input file: " + e.getMessage());
+//            }
     }
 
 }

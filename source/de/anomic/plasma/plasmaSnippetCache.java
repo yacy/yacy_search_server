@@ -413,7 +413,7 @@ public class plasmaSnippetCache {
                 return null;
             }
             if (plasmaParser.supportedMimeTypesContains(docInfo.getMimeType())) {
-                return this.parser.parseSource(url, docInfo.getMimeType(), docInfo.getCharSet(), resource);
+                return this.parser.parseSource(url, docInfo.getMimeType(), docInfo.getCharacterEncoding(), resource);
             }
             return null;
         } catch (InterruptedException e) {

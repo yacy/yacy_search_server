@@ -43,9 +43,6 @@
 
 package de.anomic.htmlFilter;
 
-import de.anomic.server.serverByteBuffer;
-import de.anomic.net.URL;
-
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
@@ -58,6 +55,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
+
+import de.anomic.net.URL;
+import de.anomic.server.serverCharBuffer;
 
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 
@@ -95,10 +95,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     private String title;
     //private String headline;
     private List[] headlines;
-    private serverByteBuffer content;
+    private serverCharBuffer content;
     
     private URL root;
-    private String charset = "UTF-8";
 
     public htmlFilterContentScraper(URL root) {
         // the root value here will not be used to load the resource.
@@ -111,27 +110,13 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         this.title = "";
         this.headlines = new ArrayList[4];
         for (int i = 0; i < 4; i++) headlines[i] = new ArrayList();
-        this.content = new serverByteBuffer(1024);
-    }
-
-    public void setCharset(String charset) throws UnsupportedCharsetException {
-        if (charset == null) return;
-        
-        // testing if charset exists
-        Charset.forName(charset);
-        
-        // remember it
-        this.charset = charset;
+        this.content = new serverCharBuffer(1024);
     }
     
-    public String getCharset() {
-        return this.charset;
-    }
-    
-    public void scrapeText(byte[] newtext) {
+    public void scrapeText(char[] newtext) {
         // System.out.println("SCRAPE: " + new String(newtext));
-        if ((content.length() != 0) && (content.byteAt(content.length() - 1) != 32)) content.append(32);
-        content.append(super.stripAll(new serverByteBuffer(newtext, newtext.length + 1)).trim()).append(32);
+        if ((content.length() != 0) && (content.charAt(content.length() - 1) != 32)) content.append(32);
+        content.append(super.stripAll(new serverCharBuffer(newtext, newtext.length + 1)).trim()).append(32);
     }
 
     public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
@@ -188,31 +173,31 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
     }
 
-    public void scrapeTag1(String tagname, Properties tagopts, byte[] text) {
+    public void scrapeTag1(String tagname, Properties tagopts, char[] text) {
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
         if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) {
             String href = tagopts.getProperty("href", "");
-            if (href.length() > 0) anchors.put(absolutePath(href), super.stripAll(new serverByteBuffer(text)).trim().toString(this.charset));
+            if (href.length() > 0) anchors.put(absolutePath(href), super.stripAll(new serverCharBuffer(text)).trim().toString());
         }
         String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString(this.charset));
+            h = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());
             if (h.length() > 0) headlines[0].add(h);
         }
         if ((tagname.equalsIgnoreCase("h2")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString(this.charset));
+            h = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());
             if (h.length() > 0) headlines[1].add(h);
         }
         if ((tagname.equalsIgnoreCase("h3")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString(this.charset));
+            h = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());
             if (h.length() > 0) headlines[2].add(h);
         }
         if ((tagname.equalsIgnoreCase("h4")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new serverByteBuffer(text)).toString(this.charset));
+            h = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());
             if (h.length() > 0) headlines[3].add(h);
         }
         if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) 
-            title = cleanLine(super.stripAll(new serverByteBuffer(text)).toString(this.charset));        
+            title = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());        
     }
 
     private static String cleanLine(String s) {
@@ -250,13 +235,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         
         // extract headline from content
         if (content.length() > 80) {
-            try {
-                return cleanLine(new String(content.getBytes(), 0, 80,this.charset));
-            } catch (UnsupportedEncodingException e) {
-                return cleanLine(new String(content.getBytes(), 0, 80));
-            }
+            return cleanLine(new String(content.getChars(), 0, 80));
         }
-        return cleanLine(content.trim().toString(this.charset));
+        return cleanLine(content.trim().toString());
     }
     
     public String[] getHeadlines(int i) {
@@ -267,7 +248,11 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public byte[] getText() {
-       return content.getBytes();
+        try {
+            return content.toString().getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return content.toString().getBytes();
+        }
     }
 
     public Map getAnchors() {
@@ -359,7 +344,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         System.out.println("ANCHORS  :" + anchors.toString());
         System.out.println("IMAGES   :" + images.toString());
         System.out.println("METAS    :" + metas.toString());
-        System.out.println("TEXT     :" + new String(content.getBytes()));
+        System.out.println("TEXT     :" + content.toString());
     }
     
     

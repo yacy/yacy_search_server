@@ -40,7 +40,6 @@
 
 package de.anomic.htmlFilter;
 
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.Properties;
 
 public interface htmlFilterScraper {
@@ -49,22 +48,11 @@ public interface htmlFilterScraper {
 
     public boolean isTag1(String tag);
 
-    public void scrapeText(byte[] text);
+    public void scrapeText(char[] text);
 
     public void scrapeTag0(String tagname, Properties tagopts);
 
-    public void scrapeTag1(String tagname, Properties tagopts, byte[] text);
+    public void scrapeTag1(String tagname, Properties tagopts, char[] text);
     
     public void close();
-    
-    /**
-     * @param charset the charset of the source document
-     * @throws UnsupportedCharsetException
-     */
-    public void setCharset(String charset) throws UnsupportedCharsetException;
-    
-    /**
-     * @return charset the charset of the source document
-     */
-    public String getCharset();
 }

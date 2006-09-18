@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.io.Writer;
 import java.lang.Math;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -86,6 +87,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
 
@@ -1586,65 +1588,65 @@ do upload
         }
     }
     
-    /**
-     * This method outputs the input stream to either an output socket or an
-     * file or both. If the length of the input stream is given in the
-     * header, exactly that lenght is written. Otherwise the stream is
-     * written, till it is closed. If this instance is zipped, stream the
-     * input stream through gzip to unzip it on the fly.
-     *
-     * @param procOS OutputStream where the stream is to be written. If null
-     * no write happens.
-     * @param bufferOS OutputStream where the stream is to be written too.
-     * If null no write happens.
-     * @param clientInput InputStream where the content is to be read from.
-     * @throws IOException
-     */
-     public static void writeContentX(InputStream clientInput, boolean usegzip, long length, OutputStream procOS, OutputStream bufferOS) throws IOException {
-         // we write length bytes, but if length == -1 (or < 0) then we
-         // write until the input stream closes
-         // procOS == null -> no write to procOS
-         // file == null -> no write to file
-         // If the Content-Encoding is gzip, we gunzip on-the-fly
-         // and change the Content-Encoding and Content-Length attributes in the header
-         byte[] buffer = new byte[2048];
-         int l;
-         long len = 0;
-
-         // using the proper intput stream
-         InputStream dis = (usegzip) ? (InputStream) new GZIPInputStream(clientInput) : (InputStream) clientInput;
-
-         // we have three methods of reading: length-based, length-based gzip and connection-close-based
-         try {
-             if (length > 0) {
-                 // we read exactly 'length' bytes
-                 while ((len < length) && ((l = dis.read(buffer)) >= 0)) {
-                     if (procOS != null) procOS.write(buffer, 0, l);
-                     if (bufferOS != null) bufferOS.write(buffer, 0, l);
-                     len += l;
-                 }
-             } else {
-                 // no content-length was given, thus we read until the connection closes
-                 while ((l = dis.read(buffer, 0, buffer.length)) >= 0) {
-                     if (procOS != null) procOS.write(buffer, 0, l);
-                     if (bufferOS != null) bufferOS.write(buffer, 0, l);
-                 }
-             }
-         } catch (java.net.SocketException e) {
-             throw new IOException("Socket exception: " + e.getMessage());
-         } catch (java.net.SocketTimeoutException e) {
-             throw new IOException("Socket time-out: " + e.getMessage());
-         } finally {
-             // close the streams
-             if (procOS != null) {
-                 if (procOS instanceof httpChunkedOutputStream)
-                     ((httpChunkedOutputStream)procOS).finish();
-                 procOS.flush();
-             }
-             if (bufferOS != null) bufferOS.flush();
-             buffer = null;
-         }
-     }
+//    /**
+//     * This method outputs the input stream to either an output socket or an
+//     * file or both. If the length of the input stream is given in the
+//     * header, exactly that lenght is written. Otherwise the stream is
+//     * written, till it is closed. If this instance is zipped, stream the
+//     * input stream through gzip to unzip it on the fly.
+//     *
+//     * @param procOS OutputStream where the stream is to be written. If null
+//     * no write happens.
+//     * @param bufferOS OutputStream where the stream is to be written too.
+//     * If null no write happens.
+//     * @param clientInput InputStream where the content is to be read from.
+//     * @throws IOException
+//     */
+//     private static void writeContentX(InputStream clientInput, boolean usegzip, long length, OutputStream procOS, OutputStream bufferOS) throws IOException {
+//         // we write length bytes, but if length == -1 (or < 0) then we
+//         // write until the input stream closes
+//         // procOS == null -> no write to procOS
+//         // file == null -> no write to file
+//         // If the Content-Encoding is gzip, we gunzip on-the-fly
+//         // and change the Content-Encoding and Content-Length attributes in the header
+//         byte[] buffer = new byte[2048];
+//         int l;
+//         long len = 0;
+//
+//         // using the proper intput stream
+//         InputStream dis = (usegzip) ? (InputStream) new GZIPInputStream(clientInput) : (InputStream) clientInput;
+//
+//         // we have three methods of reading: length-based, length-based gzip and connection-close-based
+//         try {
+//             if (length > 0) {
+//                 // we read exactly 'length' bytes
+//                 while ((len < length) && ((l = dis.read(buffer)) >= 0)) {
+//                     if (procOS != null) procOS.write(buffer, 0, l);
+//                     if (bufferOS != null) bufferOS.write(buffer, 0, l);
+//                     len += l;
+//                 }
+//             } else {
+//                 // no content-length was given, thus we read until the connection closes
+//                 while ((l = dis.read(buffer, 0, buffer.length)) >= 0) {
+//                     if (procOS != null) procOS.write(buffer, 0, l);
+//                     if (bufferOS != null) bufferOS.write(buffer, 0, l);
+//                 }
+//             }
+//         } catch (java.net.SocketException e) {
+//             throw new IOException("Socket exception: " + e.getMessage());
+//         } catch (java.net.SocketTimeoutException e) {
+//             throw new IOException("Socket time-out: " + e.getMessage());
+//         } finally {
+//             // close the streams
+//             if (procOS != null) {
+//                 if (procOS instanceof httpChunkedOutputStream)
+//                     ((httpChunkedOutputStream)procOS).finish();
+//                 procOS.flush();
+//             }
+//             if (bufferOS != null) bufferOS.flush();
+//             buffer = null;
+//         }
+//     }
 
 
     /**
@@ -1800,17 +1802,39 @@ do upload
         }
 
         /**
+         * Returns a {@link InputStream} to read the response body. If the response was encoded using <code>Content-Encoding: gzip</code>
+         * a {@link GZIPInputStream} is returned. If the <code>Content-Length</code> header was set,
+         * a {@link httpContentLengthInputStream} is returned which returns <code>-1</code> if the end of the
+         * response body was reached.
+         * 
+         * @return
+         * @throws IOException
+         */
+        public InputStream getContentInputStream() throws IOException {
+            if (this.gzip) {
+                // use a gzip input stream for Content-Encoding: gzip
+                return new GZIPInputStream(httpc.this.clientInput);
+            } else if (this.responseHeader.contentLength() != -1) {
+                // use a httpContentLengthInputStream to read until the end of the response body is reached
+                return new httpContentLengthInputStream(httpc.this.clientInput,this.responseHeader.contentLength());
+            } 
+            // no Content-Lenght was set. In this case we can read until EOF
+            return httpc.this.clientInput;
+        }
+        
+        /**
         * This method just output the found content into an byte-array and
         * returns it.
         *
-        * @return 
+        * @return
         * @throws IOException 
         */
         public byte[] writeContent() throws IOException {
-            int contentLength = (int) this.responseHeader.contentLength();
-            serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
-            writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), null, sbb);
-            return sbb.getBytes();
+//            int contentLength = (int) this.responseHeader.contentLength();
+//            serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
+//            writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), null, sbb);
+//            return sbb.getBytes();
+            return serverFileUtils.read(this.getContentInputStream());
         }
 
         /**
@@ -1821,12 +1845,23 @@ do upload
         * @return 
         * @throws IOException
         */
-        public byte[] writeContent(OutputStream procOS) throws IOException {
+        public byte[] writeContent(Object procOS) throws IOException {
             int contentLength = (int) this.responseHeader.contentLength();
             serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
-            writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, sbb);
+            
+            if (procOS instanceof OutputStream) {
+                //writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, sbb);
+                serverFileUtils.writeX(this.getContentInputStream(), (OutputStream)procOS, sbb);
+            } else if (procOS instanceof Writer) {
+                String charSet = this.responseHeader.getCharacterEncoding();
+                if (charSet == null) charSet = "UTF-8";
+                serverFileUtils.writeX(this.getContentInputStream(), charSet, (Writer)procOS, sbb, charSet);                
+            } else {
+                throw new IllegalArgumentException("Invalid procOS object type '" + procOS.getClass().getName() + "'");
+            }
+            
             return sbb.getBytes();
-        }
+        }        
 
         /**
         * This method writes the input stream to either another output stream
@@ -1836,13 +1871,22 @@ do upload
         * @param file
         * @throws IOException
         */
-        public void writeContent(OutputStream procOS, File file) throws IOException {
+        public void writeContent(Object procOS, File file) throws IOException {
             // this writes the input stream to either another output stream or
             // a file or both.
             FileOutputStream bufferOS = null;
             try {
                 if (file != null) bufferOS = new FileOutputStream(file);
-                writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, bufferOS);
+                if (procOS instanceof OutputStream) {
+                    serverFileUtils.writeX(this.getContentInputStream(), (OutputStream) procOS, bufferOS);
+                    //writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, bufferOS);
+                } else if (procOS instanceof Writer) {
+                    String charSet = this.responseHeader.getCharacterEncoding();
+                    if (charSet == null) charSet = "UTF-8";
+                    serverFileUtils.writeX(this.getContentInputStream(), charSet, (Writer)procOS, bufferOS, charSet);                
+                } else {
+                    throw new IllegalArgumentException("Invalid procOS object type '" + procOS.getClass().getName() + "'");
+                }
             } finally {
                 if (bufferOS != null) {
                     bufferOS.close();

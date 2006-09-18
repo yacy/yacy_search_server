@@ -44,10 +44,9 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -58,9 +57,10 @@ import java.util.regex.PatternSyntaxException;
 
 import de.anomic.data.wikiCode;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterOutputStream;
+import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -70,9 +70,9 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyNewsPool;
+import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacySeed;
 
 public class IndexCreate_p {
     
@@ -234,11 +234,15 @@ public class IndexCreate_p {
                                 // getting the content of the bookmark file
                                 byte[] fileContent = (byte[]) post.get("crawlingFile$file");
                                 
+                                // TODO: determine the real charset here ....
+                                String fileString = new String(fileContent,"UTF-8");
+                                
                                 // parsing the bookmark file and fetching the headline and contained links
                                 htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL(file));
-                                OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                                serverFileUtils.write(fileContent,os);
-                                os.close();
+                                //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
+                                Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
+                                serverFileUtils.write(fileString,writer);
+                                writer.close();
                                 
                                 //String headline = scraper.getHeadline();
                                 HashMap hyperlinks = (HashMap) scraper.getAnchors();

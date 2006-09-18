@@ -161,7 +161,7 @@ public class ResourceInfo implements IResourceInfo {
         return responseStatus != null && responseStatus.equalsIgnoreCase("OK");
     }
 
-    public String getCharSet() {
+    public String getCharacterEncoding() {
         return null;
     }
 

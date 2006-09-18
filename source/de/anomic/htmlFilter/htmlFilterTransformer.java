@@ -65,13 +65,13 @@ public interface htmlFilterTransformer {
     // method that is called with any text between tags
     // the returned text replaces the given text
     // if the text shall not be changed, it must be returned as called
-    public byte[] transformText(byte[] text);
+    public char[] transformText(char[] text);
 
     // method that is called when a body-less tag occurs
-    public byte[] transformTag0(String tagname, Properties tagopts, byte quotechar);
+    public char[] transformTag0(String tagname, Properties tagopts, char quotechar);
 
     // method that is called when a body-containing text occurs
-    public byte[] transformTag1(String tagname, Properties tagopts, byte[] text, byte quotechar);
+    public char[] transformTag1(String tagname, Properties tagopts, char[] text, char quotechar);
 
     public void close();
 }

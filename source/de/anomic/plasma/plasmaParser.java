@@ -50,7 +50,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
 
@@ -66,18 +66,19 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.pool.KeyedPoolableObjectFactory;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.commons.pool.impl.GenericObjectPool;
+
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterOutputStream;
+import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
-
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.apache.commons.pool.KeyedPoolableObjectFactory;
-import org.apache.commons.pool.impl.GenericObjectPool;
 
 public final class plasmaParser {
     public static final String PARSER_MODE_PROXY   = "PROXY";
@@ -482,12 +483,20 @@ public final class plasmaParser {
         
     }
 
-    public plasmaParserDocument parseSource(URL location, String mimeType, String charset, File sourceFile) throws InterruptedException {
+    public plasmaParserDocument parseSource(URL location, String mimeType, String documentCharset, File sourceFile) throws InterruptedException {
 
         Parser theParser = null;
         try {
+            // getting the mimetype of the document
             mimeType = getRealMimeType(mimeType);
+            
+            // getting the file extension of the document
             String fileExt = getFileExt(location);
+            
+            // getting the charset of the document
+            if (documentCharset == null)
+                // TODO: do a charset detection here ....
+                documentCharset = "ISO-8859-1";
             
             if (this.theLogger.isFine())
                 this.theLogger.logFine("Parsing " + location + " with mimeType '" + mimeType + 
@@ -547,7 +556,7 @@ public final class plasmaParser {
             
             // if a parser was found we use it ...
             if (theParser != null) {
-                return theParser.parse(location, mimeType,charset,sourceFile);
+                return theParser.parse(location, mimeType,documentCharset,sourceFile);
             } else if (realtimeParsableMimeTypesContains(mimeType)) {                      
                 // ...otherwise we make a scraper and transformer
                 htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
@@ -561,11 +570,17 @@ public final class plasmaParser {
                         return null;                        
                     }
                 }*/               
-                
-                OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
-                serverFileUtils.copy(sourceFile, hfos);
-                hfos.close();
-                return transformScraper(location, mimeType, scraper);
+                htmlFilterWriter writer = new htmlFilterWriter(null,null,scraper,null,false);
+                serverFileUtils.copy(sourceFile, documentCharset, writer);
+                writer.close();
+                //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
+                //serverFileUtils.copy(sourceFile, hfos);
+                //hfos.close();
+                if (writer.binarySuspect()) {
+                    this.theLogger.logInfo("Binary data found in URL " + location);
+                    return null;
+                }
+                return transformScraper(location, mimeType, documentCharset, scraper);
             } else {
                 serverLog.logWarning("PARSER", "parseSource2: wrong mime type");
                 return null;
@@ -581,13 +596,13 @@ public final class plasmaParser {
         }
     }
     
-    public plasmaParserDocument transformScraper(URL location, String mimeType, htmlFilterContentScraper scraper) {
+    public plasmaParserDocument transformScraper(URL location, String mimeType, String charSet, htmlFilterContentScraper scraper) {
         try {
             String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
             int p = 0;
             for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
             plasmaParserDocument ppd =  new plasmaParserDocument(new URL(location.toNormalform()),
-                                mimeType, scraper.getCharset(), scraper.getKeywords(),
+                                mimeType, charSet, scraper.getKeywords(),
                                 scraper.getTitle(), scraper.getTitle(),
                                 sections, scraper.getDescription(),
                                 scraper.getText(), scraper.getAnchors(), scraper.getImages());

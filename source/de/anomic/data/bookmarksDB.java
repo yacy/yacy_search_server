@@ -44,8 +44,7 @@ package de.anomic.data;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import de.anomic.net.URL;
+import java.io.Writer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -67,13 +66,15 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterOutputStream;
+import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
+import de.anomic.net.URL;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
@@ -441,9 +442,10 @@ public class bookmarksDB {
         try {
             //load the links
             htmlFilterContentScraper scraper = new htmlFilterContentScraper(baseURL);
-            OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-            serverFileUtils.write(input.getBytes(),os);
-            os.close();
+            //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
+            Writer writer= new htmlFilterWriter(null,null,scraper, null, false);
+            serverFileUtils.write(input,writer);
+            writer.close();
             links = (HashMap) scraper.getAnchors();
         } catch (IOException e) {}
         it=links.keySet().iterator();

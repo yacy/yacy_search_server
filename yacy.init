@@ -599,6 +599,9 @@ isTransparentProxy=false
 # Specifies if yacy should use the http connection keep-alive feature
 connectionKeepAliveSupport=true
 
+# Specifies the timeout the proxy sould use
+proxy.clientTimeout = 10000
+
 # Specifies if the proxy should send the via header according to RFC
 proxy.sendViaHeader=true
 

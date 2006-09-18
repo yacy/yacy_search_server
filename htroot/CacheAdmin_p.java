@@ -48,13 +48,15 @@
 
 import java.io.File;
 import java.io.OutputStream;
-import de.anomic.net.URL;
+import java.io.Writer;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
+
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterOutputStream;
+import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -112,9 +114,14 @@ public class CacheAdmin_p {
                     info.append("<img src=\"" + "CacheResource_p.html?path=").append(pathString).append("\">");
                 } else {
                     final htmlFilterContentScraper scraper = new htmlFilterContentScraper(url);
-                    final OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                    serverFileUtils.copy(file, os);
-                    final plasmaParserDocument document = switchboard.parser.transformScraper(url, "text/html", scraper);
+                    //final OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
+                    Writer writer = new htmlFilterWriter(null,null,scraper,null,false);                    
+                    String sourceCharset = resInfo.getCharacterEncoding();
+                    if (sourceCharset == null) sourceCharset = "UTF-8";
+                    String mimeType = resInfo.getMimeType();                    
+                    serverFileUtils.copy(file, sourceCharset, writer);
+                    writer.close();
+                    final plasmaParserDocument document = switchboard.parser.transformScraper(url, mimeType, sourceCharset, scraper);
                     info.append("<b>TITLE:</b><br>").append(scraper.getTitle()).append("<br>").append("<br>")
                         .append("<b>SECTION HEADLINES:</b><br>").append(formatTitles(document.getSectionTitles())).append("<br>")
                         .append("<b>HREF:</b><br>").append(formatAnchor(document.getHyperlinks())).append("<br>")
