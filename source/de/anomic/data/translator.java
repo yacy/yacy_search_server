@@ -8,6 +8,10 @@
 // This file ist contributed by Alexander Schier
 // last major change: 25.05.2005
 //
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -62,11 +66,9 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.lang.IndexOutOfBoundsException;
 
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-import de.anomic.data.listManager;
 
 /**
  * Wordlist based translator
