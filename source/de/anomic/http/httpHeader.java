@@ -82,6 +82,8 @@ public final class httpHeader extends TreeMap implements Map {
 
     
 	private static final long serialVersionUID = 17L;
+    
+    public static final String DEFAULT_CHARSET = "ISO-8859-1";
 	
 	/* =============================================================
      * Constants defining http versions
@@ -432,15 +434,18 @@ public final class httpHeader extends TreeMap implements Map {
     
     public String getCharacterEncoding() {
         String mimeType = mime();
-        
+       return extractCharsetFromMimetyeHeader(mimeType);
+    }  
+    
+    public static String extractCharsetFromMimetyeHeader(String mimeType) {        
         int idx = mimeType.indexOf(";");
         if (idx == -1) return null;
         
-        String encoding = mimeType.substring(idx + 1);
+        String encoding = mimeType.substring(idx + 1).trim();
         if (!encoding.startsWith("charset=")) return null;
         
-        return encoding.substring("charset=".length()).trim();           
-    }    
+        return encoding.substring("charset=".length()).trim();            
+    }
     
     public Date date() {
         return headerDate(httpHeader.DATE);

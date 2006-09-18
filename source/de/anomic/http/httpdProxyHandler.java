@@ -613,7 +613,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 this.theLogger.logFine("create transformer for URL " + url);
                 //hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
                 String charSet = res.responseHeader.getCharacterEncoding();
-                if (charSet == null) charSet = "UTF-8";
+                if (charSet == null) charSet = httpHeader.DEFAULT_CHARSET;
                 hfos = new htmlFilterWriter((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond),charSet, null, transformer, (ext.length() == 0));
             } else {
                 // simply pass through without parsing
@@ -816,7 +816,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 
                 // determine the content charset
                 String charSet = cachedResponseHeader.getCharacterEncoding();
-                if (charSet == null) charSet = "UTF-8";
+                if (charSet == null) charSet = httpHeader.DEFAULT_CHARSET;
                 
                 // make a transformer
                 if ((!(transformer.isIdentityTransformer())) &&

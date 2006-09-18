@@ -1854,7 +1854,7 @@ do upload
                 serverFileUtils.writeX(this.getContentInputStream(), (OutputStream)procOS, sbb);
             } else if (procOS instanceof Writer) {
                 String charSet = this.responseHeader.getCharacterEncoding();
-                if (charSet == null) charSet = "UTF-8";
+                if (charSet == null) charSet = httpHeader.DEFAULT_CHARSET;
                 serverFileUtils.writeX(this.getContentInputStream(), charSet, (Writer)procOS, sbb, charSet);                
             } else {
                 throw new IllegalArgumentException("Invalid procOS object type '" + procOS.getClass().getName() + "'");
@@ -1882,7 +1882,7 @@ do upload
                     //writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, bufferOS);
                 } else if (procOS instanceof Writer) {
                     String charSet = this.responseHeader.getCharacterEncoding();
-                    if (charSet == null) charSet = "UTF-8";
+                    if (charSet == null) charSet = httpHeader.DEFAULT_CHARSET;
                     serverFileUtils.writeX(this.getContentInputStream(), charSet, (Writer)procOS, bufferOS, charSet);                
                 } else {
                     throw new IllegalArgumentException("Invalid procOS object type '" + procOS.getClass().getName() + "'");
