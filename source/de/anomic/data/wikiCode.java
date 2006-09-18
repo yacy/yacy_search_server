@@ -1061,7 +1061,7 @@ public class wikiCode {
         }
 
         //check if line contains preformatted symbols or if we are in a preformatted sequence already.
-        if ((result.indexOf("&lt;pre&gt;")>=0)||(result.indexOf("&lt;/pre&gt;")>=0)||(preformattedSpan)){
+        else if ((result.indexOf("&lt;pre&gt;")>=0)||(result.indexOf("&lt;/pre&gt;")>=0)||(preformattedSpan)){
                 result = preformattedTag(result, switchboard);
         }
 
