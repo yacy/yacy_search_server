@@ -54,6 +54,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import javax.swing.event.EventListenerList;
+
 import de.anomic.net.URL;
 import de.anomic.server.serverCharBuffer;
 
@@ -94,6 +96,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     //private String headline;
     private List[] headlines;
     private serverCharBuffer content;
+    private EventListenerList htmlFilterEventListeners = new EventListenerList();
     
     private URL root;
 
@@ -109,23 +112,6 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         this.headlines = new ArrayList[4];
         for (int i = 0; i < 4; i++) headlines[i] = new ArrayList();
         this.content = new serverCharBuffer(1024);
-    }
-    
-    public void transformCharset(String oldCharset, String newCharset) throws UnsupportedEncodingException {
-//        // convert the content back to the old bytearray
-//        ByteArrayInputStream temp = new ByteArrayInputStream(new String(this.content.getChars()).getBytes(oldCharset));
-//        
-//        // create a reader with the new charset
-//        serverCharBuffer newContent = new serverCharBuffer(this.content.length());
-//        try {
-//            InputStreamReader reader = new InputStreamReader(temp,newCharset);                               
-//            serverFileUtils.copy(reader, newContent);
-//            reader.close();
-//        } catch (IOException e) {
-//            // ignore this
-//        }
-//        
-//        this.content = newContent;        
     }
     
     public void scrapeText(char[] newtext) {
@@ -172,12 +158,11 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             String name = tagopts.getProperty("name", "");
             if (name.length() > 0) {
                 metas.put(name.toLowerCase(), tagopts.getProperty("content",""));
-                return;
-            }
-            name = tagopts.getProperty("http-equiv", "");
-            if (name.length() > 0) {
-                metas.put(name.toLowerCase(), tagopts.getProperty("content",""));
-                return;
+            } else {
+                name = tagopts.getProperty("http-equiv", "");
+                if (name.length() > 0) {
+                    metas.put(name.toLowerCase(), tagopts.getProperty("content",""));
+                }
             }
         }
         if (tagname.equalsIgnoreCase("area")) {
@@ -186,6 +171,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             String href  = tagopts.getProperty("href", "");
             if (href.length() > 0) anchors.put(absolutePath(href), areatitle);
         }
+        
+        // fire event
+        fireScrapeTag0(tagname, tagopts);
     }
 
     public void scrapeTag1(String tagname, Properties tagopts, char[] text) {
@@ -211,8 +199,12 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             h = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());
             if (h.length() > 0) headlines[3].add(h);
         }
-        if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) 
-            title = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());        
+        if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) {
+            title = cleanLine(super.stripAll(new serverCharBuffer(text)).toString());
+        }
+
+        // fire event
+        fireScrapeTag1(tagname, tagopts, text);
     }
 
     private static String cleanLine(String s) {
@@ -365,16 +357,34 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         System.out.println("METAS    :" + metas.toString());
         System.out.println("TEXT     :" + content.toString());
     }
-    
-    
-    
-/*
-    public static void main(String[] args) {  
-        try {
-            htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL("http://localhost"));
-            scraper.scrapeText(test.getBytes());
-            System.out.println(new String(scraper.getText()));
-        } catch (MalformedURLException e) {}
+
+    public void registerHtmlFilterEventListener(htmlFilterEventListener listener) {
+        if (listener != null) {
+            this.htmlFilterEventListeners.add(htmlFilterEventListener.class, listener);
+        }        
     }
-*/
+
+    public void deregisterHtmlFilterEventListener(htmlFilterEventListener listener) {
+        if (listener != null) {
+            this.htmlFilterEventListeners.remove(htmlFilterEventListener.class, listener);
+        }        
+    }
+    
+    void fireScrapeTag0(String tagname, Properties tagopts) {
+        Object[] listeners = this.htmlFilterEventListeners.getListenerList();
+        for (int i=0; i<listeners.length; i+=2) {
+            if (listeners[i]==htmlFilterEventListener.class) {
+                    ((htmlFilterEventListener)listeners[i+1]).scrapeTag0(tagname, tagopts);
+            }
+        }
+    }    
+    
+    void fireScrapeTag1(String tagname, Properties tagopts, char[] text) {
+        Object[] listeners = this.htmlFilterEventListeners.getListenerList();
+        for (int i=0; i<listeners.length; i+=2) {
+            if (listeners[i]==htmlFilterEventListener.class) {
+                    ((htmlFilterEventListener)listeners[i+1]).scrapeTag1(tagname, tagopts, text);
+            }
+        }
+    }      
 }

@@ -50,10 +50,9 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
-
-import de.anomic.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,8 +69,11 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.ParserInfo;
@@ -556,29 +558,7 @@ public final class plasmaParser {
             if (theParser != null) {
                 return theParser.parse(location, mimeType,documentCharset,sourceFile);
             } else if (realtimeParsableMimeTypesContains(mimeType)) {                      
-                // ...otherwise we make a scraper and transformer
-                htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
-                
-                // set the charset if known
-                /*if (charset != null) {
-                    try {
-                    scraper.setCharset(charset);
-                    } catch (UnsupportedCharsetException e) {
-                        serverLog.logWarning("PARSER", "parseSource2: unknown or unsupported charset '" + charset + "'");
-                        return null;                        
-                    }
-                }*/               
-                htmlFilterWriter writer = new htmlFilterWriter(null,null,scraper,null,false);
-                serverFileUtils.copy(sourceFile, documentCharset, writer);
-                writer.close();
-                //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
-                //serverFileUtils.copy(sourceFile, hfos);
-                //hfos.close();
-                if (writer.binarySuspect()) {
-                    this.theLogger.logInfo("Binary data found in URL " + location);
-                    return null;
-                }
-                return transformScraper(location, mimeType, documentCharset, scraper);
+                return parseHtml(location, mimeType, documentCharset, sourceFile);
             } else {
                 serverLog.logWarning("PARSER", "parseSource2: wrong mime type");
                 return null;
@@ -594,16 +574,36 @@ public final class plasmaParser {
         }
     }
     
+    private plasmaParserDocument parseHtml(URL location, String mimeType, String documentCharset, File sourceFile) throws IOException {
+        
+        // ...otherwise we make a scraper and transformer
+        FileInputStream fileIn = new FileInputStream(sourceFile);
+        htmlFilterInputStream htmlFilter = new htmlFilterInputStream(fileIn,documentCharset,location,null,false);
+        String charset = htmlFilter.detectCharset();
+        if (charset == null) {
+            charset = documentCharset;
+        }
+        if (!documentCharset.equalsIgnoreCase(charset)) {
+            this.theLogger.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "'");
+        }
+        
+        // parsing the content
+        htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);        
+        htmlFilterWriter writer = new htmlFilterWriter(null,null,scraper,null,false);
+        serverFileUtils.copy(htmlFilter, writer, charset);
+        writer.close();
+        //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
+        //serverFileUtils.copy(sourceFile, hfos);
+        //hfos.close();
+        if (writer.binarySuspect()) {
+            this.theLogger.logInfo("Binary data found in URL " + location);
+            return null;
+        }
+        return transformScraper(location, mimeType, documentCharset, scraper);        
+    }
+    
     public plasmaParserDocument transformScraper(URL location, String mimeType, String charSet, htmlFilterContentScraper scraper) {
         try {
-            if (scraper.getMetas().containsKey("content-type")) {
-                String newCharset = (String) scraper.getMetas().get("content-type");
-                if (!charSet.equals(newCharset)) {
-                    // TODO: transformation of content needed
-                    this.theLogger.logFine("Charset transformation needed from '" + charSet + "' to '" + newCharset + "'");
-                }
-            }
-            
             String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
             int p = 0;
             for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];

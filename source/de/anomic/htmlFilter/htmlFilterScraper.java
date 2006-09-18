@@ -55,4 +55,8 @@ public interface htmlFilterScraper {
     public void scrapeTag1(String tagname, Properties tagopts, char[] text);
     
     public void close();
+    
+    public void registerHtmlFilterEventListener(htmlFilterEventListener listener);
+    
+    public void deregisterHtmlFilterEventListener(htmlFilterEventListener listener);
 }
