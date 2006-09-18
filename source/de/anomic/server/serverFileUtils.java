@@ -57,7 +57,6 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.StringTokenizer;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;

@@ -47,7 +47,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
-import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.Map;

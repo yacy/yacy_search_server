@@ -43,13 +43,8 @@
 
 package de.anomic.htmlFilter;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,9 +55,7 @@ import java.util.Properties;
 import java.util.TreeSet;
 
 import de.anomic.net.URL;
-import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCharBuffer;
-import de.anomic.server.serverFileUtils;
 
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 

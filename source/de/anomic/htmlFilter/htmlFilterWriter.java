@@ -117,7 +117,6 @@ public final class htmlFilterWriter extends Writer {
     }
 
     public static char[] genTag0raw(String tagname, boolean opening, char[] tagopts) {
-        try {
             serverCharBuffer bb = new serverCharBuffer(tagname.length() + tagopts.length + 3);
             bb.append('<');
             if (!opening) {
@@ -131,14 +130,9 @@ public final class htmlFilterWriter extends Writer {
             }
             bb.append('>');
             return bb.getChars();
-        } catch (IOException e) {
-            // ignore this
-            return null;
-        }
     }
 
     public static char[] genTag1raw(String tagname, char[] tagopts, char[] text) {
-        try {
             serverCharBuffer bb = new serverCharBuffer(2 * tagname.length() + tagopts.length + text.length + 5);
             bb.append('<').append(tagname);
             if (tagopts.length > 0) {
@@ -150,14 +144,9 @@ public final class htmlFilterWriter extends Writer {
             bb.append(text);
             bb.append('<').append('/').append(tagname).append('>');
             return bb.getChars();
-        } catch (IOException e) {
-            // ignore this
-            return null;
-        }
     }
 
     public static char[] genTag0(String tagname, Properties tagopts, char quotechar) {   
-        try {
             char[] tagoptsx = (tagopts.size() == 0) ? null : genOpts(tagopts, quotechar);
             serverCharBuffer bb = new serverCharBuffer(tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
             bb.append('<').append(tagname);
@@ -166,28 +155,18 @@ public final class htmlFilterWriter extends Writer {
                 bb.append(tagoptsx);
             }
             bb.append('>');
-            return bb.getChars();    
-        } catch (IOException e) {
-            // ignore this
-            return null;
-        }        
+            return bb.getChars();          
     }
 
     public static char[] genTag1(String tagname, Properties tagopts, char[] text, char quotechar) {  
-        try {
             char[] gt0 = genTag0(tagname, tagopts, quotechar);
             serverCharBuffer cb = new serverCharBuffer(gt0, gt0.length + text.length + tagname.length() + 3);
             cb.append(text).append('<').append('/').append(tagname).append('>');
             return cb.getChars();        
-        } catch (IOException e) {
-            // ignore this
-            return null;
-        }
     }
 
     // a helper method for pretty-printing of properties for html tags
     public static char[] genOpts(Properties prop, char quotechar) {   
-        try {
             Enumeration e = prop.propertyNames();
             serverCharBuffer bb = new serverCharBuffer(prop.size() * 40);
             String key;
@@ -199,10 +178,6 @@ public final class htmlFilterWriter extends Writer {
             }
             if (bb.length() > 0) return bb.getChars(1);
             return bb.getChars(); 
-        }catch (IOException e) {
-            // ignore this
-            return null;
-        }
     }
 
     private char[] filterTag(String tag, boolean opening, char[] content, char quotechar) {

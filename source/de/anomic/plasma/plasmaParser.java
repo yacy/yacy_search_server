@@ -50,7 +50,6 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URI;
 
@@ -73,7 +72,6 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.ParserInfo;

@@ -50,7 +50,6 @@ import java.util.Iterator;
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCharBuffer;
 
 public final class plasmaSearchQuery {
