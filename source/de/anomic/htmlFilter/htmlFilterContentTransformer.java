@@ -116,7 +116,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
             length = length / 2;
             if (length > 10) length = 7;
             while (length-- > 0) {
-                bb.append('X');
+                bb.append((int)'X');
             }
             bb.append("</FONT> ");
             return bb.getChars();

@@ -118,9 +118,9 @@ public final class htmlFilterWriter extends Writer {
 
     public static char[] genTag0raw(String tagname, boolean opening, char[] tagopts) {
             serverCharBuffer bb = new serverCharBuffer(tagname.length() + tagopts.length + 3);
-            bb.append('<');
+            bb.append((int)'<');
             if (!opening) {
-                bb.append('/');
+                bb.append((int)'/');
             }
             bb.append(tagname);
             if (tagopts.length > 0) {
@@ -128,40 +128,40 @@ public final class htmlFilterWriter extends Writer {
                 bb.append(tagopts);
 //              else bb.append((byte) 32).append(tagopts);
             }
-            bb.append('>');
+            bb.append((int)'>');
             return bb.getChars();
     }
 
     public static char[] genTag1raw(String tagname, char[] tagopts, char[] text) {
             serverCharBuffer bb = new serverCharBuffer(2 * tagname.length() + tagopts.length + text.length + 5);
-            bb.append('<').append(tagname);
+            bb.append((int)'<').append(tagname);
             if (tagopts.length > 0) {
 //              if (tagopts[0] == (byte) 32)
                 bb.append(tagopts);
 //              else bb.append((byte) 32).append(tagopts);
             }
-            bb.append('>');
+            bb.append((int)'>');
             bb.append(text);
-            bb.append('<').append('/').append(tagname).append('>');
+            bb.append((int)'<').append((int)'/').append(tagname).append((int)'>');
             return bb.getChars();
     }
 
     public static char[] genTag0(String tagname, Properties tagopts, char quotechar) {   
             char[] tagoptsx = (tagopts.size() == 0) ? null : genOpts(tagopts, quotechar);
             serverCharBuffer bb = new serverCharBuffer(tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
-            bb.append('<').append(tagname);
+            bb.append((int)'<').append(tagname);
             if (tagoptsx != null) {
                 bb.append(32);
                 bb.append(tagoptsx);
             }
-            bb.append('>');
+            bb.append((int)'>');
             return bb.getChars();          
     }
 
     public static char[] genTag1(String tagname, Properties tagopts, char[] text, char quotechar) {  
             char[] gt0 = genTag0(tagname, tagopts, quotechar);
             serverCharBuffer cb = new serverCharBuffer(gt0, gt0.length + text.length + tagname.length() + 3);
-            cb.append(text).append('<').append('/').append(tagname).append('>');
+            cb.append(text).append((int)'<').append((int)'/').append(tagname).append((int)'>');
             return cb.getChars();        
     }
 
@@ -172,9 +172,9 @@ public final class htmlFilterWriter extends Writer {
             String key;
             while (e.hasMoreElements()) {
                 key = (String) e.nextElement();
-                bb.append(32).append(key).append('=').append(quotechar);
+                bb.append(32).append(key).append((int)'=').append((int)quotechar);
                 bb.append(prop.getProperty(key));
-                bb.append(quotechar); 
+                bb.append((int)quotechar); 
             }
             if (bb.length() > 0) return bb.getChars(1);
             return bb.getChars(); 
