@@ -1045,12 +1045,12 @@ public class wikiCode {
       */
     public String transformLine(String result, plasmaSwitchboard switchboard) {
         //If HTML has not bee replaced yet (can happen if method gets called in recursion), replace now!
-        if (!replacedHTML){
+        if (!replacedHTML || preformattedSpan){
             result = replaceHTMLonly(result);
             replacedHTML = true;
         }
         //If special characters have not bee replaced yet, replace now!
-        if (!replacedCharacters){
+        if (!replacedCharacters || preformattedSpan){
             result = replaceCharacters(result);
             replacedCharacters = true;
         }
@@ -1059,10 +1059,12 @@ public class wikiCode {
         if ((result.indexOf("[=")>=0)||(result.indexOf("=]")>=0)||(escapeSpan)){
                 result = escapeTag(result, switchboard);
         }
+
         //check if line contains preformatted symbols or if we are in a preformatted sequence already.
-        else if ((result.indexOf("&lt;pre&gt;")>=0)||(result.indexOf("&lt;/pre&gt;")>=0)||(preformattedSpan)){
+        if ((result.indexOf("&lt;pre&gt;")>=0)||(result.indexOf("&lt;/pre&gt;")>=0)||(preformattedSpan)){
                 result = preformattedTag(result, switchboard);
         }
+
         //transform page as usual
         else {
 
