@@ -598,6 +598,14 @@ public final class plasmaParser {
     
     public plasmaParserDocument transformScraper(URL location, String mimeType, String charSet, htmlFilterContentScraper scraper) {
         try {
+            if (scraper.getMetas().containsKey("content-type")) {
+                String newCharset = (String) scraper.getMetas().get("content-type");
+                if (!charSet.equals(newCharset)) {
+                    // TODO: transformation of content needed
+                    this.theLogger.logFine("Charset transformation needed from '" + charSet + "' to '" + newCharset + "'");
+                }
+            }
+            
             String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
             int p = 0;
             for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];

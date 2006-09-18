@@ -43,6 +43,9 @@
 
 package de.anomic.htmlFilter;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
@@ -57,7 +60,9 @@ import java.util.Properties;
 import java.util.TreeSet;
 
 import de.anomic.net.URL;
+import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCharBuffer;
+import de.anomic.server.serverFileUtils;
 
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 
@@ -111,6 +116,23 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         this.headlines = new ArrayList[4];
         for (int i = 0; i < 4; i++) headlines[i] = new ArrayList();
         this.content = new serverCharBuffer(1024);
+    }
+    
+    public void transformCharset(String oldCharset, String newCharset) throws UnsupportedEncodingException {
+//        // convert the content back to the old bytearray
+//        ByteArrayInputStream temp = new ByteArrayInputStream(new String(this.content.getChars()).getBytes(oldCharset));
+//        
+//        // create a reader with the new charset
+//        serverCharBuffer newContent = new serverCharBuffer(this.content.length());
+//        try {
+//            InputStreamReader reader = new InputStreamReader(temp,newCharset);                               
+//            serverFileUtils.copy(reader, newContent);
+//            reader.close();
+//        } catch (IOException e) {
+//            // ignore this
+//        }
+//        
+//        this.content = newContent;        
     }
     
     public void scrapeText(char[] newtext) {
@@ -246,10 +268,14 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         for (int j = 0; j < headlines[i - 1].size(); j++) s[j] = (String) headlines[i - 1].get(j);
         return s;
     }
-
+    
     public byte[] getText() {
+        return this.getText("UTF-8");
+    }
+    
+    public byte[] getText(String charSet) {
         try {
-            return content.toString().getBytes("UTF-8");
+            return content.toString().getBytes(charSet);
         } catch (UnsupportedEncodingException e) {
             return content.toString().getBytes();
         }

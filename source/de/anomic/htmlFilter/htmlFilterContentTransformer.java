@@ -46,6 +46,7 @@ package de.anomic.htmlFilter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -112,14 +113,19 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     }
 
     private static char[] genBlueLetters(int length) {
-        serverCharBuffer bb = new serverCharBuffer(" <FONT COLOR=#0000FF>".toCharArray());
-        length = length / 2;
-        if (length > 10) length = 7;
-        while (length-- > 0) {
-            bb.append('X');
+        try {
+            serverCharBuffer bb = new serverCharBuffer(" <FONT COLOR=#0000FF>".toCharArray());
+            length = length / 2;
+            if (length > 10) length = 7;
+            while (length-- > 0) {
+                bb.append('X');
+            }
+            bb.append("</FONT> ");
+            return bb.getChars();
+        } catch (IOException e) {
+            // ignore this.
+            return null;
         }
-        bb.append("</FONT> ");
-        return bb.getChars();
     }
 
     private boolean bluelistHit(char[] text) {
