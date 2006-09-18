@@ -6,9 +6,9 @@
 // Frankfurt, Germany, 2006
 // created 09.02.2006
 //
-// $LastChangedDate: 2005-09-22 22:01:26 +0200 (Thu, 22 Sep 2005) $
-// $LastChangedRevision: 774 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -45,9 +45,14 @@
 
 package de.anomic.kelondro;
 
-import java.beans.*;
-import java.io.*;
-import java.util.*;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 public class kelondroXMLTables {
 
