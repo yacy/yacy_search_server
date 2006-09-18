@@ -361,7 +361,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
             for  (int i = 0; i < bb.length(); i++) {
                 c = bb.charAt(i);
                 String z = code_iso8859s(c);
-                if (z == null) t.append(c); 
+                if (z == null) t.append((int)c); 
                 else t.append(z);
             }
             return t;
