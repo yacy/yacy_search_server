@@ -110,7 +110,7 @@ public class plasmaSwitchboardQueue {
             (entry.initiator == null) ? indexURL.dummyHash.getBytes() : entry.initiator.getBytes(),
             kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, indexURL.urlCrawlDepthLength).getBytes(),
             (entry.profileHandle == null) ? indexURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
-            (entry.anchorName == null) ? "-".getBytes() : entry.anchorName.getBytes()
+            (entry.anchorName == null) ? "-".getBytes("UTF-8") : entry.anchorName.getBytes("UTF-8")
         }));
     }
 

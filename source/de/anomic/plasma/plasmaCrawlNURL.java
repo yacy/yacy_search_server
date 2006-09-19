@@ -500,7 +500,7 @@ public class plasmaCrawlNURL extends indexURL {
             this.initiator = entry.getColString(1, null);
             this.url = new URL(urlstring);
             this.referrer = (entry.empty(3)) ? dummyHash : entry.getColString(3, null);
-            this.name = (entry.empty(4)) ? "" : entry.getColString(4, null).trim();
+            this.name = (entry.empty(4)) ? "" : entry.getColString(4, "UTF-8").trim();
             this.loaddate = new Date(86400000 * entry.getColLong(5));
             this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, null).trim();
             this.depth = (int) entry.getColLong(7);
@@ -523,7 +523,7 @@ public class plasmaCrawlNURL extends indexURL {
                     (initiator == null) ? "".getBytes() : this.initiator.getBytes(),
                     this.url.toString().getBytes(),
                     this.referrer.getBytes(),
-                    this.name.getBytes(),
+                    this.name.getBytes("UTF-8"),
                     loaddatestr.getBytes(),
                     (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
                     kelondroBase64Order.enhancedCoder.encodeLong(this.depth, urlCrawlDepthLength).getBytes(),

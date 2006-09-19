@@ -48,6 +48,7 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -560,12 +561,14 @@ public final class plasmaCrawlStacker {
             // store the hash in the hash cache
 
             // even if the entry exists, we simply overwrite it
-            byte[][] entry = new byte[][] { 
+            byte[][] entry = null;
+            try {
+                entry = new byte[][] { 
                     this.urlHash.getBytes(),
                     (this.initiator == null) ? "".getBytes() : this.initiator.getBytes(),
                     this.url.getBytes(),
                     this.referrerHash.getBytes(),
-                    this.name.getBytes(),
+                    this.name.getBytes("UTF-8"),
                     loaddatestr.getBytes(),
                     (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
                     kelondroBase64Order.enhancedCoder.encodeLong(this.depth, indexURL.urlCrawlDepthLength).getBytes(),
@@ -574,6 +577,7 @@ public final class plasmaCrawlStacker {
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
             };
+            } catch (UnsupportedEncodingException e) { /* ignore this */ }
             return entry;
         }        
         
