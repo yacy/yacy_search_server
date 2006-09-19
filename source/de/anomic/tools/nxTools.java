@@ -155,6 +155,7 @@ public class nxTools {
      */
     public static String cutUrlText(String url, int len) {
         // This is contributed by Thomas Quella (borg-0300)
+        if (url == null) { return url; }
         int la = url.length();
         if (la > len) {
             int cpos;
