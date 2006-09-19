@@ -1,5 +1,5 @@
 # Wenn man diese Liste benutzen moechte muss diese zuerst in "yacy.badwords"
-# unbenannt werden !
+# umbenannt werden !
 #
 # Alles was hier gelistet ist wir dann bei den "Topwoerter" die nach einer
 # Suche angezeigt werden gefiltert.
@@ -9,50 +9,60 @@
 # Fehlt hier was, wird zu viel gefiltert, dann bitte aendern.
 # Wenn was entfernt wird bitte auch schreiben warum das hier raus muss.
 #
-# Jeder darf/sollte jetzt mitmachen ;)
+# Jeder darf und sollte mitmachen !
 #
-enc
-all
-app
-from
-***
-alles
-dem
-den
-ich
-werde
-wer
-wie
-was
-von
-vom
+# $LastChangedDate$
+# $LastChangedRevision$
+# $LastChangedBy$
+#
+aber
 allen
-weitere
-fuer
-dir
-nach
+alles
+auch
 auf
 aus
-mit
-zum
 bei
-ueber
-ist
-eine
-auch
-aber
-und
-der
-die
+bringt
 das
 dass
-oder
+dem
+den
+der
+die
+dir
+eine
+fuer
+ich
+ist
 kein
+mehr
+meine
+meldung
+mit
+nach
+nicht
+oder
+ueber
+und
+vom
+von
+was
 weg
+weitere
+wer
+werde
+wie
+zum
 >>>
+***
 ads
-ads43
+all
+app
+are
+enc
+from
 jhtml
+the
 shtml
 site=all
 referrer=default

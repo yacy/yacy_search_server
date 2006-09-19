@@ -48,7 +48,6 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -60,11 +59,12 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchImages;
+import de.anomic.plasma.plasmaSearchPreOrder;
+import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSearchQuery;
-import de.anomic.plasma.plasmaSearchPreOrder;
+import de.anomic.net.URL;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -134,7 +134,7 @@ public class yacysearch {
             maxDistance = 1;
         }
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
-        
+
         final int count = Integer.parseInt(post.get("count", "10"));
         final String order = post.get("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
@@ -152,9 +152,9 @@ public class yacysearch {
         if ((prefermask.length() > 0) && (prefermask.indexOf(".*") < 0)) prefermask = ".*" + prefermask + ".*";
 
         serverObjects prop = new serverObjects();
-        
+
         if (post.get("cat", "href").equals("href")) {
-            
+
             final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
             // filter out stopwords
             final TreeSet filtered = kelondroMSetTools.joinConstructive(query,
@@ -190,7 +190,7 @@ public class yacysearch {
                     map.put("description", ((document == null) ? urlentry.descr() : document.getMainLongTitle()).replace(',', ' '));
                     map.put("tags",  ((document == null) ? "" : document.getKeywords(' ')));
                     yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippadd", map));
-                }                
+                }
             }
 
             // prepare search order
@@ -208,7 +208,7 @@ public class yacysearch {
             if (order.endsWith("YBR")) order3 = plasmaSearchRankingProfile.ORDER_YBR;
             if (order.endsWith("Date")) order3 = plasmaSearchRankingProfile.ORDER_DATE;
             if (order.endsWith("Quality")) order3 = plasmaSearchRankingProfile.ORDER_QUALITY;
-            
+
             // do the search
             plasmaSearchQuery thisSearch = new plasmaSearchQuery(
                     query,
@@ -263,15 +263,16 @@ public class yacysearch {
                     if (hintcount > 0) {
 
                         prop.put("type_combine", 1);
-
                         // get the topwords
                         final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
                         String tmp = "";
                         for (int i = 0; i < hintcount; i++) {
                             tmp = (String) references[i];
-                            if (!tmp.matches("[0-9]+")) {
+                            if (tmp.matches("[a-z]+")) {
                                 topwords.add(tmp);
-                            } // omit in the production ?
+                            // } else {
+                            //    topwords.add("(" + tmp + ")");
+                            }
                         }
 
                         // filter out the badwords
@@ -336,9 +337,9 @@ public class yacysearch {
             prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
 
         }
-        
+
         if (post.get("cat", "href").equals("image")) {
-            
+
             int depth = post.getInt("depth", 0);
             int columns = post.getInt("columns", 6);
             URL url = null;
@@ -363,12 +364,12 @@ public class yacysearch {
                 line++;
             }
             prop.put("type_results", line);
-            
+
             prop.put("type", 1); // set type of result: image list
             prop.put("cat", "href");
             prop.put("depth", depth);
         }
-        
+
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("former", post.get("search", ""));
         prop.put("count", count);
@@ -378,7 +379,7 @@ public class yacysearch {
         prop.put("urlmaskfilter", urlmask);
         prop.put("prefermaskfilter", prefermask);
         prop.put("display", display);
-        
+
         // return rewrite properties
         return prop;
     }
