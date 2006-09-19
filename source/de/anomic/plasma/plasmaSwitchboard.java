@@ -1706,7 +1706,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
                                     " [" + entry.urlHash() + "]" +
                                     "\n\tDescription:  " + docDescription +
-                                    "\n\tMimeType: "  + document.getMimeType() + " | " +
+                                    "\n\tMimeType: "  + document.getMimeType() + " | Charset: " + document.getCharset() + " | " +
                                     "Size: " + document.text.length + " bytes | " +
                                     "Anchors: " + ((document.anchors==null)?0:document.anchors.size()) +
                                     "\n\tStackingTime:  " + (stackEndTime-stackStartTime) + " ms | " +

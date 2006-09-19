@@ -15,12 +15,15 @@ import de.anomic.net.URL;
 
 public class htmlFilterInputStream extends InputStream implements htmlFilterEventListener {
     
+    private static final int MODE_PRESCAN = 0;
+    private static final int MODE_PRESCAN_FINISHED = 1;
+    private int mode = 1;
+    
     private long preBufferSize = 143336;
     private long preRead = 0;
     private BufferedInputStream bufferedIn;
 
     private String detectedCharset;
-    private int mode = 0;
     private boolean charsetChanged = false;
     private boolean endOfHead = false;
     
@@ -52,9 +55,15 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
             if (tagopts.containsKey("http-equiv")) {
                 String value = tagopts.getProperty("http-equiv");
                 if (value.equalsIgnoreCase("Content-Type")) {
-                    String contentType = tagopts.getProperty("content");
+                    String contentType = tagopts.getProperty("content","");
                     this.detectedCharset = httpHeader.extractCharsetFromMimetyeHeader(contentType);
-                    this.charsetChanged = true;
+                    if (this.detectedCharset != null && this.detectedCharset.length() > 0) {
+                        this.charsetChanged = true;
+                    } else if (tagopts.containsKey("charset")) { 
+                        // sometimes the charset property is configured as extra attribut. try it ...
+                        this.detectedCharset = tagopts.getProperty("charset");
+                        this.charsetChanged = true;
+                    }
                 }
             }
         }
@@ -69,6 +78,8 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
     }
     
     public String detectCharset() throws IOException {
+        this.mode = MODE_PRESCAN; 
+        
         // loop until we have detected the header element or the charset data
         int c;
         while ((c = this.reader.read())!= -1) {
@@ -78,13 +89,17 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
         // free writer
         this.writer = null;        
         // don't close writer here, otherwise it will shutdown our source stream 
+
+        // reset the buffer if not already done
+        if (this.mode != MODE_PRESCAN_FINISHED) this.bufferedIn.reset();
         
+        // return scanning result
         return (this.charsetChanged) ? this.detectedCharset : null;
     }
 
     public int read() throws IOException {
         // mode 0 is called from within the detectCharset function
-        if (this.mode == 0) {      
+        if (this.mode == MODE_PRESCAN) {      
             if (this.endOfHead || this.charsetChanged || this.preRead >= this.preBufferSize) {
                 this.mode++;
                 this.bufferedIn.reset();
