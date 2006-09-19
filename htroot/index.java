@@ -76,7 +76,9 @@ public class index {
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
+
         int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
+
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         final String handover = (post == null) ? "" : post.get("handover", "");
@@ -213,7 +215,7 @@ public class index {
                 prop.put("surftipps_results_" + i + "_recommend_deletelink", "/index.html?");
                 prop.put("surftipps" + i + "_recommend_recommendlink", "/index.html?");
                 prop.put("surftipps_results_" + i + "_url", row.getColString(0, null));
-                prop.put("surftipps_results_" + i + "_urlname", nxTools.cutUrlText(row.getColString(0, null), 60));
+                prop.put("surftipps_results_" + i + "_urlname", nxTools.shortenURLString(row.getColString(0, null), 60));
                 prop.put("surftipps_results_" + i + "_title", row.getColString(1, null));
                 prop.put("surftipps_results_" + i + "_description", row.getColString(2, null));
                 i++;

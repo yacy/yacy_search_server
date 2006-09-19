@@ -2087,7 +2087,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             prop.put("type_results_" + i + "_url", urlstring);
                             prop.put("type_results_" + i + "_urlhash", urlhash);
                             prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(urlhash));
-                            prop.put("type_results_" + i + "_urlname", nxTools.cutUrlText(urlname, 120));
+                            prop.put("type_results_" + i + "_urlname", nxTools.shortenURLString(urlname, 120));
                             prop.put("type_results_" + i + "_date", dateString(urlentry.moddate()));
                             prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(urlentry.hash()));
                             prop.put("type_results_" + i + "_size", Long.toString(urlentry.size()));

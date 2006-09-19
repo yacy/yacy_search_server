@@ -153,9 +153,9 @@ public class nxTools {
      * @param String like a URL
      * @return the shorten or the old String
      */
-    public static String cutUrlText(String url, int len) {
+    public static String shortenURLString(String url, int len) {
         // This is contributed by Thomas Quella (borg-0300)
-        if (url == null) { return url; }
+        if (url == null) { return null; }
         int la = url.length();
         if (la > len) {
             int cpos;

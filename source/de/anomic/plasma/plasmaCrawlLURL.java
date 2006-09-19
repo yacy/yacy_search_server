@@ -55,7 +55,6 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -74,6 +73,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRAMIndex;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCodings;
@@ -373,8 +373,8 @@ public final class plasmaCrawlLURL extends indexURL {
         final plasmaSwitchboard switchboard = plasmaSwitchboard.getSwitchboard();
         final plasmaHTCache cacheManager = switchboard.getCacheManager();
 
-        int cnt = 0;
-        for (int i = getStackSize(tabletype) - 1; i >= (getStackSize(tabletype) - lines); i--) {
+        int i, cnt = 0;
+        for (i = getStackSize(tabletype) - 1; i >= (getStackSize(tabletype) - lines); i--) {
             initiatorHash = getInitiatorHash(tabletype, i);
             executorHash = getExecutorHash(tabletype, i);
 //          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps initiatorHash=" + initiatorHash + " executorHash=" + executorHash);
@@ -388,7 +388,7 @@ public final class plasmaCrawlLURL extends indexURL {
 
                 url = urle.url();
                 urlstr = url.toString();
-                urltxt = nxTools.cutUrlText(urlstr, 72); // shorten the string text like a URL
+                urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
                 cachepath = (url == null) ? "-not-cached-" : cacheManager.getCachePath(url).toString().replace('\\', '/').substring(cacheManager.cachePath.toString().length() + 1);
 
                 prop.put("table_indexed_" + cnt + "_dark", (dark) ? 1 : 0);
@@ -876,7 +876,8 @@ public final class plasmaCrawlLURL extends indexURL {
                     
                     plasmaCrawlLURL.Entry entry = (plasmaCrawlLURL.Entry) eiter.next();
                     totalSearchedUrls++;
-                    if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER,entry.url())==true || plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT,entry.url())==true) {
+                    if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, entry.url()) ||
+                        plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, entry.url())) {
                         lastBlacklistedUrl = entry.url().toString();
                         lastBlacklistedHash = entry.hash();                        
                         serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " " + entry.url());
@@ -912,7 +913,7 @@ public final class plasmaCrawlLURL extends indexURL {
 
         public void pause() {
             synchronized(this) {
-                if(pause == false) {
+                if (!pause) {
                     pause = true;
                     serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread paused");
                 }
@@ -921,7 +922,7 @@ public final class plasmaCrawlLURL extends indexURL {
 
         public void endPause() {
             synchronized(this) {
-                if (pause == true) {
+                if (pause) {
                     pause = false;
                     this.notifyAll();
                     serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread resumed");
