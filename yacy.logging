@@ -33,6 +33,7 @@ java.util.logging.FileHandler.count = 20
 java.util.logging.FileHandler.pattern = DATA/LOG/yacy%u%g.log
 java.util.logging.FileHandler.level = ALL
 java.util.logging.FileHandler.formatter=de.anomic.server.logging.serverSimpleLogFormatter
+java.util.logging.FileHandler.encoding=UTF-8
 
 # Properties for the GuiHandler
 de.anomic.server.logging.GuiHandler.level = ALL
