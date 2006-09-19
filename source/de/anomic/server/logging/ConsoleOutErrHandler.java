@@ -45,6 +45,7 @@
 
 package de.anomic.server.logging;
 
+import java.io.UnsupportedEncodingException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
@@ -87,6 +88,14 @@ public final class ConsoleOutErrHandler extends Handler{
         
         String formatter = manager.getProperty(className + ".formatter");
         setFormatter(makeFormatter(formatter));
+        
+        String encoding = manager.getProperty(className + ".encoding");
+        try {
+            this.stdOutHandler.setEncoding(encoding);
+            this.stdErrHandler.setEncoding(encoding);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         
         String ignoreCtrlChrStr = manager.getProperty(className + ".ignoreCtrlChr");
         this.ignoreCtrlChr = (ignoreCtrlChrStr==null)?false:ignoreCtrlChrStr.equalsIgnoreCase("true");

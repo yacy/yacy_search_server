@@ -78,6 +78,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         linkTags0.add("frame");
         linkTags0.add("meta");
         linkTags0.add("area");
+        linkTags0.add("link");
 
         linkTags1 = new TreeSet(insensitiveCollator);
         linkTags1.add("a");
@@ -170,6 +171,24 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             //String alt   = tagopts.getProperty("alt","");
             String href  = tagopts.getProperty("href", "");
             if (href.length() > 0) anchors.put(absolutePath(href), areatitle);
+        }
+        if (tagname.equalsIgnoreCase("link")) {
+            URL newLink = null;
+            try {
+                newLink = new URL(absolutePath(tagopts.getProperty("href", "")));
+            } catch (MalformedURLException e) {}
+
+            if (newLink != null) {
+                String type = tagopts.getProperty("rel", "");
+                String linktitle = tagopts.getProperty("title", "");
+
+                if (type.equalsIgnoreCase("shortcut icon")) {
+                    htmlFilterImageEntry ie = new htmlFilterImageEntry(newLink, linktitle, -1,-1);
+                    images.add(ie);                
+                } else if (!type.equalsIgnoreCase("stylesheet") && !type.equalsIgnoreCase("alternate stylesheet")) {
+                    anchors.put(newLink.toString(), linktitle);                    
+                }
+            }
         }
         
         // fire event
