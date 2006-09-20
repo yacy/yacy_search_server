@@ -123,7 +123,7 @@ public class IndexControl_p {
                 switchboard.setConfig("allowDistributeIndex", "false");
             }
 
-            if (post.containsKey("indexDistributeWhileCrawling")) {
+            if (post.get("indexDistributeWhileCrawling","").equals("on")) {
                 switchboard.setConfig("allowDistributeIndexWhileCrawling", "true");
             } else {
                 switchboard.setConfig("allowDistributeIndexWhileCrawling", "false");
