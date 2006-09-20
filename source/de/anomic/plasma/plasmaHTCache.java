@@ -63,6 +63,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverSystem;
+import de.anomic.server.serverThread;
 import de.anomic.tools.enumerateFiles;
 
 import java.io.File;
@@ -98,6 +99,7 @@ public final class plasmaHTCache {
     public static final HashSet filesInUse = new HashSet(); // can we delete this file
 
     private ResourceInfoFactory objFactory;
+    private serverThread cacheScanThread;
     
     public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb, long preloadTime) {
         // this.switchboard = switchboard;
@@ -176,7 +178,7 @@ public final class plasmaHTCache {
 
         // start the cache startup thread
         // this will collect information about the current cache size and elements
-        serverInstantThread.oneTimeJob(this, "cacheScan", this.log, 120000);
+        this.cacheScanThread = serverInstantThread.oneTimeJob(this, "cacheScan", this.log, 120000);
     }
 
     private void deleteOldHTCache(File directory) {
@@ -329,27 +331,29 @@ public final class plasmaHTCache {
     private void cleanupDoIt(long newCacheSize) {
         File obj;
         synchronized (cacheAge) {
-        Iterator iter = this.cacheAge.keySet().iterator();
-        while (iter.hasNext() && this.curCacheSize >= newCacheSize) {
-            Object key = iter.next();
-            obj = (File) this.cacheAge.get(key);
-            if (obj != null) {
-                if (filesInUse.contains(obj)) continue;
-                this.log.logFinest("Trying to delete old file: " + obj.toString());
-                if (deleteFileandDirs (obj, "OLD")) {
-                    try {
-                        // As the file is gone, the entry in responseHeader.db is not needed anymore
-                        this.log.logFinest("Trying to remove responseHeader for URL: " +
-                            getURL(this.cachePath ,obj).toString());
-                        this.responseHeaderDB.remove(indexURL.urlHash(getURL(this.cachePath ,obj)));
-                    } catch (IOException e) {
-                        this.log.logInfo("IOExeption removing response header from DB: " +
-                            e.getMessage(), e);
+            Iterator iter = this.cacheAge.keySet().iterator();
+            while (iter.hasNext() && this.curCacheSize >= newCacheSize) {
+                if (Thread.currentThread().isInterrupted()) return;
+
+                Object key = iter.next();
+                obj = (File) this.cacheAge.get(key);
+                if (obj != null) {
+                    if (filesInUse.contains(obj)) continue;
+                    this.log.logFinest("Trying to delete old file: " + obj.toString());
+                    if (deleteFileandDirs (obj, "OLD")) {
+                        try {
+                            // As the file is gone, the entry in responseHeader.db is not needed anymore
+                            this.log.logFinest("Trying to remove responseHeader for URL: " +
+                                    getURL(this.cachePath ,obj).toString());
+                            this.responseHeaderDB.remove(indexURL.urlHash(getURL(this.cachePath ,obj)));
+                        } catch (IOException e) {
+                            this.log.logInfo("IOExeption removing response header from DB: " +
+                                    e.getMessage(), e);
+                        }
                     }
                 }
+                iter.remove();
             }
-            iter.remove();
-        }
         }
     }
 
@@ -363,6 +367,12 @@ public final class plasmaHTCache {
     }
 
     public void close() {
+        // closing cache scan if still running
+        if ((this.cacheScanThread != null) && (this.cacheScanThread.isAlive())) {
+            this.cacheScanThread.terminate(true);
+        }
+        
+        // closing DB
         try {this.responseHeaderDB.close();} catch (IOException e) {}
     }
 
@@ -380,18 +390,22 @@ public final class plasmaHTCache {
     public void cacheScan() {
         log.logConfig("STARTING HTCACHE SCANNING");
         kelondroMScoreCluster doms = new kelondroMScoreCluster();
-        int c = 0;
-        enumerateFiles ef = new enumerateFiles(this.cachePath, true, false, true, true);
-        File f;
-        while (ef.hasMoreElements()) {
-            c++;
-            f = (File) ef.nextElement();
-            long d = f.lastModified();
+        int fileCount = 0;
+        enumerateFiles fileEnum = new enumerateFiles(this.cachePath, true, false, true, true);
+        while (fileEnum.hasMoreElements()) {
+            if (Thread.currentThread().isInterrupted()) return;
+            fileCount++;
+            File nextFile = (File) fileEnum.nextElement();
+            long nextFileModDate = nextFile.lastModified();
             //System.out.println("Cache: " + dom(f));
-            doms.incScore(dom(f));
-            this.curCacheSize += f.length();
-            this.cacheAge.put(ageString(d, f), f);
-            try {Thread.sleep(10);} catch (InterruptedException e) {}
+            doms.incScore(dom(nextFile));
+            this.curCacheSize += nextFile.length();
+            this.cacheAge.put(ageString(nextFileModDate, nextFile), nextFile);
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                return;
+            }
         }
         //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
         long ageHours = 0;
@@ -401,7 +415,7 @@ public final class plasmaHTCache {
         } catch (NumberFormatException e) {
             //e.printStackTrace();
         }
-        this.log.logConfig("CACHE SCANNED, CONTAINS " + c +
+        this.log.logConfig("CACHE SCANNED, CONTAINS " + fileCount +
                       " FILES = " + this.curCacheSize/1048576 + "MB, OLDEST IS " + 
             ((ageHours < 24) ? (ageHours + " HOURS") : ((ageHours / 24) + " DAYS")) + " OLD");
         cleanup();
@@ -411,19 +425,24 @@ public final class plasmaHTCache {
         String dom;
         long start = System.currentTimeMillis();
         String result = "";
-        c = 0;
-        while ((doms.size() > 0) && (c < 50) && ((System.currentTimeMillis() - start) < 60000)) {
+        fileCount = 0;
+        while ((doms.size() > 0) && (fileCount < 50) && ((System.currentTimeMillis() - start) < 60000)) {
+            if (Thread.currentThread().isInterrupted()) return;
             dom = (String) doms.getMaxObject();
             InetAddress ip = httpc.dnsResolve(dom);
             if (ip == null) continue;
             result += ", " + dom + "=" + ip.getHostAddress();
             this.log.logConfig("PRE-FILLED " + dom + "=" + ip.getHostAddress());
-            c++;
+            fileCount++;
             doms.deleteScore(dom);
             // wait a short while to prevent that this looks like a DoS
-            try {Thread.sleep(100);} catch (InterruptedException e) {}
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                return;
+            }
         }
-        if (result.length() > 2) this.log.logConfig("PRE-FILLED DNS CACHE, FETCHED " + c +
+        if (result.length() > 2) this.log.logConfig("PRE-FILLED DNS CACHE, FETCHED " + fileCount +
                                                " ADDRESSES: " + result.substring(2));
     }
 
