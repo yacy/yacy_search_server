@@ -73,24 +73,39 @@ import de.anomic.kelondro.kelondroRowSet;
 
 public final class serverFileUtils {
 
+    private static final int DEFAULT_BUFFER_SIZE = 4096;
+    
+    public static long copy(InputStream source, OutputStream dest) throws IOException {
+        return copy(source,dest);
+    }
+    
     /**
     * Copies an InputStream to an OutputStream.
-    * @param source    InputStream
-    * @param dest    OutputStream
+    * @param source InputStream
+    * @param dest OutputStream
+    * @param count the total amount of bytes to copy
     * @return Total number of bytes copied.
+    * 
     * @see copy(InputStream source, File dest)
     * @see copyRange(File source, OutputStream dest, int start)
     * @see copy(File source, OutputStream dest)
     * @see copy(File source, File dest)
     */
-    public static int copy(InputStream source, OutputStream dest) throws IOException {
-        byte[] buffer = new byte[4096];
+    public static long copy(InputStream source, OutputStream dest, long count) throws IOException {
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];                
+        int chunkSize = (int) ((count > 0) ? Math.min(count, DEFAULT_BUFFER_SIZE) : DEFAULT_BUFFER_SIZE);
         
-        int c, total = 0;
-        while ((c = source.read(buffer)) > 0) {
+        int c; long total = 0;
+        while ((c = source.read(buffer,0,chunkSize)) > 0) {
             dest.write(buffer, 0, c);
             dest.flush();
             total += c;
+            
+            if (count > 0) {
+                chunkSize = (int)Math.min(count-total,DEFAULT_BUFFER_SIZE);
+                if (chunkSize == 0) break;
+            }
+            
         }
         dest.flush();
         
@@ -165,21 +180,26 @@ public final class serverFileUtils {
         }
         return count;
     }
+    
+    public static void copy(InputStream source, File dest) throws IOException {
+        copy(source,dest,-1);
+    }
 
     /**
     * Copies an InputStream to a File.
     * @param source    InputStream
     * @param dest    File
+    * @param the amount of bytes to copy
     * @see copy(InputStream source, OutputStream dest)
     * @see copyRange(File source, OutputStream dest, int start)
     * @see copy(File source, OutputStream dest)
     * @see copy(File source, File dest)
     */
-    public static void copy(InputStream source, File dest) throws IOException {
+    public static void copy(InputStream source, File dest, long count) throws IOException {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(dest);
-            copy(source, fos);
+            copy(source, fos, count);
         } finally {
             if (fos != null) try {fos.close();} catch (Exception e) {}
         }
@@ -201,7 +221,7 @@ public final class serverFileUtils {
             fis = new FileInputStream(source);
             long skipped = fis.skip(start);
             if (skipped != start) throw new IllegalStateException("Unable to skip '" + start + "' bytes. Only '" + skipped + "' bytes skipped.");
-            copy(fis, dest);
+            copy(fis, dest,-1);
         } finally {
             if (fis != null) try { fis.close(); } catch (Exception e) {}
         }
@@ -220,28 +240,33 @@ public final class serverFileUtils {
         InputStream fis = null;
         try {
             fis = new FileInputStream(source);
-            copy(fis, dest);
+            copy(fis, dest, -1);
         } finally {
             if (fis != null) try { fis.close(); } catch (Exception e) {}
         }
     }
 
+    public static void copy(File source, File dest) throws IOException {
+        copy(source,dest,-1);
+    }
+    
     /**
     * Copies a File to a File.
     * @param source    File
     * @param dest    File
+    * @param count the amount of bytes to copy
     * @see copy(InputStream source, OutputStream dest)
     * @see copy(InputStream source, File dest)
     * @see copyRange(File source, OutputStream dest, int start)
     * @see copy(File source, OutputStream dest)
     */
-    public static void copy(File source, File dest) throws IOException {
+    public static void copy(File source, File dest, long count) throws IOException {
         FileInputStream fis = null;
         FileOutputStream fos = null;
         try {
             fis = new FileInputStream(source);
             fos = new FileOutputStream(dest);
-            copy(fis, fos);
+            copy(fis, fos, count);
         } finally {
             if (fis != null) try {fis.close();} catch (Exception e) {}
             if (fos != null) try {fos.close();} catch (Exception e) {}
@@ -250,7 +275,7 @@ public final class serverFileUtils {
 
     public static byte[] read(InputStream source) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        copy(source, baos);
+        copy(source, baos, -1);
         baos.close();
         return baos.toByteArray();
     }
@@ -309,7 +334,7 @@ public final class serverFileUtils {
     }
 
     public static void write(byte[] source, OutputStream dest) throws IOException {
-        copy(new ByteArrayInputStream(source), dest);
+        copy(new ByteArrayInputStream(source), dest, -1);
     }
 
     public static void write(byte[] source, File dest) throws IOException {

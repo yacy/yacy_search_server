@@ -51,11 +51,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.net.URL;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;

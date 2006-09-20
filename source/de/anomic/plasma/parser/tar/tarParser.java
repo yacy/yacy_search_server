@@ -87,7 +87,7 @@ public class tarParser extends AbstractParser implements Parser {
     
     public tarParser() {        
         super(LIBX_DEPENDENCIES);
-        parserName = "Tape Archive File Parser"; 
+        this.parserName = "Tape Archive File Parser"; 
     }
     
     public Hashtable getSupportedMimeTypes() {
@@ -128,12 +128,11 @@ public class tarParser extends AbstractParser implements Parser {
                 // skip directories
                 if (entry.isDirectory()) continue;
                 
-                // Get the entry name
-                int idx = -1;
+                // Get the short entry name
                 String entryName = entry.getName();
-                idx = entryName.lastIndexOf("/");
-                if (idx != -1) entryName = entryName.substring(idx+1);
-                idx = entryName.lastIndexOf(".");
+                
+                // getting the entry file extension
+                int idx = entryName.lastIndexOf(".");
                 String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
                 
                 // trying to determine the mimeType per file extension   
@@ -143,19 +142,21 @@ public class tarParser extends AbstractParser implements Parser {
                 plasmaParserDocument theDoc = null;
                 File tempFile = null;
                 try {
-                    byte[] buf = new byte[(int) entry.getSize()];
-                    /*int bytesRead =*/ tin.read(buf);
-
-                    tempFile = File.createTempFile("tarParser_" + ((idx>-1)?entryName.substring(0,idx):entryName), (entryExt.length()>0)?"."+entryExt:entryExt);
-                    serverFileUtils.write(buf, tempFile);           
+                    // create the temp file
+                    tempFile = createTempFile(entryName);
+                    
+                    // copy the data into the file
+                    serverFileUtils.copy(tin,tempFile,entry.getSize());
                     
                     // check for interruption
                     checkInterruption();
                     
                     // parsing the content                    
-                    theDoc = theParser.parseSource(new URL(tempFile),entryMime,null,tempFile);
+                    theDoc = theParser.parseSource(new URL(location,"#" + entryName),entryMime,null,tempFile);
+                } catch (ParserException e) {
+                    this.theLogger.logInfo("Unable to parse tar file entry '" + entryName + "'. " + e.getErrorCode());
                 } finally {
-                    if (tempFile != null) try {tempFile.delete(); } catch(Exception ex){}
+                    if (tempFile != null) try {tempFile.delete(); } catch(Exception ex){/* ignore this */}
                 }
                 if (theDoc == null) continue;
                 
@@ -200,7 +201,9 @@ public class tarParser extends AbstractParser implements Parser {
                     docImages);
         } catch (Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            throw new ParserException("Unable to parse the zip content. " + e.getMessage());
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while parsing tar resource. " + e.getMessage(),location); 
         }
     }
     

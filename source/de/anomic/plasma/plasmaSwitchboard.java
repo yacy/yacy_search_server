@@ -144,6 +144,7 @@ import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroMapTable;
 import de.anomic.plasma.dbImport.dbImportManager;
+import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
@@ -1392,7 +1393,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
     }
     
-    private plasmaParserDocument parseResource(plasmaSwitchboardQueue.Entry entry, String initiatorHash) throws InterruptedException {
+    private plasmaParserDocument parseResource(plasmaSwitchboardQueue.Entry entry, String initiatorHash) throws InterruptedException, ParserException {
         plasmaParserDocument document = null;
 
         // the mimetype of this entry
@@ -1402,29 +1403,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // the parser logger
         serverLog parserLogger = parser.getLogger();
 
-        // if the document content is supported we can start to parse the content
-        if (plasmaParser.supportedContent(
-                entry.url(),
-                mimeType)
-        ){
-            if ((entry.cacheFile().exists()) && (entry.cacheFile().length() > 0)) {
-                parserLogger.logFine("'" + entry.normalizedURLString() + "' is not parsed yet, parsing now from File");
-                document = parser.parseSource(entry.url(), mimeType, charset, entry.cacheFile());
-            } else {
-                parserLogger.logFine("'" + entry.normalizedURLString() + "' cannot be parsed, no resource available");
-                addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorHash, entry.anchorName(), plasmaCrawlEURL.DENIED_NOT_PARSEABLE_NO_CONTENT, new bitfield(indexURL.urlFlagLength));
-            }
-            if (document == null) {
-                parserLogger.logSevere("'" + entry.normalizedURLString() + "' parse failure");
-                addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorHash, entry.anchorName(), plasmaCrawlEURL.DENIED_PARSER_ERROR, new bitfield(indexURL.urlFlagLength));
-            }
-        } else {
-            parserLogger.logFine("'" + entry.normalizedURLString() + "'. Unsupported mimeType '" + ((mimeType == null) ? "null" : mimeType) + "'.");
-            addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorHash, entry.anchorName(), plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT, new bitfield(indexURL.urlFlagLength));
-        }  
-
-        checkInterruption();
-        return document;
+        // parse the document
+        return parseResource(entry.url(), mimeType, charset, entry.cacheFile());
+    }
+    
+    public plasmaParserDocument parseResource(URL location, String mimeType, String documentCharset, File sourceFile) throws InterruptedException, ParserException {
+        plasmaParserDocument doc = parser.parseSource(location, mimeType, documentCharset, sourceFile);
+        assert(doc != null) : "Unexpected error. Parser returned null.";
+        return doc;
     }
     
     private void processResourceStack(plasmaSwitchboardQueue.Entry entry) throws InterruptedException {
@@ -1471,8 +1457,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             plasmaParserDocument document = null;
             parsingStartTime = System.currentTimeMillis();
 
+            try {
                 document = this.parseResource(entry, initiatorPeerHash);
                 if (document == null) return;
+            } catch (ParserException e) {
+                this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
+                addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorPeerHash, entry.anchorName(), e.getErrorCode(), new bitfield(indexURL.urlFlagLength));
+                return;
+            }
             
             parsingEndTime = System.currentTimeMillis();            
             
@@ -2172,16 +2164,22 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // determine the url string
         plasmaCrawlLURL.Entry entry = urlPool.loadedURL.load(urlhash, null);
         if (entry == null) return 0;
+        
         URL url = entry.url();
         if (url == null) return 0;
-        // get set of words
-        // Set words = plasmaCondenser.getWords(getText(getResource(url, fetchOnline)));
-        Iterator witer = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline, 10000)).getText());
-        // delete all word references
-        int count = removeReferences(urlhash, witer);
-        // finally delete the url entry itself
-        urlPool.loadedURL.remove(urlhash);
-        return count;
+        
+        try {
+            // get set of words
+            // Set words = plasmaCondenser.getWords(getText(getResource(url, fetchOnline)));
+            Iterator witer = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline, 10000)).getText());
+            // delete all word references
+            int count = removeReferences(urlhash, witer);
+            // finally delete the url entry itself
+            urlPool.loadedURL.remove(urlhash);
+            return count;
+        } catch (ParserException e) {
+            return 0;
+        }
     }
     
     public int removeReferences(URL url, Set words) {

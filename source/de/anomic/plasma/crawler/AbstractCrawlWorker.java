@@ -93,6 +93,8 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
     protected plasmaCrawlProfile.entry profile;  
     protected boolean acceptAllContent;
     
+    protected String errorMessage;
+    
     /**
      * The crawler thread pool
      */
@@ -186,6 +188,8 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
     }    
     
     public void execute() {
+        
+        plasmaHTCache.Entry loadedResource = null;
         try {
             // setting threadname
             this.setName(plasmaCrawlWorker.threadBaseName + "_" + this.url);
@@ -194,15 +198,23 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
             init();
 
             // loading resource
-            plasmaHTCache.Entry resource = load();
+            loadedResource = load();
+        } catch (IOException e) {
+            //throw e;
+        } finally {                        
+            // setting the error message (if available)
+            if (this.errorMessage != null) {
+                this.theMsg.setError(this.errorMessage);
+            }
             
             // store a reference to the result in the message object
             // this is e.g. needed by the snippet fetcher
-            this.theMsg.setResult(resource);
-
-        } catch (IOException e) {
-            //throw e;
-        } finally {
+            //
+            // Note: this is always called, even on empty results.
+            //       Otherwise the caller will block forever
+            this.theMsg.setResult(loadedResource);            
+            
+            // signal that this worker thread has finished the job
             this.done = true;
         }
     }    
@@ -256,9 +268,13 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
         this.startdate = 0;
         this.profile = null;
         this.acceptAllContent = false;
+        this.errorMessage = null;
     }    
     
-    protected void addURLtoErrorDB(String failreason) {        
+    protected void addURLtoErrorDB(String failreason) { 
+        // remember error message
+        this.errorMessage = failreason;
+        
         // convert the referrer URL into a hash value
         String referrerHash = (this.refererURLString==null)?null:indexURL.urlHash(this.refererURLString);
         

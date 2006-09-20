@@ -52,6 +52,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.net.URL;
 import de.anomic.plasma.crawler.plasmaCrawlWorker;
+import de.anomic.plasma.crawler.plasmaCrawlerException;
 import de.anomic.plasma.crawler.plasmaCrawlerFactory;
 import de.anomic.plasma.crawler.plasmaCrawlerMsgQueue;
 import de.anomic.plasma.crawler.plasmaCrawlerPool;
@@ -83,7 +84,7 @@ public final class plasmaCrawlLoader extends Thread {
 
         // supported protocols 
         // TODO: change this, e.g. by loading settings from file
-        this.supportedProtocols = new HashSet(Arrays.asList(new String[]{"http","https" /* ,"ftp" */}));
+        this.supportedProtocols = new HashSet(Arrays.asList(new String[]{"http","https"/* ,"ftp" */}));
         
         // configuring the crawler messagequeue
         this.theQueue = new plasmaCrawlerMsgQueue();
@@ -99,6 +100,8 @@ public final class plasmaCrawlLoader extends Thread {
         // The maximum number of idle connections connections in the pool
         // 0 = no limit.        
         this.crawlerPoolConfig.maxIdle = Integer.parseInt(switchboard.getConfig("crawler.MaxIdleThreads","7"));
+        
+        // minIdle configuration not possible for keyedObjectPools
         //this.crawlerPoolConfig.minIdle = Integer.parseInt(switchboard.getConfig("crawler.MinIdleThreads","5"));    
 
         // block undefinitely 
@@ -216,7 +219,7 @@ public final class plasmaCrawlLoader extends Thread {
             int depth, 
             plasmaCrawlProfile.entry profile,
             int timeout
-    ) {
+    ) throws plasmaCrawlerException {
 
         plasmaHTCache.Entry result = null;
         if (!this.crawlwerPool.isClosed) {            
@@ -241,11 +244,17 @@ public final class plasmaCrawlLoader extends Thread {
                 this.execute(theMsg);
 
                 // wait for the crawl job result
-                result = theMsg.waitForResult();
-
+                result = theMsg.waitForResult();                
             } catch (Exception e) {
-                this.log.logSevere("plasmaCrawlLoader.loadSync", e);
+                this.log.logSevere("plasmaCrawlLoader.loadSync: Unexpected error", e);
+                throw new plasmaCrawlerException("Unexpected error: " + e.getMessage());
             }
+            
+            // check if an error has occured
+            if (result == null) {
+                String errorMsg = theMsg.getError();
+                throw new plasmaCrawlerException(errorMsg);
+            }            
         }        
 
         // return the result

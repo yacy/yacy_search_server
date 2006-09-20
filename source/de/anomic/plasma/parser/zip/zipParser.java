@@ -43,9 +43,8 @@
 
 package de.anomic.plasma.parser.zip;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
-import de.anomic.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -55,12 +54,14 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverFileUtils;
 
 public class zipParser extends AbstractParser implements Parser {
 
@@ -84,7 +85,7 @@ public class zipParser extends AbstractParser implements Parser {
     
     public zipParser() {        
         super(LIBX_DEPENDENCIES);
-        parserName = "Compressed Archive File Parser"; 
+        this.parserName = "Compressed Archive File Parser"; 
     }
     
     public Hashtable getSupportedMimeTypes() {
@@ -110,29 +111,39 @@ public class zipParser extends AbstractParser implements Parser {
             ZipEntry entry;
             ZipInputStream zippedContent = new ZipInputStream(source);                      
             while ((entry = zippedContent.getNextEntry()) !=null) {
+                // check for interruption
+                checkInterruption();                
+                
                 // skip directories
                 if (entry.isDirectory()) continue;
                 
                 // Get the entry name
                 String entryName = entry.getName();                
                 int idx = entryName.lastIndexOf(".");
-                String entryExt = (idx > -1) ? entryName.substring(idx+1) : null;
+                
+                // getting the file extension
+                String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
                 
                 // trying to determine the mimeType per file extension   
-                String entryMime = plasmaParser.getMimeTypeByFileExt(entryExt);
-                
-                // getting the entry content
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                byte[] buf = new byte[(int) entry.getSize()];
-                /*int bytesRead =*/ zippedContent.read(buf);
-                bos.write(buf);
-                byte[] ut = bos.toByteArray();           
-                
-                // check for interruption
-                checkInterruption();
+                String entryMime = plasmaParser.getMimeTypeByFileExt(entryExt);      
                 
                 // parsing the content
-                plasmaParserDocument theDoc = theParser.parseSource(location,entryMime,null, ut);
+                plasmaParserDocument theDoc = null;
+                File tempFile = null;
+                try {
+                    // create the temp file
+                    tempFile = createTempFile(entryName);
+                    
+                    // copy the data into the file
+                    serverFileUtils.copy(zippedContent,tempFile,entry.getSize());                    
+                    
+                    // parsing the zip file entry
+                    theDoc = theParser.parseSource(new URL(location,"#" + entryName),entryMime,null, tempFile);
+                } catch (ParserException e) {
+                    this.theLogger.logInfo("Unable to parse zip file entry '" + entryName + "'. " + e.getErrorCode());
+                } finally {
+                    if (tempFile != null) try {tempFile.delete(); } catch(Exception ex){/* ignore this */}
+                }
                 if (theDoc == null) continue;
                 
                 // merging all documents together
@@ -157,11 +168,7 @@ public class zipParser extends AbstractParser implements Parser {
                 docImages.addAll(theDoc.getImages());
             }
             
-            /* (URL location, String mimeType,
-             String keywords, String shortTitle, String longTitle,
-             String[] sections, String abstrct,
-             byte[] text, Map anchors, Map images)
-             */            
+        
             return new plasmaParserDocument(
                     location,
                     mimeType,
@@ -176,9 +183,9 @@ public class zipParser extends AbstractParser implements Parser {
                     docImages);
         } catch (Exception e) {  
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            throw new ParserException("Unable to parse the zip content. " + e.getMessage());
-        } catch (Error e) {
-            throw new ParserException("Unable to parse the zip content. " + e.getMessage());
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while parsing zip resource. " + e.getMessage(),location);
         }
     }
     

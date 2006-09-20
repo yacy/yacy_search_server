@@ -78,7 +78,7 @@ public class pdfParser extends AbstractParser implements Parser {
     
     public pdfParser() {        
         super(LIBX_DEPENDENCIES);
-        parserName = "Acrobat Portable Document Parser"; 
+        this.parserName = "Acrobat Portable Document Parser"; 
     }
     
     public Hashtable getSupportedMimeTypes() {
@@ -98,7 +98,7 @@ public class pdfParser extends AbstractParser implements Parser {
 //            Logger theLogger = Logger.getLogger("org.pdfbox");
 //            theLogger.setLevel(Level.INFO);            
             
-            String docTitle = null, docSubject = null, /*docAuthor = null,*/ docKeyWords = null;
+            String docTitle = null, docSubject = null, /*docAuthor = null,*/ docKeywordStr = null;
             
             // check for interruption
             checkInterruption();
@@ -120,7 +120,7 @@ public class pdfParser extends AbstractParser implements Parser {
                 docTitle = theDocInfo.getTitle();
                 docSubject = theDocInfo.getSubject();
                 //docAuthor = theDocInfo.getAuthor();
-                docKeyWords = theDocInfo.getKeywords();
+                docKeywordStr = theDocInfo.getKeywords();
             }
             
             serverByteBuffer out = new serverByteBuffer();
@@ -142,18 +142,14 @@ public class pdfParser extends AbstractParser implements Parser {
                 replaceAll("\t"," ");                
             }
             
-            /*
-             *         public document(URL location, String mimeType,
-                            String keywords, String shortTitle, String longTitle,
-                            String[] sections, String abstrct,
-                            byte[] text, Map anchors, Map images) {
-             * 
-             */            
+            String[] docKeywords = null;
+            if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
+            
             plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,
                     mimeType,
                     "UTF-8",
-                    docKeyWords.split(" |,"),
+                    docKeywords,
                     docSubject,
                     docTitle,
                     null,
@@ -166,10 +162,12 @@ public class pdfParser extends AbstractParser implements Parser {
         }
         catch (Exception e) {       
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            throw new ParserException("Unable to parse the pdf content. " + e.getMessage(),e);
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while parsing pdf file. " + e.getMessage(),location); 
         } finally {
-            if (theDocument != null) try { theDocument.close(); } catch (Exception e) {}
-            if (writer != null)      try { writer.close(); }      catch (Exception e) {}
+            if (theDocument != null) try { theDocument.close(); } catch (Exception e) {/* ignore this */}
+            if (writer != null)      try { writer.close(); }      catch (Exception e) {/* ignore this */}
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
         }
     }

@@ -188,6 +188,10 @@ public final class serverByteBuffer extends OutputStream {
     public serverByteBuffer append(String s) {
         return append(s.getBytes());
     }
+    
+    public serverByteBuffer append(String s, String charset) throws UnsupportedEncodingException {
+        return append(s.getBytes(charset));
+    }    
 
     public serverByteBuffer append(serverByteBuffer bb) {
         return append(bb.buffer, bb.offset, bb.length);

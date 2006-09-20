@@ -73,12 +73,14 @@ import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.index.indexURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.bitfield;
 
 public final class plasmaParser {
     public static final String PARSER_MODE_PROXY   = "PROXY";
@@ -407,7 +409,7 @@ public final class plasmaParser {
                         if (neededLibx != null) {
                             for (int libxId=0; libxId < neededLibx.length; libxId++) {
                                 if (javaClassPath.indexOf(neededLibx[libxId]) == -1) {
-                                    throw new ParserException("Missing dependency detected: '" + neededLibx[libxId] + "'.");
+                                    throw new Exception("Missing dependency detected: '" + neededLibx[libxId] + "'.");
                                 }
                                 neededLibxBuf.append(neededLibx[libxId])
                                              .append(",");
@@ -464,42 +466,67 @@ public final class plasmaParser {
         // closing the parser object pool
         try {
             theParserPool.close();
-        } catch (Exception e) { }
+        } catch (Exception e) {/* ignore this */}
     }    
     
-    public plasmaParserDocument parseSource(URL location, String mimeType, String charset, byte[] source) throws InterruptedException {
+    public plasmaParserDocument parseSource(URL location, String mimeType, String charset, byte[] source) 
+    throws InterruptedException, ParserException {
         File tempFile = null;
         try {
+            // creating a temp file to store the byte array
             tempFile = File.createTempFile("parseSource", ".tmp");
             serverFileUtils.write(source, tempFile);
+            
+            // parsing the temp file
             return parseSource(location, mimeType, charset, tempFile);
+            
         } catch (Exception e) {
+            // Interrupted- and Parser-Exceptions should pass through
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            serverLog.logSevere("PARSER", "parseSource1: " + e.getMessage(), e);
-            return null;
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            // log unexpected error
+            this.theLogger.logSevere("Unexpected exception in parseSource1: " + e.getMessage(), e);
+            throw new ParserException("Unexpected exception while parsing " + location,location, e);
         } finally {
-            if (tempFile != null) try { tempFile.delete(); } catch (Exception ex){}
+            if (tempFile != null) try { tempFile.delete(); } catch (Exception ex){/* ignore this */}
         }
         
     }
 
-    public plasmaParserDocument parseSource(URL location, String mimeType, String documentCharset, File sourceFile) throws InterruptedException {
+    public plasmaParserDocument parseSource(URL location, String theMimeType, String theDocumentCharset, File sourceFile) 
+    throws InterruptedException, ParserException {
 
         Parser theParser = null;
+        String mimeType = null;
         try {
             // getting the mimetype of the document
-            mimeType = getRealMimeType(mimeType);
+            mimeType = getRealMimeType(theMimeType);
             
             // getting the file extension of the document
             String fileExt = getFileExt(location);
             
             // getting the charset of the document
-            if (documentCharset == null)
-                // TODO: do a charset detection here ....
-                documentCharset = "ISO-8859-1";
+            // TODO: do a charset detection here ....
+            String documentCharset = (theDocumentCharset == null) ? "ISO-8859-1" : theDocumentCharset;
+            
+            // testing if parsing is supported for this resource
+            if (!plasmaParser.supportedContent(location,mimeType)) {
+                String errorMsg = "No parser available to parse mimetype";
+                this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
+                throw new ParserException(errorMsg,location,plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
+            }
+            
+            // testing if the resource is not empty
+            if (!(sourceFile.exists() && sourceFile.canRead() && sourceFile.length() > 0)) {
+                String errorMsg = "No resource content available.";
+                this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
+                throw new ParserException(errorMsg,location,plasmaCrawlEURL.DENIED_NOT_PARSEABLE_NO_CONTENT);
+            }
+
             
             if (this.theLogger.isFine())
-                this.theLogger.logFine("Parsing " + location + " with mimeType '" + mimeType + 
+                this.theLogger.logInfo("Parsing " + location + " with mimeType '" + mimeType + 
                                        "' and file extension '" + fileExt + "'.");
             
             /*
@@ -555,26 +582,43 @@ public final class plasmaParser {
             theParser = this.getParser(mimeType);
             
             // if a parser was found we use it ...
+            plasmaParserDocument doc = null;
             if (theParser != null) {
-                return theParser.parse(location, mimeType,documentCharset,sourceFile);
+                doc = theParser.parse(location, mimeType,documentCharset,sourceFile);
             } else if (realtimeParsableMimeTypesContains(mimeType)) {                      
-                return parseHtml(location, mimeType, documentCharset, sourceFile);
+                doc = parseHtml(location, mimeType, documentCharset, sourceFile);
             } else {
-                serverLog.logWarning("PARSER", "parseSource2: wrong mime type");
-                return null;
+                String errorMsg = "No parser available to parse mimetype";
+                this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
+                throw new ParserException(errorMsg,location,plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);                
             }
+            
+            // check result
+            if (doc == null) {
+                String errorMsg = "Unexpected error. Parser returned null.";
+                this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
+                throw new ParserException(errorMsg,location);                
+            }
+            return doc;
+            
         } catch (Exception e) {
+            // Interrupted- and Parser-Exceptions should pass through
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            serverLog.logSevere("PARSER", "parseSource2: " + e.getMessage(), e);
-            return null;
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            // log unexpected error
+            String errorMsg = "Unexpected exception. " + e.getMessage();
+            this.theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
+            throw new ParserException(errorMsg,location,e);            
+            
         } finally {
             if (theParser != null) {
-                try { plasmaParser.theParserPool.returnObject(mimeType, theParser); } catch (Exception e) { }
+                try { plasmaParser.theParserPool.returnObject(mimeType, theParser); } catch (Exception e) { /* ignore this */}
             }
         }
     }
     
-    private plasmaParserDocument parseHtml(URL location, String mimeType, String documentCharset, File sourceFile) throws IOException {
+    private plasmaParserDocument parseHtml(URL location, String mimeType, String documentCharset, File sourceFile) throws IOException, ParserException {
         
         // ...otherwise we make a scraper and transformer
         FileInputStream fileIn = new FileInputStream(sourceFile);
@@ -596,8 +640,9 @@ public final class plasmaParser {
         //serverFileUtils.copy(sourceFile, hfos);
         //hfos.close();
         if (writer.binarySuspect()) {
-            this.theLogger.logInfo("Binary data found in URL " + location);
-            return null;
+            String errorMsg = "Binary data found in resource";
+            this.theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg);
+            throw new ParserException(errorMsg,location);    
         }
         return transformScraper(location, mimeType, documentCharset, scraper);        
     }

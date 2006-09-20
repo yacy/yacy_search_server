@@ -49,6 +49,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import de.anomic.net.URL;
 
@@ -93,10 +94,33 @@ public abstract class AbstractParser implements Parser{
         this.libxDependencies = libxDependencies;
 	}
 
+    /**
+     * Check if the parser was interrupted.
+     * @throws InterruptedException if the parser was interrupted
+     */
     public static final void checkInterruption() throws InterruptedException {
         Thread currentThread = Thread.currentThread();
         if ((currentThread instanceof serverThread) && ((serverThread)currentThread).shutdownInProgress()) throw new InterruptedException("Shutdown in progress ...");
         if (currentThread.isInterrupted()) throw new InterruptedException("Shutdown in progress ...");    
+    }
+    
+    public final File createTempFile(String name) throws IOException {
+        String parserClassName = this.getClass().getName();
+        int idx = parserClassName.lastIndexOf(".");
+        if (idx != -1) {
+            parserClassName = parserClassName.substring(idx+1);
+        } 
+                    
+        // getting the file extension
+        idx = name.lastIndexOf("/");
+        String fileName = (idx != -1) ? name.substring(idx+1) : name;        
+        
+        idx = fileName.lastIndexOf(".");
+        String fileExt = (idx > -1) ? fileName.substring(idx+1) : "";
+        
+        // creates the temp file
+        File tempFile = File.createTempFile(parserClassName + "_" + ((idx>-1)?fileName.substring(0,idx):fileName), (fileExt.length()>0)?"."+fileExt:fileExt);
+        return tempFile;
     }
     
 	/**
@@ -119,14 +143,17 @@ public abstract class AbstractParser implements Parser{
     ) throws ParserException, InterruptedException {
         ByteArrayInputStream contentInputStream = null;
         try {
+            // convert the byte array into a stream
             contentInputStream = new ByteArrayInputStream(source);
+            
+            // parse the stream
             return this.parse(location,mimeType,charset,contentInputStream); 
         } finally {
             if (contentInputStream != null) {
                 try {
                     contentInputStream.close();
                     contentInputStream = null;
-                } catch (Exception e){}
+                } catch (Exception e){ /* ignore this */}
             }
         }
 	}
@@ -151,12 +178,15 @@ public abstract class AbstractParser implements Parser{
 	) throws ParserException, InterruptedException {
         BufferedInputStream contentInputStream = null;
         try {
+            // create a stream from the file
             contentInputStream = new BufferedInputStream(new FileInputStream(sourceFile));
+            
+            // parse the stream
             return this.parse(location, mimeType, charset, contentInputStream);
         } catch (FileNotFoundException e) {
-            throw new ParserException(e.getMessage());
+            throw new ParserException("Unexpected error while parsing file. " + e.getMessage(),location); 
         } finally {
-            if (contentInputStream != null) try{contentInputStream.close();}catch(Exception e){}
+            if (contentInputStream != null) try{contentInputStream.close();}catch(Exception e){/* ignore this */}
         }
 	}
     
@@ -201,6 +231,6 @@ public abstract class AbstractParser implements Parser{
      * Return the name of the parser
      */
     public String getName() {
-        return parserName;
+        return this.parserName;
     }
 }

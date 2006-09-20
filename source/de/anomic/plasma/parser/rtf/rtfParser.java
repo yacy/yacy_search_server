@@ -77,7 +77,7 @@ implements Parser {
     
 	public rtfParser() {
 		super(LIBX_DEPENDENCIES);
-        parserName = "Rich Text Format Parser";  
+        this.parserName = "Rich Text Format Parser";  
 	}
 
 	public plasmaParserDocument parse(URL location, String mimeType, String charset,
@@ -113,7 +113,9 @@ implements Parser {
 		}
 		catch (Exception e) {			
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-			throw new ParserException("Unable to parse the rdf content. " + e.getMessage());
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while parsing rtf resource." + e.getMessage(),location); 
 		}        
 	}
 

@@ -56,6 +56,7 @@ import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchImages;
@@ -64,7 +65,6 @@ import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.net.URL;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -192,13 +192,15 @@ public class yacysearch {
                 plasmaCrawlLURL.Entry urlentry = sb.urlPool.loadedURL.load(recommendHash, null);
                 if (urlentry != null) {
                     plasmaParserDocument document = sb.snippetCache.retrieveDocument(urlentry.url(), true);
-                    // create a news message
-                    HashMap map = new HashMap();
-                    map.put("url", urlentry.url().toNormalform().replace(',', '|'));
-                    map.put("title", urlentry.descr().replace(',', ' '));
-                    map.put("description", ((document == null) ? urlentry.descr() : document.getMainLongTitle()).replace(',', ' '));
-                    map.put("tags",  ((document == null) ? "" : document.getKeywords(' ')));
-                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippadd", map));
+                    if (document != null) {
+                        // create a news message
+                        HashMap map = new HashMap();
+                        map.put("url", urlentry.url().toNormalform().replace(',', '|'));
+                        map.put("title", urlentry.descr().replace(',', ' '));
+                        map.put("description", ((document == null) ? urlentry.descr() : document.getMainLongTitle()).replace(',', ' '));
+                        map.put("tags",  ((document == null) ? "" : document.getKeywords(' ')));
+                        yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippadd", map));
+                    }
                 }
             }
 

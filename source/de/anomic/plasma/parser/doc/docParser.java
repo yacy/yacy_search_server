@@ -75,7 +75,7 @@ implements Parser {
     
 	public docParser() {
 		super(LIBX_DEPENDENCIES);
-        parserName = "Word Document Parser";
+        this.parserName = "Word Document Parser";
 	}
 
 	public plasmaParserDocument parse(URL location, String mimeType, String charset,
@@ -99,14 +99,16 @@ implements Parser {
                       null,
                       null,
                       null,
-                      contents.getBytes(),
+                      contents.getBytes("UTF-8"),
                       null,
                       null);
               
               return theDoc;             
 		} catch (Exception e) {			
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-			throw new ParserException("Unable to parse the doc content. " + e.getMessage());
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while parsing doc file. " + e.getMessage(),location);            
 		}        
 	}
 

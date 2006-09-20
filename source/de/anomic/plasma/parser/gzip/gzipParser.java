@@ -76,7 +76,7 @@ public class gzipParser extends AbstractParser implements Parser {
     
     public gzipParser() {        
         super(LIBX_DEPENDENCIES);
-        parserName = "GNU Zip Compressed Archive Parser";
+        this.parserName = "GNU Zip Compressed Archive Parser";
     }
     
     public Hashtable getSupportedMimeTypes() {
@@ -113,7 +113,9 @@ public class gzipParser extends AbstractParser implements Parser {
             return theParser.parseSource(location,null,null,tempFile);
         } catch (Exception e) {    
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            throw new ParserException("Unable to parse the gzip content. " + e.getMessage());
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while parsing gzip file. " + e.getMessage(),location); 
         } finally {
             if (tempFile != null) tempFile.delete();
         }

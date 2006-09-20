@@ -44,6 +44,7 @@
 package de.anomic.plasma.parser.mimeType;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import de.anomic.net.URL;
 import java.util.Collection;
@@ -99,7 +100,7 @@ implements Parser {
     
     public mimeTypeParser() {
         super(LIBX_DEPENDENCIES);
-        parserName = "MimeType Parser"; 
+        this.parserName = "MimeType Parser"; 
     }
     
     public String getMimeType (File sourceFile) {
@@ -142,8 +143,8 @@ implements Parser {
             threadLoopDetection.put(Thread.currentThread(),new Integer(loopDepth.intValue()+1));
             
             // deactivating the logging for jMimeMagic
-            Logger theLogger = Logger.getLogger("net.sf.jmimemagic");
-            theLogger.setLevel(Level.OFF);
+            Logger jmimeMagicLogger = Logger.getLogger("net.sf.jmimemagic");
+            jmimeMagicLogger.setLevel(Level.OFF);
             
             Magic theMagic = new Magic();           
             MagicMatch match = theMagic.getMagicMatch(sourceFile);
@@ -160,8 +161,8 @@ implements Parser {
                 }
                 
                 // to avoid loops we have to test if the mimetype has changed ...
-                if (this.getSupportedMimeTypes().containsKey(mimeType)) return null;
-                if (orgMimeType.equals(mimeType)) return null;
+                if (this.getSupportedMimeTypes().containsKey(mimeType)) throw new ParserException("Unable to detect mimetype of resource.",location);
+                if (orgMimeType.equals(mimeType)) throw new ParserException("Unable to detect mimetype of resource.",location);
                                 
                 // check for interruption
                 checkInterruption();
@@ -170,11 +171,13 @@ implements Parser {
                 plasmaParser theParser = new plasmaParser();
                 return theParser.parseSource(location,mimeType,charset,sourceFile);
             }
-            return null;
+            throw new ParserException("Unable to detect mimetype of resource.",location);
             
         } catch (Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            return null;
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while detect mimetype of resource. " + e.getMessage(),location); 
         } finally {
             Integer loopDepth = (Integer) threadLoopDetection.get(Thread.currentThread());                
             if (loopDepth.intValue() <= 1) {
@@ -186,14 +189,14 @@ implements Parser {
     }
     
     public plasmaParserDocument parse(URL location, String mimeType,String charset,
-            InputStream source) throws ParserException {
+            InputStream source) throws ParserException, InterruptedException {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("mimeTypeParser",".tmp");
             serverFileUtils.copy(source,dstFile);
             return parse(location,mimeType,charset,dstFile);
-        } catch (Exception e) {            
-            return null;
+        } catch (IOException e) {
+            throw new ParserException("Unexpected error while detect mimetype of resource. " + e.getMessage(),location);
         } finally {
             if (dstFile != null) {dstFile.delete();}            
         }

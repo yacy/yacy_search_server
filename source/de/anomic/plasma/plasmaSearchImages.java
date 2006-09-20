@@ -43,6 +43,8 @@ package de.anomic.plasma;
 
 import java.net.MalformedURLException;
 import de.anomic.net.URL;
+import de.anomic.plasma.parser.ParserException;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
@@ -60,10 +62,16 @@ public final class plasmaSearchImages {
         if (maxTime > 10) {
             byte[] res = sc.getResource(url, true, (int) maxTime);
             if (res != null) {
-                plasmaParserDocument document = sc.parseDocument(url, res);
-
+                plasmaParserDocument document = null;
+                try {
+                    document = sc.parseDocument(url, res);
+                } catch (ParserException e) {
+                    // parsing failed
+                }
+                if (document == null) return;
+                
                 // add the image links
-                if (document != null) this.addAll(document.getImages());
+                this.addAll(document.getImages());
 
                 // add also links from pages one step deeper, if depth > 0
                 if (depth > 0) {

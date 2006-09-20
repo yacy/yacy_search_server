@@ -59,6 +59,7 @@ public final class plasmaCrawlLoaderMessage {
     
     private serverSemaphore resultSync  = null;
     private plasmaHTCache.Entry result;
+    private String errorMessage;
     
     // loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
     public plasmaCrawlLoaderMessage(
@@ -85,6 +86,14 @@ public final class plasmaCrawlLoaderMessage {
         this.resultSync  = new serverSemaphore(0);
         this.result = null;
     } 
+    
+    public void setError(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+    
+    public String getError() {
+        return this.errorMessage;
+    }
     
     public void setResult(plasmaHTCache.Entry theResult) {
         // store the result

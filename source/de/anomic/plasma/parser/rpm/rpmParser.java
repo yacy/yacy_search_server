@@ -84,7 +84,7 @@ public class rpmParser extends AbstractParser implements Parser {
     
     public rpmParser() {        
         super(LIBX_DEPENDENCIES);
-        parserName = "rpm Parser"; 
+        this.parserName = "rpm Parser"; 
     }
     
     public Hashtable getSupportedMimeTypes() {
@@ -126,12 +126,12 @@ public class rpmParser extends AbstractParser implements Parser {
                 
                 // getting the next tag
                 DataTypeIf tag = rpmFile.getTag(headerNames[i]);
-                if (tag != null) {
-                    content.append(headerNames[i])
-                               .append(": ")
-                               .append(tag.toString())
-                               .append("\n");
-                }
+                if (tag == null) continue;
+                
+                content.append(headerNames[i])
+                .append(": ")
+                .append(tag.toString())
+                .append("\n");
                 
                 if (headerNames[i].equals("N")) name = tag.toString();
                 else if (headerNames[i].equals("SUMMARY")) summary = tag.toString();
@@ -153,16 +153,18 @@ public class rpmParser extends AbstractParser implements Parser {
                     summary,
                     null,
                     description,
-                    content.toString().getBytes(),
+                    content.toString().getBytes("UTF-8"),
                     anchors,
                     null); 
             
             return theDoc;
         } catch (Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            throw new ParserException("Unable to parse the rpm file. " + e.getMessage());
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while parsing rpm file. " + e.getMessage(),location); 
         } finally {
-            if (rpmFile != null) try { rpmFile.close(); } catch (Exception e) {}
+            if (rpmFile != null) try { rpmFile.close(); } catch (Exception e) {/* ignore this */}
         }
     }
     

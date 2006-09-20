@@ -98,7 +98,7 @@ public class rssParser extends AbstractParser implements Parser {
     
 	public rssParser() {
 		super(LIBX_DEPENDENCIES);
-        parserName = "Rich Site Summary/Atom Feed Parser"; 
+        this.parserName = "Rich Site Summary/Atom Feed Parser"; 
 	}
 
 	public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
@@ -149,7 +149,7 @@ public class rssParser extends AbstractParser implements Parser {
                     anchors.put(itemURL.toString(),itemTitle);
                     
                 	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
-                	text.append(new serverCharBuffer(htmlFilterAbstractScraper.stripAll(new serverCharBuffer(itemDescr.toCharArray()))).trim()).append(' '); // TODO: this does not work for utf-8
+                	text.append(new serverCharBuffer(htmlFilterAbstractScraper.stripAll(new serverCharBuffer(itemDescr.toCharArray()))).trim().toString()).append(' ');
                     
                     String itemContent = item.getElementValue("content");
                     if ((itemContent != null) && (itemContent.length() > 0)) {
@@ -183,11 +183,6 @@ public class rssParser extends AbstractParser implements Parser {
                 }
             }
             
-	        /* (URL location, String mimeType,
-                    String keywords, String shortTitle, String longTitle,
-                    String[] sections, String abstrct,
-                    byte[] text, Map anchors, Map images)
-            */
             plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,
                     mimeType,
@@ -205,7 +200,9 @@ public class rssParser extends AbstractParser implements Parser {
             
         } catch (Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            throw new ParserException("Unable to parse the rss file. " + e.getMessage());
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while parsing rss file." + e.getMessage(),location); 
         }
 	}
 

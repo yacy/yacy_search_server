@@ -80,7 +80,7 @@ public class bzipParser extends AbstractParser implements Parser {
     
     public bzipParser() {        
         super(LIBX_DEPENDENCIES);
-        parserName = "Bzip 2 UNIX Compressed File Parser";
+        this.parserName = "Bzip 2 UNIX Compressed File Parser";
     }
     
     public Hashtable getSupportedMimeTypes() {
@@ -129,7 +129,9 @@ public class bzipParser extends AbstractParser implements Parser {
             return theParser.parseSource(location,null,null,tempFile);
         } catch (Exception e) {  
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            throw new ParserException("Unable to parse the gzip content. " + e.getMessage());
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while parsing bzip file. " + e.getMessage(),location);
         } finally {
             if (tempFile != null) tempFile.delete();
         }

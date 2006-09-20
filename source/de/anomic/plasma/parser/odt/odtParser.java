@@ -84,7 +84,7 @@ public class odtParser extends AbstractParser implements Parser {
     
     public odtParser() {        
         super(LIBX_DEPENDENCIES);
-        parserName = "OASIS OpenDocument V2 Text Document Parser"; 
+        this.parserName = "OASIS OpenDocument V2 Text Document Parser"; 
     }
     
     public Hashtable getSupportedMimeTypes() {
@@ -96,7 +96,7 @@ public class odtParser extends AbstractParser implements Parser {
         try {          
             byte[] docContent     = null;
             String docDescription = null;
-            String docKeywords    = null;
+            String docKeywordStr    = null;
             String docShortTitle  = null;
             String docLongTitle   = null;
             
@@ -125,7 +125,7 @@ public class odtParser extends AbstractParser implements Parser {
                     ODFMetaFileAnalyzer metaAnalyzer = new ODFMetaFileAnalyzer();
                     OpenDocumentMetadata metaData = metaAnalyzer.analyzeMetaData(zipFileEntryStream);
                     docDescription = metaData.getDescription();
-                    docKeywords    = metaData.getKeyword();
+                    docKeywordStr    = metaData.getKeyword();
                     docShortTitle  = metaData.getTitle();
                     docLongTitle   = metaData.getSubject();
                     
@@ -149,11 +149,16 @@ public class odtParser extends AbstractParser implements Parser {
                 }
             }
          
+            // split the keywords
+            String[] docKeywords = null;
+            if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
+            
+            // create the parser document
             return new plasmaParserDocument(
                     location,
                     mimeType,
                     "UTF-8",
-                    docKeywords.split(" |,"),
+                    docKeywords,
                     docShortTitle, 
                     docLongTitle,
                     null,
@@ -163,13 +168,13 @@ public class odtParser extends AbstractParser implements Parser {
                     null);
         } catch (Exception e) {            
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            throw new ParserException("Unable to parse the odt content. " + e.getMessage());
-        } catch (Error e) {
-            throw new ParserException("Unable to parse the odt content. " + e.getMessage());
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while parsing odt file. " + e.getMessage(),location); 
         }
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException {
+    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         File dest = null;
         try {
             // creating a tempfile
@@ -182,9 +187,12 @@ public class odtParser extends AbstractParser implements Parser {
             // parsing the content
             return parse(location, mimeType, charset, dest);
         } catch (Exception e) {
-            throw new ParserException("Unable to parse the odt document. " + e.getMessage());
+            if (e instanceof InterruptedException) throw (InterruptedException) e;
+            if (e instanceof ParserException) throw (ParserException) e;
+            
+            throw new ParserException("Unexpected error while parsing odt file. " + e.getMessage(),location); 
         } finally {
-            if (dest != null) try { dest.delete(); } catch (Exception e){}
+            if (dest != null) try { dest.delete(); } catch (Exception e){/* ignore this */}
         }
     }
     

@@ -44,24 +44,45 @@
 
 package de.anomic.plasma.parser;
 
+import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCrawlEURL;
+
 public class ParserException extends Exception
 {
-
+    private String errorCode = null;
+    private URL url = null;
+    
 	private static final long serialVersionUID = 1L;
 
 	public ParserException() {
         super();
     }
 
-    public ParserException(String message) {
+    public ParserException(String message, URL url) {
+        this(message,url,plasmaCrawlEURL.DENIED_PARSER_ERROR);
+    }    
+    
+    public ParserException(String message, URL url, String errorCode) {
         super(message);
+        this.errorCode = errorCode;
+        this.url = url;
     }
 
-    public ParserException(String message, Throwable cause) {
+    public ParserException(String message, URL url, Throwable cause) {
+        this(message,url,cause,plasmaCrawlEURL.DENIED_PARSER_ERROR);
+    }
+    
+    public ParserException(String message, URL url, Throwable cause, String errorCode) {
         super(message, cause);
+        this.errorCode = errorCode;
+        this.url = url;
     }
 
-    public ParserException(Throwable cause) {
-        super(cause);
+    public String getErrorCode() {
+        return this.errorCode;
+    }
+    
+    public URL getURL() {
+        return this.url;
     }
 }

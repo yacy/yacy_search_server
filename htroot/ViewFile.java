@@ -57,6 +57,8 @@ import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.crawler.plasmaCrawlerException;
+import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.plasmaCrawlLURL.Entry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -83,174 +85,185 @@ public class ViewFile {
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = (plasmaSwitchboard)env;     
 
-
-
-        if (post.containsKey("words"))
+        if (post != null && post.containsKey("words"))
             try {
                 prop.put("error_words",URLEncoder.encode((String) post.get("words"), "UTF-8"));
             } catch (UnsupportedEncodingException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                // ignore this. this should not occure
             }
 
-            if (post != null) {
-                // getting the url hash from which the content should be loaded
-                String urlHash = post.get("urlHash","");       
-                if (urlHash.equals("")) {
-                    prop.put("error",1);
-                    prop.put("viewMode",VIEW_MODE_NO_TEXT);
-                    return prop;
+
+            // getting the url hash from which the content should be loaded
+            String urlHash = post.get("urlHash","");       
+            if (urlHash.equals("")) {
+                prop.put("error",1);
+                prop.put("viewMode",VIEW_MODE_NO_TEXT);
+                return prop;
+            }
+
+            String viewMode = post.get("viewMode","sentences");
+
+            // getting the urlEntry that belongs to the url hash
+            Entry urlEntry = null;
+            urlEntry = sb.urlPool.loadedURL.load(urlHash, null);
+            if (urlEntry == null) {
+                prop.put("error",2);
+                prop.put("viewMode",VIEW_MODE_NO_TEXT);
+                return prop;
+            }            
+
+            // gettin the url that belongs to the entry
+            URL url = urlEntry.url();
+            if (url == null) {
+                prop.put("error",3);
+                prop.put("viewMode",VIEW_MODE_NO_TEXT);
+                return prop;
+            }    
+
+            // loading the resource content as byte array
+            byte[] resource = null;
+            IResourceInfo resInfo = null;
+            String resMime = null;
+            try {
+                // trying to load the resource body
+                resource = sb.cacheManager.loadResourceContent(url);
+
+                // if the resource body was not cached we try to load it from web
+                if (resource == null) {
+                    plasmaHTCache.Entry entry = null;
+                    try {
+                        entry = sb.snippetCache.loadResourceFromWeb(url, 5000);
+                    } catch (plasmaCrawlerException e) {
+                        prop.put("error",4);
+                        prop.put("error_errorText",e.getMessage());
+                        prop.put("viewMode",VIEW_MODE_NO_TEXT);                        
+                        return prop;
+                    }
+
+                    if (entry != null) {
+                        resInfo = entry.getDocumentInfo();
+                        resource = sb.cacheManager.loadResourceContent(url);
+                    }
+
+                    if (resource == null) {
+                        prop.put("error",4);
+                        prop.put("viewMode",VIEW_MODE_NO_TEXT);
+                        return prop;
+                    } 
                 }
 
-                String viewMode = post.get("viewMode","sentences");
+                // try to load resource metadata
+                if (resInfo == null) {
 
-                // getting the urlEntry that belongs to the url hash
-                Entry urlEntry = null;
-                urlEntry = sb.urlPool.loadedURL.load(urlHash, null);
-                if (urlEntry == null) {
-                    prop.put("error",2);
-                    prop.put("viewMode",VIEW_MODE_NO_TEXT);
-                    return prop;
-                }            
+                    // try to load the metadata from cache
+                    try {
+                        resInfo = sb.cacheManager.loadResourceInfo(urlEntry.url());
+                    } catch (Exception e) { /* ignore this */}
 
-                // gettin the url that belongs to the entry
-                URL url = urlEntry.url();
-                if (url == null) {
-                    prop.put("error",3);
-                    prop.put("viewMode",VIEW_MODE_NO_TEXT);
-                    return prop;
-                }    
-
-                // loading the resource content as byte array
-                byte[] resource = null;
-                IResourceInfo resInfo = null;
-                String resMime = null;
-                try {
-                    // trying to load the resource body
-                    resource = sb.cacheManager.loadResourceContent(url);
-
-                    // if the resource body was not cached we try to load it from web
-                    if (resource == null) {
-                        plasmaHTCache.Entry entry = sb.snippetCache.loadResourceFromWeb(url, 5000);                 
-
-                        if (entry != null) {
-                            resInfo = entry.getDocumentInfo();
-                            resource = sb.cacheManager.loadResourceContent(url);
+                    // if the metadata where not cached try to load it from web
+                    if (resInfo == null) {
+                        String protocol = url.getProtocol();
+                        if (!((protocol.equals("http") || protocol.equals("https")))) {
+                            prop.put("error",6);
+                            prop.put("viewMode",VIEW_MODE_NO_TEXT);
+                            return prop;                                
                         }
 
-                        if (resource == null) {
+                        httpHeader responseHeader = httpc.whead(url,url.getHost(),5000,null,null,sb.remoteProxyConfig);
+                        if (responseHeader == null) {
                             prop.put("error",4);
                             prop.put("viewMode",VIEW_MODE_NO_TEXT);
                             return prop;
                         } 
+                        resMime = responseHeader.mime();
                     }
+                } else {
+                    resMime = resInfo.getMimeType();
+                }
+            } catch (IOException e) {
+                prop.put("error",4);
+                prop.put("viewMode",VIEW_MODE_NO_TEXT);
+                return prop; 
+            }    
+            if (viewMode.equals("plain")) {                
+                String content = new String(resource);
+                content = content.replaceAll("<","&lt;")
+                .replaceAll(">","&gt;")
+                .replaceAll("\"","&quot;")
+                .replaceAll("\n","<br>")
+                .replaceAll("\t","&nbsp;&nbsp;&nbsp;&nbsp;");
 
-                    // try to load resource metadata
-                    if (resInfo == null) {
-
-                        // try to load the metadata from cache
-                        try {
-                            resInfo = sb.cacheManager.loadResourceInfo(urlEntry.url());
-                        } catch (Exception e) { /* ignore this */}
-
-                        // if the metadata where not cached try to load it from web
-                        if (resInfo == null) {
-                            String protocol = url.getProtocol();
-                            if (!((protocol.equals("http") || protocol.equals("https")))) {
-                                prop.put("error",6);
-                                prop.put("viewMode",VIEW_MODE_NO_TEXT);
-                                return prop;                                
-                            }
-
-                            httpHeader responseHeader = httpc.whead(url,url.getHost(),5000,null,null,sb.remoteProxyConfig);
-                            if (responseHeader == null) {
-                                prop.put("error",4);
-                                prop.put("viewMode",VIEW_MODE_NO_TEXT);
-                                return prop;
-                            } 
-                            resMime = responseHeader.mime();
-                        }
-                    } else {
-                        resMime = resInfo.getMimeType();
-                    }
-                } catch (IOException e) {
-                    if (url == null) {
-                        prop.put("error",4);
-                        prop.put("viewMode",VIEW_MODE_NO_TEXT);
-                        return prop;
-                    }   
-                }    
-                if (viewMode.equals("plain")) {                
-                    String content = new String(resource);
-                    content = content.replaceAll("<","&lt;")
-                    .replaceAll(">","&gt;")
-                    .replaceAll("\"","&quot;")
-                    .replaceAll("\n","<br>")
-                    .replaceAll("\t","&nbsp;&nbsp;&nbsp;&nbsp;");
-
-                    prop.put("error",0);
-                    prop.put("viewMode",VIEW_MODE_AS_PLAIN_TEXT);
-                    prop.put("viewMode_plainText",content);                     
-                } else if (viewMode.equals("parsed") || viewMode.equals("sentences") || viewMode.equals("iframe")) {
-                    // parsing the resource content
-                    plasmaParserDocument document = sb.snippetCache.parseDocument(url, resource,resInfo);
+                prop.put("error",0);
+                prop.put("viewMode",VIEW_MODE_AS_PLAIN_TEXT);
+                prop.put("viewMode_plainText",content);                     
+            } else if (viewMode.equals("parsed") || viewMode.equals("sentences") || viewMode.equals("iframe")) {
+                // parsing the resource content
+                plasmaParserDocument document = null;
+                try {
+                    document = sb.snippetCache.parseDocument(url, resource,resInfo);
                     if (document == null) {
                         prop.put("error",5);
+                        prop.put("error_errorText","Unknown error");
                         prop.put("viewMode",VIEW_MODE_NO_TEXT);
                         return prop;                
                     }
-                    resMime = document.getMimeType();
-
-                    if (viewMode.equals("parsed")) {
-                        String content = new String(document.getText());
-                        content = wikiCode.replaceHTML(content); //added by Marc Nause
-                        content = content.replaceAll("\n","<br>")
-                        .replaceAll("\t","&nbsp;&nbsp;&nbsp;&nbsp;");
-
-                        prop.put("viewMode",VIEW_MODE_AS_PARSED_TEXT);
-                        prop.put("viewMode_parsedText",content);
-                    } else if (viewMode.equals("iframe")) {
-                        prop.put("viewMode",VIEW_MODE_AS_IFRAME);
-                        prop.put("viewMode_url",url.toString());
-                    } else {
-                        prop.put("viewMode",VIEW_MODE_AS_PARSED_SENTENCES);
-                        String[] sentences = document.getSentences();
-
-                        boolean dark = true;
-                        for (int i=0; i < sentences.length; i++) {
-                            String currentSentence = wikiCode.replaceHTML(sentences[i]);
-
-                            // Search word highlighting
-                            String words = post.get("words",null);
-                            if (words != null) {
-                                try {
-                                    words = URLDecoder.decode(words,"UTF-8");
-                                } catch (UnsupportedEncodingException e) {}
-
-                                String[] wordArray = words.substring(1,words.length()-1).split(",");
-                                for (int j=0; j < wordArray.length; j++) {
-                                    String currentWord = wordArray[j].trim(); 
-                                    currentSentence = currentSentence.replaceAll(currentWord,
-                                            "<b style=\"color: black; background-color: rgb(" + highlightingColors[j%6] + ");\">" + currentWord + "</b>");
-                                }
-                            }
-
-                            prop.put("viewMode_sentences_" + i + "_nr",Integer.toString(i+1)); 
-                            prop.put("viewMode_sentences_" + i + "_text",currentSentence);   
-                            prop.put("viewMode_sentences_" + i + "_dark",((dark) ? 1 : 0) ); dark=!dark;
-                        }
-                        prop.put("viewMode_sentences",sentences.length);
-
-                    } 
+                } catch (ParserException e) {
+                    prop.put("error",5);
+                    prop.put("error_errorText",e.getMessage());
+                    prop.put("viewMode",VIEW_MODE_NO_TEXT);
+                    return prop;     
                 }
-                prop.put("error",0);
-                prop.put("error_url",url.toString());                
-                prop.put("error_hash",urlHash);
-                prop.put("error_wordCount",Integer.toString(urlEntry.wordCount()));
-                prop.put("error_desc",urlEntry.descr());
-                prop.put("error_size",urlEntry.size());
-                prop.put("error_mimeType",resMime);
-            }        
+                resMime = document.getMimeType();
+
+                if (viewMode.equals("parsed")) {
+                    String content = new String(document.getText());
+                    content = wikiCode.replaceHTML(content); //added by Marc Nause
+                    content = content.replaceAll("\n","<br>")
+                    .replaceAll("\t","&nbsp;&nbsp;&nbsp;&nbsp;");
+
+                    prop.put("viewMode",VIEW_MODE_AS_PARSED_TEXT);
+                    prop.put("viewMode_parsedText",content);
+                } else if (viewMode.equals("iframe")) {
+                    prop.put("viewMode",VIEW_MODE_AS_IFRAME);
+                    prop.put("viewMode_url",url.toString());
+                } else {
+                    prop.put("viewMode",VIEW_MODE_AS_PARSED_SENTENCES);
+                    String[] sentences = document.getSentences();
+
+                    boolean dark = true;
+                    for (int i=0; i < sentences.length; i++) {
+                        String currentSentence = wikiCode.replaceHTML(sentences[i]);
+
+                        // Search word highlighting
+                        String words = post.get("words",null);
+                        if (words != null) {
+                            try {
+                                words = URLDecoder.decode(words,"UTF-8");
+                            } catch (UnsupportedEncodingException e) {}
+
+                            String[] wordArray = words.substring(1,words.length()-1).split(",");
+                            for (int j=0; j < wordArray.length; j++) {
+                                String currentWord = wordArray[j].trim(); 
+                                currentSentence = currentSentence.replaceAll(currentWord,
+                                        "<b style=\"color: black; background-color: rgb(" + highlightingColors[j%6] + ");\">" + currentWord + "</b>");
+                            }
+                        }
+
+                        prop.put("viewMode_sentences_" + i + "_nr",Integer.toString(i+1)); 
+                        prop.put("viewMode_sentences_" + i + "_text",currentSentence);   
+                        prop.put("viewMode_sentences_" + i + "_dark",((dark) ? 1 : 0) ); dark=!dark;
+                    }
+                    prop.put("viewMode_sentences",sentences.length);
+
+                } 
+            }
+            prop.put("error",0);
+            prop.put("error_url",url.toString());                
+            prop.put("error_hash",urlHash);
+            prop.put("error_wordCount",Integer.toString(urlEntry.wordCount()));
+            prop.put("error_desc",urlEntry.descr());
+            prop.put("error_size",urlEntry.size());
+            prop.put("error_mimeType",resMime);
 
             return prop;
     }

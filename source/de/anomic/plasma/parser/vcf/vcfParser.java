@@ -215,7 +215,7 @@ public class vcfParser extends AbstractParser implements Parser {
                             URL newURL = new URL(value);
                             anchors.put(newURL.toString(),newURL.toString());   
                             //parsedData.put(key,value);
-                        } catch (MalformedURLException ex) {}                                                
+                        } catch (MalformedURLException ex) {/* ignore this */}                                                
                     } else if (
                             !key.equalsIgnoreCase("BEGIN") &&
                             !key.equalsIgnoreCase("END") &&
@@ -255,12 +255,10 @@ public class vcfParser extends AbstractParser implements Parser {
             return theDoc;
         } catch (Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;
+            if (e instanceof ParserException) throw (ParserException) e;
             
-            String errorMsg = "Unable to parse the vcard content. " + e.getMessage();
-            this.theLogger.logSevere(errorMsg);            
-            throw new ParserException(errorMsg);
-        } finally {
-        }
+            throw new ParserException("Unexpected error while parsing vcf resource. " + e.getMessage(),location);
+        } 
     }
     
     public void reset() {
