@@ -1411,7 +1411,9 @@ class shutdownHookThread extends Thread {
 
                 // waiting for the yacy thread to finish execution
                 serverLog.logFine("SHUTDOWN","Waiting for main thread to finish.");
-                this.mainThread.join();
+                if (this.mainThread.isAlive() && !this.sb.isTerminated()) {
+                    this.mainThread.join();
+                }
             }
         } catch (Exception e) {
             serverLog.logSevere("SHUTDOWN","Unexpected error. " + e.getClass().getName(),e);
