@@ -812,3 +812,6 @@ useCollectionIndex=false
 useFlexTableForNURL=false
 useFlexTableForEURL=true
 useFlexTableForPreNURL=false
+
+# flag to show surftipps on index.html page
+showSurftipps = true

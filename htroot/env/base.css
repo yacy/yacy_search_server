@@ -198,9 +198,15 @@ div.urlactions a {
   display:block;
 }
 
+div.urlactions > a {
+  width: 11px;
+  height: 11px;
+  margin: 1px 1px 1px 7px;
+}
+
 img.bookmarkIcon, img.deleteIcon, img.recommendIcon {
-  height: 16px;
-  width: 16px;
+  height: 11px;
+  width: 11px;
 }
 
 a.bookmarklink:hover, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {

@@ -147,6 +147,10 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 	return log;
     }
 
+    public void setConfig(String key, boolean value) {
+        setConfig(key, (value) ? "true" : "false");
+    }
+
     public void setConfig(String key, long value) {
         setConfig(key, Long.toString(value));
     }

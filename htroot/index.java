@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -61,6 +62,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -72,13 +74,23 @@ public class index {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
-
+        final serverObjects prop = new serverObjects();
+        
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
+        
+        boolean surftippsOn = sb.getConfigBool("showSurftipps", true);
+        if ((post != null) && (post.containsKey("surftipps"))) {
+            if (!sb.verifyAuthentication(header, false)) {
+                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                return prop;
+            }
+            surftippsOn = post.get("surftipps", "off").equals("on");
+            sb.setConfig("showSurftipps", surftippsOn);
+        }
+        
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
-
         int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
-
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         final String handover = (post == null) ? "" : post.get("handover", "");
@@ -104,7 +116,6 @@ public class index {
         }
 
         // we create empty entries for template strings
-        final serverObjects prop = new serverObjects();
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
@@ -143,90 +154,74 @@ public class index {
         prop.put("display", display);
         prop.put("searchoptions_display", display);
         
+        if (surftippsOn) {
         
-        // create surftipps
-        int maxCount = yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB);
-        if (maxCount > 300) maxCount = 300;
-        kelondroMScoreCluster surftipps = new kelondroMScoreCluster();
-        yacyNewsRecord record;
-        kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120");
-        for (int j = 0; j < maxCount; j++) try {
-            record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, j);
-            if (record == null) continue;
-            
-            if (record.category().equals("crwlstrt")) {
-                String intention = record.attribute("intention", "");
-                surftipps.setScore(
-                        rowdef.newEntry(new byte[][]{
-                                record.attribute("startURL", "").getBytes(),
-                                ((intention.length() == 0) ? record.attribute("startURL", "") : intention).getBytes(),
-                                ("Crawl Start Point").getBytes()
-                        }), 2 + Math.min(10, intention.length() / 4) + timeFactor(record.created()));
+            // read voting
+            String hash;
+            if ((hash = post.get("voteNegative", null)) != null) {
+                // make new news message with voting
+                HashMap map = new HashMap();
+                map.put("urlhash", hash);
+                map.put("vote", "negative");
+                map.put("refid", post.get("refid", ""));
+                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
             }
-            
-            if (record.category().equals("prfleupd")) {
-                surftipps.setScore(
-                        rowdef.newEntry(new byte[][]{
-                                record.attribute("homepage", "").getBytes(),
-                                ("Home Page of " + record.attribute("nickname", "")).getBytes(),
-                                ("Profile Update").getBytes()
-                        }), 1 + timeFactor(record.created()));
+            if ((hash = post.get("votePositive", null)) != null) {
+                // make new news message with voting
+                HashMap map = new HashMap();
+                map.put("urlhash", hash);
+                map.put("url", crypt.simpleDecode(post.get("url", ""), null));
+                map.put("title", crypt.simpleDecode(post.get("title", ""), null));
+                map.put("description", crypt.simpleDecode(post.get("description", ""), null));
+                map.put("vote", "positive");
+                map.put("refid", post.get("refid", ""));
+                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
             }
-            
-            if (record.category().equals("bkmrkadd")) {
-                surftipps.setScore(
-                        rowdef.newEntry(new byte[][]{
-                                record.attribute("url", "").getBytes(),
-                                (record.attribute("title", "")).getBytes(),
-                                ("Bookmark: " + record.attribute("description", "")).getBytes()
-                        }), 8 + timeFactor(record.created()));
-            }
-            
-            if (record.category().equals("stippadd")) {
-                surftipps.setScore(
-                        rowdef.newEntry(new byte[][]{
-                                record.attribute("url", "").getBytes(),
-                                (record.attribute("title", "")).getBytes(),
-                                ("Surf Tipp: " + record.attribute("description", "")).getBytes()
-                        }), 5 + timeFactor(record.created()));
-            }
-            
-            if (record.category().equals("wiki_upd")) {
-                yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
-                if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
-                if (seed != null) surftipps.setScore(
-                        rowdef.newEntry(new byte[][]{
-                                ("http://" + seed.getAddress() + "/Wiki.html?page=" + record.attribute("page", "")).getBytes(),
-                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes(),
-                                ("Wiki Update: " + record.attribute("description", "")).getBytes()
-                        }), 4 + timeFactor(record.created()));
-            }
-            
-        } catch (IOException e) {e.printStackTrace();}
         
-        // read out surftipp array and create property entries
-        Iterator k = surftipps.scores(false);
-        int i = 0;
-        kelondroRow.Entry row;
-        while (k.hasNext()) {
-            row = (kelondroRow.Entry) k.next();
-            try {
-                prop.put("surftipps_results_" + i + "_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", row.getColString(1, null)) == null) ? 1 : 0);
-                prop.put("surftipps_results_" + i + "_recommend_deletelink", "/index.html?");
-                prop.put("surftipps" + i + "_recommend_recommendlink", "/index.html?");
-                prop.put("surftipps_results_" + i + "_url", row.getColString(0, null));
-                prop.put("surftipps_results_" + i + "_urlname", nxTools.shortenURLString(row.getColString(0, null), 60));
-                prop.put("surftipps_results_" + i + "_title", row.getColString(1, null));
-                prop.put("surftipps_results_" + i + "_description", row.getColString(2, null));
-                i++;
-            } catch (IOException e) {
-                e.printStackTrace();
+            // create surftipps
+            kelondroMScoreCluster surftipps = new kelondroMScoreCluster();
+            kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (yacyCore.universalDateShortPattern.length() + 12));
+            HashMap negativeHashes = new HashMap(); // a mapping from an url hash to Integer (count of votes)
+            HashMap positiveHashes = new HashMap(); // a mapping from an url hash to Integer (count of votes)
+            accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
+            accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
+            accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
+            accumulateSurftipps(surftipps, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
+            accumulateSurftipps(surftipps, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
+            accumulateSurftipps(surftipps, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
+        
+            // read out surftipp array and create property entries
+            Iterator k = surftipps.scores(false);
+            int i = 0;
+            kelondroRow.Entry row;
+            String url, urlhash, refid, title, description;
+            while (k.hasNext()) {
+                row = (kelondroRow.Entry) k.next();
+                url = row.getColString(0, null);
+                urlhash = indexURL.urlHash(url);
+                refid = row.getColString(3, null);
+                title = row.getColString(1, null);
+                description = row.getColString(2, null);
+                try {
+                    prop.put("surftipps_results_" + i + "_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippavt", "refid", refid) == null) ? 1 : 0);
+                    prop.put("surftipps_results_" + i + "_recommend_negativeVoteLink", "/index.html?voteNegative=" + urlhash + "&refid=" + refid + "&display=" + display); // for negaive votes, we don't send around the bad url again, the hash is enough
+                    prop.put("surftipps_results_" + i + "_recommend_positiveVoteLink", "/index.html?votePositive=" + urlhash + "&refid=" + refid + "&url=" + crypt.simpleEncode(url,null,'b') + "&title=" + crypt.simpleEncode(title,null,'b') + "&description=" + crypt.simpleEncode(description,null,'b') + "&display=" + display);
+                    prop.put("surftipps_results_" + i + "_url", url);
+                    prop.put("surftipps_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
+                    prop.put("surftipps_results_" + i + "_urlhash", urlhash);
+                    prop.put("surftipps_results_" + i + "_title", title);
+                    prop.put("surftipps_results_" + i + "_description", description);
+                    i++;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (i >= 50) break;
             }
-            if (i >= 50) break;
+            prop.put("surftipps_results", i);
+            prop.put("surftipps", 1);
+        } else {
+            prop.put("surftipps", 0);
         }
-        prop.put("surftipps_results", i);
-        prop.put("surftipps", 1);
-        
         
         return prop;
     }
@@ -234,5 +229,136 @@ public class index {
     private static int timeFactor(Date created) {
         return (int) Math.max(0, 10 - ((System.currentTimeMillis() - created.getTime()) / 24 / 60 / 60 / 1000));
     }
+    
+    private static void accumulateVotes(HashMap negativeHashes, HashMap positiveHashes, int dbtype) {
+        int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
+        yacyNewsRecord record;
+        
+        for (int j = 0; j < maxCount; j++) try {
+            record = yacyCore.newsPool.get(dbtype, j);
+            if (record == null) continue;
+            
+            if (record.category().equals("stippavt")) {
+                String urlhash = record.attribute("urlhash", "");
+                String vote    = record.attribute("vote", "");
+                if (vote.equals("negative")) {
+                    Integer i = (Integer) negativeHashes.get(urlhash);
+                    if (i == null) negativeHashes.put(urlhash, new Integer(1));
+                    else negativeHashes.put(urlhash, new Integer(i.intValue() + 1));
+                }
+                if (vote.equals("positive")) {
+                    Integer i = (Integer) positiveHashes.get(urlhash);
+                    if (i == null) positiveHashes.put(urlhash, new Integer(1));
+                    else positiveHashes.put(urlhash, new Integer(i.intValue() + 1));
+                }
+            }
+        } catch (IOException e) {e.printStackTrace();}
+    }
+    
+    private static void accumulateSurftipps(
+            kelondroMScoreCluster surftipps, kelondroRow rowdef,
+            HashMap negativeHashes, HashMap positiveHashes, int dbtype) {
+        int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
+        yacyNewsRecord record;
+        String url = "", urlhash;
+        kelondroRow.Entry entry;
+        int score = 0;
+        Integer vote;
+        for (int j = 0; j < maxCount; j++) try {
+            record = yacyCore.newsPool.get(dbtype, j);
+            if (record == null) continue;
+            
+            entry = null;
+            if (record.category().equals("crwlstrt")) {
+                String intention = record.attribute("intention", "");
+                url = record.attribute("startURL", "");
+                entry = rowdef.newEntry(new byte[][]{
+                                url.getBytes(),
+                                ((intention.length() == 0) ? record.attribute("startURL", "") : intention).getBytes(),
+                                ("Crawl Start Point").getBytes(),
+                                record.id().getBytes()
+                        });
+                score = 2 + Math.min(10, intention.length() / 4) + timeFactor(record.created());
+            }
+            
+            if (record.category().equals("prfleupd")) {
+                url = record.attribute("homepage", "");
+                entry = rowdef.newEntry(new byte[][]{
+                                url.getBytes(),
+                                ("Home Page of " + record.attribute("nickname", "")).getBytes(),
+                                ("Profile Update").getBytes(),
+                                record.id().getBytes()
+                        });
+                score = 1 + timeFactor(record.created());
+            }
+            
+            if (record.category().equals("bkmrkadd")) {
+                url = record.attribute("url", "");
+                entry = rowdef.newEntry(new byte[][]{
+                                url.getBytes(),
+                                (record.attribute("title", "")).getBytes(),
+                                ("Bookmark: " + record.attribute("description", "")).getBytes(),
+                                record.id().getBytes()
+                        });
+                score = 8 + timeFactor(record.created());
+            }
+            
+            if (record.category().equals("stippadd")) {
+                url = record.attribute("url", "");
+                entry = rowdef.newEntry(new byte[][]{
+                                url.getBytes(),
+                                (record.attribute("title", "")).getBytes(),
+                                ("Surf Tipp: " + record.attribute("description", "")).getBytes(),
+                                record.id().getBytes()
+                        });
+                score = 5 + timeFactor(record.created());
+            }
+            
+            if (record.category().equals("wiki_upd")) {
+                yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
+                if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
+                if (seed != null) {
+                    url = "http://" + seed.getAddress() + "/Wiki.html?page=" + record.attribute("page", "");
+                    entry = rowdef.newEntry(new byte[][]{
+                                url.getBytes(),
+                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes(),
+                                ("Wiki Update: " + record.attribute("description", "")).getBytes(),
+                                record.id().getBytes()
+                        });
+                    score = 4 + timeFactor(record.created());
+                }
+            }
+            
+            if (record.category().equals("blog_add")) {
+                yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
+                if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
+                if (seed != null) {
+                    url = "http://" + seed.getAddress() + "/Blog.html?page=" + record.attribute("page", "");
+                    entry = rowdef.newEntry(new byte[][]{
+                                url.getBytes(),
+                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes(),
+                                ("Blog Entry: " + record.attribute("subject", "")).getBytes(),
+                                record.id().getBytes()
+                        });
+                    score = 4 + timeFactor(record.created());
+                }
+            }
+
+            // add/subtract votes and write record
+            if (entry != null) {
+                urlhash = indexURL.urlHash(url);
+                if ((vote = (Integer) negativeHashes.get(urlhash)) != null) {
+                    score -= Math.max(0, 2 * vote.intValue());
+                }
+                if ((vote = (Integer) positiveHashes.get(urlhash)) != null) {
+                    score += 2 * vote.intValue();
+                }
+                surftipps.setScore(entry, score);
+            }
+            
+        } catch (IOException e) {e.printStackTrace();}
+        
+    }
+    
     
 }
