@@ -158,7 +158,7 @@ public class index {
         
             // read voting
             String hash;
-            if ((hash = post.get("voteNegative", null)) != null) {
+            if ((post != null) && ((hash = post.get("voteNegative", null)) != null)) {
                 // make new news message with voting
                 HashMap map = new HashMap();
                 map.put("urlhash", hash);
@@ -166,7 +166,7 @@ public class index {
                 map.put("refid", post.get("refid", ""));
                 yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
             }
-            if ((hash = post.get("votePositive", null)) != null) {
+            if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
                 // make new news message with voting
                 HashMap map = new HashMap();
                 map.put("urlhash", hash);
@@ -179,29 +179,33 @@ public class index {
             }
         
             // create surftipps
-            kelondroMScoreCluster surftipps = new kelondroMScoreCluster();
-            kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (yacyCore.universalDateShortPattern.length() + 12));
             HashMap negativeHashes = new HashMap(); // a mapping from an url hash to Integer (count of votes)
             HashMap positiveHashes = new HashMap(); // a mapping from an url hash to Integer (count of votes)
             accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
-            accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
-            accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
-            accumulateSurftipps(surftipps, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
-            accumulateSurftipps(surftipps, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
-            accumulateSurftipps(surftipps, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
+            //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
+            //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
+            kelondroMScoreCluster ranking = new kelondroMScoreCluster(); // score cluster for url hashes
+            kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (yacyCore.universalDateShortPattern.length() + 12));
+            HashMap surftipps = new HashMap(); // a mapping from an url hash to a kelondroRow.Entry with display properties
+            accumulateSurftipps(surftipps, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
+            //accumulateSurftipps(surftipps, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
+            //accumulateSurftipps(surftipps, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
         
             // read out surftipp array and create property entries
-            Iterator k = surftipps.scores(false);
+            Iterator k = ranking.scores(false);
             int i = 0;
             kelondroRow.Entry row;
             String url, urlhash, refid, title, description;
             while (k.hasNext()) {
-                row = (kelondroRow.Entry) k.next();
+                urlhash = (String) k.next();
+                if (urlhash == null) continue;
+                row = (kelondroRow.Entry) surftipps.get(urlhash);
+                if (row == null) continue;
                 url = row.getColString(0, null);
-                urlhash = indexURL.urlHash(url);
-                refid = row.getColString(3, null);
                 title = row.getColString(1, null);
                 description = row.getColString(2, null);
+                if ((url == null) || (title == null) || (description == null)) continue;
+                refid = row.getColString(3, null);
                 try {
                     prop.put("surftipps_results_" + i + "_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippavt", "refid", refid) == null) ? 1 : 0);
                     prop.put("surftipps_results_" + i + "_recommend_negativeVoteLink", "/index.html?voteNegative=" + urlhash + "&refid=" + refid + "&display=" + display); // for negaive votes, we don't send around the bad url again, the hash is enough
@@ -241,22 +245,23 @@ public class index {
             if (record.category().equals("stippavt")) {
                 String urlhash = record.attribute("urlhash", "");
                 String vote    = record.attribute("vote", "");
+                int factor = ((dbtype == yacyNewsPool.OUTGOING_DB) || (dbtype == yacyNewsPool.PUBLISHED_DB)) ? 2 : 1;
                 if (vote.equals("negative")) {
                     Integer i = (Integer) negativeHashes.get(urlhash);
-                    if (i == null) negativeHashes.put(urlhash, new Integer(1));
-                    else negativeHashes.put(urlhash, new Integer(i.intValue() + 1));
+                    if (i == null) negativeHashes.put(urlhash, new Integer(factor));
+                    else negativeHashes.put(urlhash, new Integer(i.intValue() + factor));
                 }
                 if (vote.equals("positive")) {
                     Integer i = (Integer) positiveHashes.get(urlhash);
-                    if (i == null) positiveHashes.put(urlhash, new Integer(1));
-                    else positiveHashes.put(urlhash, new Integer(i.intValue() + 1));
+                    if (i == null) positiveHashes.put(urlhash, new Integer(factor));
+                    else positiveHashes.put(urlhash, new Integer(i.intValue() + factor));
                 }
             }
         } catch (IOException e) {e.printStackTrace();}
     }
     
     private static void accumulateSurftipps(
-            kelondroMScoreCluster surftipps, kelondroRow rowdef,
+            HashMap surftipps, kelondroMScoreCluster ranking, kelondroRow rowdef,
             HashMap negativeHashes, HashMap positiveHashes, int dbtype) {
         int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
         yacyNewsRecord record;
@@ -314,6 +319,18 @@ public class index {
                 score = 5 + timeFactor(record.created());
             }
             
+            if (record.category().equals("stippavt")) {
+                if (!(record.attribute("vote", "negative").equals("positive"))) continue;
+                url = record.attribute("url", "");
+                entry = rowdef.newEntry(new byte[][]{
+                                url.getBytes(),
+                                record.attribute("title", "").getBytes(),
+                                record.attribute("description", "").getBytes(),
+                                record.attribute("refid", "").getBytes()
+                        });
+                score = 5 + timeFactor(record.created());
+            }
+            
             if (record.category().equals("wiki_upd")) {
                 yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
                 if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
@@ -347,13 +364,23 @@ public class index {
             // add/subtract votes and write record
             if (entry != null) {
                 urlhash = indexURL.urlHash(url);
+                if (urlhash == null) {
+                    System.out.println("Surftipps: bad url '" + url + "' from news record " + record.toString());
+                    continue;
+                }
                 if ((vote = (Integer) negativeHashes.get(urlhash)) != null) {
-                    score -= Math.max(0, 2 * vote.intValue());
+                    score = Math.max(0, score - vote.intValue()); // do not go below zero
                 }
                 if ((vote = (Integer) positiveHashes.get(urlhash)) != null) {
                     score += 2 * vote.intValue();
                 }
-                surftipps.setScore(entry, score);
+                // consider double-entries
+                if (surftipps.containsKey(urlhash)) {
+                    ranking.addScore(urlhash, score);
+                } else {
+                    ranking.setScore(urlhash, score);
+                    surftipps.put(urlhash, entry);
+                }
             }
             
         } catch (IOException e) {e.printStackTrace();}

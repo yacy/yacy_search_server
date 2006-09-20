@@ -169,8 +169,17 @@ public class yacysearch {
                     prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                     return prop;
                 }
+                
+                // delete the index entry locally
                 final String delHash = post.get("deleteref", ""); // urlhash
                 sb.removeReferences(delHash, query);
+                
+                // make new news message with negative voting
+                HashMap map = new HashMap();
+                map.put("urlhash", delHash);
+                map.put("vote", "negative");
+                map.put("refid", "");
+                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
             }
 
             // if aplus-button was hit, create new voting message
