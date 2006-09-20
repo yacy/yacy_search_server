@@ -76,7 +76,7 @@ public final class serverFileUtils {
     private static final int DEFAULT_BUFFER_SIZE = 4096;
     
     public static long copy(InputStream source, OutputStream dest) throws IOException {
-        return copy(source,dest);
+        return copy(source,dest, -1);
     }
     
     /**
