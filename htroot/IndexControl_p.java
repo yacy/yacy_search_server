@@ -76,6 +76,7 @@ public class IndexControl_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        
         serverObjects prop = new serverObjects();
 
         if (post == null || env == null) {
@@ -107,7 +108,7 @@ public class IndexControl_p {
         prop.put("keyhash", keyhash);
         prop.put("urlstring", urlstring);
         prop.put("urlhash", urlhash);
-        prop.put("result", "");
+        prop.put("result", " ");
 
         // read values from checkboxes
         String[] urlx = post.getAll("urlhx.*");
@@ -228,7 +229,7 @@ public class IndexControl_p {
             prop.put("keyhash", keyhash);
             prop.put("urlstring", "");
             prop.put("urlhash", "");
-            prop.put("result", genUrlList(switchboard, keyhash, keystring));
+            prop.putAll(genUrlList(switchboard, keyhash, keystring));
         }
 
         if (post.containsKey("keyhashsearch")) {
@@ -238,7 +239,7 @@ public class IndexControl_p {
             }
             prop.put("urlstring", "");
             prop.put("urlhash", "");
-            prop.put("result", genUrlList(switchboard, keyhash, ""));
+            prop.putAll(genUrlList(switchboard, keyhash, ""));
         }
 
         // transfer to other peer
@@ -287,16 +288,23 @@ public class IndexControl_p {
         if (post.containsKey("keyhashsimilar")) {
             try {
             final Iterator containerIt = switchboard.wordIndex.indexContainerSet(keyhash, plasmaWordIndex.RL_WORDFILES, true, 256).iterator();
-                StringBuffer result = new StringBuffer("Sequential List of Word-Hashes:<br>");
                 indexContainer container;
                 int i = 0;
+                int rows = 0, cols = 0;
+                prop.put("keyhashsimilar", 1);
                 while (containerIt.hasNext() && i < 256) {
                     container = (indexContainer) containerIt.next();
-                    result.append("<a href=\"/IndexControl_p.html?").append("keyhash=").append(container.getWordHash()).append("&keyhashsearch=")
-                            .append("\" class=\"tt\">").append(container.getWordHash()).append("</a> ").append(((i + 1) % 8 == 0) ? "<br>" : "");
+                    prop.put("keyhashsimilar_rows_"+rows+"_cols_"+cols+"_wordHash", container.getWordHash());
+                    cols++;
+                    if (cols==8) {
+                        prop.put("keyhashsimilar_rows_"+rows+"_cols", cols);
+                        cols = 0;
+                        rows++;
+                    }
                     i++;
                 }
-                prop.put("result", result);
+                prop.put("keyhashsimilar_rows", rows);
+                prop.put("result", "");
             } catch (IOException e) {
                 prop.put("result", "unknown keys: " + e.getMessage());
             }
@@ -312,7 +320,7 @@ public class IndexControl_p {
                     prop.put("urlstring", "unknown url: " + urlstring);
                     prop.put("urlhash", "");
                 } else {
-                    prop.put("result", genUrlProfile(switchboard, entry, urlhash));
+                    prop.putAll(genUrlProfile(switchboard, entry, urlhash));
                 }
             } catch (MalformedURLException e) {
                 prop.put("urlstring", "bad url: " + urlstring);
@@ -328,7 +336,7 @@ public class IndexControl_p {
                 URL url = entry.url();
                 urlstring = url.toString();
                 prop.put("urlstring", urlstring);
-                prop.put("result", genUrlProfile(switchboard, entry, urlhash));
+                prop.putAll(genUrlProfile(switchboard, entry, urlhash));
             }
         }
 
@@ -339,12 +347,20 @@ public class IndexControl_p {
                 StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br>");
                 plasmaCrawlLURL.Entry entry;
                 int i = 0;
+                int rows = 0, cols = 0;
+                prop.put("urlhashsimilar", 1);
                 while (entryIt.hasNext() && i < 256) {
                     entry = (plasmaCrawlLURL.Entry) entryIt.next();
-                    result.append("<a href=\"/IndexControl_p.html?").append("urlhash=").append(entry.hash()).append("&urlhashsearch=")
-                            .append("\" class=\"tt\">").append(entry.hash()).append("</a> ").append(((i + 1) % 8 == 0) ? "<br>" : "");
+                    prop.put("urlhashsimilar_rows_"+rows+"_cols_"+cols+"_urlHash", entry.hash());
+                    cols++;
+                    if (cols==8) {
+                        prop.put("urlhashsimilar_rows_"+rows+"_cols", cols);
+                        cols = 0;
+                        rows++;
+                    }
                     i++;
                 }
+                prop.put("urlhashsimilar_rows", rows);
                 prop.put("result", result.toString());
             } catch (IOException e) {
                 prop.put("result", "No Entries for URL hash " + urlhash);
@@ -380,8 +396,13 @@ public class IndexControl_p {
         return prop;
     }
 
-    public static String genUrlProfile(plasmaSwitchboard switchboard, plasmaCrawlLURL.Entry entry, String urlhash) {
-        if (entry == null) { return "No entry found for URL-hash " + urlhash; }
+    public static serverObjects genUrlProfile(plasmaSwitchboard switchboard, plasmaCrawlLURL.Entry entry, String urlhash) {
+        serverObjects prop = new serverObjects();
+        if (entry == null) {
+            prop.put("genUrlProfile", 1);
+            prop.put("genUrlProfile_urlhash", urlhash);
+            return prop;
+        }
         URL url = entry.url();
         String referrer = null;
         plasmaCrawlLURL.Entry le = switchboard.urlPool.loadedURL.load(entry.referrerHash(), null);
@@ -390,49 +411,42 @@ public class IndexControl_p {
         } else {
             referrer = le.url().toString();
         }
-        if (url == null) { return "No entry found for URL-hash " + urlhash; }
-        String result = "<table>" +
-        "<tr><td class=\"small\">URL String</td><td class=\"tt\">" + url.toNormalform() + "</td></tr>" +
-        "<tr><td class=\"small\">Hash</td><td class=\"tt\">" + urlhash + "</td></tr>" +
-        "<tr><td class=\"small\">Description</td><td class=\"tt\">" + entry.descr() + "</td></tr>" +
-        "<tr><td class=\"small\">Modified-Date</td><td class=\"tt\">" + entry.moddate() + "</td></tr>" +
-        "<tr><td class=\"small\">Loaded-Date</td><td class=\"tt\">" + entry.loaddate() + "</td></tr>" +
-        "<tr><td class=\"small\">Referrer</td><td class=\"tt\">" + referrer + "</td></tr>" +
-        "<tr><td class=\"small\">Doctype</td><td class=\"tt\">" + entry.doctype() + "</td></tr>" +
-        "<tr><td class=\"small\">Copy-Count</td><td class=\"tt\">" + entry.copyCount() + "</td></tr>" +
-        "<tr><td class=\"small\">Local-Flag</td><td class=\"tt\">" + entry.local() + "</td></tr>" +
-        "<tr><td class=\"small\">Quality</td><td class=\"tt\">" + entry.quality() + "</td></tr>" +
-        "<tr><td class=\"small\">Language</td><td class=\"tt\">" + entry.language() + "</td></tr>" +
-        "<tr><td class=\"small\">Size</td><td class=\"tt\">" + entry.size() + "</td></tr>" +
-        "<tr><td class=\"small\">Words</td><td class=\"tt\">" + entry.wordCount() + "</td></tr>" +
-        "</table><br>";
-        result +=
-        "<form action=\"IndexControl_p.html\" method=\"post\" enctype=\"multipart/form-data\">" +
-        "<input type=\"hidden\" name=\"keystring\" value=\"\">" +
-        "<input type=\"hidden\" name=\"keyhash\" value=\"\">" +
-        "<input type=\"hidden\" name=\"urlstring\" value=\"\">" +
-        "<input type=\"hidden\" name=\"urlhash\" value=\"" + urlhash + "\">" +
-        "<input type=\"submit\" value=\"Delete URL\" name=\"urlhashdelete\"><br>" +
-        "<span class=\"small\">&nbsp;this may produce unresolved references at other word indexes but they do not harm</span><br><br>" +
-        "<input type=\"submit\" value=\"Delete URL and remove all references from words\" name=\"urlhashdeleteall\"><br>" +
-        "<span class=\"small\">&nbsp;delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)</span><br>" +
-        "</form>";
-        return result;
+        if (url == null) {
+            prop.put("genUrlProfile", 1);
+            prop.put("genUrlProfile_urlhash", urlhash);
+            return prop;
+        }
+        prop.put("genUrlProfile", 2);
+        prop.put("genUrlProfile_urlNormalform", url.toNormalform());
+        prop.put("genUrlProfile_urlhash", urlhash);
+        prop.put("genUrlProfile_urlDescr", entry.descr());
+        prop.put("genUrlProfile_moddate", entry.moddate());
+        prop.put("genUrlProfile_loaddate", entry.loaddate());
+        prop.put("genUrlProfile_referrer", referrer);
+        prop.put("genUrlProfile_doctype", ""+entry.doctype());
+        prop.put("genUrlProfile_copyCount", entry.copyCount());
+        prop.put("genUrlProfile_local", ""+entry.local());
+        prop.put("genUrlProfile_quality", entry.quality());
+        prop.put("genUrlProfile_language", entry.language());
+        prop.put("genUrlProfile_size", entry.size());
+        prop.put("genUrlProfile_wordCount", entry.wordCount());
+        return prop;
     }
 
-    public static String genUrlList(plasmaSwitchboard switchboard, String keyhash, String keystring) {
+    public static serverObjects genUrlList(plasmaSwitchboard switchboard, String keyhash, String keystring) {
         // search for a word hash and generate a list of url links
+        serverObjects prop = new serverObjects();
         indexContainer index = null;
         try {
             index = switchboard.wordIndex.getContainer(keyhash, null, true, -1);
 
-            final StringBuffer result = new StringBuffer(1024);
+            prop.put("genUrlList_keyHash", keyhash);
+            
             if (index.size() == 0) {
-                result.append("No URL entries related to this word hash <span class=\"tt\">").append(keyhash).append("</span>.");
+                prop.put("genUrlList", 1);
             } else {
                 final Iterator en = index.entries();
-                result.append("URL entries related to this word hash <span class=\"tt\">").append(keyhash).append("</span><br><br>");
-                result.append("<form action=\"IndexControl_p.html\" method=\"post\" enctype=\"multipart/form-data\">");
+                prop.put("genUrlList", 2);
                 String us;
                 String uh[] = new String[2];
                 int i = 0;
@@ -454,46 +468,35 @@ public class IndexControl_p {
 
                 URL url;
                 final Iterator iter = tm.keySet().iterator();
-                result.ensureCapacity((tm.size() + 2) * 384);
                 while (iter.hasNext()) {
                     us = iter.next().toString();
                     uh = (String[]) tm.get(us);
                     if (us.equals(uh[0])) {
-                        result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" checked value=\"").append(uh[0]).append("\" align=\"top\">")
-                              .append("<span class=\"tt\">").append(uh[0]).append("&nbsp;&lt;unresolved URL Hash&gt;</span><br>");
-
+                        prop.put("genUrlList_urlList_"+i+"_urlExists", 0);
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxValue", uh[0]);
                     } else {
+                        prop.put("genUrlList_urlList_"+i+"_urlExists", 1);
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxValue", uh[0]);
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_keyString", keystring);
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", keyhash);
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_urlString", us);
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_pos", uh[1]);
                         url = new URL(us);
                         if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, url)) {
-                            result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" checked value=\"").append(uh[0]).append("\" align=\"top\">");
-                        } else {
-                            result.append("<input type=\"checkbox\" name=\"urlhx").append(i++).append("\" value=\"").append(uh[0]).append("\" align=\"top\">");
+                            prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", 1);
                         }
-                        result.append("<a href=\"/IndexControl_p.html?").append("keystring=").append(keystring)
-                              .append("&keyhash=").append(keyhash).append("&urlhash=").append(uh[0])
-                              .append("&urlstringsearch=").append("&urlstring=").append(us).append("\" class=\"tt\">")
-                              .append(uh[0]).append("</a><span class=\"tt\">&nbsp;").append(us).append(", pos=").append(uh[1]).append("</span><br>");
                     }
+                    i++;
                 }
-                result.append("<input type=\"hidden\" name=\"keystring\" value=\"").append(keystring).append("\">")
-                      .append("<input type=\"hidden\" name=\"keyhash\" value=\"").append(keyhash).append("\">")
-                      .append("<input type=\"hidden\" name=\"urlstring\" value=\"\">")
-                      .append("<input type=\"hidden\" name=\"urlhash\" value=\"\">")
-                      .append("<br><fieldset><legend>Reference Deletion</legend><table border=\"0\" cellspacing=\"5\" cellpadding=\"5\"><tr valign=\"top\"><td><br><br>")
-                      .append("<input type=\"submit\" value=\"Delete reference to selected URLs\" name=\"keyhashdelete\"><br><br>")
-                      .append("<input type=\"submit\" value=\"Delete reference to ALL URLs\" name=\"keyhashdeleteall\"><span class=\"small\"><br>&nbsp;&nbsp;(= delete Word)</span>")
-                      .append("</td><td width=\"150\">")
-                      .append("<center><input type=\"checkbox\" name=\"delurl\" value=\"\" align=\"top\" checked></center><br>")
-                      .append("<span class=\"small\">delete also the referenced URL itself (reasonable and recommended, may produce unresolved references at other word indexes but they do not harm)</span>")
-                      .append("</td><td width=\"150\">")
-                      .append("<center><input type=\"checkbox\" name=\"delurlref\" value=\"\" align=\"top\"></center><br>")
-                      .append("<span class=\"small\">for every resolveable and deleted URL reference, delete the same reference at every other word where the reference exists (very extensive, but prevents further unresolved references)</span>")
-                      .append("</td></tr></table></fieldset></form><br>");
+                prop.put("genUrlList_urlList", i);
+                prop.put("genUrlList_keyString", keystring);
             }
             index = null;
-            return result.toString();
+            return prop;
         }  catch (IOException e) {
-            return "";
+            return prop;
         } finally {
             if (index != null) index = null;
         }

@@ -107,7 +107,73 @@
         </tr>
       </table>
     </form>
-    
+    #(keyhashsimilar)#
+    ::Sequential List of Word-Hashes:<br />#{rows}# #{cols}#<a href="/IndexControl_p.html?keyhash=#[wordHash]#&keyhashsearch=" class="tt">#[wordHash]#</a> #{/cols}#<br />#{/rows}#
+    #(/keyhashsimilar)#
+	#(urlhashsimilar)#
+    ::Sequential List of URL-Hashes:<br />#{rows}# #{cols}#<a href="/IndexControl_p.html?urlhash=#[urlHash]#&urlhashsearch=" class="tt">#[urlHash]#</a> #{/cols}#<br />#{/rows}#
+    #(/urlhashsimilar)#
+    #(genUrlList)#
+    ::
+    No URL entries related to this word hash <span class="tt">#[keyHash]#</span>.
+    ::
+    URL entries related to this word hash <span class="tt">#[keyHash]#</span><br /><br />
+    <form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
+    #{urlList}# #(urlExists)#
+    <input type="checkbox" name="#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" /><span class="tt">#[urlhxValue]#&nbsp;&lt;unresolved URL Hash&gt;</span><br />
+    ::<input type="checkbox" name="#[urlhxCount]#" #(urlhxChecked)#::checked #(/urlhxChecked)#value="#[urlhxValue]#" align="top" />
+    <a href="/IndexControl_p.html?keystring=#[keyString]#&keyhash=#[keyHash]#&urlhash=#[urlhxValue]#&urlstringsearch=&urlstring=#[urlString]#" class="tt">#[urlhxValue]#</a><span class="tt">&nbsp;#[urlString]#, pos=#[pos]#</span><br />
+    #(/urlExists)# #{/urlList}#
+    <input type="hidden" name="keystring" value="#[keyString]#" />
+    <input type="hidden" name="keyhash" value="#[keyHash]#" />
+    <input type="hidden" name="urlstring" value="" />
+    <input type="hidden" name="urlhash" value="" /><br />
+    <fieldset><legend>Reference Deletion</legend>
+    <table border="0" cellspacing="5" cellpadding="5">
+        <tr valign="top">
+            <td>
+                <br /><br /><input type="submit" value="Delete reference to selected URLs" name="keyhashdelete" />
+                <br /><br /><input type="submit" value="Delete reference to ALL URLs" name="keyhashdeleteall" /><span class="small"><br />&nbsp;&nbsp;(= delete Word)</span>
+            </td>
+            <td width="150">
+                <center><input type="checkbox" name="delurl" value="" align="top" checked /></center><br />
+                <span class="small">delete also the referenced URL itself (reasonable and recommended, may produce unresolved references at other word indexes but they do not harm)</span>
+            </td>
+            <td width="150">
+                <center><input type="checkbox" name="delurlref" value="" align="top" /></center><br />
+                <span class="small">for every resolveable and deleted URL reference, delete the same reference at every other word where the reference exists (very extensive, but prevents further unresolved references)</span>
+            </td>
+        </tr>
+    </table>
+    </fieldset></form><br />#(/genUrlList)#
+    #(genUrlProfile)#
+    ::No entry found for URL-hash #[urlhash]#
+    ::<table>
+		<tr><td class="small">URL String</td><td class="tt">#[urlNormalform]#</td></tr>
+		<tr><td class="small">Hash</td><td class="tt">#[urlhash]#</td></tr>
+		<tr><td class="small">Description</td><td class="tt">#[urlDescr]#</td></tr>
+		<tr><td class="small">Modified-Date</td><td class="tt">#[moddate]#</td></tr>
+		<tr><td class="small">Loaded-Date</td><td class="tt">#[loaddate]#</td></tr>
+		<tr><td class="small">Referrer</td><td class="tt">#[referrer]#</td></tr>
+		<tr><td class="small">Doctype</td><td class="tt">#[doctype]#</td></tr>
+		<tr><td class="small">Copy-Count</td><td class="tt">#[copyCount]#</td></tr>
+		<tr><td class="small">Local-Flag</td><td class="tt">#[local]#</td></tr>
+		<tr><td class="small">Quality</td><td class="tt">#[quality]#</td></tr>
+		<tr><td class="small">Language</td><td class="tt">#[language]#</td></tr>
+		<tr><td class="small">Size</td><td class="tt">#[size]#</td></tr>
+		<tr><td class="small">Words</td><td class="tt">#[wordCount]#</td></tr>
+	</table><br />
+	<form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="keystring" value="" />
+		<input type="hidden" name="keyhash" value="" />
+		<input type="hidden" name="urlstring" value="" />
+		<input type="hidden" name="urlhash" value="#[urlhash]#" />
+		<input type="submit" value="Delete URL" name="urlhashdelete" /><br />
+		<span class="small">&nbsp;this may produce unresolved references at other word indexes but they do not harm</span><br /><br />
+		<input type="submit" value="Delete URL and remove all references from words" name="urlhashdeleteall" /><br />
+		<span class="small">&nbsp;delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)</span><br />
+	</form>
+    #(/genUrlProfile)#
     #[result]#
     
     #%env/templates/footer.template%#
