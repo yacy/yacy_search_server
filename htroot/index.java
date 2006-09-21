@@ -159,6 +159,10 @@ public class index {
             // read voting
             String hash;
             if ((post != null) && ((hash = post.get("voteNegative", null)) != null)) {
+                if (!sb.verifyAuthentication(header, false)) {
+                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                    return prop;
+                }
                 // make new news message with voting
                 HashMap map = new HashMap();
                 map.put("urlhash", hash);
@@ -167,6 +171,10 @@ public class index {
                 yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
+                if (!sb.verifyAuthentication(header, false)) {
+                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                    return prop;
+                }
                 // make new news message with voting
                 HashMap map = new HashMap();
                 map.put("urlhash", hash);
@@ -196,6 +204,7 @@ public class index {
             int i = 0;
             kelondroRow.Entry row;
             String url, urlhash, refid, title, description;
+            boolean voted;
             while (k.hasNext()) {
                 urlhash = (String) k.next();
                 if (urlhash == null) continue;
@@ -206,19 +215,22 @@ public class index {
                 description = row.getColString(2, null);
                 if ((url == null) || (title == null) || (description == null)) continue;
                 refid = row.getColString(3, null);
+                voted = false;
                 try {
-                    prop.put("surftipps_results_" + i + "_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippavt", "refid", refid) == null) ? 1 : 0);
-                    prop.put("surftipps_results_" + i + "_recommend_negativeVoteLink", "/index.html?voteNegative=" + urlhash + "&refid=" + refid + "&display=" + display); // for negaive votes, we don't send around the bad url again, the hash is enough
-                    prop.put("surftipps_results_" + i + "_recommend_positiveVoteLink", "/index.html?votePositive=" + urlhash + "&refid=" + refid + "&url=" + crypt.simpleEncode(url,null,'b') + "&title=" + crypt.simpleEncode(title,null,'b') + "&description=" + crypt.simpleEncode(description,null,'b') + "&display=" + display);
-                    prop.put("surftipps_results_" + i + "_url", url);
-                    prop.put("surftipps_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
-                    prop.put("surftipps_results_" + i + "_urlhash", urlhash);
-                    prop.put("surftipps_results_" + i + "_title", title);
-                    prop.put("surftipps_results_" + i + "_description", description);
-                    i++;
+                    voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippavt", "refid", refid) != null) || (yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, "stippavt", "refid", refid) != null);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                prop.put("surftipps_results_" + i + "_recommend", (voted) ? 0 : 1);
+                prop.put("surftipps_results_" + i + "_recommend_negativeVoteLink", "/index.html?voteNegative=" + urlhash + "&refid=" + refid + "&display=" + display); // for negaive votes, we don't send around the bad url again, the hash is enough
+                prop.put("surftipps_results_" + i + "_recommend_positiveVoteLink", "/index.html?votePositive=" + urlhash + "&refid=" + refid + "&url=" + crypt.simpleEncode(url,null,'b') + "&title=" + crypt.simpleEncode(title,null,'b') + "&description=" + crypt.simpleEncode(description,null,'b') + "&display=" + display);
+                prop.put("surftipps_results_" + i + "_url", url);
+                prop.put("surftipps_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
+                prop.put("surftipps_results_" + i + "_urlhash", urlhash);
+                prop.put("surftipps_results_" + i + "_title", title);
+                prop.put("surftipps_results_" + i + "_description", description);
+                i++;
+                
                 if (i >= 50) break;
             }
             prop.put("surftipps_results", i);
