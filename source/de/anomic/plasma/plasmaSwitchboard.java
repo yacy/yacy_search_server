@@ -432,6 +432,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                          (int) getConfigLong("wordCacheMaxCount", 20000));
         setConfig("wordCacheMaxCount", Integer.toString(wordCacheMaxCount));
         wordIndex.setMaxWordCount(wordCacheMaxCount); 
+
+        int wordInCacheMaxCount = (int) getConfigLong("indexDistribution.dhtReceiptLimit", 1000);
+        wordIndex.setInMaxWordCount(wordInCacheMaxCount);
         
         // start a cache manager
         log.logConfig("Starting HT Cache Manager");

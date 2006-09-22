@@ -178,6 +178,10 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         dhtOutCache.setMaxWordCount(maxWords);
     }
 
+    public void setInMaxWordCount(int maxWords) {
+        dhtInCache.setMaxWordCount(maxWords);
+    }
+
     public void setWordFlushDivisor(int idleDivisor, int busyDivisor) {
        this.idleDivisor = idleDivisor;
        this.busyDivisor = busyDivisor;
@@ -229,9 +233,14 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
     
     private void flushCacheSome(indexRAMCacheRI ram, boolean busy) {
-        int flushCount = (busy) ? ram.size() / busyDivisor : ram.size() / idleDivisor;
-        if (flushCount > 100) flushCount = 100;
-        if (flushCount < 1) flushCount = Math.min(1, ram.size());
+        int flushCount;
+        if (ram.size() > ram.getMaxWordCount()) {
+            flushCount = ram.size() + 100 - ram.getMaxWordCount();
+        } else {
+            flushCount = (busy) ? ram.size() / busyDivisor : ram.size() / idleDivisor;
+            if (flushCount > 100) flushCount = 100;
+            if (flushCount < 1) flushCount = Math.min(1, ram.size());
+        }
         flushCache(ram, flushCount);
     }
     
