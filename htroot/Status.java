@@ -292,14 +292,14 @@ public class Status {
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;
         int indexingJobCount = sb.getThread("80_indexing").getJobCount()+sb.indexingTasksInProcess.size();
         int indexingMaxCount = plasmaSwitchboard.indexingSlots;
-        int indexingPercent = indexingJobCount*100/indexingMaxCount;
+        int indexingPercent = (indexingMaxCount==0)?0:indexingJobCount*100/indexingMaxCount;
         prop.put("indexingQueueSize", Integer.toString(indexingJobCount));
         prop.put("indexingQueueMax", Integer.toString(indexingMaxCount));
         prop.put("indexingQueuePercent",(indexingPercent>100)?"100":Integer.toString(indexingPercent));
         
         int loaderJobCount = sb.cacheLoader.size();
         int loaderMaxCount = plasmaSwitchboard.crawlSlots;
-        int loaderPercent = loaderJobCount*100/loaderMaxCount;
+        int loaderPercent = (loaderMaxCount==0)?0:loaderJobCount*100/loaderMaxCount;
         prop.put("loaderQueueSize", Integer.toString(loaderJobCount));        
         prop.put("loaderQueueMax", Integer.toString(loaderMaxCount));        
         prop.put("loaderQueuePercent", (loaderPercent>100)?"100":Integer.toString(loaderPercent));
