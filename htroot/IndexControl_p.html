@@ -108,10 +108,10 @@
       </table>
     </form>
     #(keyhashsimilar)#
-    ::Sequential List of Word-Hashes:<br />#{rows}# #{cols}#<a href="/IndexControl_p.html?keyhash=#[wordHash]#&keyhashsearch=" class="tt">#[wordHash]#</a> #{/cols}#<br />#{/rows}#
+    ::Sequential List of Word-Hashes:<br />#{rows}# #{cols}#<a href="/IndexControl_p.html?keyhash=#[wordHash]#&amp;keyhashsearch=1" class="tt">#[wordHash]#</a> #{/cols}#<br />#{/rows}#
     #(/keyhashsimilar)#
 	#(urlhashsimilar)#
-    ::Sequential List of URL-Hashes:<br />#{rows}# #{cols}#<a href="/IndexControl_p.html?urlhash=#[urlHash]#&urlhashsearch=" class="tt">#[urlHash]#</a> #{/cols}#<br />#{/rows}#
+    ::Sequential List of URL-Hashes:<br />#{rows}# #{cols}#<a href="/IndexControl_p.html?urlhash=#[urlHash]#&amp;urlhashsearch=1" class="tt">#[urlHash]#</a> #{/cols}#<br />#{/rows}#
     #(/urlhashsimilar)#
     #(genUrlList)#
     ::
@@ -122,7 +122,7 @@
     #{urlList}# #(urlExists)#
     <input type="checkbox" name="#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" /><span class="tt">#[urlhxValue]#&nbsp;&lt;unresolved URL Hash&gt;</span><br />
     ::<input type="checkbox" name="#[urlhxCount]#" #(urlhxChecked)#::checked #(/urlhxChecked)#value="#[urlhxValue]#" align="top" />
-    <a href="/IndexControl_p.html?keystring=#[keyString]#&keyhash=#[keyHash]#&urlhash=#[urlhxValue]#&urlstringsearch=&urlstring=#[urlString]#" class="tt">#[urlhxValue]#</a><span class="tt">&nbsp;#[urlString]#, pos=#[pos]#</span><br />
+    <a href="/IndexControl_p.html?keystring=#[keyString]#&amp;keyhash=#[keyHash]#&amp;urlhash=#[urlhxValue]#&amp;urlstringsearch=&amp;urlstring=#[urlString]#" class="tt">#[urlhxValue]#</a><span class="tt">&nbsp;#[urlString]#, pos=#[pos]#</span><br />
     #(/urlExists)# #{/urlList}#
     <input type="hidden" name="keystring" value="#[keyString]#" />
     <input type="hidden" name="keyhash" value="#[keyHash]#" />
