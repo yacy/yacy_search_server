@@ -208,11 +208,13 @@ public class index {
             while (k.hasNext()) {
                 urlhash = (String) k.next();
                 if (urlhash == null) continue;
+                
                 row = (kelondroRow.Entry) surftipps.get(urlhash);
                 if (row == null) continue;
+                
                 url = row.getColString(0, null);
-                title = row.getColString(1, null);
-                description = row.getColString(2, null);
+                title = row.getColString(1,"UTF-8");
+                description = row.getColString(2,"UTF-8");
                 if ((url == null) || (title == null) || (description == null)) continue;
                 refid = row.getColString(3, null);
                 voted = false;
@@ -292,7 +294,7 @@ public class index {
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 ((intention.length() == 0) ? record.attribute("startURL", "") : intention).getBytes(),
-                                ("Crawl Start Point").getBytes(),
+                                ("Crawl Start Point").getBytes("UTF-8"),
                                 record.id().getBytes()
                         });
                 score = 2 + Math.min(10, intention.length() / 4) + timeFactor(record.created());
@@ -302,8 +304,8 @@ public class index {
                 url = record.attribute("homepage", "");
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                ("Home Page of " + record.attribute("nickname", "")).getBytes(),
-                                ("Profile Update").getBytes(),
+                                ("Home Page of " + record.attribute("nickname", "")).getBytes("UTF-8"),
+                                ("Profile Update").getBytes("UTF-8"),
                                 record.id().getBytes()
                         });
                 score = 1 + timeFactor(record.created());
@@ -313,8 +315,8 @@ public class index {
                 url = record.attribute("url", "");
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                (record.attribute("title", "")).getBytes(),
-                                ("Bookmark: " + record.attribute("description", "")).getBytes(),
+                                (record.attribute("title", "")).getBytes("UTF-8"),
+                                ("Bookmark: " + record.attribute("description", "")).getBytes("UTF-8"),
                                 record.id().getBytes()
                         });
                 score = 8 + timeFactor(record.created());
@@ -324,8 +326,8 @@ public class index {
                 url = record.attribute("url", "");
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                (record.attribute("title", "")).getBytes(),
-                                ("Surf Tipp: " + record.attribute("description", "")).getBytes(),
+                                (record.attribute("title", "")).getBytes("UTF-8"),
+                                ("Surf Tipp: " + record.attribute("description", "")).getBytes("UTF-8"),
                                 record.id().getBytes()
                         });
                 score = 5 + timeFactor(record.created());
@@ -336,8 +338,8 @@ public class index {
                 url = record.attribute("url", "");
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                record.attribute("title", "").getBytes(),
-                                record.attribute("description", "").getBytes(),
+                                record.attribute("title", "").getBytes("UTF-8"),
+                                record.attribute("description", "").getBytes("UTF-8"),
                                 record.attribute("refid", "").getBytes()
                         });
                 score = 5 + timeFactor(record.created());
@@ -350,8 +352,8 @@ public class index {
                     url = "http://" + seed.getAddress() + "/Wiki.html?page=" + record.attribute("page", "");
                     entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes(),
-                                ("Wiki Update: " + record.attribute("description", "")).getBytes(),
+                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes("UTF-8"),
+                                ("Wiki Update: " + record.attribute("description", "")).getBytes("UTF-8"),
                                 record.id().getBytes()
                         });
                     score = 4 + timeFactor(record.created());
@@ -365,8 +367,8 @@ public class index {
                     url = "http://" + seed.getAddress() + "/Blog.html?page=" + record.attribute("page", "");
                     entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes(),
-                                ("Blog Entry: " + record.attribute("subject", "")).getBytes(),
+                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes("UTF-8"),
+                                ("Blog Entry: " + record.attribute("subject", "")).getBytes("UTF-8"),
                                 record.id().getBytes()
                         });
                     score = 4 + timeFactor(record.created());
