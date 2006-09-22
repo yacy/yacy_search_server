@@ -57,6 +57,8 @@ import java.util.Set;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
+import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 
@@ -439,9 +441,21 @@ public class plasmaSnippetCache {
                 // try to get the header from the htcache directory
                 try {                    
                     docInfo = this.cacheManager.loadResourceInfo(url);
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                    // ignore this. resource info loading failed
+                }
                 
-                // TODO: try to load it from web
+                // TODO: we need a better solution here
+                // encapsulate this in the crawlLoader class
+                if (url.getProtocol().startsWith("http")) {
+                    // getting URL mimeType
+                    try {
+                        httpHeader header = httpc.whead(url, url.getHost(), 10000, null, null, this.sb.remoteProxyConfig);
+                        docInfo = this.cacheManager.getResourceInfoFactory().buildResourceInfoObj(url, header);
+                    } catch (Exception e) {
+                        // ingore this. http header download failed
+                    } 
+                }
                 
             }
 

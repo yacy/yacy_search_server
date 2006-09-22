@@ -487,6 +487,10 @@ public final class plasmaHTCache {
         IResourceInfo cachedObj = this.objFactory.buildResourceInfoObj(url, hdb);
         return cachedObj;
     }
+    
+    public ResourceInfoFactory getResourceInfoFactory() {
+        return this.objFactory;
+    }
 
     public boolean full() {
         return (this.cacheStack.size() > stackLimit);
