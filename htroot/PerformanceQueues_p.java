@@ -171,9 +171,13 @@ public class PerformanceQueues_p {
         prop.put("table", c);
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
-            int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
-            switchboard.setConfig("wordCacheMaxCount", Integer.toString(wordCacheMaxCount));
-            switchboard.wordIndex.setMaxWordCount(wordCacheMaxCount);
+            int wordOutCacheMaxCount = post.getInt("wordOutCacheMaxCount", 20000);
+            switchboard.setConfig("wordCacheMaxCount", Integer.toString(wordOutCacheMaxCount));
+            switchboard.wordIndex.setMaxWordCount(wordOutCacheMaxCount);
+
+            int wordInCacheMaxCount = post.getInt("wordInCacheMaxCount", 1000);
+            switchboard.setConfig("indexDistribution.dhtReceiptLimit", Integer.toString(wordInCacheMaxCount));
+            switchboard.wordIndex.setInMaxWordCount(wordInCacheMaxCount);
             
             int wordCacheInitCount = post.getInt("wordCacheInitCount", 30000);
             switchboard.setConfig("wordCacheInitCount", Integer.toString(wordCacheInitCount));
@@ -268,7 +272,8 @@ public class PerformanceQueues_p {
         prop.put("minAgeOfWCache", "" + (switchboard.wordIndex.minAgeOfDHTOutCache() / 1000 / 60)); // minutes
         prop.put("minAgeOfKCache", "" + (switchboard.wordIndex.minAgeOfDHTInCache() / 1000 / 60)); // minutes
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
-        prop.put("wordCacheMaxCount", switchboard.getConfigLong("wordCacheMaxCount", 20000));
+        prop.put("wordOutCacheMaxCount", switchboard.getConfigLong("wordCacheMaxCount", 20000));
+        prop.put("wordInCacheMaxCount", switchboard.getConfigLong("indexDistribution.dhtReceiptLimit", 1000));
         prop.put("wordCacheInitCount", switchboard.getConfigLong("wordCacheInitCount", 30000));
         prop.put("wordFlushIdleDivisor", switchboard.getConfigLong("wordFlushIdleDivisor", 420));
         prop.put("wordFlushBusyDivisor", switchboard.getConfigLong("wordFlushBusyDivisor", 5000));

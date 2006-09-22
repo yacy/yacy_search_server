@@ -120,8 +120,11 @@
       </tr>
       <tr valign="top" class="TableCellDark">
         <td>Maximum number of words in cache:</td>
-        <td colspan="2">
-          <input name="wordCacheMaxCount" type="text" size="20" maxlength="100" value="#[wordCacheMaxCount]#" />
+        <td>
+          <input name="wordOutCacheMaxCount" type="text" size="10" maxlength="100" value="#[wordOutCacheMaxCount]#" />
+        </td>
+        <td>
+          <input name="wordInCacheMaxCount" type="text" size="10" maxlength="100" value="#[wordInCacheMaxCount]#" />
         </td>
         <td>
           This is is the number of word indexes that shall be held in the
@@ -131,9 +134,10 @@
       </tr>
       <tr valign="top" class="TableCellDark">
         <td>Initial space of words in cache:</td>
-        <td colspan="2">
-          <input name="wordCacheInitCount" type="text" size="20" maxlength="100" value="#[wordCacheInitCount]#" />
+        <td>
+          <input name="wordCacheInitCount" type="text" size="10" maxlength="100" value="#[wordCacheInitCount]#" />
         </td>
+        <td>-</td>
         <td>
           This is is the init size of space for words in cache.
         </td>
