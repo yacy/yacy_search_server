@@ -55,6 +55,7 @@ import org.apache.log4j.Logger;
 
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
+import net.sf.jmimemagic.MagicMatchNotFoundException;
 
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
@@ -86,7 +87,7 @@ implements Parser {
      * @see Parser#getLibxDependences()
      */
     private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "jmimemagic-0.0.4a.jar",
+        "jmimemagic-0.1.0.jar",
         "jakarta-oro-2.0.7.jar",
         "log4j-1.2.9.jar",
         "xerces.jar"
@@ -106,9 +107,8 @@ implements Parser {
     public String getMimeType (File sourceFile) {
         String mimeType = null;
         
-        try {    
-            Magic theMagic = new Magic();           
-            MagicMatch match = theMagic.getMagicMatch(sourceFile);        
+        try {           
+            MagicMatch match = Magic.getMagicMatch(sourceFile,true);        
             
             // if a match was found we can return the new mimeType
             if (match!=null) {
@@ -145,10 +145,8 @@ implements Parser {
             // deactivating the logging for jMimeMagic
             Logger jmimeMagicLogger = Logger.getLogger("net.sf.jmimemagic");
             jmimeMagicLogger.setLevel(Level.OFF);
-            
-            Magic theMagic = new Magic();           
-            MagicMatch match = theMagic.getMagicMatch(sourceFile);
-            
+
+            MagicMatch match = Magic.getMagicMatch(sourceFile,true,false);
             
             // if a match was found we can return the new mimeType
             if (match!=null) {
@@ -172,7 +170,8 @@ implements Parser {
                 return theParser.parseSource(location,mimeType,charset,sourceFile);
             }
             throw new ParserException("Unable to detect mimetype of resource.",location);
-            
+        } catch (MagicMatchNotFoundException e) {
+            throw new ParserException("Unable to detect mimetype of resource.",location);
         } catch (Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;

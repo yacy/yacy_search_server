@@ -274,8 +274,14 @@ public final class serverFileUtils {
     }
 
     public static byte[] read(InputStream source) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        copy(source, baos, -1);
+        return read(source,-1);
+    }
+    
+    public static byte[] read(InputStream source, long count) throws IOException {
+        ByteArrayOutputStream baos = (count > 0) 
+                                   ? new ByteArrayOutputStream((int)count) 
+                                   : new ByteArrayOutputStream();
+        copy(source, baos, count);
         baos.close();
         return baos.toByteArray();
     }

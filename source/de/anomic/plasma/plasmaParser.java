@@ -50,7 +50,6 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Arrays;
@@ -71,16 +70,13 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.index.indexURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.bitfield;
 
 public final class plasmaParser {
     public static final String PARSER_MODE_PROXY   = "PROXY";
@@ -512,7 +508,7 @@ public final class plasmaParser {
             
             // testing if parsing is supported for this resource
             if (!plasmaParser.supportedContent(location,mimeType)) {
-                String errorMsg = "No parser available to parse mimetype";
+                String errorMsg = "No parser available to parse mimetype '" + mimeType + "'";
                 this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location,plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
             }
@@ -588,7 +584,7 @@ public final class plasmaParser {
             } else if (realtimeParsableMimeTypesContains(mimeType)) {                      
                 doc = parseHtml(location, mimeType, documentCharset, sourceFile);
             } else {
-                String errorMsg = "No parser available to parse mimetype";
+                String errorMsg = "No parser available to parse mimetype '" + mimeType + "'";
                 this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location,plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);                
             }

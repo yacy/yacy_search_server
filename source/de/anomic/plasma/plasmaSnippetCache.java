@@ -434,11 +434,15 @@ public class plasmaSnippetCache {
         try {
             if (resource == null) return null;
 
-            // try to get the header from the htcache directory
+            // if no resource metadata is available, try to load it
             if (docInfo == null) {
-                try {
+                // try to get the header from the htcache directory
+                try {                    
                     docInfo = this.cacheManager.loadResourceInfo(url);
                 } catch (Exception e) {}
+                
+                // TODO: try to load it from web
+                
             }
 
             if (docInfo == null) {

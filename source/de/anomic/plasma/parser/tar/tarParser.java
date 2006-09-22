@@ -45,7 +45,6 @@ package de.anomic.plasma.parser.tar;
 
 import java.io.File;
 import java.io.InputStream;
-import de.anomic.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -57,6 +56,7 @@ import java.util.zip.GZIPInputStream;
 import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
 
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -109,6 +109,8 @@ public class tarParser extends AbstractParser implements Parser {
                 source = new GZIPInputStream(source);
             }
             
+            // TODO: what about bzip ....
+
             StringBuffer docKeywords = new StringBuffer();
             StringBuffer docShortTitle = new StringBuffer();  
             StringBuffer docLongTitle = new StringBuffer();   
@@ -154,7 +156,7 @@ public class tarParser extends AbstractParser implements Parser {
                     // parsing the content                    
                     theDoc = theParser.parseSource(new URL(location,"#" + entryName),entryMime,null,tempFile);
                 } catch (ParserException e) {
-                    this.theLogger.logInfo("Unable to parse tar file entry '" + entryName + "'. " + e.getErrorCode());
+                    this.theLogger.logInfo("Unable to parse tar file entry '" + entryName + "'. " + e.getMessage());
                 } finally {
                     if (tempFile != null) try {tempFile.delete(); } catch(Exception ex){/* ignore this */}
                 }
