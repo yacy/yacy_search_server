@@ -85,7 +85,7 @@ public class index {
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
             }
-            surftippsOn = post.get("surftipps", "off").equals("on");
+            surftippsOn = post.get("surftipps", "0").equals("1");
             sb.setConfig("showSurftipps", surftippsOn);
         }
         
