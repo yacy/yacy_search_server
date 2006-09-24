@@ -437,14 +437,18 @@ public final class httpHeader extends TreeMap implements Map {
        return extractCharsetFromMimetyeHeader(mimeType);
     }  
     
-    public static String extractCharsetFromMimetyeHeader(String mimeType) {        
-        int idx = mimeType.indexOf(";");
-        if (idx == -1) return null;
+    public static String extractCharsetFromMimetyeHeader(String mimeType) {
+        if (mimeType == null) return null;
         
-        String encoding = mimeType.substring(idx + 1).trim();
-        if (!encoding.startsWith("charset=")) return null;
+        String[] parts = mimeType.split(";");
+        if (parts == null || parts.length <= 1) return null;
         
-        return encoding.substring("charset=".length()).trim();            
+        for (int i=1; i < parts.length; i++) {    
+            String param = parts[i].trim();
+            if (param.startsWith("charset=")) return param.substring("charset=".length()).trim();
+        }
+        
+        return null;            
     }
     
     public Date date() {
