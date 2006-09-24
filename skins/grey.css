@@ -1,63 +1,58 @@
-/* Skin phosphor */
+/* Skin grey*/
 
 body {
-  background-color:#000000;
-  color:#00ff00;
+  background-color:#f3f3f3;
 }
 
 a:link {
-  color:#336633;
+  color:#5f5f5f;
 }
 
 a:link:hover {
-  color:#009900;
-  text-decoration:underline;
+  color:#2f2f2f;
 }
 
-a:link:visited {
-  color:#339933;
-  }
-
+a:visited{
+  color:#2f2f2f;
+}
 
 /* Menu */
 
 .menugroup h3, .SubMenugroup h3, .SubMenu h3 {
-  background-color: #00ff00;
-  color:#000000;
+  background-color: #2f2f2f;
+  color:white;
 }
 
-a.MenuItemLink, ul.SubMenu em {
-  background-color: #000000;
-  color: #00ff00;
-  border: 1px solid #00ff00;
+a.MenuItemLink, ul.SubMenu em, .MenuItemLink lock {
+  background-color: #d0d0d0;
+  color: black;
+
 }
 
 a:hover.MenuItemLink {
-  color:#006600;
+  color:#5f5f5f;
 }
 
 /* Head */
 
 div.head h1 {
-  background-color:#00ff00;
-  color:#000000;
+  background-color:#2f2f2f;
+  color:white;
 }
 
 /* Tables */
 
 .TableHeader {
-  background-color: #00ff00;
-  color:#000000;
+  background-color: #5f5f5f;
+  color: #ffffff;
 }
 
 .TableCellDark {
-  background-color: #003300;
+  background-color: #a0a0a0;
 }
 
 .TableCellLight {
-  background-color: #000000;
-  color: #00ff00;
-  border: 1px solid #00ff00;
+  background-color: #d0d0d0;
 }
 
 .TableCellSummary {
@@ -75,13 +70,12 @@ div.head h1 {
 /* Blog and Wiki*/
 
 .Post {
-  background-color:#000000;
-  color: #00ff00;
+  background-color:#f3f3f3;
 }
 
 .PostSubject {
-  background-color:#00ff00;
-  color:#000000;
+  background-color:#2f2f2f;
+  color: #ffffff;
 }
 
 .PostSubject a {
@@ -89,10 +83,8 @@ div.head h1 {
 }
 
 .PostInfo {
-  background-color:#000000;
-  color: #00ff00;
-  border:1px solid #00ff00;
-
+  background-color:#2f2f2f;
+  color: #ffffff;
 }
 
 /* Wiki */
@@ -182,13 +174,12 @@ a.bookmarkAction {
 }
 
 .Headline {
-  background-color: #00ff00;
-  color: #000000;
+  background-color: #2f2f2f2;
+  color: white;
 }
 
 .Heading {
-  background-color: #00ff00;
-  color: #000000;
+  background-color: #2f2f2f;
 }
 
 .error, .warning {
@@ -217,8 +208,8 @@ body#ViewLog pre {
 /* Forms */
 
 fieldset {
-  background-color:#000000;
-  border:1px solid #00ff00;
+  background-color:#d0d0d0;
+  border:1px solid #5f5f5f;
 }
 
 legend {
@@ -227,12 +218,9 @@ legend {
 }
 
 form dt, dl.pairs dt {
-  background-color:#00ff00;
-  color:#000000;
+  background-color:#a0a0a0;
 }
 
 form dd, dl.pairs dd {
-  background-color: #000000;
-  color: #00ff00;
-  border: 1px solid #00ff00;
+  background-color:#f3f3f3;
 }
