@@ -65,6 +65,7 @@ public class SearchService extends AbstractService
      * ================================================================ */
     private static final String TEMPLATE_SEARCH = "yacysearch.soap";
     private static final String TEMPLATE_URLINFO = "ViewFile.soap";
+    private static final String TEMPLATE_SNIPPET = "xml/snippet.xml";
 
         
     /**
@@ -163,7 +164,7 @@ public class SearchService extends AbstractService
     /**
     *
     *
-    * @param url the url
+    * @param urlHash the url hash
     * @param viewMode one of (VIEW_MODE_AS_PLAIN_TEXT = 1,
     * VIEW_MODE_AS_PARSED_TEXT = 2,
     * VIEW_MODE_AS_PARSED_SENTENCES = 3) [Source: ViewFile.java]
@@ -204,5 +205,29 @@ public class SearchService extends AbstractService
            throw new AxisFault(e.getMessage());
        }
    }    
+   
+   public Document snippet(String url, String searchString) throws AxisFault {
+       try {
+           if (url == null || url.trim().equals("")) throw new AxisFault("No url provided.");
+           if (searchString == null || searchString.trim().equals("")) throw new AxisFault("No search string provided.");
+           
+           // extracting the message context
+           extractMessageContext(false);
+           
+           // setting the properties
+           final serverObjects args = new serverObjects();
+           args.put("url",url);
+           args.put("search",searchString);      
+           
+           // generating the template containing the url info
+           byte[] result = writeTemplate(TEMPLATE_SNIPPET, args);     
+           
+           // sending back the result to the client
+           return this.convertContentToXML(result);           
+           
+       } catch (Exception e)  {
+           throw new AxisFault(e.getMessage());
+       }           
+   }
 
 }
