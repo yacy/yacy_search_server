@@ -45,9 +45,13 @@
 
 package de.anomic.soap.services;
 
+import java.net.MalformedURLException;
+
 import org.apache.axis.AxisFault;
 import org.w3c.dom.Document;
 
+import de.anomic.index.indexURL;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.server.serverObjects;
 import de.anomic.soap.AbstractService;
@@ -161,9 +165,30 @@ public class SearchService extends AbstractService
         }
     }
     
+    
     /**
+    * @param url the url
+    * @param viewMode one of (VIEW_MODE_AS_PLAIN_TEXT = 1,
+    * VIEW_MODE_AS_PARSED_TEXT = 2,
+    * VIEW_MODE_AS_PARSED_SENTENCES = 3) [Source: ViewFile.java]
+    * @return an xml document containing the url info.
     *
-    *
+    * @throws AxisFault if the service could not be executed propery.
+    */    
+    public Document urlInfo(String urlStr, int viewMode) throws AxisFault {
+        try {
+            // getting the url hash for this url
+            URL url = new URL(urlStr);
+            String urlHash = indexURL.urlHash(url);
+            
+            // fetch urlInfo
+            return this.urlInfoByHash(urlHash, viewMode);
+        } catch (Exception e) {
+            throw new AxisFault(e.getMessage());
+        }
+    }
+    
+    /**
     * @param urlHash the url hash
     * @param viewMode one of (VIEW_MODE_AS_PLAIN_TEXT = 1,
     * VIEW_MODE_AS_PARSED_TEXT = 2,
@@ -172,7 +197,7 @@ public class SearchService extends AbstractService
     *
     * @throws AxisFault if the service could not be executed propery.
     */
-   public Document urlInfo(String urlHash, int viewMode) throws AxisFault {       
+   public Document urlInfoByHash(String urlHash, int viewMode) throws AxisFault {       
        try {
            // extracting the message context
            extractMessageContext(true);
