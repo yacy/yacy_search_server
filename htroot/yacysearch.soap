@@ -5,8 +5,8 @@
 		<description>Search for #[former]#</description>
 		
 		#(type)#
-		<totalResultCount>#(num-results)#::::::::::#[totalcount]##(/num-results)#</totalResultCount>
-		<currentResultCount>#(num-results)#::::::::::#[linkcount]##(/num-results)#</currentResultCount>
+		<totalResultCount>#(num-results)#::::::::#[totalcount]##(/num-results)#</totalResultCount>
+		<currentResultCount>#(num-results)#::::::::#[linkcount]##(/num-results)#</currentResultCount>
 		
 		<!-- StopWords -->
 		<stopWords>#(excluded)#::#[stopwords]##(/excluded)#</stopWords>
@@ -28,7 +28,7 @@
 			<pubDate>#[date]#</pubDate>
 			<size>#[size]#</size>
 			<ranking>YBR-#[ybr]#</ranking>
-			<snippet>#(snippet)#::#[text]##(/snippet)#</snippet>
+			<snippet>#(snippet)#::<![CDATA[#[text]##(/snippet)#]]></snippet>
 		</yacySearchResultItem>
 		#{/results}#
 		::
