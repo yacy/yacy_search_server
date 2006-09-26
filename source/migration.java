@@ -54,23 +54,21 @@ public class migration {
     public static void main(String[] args) {
 
     }
-    public static void migrate(plasmaSwitchboard sb){
-        presetPasswords(sb);
-        migrateSwitchConfigSettings(sb);
-        migrateWorkFiles(sb);
-    }
+
     public static void migrate(plasmaSwitchboard sb, int fromRev, int toRev){
-    	if(fromRev < toRev){
+        if(fromRev < toRev){
             if(fromRev < TAGDB_WITH_TAGHASH){
                 migrateBookmarkTagsDB(sb);
             }
             if(fromRev < NEW_OVERLAYS){
                 migrateDefaultFiles(sb);
             }
-    		serverLog.logInfo("MIGRATION", "Migrating from "+String.valueOf(fromRev)+ " to "+String.valueOf(toRev));
-            installSkins(sb);
-    		migrate(sb);
-    	}
+            serverLog.logInfo("MIGRATION", "Migrating from "+String.valueOf(fromRev)+ " to "+String.valueOf(toRev));
+            presetPasswords(sb);
+            migrateSwitchConfigSettings(sb);
+            migrateWorkFiles(sb);
+        }
+        installSkins(sb); // FIXME: yes, bad fix for quick release 0.47
     }
     /*
      * remove the static defaultfiles. We use them through a overlay now.

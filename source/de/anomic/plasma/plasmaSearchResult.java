@@ -188,6 +188,7 @@ public final class plasmaSearchResult {
             shorten = shortenPath(path);
             // scan all subpaths of the url
             while (shorten != null) {
+                if (pageAcc.size() <= query.wantedResults) break;
                 if (paths.containsKey(shorten)) {
                     //System.out.println("deleting path from search result: " + path + " is redundant to " + shorten);
                     try {

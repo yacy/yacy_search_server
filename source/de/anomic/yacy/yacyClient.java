@@ -484,7 +484,7 @@ public final class yacyClient {
             // references  : references (search hints) that was calculated during search
 
             // now create a plasmaIndex out of this result
-            System.out.println("yacyClient: " + ((urlhashes.length() == 0) ? "primary" : "secondary")+ " search result = " + result.toString()); // debug
+            //System.out.println("yacyClient: " + ((urlhashes.length() == 0) ? "primary" : "secondary")+ " search result = " + result.toString()); // debug
             final int results = Integer.parseInt((String) result.get("count"));
             //System.out.println("***result count " + results);
             
