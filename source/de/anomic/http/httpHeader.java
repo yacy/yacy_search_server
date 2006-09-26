@@ -120,6 +120,7 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_MD5 = "Content-MD5";
+    public static final String CONTENT_LOCATION = "Content-Location";
     
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String SET_COOKIE2 = "Set-Cookie2";
