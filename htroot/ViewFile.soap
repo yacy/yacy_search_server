@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<yacyUrlInfo>
+   <meta>
+      <url>#(error)#::#[url]##(/error)#</url>
+      <hash>#(error)#::#[hash]##(/error)#</hash>
+      <wordCount>#(error)#::#[wordCount]##(/error)#</wordCount>
+      <desc>#(error)#::#[desc]##(/error)#</desc>
+      <size>#(error)#::#[size]##(/error)#</size>
+      <mimeType>#(error)#::#[mimeType]##(/error)#</mimeType>
+      <statusCode>#(error)#0::1::2::3::4::5::6#(/error)#</statusCode>
+   </meta>
+   <body mode="#(viewMode)#::1::2::3#(/viewMode)#">
+      #(viewMode)#
+      :: <!-- 1 -->
+         <![CDATA[#[plainText]#]]>
+      :: <!-- 2 -->
+         <![CDATA[#[parsedText]#]]>
+      :: <!-- 3 -->
+         #{sentences}#
+         <sentence nr="#[nr]#"><![CDATA[#[text]#]]></sentence>
+         #{/sentences}#
+      #(/viewMode)#
+   </body>
+</yacyUrlInfo>

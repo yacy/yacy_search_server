@@ -1,26 +1,34 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <yacySearch>
 	<yacySearchResult>	
 		<title>Search for #[former]#</title>
 		<description>Search for #[former]#</description>
 		
 		#(type)#
-		<totalResultCount>#[totalcount]#</totalResultCount>
-		<currentResultCount>#[linkcount]#</currentResultCount>
+		<totalResultCount>#(num-results)#::::::::::#[totalcount]##(/num-results)#</totalResultCount>
+		<currentResultCount>#(num-results)#::::::::::#[linkcount]##(/num-results)#</currentResultCount>
 		
-		<searchTips>
+		<!-- StopWords -->
+		<stopWords>#(excluded)#::#[stopwords]##(/excluded)#</stopWords>
+		
+		<!--  YaCy Top-Worts -->
+		<topWords>
 		#(combine)#::		
-		#{words}#<searchTip query="#[newsearch]#">#[word]#</searchTip>#{/words}#
+		#{words}#<word query="#[newsearch]#">#[word]#</word>#{/words}#
 		#(/combine)#
-		</searchTips>				
+		</topWords>				
 		
-		#{results}#
+		<!-- Search Results -->
+		#{results}#		
 		<yacySearchResultItem>
 			<description>#[description]#</description>
 			<link>#[url]#</link>
+			<hash>#[urlhash]#</hash>
 			<linkName>#[urlname]#</linkName>
-			<date>#[date]#</date>
+			<pubDate>#[date]#</pubDate>
 			<size>#[size]#</size>
+			<ranking>YBR-#[ybr]#</ranking>
+			<description>#(snippet)#::#[text]##(/snippet)#</description>
 		</yacySearchResultItem>
 		#{/results}#
 		::
