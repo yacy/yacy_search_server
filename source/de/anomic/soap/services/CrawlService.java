@@ -46,7 +46,9 @@
 package de.anomic.soap.services;
 
 import org.apache.axis.AxisFault;
+import org.w3c.dom.Document;
 
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.soap.AbstractService;
 
@@ -55,40 +57,116 @@ public class CrawlService extends AbstractService {
     /**
      * Constant: template for crawling
      */    
-    private static final String TEMPLATE_CRAWLING = "IndexCreate_p.html";    
+    private static final String TEMPLATE_CRAWLING = "QuickCrawlLink_p.xml";    
     
     /**
-     * Service used start a new crawling job using the default settings for crawling
-     * 
-     * @return returns the http status page containing the crawling properties to the user
-     * TODO: creating an extra xml template that can be send back to the client. 
-     * 
-     * @throws AxisFault if the service could not be executed propery. 
-     */    
-    public String crawling(String crawlingURL) throws AxisFault {
+     * Function to crawl a single link with depth <code>0</code>
+     */
+    public Document crawlSingleUrl(String crawlingURL) throws AxisFault {
+        return this.crawling(crawlingURL, "CRAWLING-ROOT", new Integer(0), ".*", Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null, Boolean.TRUE);
+    }
+    
+    public Document crawling(
+            String crawlingURL, 
+            String crawljobTitel,
+            Integer crawlingDepth,
+            String crawlingFilter,
+            Boolean localIndexing,
+            Boolean crawlingQ,
+            Boolean storeHTCache,
+            Boolean crawlOrder,
+            String crawlOrderIntention,
+            Boolean xsstopw            
+    ) throws AxisFault {
         try {
             // extracting the message context
             extractMessageContext(true);  
             
             // setting the crawling properties
-            serverObjects args = new serverObjects();
-            args.put("crawlingQ","on");
-            args.put("xsstopw","on");
-            args.put("crawlOrder","on");
-            args.put("crawlingstart","Start New Crawl");
-            args.put("crawlingDepth","2");
-            args.put("crawlingFilter",".*");
-            args.put("storeHTCache","on");
-            args.put("localIndexing","on");            
-            args.put("crawlingURL",crawlingURL);            
+            serverObjects args = new serverObjects();      
+            args.put("url",crawlingURL);    
+            if (crawljobTitel != null && crawljobTitel.length() > 0) 
+                args.put("title",crawljobTitel);
+            if (crawlingFilter != null && crawlingFilter.length() > 0) 
+                args.put("crawlingFilter",crawlingFilter); 
+            if (crawlingDepth != null && crawlingDepth.intValue() > 0) 
+                args.put("crawlingDepth",crawlingDepth.toString());   
+            if (localIndexing != null) 
+                args.put("localIndexinglingQ",localIndexing.booleanValue()?"on":"off");               
+            if (crawlingQ != null) 
+                args.put("crawlingQ",crawlingQ.booleanValue()?"on":"off");              
+            if (storeHTCache != null) 
+                args.put("storeHTCache",storeHTCache.booleanValue()?"on":"off");             
+            if (crawlOrder != null) 
+                args.put("crawlOrder",crawlOrder.booleanValue()?"on":"off");      
+            if (crawlOrderIntention != null) 
+                args.put("intention",crawlOrderIntention);               
+            if (xsstopw != null) 
+                args.put("xsstopw",xsstopw.booleanValue()?"on":"off");               
             
             // triggering the crawling
             byte[] result = writeTemplate(TEMPLATE_CRAWLING, args);
             
-            // sending back the crawling status page to the user
-            return new String(result,"UTF-8");
+            // sending back the result to the client
+            return this.convertContentToXML(result);
         } catch (Exception e) {
             throw new AxisFault(e.getMessage());
+        }             
+    }
+    
+    /**
+     * Function to pause crawling of local crawl jobs, remote crawl jobs and sending of remote crawl job triggers
+     * @throws AxisFault 
+     */
+    public void pauseCrawling() throws AxisFault {
+        this.pauseResumeCrawling(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE);
+    }
+    
+    /**
+     * Function to resume crawling of local crawl jobs, remote crawl jobs and sending of remote crawl job triggers
+     * @throws AxisFault 
+     */
+    public void resumeCrawling() throws AxisFault {
+        this.pauseResumeCrawling(Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+    }
+    
+    /**
+     * Function to pause or resume crawling of local crawl jobs, remote crawl jobs and sending of remote crawl job triggers
+     * @param localCrawl if <code>null</code> current status is not changed. pause local crawls if <code>true</code> or
+     *        resumes local crawls if <code>false</code>
+     * @param remoteTriggeredCrawl if <code>null</code> current status is not changed. pause remote crawls if <code>true</code> or
+     *        resumes remote crawls if <code>false</code>
+     * @param globalCrawlTrigger if <code>null</code> current status is not changed. stops sending of global crawl triggers to other peers if <code>true</code> or
+     *        resumes sending of global crawl triggers if <code>false</code>
+     * @throws AxisFault 
+     */
+    public void pauseResumeCrawling(Boolean localCrawl, Boolean remoteTriggeredCrawl, Boolean globalCrawlTrigger) throws AxisFault {
+        // extracting the message context
+        extractMessageContext(true);         
+        
+        if (localCrawl != null) {
+            if (localCrawl.booleanValue()) {
+                ((plasmaSwitchboard)this.switchboard).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+            } else {
+                ((plasmaSwitchboard)this.switchboard).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+            }
+        }
+        
+        if (remoteTriggeredCrawl != null) {
+            if (remoteTriggeredCrawl.booleanValue()) {
+                ((plasmaSwitchboard)this.switchboard).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+            } else {
+                ((plasmaSwitchboard)this.switchboard).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+            }
+        }
+        
+        if (globalCrawlTrigger != null) {
+            if (globalCrawlTrigger.booleanValue()) {
+                ((plasmaSwitchboard)this.switchboard).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+            } else {
+                ((plasmaSwitchboard)this.switchboard).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+            }
         }        
     }
+
 }
