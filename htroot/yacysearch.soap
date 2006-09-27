@@ -28,7 +28,7 @@
 			<pubDate>#[date]#</pubDate>
 			<size>#[size]#</size>
 			<ranking>YBR-#[ybr]#</ranking>
-			<snippet>#(snippet)#::<![CDATA[#[text]##(/snippet)#]]></snippet>
+			<snippet>#(snippet)#::<![CDATA[#[text]#]]>#(/snippet)#</snippet>
 		</yacySearchResultItem>
 		#{/results}#
 		::
