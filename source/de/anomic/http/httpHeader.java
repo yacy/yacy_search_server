@@ -446,7 +446,12 @@ public final class httpHeader extends TreeMap implements Map {
         
         for (int i=1; i < parts.length; i++) {    
             String param = parts[i].trim();
-            if (param.startsWith("charset=")) return param.substring("charset=".length()).trim();
+            if (param.startsWith("charset=")) {
+                String charset = param.substring("charset=".length()).trim();
+                if (charset.startsWith("\"") || charset.startsWith("'")) charset = charset.substring(1);
+                if (charset.endsWith("\"") || charset.endsWith("'")) charset = charset.substring(0,charset.length()-1);
+                return charset.trim();
+            }
         }
         
         return null;            
