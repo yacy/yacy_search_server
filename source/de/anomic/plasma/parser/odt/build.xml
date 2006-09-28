@@ -14,7 +14,7 @@
   	  <javac srcdir="${src}/de/anomic/plasma/parser/${parserShortName}" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
   	  	<classpath>
   	  	  <pathelement location="${build}" />
-   	  	  <pathelement location="${libx}/odf_utils_05_11_10.jar" />
+   	  	  <pathelement location="${libx}/odf_utils_05_11_29.jar" />
   	  	</classpath>
   	  </javac>    	
     </target>
@@ -23,7 +23,7 @@
     <target name="zip" depends="compile">
   	  <tar destfile="${parserArchive}" compression="gzip">
   	  	<tarfileset dir="${libx}" 
-  	  				includes="odf_utils_05_11_10.*" 
+  	  				includes="odf_utils_05_11_29.*" 
   	  				prefix="${releaseFileParentDir}/libx/"
 			  	  	dirmode="755" mode="644"/>    	  	
   	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
@@ -37,7 +37,7 @@
 
     <target name="copy" depends="compile">
         <copy todir="${release}/libx/">
-             <fileset dir="${libx}" includes="odf_utils_05_11_10.*"/> 
+             <fileset dir="${libx}" includes="odf_utils_05_11_29.*"/> 
         </copy> 
         <copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
              <fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 

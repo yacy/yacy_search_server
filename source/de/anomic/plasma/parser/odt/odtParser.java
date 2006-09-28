@@ -80,7 +80,7 @@ public class odtParser extends AbstractParser implements Parser {
      * a list of library names that are needed by this parser
      * @see Parser#getLibxDependences()
      */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {"odf_utils_05_11_10.jar"};        
+    private static final String[] LIBX_DEPENDENCIES = new String[] {"odf_utils_05_11_29.jar"};        
     
     public odtParser() {        
         super(LIBX_DEPENDENCIES);
