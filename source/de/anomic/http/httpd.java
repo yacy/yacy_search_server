@@ -53,7 +53,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -62,6 +61,9 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import de.anomic.data.userDB;
+import de.anomic.net.URL;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -72,8 +74,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.data.userDB;
 
 
 /**

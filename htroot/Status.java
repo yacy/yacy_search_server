@@ -46,7 +46,6 @@
 // javac -classpath .:../Classes Status.java
 // if the shell's current path is HTROOT
 
-import java.lang.Math;
 import java.text.DecimalFormat;
 import java.util.Date;
 

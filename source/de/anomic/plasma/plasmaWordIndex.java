@@ -49,17 +49,16 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.Date;
 import java.util.TreeSet;
-import de.anomic.net.URL;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexCollectionRI;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
@@ -67,13 +66,14 @@ import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexRAMCacheRI;
 import de.anomic.index.indexRI;
-import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
+import de.anomic.net.URL;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyDHTAction;
 

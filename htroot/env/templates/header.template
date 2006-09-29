@@ -7,6 +7,7 @@
     <ul class="menu">
       <li><a href="/index.html?display=1" accesskey="s" class="MenuItemLink">Search Page</a></li>
       <li><a href="/DetailedSearch.html" class="MenuItemLink">Detailed Search</a></li>
+      <li><a href="/Surftipps.html?display=1" class="MenuItemLink">Surftipps</a></li>
       <li><a href="/Bookmarks.html" class="MenuItemLink">Bookmarks</a></li>
       <li><a href="/Help.html" class="MenuItemLink">Help</a></li>
     </ul>

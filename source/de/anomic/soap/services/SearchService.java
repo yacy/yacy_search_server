@@ -45,8 +45,6 @@
 
 package de.anomic.soap.services;
 
-import java.net.MalformedURLException;
-
 import org.apache.axis.AxisFault;
 import org.w3c.dom.Document;
 

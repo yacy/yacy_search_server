@@ -33,8 +33,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroFixedWidthArray;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroFixedWidthArray;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;

@@ -50,8 +50,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import de.anomic.data.wikiBoard;
 import de.anomic.data.wikiCode;
@@ -59,8 +59,8 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsRecord;
 
 public class Wiki {
 

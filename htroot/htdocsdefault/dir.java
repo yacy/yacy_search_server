@@ -49,18 +49,20 @@
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import de.anomic.net.URL;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+
+import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -75,7 +77,6 @@ import de.anomic.tools.dirlistComparator;
 import de.anomic.tools.md5DirFileFilter;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
-import de.anomic.data.userDB;
 
 public class dir {
 

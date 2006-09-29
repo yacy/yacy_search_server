@@ -42,8 +42,6 @@
 package de.anomic.plasma;
 
 import java.io.File;
-import de.anomic.net.URL;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,6 +50,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.net.URL;
 
 public class plasmaURLPattern {
     

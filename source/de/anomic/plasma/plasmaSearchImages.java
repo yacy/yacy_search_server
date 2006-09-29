@@ -42,14 +42,13 @@
 package de.anomic.plasma;
 
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
-import de.anomic.plasma.parser.ParserException;
-
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.net.URL;
+import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverDate;
 
 public final class plasmaSearchImages {

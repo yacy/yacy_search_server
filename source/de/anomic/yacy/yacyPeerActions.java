@@ -48,19 +48,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import de.anomic.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.tools.disorderSet;
-import de.anomic.yacy.yacySeed;
 
 public class yacyPeerActions {
    

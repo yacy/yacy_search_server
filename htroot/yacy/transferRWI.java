@@ -59,8 +59,8 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyDHTAction;
+import de.anomic.yacy.yacySeed;
 
 public final class transferRWI {
 

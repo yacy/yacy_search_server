@@ -44,11 +44,11 @@
 package de.anomic.plasma.parser.doc;
 
 import java.io.InputStream;
-import de.anomic.net.URL;
 import java.util.Hashtable;
 
 import org.textmining.text.extraction.WordExtractor;
 
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;

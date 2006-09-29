@@ -42,8 +42,6 @@
 package de.anomic.plasma;
 
 import java.util.HashMap;
-import java.lang.StringBuffer;
-import java.lang.Cloneable;
 
 /**
  *

@@ -51,12 +51,12 @@ import java.util.Date;
 import java.util.Iterator;
 
 import de.anomic.data.messageBoard;
+import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.data.wikiCode;
 
 public class Messages_p {
 

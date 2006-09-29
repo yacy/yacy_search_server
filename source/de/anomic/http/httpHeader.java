@@ -60,7 +60,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.text.Collator;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -74,6 +73,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import de.anomic.net.URL;
 import de.anomic.server.serverCore;
 import de.anomic.server.logging.serverLog;
 

@@ -53,36 +53,35 @@
 
 package de.anomic.plasma;
 
-import de.anomic.http.httpc;
-import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexURL;
-import de.anomic.kelondro.kelondroDyn;
-import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverInstantThread;
-import de.anomic.server.serverSystem;
-import de.anomic.server.serverThread;
-import de.anomic.tools.enumerateFiles;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
-import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.cache.ResourceInfoFactory;
-
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.TreeMap;
+
+import de.anomic.http.httpc;
+import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexURL;
+import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.kelondroMap;
+import de.anomic.net.URL;
+import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.cache.ResourceInfoFactory;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverSystem;
+import de.anomic.server.serverThread;
+import de.anomic.server.logging.serverLog;
+import de.anomic.tools.enumerateFiles;
 
 public final class plasmaHTCache {
 

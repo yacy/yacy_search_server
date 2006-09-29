@@ -28,9 +28,8 @@
 
 package de.anomic.index;
 
-import de.anomic.net.URL;
-
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.net.URL;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
 

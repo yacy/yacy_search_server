@@ -54,9 +54,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+
 import de.anomic.kelondro.kelondroDyn;
-import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroMap;
 
 public class plasmaCrawlRobotsTxt {
     

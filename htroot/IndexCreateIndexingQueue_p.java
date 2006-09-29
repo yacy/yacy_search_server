@@ -43,9 +43,9 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.io.IOException;
 
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;

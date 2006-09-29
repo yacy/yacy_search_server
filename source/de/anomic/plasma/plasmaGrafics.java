@@ -45,17 +45,16 @@
 
 package de.anomic.plasma;
 
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySearch;
-import de.anomic.yacy.yacySeed;
-
-import de.anomic.ymage.ymageMatrix;
-import de.anomic.ymage.ymageMatrixPainter;
-import de.anomic.ymage.ymagePainter;
-
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
+
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySearch;
+import de.anomic.yacy.yacySeed;
+import de.anomic.ymage.ymageMatrix;
+import de.anomic.ymage.ymageMatrixPainter;
+import de.anomic.ymage.ymagePainter;
 
 public class plasmaGrafics {
 

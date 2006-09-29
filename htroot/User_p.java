@@ -46,16 +46,16 @@
 //javac -classpath .:../Classes Message.java
 //if the shell's current path is HTROOT
 
-import java.util.Iterator;
-import java.util.HashMap;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.data.userDB;
-import de.anomic.server.serverCodings;
 
 public class User_p {
     

@@ -49,17 +49,16 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import de.anomic.net.URL;
-
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.net.URL;
 import de.anomic.tools.bitfield;
 
 public class plasmaCrawlEURL extends indexURL {

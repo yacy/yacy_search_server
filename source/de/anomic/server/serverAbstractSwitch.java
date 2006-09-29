@@ -49,7 +49,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverAbstractSwitch;
 
 public abstract class serverAbstractSwitch implements serverSwitch {
 

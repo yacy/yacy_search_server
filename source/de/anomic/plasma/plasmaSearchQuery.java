@@ -43,9 +43,9 @@
 package de.anomic.plasma;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Iterator;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.index.indexEntryAttribute;

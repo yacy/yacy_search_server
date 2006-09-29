@@ -46,13 +46,13 @@
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import de.anomic.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;

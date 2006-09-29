@@ -45,10 +45,10 @@
 
 
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaGrafics;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymagePainter;
-import de.anomic.plasma.plasmaGrafics;
 
 // draw a picture of the yacy network
 

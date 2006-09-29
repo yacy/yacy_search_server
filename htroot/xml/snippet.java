@@ -1,13 +1,13 @@
 package xml;
 
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;

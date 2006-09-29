@@ -44,11 +44,11 @@
 
 package de.anomic.plasma;
 
-import de.anomic.net.URL;
 import java.io.File;
 import java.io.IOException;
 
 import de.anomic.index.indexURL;
+import de.anomic.net.URL;
 
 public class plasmaURLPool {
     

@@ -44,9 +44,9 @@ package de.anomic.kelondro;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.ConcurrentModificationException;
 
 public class kelondroMergeIterator implements Iterator {
     

@@ -62,8 +62,8 @@ import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexAssortment {

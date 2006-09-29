@@ -49,11 +49,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
-import de.anomic.yacy.yacyCore;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 

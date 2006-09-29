@@ -42,15 +42,15 @@
 
 package de.anomic.plasma;
 
-import de.anomic.htmlFilter.htmlFilterImageEntry;
-
 import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
+
+import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.net.URL;
 
 public class plasmaParserDocument {
     

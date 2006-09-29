@@ -108,33 +108,6 @@
       #(/searchoptions)#
     </form>
     
-    #(surftipps)#
-    <a href="/index.html?surftipps=1">Show surftipps</a>
-    ::
-    <h3>Surftipps</h3><br>
-    provided by YaCy peers<br>
-    #{results}#
-     <!-- link begin -->
-     <div class="searchresults">
-       <div class="urlactions">
-         <a href="/Bookmarks.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img src="/env/grafics/empty.gif" title="bookmark" alt="Add to bookmarks" class="bookmarkIcon" /></a>
-         #(recommend)#
-         <img src="/env/grafics/empty.gif" title="" alt="" class="recommendIcon" />
-         <img src="/env/grafics/empty.gif" title="" alt="" class="deleteIcon" />
-         ::
-         <a href="#[positiveVoteLink]#" title="positive vote" class="recommendlink"><img src="/env/grafics/empty.gif" title="positive vote" alt="Give positive vote" class="recommendIcon" /></a>
-         <a href="#[negativeVoteLink]#" title="negative vote" class="deletelink" ><img src="/env/grafics/empty.gif" title="negative vote" alt="Give negative vote" class="deleteIcon" /></a>
-         #(/recommend)#
-       </div>
-       <h4 class="linktitle"><a href="#[url]#">#[title]#</a></h4>
-       <p class="snippet">#[description]#</p>
-     </div>
-    <!-- link end -->
-    #{/results}#
-    <br>
-    <a href="/index.html?surftipps=0">Hide surftipps</a>
-	#(/surftipps)#
-    
     #(display)#
     #%env/templates/simplefooter.template%#
     ::

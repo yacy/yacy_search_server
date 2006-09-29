@@ -27,8 +27,6 @@
 package de.anomic.index;
 
 import java.io.IOException;
-import de.anomic.net.URL;
-
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -39,8 +37,9 @@ import java.util.TreeMap;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRAMIndex;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroTree;
+import de.anomic.net.URL;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;

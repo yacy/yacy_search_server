@@ -44,11 +44,11 @@
 // if the shell's current path is HTROOT
 
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpHeader;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;

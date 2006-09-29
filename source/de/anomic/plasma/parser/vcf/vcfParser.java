@@ -48,7 +48,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -58,6 +57,7 @@ import org.apache.commons.codec.net.QuotedPrintableCodec;
 
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;

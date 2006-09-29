@@ -41,12 +41,12 @@
 package de.anomic.tools;
 
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 
 public class loaderThreads {
     

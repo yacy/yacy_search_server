@@ -46,21 +46,22 @@
 // javac -classpath .:../classes Network.java
 // if the shell's current path is HTROOT
 
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.io.IOException;
+
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyNewsPool;
+import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 
 public class Network {

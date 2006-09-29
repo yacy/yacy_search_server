@@ -52,15 +52,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexRI;
-import de.anomic.index.indexAbstractRI;
+import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroObjectCache;
 import de.anomic.kelondro.kelondroRecords;
-import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI implements indexRI {

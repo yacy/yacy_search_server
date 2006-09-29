@@ -54,13 +54,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import de.anomic.net.URL;
 import java.util.Date;
 import java.util.Properties;
 
 import de.anomic.http.httpChunkedInputStream;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;

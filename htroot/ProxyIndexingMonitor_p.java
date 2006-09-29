@@ -48,9 +48,6 @@
 
 import java.io.File;
 import java.io.IOException;
-// import java.text.SimpleDateFormat;
-// import java.util.Date;
-// import java.util.Locale;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlProfile;

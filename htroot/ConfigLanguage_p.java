@@ -50,18 +50,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import de.anomic.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import de.anomic.data.listManager;
+import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.data.translator;
 
 
 public class ConfigLanguage_p {

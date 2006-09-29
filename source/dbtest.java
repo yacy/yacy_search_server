@@ -8,9 +8,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Random;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Random;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroFlexTable;
@@ -18,13 +18,13 @@ import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroProfile;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroSplittedTree;
 import de.anomic.kelondro.kelondroTree;
-import de.anomic.kelondro.kelondroRow;
+import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverMemory;
 import de.anomic.ymage.ymageChart;
 import de.anomic.ymage.ymagePNGEncoderAWT;
-import de.anomic.server.serverMemory;
-import de.anomic.server.serverInstantThread;
 
 public class dbtest {
 

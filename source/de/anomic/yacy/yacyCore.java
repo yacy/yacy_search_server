@@ -62,7 +62,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import de.anomic.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -73,15 +72,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacySeed;
 
 public class yacyCore {
 

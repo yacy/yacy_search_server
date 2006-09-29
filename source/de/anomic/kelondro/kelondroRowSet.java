@@ -25,9 +25,9 @@
 package de.anomic.kelondro;
 
 import java.io.IOException;
-import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.TreeSet;
 
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
 

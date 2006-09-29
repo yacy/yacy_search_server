@@ -51,8 +51,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import de.anomic.net.URL;
 
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;

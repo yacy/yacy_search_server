@@ -44,9 +44,9 @@ import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Toolkit;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 
 import de.anomic.http.httpHeader;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

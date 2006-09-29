@@ -43,24 +43,23 @@
 package de.anomic.plasma;
 
 import java.io.IOException;
-import de.anomic.net.URL;
-import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.crawler.plasmaCrawlerException;
-import de.anomic.plasma.parser.ParserException;
-
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacySearch;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.net.URL;
+import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.crawler.plasmaCrawlerException;
+import de.anomic.plasma.parser.ParserException;
+import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacySearch;
 
 public class plasmaSnippetCache {
 

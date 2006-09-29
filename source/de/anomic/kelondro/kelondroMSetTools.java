@@ -40,16 +40,16 @@
 
 package de.anomic.kelondro;
 
-import java.io.File;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 

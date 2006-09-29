@@ -46,7 +46,6 @@ package de.anomic.plasma.parser.rpm;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import de.anomic.net.URL;
 import java.util.HashMap;
 import java.util.Hashtable;
 
@@ -54,6 +53,7 @@ import com.jguild.jrpm.io.RPMFile;
 import com.jguild.jrpm.io.datatype.DataTypeIf;
 
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;

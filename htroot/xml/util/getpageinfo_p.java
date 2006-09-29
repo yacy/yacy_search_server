@@ -47,13 +47,13 @@
 package xml.util;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 import de.anomic.data.robotsParser;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

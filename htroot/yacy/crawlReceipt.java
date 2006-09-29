@@ -50,9 +50,9 @@ import java.io.IOException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
-import de.anomic.plasma.plasmaCrawlNURL;
-import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

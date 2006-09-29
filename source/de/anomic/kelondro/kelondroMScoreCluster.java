@@ -44,9 +44,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Random;
 import java.util.SortedMap;
-import java.util.Random; // only for testing
+import java.util.TreeMap;
 
 public final class kelondroMScoreCluster {
     

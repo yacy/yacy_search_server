@@ -44,12 +44,12 @@
 package de.anomic.plasma.parser.rtf;
 
 import java.io.InputStream;
-import de.anomic.net.URL;
 import java.util.Hashtable;
 
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;

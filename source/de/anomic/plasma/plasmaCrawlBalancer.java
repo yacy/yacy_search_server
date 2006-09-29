@@ -43,10 +43,10 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.ArrayList;
+import java.util.Map;
 
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroRecords;

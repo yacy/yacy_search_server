@@ -5,13 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.Date;
 
 import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.index.indexURL;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;

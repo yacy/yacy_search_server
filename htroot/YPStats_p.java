@@ -45,7 +45,6 @@
 
 import java.util.Iterator;
 
-
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -56,7 +55,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.yacy.yacyCore;
-
 import de.anomic.yacy.yacySeed;
 
 public class YPStats_p {

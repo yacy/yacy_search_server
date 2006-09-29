@@ -50,10 +50,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexRI;
-import de.anomic.index.indexAbstractRI;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;

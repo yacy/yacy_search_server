@@ -71,10 +71,10 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 

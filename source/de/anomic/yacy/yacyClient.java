@@ -48,9 +48,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;

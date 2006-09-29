@@ -47,15 +47,15 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import de.anomic.net.URL;
 import java.net.MalformedURLException;
-import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroAttrSeq;
+import de.anomic.net.URL;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 

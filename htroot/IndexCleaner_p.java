@@ -45,8 +45,8 @@
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLURL;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

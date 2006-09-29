@@ -46,17 +46,17 @@ package de.anomic.plasma.parser.mimeType;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import de.anomic.net.URL;
 import java.util.Collection;
 import java.util.Hashtable;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
 import net.sf.jmimemagic.MagicMatchNotFoundException;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;

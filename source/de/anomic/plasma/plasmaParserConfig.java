@@ -47,7 +47,6 @@
 
 package de.anomic.plasma;
 
-import de.anomic.net.URL;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -55,6 +54,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
+import de.anomic.net.URL;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.logging.serverLog;

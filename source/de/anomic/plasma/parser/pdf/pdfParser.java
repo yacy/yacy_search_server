@@ -45,7 +45,6 @@ package de.anomic.plasma.parser.pdf;
 
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import de.anomic.net.URL;
 import java.util.Hashtable;
 
 import org.pdfbox.pdfparser.PDFParser;
@@ -53,6 +52,7 @@ import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.pdmodel.PDDocumentInformation;
 import org.pdfbox.util.PDFTextStripper;
 
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;

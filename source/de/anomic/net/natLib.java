@@ -48,10 +48,10 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 
 import de.anomic.http.httpc;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.tools.disorderHeap;
 import de.anomic.tools.nxTools;
-import de.anomic.plasma.plasmaSwitchboard;
 
 public class natLib {
 

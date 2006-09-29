@@ -46,8 +46,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.MessageDigest;
-import java.util.Properties;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 public final class serverCodings {

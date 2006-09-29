@@ -40,11 +40,11 @@
 import java.io.File;
 import java.io.IOException;
 
+import de.anomic.data.listManager;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
-import de.anomic.data.listManager;
 
 public class migration {
     //SVN constants

@@ -49,13 +49,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.Writer;
-import java.lang.Math;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
-import de.anomic.net.URL;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -82,16 +80,17 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.pool.impl.GenericObjectPool;
+
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
-
-import org.apache.commons.pool.impl.GenericObjectPool;
 
 /**
 * This class implements an http client. While http access is built-in in java

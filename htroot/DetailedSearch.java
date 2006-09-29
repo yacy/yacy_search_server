@@ -51,10 +51,10 @@ import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

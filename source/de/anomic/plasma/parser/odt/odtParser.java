@@ -46,7 +46,6 @@ package de.anomic.plasma.parser.odt;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import de.anomic.net.URL;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.zip.ZipEntry;
@@ -57,6 +56,7 @@ import com.catcode.odf.OpenDocumentMetadata;
 import com.catcode.odf.OpenDocumentTextInputStream;
 
 import de.anomic.http.httpc;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;

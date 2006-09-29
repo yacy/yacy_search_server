@@ -42,21 +42,21 @@
 
 package de.anomic.plasma;
 
-import java.util.TreeMap;
-import java.util.Set;
-import java.util.Map;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Iterator;
-import de.anomic.net.URL;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.server.serverCodings;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.net.URL;
+import de.anomic.server.serverCodings;
 
 public final class plasmaSearchResult {
     

@@ -61,7 +61,6 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import de.anomic.net.URL;
 import java.net.UnknownHostException;
 import java.nio.channels.ClosedByInterruptException;
 import java.security.KeyStore;
@@ -80,6 +79,7 @@ import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
 import de.anomic.http.httpc;
 import de.anomic.icap.icapd;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.portForwarding.serverPortForwarding;

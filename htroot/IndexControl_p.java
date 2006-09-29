@@ -48,10 +48,9 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import de.anomic.net.URL;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
@@ -61,6 +60,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;

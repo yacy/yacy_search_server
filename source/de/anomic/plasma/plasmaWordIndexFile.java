@@ -52,9 +52,9 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexURL;
 import de.anomic.index.indexURLEntry;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaWordIndexFile {

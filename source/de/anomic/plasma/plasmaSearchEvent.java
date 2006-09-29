@@ -43,19 +43,19 @@
 package de.anomic.plasma;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 
+import de.anomic.index.indexContainer;
+import de.anomic.index.indexEntry;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySearch;
-import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
 
 public final class plasmaSearchEvent extends Thread implements Runnable {
     

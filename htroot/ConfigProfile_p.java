@@ -53,11 +53,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsRecord;
 
 public class ConfigProfile_p {
 

@@ -54,16 +54,16 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.data.wikiCode;
+import de.anomic.yacy.yacySeed;
 
 public class ViewProfile {
 

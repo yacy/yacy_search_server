@@ -48,6 +48,7 @@
 package de.anomic.plasma.crawler;
 
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaCrawlerPool extends GenericKeyedObjectPool {

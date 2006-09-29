@@ -45,16 +45,16 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.TreeMap;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
-import de.anomic.server.serverCodings;
-import de.anomic.server.serverFileUtils;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBinSearch;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverFileUtils;
 
 public final class plasmaSearchPreOrder {
     

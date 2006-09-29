@@ -55,8 +55,8 @@ import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.server.serverDate;
 
 public class ResourceInfo implements IResourceInfo {

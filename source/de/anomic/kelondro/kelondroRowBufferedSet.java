@@ -24,8 +24,8 @@
 
 package de.anomic.kelondro;
 
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 

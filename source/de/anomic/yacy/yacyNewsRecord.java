@@ -44,12 +44,12 @@
 
 package de.anomic.yacy;
 
+import java.util.Date;
+import java.util.Map;
+
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
-
-import java.util.Date;
-import java.util.Map;
 
 public class yacyNewsRecord {
 

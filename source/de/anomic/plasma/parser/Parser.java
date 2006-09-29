@@ -46,9 +46,9 @@ package de.anomic.plasma.parser;
 
 import java.io.File;
 import java.io.InputStream;
-import de.anomic.net.URL;
 import java.util.Hashtable;
 
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.server.logging.serverLog;
 

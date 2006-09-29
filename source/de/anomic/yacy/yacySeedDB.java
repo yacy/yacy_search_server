@@ -50,27 +50,27 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.SoftReference;
 import java.net.InetAddress;
-import de.anomic.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
-import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroObjectCache;
 import de.anomic.kelondro.kelondroRecords;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacySeed;
 
 public final class yacySeedDB {
   
