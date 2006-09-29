@@ -4,7 +4,7 @@
 
 Name "YaCy"
 
-OutFile "yacy_v0.46_20060823_2442.exe"
+OutFile "yacy_v0.47_20060927_2665.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
@@ -17,7 +17,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.46 (Build 20060823) on your computer. Select which optional things you want to be installed."
+ComponentText "This will install YaCy v0.47 (Build 20060927) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old version was installed into another location (eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install into:"
@@ -149,13 +149,13 @@ Section "Addons"
 	SetOutPath $INSTDIR
 SectionEnd
 
-Section "Docs"
-	SectionIn 2 3
-	SetOutPath $INSTDIR\doc
-	File /r "doc\*"
-
-	SetOutPath $INSTDIR
-SectionEnd
+#Section "Docs"
+#	SectionIn 2 3
+#	SetOutPath $INSTDIR\doc
+#	File /r "doc\*"
+#
+#	SetOutPath $INSTDIR
+#SectionEnd
 
 Section "Development"
 	SectionIn 3
