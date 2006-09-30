@@ -79,6 +79,7 @@ public class plasmaParserDocument {
     Map emaillinks;
     plasmaCondenser condenser;
     boolean resorted;
+    private InputStream textStream; 
                     
     public plasmaParserDocument(URL location, String mimeType, String charset,
                     String[] keywords, String shortTitle, String longTitle,
@@ -156,9 +157,12 @@ public class plasmaParserDocument {
         try {
             if (this.text == null) return null;
 
-            if (this.text instanceof File) return new BufferedInputStream(new FileInputStream((File)this.text));
-            else if (this.text instanceof byte[]) return new ByteArrayInputStream((byte[])this.text);
-
+            if (this.text instanceof File) {
+                this.textStream = new BufferedInputStream(new FileInputStream((File)this.text));
+            } else if (this.text instanceof byte[]) {
+                this.textStream =  new ByteArrayInputStream((byte[])this.text);
+            }
+            return this.textStream;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -320,9 +324,26 @@ public class plasmaParserDocument {
     }
     
     public void close() {
+        // try close the output stream
+        if (this.textStream != null) {
+            try {
+                this.textStream.close();
+            } catch (Exception e) { 
+                /* ignore this */
+            } finally {
+                this.textStream = null;
+            }
+        }
+        
         // delete the temp file
         if ((this.text != null) && (this.text instanceof File)) {
-            try { ((File)this.text).delete(); } catch (Exception e) {/* ignore this */}
+            try { 
+                ((File)this.text).delete(); 
+            } catch (Exception e) {
+                /* ignore this */
+            } finally {
+                this.text = null;
+            }
         }        
     }
     

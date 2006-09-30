@@ -200,6 +200,7 @@ public class yacysearch {
                         map.put("description", ((document == null) ? urlentry.descr() : document.getMainLongTitle()).replace(',', ' '));
                         map.put("tags",  ((document == null) ? "" : document.getKeywords(' ')));
                         yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippadd", map));
+                        document.close();
                     }
                 }
             }

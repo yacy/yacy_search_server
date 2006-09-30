@@ -160,6 +160,7 @@ public class Bookmarks {
                             prop.put("mode_tags", (document == null) ? "" : document.getKeywords(','));
                             prop.put("mode_public", 0);
                         }
+                        if (document != null) document.close();
                     } else {
                         // get from the bookmark database
                         prop.put("mode_edit", 1); // edit mode

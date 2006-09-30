@@ -230,6 +230,7 @@ public class plasmaSnippetCache {
                 
         //System.out.println("loaded document for URL " + url);
         String[] sentences = document.getSentences();
+        document.close();
         //System.out.println("----" + url.toString()); for (int l = 0; l < sentences.length; l++) System.out.println(sentences[l]);
         if ((sentences == null) || (sentences.length == 0)) {
             //System.out.println("found no sentences in url " + url);

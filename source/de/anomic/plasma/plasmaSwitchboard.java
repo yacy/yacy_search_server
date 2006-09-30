@@ -1465,6 +1465,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } catch (ParserException e) {
                 this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
                 addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorPeerHash, entry.anchorName(), e.getErrorCode(), new bitfield(indexURL.urlFlagLength));
+                if (document != null) {
+                    document.close();
+                    document = null;
+                }
                 return;
             }
             

@@ -133,6 +133,7 @@ public class CacheAdmin_p {
                         info.append(sentences[i]).append("<br>");
                     }
                     info.append("</span><br>");
+                    if (document != null) document.close();
                 }
             } catch (Exception e) {
                 info.append("- This file is not cached -<br><br>");

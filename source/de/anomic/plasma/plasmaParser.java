@@ -830,6 +830,7 @@ public final class plasmaParser {
                     System.out.println("URL " + anchorNr + ":\t" + key + " | " + anchors.get(key));
                     anchorNr++;
                 }
+                document.close();
             }
         } catch (Exception e) {
             e.printStackTrace();

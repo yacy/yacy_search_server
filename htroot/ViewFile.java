@@ -256,6 +256,7 @@ public class ViewFile {
                     prop.put("viewMode_sentences",sentences.length);
 
                 } 
+                if (document != null) document.close();
             }
             prop.put("error",0);
             prop.put("error_url",url.toString());                
