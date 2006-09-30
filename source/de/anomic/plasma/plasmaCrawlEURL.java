@@ -117,6 +117,7 @@ public class plasmaCrawlEURL extends indexURL {
     
     // Parser errors
     public static final String DENIED_PARSER_ERROR = "denied_(parser_error)";
+    public static final String DENIED_DOCUMENT_ENCRYPTED = "denied_(document_encrypted)";
     public static final String DENIED_NOT_PARSEABLE_NO_CONTENT = "denied_(not_parseabel_no_content)";
     
     // indexing errors

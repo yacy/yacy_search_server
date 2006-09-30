@@ -43,8 +43,11 @@
 
 package de.anomic.plasma.parser.zip;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -94,13 +97,23 @@ public class zipParser extends AbstractParser implements Parser {
     
     public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         
+        long docTextLength = 0;
+        OutputStream docText = null;
+        File outputFile = null;
+        plasmaParserDocument subDoc = null;
         try {           
+            if ((this.fileSize != -1) && (this.fileSize > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
+                outputFile = File.createTempFile("zipParser",".tmp");
+                docText = new BufferedOutputStream(new FileOutputStream(outputFile));
+            } else {
+                docText = new serverByteBuffer();
+            }
+            
             StringBuffer docKeywords = new StringBuffer();
             StringBuffer docShortTitle = new StringBuffer();  
             StringBuffer docLongTitle = new StringBuffer();   
             LinkedList docSections = new LinkedList();
             StringBuffer docAbstrct = new StringBuffer();
-            serverByteBuffer docText = new serverByteBuffer();
             Map docAnchors = new HashMap();
             TreeSet docImages = new TreeSet(); 
             
@@ -128,48 +141,56 @@ public class zipParser extends AbstractParser implements Parser {
                 String entryMime = plasmaParser.getMimeTypeByFileExt(entryExt);      
                 
                 // parsing the content
-                plasmaParserDocument theDoc = null;
-                File tempFile = null;
+                File subDocTempFile = null;
                 try {
                     // create the temp file
-                    tempFile = createTempFile(entryName);
+                    subDocTempFile = createTempFile(entryName);
                     
                     // copy the data into the file
-                    serverFileUtils.copy(zippedContent,tempFile,entry.getSize());                    
+                    serverFileUtils.copy(zippedContent,subDocTempFile,entry.getSize());                    
                     
                     // parsing the zip file entry
-                    theDoc = theParser.parseSource(new URL(location,"#" + entryName),entryMime,null, tempFile);
+                    subDoc = theParser.parseSource(new URL(location,"#" + entryName),entryMime,null, subDocTempFile);
                 } catch (ParserException e) {
                     this.theLogger.logInfo("Unable to parse zip file entry '" + entryName + "'. " + e.getMessage());
                 } finally {
-                    if (tempFile != null) try {tempFile.delete(); } catch(Exception ex){/* ignore this */}
+                    if (subDocTempFile != null) try {subDocTempFile.delete(); } catch(Exception ex){/* ignore this */}
                 }
-                if (theDoc == null) continue;
+                if (subDoc == null) continue;
                 
                 // merging all documents together
                 if (docKeywords.length() > 0) docKeywords.append(",");
-                docKeywords.append(theDoc.getKeywords(','));
+                docKeywords.append(subDoc.getKeywords(','));
                 
                 if (docLongTitle.length() > 0) docLongTitle.append("\n");
-                docLongTitle.append(theDoc.getMainLongTitle());
+                docLongTitle.append(subDoc.getMainLongTitle());
                 
                 if (docShortTitle.length() > 0) docShortTitle.append("\n");
-                docShortTitle.append(theDoc.getMainShortTitle());                
+                docShortTitle.append(subDoc.getMainShortTitle());                
                 
-                docSections.addAll(Arrays.asList(theDoc.getSectionTitles()));
+                docSections.addAll(Arrays.asList(subDoc.getSectionTitles()));
                 
                 if (docAbstrct.length() > 0) docAbstrct.append("\n");
-                docAbstrct.append(theDoc.getAbstract());                   
+                docAbstrct.append(subDoc.getAbstract());                   
 
-                if (docText.length() > 0) docText.append("\n");
-                docText.append(theDoc.getText());                 
+                if (subDoc.getTextLength() > 0) {
+                    if (docTextLength > 0) docText.write('\n');
+                    docTextLength += serverFileUtils.copy(subDoc.getText(), docText);
+                }
                 
-                docAnchors.putAll(theDoc.getAnchors());
-                docImages.addAll(theDoc.getImages());
+                docAnchors.putAll(subDoc.getAnchors());
+                docImages.addAll(subDoc.getImages());
+                
+                // release subdocument
+                subDoc.close();
+                subDoc = null;
             }
             
         
-            return new plasmaParserDocument(
+            plasmaParserDocument result = null;
+            
+            if (docText instanceof serverByteBuffer) {
+                result = new plasmaParserDocument(
                     location,
                     mimeType,
                     null,
@@ -178,12 +199,36 @@ public class zipParser extends AbstractParser implements Parser {
                     docLongTitle.toString(),
                     (String[])docSections.toArray(new String[docSections.size()]),
                     docAbstrct.toString(),
-                    docText.toByteArray(),
+                    ((serverByteBuffer)docText).toByteArray(),
                     docAnchors,
                     docImages);
+            } else {
+                result = new plasmaParserDocument(
+                        location,
+                        mimeType,
+                        null,
+                        docKeywords.toString().split(" |,"),
+                        docShortTitle.toString(), 
+                        docLongTitle.toString(),
+                        (String[])docSections.toArray(new String[docSections.size()]),
+                        docAbstrct.toString(),
+                        outputFile,
+                        docAnchors,
+                        docImages);                
+            }
+            
+            return result;
         } catch (Exception e) {  
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
+            
+            if (subDoc != null) subDoc.close();
+            
+            // close the writer
+            if (docText != null) try { docText.close(); } catch (Exception ex) {/* ignore this */}
+            
+            // delete the file
+            if (outputFile != null) try { outputFile.delete(); } catch (Exception ex)  {/* ignore this */}            
             
             throw new ParserException("Unexpected error while parsing zip resource. " + e.getClass().getName() + ": "+ e.getMessage(),location);
         }

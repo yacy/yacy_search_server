@@ -43,8 +43,11 @@
 
 package de.anomic.plasma.parser.pdf;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Hashtable;
 
 import org.pdfbox.pdfparser.PDFParser;
@@ -53,11 +56,12 @@ import org.pdfbox.pdmodel.PDDocumentInformation;
 import org.pdfbox.util.PDFTextStripper;
 
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverCharBuffer;
 
 public class pdfParser extends AbstractParser implements Parser {
 
@@ -87,9 +91,9 @@ public class pdfParser extends AbstractParser implements Parser {
     
     public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         
-        
         PDDocument theDocument = null;
-        OutputStreamWriter writer = null;
+        Writer writer = null;
+        File writerFile = null;
         try {       
             // reducing thread priority
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);                        
@@ -114,6 +118,10 @@ public class pdfParser extends AbstractParser implements Parser {
             PDFTextStripper stripper = new PDFTextStripper();
             theDocument = parser.getPDDocument();
             
+            if (theDocument.isEncrypted()) {
+                throw new ParserException("Document is encrypted",location,plasmaCrawlEURL.DENIED_DOCUMENT_ENCRYPTED);
+            }
+            
             // extracting some metadata
             PDDocumentInformation theDocInfo = theDocument.getDocumentInformation();            
             if (theDocInfo != null) {
@@ -121,48 +129,66 @@ public class pdfParser extends AbstractParser implements Parser {
                 docSubject = theDocInfo.getSubject();
                 //docAuthor = theDocInfo.getAuthor();
                 docKeywordStr = theDocInfo.getKeywords();
-            }
+            }            
             
-            serverByteBuffer out = new serverByteBuffer();
-            writer = new OutputStreamWriter( out );            
+            // creating a writer for output
+            if ((this.fileSize != -1) && (this.fileSize > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
+                writerFile = File.createTempFile("pdfParser",".tmp");
+                writer = new OutputStreamWriter(new FileOutputStream(writerFile),"UTF-8");
+            } else {
+                writer = new serverCharBuffer(); 
+            }
+
             stripper.writeText(theDocument, writer );
-            
-            writer.close(); writer = null;
-            theDocument.close(); theDocument = null;
-            
-            byte[] contents = out.toByteArray();
-            out.close();
-            out = null;
-			
-            if ((docTitle == null) || (docTitle.length() == 0)) {
-                docTitle = ((contents.length > 80)? new String(contents, 0, 80, "UTF-8"):new String(contents, "UTF-8")).
-                replaceAll("\r\n"," ").
-                replaceAll("\n"," ").
-                replaceAll("\r"," ").
-                replaceAll("\t"," ");                
-            }
+            theDocument.close(); theDocument = null;            
+            writer.close();
+
             
             String[] docKeywords = null;
             if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
             
-            plasmaParserDocument theDoc = new plasmaParserDocument(
-                    location,
-                    mimeType,
-                    "UTF-8",
-                    docKeywords,
-                    docSubject,
-                    docTitle,
-                    null,
-                    null,
-                    contents,
-                    null,
-                    null);
+            plasmaParserDocument theDoc = null;
+            
+            if (writer instanceof serverCharBuffer) {
+                byte[] contentBytes = ((serverCharBuffer)writer).toString().getBytes("UTF-8");
+                theDoc = new plasmaParserDocument(
+                        location,
+                        mimeType,
+                        "UTF-8",
+                        docKeywords,
+                        docSubject,
+                        docTitle,
+                        null,
+                        null,
+                        contentBytes,
+                        null,
+                        null);
+            } else {
+                theDoc = new plasmaParserDocument(
+                        location,
+                        mimeType,
+                        "UTF-8",
+                        docKeywords,
+                        docSubject,
+                        docTitle,
+                        null,
+                        null,
+                        writerFile,
+                        null,
+                        null);                
+            }
             
             return theDoc;
         }
         catch (Exception e) {       
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
+            
+            // close the writer
+            if (writer != null) try { writer.close(); } catch (Exception ex) {/* ignore this */}
+            
+            // delete the file
+            if (writerFile != null) try { writerFile.delete(); } catch (Exception ex)  {/* ignore this */}
             
             throw new ParserException("Unexpected error while parsing pdf file. " + e.getMessage(),location); 
         } finally {
@@ -173,8 +199,7 @@ public class pdfParser extends AbstractParser implements Parser {
     }
     
     public void reset() {
-		// Nothing todo here at the moment
-    	
+        this.fileSize = -1;
     }
 
 }

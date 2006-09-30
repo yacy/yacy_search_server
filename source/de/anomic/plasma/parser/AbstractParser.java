@@ -64,7 +64,7 @@ import de.anomic.server.logging.serverLog;
  * @version $LastChangedRevision$ / $LastChangedDate$
  */
 public abstract class AbstractParser implements Parser{
-
+    
     /**
      * a list of library names that are needed by this parser
      */
@@ -85,6 +85,12 @@ public abstract class AbstractParser implements Parser{
      * Parser name
      */
     protected String parserName = this.getClass().getName();
+    
+    /**
+     * The source file file size in bytes if the source document was passed
+     * in as file
+     */
+    protected long fileSize = -1;
     
     /**
      * The Constructor of this class.
@@ -178,6 +184,9 @@ public abstract class AbstractParser implements Parser{
 	) throws ParserException, InterruptedException {
         BufferedInputStream contentInputStream = null;
         try {
+            // getting the file size of the document
+            this.fileSize = sourceFile.length();            
+            
             // create a stream from the file
             contentInputStream = new BufferedInputStream(new FileInputStream(sourceFile));
             

@@ -1416,6 +1416,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     private void processResourceStack(plasmaSwitchboardQueue.Entry entry) throws InterruptedException {
+        plasmaParserDocument document = null;
         try {
             // work off one stack entry with a fresh resource
             long stackStartTime = 0, stackEndTime = 0,
@@ -1456,7 +1457,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             /* =========================================================================
              * PARSE CONTENT
              * ========================================================================= */
-            plasmaParserDocument document = null;
             parsingStartTime = System.currentTimeMillis();
 
             try {
@@ -1527,7 +1527,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 
                 checkInterruption();
                 log.logFine("Condensing for '" + entry.normalizedURLString() + "'");
-                plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(document.getText()));
+                plasmaCondenser condenser = new plasmaCondenser(document.getText());
                 
                 // generate citation reference
                 Integer[] ioLinks = generateCitationReference(entry.urlHash(), docDate, document, condenser);
@@ -1700,8 +1700,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
                                     " [" + entry.urlHash() + "]" +
                                     "\n\tDescription:  " + docDescription +
-                                    "\n\tMimeType: "  + document.getMimeType() + " | Charset: " + document.getCharset() + " | " +
-                                    "Size: " + document.text.length + " bytes | " +
+                                    "\n\tMimeType: "  + document.getMimeType() + " | Charset: " + document.getSourceCharset() + " | " +
+                                    "Size: " + document.getTextLength() + " bytes | " +
                                     "Anchors: " + ((document.anchors==null)?0:document.anchors.size()) +
                                     "\n\tStackingTime:  " + (stackEndTime-stackStartTime) + " ms | " +
                                     "ParsingTime:  " + (parsingEndTime-parsingStartTime) + " ms | " +
@@ -1744,6 +1744,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     yacyClient.crawlReceipt(initiatorPeer, "crawl", "rejected", noIndexReason, null, "");
                 }
             }
+            document.close();
             document = null;
         } catch (Exception e) {
             this.log.logSevere("Unexpected exception while parsing/indexing URL ",e);
@@ -1772,6 +1773,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 cacheManager.deleteFile(entry.url());
             }
             entry = null;
+            
+            if (document != null) try { document.close(); } catch (Exception e) { /* ignore this */ }
         }
     }
     
@@ -1807,7 +1810,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         kelondroBase64Order.enhancedCoder.encodeLongSmart(GCount, 2) +  // count of links to global resources
         kelondroBase64Order.enhancedCoder.encodeLongSmart(document.getImages().size(), 2) + // count of Images in document
         kelondroBase64Order.enhancedCoder.encodeLongSmart(0, 2) +       // count of links to other documents
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(document.getText().length, 3) +   // length of plain text in bytes
+        kelondroBase64Order.enhancedCoder.encodeLongSmart(document.getTextLength(), 3) +   // length of plain text in bytes
         kelondroBase64Order.enhancedCoder.encodeLongSmart(condenser.RESULT_NUMB_WORDS, 3) + // count of all appearing words
         kelondroBase64Order.enhancedCoder.encodeLongSmart(condenser.RESULT_SIMI_WORDS, 3) + // count of all unique words
         kelondroBase64Order.enhancedCoder.encodeLongSmart(0, 1); // Flags (update, popularity, attention, vote)
@@ -2173,7 +2176,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         try {
             // get set of words
             // Set words = plasmaCondenser.getWords(getText(getResource(url, fetchOnline)));
-            Iterator witer = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline, 10000)).getText());
+            Iterator witer = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline, 10000)).getTextBytes());
             // delete all word references
             int count = removeReferences(urlhash, witer);
             // finally delete the url entry itself

@@ -42,8 +42,14 @@
 
 package de.anomic.plasma;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import de.anomic.server.serverFileUtils;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -62,7 +68,7 @@ public class plasmaParserDocument {
     String longTitle;   // the real title of the document, commonly h1-tags
     String[] sections;  // if present: more titles/headlines appearing in the document
     String abstrct;     // an abstract, if present: short content description
-    byte[] text;        // the clear text, all that is visible
+    private Object text;  // the clear text, all that is visible
     Map anchors;        // all links embedded as clickeable entities (anchor tags)
     TreeSet images;     // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
@@ -95,6 +101,29 @@ public class plasmaParserDocument {
         this.condenser = null;
         this.resorted = false;
     }
+    
+    public plasmaParserDocument(URL location, String mimeType, String charset,
+            String[] keywords, String shortTitle, String longTitle,
+            String[] sections, String abstrct,
+            File text, Map anchors, TreeSet images) {
+        this.location = location;
+        this.mimeType = (mimeType==null)?"application/octet-stream":mimeType;
+        this.charset = charset;
+        this.keywords = (keywords==null) ? new String[0] : keywords;
+        this.shortTitle = (shortTitle==null)?"":shortTitle;
+        this.longTitle = (longTitle==null)?"":longTitle;
+        this.sections = (sections==null)?new String[0]:sections;
+        this.abstrct = (abstrct==null)?"":abstrct;
+        this.text = text;
+        if (text != null) text.deleteOnExit();
+        this.anchors = (anchors==null)?new HashMap(0):anchors;
+        this.images = (images==null)?new TreeSet():images;
+        this.hyperlinks = null;
+        this.medialinks = null;
+        this.emaillinks = null;
+        this.condenser = null;
+        this.resorted = false;
+    }    
 
     public String getMimeType() {
         return this.mimeType;
@@ -103,7 +132,7 @@ public class plasmaParserDocument {
     /**
      * @return the supposed charset of this document or <code>null</code> if unknown
      */
-    public String getCharset() {
+    public String getSourceCharset() {
         return this.charset;
     }
     
@@ -123,13 +152,41 @@ public class plasmaParserDocument {
         if (abstrct != null) return abstrct; else return getMainLongTitle();
     }
     
-    public byte[] getText() {
-        // returns only the clear (visible) text (not the source data)
-        return text;
+    public InputStream getText() {
+        try {
+            if (this.text == null) return null;
+
+            if (this.text instanceof File) return new BufferedInputStream(new FileInputStream((File)this.text));
+            else if (this.text instanceof byte[]) return new ByteArrayInputStream((byte[])this.text);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null; 
+    }
+    
+    public byte[] getTextBytes() {
+        try {
+            if (this.text == null) return new byte[0];
+
+            if (this.text instanceof File) return serverFileUtils.read((File)this.text);
+            else if (this.text instanceof byte[]) return (byte[])this.text;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new byte[0];             
+    }
+    
+    public long getTextLength() {
+        if (this.text == null) return 0;
+        if (this.text instanceof File) return ((File)this.text).length();
+        else if (this.text instanceof byte[]) return ((byte[])this.text).length;
+        
+        return -1; 
     }
     
     public plasmaCondenser getCondenser() {
-        if (condenser == null) condenser = new plasmaCondenser(new ByteArrayInputStream(getText()), 0, 0);
+        if (condenser == null) condenser = new plasmaCondenser(getText(), 0, 0);
         return condenser;
     }
     
@@ -260,6 +317,18 @@ public class plasmaParserDocument {
         
         // don't do this again
         this.resorted = true;
+    }
+    
+    public void close() {
+        // delete the temp file
+        if ((this.text != null) && (this.text instanceof File)) {
+            try { ((File)this.text).delete(); } catch (Exception e) {/* ignore this */}
+        }        
+    }
+    
+    protected void finalize() throws Throwable {
+        this.close();
+        super.finalize();
     }
     
 }

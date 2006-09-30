@@ -216,7 +216,7 @@ public class ViewFile {
                 resMime = document.getMimeType();
 
                 if (viewMode.equals("parsed")) {
-                    String content = new String(document.getText());
+                    String content = new String(document.getTextBytes());
                     content = wikiCode.replaceHTML(content); //added by Marc Nause
                     content = content.replaceAll("\n","<br>")
                     .replaceAll("\t","&nbsp;&nbsp;&nbsp;&nbsp;");

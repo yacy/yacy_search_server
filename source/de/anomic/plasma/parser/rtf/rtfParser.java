@@ -80,8 +80,7 @@ implements Parser {
         this.parserName = "Rich Text Format Parser";  
 	}
 
-	public plasmaParserDocument parse(URL location, String mimeType, String charset,
-			InputStream source) throws ParserException, InterruptedException {
+	public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
 
         
 		try {	
@@ -105,7 +104,7 @@ implements Parser {
                     null,
                     null,
                     null,
-                    bodyText.getBytes(),
+                    bodyText.getBytes("UTF-8"),
                     null,
                     null);
             

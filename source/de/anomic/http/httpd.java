@@ -406,24 +406,24 @@ public final class httpd implements serverHandler {
                     /*
                      * Handling SOAP Requests here ...
                      */
-                    if (this.prop.containsKey(httpHeader.CONNECTION_PROP_PATH) && this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH).startsWith("/soap")) {
-                        if (soapHandler == null) {
+                    if (this.prop.containsKey(httpHeader.CONNECTION_PROP_PATH) && this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH).startsWith("/soap/")) {
+                        if (this.soapHandler == null) {
                             try {
                                 Class soapHandlerClass = Class.forName("de.anomic.soap.httpdSoapHandler");
                                 Constructor classConstructor = soapHandlerClass.getConstructor( new Class[] { serverSwitch.class } );
-                                soapHandler  = (httpdHandler) classConstructor.newInstance(new Object[] { switchboard });
+                                this.soapHandler  = (httpdHandler) classConstructor.newInstance(new Object[] { switchboard });
                             } catch (Exception e) {
-                                sendRespondHeader(this.prop,this.session.out,httpVersion,503,null);
+                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
                                 return serverCore.TERMINATE_CONNECTION;
                             } catch (NoClassDefFoundError e) {
-                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",null);
+                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
                                 return serverCore.TERMINATE_CONNECTION;
                             } catch (Error e) {
-                                sendRespondHeader(this.prop,this.session.out,httpVersion,503,null);
+                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
                                 return serverCore.TERMINATE_CONNECTION;                                
                             }
                         }
-                        soapHandler.doGet(this.prop, header, this.session.out);
+                        this.soapHandler.doGet(this.prop, header, this.session.out);
                         
                         /*
                          * Handling HTTP requests here ...
@@ -541,7 +541,7 @@ public final class httpd implements serverHandler {
             
             // we now know the HTTP version. depending on that, we read the header
             httpHeader header;
-            String httpVersion = prop.getProperty("HTTP", "HTTP/0.9");
+            String httpVersion = this.prop.getProperty("HTTP", "HTTP/0.9");
             if (httpVersion.equals("HTTP/0.9"))  header = new httpHeader(reverseMappingCache);
             else header = httpHeader.readHeader(this.prop,this.session);
             
@@ -559,8 +559,8 @@ public final class httpd implements serverHandler {
                     /*
                      * Handling SOAP Requests here ...
                      */
-                    if (this.prop.containsKey("PATH") && this.prop.getProperty("PATH").startsWith("/soap")) {
-                        if (soapHandler == null) {
+                    if (this.prop.containsKey("PATH") && this.prop.getProperty("PATH").startsWith("/soap/")) {
+                        if (this.soapHandler == null) {
                             try {
                                 // creating the soap handler class by name
                                 Class soapHandlerClass = Class.forName("de.anomic.soap.httpdSoapHandler");
@@ -569,19 +569,19 @@ public final class httpd implements serverHandler {
                                 Constructor soapHandlerConstructor = soapHandlerClass.getConstructor( new Class[] { serverSwitch.class } );
                                 
                                 // creating the new object
-                                soapHandler = (httpdHandler)soapHandlerConstructor.newInstance( new Object[] { switchboard } );   
+                                this.soapHandler = (httpdHandler)soapHandlerConstructor.newInstance( new Object[] { switchboard } );   
                             } catch (Exception e) {
-                                sendRespondHeader(this.prop,this.session.out,httpVersion,503,null);
+                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
                                 return serverCore.TERMINATE_CONNECTION;
                             } catch (NoClassDefFoundError e) {
-                                sendRespondError(this.prop,this.session.out,4,503,"SOAP Extension not installed","SOAP Extension not installed",null);
+                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
                                 return serverCore.TERMINATE_CONNECTION;                                
                             } catch (Error e) {
-                                sendRespondHeader(this.prop,this.session.out,httpVersion,503,null);
+                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
                                 return serverCore.TERMINATE_CONNECTION;                                
                             }
                         }
-                        soapHandler.doPost(prop, header, this.session.out, this.session.in);                
+                        this.soapHandler.doPost(this.prop, header, this.session.out, this.session.in);                
                         /*
                          * Handling normal HTTP requests here ...
                          */
@@ -981,7 +981,7 @@ public final class httpd implements serverHandler {
             int httpStatusCode,            
             String httpStatusText,
             String detailedErrorMsg,
-            Exception stackTrace
+            Throwable stackTrace
     ) throws IOException {
         sendRespondError(
                 conProp,
@@ -1004,7 +1004,7 @@ public final class httpd implements serverHandler {
             String httpStatusText,
             File detailedErrorMsgFile,
             serverObjects detailedErrorMsgValues,
-            Exception stackTrace
+            Throwable stackTrace
     ) throws IOException {
         sendRespondError(
                 conProp,
@@ -1029,7 +1029,7 @@ public final class httpd implements serverHandler {
             String detailedErrorMsgText,
             Object detailedErrorMsgFile,
             serverObjects detailedErrorMsgValues,
-            Exception stackTrace,
+            Throwable stackTrace,
             httpHeader header
     ) throws IOException {
         
