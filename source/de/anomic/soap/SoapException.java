@@ -50,6 +50,8 @@ import org.apache.axis.Message;
 import de.anomic.http.httpHeader;
 
 public class SoapException extends Exception {
+
+    private static final long serialVersionUID = 1L;
     private int statusCode = 500;
     private String statusText = (String) httpHeader.http1_1.get(Integer.toString(this.statusCode));
     private Object errorMsg = this.statusText;

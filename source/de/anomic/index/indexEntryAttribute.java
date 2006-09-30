@@ -93,7 +93,7 @@ public class indexEntryAttribute {
     public static char docType(URL url) {
         String path = url.getPath();
         // serverLog.logFinest("PLASMA", "docType URL=" + path);
-        char doctype = doctype = indexEntryAttribute.DT_UNKNOWN;
+        char doctype = indexEntryAttribute.DT_UNKNOWN;
         if (path.endsWith(".gif"))       { doctype = indexEntryAttribute.DT_IMAGE; }
         else if (path.endsWith(".jpg"))  { doctype = indexEntryAttribute.DT_IMAGE; }
         else if (path.endsWith(".jpeg")) { doctype = indexEntryAttribute.DT_IMAGE; }

@@ -225,7 +225,7 @@ public final class plasmaCrawlStacker {
         
         plasmaCrawlProfile.entry profile = this.sb.profiles.getEntry(theMsg.profileHandle());
         if (profile == null) {
-            String errorMsg = "LOST PROFILE HANDLE '" + theMsg.profileHandle() + "' (must be internal error) for URL " + theMsg.url();
+            String errorMsg = "LOST PROFILE HANDLE '" + theMsg.profileHandle() + "' for URL " + theMsg.url();
             this.log.logSevere(errorMsg);
             throw new IllegalStateException(errorMsg);
         }

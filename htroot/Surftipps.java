@@ -54,6 +54,8 @@ public class Surftipps {
         int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
         
+        boolean showScore = ((post != null) && (post.containsKey("score")));
+        
         boolean surftippsOn = sb.getConfigBool("showSurftipps", true);
         if ((post != null) && (post.containsKey("surftipps"))) {
             if (!sb.verifyAuthentication(header, false)) {
@@ -134,12 +136,12 @@ public class Surftipps {
                     e.printStackTrace();
                 }
                 prop.put("surftipps_results_" + i + "_recommend", (voted) ? 0 : 1);
-                prop.put("surftipps_results_" + i + "_recommend_negativeVoteLink", "/Surftipps.html?voteNegative=" + urlhash + "&refid=" + refid + "&display=" + display); // for negaive votes, we don't send around the bad url again, the hash is enough
-                prop.put("surftipps_results_" + i + "_recommend_positiveVoteLink", "/Surftipps.html?votePositive=" + urlhash + "&refid=" + refid + "&url=" + crypt.simpleEncode(url,null,'b') + "&title=" + crypt.simpleEncode(title,null,'b') + "&description=" + crypt.simpleEncode(description,null,'b') + "&display=" + display);
+                prop.put("surftipps_results_" + i + "_recommend_negativeVoteLink", "/Surftipps.html?voteNegative=" + urlhash + "&refid=" + refid + "&display=" + display + ((showScore) ? "&score=" : "")); // for negaive votes, we don't send around the bad url again, the hash is enough
+                prop.put("surftipps_results_" + i + "_recommend_positiveVoteLink", "/Surftipps.html?votePositive=" + urlhash + "&refid=" + refid + "&url=" + crypt.simpleEncode(url,null,'b') + "&title=" + crypt.simpleEncode(title,null,'b') + "&description=" + crypt.simpleEncode(description,null,'b') + "&display=" + display + ((showScore) ? "&score=" : ""));
                 prop.put("surftipps_results_" + i + "_url", url);
                 prop.put("surftipps_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
                 prop.put("surftipps_results_" + i + "_urlhash", urlhash);
-                prop.put("surftipps_results_" + i + "_title", title);
+                prop.put("surftipps_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
                 prop.put("surftipps_results_" + i + "_description", description);
                 i++;
                 
