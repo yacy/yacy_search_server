@@ -4,7 +4,9 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// last major change: 07.06.2005
+// last major change: 30.09.2006
+//
+// contributions by Marc Nause [MN]
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -127,10 +129,24 @@ public class plasmaSnippetCache {
             Iterator i = queryHashes.iterator();
             String h;
             String[] w = line.split(" ");
+            String mark = "";
             while (i.hasNext()) {
                 h = (String) i.next();
                 for (int j = 0; j < w.length; j++) {
+                    //ignore punctuation marks (contrib [MN])
+                    if ((w[j].endsWith("."))||
+                        (w[j].endsWith(","))||
+                        (w[j].endsWith("!"))||
+                        (w[j].endsWith("?"))) {
+                        mark = w[j].substring(w[j].length()-1);
+                        w[j] = w[j].substring(0,w[j].length()-1);
+                    }
+                    else {
+                        mark = "";
+                    }
+                    //end contrib [MN]
                     if (indexEntryAttribute.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
+                    w[j] = w[j] + mark;
                 }
             }
             StringBuffer l = new StringBuffer(line.length() + queryHashes.size() * 8);
