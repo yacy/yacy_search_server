@@ -1,5 +1,19 @@
 YaCy: The Search Engine with the friendly whale
 
+version 0.47
+	* CHANGED: The whole interface is now xHTML
+	* ADDED: Crawler/Indexing Monitor
+	* ADDED: Surftips
+	* ADDED: Crawler for FTP
+	* ADDED: fully controlled DHT cache
+	* ADDED: write cache for LURLs
+	* ADDED: new Database Structure
+	* UPDATED: external Parsers
+	* CHANGED: Enhanced SOAP services
+	* FIXED: Wrong ranking calculation
+	* FIXED: version number presentation
+	* FIXED: many UTF-8 fixes.
+
 version 0.46
 	* ADDED: more authentication Methods (cookieAuth)
 	* ADDED: Form-Login on User.html
