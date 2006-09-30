@@ -134,8 +134,8 @@ public class Surftipps {
                     e.printStackTrace();
                 }
                 prop.put("surftipps_results_" + i + "_recommend", (voted) ? 0 : 1);
-                prop.put("surftipps_results_" + i + "_recommend_negativeVoteLink", "/index.html?voteNegative=" + urlhash + "&refid=" + refid + "&display=" + display); // for negaive votes, we don't send around the bad url again, the hash is enough
-                prop.put("surftipps_results_" + i + "_recommend_positiveVoteLink", "/index.html?votePositive=" + urlhash + "&refid=" + refid + "&url=" + crypt.simpleEncode(url,null,'b') + "&title=" + crypt.simpleEncode(title,null,'b') + "&description=" + crypt.simpleEncode(description,null,'b') + "&display=" + display);
+                prop.put("surftipps_results_" + i + "_recommend_negativeVoteLink", "/Surftipps.html?voteNegative=" + urlhash + "&refid=" + refid + "&display=" + display); // for negaive votes, we don't send around the bad url again, the hash is enough
+                prop.put("surftipps_results_" + i + "_recommend_positiveVoteLink", "/Surftipps.html?votePositive=" + urlhash + "&refid=" + refid + "&url=" + crypt.simpleEncode(url,null,'b') + "&title=" + crypt.simpleEncode(title,null,'b') + "&description=" + crypt.simpleEncode(description,null,'b') + "&display=" + display);
                 prop.put("surftipps_results_" + i + "_url", url);
                 prop.put("surftipps_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
                 prop.put("surftipps_results_" + i + "_urlhash", urlhash);
