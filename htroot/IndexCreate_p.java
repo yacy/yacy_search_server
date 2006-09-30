@@ -305,8 +305,6 @@ public class IndexCreate_p {
                 }
             }
 
-            
-            
             if (post.containsKey("distributedcrawling")) {
                 long newBusySleep = Integer.parseInt(env.getConfig("62_remotetriggeredcrawl_busysleep", "100"));
                 if (post.get("dcr", "").equals("acceptCrawlMax")) {
@@ -328,16 +326,20 @@ public class IndexCreate_p {
                 //env.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
             }
 
-            
             if (post.containsKey("pausecrawlqueue")) {
                 switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 prop.put("info", 4);//crawling paused
-            }           
+            }
             
             if (post.containsKey("continuecrawlqueue")) {
                 switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 prop.put("info", 5);//crawling continued
-            }                
+            }
+            
+            if (post.containsKey("deleteprofile")) {
+                String handle = (String) post.get("handle");
+                if (handle != null) switchboard.profiles.removeEntry(handle);
+            }
         }
         
         // define visible variables
@@ -444,6 +446,8 @@ public class IndexCreate_p {
             prop.put("crawlProfiles_"+count+"_storeCache", ((profile.storeHTCache()) ? 1 : 0));
             prop.put("crawlProfiles_"+count+"_localIndexing", ((profile.localIndexing()) ? 1 : 0));
             prop.put("crawlProfiles_"+count+"_remoteIndexing", ((profile.remoteIndexing()) ? 1 : 0));
+            prop.put("crawlProfiles_"+count+"_deleteButton", (((profile.name().equals("remote")) || (profile.name().equals("proxy"))) ? 0 : 1));
+            prop.put("crawlProfiles_"+count+"_deleteButton_handle", profile.handle());
             
             dark = !dark;
             count++;

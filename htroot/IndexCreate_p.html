@@ -325,6 +325,7 @@
         <td><strong>Fill Proxy Cache</strong></td>
         <td><strong>Local Indexing</strong></td>
         <td><strong>Remote Indexing</strong></td>
+        <td></td>
       </tr>
     #{crawlProfiles}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
@@ -340,6 +341,7 @@
         <td>#(storeCache)#no::yes#(/storeCache)#</td>
         <td>#(localIndexing)#no::yes#(/localIndexing)#</td>
         <td>#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
+        <td>#(deleteButton)#::<form action="IndexCreate_p.html" method="get" enctype="multipart/form-data"><input type="hidden" name="handle" value="#[handle]#" /><input type="submit" name="deleteprofile" value="Delete" /></form>#(/deleteButton)#</td>
       </tr>
     #{/crawlProfiles}#
     </table>
