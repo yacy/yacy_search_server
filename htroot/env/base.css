@@ -340,11 +340,40 @@ dl.pairs dd {
 
 /* for pages: */
 
+body#ViewLog div.log {
+  height:480px;
+  overflow:scroll;  
+}	
+
 body#ViewLog pre {
   width:100%; /* TODO: fix width in IE */
-  height:480px;
-  overflow:scroll;
+  margin-top:0px; 
+  margin-bottom:0px;
+  font-family: Courier,monospace; 
+  font-weight: normal;
+  font-size: small;
 }
+
+body#ViewLog pre.logSevere {
+	color:red;
+}
+
+body#ViewLog pre.logWarning {
+	color:orange
+}
+
+body#ViewLog pre.logSystem {
+	color:black;
+}
+
+body#ViewLog pre.logInfo {
+	color:black;
+}
+
+body#ViewLog pre.logDebug {
+	color:black;
+}
+
 body#QuickCrawlLink p, body#QuickCrawlLink h4 {
   padding:0 5%;
 }

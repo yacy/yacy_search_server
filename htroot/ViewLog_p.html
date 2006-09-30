@@ -16,8 +16,9 @@
       </fieldset>
     </form>
     
-    <pre>#[log]#</pre>
-
+    <div class="log">
+    #{log}#<pre class="log#(level)#Debug::Info::System::Warning::Severe#(/level)#">#[line]#</pre>#{/log}#
+	</div>
     
     #%env/templates/footer.template%#
   </body>

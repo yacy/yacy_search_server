@@ -44,6 +44,7 @@
 
 package de.anomic.server.logging;
 
+import java.util.ArrayList;
 import java.util.logging.ErrorManager;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
@@ -186,6 +187,32 @@ public class GuiHandler extends Handler{
             return "Error while formatting the logging message";
         }
     }
+    
+    public synchronized String[] getLogLines(boolean reversed, int lineCount) { 
+        
+        if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
+        
+        ArrayList logMessages = new ArrayList(this.count);
+        Formatter logFormatter = getFormatter();
+        
+        try {
+                int start = (reversed)?this.start+this.count-1:this.start;
+                LogRecord record=null;
+                for (int i = 0; i < lineCount; i++) {
+                    int ix = (reversed) ?
+                                Math.abs((start-i)%this.buffer.length) :
+                                (start+i)%this.buffer.length;
+                    record = this.buffer[ix];
+                    logMessages.add(logFormatter.format(record));                
+                }             
+            return (String[])logMessages.toArray(new String[logMessages.size()]);
+        } catch (Exception ex) {
+            // We don't want to throw an exception here, but we
+            // report the exception to any registered ErrorManager.
+            reportError(null, ex, ErrorManager.FORMAT_FAILURE);
+            return new String[]{"Error while formatting the logging message"};
+        }
+    }    
     
     public void flush() {
         // TODO Auto-generated method stub

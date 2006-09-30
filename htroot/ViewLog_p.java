@@ -56,10 +56,9 @@ import de.anomic.server.logging.GuiHandler;
 
 public class ViewLog_p {
     
-    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
-        String log = "";
+        String[] log = new String[0];
         boolean reversed = false;
         int lines = 50;
         
@@ -77,14 +76,28 @@ public class ViewLog_p {
         Handler[] handlers = logger.getHandlers();
         for (int i=0; i<handlers.length; i++) {
             if (handlers[i] instanceof GuiHandler) {
-                log = ((GuiHandler)handlers[i]).getLog(reversed,lines);
+                log = ((GuiHandler)handlers[i]).getLogLines(reversed,lines);
                 break;
             }
         }
         
         prop.put("reverseChecked", reversed ? 1 : 0);
-        prop.put("log", log);
         prop.put("lines", lines);
+        
+
+        int level = 0;
+        for (int i=0; i < log.length; i++) {
+            String nextLogLine = log[i];
+            if (nextLogLine.startsWith("E ")) level = 4;
+            else if (nextLogLine.startsWith("W ")) level = 3;
+            else if (nextLogLine.startsWith("S ")) level = 2;
+            else if (nextLogLine.startsWith("I ")) level = 1;
+            else if (nextLogLine.startsWith("D ")) level = 0;
+            
+            prop.put("log_" + i + "_level",level);
+            prop.put("log_" + i + "_line", nextLogLine); 
+        }
+        prop.put("log",log.length);
         
         // return rewrite properties
         return prop;
