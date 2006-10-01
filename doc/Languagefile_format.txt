@@ -1,0 +1,177 @@
+Description of the YaCy lng format
+
+Foreword:
+You are not forced but encouraged to use the following format for your language file.
+It ensures a high compatibility, readability and full support of syntax highlighting in Notepad++ and other editors.
+
+Also we recommend to use an fully UTF-8 capable text editor and to save in this format, so please don't use an old notepad.exe ;-)
+
+If you start a completely new translation, you can build it from scratch and search all the strings out of the HTROOT files yourself (best, but most laborious way) or use a good, current translation and copy the English strings from there.
+If you would decide to copy from an existing translation, i.e. the German, because at the moment it is the most complete, take care, that you delete all strings which are not translated into your target language.
+
+Otherwise the user may have a mixed German/Japanese webinterface when he chooses the Japanese translation. This is not good, if you don't translate the whole interface simply don't mention the strings you don't translate in your language file and they will be left in English.
+
+Definitions:
+
+---Header---
+
+Every languagefile should have a header, which gives short information about it and should consist of comments as described later in this document.
+
+It should start with the filename, the "direction" of your translation, the SVN-keyword for the date with the last change (don't forget to "svn propset svn:keywords "LastChangedDate" <filename>.lng" if you maintain the file by yourself), a copyright header, followed by a maintainer.
+
+The maintainer should be someone with SVN write-access. He is responsible for getting upates of the lng-file from other persons and checking them into our repository on a long term basis.
+
+If you are willing to contribute once or only for a short time, find a maintainer who is willing to to this job for a long time.
+
+The maintainer of the German language file (who wrote this document ;-)) is always up to act as maintainer for new languages, if you are not able/willing to do so by yourself.
+
+Then follows an enumeration of all people who contributed at least some content to the translation file in chronological order and an advice for newbies to contact the maintainer if they have something to contribute.
+
+Example:
+# de.lng
+# English-->German
+# $LastChangedDate$
+# -----------------------
+# part of YaCy
+# (C) by Michael Peter Christen; mc@anomic.de
+# first published on http://www.anomic.de
+# Frankfurt, Germany, 2005
+#
+# This file is maintained by Roland Ramthun <admin@yacy-forum.de>
+# This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink
+
+# If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
+
+---File definitions---
+
+YaCy needs to know which XHTML file you are translating. The definition consists of a hash/pound-symbol (#), followed by the word "File:", a blank space and the filename of the translated file relative to the YaCy HTROOT.
+Every file can only be declared once.
+
+Examples:
+#File: Messages_p.html
+#File: env/templates/header.template
+
+---Start of translation section---
+
+After the "File"-declaration you should open the file specific part by a hash/pound-symbol (#), followed by 27 hyphens.
+
+Example:
+#---------------------------
+
+---Translation mappings---
+
+This is the real work. Find every string you want to translate in the corresponding files in HTROOT.
+In the correct section, initialized by the above "File"-definition and framed by the "Start/End of translation section"-strings, you enter the original string, a double equals sign and the translation.
+
+Examples:
+Author:==Autor:
+Subject:==Titel:
+
+---End of translation section---
+
+After the translation strings you should close the file specific section with a hash/pound-symbol (#), followed by 29 hyphens.
+
+Example:
+#-----------------------------
+
+---Comments---
+
+Comments are started with a hash/pound-symbol (#), followed by a blank space and the comment itself.
+
+Example:
+# This is a comment without many sense.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Full example:
+
+
+# de.lng
+# English-->German
+# $LastChangedDate$
+# -----------------------
+# part of YaCy
+# (C) by Michael Peter Christen; mc@anomic.de
+# first published on http://www.anomic.de
+# Frankfurt, Germany, 2005
+#
+# This file is maintained by Roland Ramthun <admin@yacy-forum.de>
+# This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink
+
+# If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
+
+#File: ConfigLanguage_p.html
+#---------------------------
+# Only part 1.
+# Contributors are in chronological ordern, not how much they did absolutely.
+# Thank you for your help!
+<!-- lang -->default\(english\)==Deutsch
+<!-- author -->==Roland Ramthun, Oliver Wunder, Jan Sandbrink
+<!-- maintainer -->==&lt;admin@yacy-forum.de&gt;
+#-----------------------------
+
+#File: Blacklist_p.html
+#---------------------------
+Blacklist Manager==Blacklist Manager
+Blacklist==Blacklist
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
+from being loaded. You can define several blacklists and activate them separately.==Sie k&ouml;nnen mehrere Blacklists anlegen und getrennt aktivieren.
+You may also provide your blacklist to other peers by sharing them; in return you may==Sie k&ouml;nnen ebenfalls Ihre Blacklist einem anderen Peer zum Download anbieten.
+collect blacklist entries from other peers.==Im Gegenzug k&ouml;nnen Sie sich selber von anderen Peers Blacklists runterladen.
+Edit list:==Liste bearbeiten:
+\(active\)\#not active::active\#\(/active\)\# \#\(shared\)\#not shared::shared\#\(/shared\)==(active)#nicht aktiv::aktiv#(/active)# #(shared)#nicht freigegeben::freigegeben#(/shared)
+"select"=="w&auml;hlen"
+New list:==Neue Liste:
+"create"=="anlegen"
+Enable/disable this list==Liste an/ausschalten
+Share/don't share this list==Liste freigeben/nicht freigeben
+Change==&Auml;ndern
+Delete this list==Liste l&ouml;schen
+/>active==/>aktiv
+/>shared==/>freigegeben
+Active list:==Aktivierte Liste:
+These are the domain name / path patterns in this blacklist:==Dies sind die Domainnamen / -pfade die in der Blacklist sind:
+You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
+Delete URL pattern==URL aus der Liste l&ouml;schen
+Enter new domain name / path pattern in the form:==Geben Sie eine neue Domain/einen neuen Pfad in dieser Form ein:
+Add URL pattern==F&uuml;ge URL hinzu
+Import blacklist items from other YaCy peers:==Importiere Blacklist von anderen YaCy Peers:
+Host:==Host:
+Load new blacklist items==Lade neue Blacklist
+Import blacklist items from URL:==Importiere Blacklist von URL:
+URL:==URL:
+Load new blacklist items==Lade neue Blacklist
+Import blacklist items from file:==Importiere Blacklist aus Datei:
+"Load new blacklist items"==Lade neue Blacklist
+was removed from blacklist==wurde aus Blacklist entfernt
+was added to the blacklist==wurde zur Blacklist hinzugef&uuml;gt
+File:==Datei:
+Activate this list for==Diese Liste ist g&uuml;ltig f&uuml;r
+#-----------------------------
+
+#File: Blog.html
+#---------------------------
+>by==>von
+>edit==>editieren
+>delete==>l&ouml;schen
+show more entries==zeige weitere Eintr&auml;ge
+new entry==Neuer Eintrag
+import XML-File==XML-Datei importieren
+export as XML==als XML exportieren
+Blog-Home==Blog-Startseite
+Author:==Autor:
+Subject:==Titel:
+"Submit">=="Absenden">
+"Preview">=="Vorschau">
+"Discard">=="Verwerfen">
+>Preview==>Vorschau
+No changes have been submitted so far!==Es wurden noch keine &Auml;nderungen &uuml;bertragen!
+Access denied==Zugriff verweigert
+To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Um Blogeintr&auml;ge zu ver&auml;ndern oder zu erstellen m&uuml;ssen Sie als Admin oder User mit Blog-Rechten eingeloggt sein.
+Are you sure==Sind Sie sicher
+that you want to delete <b>\#\[subject\]\#</b> by \#\[author\]\#?==dass Sie <b>#[subject]#</b> von #[author]# l&ouml;schen wollen?
+Yes, delete it.==Ja, l&ouml;schen.
+No, leave it.==Nein, belassen.
+Import was successful!==Import war erfolgreich!
+Import failed, maybe the supplied file was no valid blog-backup?==Import fehlgeschlagen, unter Umst&auml;nden war die angegebene Datei keine g&uuml;ltige Blog-Sicherung?
+Please select the XML-file you want to import:==Bitte w&auml;hlen Sie die XML-Datei die Sie importieren wollen:
+#-----------------------------

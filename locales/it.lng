@@ -1,16 +1,16 @@
 # it.lng
+# English-->Italian
+# $LastChangedDate$
 # -----------------------
 # part of YaCy
 # (C) by Michael Peter Christen; mc@anomic.de
 # first published on http://www.anomic.de
 # Frankfurt, Germany, 2005
 #
+# This file is maintained by Roland Ramthun <admin@yacy-forum.de>
 # This file is written by (chronological order) Riccardo Lemmi <riccardo@reflab.it>
 
-# If you find any mistakes in this file please don't hesitate to email them to me.
-# If you find any untranslated string in the webinterface do so, too.
-
-#English=Italian
+# If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
 
 #-------------------------------------------------------
 #File: Language_p.html

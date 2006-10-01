@@ -1,4 +1,6 @@
 # de.lng
+# English-->German
+# $LastChangedDate$
 # -----------------------
 # part of YaCy
 # (C) by Michael Peter Christen; mc@anomic.de
@@ -8,12 +10,7 @@
 # This file is maintained by Roland Ramthun <admin@yacy-forum.de>
 # This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink
 
-# If you find any mistakes in this file please don't hesitate to email them to me.
-# If you find any untranslated string in the webinterface do so, too.
-
-# English=German
-# DO _NOT_ USE THIS FILE AS TEMPLATE FOR YOUR OWN TRANSLATIONS, INSTEAD GET THE STRINGS DIRECTLY OUT OF THE HTML-FILES
-# OTHERWISE YOU MAY GET A $TARGET_LANGUAGE - SLOVAK MIXTURE IN THE WEBINTERFACE
+# If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
 
 #File: ConfigLanguage_p.html
 #---------------------------
@@ -27,8 +24,6 @@
 
 #File: Blacklist_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Blacklist Manager==Blacklist Manager
 Blacklist==Blacklist
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
@@ -68,7 +63,6 @@ Activate this list for==Diese Liste ist g&uuml;ltig f&uuml;r
 
 #File: Blog.html
 #---------------------------
-
 >by==>von
 >edit==>editieren
 >delete==>l&ouml;schen
@@ -97,7 +91,6 @@ Please select the XML-file you want to import:==Bitte w&auml;hlen Sie die XML-Da
 
 #File: Bookmarks.html
 #---------------------------
-
 YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
 <h2>Bookmarks==<h2>Lesezeichen
 Add Bookmark==Lesezeichen hinzuf&uuml;gen
@@ -129,7 +122,6 @@ Bookmarks per page.==Lesezeichen pro Seite.
 
 #File: CacheAdmin_p.html
 #---------------------------
-
 Local Cache Management==Lokale Cache Verwaltung
 >Local Cache==>Lokaler Cache
 The current cache size is==Die aktuelle Gr&ouml;&szlig;e des Caches betr&auml;gt
@@ -138,8 +130,6 @@ The maximum cache size is==Die maximale Gr&ouml;&szlig;e betr&auml;gt
 
 #File: Config_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Advanced Config==Erweiterte Einstellungen
 Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie k&ouml;nnen alles &auml;ndern, bedenken Sie aber, dass einige &Auml;nderungen einen Neustart von YaCy erfordern und andere &Auml;nderungen YaCy ganz zum Absturz bringen k&ouml;nnen.
@@ -149,8 +139,6 @@ For an explanation of the available options please look into yacy.init==Eine Erk
 
 #File: ConfigAdvanced_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Advanced Config==Erweiterte Einstellungen
 Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie k&ouml;nnen alles &auml;ndern, bedenken Sie aber, dass einige &Auml;nderungen einen Neustart von YaCy erfordern und andere &Auml;nderungen YaCy ganz zum Absturz bringen k&ouml;nnen.
@@ -160,7 +148,6 @@ For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in de
 
 #File: ConfigBasic.html
 #---------------------------
-
 Select a language for the interface==W&auml;hlen Sie eine Sprache f&uuml;r das Interface
 Basic Configuration==Grundeinstellungen
 Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer ben&ouml;tigt einige Grundinformationen um korrekt zu funktionieren
@@ -201,8 +188,6 @@ You can also use your peer without opening it, but this is not recomended.==Sie 
 
 #File: ConfigLanguage_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Language selection==Sprachauswahl
 Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
@@ -222,7 +207,6 @@ Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdat
 
 #File: ConfigProfile_p.html
 #---------------------------
-
 Your Personal Profile==Ihr pers&ouml;nliches Profil
 You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Hier k&ouml;nnen Sie Ihr pers&ouml;nliches Profil verwalten. Andere YaCy-Benutzer k&ouml;nnen dieses Profil &uuml;ber einen Link auf ihrer Netzwerkseite ansehen.
 You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie m&uuml;ssen hier keine pers&ouml;nlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen m&ouml;chten, k&ouml;nnen Sie das hier machen.
@@ -242,8 +226,6 @@ here.==im Profil benutzen.
 
 #File: ConfigSkins_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Skin Selection==Skinauswahl
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie k&ouml;nnen hier das Aussehen von YaCy mit Skins &auml;ndern. W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
 Current skin:==Aktueller Skin:
@@ -259,8 +241,6 @@ Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
 
 #File: Connections_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Connection Tracking==Verbindungsstatus
 Incoming Connections==Eingehende Verbindungen
 Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt..
@@ -276,8 +256,6 @@ Waiting for new request nr.==Warte auf neue Anfrage Nr.
 
 #File: CookieMonitorIncoming_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Incoming Cookies Monitor==&Uuml;berwachung eingehender Cookies
 Cookie Monitor: Incoming Cookies==Cookie &Uuml;berwachung: Eingehende Cookies
 This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Dies ist eine Auflistung aller Cookies, die ein Webserver an diesen YaCy Proxy geschickt hat:
@@ -288,8 +266,6 @@ Cookies==Cookies
 
 #File: CookieMonitorOutgoing_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Outgoing Cookies Monitor==&Uuml;berwachung ausgehender Cookies
 Cookie Monitor: Outgoing Cookies==Cookie &Uuml;berwachung: Ausgehende Cookies
 This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Dies ist eine Auflistung aller Cookies, die Ihr Browser an einen Webserver geschickt hat:
@@ -300,7 +276,6 @@ Cookies==Cookies
 
 #File: Help.html
 #---------------------------
-
 YaCy: Help==YaCy: Hilfeseiten
 >Help==>Hilfe
 This is a distributed web crawler and also a caching HTTP proxy. You are using the <em>online-interface</em> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <em>global<em> index.==YaCy ist eine Suchmaschine,  die &auml;hnlich dem Prinzip des verteilten Rechnens (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und Indexieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <em>Online-Interface<em> von YaCy. Sie k&ouml;nnen dieses Interface auch zum Konfigurieren Ihrer pers&ouml;nlichen Einstellungen, Proxy-Einstellungen, der Zugriffs-Kontrolle und den Crawl-Einstellungen benutzen. Sie k&ouml;nnen das Interface auch zum Starten von Crawls, Nachrichtenversand an andere YaCy-Nutzer und zur &Uuml;berwachung Ihres Index, Cache-Status und des Crawl-Prozesses benutzen. Besonders wichtig ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den <em>globalen<em> Index zu durchsuchen.
@@ -377,8 +352,6 @@ There is ".html" at the end, which is not included with the Regular Expression.=
 
 #File: index.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
 P2P WEB SEARCH==P2P Internet Suche
 "Search"=="Suchen"
@@ -447,8 +420,6 @@ Give negative vote==Link negativ bewerten
 
 #File: IndexCleaner_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Index Control==Index Kontrolle
 Index Cleaner==Index Aufr&auml;umer
 ThreadAlive:
@@ -472,7 +443,6 @@ RWIDbCleaner - Clean up the database by deletion of words with reference to blac
 
 #File: IndexControl_p.html
 #---------------------------
-
 Index Control==Index Kontrolle
 Index Administration==Index Administration
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Der lokale Index besteht im Moment aus #[wcount]# W&ouml;rtern und #[ucount]# URL-Links.
@@ -505,8 +475,6 @@ Word-Hash:</td>==Wort-Hash:</td>
 
 #File: IndexCreate_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Index Creation==Index Erzeugung
 Start Crawling Job:==Starte Crawling Aufgabe:
 You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Sie k&ouml;nnen hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. "Crawling" bedeutet, dass YaCy die angegebene Webseite runterl&auml;dt, alle Links extrahiert und dann den Inhalt hinter diesen Links runterl&auml;dt. Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
@@ -629,8 +597,6 @@ Busy Peers==Besch&auml;tigte Peers
 
 #File: IndexCreateIndexingQueue_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Index Creation/Indexing Queue==Index Erzeugung/Indexier Warteschlange
 Index Creation: Indexing Queue==Index Erzeugung: Indexier Warteschlange
 The indexing queue is empty==Die Indexier Warteschlange ist leer.
@@ -656,8 +622,6 @@ Fail-Reason==Fehler Grund
 
 #File: IndexCreateLoaderQueue_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Index Creation / Loader Queue==Index Erzeugung / Lade Warteschlange
 Index Creation: Loader Queue==Index Erzeugung: Lade Warteschlange
 The loader set is empty==Die Lade Warteschlange ist leer.
@@ -669,8 +633,6 @@ Depth==Tiefe
 
 #File: IndexCreateWWWGlobalQueue_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 YaCy '\#\[clientname\]\#': Index Creation / WWW Global Crawl Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Globale WWW Warteschlange
 Index Creation: WWW Global Crawl Queue==Index Erzeugung: Globale WWW Warteschlange
 This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Diese Warteschlange enth&auml;lt URLs, die an andere Peers gesendet werden sollen, um einen Remote Crawl durchzuf&uuml;hren.
@@ -690,8 +652,6 @@ Anchor Name==Anker Name
 
 #File: IndexCreateWWWLocalQueue_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 YaCy '\#\[clientname\]\#': Index Creation / WWW Local Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Lokale WWW Warteschlange
 Index Creation: WWW Local Crawl Queue==Index Erzeugung: Lokale WWW Warteschlange
 This queue stores the urls that shall be crawled localy by this peer.==Diese Warteschlange enth&auml;lt URLs, die von diesem Peer lokal gecrawlt werden sollen.
@@ -715,8 +675,6 @@ This may take a quite long time.==Dies wird vielleicht einige Zeit dauern.
 
 #File: IndexImport_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 YaCy \'\#\[clientname\]\#\': Index Import==YaCy '#[clientname]#': Index Import
 Index DB Import==Index Datenbank Import
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==Der lokale Index besteht zur Zeit aus (mindestens) #[wcount]# W&ouml;rtern und #[ucount]# URLs.
@@ -772,8 +730,6 @@ Various stack files that belong to the crawling queue==Verschiedene Stack-Dateie
 
 #File: IndexMonitor.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 #YaCy '#[clientname]#': Index Monitor
 Index Monitor Menu==Index Monitor Men&uuml;
 Index&nbsp;Monitor&nbsp;Overview==Index Monitor &Uuml;berblick
@@ -838,8 +794,6 @@ Title==Titel
 
 #File: IndexTransfer_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==Der lokale Index besteht zur Zeit aus (ungef&auml;hr) #[wcount]# W&ouml;rtern und #[ucount]# URLs.
 Chunk Size<br>\(Word Entries\)==Chunk-Gr&ouml;sse<br />(Wort Eintr&auml;ge)
 Words Range==Worte-Bereich
@@ -860,8 +814,6 @@ Start/Stop Transfer==Starte/Stoppe Transfer
 
 #File: Language_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Language selection==Sprachauswahl
 Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
@@ -881,8 +833,6 @@ Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdat
 
 #File: Lab.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 YaCy \'\#\[clientname\]\#\': Lab==YaCy '#[clientname]#': Labor
 The YACY Lab==Das YaCy Labor
 This is the place where we try new functions of the YaCy search engine.==Dies ist ein Platz, an dem wir neue Funktionen der YaCy Suchmaschine testen.
@@ -895,8 +845,6 @@ Configuration</a>==Einstellungen</a>
 
 #File: Messages_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 >Messages==>Nachrichten
 >Date==>Datum
 >From==>Von
@@ -913,15 +861,11 @@ reply==antworten
 
 #File: MessageSend_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Send message==Nachricht versenden
 #-----------------------------
 
 #File: Network.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Network Overview==Netzwerk&uuml;bersicht
 Network Menu==Netzwerkmen&uuml;
 Network&nbsp;Overview==Netzwerk&uuml;bersicht
@@ -1001,8 +945,6 @@ To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Kn
 
 #File: News.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Network Menu==Netzwerkmen&uuml;
 News&nbsp;Overview==News-&Uuml;berblick
 Incoming&nbsp;News==eingehende News
@@ -1214,8 +1156,6 @@ The network picture below shows how the latest search query was solved by asking
 
 #File: ProxyIndexingMonitor_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Index Monitor for Proxy Indexing==Index Profil f&uuml;r den Proxy Index
 This is the control page for web pages that your peer has indexed during the current application run-time==Dies ist die Kontrollseite f&uuml;r Internetseiten, die Ihr Peer w&auml;hrend der aktuellen Sitzung
 as result of proxy fetch/prefetch.==durch Besuchen einer Seite indexiert.
@@ -1259,8 +1199,6 @@ Page.==Seite ansehen.
 
 #File: QuickCrawlLink_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Schnell-Crawl-Link
 Quick Crawl Link==Schnell Crawl Link
 Quickly adding Bookmarks:==Schnell Crawl Lesezeichen:
@@ -1278,8 +1216,6 @@ Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zur Crawl
 
 #File: Settings_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Einstellungen
 <h2>Settings</h2>==<h2>Einstellungen</h2>
 This is the configuration page for YaCy. Access to this page should be limited to an administration person only.==Dies ist die Konfigurationsseite f&uuml;r YaCy. Zugriff auf diese Seite sollte nur der Administrator haben.
@@ -1369,7 +1305,7 @@ Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
 
 #File: Settings_PortForwarding.inc
 #---------------------------
-#check for logical mistakes, unsure about some translations
+# check for logical mistakes, unsure about some translations
 Port Forwarding==Port Weiterleitung
 You can use a remote server running a ssh demon to forward your server/proxy port.==Sie k&ouml;nnen einen Remote Server mit einem ssh demon nutzen, um Ihrem Server/Proxy Port weiterzuleiten.
 This is useful if you want to tunnel throug a NAT/router.==Dies ist n&uuml;tzlich, wenn Sie durch einen NAT/Router tunneln wollen.
@@ -1480,7 +1416,6 @@ Changes will take effect immediately==Änderungen sind sofort aktiv
 
 #File: SettingsAck_p.html
 #---------------------------
-
 YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': Einstellung Verarbeitung
 Settings Receipt:==Einstellungen angenommen:
 No information has been submitted==Es wurden keine Informationen &uuml;bertragen.
@@ -1553,8 +1488,6 @@ You can reach your YaCy server under the new location==Dieser YaCy-Peer kann nun
 
 #File: Settings_Admin.inc
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Administration Account Settings==Administrator Konto Einstellungen
 This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:==Dies ist das Konto, das Zugriff auf diese sonst gesch&uuml;tzte "Einstellungen" Seite hat. Wenn Sie es noch nicht eingerichtet haben, sollten Sie es nun tun:
 Account Name:==Konto Name:
@@ -1565,8 +1498,6 @@ value="submit">==value="Speichern">
 
 #File: Settings_SystemBehaviour.inc
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 System Behaviour Settings==System Einstellungen
 Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite beim Start von YaCy:
 "enable"=="Aktivieren"
@@ -1575,8 +1506,6 @@ Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite b
 
 #File: simple_search.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
 "Search for \#\[former\]\#"=="Suche f&uuml;r #[former]#"
 P2P WEB SEARCH==P2P Internet Suche
@@ -1608,8 +1537,6 @@ from 'late' peers to enrich this search result.==um mehr Treffer zu erzielen.
 
 #File: Status.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 System-, Index- and Peer-Status==System-, Index- und Peer-Status
 Welcome to YaCy!==Willkommen bei YaCy!
 "Restart"=="Neustarten"
@@ -1676,8 +1603,6 @@ to log in as administrator and see full status.==um sich als Administrator einzu
 
 #File: Status_p.inc
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Private System Properties==Private Systemeigenschaften
 System Resources==Systemressourcen
 Processors:==Prozessoren:
@@ -1720,8 +1645,6 @@ Global Crawl Trigger==ausgehende Remote-Crawls
 
 #File: Steering.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Steering==Steuerung
 Steering Receipt:==Steuerung:
 No information has been submitted==Es wurden keine Informationen &uuml;bermittelt
@@ -1760,8 +1683,6 @@ user</a> page.==Benutzerseite</a> zur&uuml;ck.
 
 #File: ViewFile.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 YaCy \'\#\[clientname\]\#\': View URL Content==YaCy '#[clientname]#': Zeige URL Inhalte
 View URL Content==Zeige URL Inhalte
 #URL==URL
@@ -1787,8 +1708,6 @@ Original Resource Content==Original Quellen Inhalt
 
 #File: ViewLog_p.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Lines==Zeilen
 reversed order==in umgekehrter Reihenfolge
 "refresh"=="Aktualisieren"
@@ -1796,8 +1715,6 @@ reversed order==in umgekehrter Reihenfolge
 
 #File: ViewProfile.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Remote Peer Profile==Remote Peer Profil
 Remote Peer Profile:==Remote Peer Profil:
 Wrong access of this page==Falscher Zugriff auf diese Seite
@@ -1819,7 +1736,6 @@ Comment==Kommentar
 
 #File: Wiki.html
 #---------------------------
-
 yacyWiki==YaCyWiki
 Changes will be published as announcement on YaCyNews==&Auml;nderungen werden &uuml;ber den YaCy News Service bekannt gegeben.
 #-----------------------------
@@ -1872,8 +1788,6 @@ Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter 
 
 #File: WatchCrawler.html
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Next update in==Nächste Aktualisierung in
 seconds==Sekunden
 Initiator==Auftraggeber
@@ -1887,8 +1801,6 @@ Local Crawler==Lokaler Crawler
 
 #File: env/templates/simpleheader.template
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Project Home==Projektseite
 Help / Wiki==Hilfe / Wiki
 Peer Owner Profile==Impressum dieses Peers
@@ -1896,8 +1808,6 @@ Peer Owner Profile==Impressum dieses Peers
 
 #File: env/templates/header.template
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 YaCy&nbsp;-&nbsp;Distributed&nbsp;Web&nbsp;Indexing&nbsp;-&nbsp;Administration==YaCy - Verteiltes Internet-Indexieren - Administration
 Global&nbsp;Index==Globaler Index
 Crawler Control==Crawler Steuerung
@@ -1941,7 +1851,6 @@ Download YaCy==YaCy herunterladen
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-
 Peer Configuration Menu==Peerkonfigurationsmen&uuml;
 Basic Configuraton==Grundeinstellungen
 >Language==>Sprache
@@ -1952,8 +1861,6 @@ Interface Skins==Skin Auswahl
 
 #File: env/templates/submenuCookie.template
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Cookie Menu==Cookie Men&uuml;
 Incoming&nbsp;Cookies==Eingehende Cookies
 Outgoing&nbsp;Cookies==Ausgehende Cookies
@@ -1961,8 +1868,6 @@ Outgoing&nbsp;Cookies==Ausgehende Cookies
 
 #File: env/templates/submenuIndexControl.template
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Index Control Menu==Index Verwalten Men&uuml;
 #Index Administration==Index Administration
 #Index Import==Index Import
@@ -1971,8 +1876,6 @@ Index Control Menu==Index Verwalten Men&uuml;
 
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Index Creation Menu==Index-erzeugen Men&uuml;
 Control Queues==Kontrolle der Warteschlangen
 WWW Crawl Queues==WWW Crawl Warteschlangen
@@ -1990,8 +1893,6 @@ Media Crawl Queues==Medien Crawl Warteschlangen
 
 #File: env/templates/submenuPerformance.template
 #---------------------------
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
-
 Performance Menu==Performance Men&uuml;
 Queues Performance Settings==Warteschlangen Performance Einstellungen
 Memory Settings for Database Caches==Speicher Einstellungen des Datenbank Caches
@@ -2000,7 +1901,6 @@ Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequen
 
 #File: htdocsdefault/dir.html
 #---------------------------
-
 YaCy: Public Files==YaCy: &Ouml;ffentliche Dateien
 Public&nbsp;File&nbsp;Directory==&Ouml;ffentliches Datei Verzeichnis
 value="\#\[peername\]\#'s Console"==value="#[peername]#s Konsole"

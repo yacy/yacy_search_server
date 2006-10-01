@@ -1,5 +1,5 @@
 ###
-### YACY Init File
+### YaCy Init File
 ###
 # These properties will be loaded upon installation.
 # They are used only once for set-up.
@@ -7,7 +7,7 @@
 # you must delete the httpProxy.conf file in DATA/SETTINGS
 
 # ----------------------------------------------------------------------------
-# the http service configurations
+# the HTTP service configurations
 
 # port number where the server should bind to
 # e.g. 8080
@@ -78,7 +78,7 @@ superseedLocation=http://www.yacy.net/superseed.txt
 
 # bootstrapLoadTimeout
 # this is the time-out for loading of the seedlist files during bootstraping
-# the time may not too long, since loading of the seedlist is not parallelized
+# the time should not be too long, since loading of the seedlist is not parallelized
 # and a not successful loading of a seed file may prevent a peer from becoming
 # a (at least) junior status. If the time-out is too short, there is the danger
 # that the peer stays in virgin mode
@@ -88,7 +88,7 @@ bootstrapLoadTimeout = 6000
 # since this applies only to the client-proxy connection,
 # it can be rather short
 # milliseconds
-clientTimeout = 30000
+clientTimeout = 10000
 
 # maximal number of httpd sessions
 # a client may open several connections at one, and the httpdMaxActiveSessions value sets

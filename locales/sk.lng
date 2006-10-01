@@ -1,4 +1,6 @@
 # sk.lng
+# English-->Slovak
+# $LastChangedDate$
 # -----------------------
 # part of YaCy
 # (C) by Michael Peter Christen; mc@anomic.de
@@ -6,13 +8,9 @@
 # Frankfurt, Germany, 2005
 #
 # This file is maintained by Rostislav Svoboda <Rostislav.Svoboda@gmail.com>
+# This file is written by (chronological order) Rostislav Svoboda <Rostislav.Svoboda@gmail.com>
 
-# If you find any mistakes in this file please don't hesitate to email them to the author
-# If you find any untranslated string in the webinterface do so, too.
-
-#English=Slovak
-#DO _NOT_ USE THIS FILE AS TEMPLATE FOR YOUR OWN TRANSLATIONS, INSTEAD GET THE STRINGS DIRECTLY OUT OF THE HTML-FILES
-#OTHERWISE YOU MAY GET A $TARGET_LANGUAGE - SLOVAK MIXTURE IN THE WEBINTERFACE
+# If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
 
 #-------------------------------------------------------
 #File: ConfigLanguage_p.html
