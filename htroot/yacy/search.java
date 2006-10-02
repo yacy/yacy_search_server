@@ -91,6 +91,7 @@ public final class search {
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
         final String  filter = post.get("filter", ".*");
+        final boolean includesnippet = post.get("includesnippet", "false").equals("true");
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
@@ -200,11 +201,15 @@ public final class search {
             plasmaSnippetCache.Snippet snippet;
             while ((acc.hasMoreElements()) && (i < squery.wantedResults)) {
                 urlentry = acc.nextElement();
-                snippet = sb.snippetCache.retrieveSnippet(urlentry.url(), squery.queryHashes, false, 260);
-                if (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH) {
+                if (includesnippet) {
+                    snippet = sb.snippetCache.retrieveSnippet(urlentry.url(), squery.queryHashes, false, 260);
+                } else {
+                    snippet = null;
+                }
+                if ((snippet != null) && (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH)) {
                     // suppress line: there is no match in that resource
                 } else {
-                    if (snippet.exists()) {
+                    if ((snippet != null) && (snippet.exists())) {
                         resource = urlentry.toString(snippet.getLineRaw());
                     } else {
                         resource = urlentry.toString();

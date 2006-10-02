@@ -192,7 +192,6 @@ public class plasmaSnippetCache {
         try {
             // trying to load the resource from the cache
             resource = this.cacheManager.loadResourceContent(url);
-            docInfo = this.cacheManager.loadResourceInfo(url);
             
             // if not found try to download it
             if ((resource == null) && (fetchOnline)) {
@@ -200,22 +199,21 @@ public class plasmaSnippetCache {
                 plasmaHTCache.Entry entry = loadResourceFromWeb(url, 5000);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
-                if (entry != null) {
-                    docInfo = entry.getDocumentInfo();
-                }
+                if (entry != null) docInfo = entry.getDocumentInfo();
                 
-                // now the resource should be stored in the cache, load body
-                resource = this.cacheManager.loadResourceContent(url);
+                // read resource body
+                resource = entry.cacheArray();
                 if (resource == null) {
-                    //System.out.println("cannot load document for URL " + url);
-                    return new Snippet(null, ERROR_RESOURCE_LOADING, "error loading resource from web, cacheManager returned NULL");
+                    return new Snippet(null, ERROR_RESOURCE_LOADING, "error loading resource, plasmaHTCache.Entry cache is NULL");
                 }                                
                 source = SOURCE_WEB;
             }
         } catch (Exception e) {
             if (!(e instanceof plasmaCrawlerException)) e.printStackTrace();
-            return new Snippet(null, ERROR_SOURCE_LOADING, "error loading resource from web: " + e.getMessage());
+            return new Snippet(null, ERROR_SOURCE_LOADING, "error loading resource: " + e.getMessage());
         }
+
+        if (resource == null) return new Snippet(null, ERROR_SOURCE_LOADING, "no resource available");
         
         /* ===========================================================================
          * PARSING RESOURCE
@@ -459,11 +457,12 @@ public class plasmaSnippetCache {
                     docInfo = this.cacheManager.loadResourceInfo(url);
                 } catch (Exception e) {
                     // ignore this. resource info loading failed
-                }
-                
+                }   
+            }
+            
                 // TODO: we need a better solution here
                 // encapsulate this in the crawlLoader class
-                if (url.getProtocol().startsWith("http")) {
+                if ((docInfo == null) && (url.getProtocol().startsWith("http"))) {
                     // getting URL mimeType
                     try {
                         httpHeader header = httpc.whead(url, url.getHost(), 10000, null, null, this.sb.remoteProxyConfig);
@@ -472,8 +471,6 @@ public class plasmaSnippetCache {
                         // ingore this. http header download failed
                     } 
                 }
-                
-            }
 
             if (docInfo == null) {
                 String filename = this.cacheManager.getCachePath(url).getName();

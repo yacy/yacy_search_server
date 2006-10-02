@@ -2033,9 +2033,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 String host, hash, address, descr = "";
                 yacySeed seed;
                 plasmaSnippetCache.Snippet snippet;
+                boolean includeSnippets = false;
                 String formerSearch = query.words(" ");
                 long targetTime = timestamp + query.maximumTime;
-                if (targetTime < System.currentTimeMillis()) targetTime = System.currentTimeMillis() + 5000;
+                if (targetTime < System.currentTimeMillis()) targetTime = System.currentTimeMillis() + 1000;
                 while ((acc.hasMoreElements()) && (i < query.wantedResults) && (System.currentTimeMillis() < targetTime)) {
                     urlentry = acc.nextElement();
                     url = urlentry.url();
@@ -2076,8 +2077,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     //addScoreForked(ref, gs, urlstring.split("/"));
                     URL wordURL;
                     if (urlstring.matches(query.urlMask)) { //.* is default
-                        snippet = snippetCache.retrieveSnippet(url, query.queryHashes, false, 260);
-                        if (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH) {
+                        if (includeSnippets) {
+                            snippet = snippetCache.retrieveSnippet(url, query.queryHashes, false, 260);
+                        } else {
+                            snippet = null;
+                        }
+                        if ((snippet != null) && (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH)) {
                             // suppress line: there is no match in that resource
                         } else {
                             prop.put("type_results_" + i + "_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", urlstring) == null) ? 1 : 0);
@@ -2097,7 +2102,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                     ((indexURL.probablyRootURL(urlhash)) ? ", probablyRootURL" : "") + 
                                     (((wordURL = indexURL.probablyWordURL(urlhash, query.words(""))) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
                             // adding snippet if available
-                            if (snippet.exists()) {
+                            if ((snippet != null) && (snippet.exists())) {
                                 prop.put("type_results_" + i + "_snippet", 1);
                                 prop.put("type_results_" + i + "_snippet_text", snippet.getLineMarked(query.queryHashes));
                             } else {
