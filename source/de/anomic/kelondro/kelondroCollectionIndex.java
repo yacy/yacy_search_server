@@ -221,6 +221,7 @@ public class kelondroCollectionIndex {
                         if (k instanceof byte[]) {if (oldcollection.remove((byte[]) k) != null) removed++;}
                         if (k instanceof String) {if (oldcollection.remove(((String) k).getBytes()) != null) removed++;}
                     }
+                    oldcollection.shape();
                     collection = oldcollection;
                 }
             

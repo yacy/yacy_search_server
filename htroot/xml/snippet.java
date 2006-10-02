@@ -45,6 +45,10 @@ public class snippet {
             //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
             prop.put("text", (snippet.exists()) ? "<![CDATA["+snippet.getLineMarked(queryHashes)+"]]>" : "unknown"); 
         } else {
+            String error = snippet.getError();
+            if (error.equals("no matching snippet found")) {
+                switchboard.removeReferences(indexURL.urlHash(url), query);
+            }
             prop.put("text", snippet.getError());
         }
         prop.put("urlHash",indexURL.urlHash(url));
