@@ -49,7 +49,7 @@ public class snippet {
             if (error.equals("no matching snippet found")) {
                 switchboard.removeReferences(indexURL.urlHash(url), query);
             }
-            prop.put("text", snippet.getError());
+            prop.put("text", error);
         }
         prop.put("urlHash",indexURL.urlHash(url));
         
