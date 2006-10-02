@@ -66,6 +66,10 @@ public class nxTools {
 	return props;
     }
     
+    public static HashMap table(byte[] a) {
+        return table(strings(a));
+    }
+    
     public static HashMap table(ArrayList list) {
         Iterator i = list.iterator();
         int pos;
@@ -78,7 +82,7 @@ public class nxTools {
             if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
         }
         return props;
-        }
+    }
 
     public static Vector grep(Vector list, int afterContext, String pattern) {
 	Enumeration i = list.elements();
@@ -144,6 +148,18 @@ public class nxTools {
         return null;
     }
 
+    public static ArrayList strings(byte[] a) {
+        int s = 0;
+        int e;
+        ArrayList v = new ArrayList();
+        while (s < a.length) {
+            e = s; while (e < a.length) if (a[e++] < 32) {e--; break;}
+            v.add(new String(a, s, e - s));
+            s = e; while (s < a.length) if (a[s++] >= 32) {s--; break;}
+        }
+        return v;
+    }
+    
     /**
      * This function shorten URL Strings<br>
      *

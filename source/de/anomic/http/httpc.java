@@ -91,6 +91,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.nxTools;
 
 /**
 * This class implements an http client. While http access is built-in in java
@@ -1280,7 +1281,7 @@ do upload
         }
     }
 
-    public static ArrayList wget(
+    public static byte[] wget(
             URL url,
             String vhost,
             int timeout, 
@@ -1291,11 +1292,11 @@ do upload
         return wget(url, vhost,timeout,user,password,theRemoteProxyConfig,null);
     }
     
-    public static ArrayList wget(URL url) throws IOException{
+    public static byte[] wget(URL url) throws IOException{
         return wget(url, url.getHost(), 6000, null, null, plasmaSwitchboard.getSwitchboard().remoteProxyConfig, null);
     }
     
-    public static ArrayList wget(
+    public static byte[] wget(
             URL url,
             String vhost,
             int timeout, 
@@ -1352,15 +1353,7 @@ do upload
             }
         }
         
-        int s = 0;
-        int e;
-        ArrayList v = new ArrayList();
-        while (s < a.length) {
-            e = s; while (e < a.length) if (a[e++] < 32) {e--; break;}
-            v.add(new String(a, s, e - s));
-            s = e; while (s < a.length) if (a[s++] >= 32) {s--; break;}
-        }
-        return v;
+        return a;
     }
 
     public static httpHeader whead(
@@ -1466,7 +1459,7 @@ do upload
             httpRemoteProxyConfig theRemoteProxyConfig = httpRemoteProxyConfig.init(proxyHost,proxyPort);
             try {
                 URL u = new URL(url);
-                text = wget(u, u.getHost(), timeout, null, null, theRemoteProxyConfig);
+                text = nxTools.strings(wget(u, u.getHost(), timeout, null, null, theRemoteProxyConfig));
             } catch (MalformedURLException e) {
                 System.out.println("The url '" + url + "' is wrong.");
             } catch (IOException e) {

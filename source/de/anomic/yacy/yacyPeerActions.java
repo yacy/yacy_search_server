@@ -61,6 +61,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.tools.disorderSet;
+import de.anomic.tools.nxTools;
 
 public class yacyPeerActions {
    
@@ -200,7 +201,7 @@ public class yacyPeerActions {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-                        seedList = httpc.wget(url, url.getHost(), this.bootstrapLoadTimeout, null, null, this.sb.remoteProxyConfig,reqHeader);
+                        seedList = nxTools.strings(httpc.wget(url, url.getHost(), this.bootstrapLoadTimeout, null, null, this.sb.remoteProxyConfig,reqHeader));
                         enu = seedList.iterator();
                         lc = 0;
                         while (enu.hasNext()) {
@@ -254,7 +255,7 @@ public class yacyPeerActions {
         // read in remote file from url
         try {
             URL u = new URL(url);
-            ArrayList remote = httpc.wget(u, u.getHost(), 5000, null, null, this.sb.remoteProxyConfig);
+            ArrayList remote = nxTools.strings(httpc.wget(u, u.getHost(), 5000, null, null, this.sb.remoteProxyConfig));
             if ((remote != null) && (remote.size() > 0)) {
                 Iterator e = remote.iterator();
                 while (e.hasNext()) {

@@ -56,6 +56,7 @@ import de.anomic.http.httpc;
 import de.anomic.net.URL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.nxTools;
 
 public class getpageinfo_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
@@ -77,7 +78,7 @@ public class getpageinfo_p {
             }
             if (actions.indexOf("title")>=0) {
                 try {
-                    content = httpc.wget(new URL(url));
+                    content = nxTools.strings(httpc.wget(new URL(url)));
 
                     Iterator it = content.iterator();
                     String line;

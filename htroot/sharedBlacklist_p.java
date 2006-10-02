@@ -62,6 +62,7 @@ import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
@@ -130,7 +131,7 @@ public class sharedBlacklist_p {
 
                         // get List
                         URL u = new URL(downloadURL);
-                        otherBlacklist = httpc.wget(u, u.getHost(), 12000, null, null, switchboard.remoteProxyConfig,reqHeader); 
+                        otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 12000, null, null, switchboard.remoteProxyConfig,reqHeader)); 
                     } catch (Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.put("page", 1);                      
@@ -146,7 +147,7 @@ public class sharedBlacklist_p {
 
                 try {
                     URL u = new URL(downloadURL);
-                    otherBlacklist = httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig); //get List
+                    otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig)); //get List
                 } catch (Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.put("status_address",downloadURL);

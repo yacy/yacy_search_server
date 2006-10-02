@@ -41,7 +41,6 @@
 
 package de.anomic.tools;
 
-import java.util.ArrayList;
 import java.util.Properties;
 
 public abstract class loaderCore implements loaderProcess {
@@ -63,7 +62,7 @@ public abstract class loaderCore implements loaderProcess {
     protected int completion = 0;
     
     // steering methods
-    public abstract void feed(ArrayList v); // returns true if process was successful; should be always synchronized
+    public abstract void feed(byte[] a); // returns true if process was successful; should be always synchronized
 
     public void terminate() {
         // if terminated before completion, completed() shows x < 100

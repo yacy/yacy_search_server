@@ -41,13 +41,12 @@
 
 package de.anomic.tools;
 
-import java.util.ArrayList;
 import java.util.Properties;
 
 public interface loaderProcess {
     
     // steering methods
-    public void feed(ArrayList v); // returns true if process was successful; should be always synchronized
+    public void feed(byte[] v); // returns true if process was successful; should be always synchronized
     public void terminate(); // if terminated before completion, completed() shows x < 100
     
     // feed-back methods

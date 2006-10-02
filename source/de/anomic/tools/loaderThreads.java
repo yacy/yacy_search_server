@@ -133,7 +133,7 @@ public class loaderThreads {
         private URL url;
         private Exception error;
         private loaderProcess process;
-        private ArrayList page;
+        private byte[] page;
         private boolean loaded;
         
         public loaderThread(URL url, loaderProcess process) {
@@ -193,16 +193,17 @@ public class loaderThreads {
             this.status = STATUS_READY;
         }
         
-        public synchronized void feed(ArrayList v) {
+        public synchronized void feed(byte[] v) {
             this.status = STATUS_RUNNING;
             this.completion = 1;
             int line = 0;
             String s, key, value;
             int p;
+            ArrayList lines = nxTools.strings(v);
             try {
-                while ((this.run) && (line < v.size())) {
+                while ((this.run) && (line < lines.size())) {
                     // parse line and construct a property
-                    s = (String) v.get(line);
+                    s = (String) lines.get(line);
                     if ((s != null) && ((p = s.indexOf('=')) > 0)) {
                         key = s.substring(0, p).trim();
                         value = s.substring(p + 1).trim();
@@ -210,9 +211,9 @@ public class loaderThreads {
                     }
                     // update thread information
                     line++;
-                    this.completion = 100 * line / v.size();
+                    this.completion = 100 * line / lines.size();
                 }
-                if (line == v.size()) {
+                if (line == lines.size()) {
                     this.status = STATUS_COMPLETED;
                     return;
                 } else {

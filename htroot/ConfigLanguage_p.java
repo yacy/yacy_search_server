@@ -62,6 +62,7 @@ import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.nxTools;
 
 
 public class ConfigLanguage_p {
@@ -97,7 +98,7 @@ public class ConfigLanguage_p {
 			ArrayList langVector;
 			try{
                 URL u = new URL(url);
-				langVector = httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig);
+				langVector = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig));
 			}catch(IOException e){
 				prop.put("status", 1);//unable to get url
 				prop.put("status_url", url);

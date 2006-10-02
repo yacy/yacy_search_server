@@ -61,6 +61,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.nxTools;
 
 public class ConfigSkins_p {
 
@@ -126,7 +127,7 @@ public class ConfigSkins_p {
 			ArrayList skinVector;
 			try{
                 URL u = new URL(url);
-				skinVector = httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig);
+				skinVector = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig));
 			}catch(IOException e){
 				prop.put("status", 1);//unable to get URL
 				prop.put("status_url", url);

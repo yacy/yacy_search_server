@@ -71,6 +71,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.nxTools;
 
 public final class yacySeedDB {
   
@@ -713,7 +714,7 @@ public final class yacySeedDB {
         httpHeader reqHeader = new httpHeader();
         reqHeader.put(httpHeader.PRAGMA, "no-cache");
         reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
-        ArrayList check  = httpc.wget(
+        ArrayList check  = nxTools.strings(httpc.wget(
                 seedURL,
                 seedURL.getHost(),
                 10000, 
@@ -721,7 +722,7 @@ public final class yacySeedDB {
                 null, 
                 sb.remoteProxyConfig,
                 reqHeader
-        );
+        ));
         
         if (check == null) {
             serverLog.logFine("YACY","SaveSeedList: Testing download failed ...");
