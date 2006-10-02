@@ -201,11 +201,15 @@ public class plasmaSnippetCache {
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) docInfo = entry.getDocumentInfo();
                 
-                // read resource body
+                // read resource body (if it is there)
                 resource = entry.cacheArray();
-                if (resource == null) {
-                    return new Snippet(null, ERROR_RESOURCE_LOADING, "error loading resource, plasmaHTCache.Entry cache is NULL");
-                }                                
+                
+                // in case that the reosurce was not in ram, read it from disk
+                if (resource == null) resource = this.cacheManager.loadResourceContent(url);
+                
+                // if it is still not available, throw exception
+                if (resource == null) return new Snippet(null, ERROR_RESOURCE_LOADING, "error loading resource, plasmaHTCache.Entry cache is NULL");
+                            
                 source = SOURCE_WEB;
             }
         } catch (Exception e) {
