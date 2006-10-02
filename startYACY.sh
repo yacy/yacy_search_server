@@ -1,5 +1,5 @@
 #!/bin/sh
-if [ $UID -eq 0 ]
+if [ `id -u` -eq 0 ]
 then
 	echo
 	echo "For security reasons you should not run this script as root!"
@@ -43,23 +43,23 @@ DEBUG=0
 PRINTONLY=0
 for option in $options;do
 	if [ $isparameter -ne 1 ];then #option
-		if [ x$option == "x-l" ];then
+		if [ x$option = "x-l" ];then
 			LOGGING=1
 			if [ $DEBUG -eq 1 ];then
 				echo "can not combine -l and -d"
 				exit 1;
 			fi
-		elif [ x$option == "x-d" ];then
+		elif [ x$option = "x-d" ];then
 			DEBUG=1
 			if [ $LOGGING -eq 1 ];then
 				echo "can not combine -l and -d"
 				exit 1;
 			fi
-		elif [ x$option == "x-p" ];then
+		elif [ x$option = "x-p" ];then
 			PRINTONLY=1
 		fi #which option 
 	else #parameter
-		if [ x$option == "--" ];then #option / parameter seperator
+		if [ x$option = "--" ];then #option / parameter seperator
 			isparameter=1;
 			continue
 		else
@@ -83,7 +83,7 @@ fi
 # generating the proper classpath
 CLASSPATH=""
 #prefix=$(dirname $0);
-#if [ x$prefix == "x." ];then
+#if [ x$prefix = "x." ];then
 #	prefix="";
 #else
 #	prefix="$prefix/"
