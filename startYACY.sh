@@ -20,7 +20,7 @@ fi
 #startup YaCy
 cd "`dirname $0`"
 
-options="`getopt -n YaCy -o d,l,p -- $@`"
+options="`getopt -n YaCy -o d,l,p,t -- $@`"
 if [ $? -ne 0 ];then
 	exit 1;
 fi
@@ -31,6 +31,7 @@ parameter="" #parameters will be collected here
 LOGGING=0
 DEBUG=0
 PRINTONLY=0
+TAILLOG=0
 for option in $options;do
 	if [ $isparameter -ne 1 ];then #option
 		if [ "$option" = "-l" ];then
@@ -39,14 +40,16 @@ for option in $options;do
 				echo "can not combine -l and -d"
 				exit 1;
 			fi
-		elif [ x$option = "x-d" ];then
+		elif [ "$option" = "-d" ];then
 			DEBUG=1
 			if [ $LOGGING -eq 1 ];then
 				echo "can not combine -l and -d"
 				exit 1;
 			fi
-		elif [ x$option = "x-p" ];then
+		elif [ "$option" = "-p" ];then
 			PRINTONLY=1
+		elif [ "$option" = "-t" ];then
+			TAILLOG=1
 		fi #which option 
 	else #parameter
 		if [ x$option = "--" ];then #option / parameter seperator
@@ -98,4 +101,7 @@ else
 	echo "*******************************************************************************"
 	echo " >> YaCy started as daemon process. Administration at http://localhost:8080 << "
 	eval $cmdline
+	if [ "$TAILLOG" -eq "1" -a ! "$DEBUG" -eq "1" ];then
+		tail -f DATA/LOG/yacy00.log
+	fi
 fi
