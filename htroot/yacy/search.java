@@ -202,7 +202,7 @@ public final class search {
             while ((acc.hasMoreElements()) && (i < squery.wantedResults)) {
                 urlentry = acc.nextElement();
                 if (includesnippet) {
-                    snippet = sb.snippetCache.retrieveSnippet(urlentry.url(), squery.queryHashes, false, 260);
+                    snippet = sb.snippetCache.retrieveSnippet(urlentry.url(), squery.queryHashes, false, 260, 1000);
                 } else {
                     snippet = null;
                 }

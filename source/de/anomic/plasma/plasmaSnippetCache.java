@@ -166,7 +166,7 @@ public class plasmaSnippetCache {
         return retrieveFromCache(hashes, indexURL.urlHash(url)) != null;
     }
     
-    public Snippet retrieveSnippet(URL url, Set queryhashes, boolean fetchOnline, int snippetMaxLength) {
+    public Snippet retrieveSnippet(URL url, Set queryhashes, boolean fetchOnline, int snippetMaxLength, int timeout) {
         // heise = "0OQUNU3JSs05"
         if (queryhashes.size() == 0) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
@@ -196,7 +196,7 @@ public class plasmaSnippetCache {
             // if not found try to download it
             if ((resource == null) && (fetchOnline)) {
                 // download resource using the crawler
-                plasmaHTCache.Entry entry = loadResourceFromWeb(url, 5000);
+                plasmaHTCache.Entry entry = loadResourceFromWeb(url, timeout);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) docInfo = entry.getDocumentInfo();
@@ -552,7 +552,7 @@ public class plasmaSnippetCache {
             urlstring = urlentry.url().toNormalform();
             if ((urlstring.matches(urlmask)) &&
                 (!(existsInCache(urlentry.url(), queryhashes)))) {
-                new Fetcher(urlentry.url(), queryhashes).start();
+                new Fetcher(urlentry.url(), queryhashes, (int) maxTime).start();
                 i++;
             }
         }
@@ -561,14 +561,16 @@ public class plasmaSnippetCache {
     public class Fetcher extends Thread {
         URL url;
         Set queryhashes;
-        public Fetcher(URL url, Set queryhashes) {
+        int timeout;
+        public Fetcher(URL url, Set queryhashes, int timeout) {
             if (url.getHost().endsWith(".yacyh")) return;
             this.url = url;
             this.queryhashes = queryhashes;
+            this.timeout = timeout;
         }
         public void run() {
             log.logFine("snippetFetcher: try to get URL " + url);
-            plasmaSnippetCache.Snippet snippet = retrieveSnippet(url, queryhashes, true, 260);
+            plasmaSnippetCache.Snippet snippet = retrieveSnippet(url, queryhashes, true, 260, timeout);
             if (snippet.line == null)
                 log.logFine("snippetFetcher: cannot get URL " + url + ". error(" + snippet.source + "): " + snippet.error);
             else

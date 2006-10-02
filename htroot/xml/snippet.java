@@ -39,7 +39,7 @@ public class snippet {
         // do the search
         Set queryHashes = plasmaSearchQuery.words2hashes(query);
         
-        plasmaSnippetCache.Snippet snippet = switchboard.snippetCache.retrieveSnippet(url, queryHashes, true, 260);
+        plasmaSnippetCache.Snippet snippet = switchboard.snippetCache.retrieveSnippet(url, queryHashes, true, 260, 10000);
         prop.put("status",snippet.getSource());
         if (snippet.getSource() < 11) {
             //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");

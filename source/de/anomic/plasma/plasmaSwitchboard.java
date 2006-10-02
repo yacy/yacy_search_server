@@ -2078,7 +2078,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     URL wordURL;
                     if (urlstring.matches(query.urlMask)) { //.* is default
                         if (includeSnippets) {
-                            snippet = snippetCache.retrieveSnippet(url, query.queryHashes, false, 260);
+                            snippet = snippetCache.retrieveSnippet(url, query.queryHashes, false, 260, 1000);
                         } else {
                             snippet = null;
                         }
