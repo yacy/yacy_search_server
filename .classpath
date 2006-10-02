@@ -30,7 +30,6 @@
 	<classpathentry kind="lib" path="libx/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="libx/commons-jxpath-1.1.jar"/>
 	<classpathentry kind="lib" path="libx/sbbi-upnplib-1.0.3.jar"/>
-	<classpathentry kind="lib" path="libx/commons-jxpath-1.1.jar"/>
 	<classpathentry kind="lib" path="libx/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="libx/jmimemagic-0.1.0.jar"/>
 	<classpathentry kind="lib" path="libx/odf_utils_05_11_29.jar"/>
