@@ -270,8 +270,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         private Node thenode, parentnode;
         private boolean found; // property if node was found
         private byte child; // -1: left child; 0: root node; 1: right child
-        private Handle thisHandle;
 
+        // temporary variables
+        private Handle thisHandle;
+        byte[] keybuffer;
+        
         protected Search() {
         }
 
@@ -282,6 +285,8 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             thisHandle = getHandle(root);
             parentnode = null;
             if (key == null) {
+                throw new kelondroException("startet search process with key == null");
+                /*
                 child = 0;
                 if (thisHandle == null) {
                     thenode = null;
@@ -290,60 +295,71 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     thenode = getNode(thisHandle, null, 0);
                     found = true;
                 }
-            } else {
-                thenode = null;
-                child = 0;
-                found = false;
-                int c;
-                byte[] k;
-                TreeSet visitedNodeKeys = new TreeSet(loopDetectionOrder); // to detect loops
-                // System.out.println("Starting Compare Loop in Database " + filename); // debug
-                while (thisHandle != null) {
-                    try {
-                        parentnode = thenode;
-                        thenode = getNode(thisHandle, thenode, (child == -1) ? leftchild : rightchild);
-                    } catch (IllegalArgumentException e) {
-                        logWarning("kelondroTree.Search.process: fixed a broken handle");
-                        found = false;
-                        return;
-                    }
-                    if (thenode == null) {
-                        throw new kelondroException(filename, "kelondroTree.Search.process: thenode==null");
-                    }
-                    k = thenode.getKey();
-                    if (k == null) {
-                        found = false;
-                        return;
-                    }
-                    if (visitedNodeKeys.contains(k)) {
-                            // we have loops in the database.
-                            // to fix this, all affected nodes must be patched
-                            thenode.setOHByte(magic, (byte) 1);
-                            thenode.setOHByte(balance, (byte) 0);
-                            thenode.setOHHandle(parent, null);
-                            thenode.setOHHandle(leftchild, null);
-                            thenode.setOHHandle(rightchild, null);
-                            thenode.commit(CP_NONE);
-                            logWarning("kelondroTree.Search.process: database contains loops; the loop-nodes have been auto-fixed");
-                            found = false;
-                            return;
-                    }
-                        // System.out.println("Comparing key = '" + new String(key) + "' with '" + otherkey + "':"); // debug
-                        c = objectOrder.compare(key, k);
-                        // System.out.println(c); // debug
-                        if (c == 0) {
-                            found = true;
-                            // System.out.println("DEBUG: search for " + new String(key) + " ended with status=" + ((found) ? "found" : "not-found") + ", node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ", parent=" + ((parentnode == null) ? "NULL" : parentnode.toString()));
-                            return;
-                        } else if (c < 0) {
-                            child = -1;
-                            thisHandle = thenode.getOHHandle(leftchild);
-                        } else {
-                            child = 1;
-                            thisHandle = thenode.getOHHandle(rightchild);
-                        }
-                        visitedNodeKeys.add(k);
+                return;
+                */
+            }
+            thenode = null;
+            child = 0;
+            found = false;
+            int c;
+            
+            TreeMap visitedNodeKeys = new TreeMap(loopDetectionOrder); // to detect loops
+            // System.out.println("Starting Compare Loop in Database " + filename); // debug
+            while (thisHandle != null) {
+                try {
+                    parentnode = thenode;
+                    thenode = getNode(thisHandle, thenode, (child == -1) ? leftchild : rightchild);
+                } catch (IllegalArgumentException e) {
+                    logWarning("kelondroTree.Search.process: fixed a broken handle");
+                    found = false;
+                    return;
                 }
+                if (thenode == null) throw new kelondroException(filename, "kelondroTree.Search.process: thenode==null");
+
+                keybuffer = thenode.getKey();
+                if (keybuffer == null) {
+                    // this is an error. distinguish two cases:
+                    // 1. thenode is a leaf node. Then this error can be fixed if we can consider this node as a good node to be replaced with a new value
+                    // 2. thenode is not a leaf node. An exception must be thrown
+                    if ((thenode.getOHHandle(leftchild) == null) && (thenode.getOHHandle(rightchild) == null)) {
+                        // case 1: recover
+                        deleteNode(thisHandle);
+                        thenode = parentnode;
+                        found = false;
+                        return;
+                    } else {
+                        // case 2: fail
+                        throw new kelondroException("found key during search process with key == null");
+                    }
+                }
+                if (visitedNodeKeys.containsKey(keybuffer)) {
+                    // we have loops in the database.
+                    // to fix this, all affected nodes must be patched
+                    thenode.setOHByte(magic, (byte) 1);
+                    thenode.setOHByte(balance, (byte) 0);
+                    thenode.setOHHandle(parent, null);
+                    thenode.setOHHandle(leftchild, null);
+                    thenode.setOHHandle(rightchild, null);
+                    thenode.commit(CP_NONE);
+                    logWarning("kelondroTree.Search.process: database contains loops; the loop-nodes have been auto-fixed");
+                    found = false;
+                    return;
+                }
+                // System.out.println("Comparing key = '" + new String(key) + "' with '" + otherkey + "':"); // debug
+                c = objectOrder.compare(key, keybuffer);
+                // System.out.println(c); // debug
+                if (c == 0) {
+                    found = true;
+                    // System.out.println("DEBUG: search for " + new String(key) + " ended with status=" + ((found) ? "found" : "not-found") + ", node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ", parent=" + ((parentnode == null) ? "NULL" : parentnode.toString()));
+                    return;
+                } else if (c < 0) {
+                    child = -1;
+                    thisHandle = thenode.getOHHandle(leftchild);
+                } else {
+                    child = 1;
+                    thisHandle = thenode.getOHHandle(rightchild);
+                }
+                visitedNodeKeys.put(keybuffer, null);
             }
             // System.out.println("DEBUG: search for " + new String(key) + " ended with status=" + ((found) ? "found" : "not-found") + ", node=" + ((thenode == null) ? "NULL" : thenode.toString()) + ", parent=" + ((parentnode == null) ? "NULL" : parentnode.toString()));
             // we reached a node where we must insert the new value
@@ -351,34 +367,34 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             // all values are set, just return
         }
 
-	public boolean found() {
-	    return found;
-	}
+        public boolean found() {
+            return found;
+        }
 
-	public Node getMatcher() {
-	    if (found) return thenode; 
-	    throw new IllegalArgumentException("wrong access of matcher");
-	}
+        public Node getMatcher() {
+            if (found) return thenode;
+            throw new IllegalArgumentException("wrong access of matcher");
+        }
 
-	public Node getParent() {
-	    if (found) return parentnode;
-        return thenode; 
-	}
+        public Node getParent() {
+            if (found) return parentnode;
+            return thenode;
+        }
 
-	public boolean isRoot() {
-	    if (found) throw new IllegalArgumentException("wrong access of isRoot");
-	    return (child == 0);
-	}
+        public boolean isRoot() {
+            if (found) throw new IllegalArgumentException("wrong access of isRoot");
+            return (child == 0);
+        }
 
-	public boolean isLeft() {
-	    if (found) throw new IllegalArgumentException("wrong access of leftchild");
-	    return (child == -1);
-	}
-        
-    public boolean isRight() {
-	    if (found) throw new IllegalArgumentException("wrong access of leftchild");
-	    return (child == 1);
-	}
+        public boolean isLeft() {
+            if (found) throw new IllegalArgumentException("wrong access of leftchild");
+            return (child == -1);
+        }
+
+        public boolean isRight() {
+            if (found) throw new IllegalArgumentException("wrong access of leftchild");
+            return (child == 1);
+        }
     }
 
     public synchronized boolean isChild(Node childn, Node parentn, int child) {
@@ -442,10 +458,10 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 // check consistency and link new node to parent node
                 byte parentBalance;
                 if (writeSearchObj.isLeft()) {
-                    if (parentNode.getOHHandle(leftchild) != null) throw new kelondroException(filename, "tried to create leftchild node twice");
+                    if (parentNode.getOHHandle(leftchild) != null) throw new kelondroException(filename, "tried to create leftchild node twice. parent=" + new String(parentNode.getKey()) + ", leftchild=" + new String(new Node(parentNode.getOHHandle(leftchild), (Node) null, 0).getKey()));
                     parentNode.setOHHandle(leftchild, theNode.handle());
                 } else if (writeSearchObj.isRight()) {
-                    if (parentNode.getOHHandle(rightchild) != null) throw new kelondroException(filename, "tried to create rightchild node twice");
+                    if (parentNode.getOHHandle(rightchild) != null) throw new kelondroException(filename, "tried to create rightchild node twice. parent=" + new String(parentNode.getKey()) + ", rightchild=" + new String(new Node(parentNode.getOHHandle(rightchild), (Node) null, 0).getKey()));
                     parentNode.setOHHandle(rightchild, theNode.handle());
                 } else {
                     throw new kelondroException(filename, "neither left nor right child");
