@@ -269,7 +269,7 @@ public final class yacyClient {
                             (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
                             null
                     )
-            );
+                    , "UTF-8");
             
             if (result == null || result.size() == 0) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
@@ -305,7 +305,7 @@ public final class yacyClient {
                             null, 
                             (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null
                     )
-            );
+                    , "UTF-8");
             
             if (result == null || result.size() == 0) { return -1; }
             return Integer.parseInt((String) result.get("response"));
@@ -346,7 +346,7 @@ public final class yacyClient {
                             null,
                             (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null
                     )
-            );
+                    , "UTF-8");
             
 //          yacyCore.log("DEBUG QUERY: query=" + querystr + "; result = " + result.toString());
             if ((result == null) || (result.size() == 0)) return -1;
@@ -917,7 +917,7 @@ public final class yacyClient {
                             null,             
                             (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null
                     )
-            );
+                    , "UTF-8");
         } catch (Exception e) {
             // most probably a network time-out exception
             yacyCore.log.logSevere("yacyClient.crawlReceipt error:" + e.getMessage());
@@ -1213,7 +1213,7 @@ public final class yacyClient {
                                     null, 
                                     (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null
                     )
-            );
+                    , "UTF-8");
             System.out.println("Result=" + result.toString());
         } catch (Exception e) {
             e.printStackTrace();

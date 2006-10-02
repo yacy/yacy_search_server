@@ -722,7 +722,7 @@ public final class yacySeedDB {
                 null, 
                 sb.remoteProxyConfig,
                 reqHeader
-        ));
+        ), "UTF-8");
         
         if (check == null) {
             serverLog.logFine("YACY","SaveSeedList: Testing download failed ...");

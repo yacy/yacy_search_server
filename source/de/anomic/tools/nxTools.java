@@ -67,8 +67,8 @@ public class nxTools {
 	return props;
     }
     
-    public static HashMap table(byte[] a) {
-        return table(strings(a));
+    public static HashMap table(byte[] a, String encoding) {
+        return table(strings(a, encoding));
     }
     
     public static HashMap table(ArrayList list) {

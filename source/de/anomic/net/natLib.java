@@ -97,7 +97,7 @@ public class natLib {
 
     private static String getIPID() {
 	try {
-        ArrayList x = nxTools.strings(httpc.wget(new URL("http://ipid.shat.net/"), "ipid.shat.net", 5000, null, null, null));
+        ArrayList x = nxTools.strings(httpc.wget(new URL("http://ipid.shat.net/"), "ipid.shat.net", 5000, null, null, null), "UTF-8");
 	    x = nxTools.grep(x, 2, "Your IP address");
 	    String line = nxTools.tail1(x);
 	    return nxTools.awk(nxTools.awk(nxTools.awk(line, " ", 5), ">", 2), "<", 1);
