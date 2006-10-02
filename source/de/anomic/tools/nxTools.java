@@ -43,6 +43,7 @@
 
 package de.anomic.tools;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -149,13 +150,39 @@ public class nxTools {
     }
 
     public static ArrayList strings(byte[] a) {
+        return strings(a, null);
+    }
+    
+    public static ArrayList strings(byte[] a, String encoding) {
         int s = 0;
         int e;
         ArrayList v = new ArrayList();
+        byte b;
         while (s < a.length) {
-            e = s; while (e < a.length) if (a[e++] < 32) {e--; break;}
-            v.add(new String(a, s, e - s));
-            s = e; while (s < a.length) if (a[s++] >= 32) {s--; break;}
+            // find eol
+            e = s;
+            while (e < a.length) {
+                b = a[e];
+                if ((b == 10) || (b == 13)) break;
+                e++;
+            }
+            
+            // read line
+            if (encoding == null) {
+                v.add(new String(a, s, e - s));
+            } else try {
+                v.add(new String(a, s, e - s, encoding));
+            } catch (UnsupportedEncodingException xcptn) {
+                return v;
+            }
+            
+            // eat up additional eol bytes
+            s = e + 1;
+            while (s < a.length) {
+                b = a[s];
+                if ((b != 10) && (b != 13)) break;
+                s++;
+            }
         }
         return v;
     }
