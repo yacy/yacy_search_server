@@ -248,9 +248,21 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                             // creating an output stream
                             fos = new FileOutputStream(cacheFile); 
                             
+                            // getting content length
+                            long contentLength = (res.isGzipped()) ? res.getGzippedLength() : res.responseHeader.contentLength();
+                            
+                            // check if the file is too large to keep it in memory
+                            if (this.keepInMemory) {
+                                // if the content length is unknown or larger than 5MB we
+                                // do not keep resource in memory
+                                // TODO: make MAX_KEEP_IN_MEMORY_SIZE configureble
+                                if ((contentLength == -1) || (contentLength > 5 * 1024 * 1024)) {
+                                    this.keepInMemory = false;
+                                }
+                            }
+                            
                             // check the maximum allowed file size                            
-                            if (this.maxFileSize > -1) {
-                                long contentLength = (res.isGzipped()) ? res.getGzippedLength() : res.responseHeader.contentLength();
+                            if (this.maxFileSize > -1) {                                
                                 if (contentLength == -1) {
                                     fos = new httpdBoundedSizeOutputStream(fos,this.maxFileSize);                     
                                 } else if (contentLength > this.maxFileSize) {
