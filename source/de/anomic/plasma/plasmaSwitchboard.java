@@ -1751,6 +1751,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             document.close();
             document = null;
         } catch (Exception e) {
+            if (e instanceof InterruptedException) throw (InterruptedException)e;
             this.log.logSevere("Unexpected exception while parsing/indexing URL ",e);
         } catch (Error e) {
             this.log.logSevere("Unexpected exception while parsing/indexing URL ",e);
