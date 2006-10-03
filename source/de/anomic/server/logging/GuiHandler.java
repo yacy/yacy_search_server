@@ -201,7 +201,7 @@ public class GuiHandler extends Handler{
                 for (int i = 0; i < lineCount; i++) {
                     int ix = (reversed) ?
                                 Math.abs((start-i)%this.buffer.length) :
-                                (start+i)%this.buffer.length;
+                                (start - lineCount + i) % this.buffer.length;
                     record = this.buffer[ix];
                     logMessages.add(logFormatter.format(record));                
                 }             

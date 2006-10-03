@@ -48,6 +48,7 @@
 
 import java.util.logging.Handler;
 import java.util.logging.Logger;
+import java.util.regex.PatternSyntaxException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
@@ -60,7 +61,8 @@ public class ViewLog_p {
         serverObjects prop = new serverObjects();
         String[] log = new String[0];
         boolean reversed = false;
-        int lines = 50;
+        int lines = 200;
+        String filter = ".*.*";
         
         if(post != null){
             if(post.containsKey("mode") && ((String)post.get("mode")).equals("reversed")){
@@ -68,6 +70,9 @@ public class ViewLog_p {
             }
             if(post.containsKey("lines")){
                 lines = Integer.parseInt((String)post.get("lines"));
+            }
+            if(post.containsKey("filter")){
+                filter = (String)post.get("filter");
             }
         }
         
@@ -83,21 +88,26 @@ public class ViewLog_p {
         
         prop.put("reverseChecked", reversed ? 1 : 0);
         prop.put("lines", lines);
+        prop.put("filter", filter);
         
 
         int level = 0;
+        int lc = 0;
         for (int i=0; i < log.length; i++) {
-            String nextLogLine = log[i];
+            String nextLogLine = log[i].trim();
+            try {if (!(nextLogLine.matches(filter))) continue;} catch (PatternSyntaxException e) {}
+            
             if (nextLogLine.startsWith("E ")) level = 4;
             else if (nextLogLine.startsWith("W ")) level = 3;
             else if (nextLogLine.startsWith("S ")) level = 2;
             else if (nextLogLine.startsWith("I ")) level = 1;
             else if (nextLogLine.startsWith("D ")) level = 0;
             
-            prop.put("log_" + i + "_level",level);
-            prop.put("log_" + i + "_line", nextLogLine); 
+            prop.put("log_" + lc + "_level",level);
+            prop.put("log_" + lc + "_line", nextLogLine); 
+            lc++;
         }
-        prop.put("log",log.length);
+        prop.put("log",lc);
         
         // return rewrite properties
         return prop;

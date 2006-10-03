@@ -70,7 +70,7 @@ public class yacySearch extends Thread {
     final private plasmaURLPattern blacklist;
     final private plasmaSnippetCache snippetCache;
     final private yacySeed targetPeer;
-    private int links;
+    private String[] urls;
     private int maxDistance;
     final private plasmaSearchTimingProfile timingProfile;
     final private plasmaSearchRankingProfile rankingProfile;
@@ -94,18 +94,20 @@ public class yacySearch extends Thread {
         this.blacklist = blacklist;
         this.snippetCache = snippetCache;
         this.targetPeer = targetPeer;
-        this.links = -1;
+        this.urls = null;
         this.maxDistance = maxDistance;
         this.timingProfile = (plasmaSearchTimingProfile) timingProfile.clone();
         this.rankingProfile = rankingProfile;
     }
 
     public void run() {
-        this.links = yacyClient.search(wordhashes, urlhashes, prefer, filter, maxDistance, global, targetPeer, urlManager, containerCache, abstractCache, blacklist, snippetCache, timingProfile, rankingProfile);
-        yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + links + " links for word hash " + wordhashes);
-        if (links != 0) {
-            yacyCore.seedDB.mySeed.incRI(links);
-            yacyCore.seedDB.mySeed.incRU(links);
+        this.urls = yacyClient.search(wordhashes, urlhashes, prefer, filter, maxDistance, global, targetPeer, urlManager, containerCache, abstractCache, blacklist, snippetCache, timingProfile, rankingProfile);
+        StringBuffer urllist = new StringBuffer(this.urls.length * 13);
+        for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
+        yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls.length + " links for word hash " + wordhashes + ": " + new String(urllist));
+        if (urls != null) {
+            yacyCore.seedDB.mySeed.incRI(urls.length);
+            yacyCore.seedDB.mySeed.incRU(urls.length);
         }
     }
 
@@ -117,7 +119,7 @@ public class yacySearch extends Thread {
     }
 
     public int links() {
-        return this.links;
+        return this.urls.length;
     }
     
     public plasmaSearchTimingProfile timingProfile() {
@@ -241,7 +243,7 @@ public class yacySearch extends Thread {
     public static int collectedLinks(yacySearch[] searchThreads) {
         int links = 0;
         for (int i = 0; i < searchThreads.length; i++) {
-            if (!(searchThreads[i].isAlive())) links += searchThreads[i].links;
+            if (!(searchThreads[i].isAlive())) links += searchThreads[i].urls.length;
         }
         return links;
     }

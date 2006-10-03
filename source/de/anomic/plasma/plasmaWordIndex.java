@@ -363,8 +363,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             if (container == null) {
                 container = dhtInCache.getContainer(wordHash, urlselection, true, -1);
             } else {
-                indexContainer ic = dhtInCache.getContainer(wordHash, urlselection, true, -1);
-                if (ic != null) container.add(ic, -1);
+                container.add(dhtInCache.getContainer(wordHash, urlselection, true, -1), -1);
             }
         
             // get from collection index

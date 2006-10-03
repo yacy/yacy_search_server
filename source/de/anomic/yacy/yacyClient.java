@@ -364,7 +364,7 @@ public final class yacyClient {
         }
     }
 
-    public static int search(
+    public static String[] search(
             String wordhashes,
             String urlhashes,
             String prefer,
@@ -454,12 +454,12 @@ public final class yacyClient {
             } catch (IOException e) {
                 yacyCore.log.logFine("SEARCH failed FROM " + targetPeer.hash + ":" + targetPeer.getName() + " (" + e.getMessage() + "), score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes));
                 yacyCore.peerActions.peerDeparture(targetPeer);
-                return 0;
+                return null;
             }
 
             if (result.size() == 0) {
                 yacyCore.log.logFine("SEARCH failed FROM " + targetPeer.hash + ":" + targetPeer.getName() + " (zero response), score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes));
-                return 0;
+                return null;
             }
             
             // compute all computation times
@@ -497,6 +497,7 @@ public final class yacyClient {
 
             // insert results to containers
             plasmaCrawlLURL.Entry urlEntry;
+            String[] urls = new String[results];
             for (int n = 0; n < results; n++) {
                 // get one single search result
                 urlEntry = urlManager.newEntry((String) result.get("resource" + n), true);
@@ -540,6 +541,8 @@ public final class yacyClient {
                 for (int m = 0; m < words; m++) {
                     container[m].add(new indexEntry[]{entry}, System.currentTimeMillis());
                 }
+                // store url hash for statistics
+                urls[n] = urlEntry.hash();
             }
 
             // insert the containers to the index
@@ -574,11 +577,11 @@ public final class yacyClient {
                 searchtime = totalrequesttime;
             }
             yacyCore.log.logFine("SEARCH " + results + " URLS FROM " + targetPeer.hash + ":" + targetPeer.getName() + ", score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes) + ", duetime=" + duetime + ", searchtime=" + searchtime + ", netdelay=" + (totalrequesttime - searchtime) + ", references=" + result.get("references"));
-            return results;
+            return urls;
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.search error: '" + targetPeer.get(yacySeed.NAME, "anonymous") + "' failed - " + e);
             e.printStackTrace();
-            return 0;
+            return null;
         }
     }
 

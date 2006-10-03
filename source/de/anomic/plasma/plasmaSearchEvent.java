@@ -70,7 +70,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private plasmaCrawlLURL urlStore;
     private plasmaSnippetCache snippetCache;
     private indexContainer rcContainers; // cache for results
-    private int rcContainerCount;
+    private int rcContainerFlushCount;
     private Map rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private plasmaSearchTimingProfile profileLocal, profileGlobal;
     private boolean postsort;
@@ -92,7 +92,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.urlStore = urlStore;
         this.snippetCache = snippetCache;
         this.rcContainers = new indexContainer(null);
-        this.rcContainerCount = 0;
+        this.rcContainerFlushCount = 0;
         this.rcAbstracts = new TreeMap();
         this.profileLocal = localTiming;
         this.profileGlobal = remoteTiming;
@@ -434,7 +434,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // this must be called after search results had been computed
         // it is wise to call this within a separate thread because
         // this method waits until all threads are finished
-
+        serverLog.logFine("PLASMA", "STARTED FLUSHING GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
+        
         int remaining = 0;
         if (primarySearchThreads == null) return;
         long starttime = System.currentTimeMillis();
@@ -456,7 +457,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             //log.logFine("FINISHED FLUSH RESULTS PROCESS for query " + query.hashes(","));
         }
         
-        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + rcContainerCount + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
+        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + rcContainerFlushCount + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
             
         // finally delete the temporary index
         rcContainers = null;
@@ -483,7 +484,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 rcContainers.clear();
             }
         }
-        rcContainerCount += count;
+        rcContainerFlushCount += count;
     }
     
 }

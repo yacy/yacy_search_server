@@ -447,7 +447,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
         System.out.println("RESULT SIZE: " + c.size());
         */
-        
+        /*
+        // performance test for put
         long start = System.currentTimeMillis();
         kelondroRowSet c = new kelondroRowSet(new kelondroRow("byte[] a-12, byte[] b-12"), 0);
         Random random = new Random(0);
@@ -457,6 +458,40 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             c.put(c.rowdef.newEntry(new byte[][]{key, key}));
             if (i % 1000 == 0) System.out.println(i + " entries. ");
         }
+        System.out.println("RESULT SIZE: " + c.size());
+        System.out.println("Time: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+        */
+        
+        // remove test
+        long start = System.currentTimeMillis();
+        kelondroRowSet c = new kelondroRowSet(new kelondroRow("byte[] a-12, byte[] b-12"), 0);
+        byte[] key;
+        int testsize = 5000;
+        byte[][] delkeys = new byte[testsize / 5][];
+        Random random = new Random(0);
+        for (int i = 0; i < testsize; i++) {
+            key = randomHash(random);
+            if (i % 5 != 0) continue;
+            delkeys[i / 5] = key;
+        }
+        random = new Random(0);
+        for (int i = 0; i < testsize; i++) {
+            key = randomHash(random);
+            c.put(c.rowdef.newEntry(new byte[][]{key, key}));
+            if (i % 1000 == 0) {
+                for (int j = 0; j < delkeys.length; j++) c.remove(delkeys[j]);
+                c.shape();
+            }
+        }
+        for (int j = 0; j < delkeys.length; j++) c.remove(delkeys[j]);
+        c.shape();
+        random = new Random(0);
+        for (int i = 0; i < testsize; i++) {
+            key = randomHash(random);
+            if (i % 5 == 0) continue;
+            if (c.get(key) == null) System.out.println("missing entry " + new String(key));
+        }
+        c.shape();
         System.out.println("RESULT SIZE: " + c.size());
         System.out.println("Time: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
     }

@@ -214,7 +214,7 @@ public class kelondroRowCollection {
         int l = Math.min(rowdef.objectsize(), Math.min(alength, a.length - astart));
         synchronized (chunkcache) {
             ensureSize(chunkcount + 1);
-            System.arraycopy(a, 0, chunkcache, rowdef.objectsize() * chunkcount, l);
+            System.arraycopy(a, astart, chunkcache, rowdef.objectsize() * chunkcount, l);
             chunkcount++;
         }
         this.lastTimeWrote = System.currentTimeMillis();

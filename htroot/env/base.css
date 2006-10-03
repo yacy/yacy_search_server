@@ -341,7 +341,7 @@ dl.pairs dd {
 /* for pages: */
 
 body#ViewLog div.log {
-  height:480px;
+  height:600px;
   overflow:scroll;  
 }	
 
