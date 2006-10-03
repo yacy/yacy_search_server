@@ -296,146 +296,148 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         
         this.connectionProperties = conProp;
         
-        // getting some connection properties
-        String method     = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
-        String path       = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
-        String argsString = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS); // is null if no args were given
-        String httpVersion= conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
-        
-        // check hack attacks in path
-        if (path.indexOf("..") >= 0) {
-            httpd.sendRespondError(conProp,out,4,403,null,"Access not allowed",null);
-            return;
-        }
-        
-        // url decoding of path
+        String path = null;
         try {
-            path = URLDecoder.decode(path, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            // This should never occur
-            assert(false) : "UnsupportedEncodingException: " + e.getMessage();
-        }
-        
-        // check permission/granted access
-        String authorization = (String) requestHeader.get(httpHeader.AUTHORIZATION);
-        String adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "");
-        
-        int pos = path.lastIndexOf(".");
-        
-        if ((path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p") && (adminAccountBase64MD5.length() != 0)) {
-            //authentication required
-            //userDB
-            if(sb.userDB.hasAdminRight(authorization, conProp.getProperty("CLIENTIP"), requestHeader.getHeaderCookies())){
-                //Authentication successful. remove brute-force flag
-                serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
-            //static
-            }else if(authorization != null && sb.staticAdminAuthenticated(authorization.trim().substring(6))==4){
-                //Authentication successful. remove brute-force flag
-                serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
-            //no auth
-            }else if (authorization == null) {
-                // no authorization given in response. Ask for that
-                httpHeader headers = getDefaultHeaders(path);
-                headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
-                //httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
-                serverObjects tp=new serverObjects();
-                tp.put("returnto", path);
-                //TODO: separate errorpage Wrong Login / No Login
-                httpd.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, headers);
-                return;
-            } else {
-                // a wrong authentication was given or the userDB user does not have admin access. Ask again
-                String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
-                serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
-                Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
-                if (attempts == null)
-                    serverCore.bfHost.put(clientIP, new Integer(1));
-                else
-                    serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
-
-                httpHeader headers = getDefaultHeaders(path);
-                headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
-                httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
+            // getting some connection properties            
+            String method = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
+            path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
+            String argsString = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS); // is null if no args were given
+            String httpVersion= conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
+            
+            // check hack attacks in path
+            if (path.indexOf("..") >= 0) {
+                httpd.sendRespondError(conProp,out,4,403,null,"Access not allowed",null);
                 return;
             }
-        }
-        
-        
-        // parse arguments
-        serverObjects args = new serverObjects();
-        int argc;
-        if (argsString == null) {
-            // no args here, maybe a POST with multipart extension
-            int length = 0;
-            //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
-            if (method.equals(httpHeader.METHOD_POST)) {
-
-                GZIPInputStream gzipBody = null;
-                if (requestHeader.containsKey(httpHeader.CONTENT_LENGTH)) {
-                    length = Integer.parseInt((String) requestHeader.get(httpHeader.CONTENT_LENGTH));
-                } else if (requestHeader.gzip()) {
-                    length = -1;
-                    gzipBody = new GZIPInputStream(body);
-                }
-//                } else {
-//                    httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null); 
-//                    return;
-//                }
-                
-                // if its a POST, it can be either multipart or as args in the body
-                if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
-                        (((String) requestHeader.get(httpHeader.CONTENT_TYPE)).toLowerCase().startsWith("multipart"))) {
-                    // parse multipart
-                    HashMap files = httpd.parseMultipart(requestHeader, args, (gzipBody!=null)?gzipBody:body, length);
-                    // integrate these files into the args
-                    if (files != null) {
-                        Iterator fit = files.entrySet().iterator();
-                        Map.Entry entry;
-                        while (fit.hasNext()) {
-                            entry = (Map.Entry) fit.next();
-                            args.put(((String) entry.getKey()) + "$file", entry.getValue());
-                        }
-                    }
-                    argc = Integer.parseInt((String) requestHeader.get("ARGC"));
+            
+            // url decoding of path
+            try {
+                path = URLDecoder.decode(path, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                // This should never occur
+                assert(false) : "UnsupportedEncodingException: " + e.getMessage();
+            }
+            
+            // check permission/granted access
+            String authorization = (String) requestHeader.get(httpHeader.AUTHORIZATION);
+            String adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "");
+            
+            int pos = path.lastIndexOf(".");
+            
+            if ((path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p") && (adminAccountBase64MD5.length() != 0)) {
+                //authentication required
+                //userDB
+                if(sb.userDB.hasAdminRight(authorization, conProp.getProperty("CLIENTIP"), requestHeader.getHeaderCookies())){
+                    //Authentication successful. remove brute-force flag
+                    serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+                //static
+                }else if(authorization != null && sb.staticAdminAuthenticated(authorization.trim().substring(6))==4){
+                    //Authentication successful. remove brute-force flag
+                    serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+                //no auth
+                }else if (authorization == null) {
+                    // no authorization given in response. Ask for that
+                    httpHeader headers = getDefaultHeaders(path);
+                    headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
+                    //httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
+                    serverObjects tp=new serverObjects();
+                    tp.put("returnto", path);
+                    //TODO: separate errorpage Wrong Login / No Login
+                    httpd.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, headers);
+                    return;
                 } else {
-                    // parse args in body
-                    argc = httpd.parseArgs(args, (gzipBody!=null)?gzipBody:body, length);
-                }
-            } else {
-                // no args
-                argsString = null;
-                args = null;
-                argc = 0;
-            }
-        } else {
-            // simple args in URL (stuff after the "?")
-            argc = httpd.parseArgs(args, argsString);
-        }
-        
-        // check for cross site scripting - attacks in request arguments
-        if (argc > 0) {
-            // check all values for occurrences of script values
-            Enumeration e = args.elements(); // enumeration of values
-            Object val;
-            while (e.hasMoreElements()) {
-                val = e.nextElement();
-                if ((val != null) && (val instanceof String) && (((String) val).indexOf("<script") >= 0)) {
-                    // deny request
-                    httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null);
+                    // a wrong authentication was given or the userDB user does not have admin access. Ask again
+                    String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
+                    serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
+                    Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
+                    if (attempts == null)
+                        serverCore.bfHost.put(clientIP, new Integer(1));
+                    else
+                        serverCore.bfHost.put(clientIP, new Integer(attempts.intValue() + 1));
+    
+                    httpHeader headers = getDefaultHeaders(path);
+                    headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
+                    httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                     return;
                 }
             }
-        }
         
-        // we are finished with parsing
-        // the result of value hand-over is in args and argc
-        if (path.length() == 0) {
-            httpd.sendRespondError(conProp,out,4,400,null,"Bad Request",null);
-            out.flush();
-            return;
-        }
-        File targetClass=null;
-        try {
+        
+            // parse arguments
+            serverObjects args = new serverObjects();
+            int argc;
+            if (argsString == null) {
+                // no args here, maybe a POST with multipart extension
+                int length = 0;
+                //System.out.println("HEADER: " + requestHeader.toString()); // DEBUG
+                if (method.equals(httpHeader.METHOD_POST)) {
+    
+                    GZIPInputStream gzipBody = null;
+                    if (requestHeader.containsKey(httpHeader.CONTENT_LENGTH)) {
+                        length = Integer.parseInt((String) requestHeader.get(httpHeader.CONTENT_LENGTH));
+                    } else if (requestHeader.gzip()) {
+                        length = -1;
+                        gzipBody = new GZIPInputStream(body);
+                    }
+    //                } else {
+    //                    httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null); 
+    //                    return;
+    //                }
+                    
+                    // if its a POST, it can be either multipart or as args in the body
+                    if ((requestHeader.containsKey(httpHeader.CONTENT_TYPE)) &&
+                            (((String) requestHeader.get(httpHeader.CONTENT_TYPE)).toLowerCase().startsWith("multipart"))) {
+                        // parse multipart
+                        HashMap files = httpd.parseMultipart(requestHeader, args, (gzipBody!=null)?gzipBody:body, length);
+                        // integrate these files into the args
+                        if (files != null) {
+                            Iterator fit = files.entrySet().iterator();
+                            Map.Entry entry;
+                            while (fit.hasNext()) {
+                                entry = (Map.Entry) fit.next();
+                                args.put(((String) entry.getKey()) + "$file", entry.getValue());
+                            }
+                        }
+                        argc = Integer.parseInt((String) requestHeader.get("ARGC"));
+                    } else {
+                        // parse args in body
+                        argc = httpd.parseArgs(args, (gzipBody!=null)?gzipBody:body, length);
+                    }
+                } else {
+                    // no args
+                    argsString = null;
+                    args = null;
+                    argc = 0;
+                }
+            } else {
+                // simple args in URL (stuff after the "?")
+                argc = httpd.parseArgs(args, argsString);
+            }
+        
+            // check for cross site scripting - attacks in request arguments
+            if (argc > 0) {
+                // check all values for occurrences of script values
+                Enumeration e = args.elements(); // enumeration of values
+                Object val;
+                while (e.hasMoreElements()) {
+                    val = e.nextElement();
+                    if ((val != null) && (val instanceof String) && (((String) val).indexOf("<script") >= 0)) {
+                        // deny request
+                        httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null);
+                        return;
+                    }
+                }
+            }
+        
+            // we are finished with parsing
+            // the result of value hand-over is in args and argc
+            if (path.length() == 0) {
+                httpd.sendRespondError(conProp,out,4,400,null,"Bad Request",null);
+                out.flush();
+                return;
+            }
+            File targetClass=null;
+
             // locate the file
             if (!(path.startsWith("/"))) path = "/" + path; // attach leading slash
             File   targetFile  = getLocalizedFile(path);
