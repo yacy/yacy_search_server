@@ -45,7 +45,10 @@ package de.anomic.plasma.parser.odt;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.zip.ZipEntry;
@@ -61,6 +64,7 @@ import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
@@ -93,8 +97,9 @@ public class odtParser extends AbstractParser implements Parser {
     
     public plasmaParserDocument parse(URL location, String mimeType, String charset, File dest) throws ParserException, InterruptedException {
         
+        Writer writer = null;
+        File writerFile = null;
         try {          
-            byte[] docContent     = null;
             String docDescription = null;
             String docKeywordStr    = null;
             String docShortTitle  = null;
@@ -115,12 +120,27 @@ public class odtParser extends AbstractParser implements Parser {
                 
                 // content.xml contains the document content in xml format
                 if (entryName.equals("content.xml")) {
+                    long contentSize = zipEntry.getSize();
+                    
+                    // creating a writer for output
+                    if ((contentSize == -1) || (contentSize > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
+                        writerFile = File.createTempFile("odtParser",".tmp");
+                        writer = new OutputStreamWriter(new FileOutputStream(writerFile),"UTF-8");
+                    } else {
+                        writer = new serverCharBuffer(); 
+                    }                    
+                    
+                    // extract data
                     InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
                     OpenDocumentTextInputStream odStream = new OpenDocumentTextInputStream(zipFileEntryStream);
-                    docContent = serverFileUtils.read(odStream); 
+                    serverFileUtils.copy(odStream, writer, "UTF-8");
                 
-                // meta.xml contains metadata about the document
+                    // close readers and writers
+                    odStream.close();
+                    writer.close();
+                    
                 } else if (entryName.equals("meta.xml")) {
+                    //  meta.xml contains metadata about the document
                     InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
                     ODFMetaFileAnalyzer metaAnalyzer = new ODFMetaFileAnalyzer();
                     OpenDocumentMetadata metaData = metaAnalyzer.analyzeMetaData(zipFileEntryStream);
@@ -128,47 +148,60 @@ public class odtParser extends AbstractParser implements Parser {
                     docKeywordStr    = metaData.getKeyword();
                     docShortTitle  = metaData.getTitle();
                     docLongTitle   = metaData.getSubject();
-                    
-                    // if there is no title availabe we generate one
-                    if (docLongTitle == null) {
-                        if (docShortTitle != null) {
-                            docLongTitle = docShortTitle;
-                        } else if (docContent != null && docContent.length <= 80) {
-                            docLongTitle = new String(docContent, "UTF-8");
-                        } else {
-                            byte[] title = new byte[80];
-                            System.arraycopy(docContent, 0, title, 0, 80);
-                            docLongTitle = new String(title, "UTF-8");
-                        }
-                        docLongTitle.
-                        replaceAll("\r\n"," ").
-                        replaceAll("\n"," ").
-                        replaceAll("\r"," ").
-                        replaceAll("\t"," ");
-                    }
                 }
             }
+            
+            // if there is no title availabe we generate one
+            if (docLongTitle == null) {
+                if (docShortTitle != null) {
+                    docLongTitle = docShortTitle;
+                } 
+            }            
          
             // split the keywords
             String[] docKeywords = null;
             if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
             
             // create the parser document
-            return new plasmaParserDocument(
-                    location,
-                    mimeType,
-                    "UTF-8",
-                    docKeywords,
-                    docShortTitle, 
-                    docLongTitle,
-                    null,
-                    docDescription,
-                    docContent,
-                    null,
-                    null);
+            plasmaParserDocument theDoc = null;
+            if (writer instanceof serverCharBuffer) {
+                byte[] contentBytes = ((serverCharBuffer)writer).toString().getBytes("UTF-8");
+                theDoc = new plasmaParserDocument(
+                        location,
+                        mimeType,
+                        "UTF-8",
+                        docKeywords,
+                        docShortTitle, 
+                        docLongTitle,
+                        null,
+                        docDescription,
+                        contentBytes,
+                        null,
+                        null);
+            } else {
+                theDoc = new plasmaParserDocument(
+                        location,
+                        mimeType,
+                        "UTF-8",
+                        docKeywords,
+                        docShortTitle, 
+                        docLongTitle,
+                        null,
+                        docDescription,
+                        writerFile,
+                        null,
+                        null);
+            }
+            return theDoc;
         } catch (Exception e) {            
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
+            
+            // close the writer
+            if (writer != null) try { writer.close(); } catch (Exception ex) {/* ignore this */}
+            
+            // delete the file
+            if (writerFile != null) try { writerFile.delete(); } catch (Exception ex)  {/* ignore this */}            
             
             throw new ParserException("Unexpected error while parsing odt file. " + e.getMessage(),location); 
         }
