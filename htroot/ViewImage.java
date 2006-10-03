@@ -43,11 +43,14 @@ import java.awt.Container;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Toolkit;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -70,9 +73,20 @@ public class ViewImage {
         int maxheight = post.getInt("maxheight", 0);
         int timeout = post.getInt("timeout", 5000);
         
-        // load image
-        byte[] imgb = sb.snippetCache.getResource(url, true, timeout);
-        if (imgb == null) return null;
+        // getting the image as stream
+        InputStream imgStream = (InputStream) sb.snippetCache.getResource(url, true, timeout)[0];
+        if (imgStream == null) return null;
+        
+        // read image data
+        byte[] imgb = null;
+        try {
+            imgb = serverFileUtils.read(imgStream);
+        } catch (IOException e) {
+            return null;
+        } finally {
+            try { imgStream.close(); } catch (Exception e) {/* ignore this */}
+        }
+        
         
         // create image 
         MediaTracker mediaTracker = new MediaTracker(new Container()); 

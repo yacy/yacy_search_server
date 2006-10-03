@@ -163,15 +163,23 @@ public final class plasmaCrawlLoader extends Thread {
         return this.theThreadGroup;
     }
     
-    private void execute(plasmaCrawlLoaderMessage theMsg) throws Exception {
+    private void execute(plasmaCrawlLoaderMessage theMsg, boolean useThreadPool) throws Exception {
         // getting the protocol of the next URL                
         String protocol = theMsg.url.getProtocol();
         
         // TODO: remove this
         if (protocol.equals("https")) protocol = "http";
         
-        // getting a new crawler from the crawler pool
-        plasmaCrawlWorker theWorker = (plasmaCrawlWorker) this.crawlwerPool.borrowObject(protocol);
+        // get a new worker thread
+        plasmaCrawlWorker theWorker = null;
+        if (useThreadPool) {
+            // getting a new crawler from the crawler pool
+            theWorker = (plasmaCrawlWorker) this.crawlwerPool.borrowObject(protocol);
+        } else {
+            // create a new one
+            theWorker = (plasmaCrawlWorker) this.crawlwerPool.getFactory().makeObject(protocol,false);
+        }
+        
         if (theWorker == null) {
             this.log.logWarning("Unsupported protocol '" + protocol + "' in url " + theMsg.url);
         } else {
@@ -187,7 +195,7 @@ public final class plasmaCrawlLoader extends Thread {
                 plasmaCrawlLoaderMessage theMsg = this.theQueue.waitForMessage();
 
                 // start new crawl job
-                this.execute(theMsg);
+                this.execute(theMsg, true);
 
             } catch (InterruptedException e) {
                 Thread.interrupted();
@@ -218,7 +226,8 @@ public final class plasmaCrawlLoader extends Thread {
             String initiator, 
             int depth, 
             plasmaCrawlProfile.entry profile,
-            int timeout
+            int timeout,
+            boolean keepInMemory
     ) throws plasmaCrawlerException {
 
         plasmaHTCache.Entry result = null;
@@ -235,13 +244,14 @@ public final class plasmaCrawlLoader extends Thread {
                     profile, 
                     crawlingPriority,
                     true,
-                    timeout
+                    timeout,
+                    keepInMemory
             );
 
 
             try {
                 // start new crawl job
-                this.execute(theMsg);
+                this.execute(theMsg, false);
 
                 // wait for the crawl job result
                 result = theMsg.waitForResult();                
@@ -283,7 +293,8 @@ public final class plasmaCrawlLoader extends Thread {
                     profile,            // crawling profile
                     crawlingPriority,   // crawling priority
                     false,              // only download documents whose mimetypes are enabled for the crawler
-                    -1                  // use default crawler timeout
+                    -1,                 // use default crawler timeout
+                    false               // resource should not be kept in memory 
             );
             
             // adding the message to the queue

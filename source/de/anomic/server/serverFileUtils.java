@@ -144,7 +144,7 @@ public final class serverFileUtils {
     
     public static void writeX(InputStream source, String inputCharset, Writer procOS, OutputStream bufferOS, String outputCharset) throws IOException {
         InputStreamReader sourceReader = new InputStreamReader(source,inputCharset);
-        OutputStreamWriter bufferOSWriter = new OutputStreamWriter(bufferOS,outputCharset);
+        OutputStreamWriter bufferOSWriter = (bufferOS==null)?null:new OutputStreamWriter(bufferOS,outputCharset);
         writeX(sourceReader,procOS,bufferOSWriter);
     }    
 

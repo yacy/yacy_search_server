@@ -117,6 +117,8 @@ public interface Parser {
      */
     public void reset();
     
+    public void setContentLength(long length);
+    
     /**
      * @return Returns a list of library names that are needed by this parser
      */

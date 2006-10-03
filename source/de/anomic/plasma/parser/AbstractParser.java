@@ -90,7 +90,7 @@ public abstract class AbstractParser implements Parser{
      * The source file file size in bytes if the source document was passed
      * in as file
      */
-    protected long fileSize = -1;
+    protected long contentLength = -1;
     
     /**
      * The Constructor of this class.
@@ -99,6 +99,15 @@ public abstract class AbstractParser implements Parser{
 		super();
         this.libxDependencies = libxDependencies;
 	}
+    
+    /**
+     * Set the content length of the source file.
+     * This value is needed by some parsers to decide
+     * if the parsed text could be hold in memory
+     */
+    public void setContentLength(long length) {
+        this.contentLength = length;
+    }
 
     /**
      * Check if the parser was interrupted.
@@ -185,7 +194,7 @@ public abstract class AbstractParser implements Parser{
         BufferedInputStream contentInputStream = null;
         try {
             // getting the file size of the document
-            this.fileSize = sourceFile.length();            
+            this.contentLength = sourceFile.length();            
             
             // create a stream from the file
             contentInputStream = new BufferedInputStream(new FileInputStream(sourceFile));
@@ -241,5 +250,9 @@ public abstract class AbstractParser implements Parser{
      */
     public String getName() {
         return this.parserName;
+    }
+    
+    public void reset() {
+        this.contentLength = -1;
     }
 }

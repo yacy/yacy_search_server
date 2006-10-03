@@ -45,6 +45,7 @@
 //if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -60,6 +61,7 @@ import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.crawler.plasmaCrawlerException;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.plasmaCrawlLURL.Entry;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -121,18 +123,20 @@ public class ViewFile {
             }    
 
             // loading the resource content as byte array
-            byte[] resource = null;
+            InputStream resource = null;
+            long resourceLength = -1;
             IResourceInfo resInfo = null;
             String resMime = null;
             try {
                 // trying to load the resource body
-                resource = sb.cacheManager.loadResourceContent(url);
+                resource = sb.cacheManager.getResourceContentStream(url);
+                resourceLength = sb.cacheManager.getResourceContentLength(url);
 
                 // if the resource body was not cached we try to load it from web
                 if (resource == null) {
                     plasmaHTCache.Entry entry = null;
                     try {
-                        entry = sb.snippetCache.loadResourceFromWeb(url, 5000);
+                        entry = sb.snippetCache.loadResourceFromWeb(url, 5000, false);
                     } catch (plasmaCrawlerException e) {
                         prop.put("error",4);
                         prop.put("error_errorText",e.getMessage());
@@ -142,11 +146,13 @@ public class ViewFile {
 
                     if (entry != null) {
                         resInfo = entry.getDocumentInfo();
-                        resource = sb.cacheManager.loadResourceContent(url);
+                        resource = sb.cacheManager.getResourceContentStream(url);
+                        resourceLength = sb.cacheManager.getResourceContentLength(url);
                     }
 
                     if (resource == null) {
                         prop.put("error",4);
+                        prop.put("error_errorText","No resource available");
                         prop.put("viewMode",VIEW_MODE_NO_TEXT);
                         return prop;
                     } 
@@ -172,21 +178,46 @@ public class ViewFile {
                         httpHeader responseHeader = httpc.whead(url,url.getHost(),5000,null,null,sb.remoteProxyConfig);
                         if (responseHeader == null) {
                             prop.put("error",4);
+                            prop.put("error_errorText","Unable to load resource metadata.");
                             prop.put("viewMode",VIEW_MODE_NO_TEXT);
                             return prop;
                         } 
+                        try {
+                            resInfo = sb.cacheManager.getResourceInfoFactory().buildResourceInfoObj(url, responseHeader);
+                        } catch (Exception e) {
+                            prop.put("error",4);
+                            prop.put("error_errorText",e.getMessage());
+                            prop.put("viewMode",VIEW_MODE_NO_TEXT);
+                            return prop;
+                        }
                         resMime = responseHeader.mime();
                     }
                 } else {
                     resMime = resInfo.getMimeType();
                 }
             } catch (IOException e) {
+                if (resource != null) try { resource.close(); } catch (Exception ex) {/* ignore this */}
                 prop.put("error",4);
+                prop.put("error_errorText",e.getMessage());
                 prop.put("viewMode",VIEW_MODE_NO_TEXT);
                 return prop; 
-            }    
-            if (viewMode.equals("plain")) {                
-                String content = new String(resource);
+            } 
+            
+            if (viewMode.equals("plain")) {
+                
+                // TODO: how to handle very large files here ?
+                String content;
+                try {
+                    content = new String(serverFileUtils.read(resource),"UTF-8");
+                } catch (Exception e) {
+                    prop.put("error",4);
+                    prop.put("error_errorText",e.getMessage());
+                    prop.put("viewMode",VIEW_MODE_NO_TEXT);
+                    return prop;                     
+                } finally {
+                    if (resource != null) try { resource.close(); } catch (Exception e) {/* ignore this */}
+                }
+                
                 content = content.replaceAll("<","&lt;")
                 .replaceAll(">","&gt;")
                 .replaceAll("\"","&quot;")
@@ -195,12 +226,15 @@ public class ViewFile {
 
                 prop.put("error",0);
                 prop.put("viewMode",VIEW_MODE_AS_PLAIN_TEXT);
-                prop.put("viewMode_plainText",content);                     
-            } else if (viewMode.equals("parsed") || viewMode.equals("sentences") || viewMode.equals("iframe")) {
+                prop.put("viewMode_plainText",content); 
+            } else if (viewMode.equals("iframe")) {
+                prop.put("viewMode",VIEW_MODE_AS_IFRAME);
+                prop.put("viewMode_url",url.toString());                
+            } else if (viewMode.equals("parsed") || viewMode.equals("sentences")) {
                 // parsing the resource content
                 plasmaParserDocument document = null;
                 try {
-                    document = sb.snippetCache.parseDocument(url, resource,resInfo);
+                    document = sb.snippetCache.parseDocument(url, resourceLength, resource,resInfo);
                     if (document == null) {
                         prop.put("error",5);
                         prop.put("error_errorText","Unknown error");
@@ -212,7 +246,10 @@ public class ViewFile {
                     prop.put("error_errorText",e.getMessage());
                     prop.put("viewMode",VIEW_MODE_NO_TEXT);
                     return prop;     
+                } finally {
+                    if (resource != null) try { resource.close(); } catch (Exception e) {/* ignore this */}
                 }
+                
                 resMime = document.getMimeType();
 
                 if (viewMode.equals("parsed")) {
@@ -223,9 +260,6 @@ public class ViewFile {
 
                     prop.put("viewMode",VIEW_MODE_AS_PARSED_TEXT);
                     prop.put("viewMode_parsedText",content);
-                } else if (viewMode.equals("iframe")) {
-                    prop.put("viewMode",VIEW_MODE_AS_IFRAME);
-                    prop.put("viewMode_url",url.toString());
                 } else {
                     prop.put("viewMode",VIEW_MODE_AS_PARSED_SENTENCES);
                     String[] sentences = document.getSentences();

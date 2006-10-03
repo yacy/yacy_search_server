@@ -53,9 +53,12 @@
 
 package de.anomic.plasma;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -701,15 +704,50 @@ public final class plasmaHTCache {
         return null;
     }
 
+    /**
+     * @param url
+     * @return
+     * 
+     * @deprecated dont't use this function to avoid OutOfMemory-Exceptions.
+     *  Use {@link #getResourceContentStream(URL)} instead 
+     */
     public byte[] loadResourceContent(URL url) {
         // load the url as resource from the cache
         File f = getCachePath(url);
-        if (f.exists()) try {
+        if (f.exists() && f.canRead()) try {
             return serverFileUtils.read(f);
         } catch (IOException e) {
             return null;
         }
         return null;
+    }
+    
+    /**
+     * Returns the content of a cached resource as {@link InputStream}
+     * @param url the requested resource
+     * @return the resource content as {@link InputStream}. In no data
+     * is available or the cached file is not readable, <code>null</code>
+     * is returned.
+     */
+    public InputStream getResourceContentStream(URL url) {
+        // load the url as resource from the cache
+        File f = getCachePath(url);
+        if (f.exists() && f.canRead()) try {
+            return new BufferedInputStream(new FileInputStream(f));
+        } catch (IOException e) {
+            this.log.logSevere("Unable to create a BufferedInputStream from file " + f,e);
+            return null;
+        }
+        return null;        
+    }
+    
+    public long getResourceContentLength(URL url) {
+        // load the url as resource from the cache
+        File f = getCachePath(url);
+        if (f.exists() && f.canRead()) {
+            return f.length();
+        } 
+        return 0;           
     }
 
     public static boolean isPOST(String urlString) {

@@ -52,15 +52,22 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import de.anomic.server.logging.serverLog;
 
 public final class plasmaCrawlerPool extends GenericKeyedObjectPool {
+    
+    private plasmaCrawlerFactory theFactory;
     private final ThreadGroup theThreadGroup;
     public boolean isClosed = false;
 
     public plasmaCrawlerPool(plasmaCrawlerFactory objFactory, GenericKeyedObjectPool.Config config, ThreadGroup threadGroup) {
         super(objFactory, config);
+        this.theFactory = objFactory;
         this.theThreadGroup = threadGroup;
         objFactory.setPool(this);
     }
 
+    public plasmaCrawlerFactory getFactory() {
+        return this.theFactory;
+    }
+    
     public Object borrowObject(Object key) throws Exception  {
        return super.borrowObject(key);
     }

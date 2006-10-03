@@ -262,8 +262,9 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                             }
 
                             // we write the new cache entry to file system directly
-                            res.writeContent(fos);
-                            htCache.setCacheArray(null);
+                            byte[] cacheArray = null;
+                            cacheArray = res.writeContent(fos,this.keepInMemory);
+                            htCache.setCacheArray(cacheArray);
                             this.cacheManager.writeFileAnnouncement(cacheFile);
                         } finally {
                             if (fos!=null)try{fos.close();}catch(Exception e){/* ignore this */}

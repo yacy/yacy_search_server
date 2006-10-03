@@ -662,7 +662,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 if ((contentLength > 0) && (contentLength < 1048576)) // if the length is known and < 1 MB
                 {
                     // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
-                    byte[] cacheArray = res.writeContent(hfos);
+                    byte[] cacheArray = res.writeContent(hfos,true);
                     this.theLogger.logFine("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
 
                     if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();

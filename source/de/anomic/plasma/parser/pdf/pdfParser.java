@@ -132,7 +132,7 @@ public class pdfParser extends AbstractParser implements Parser {
             }            
             
             // creating a writer for output
-            if ((this.fileSize != -1) && (this.fileSize > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
+            if ((this.contentLength == -1) || (this.contentLength > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
                 writerFile = File.createTempFile("pdfParser",".tmp");
                 writer = new OutputStreamWriter(new FileOutputStream(writerFile),"UTF-8");
             } else {
@@ -199,7 +199,8 @@ public class pdfParser extends AbstractParser implements Parser {
     }
     
     public void reset() {
-        this.fileSize = -1;
+        // Nothing todo here at the moment
+        super.reset();
     }
 
 }

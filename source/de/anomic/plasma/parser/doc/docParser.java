@@ -118,6 +118,7 @@ implements Parser {
 
 	public void reset() {
         // Nothing todo here at the moment
+        super.reset();
 	}
 
 }

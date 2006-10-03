@@ -56,6 +56,7 @@ public final class plasmaCrawlLoaderMessage {
     public final plasmaCrawlProfile.entry profile;
     public final boolean acceptAllContent;
     public final int timeout;
+    public final boolean keepInMemory;
     
     private serverSemaphore resultSync  = null;
     private plasmaHTCache.Entry result;
@@ -71,7 +72,8 @@ public final class plasmaCrawlLoaderMessage {
             plasmaCrawlProfile.entry profile,
             int crawlingPriority,
             boolean acceptAllContent,
-            int timeout
+            int timeout,
+            boolean keepInMemory
     ) {
         this.url = url;
         this.name = name;
@@ -82,6 +84,7 @@ public final class plasmaCrawlLoaderMessage {
         this.crawlingPriority = crawlingPriority;
         this.acceptAllContent = acceptAllContent;
         this.timeout = timeout;
+        this.keepInMemory = keepInMemory;
         
         this.resultSync  = new serverSemaphore(0);
         this.result = null;

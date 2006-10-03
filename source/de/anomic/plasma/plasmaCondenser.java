@@ -671,11 +671,16 @@ public final class plasmaCondenser {
     }
     */
     
+    public static Iterator getWords(InputStream input) {
+        if (input == null) return null;
+        plasmaCondenser condenser = new plasmaCondenser(input);
+        return condenser.words();        
+    }
+    
     public static Iterator getWords(byte[] text) {
         if (text == null) return null;
         ByteArrayInputStream buffer = new ByteArrayInputStream(text);
-        plasmaCondenser condenser = new plasmaCondenser(buffer);
-        return condenser.words();
+        return getWords(buffer);
     }
         
     public static void main(String[] args) {

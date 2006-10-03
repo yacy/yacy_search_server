@@ -102,7 +102,7 @@ public class zipParser extends AbstractParser implements Parser {
         File outputFile = null;
         plasmaParserDocument subDoc = null;
         try {           
-            if ((this.fileSize != -1) && (this.fileSize > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
+            if ((this.contentLength == -1) || (this.contentLength > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
                 outputFile = File.createTempFile("zipParser",".tmp");
                 docText = new BufferedOutputStream(new FileOutputStream(outputFile));
             } else {
@@ -235,7 +235,7 @@ public class zipParser extends AbstractParser implements Parser {
     }
     
     public void reset() {
-		// Nothing todo here at the moment
-    	
+        // Nothing todo here at the moment
+        super.reset();
     }
 }

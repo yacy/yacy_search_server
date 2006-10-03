@@ -84,10 +84,14 @@ public final class plasmaCrawlerFactory implements KeyedPoolableObjectFactory {
         this.thePool = pool;    
     }
 
+    public Object makeObject(Object key) throws Exception { 
+        return makeObject(key, true);
+    }
+    
     /**
      * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
      */
-    public Object makeObject(Object key) throws Exception {        
+    public Object makeObject(Object key, boolean usePool) throws Exception {        
         if (!(key instanceof String))
             throw new IllegalArgumentException("The object key must be of type string.");        
         
@@ -109,11 +113,11 @@ public final class plasmaCrawlerFactory implements KeyedPoolableObjectFactory {
         // instantiating class
         plasmaCrawlWorker theCrawlWorker = (plasmaCrawlWorker) classConstructor.newInstance(new Object[] {
               this.theThreadGroup,
-              this.thePool,
+              (usePool)?this.thePool:null,
               this.sb,
               this.cacheManager,
               this.theLog
-        });        
+        });           
         
         // return the newly created object
         return theCrawlWorker;

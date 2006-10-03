@@ -105,6 +105,7 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -2181,17 +2182,32 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         URL url = entry.url();
         if (url == null) return 0;
         
+        InputStream resourceContent = null;
         try {
-            // get set of words
-            // Set words = plasmaCondenser.getWords(getText(getResource(url, fetchOnline)));
-            Iterator witer = plasmaCondenser.getWords(snippetCache.parseDocument(url, snippetCache.getResource(url, fetchOnline, 10000)).getTextBytes());
+            // get the resource content
+            Object[] resource = snippetCache.getResource(url, fetchOnline, 10000);
+            resourceContent = (InputStream) resource[0];
+            Long resourceContentLength = (Long) resource[1];
+            
+            // parse the resource
+            plasmaParserDocument document = snippetCache.parseDocument(url, resourceContentLength.longValue(), resourceContent);
+            
+            // getting parsed body input stream
+            InputStream docBodyInputStream = document.getText();
+            
+            // getting word iterator
+            Iterator witer = plasmaCondenser.getWords(docBodyInputStream);
+            
             // delete all word references
             int count = removeReferences(urlhash, witer);
+            
             // finally delete the url entry itself
             urlPool.loadedURL.remove(urlhash);
             return count;
         } catch (ParserException e) {
             return 0;
+        } finally {
+            if (resourceContent != null) try { resourceContent.close(); } catch (Exception e) {/* ignore this */}
         }
     }
     

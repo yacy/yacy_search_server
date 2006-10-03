@@ -211,8 +211,8 @@ public class rssParser extends AbstractParser implements Parser {
 	}
 
 	public void reset() {
-		// TODO Auto-generated method stub
-
+        // Nothing todo here at the moment
+        super.reset();
 	}
 
 }

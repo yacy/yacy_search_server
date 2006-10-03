@@ -187,8 +187,7 @@ implements Parser {
         }
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType,String charset,
-            InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(URL location, String mimeType,String charset, InputStream source) throws ParserException, InterruptedException {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("mimeTypeParser",".tmp");
@@ -208,6 +207,7 @@ implements Parser {
     
     public void reset() {
         // Nothing todo here at the moment
+        super.reset();
     }
     
 }

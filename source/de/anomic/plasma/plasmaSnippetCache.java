@@ -44,7 +44,9 @@
 
 package de.anomic.plasma;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -187,46 +189,62 @@ public class plasmaSnippetCache {
          * LOADING RESOURCE DATA
          * =========================================================================== */
         // if the snippet is not in the cache, we can try to get it from the htcache
-        byte[] resource = null;
-        IResourceInfo docInfo = null;
+        long resContentLength = 0;
+        InputStream resContent = null;
+        IResourceInfo resInfo = null;
         try {
             // trying to load the resource from the cache
-            resource = this.cacheManager.loadResourceContent(url);
+            resContent = this.cacheManager.getResourceContentStream(url);
+            if (resContent != null) {
+                // if the content was found
+                resContentLength = this.cacheManager.getResourceContentLength(url);
+                
+                // getting resource metadata
+                resInfo = this.cacheManager.loadResourceInfo(url);
             
-            // if not found try to download it
-            if ((resource == null) && (fetchOnline)) {
-                // download resource using the crawler
-                plasmaHTCache.Entry entry = loadResourceFromWeb(url, timeout);
+            } else if (fetchOnline) {
+                // if not found try to download it
+                
+                // download resource using the crawler and keep resource in memory if possible
+                plasmaHTCache.Entry entry = loadResourceFromWeb(url, timeout, true);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
-                if (entry != null) docInfo = entry.getDocumentInfo();
+                if (entry != null) {
+                    resInfo = entry.getDocumentInfo();
+
+                    // read resource body (if it is there)
+                    byte []resourceArray = entry.cacheArray();
+                    if (resourceArray != null) {
+                        resContent = new ByteArrayInputStream(resourceArray);
+                        resContentLength = resourceArray.length;
+                    } else {
+                        resContent = this.cacheManager.getResourceContentStream(url); 
+                        resContentLength = this.cacheManager.getResourceContentLength(url);
+                    }
+                }
                 
-                // read resource body (if it is there)
-                resource = entry.cacheArray();
+                // if it is still not available, report an error
+                if (resContent == null) return new Snippet(null, ERROR_RESOURCE_LOADING, "error loading resource, plasmaHTCache.Entry cache is NULL");                
                 
-                // in case that the reosurce was not in ram, read it from disk
-                if (resource == null) resource = this.cacheManager.loadResourceContent(url);
-                
-                // if it is still not available, throw exception
-                if (resource == null) return new Snippet(null, ERROR_RESOURCE_LOADING, "error loading resource, plasmaHTCache.Entry cache is NULL");
-                            
                 source = SOURCE_WEB;
+            } else {
+                return new Snippet(null, ERROR_SOURCE_LOADING, "no resource available");
             }
         } catch (Exception e) {
             if (!(e instanceof plasmaCrawlerException)) e.printStackTrace();
             return new Snippet(null, ERROR_SOURCE_LOADING, "error loading resource: " + e.getMessage());
-        }
+        } 
 
-        if (resource == null) return new Snippet(null, ERROR_SOURCE_LOADING, "no resource available");
-        
         /* ===========================================================================
          * PARSING RESOURCE
          * =========================================================================== */
         plasmaParserDocument document = null;
         try {
-             document = parseDocument(url, resource, docInfo);            
+             document = parseDocument(url, resContentLength, resContent, resInfo);            
         } catch (ParserException e) {
             return new Snippet(null, ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
+        } finally {
+            try { resContent.close(); } catch (Exception e) {/* ignore this */}
         }
         if (document == null) return new Snippet(null, ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
                 
@@ -263,30 +281,40 @@ public class plasmaSnippetCache {
      * @return the parsed document as {@link plasmaParserDocument}
      */
     public plasmaParserDocument retrieveDocument(URL url, boolean fetchOnline) {
-        byte[] resource = null;
         IResourceInfo docInfo = null;
         try {
             // trying to load the resource body from cache
-            resource = this.cacheManager.loadResourceContent(url);
+            InputStream content = this.cacheManager.getResourceContentStream(url);
+            long resourceLength = this.cacheManager.getResourceContentLength(url);
             
             // if not available try to load resource from web
-            if ((fetchOnline) && (resource == null)) {
+            if ((fetchOnline) && (content == null)) {
                 // download resource using crawler
-                plasmaHTCache.Entry entry = loadResourceFromWeb(url, 5000);
+                plasmaHTCache.Entry entry = loadResourceFromWeb(url, 5000, true);
                 
                 // fetching metadata of the resource (e.g. http headers for http resource)
-                if (entry != null) docInfo = entry.getDocumentInfo();
-                
-                // getting the resource body from the cache
-                resource = this.cacheManager.loadResourceContent(url);
+                if (entry != null) {
+                    docInfo = entry.getDocumentInfo();
+                    
+                    byte[] resourceArray = entry.cacheArray();
+                    if (resourceArray != null) {
+                        // read resource body (if it is there)
+                        content = new ByteArrayInputStream(resourceArray);
+                        resourceLength = resourceArray.length;
+                    } else {
+                        // in case that the reosurce was not in ram, read it from disk
+                        content = this.cacheManager.getResourceContentStream(url);
+                        resourceLength = this.cacheManager.getResourceContentLength(url);
+                    }
+                }
             } else {
                 // trying to load resource metadata
                 docInfo = this.cacheManager.loadResourceInfo(url);
             }
             
             // parsing document
-            if (resource == null) return null;
-            return parseDocument(url, resource, docInfo);
+            if (content == null) return null;
+            return parseDocument(url, resourceLength, content, docInfo);
         } catch (ParserException e) {
             this.log.logWarning("Unable to parse resource. " + e.getMessage());
             return null;
@@ -446,15 +474,24 @@ public class plasmaSnippetCache {
         return map;
     }
      
-    public plasmaParserDocument parseDocument(URL url, byte[] resource) throws ParserException {
-        return parseDocument(url, resource, null);
+    public plasmaParserDocument parseDocument(URL url, long contentLength, InputStream resourceStream) throws ParserException {
+        return parseDocument(url, contentLength, resourceStream, null);
     }
     
-    public plasmaParserDocument parseDocument(URL url, byte[] resource, IResourceInfo docInfo) throws ParserException {
+    /**
+     * Parse the resource
+     * @param url the URL of the resource
+     * @param contentLength the contentLength of the resource
+     * @param resourceStream the resource body as stream
+     * @param docInfo metadata about the resource
+     * @return the extracted data
+     * @throws ParserException
+     */
+    public plasmaParserDocument parseDocument(URL url, long contentLength, InputStream resourceStream, IResourceInfo docInfo) throws ParserException {
         try {
-            if (resource == null) return null;
+            if (resourceStream == null) return null;
 
-            // if no resource metadata is available, try to load it
+            // STEP 1: if no resource metadata is available, try to load it from cache 
             if (docInfo == null) {
                 // try to get the header from the htcache directory
                 try {                    
@@ -464,18 +501,21 @@ public class plasmaSnippetCache {
                 }   
             }
             
+            // STEP 2: if the metadata is still null try to download it from web
+            if ((docInfo == null) && (url.getProtocol().startsWith("http"))) {
                 // TODO: we need a better solution here
-                // encapsulate this in the crawlLoader class
-                if ((docInfo == null) && (url.getProtocol().startsWith("http"))) {
-                    // getting URL mimeType
-                    try {
-                        httpHeader header = httpc.whead(url, url.getHost(), 10000, null, null, this.sb.remoteProxyConfig);
-                        docInfo = this.cacheManager.getResourceInfoFactory().buildResourceInfoObj(url, header);
-                    } catch (Exception e) {
-                        // ingore this. http header download failed
-                    } 
-                }
+                // e.g. encapsulate this in the crawlLoader class
+                
+                // getting URL mimeType
+                try {
+                    httpHeader header = httpc.whead(url, url.getHost(), 10000, null, null, this.sb.remoteProxyConfig);
+                    docInfo = this.cacheManager.getResourceInfoFactory().buildResourceInfoObj(url, header);
+                } catch (Exception e) {
+                    // ingore this. http header download failed
+                } 
+            }
 
+            // STEP 3: if the metadata is still null try to guess the mimeType of the resource
             if (docInfo == null) {
                 String filename = this.cacheManager.getCachePath(url).getName();
                 int p = filename.lastIndexOf('.');
@@ -495,12 +535,12 @@ public class plasmaSnippetCache {
                         supposedMime = plasmaParser.getMimeTypeByFileExt(filename.substring(p + 1));
                     }
 
-                    return this.parser.parseSource(url, supposedMime, null, resource);
+                    return this.parser.parseSource(url, supposedMime, null, contentLength, resourceStream);
                 }
                 return null;
-            }
+            }            
             if (plasmaParser.supportedMimeTypesContains(docInfo.getMimeType())) {
-                return this.parser.parseSource(url, docInfo.getMimeType(), docInfo.getCharacterEncoding(), resource);
+                return this.parser.parseSource(url, docInfo.getMimeType(), docInfo.getCharacterEncoding(), contentLength, resourceStream);
             }
             return null;
         } catch (InterruptedException e) {
@@ -509,27 +549,57 @@ public class plasmaSnippetCache {
         }
     }
     
-    public byte[] getResource(URL url, boolean fetchOnline, int socketTimeout) {
+    /**
+     * 
+     * @param url
+     * @param fetchOnline
+     * @param socketTimeout
+     * @return an Object array containing
+     * <table>
+     * <tr><td>[0]</td><td>the content as {@link InputStream}</td></tr>
+     * <tr><td>[1]</td><td>the content-length as {@link Integer}</td></tr>
+     * </table>
+     */
+    public Object[] getResource(URL url, boolean fetchOnline, int socketTimeout) {
         // load the url as resource from the web
         try {
-            // trying to load the resource body from cache
-            byte[] resource = cacheManager.loadResourceContent(url);
+            long contentLength = -1;
             
-            // if the content is not available in cache try to download it from web
-            if ((fetchOnline) && (resource == null)) {
-                // try to download the resource using a crawler
-                loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout);
+            // trying to load the resource body from cache
+            InputStream resource = this.cacheManager.getResourceContentStream(url);
+            if (resource != null) {
+                contentLength = this.cacheManager.getResourceContentLength(url);
+            } else if (fetchOnline) {
+                // if the content is not available in cache try to download it from web
                 
-                // get the content from cache
-                resource = cacheManager.loadResourceContent(url);
+                // try to download the resource using a crawler
+                plasmaHTCache.Entry entry = loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true);
+                
+                // read resource body (if it is there)
+                byte[] resourceArray = entry.cacheArray();
+            
+                // in case that the reosurce was not in ram, read it from disk
+                if (resourceArray == null) {
+                    resource = this.cacheManager.getResourceContentStream(url);   
+                    contentLength = this.cacheManager.getResourceContentLength(url); 
+                } else {
+                    resource = new ByteArrayInputStream(resourceArray);
+                    contentLength = resourceArray.length;
+                }
+            } else {
+                return null;
             }
-            return resource;
+            return new Object[]{resource,new Long(contentLength)};
         } catch (IOException e) {
             return null;
         }
     }
     
-    public plasmaHTCache.Entry loadResourceFromWeb(URL url, int socketTimeout) throws plasmaCrawlerException {
+    public plasmaHTCache.Entry loadResourceFromWeb(
+            URL url, 
+            int socketTimeout,
+            boolean keepInMemory
+    ) throws plasmaCrawlerException {
         
         plasmaHTCache.Entry result = this.sb.cacheLoader.loadSync(
                 url, 
@@ -538,7 +608,8 @@ public class plasmaSnippetCache {
                 null, 
                 0, 
                 null,
-                socketTimeout
+                socketTimeout,
+                keepInMemory
         );
         
         return result;

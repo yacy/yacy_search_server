@@ -80,6 +80,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
      */
     protected boolean done = false;       
     
+    
     /* ============================================================
      * Crawl job specific variables
      * ============================================================ */    
@@ -92,6 +93,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
     protected long startdate;
     protected plasmaCrawlProfile.entry profile;  
     protected boolean acceptAllContent;
+    protected boolean keepInMemory;
     
     protected String errorMessage;
     
@@ -159,22 +161,27 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
 
         try {
             // The thread keeps running.
-            while (!this.stopped && !this.isInterrupted() && !this.myPool.isClosed) {
-                if (this.done) {       
-                    synchronized (this) { 
-                        // return thread back into pool
-                        this.myPool.returnObject(this.protocol,this);
-                        
-                        // We are waiting for a new task now.
-                        if (!this.stopped && !this.destroyed && !this.isInterrupted()) { 
-                            this.wait(); 
+            while (!this.stopped && !this.isInterrupted()) {
+                if (this.done) {  
+                    if (this.myPool != null && !this.myPool.isClosed) {
+                        synchronized (this) { 
+                            // return thread back into pool
+                            this.myPool.returnObject(this.protocol,this);
+
+                            // We are waiting for a new task now.
+                            if (!this.stopped && !this.destroyed && !this.isInterrupted()) { 
+                                this.wait(); 
+                            }
                         }
+                    } else {
+                        this.stopped = true;
                     }
                 } else {
                     try {
                         // executing the new task
                         execute();
                     } finally {
+                        // free memory
                         reset();
                     }
                 }
@@ -231,6 +238,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
             this.depth = theNewMsg.depth;
             this.profile = theNewMsg.profile;
             this.acceptAllContent = theNewMsg.acceptAllContent;
+            this.keepInMemory = theNewMsg.keepInMemory;
 
             this.startdate = System.currentTimeMillis();
 
@@ -260,6 +268,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
     
     public void reset() {
         this.theMsg = null;
+        
         this.url = null;
         this.name = null;
         this.refererURLString = null;
@@ -268,6 +277,8 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
         this.startdate = 0;
         this.profile = null;
         this.acceptAllContent = false;
+        this.keepInMemory = false;
+        
         this.errorMessage = null;
     }    
     

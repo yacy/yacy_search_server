@@ -41,6 +41,7 @@
 
 package de.anomic.plasma;
 
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.Map;
@@ -59,13 +60,18 @@ public final class plasmaSearchImages {
         long start = System.currentTimeMillis();
         this.images = new TreeSet();
         if (maxTime > 10) {
-            byte[] res = sc.getResource(url, true, (int) maxTime);
+            Object[] resource = sc.getResource(url, true, (int) maxTime);
+            InputStream res = (InputStream) resource[0];
+            Long resLength = (Long) resource[1];
             if (res != null) {
                 plasmaParserDocument document = null;
                 try {
-                    document = sc.parseDocument(url, res);
+                    // parse the document
+                    document = sc.parseDocument(url, resLength.longValue(), res);
                 } catch (ParserException e) {
                     // parsing failed
+                } finally {
+                    try { res.close(); } catch (Exception e) {/* ignore this */}
                 }
                 if (document == null) return;
                 

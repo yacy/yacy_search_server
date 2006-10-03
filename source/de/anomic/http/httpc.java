@@ -1828,7 +1828,7 @@ do upload
 //            return sbb.getBytes();
             return serverFileUtils.read(this.getContentInputStream());
         }
-
+        
         /**
         * This method outputs the found content into an byte-array and
         * additionally outputs it to procOS.
@@ -1837,9 +1837,13 @@ do upload
         * @return 
         * @throws IOException
         */
-        public byte[] writeContent(Object procOS) throws IOException {
-            int contentLength = (int) this.responseHeader.contentLength();
-            serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
+        public byte[] writeContent(Object procOS, boolean returnByteArray) throws IOException {
+            serverByteBuffer sbb = null;
+            
+            if (returnByteArray) {
+                int contentLength = (int) this.responseHeader.contentLength();
+                sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
+            }
             
             if (procOS instanceof OutputStream) {
                 //writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, sbb);
@@ -1852,7 +1856,7 @@ do upload
                 throw new IllegalArgumentException("Invalid procOS object type '" + procOS.getClass().getName() + "'");
             }
             
-            return sbb.getBytes();
+            return (sbb==null)?null:sbb.getBytes();
         }        
 
         /**
