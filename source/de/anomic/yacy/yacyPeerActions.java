@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -378,7 +379,13 @@ public class yacyPeerActions {
                         if (connectedSeed.getName() != seed.getName()) {
                             // TODO: update seed name lookup cache
                         }
-                    } catch (java.text.ParseException e) {}
+                    } catch (ParseException e) {
+                        yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getAddress() + ". Cause: " + e.getMessage());
+                        return false;
+                    } catch (NumberFormatException e) {
+                        yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getAddress() + ". Cause: " + e.getMessage());
+                        return false;
+                    }
                     yacyCore.log.logFine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getAddress());
                     seedDB.addConnected(seed);
                     return true;
