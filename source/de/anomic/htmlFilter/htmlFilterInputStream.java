@@ -91,7 +91,10 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
         // don't close writer here, otherwise it will shutdown our source stream 
 
         // reset the buffer if not already done
-        if (this.mode != MODE_PRESCAN_FINISHED) this.bufferedIn.reset();
+        if (this.mode != MODE_PRESCAN_FINISHED) {
+            this.mode++;
+            this.bufferedIn.reset();
+        }
         
         // return scanning result
         return (this.charsetChanged) ? this.detectedCharset : null;
@@ -100,9 +103,7 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
     public int read() throws IOException {
         // mode 0 is called from within the detectCharset function
         if (this.mode == MODE_PRESCAN) {      
-            if (this.endOfHead || this.charsetChanged || this.preRead >= this.preBufferSize) {
-                this.mode++;
-                this.bufferedIn.reset();
+            if (this.endOfHead || this.charsetChanged || this.preRead >= this.preBufferSize-1) {
                 return -1;            
             }
             this.preRead++;            
