@@ -53,7 +53,7 @@ import de.anomic.server.serverSwitch;
 public class IndexCleaner_p {
     private static plasmaCrawlLURL.Cleaner urldbCleanerThread;
     private static plasmaWordIndex.Cleaner indexCleanerThread;
-    
+
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -69,10 +69,10 @@ public class IndexCleaner_p {
                     urldbCleanerThread.endPause();
                 }
             }
-            else if (post.get("action").equals("ustop")) {
+            else if (post.get("action").equals("ustop") && (urldbCleanerThread!=null)) {
                 urldbCleanerThread.abort();
             }
-            else if (post.get("action").equals("upause")) {
+            else if (post.get("action").equals("upause") && (urldbCleanerThread!=null)) {
                 urldbCleanerThread.pause();
             }
             else if (post.get("action").equals("rstart")) {
@@ -84,17 +84,17 @@ public class IndexCleaner_p {
                     indexCleanerThread.endPause();
                 }
             }
-            else if (post.get("action").equals("rstop")) {
+            else if (post.get("action").equals("rstop") && (indexCleanerThread!=null)) {
                 indexCleanerThread.abort();
             }
-            else if (post.get("action").equals("rpause")) {
+            else if (post.get("action").equals("rpause") && (indexCleanerThread!=null)) {
                 indexCleanerThread.pause();
             }
             prop.put("LOCATION","");
             return prop;
         }
         else {
-            prop.put("bla", "post==null");            
+            prop.put("bla", "post==null");
         }
         if (urldbCleanerThread!=null) {
             prop.put("urldb", 1);
@@ -119,7 +119,7 @@ public class IndexCleaner_p {
             prop.put("rwidb_wordHashNow", indexCleanerThread.wordHashNow);
             prop.put("rwidb_lastWordHash", indexCleanerThread.lastWordHash);
             prop.put("rwidb_lastDeletionCounter", indexCleanerThread.lastDeletionCounter);
-            
+
         }
         return prop;
     }
