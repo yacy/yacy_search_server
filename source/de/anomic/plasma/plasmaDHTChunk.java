@@ -121,14 +121,14 @@ public class plasmaDHTChunk {
         return this.status;
     }
     
-    public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, plasmaCrawlLURL lurls, int minCount, int maxCount) {
+    public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, plasmaCrawlLURL lurls, int minCount, int maxCount, int maxtime) {
         try {
             this.log = log;
             this.wordIndex = wordIndex;
             this.lurls = lurls;
             this.startPointHash = selectTransferStart();
             log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, this.startPointHash));
-            selectTransferContainers(this.startPointHash, minCount, maxCount);
+            selectTransferContainers(this.startPointHash, minCount, maxCount, maxtime);
 
             // count the indexes, can be smaller as expected
             this.idxCount = indexCounter();
@@ -141,13 +141,13 @@ public class plasmaDHTChunk {
         }
     }
 
-    public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, plasmaCrawlLURL lurls, int minCount, int maxCount, String startHash) {
+    public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, plasmaCrawlLURL lurls, int minCount, int maxCount, int maxtime, String startHash) {
         try {
             this.log = log;
             this.wordIndex = wordIndex;
             this.lurls = lurls;
             log.logFine("Demanded hash " + startHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, this.startPointHash));
-            selectTransferContainers(startHash, minCount, maxCount);
+            selectTransferContainers(startHash, minCount, maxCount, maxtime);
 
             // count the indexes, can be smaller as expected
             this.idxCount = indexCounter();
@@ -175,15 +175,15 @@ public class plasmaDHTChunk {
         return startPointHash;
     }
 
-    private void selectTransferContainers(String hash, int mincount, int maxcount) throws InterruptedException {        
+    private void selectTransferContainers(String hash, int mincount, int maxcount, int maxtime) throws InterruptedException {        
         try {
             this.selectionStartTime = System.currentTimeMillis();
-            int refcountRAM = selectTransferContainersResource(hash, plasmaWordIndex.RL_RAMCACHE, maxcount);
+            int refcountRAM = selectTransferContainersResource(hash, plasmaWordIndex.RL_RAMCACHE, maxcount, maxtime);
             if (refcountRAM >= mincount) {
                 log.logFine("DHT selection from RAM: " + refcountRAM + " entries");
                 return;
             }
-            int refcountFile = selectTransferContainersResource(hash, plasmaWordIndex.RL_WORDFILES, maxcount);
+            int refcountFile = selectTransferContainersResource(hash, plasmaWordIndex.RL_WORDFILES, maxcount, maxtime);
             log.logFine("DHT selection from FILE: " + refcountFile + " entries, RAM provided only " + refcountRAM + " entries");
             return;
         } finally {
@@ -191,7 +191,7 @@ public class plasmaDHTChunk {
         }
     }
 
-    private int selectTransferContainersResource(String hash, int resourceLevel, int maxcount) throws InterruptedException {
+    private int selectTransferContainersResource(String hash, int resourceLevel, int maxcount, int maxtime) throws InterruptedException {
         // the hash is a start hash from where the indexes are picked
         ArrayList tmpContainers = new ArrayList(maxcount);
         try {
@@ -205,16 +205,15 @@ public class plasmaDHTChunk {
             
             urlCache = new HashMap();
             double maximumDistance = ((double) peerRedundancy * 2) / ((double) yacyCore.seedDB.sizeConnected());
-            
+            long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
             while (
                     (maxcount > refcount) && 
                     (indexContainerIterator.hasNext()) && 
                     ((container = (indexContainer) indexContainerIterator.next()) != null) && 
                     (container.size() > 0) && 
-                    (
-                            (tmpContainers.size() == 0) || 
-                            (yacyDHTAction.dhtDistance(container.getWordHash(), ((indexContainer) tmpContainers.get(0)).getWordHash()) < maximumDistance)
-                    )
+                    ((tmpContainers.size() == 0) || 
+                     (yacyDHTAction.dhtDistance(container.getWordHash(), ((indexContainer) tmpContainers.get(0)).getWordHash()) < maximumDistance)) &&
+                    (System.currentTimeMillis() < timeout)
             ) {
                 // check for interruption
                 if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
@@ -225,7 +224,7 @@ public class plasmaDHTChunk {
                     wholesize = container.size();
                     urlIter = container.entries();
                     // iterate over indexes to fetch url entries and store them in the urlCache
-                    while ((urlIter.hasNext()) && (maxcount > refcount)) {
+                    while ((urlIter.hasNext()) && (maxcount > refcount) && (System.currentTimeMillis() < timeout)) {
                         iEntry = (indexEntry) urlIter.next();
                         lurl = lurls.load(iEntry.urlHash(), iEntry);
                         if ((lurl == null) || (lurl.url() == null)) {
