@@ -618,17 +618,22 @@ public class bookmarksDB {
         public static final String URL_HASHES="urlHashes";
         private Map mem;
         String date;
+
         public bookmarksDate(String mydate){
-            date=mydate;
+            //round to seconds, but store as milliseconds (java timestamp)
+            date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
             mem=new HashMap();
             mem.put(URL_HASHES, "");
         }
+
         public bookmarksDate(String mydate, Map map){
-            date=mydate;
+            //round to seconds, but store as milliseconds (java timestamp)
+            date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
             mem=map;
         }
         public bookmarksDate(String mydate, ArrayList entries){
-            date=mydate;
+            //round to seconds, but store as milliseconds (java timestamp)
+            date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
             mem=new HashMap();
             mem.put(URL_HASHES, listManager.arraylist2string(entries));
         }
@@ -670,6 +675,9 @@ public class bookmarksDB {
         }
         public String getDateString(){
             return date;
+        }
+        public ArrayList getBookmarkList(){
+            return listManager.string2arraylist((String)this.mem.get(URL_HASHES));
         }
         public int size(){
             return listManager.string2arraylist(((String)this.mem.get(URL_HASHES))).size();
