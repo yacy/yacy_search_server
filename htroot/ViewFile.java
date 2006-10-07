@@ -49,6 +49,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Enumeration;
 
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
@@ -262,11 +263,12 @@ public class ViewFile {
                     prop.put("viewMode_parsedText",content);
                 } else {
                     prop.put("viewMode",VIEW_MODE_AS_PARSED_SENTENCES);
-                    String[] sentences = document.getSentences();
+                    final Enumeration sentences = document.getSentences(null); // FIXME: apply correct charset
 
                     boolean dark = true;
-                    for (int i=0; i < sentences.length; i++) {
-                        String currentSentence = wikiCode.replaceHTML(sentences[i]);
+                    int i = 0;
+                    if (sentences != null) while (sentences.hasMoreElements()) {
+                        String currentSentence = wikiCode.replaceHTML((String) sentences.nextElement());
 
                         // Search word highlighting
                         String words = post.get("words",null);
@@ -286,8 +288,9 @@ public class ViewFile {
                         prop.put("viewMode_sentences_" + i + "_nr",Integer.toString(i+1)); 
                         prop.put("viewMode_sentences_" + i + "_text",currentSentence);   
                         prop.put("viewMode_sentences_" + i + "_dark",((dark) ? 1 : 0) ); dark=!dark;
+                        i++;
                     }
-                    prop.put("viewMode_sentences",sentences.length);
+                    prop.put("viewMode_sentences", i);
 
                 } 
                 if (document != null) document.close();

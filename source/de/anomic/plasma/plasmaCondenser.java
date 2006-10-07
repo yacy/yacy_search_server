@@ -51,6 +51,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -469,7 +471,7 @@ public final class plasmaCondenser {
     }
 
     protected final static boolean punctuation(char c) {
-        return ("!?.".indexOf(c) >= 0);
+        return (c == '.') || (c == '!') || (c == '?');
     }
 
     public final static boolean invisible(char c) {
@@ -648,7 +650,89 @@ public final class plasmaCondenser {
             return counter;
         }
     }
+    
+    public static Enumeration sentencesFromInputStream(InputStream is, String charset) {
+        try {
+            return new sentencesFromInputStreamEnum(is, charset);
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
+    }
+    
+    private static class sentencesFromInputStreamEnum implements Enumeration {
+        // read sentences from a given input stream
+        // this enumerates String objects
+        
+        Object buffer = null;
+        BufferedReader raf;
+        int counter = 0;
 
+        public sentencesFromInputStreamEnum(InputStream is, String charset) throws UnsupportedEncodingException {
+            raf = new BufferedReader((charset == null) ? new InputStreamReader(is) : new InputStreamReader(is, charset));
+            buffer = nextElement0();
+            counter = 0;
+        }
+
+        private Object nextElement0() {
+            try {
+                String s = readSentence(raf);
+                if (s == null) {
+                    raf.close();
+                    return null;
+                }
+                return s;
+            } catch (IOException e) {
+                try {
+                    raf.close();
+                } catch (Exception ee) {
+                }
+                return null;
+            }
+        }
+
+        public boolean hasMoreElements() {
+            return buffer != null;
+        }
+
+        public Object nextElement() {
+            if (buffer == null) {
+                return null;
+            } else {
+                counter = counter + ((String) buffer).length() + 1;
+                Object r = buffer;
+                buffer = nextElement0();
+                return r;
+            }
+        }
+
+        public int count() {
+            return counter;
+        }
+    }
+
+    static String readSentence(Reader reader) throws IOException {
+        StringBuffer s = new StringBuffer();
+        int nextChar;
+        char c;
+        
+        // find sentence end
+        for (;;) {
+            nextChar = reader.read();
+            if (nextChar < 0) return null;
+            c = (char) nextChar;
+            s.append(c);
+            if (punctuation(c)) break;
+        }
+
+        // replace line endings and tabs by blanks
+        for (int i = 0; i < s.length(); i++) {
+            if ((s.charAt(i) == (char) 10) || (s.charAt(i) == (char) 13) || (s.charAt(i) == (char) 8)) s.setCharAt(i, ' ');
+        }
+        // remove all double-spaces
+        int p; while ((p = s.indexOf("  ")) >= 0) s.deleteCharAt(p);
+        return new String(s);
+        
+    }
     /*
     private static void addLineSearchProp(Properties prop, String s, String[] searchwords, HashSet foundsearch) {
         // we store lines containing a key in search vector

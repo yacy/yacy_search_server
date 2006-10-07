@@ -47,6 +47,7 @@ package de.anomic.plasma;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -249,10 +250,10 @@ public class plasmaSnippetCache {
         if (document == null) return new Snippet(null, ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
                 
         //System.out.println("loaded document for URL " + url);
-        String[] sentences = document.getSentences();
+        final Enumeration sentences = document.getSentences(null); // FIXME: apply correct charset
         document.close();
         //System.out.println("----" + url.toString()); for (int l = 0; l < sentences.length; l++) System.out.println(sentences[l]);
-        if ((sentences == null) || (sentences.length == 0)) {
+        if (sentences == null) {
             //System.out.println("found no sentences in url " + url);
             return new Snippet(null, ERROR_PARSER_NO_LINES, "parser returned no sentences");
         }
@@ -357,26 +358,30 @@ public class plasmaSnippetCache {
         return (String) snippetsCache.get(key);
     }
     
-    private String computeSnippet(String[] sentences, Set queryhashes, int minLength, int maxLength) {
+    private String computeSnippet(Enumeration sentences, Set queryhashes, int minLength, int maxLength) {
         try {
-            if ((sentences == null) || (sentences.length == 0)) return null;
+            if (sentences == null) return null;
             if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
             kelondroMScoreCluster hitTable = new kelondroMScoreCluster();
             Iterator j;
             HashMap hs;
             String hash;
-            for (int i = 0; i < sentences.length; i++) {
+            ArrayList sb = new ArrayList();
+            String sentence;
+            while (sentences.hasMoreElements()) {
+                sentence = (String) sentences.nextElement();
                 //System.out.println("Sentence " + i + ": " + sentences[i]);
-                if (sentences[i].length() > minLength) {
-                    hs = hashSentence(sentences[i]);
+                if (sentence.length() > minLength) {
+                    hs = hashSentence(sentence);
                     j = queryhashes.iterator();
                     while (j.hasNext()) {
                         hash = (String) j.next();
                         if (hs.containsKey(hash)) {
                             //System.out.println("hash " + hash + " appears in line " + i);
-                            hitTable.incScore(new Integer(i));
+                            hitTable.incScore(new Integer(sb.size()));
                         }
                     }
+                    sb.add(sentence);
                 }
             }
             int score = hitTable.getMaxScore(); // best number of hits
@@ -385,15 +390,14 @@ public class plasmaSnippetCache {
             // now find the shortest line of these hits
             int shortLineIndex = -1;
             int shortLineLength = Integer.MAX_VALUE;
-            for (int i = 0; i < sentences.length; i++) {
-                if ((hitTable.getScore(new Integer(i)) == score) &&
-                (sentences[i].length() < shortLineLength)) {
+            for (int i = 0; i < sb.size(); i++) {
+                if ((hitTable.getScore(new Integer(i)) == score) && (((String) sb.get(i)).length() < shortLineLength)) {
                     shortLineIndex = i;
-                    shortLineLength = sentences[i].length();
+                    shortLineLength = ((String) sb.get(i)).length();
                 }
             }
             // find a first result
-            String result = sentences[shortLineIndex];
+            String result = (String) sb.get(shortLineIndex);
             // remove all hashes that appear in the result
             hs = hashSentence(result);
             j = queryhashes.iterator();

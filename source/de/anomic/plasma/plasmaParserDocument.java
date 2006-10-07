@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import de.anomic.server.serverFileUtils;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -189,13 +190,9 @@ public class plasmaParserDocument {
         return -1; 
     }
     
-    public plasmaCondenser getCondenser() {
-        if (condenser == null) condenser = new plasmaCondenser(getText(), 0, 0);
-        return condenser;
-    }
-    
-    public String[] getSentences() {
-        return getCondenser().sentences();
+    public Enumeration getSentences(String charset) {
+        if (this.text == null) return null;
+        return plasmaCondenser.sentencesFromInputStream(getText(), charset);
     }
     
     public String getKeywords(char separator) {

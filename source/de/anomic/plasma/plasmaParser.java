@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -815,12 +816,12 @@ public final class plasmaParser {
                 System.out.println(document.getMainLongTitle());
                 
                 // found text
-                String[] sentences = document.getSentences();
-                if (sentences != null) {
-                    for (int i = 0; i < sentences.length; i++) {
+                final Enumeration sentences = document.getSentences(null); // FIXME: apply correct charset
+                int i = 0;
+                if (sentences != null) while (sentences.hasMoreElements()) {
                         System.out.print("line " + i + ": ");
-                        System.out.println(sentences[i]);
-                    }
+                        System.out.println((String) sentences.nextElement());
+                        i++;
                 }
                 
                 // found links
