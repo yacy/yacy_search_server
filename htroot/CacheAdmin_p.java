@@ -92,7 +92,7 @@ public class CacheAdmin_p {
         final StringBuffer tree = new StringBuffer();
         final StringBuffer info = new StringBuffer();
 
-        final URL  url  = plasmaHTCache.getURL(switchboard.htCachePath, file);
+        final URL  url  = switchboard.cacheManager.getURL(file);
         
         String urlstr = "";
         if (action.equals("info") && !file.isDirectory()) {

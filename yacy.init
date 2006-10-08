@@ -160,6 +160,21 @@ proxyCache = DATA/HTCACHE
 #for testing:
 proxyCacheSize = 200
 
+# use the mostly direct mapping of URLs to Filenames
+# makes it easy watching the content of the cache using file browsers
+# problems arise when a file already exists where a new entry expects a directory
+# or vice versa.
+# when set to false, the file names are set to the hash of the URL and the
+# directory is build from protokoll, hostname and port, as with the old
+# layout.
+# the advantage of this scheme is that no directory/file collisions can
+# occurr.
+# switching this flag will take effect after a restart of yacy.
+# files that are present under the previously used layout will be renamed
+# to the new location and thus be accessible immediately. so an accumulated
+# cache is still usable after the switch.
+proxyCacheTree = true
+
 # the following mime-types are the whitelist for indexing
 #
 # parseableRealtimeMimeTypes: specifies mime-types that can be indexed on the fly

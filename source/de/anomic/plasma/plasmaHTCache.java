@@ -59,6 +59,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.StringBuffer;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -71,14 +72,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.anomic.http.httpc;
+import de.anomic.http.httpHeader;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.net.URL;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.ResourceInfoFactory;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverSystem;
@@ -99,15 +103,17 @@ public final class plasmaHTCache {
     public final File cachePath;
     public final serverLog log;
     public static final HashSet filesInUse = new HashSet(); // can we delete this file
+    public final boolean useTreeStorage;
 
     private ResourceInfoFactory objFactory;
     private serverThread cacheScanThread;
-    
-    public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb, long preloadTime) {
+
+    public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb, long preloadTime, boolean useTreeStorage) {
         // this.switchboard = switchboard;
 
         this.log = new serverLog("HTCACHE");
         this.cachePath = htCachePath;
+        this.useTreeStorage = useTreeStorage;
         
         // create the object factory
         this.objFactory = new ResourceInfoFactory();
@@ -345,9 +351,19 @@ public final class plasmaHTCache {
                     if (deleteFileandDirs (obj, "OLD")) {
                         try {
                             // As the file is gone, the entry in responseHeader.db is not needed anymore
-                            this.log.logFinest("Trying to remove responseHeader for URL: " +
-                                    getURL(this.cachePath ,obj).toString());
-                            this.responseHeaderDB.remove(indexURL.urlHash(getURL(this.cachePath ,obj)));
+                            String urlHash = getHash(obj);
+                            if (urlHash != null) {
+                                this.log.logFinest("Trying to remove responseHeader for URLhash: " +
+                                    urlHash);
+                                this.responseHeaderDB.remove(urlHash);
+                            } else {
+                                URL url = getURL(obj);
+                                if (url != null) {
+                                    this.log.logFinest("Trying to remove responseHeader for URL: " +
+                                        url.toString());
+                                    this.responseHeaderDB.remove(indexURL.urlHash(url));
+                                }
+                            }
                         } catch (IOException e) {
                             this.log.logInfo("IOExeption removing response header from DB: " +
                                     e.getMessage(), e);
@@ -394,6 +410,7 @@ public final class plasmaHTCache {
         kelondroMScoreCluster doms = new kelondroMScoreCluster();
         int fileCount = 0;
         enumerateFiles fileEnum = new enumerateFiles(this.cachePath, true, false, true, true);
+        File dbfile = new File(this.cachePath, "responseHeader.db");
         while (fileEnum.hasMoreElements()) {
             if (Thread.currentThread().isInterrupted()) return;
             fileCount++;
@@ -402,7 +419,7 @@ public final class plasmaHTCache {
             //System.out.println("Cache: " + dom(f));
             doms.incScore(dom(nextFile));
             this.curCacheSize += nextFile.length();
-            this.cacheAge.put(ageString(nextFileModDate, nextFile), nextFile);
+            if (!dbfile.equals(nextFile)) this.cacheAge.put(ageString(nextFileModDate, nextFile), nextFile);
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -542,6 +559,29 @@ public final class plasmaHTCache {
         return plasmaParser.mediaExtContains(urlString);
     }
 
+    /*
+     * This function moves an old cached object (if it exists) to the new position
+     */
+    private void moveCachedObject(File oldpath, File newpath) {
+        try {
+            if (oldpath.exists() && oldpath.isFile() && (!newpath.exists())) {
+                long d = oldpath.lastModified();
+                newpath.getParentFile().mkdirs();
+                if (oldpath.renameTo(newpath)) {
+                    cacheAge.put(ageString(d, newpath), newpath);
+                    File obj = oldpath.getParentFile();
+                    while ((!(obj.equals(this.cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
+                        if (obj.delete()) this.log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
+                        obj = obj.getParentFile();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.logFine("moveCachedObject('" + oldpath.toString() + "','" +
+                        newpath.toString() + "')", e);
+        }
+    }
+
     private String replaceRegex(String input, String regex, String replacement) {
         if (input == null) { return ""; }
         if (input.length() > 0) {
@@ -583,6 +623,14 @@ public final class plasmaHTCache {
         // yes this is not reversible, but that is not needed
         path = replaceRegex(path, "/\\.\\./", "/!!/");
         path = replaceRegex(path, "(\"|\\\\|\\*|\\?|:|<|>|\\|+)", "_"); // hier wird kein '/' gefiltert
+        String extention = null;
+        int d = path.lastIndexOf(".");
+        int s = path.lastIndexOf("/");
+        if ((d >= 0) && (d > s)) {
+            extention = path.substring(d);
+        } else if (path.endsWith("/ndx")) {
+            extention = new String (".html"); // Just a wild guess
+        }
         path = path.concat(replaceRegex(query, "(\"|\\\\|\\*|\\?|/|:|<|>|\\|+)", "_"));
 
         // only set NO default ports
@@ -608,18 +656,86 @@ public final class plasmaHTCache {
         } else {
             host = "other/" + host;
         }
-        if (port < 0) {
-            return new File(this.cachePath, protocol + "/" + host + path);
+        StringBuffer fileName = new StringBuffer();
+        fileName.append(protocol).append('/').append(host);
+        if (port >= 0) {
+            fileName.append('!').append(port);
         }
-        return new File(this.cachePath, protocol + "/" + host + "!" + port + path);
+        File FileTree = new File(this.cachePath, fileName.toString() + path);
+        String urlHash = indexURL.urlHash(url);
+        String hexHash = serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(urlHash));
+        fileName.append('/').append(hexHash.substring(0,2)).append('/').append(hexHash.substring(2,4)).append('/').append(hexHash);
+        if (extention != null) {
+            fileName.append(extention);
+        }
+        File FileFlat = new File(this.cachePath, fileName.toString());
+        if (useTreeStorage) {
+            moveCachedObject(FileFlat, FileTree);
+            return FileTree;
+        } else {
+            moveCachedObject(FileTree, FileFlat);
+            return FileFlat;
+        }
+    }
+
+    /**
+     * This is a helper funktion that extracts the Hash from the filename
+     */
+    public static String getHash(final File f) {
+        String hexHash, hash;
+        try {
+            hexHash = f.getName().substring(0,18);
+            hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.decodeHex(hexHash));
+        } catch (Exception e) {
+            //log.logWarning("getHash: " + e.getMessage(), e);
+            return null;
+        }
+        if (hash.length() == indexURL.urlHashLength) return hash;
+        else return null;
     }
 
     /**
      * this is the reverse function to getCachePath: it constructs the url as string
      * from a given storage path
      */
-    public static URL getURL(final File cachePath, final File f) {
+    public URL getURL(final File f) {
 //      this.log.logFinest("plasmaHTCache: getURL:  IN: Path=[" + cachePath + "] File=[" + f + "]");
+        final String urlHash = getHash(f);
+        if (urlHash != null) {
+            URL url = null;
+            // try the urlPool
+            try {
+                url = plasmaSwitchboard.getSwitchboard().urlPool.getURL(urlHash);
+            } catch (Exception e) {
+                log.logWarning("getURL(" + urlHash + "): " /*+ e.getMessage()*/, e);
+                url = null;
+            }
+            if (url != null) return url;
+            // try responseHeaderDB
+            Map hdb;
+            try {
+               hdb = this.responseHeaderDB.get(urlHash);
+            } catch (IOException e) {
+               hdb = null;
+            }
+            if (hdb != null) {
+                Object origRequestLine = hdb.get(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
+                if ((origRequestLine != null)&&(origRequestLine instanceof String)) {
+                    int i = ((String)origRequestLine).indexOf(" ");
+                    if (i >= 0) {
+                        String s = ((String)origRequestLine).substring(i).trim();
+                        i = s.indexOf(" ");
+                        try {
+                            url = new URL((i<0) ? s : s.substring(0,i));
+                        } catch (final Exception e) {
+                            url = null;
+                        }
+                    }
+                }
+            }
+            if (url != null) return url;
+        }
+        // If we can't get the correct URL, it seems to be a treeed file
         final String c = cachePath.toString().replace('\\', '/');
         String path = f.toString().replace('\\', '/');
 
