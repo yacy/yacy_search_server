@@ -48,7 +48,7 @@ public interface htmlFilterScraper {
 
     public boolean isTag1(String tag);
 
-    public void scrapeText(char[] text);
+    public void scrapeText(char[] text, boolean insideTag);
 
     public void scrapeTag0(String tagname, Properties tagopts);
 

@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.kelondro.kelondroMSetTools;
 
 public final class plasmaCondenser {
@@ -192,7 +193,7 @@ public final class plasmaCondenser {
             word = ((String) wordenum.nextElement()).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             // System.out.println("PARSED-WORD " + word);
             wordlen = word.length();
-            if ((wordlen == 1) && (punctuation(word.charAt(0)))) {
+            if ((wordlen == 1) && (htmlFilterContentScraper.punctuation(word.charAt(0)))) {
                 // store sentence
                 if (sentence.length() > 0) {
                     // we store the punctuation symbol as first element of the sentence vector
@@ -470,10 +471,6 @@ public final class plasmaCondenser {
         writer.close();
     }
 
-    protected final static boolean punctuation(char c) {
-        return (c == '.') || (c == '!') || (c == '?');
-    }
-
     public final static boolean invisible(char c) {
         // TODO: Bugfix for UTF-8: does this work for non ISO-8859-1 chars?
         if ((c < ' ') || (c > 'z')) return true;
@@ -507,7 +504,7 @@ public final class plasmaCondenser {
             char c;
             loop: while (e.hasMoreElements()) {
                 s = (String) e.nextElement();
-                if ((s.length() == 1) && (punctuation(s.charAt(0)))) return s;
+                if ((s.length() == 1) && (htmlFilterContentScraper.punctuation(s.charAt(0)))) return s;
                 if (s.length() < ml) continue loop;
                 for (int i = 0; i < s.length(); i++) {
                     c = s.charAt(i);
@@ -562,7 +559,7 @@ public final class plasmaCondenser {
                     for (int i = 0; i < r.length(); i++) {
                         c = r.charAt(i);
                         if (invisible(c)) sb = sb.append(' '); // TODO: Bugfix needed for UTF-8
-                        else if (punctuation(c)) sb = sb.append(' ').append(c).append(' ');
+                        else if (htmlFilterContentScraper.punctuation(c)) sb = sb.append(' ').append(c).append(' ');
                         else sb = sb.append(c);
                     }
                     s = sb.toString().trim(); 
@@ -721,7 +718,7 @@ public final class plasmaCondenser {
             if (nextChar < 0) return null;
             c = (char) nextChar;
             s.append(c);
-            if (punctuation(c)) break;
+            if (htmlFilterContentScraper.punctuation(c)) break;
         }
 
         // replace line endings and tabs by blanks

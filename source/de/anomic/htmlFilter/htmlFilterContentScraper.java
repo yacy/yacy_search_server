@@ -115,10 +115,23 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         this.content = new serverCharBuffer(1024);
     }
     
-    public void scrapeText(char[] newtext) {
+    public final static boolean punctuation(char c) {
+        return (c == '.') || (c == '!') || (c == '?');
+    }
+    
+    public void scrapeText(char[] newtext, boolean insideTag) {
         // System.out.println("SCRAPE: " + new String(newtext));
-        if ((content.length() != 0) && (content.charAt(content.length() - 1) != 32)) content.append(32);
-        content.append(super.stripAll(new serverCharBuffer(newtext, newtext.length + 1)).trim()).append(32);
+        serverCharBuffer b = super.stripAll(new serverCharBuffer(newtext, newtext.length + 1)).trim();
+        if (insideTag) {
+            // texts inside tags sometimes have no punctuation at the line end
+            // this is bad for the text sematics, because it is not possible for the
+            // condenser to distinguish headlines from text beginnings.
+            // to make it easier for the condenser, a dot ('.') is appended in case that
+            // no punctuation is part of the newtext line
+            if ((b.length() != 0) && (!(punctuation(b.charAt(b.length() - 1))))) b.append('.');
+            //System.out.println("*** Appended dot: " + b.toString());
+        }
+        if (b.length() != 0) content.append(b).append((char) 32);
     }
 
     public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';

@@ -186,7 +186,7 @@ public final class htmlFilterWriter extends Writer {
             // we are not collection tag text
             if (tag == null) {
                 // and this is not a tag opener/closer
-                if (scraper != null) scraper.scrapeText(content);
+                if (scraper != null) scraper.scrapeText(content, false);
                 if (transformer != null) return transformer.transformText(content);
                 return content;
             }
@@ -221,7 +221,7 @@ public final class htmlFilterWriter extends Writer {
         // we are collection tag text for the tag 'filterTag'
         if (tag == null) {
             // go on collecting content
-            if (scraper != null) scraper.scrapeText(content);
+            if (scraper != null) scraper.scrapeText(content, true);
             if (transformer != null) {
                 filterCont.append(transformer.transformText(content));
             } else {
