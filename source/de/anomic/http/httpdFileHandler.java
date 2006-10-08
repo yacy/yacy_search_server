@@ -919,7 +919,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         }
     }
     
-    private File getOverlayedClass(String path) {
+    public File getOverlayedClass(String path) {
         File targetClass;
         targetClass=rewriteClassFile(new File(htDefaultPath, path)); //works for default and localized files
         if(targetClass == null || !targetClass.exists()){
@@ -929,7 +929,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         return targetClass;
     }
 
-    private File getOverlayedFile(String path) {
+    public File getOverlayedFile(String path) {
         File targetFile;
         targetFile = getLocalizedFile(path);
         if (!(targetFile.exists())){
@@ -1002,7 +1002,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         return m;
     }
     
-    private Object invokeServlet(File targetClass, httpHeader request, serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public Object invokeServlet(File targetClass, httpHeader request, serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         Object result;
         if (safeServletsMode) synchronized (switchboard) {
             result = rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
