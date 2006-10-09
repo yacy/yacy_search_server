@@ -289,9 +289,20 @@ public class SettingsAck_p {
         }
         
         
-        // server password
+        // server access
         if (post.containsKey("serveraccount")) {
-            // read and process data
+            
+            // static IP
+            String staticIP =  (String)post.get("staticIP");
+            if(staticIP.equals("")){
+                serverCore.useStaticIP=false;
+            }else{
+                serverCore.useStaticIP=true;
+            }
+            env.setConfig("staticIP", staticIP);
+            if (staticIP.length() > 0) yacyCore.seedDB.mySeed.put(yacySeed.IP, staticIP);
+            
+            // server access data
             String filter = ((String) post.get("serverfilter")).trim();
             /*String user   = (String) post.get("serveruser");
             String pw1    = (String) post.get("serverpw1");
@@ -374,53 +385,6 @@ public class SettingsAck_p {
             env.setConfig("onlineMode", "0");
             prop.put("info", 25);//cache mode
             yacyCore.setOnlineMode(0);
-            return prop;
-        }
-        
-        if (post.containsKey("generalsettings")) {
-            /*
-            // set peer language
-            String peerLang = (String) post.get("peerlang");
-            if ((peerLang == null) || (peerLang.equals("en"))) peerLang = "default";
-	    HashMap lm = langMap(env);
-	    if (!(lm.containsKey(peerLang))) peerLang = "default";
-	    env.setConfig("htLocaleSelection", peerLang);
-	    prop.put("info_peerLang", (String) lm.get(peerLang));
-            */
-            
-            // check if peer name already exists
-            String peerName = (String) post.get("peername");
-            String staticIP =  (String)post.get("staticIP");
-            if(staticIP.equals("")){
-                serverCore.useStaticIP=false;
-            }else{
-                serverCore.useStaticIP=true;
-            }
-            env.setConfig("staticIP", staticIP);
-            if (staticIP.length() > 0) yacyCore.seedDB.mySeed.put(yacySeed.IP, staticIP);
-            yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
-            
-            if ((oldSeed == null) || (env.getConfig("peerName","").equals(peerName))) {
-                // the name is new
-                boolean nameOK = (peerName.length() <= 80);
-                for (int i = 0; i < peerName.length(); i++) {
-                    if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_".indexOf(peerName.charAt(i)) < 0) nameOK = false;
-                }
-                if (!(nameOK)) {
-                    // deny change
-                    prop.put("info", 17);//peer name is wrong
-                } else {
-                    
-                    // set values
-                    env.setConfig("peerName", peerName);
-                    prop.put("info", 12);//port or peername changed
-                    prop.put("info_peerName", peerName);
-                    prop.put("info_staticIP", staticIP);
-                }
-            } else {
-                // deny change
-                prop.put("info", 16);//peer name is already used by another peer
-            }
             return prop;
         }
         

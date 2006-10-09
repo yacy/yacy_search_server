@@ -95,7 +95,7 @@ public final class search {
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
-        //urls = "nQoUx975gJ5C"; // ONLY FOR TESTS!
+        // test - http://localhost:8080/yacy/search.html?query=4galTpdpDM5Q
         
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(2 * duetime);

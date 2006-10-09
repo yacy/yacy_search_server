@@ -1,4 +1,5 @@
-<p><b>Uploading via FTP:</b></p>
+<p><fieldset>
+<b>Uploading via FTP:</b></p>
 <p>This is the account for a FTP server where you can host a seed-list file.
 If you set this, you will become a principal peer.
 Your peer will then upload the seed-bootstrap information periodically,
@@ -32,3 +33,4 @@ but only if there had been changes to the seed-list.
   </tr>
 </table>
 </form>
+</fieldset>

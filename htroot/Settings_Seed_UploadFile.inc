@@ -1,4 +1,5 @@
-<p><b>Store into filesystem:</b></p>
+<p><fieldset>
+<b>Store into filesystem:</b></p>
 <p>You must configure this if you want to store the seed-list file onto the file system.</p>
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <table border="0" cellspacing="5">
@@ -12,3 +13,4 @@
   </tr>  
 </table>
 </form>
+</fieldset>

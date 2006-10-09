@@ -1,4 +1,5 @@
-<p><b>Uploading via SCP:</b></p>
+<p><fieldset>
+<b>Uploading via SCP:</b></p>
 <p>This is the account for a server where you are able to login via ssh.</p>
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
 <table border="0" cellspacing="5">
@@ -32,5 +33,5 @@
     <td colspan="3"><input type="submit" name="seedScpSettings" value="submit"></td>
   </tr>
 </table>
-</fieldset>
 </form>
+</fieldset>
