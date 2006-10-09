@@ -296,7 +296,7 @@ public class kelondroRowCollection {
     
     public void select(Set keys) {
         // removes all entries but the ones given by urlselection
-        if (keys == null) return;
+        if ((keys == null) || (keys.size() == 0)) return;
         synchronized (this) {
             Iterator i = rows();
             kelondroRow.Entry row;
