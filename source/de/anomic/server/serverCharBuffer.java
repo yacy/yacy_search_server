@@ -163,7 +163,12 @@ public final class serverCharBuffer extends Writer {
         System.arraycopy(bb, of, buffer, offset + length, le);
         length += le;
     }
-    
+
+// do not use/implement the following method, a
+// "overridden method is a bridge method"
+// will occur
+// see also: http://www.yacy-forum.de/viewtopic.php?p=26407#26407
+// and       http://www.yacy-forum.de/viewtopic.php?t=2833
 //    public serverCharBuffer append(char b) {
 //        write(b);
 //        return this;
