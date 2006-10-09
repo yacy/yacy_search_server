@@ -839,24 +839,6 @@ public final class plasmaHTCache {
         }
         return null;
     }
-
-    /**
-     * @param url
-     * @return
-     * 
-     * @deprecated dont't use this function to avoid OutOfMemory-Exceptions.
-     *  Use {@link #getResourceContentStream(URL)} instead 
-     */
-    public byte[] loadResourceContent(URL url) {
-        // load the url as resource from the cache
-        File f = getCachePath(url);
-        if (f.exists() && f.canRead()) try {
-            return serverFileUtils.read(f);
-        } catch (IOException e) {
-            return null;
-        }
-        return null;
-    }
     
     /**
      * Returns the content of a cached resource as {@link InputStream}
