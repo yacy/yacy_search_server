@@ -119,10 +119,10 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         return (c == '.') || (c == '!') || (c == '?');
     }
     
-    public void scrapeText(char[] newtext, boolean insideTag) {
+    public void scrapeText(char[] newtext, String insideTag) {
         // System.out.println("SCRAPE: " + new String(newtext));
         serverCharBuffer b = super.stripAll(new serverCharBuffer(newtext, newtext.length + 1)).trim();
-        if (insideTag) {
+        if ((insideTag != null) && (!(insideTag.equals("a")))) {
             // texts inside tags sometimes have no punctuation at the line end
             // this is bad for the text sematics, because it is not possible for the
             // condenser to distinguish headlines from text beginnings.

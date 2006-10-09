@@ -304,7 +304,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
     }
 
     //the 'missing' method that shall be implemented:
-    public abstract void scrapeText(char[] text, boolean insideTag);
+    public abstract void scrapeText(char[] text, String insideTag);
 
     // the other methods must take into account to construct the return value correctly
     public abstract void scrapeTag0(String tagname, Properties tagopts);
