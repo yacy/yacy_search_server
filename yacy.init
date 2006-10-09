@@ -145,19 +145,11 @@ messConfig = httpd.messages
 # to enable that function, set proxy=true
 proxy=true
 
-# a path to the proxy's file cache.
+# a path to the file cache, used for the internal proxy and as crawl buffer
 # This will be used if the server is addressed as a proxy
 proxyCache = DATA/HTCACHE
 
-# the proxy's maximum disc cache size in megabytes
-# there should be enough space for the browsing load of an internet caffee
-# running at 56kbit/s modem speed (this time not unusual)
-# during 3 days, 8 hours a day
-# necessary space = 3 * 8 * 60 * 60 * 56 / 8 = 604800 KB = ca. 590 MB
-# since 600 MB is not much these days (it's below one GB!)
-# we recommend using that space
-#proxyCacheSize = 600
-#for testing:
+# the maximum disc cache size for files in proxyCache in megabytes
 proxyCacheSize = 200
 
 # use the mostly direct mapping of URLs to Filenames
@@ -173,7 +165,12 @@ proxyCacheSize = 200
 # files that are present under the previously used layout will be renamed
 # to the new location and thus be accessible immediately. so an accumulated
 # cache is still usable after the switch.
-proxyCacheTree = true
+# possible values are {tree, hash}
+proxyCacheLayout = tree
+
+# the migration flag shows, if the different layout shall be migrated from one to another
+proxyCacheMigration = true
+
 
 # the following mime-types are the whitelist for indexing
 #

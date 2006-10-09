@@ -449,8 +449,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         this.log.logInfo("HTCACHE Path = " + htCachePath.getAbsolutePath());
         long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig("proxyCacheSize", "2")); // this is megabyte
-        boolean useTreeStorage = getConfigBool("proxyCacheTree", true);
-        this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP, ramHTTP_time, useTreeStorage);
+        String cacheLayout = getConfig("proxyCacheLayout", "tree");
+        boolean cacheMigration = getConfigBool("proxyCacheMigration", true);
+        this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP, ramHTTP_time, cacheLayout, cacheMigration);
         
         // make parser
         log.logConfig("Starting Parser");

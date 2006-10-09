@@ -103,17 +103,19 @@ public final class plasmaHTCache {
     public final File cachePath;
     public final serverLog log;
     public static final HashSet filesInUse = new HashSet(); // can we delete this file
-    public final boolean useTreeStorage;
+    public String cacheLayout;
+    public boolean cacheMigration;
 
     private ResourceInfoFactory objFactory;
     private serverThread cacheScanThread;
 
-    public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb, long preloadTime, boolean useTreeStorage) {
+    public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb, long preloadTime, String cacheLayout, boolean cacheMigration) {
         // this.switchboard = switchboard;
 
         this.log = new serverLog("HTCACHE");
         this.cachePath = htCachePath;
-        this.useTreeStorage = useTreeStorage;
+        this.cacheLayout = cacheLayout;
+        this.cacheMigration = cacheMigration;
         
         // create the object factory
         this.objFactory = new ResourceInfoFactory();
@@ -661,23 +663,41 @@ public final class plasmaHTCache {
         if (port >= 0) {
             fileName.append('!').append(port);
         }
-        File FileTree = new File(this.cachePath, fileName.toString() + path);
+
+        // generate cache path according to storage method
+        if (cacheLayout.equals("tree")) {
+            File FileTree = treeFile(fileName, path);
+            if (cacheMigration) {
+                moveCachedObject(hashFile(fileName, extention, url), FileTree);
+            }
+            return FileTree;
+        }
+        if (cacheLayout.equals("hash")) {
+            File FileFlat = hashFile(fileName, extention, url);
+            if (cacheMigration) {
+                moveCachedObject(treeFile(fileName, path), FileFlat);
+            }
+            return FileFlat;
+        }
+        return null;
+    }
+
+    private File treeFile(StringBuffer fileName, String path) {
+        return new File(this.cachePath, fileName.toString() + path);
+    }
+    
+    private File hashFile(StringBuffer fileName, String extention, URL url) {
         String urlHash = indexURL.urlHash(url);
         String hexHash = serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(urlHash));
-        fileName.append('/').append(hexHash.substring(0,2)).append('/').append(hexHash.substring(2,4)).append('/').append(hexHash);
+        StringBuffer f = new StringBuffer(18);
+        f.append('/').append(hexHash.substring(0,2)).append('/').append(hexHash.substring(2,4)).append('/').append(hexHash);
         if (extention != null) {
             fileName.append(extention);
         }
-        File FileFlat = new File(this.cachePath, fileName.toString());
-        if (useTreeStorage) {
-            moveCachedObject(FileFlat, FileTree);
-            return FileTree;
-        } else {
-            moveCachedObject(FileTree, FileFlat);
-            return FileFlat;
-        }
+        return new File(this.cachePath, fileName.toString() + f);
     }
-
+    
+    
     /**
      * This is a helper funktion that extracts the Hash from the filename
      */
@@ -922,7 +942,7 @@ public final class plasmaHTCache {
     private String                   name;           // the name of the link, read as anchor from an <a>-tag
     private String                   nomalizedURLHash;
     private String                   nomalizedURLString;
-    private int                      status;         // cache load/hit/stale etc status
+    //private int                      status;         // cache load/hit/stale etc status
     private Date                     lastModified;
     private char                     doctype;
     private String                   language;
@@ -1011,6 +1031,14 @@ public final class plasmaHTCache {
     
     public String urlHash() {
         return this.nomalizedURLHash;
+    }
+    
+    public Date lastModified() {
+        return this.lastModified;
+    }
+    
+    public String language() {
+        return this.language;
     }
     
     public plasmaCrawlProfile.entry profile() {
