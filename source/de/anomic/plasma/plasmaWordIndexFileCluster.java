@@ -224,10 +224,14 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
         }
     }
 
+    public synchronized boolean exists(String wordHash) {
+        return plasmaWordIndexFile.wordHash2path(databaseRoot, wordHash).exists();
+    }
+    
     public synchronized indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxTime) {
         long start = System.currentTimeMillis();
         if ((maxTime < 0) || (maxTime > 60000)) maxTime=60000; // maximum is one minute
-        if (plasmaWordIndexFile.wordHash2path(databaseRoot, wordHash).exists()) {
+        if (exists(wordHash)) {
             plasmaWordIndexFile entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
             indexContainer container = new indexContainer(wordHash);
             indexEntry entry;
@@ -260,7 +264,7 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
         // removes all given url hashes from a single word index. Returns number of deletions.
         plasmaWordIndexFile pi = null;
         boolean removed = false;
-        try {
+        if (exists(wordHash)) try {
             pi = getEntity(wordHash, true, -1);
             if (pi.removeEntry(urlHash, deleteComplete)) removed = true;
             int size = pi.size();
@@ -273,14 +277,14 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
             return false;
         } finally {
             if (pi != null) try{pi.close();}catch(Exception e){}
-        }
+        } else return false;
     }
     
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
         // removes all given url hashes from a single word index. Returns number of deletions.
         plasmaWordIndexFile pi = null;
         int count = 0;
-        try {
+        if (exists(wordHash)) try {
             pi = getEntity(wordHash, true, -1);
             Iterator i = urlHashes.iterator();
             while (i.hasNext()) if (pi.removeEntry((String) i.next(), deleteComplete)) count++;
@@ -294,7 +298,7 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
             return count;
         } finally {
             if (pi != null) try{pi.close();}catch(Exception e){}
-        }
+        } else return 0;
     }
     
     public indexContainer addEntries(indexContainer container, long creationTime, boolean highPriority) {
