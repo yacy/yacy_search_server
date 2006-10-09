@@ -4,7 +4,7 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// last major change: 30.09.2006
+// last major change: 09.10.2006
 //
 // contributions by Marc Nause [MN]
 //
@@ -132,24 +132,34 @@ public class plasmaSnippetCache {
             Iterator i = queryHashes.iterator();
             String h;
             String[] w = line.split(" ");
-            String mark = "";
+            String prefix = "";
+            String postfix = "";
+            int len = 0;
             while (i.hasNext()) {
                 h = (String) i.next();
                 for (int j = 0; j < w.length; j++) {
                     //ignore punctuation marks (contrib [MN])
-                    if ((w[j].endsWith("."))||
-                        (w[j].endsWith(","))||
-                        (w[j].endsWith("!"))||
-                        (w[j].endsWith("?"))) {
-                        mark = w[j].substring(w[j].length()-1);
-                        w[j] = w[j].substring(0,w[j].length()-1);
+                    //note to myself:
+                    //For details on regex see "Mastering regular expressions" by J.E.F. Friedl
+                    //especially p. 123 and p. 390/391 (in the German version of the 2nd edition)
+
+                    prefix = "";
+                    postfix = "";
+
+                    while((w[j].matches("\\A\\PL.+"))) {
+                        prefix = w[j].substring(0,1) + prefix;
+                        w[j] = w[j].substring(1);
                     }
-                    else {
-                        mark = "";
+
+                    while((w[j].matches(".+\\PL\\Z"))) {
+                        len = w[j].length();
+                        postfix = w[j].substring(len-1,len) + postfix;
+                        w[j] = w[j].substring(0,len-1);
                     }
+
                     //end contrib [MN]
                     if (indexEntryAttribute.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
-                    w[j] = w[j] + mark;
+                    w[j] = prefix + w[j] + postfix;
                 }
             }
             StringBuffer l = new StringBuffer(line.length() + queryHashes.size() * 8);
