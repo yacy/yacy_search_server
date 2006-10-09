@@ -455,10 +455,10 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     requestDate,                     // init date 
                     0,                               // crawling depth
                     url,                             // url
-                    "",                        // name of the url is unknown
-                    //requestHeader,                   // request headers
+                    "",                              // name of the url is unknown
+                    //requestHeader,                 // request headers
                     "200 OK",                        // request status
-                    //cachedResponseHeader,            // response headers
+                    //cachedResponseHeader,          // response headers
                     cachedResInfo,
                     null,                            // initiator
                     switchboard.defaultProxyProfile  // profile

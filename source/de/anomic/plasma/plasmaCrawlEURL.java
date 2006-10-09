@@ -205,7 +205,7 @@ public class plasmaCrawlEURL extends indexURL {
         private String   hash;       // the url's hash
         private String   referrer;   // the url's referrer hash
         private String   initiator;  // the crawling initiator
-        private String   executor;  // the crawling initiator
+        private String   executor;   // the crawling initiator
         private URL      url;        // the url as string
         private String   name;       // the name of the url, from anchor tag <a>name</a>     
         private Date     initdate;   // the time when the url was first time appeared

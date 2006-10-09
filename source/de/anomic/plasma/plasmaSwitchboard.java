@@ -219,6 +219,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaCrawlProfile          profiles;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
     public  plasmaCrawlProfile.entry    defaultRemoteProfile;
+    public  plasmaCrawlProfile.entry    defaultSnippetProfile;
     public  boolean                     rankingOn;
     public  plasmaRankingDistribution   rankingOwnDistribution;
     public  plasmaRankingDistribution   rankingOtherDistribution;
@@ -251,8 +252,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     /*
      * Some constants
      */
-    private static final String STR_PROXYPROFILE       = "defaultProxyProfile";
-    private static final String STR_REMOTEPROFILE      = "defaultRemoteProfile";
     private static final String STR_REMOTECRAWLTRIGGER = "REMOTECRAWLTRIGGER: REMOTE CRAWL TO PEER ";
     
     private serverSemaphore shutdownSync = new serverSemaphore(0);
@@ -744,23 +743,35 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
 
     private void initProfiles() {
-        if ((this.profiles.size() == 0) ||
-            (getConfig(STR_PROXYPROFILE, "").length() == 0) ||
-            (this.profiles.getEntry(getConfig(STR_PROXYPROFILE, "")) == null)) {
-            // generate new default entry for proxy crawling
-            this.defaultProxyProfile = this.profiles.newEntry("proxy", "", ".*", ".*", Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), Integer.parseInt(getConfig("proxyPrefetchDepth", "0")), 60 * 24 * 30, -1, -1, false, true, true, true, getConfigBool("proxyCrawlOrder", false), true, true, true);
-            setConfig(STR_PROXYPROFILE, this.defaultProxyProfile.handle());
-        } else {
-            this.defaultProxyProfile = this.profiles.getEntry(getConfig(STR_PROXYPROFILE, ""));
+        this.defaultProxyProfile = null;
+        this.defaultRemoteProfile = null;
+        this.defaultSnippetProfile = null;
+        Iterator i = this.profiles.profiles(true);
+        plasmaCrawlProfile.entry profile;
+        String name;
+        while (i.hasNext()) {
+            profile = (plasmaCrawlProfile.entry) i.next();
+            name = profile.name();
+            if (name.equals("proxy")) this.defaultProxyProfile = profile;
+            if (name.equals("remote")) this.defaultRemoteProfile = profile;
+            if (name.equals("snippet")) this.defaultSnippetProfile = profile;
         }
-        if ((profiles.size() == 1) ||
-            (getConfig(STR_REMOTEPROFILE, "").length() == 0) ||
-            (profiles.getEntry(getConfig(STR_REMOTEPROFILE, "")) == null)) {
+        if (this.defaultProxyProfile == null) {
+            // generate new default entry for proxy crawling
+            this.defaultProxyProfile = this.profiles.newEntry("proxy", "", ".*", ".*",
+                    Integer.parseInt(getConfig("proxyPrefetchDepth", "0")),
+                    Integer.parseInt(getConfig("proxyPrefetchDepth", "0")),
+                    60 * 24, -1, -1, false, true, true, true, getConfigBool("proxyCrawlOrder", false), true, true, true);
+        }
+        if (this.defaultRemoteProfile == null) {
             // generate new default entry for remote crawling
-            defaultRemoteProfile = profiles.newEntry("remote", "", ".*", ".*", 0, 0, 60 * 24 * 30, -1, -1, true, false, true, true, false, true, true, false);
-            setConfig(STR_REMOTEPROFILE, defaultRemoteProfile.handle());
-        } else {
-            defaultRemoteProfile = profiles.getEntry(getConfig(STR_REMOTEPROFILE, ""));
+            defaultRemoteProfile = this.profiles.newEntry("remote", "", ".*", ".*", 0, 0,
+                    -1, -1, -1, true, false, true, true, false, true, true, false);
+        }
+        if (this.defaultSnippetProfile == null) {
+            // generate new default entry for snippet fetch and optional crawling
+            defaultSnippetProfile = this.profiles.newEntry("snippet", "", ".*", ".*", 0, 0,
+                    60 * 24 * 30, -1, -1, true, true, true, true, false, true, true, false);
         }
     }
 
@@ -785,7 +796,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 
                 // getting next profile
                 entry = (plasmaCrawlProfile.entry) iter.next();
-                if (!((entry.name().equals("proxy")) || (entry.name().equals("remote")))) {
+                if (!((entry.name().equals("proxy"))  ||
+                      (entry.name().equals("remote")) ||
+                      (entry.name().equals("snippet")))) {
                     iter.remove();
                     hasDoneSomething = true;
                 }

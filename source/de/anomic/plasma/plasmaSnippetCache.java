@@ -65,6 +65,7 @@ import de.anomic.plasma.crawler.plasmaCrawlerException;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
+import de.anomic.yacy.yacyCore;
 
 public class plasmaSnippetCache {
 
@@ -209,10 +210,6 @@ public class plasmaSnippetCache {
             if (resContent != null) {
                 // if the content was found
                 resContentLength = this.cacheManager.getResourceContentLength(url);
-                
-                // getting resource metadata
-                resInfo = this.cacheManager.loadResourceInfo(url);
-            
             } else if (fetchOnline) {
                 // if not found try to download it
                 
@@ -616,12 +613,12 @@ public class plasmaSnippetCache {
     ) throws plasmaCrawlerException {
         
         plasmaHTCache.Entry result = this.sb.cacheLoader.loadSync(
-                url, 
-                "",
-                null, 
-                null, 
-                0, 
-                null,
+                url,                         // the url
+                "",                          // name of the url, from anchor tag <a>name</a>
+                null,                        // referer
+                yacyCore.seedDB.mySeed.hash, // initiator
+                0,                           // depth
+                sb.defaultSnippetProfile,    // crawl profile
                 socketTimeout,
                 keepInMemory
         );

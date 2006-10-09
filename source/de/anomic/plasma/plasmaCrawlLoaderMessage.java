@@ -65,7 +65,7 @@ public final class plasmaCrawlLoaderMessage {
     // loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
     public plasmaCrawlLoaderMessage(
             URL url,
-            String name,
+            String name,                       // the name of the url, from anchor tag <a>name</a>
             String referer, 
             String initiator, 
             int depth, 

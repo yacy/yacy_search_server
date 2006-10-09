@@ -50,7 +50,6 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -110,14 +109,13 @@ public class ProxyIndexingMonitor_p {
                 sb.setCacheSize(Long.parseLong(newProxyCacheSize));                
 
                 // implant these settings also into the crawling profile for the proxy
-                plasmaCrawlProfile.entry profile = sb.profiles.getEntry(sb.getConfig("defaultProxyProfile", ""));
-                if (profile == null) {
+                if (sb.defaultProxyProfile == null) {
                     prop.put("info", 1); //delete DATA/PLASMADB/crawlProfiles0.db
                 } else {
                     try {
-                        profile.changeEntry("generalDepth", Integer.toString(newProxyPrefetchDepth));
-                        profile.changeEntry("storeHTCache", (proxyStoreHTCache) ? "true": "false");
-                        profile.changeEntry("remoteIndexing",proxyCrawlOrder ? "true":"false");
+                        sb.defaultProxyProfile.changeEntry("generalDepth", Integer.toString(newProxyPrefetchDepth));
+                        sb.defaultProxyProfile.changeEntry("storeHTCache", (proxyStoreHTCache) ? "true": "false");
+                        sb.defaultProxyProfile.changeEntry("remoteIndexing",proxyCrawlOrder ? "true":"false");
                         
                         prop.put("info", 2);//new proxyPrefetchdepth
                         prop.put("info_message", newProxyPrefetchDepth);

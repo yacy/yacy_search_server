@@ -439,11 +439,6 @@ crawlingQ=false
 storeHTCache=false
 storeTXCache=true
 
-# default crawl profile entries
-# if these entries are empty, then a new entry will be generated
-defaultProxyProfile=
-defaultRemoteProfile=
-
 # peers may initiate remote crawling tasks.
 # every peer may allow or disallow to be used as crawling-peer;
 # you can also set a maximum crawl depth that can be requested or accepted
