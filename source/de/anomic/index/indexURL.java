@@ -449,7 +449,7 @@ public class indexURL {
      if (urlIndexCache.size() == 0) return;
      synchronized (urlIndexCache) {
          Iterator i = urlIndexCache.rows(true, false, null);
-         try {
+         if (i.hasNext()) try {
              urlIndexFile.put((kelondroRow.Entry) i.next());
              i.remove();
          } catch (IOException e) {
