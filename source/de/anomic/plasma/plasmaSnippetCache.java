@@ -146,12 +146,12 @@ public class plasmaSnippetCache {
                     prefix = "";
                     postfix = "";
 
-                    while((w[j].matches("\\A\\PL.+"))) {
+                    while((w[j].matches("\\A[^\\p{L}\\p{N}].+"))) {
                         prefix = w[j].substring(0,1) + prefix;
                         w[j] = w[j].substring(1);
                     }
 
-                    while((w[j].matches(".+\\PL\\Z"))) {
+                    while((w[j].matches(".+[^\\p{L}\\p{N}]\\Z"))) {
                         len = w[j].length();
                         postfix = w[j].substring(len-1,len) + postfix;
                         w[j] = w[j].substring(0,len-1);
