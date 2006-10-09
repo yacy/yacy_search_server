@@ -667,32 +667,42 @@ public final class plasmaHTCache {
 
         // generate cache path according to storage method
         if (cacheLayout.equals("tree")) {
-            File FileTree = treeFile(fileName, path);
+            File FileTree = treeFile(fileName, "tree", path);
             if (cacheMigration) {
-                moveCachedObject(hashFile(fileName, extention, url), FileTree);
+                moveCachedObject(hashFile(fileName, "hash", extention, url), FileTree);
+                moveCachedObject(hashFile(fileName, null, extention, url), FileTree); // temporary migration
+                moveCachedObject(treeFile(fileName, null, path), FileTree);           // temporary migration
             }
             return FileTree;
         }
         if (cacheLayout.equals("hash")) {
-            File FileFlat = hashFile(fileName, extention, url);
+            File FileFlat = hashFile(fileName, "hash", extention, url);
             if (cacheMigration) {
-                moveCachedObject(treeFile(fileName, path), FileFlat);
+                moveCachedObject(treeFile(fileName, "tree", path), FileFlat);
+                moveCachedObject(treeFile(fileName, null, path), FileFlat);           // temporary migration
+                moveCachedObject(hashFile(fileName, null, extention, url), FileFlat); // temporary migration
             }
             return FileFlat;
         }
         return null;
     }
 
-    private File treeFile(StringBuffer fileName, String path) {
-        return new File(this.cachePath, fileName.toString() + path);
+    private File treeFile(StringBuffer fileName, String prefix, String path) {
+        StringBuffer f = new StringBuffer(fileName.length() + 30);
+        f.append(fileName);
+        if (prefix != null) f.append('/').append(prefix);
+        f.append(path);
+        return new File(this.cachePath, f.toString());
     }
     
-    private File hashFile(StringBuffer fileName, String extention, URL url) {
+    private File hashFile(StringBuffer fileName, String prefix, String extention, URL url) {
         String hexHash = yacySeed.b64Hash2hexHash(indexURL.urlHash(url));
-        StringBuffer f = new StringBuffer(30);
+        StringBuffer f = new StringBuffer(fileName.length() + 30);
+        f.append(fileName);
+        if (prefix != null) f.append('/').append(prefix);
         f.append('/').append(hexHash.substring(0,2)).append('/').append(hexHash.substring(2,4)).append('/').append(hexHash);
         if (extention != null) fileName.append(extention);
-        return new File(this.cachePath, fileName.toString() + f);
+        return new File(this.cachePath, f.toString());
     }
     
     
@@ -700,16 +710,17 @@ public final class plasmaHTCache {
      * This is a helper funktion that extracts the Hash from the filename
      */
     public static String getHash(final File f) {
-        String hexHash, hash;
+        if ((f.getPath().indexOf("hash")) < 0) return null;
+        String hexHash = f.getName().substring(0,18);
+        if (hexHash.indexOf('.') >= 0) return null;
         try {
-            hexHash = f.getName().substring(0,18);
-            hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.decodeHex(hexHash));
+            String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.decodeHex(hexHash));
+            if (hash.length() == indexURL.urlHashLength) return hash;
+            return null;
         } catch (Exception e) {
             //log.logWarning("getHash: " + e.getMessage(), e);
             return null;
         }
-        if (hash.length() == indexURL.urlHashLength) return hash;
-        else return null;
     }
 
     /**
@@ -754,13 +765,14 @@ public final class plasmaHTCache {
             if (url != null) return url;
         }
         // If we can't get the correct URL, it seems to be a treeed file
-        final String c = cachePath.toString().replace('\\', '/');
+        String c = cachePath.toString().replace('\\', '/');
         String path = f.toString().replace('\\', '/');
-
+        int pos;
+        if ((pos = path.indexOf("/tree")) >= 0) path = path.substring(0, pos) + path.substring(pos + 5);
+        
         if (path.endsWith("ndx")) { path = path.substring(0, path.length() - 3); }
-
-        int pos = path.lastIndexOf(c);
-        if (pos == 0) {
+        
+        if ((pos = path.lastIndexOf(c)) == 0) {
             path = path.substring(pos + c.length());
             while (path.startsWith("/")) { path = path.substring(1); }
 
