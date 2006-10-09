@@ -89,6 +89,7 @@ import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
+import de.anomic.yacy.yacySeed;
 
 public final class plasmaHTCache {
 
@@ -687,13 +688,10 @@ public final class plasmaHTCache {
     }
     
     private File hashFile(StringBuffer fileName, String extention, URL url) {
-        String urlHash = indexURL.urlHash(url);
-        String hexHash = serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(urlHash));
-        StringBuffer f = new StringBuffer(18);
+        String hexHash = yacySeed.b64Hash2hexHash(indexURL.urlHash(url));
+        StringBuffer f = new StringBuffer(30);
         f.append('/').append(hexHash.substring(0,2)).append('/').append(hexHash.substring(2,4)).append('/').append(hexHash);
-        if (extention != null) {
-            fileName.append(extention);
-        }
+        if (extention != null) fileName.append(extention);
         return new File(this.cachePath, fileName.toString() + f);
     }
     
