@@ -446,7 +446,9 @@ public class IndexCreate_p {
             prop.put("crawlProfiles_"+count+"_storeCache", ((profile.storeHTCache()) ? 1 : 0));
             prop.put("crawlProfiles_"+count+"_localIndexing", ((profile.localIndexing()) ? 1 : 0));
             prop.put("crawlProfiles_"+count+"_remoteIndexing", ((profile.remoteIndexing()) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_deleteButton", (((profile.name().equals("remote")) || (profile.name().equals("proxy"))) ? 0 : 1));
+            prop.put("crawlProfiles_"+count+"_deleteButton", (((profile.name().equals("remote")) ||
+                                                               (profile.name().equals("proxy")) ||
+                                                               (profile.name().equals("snippet"))) ? 0 : 1));
             prop.put("crawlProfiles_"+count+"_deleteButton_handle", profile.handle());
             
             dark = !dark;

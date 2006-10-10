@@ -102,12 +102,14 @@ public class yacySearch extends Thread {
 
     public void run() {
         this.urls = yacyClient.search(wordhashes, urlhashes, prefer, filter, maxDistance, global, targetPeer, urlManager, containerCache, abstractCache, blacklist, snippetCache, timingProfile, rankingProfile);
-        StringBuffer urllist = new StringBuffer(this.urls.length * 13);
-        for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
-        yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls.length + " links for word hash " + wordhashes + ": " + new String(urllist));
         if (urls != null) {
+            StringBuffer urllist = new StringBuffer(this.urls.length * 13);
+            for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
+            yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls.length + " links for word hash " + wordhashes + ": " + new String(urllist));
             yacyCore.seedDB.mySeed.incRI(urls.length);
             yacyCore.seedDB.mySeed.incRU(urls.length);
+        } else {
+            yacyCore.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
         }
     }
 
