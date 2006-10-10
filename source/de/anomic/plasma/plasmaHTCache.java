@@ -432,8 +432,10 @@ public final class plasmaHTCache {
         //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
         long ageHours = 0;
         try {
-            ageHours = (System.currentTimeMillis() -
+        	if (!this.cacheAge.isEmpty()) {
+        		ageHours = (System.currentTimeMillis() -
                             Long.parseLong(((String) this.cacheAge.firstKey()).substring(0, 16), 16)) / 3600000;
+        	}
         } catch (NumberFormatException e) {
             //e.printStackTrace();
         }
