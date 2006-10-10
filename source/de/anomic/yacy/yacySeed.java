@@ -67,6 +67,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.natLib;
@@ -128,6 +129,7 @@ public class yacySeed {
     public static final String NAME      = "Name";
     public static final String BDATE     = "BDate";
     public static final String UTC       = "UTC";
+    public static final String PEERTAGS  = "Tags";
 
     public static final String ISPEED    = "ISpeed";
     public static final String UPTIME    = "Uptime";
@@ -392,6 +394,14 @@ public class yacySeed {
         put(LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() - serverDate.UTCDiff() + getUTCDiff())));
     }
 
+    public void setPeerTags(Set keys) {
+        put(PEERTAGS, serverCodings.set2string(keys, "|", false));
+    }
+    
+    public Set getPeerTags() {
+        return serverCodings.string2set(get(PEERTAGS, ""), "|");
+    }
+    
     public int getPPM() {
         try {
             return Integer.parseInt(get(ISPEED, "0"));
@@ -609,7 +619,7 @@ public class yacySeed {
         if (seedStr == null) { return null; }
         final String seed = crypt.simpleDecode(seedStr, key);
         if (seed == null) { return null; }
-        final HashMap dna = serverCodings.string2map(seed);
+        final HashMap dna = serverCodings.string2map(seed, ",");
         final String hash = (String) dna.remove("Hash");
         yacySeed resultSeed = new yacySeed(hash, dna);
         if (properTest) {
@@ -624,9 +634,9 @@ public class yacySeed {
 
     public String toString() {       
         synchronized (this.dna) {
-            this.dna.put("Hash", this.hash);      // set hash into seed code structure
-            final String s = this.dna.toString(); // generate string representation
-            this.dna.remove("Hash");              // reconstruct original: hash is stored external
+            this.dna.put("Hash", this.hash);                                // set hash into seed code structure
+            final String s = serverCodings.map2string(this.dna, ",", true); // generate string representation
+            this.dna.remove("Hash");                                        // reconstruct original: hash is stored external
             return s;
         }
     }

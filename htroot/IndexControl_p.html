@@ -99,6 +99,14 @@
           <td><input type="checkbox" name="indexReceiveBlockBlacklist" #[indexReceiveBlockBlacklistChecked]# /></td>
           <td>If checked, your peer silently ignores transmitted URLs that match your blacklist</td>
         </tr>
+        <tr valign="top" class="TableCellDark">
+          <td>Peer Tags:</td>
+          <td colspan="2"><input type="text" name="peertags" value="#[peertags]#" size="40" maxlength="80" /></td>
+          <td>If your peer runs in 'Robinson Mode' (Distribution and Receive off), you probably run YaCy as a search engine
+              for your own search portal. Please describe your search portal with some keywords (comma-separated).
+              This will help to use your peer as search target even if you do not distribute your web index by
+              DHT distribution.</td>
+        </tr>
         <tr valign="top" class="TableCellLight">
           <td></td>
           <td><input type="submit" name="setIndexTransmission" value="set" /></td>

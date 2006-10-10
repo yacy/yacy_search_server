@@ -47,8 +47,13 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 
 public final class serverCodings {
 
@@ -154,21 +159,69 @@ public final class serverCodings {
 	return p;
     }
     
-    public static HashMap string2map(String string) {
+    public static HashMap string2map(String string, String separator) {
         // this can be used to parse a Map.toString() into a Map again
-	if (string == null) return null;
-	HashMap map = new HashMap();
-	int pos;
-	pos = string.indexOf("{"); if (pos >= 0) string = string.substring(pos + 1).trim();
-	pos = string.lastIndexOf("}"); if (pos >= 0) string = string.substring(0, pos).trim();
-	StringTokenizer st = new StringTokenizer(string, ",");
-	String token;
-	while (st.hasMoreTokens()) {
-	    token = st.nextToken().trim();
-	    pos = token.indexOf("=");
-	    if (pos > 0) map.put(token.substring(0, pos).trim(), token.substring(pos + 1).trim());
-	}
-	return map;
+        if (string == null) return null;
+        HashMap map = new HashMap();
+        int pos;
+        if ((pos = string.indexOf("{")) >= 0) string = string.substring(pos + 1).trim();
+        if ((pos = string.lastIndexOf("}")) >= 0) string = string.substring(0, pos).trim();
+        StringTokenizer st = new StringTokenizer(string, separator);
+        String token;
+        while (st.hasMoreTokens()) {
+            token = st.nextToken().trim();
+            pos = token.indexOf("=");
+            if (pos > 0) map.put(token.substring(0, pos).trim(), token.substring(pos + 1).trim());
+        }
+        return map;
+    }
+    
+    public static String map2string(Map m, String separator, boolean braces) {
+        StringBuffer buf = new StringBuffer();
+        if (braces) buf.append("{");
+        Iterator i = m.entrySet().iterator();
+        boolean hasNext = i.hasNext();
+        while (hasNext) {
+            Entry e = (Entry) (i.next());
+            Object key = e.getKey();
+            Object value = e.getValue();
+            buf.append(key.toString());
+            buf.append('=');
+            buf.append(value.toString());
+
+            hasNext = i.hasNext();
+            if (hasNext) buf.append(separator);
+        }
+        if (braces) buf.append("}");
+        return buf.toString();
+    }
+    
+    public static Set string2set(String string, String separator) {
+        // this can be used to parse a Map.toString() into a Map again
+        if (string == null) return null;
+        HashSet set = new HashSet();
+        int pos;
+        if ((pos = string.indexOf("{")) >= 0) string = string.substring(pos + 1).trim();
+        if ((pos = string.lastIndexOf("}")) >= 0) string = string.substring(0, pos).trim();
+        StringTokenizer st = new StringTokenizer(string, separator);
+        while (st.hasMoreTokens()) {
+            set.add(st.nextToken().trim());
+        }
+        return set;
+    }
+    
+    public static String set2string(Set s, String separator, boolean braces) {
+        StringBuffer buf = new StringBuffer();
+        if (braces) buf.append("{");
+        Iterator i = s.iterator();
+        boolean hasNext = i.hasNext();
+        while (hasNext) {
+            buf.append(i.next().toString());
+            hasNext = i.hasNext();
+            if (hasNext) buf.append(separator);
+        }
+        if (braces) buf.append("}");
+        return buf.toString();
     }
     
     public static void main(String[] s) {
@@ -179,7 +232,7 @@ public final class serverCodings {
 
         if (s[0].equals("-s2m")) {
             // generate a b64 decoding from a given string
-            System.out.println(string2map(s[1]).toString());
+            System.out.println(string2map(s[1], ",").toString());
         }
     }
 

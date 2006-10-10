@@ -79,7 +79,7 @@ public class yacyNewsRecord {
     );
     
     public yacyNewsRecord(String newsString) {
-        this.attributes = serverCodings.string2map(newsString);
+        this.attributes = serverCodings.string2map(newsString, ",");
         this.received = (attributes.containsKey("rec")) ? yacyCore.parseUniversalDate((String) attributes.get("rec"), serverDate.UTCDiffString()) : new Date();
         this.created = (attributes.containsKey("cre")) ? yacyCore.parseUniversalDate((String) attributes.get("cre"), serverDate.UTCDiffString()) : new Date();
         this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : null;

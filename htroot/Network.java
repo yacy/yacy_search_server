@@ -54,6 +54,7 @@ import java.util.Map;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -409,12 +410,19 @@ public class Network {
                                 } else {
                                     prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", 0);  // red/red; offline was off
                                 }
+                                
                                 if (seed.getVersion() >= yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION &&
                                     seed.getFlagAcceptCitationReference()) {
                                     prop.put(STR_TABLE_LIST + conCount + "_rankingreceive", 1);
                                 } else {
                                     prop.put(STR_TABLE_LIST + conCount + "_rankingreceive", 0);
                                 }
+                            }
+                            if (seed.getFlagAcceptRemoteIndex()) {
+                                prop.put(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", "");
+                            } else {
+                                String peertags = serverCodings.set2string(seed.getPeerTags(), ",", false);
+                                prop.put(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.length() == 0)) ? "no tags given" : ("tags = " + peertags));
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_version", yacy.combinedVersionString2PrettyString(seed.get(yacySeed.VERSION, "0.1")));
                             prop.put(STR_TABLE_LIST + conCount + "_lastSeen", lastseen);

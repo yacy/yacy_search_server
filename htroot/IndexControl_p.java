@@ -65,6 +65,7 @@ import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -92,6 +93,7 @@ public class IndexControl_p {
             prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? "checked" : "");
             prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
             prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "checked" : "");
+            prop.put("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed.getPeerTags(), ",", false));
             return prop; // be save
         }
 
@@ -142,6 +144,10 @@ public class IndexControl_p {
                 switchboard.setConfig("indexReceiveBlockBlacklist", "true");
             } else {
                 switchboard.setConfig("indexReceiveBlockBlacklist", "false");
+            }
+            
+            if (post.containsKey("peertags")) {
+                yacyCore.seedDB.mySeed.setPeerTags(serverCodings.string2set((String) post.get("peertags"), ","));
             }
         }
 
@@ -392,6 +398,7 @@ public class IndexControl_p {
         prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? "checked" : "");
         prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
         prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "checked" : "");
+        prop.put("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed.getPeerTags(), ",", false));
         // return rewrite properties
         return prop;
     }

@@ -64,8 +64,8 @@ public class yacyNewsAction implements yacyPeerAction {
         String decodedString = de.anomic.tools.crypt.simpleDecode(recordString, "");
         yacyNewsRecord record = new yacyNewsRecord(decodedString);
         //System.out.println("### news arrival from peer " + peer.getName() + ", decoded=" + decodedString + ", record=" + recordString + ", news=" + record.toString());
-        String cre1 = (String) serverCodings.string2map(decodedString).get("cre");
-        String cre2 = (String) serverCodings.string2map(record.toString()).get("cre");
+        String cre1 = (String) serverCodings.string2map(decodedString, ",").get("cre");
+        String cre2 = (String) serverCodings.string2map(record.toString(), ",").get("cre");
         if ((cre1 == null) || (cre2 == null) || (!(cre1.equals(cre2)))) {
             System.out.println("### ERROR - cre are not equal: cre1=" + cre1 + ", cre2=" + cre2);
             return;

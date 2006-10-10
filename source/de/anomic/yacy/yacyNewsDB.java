@@ -160,7 +160,7 @@ public class yacyNewsDB {
             b.getColString(1, "UTF-8"),
             (b.empty(2)) ? null : yacyCore.parseUniversalDate(b.getColString(2, null), serverDate.UTCDiffString()),
             (int) b.getColLong(3),
-            serverCodings.string2map(b.getColString(4, "UTF-8"))
+            serverCodings.string2map(b.getColString(4, "UTF-8"), ",")
         );
     }
 
