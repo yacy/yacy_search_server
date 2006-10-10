@@ -86,6 +86,7 @@ public class plasmaCrawlEURL extends indexURL {
     
     // wrong content
     public static final String DENIED_WRONG_MIMETYPE_OR_EXT = "denied_(wrong_mimetype_or_extension)";
+    public static final String DENIED_UNSUPPORTED_CHARSET = "denied_(unsupported_charset)";
     public static final String DENIED_REDIRECTION_HEADER_EMPTY = "denied_(redirection_header_empty)";
     public static final String DENIED_REDIRECTION_COUNTER_EXCEEDED = "denied_(redirection_counter_exceeded)";
     public static final String DENIED_WRONG_HTTP_STATUSCODE = "denied_(wrong_http_status_code_";
