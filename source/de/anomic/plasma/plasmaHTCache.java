@@ -475,13 +475,6 @@ public final class plasmaHTCache {
         int p = s.indexOf("/");
         if (p < 0) p = s.indexOf("\\");
         if (p < 0) return null;
-        if (s.startsWith("tree") || s.startsWith("hash")) {
-            // remove prefix
-            s = s.substring(p + 1);
-            p = s.indexOf("/");
-            if (p < 0) p = s.indexOf("\\");
-            if (p < 0) return null;
-        }
         // remove the protokoll
         s = s.substring(p + 1);
         p = s.indexOf("/");
