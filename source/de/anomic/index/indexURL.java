@@ -648,7 +648,7 @@ public class indexURL {
          String dom, paths;
          while (i.hasNext()) {
              iEntry = (indexEntry) i.next();
-             if (excludeContainer.get(iEntry.urlHash()) != null) continue; // do not include urls that are in excludeContainer
+             if ((excludeContainer != null) && (excludeContainer.get(iEntry.urlHash()) != null)) continue; // do not include urls that are in excludeContainer
              dom = iEntry.urlHash().substring(6);
              if ((paths = (String) doms.get(dom)) == null) {
                  doms.put(dom, iEntry.urlHash().substring(0, 6));

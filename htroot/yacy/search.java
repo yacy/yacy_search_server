@@ -83,7 +83,8 @@ public final class search {
 //      final String  youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
         final String  key    = post.get("key", "");    // transmission key for response
         final String  query  = post.get("query", "");  // a string of word hashes that shall be searched and combined
-        String  urls   = post.get("urls", "");   // a string of url hashes that are preselected for the search: no other may be returned
+        String  urls   = post.get("urls", "");         // a string of url hashes that are preselected for the search: no other may be returned
+        String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
 //      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
 //      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
         final long    duetime= post.getLong("duetime", 3000);
@@ -95,11 +96,17 @@ public final class search {
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
-        // test - http://localhost:8080/yacy/search.html?query=4galTpdpDM5Q
+        // test:
+        // http://localhost:8080/yacy/search.html?query=4galTpdpDM5Q (search for linux)
+        // http://localhost:8080/yacy/search.html?query=gh8DKIhGKXws (search for book)
+        // http://localhost:8080/yacy/search.html?query=4galTpdpDM5Qgh8DKIhGKXws&abstracts=auto (search for linux and book, generate abstract automatically)
+        // http://localhost:8080/yacy/search.html?query=&abstracts=4galTpdpDM5Q (only abstracts for linux)
         
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(2 * duetime);
 
+        Set abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
+        
         // store accessing peer
         if (yacyCore.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
@@ -111,76 +118,117 @@ public final class search {
         final Set keyhashes = plasmaSearchQuery.hashes2Set(query);
         final long timestamp = System.currentTimeMillis();
         
-        plasmaSearchQuery squery = new plasmaSearchQuery(keyhashes, maxdist, prefer, count, duetime, filter);
-        squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
-
+        
         serverObjects prop = new serverObjects();
 
-        yacyCore.log.logInfo("INIT HASH SEARCH: " + squery.queryHashes + " - " + squery.wantedResults + " links");
         long timestamp1 = System.currentTimeMillis();
         
-        // prepare a search profile
-        plasmaSearchRankingProfile rankingProfile = new plasmaSearchRankingProfile(new String[]{plasmaSearchRankingProfile.ORDER_YBR, plasmaSearchRankingProfile.ORDER_DATE, plasmaSearchRankingProfile.ORDER_QUALITY});
-        plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
-        plasmaSearchTimingProfile remoteTiming = null;
-
-        // retrieve index containers from search request
-        plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
-        Map containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
         
-        // set statistic details of search result and find best result index set
+        // prepare an abstract result
+        StringBuffer indexabstract = new StringBuffer();
         int joincount = 0;
         plasmaSearchResult acc = null;
-        if (containers == null) {
-            prop.put("indexcount", "0");
-            prop.put("joincount", "0");
-            prop.put("indexabstract","");
-        } else {
-            Iterator ci = containers.entrySet().iterator();
-            StringBuffer indexcount = new StringBuffer();
-            Map.Entry entry;
-            int maxcount = -1;
-            double mindhtdistance = 1.1, d;
-            String wordhash;
-            String maxcounthash = null, neardhthash = null;
-            while (ci.hasNext()) {
-                entry = (Map.Entry) ci.next();
-                wordhash = (String) entry.getKey();
-                indexContainer container = (indexContainer) entry.getValue();
-                if (container.size() > maxcount) {
-                    maxcounthash = wordhash;
-                    maxcount = container.size();
-                }
-                d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhash);
-                if (d < mindhtdistance) {
-                    mindhtdistance = d;
-                    neardhthash = wordhash;
-                }
-                indexcount.append("indexcount.").append(container.getWordHash()).append('=').append(Integer.toString(container.size())).append(serverCore.crlfString);
-            }
-            prop.put("indexcount", new String(indexcount));
-            
-            // join and order the result
-            indexContainer localResults = theSearch.localSearchJoin(containers.values());
-            joincount = localResults.size();
-            prop.put("joincount", Integer.toString(joincount));
-            acc = theSearch.orderFinal(localResults);
+        plasmaSearchQuery squery = null;
+        if ((query.length() == 0) && (abstractSet != null)) {
+            // this is _not_ a normal search, only a request for index abstracts
+            squery = new plasmaSearchQuery(abstractSet, maxdist, prefer, count, duetime, filter);
+            squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
+            yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + squery.queryHashes + " - " + squery.wantedResults + " links");
 
-            // generate compressed index for maxcounthash
-            // this is not needed if the search is restricted to specific urls, because it is a re-search
-            if ((maxcounthash == null) || (urls.length() != 0) || (keyhashes.size() == 1)) {
-                prop.put("indexabstract","");
-            } else {
-                String indexabstract = "indexabstract." + maxcounthash + "=" + indexURL.compressIndex(((indexContainer) containers.get(maxcounthash)), localResults, 1000).toString() + serverCore.crlfString;
-                if ((neardhthash != null) && (!(neardhthash.equals(maxcounthash)))) {
-                    indexabstract += "indexabstract." + neardhthash + "=" + indexURL.compressIndex(((indexContainer) containers.get(neardhthash)), localResults, 1000).toString() + serverCore.crlfString;
+            // prepare a search profile
+            plasmaSearchRankingProfile rankingProfile = new plasmaSearchRankingProfile(new String[]{plasmaSearchRankingProfile.ORDER_YBR, plasmaSearchRankingProfile.ORDER_DATE, plasmaSearchRankingProfile.ORDER_QUALITY});
+            plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
+            plasmaSearchTimingProfile remoteTiming = null;
+
+            plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
+            Map containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
+            if (containers != null) {
+                Iterator ci = containers.entrySet().iterator();
+                Map.Entry entry;
+                String wordhash;
+                while (ci.hasNext()) {
+                    entry = (Map.Entry) ci.next();
+                    wordhash = (String) entry.getKey();
+                    indexContainer container = (indexContainer) entry.getValue();
+                    indexabstract.append("indexabstract." + wordhash + "=").append(indexURL.compressIndex(container, null, 1000).toString()).append(serverCore.crlfString);                
                 }
-                System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
-                System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = " + neardhthash);
-                //yacyCore.log.logFine("DEBUG HASH SEARCH: " + indexabstract);
-                prop.put("indexabstract", indexabstract);
+            }
+            
+            prop.put("indexcount", "");
+            prop.put("joincount", 0);
+        } else {
+            // retrieve index containers from search request
+            squery = new plasmaSearchQuery(keyhashes, maxdist, prefer, count, duetime, filter);
+            squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
+            yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + squery.queryHashes + " - " + squery.wantedResults + " links");
+
+            // prepare a search profile
+            plasmaSearchRankingProfile rankingProfile = new plasmaSearchRankingProfile(new String[]{plasmaSearchRankingProfile.ORDER_YBR, plasmaSearchRankingProfile.ORDER_DATE, plasmaSearchRankingProfile.ORDER_QUALITY});
+            plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
+            plasmaSearchTimingProfile remoteTiming = null;
+
+            plasmaSearchEvent theSearch = new plasmaSearchEvent(squery,
+                    rankingProfile, localTiming, remoteTiming, true,
+                    yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL,
+                    sb.snippetCache);
+            Map containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
+
+            // set statistic details of search result and find best result index set
+            if (containers == null) {
+                prop.put("indexcount", "");
+                prop.put("joincount", "0");
+            } else {
+                Iterator ci = containers.entrySet().iterator();
+                StringBuffer indexcount = new StringBuffer();
+                Map.Entry entry;
+                int maxcount = -1;
+                double mindhtdistance = 1.1, d;
+                String wordhash;
+                String maxcounthash = null, neardhthash = null;
+                while (ci.hasNext()) {
+                    entry = (Map.Entry) ci.next();
+                    wordhash = (String) entry.getKey();
+                    indexContainer container = (indexContainer) entry.getValue();
+                    if (container.size() > maxcount) {
+                        maxcounthash = wordhash;
+                        maxcount = container.size();
+                    }
+                    d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhash);
+                    if (d < mindhtdistance) {
+                        mindhtdistance = d;
+                        neardhthash = wordhash;
+                    }
+                    indexcount.append("indexcount.").append(container.getWordHash()).append('=').append(Integer.toString(container.size())).append(serverCore.crlfString);
+                    if ((abstractSet != null) && (abstractSet.contains(wordhash))) {
+                        indexabstract.append("indexabstract." + wordhash + "=").append(indexURL.compressIndex(container, null,1000).toString()).append(serverCore.crlfString);
+                    }
+                }
+                prop.put("indexcount", new String(indexcount));
+
+                // join and order the result
+                indexContainer localResults = theSearch.localSearchJoin(containers.values());
+                joincount = localResults.size();
+                prop.put("joincount", Integer.toString(joincount));
+                acc = theSearch.orderFinal(localResults);
+
+                // generate compressed index for maxcounthash
+                // this is not needed if the search is restricted to specific
+                // urls, because it is a re-search
+                if ((maxcounthash == null) || (urls.length() != 0) || (keyhashes.size() == 1) || (abstracts.length() == 0)) {
+                    prop.put("indexabstract", "");
+                } else if (abstracts.equals("auto")) {
+                    indexabstract.append("indexabstract." + maxcounthash + "=").append(indexURL.compressIndex(((indexContainer) containers.get(maxcounthash)),localResults, 1000).toString()).append(serverCore.crlfString);
+                    if ((neardhthash != null)
+                            && (!(neardhthash.equals(maxcounthash)))) {
+                        indexabstract.append("indexabstract." + neardhthash + "=").append(indexURL.compressIndex(((indexContainer) containers.get(neardhthash)), localResults, 1000).toString()).append(serverCore.crlfString);
+                    }
+                    //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
+                    //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);
+                    //yacyCore.log.logFine("DEBUG HASH SEARCH: " + indexabstract);
+                }
             }
         }
+        prop.put("indexabstract", indexabstract.toString());
         
         // prepare result
         if ((joincount == 0) || (acc == null)) {
@@ -191,7 +239,6 @@ public final class search {
             prop.put("references", "");
 
         } else {
-            
             // result is a List of urlEntry elements
             int i = 0;
             StringBuffer links = new StringBuffer();
