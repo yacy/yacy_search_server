@@ -1,7 +1,6 @@
 http://www.yacy.net/yacy/seed.txt
 http://www.suma-lab.de/yacy/seed.txt
 http://www.lulabad.de/seed.txt
-http://www.roland-ramthun.de/seed.txt
 http://home.arcor.de/hermens/yacy/seed.txt
 http://www.blowmymind.de/yacy/seed1.txt
 http://borg-0300.dyndns.org:3000/share/seed.txt

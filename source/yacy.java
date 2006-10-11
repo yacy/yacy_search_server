@@ -202,9 +202,13 @@ public final class yacy {
                 System.exit(-1);
             }
             
-            // ensure that there is a DATA directory
+            // ensure that there is a DATA directory, if not, create one and if that fails warn and die
             File f = new File(homePath); if (!(f.exists())) f.mkdirs();
             f = new File(homePath, "DATA/"); if (!(f.exists())) f.mkdirs();
+			if (!(f.exists())) { 
+			System.err.println("Error creating DATA-directory in " + homePath.toString() + " . Please check your write-permission for this folder. YaCy will now terminate."); 
+			System.exit(-1); 
+			}
             
             // setting up logging
             f = new File(homePath, "DATA/LOG/"); if (!(f.exists())) f.mkdirs();
@@ -223,10 +227,6 @@ public final class yacy {
             serverLog.logConfig("STARTUP", "Application Root Path: " + homePath);
             serverLog.logConfig("STARTUP", "Time Zone: UTC" + serverDate.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
             serverLog.logConfig("STARTUP", "Maximum file system path length: " + serverSystem.maxPathLength);
-
-            // create data folder
-            final File dataFolder = new File(homePath, "DATA");
-            if (!(dataFolder.exists())) dataFolder.mkdir();
 
             /*
                 // Testing if the yacy archive file were unzipped correctly.

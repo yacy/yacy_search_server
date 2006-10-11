@@ -1407,7 +1407,7 @@ Connection timeout in ms==Verbindungs-Timeout in ms
 means unlimited==schaltet die Begrenzung ab
 Crawler Settings==Crawler Einstellungen
 Maximum&nbsp;Filesize==Maximale&nbsp;Dateigröße
-Maximum allowed file size in bytes that should be downloaded==Maximale Größe der herunterzuladenden Dateien
+Maximum allowed file size in bytes that should be downloaded==Maximale Größe der herunterzuladenden Datei in Byte
 Larger files will be skipped==Größere Dateien werden übersprungen
 Please note that if the crawler uses content compression, this limit is used to check the compressed content size==Beachten Sie, dass beim Herunterladen der Dateien mittels "Content-Compression" die komprimierte Dateigröße maßgeblich ist
 Submit==Speichern
