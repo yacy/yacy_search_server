@@ -408,7 +408,9 @@ public class kelondroCollectionIndex {
         synchronized (index) {
             kelondroRow.Entry indexrow = index.get(key);
             if (indexrow == null) return null;
-            return getdelete(indexrow, true, false);
+            kelondroRowSet removedCollection = getdelete(indexrow, true, false);
+            index.remove(key);
+            return removedCollection;
         }
     }
     

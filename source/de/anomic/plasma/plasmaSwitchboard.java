@@ -606,7 +606,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         serverInstantThread.oneTimeJob(yc, "loadSeeds", yacyCore.log, 3000);
         
         // initializing the stackCrawlThread
-        this.sbStackCrawlThread = new plasmaCrawlStacker(this, this.plasmaPath, ramPreNURL, ramPreNURL_time, getConfigBool("useFlexTableForPreNURL", false));
+        this.sbStackCrawlThread = new plasmaCrawlStacker(this, this.plasmaPath, ramPreNURL, ramPreNURL_time, (int) getConfigLong("tableTypeForPreNURL", 0));
         //this.sbStackCrawlThread = new plasmaStackCrawlThread(this,this.plasmaPath,ramPreNURL);
         //this.sbStackCrawlThread.start();
         

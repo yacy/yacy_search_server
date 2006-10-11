@@ -47,7 +47,7 @@ public class kelondroRAMIndex implements kelondroIndex {
         return this.order;
     }
 
-    public int size() {
+    public synchronized int size() {
         return this.index.size();
     }
 
@@ -55,19 +55,19 @@ public class kelondroRAMIndex implements kelondroIndex {
         return this.rowdef;
     }
 
-    public Entry get(byte[] key) {
+    public synchronized Entry get(byte[] key) {
         return (kelondroRow.Entry) index.get(key);
     }
 
-    public Entry put(Entry row) {
+    public synchronized Entry put(Entry row) {
         return (kelondroRow.Entry) index.put(row.getColBytes(0), row);
     }
 
-    public Entry remove(byte[] key) {
+    public synchronized Entry remove(byte[] key) {
         return (kelondroRow.Entry) index.remove(key);
     }
 
-    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) {
+    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) {
         return index.values().iterator();
     }
 

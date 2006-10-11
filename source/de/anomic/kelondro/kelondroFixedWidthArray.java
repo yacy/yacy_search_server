@@ -128,7 +128,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     }
 
     public synchronized void remove(int index) throws IOException {
-        if (index >= size()) throw new IOException("remove: index " + index + " out of bounds " + size());
+        if (index >= super.USAGE.allCount()) throw new IOException("remove: index " + index + " out of bounds " + super.USAGE.allCount());
 
         // get the node at position index
         Handle h = new Handle(index);

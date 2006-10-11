@@ -37,13 +37,13 @@ public class kelondroBytesIntMap {
         this.ki = ki;
     }
     
-    public int geti(byte[] key) throws IOException {
+    public synchronized int geti(byte[] key) throws IOException {
         kelondroRow.Entry indexentry = ki.get(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
     
-    public int puti(byte[] key, int i) throws IOException {
+    public synchronized int puti(byte[] key, int i) throws IOException {
         kelondroRow.Entry newentry = ki.row().newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, i);
@@ -52,18 +52,18 @@ public class kelondroBytesIntMap {
         return (int) oldentry.getColLong(1);
     }
     
-    public int removei(byte[] key) throws IOException {
+    public synchronized int removei(byte[] key) throws IOException {
         if (ki.size() == 0) return -1;
         kelondroRow.Entry indexentry = ki.remove(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
 
-    public int size() throws IOException {
+    public synchronized int size() throws IOException {
         return ki.size();
     }
     
-    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
         // returns the row-iterator of the underlying kelondroIndex
         // col[0] = key
         // col[1] = integer as {b265}

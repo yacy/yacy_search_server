@@ -64,6 +64,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
+import de.anomic.kelondro.kelondroRAMIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
@@ -75,6 +76,11 @@ import de.anomic.yacy.yacyCore;
 
 public final class plasmaCrawlStacker {
     
+    // keys for different database types
+    public static final int QUEUE_DB_TYPE_RAM  = 0;
+    public static final int QUEUE_DB_TYPE_TREE = 1;
+    public static final int QUEUE_DB_TYPE_FLEX = 2;
+    
     final WorkerPool theWorkerPool;
     private GenericObjectPool.Config theWorkerPoolConfig = null; 
     final ThreadGroup theWorkerThreadGroup = new ThreadGroup("stackCrawlThreadGroup");
@@ -83,10 +89,10 @@ public final class plasmaCrawlStacker {
     //private boolean stopped = false;
     private stackCrawlQueue queue;
     
-    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, int dbCacheSize, long preloadTime, boolean newdb) {
+    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, int dbCacheSize, long preloadTime, int dbtype) {
         this.sb = sb;
         
-        this.queue = new stackCrawlQueue(dbPath, dbCacheSize, preloadTime, newdb);
+        this.queue = new stackCrawlQueue(dbPath, dbCacheSize, preloadTime, dbtype);
         this.log.logInfo(this.queue.size() + " entries in the stackCrawl queue.");
         this.log.logInfo("STACKCRAWL thread initialized.");
         
@@ -248,7 +254,7 @@ public final class plasmaCrawlStacker {
     public String stackCrawl(String nexturlString, String referrerString, String initiatorHash, String name, Date loadDate, int currentdepth, plasmaCrawlProfile.entry profile) throws InterruptedException {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
-        this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
+        //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
         
         long startTime = System.currentTimeMillis();
         String reason = null; // failure reason
@@ -384,8 +390,7 @@ public final class plasmaCrawlStacker {
         boolean recrawl = (oldEntry != null) && (((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000) > profile.recrawlIfOlder());
         if ((dbocc != null) && (!(recrawl))) {
             reason = plasmaCrawlEURL.DOUBLE_REGISTERED + dbocc + ")";
-            this.log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'. " +
-                             "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
+            //this.log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
 
@@ -597,9 +602,9 @@ public final class plasmaCrawlStacker {
         private File cacheStacksPath;
         private int bufferkb;
         private long preloadTime;
-        private boolean newdb;
+        private int dbtype;
         
-        public stackCrawlQueue(File cacheStacksPath, int bufferkb, long preloadTime, boolean newdb) {
+        public stackCrawlQueue(File cacheStacksPath, int bufferkb, long preloadTime, int dbtype) {
             // init the read semaphore
             this.readSync  = new serverSemaphore (0);
             
@@ -613,7 +618,7 @@ public final class plasmaCrawlStacker {
             this.cacheStacksPath = cacheStacksPath;
             this.bufferkb = bufferkb;
             this.preloadTime = preloadTime;
-            this.newdb = newdb;
+            this.dbtype = dbtype;
 
             openDB();
             try {
@@ -650,9 +655,13 @@ public final class plasmaCrawlStacker {
         }
         
         private void deleteDB() {
-            if (this.newdb) {
+            if (this.dbtype == QUEUE_DB_TYPE_RAM) {
+                // do nothing..
+            } 
+            if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
                 kelondroFlexTable.delete(cacheStacksPath, "urlPreNotice1.table");
-            } else {
+            } 
+            if (this.dbtype == QUEUE_DB_TYPE_TREE) {
                 File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
                 cacheFile.delete();
             }
@@ -661,7 +670,10 @@ public final class plasmaCrawlStacker {
         private void openDB() {
             if (!(cacheStacksPath.exists())) cacheStacksPath.mkdir(); // make the path
             
-            if (this.newdb) {
+            if (this.dbtype == QUEUE_DB_TYPE_RAM) {
+                this.urlEntryCache = new kelondroRAMIndex(kelondroBase64Order.enhancedCoder, plasmaCrawlNURL.rowdef);
+            } 
+            if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
                 String newCacheName = "urlPreNotice1.table";
                 cacheStacksPath.mkdirs();
                 try {
@@ -670,7 +682,8 @@ public final class plasmaCrawlStacker {
                     e.printStackTrace();
                     System.exit(-1);
                 }
-            } else {
+            } 
+            if (this.dbtype == QUEUE_DB_TYPE_TREE) {
                 File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
                 cacheFile.getParentFile().mkdirs();
                 this.urlEntryCache = kelondroTree.open(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef);

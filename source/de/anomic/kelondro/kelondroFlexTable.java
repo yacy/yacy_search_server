@@ -155,7 +155,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             return r;
     }
 
-    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
         return new rowIterator(up, rotating, firstKey);
     }
     
