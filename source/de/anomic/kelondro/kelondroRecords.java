@@ -1049,6 +1049,11 @@ public class kelondroRecords {
                 Handle h = USAGE.FREEH;
                 while (h.index != NUL) {
                     //System.out.println("handle=0x" + Integer.toHexString(h.index));
+                    if (markedDeleted.contains(h)) {
+                        // loop detection
+                        this.theLogger.severe("KELONDRO WARNING " + this.filename + ": FREE-Queue contains loops");
+                        return markedDeleted;
+                    }
                     markedDeleted.add(h);
                     seekp = seekpos(h);
                     if (seekp > entryFile.length()) throw new kelondroException("deletedHandles: seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
