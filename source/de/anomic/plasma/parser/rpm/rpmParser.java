@@ -71,9 +71,10 @@ public class rpmParser extends AbstractParser implements Parser {
      * @see #getSupportedMimeTypes()
      */
     public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
-    static { 
+    static { ttp://packman.inode.at/suse/10.1/setup/descr/packages 
         SUPPORTED_MIME_TYPES.put("application/x-rpm","rpm");
-        SUPPORTED_MIME_TYPES.put("application/x-redhat packet manager","rpm");        
+        SUPPORTED_MIME_TYPES.put("application/x-redhat packet manager","rpm");    
+        SUPPORTED_MIME_TYPES.put("application/x-redhat-package-manager","rpm");         
     }     
 
     /**
