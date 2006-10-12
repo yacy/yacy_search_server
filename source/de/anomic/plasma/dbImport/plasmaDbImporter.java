@@ -9,6 +9,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverDate;
@@ -155,7 +156,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                             // we need to import the url
 
                             // getting the url entry
-                            plasmaCrawlLURL.Entry urlEntry = this.importUrlDB.load(urlHash, null);
+                            plasmaCrawlLURLEntry urlEntry = this.importUrlDB.load(urlHash, null);
                             if (urlEntry != null) {
 
                                 /* write it into the home url db */

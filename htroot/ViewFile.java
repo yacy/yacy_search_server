@@ -55,13 +55,13 @@ import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.crawler.plasmaCrawlerException;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.plasma.plasmaCrawlLURL.Entry;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -107,7 +107,7 @@ public class ViewFile {
             String viewMode = post.get("viewMode","sentences");
 
             // getting the urlEntry that belongs to the url hash
-            Entry urlEntry = null;
+            plasmaCrawlLURLEntry urlEntry = null;
             urlEntry = sb.urlPool.loadedURL.load(urlHash, null);
             if (urlEntry == null) {
                 prop.put("error",2);

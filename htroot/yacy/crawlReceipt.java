@@ -51,7 +51,7 @@ import java.io.IOException;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
 import de.anomic.plasma.plasmaCrawlEURL;
-import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -124,7 +124,7 @@ public final class crawlReceipt {
             prop.put("delay", "3600");
         } else if (result.equals("fill")) {
             // generating a new loaded URL entry
-            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.newEntry(propStr, true);
+            plasmaCrawlLURLEntry entry = switchboard.urlPool.loadedURL.newEntry(propStr, true);
             if ((entry == null)||(entry.url()==null)) {
                 log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT for hash " + receivedUrlhash + " from peer " + iam +
                               "\n\tURL properties: "+ propStr);

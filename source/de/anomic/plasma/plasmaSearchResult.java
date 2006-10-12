@@ -99,13 +99,13 @@ public final class plasmaSearchResult {
         return pageAcc.size() > 0;
     }
     
-    public plasmaCrawlLURL.Entry nextElement() {
+    public plasmaCrawlLURLEntry nextElement() {
         Object top = pageAcc.firstKey();
         //System.out.println("postorder-key: " + ((String) top));
-        return (plasmaCrawlLURL.Entry) pageAcc.remove(top);
+        return (plasmaCrawlLURLEntry) pageAcc.remove(top);
     }
     
-    protected void addResult(plasmaCrawlLURL.Entry page, Long preranking) {
+    protected void addResult(plasmaCrawlLURLEntry page, Long preranking) {
         
         // take out relevant information for reference computation
         URL url = page.url();
@@ -132,12 +132,12 @@ public final class plasmaSearchResult {
         for (int i = 0; i < references.length; i++) commonSense.add(references[i]);
         
         Object[] resultVector;
-        plasmaCrawlLURL.Entry page;
+        plasmaCrawlLURLEntry page;
         long ranking;
         for (int i = 0; i < results.size(); i++) {
             // take out values from result array
             resultVector = (Object[]) results.get(i);
-            page = (plasmaCrawlLURL.Entry) resultVector[0];
+            page = (plasmaCrawlLURLEntry) resultVector[0];
             
             // calculate ranking
             if (postsort)
@@ -173,7 +173,7 @@ public final class plasmaSearchResult {
         // first scan all entries and find all urls that are referenced
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            path = urlPath(((plasmaCrawlLURL.Entry) entry.getValue()).url());
+            path = urlPath(((plasmaCrawlLURLEntry) entry.getValue()).url());
             paths.put(path, entry.getKey());
             //if (path != null) path = shortenPath(path);
             //if (path != null) paths.put(path, entry.getKey());
@@ -184,7 +184,7 @@ public final class plasmaSearchResult {
         String shorten;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            path = urlPath(((plasmaCrawlLURL.Entry) entry.getValue()).url());
+            path = urlPath(((plasmaCrawlLURLEntry) entry.getValue()).url());
             shorten = shortenPath(path);
             // scan all subpaths of the url
             while (shorten != null) {

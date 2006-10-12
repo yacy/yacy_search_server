@@ -209,6 +209,11 @@ public class kelondroColumn {
     public String toString() {
         StringBuffer s = new StringBuffer();
         switch (celltype) {
+        case celltype_undefined:
+            s.append(nickname);
+            s.append('-');
+            s.append(cellwidth);
+            break;
         case celltype_boolean:
             s.append("boolean ");
             s.append(nickname);

@@ -56,7 +56,7 @@ import de.anomic.data.listManager;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
-import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -147,7 +147,7 @@ public class Bookmarks {
                     bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        plasmaCrawlLURL.Entry urlentry = switchboard.urlPool.loadedURL.load(urlHash, null);
+                        plasmaCrawlLURLEntry urlentry = switchboard.urlPool.loadedURL.load(urlHash, null);
                         plasmaParserDocument document = null;
                         if(urlentry != null){
                             document = switchboard.snippetCache.retrieveDocument(urlentry.url(), true);

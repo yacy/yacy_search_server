@@ -222,7 +222,7 @@ public class plasmaDHTFlush extends Thread {
                         // deleting transfered words from index
                         if (this.delete) {
                             this.status = "Running: Deleting chunk " + iteration;
-                            int urlReferences = oldDHTChunk.deleteTransferIndexes();
+                            String urlReferences = oldDHTChunk.deleteTransferIndexes();
                             this.log.logFine("Deleted from " + oldDHTChunk.containerSize() + " transferred RWIs locally " + urlReferences + " URL references");
                         } 
                         oldDHTChunk = null;

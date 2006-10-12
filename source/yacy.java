@@ -75,11 +75,15 @@ import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlLURLEntry;
+import de.anomic.plasma.plasmaCrawlLURLOldEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURLPool;
@@ -730,7 +734,7 @@ public final class yacy {
                         iEntry = (indexEntry) wordIdxEntries.next();
                         String urlHash = iEntry.urlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            plasmaCrawlLURL.Entry urlEntry = currentUrlDB.load(urlHash, null);                       
+                            plasmaCrawlLURLEntry urlEntry = currentUrlDB.load(urlHash, null);                       
                             urlCounter++;
                             minimizedUrlDB.store(urlEntry, false);
                             if (urlCounter % 500 == 0) {
@@ -950,10 +954,10 @@ public final class yacy {
             long start = System.currentTimeMillis();
             if (source.equals("lurl")) {
                 Iterator eiter = pool.loadedURL.entries(true, false, null);
-                plasmaCrawlLURL.Entry entry;
+                plasmaCrawlLURLEntry entry;
                 while (eiter.hasNext()) {
                     try {
-                        entry = (plasmaCrawlLURL.Entry) eiter.next();
+                        entry = (plasmaCrawlLURLEntry) eiter.next();
                         if ((entry != null) && (entry.url() != null)) doms.put(entry.url().getHost(), null);
                     } catch (Exception e) {
                         // here a MalformedURLException may occur
@@ -1061,9 +1065,9 @@ public final class yacy {
             
             if (source.equals("lurl")) {
                 Iterator eiter = pool.loadedURL.entries(true, false, null);
-                plasmaCrawlLURL.Entry entry;
+                plasmaCrawlLURLEntry entry;
                 while (eiter.hasNext()) {
-                    entry = (plasmaCrawlLURL.Entry) eiter.next();
+                    entry = (plasmaCrawlLURLEntry) eiter.next();
                     if ((entry != null) && (entry.url() != null)) {
                         if (html) {
                             bos.write(("<a href=\"" + entry.url() + "\">" + entry.descr() + "</a><br>").getBytes("UTF-8"));
@@ -1108,6 +1112,27 @@ public final class yacy {
                 }
             }
             bos.close();
+            pool.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private static void migratelurls(String homePath) {
+        File root = new File(homePath);
+        try {
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, false, 1000, false, 1000, false, 10000);
+            kelondroFlexSplitTable fsp = new kelondroFlexSplitTable(new File(root, "DATA//INDEX/PUBLIC/TEXT"), "urls", 1000, -1, plasmaCrawlLURLOldEntry.rowdef, kelondroNaturalOrder.naturalOrder);
+            
+            Iterator eiter = pool.loadedURL.entries(true, false, null);
+            plasmaCrawlLURLEntry entry;
+            while (eiter.hasNext()) {
+                entry = (plasmaCrawlLURLEntry) eiter.next();
+                if ((entry != null) && (entry.url() != null)) {
+                    fsp.put(entry.toRowEntry(), entry.loaddate());
+                }
+            }
+            
             pool.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -1365,6 +1390,8 @@ public final class yacy {
             if (args.length == 2) applicationRoot= args[1];
             String outfile = "urllist_" + source + "_" + System.currentTimeMillis() + ((html) ? ".html" : ".txt");
             urllist(applicationRoot, source, html, outfile);
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-migratelurls"))) {
+            migratelurls(applicationRoot);            
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file
             if (args.length == 2) applicationRoot= args[1];

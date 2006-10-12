@@ -27,6 +27,7 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 
 public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondroIndex {
@@ -137,6 +138,10 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             return super.get(i);
     }
 
+    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+        return put(row);
+    }
+    
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
             int i = index.geti(row.getColBytes(0));
             if (i < 0) {

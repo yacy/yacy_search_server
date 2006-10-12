@@ -61,7 +61,7 @@ import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.net.URL;
-import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
@@ -218,7 +218,7 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+            plasmaCrawlLURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -265,7 +265,7 @@ public class IndexControl_p {
             HashMap knownURLs = new HashMap();
             HashSet unknownURLEntries = new HashSet();
             indexEntry iEntry;
-            plasmaCrawlLURL.Entry lurl;
+            plasmaCrawlLURLEntry lurl;
             while (urlIter.hasNext()) {
                 iEntry = (indexEntry) urlIter.next();
                 lurl = switchboard.urlPool.loadedURL.load(iEntry.urlHash(), null);
@@ -321,7 +321,7 @@ public class IndexControl_p {
                 URL url = new URL(urlstring);
                 urlhash = indexURL.urlHash(url);
                 prop.put("urlhash", urlhash);
-                plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+                plasmaCrawlLURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
                 if (entry == null) {
                     prop.put("urlstring", "unknown url: " + urlstring);
                     prop.put("urlhash", "");
@@ -335,7 +335,7 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            plasmaCrawlLURL.Entry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+            plasmaCrawlLURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -351,12 +351,12 @@ public class IndexControl_p {
             try {
                 final Iterator entryIt = switchboard.urlPool.loadedURL.entries(true, true, urlhash); 
                 StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br>");
-                plasmaCrawlLURL.Entry entry;
+                plasmaCrawlLURLEntry entry;
                 int i = 0;
                 int rows = 0, cols = 0;
                 prop.put("urlhashsimilar", 1);
                 while (entryIt.hasNext() && i < 256) {
-                    entry = (plasmaCrawlLURL.Entry) entryIt.next();
+                    entry = (plasmaCrawlLURLEntry) entryIt.next();
                     prop.put("urlhashsimilar_rows_"+rows+"_cols_"+cols+"_urlHash", entry.hash());
                     cols++;
                     if (cols==8) {
@@ -403,7 +403,7 @@ public class IndexControl_p {
         return prop;
     }
 
-    public static serverObjects genUrlProfile(plasmaSwitchboard switchboard, plasmaCrawlLURL.Entry entry, String urlhash) {
+    public static serverObjects genUrlProfile(plasmaSwitchboard switchboard, plasmaCrawlLURLEntry entry, String urlhash) {
         serverObjects prop = new serverObjects();
         if (entry == null) {
             prop.put("genUrlProfile", 1);
@@ -412,7 +412,7 @@ public class IndexControl_p {
         }
         URL url = entry.url();
         String referrer = null;
-        plasmaCrawlLURL.Entry le = switchboard.urlPool.loadedURL.load(entry.referrerHash(), null);
+        plasmaCrawlLURLEntry le = switchboard.urlPool.loadedURL.load(entry.referrerHash(), null);
         if (le == null) {
             referrer = "<unknown>";
         } else {
@@ -463,7 +463,7 @@ public class IndexControl_p {
                 while (en.hasNext()) {
                     xi = (indexEntry) en.next();
                     uh = new String[]{xi.urlHash(), Integer.toString(xi.posintext())};
-                    plasmaCrawlLURL.Entry le = switchboard.urlPool.loadedURL.load(uh[0], null);
+                    plasmaCrawlLURLEntry le = switchboard.urlPool.loadedURL.load(uh[0], null);
                     if (le == null) {
                         tm.put(uh[0], uh);
                     } else {

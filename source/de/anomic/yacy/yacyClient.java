@@ -62,6 +62,7 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -496,7 +497,7 @@ public final class yacyClient {
             }
 
             // insert results to containers
-            plasmaCrawlLURL.Entry urlEntry;
+            plasmaCrawlLURLEntry urlEntry;
             String[] urls = new String[results];
             for (int n = 0; n < results; n++) {
                 // get one single search result
@@ -862,7 +863,7 @@ public final class yacyClient {
         -er crawlt, Ergebnis erscheint aber unter falschem initiator
      */
 
-    public static HashMap crawlReceipt(yacySeed targetSeed, String process, String result, String reason, plasmaCrawlLURL.Entry entry, String wordhashes) {
+    public static HashMap crawlReceipt(yacySeed targetSeed, String process, String result, String reason, plasmaCrawlLURLEntry entry, String wordhashes) {
         if (targetSeed == null) { return null; }
         if (yacyCore.seedDB.mySeed == null) { return null; }
         if (yacyCore.seedDB.mySeed == targetSeed) { return null; }
@@ -981,9 +982,9 @@ public final class yacyClient {
             if (uhs.length == 0) { return resultObj; } // all url's known
             
             // extract the urlCache from the result
-            plasmaCrawlLURL.Entry[] urls = new plasmaCrawlLURL.Entry[uhs.length];
+            plasmaCrawlLURLEntry[] urls = new plasmaCrawlLURLEntry[uhs.length];
             for (int i = 0; i < uhs.length; i++) {
-                urls[i] = (plasmaCrawlLURL.Entry) urlCache.get(uhs[i]);
+                urls[i] = (plasmaCrawlLURLEntry) urlCache.get(uhs[i]);
                 if (urls[i] == null) {
                     yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
                 }
@@ -1092,7 +1093,7 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap transferURL(yacySeed targetSeed, plasmaCrawlLURL.Entry[] urls, boolean gzipBody, int timeout) {
+    private static HashMap transferURL(yacySeed targetSeed, plasmaCrawlLURLEntry[] urls, boolean gzipBody, int timeout) {
         // this post a message to the remote message board
         final String address = targetSeed.getAddress();
         if (address == null) { return null; }

@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.Random;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -185,6 +186,10 @@ public class dbtest {
             if (dbe.equals("kelondroFlexTable")) {
                 File tablepath = new File(tablename).getParentFile();
                 table = new kelondroFlexTable(tablepath, new File(tablename).getName(), buffer, preload, testRow, kelondroBase64Order.enhancedCoder);
+            }
+            if (dbe.equals("kelondroFlexSplitTable")) {
+                File tablepath = new File(tablename).getParentFile();
+                table = new kelondroFlexSplitTable(tablepath, new File(tablename).getName(), buffer, preload, testRow, kelondroBase64Order.enhancedCoder);
             }
             if (dbe.equals("mysql")) {
                 table = new dbTable("mysql", testRow);
@@ -513,6 +518,10 @@ final class dbTable implements kelondroIndex {
         }
     }
 
+    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+        return put(row);
+    }
+    
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
         try {
             

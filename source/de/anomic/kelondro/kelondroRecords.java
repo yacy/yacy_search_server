@@ -976,7 +976,7 @@ public class kelondroRecords {
         return USAGE.FREEC;
     }
 
-    private final void dispose(Handle h) throws IOException {
+    private synchronized final void dispose(Handle h) throws IOException {
         // delete element with handle h
         // this element is then connected to the deleted-chain and can be
         // re-used change counter
@@ -1052,7 +1052,7 @@ public class kelondroRecords {
                     if (markedDeleted.contains(h)) {
                         // loop detection
                         this.theLogger.severe("KELONDRO WARNING " + this.filename + ": FREE-Queue contains loops");
-                        return markedDeleted;
+                        return markedDeleted; // TODO: automatic fix
                     }
                     markedDeleted.add(h);
                     seekp = seekpos(h);

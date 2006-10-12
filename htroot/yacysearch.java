@@ -57,7 +57,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.net.URL;
-import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchImages;
 import de.anomic.plasma.plasmaSearchPreOrder;
@@ -189,7 +189,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                plasmaCrawlLURL.Entry urlentry = sb.urlPool.loadedURL.load(recommendHash, null);
+                plasmaCrawlLURLEntry urlentry = sb.urlPool.loadedURL.load(recommendHash, null);
                 if (urlentry != null) {
                     plasmaParserDocument document = sb.snippetCache.retrieveDocument(urlentry.url(), true);
                     if (document != null) {

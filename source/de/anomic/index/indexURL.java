@@ -47,7 +47,7 @@ import de.anomic.yacy.yacySeedDB;
 public class indexURL {
 
  // day formatter for entry export
- protected static final SimpleDateFormat shortDayFormatter = new SimpleDateFormat("yyyyMMdd");
+ public static final SimpleDateFormat shortDayFormatter = new SimpleDateFormat("yyyyMMdd");
  
  // statics for value lengths
  public static final int urlHashLength               = yacySeedDB.commonHashLength; // 12
@@ -428,15 +428,6 @@ public class indexURL {
     }
  }
 
- public void store(kelondroRow.Entry entry, boolean cached) throws IOException {
-     if ((cached) && (urlIndexCache != null))
-         synchronized (urlIndexCache) {
-             urlIndexCache.put(entry);
-         }
-     else
-         urlIndexFile.put(entry);
- }
- 
  public void flushCacheSome() {
      if (urlIndexCache == null) return;
      if (urlIndexCache.size() == 0) return;

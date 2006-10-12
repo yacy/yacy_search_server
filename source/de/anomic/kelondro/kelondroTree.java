@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -404,8 +405,12 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         return (lc.equals(childn.handle()));
     }
     
-    // Associates the specified value with the specified key in this map
+    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+        return put(row);
+    }
+    
     public kelondroRow.Entry put(kelondroRow.Entry newrow) throws IOException {
+        // Associates the specified value with the specified key in this map
         kelondroRow.Entry result = null;
         //writeLock.stay(2000, 1000);
         if (newrow.columns() != row().columns()) throw new IllegalArgumentException("put: wrong row length " + newrow.columns() + "; must be " + row().columns());

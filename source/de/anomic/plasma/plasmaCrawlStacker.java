@@ -385,7 +385,7 @@ public final class plasmaCrawlStacker {
         checkInterruption();
         String nexturlhash = indexURL.urlHash(nexturl);
         String dbocc = this.sb.urlPool.exists(nexturlhash);
-        plasmaCrawlLURL.Entry oldEntry = null;
+        plasmaCrawlLURLEntry oldEntry = null;
         oldEntry = this.sb.urlPool.loadedURL.load(nexturlhash, null);
         boolean recrawl = (oldEntry != null) && (((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000) > profile.recrawlIfOlder());
         if ((dbocc != null) && (!(recrawl))) {

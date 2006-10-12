@@ -484,13 +484,25 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         int removed = 0;
         removed += dhtInCache.removeEntries(wordHash, urlHashes, deleteComplete);
         removed += dhtOutCache.removeEntries(wordHash, urlHashes, deleteComplete);
-        if (removed == urlHashes.size()) return removed;
+        //if (removed == urlHashes.size()) return removed;
         if (useCollectionIndex) {
             removed += collections.removeEntries(wordHash, urlHashes, deleteComplete);
-            if (removed == urlHashes.size()) return removed;
+            //if (removed == urlHashes.size()) return removed;
         }
         removed += assortmentCluster.removeEntries(wordHash, urlHashes, deleteComplete);
-        if (removed == urlHashes.size()) return removed;
+        //if (removed == urlHashes.size()) return removed;
+        removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
+        return removed;
+    }
+    
+    public String removeEntriesExpl(String wordHash, Set urlHashes, boolean deleteComplete) {
+        String removed = "";
+        removed += dhtInCache.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
+        removed += dhtOutCache.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
+        if (useCollectionIndex) {
+            removed += collections.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
+        } else removed += "0, ";
+        removed += assortmentCluster.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
         removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
         return removed;
     }
@@ -772,7 +784,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                         waiter();
                         entry = (indexEntry) containerIterator.next();
                         // System.out.println("Wordhash: "+wordHash+" UrlHash: "+entry.getUrlHash());
-                        plasmaCrawlLURL.Entry ue = lurl.load(entry.urlHash(), null);
+                        plasmaCrawlLURLEntry ue = lurl.load(entry.urlHash(), null);
                         if (ue == null) {
                             urlHashs.add(entry.urlHash());
                         } else {

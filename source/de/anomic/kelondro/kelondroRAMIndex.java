@@ -26,6 +26,8 @@
 
 package de.anomic.kelondro;
 
+import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeMap;
 
@@ -59,6 +61,10 @@ public class kelondroRAMIndex implements kelondroIndex {
         return (kelondroRow.Entry) index.get(key);
     }
 
+    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+        return put(row);
+    }
+    
     public synchronized Entry put(Entry row) {
         return (kelondroRow.Entry) index.put(row.getColBytes(0), row);
     }

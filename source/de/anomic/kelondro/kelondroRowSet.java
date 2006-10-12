@@ -25,6 +25,7 @@
 package de.anomic.kelondro;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.TreeSet;
@@ -74,6 +75,10 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
         profile.stopRead(handle);
         return entry;
+    }
+    
+    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+        return put(row);
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry entry) {

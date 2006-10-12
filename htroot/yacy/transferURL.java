@@ -48,7 +48,7 @@
 import java.io.IOException;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
@@ -90,7 +90,7 @@ public final class transferURL {
             final int sizeBefore = sb.urlPool.loadedURL.size();
             // read the urls from the other properties and store
             String urls;
-            plasmaCrawlLURL.Entry lEntry;
+            plasmaCrawlLURLEntry lEntry;
             for (int i = 0; i < urlc; i++) {
                 serverCore.checkInterruption();
                 urls = (String) post.get("url" + i);

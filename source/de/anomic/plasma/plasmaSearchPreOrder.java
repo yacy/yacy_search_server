@@ -185,7 +185,13 @@ public final class plasmaSearchPreOrder {
     public Object[] /*{indexEntry, Long}*/ next() {
         String top = (String) pageAcc.firstKey();
         //System.out.println("preorder-key:  " + top);
-        Long preranking = new Long(Long.MAX_VALUE - Long.parseLong(top.substring(0, 16), 16)); // java.lang.NumberFormatException: For input string: "8000000000020b17" ???
+        Long preranking;
+        try {
+            preranking = new Long(Long.MAX_VALUE - Long.parseLong(top.substring(0, 16), 16)); // java.lang.NumberFormatException: For input string: "8000000000020b17" ???
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            preranking = new Long(0);
+        }
         return new Object[]{(indexEntry) pageAcc.remove(top), preranking};
     }
     

@@ -101,7 +101,7 @@ public final class plasmaSearchImages {
     public plasmaSearchImages(plasmaSnippetCache sc, long maxTime, plasmaSearchResult sres, int depth) {
         long start = System.currentTimeMillis();
         this.images = new TreeSet();
-        plasmaCrawlLURL.Entry urlentry;
+        plasmaCrawlLURLEntry urlentry;
         while (sres.hasMoreElements()) {
             urlentry = sres.nextElement();
             addAll(new plasmaSearchImages(sc, serverDate.remainingTime(start, maxTime, 10), urlentry.url(), depth));

@@ -370,7 +370,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         //if (searchResult.size() == 0) return acc; // case that we have nothing to do
 
         indexEntry entry;
-        plasmaCrawlLURL.Entry page;
+        plasmaCrawlLURLEntry page;
         Long preranking;
         Object[] preorderEntry;
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);

@@ -47,6 +47,7 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 
 public class kelondroSplittedTree implements kelondroIndex {
@@ -109,6 +110,10 @@ public class kelondroSplittedTree implements kelondroIndex {
         return ktfs[partition(key)].get(key);
     }
 
+    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+        return put(row);
+    }
+    
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
         return ktfs[partition(row.getColBytes(0))].put(row);
     }

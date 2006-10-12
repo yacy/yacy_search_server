@@ -64,7 +64,7 @@ import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
-import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -358,7 +358,7 @@ public class dir {
         try {
             final URL url = new URL(urlstring);
             final plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()));
-            final plasmaCrawlLURL.Entry newEntry = switchboard.urlPool.loadedURL.newEntry(
+            final plasmaCrawlLURLEntry newEntry = switchboard.urlPool.loadedURL.newEntry(
                 url, "YaCyShare: " + descr, new Date(), new Date(),
                 "AAAAAAAAAAAA", /*referrer*/
                 0, /*copycount*/

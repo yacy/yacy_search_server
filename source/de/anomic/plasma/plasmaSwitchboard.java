@@ -1011,7 +1011,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // possibly delete entries from last chunk
             if ((this.dhtTransferChunk != null) &&
                     (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE)) {
-                int deletedURLs = this.dhtTransferChunk.deleteTransferIndexes();
+                String deletedURLs = this.dhtTransferChunk.deleteTransferIndexes();
                 this.log.logFine("Deleted from " + this.dhtTransferChunk.containers().length + " transferred RWIs locally, removed " + deletedURLs + " URL references");
                 this.dhtTransferChunk = null;
             }
@@ -1556,7 +1556,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     checkInterruption();
                     
                     // create a new loaded URL db entry
-                    plasmaCrawlLURL.Entry newEntry = urlPool.loadedURL.newEntry(
+                    plasmaCrawlLURLEntry newEntry = urlPool.loadedURL.newEntry(
                             entry.url(),                                            // URL
                             docDescription,                                         // document description
                             docDate,                                                // modification date
@@ -1965,7 +1965,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         String lurl = (String) page.get("lurl");
                         if ((lurl != null) && (lurl.length() != 0)) {
                             String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));
-                            plasmaCrawlLURL.Entry entry = urlPool.loadedURL.newEntry(propStr, true);
+                            plasmaCrawlLURLEntry entry = urlPool.loadedURL.newEntry(propStr, true);
                             urlPool.loadedURL.store(entry, false);
                             urlPool.loadedURL.stack(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
                             urlPool.noticeURL.remove(entry.hash());
@@ -2045,7 +2045,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 int i = 0;
                 int p;
                 URL url;
-                plasmaCrawlLURL.Entry urlentry;
+                plasmaCrawlLURLEntry urlentry;
                 String urlstring, urlname, filename, urlhash;
                 String host, hash, address, descr = "";
                 yacySeed seed;
@@ -2192,7 +2192,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // finally, delete the url entry
         
         // determine the url string
-        plasmaCrawlLURL.Entry entry = urlPool.loadedURL.load(urlhash, null);
+        plasmaCrawlLURLEntry entry = urlPool.loadedURL.load(urlhash, null);
         if (entry == null) return 0;
         
         URL url = entry.url();

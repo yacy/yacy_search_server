@@ -199,7 +199,7 @@ public class plasmaDHTChunk {
             indexContainer container;
             Iterator urlIter;
             indexEntry iEntry;
-            plasmaCrawlLURL.Entry lurl;
+            plasmaCrawlLURLEntry lurl;
             int refcount = 0;
             int wholesize;
             
@@ -281,11 +281,11 @@ public class plasmaDHTChunk {
     }
     
     
-    public synchronized int deleteTransferIndexes() {
+    public synchronized String deleteTransferIndexes() {
         Iterator urlIter;
         indexEntry iEntry;
         HashSet urlHashes;
-        int count = 0;
+        String count = "0";
         
         for (int i = 0; i < this.indexContainers.length; i++) {
             // delete entries separately
@@ -301,7 +301,7 @@ public class plasmaDHTChunk {
                 urlHashes.add(iEntry.urlHash());
             }
             String wordHash = indexContainers[i].getWordHash();
-            count += wordIndex.removeEntries(this.indexContainers[i].getWordHash(), urlHashes, true);
+            count = wordIndex.removeEntriesExpl(this.indexContainers[i].getWordHash(), urlHashes, true);
             if (log.isFine()) 
                 log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash + "; " + this.wordIndex.indexSize(wordHash) + " entries left");
             this.indexContainers[i] = null;

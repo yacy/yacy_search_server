@@ -191,7 +191,7 @@ public class plasmaSearchRankingProfile {
                     Set topwords,
                     String[] urlcomps,
                     String[] descrcomps,
-                    plasmaCrawlLURL.Entry page) {
+                    plasmaCrawlLURLEntry page) {
 
         // apply pre-calculated order attributes
         long ranking = preranking;
