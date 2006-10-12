@@ -32,5 +32,7 @@
 	<classpathentry kind="lib" path="libx/tm-extractors-0.4.jar"/>
 	<classpathentry kind="lib" path="libx/wsdl4j.jar"/>
 	<classpathentry kind="lib" path="libx/xerces.jar"/>
+	<classpathentry kind="lib" path="libx/poi-3.0-alpha2-20060616.jar"/>
+	<classpathentry kind="lib" path="libx/poi-scratchpad-3.0-alpha2-20060616.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
