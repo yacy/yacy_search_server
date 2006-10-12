@@ -416,6 +416,10 @@ div.ProgressBar {
 	width:150px;
 	height:10px;
 }
+div.ProgressBarFill {
+	margin:0px;
+	height:100%;
+}
 
 p.info {
   margin-top:5em;

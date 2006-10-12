@@ -135,6 +135,9 @@ a.bookmarkAction {
 .ProgressBar {
   border: #CAD5E3 solid 1px;
 }
+div.ProgressBarFill {
+  background-color:#71D500;
+}
 
 /* Copyright info */
 

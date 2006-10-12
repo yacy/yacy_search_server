@@ -151,6 +151,10 @@ a.bookmarkAction {
   border: #CAD5E3 solid 1px;
 }
 
+div.ProgressBarFill {
+  background-color:#71D500;
+}
+
 /* Copyright info */
 
 .info {

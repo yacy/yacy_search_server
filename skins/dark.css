@@ -183,3 +183,7 @@ width: 16px;
 	color:#556699; 
 	font-weight:bold;
 }
+
+div.ProgressBarFill {
+  background-color:#71D500;
+}

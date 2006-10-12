@@ -69,7 +69,7 @@
     <td>
       <div class="ProgressBarCaption">#[indexingQueueSize]#&nbsp;|&nbsp;#[indexingQueueMax]#</div>
       <div class="ProgressBar">
-        <img src="env/grafics/green_bar.gif" width="#[indexingQueuePercent]#%" height="100%" alt="" style="position:relative;top:-2px;" />
+        <div class="ProgressBarFill" style="width:#[indexingQueuePercent]#%;" />
       </div>
     </td>
     <td>[<a href="IndexCreateIndexingQueue_p.html">Details</a>]</td>
@@ -79,7 +79,7 @@
     <td>    
       <div class="ProgressBarCaption">#[loaderQueueSize]#&nbsp;|&nbsp;#[loaderQueueMax]#</div>
       <div class="ProgressBar">
-        <img src="env/grafics/green_bar.gif" width="#[loaderQueuePercent]#%" height="100%" alt="" style="position:relative;top:-2px;" />
+        <div class="ProgressBarFill" style="width:#[loaderQueuePercent]#%;" />
       </div>
     </td>
     <td>[<a href="IndexCreateLoaderQueue_p.html">Details</a>]</td>

@@ -182,4 +182,8 @@ color:#007050
 .settingsValue {
 color:#556699;
 font-weight:bold;
+}
+
+div.ProgressBarFill {
+  background-color:#71D500;
 } 
