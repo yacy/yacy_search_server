@@ -343,6 +343,18 @@ public final class plasmaParser {
         }
     }
 
+    public static String getRealCharsetEncoding(String encoding) {
+    	if ((encoding == null) || (encoding.length() == 0)) return "ISO-8859-1";
+    	
+    	if (encoding.toLowerCase().startsWith("windows") && encoding.length() > 7) {
+    		char c = encoding.charAt(7);
+    		if (c == '_') encoding = "windows-" + encoding.substring(8);
+    		else if ((c >= '0') && (c <= '9')) encoding = "windows-" + encoding.substring(7);
+    	}
+    	
+    	return encoding;
+    }
+    
     public static String getRealMimeType(String mimeType) {
         //if (mimeType == null) doMimeTypeAnalysis
         if (mimeType == null) mimeType = "application/octet-stream";
@@ -562,7 +574,7 @@ public final class plasmaParser {
             
             // getting the charset of the document
             // TODO: do a charset detection here ....
-            String documentCharset = (theDocumentCharset == null) ? "ISO-8859-1" : theDocumentCharset;
+            String documentCharset = getRealCharsetEncoding(theDocumentCharset);
             
             // testing if parsing is supported for this resource
             if (!plasmaParser.supportedContent(location,mimeType)) {
@@ -629,7 +641,10 @@ public final class plasmaParser {
         String charset = htmlFilter.detectCharset();
         if (charset == null) {
             charset = documentCharset;
+        } else {
+        	charset = getRealCharsetEncoding(charset);
         }
+        
         if (!documentCharset.equalsIgnoreCase(charset)) {
             this.theLogger.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "'");
         }
@@ -769,9 +784,11 @@ public final class plasmaParser {
     public static void main(String[] args) {
         //javac -classpath lib/commons-collections.jar:lib/commons-pool-1.2.jar -sourcepath source source/de/anomic/plasma/plasmaParser.java
         //java -cp source:lib/commons-collections.jar:lib/commons-pool-1.2.jar de.anomic.plasma.plasmaParser bug.html bug.out
+    	httpc remote = null;
         try {
             Object content = null;
             URL contentURL = null;
+            long contentLength = -1;
             String contentMimeType = "application/octet-stream";
             String charSet = "UTF-8";
             
@@ -787,7 +804,22 @@ public final class plasmaParser {
                 contentURL = new URL(args[1]);
                 
                 // downloading the document content
-                content = httpc.singleGET(contentURL, contentURL.getHost(), 10000, null, null, null);
+                remote = httpc.getInstance(
+                		contentURL.getHost(),
+                		contentURL.getHost(),
+                		contentURL.getPort(),
+                		5000,
+                		contentURL.getProtocol().equalsIgnoreCase("https"));
+                
+                httpc.response res = remote.GET(contentURL.getFile(), null);
+                if (res.statusCode != 200) {
+                	System.err.println("Unable to download " + contentURL + ". " + res.status);
+                	return;
+                }
+				content = res.getContentInputStream();
+                contentMimeType = res.responseHeader.mime();
+                charSet = res.responseHeader.getCharacterEncoding();
+                contentLength = res.responseHeader.contentLength();
             }
             
             if ((args.length >= 4)&&(args[2].equalsIgnoreCase("-m"))) {
@@ -813,6 +845,8 @@ public final class plasmaParser {
                 document = theParser.parseSource(contentURL, contentMimeType, charSet, (byte[])content);
             } else if (content instanceof File) {
                 document = theParser.parseSource(contentURL, contentMimeType, charSet, (File)content);
+            } else if (content instanceof InputStream) {
+            	document = theParser.parseSource(contentURL, contentMimeType, charSet, contentLength, (InputStream)content);
             }
 
             // printing out all parsed sentences
@@ -842,6 +876,8 @@ public final class plasmaParser {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+        	if (remote != null) try { httpc.returnInstance(remote); } catch (Exception e) {}
         }
     }
     
