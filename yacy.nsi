@@ -4,7 +4,7 @@
 
 Name "YaCy"
 
-OutFile "yacy_v0.47_20060927_2665.exe"
+OutFile "yacy_v0.48_20061010_2743.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
@@ -17,7 +17,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.47 (Build 20060927) on your computer. Select which optional things you want to be installed."
+ComponentText "This will install YaCy v0.48 (Build 20061010) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old version was installed into another location (eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install into:"
@@ -109,10 +109,6 @@ Section "Binaries (required)"
     #TODO: Split in source/binary
 	SetOutPath "$INSTDIR\htroot\xml"
 	File /r "htroot\xml\*"
-
-	#yacy/seedUpload
-	SetOutPath "$INSTDIR\htroot\yacy\seedUpload"
-	File "htroot\yacy\seedUpload\*.html"
 
 	#proxymsg non-devel
 	SetOutPath "$INSTDIR\htroot\proxymsg"
