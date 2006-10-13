@@ -603,7 +603,7 @@ public final class plasmaParser {
             
         } catch (UnsupportedEncodingException e) {
             String errorMsg = "Unsupported charset encoding: " + e.getMessage();
-            this.theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
+            this.theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg);
             throw new ParserException(errorMsg,location,plasmaCrawlEURL.DENIED_UNSUPPORTED_CHARSET);                	
         } catch (Exception e) {
             // Interrupted- and Parser-Exceptions should pass through
