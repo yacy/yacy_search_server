@@ -352,6 +352,18 @@ public final class plasmaParser {
     		else if ((c >= '0') && (c <= '9')) encoding = "windows-" + encoding.substring(7);
     	}
     	
+    	if (encoding.toLowerCase().startsWith("iso") && encoding.length() > 3) {
+    		char c = encoding.charAt(3);
+    		if (c == '_') encoding = "ISO-" + encoding.substring(4);
+    		else if ((c >= '0') && (c <= '9')) encoding = "ISO-" + encoding.substring(3);    		
+    	}
+    	
+    	if (encoding.toLowerCase().startsWith("iso") && encoding.length() > 8) {
+    		char c = encoding.charAt(8);
+    		if (c == '_') encoding = encoding.substring(0,8) + "-" + encoding.substring(9);
+    		else if ((c >= '0') && (c <= '9')) encoding = encoding.substring(0,8) + "-" + encoding.substring(8);    		
+    	}    	
+
     	return encoding;
     }
     
