@@ -1,189 +1,88 @@
-body {
-  background-color:#000000;
-  color:#BBBBBB;
-}
-h1 {
-font-family:Helvetica, sans-serif;
-font-size:16pt;
-font-style:normal;
-line-height:14pt;
-margin-top:0pt;
-    margin-bottom:0pt;
-}
-h2 {
-font-family:Helvetica, sans-serif;
-font-size:14pt;
-font-style:normal;
-line-height:14pt;
-margin-top:0pt;
-    margin-bottom:0pt;
-}
-h3 {
-font-family:Helvetica, sans-serif;
-font-size:12pt;
-font-style:normal;
-line-height:14pt;
-margin-top:0pt;
-    margin-bottom:0pt;
-}
-h4 {
-font-family:Helvetica, sans-serif;
-font-size:10pt;
-font-style:normal;
-line-height:14pt;
-margin-top:0pt;
-    margin-bottom:0pt;
-}
-a, body, div, li, ol, span, table, td, tr, ul {
-color:#666666;
-font-family:Helvetica, sans-serif;
-font-size:10pt;
-font-style:normal;
-line-height:14px;
-margin-top:0px;
-margin-bottom:0px;
-}
-*.small {
-font-family:Helvetica, sans-serif;
-font-size:8pt;
-font-style:normal;
-line-height:9px;
-margin-top:0px;
-margin-bottom:0px;
-}
-body, div, li, ol, span, table, td, tr, ul {
-      
-text-decoration:none;
-}
-a:hover {
-color:#888888;
-}
-a.unknown {
-color:#666666;
-}
-a.known {
-color:#555555;
-}
-*.yellow {
-color:#0000FF;
-font-weight:bold;
-text-decoration:none;
-font-size:11px;
-}
-*.blue {
-color:#556699;
-font-weight:bold;
-text-decoration:none;
-font-size:11px;
-}
-*.tt {
-font-family:Courier,Terminal,sans-serif;
-font-size:8pt;
-line-height:9px;
-}
-.Menu {
-width: 140;
-}
-.MenuHeader {
-background-color: #000000;
-color:white;
-font-size: 9px;
-font-weight:bold;
-}
-.MenuItem {
-background-color: #2A2A2A;
-font-weight:bold;
-text-decoration:none;
-font-size:11px;
-padding-top: 2;
-padding-bottom: 2;
-}
-.MenuItemLink {
-color:#777777;
-font-weight:bold;
-text-decoration:none;
-font-size:11px;
-}
-a.MenuItemLink:hover {
-color:#8F8F8F;
-font-weight:bold;
-text-decoration:none;
-}
-.MenuSpacer {
-height: 4;
-}
-.Headline {
-color:#777777;
-font-weight: bold;
-font-size: 160%;
-font-family: Helvetica, Arial;
-text-align: center;
-text-decoration:underline;
-}
-.Heading {
-background-color: #2A2A2A;
-height: 38px;
-}
-.TableHeader {
-background-color: #2A2A2A;
-}
-.TableCellDark {
-background-color: #373737;
-}
-.TableCellLight {
-background-color: #404040;
-}
-.TableCellActive {
-background-color: #ffbbaa;
-}
-.TableCellSummary {
-background-color: #505050;
-}
-.WikiBackground {
-background-color: #202020;
-}
-.MessageBackground {
-background-color: #202020;
-}
-.bookmarkTags{
-color: #007050;
-font-weight:bold;
-text-decoration:none;
-white-space:nowrap;
-}
-.bookmarkTitle{
-line-height: 120%;
-color: #4070a0;
-font-size:17px;
-font-weight:bold;
-text-decoration:none;
-}
-.bookmarkDescription{
-font-style:normal;
-}
-.bookmarkAction{
-color: #999999;
-text-decoration:none;
-}
-img.bookmarkIcon, img.deleteIcon, img.recommendIcon {
-height: 16px;
-width: 16px;
-}
+/* Skin */
+body			{ color: #777; background-color: #000; }
 
-.ResultDescription {
-	color:#4070a0; 
-	font-weight:bold;
-}
+a:link, a:visited	{ color: #888; }
+a:hover			{ color: #999; }
 
-.ResultDateYBR {
-	color:#007050
-}
 
-.settingsValue {
-	color:#556699; 
-	font-weight:bold;
-}
+/* Menu */
+.menugroup h3,
+.SubMenugroup h3,
+.SubMenu h3		{ background-color: #222; color: #777; }
 
-div.ProgressBarFill {
-  background-color:#71D500;
-}
+a.MenuItemLink,
+ul.SubMenu em		{ background-color: #444; color: #888; }
+a:hover.MenuItemLink	{ color:#AAA; }
+
+/* Head */
+div.head h1		{ background-color: #333; color: #AAA; }
+
+/* Tables */
+.TableHeader		{ color: #777; background-color: #333; }
+.TableCellDark		{ color: #666; background-color: #252525; }
+.TableCellLight		{ color: #666; background-color: #2C2C2C; }
+.TableCellSummary	{ color: #777; background-color: #333; }
+.TableCellPassive	{ color: #666; background-color: #252525; }
+.TableCellActive	{ color: #666; background-color: #2C2C2C; }
+
+/* Blog and Wiki*/
+.Post			{ background-color: #222; }
+.PostSubject		{ background-color: #555; }
+.PostSubject a		{ color: #666; }
+.PostInfo		{ background-color:#333; }
+.PostInfo a		{ color: #666; }
+.PostBody		{ color: #666; }
+
+/* Wiki */
+.WikiTOCBox		{ background-color: #2C2C2C; border: 1px solid #555; }
+
+a.unknown		{ color: #666; }
+a.known			{ color: #600; }
+a.known:hover		{ color: #722; }
+a.extern		{ color: #635; }
+
+/* in Bookmarks */
+.bookmark		{ border-bottom: 1px #000 dashed; }
+.Tags			{ border-left: 2px solid black; }
+
+a.bookmarkTitle		{ color: #4070a0; }
+a:hover.bookmarkTitle	{ color: #4070a0; }
+a.bookmarkTags		{ color: #007050; }
+a:hover.bookmarkTags	{ color: #4070a0; }
+a.bookmarkAction	{ color: #999999; }
+
+.Navigation a		{ color: #555; }
+.Navigation a:hover	{ color: #777; }
+
+/* in Status.html */
+.ProgressBar		{ border: 1px solid #777; }
+.ProgressBarFill	{ background-color: #944; }
+
+/* Copyright info */
+.info			{ border-top: 1px solid gray; }
+
+/* Searchresults */
+.searchresults		{ border-top: 1px #000 dashed; }
+.searchresults .url a	{ color: #008000; }
+.snippetLoading		{ color: #999999; }
+.snippetError		{ color: red; }
+
+/* other */
+.settingsValue		{ color: #556699; }
+.Headline		{ background-color: #4070a0; color: white; }
+.Heading		{ background-color: #4070a0; }
+.error, .warning	{ color: red; }
+.success		{ color: green; }
+.Message		{ background-color: #eeeeee; }
+.example		{ background-color: #D3D3D3; }
+
+
+/* Log */
+body#ViewLog pre	{ color: #777; background-color: #333; }
+
+/* Forms */
+fieldset		{ color: #777; background-color: #222; border: 1px solid #555; }
+legend			{ color: #777; background-color: #2A2A2A; }
+form dt, dl.pairs dt	{ background-color: #2A2A2A; }
+form dd, dl.pairs dd	{ background-color: #222; }
+input, select, textarea	{ color: #777; background-color: #000; }
