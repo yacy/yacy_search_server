@@ -1,14 +1,15 @@
 // plasmaWordIndex.java
-// -----------------------
-// part of YACY
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2005
+// (C) 2005, 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
+// first published 2005 on http://www.anomic.de
+//
+// This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -22,28 +23,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
-
-// compile with
-// javac -classpath classes -sourcepath source -d classes -g source/de/anomic/plasma/*.java
 
 package de.anomic.plasma;
 
@@ -101,16 +80,21 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
 
         // create assortment cluster path
         File assortmentClusterPath = new File(oldDatabaseRoot, indexAssortmentClusterPath);
-        if (!(assortmentClusterPath.exists())) assortmentClusterPath.mkdirs();
         this.assortmentBufferSize = bufferkb;
-        this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, assortmentBufferSize, preloadTime, log);
         
         // create collections storage path
         if (!(newIndexRoot.exists())) newIndexRoot.mkdirs();
-        if (useCollectionIndex)
-            collections = new indexCollectionRI(newIndexRoot, "test_generation1", bufferkb * 1024, preloadTime);
-        else
-            collections = null;
+        if (useCollectionIndex) {
+            this.collections = new indexCollectionRI(newIndexRoot, "test_generation1", bufferkb * 1024, preloadTime);
+            if (assortmentClusterPath.exists())
+                this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, assortmentBufferSize, preloadTime, log);
+            else
+                this.assortmentCluster = null;
+        } else {
+            this.collections = null;
+            if (!(assortmentClusterPath.exists())) assortmentClusterPath.mkdirs();
+            this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, assortmentBufferSize, preloadTime, log);
+        }
         
         busyCacheFlush = false;
         this.useCollectionIndex = useCollectionIndex;
@@ -155,23 +139,23 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public int[] assortmentsSizes() {
-        return assortmentCluster.sizes();
+        return (assortmentCluster == null) ? null : assortmentCluster.sizes();
     }
 
     public int assortmentsCacheChunkSizeAvg() {
-        return assortmentCluster.cacheChunkSizeAvg();
+        return (assortmentCluster == null) ? 0 : assortmentCluster.cacheChunkSizeAvg();
     }
 
     public int assortmentsCacheObjectSizeAvg() {
-        return assortmentCluster.cacheObjectSizeAvg();
+        return (assortmentCluster == null) ? 0 : assortmentCluster.cacheObjectSizeAvg();
     }
 
     public int[] assortmentsCacheNodeStatus() {
-        return assortmentCluster.cacheNodeStatus();
+        return (assortmentCluster == null) ? null : assortmentCluster.cacheNodeStatus();
     }
     
     public long[] assortmentsCacheObjectStatus() {
-        return assortmentCluster.cacheObjectStatus();
+        return (assortmentCluster == null) ? null : assortmentCluster.cacheObjectStatus();
     }
     
     public void setMaxWordCount(int maxWords) {
@@ -376,13 +360,15 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             }
         
             // get from assortments
-            if (container == null) {
-                container = assortmentCluster.getContainer(wordHash, urlselection, true, (maxTime < 0) ? -1 : maxTime);
-            } else {
-                // add containers from assortment cluster
-                container.add(assortmentCluster.getContainer(wordHash, urlselection, true, (maxTime < 0) ? -1 : maxTime), -1);
+            if (assortmentCluster != null) {
+                if (container == null) {
+                    container = assortmentCluster.getContainer(wordHash, urlselection, true, (maxTime < 0) ? -1 : maxTime);
+                } else {
+                    // add containers from assortment cluster
+                    container.add(assortmentCluster.getContainer(wordHash, urlselection, true, (maxTime < 0) ? -1 : maxTime), -1);
+                }
             }
-        
+            
             // get from backend
             if (maxTime > 0) {
                 maxTime = maxTime - (System.currentTimeMillis() - start);
@@ -425,11 +411,11 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public int size() {
             if (useCollectionIndex)
                 return java.lang.Math.max(collections.size(),
-                    java.lang.Math.max(assortmentCluster.size(),
+                    java.lang.Math.max((assortmentCluster == null) ? 0 : assortmentCluster.size(),
                      java.lang.Math.max(backend.size(),
                       java.lang.Math.max(dhtInCache.size(), dhtOutCache.size()))));
             else
-                return java.lang.Math.max(assortmentCluster.size(),
+                return java.lang.Math.max((assortmentCluster == null) ? 0 : assortmentCluster.size(),
                         java.lang.Math.max(backend.size(),
                          java.lang.Math.max(dhtInCache.size(), dhtOutCache.size())));
     }
@@ -444,7 +430,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                 }
             } catch (IOException e) {}
             if (useCollectionIndex) size += collections.indexSize(wordHash);
-            size += assortmentCluster.indexSize(wordHash);
+            size += (assortmentCluster == null) ? 0 : assortmentCluster.indexSize(wordHash);
             size += dhtInCache.indexSize(wordHash);
             size += dhtOutCache.indexSize(wordHash);
         return size;
@@ -455,7 +441,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             dhtInCache.close(waitingBoundSeconds);
             dhtOutCache.close(waitingBoundSeconds);
             if (useCollectionIndex) collections.close(-1);
-            assortmentCluster.close(-1);
+            if (assortmentCluster != null) assortmentCluster.close(-1);
             backend.close(10);
         }
     }
@@ -465,7 +451,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             c.add(dhtInCache.deleteContainer(wordHash), -1);
             c.add(dhtOutCache.deleteContainer(wordHash), -1);
             if (useCollectionIndex) c.add(collections.deleteContainer(wordHash), -1);
-            c.add(assortmentCluster.deleteContainer(wordHash), -1);
+            if (assortmentCluster != null) c.add(assortmentCluster.deleteContainer(wordHash), -1);
             c.add(backend.deleteContainer(wordHash), -1);
             return c;
     }
@@ -475,7 +461,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             removed = removed | (dhtInCache.removeEntry(wordHash, urlHash, deleteComplete));
             removed = removed | (dhtOutCache.removeEntry(wordHash, urlHash, deleteComplete));
             if (useCollectionIndex) {removed = removed | (collections.removeEntry(wordHash, urlHash, deleteComplete));}
-            removed = removed | (assortmentCluster.removeEntry(wordHash, urlHash, deleteComplete));
+            if (assortmentCluster != null) removed = removed | (assortmentCluster.removeEntry(wordHash, urlHash, deleteComplete));
             removed = removed | backend.removeEntry(wordHash, urlHash, deleteComplete);
             return removed;
     }
@@ -489,7 +475,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             removed += collections.removeEntries(wordHash, urlHashes, deleteComplete);
             //if (removed == urlHashes.size()) return removed;
         }
-        removed += assortmentCluster.removeEntries(wordHash, urlHashes, deleteComplete);
+        if (assortmentCluster != null) removed += assortmentCluster.removeEntries(wordHash, urlHashes, deleteComplete);
         //if (removed == urlHashes.size()) return removed;
         removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
         return removed;
@@ -502,7 +488,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         if (useCollectionIndex) {
             removed += collections.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
         } else removed += "0, ";
-        removed += assortmentCluster.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
+        if (assortmentCluster != null) removed += assortmentCluster.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
         removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
         return removed;
     }
@@ -574,14 +560,14 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                                  new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                                  indexContainer.containerMergeMethod,
                                  true),
-                        assortmentCluster.wordContainers(startWordHash, true, false),
+                                 (assortmentCluster == null) ? null : assortmentCluster.wordContainers(startWordHash, true, false),
                         new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                         indexContainer.containerMergeMethod,
                         true);
             } else {
                 return new kelondroMergeIterator(
                             dhtOutCache.wordContainers(startWordHash, false),
-                            assortmentCluster.wordContainers(startWordHash, true, false),
+                            (assortmentCluster == null) ? null : assortmentCluster.wordContainers(startWordHash, true, false),
                             new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                             indexContainer.containerMergeMethod,
                             true);
@@ -597,7 +583,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                                  new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                                  indexContainer.containerMergeMethod,
                                  true),
-                         assortmentCluster.wordContainers(startWordHash, true, false),
+                         (assortmentCluster == null) ? null : assortmentCluster.wordContainers(startWordHash, true, false),
                          new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                          indexContainer.containerMergeMethod,
                          true),
@@ -609,7 +595,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                 return new kelondroMergeIterator(
                             new kelondroMergeIterator(
                                      dhtOutCache.wordContainers(startWordHash, false),
-                                     assortmentCluster.wordContainers(startWordHash, true, false),
+                                     (assortmentCluster == null) ? null : assortmentCluster.wordContainers(startWordHash, true, false),
                                      new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                                      indexContainer.containerMergeMethod,
                                      true),

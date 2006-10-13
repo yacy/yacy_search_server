@@ -78,14 +78,14 @@ public class kelondroMergeIterator implements Iterator {
     
     private void nexta() {
         try {
-            if (a.hasNext()) na = a.next(); else na = null;
+            if ((a != null) && (a.hasNext())) na = a.next(); else na = null;
         } catch (ConcurrentModificationException e) {
             na = null;
         }
     }
     private void nextb() {
         try {
-            if (b.hasNext()) nb = b.next(); else nb = null;
+            if ((b != null) && (b.hasNext())) nb = b.next(); else nb = null;
         } catch (ConcurrentModificationException e) {
             nb = null;
         }

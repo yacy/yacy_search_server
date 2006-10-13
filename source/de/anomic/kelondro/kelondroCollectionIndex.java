@@ -270,7 +270,7 @@ public class kelondroCollectionIndex {
             if (oldindexrow == null) {
                 if ((collection != null) && (collection.size() > 0)) {
                     // the collection is new
-                    overwrite(key, collection);
+                    overwrite(key, collection, arrayIndex(collection.size()));
                 }
                 return 0;
             }
@@ -286,8 +286,8 @@ public class kelondroCollectionIndex {
 
             if (merge) {
                 // load the old collection and join it
-                kelondroRowSet oldcollection = getdelete(oldindexrow, false, false);
-
+                kelondroRowSet oldcollection = getwithparams(oldindexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false, false);
+                
                 // join with new collection
                 oldcollection.addAll(collection);
                 collection = oldcollection;
@@ -296,7 +296,7 @@ public class kelondroCollectionIndex {
             int removed = 0;
             if (removekeys != null) {
                 // load the old collection and remove keys
-                kelondroRowSet oldcollection = getdelete(oldindexrow, false, false);
+                kelondroRowSet oldcollection = getwithparams(oldindexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false, false);
 
                 // remove the keys from the set
                 Iterator i = removekeys.iterator();
@@ -338,7 +338,7 @@ public class kelondroCollectionIndex {
 
                 // update the index entry
                 oldindexrow.setCol(idx_col_chunkcount, collection.size());
-                oldindexrow.setCol(idx_col_clusteridx, (byte) newPartitionNumber);
+                oldindexrow.setCol(idx_col_clusteridx, (byte) oldPartitionNumber);
                 oldindexrow.setCol(idx_col_flags, (byte) 0);
                 oldindexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
                 index.put(oldindexrow);
@@ -351,19 +351,18 @@ public class kelondroCollectionIndex {
                 array.remove(oldrownumber);
 
                 // write a new entry in the other array
-                overwrite(key, collection);
+                overwrite(key, collection, newPartitionNumber);
             }
             return removed;
         }
     }
 
-    private void overwrite(byte[] key, kelondroRowCollection collection) throws IOException {
+    private void overwrite(byte[] key, kelondroRowCollection collection, int targetpartition) throws IOException {
         // helper method, should not be called directly and only within a synchronized(index) environment
         // simply store a collection without check if the collection existed before
         
         // find array file
-        int clusteridx = arrayIndex(collection.size());
-        kelondroFixedWidthArray array = getArray(clusteridx, 0, this.playloadrow.objectsize());
+        kelondroFixedWidthArray array = getArray(targetpartition, 0, this.playloadrow.objectsize());
         
         // define row
         kelondroRow.Entry arrayEntry = array.row().newEntry();
@@ -378,7 +377,7 @@ public class kelondroCollectionIndex {
         indexEntry.setCol(idx_col_key, key);
         indexEntry.setCol(idx_col_chunksize, this.playloadrow.objectsize());
         indexEntry.setCol(idx_col_chunkcount, collection.size());
-        indexEntry.setCol(idx_col_clusteridx, (byte) clusteridx);
+        indexEntry.setCol(idx_col_clusteridx, (byte) targetpartition);
         indexEntry.setCol(idx_col_flags, (byte) 0);
         indexEntry.setCol(idx_col_indexpos, (long) newRowNumber);
         indexEntry.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
@@ -413,7 +412,7 @@ public class kelondroCollectionIndex {
             return removedCollection;
         }
     }
-    
+
     protected kelondroRowSet getdelete(kelondroRow.Entry indexrow, boolean remove, boolean deleteIfEmpty) throws IOException {
         // call this only within a synchronized(index) environment
         
@@ -425,10 +424,14 @@ public class kelondroCollectionIndex {
         assert(partitionnumber >= arrayIndex(chunkcount));
         int serialnumber = 0;
         
+        return getwithparams(indexrow, chunksize, chunkcount, partitionnumber, rownumber, serialnumber, remove, deleteIfEmpty);
+    }
+
+    private kelondroRowSet getwithparams(kelondroRow.Entry indexrow, int chunksize, int chunkcount, int clusteridx, int rownumber, int serialnumber, boolean remove, boolean deleteIfEmpty) throws IOException {
         // open array entry
-        kelondroFixedWidthArray array = getArray(partitionnumber, serialnumber, chunksize);
+        kelondroFixedWidthArray array = getArray(clusteridx, serialnumber, chunksize);
         kelondroRow.Entry arrayrow = array.get(rownumber);
-        if (arrayrow == null) throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, partitionnumber, serialnumber).toString(), "array does not contain expected row");
+        if (arrayrow == null) throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString(), "array does not contain expected row");
 
         // read the row and define a collection
         kelondroRowSet collection = new kelondroRowSet(this.playloadrow, arrayrow.getColBytes(1)); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
@@ -440,7 +443,7 @@ public class kelondroCollectionIndex {
             indexEntry.setCol(idx_col_key, arrayrow.getColBytes(0));
             indexEntry.setCol(idx_col_chunksize, this.playloadrow.objectsize());
             indexEntry.setCol(idx_col_chunkcount, collection.size());
-            indexEntry.setCol(idx_col_clusteridx, (byte) partitionnumber);
+            indexEntry.setCol(idx_col_clusteridx, (byte) clusteridx);
             indexEntry.setCol(idx_col_flags, (byte) 0);
             indexEntry.setCol(idx_col_indexpos, (long) rownumber);
             indexEntry.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
@@ -453,14 +456,12 @@ public class kelondroCollectionIndex {
             // fix the entry in index
             indexrow.setCol(idx_col_chunkcount, chunkcountInArray);
             index.put(indexrow);
-            array.logFailure("INCONSISTENCY in " + arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, partitionnumber, serialnumber).toString() + ": array has different chunkcount than index: index = " + chunkcount + ", array = " + chunkcountInArray + "; the index has been auto-fixed");
+            array.logFailure("INCONSISTENCY in " + arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString() + ": array has different chunkcount than index: index = " + chunkcount + ", array = " + chunkcountInArray + "; the index has been auto-fixed");
         }
-        
-        if ((remove) || ((chunkcountInArray == 0) && (deleteIfEmpty))) array.remove(rownumber);
-        
+        if ((remove) || ((collection.size() == 0) && (deleteIfEmpty))) array.remove(rownumber);
         return collection;
     }
-
+    
     public Iterator keycollections(byte[] startKey, boolean rot) {
         // returns an iteration of {byte[], kelondroRowSet} Objects
         try {
