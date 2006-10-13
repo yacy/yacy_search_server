@@ -153,15 +153,15 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         long urlCount = 0, urlsPerSecond = 0;
         try {
             synchronized (cache) {
-                int i = dumpArray.size();
+                Iterator i = dumpArray.contentRows(-1);
                 String wordHash;
                 //long creationTime;
                 indexEntry wordEntry;
                 kelondroRow.Entry row;
                 //Runtime rt = Runtime.getRuntime();
-                while (i-- > 0) {
+                while (i.hasNext()) {
                     // get out one entry
-                    row = dumpArray.get(i);
+                    row = (kelondroRow.Entry) i.next();
                     if ((row == null) || (row.empty(0)) || (row.empty(3)) || (row.empty(4))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
@@ -175,7 +175,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     if (System.currentTimeMillis() > messageTime) {
                         System.gc(); // for better statistic
                         urlsPerSecond = 1 + urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                        log.logInfo("restoring status: " + urlCount + " urls done, " + (i / urlsPerSecond) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
+                        log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpArray.size() - urlCount) / urlsPerSecond) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
                         messageTime = System.currentTimeMillis() + 5000;
                     }
                 }

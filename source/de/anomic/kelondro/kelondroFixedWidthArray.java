@@ -89,7 +89,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
 
         // make room for element
         Node n;
-        while (size() <= index) {
+        while (super.USAGE.allCount() <= index) {
             n = newNode();
             n.commit(CP_NONE);
         }

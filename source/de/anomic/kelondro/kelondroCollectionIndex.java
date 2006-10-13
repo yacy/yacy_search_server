@@ -143,7 +143,7 @@ public class kelondroCollectionIndex {
                 byte[] key;
                 long start = System.currentTimeMillis();
                 long lastlog = start;
-                for (int j = 0; j < array.size(); j++) {
+                for (int j = 0; j < array.USAGE.allCount(); j++) {
                     aentry = array.get(j);
                     key = aentry.getColBytes(0);
                     if (key == null) continue; // skip deleted entries
@@ -161,7 +161,7 @@ public class kelondroCollectionIndex {
                     
                     // write a log
                     if (System.currentTimeMillis() - lastlog > 30000) {
-                        serverLog.logFine("STARTUP", "created " + j + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() - j) / j) / 60000) + " minutes remaining for this array");
+                        serverLog.logFine("STARTUP", "created " + j + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.USAGE.allCount() - j) / j) / 60000) + " minutes remaining for this array");
                         lastlog = System.currentTimeMillis();
                     }
                 }
@@ -552,8 +552,8 @@ public class kelondroCollectionIndex {
             }
             
             // printout of index
-            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", buffersize, preloadTime, collectionIndex.indexRow(), kelondroNaturalOrder.naturalOrder);
             collectionIndex.close();
+            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", buffersize, preloadTime, collectionIndex.indexRow(), kelondroNaturalOrder.naturalOrder);
             index.print();
             index.close();
         } catch (IOException e) {
