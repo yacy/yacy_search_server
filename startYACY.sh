@@ -87,7 +87,7 @@ then
 elif [ $LOGGING -eq 1 ];then #logging
 	cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy >> yacy.log &"
 else
-	cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy > /dev/null &"
+	cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy &> /dev/null &"
 fi
 if [ $PRINTONLY -eq 1 ];then
 	echo $cmdline
