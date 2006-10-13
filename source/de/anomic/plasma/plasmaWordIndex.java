@@ -374,7 +374,11 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                 maxTime = maxTime - (System.currentTimeMillis() - start);
                 if (maxTime < 0) maxTime = 100;
             }
-            container.add(backend.getContainer(wordHash, urlselection, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime), -1);
+            if (container == null) {
+                container = backend.getContainer(wordHash, urlselection, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime);
+            } else {
+                container.add(backend.getContainer(wordHash, urlselection, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime), -1);
+            }
             return container;
     }
 
