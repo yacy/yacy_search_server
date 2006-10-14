@@ -1,4 +1,4 @@
-// Surftipps.java
+// Surftips.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 2006 on http://www.anomic.de
 //
@@ -44,7 +44,7 @@ import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 
-public class Surftipps {
+public class Surftips {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -56,17 +56,17 @@ public class Surftipps {
         
         boolean showScore = ((post != null) && (post.containsKey("score")));
         
-        boolean surftippsOn = sb.getConfigBool("showSurftipps", true);
-        if ((post != null) && (post.containsKey("surftipps"))) {
+        boolean surftipsOn = sb.getConfigBool("showSurftips", true);
+        if ((post != null) && (post.containsKey("surftips"))) {
             if (!sb.verifyAuthentication(header, false)) {
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
             }
-            surftippsOn = post.get("surftipps", "0").equals("1");
-            sb.setConfig("showSurftipps", surftippsOn);
+            surftipsOn = post.get("surftips", "0").equals("1");
+            sb.setConfig("showSurftips", surftipsOn);
         }
         
-        if (surftippsOn) {
+        if (surftipsOn) {
         
             // read voting
             String hash;
@@ -98,7 +98,7 @@ public class Surftipps {
                 yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
             }
         
-            // create surftipps
+            // create surftips
             HashMap negativeHashes = new HashMap(); // a mapping from an url hash to Integer (count of votes)
             HashMap positiveHashes = new HashMap(); // a mapping from an url hash to Integer (count of votes)
             accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
@@ -106,10 +106,10 @@ public class Surftipps {
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
             kelondroMScoreCluster ranking = new kelondroMScoreCluster(); // score cluster for url hashes
             kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (yacyCore.universalDateShortPattern.length() + 12));
-            HashMap surftipps = new HashMap(); // a mapping from an url hash to a kelondroRow.Entry with display properties
-            accumulateSurftipps(surftipps, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
-            //accumulateSurftipps(surftipps, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
-            //accumulateSurftipps(surftipps, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
+            HashMap surftips = new HashMap(); // a mapping from an url hash to a kelondroRow.Entry with display properties
+            accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
+            //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
+            //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
         
             // read out surftipp array and create property entries
             Iterator k = ranking.scores(false);
@@ -121,7 +121,7 @@ public class Surftipps {
                 urlhash = (String) k.next();
                 if (urlhash == null) continue;
                 
-                row = (kelondroRow.Entry) surftipps.get(urlhash);
+                row = (kelondroRow.Entry) surftips.get(urlhash);
                 if (row == null) continue;
                 
                 url = row.getColString(0, null);
@@ -135,22 +135,22 @@ public class Surftipps {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                prop.put("surftipps_results_" + i + "_recommend", (voted) ? 0 : 1);
-                prop.put("surftipps_results_" + i + "_recommend_negativeVoteLink", "/Surftipps.html?voteNegative=" + urlhash + "&refid=" + refid + "&display=" + display + ((showScore) ? "&score=" : "")); // for negaive votes, we don't send around the bad url again, the hash is enough
-                prop.put("surftipps_results_" + i + "_recommend_positiveVoteLink", "/Surftipps.html?votePositive=" + urlhash + "&refid=" + refid + "&url=" + crypt.simpleEncode(url,null,'b') + "&title=" + crypt.simpleEncode(title,null,'b') + "&description=" + crypt.simpleEncode(description,null,'b') + "&display=" + display + ((showScore) ? "&score=" : ""));
-                prop.put("surftipps_results_" + i + "_url", url);
-                prop.put("surftipps_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
-                prop.put("surftipps_results_" + i + "_urlhash", urlhash);
-                prop.put("surftipps_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
-                prop.put("surftipps_results_" + i + "_description", description);
+                prop.put("surftips_results_" + i + "_recommend", (voted) ? 0 : 1);
+                prop.put("surftips_results_" + i + "_recommend_negativeVoteLink", "/Surftips.html?voteNegative=" + urlhash + "&refid=" + refid + "&display=" + display + ((showScore) ? "&score=" : "")); // for negaive votes, we don't send around the bad url again, the hash is enough
+                prop.put("surftips_results_" + i + "_recommend_positiveVoteLink", "/Surftips.html?votePositive=" + urlhash + "&refid=" + refid + "&url=" + crypt.simpleEncode(url,null,'b') + "&title=" + crypt.simpleEncode(title,null,'b') + "&description=" + crypt.simpleEncode(description,null,'b') + "&display=" + display + ((showScore) ? "&score=" : ""));
+                prop.put("surftips_results_" + i + "_url", url);
+                prop.put("surftips_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
+                prop.put("surftips_results_" + i + "_urlhash", urlhash);
+                prop.put("surftips_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
+                prop.put("surftips_results_" + i + "_description", description);
                 i++;
                 
                 if (i >= 50) break;
             }
-            prop.put("surftipps_results", i);
-            prop.put("surftipps", 1);
+            prop.put("surftips_results", i);
+            prop.put("surftips", 1);
         } else {
-            prop.put("surftipps", 0);
+            prop.put("surftips", 0);
         }
         
         return prop;
@@ -186,8 +186,8 @@ public class Surftipps {
         } catch (IOException e) {e.printStackTrace();}
     }
     
-    private static void accumulateSurftipps(
-            HashMap surftipps, kelondroMScoreCluster ranking, kelondroRow rowdef,
+    private static void accumulateSurftips(
+            HashMap surftips, kelondroMScoreCluster ranking, kelondroRow rowdef,
             HashMap negativeHashes, HashMap positiveHashes, int dbtype) {
         int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
         yacyNewsRecord record;
@@ -291,7 +291,7 @@ public class Surftipps {
             if (entry != null) {
                 urlhash = indexURL.urlHash(url);
                 if (urlhash == null) {
-                    System.out.println("Surftipps: bad url '" + url + "' from news record " + record.toString());
+                    System.out.println("Surftips: bad url '" + url + "' from news record " + record.toString());
                     continue;
                 }
                 if ((vote = (Integer) negativeHashes.get(urlhash)) != null) {
@@ -301,11 +301,11 @@ public class Surftipps {
                     score += 2 * vote.intValue();
                 }
                 // consider double-entries
-                if (surftipps.containsKey(urlhash)) {
+                if (surftips.containsKey(urlhash)) {
                     ranking.addScore(urlhash, score);
                 } else {
                     ranking.setScore(urlhash, score);
-                    surftipps.put(urlhash, entry);
+                    surftips.put(urlhash, entry);
                 }
             }
             
