@@ -181,6 +181,7 @@
   <!-- deleting old file -->
   <delete file="${build}/yacy.java" failonerror="false"/>
   <copy file="${src}/yacy.java" tofile="${build}/yacy.java" overwrite="true" filtering="true" />
+  <copy file="yacy-svn-3.spec" tofile="${release}/SPECS/yacy-svn.spec" overwrite="true" filtering="true" />
   <!--<copy file="${doc}/Download.html" tofile="${doc}/Download.html.up" filtering="true" />-->
 </target>
   	
@@ -728,6 +729,18 @@
 </target>	
 
 <target name="distWinExe" depends="makeWinExe,distAllInOne">	
+</target>
+
+<target name="rpm" depends="all" description="Creates the main rpm-package and another for libx">
+	<mkdir dir="${release}/RPMS/noarch" />
+	<mkdir dir="${release}/BUILD" />
+	<rpm specFile="yacy-svn.spec" topDir="${release}" />
+	<delete dir="${release}/SPECS" failonerror="false" />
+	<move file="${release}/RPMS/noarch/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm"
+		  tofile="${release}/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
+	<move file="${release}/RPMS/noarch/yacy-libx-${releaseVersion}_${releaseNr}-3.noarch.rpm"
+		  tofile="${release}/yacy-libx-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
+	<delete dir="${release}/RPMS" failonerror="false" />
 </target>
 
 </project>
