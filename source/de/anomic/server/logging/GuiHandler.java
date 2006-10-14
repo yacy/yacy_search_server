@@ -193,8 +193,6 @@ public class GuiHandler extends Handler{
         if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
         
         ArrayList logMessages = new ArrayList(this.count);
-        logMessages.add("Testmessage:\r\nline1\r\nline2");
-        
         Formatter logFormatter = getFormatter();
         
         try {

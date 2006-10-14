@@ -48,6 +48,8 @@
 
 import java.util.logging.Handler;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import de.anomic.http.httpHeader;
@@ -62,7 +64,7 @@ public class ViewLog_p {
         String[] log = new String[0];
         boolean reversed = false;
         int lines = 200;
-        String filter = ".*.*";
+        String filter = ".*";
         
         if(post != null){
             if(post.containsKey("mode") && ((String)post.get("mode")).equals("reversed")){
@@ -90,12 +92,25 @@ public class ViewLog_p {
         prop.put("lines", lines);
         prop.put("filter", filter);
         
+        // trying to compile the regular expression filter expression
+        Matcher filterMatcher = null;
+        try {
+        	Pattern filterPattern = Pattern.compile(filter,Pattern.MULTILINE);
+        	filterMatcher = filterPattern.matcher("");
+        } catch (PatternSyntaxException e) {
+        	e.printStackTrace();
+        }
+        
 
         int level = 0;
         int lc = 0;
         for (int i=0; i < log.length; i++) {
             String nextLogLine = log[i].trim();
-            try {if (!(nextLogLine.matches(filter))) continue;} catch (PatternSyntaxException e) {}
+            
+            if (filterMatcher != null) {
+            	filterMatcher.reset(nextLogLine);
+            	if (!filterMatcher.find()) continue;
+            }
             
             if (nextLogLine.startsWith("E ")) level = 4;
             else if (nextLogLine.startsWith("W ")) level = 3;
