@@ -165,7 +165,10 @@
 	
   <filter token="REPL_DATE" value="${DSTAMP}"/>
   <filter token="REPL_RELEASE" value="${releaseFile}"/>
+  <echo message="YaCy Version number: ${releaseVersion}" />
   <filter token="REPL_VERSION" value="${releaseVersion}" />
+  <echo message="YaCy Revision number: ${releaseNr}" />	
+  <filter token="REPL_REVISION_NR" value="${releaseNr}"/>
 
   <!-- deleting old file -->
   <delete file="${build}/yacy.java" failonerror="false"/>
