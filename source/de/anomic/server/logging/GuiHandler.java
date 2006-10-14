@@ -196,12 +196,12 @@ public class GuiHandler extends Handler{
         Formatter logFormatter = getFormatter();
         
         try {
-                int start = (reversed)?this.start+this.count-1:this.start;
+                int theStart = (reversed)?this.start+lineCount-1:this.start;
                 LogRecord record=null;
                 for (int i = 0; i < lineCount; i++) {
                     int ix = (reversed) ?
-                                Math.abs((start-i)%this.buffer.length) :
-                                (start - lineCount + i) % this.buffer.length;
+                                Math.abs((theStart-i)%this.buffer.length) :
+                                (theStart + i) % this.buffer.length;
                     record = this.buffer[ix];
                     logMessages.add(logFormatter.format(record));                
                 }             
