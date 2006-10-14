@@ -1,6 +1,5 @@
 # de.lng
 # English-->German
-# $LastChangedDate$
 # -----------------------
 # part of YaCy
 # (C) by Michael Peter Christen; mc@anomic.de
@@ -410,9 +409,6 @@ The global search resulted in \#\[globalresults\]\# link contributions from othe
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
 Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
-Show surftipps==Surftipps anzeigen
-Hide surftipps==Surftipps verbergen
-provided by YaCy peers==bereitgestellt von YaCy-Peers
 Add to bookmarks==Zu den Lesezeichen hinzufügen
 Give positive vote==Link positiv bewerten
 Give negative vote==Link negativ bewerten
@@ -1577,11 +1573,6 @@ You can of course <a href="index.html">search the internet</a> using the other p
 Other peers==Andere Peers
 other peers online.==andere Peers online.
 not online==nicht online
-Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten f&uuml;r den FTP-Account k&ouml;nnen Sie in den
-Settings page</a>.==Einstellungen</a> konfigurieren.
-Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
-Enabled: Updating periodically to file==Aktiv: Periodisches Update in Datei
-Last upload:==Letzter Upload:
 Online-mode==Onlinemodus
 You are in <i>Cache-browsing</i> mode.==Sie sind im <i>Cache</i> Modus.
 Only websites from the proxy-cache are accessible.==Nur Webseiten aus dem Proxycache sind abrufbar.
@@ -1641,6 +1632,11 @@ Remote triggered Crawl==eingehende Remote-Crawls
 Global Crawl Trigger==ausgehende Remote-Crawls
 #Pre-Queueing==
  local== lokal
+Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten f&uuml;r den FTP-Account k&ouml;nnen Sie in den
+Settings page</a>.==Einstellungen</a> konfigurieren.
+Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
+Enabled: Updating periodically to file==Aktiv: Periodisches Update in Datei
+Last upload:==Letzter Upload:
 #-----------------------------
 
 #File: Steering.html
@@ -1658,6 +1654,20 @@ Application will terminate after working off all scheduled tasks.==Der YaCy Prox
 Then YaCy will restart.==Dann wird YaCy neu gestartet.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie k&ouml;nnen nun zur&uuml;ck auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie &Auml;nderungen vornehmen wollen.
 #-----------------------------
+
+#File: Surftips.html
+#-----------------------------
+Surftips==Surftipps
+Surftips are switched off==Surftipps sind ausgeschaltet
+Show surftips==Zeige Surftipps
+title="bookmark"==title=="Lesezeichen"
+alt="Add to bookmarks"==alt="Zu den Lesezeichen hinzufügen"
+title="positive vote"==title="Positive Bewertung"
+alt="Give positive vote"==alt="Link positiv bewerten"
+title="negative vote"==title="Negative Bewertung"
+alt="Give negative vote"==alt="Link negativ bewerten"
+provided by YaCy peers using public bookmarks, link votes and crawl start points==bereitgestellt von YaCy-Peers durch öffentliche Lesezeichen, Link Bewertungen und Crawl Startpunkte
+Hide surftips==Verberge Surftipps
 
 #File: User_p.html
 #---------------------------
