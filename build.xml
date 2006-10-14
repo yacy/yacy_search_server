@@ -56,6 +56,7 @@
 </tstamp>
 
 <!-- defining all needed directory names -->
+<property name="yacyroot" location="."/>	
 <property name="addon" location="addon"/>
 <property name="src" location="source"/>
 <property name="doc" location="doc"/>
@@ -165,10 +166,17 @@
 	
   <filter token="REPL_DATE" value="${DSTAMP}"/>
   <filter token="REPL_RELEASE" value="${releaseFile}"/>
+
+  <!-- YaCy Release Version number -->
   <echo message="YaCy Version number: ${releaseVersion}" />
   <filter token="REPL_VERSION" value="${releaseVersion}" />
+	
+  <!-- YaCy SVN Revision number -->
   <echo message="YaCy Revision number: ${releaseNr}" />	
   <filter token="REPL_REVISION_NR" value="${releaseNr}"/>
+	
+  <!-- YaCy root directory -->
+  <filter token="REPL_YACY_ROOT_DIR" value="${yacyroot}"/>	
 
   <!-- deleting old file -->
   <delete file="${build}/yacy.java" failonerror="false"/>
