@@ -193,10 +193,12 @@ public class GuiHandler extends Handler{
         if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
         
         ArrayList logMessages = new ArrayList(this.count);
+        logMessages.add("Testmessage:\r\nline1\r\nline2");
+        
         Formatter logFormatter = getFormatter();
         
         try {
-                int theStart = (reversed)?this.start+lineCount-1:this.start;
+                int theStart = (reversed)?this.start+this.count-1:this.start+this.count-lineCount;
                 LogRecord record=null;
                 for (int i = 0; i < lineCount; i++) {
                     int ix = (reversed) ?
