@@ -77,11 +77,13 @@ package de.anomic.http;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
@@ -89,6 +91,7 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
+import java.nio.Buffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -707,20 +710,55 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         }
                         //if(sb.getConfig("usePageTemplate", "false").equals("true")){    
                         if(!supertemplate.equals("")){
-                            o = new serverByteBuffer();
-                            /*File pageFile=getOverlayedFile("/env/page.html");
-                            File pageClass=getOverlayedClass("/env/page.html");*/
-                            File pageFile=getOverlayedFile(supertemplate);
+                            File pageFile=getOverlayedFile(supertemplate); //typically /env/page.html
                             File pageClass=getOverlayedClass(supertemplate);
                             if(pageFile != null && pageFile.exists()){
                                 //warning: o,tp and fis are reused
-                                httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
+                                //this replaces the normal template function (below), and the
+                                //normal function is used for supertemplates.
                                 
+                                //search for header Data
+                                //XXX: This part may be slow :-(
+                                BufferedReader br=new BufferedReader(new InputStreamReader(fis));
+                                String line;
+                                boolean inheader=false;
+                                StringBuffer header=new StringBuffer();
+                                StringBuffer content=new StringBuffer();
+                                String content_s,header_s;
+                                while((line=br.readLine())!=null){
+                                    if(!inheader){
+                                        if(line.startsWith("<!--HEADER")){
+                                            inheader=true;
+                                        }else{
+                                            content.append(line);
+                                        }
+                                    }else{
+                                        if(line.endsWith("HEADER-->")){
+                                            inheader=false;
+                                        }else{
+                                            header.append(line);
+                                        }
+                                    }
+                                }
+                                
+                                //tp is from the servlet, fis is the content-only from the servlet
+                                //this resolvs templates in both header and content
+                                o = new serverByteBuffer();
+                                fis=new ByteArrayInputStream(content.toString().getBytes());
+                                httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
+                                content_s=o.toString();
+                                o = new serverByteBuffer();
+                                fis=new ByteArrayInputStream(header.toString().getBytes());
+                                httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
+                                header_s=o.toString();
+                                
+                                //further processing of page.html (via page.class)?
                                 if (pageClass != null && pageClass.exists()) 
                                     tp = (serverObjects) invokeServlet(pageClass, requestHeader, args);
                                 else
                                     tp = new serverObjects();
-                                tp.put("page", o.toString());
+                                tp.put("header", header_s);
+                                tp.put("page", content_s);
                                 fis=new BufferedInputStream(new FileInputStream(pageFile));
                                 
                             }
