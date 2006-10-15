@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<version>
+	<number>#[version]#</number>
+	<svnRevision>#[svnRev]#</svnRevision>
+	<buildDate>#[buildDate]#</buildDate>
+</version>

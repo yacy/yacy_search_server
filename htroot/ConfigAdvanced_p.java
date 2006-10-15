@@ -62,7 +62,6 @@ public class ConfigAdvanced_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         int count=0;
-        Iterator keys = env.configKeys();
         String key="";
 
         //change a Key
@@ -73,6 +72,7 @@ public class ConfigAdvanced_p {
                 env.setConfig(key, value);
             }
         }
+        Iterator keys = env.configKeys();
 
         final List list = new ArrayList(250);
         while(keys.hasNext()){
