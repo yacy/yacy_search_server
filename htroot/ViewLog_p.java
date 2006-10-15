@@ -64,7 +64,7 @@ public class ViewLog_p {
         String[] log = new String[0];
         boolean reversed = false;
         int lines = 200;
-        String filter = ".*";
+        String filter = ".*.*";
         
         if(post != null){
             if(post.containsKey("mode") && ((String)post.get("mode")).equals("reversed")){
