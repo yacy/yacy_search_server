@@ -7,7 +7,7 @@ Summary:		P2P search engine, web-crawler and proxy
 Name:			yacy
 Version:		@REPL_VERSION@_@REPL_REVISION_NR@
 Release:		3
-Copyright:		GPL
+License:		GPL
 Group:			Application/Internet
 Source0:		svn://svn.berlios.de/yacy/trunk
 URL:			http://www.yacy.net/yacy/
@@ -51,9 +51,9 @@ Zip, tar, Power Point, gzip
 Additionally it allows port forwarding via secure channel,
 seed uploading via SCP and provides a SOAP API.
 
-%prep	# nothing to be done here, ant already prepared everything nicely for us
+# %prep	# nothing to be done here, ant already prepared everything nicely for us
 
-%build	# ant did this for us as well... such a nice tool
+# %build	# ant did this for us as well... such a nice tool
 
 %pre
 # check whether group 'yacy' already exists, if not it will be created
