@@ -182,6 +182,7 @@
   <delete file="${build}/yacy.java" failonerror="false"/>
   <copy file="${src}/yacy.java" tofile="${build}/yacy.java" overwrite="true" filtering="true" />
   <copy file="yacy-svn-3.spec" tofile="${release}/SPECS/yacy-svn.spec" overwrite="true" filtering="true" />
+  <copy file="yacy.nsi" tofile="${release}/WINDOWS/yacy.nsi" overwrite="true" filtering="true" />
   <!--<copy file="${doc}/Download.html" tofile="${doc}/Download.html.up" filtering="true" />-->
 </target>
   	
@@ -736,11 +737,21 @@
 	<mkdir dir="${release}/BUILD" />
 	<rpm specFile="yacy-svn.spec" topDir="${release}" />
 	<delete dir="${release}/SPECS" failonerror="false" />
+	<delete dir="${release}/WINDOWS" failonerror="false" />
 	<move file="${release}/RPMS/noarch/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm"
 		  tofile="${release}/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
 	<move file="${release}/RPMS/noarch/yacy-libx-${releaseVersion}_${releaseNr}-3.noarch.rpm"
 		  tofile="${release}/yacy-libx-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
 	<delete dir="${release}/RPMS" failonerror="false" />
+</target>
+
+<!-- http://nsisant.sourceforge.net/ -->
+<taskdef name="nsis" classname="net.sf.nsisant.Task">
+        <classpath location="nsisant-1.2.jar"/>
+</taskdef>
+<target name="exe" depends="all" description="Creates the windows installer.exe">
+	<mkdir dir="${release}/WINDOWS" />
+	<nsis script="${release}/WINDOWS/yacy.nsi" nocd="yes" />
 </target>
 
 </project>

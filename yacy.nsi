@@ -4,7 +4,7 @@
 
 Name "YaCy"
 
-OutFile "yacy_v0.48_20061010_2743.exe"
+OutFile "RELEASE/WINDOWS/yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe"
 InstallDir $PROGRAMFILES\YaCy
 
 SetCompress auto
@@ -17,7 +17,7 @@ InstType "Normal"
 InstType "Full"
 
 ; The text to prompt the user to enter a directory
-ComponentText "This will install YaCy v0.48 (Build 20061010) on your computer. Select which optional things you want to be installed."
+ComponentText "This will install YaCy v@REPL_VERSION@ (Build @REPL_DATE@) on your computer. Select which optional things you want to be installed."
 ; The text to prompt the user to enter a directory
 #DirText "If an old version was installed into another location (eg. AnomicHTTPProxy), you have to move the DATA Directory to the new location."
 DirText "Choose a directory to install into:"
@@ -164,9 +164,9 @@ Section "Development"
 	File "build.properties"
 	
 	SetOutPath "$INSTDIR\htroot"
-	File "HTROOT\*.java"
+	File "htroot\*.java"
 	SetOutPath "$INSTDIR\htroot\yacy"
-	File "HTROOT\yacy\*.java"
+	File "htroot\yacy\*.java"
 	SetOutPath "$INSTDIR\htroot\htdocsdefault"
 	File "htroot\htdocsdefault\*.java"
 	SetOutPath "$INSTDIR\htroot\www"
