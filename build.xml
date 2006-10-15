@@ -745,11 +745,11 @@
 	<delete dir="${release}/RPMS" failonerror="false" />
 </target>
 
-<!-- http://nsisant.sourceforge.net/ -->
-<taskdef name="nsis" classname="net.sf.nsisant.Task">
-        <classpath location="nsisant-1.2.jar"/>
-</taskdef>
 <target name="exe" depends="all" description="Creates the windows installer.exe">
+	<!-- http://nsisant.sourceforge.net/ -->
+	<taskdef name="nsis" classname="net.sf.nsisant.Task">
+		    <classpath location="nsisant-1.2.jar"/>
+	</taskdef>
 	<mkdir dir="${release}/WINDOWS" />
 	<nsis script="${release}/WINDOWS/yacy.nsi" nocd="yes" />
 </target>
