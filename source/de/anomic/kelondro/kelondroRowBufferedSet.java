@@ -174,7 +174,8 @@ public class kelondroRowBufferedSet implements kelondroIndex {
         return store.row();
     }
 
-    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) {
+    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) {
+        flush();
         return store.rows(up, rotating, firstKey);
     }
 }
