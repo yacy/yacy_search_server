@@ -53,6 +53,8 @@ public class kelondroBytesIntMap {
     }
     
     public synchronized int removei(byte[] key) throws IOException {
+        // returns the integer index of the key, if the key can be found and was removed
+        // and -1 if the key was not found.
         if (ki.size() == 0) return -1;
         kelondroRow.Entry indexentry = ki.remove(key);
         if (indexentry == null) return -1;

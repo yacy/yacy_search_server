@@ -128,8 +128,8 @@
     URL entries related to this word hash <span class="tt">#[keyHash]#</span><br /><br />
     <form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
     #{urlList}# #(urlExists)#
-    <input type="checkbox" name="#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" /><span class="tt">#[urlhxValue]#&nbsp;&lt;unresolved URL Hash&gt;</span><br />
-    ::<input type="checkbox" name="#[urlhxCount]#" #(urlhxChecked)#::checked #(/urlhxChecked)#value="#[urlhxValue]#" align="top" />
+    <input type="checkbox" name="urlhx.#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" /><span class="tt">#[urlhxValue]#&nbsp;&lt;unresolved URL Hash&gt;</span><br />
+    ::<input type="checkbox" name="urlhx.#[urlhxCount]#" #(urlhxChecked)#::checked #(/urlhxChecked)#value="#[urlhxValue]#" align="top" />
     <a href="/IndexControl_p.html?keystring=#[keyString]#&amp;keyhash=#[keyHash]#&amp;urlhash=#[urlhxValue]#&amp;urlstringsearch=&amp;urlstring=#[urlString]#" class="tt">#[urlhxValue]#</a><span class="tt">&nbsp;#[urlString]#, pos=#[pos]#</span><br />
     #(/urlExists)# #{/urlList}#
     <input type="hidden" name="keystring" value="#[keyString]#" />

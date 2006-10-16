@@ -45,7 +45,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     public kelondroRowSet(kelondroRow rowdef) {
-        super(rowdef);
+        super(rowdef, 0);
         this.removeMarker = new TreeSet();
         this.profile = new kelondroProfile();
     }
@@ -106,13 +106,9 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
 
     public kelondroRow.Entry remove(byte[] a) {
-        return removeMarked(a);
-    }
-    
-    public kelondroRow.Entry removeMarked(byte[] a) {
         return removeMarked(a, 0, a.length);
     }
-    
+
     private kelondroRow.Entry removeMarked(byte[] a, int astart, int alength) {
         if (chunkcount == 0) return null;
         long handle = profile.startDelete();
@@ -178,30 +174,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         super.removeShift(idx, d, chunkcount);
         chunkcount -= d;
         removeMarker.clear();
-    }
-
-    
-    protected kelondroRow.Entry removeShift(byte[] a) {
-        return removeShift(a, 0, a.length);
-    }
-    
-    private kelondroRow.Entry removeShift(byte[] a, int astart, int alength) {
-        // the byte[] a may be shorter than the chunksize
-        if (chunkcount == 0) return null;
-        long handle = profile.startDelete();
-        kelondroRow.Entry entry = null;
-        synchronized(chunkcache) {
-            int p = find(a, astart, alength);
-            if (p < 0) return null;
-            entry = get(p);
-            if (p < sortBound) {
-                removeShift(p);
-            } else {
-                super.swap(p, --chunkcount, 0);
-            }
-        }
-        profile.stopDelete(handle);
-        return entry;
     }
     
     public void removeMarkedAll(kelondroRowCollection c) {
@@ -328,7 +300,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return super.rows();
     }
     
-    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) {
         return new rowIterator(up, rotating, firstKey);
     }
     

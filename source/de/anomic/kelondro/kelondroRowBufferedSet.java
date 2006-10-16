@@ -24,6 +24,7 @@
 
 package de.anomic.kelondro;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -31,24 +32,20 @@ import java.util.TreeMap;
 
 import de.anomic.server.serverMemory;
 
-public class kelondroRowBufferedSet extends kelondroRowSet {
+public class kelondroRowBufferedSet implements kelondroIndex {
 
-    private static final long memBlockLimit = 2000000;      // do not fill cache further if the amount of available memory is less that this
+    private static final long memBlockLimit = 2000000;  // do not fill cache further if the amount of available memory is less that this
     private static final int bufferFlushLimit = 10000;
-    private static final int bufferFlushMinimum = 1000; 
-    private final boolean useRowCollection = true;
+    private static final int bufferFlushMinimum = 1000;
     private kelondroProfile profile;
     private TreeMap buffer;
+    private kelondroRowSet store;
 
-    public kelondroRowBufferedSet(kelondroRow rowdef) {
-        super(rowdef);
-        buffer = new TreeMap(kelondroNaturalOrder.naturalOrder);
-        profile = new kelondroProfile();
-    }
-
-    public kelondroRowBufferedSet(kelondroRow rowdef, int objectCount) {
-        super(rowdef, objectCount);
-        buffer = new TreeMap(kelondroNaturalOrder.naturalOrder);
+    public kelondroRowBufferedSet(kelondroRow rowdef, kelondroOrder objectOrder, int orderColumn, int objectCount) {
+        store = new kelondroRowSet(rowdef, objectCount);
+        assert (objectOrder != null);
+        store.setOrdering(objectOrder, orderColumn);
+        buffer = new TreeMap(objectOrder);
         profile = new kelondroProfile();
     }
     
@@ -58,145 +55,126 @@ public class kelondroRowBufferedSet extends kelondroRowSet {
         Map.Entry entry;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            super.add((kelondroRow.Entry) entry.getValue());
+            store.add((kelondroRow.Entry) entry.getValue());
         }
         buffer.clear();
     }
     
-    public final void trim() {
-        synchronized (buffer) {
-            flush();
-            super.trim();
-        }
+    public synchronized final void trim() {
+        flush();
+        store.trim();
     }
-    
-    public void removeOne() {
-        synchronized (buffer) {
-            if (buffer.size() == 0) {
-                super.removeOne();
-            } else try {
-                //buffer.remove(buffer.keySet().iterator().next());
-                buffer.remove(buffer.lastKey());
-            } catch (NoSuchElementException e) {}
-        }
+
+    public synchronized void removeOne() {
+        if (buffer.size() == 0) {
+            store.removeOne();
+        } else try {
+            // buffer.remove(buffer.keySet().iterator().next());
+            buffer.remove(buffer.lastKey());
+        } catch (NoSuchElementException e) {}
     }
-    
-    public void clear() {
-        synchronized (buffer) {
-            super.clear();
-            buffer.clear();
-        }
+
+    public synchronized void clear() {
+        store.clear();
+        buffer.clear();
     }
-    
-    public int size() {
-        synchronized (buffer) {
-            return buffer.size() + super.size();
-        }
+
+    public synchronized int size() {
+        return buffer.size() + store.size();
     }
-    
-    public Iterator rows() {
-        synchronized (buffer) {
-            flush();
-        }
-        return super.rows();
+
+    public synchronized Iterator rows() {
+        flush();
+        return store.rows();
     }
-    
-    public void uniq() {
-        synchronized (buffer) {
-            flush();
-            super.uniq();
-        }
+
+    public synchronized void uniq() {
+        flush();
+        store.uniq();
     }
-    
-    public String toString() {
-        synchronized (buffer) {
-            flush();
-            return super.toString();
-        }
+
+    public synchronized String toString() {
+        flush();
+        return store.toString();
     }
-    
-    public kelondroRow.Entry get(byte[] key) {
+
+    public synchronized kelondroRow.Entry get(byte[] key) {
         long handle = profile.startRead();
         kelondroRow.Entry entry = null;
-        synchronized (buffer) {
-            entry = (kelondroRow.Entry) buffer.get(key);
-            if ((entry == null) && (useRowCollection)) entry = super.get(key);
-        }
+        entry = (kelondroRow.Entry) buffer.get(key);
+        if (entry == null) entry = store.get(key);
         profile.stopRead(handle);
         return entry;
     }
-    
-    public kelondroRow.Entry put(kelondroRow.Entry newentry) {
+
+    public synchronized kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) {
+        return put(row);
+    }
+
+    public synchronized kelondroRow.Entry put(kelondroRow.Entry newentry) {
         long handle = profile.startWrite();
-        byte[] key = newentry.getColBytes(super.sortColumn);
+        byte[] key = newentry.getColBytes(store.sortColumn);
         kelondroRow.Entry oldentry = null;
-        synchronized (buffer) {
-            if (useRowCollection) {
-                oldentry = (kelondroRow.Entry) buffer.get(key);
-                if (oldentry == null) {
-                    // try the collection
-                    oldentry = super.get(key);
-                    if (oldentry == null) {
-                        // this was not anywhere
-                        buffer.put(key, newentry);
-                        if (((buffer.size() > bufferFlushMinimum) &&  (serverMemory.available() > memBlockLimit)) ||
-                            (buffer.size() > bufferFlushLimit)) flush();
-                    } else {
-                        // replace old entry
-                        super.put(newentry);
-                    }
-                } else {
-                    // the entry is already in buffer
-                    // simply replace old entry
-                    buffer.put(key, newentry);
-                }
+        oldentry = (kelondroRow.Entry) buffer.get(key);
+        if (oldentry == null) {
+            // try the collection
+            oldentry = store.get(key);
+            if (oldentry == null) {
+                // this was not anywhere
+                buffer.put(key, newentry);
+                if (((buffer.size() > bufferFlushMinimum) && (serverMemory.available() > memBlockLimit))
+                  || (buffer.size() > bufferFlushLimit))
+                    flush();
             } else {
-                oldentry = (kelondroRow.Entry) buffer.put(key, newentry);
+                // replace old entry
+                store.put(newentry);
             }
+        } else {
+            // the entry is already in buffer
+            // simply replace old entry
+            buffer.put(key, newentry);
         }
         profile.stopWrite(handle);
         return oldentry;
     }
-    
-    public kelondroRow.Entry removeShift(byte[] key) {
+
+    public synchronized kelondroRow.Entry remove(byte[] key) {
         long handle = profile.startDelete();
         kelondroRow.Entry oldentry = null;
-        synchronized (buffer) {
-            oldentry = (kelondroRow.Entry) buffer.remove(key);
-            if ((oldentry == null) && (useRowCollection)) {
-                // try the collection
-                oldentry = super.removeShift(key);
-            }
+        oldentry = (kelondroRow.Entry) buffer.remove(key);
+        if (oldentry == null) {
+            // try the collection
+            return store.remove(key);
         }
         profile.stopDelete(handle);
         return oldentry;
     }
-    
-    public kelondroRow.Entry removeMarked(byte[] key) {
+
+    public synchronized void removeMarkedAll(kelondroRowCollection c) {
         long handle = profile.startDelete();
-        kelondroRow.Entry oldentry = null;
-        synchronized (buffer) {
-            oldentry = (kelondroRow.Entry) buffer.remove(key);
-            if ((oldentry == null) && (useRowCollection)) {
-                // try the collection
-                return super.removeMarked(key);
-            }
-        }
-        profile.stopDelete(handle);
-        return oldentry;
-    }
-    
-    public void removeMarkedAll(kelondroRowCollection c) {
-        long handle = profile.startDelete();
-        synchronized (buffer) {
-            flush();
-            super.removeMarkedAll(c);
-        }
+        flush();
+        store.removeMarkedAll(c);
         profile.stopDelete(handle);
     }
 
     public kelondroProfile profile() {
-        return profile;
+        return store.profile();
     }
-    
+
+    public synchronized void close() {
+        flush();
+        store.close();
+    }
+
+    public kelondroOrder order() {
+        return store.order();
+    }
+
+    public kelondroRow row() {
+        return store.row();
+    }
+
+    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) {
+        return store.rows(up, rotating, firstKey);
+    }
 }

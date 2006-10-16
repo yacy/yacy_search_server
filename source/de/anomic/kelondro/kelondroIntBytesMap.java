@@ -29,10 +29,7 @@ package de.anomic.kelondro;
 public class kelondroIntBytesMap extends kelondroRowBufferedSet {
 
     public kelondroIntBytesMap(int payloadSize, int initSize) {
-        super(new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize), initSize);
-        
-        // initialize ordering
-        super.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
+        super(new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize), kelondroNaturalOrder.naturalOrder, 0, initSize);
     }
     
     public byte[] getb(int ii) {
@@ -42,27 +39,19 @@ public class kelondroIntBytesMap extends kelondroRowBufferedSet {
     }
     
     public byte[] putb(int ii, byte[] value) {
-        kelondroRow.Entry newentry = rowdef.newEntry();
+        kelondroRow.Entry newentry = super.row().newEntry();
         newentry.setCol(0, (long) ii);
         newentry.setCol(1, value);
         kelondroRow.Entry oldentry = super.put(newentry);
         if (oldentry == null) return null;
         return oldentry.getColBytes(1);
     }
-    
-    public void addb(int ii, byte[] value) {
-        kelondroRow.Entry newentry = rowdef.newEntry();
-        newentry.setCol(0, (long) ii);
-        newentry.setCol(1, value);
-        add(newentry);
-    }
-    
+
     public byte[] removeb(int ii) {
         if (size() == 0) {
-            if (System.currentTimeMillis() - this.lastTimeWrote > 10000) this.trim();
             return null;
         }
-        kelondroRow.Entry indexentry = super.removeMarked(kelondroNaturalOrder.encodeLong((long) ii, 4));
+        kelondroRow.Entry indexentry = super.remove(kelondroNaturalOrder.encodeLong((long) ii, 4));
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);
     }

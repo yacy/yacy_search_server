@@ -416,7 +416,6 @@ public class kelondroRecords {
         } else {
             this.cacheSize = (int) (buffersize / cacheNodeChunkSize());
             this.cacheHeaders = new kelondroIntBytesMap(this.headchunksize, 0);
-            this.cacheHeaders.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
         }
         this.readHit = 0;
         this.readMiss = 0;
@@ -434,10 +433,10 @@ public class kelondroRecords {
                 Node n;
                 while ((System.currentTimeMillis() < stop) && (cacheHeaders.size() < cacheSize) && (i.hasNext())) {
                     n = (Node) i.next();
-                    cacheHeaders.addb(n.handle.index, n.headChunk);
+                    cacheHeaders.putb(n.handle.index, n.headChunk);
                     count++;
                 }
-                cacheHeaders.shape();
+                cacheHeaders.trim();
                 logFine("preloaded " + count + " records into cache");
             } catch (kelondroException e) {
                 // the contentNodes iterator had a time-out; we don't do a preload

@@ -44,10 +44,6 @@ public class kelondroRowCollection {
     private static final int exp_order_col   = 4;
     private static final int exp_order_bound = 5;
     private static final int exp_collection  = 6;
-
-    public kelondroRowCollection(kelondroRow rowdef) {
-        this(rowdef, 0);
-    }
     
     public kelondroRowCollection(kelondroRowCollection rc) {
         this.rowdef = rc.rowdef;

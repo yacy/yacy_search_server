@@ -105,7 +105,7 @@ public class kelondroCollectionIndex {
         // open array files
         this.arrays = new HashMap(); // all entries will be dynamically created with getArray()
         if (((fileIndexGeneration) || (ramIndexGeneration))) {
-            serverLog.logFine("STARTUP", "STARTED MIGRATION OF OLD COLLECION INDEX TO NEW COLLECTION INDEX. THIS WILL TAKE SOME TIME");
+            serverLog.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX. THIS WILL TAKE SOME TIME");
             openAllArrayFiles(((fileIndexGeneration) || (ramIndexGeneration)), indexOrder);
         }
         
@@ -265,38 +265,39 @@ public class kelondroCollectionIndex {
         
         synchronized (index) {
             // first find an old entry, if one exists
-            kelondroRow.Entry oldindexrow = index.get(key);
+            kelondroRow.Entry indexrow = index.get(key);
         
-            if (oldindexrow == null) {
+            if (indexrow == null) {
                 if ((collection != null) && (collection.size() > 0)) {
                     // the collection is new
-                    overwrite(key, collection, arrayIndex(collection.size()));
+                    overwrite(key, collection, arrayIndex(collection.size()), index.row().newEntry());
                 }
                 return 0;
             }
             
             // overwrite the old collection
             // read old information
-            int oldchunksize       = (int) oldindexrow.getColLong(idx_col_chunksize); // needed only for migration
-            int oldchunkcount      = (int) oldindexrow.getColLong(idx_col_chunkcount);
-            int oldrownumber       = (int) oldindexrow.getColLong(idx_col_indexpos);
-            int oldPartitionNumber = (int) oldindexrow.getColByte(idx_col_clusteridx);
+            int oldchunksize       = (int) indexrow.getColLong(idx_col_chunksize); // needed only for migration
+            int oldchunkcount      = (int) indexrow.getColLong(idx_col_chunkcount);
+            int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);
+            int oldPartitionNumber = (int) indexrow.getColByte(idx_col_clusteridx);
             assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
             int oldSerialNumber = 0;
 
             if (merge) {
                 // load the old collection and join it
-                kelondroRowSet oldcollection = getwithparams(oldindexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false, false);
+                kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false, false);
                 
                 // join with new collection
                 oldcollection.addAll(collection);
+                oldcollection.shape();
                 collection = oldcollection;
             }
 
             int removed = 0;
             if (removekeys != null) {
                 // load the old collection and remove keys
-                kelondroRowSet oldcollection = getwithparams(oldindexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false, false);
+                kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false, false);
 
                 // remove the keys from the set
                 Iterator i = removekeys.iterator();
@@ -314,6 +315,12 @@ public class kelondroCollectionIndex {
                 if (deletecomplete) {
                     kelondroFixedWidthArray array = getArray(oldPartitionNumber, oldSerialNumber, oldchunksize);
                     array.remove(oldrownumber);
+                    index.remove(key);
+                } else {
+                    // update the index entry
+                    indexrow.setCol(idx_col_chunkcount, 0);
+                    indexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+                    index.put(indexrow);
                 }
                 return removed;
             }
@@ -337,11 +344,11 @@ public class kelondroCollectionIndex {
                 array.set(oldrownumber, arrayEntry);
 
                 // update the index entry
-                oldindexrow.setCol(idx_col_chunkcount, collection.size());
-                oldindexrow.setCol(idx_col_clusteridx, (byte) oldPartitionNumber);
-                oldindexrow.setCol(idx_col_flags, (byte) 0);
-                oldindexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
-                index.put(oldindexrow);
+                indexrow.setCol(idx_col_chunkcount, collection.size());
+                indexrow.setCol(idx_col_clusteridx, (byte) oldPartitionNumber);
+                indexrow.setCol(idx_col_flags, (byte) 0);
+                indexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+                index.put(indexrow);
             } else {
                 // we need a new slot, that means we must first delete the old entry
                 // find array file
@@ -351,13 +358,13 @@ public class kelondroCollectionIndex {
                 array.remove(oldrownumber);
 
                 // write a new entry in the other array
-                overwrite(key, collection, newPartitionNumber);
+                overwrite(key, collection, newPartitionNumber, indexrow);
             }
             return removed;
         }
     }
 
-    private void overwrite(byte[] key, kelondroRowCollection collection, int targetpartition) throws IOException {
+    private void overwrite(byte[] key, kelondroRowCollection collection, int targetpartition, kelondroRow.Entry indexEntry) throws IOException {
         // helper method, should not be called directly and only within a synchronized(index) environment
         // simply store a collection without check if the collection existed before
         
@@ -373,7 +380,6 @@ public class kelondroCollectionIndex {
         int newRowNumber = array.add(arrayEntry);
         
         // store the new row number in the index
-        kelondroRow.Entry indexEntry = index.row().newEntry();
         indexEntry.setCol(idx_col_key, key);
         indexEntry.setCol(idx_col_chunksize, this.playloadrow.objectsize());
         indexEntry.setCol(idx_col_chunkcount, collection.size());
