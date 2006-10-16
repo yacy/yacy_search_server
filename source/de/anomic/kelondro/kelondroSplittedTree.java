@@ -121,6 +121,23 @@ public class kelondroSplittedTree implements kelondroIndex {
     public kelondroRow.Entry remove(byte[] key) throws IOException {
         return ktfs[partition(key)].remove(key);
     }
+    
+    public kelondroRow.Entry removeOne() throws IOException {
+        // removes one entry from the partition with the most entries
+        int maxc = -1, maxi = 0;
+        for (int i = 0; i < ktfs.length; i++) {
+            if (ktfs[i].size() > maxc) {
+                maxc = ktfs[i].size();
+                maxi = i;
+            }
+        }
+        if (maxc > 0) {
+            return ktfs[maxi].removeOne();
+        } else {
+            return null;
+        }
+    }
+    
     public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
         return new ktfsIterator(up, rotating, firstKey);
     }
@@ -203,5 +220,14 @@ public class kelondroSplittedTree implements kelondroIndex {
         return this.order;
     }
 
+    public int primarykey() {
+        return 0;
+    }
 
+    public kelondroProfile profile() {
+        kelondroProfile[] profiles = new kelondroProfile[ktfs.length];
+        for (int i = 0; i < ktfs.length; i++) profiles[i] = ktfs[i].profile();
+        return kelondroProfile.consolidate(profiles);
+    }
+    
 }

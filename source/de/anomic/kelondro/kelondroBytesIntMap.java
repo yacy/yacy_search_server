@@ -61,6 +61,13 @@ public class kelondroBytesIntMap {
         return (int) indexentry.getColLong(1);
     }
 
+    public synchronized int removeonei() throws IOException {
+        if (ki.size() == 0) return -1;
+        kelondroRow.Entry indexentry = ki.removeOne();
+        if (indexentry == null) return -1;
+        return (int) indexentry.getColLong(1);
+    }
+    
     public synchronized int size() throws IOException {
         return ki.size();
     }
@@ -74,6 +81,10 @@ public class kelondroBytesIntMap {
     
     public kelondroOrder order() {
         return ki.order();
+    }
+    
+    public kelondroProfile profile() {
+        return ki.profile();
     }
     
 }

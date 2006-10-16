@@ -245,11 +245,14 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public void removeOne() {
-        if (chunkcount == 0) return;
-        if (chunkcount == sortBound) sortBound--;
-        chunkcount--;
-        this.lastTimeWrote = System.currentTimeMillis();
+    public kelondroRow.Entry removeOne() {
+        synchronized (chunkcache) {
+            if (chunkcount == 0) return null;
+            if (chunkcount == sortBound) sortBound--;
+            chunkcount--;
+            this.lastTimeWrote = System.currentTimeMillis();
+            return get(chunkcount);
+        }
     }
     
     public void clear() {

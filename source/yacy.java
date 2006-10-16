@@ -736,7 +736,7 @@ public final class yacy {
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
                             plasmaCrawlLURLEntry urlEntry = currentUrlDB.load(urlHash, null);                       
                             urlCounter++;
-                            minimizedUrlDB.store(urlEntry, false);
+                            minimizedUrlDB.store(urlEntry);
                             if (urlCounter % 500 == 0) {
                                 log.logInfo(urlCounter + " URLs found so far.");
                             }

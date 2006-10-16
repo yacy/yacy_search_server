@@ -130,7 +130,7 @@ public final class crawlReceipt {
                               "\n\tURL properties: "+ propStr);
             } else try {
                 // put new entry into database
-                switchboard.urlPool.loadedURL.store(entry, false);
+                switchboard.urlPool.loadedURL.store(entry);
                 switchboard.urlPool.loadedURL.stack(entry, youare, iam, 1);
                 
                 // generating url hash

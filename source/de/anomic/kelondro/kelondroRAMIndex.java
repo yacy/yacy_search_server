@@ -38,17 +38,23 @@ public class kelondroRAMIndex implements kelondroIndex {
     private TreeMap index;
     private kelondroOrder order;
     private kelondroRow rowdef;
+    private kelondroProfile profile;
     
     public kelondroRAMIndex(kelondroOrder defaultOrder, kelondroRow rowdef) {
         this.index = new TreeMap(defaultOrder);
         this.order = defaultOrder;
         this.rowdef = rowdef;
+        this.profile = new kelondroProfile();
     }
     
     public kelondroOrder order() {
         return this.order;
     }
 
+    public int primarykey() {
+        return 0;
+    }
+    
     public synchronized int size() {
         return this.index.size();
     }
@@ -73,12 +79,21 @@ public class kelondroRAMIndex implements kelondroIndex {
         return (kelondroRow.Entry) index.remove(key);
     }
 
+    public synchronized Entry removeOne() {
+        if (this.index.size() == 0) return null;
+        return remove((byte[]) index.keySet().iterator().next());
+    }
+    
     public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) {
         return index.values().iterator();
     }
 
     public void close() {
         index = null;
+    }
+    
+    public kelondroProfile profile() {
+        return profile;
     }
     
 }

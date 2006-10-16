@@ -99,7 +99,8 @@ public class kelondroCollectionIndex {
 
         boolean ramIndexGeneration = false;
         boolean fileIndexGeneration = !(new File(path, filenameStub + ".index").exists());
-        if (ramIndexGeneration) index = new kelondroRAMIndex(indexOrder, indexRow());
+        //if (ramIndexGeneration) index = new kelondroRAMIndex(indexOrder, indexRow());
+        if (ramIndexGeneration) index = new kelondroBufferedIndex(new kelondroRowSet(indexRow(), indexOrder, 0, 0));
         if (fileIndexGeneration) index = new kelondroFlexTable(path, filenameStub + ".index", buffersize, preloadTime, indexRow(), indexOrder);
                    
         // open array files

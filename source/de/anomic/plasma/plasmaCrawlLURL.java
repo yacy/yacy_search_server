@@ -66,8 +66,7 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpc.response;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexURL;
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroRAMIndex;
+import de.anomic.kelondro.kelondroBufferedIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
@@ -98,8 +97,7 @@ public final class plasmaCrawlLURL extends indexURL {
         
         cacheFile.getParentFile().mkdirs();
         try {
-            urlIndexFile = new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlLURLOldEntry.rowdef);
-            urlIndexCache = new kelondroRAMIndex(kelondroNaturalOrder.naturalOrder, plasmaCrawlLURLOldEntry.rowdef);
+            urlIndexFile = new kelondroBufferedIndex(new kelondroTree(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlLURLOldEntry.rowdef));
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);
@@ -139,6 +137,16 @@ public final class plasmaCrawlLURL extends indexURL {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
 
+    public void flushCacheSome() {
+        try {
+            ((kelondroBufferedIndex) urlIndexFile).flushSome();
+        } catch (IOException e) {}
+    }
+    
+    public int writeCacheSize() {
+        return ((kelondroBufferedIndex) urlIndexFile).writeBufferSize();
+    }
+    
     public plasmaCrawlLURLEntry load(String urlHash, indexEntry searchedWord) {
         // generates an plasmaLURLEntry using the url hash
         // to speed up the access, the url-hashes are buffered
@@ -147,9 +155,8 @@ public final class plasmaCrawlLURL extends indexURL {
         // - look into the hash cache
         // - look into the filed properties
         // if the url cannot be found, this returns null
-        kelondroRow.Entry entry = urlIndexCache.get(urlHash.getBytes());
         try {
-            if (entry == null) entry = urlIndexFile.get(urlHash.getBytes());
+            kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
             return new plasmaCrawlLURLOldEntry(entry, searchedWord);
         } catch (IOException e) {
@@ -157,7 +164,7 @@ public final class plasmaCrawlLURL extends indexURL {
         }
     }
 
-    public void store(plasmaCrawlLURLEntry entry, boolean cached) throws IOException {
+    public void store(plasmaCrawlLURLEntry entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
         plasmaCrawlLURLEntry oldEntry;
         try {
@@ -177,13 +184,7 @@ public final class plasmaCrawlLURL extends indexURL {
             return; // this did not need to be stored, but is updated
         }
 
-        if ((cached) && (urlIndexCache != null)) {
-            synchronized (urlIndexCache) {
-                urlIndexCache.put(entry.toRowEntry());
-            }
-        } else {
-            urlIndexFile.put(entry.toRowEntry(), entry.loaddate());
-        }
+        urlIndexFile.put(entry.toRowEntry(), entry.loaddate());
     }
     
     public synchronized plasmaCrawlLURLEntry newEntry(String propStr, boolean setGlobal) {

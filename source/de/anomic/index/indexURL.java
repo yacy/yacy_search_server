@@ -36,8 +36,6 @@ import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroIndex;
-import de.anomic.kelondro.kelondroRAMIndex;
-import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.server.serverByteBuffer;
@@ -412,48 +410,24 @@ public class indexURL {
  
  
  // the class object
- protected kelondroIndex    urlIndexFile = null;
- protected kelondroRAMIndex urlIndexCache = null;
+ protected kelondroIndex urlIndexFile = null;
  
  public indexURL() {
      urlIndexFile = null;
-     urlIndexCache = null;
  }
 
  public int size() {
      try {
-        return urlIndexFile.size() + ((urlIndexCache == null) ? 0 : urlIndexCache.size());
+        return urlIndexFile.size() ;
     } catch (IOException e) {
         return 0;
     }
- }
-
- public void flushCacheSome() {
-     if (urlIndexCache == null) return;
-     if (urlIndexCache.size() == 0) return;
-     int flush = Math.max(1, urlIndexCache.size() / 10);
-     while (flush-- > 0) flushCacheOnce();
- }
- 
- public void flushCacheOnce() {
-     if (urlIndexCache == null) return;
-     if (urlIndexCache.size() == 0) return;
-     synchronized (urlIndexCache) {
-         Iterator i = urlIndexCache.rows(true, false, null);
-         if (i.hasNext()) try {
-             urlIndexFile.put((kelondroRow.Entry) i.next());
-             i.remove();
-         } catch (IOException e) {
-             e.printStackTrace();
-         }
-     }
  }
  
  public boolean remove(String hash) {
      if (hash == null) return false;
      try {
          urlIndexFile.remove(hash.getBytes());
-         if (urlIndexCache != null) synchronized (urlIndexCache) {urlIndexCache.remove(hash.getBytes());}
          return true;
      } catch (IOException e) {
          return false;
@@ -461,19 +435,10 @@ public class indexURL {
  }
  
  public void close() throws IOException {
-     while ((urlIndexCache != null) && (urlIndexCache.size() > 0)) flushCacheOnce();
      if (urlIndexFile != null) {
          urlIndexFile.close();
          urlIndexFile = null;
      }
-     if (urlIndexCache != null) {
-         urlIndexCache.close();
-         urlIndexCache = null;
-     }
- }
-
- public int writeCacheSize() {
-     return (urlIndexCache == null) ? 0 : urlIndexCache.size();
  }
  
  public int cacheNodeChunkSize() {

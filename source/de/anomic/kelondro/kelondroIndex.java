@@ -57,12 +57,15 @@ import java.util.Iterator;
 public interface kelondroIndex {
 
     public kelondroOrder order();
+    public int primarykey();
     public int size() throws IOException;
+    public kelondroProfile profile();
     public kelondroRow row() throws IOException;
     public kelondroRow.Entry get(byte[] key) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException;
     public kelondroRow.Entry remove(byte[] key) throws IOException;
+    public kelondroRow.Entry removeOne() throws IOException;
     public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException;
     public void close() throws IOException;
 }

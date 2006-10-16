@@ -24,36 +24,95 @@
 
 package de.anomic.kelondro;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 //import java.util.Random;
 
-public class kelondroIntBytesMap extends kelondroRowBufferedSet {
+public class kelondroIntBytesMap {
 
+    private kelondroBufferedIndex index;
+    
     public kelondroIntBytesMap(int payloadSize, int initSize) {
-        super(new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize), kelondroNaturalOrder.naturalOrder, 0, initSize);
+        index = kelondroBufferedIndex.getRAMIndex(new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize), initSize);
+    }
+    
+    public int size() {
+        try {
+            return index.size();
+        } catch (IOException e) {
+            return 0;
+        }
     }
     
     public byte[] getb(int ii) {
-        kelondroRow.Entry indexentry = super.get(kelondroNaturalOrder.encodeLong((long) ii, 4));
+        kelondroRow.Entry indexentry;
+        try {indexentry = index.get(kelondroNaturalOrder.encodeLong((long) ii, 4));} catch (IOException e) {return null;}
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);
     }
     
+    public void addb(int ii, byte[] value) {
+        kelondroRow.Entry newentry;
+        try {
+            newentry = index.row().newEntry();
+            newentry.setCol(0, (long) ii);
+            newentry.setCol(1, value);
+            index.add(newentry);
+        } catch (IOException e) {}
+    }
+
+    
     public byte[] putb(int ii, byte[] value) {
-        kelondroRow.Entry newentry = super.row().newEntry();
-        newentry.setCol(0, (long) ii);
-        newentry.setCol(1, value);
-        kelondroRow.Entry oldentry = super.put(newentry);
-        if (oldentry == null) return null;
-        return oldentry.getColBytes(1);
+        kelondroRow.Entry newentry;
+        try {
+            newentry = index.row().newEntry();
+            newentry.setCol(0, (long) ii);
+            newentry.setCol(1, value);
+            kelondroRow.Entry oldentry = index.put(newentry);
+            if (oldentry == null) return null;
+            return oldentry.getColBytes(1);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     public byte[] removeb(int ii) {
-        if (size() == 0) {
+        try {
+            if (index.size() == 0) return null;
+            kelondroRow.Entry indexentry = index.remove(kelondroNaturalOrder.encodeLong((long) ii, 4));
+            if (indexentry == null) return null;
+            return indexentry.getColBytes(1);
+        } catch (IOException e) {
             return null;
         }
-        kelondroRow.Entry indexentry = super.remove(kelondroNaturalOrder.encodeLong((long) ii, 4));
-        if (indexentry == null) return null;
-        return indexentry.getColBytes(1);
+    }
+    
+    public byte[] removeoneb() {
+        try {
+            if (index.size() == 0) return null;
+            kelondroRow.Entry indexentry = index.removeOne();
+            if (indexentry == null) return null;
+            return indexentry.getColBytes(1);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+    
+    public Iterator rows() {
+        try {
+            return index.rows();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+    
+    public void flush() {
+        try {index.flush();} catch (IOException e) {}
+    }
+    
+    public kelondroProfile profile() {
+        return index.profile();
     }
     
     public static void main(String[] args) {

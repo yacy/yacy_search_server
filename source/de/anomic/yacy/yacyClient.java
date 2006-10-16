@@ -503,7 +503,7 @@ public final class yacyClient {
                 // get one single search result
                 urlEntry = urlManager.newEntry((String) result.get("resource" + n), true);
                 if ((urlEntry == null) || (blacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, urlEntry.url()))) { continue; } // block with backlist
-                urlManager.store(urlEntry, true);
+                urlManager.store(urlEntry);
                 urlManager.stack(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
 
                 // save the url entry

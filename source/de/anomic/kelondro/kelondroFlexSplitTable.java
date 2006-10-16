@@ -93,6 +93,10 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         return this.objectOrder;
     }
     
+    public int primarykey() {
+        return 0;
+    }
+    
     public synchronized int size() throws IOException {
         Iterator i = tables.values().iterator();
         int s = 0;
@@ -100,6 +104,14 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             s += ((kelondroFlexTable) i.next()).size();
         }
         return s;
+    }
+    
+    public synchronized kelondroProfile profile() {
+        kelondroProfile[] profiles = new kelondroProfile[tables.size()];
+        Iterator i = tables.values().iterator();
+        int c = 0;
+        while (i.hasNext()) profiles[c++] = ((kelondroFlexTable) i.next()).profile();
+        return kelondroProfile.consolidate(profiles);
     }
     
     public kelondroRow row() throws IOException {
@@ -148,6 +160,24 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             if (entry != null) return entry;
         }
         return null;
+    }
+    
+    public synchronized kelondroRow.Entry removeOne() throws IOException {
+        Iterator i = tables.values().iterator();
+        kelondroFlexTable table, maxtable = null;
+        int maxcount = -1;
+        while (i.hasNext()) {
+            table = (kelondroFlexTable) i.next();
+            if (table.size() > maxcount) {
+                maxtable = table;
+                maxcount = table.size();
+            }
+        }
+        if (maxtable == null) {
+            return null;
+        } else {
+            return maxtable.removeOne();
+        }
     }
     
     public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {

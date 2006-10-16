@@ -301,7 +301,7 @@ public class indexContainer extends kelondroRowSet {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
         indexContainer conj = new indexContainer(null); // start with empty search result
         if (!((i1.order().signature().equals(i2.order().signature())) &&
-              (i1.orderColumn() == i2.orderColumn()))) return conj; // ordering must be equal
+              (i1.primarykey() == i2.primarykey()))) return conj; // ordering must be equal
         Iterator e1 = i1.entries();
         Iterator e2 = i2.entries();
         int c;

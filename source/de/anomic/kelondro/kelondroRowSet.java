@@ -62,6 +62,12 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         this.profile = new kelondroProfile();
     }
     
+    public kelondroRowSet(kelondroRow rowdef, kelondroOrder objectOrder, int orderColumn, int objectCount) {
+        this(rowdef, objectCount);
+        assert (objectOrder != null);
+        setOrdering(objectOrder, orderColumn);
+    }
+    
     public kelondroRow.Entry get(byte[] key) {
         return get(key, 0, key.length);
     }
@@ -201,7 +207,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return this.sortOrder;
     }
 
-    public int orderColumn() {
+    public int primarykey() {
         return this.sortColumn;
     }
 

@@ -433,10 +433,10 @@ public class kelondroRecords {
                 Node n;
                 while ((System.currentTimeMillis() < stop) && (cacheHeaders.size() < cacheSize) && (i.hasNext())) {
                     n = (Node) i.next();
-                    cacheHeaders.putb(n.handle.index, n.headChunk);
+                    cacheHeaders.addb(n.handle.index, n.headChunk);
                     count++;
                 }
-                cacheHeaders.trim();
+                cacheHeaders.flush();
                 logFine("preloaded " + count + " records into cache");
             } catch (kelondroException e) {
                 // the contentNodes iterator had a time-out; we don't do a preload
@@ -831,7 +831,7 @@ public class kelondroRecords {
             if ((cacheHeaders.size() < cacheSize) && (serverMemory.available() >= memBlock)) return true; // no need to flush cache space
             
             // just delete any of the entries
-            cacheHeaders.removeOne();
+            cacheHeaders.removeoneb();
             cacheFlush++;
             return true;
         }
@@ -1332,4 +1332,9 @@ public class kelondroRecords {
                 entryFile.profile()
         };
     }
+    
+    public kelondroProfile profile() {
+        return kelondroProfile.consolidate(profiles());
+    }
+    
 }

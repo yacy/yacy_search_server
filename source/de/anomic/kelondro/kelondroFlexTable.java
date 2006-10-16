@@ -80,7 +80,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     private kelondroIndex initializeRamIndex(kelondroOrder objectOrder) throws IOException {
-        kelondroRowBufferedSet ri = new kelondroRowBufferedSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}), objectOrder, 0, 0);
+        kelondroBufferedIndex ri = new kelondroBufferedIndex(new kelondroRowSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}), objectOrder, 0, 0));
         //kelondroRowSet ri = new kelondroRowSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}), 0);
         //ri.setOrdering(objectOrder, 0);
         Iterator content = super.col[0].contentNodes(-1);
@@ -93,7 +93,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             indexentry = ri.row().newEntry();
             indexentry.setCol(0, node.getValueRow());
             indexentry.setCol(1, i);
-            ri.put(indexentry);
+            ri.add(indexentry);
             if ((i % 10000) == 0) {
                 System.out.print('.');
                 System.out.flush();
@@ -101,7 +101,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         }
         System.out.print(" -ordering- ");
         System.out.flush();
-        ri.trim();
+        ri.flush();
         return ri;
     }
     
@@ -144,23 +144,32 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
-            int i = index.geti(row.getColBytes(0));
-            if (i < 0) {
-                index.puti(row.getColBytes(0), super.add(row));
-                return null;
-            }
-            return super.set(i, row);
+        int i = index.geti(row.getColBytes(0));
+        if (i < 0) {
+            index.puti(row.getColBytes(0), super.add(row));
+            return null;
+        }
+        return super.set(i, row);
     }
     
     public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
-            int i = index.removei(key);
-            if (i < 0) return null;
-            kelondroRow.Entry r;
-            r = super.get(i);
-            super.remove(i);
-            return r;
+        int i = index.removei(key);
+        if (i < 0) return null;
+        kelondroRow.Entry r;
+        r = super.get(i);
+        super.remove(i);
+        return r;
     }
 
+    public synchronized kelondroRow.Entry removeOne() throws IOException {
+        int i = index.removeonei();
+        if (i < 0) return null;
+        kelondroRow.Entry r;
+        r = super.get(i);
+        super.remove(i);
+        return r;
+    }
+    
     public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
         return new rowIterator(up, rotating, firstKey);
     }
@@ -198,4 +207,12 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return index.order();
     }
 
+    public int primarykey() {
+        return 0;
+    }
+    
+    public kelondroProfile profile() {
+        return index.profile();
+    }
+    
 }

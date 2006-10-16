@@ -219,11 +219,14 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         return oo;
     }
     
-    public kelondroOrder getOrder() {
-        // returns the order of this tree
+    public kelondroOrder order() {
         return this.objectOrder;
     }
     
+    public int primarykey() {
+        return 0;
+    }
+
     public void clear() throws IOException {
         super.clear();
         setHandle(root, null); // reset the root value
@@ -695,6 +698,16 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
     }
 
+    public kelondroRow.Entry removeOne() throws IOException {
+        // removes just any entry and removes that entry
+        synchronized(writeSearchObj) {
+            Node theOne = lastNode();
+            kelondroRow.Entry values = row().newEntry(theOne.getValueRow());
+            remove(theOne, null);
+            return values;
+        }
+    }
+    
     public synchronized void removeAll() throws IOException {
         while (size() > 0) remove(lastNode(), null);
     }
@@ -1371,10 +1384,6 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	}
     }
     
-    public kelondroOrder order() {
-        return this.objectOrder;
-    }
-
     public static void main(String[] args) {
         //cmd(args);
         //iterationtest();

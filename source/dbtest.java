@@ -139,14 +139,14 @@ public class dbtest {
             try {
                 final kelondroRow.Entry entryBytes = getTable().get(entry.getKey());
                 if (entryBytes != null) {
-                    System.out.println("ENTRY=" + entryBytes.getColString(1, null));
+                    //System.out.println("ENTRY=" + entryBytes.getColString(1, null));
                     final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0), entryBytes.getColBytes(1));
                     if (!dbEntry.isValid()) {
                         System.out.println("INVALID: " + dbEntry);
-                    } else {
+                    }/* else {
                         System.out.println("_VALID_: " + dbEntry);
                         getTable().remove(entry.getKey());
-                    }
+                    }*/
                 }
             } catch (IOException e) {
                 System.err.println(e);
@@ -572,6 +572,10 @@ final class dbTable implements kelondroIndex {
         }
     }
     
+    public kelondroRow.Entry removeOne() {
+        return null;
+    }
+    
     public Iterator rows(boolean up, boolean rotating, byte[] startKey) throws IOException {
         // Objects are of type byte[][]
         return null;
@@ -595,6 +599,15 @@ final class dbTable implements kelondroIndex {
     public kelondroOrder order() {
         return this.order;
     }
+    
+    public int primarykey() {
+        return 0;
+    }
+    
+    public kelondroProfile profile() {
+        return new kelondroProfile();
+    }
+    
 }
 
 

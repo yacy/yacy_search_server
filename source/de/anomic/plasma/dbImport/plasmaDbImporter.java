@@ -160,7 +160,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                             if (urlEntry != null) {
 
                                 /* write it into the home url db */
-                                this.homeUrlDB.store(urlEntry, false);
+                                this.homeUrlDB.store(urlEntry);
                                 importedUrlBuffer.add(urlHash);
                                 this.urlCounter++;
 

@@ -106,7 +106,7 @@ public final class transferURL {
                             lEntry = null;
                             blocked++;
                         } else try {
-                            sb.urlPool.loadedURL.store(lEntry, true);
+                            sb.urlPool.loadedURL.store(lEntry);
                             sb.urlPool.loadedURL.stack(lEntry, iam, iam, 3);
                             yacyCore.log.logFine("transferURL: received URL '" + lEntry.url() + "' from peer " + otherPeerName);
                             received++;
