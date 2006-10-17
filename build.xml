@@ -298,6 +298,20 @@
     <fileset dir="${src}/" includes="de/anomic/soap/build.xml"/>
   </subant>
 </target>       
+	
+<target name="distSoapClientStubJar" depends="init" description="Generates a jar file with all client stub classes for the YaCy SOAP API">
+  <subant target="buildClientStubJar">
+    <property name="src" location="${src}"/>
+    <property name="build" location="${build}"/>
+    <property name="libx" location="${libx}"/>
+    <property name="htroot" value="${htroot}"/>    
+    <property name="release" location="${release_ext}"/>
+    <property name="releaseDir" value="${releaseDir}"/> 
+    <property name="javacSource" value="${javacSource}"/>
+    <property name="javacTarget" value="${javacTarget}"/>
+    <fileset dir="${src}/" includes="de/anomic/soap/build.xml"/>
+  </subant>
+</target>	
    
 <target name="compilePortForwarding" depends="compileMain" description="Compiling and zipping additional port forwarder"> 
     <javac srcdir="${src}/de/anomic/server/portForwarding" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
