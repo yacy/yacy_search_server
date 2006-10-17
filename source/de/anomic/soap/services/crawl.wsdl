@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://yacy:8080/soap/crawl" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://yacy:8080/soap/crawl" xmlns:intf="http://yacy:8080/soap/crawl" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><!--WSDL created by Apache Axis version: 1.2RC2
+Built on Nov 16, 2004 (12:19:44 EST)-->
+  <wsdl:message name="pauseCrawlingResponse">
+  </wsdl:message>
+  <wsdl:message name="pauseResumeCrawlingResponse">
+  </wsdl:message>
+  <wsdl:message name="resumeCrawlingRequest">
+  </wsdl:message>
+  <wsdl:message name="crawlSingleUrlResponse">
+    <wsdl:part name="crawlSingleUrlReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="crawlSingleUrlRequest">
+    <wsdl:part name="crawlingURL" type="soapenc:string"/>
+  </wsdl:message>
+  <wsdl:message name="crawlingRequest">
+    <wsdl:part name="crawlingURL" type="soapenc:string"/>
+    <wsdl:part name="crawljobTitel" type="soapenc:string"/>
+    <wsdl:part name="crawlingDepth" type="soapenc:int"/>
+    <wsdl:part name="crawlingFilter" type="soapenc:string"/>
+    <wsdl:part name="localIndexing" type="soapenc:boolean"/>
+    <wsdl:part name="crawlingQ" type="soapenc:boolean"/>
+    <wsdl:part name="storeHTCache" type="soapenc:boolean"/>
+    <wsdl:part name="crawlOrder" type="soapenc:boolean"/>
+    <wsdl:part name="crawlOrderIntention" type="soapenc:string"/>
+    <wsdl:part name="xsstopw" type="soapenc:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="resumeCrawlingResponse">
+  </wsdl:message>
+  <wsdl:message name="pauseResumeCrawlingRequest">
+    <wsdl:part name="localCrawl" type="soapenc:boolean"/>
+    <wsdl:part name="remoteTriggeredCrawl" type="soapenc:boolean"/>
+    <wsdl:part name="globalCrawlTrigger" type="soapenc:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="pauseCrawlingRequest">
+  </wsdl:message>
+  <wsdl:message name="crawlingResponse">
+    <wsdl:part name="crawlingReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:portType name="CrawlService">
+    <wsdl:operation name="crawlSingleUrl" parameterOrder="crawlingURL">
+      <wsdl:input message="impl:crawlSingleUrlRequest" name="crawlSingleUrlRequest"/>
+      <wsdl:output message="impl:crawlSingleUrlResponse" name="crawlSingleUrlResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="crawling" parameterOrder="crawlingURL crawljobTitel crawlingDepth crawlingFilter localIndexing crawlingQ storeHTCache crawlOrder crawlOrderIntention xsstopw">
+      <wsdl:input message="impl:crawlingRequest" name="crawlingRequest"/>
+      <wsdl:output message="impl:crawlingResponse" name="crawlingResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="pauseCrawling">
+      <wsdl:input message="impl:pauseCrawlingRequest" name="pauseCrawlingRequest"/>
+      <wsdl:output message="impl:pauseCrawlingResponse" name="pauseCrawlingResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="resumeCrawling">
+      <wsdl:input message="impl:resumeCrawlingRequest" name="resumeCrawlingRequest"/>
+      <wsdl:output message="impl:resumeCrawlingResponse" name="resumeCrawlingResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="pauseResumeCrawling" parameterOrder="localCrawl remoteTriggeredCrawl globalCrawlTrigger">
+      <wsdl:input message="impl:pauseResumeCrawlingRequest" name="pauseResumeCrawlingRequest"/>
+      <wsdl:output message="impl:pauseResumeCrawlingResponse" name="pauseResumeCrawlingResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="crawlSoapBinding" type="impl:CrawlService">
+    <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="crawlSingleUrl">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="crawlSingleUrlRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="crawlSingleUrlResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/crawl" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="crawling">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="crawlingRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="crawlingResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/crawl" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="pauseCrawling">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="pauseCrawlingRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="pauseCrawlingResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/crawl" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="resumeCrawling">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="resumeCrawlingRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="resumeCrawlingResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/crawl" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="pauseResumeCrawling">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="pauseResumeCrawlingRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="pauseResumeCrawlingResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/crawl" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="CrawlServiceService">
+    <wsdl:port binding="impl:crawlSoapBinding" name="crawl">
+      <wsdlsoap:address location="http://yacy:8080/soap/crawl"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
