@@ -166,18 +166,14 @@ public class PerformanceMemory_p {
         currTotal = 0;
         dfltTotal = 0;
         bestTotal = 0;
-        
-        if (sb.wordIndex.useCollectionIndex) {
-            prop.put("useRWICache", 0);
-        } else {
-	        req = sb.wordIndex.size();
-	        chk = sb.wordIndex.assortmentsCacheChunkSizeAvg();
-	        obj = sb.wordIndex.assortmentsCacheObjectSizeAvg();
-	        slt = sb.wordIndex.assortmentsCacheNodeStatus();
-	        ost = sb.wordIndex.assortmentsCacheObjectStatus();
-	        putprop(prop, env, "RWI", set);
-        }
-        
+    
+        req = sb.wordIndex.size();
+        chk = sb.wordIndex.assortmentsCacheChunkSizeAvg();
+        obj = sb.wordIndex.assortmentsCacheObjectSizeAvg();
+        slt = sb.wordIndex.assortmentsCacheNodeStatus();
+        ost = sb.wordIndex.assortmentsCacheObjectStatus();
+        putprop(prop, env, "RWI", set);
+         
         req = sb.cacheManager.dbSize();
         chk = sb.cacheManager.cacheNodeChunkSize();
         obj = sb.cacheManager.cacheObjectChunkSize();
@@ -192,16 +188,12 @@ public class PerformanceMemory_p {
         ost = sb.urlPool.loadedURL.cacheObjectStatus();
         putprop(prop, env, "LURL", set);
         
-        if (sb.sbStackCrawlThread.getDBType() != de.anomic.plasma.plasmaCrawlStacker.QUEUE_DB_TYPE_TREE) {
-            prop.put("usePreNURLCache", 0);
-        } else {
-            req = sb.sbStackCrawlThread.size();
-            chk = sb.sbStackCrawlThread.cacheNodeChunkSize();
-            obj = sb.sbStackCrawlThread.cacheObjectChunkSize();
-            slt = sb.sbStackCrawlThread.cacheNodeStatus();
-            ost = sb.sbStackCrawlThread.cacheObjectStatus();
-            putprop(prop, env, "PreNURL", set);
-        }
+        req = sb.sbStackCrawlThread.size();
+        chk = sb.sbStackCrawlThread.cacheNodeChunkSize();
+        obj = sb.sbStackCrawlThread.cacheObjectChunkSize();
+        slt = sb.sbStackCrawlThread.cacheNodeStatus();
+        ost = sb.sbStackCrawlThread.cacheObjectStatus();
+        putprop(prop, env, "PreNURL", set);
         
         req = sb.urlPool.noticeURL.size();
         chk = sb.urlPool.noticeURL.cacheNodeChunkSize();
@@ -210,16 +202,12 @@ public class PerformanceMemory_p {
         ost = sb.urlPool.noticeURL.cacheObjectStatus();
         putprop(prop, env, "NURL", set);
         
-        if (sb.urlPool.errorURL.getUseNewDB()) {
-            prop.put("useEURLCache", 0);
-        } else {
-            req = sb.urlPool.errorURL.size();
-            chk = sb.urlPool.errorURL.cacheNodeChunkSize();
-            obj = sb.urlPool.errorURL.cacheObjectChunkSize();
-            slt = sb.urlPool.errorURL.cacheNodeStatus();
-            ost = sb.urlPool.errorURL.cacheObjectStatus();
-            putprop(prop, env, "EURL", set);
-        }
+        req = sb.urlPool.errorURL.size();
+        chk = sb.urlPool.errorURL.cacheNodeChunkSize();
+        obj = sb.urlPool.errorURL.cacheObjectChunkSize();
+        slt = sb.urlPool.errorURL.cacheNodeStatus();
+        ost = sb.urlPool.errorURL.cacheObjectStatus();
+        putprop(prop, env, "EURL", set);
         
         req = yacyCore.seedDB.sizeConnected() + yacyCore.seedDB.sizeDisconnected() + yacyCore.seedDB.sizePotential();
         chk = yacyCore.seedDB.cacheNodeChunkSize();
