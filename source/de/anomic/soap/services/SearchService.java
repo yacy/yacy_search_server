@@ -48,6 +48,7 @@ package de.anomic.soap.services;
 import org.apache.axis.AxisFault;
 import org.w3c.dom.Document;
 
+import de.anomic.data.wikiCode;
 import de.anomic.index.indexURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSearchPreOrder;
@@ -153,8 +154,19 @@ public class SearchService extends AbstractService
             
             args.put("Enter","Search");
             
-            // generating the template containing the search result
-            byte[] result = writeTemplate(TEMPLATE_SEARCH, args);
+            // invoke servlet
+            serverObjects searchResult = invokeServlet(TEMPLATE_SEARCH, args);
+            
+            // Postprocess search ...
+            int count = Integer.valueOf(searchResult.get("type_results","0")).intValue();
+            for (int i=0; i < count; i++) {
+            	searchResult.put("type_results_" + i + "_url",wikiCode.replaceHTMLonly(searchResult.get("type_results_" + i + "_url","")));
+            	searchResult.put("type_results_" + i + "_description",wikiCode.replaceHTMLonly(searchResult.get("type_results_" + i + "_description","")));
+            	searchResult.put("type_results_" + i + "_urlnamen",wikiCode.replaceHTMLonly(searchResult.get("type_results_" + i + "_urlname","")));
+            }
+            
+            // format the result
+            byte[] result = buildServletOutput(TEMPLATE_SEARCH, searchResult);
             
             // sending back the result to the client
             return this.convertContentToXML(result);

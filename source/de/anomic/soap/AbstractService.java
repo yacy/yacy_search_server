@@ -108,36 +108,84 @@ public abstract class AbstractService {
      * @return
      * @throws AxisFault
      */
-    protected byte[] writeTemplate(String templateName, serverObjects args) 
-        throws AxisFault {
+    protected byte[] writeTemplate(String templateName, serverObjects args) throws AxisFault {
         try {
-            // determining the proper class that should be invoked
-            File file = new File(this.rootPath, templateName);    
-            File rc = rewriteClassFile(file);
+        	// invoke servlet
+        	serverObjects tp = invokeServlet(templateName,args);
             
-            // invoke the desired method
-            serverObjects tp = (serverObjects) rewriteMethod(rc).invoke(null, new Object[] {this.requestHeader, args, this.switchboard});
-            
-            // testing if a authentication was needed by the invoked method
-            validateAuthentication(tp);
-            
-            // adding all available templates
-            tp.putAll(this.templates);
-            
-            // generating the output document
-            ByteArrayOutputStream o = new ByteArrayOutputStream();
-            FileInputStream fis = new FileInputStream(file);
-            httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
-            o.close();
-            fis.close();
-            
-            // convert it into a byte array and send it back as result
-            byte[] result = o.toByteArray();            
+        	// generate output
+        	byte[] result = buildServletOutput(templateName, tp);
             return result; 
         } catch (Exception e) {
-            throw new AxisFault(e.getMessage());
+    		if (e instanceof AxisFault) throw (AxisFault) e;
+    		
+    		// create a new AxisFault Object
+    		throw new AxisFault(e.getMessage());
         }
     }        
+    
+    protected byte[] buildServletOutput(String templateName, serverObjects tp) throws AxisFault {
+            try {
+            	File templateFile = getTemplateFile(templateName);
+            	
+                // generating the output document
+                ByteArrayOutputStream o = new ByteArrayOutputStream();
+                FileInputStream fis = new FileInputStream(templateFile);
+                httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                o.close();
+                fis.close();
+                
+                // convert it into a byte array and send it back as result
+                byte[] result = o.toByteArray();            
+                return result; 
+            } catch (Exception e) {
+        		if (e instanceof AxisFault) throw (AxisFault) e;
+        		
+        		// create a new AxisFault Object
+        		throw new AxisFault(e.getMessage());
+            }    	
+    }
+    
+    protected serverObjects invokeServlet(String templateName, serverObjects args) throws AxisFault {
+    	try {
+    		// getting the template class file
+    		File rc = getServletClassFile(templateName);
+    		
+    		// invoke the desired method
+    		serverObjects tp = (serverObjects) rewriteMethod(rc).invoke(null, new Object[] {this.requestHeader, args, this.switchboard});
+    		
+    		// testing if a authentication was needed by the invoked method
+    		validateAuthentication(tp);
+    		
+    		// adding all available templates
+    		tp.putAll(this.templates);
+    		
+    		// return result
+    		return tp;
+    	} catch (Exception e) {
+    		if (e instanceof AxisFault) throw (AxisFault) e;
+    		
+    		// create a new AxisFault Object
+    		throw new AxisFault(e.getMessage());
+    	}        
+    }
+    
+    protected File getTemplateFile(String templateName) {
+        // determining the proper class that should be invoked
+        File file = new File(this.rootPath, templateName);     
+        return file;
+    }
+    
+    protected File getServletClassFile(String templateName) {
+    	File templateFile = getTemplateFile(templateName);
+    	File templateClassFile = getServletClassFile(templateFile);
+    	return templateClassFile;
+    }
+    
+    protected File getServletClassFile(File templateFile) {    	 
+        File templateClassFile = rewriteClassFile(templateFile);    	
+        return templateClassFile;
+    }
     
     
     /**

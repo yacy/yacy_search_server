@@ -145,7 +145,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     public static final String[] services = new String[] {
         "search=de.anomic.soap.services.SearchService",
         "crawl=de.anomic.soap.services.CrawlService",
-        "status=de.anomic.soap.services.StatusSevice"
+        "status=de.anomic.soap.services.StatusService"
     };
     
     /* ===============================================================
