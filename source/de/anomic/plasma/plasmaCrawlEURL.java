@@ -184,6 +184,10 @@ public class plasmaCrawlEURL extends indexURL {
     public synchronized Entry getEntry(String hash) throws IOException {
         return new Entry(hash);
     }
+    
+    public boolean getUseNewDB() {
+        return (urlIndexFile instanceof kelondroFlexTable);
+    }
 
     public boolean exists(String urlHash) {
         try {

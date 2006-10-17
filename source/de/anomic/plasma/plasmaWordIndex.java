@@ -139,7 +139,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public int[] assortmentsSizes() {
-        return (assortmentCluster == null) ? null : assortmentCluster.sizes();
+        return (assortmentCluster == null) ? new int[assortmentCount] : assortmentCluster.sizes();
     }
 
     public int assortmentsCacheChunkSizeAvg() {
@@ -151,11 +151,13 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     }
 
     public int[] assortmentsCacheNodeStatus() {
-        return (assortmentCluster == null) ? null : assortmentCluster.cacheNodeStatus();
+        if (assortmentCluster != null) return assortmentCluster.cacheNodeStatus();
+        return new int[]{0,0,0,0,0,0,0,0,0,0};
     }
     
     public long[] assortmentsCacheObjectStatus() {
-        return (assortmentCluster == null) ? null : assortmentCluster.cacheObjectStatus();
+        if (assortmentCluster != null) return assortmentCluster.cacheObjectStatus();
+        return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     }
     
     public void setMaxWordCount(int maxWords) {

@@ -127,6 +127,10 @@ public final class plasmaCrawlStacker {
         return this.theWorkerPoolConfig;
     }    
     
+    public int getDBType() {
+        return this.queue.getDBType();
+    }
+    
     public void setPoolConfig(GenericObjectPool.Config newConfig) {
         this.theWorkerPool.setConfig(newConfig);
     }    
@@ -174,7 +178,7 @@ public final class plasmaCrawlStacker {
     
     public long[] cacheObjectStatus() {
         return this.queue.cacheObjectStatus();
-    }    
+    }
     
     public void job() {
         try {
@@ -745,6 +749,10 @@ public final class plasmaCrawlStacker {
             synchronized(this.urlEntryHashCache) {
                 return this.urlEntryHashCache.size();
             }         
+        }
+        
+        public int getDBType() {
+            return this.dbtype;
         }
         
         public stackCrawlMessage waitForMessage() throws InterruptedException, IOException {
