@@ -839,8 +839,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * yacy to index the response returned as answer to a request
          * ========================================================================= */
         boolean doIndexing = true;        
-        if (entry.requestProhibitsIndexing()) {
-                doIndexing = false;
+        if (entry.requestProhibitsIndexing()) {        
+            doIndexing = false;
+            if (this.log.isFine())
+                this.log.logFine("Crawling of " + entry.url() + " prohibited by request.");
         }        
         
         /* =========================================================================
