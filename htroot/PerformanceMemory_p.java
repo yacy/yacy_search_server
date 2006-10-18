@@ -340,7 +340,6 @@ public class PerformanceMemory_p {
         usd = chk * slt[1] + obj * ost[2] /*hit*/ + kelondroTree.cacheObjectMissSize * ost[3] /*miss*/;
         bst = (((((long) chk) * ((long) req)) >> 10) + 1) << 10;
         if (set.equals("setBest")) env.setConfig("ramCache" + db, bst);
-        System.out.println(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "nodsc" + db);
         prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "nodsz" + db, chk);
         prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ochunksiz" + db, obj);
         prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "slreq" + db, req);
