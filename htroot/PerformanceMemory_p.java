@@ -166,97 +166,117 @@ public class PerformanceMemory_p {
         currTotal = 0;
         dfltTotal = 0;
         bestTotal = 0;
-    
-        req = sb.wordIndex.size();
-        chk = sb.wordIndex.assortmentsCacheChunkSizeAvg();
-        obj = sb.wordIndex.assortmentsCacheObjectSizeAvg();
-        slt = sb.wordIndex.assortmentsCacheNodeStatus();
-        ost = sb.wordIndex.assortmentsCacheObjectStatus();
-        putprop(prop, env, "RWI", set);
+        
+        if (sb.wordIndex.useCollectionIndex) {
+            prop.put("useRWICache", 0);
+        } else {
+            prop.put("useRWICache", 1);
+            req = sb.wordIndex.size();
+            chk = sb.wordIndex.assortmentsCacheChunkSizeAvg();
+            obj = sb.wordIndex.assortmentsCacheObjectSizeAvg();
+            slt = sb.wordIndex.assortmentsCacheNodeStatus();
+            ost = sb.wordIndex.assortmentsCacheObjectStatus();
+            putprop(prop, env, "useRWICache", "RWI", set);
+        }
          
         req = sb.cacheManager.dbSize();
         chk = sb.cacheManager.cacheNodeChunkSize();
         obj = sb.cacheManager.cacheObjectChunkSize();
         slt = sb.cacheManager.cacheNodeStatus();
         ost = sb.cacheManager.cacheObjectStatus();
-        putprop(prop, env, "HTTP", set);
+        putprop(prop, env, "", "HTTP", set);
         
         req = sb.urlPool.loadedURL.size();
         chk = sb.urlPool.loadedURL.cacheNodeChunkSize();
         obj = sb.urlPool.loadedURL.cacheObjectChunkSize();
         slt = sb.urlPool.loadedURL.cacheNodeStatus();
         ost = sb.urlPool.loadedURL.cacheObjectStatus();
-        putprop(prop, env, "LURL", set);
+        putprop(prop, env, "", "LURL", set);
         
-        req = sb.sbStackCrawlThread.size();
-        chk = sb.sbStackCrawlThread.cacheNodeChunkSize();
-        obj = sb.sbStackCrawlThread.cacheObjectChunkSize();
-        slt = sb.sbStackCrawlThread.cacheNodeStatus();
-        ost = sb.sbStackCrawlThread.cacheObjectStatus();
-        putprop(prop, env, "PreNURL", set);
+        if (sb.sbStackCrawlThread.getDBType() != de.anomic.plasma.plasmaCrawlStacker.QUEUE_DB_TYPE_TREE) {
+            prop.put("usePreNURLCache", 0);
+        } else {
+            prop.put("usePreNURLCache", 1);
+            req = sb.sbStackCrawlThread.size();
+            chk = sb.sbStackCrawlThread.cacheNodeChunkSize();
+            obj = sb.sbStackCrawlThread.cacheObjectChunkSize();
+            slt = sb.sbStackCrawlThread.cacheNodeStatus();
+            ost = sb.sbStackCrawlThread.cacheObjectStatus();
+            putprop(prop, env, "usePreNURLCache", "PreNURL", set);
+        }
         
-        req = sb.urlPool.noticeURL.size();
-        chk = sb.urlPool.noticeURL.cacheNodeChunkSize();
-        obj = sb.urlPool.noticeURL.cacheObjectChunkSize();
-        slt = sb.urlPool.noticeURL.cacheNodeStatus();
-        ost = sb.urlPool.noticeURL.cacheObjectStatus();
-        putprop(prop, env, "NURL", set);
+        if (sb.urlPool.noticeURL.getUseNewDB()) {
+            prop.put("useNURLCache", 0);
+        } else {
+            prop.put("useNURLCache", 1);
+            req = sb.urlPool.noticeURL.size();
+            chk = sb.urlPool.noticeURL.cacheNodeChunkSize();
+            obj = sb.urlPool.noticeURL.cacheObjectChunkSize();
+            slt = sb.urlPool.noticeURL.cacheNodeStatus();
+            ost = sb.urlPool.noticeURL.cacheObjectStatus();
+            putprop(prop, env, "useNURLCache", "NURL", set);
+        }
         
-        req = sb.urlPool.errorURL.size();
-        chk = sb.urlPool.errorURL.cacheNodeChunkSize();
-        obj = sb.urlPool.errorURL.cacheObjectChunkSize();
-        slt = sb.urlPool.errorURL.cacheNodeStatus();
-        ost = sb.urlPool.errorURL.cacheObjectStatus();
-        putprop(prop, env, "EURL", set);
+        if (sb.urlPool.errorURL.getUseNewDB()) {
+            prop.put("useEURLCache", 0);
+        } else {
+            prop.put("useEURLCache", 1);
+            req = sb.urlPool.errorURL.size();
+            chk = sb.urlPool.errorURL.cacheNodeChunkSize();
+            obj = sb.urlPool.errorURL.cacheObjectChunkSize();
+            slt = sb.urlPool.errorURL.cacheNodeStatus();
+            ost = sb.urlPool.errorURL.cacheObjectStatus();
+            putprop(prop, env, "useEURLCache", "EURL", set);
+        }
         
         req = yacyCore.seedDB.sizeConnected() + yacyCore.seedDB.sizeDisconnected() + yacyCore.seedDB.sizePotential();
         chk = yacyCore.seedDB.cacheNodeChunkSize();
         obj = yacyCore.seedDB.cacheObjectChunkSize();
         slt = yacyCore.seedDB.cacheNodeStatus();
         ost = yacyCore.seedDB.cacheObjectStatus();
-        putprop(prop, env, "DHT", set);
+        putprop(prop, env, "", "DHT", set);
         
         req = sb.messageDB.size();
         chk = sb.messageDB.cacheNodeChunkSize();
         obj = sb.messageDB.cacheObjectChunkSize();
         slt = sb.messageDB.cacheNodeStatus();
         ost = sb.messageDB.cacheObjectStatus();
-        putprop(prop, env, "Message", set);
+        putprop(prop, env, "", "Message", set);
         
         req = sb.wikiDB.sizeOfTwo();
         chk = sb.wikiDB.cacheNodeChunkSize();
         obj = sb.wikiDB.cacheObjectChunkSize();
         slt = sb.wikiDB.cacheNodeStatus();
         ost = sb.wikiDB.cacheObjectStatus();
-        putprop(prop, env, "Wiki", set);
+        putprop(prop, env, "", "Wiki", set);
         
         req = sb.blogDB.size();
         chk = sb.blogDB.cacheNodeChunkSize();
         obj = sb.blogDB.cacheObjectChunkSize();
         slt = sb.blogDB.cacheNodeStatus();
         ost = sb.blogDB.cacheObjectStatus();
-        putprop(prop, env, "Blog", set);
+        putprop(prop, env, "", "Blog", set);
         
         req = yacyCore.newsPool.dbSize();
         chk = yacyCore.newsPool.cacheNodeChunkSize();
         obj = yacyCore.newsPool.cacheObjectChunkSize();
         slt = yacyCore.newsPool.cacheNodeStatus();
         ost = yacyCore.newsPool.cacheObjectStatus();
-        putprop(prop, env, "News", set);
+        putprop(prop, env, "", "News", set);
         
         req = plasmaSwitchboard.robots.size();
         chk = plasmaSwitchboard.robots.cacheNodeChunkSize();
         obj = plasmaSwitchboard.robots.cacheObjectChunkSize();
         slt = plasmaSwitchboard.robots.cacheNodeStatus();
         ost = plasmaSwitchboard.robots.cacheObjectStatus();
-        putprop(prop, env, "Robots", set);
+        putprop(prop, env, "", "Robots", set);
         
         req = sb.profiles.size();
         chk = sb.profiles.cacheNodeChunkSize();
         obj = sb.profiles.cacheObjectChunkSize();
         slt = sb.profiles.cacheNodeStatus();
         ost = sb.profiles.cacheObjectStatus();
-        putprop(prop, env, "Profiles", set);
+        putprop(prop, env, "", "Profiles", set);
         
         prop.put("usedTotal", usedTotal / MB);
         prop.put("currTotal", currTotal / MB);
@@ -316,31 +336,32 @@ public class PerformanceMemory_p {
         return prop;
     }
     
-    private static void putprop(serverObjects prop, serverSwitch env, String db, String set) {
+    private static void putprop(serverObjects prop, serverSwitch env, String wdb, String db, String set) {
         usd = chk * slt[1] + obj * ost[2] /*hit*/ + kelondroTree.cacheObjectMissSize * ost[3] /*miss*/;
         bst = (((((long) chk) * ((long) req)) >> 10) + 1) << 10;
         if (set.equals("setBest")) env.setConfig("ramCache" + db, bst);
-        prop.put("nodsz" + db, chk);
-        prop.put("ochunksiz" + db, obj);
-        prop.put("slreq" + db, req);
-        prop.put("slemp" + db, slt[0] - slt[1]);
-        prop.put("slfil" + db, slt[1]);
-        prop.put("slhittmiss" + db, slt[4] + ":" + slt[5]);
-        prop.put("sluniqdoub" + db, slt[6] + ":" + slt[7]);
-        prop.put("slflush" + db, slt[8] + ":" + slt[9]);
-        prop.put("ochunkmax" + db, ost[0]);
-        prop.put("omisscmax" + db, ost[1]);
-        prop.put("ochunkcur" + db, ost[2] + "<br>" + ost[3]);
-        prop.put("ohittmiss" + db, ost[7] + ":" + ost[8]);
-        prop.put("ouniqdoub" + db, ost[9] + ":" + ost[10]);
-        prop.put("oflush" + db, ost[11] + ":" + ost[12]);
-        prop.put("nhittmiss" + db, ost[13] + ":" + ost[14]);
-        prop.put("nuniqdoub" + db, ost[15] + ":" + ost[16]);
-        prop.put("nflush" + db, ost[17] + ":" + ost[18]);
-        prop.put("used" + db, usd / KB);
-        prop.put("best" + db, bst / KB);
-        prop.put("dflt" + db, Long.parseLong((String) defaultSettings.get("ramCache" + db)) / KB);
-        prop.put("ramCache" + db, Long.parseLong(env.getConfig("ramCache" + db, "0")) / KB);
+        System.out.println(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "nodsc" + db);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "nodsz" + db, chk);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ochunksiz" + db, obj);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "slreq" + db, req);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "slemp" + db, slt[0] - slt[1]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "slfil" + db, slt[1]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "slhittmiss" + db, slt[4] + ":" + slt[5]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "sluniqdoub" + db, slt[6] + ":" + slt[7]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "slflush" + db, slt[8] + ":" + slt[9]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ochunkmax" + db, ost[0]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "omisscmax" + db, ost[1]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ochunkcur" + db, ost[2] + "<br>" + ost[3]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ohittmiss" + db, ost[7] + ":" + ost[8]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ouniqdoub" + db, ost[9] + ":" + ost[10]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "oflush" + db, ost[11] + ":" + ost[12]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "nhittmiss" + db, ost[13] + ":" + ost[14]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "nuniqdoub" + db, ost[15] + ":" + ost[16]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "nflush" + db, ost[17] + ":" + ost[18]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "used" + db, usd / KB);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "best" + db, bst / KB);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "dflt" + db, Long.parseLong((String) defaultSettings.get("ramCache" + db)) / KB);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ramCache" + db, Long.parseLong(env.getConfig("ramCache" + db, "0")) / KB);
         usedTotal += usd;
         currTotal += Long.parseLong(env.getConfig("ramCache" + db, "0"));
         dfltTotal += Long.parseLong((String) defaultSettings.get("ramCache" + db));

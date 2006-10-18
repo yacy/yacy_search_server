@@ -96,7 +96,7 @@
           <td>Default Max</td>
           <td>Best Max</td>
         </tr>
-        
+        #(useRWICache)#::
         <tr class="TableCellDark">
           <td align="left">RWI Assortment Cluster</td>
           <td align="right">#[slreqRWI]#</td>
@@ -116,7 +116,7 @@
           <td align="left">The Assortment Cluster stores most of the page indexes.
           Flushing speed of the temporary RWI cache depends on the size of this file cache. Increasing the space of this
           cache will speed up crawls with a depth > 3.</td>
-        </tr>
+        </tr>#(/useRWICache)#
         
         <tr class="TableCellDark">
           <td align="left">HTTP Response Header</td>
@@ -158,7 +158,7 @@
           <td align="left">This is the database that holds the hash/url - relation and properties regarding the url like load date and server date.
           This cache is very important for a fast search process. Increasing the cache size will result in more search results and less IO during DHT transfer.</td>
         </tr>
-        
+        #(usePreNURLCache)#::
         <tr class="TableCellDark">
           <td align="left">'pre-noticed' URLs</td>
           <td align="right">#[slreqPreNURL]#</td>
@@ -176,8 +176,8 @@
           <td align="right">#[dfltPreNURL]#</td>
           <td align="right">#[bestPreNURL]#</td>
           <td align="left"></td>
-        </tr>
-        
+        </tr>#(/usePreNURLCache)#
+        #(useNURLCache)#::
         <tr class="TableCellDark">
           <td align="left">'noticed' URLs</td>
           <td align="right">#[slreqNURL]#</td>
@@ -196,8 +196,8 @@
           <td align="right">#[bestNURL]#</td>
           <td align="left">A noticed URL is one that was discovered during crawling but was not loaded yet.
           Increasing the cache size will result in faster double-check during URL recognition when doing crawls.</td>
-        </tr> 
-        
+        </tr>#(/useNURLCache)#
+        #(useEURLCache)#::
         <tr class="TableCellDark">
           <td align="left">'error' URLs</td>
           <td align="right">#[slreqEURL]#</td>
@@ -216,7 +216,7 @@
           <td align="right">#[bestEURL]#</td>
           <td align="left">URLs that cannot be loaded are stored in this database. It is also used for double-checked during crawling.
           Increasing the cache size will most probably speed up crawling slightly, but not significantly.</td>
-        </tr>
+        </tr>#(/useEURLCache)#
         
         <tr class="TableCellDark">
           <td align="left">DHT Control</td>

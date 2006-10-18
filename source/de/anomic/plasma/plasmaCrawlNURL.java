@@ -147,6 +147,10 @@ public class plasmaCrawlNURL extends indexURL {
         
     }
     
+    public boolean getUseNewDB() {
+        return (urlIndexFile instanceof kelondroFlexTable);
+    }
+    
     private void openHashCache() {
         if (newdb) {
             String newCacheName = "urlNotice4.table";
