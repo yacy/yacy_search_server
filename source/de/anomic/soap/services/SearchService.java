@@ -162,7 +162,7 @@ public class SearchService extends AbstractService
             for (int i=0; i < count; i++) {
             	searchResult.put("type_results_" + i + "_url",wikiCode.replaceHTMLonly(searchResult.get("type_results_" + i + "_url","")));
             	searchResult.put("type_results_" + i + "_description",wikiCode.replaceHTMLonly(searchResult.get("type_results_" + i + "_description","")));
-            	searchResult.put("type_results_" + i + "_urlnamen",wikiCode.replaceHTMLonly(searchResult.get("type_results_" + i + "_urlname","")));
+            	searchResult.put("type_results_" + i + "_urlname",wikiCode.replaceHTMLonly(searchResult.get("type_results_" + i + "_urlname","")));
             }
             
             // format the result
