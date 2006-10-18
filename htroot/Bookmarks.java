@@ -149,15 +149,15 @@ public class Bookmarks {
                         // try to get the bookmark from the LURL database
                         plasmaCrawlLURLEntry urlentry = switchboard.urlPool.loadedURL.load(urlHash, null);
                         plasmaParserDocument document = null;
-                        if(urlentry != null){
-                            document = switchboard.snippetCache.retrieveDocument(urlentry.url(), true);
-                        }
                         if (urlentry != null) {
+                            plasmaCrawlLURLEntry.Components comp = urlentry.comp();
+                            document = switchboard.snippetCache.retrieveDocument(comp.url(), true);
                             prop.put("mode_edit", 0); // create mode
-                            prop.put("mode_title", urlentry.descr());
-                            prop.put("mode_description", (document == null) ? urlentry.descr() : document.getMainLongTitle());
-                            prop.put("mode_url", urlentry.url());
-                            prop.put("mode_tags", (document == null) ? "" : document.getKeywords(','));
+                            prop.put("mode_url", comp.url().toNormalform());
+                            prop.put("mode_title", comp.descr());
+                            prop.put("mode_description", (document == null) ? comp.descr(): document.getMainLongTitle());
+                            prop.put("mode_author", comp.author());
+                            prop.put("mode_tags", (document == null) ? comp.tags() : document.getKeywords(','));
                             prop.put("mode_public", 0);
                         }
                         if (document != null) document.close();

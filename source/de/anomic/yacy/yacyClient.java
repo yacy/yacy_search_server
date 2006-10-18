@@ -502,7 +502,9 @@ public final class yacyClient {
             for (int n = 0; n < results; n++) {
                 // get one single search result
                 urlEntry = urlManager.newEntry((String) result.get("resource" + n), true);
-                if ((urlEntry == null) || (blacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, urlEntry.url()))) { continue; } // block with backlist
+                if (urlEntry == null) continue;
+                plasmaCrawlLURLEntry.Components comp = urlEntry.comp();
+                if (blacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, comp.url())) continue; // block with backlist
                 urlManager.store(urlEntry);
                 urlManager.stack(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
 
@@ -510,19 +512,20 @@ public final class yacyClient {
                 final indexEntry entry;
                 if (urlEntry.word() == null) {
                     // the old way to define words
-                    int urlLength = urlEntry.url().toString().length();
-                    int urlComps = htmlFilterContentScraper.urlComps(urlEntry.url().toString()).length;
+                    int urlLength = comp.url().toNormalform().length();
+                    int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()).length;
                     
                     entry = new indexURLEntry(
                                                      urlEntry.hash(),
-                                                     urlLength, urlComps,
-                                                     urlEntry.descr().length(),
+                                                     urlLength,
+                                                     urlComps,
+                                                     comp.descr().length(),
                                                      urlEntry.wordCount(),
                                                      0, 0, 0, 0, 0, 0,
                                                      urlEntry.size(),
                                                      urlEntry.moddate().getTime(),
                                                      System.currentTimeMillis(),
-                                                     urlEntry.quality(),
+                                                     0,
                                                      urlEntry.language(),
                                                      urlEntry.doctype(),
                                                      0,0,

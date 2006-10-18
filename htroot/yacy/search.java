@@ -249,7 +249,7 @@ public final class search {
             while ((acc.hasMoreElements()) && (i < squery.wantedResults)) {
                 urlentry = (plasmaCrawlLURLEntry) acc.nextElement();
                 if (includesnippet) {
-                    snippet = sb.snippetCache.retrieveSnippet(urlentry.url(), squery.queryHashes, false, 260, 1000);
+                    snippet = sb.snippetCache.retrieveSnippet(urlentry.comp().url(), squery.queryHashes, false, 260, 1000);
                 } else {
                     snippet = null;
                 }

@@ -195,7 +195,7 @@ public final class plasmaCrawlLURL extends indexURL {
         }
     }
 
-    public synchronized plasmaCrawlLURLEntry newEntry(URL url, String descr, Date moddate, Date loaddate,
+    public synchronized plasmaCrawlLURLEntry newEntry(String url, String descr, Date moddate, Date loaddate,
             String referrerHash, int copyCount, boolean localNeed,
             int quality, String language, char doctype,
             int size, int wordCount) {
@@ -338,7 +338,6 @@ public final class plasmaCrawlLURL extends indexURL {
         String cachepath, urlstr, urltxt;
         yacySeed initiatorSeed, executorSeed;
         plasmaCrawlLURLEntry urle;
-        URL url;
 
         // needed for getCachePath(url)
         final plasmaSwitchboard switchboard = plasmaSwitchboard.getSwitchboard();
@@ -353,14 +352,14 @@ public final class plasmaCrawlLURL extends indexURL {
 //          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
             try {
                 urle = load(urlHash, null);
+                plasmaCrawlLURLEntry.Components comp = urle.comp();
 //              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
                 initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                 executorSeed = yacyCore.seedDB.getConnected(executorHash);
 
-                url = urle.url();
-                urlstr = url.toString();
+                urlstr = comp.url().toNormalform();
                 urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
-                cachepath = (url == null) ? "-not-cached-" : cacheManager.getCachePath(url).toString().replace('\\', '/').substring(cacheManager.cachePath.toString().length() + 1);
+                cachepath = cacheManager.getCachePath(new URL(urlstr)).toString().replace('\\', '/').substring(cacheManager.cachePath.toString().length() + 1);
 
                 prop.put("table_indexed_" + cnt + "_dark", (dark) ? 1 : 0);
                 prop.put("table_indexed_" + cnt + "_feedbackpage", feedbackpage);
@@ -372,8 +371,8 @@ public final class plasmaCrawlLURL extends indexURL {
                 prop.put("table_indexed_" + cnt + "_showExec_executorSeed", (executorSeed == null) ? dfltExec : executorSeed.getName());
                 prop.put("table_indexed_" + cnt + "_moddate", daydate(urle.moddate()));
                 prop.put("table_indexed_" + cnt + "_wordcount", urle.wordCount());
-                prop.put("table_indexed_" + cnt + "_urldescr", urle.descr());
-                prop.put("table_indexed_" + cnt + "_url", (urle.url() == null) ? "-not-cached-" : ((makeLink) ? ("<a href=\"CacheAdmin_p.html?action=info&path=" + cachepath + "\" class=\"small\" title=\"" + urlstr + "\">" + urltxt + "</a>") : urlstr));
+                prop.put("table_indexed_" + cnt + "_urldescr", comp.descr());
+                prop.put("table_indexed_" + cnt + "_url", (cachepath == null) ? "-not-cached-" : ((makeLink) ? ("<a href=\"CacheAdmin_p.html?action=info&path=" + cachepath + "\" class=\"small\" title=\"" + urlstr + "\">" + urltxt + "</a>") : urlstr));
                 dark = !dark;
                 cnt++;
             } catch (Exception e) {
@@ -535,18 +534,19 @@ public final class plasmaCrawlLURL extends indexURL {
                     }
                     
                     plasmaCrawlLURLEntry entry = (plasmaCrawlLURLEntry) eiter.next();
+                    plasmaCrawlLURLEntry.Components comp = entry.comp();
                     totalSearchedUrls++;
-                    if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, entry.url()) ||
-                        plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, entry.url())) {
-                        lastBlacklistedUrl = entry.url().toString();
+                    if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, comp.url()) ||
+                        plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, comp.url())) {
+                        lastBlacklistedUrl = comp.url().toNormalform();
                         lastBlacklistedHash = entry.hash();                        
-                        serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " " + entry.url());
+                        serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " " + comp.url().toNormalform());
                         remove(entry.hash());
                         if (blacklistedUrls % 100 == 0) {
                             serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
                         }
                     }
-                    lastUrl = entry.url().toString();
+                    lastUrl = comp.url().toNormalform();
                     lastHash = entry.hash();
                 }
             } catch (RuntimeException e) {
@@ -605,7 +605,7 @@ public final class plasmaCrawlLURL extends indexURL {
             final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), 1, 0, false);
             final Iterator enu = urls.entries(true, false, null);
             while (enu.hasNext()) {
-                ((plasmaCrawlLURLEntry) enu.next()).print();
+                System.out.println(((plasmaCrawlLURLEntry) enu.next()).toString());
             }
         } catch (Exception e) {
             e.printStackTrace();

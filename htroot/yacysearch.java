@@ -191,13 +191,15 @@ public class yacysearch {
                 final String recommendHash = post.get("recommendref", ""); // urlhash
                 plasmaCrawlLURLEntry urlentry = sb.urlPool.loadedURL.load(recommendHash, null);
                 if (urlentry != null) {
-                    plasmaParserDocument document = sb.snippetCache.retrieveDocument(urlentry.url(), true);
+                    plasmaCrawlLURLEntry.Components comp = urlentry.comp();
+                    plasmaParserDocument document;
+                    document = sb.snippetCache.retrieveDocument(comp.url(), true);
                     if (document != null) {
                         // create a news message
                         HashMap map = new HashMap();
-                        map.put("url", urlentry.url().toNormalform().replace(',', '|'));
-                        map.put("title", urlentry.descr().replace(',', ' '));
-                        map.put("description", ((document == null) ? urlentry.descr() : document.getMainLongTitle()).replace(',', ' '));
+                        map.put("url", comp.url().toNormalform().replace(',', '|'));
+                        map.put("title", comp.descr().replace(',', ' '));
+                        map.put("description", ((document == null) ? comp.descr() : document.getMainLongTitle()).replace(',', ' '));
                         map.put("tags",  ((document == null) ? "" : document.getKeywords(' ')));
                         yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippadd", map));
                         document.close();

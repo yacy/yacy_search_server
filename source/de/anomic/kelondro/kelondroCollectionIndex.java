@@ -158,7 +158,10 @@ public class kelondroCollectionIndex {
                     ientry.setCol(idx_col_indexpos,   j);
                     ientry.setCol(idx_col_lastread,   t);
                     ientry.setCol(idx_col_lastwrote,  t);
-                    index.put(ientry);
+                    if (index instanceof kelondroBufferedIndex)
+                        ((kelondroBufferedIndex) index).add(ientry);
+                    else
+                        index.put(ientry);
                     
                     // write a log
                     if (System.currentTimeMillis() - lastlog > 30000) {

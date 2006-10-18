@@ -1559,7 +1559,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     
                     // create a new loaded URL db entry
                     plasmaCrawlLURLEntry newEntry = urlPool.loadedURL.newEntry(
-                            entry.url(),                                            // URL
+                            entry.url().toNormalform(),                             // URL
                             docDescription,                                         // document description
                             docDate,                                                // modification date
                             new Date(),                                             // loaded date
@@ -1641,8 +1641,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             
                             String language = indexEntryAttribute.language(entry.url());                            
                             char doctype = indexEntryAttribute.docType(document.getMimeType());
-                            int urlLength = newEntry.url().toString().length();
-                            int urlComps = htmlFilterContentScraper.urlComps(newEntry.url().toString()).length;
+                            plasmaCrawlLURLEntry.Components comp = newEntry.comp();
+                            int urlLength = comp.url().toNormalform().length();
+                            int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()).length;
 
                             // iterate over all words
                             Iterator i = condenser.words();
@@ -2046,10 +2047,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 prop.put("type_globalresults", acc.globalContributions);
                 int i = 0;
                 int p;
-                URL url;
                 plasmaCrawlLURLEntry urlentry;
                 String urlstring, urlname, filename, urlhash;
-                String host, hash, address, descr = "";
+                String host, hash, address;
                 yacySeed seed;
                 plasmaSnippetCache.Snippet snippet;
                 boolean includeSnippets = false;
@@ -2058,30 +2058,29 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (targetTime < System.currentTimeMillis()) targetTime = System.currentTimeMillis() + 1000;
                 while ((acc.hasMoreElements()) && (i < query.wantedResults) && (System.currentTimeMillis() < targetTime)) {
                     urlentry = acc.nextElement();
-                    url = urlentry.url();
+                    plasmaCrawlLURLEntry.Components comp = urlentry.comp();
                     urlhash = urlentry.hash();
-                    host = url.getHost();
+                    host = comp.url().getHost();
                     if (host.endsWith(".yacyh")) {
                         // translate host into current IP
                         p = host.indexOf(".");
                         hash = yacySeed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
                         seed = yacyCore.seedDB.getConnected(hash);
-                        filename = url.getFile();
+                        filename = comp.url().getFile();
                         if ((seed == null) || ((address = seed.getAddress()) == null)) {
                             // seed is not known from here
-                            removeReferences(urlentry.hash(), plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + urlentry.descr()).getBytes()));
+                            removeReferences(urlentry.hash(), plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.descr()).getBytes()));
                             urlPool.loadedURL.remove(urlentry.hash()); // clean up
                             continue; // next result
                         }
-                        url = new URL("http://" + address + "/" + host.substring(0, p) + filename);
                         urlname = "http://share." + seed.getName() + ".yacy" + filename;
                         if ((p = urlname.indexOf("?")) > 0) urlname = urlname.substring(0, p);
-                        urlstring = url.toNormalform();
+                        urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
                     } else {
-                        urlstring = url.toNormalform();
+                        urlstring = comp.url().toNormalform();
                         urlname = urlstring;
                     }
-                    descr = urlentry.descr();
+                    
                     
                     // check bluelist again: filter out all links where any bluelisted word
                     // appear either in url, url's description or search word
@@ -2097,7 +2096,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     URL wordURL;
                     if (urlstring.matches(query.urlMask)) { //.* is default
                         if (includeSnippets) {
-                            snippet = snippetCache.retrieveSnippet(url, query.queryHashes, false, 260, 1000);
+                            snippet = snippetCache.retrieveSnippet(comp.url(), query.queryHashes, false, 260, 1000);
                         } else {
                             snippet = null;
                         }
@@ -2107,7 +2106,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             prop.put("type_results_" + i + "_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", urlstring) == null) ? 1 : 0);
                             prop.put("type_results_" + i + "_recommend_deletelink", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
                             prop.put("type_results_" + i + "_recommend_recommendlink", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
-                            prop.put("type_results_" + i + "_description", descr);
+                            prop.put("type_results_" + i + "_description", comp.descr());
                             prop.put("type_results_" + i + "_url", urlstring);
                             prop.put("type_results_" + i + "_urlhash", urlhash);
                             prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(urlhash));
@@ -2196,19 +2195,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // determine the url string
         plasmaCrawlLURLEntry entry = urlPool.loadedURL.load(urlhash, null);
         if (entry == null) return 0;
-        
-        URL url = entry.url();
-        if (url == null) return 0;
+        plasmaCrawlLURLEntry.Components comp = entry.comp();
+        if (comp.url() == null) return 0;
         
         InputStream resourceContent = null;
         try {
             // get the resource content
-            Object[] resource = snippetCache.getResource(url, fetchOnline, 10000);
+            Object[] resource = snippetCache.getResource(comp.url(), fetchOnline, 10000);
             resourceContent = (InputStream) resource[0];
             Long resourceContentLength = (Long) resource[1];
             
             // parse the resource
-            plasmaParserDocument document = snippetCache.parseDocument(url, resourceContentLength.longValue(), resourceContent);
+            plasmaParserDocument document = snippetCache.parseDocument(comp.url(), resourceContentLength.longValue(), resourceContent);
             
             // getting parsed body input stream
             InputStream docBodyInputStream = document.getText();

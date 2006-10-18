@@ -359,7 +359,7 @@ public class dir {
             final URL url = new URL(urlstring);
             final plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()));
             final plasmaCrawlLURLEntry newEntry = switchboard.urlPool.loadedURL.newEntry(
-                url, "YaCyShare: " + descr, new Date(), new Date(),
+                url.toNormalform(), "YaCyShare: " + descr, new Date(), new Date(),
                 "AAAAAAAAAAAA", /*referrer*/
                 0, /*copycount*/
                 false, /*localneed*/

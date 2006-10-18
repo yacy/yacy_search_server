@@ -27,10 +27,11 @@
 package de.anomic.plasma;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Date;
 
-import de.anomic.net.URL;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.net.URL;
 import de.anomic.index.indexEntry;
 
 public interface plasmaCrawlLURLEntry {
@@ -39,9 +40,7 @@ public interface plasmaCrawlLURLEntry {
 
     public String hash();
 
-    public URL url();
-
-    public String descr();
+    public Components comp();
 
     public Date moddate();
 
@@ -50,12 +49,6 @@ public interface plasmaCrawlLURLEntry {
     public String referrerHash();
 
     public char doctype();
-
-    public int copyCount();
-
-    public boolean local();
-
-    public int quality();
 
     public String language();
 
@@ -73,6 +66,26 @@ public interface plasmaCrawlLURLEntry {
 
     public String toString();
 
-    public void print();
-
+    public class Components {
+        private URL url;
+        private String descr, author, tags, ETag;
+        
+        public Components(String url, String descr, String author, String tags, String ETag) {
+            try {
+                this.url = new URL(url);
+            } catch (MalformedURLException e) {
+                this.url = null;
+            }
+            this.descr = descr;
+            this.author = author;
+            this.tags = tags;
+            this.ETag = ETag;
+        }
+        public URL    url()    { return this.url; }
+        public String descr()  { return this.descr; }
+        public String author() { return this.author; }
+        public String tags()   { return this.tags; }
+        public String ETag()   { return this.ETag; }
+    }
+    
 }

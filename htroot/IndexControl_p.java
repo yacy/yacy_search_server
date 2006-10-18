@@ -222,8 +222,7 @@ public class IndexControl_p {
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
-                URL url = entry.url();
-                urlstring = url.toNormalform();
+                urlstring = entry.comp().url().toNormalform();
                 prop.put("urlstring", "");
                 switchboard.urlPool.loadedURL.remove(urlhash);
                 prop.put("result", "Removed URL " + urlstring);
@@ -339,9 +338,7 @@ public class IndexControl_p {
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash);
             } else {
-                URL url = entry.url();
-                urlstring = url.toString();
-                prop.put("urlstring", urlstring);
+                prop.put("urlstring", entry.comp().url().toNormalform());
                 prop.putAll(genUrlProfile(switchboard, entry, urlhash));
             }
         }
@@ -410,30 +407,27 @@ public class IndexControl_p {
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        URL url = entry.url();
+        plasmaCrawlLURLEntry.Components comp = entry.comp();
         String referrer = null;
         plasmaCrawlLURLEntry le = switchboard.urlPool.loadedURL.load(entry.referrerHash(), null);
         if (le == null) {
             referrer = "<unknown>";
         } else {
-            referrer = le.url().toString();
+            referrer = le.comp().url().toNormalform();
         }
-        if (url == null) {
+        if (comp.url() == null) {
             prop.put("genUrlProfile", 1);
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
         prop.put("genUrlProfile", 2);
-        prop.put("genUrlProfile_urlNormalform", url.toNormalform());
+        prop.put("genUrlProfile_urlNormalform", comp.url().toNormalform());
         prop.put("genUrlProfile_urlhash", urlhash);
-        prop.put("genUrlProfile_urlDescr", entry.descr());
+        prop.put("genUrlProfile_urlDescr", comp.descr());
         prop.put("genUrlProfile_moddate", entry.moddate());
         prop.put("genUrlProfile_loaddate", entry.loaddate());
         prop.put("genUrlProfile_referrer", referrer);
         prop.put("genUrlProfile_doctype", ""+entry.doctype());
-        prop.put("genUrlProfile_copyCount", entry.copyCount());
-        prop.put("genUrlProfile_local", ""+entry.local());
-        prop.put("genUrlProfile_quality", entry.quality());
         prop.put("genUrlProfile_language", entry.language());
         prop.put("genUrlProfile_size", entry.size());
         prop.put("genUrlProfile_wordCount", entry.wordCount());
@@ -467,7 +461,7 @@ public class IndexControl_p {
                     if (le == null) {
                         tm.put(uh[0], uh);
                     } else {
-                        us = le.url().toString();
+                        us = le.comp().url().toNormalform();
                         tm.put(us, uh);
 
                     }

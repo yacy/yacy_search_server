@@ -104,7 +104,7 @@ public final class plasmaSearchImages {
         plasmaCrawlLURLEntry urlentry;
         while (sres.hasMoreElements()) {
             urlentry = sres.nextElement();
-            addAll(new plasmaSearchImages(sc, serverDate.remainingTime(start, maxTime, 10), urlentry.url(), depth));
+            addAll(new plasmaSearchImages(sc, serverDate.remainingTime(start, maxTime, 10), urlentry.comp().url(), depth));
         }
     }
     

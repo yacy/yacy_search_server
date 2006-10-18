@@ -780,7 +780,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
                         if (ue == null) {
                             urlHashs.add(entry.urlHash());
                         } else {
-                            url = ue.url();
+                            url = ue.comp().url();
                             if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, url) == true)) {
                                 urlHashs.add(entry.urlHash());
                             }

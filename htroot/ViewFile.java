@@ -54,7 +54,6 @@ import java.util.Enumeration;
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
@@ -116,12 +115,12 @@ public class ViewFile {
             }            
 
             // gettin the url that belongs to the entry
-            URL url = urlEntry.url();
-            if (url == null) {
+            plasmaCrawlLURLEntry.Components comp = urlEntry.comp();
+            if ((comp == null) || (comp.url() == null)) {
                 prop.put("error",3);
                 prop.put("viewMode",VIEW_MODE_NO_TEXT);
                 return prop;
-            }    
+            }
 
             // loading the resource content as byte array
             InputStream resource = null;
@@ -130,14 +129,14 @@ public class ViewFile {
             String resMime = null;
             try {
                 // trying to load the resource body
-                resource = sb.cacheManager.getResourceContentStream(url);
-                resourceLength = sb.cacheManager.getResourceContentLength(url);
+                resource = sb.cacheManager.getResourceContentStream(comp.url());
+                resourceLength = sb.cacheManager.getResourceContentLength(comp.url());
 
                 // if the resource body was not cached we try to load it from web
                 if (resource == null) {
                     plasmaHTCache.Entry entry = null;
                     try {
-                        entry = sb.snippetCache.loadResourceFromWeb(url, 5000, false);
+                        entry = sb.snippetCache.loadResourceFromWeb(comp.url(), 5000, false);
                     } catch (plasmaCrawlerException e) {
                         prop.put("error",4);
                         prop.put("error_errorText",e.getMessage());
@@ -147,8 +146,8 @@ public class ViewFile {
 
                     if (entry != null) {
                         resInfo = entry.getDocumentInfo();
-                        resource = sb.cacheManager.getResourceContentStream(url);
-                        resourceLength = sb.cacheManager.getResourceContentLength(url);
+                        resource = sb.cacheManager.getResourceContentStream(comp.url());
+                        resourceLength = sb.cacheManager.getResourceContentLength(comp.url());
                     }
 
                     if (resource == null) {
@@ -164,19 +163,19 @@ public class ViewFile {
 
                     // try to load the metadata from cache
                     try {
-                        resInfo = sb.cacheManager.loadResourceInfo(urlEntry.url());
+                        resInfo = sb.cacheManager.loadResourceInfo(comp.url());
                     } catch (Exception e) { /* ignore this */}
 
                     // if the metadata where not cached try to load it from web
                     if (resInfo == null) {
-                        String protocol = url.getProtocol();
+                        String protocol = comp.url().getProtocol();
                         if (!((protocol.equals("http") || protocol.equals("https")))) {
                             prop.put("error",6);
                             prop.put("viewMode",VIEW_MODE_NO_TEXT);
                             return prop;                                
                         }
 
-                        httpHeader responseHeader = httpc.whead(url,url.getHost(),5000,null,null,sb.remoteProxyConfig);
+                        httpHeader responseHeader = httpc.whead(comp.url(),comp.url().getHost(),5000,null,null,sb.remoteProxyConfig);
                         if (responseHeader == null) {
                             prop.put("error",4);
                             prop.put("error_errorText","Unable to load resource metadata.");
@@ -184,7 +183,7 @@ public class ViewFile {
                             return prop;
                         } 
                         try {
-                            resInfo = sb.cacheManager.getResourceInfoFactory().buildResourceInfoObj(url, responseHeader);
+                            resInfo = sb.cacheManager.getResourceInfoFactory().buildResourceInfoObj(comp.url(), responseHeader);
                         } catch (Exception e) {
                             prop.put("error",4);
                             prop.put("error_errorText",e.getMessage());
@@ -230,12 +229,12 @@ public class ViewFile {
                 prop.put("viewMode_plainText",content); 
             } else if (viewMode.equals("iframe")) {
                 prop.put("viewMode",VIEW_MODE_AS_IFRAME);
-                prop.put("viewMode_url",url.toString());                
+                prop.put("viewMode_url",comp.url().toNormalform());                
             } else if (viewMode.equals("parsed") || viewMode.equals("sentences")) {
                 // parsing the resource content
                 plasmaParserDocument document = null;
                 try {
-                    document = sb.snippetCache.parseDocument(url, resourceLength, resource,resInfo);
+                    document = sb.snippetCache.parseDocument(comp.url(), resourceLength, resource,resInfo);
                     if (document == null) {
                         prop.put("error",5);
                         prop.put("error_errorText","Unknown error");
@@ -295,13 +294,13 @@ public class ViewFile {
                 } 
                 if (document != null) document.close();
             }
-            prop.put("error",0);
-            prop.put("error_url",url.toString());                
-            prop.put("error_hash",urlHash);
-            prop.put("error_wordCount",Integer.toString(urlEntry.wordCount()));
-            prop.put("error_desc",urlEntry.descr());
-            prop.put("error_size",urlEntry.size());
-            prop.put("error_mimeType",resMime);
+            prop.put("error", 0);
+            prop.put("error_url", comp.url().toNormalform());                
+            prop.put("error_hash", urlHash);
+            prop.put("error_wordCount", Integer.toString(urlEntry.wordCount()));
+            prop.put("error_desc", comp.descr());
+            prop.put("error_size", urlEntry.size());
+            prop.put("error_mimeType", resMime);
 
             return prop;
     }

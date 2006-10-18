@@ -36,7 +36,6 @@ import de.anomic.index.indexURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.net.URL;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
 
@@ -57,7 +56,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
             "Cardinal size-" + indexURL.urlSizeLength + " {b64e}, " + // size of file in bytes
             "Cardinal wc-" + indexURL.urlWordCountLength + " {b64e}"); // word count
 
-    private URL url;
+    private String url;
     private String descr;
     private Date moddate;
     private Date loaddate;
@@ -73,19 +72,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
     private String snippet;
     private indexEntry word; // this is only used if the url is transported via remote search requests
 
-    // more needed attributes:
-    // - author / copyright owner
-    // - keywords
-    // - phrasecount, total number of phrases
-    // - boolean: URL attributes (see Word-Entity definition)
-    // - boolean: appearance of bold and/or italics
-    // - ETag: for re-crawl decision upon HEAD request
-    // - int: # of outlinks to same domain
-    // - int: # of outlinks to outside domain
-    // - int: # of keywords
-    // - int: # der auf der Seite vorhandenen Links zu image, audio, video, applications
-
-    public plasmaCrawlLURLOldEntry(URL url, String descr, Date moddate,
+    public plasmaCrawlLURLOldEntry(String url, String descr, Date moddate,
             Date loaddate, String referrerHash, int copyCount,
             boolean localNeed, int quality, String language, char doctype,
             int size, int wordCount) {
@@ -110,7 +97,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
     public plasmaCrawlLURLOldEntry(kelondroRow.Entry entry, indexEntry searchedWord) throws IOException {
         try {
             this.urlHash = entry.getColString(0, null);
-            this.url = new URL(entry.getColString(1, "UTF-8").trim());
+            this.url = entry.getColString(1, "UTF-8").trim();
             this.descr = (entry.empty(2)) ? this.url.toString() : entry.getColString(2, "UTF-8").trim();
             this.moddate = new Date(86400000 * entry.getColLong(3));
             this.loaddate = new Date(86400000 * entry.getColLong(4));
@@ -144,7 +131,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
             this.copyCount = Integer.parseInt(prop.getProperty("cc", "0"));
             this.flags = ((prop.getProperty("local", "true").equals("true")) ? "L " : "  ");
             if (setGlobal) this.flags = "G ";
-            this.url = new URL(crypt.simpleDecode(prop.getProperty("url", ""), null));
+            this.url = crypt.simpleDecode(prop.getProperty("url", ""), null);
             this.descr = crypt.simpleDecode(prop.getProperty("descr", ""), null);
             if (this.descr == null) this.descr = this.url.toString();
             this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(prop.getProperty("q", ""));
@@ -195,13 +182,9 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
         // that should be enough for all web pages on the world
         return this.urlHash;
     }
-
-    public URL url() {
-        return url;
-    }
-
-    public String descr() {
-        return descr;
+    
+    public Components comp() {
+        return new Components(url, descr, "", "", "");
     }
 
     public Date moddate() {
@@ -263,9 +246,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
         if (moddate.before(other.moddate())) return true;
         if (moddate.equals(other.moddate())) {
             if (loaddate.before(other.loaddate())) return true;
-            if (loaddate.equals(other.loaddate())) {
-                if (quality < other.quality()) return true;
-            }
+            if (loaddate.equals(other.loaddate())) return true;
         }
         return false;
     }
@@ -297,29 +278,9 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
             return corePropStr;
 
         } catch (Exception e) {
-            //          serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
-            //          if (moddate == null) serverLog.logFailure("plasmaLURL.corePropList", "moddate=null");
-            //          if (loaddate == null) serverLog.logFailure("plasmaLURL.corePropList", "loaddate=null");
-            //          e.printStackTrace();
             return null;
         }
     }
-
-    /*
-     public String toString(int posintext, int posinphrase, int posofphrase) {
-     // add information needed for remote transport
-     final StringBuffer core = corePropList();
-     if (core == null) return null;
-
-     core.ensureCapacity(core.length() + 200);
-     core.insert(0,"{")
-     .append(",posintext=").append(posintext)
-     .append(",posinphrase=").append(posinphrase)
-     .append(",posofphraseint=").append(posofphrase)
-     .append("}");
-     return core.toString();
-     }        
-     */
 
     public String toString(String snippet) {
         // add information needed for remote transport

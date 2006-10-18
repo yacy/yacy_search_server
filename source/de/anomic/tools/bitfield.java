@@ -46,7 +46,7 @@ public class bitfield {
 
     public bitfield(int bytelength) {
         this.bb= new byte[bytelength];
-        for (int i = 0 ; i < bytelength; i++) bb[i] = (char) 48;
+        for (int i = 0 ; i < bytelength; i++) bb[i] = 0;
     }
     
     public bitfield(byte[] field) {

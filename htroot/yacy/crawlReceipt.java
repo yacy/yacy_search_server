@@ -125,8 +125,13 @@ public final class crawlReceipt {
         } else if (result.equals("fill")) {
             // generating a new loaded URL entry
             plasmaCrawlLURLEntry entry = switchboard.urlPool.loadedURL.newEntry(propStr, true);
-            if ((entry == null)||(entry.url()==null)) {
-                log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT for hash " + receivedUrlhash + " from peer " + iam +
+            if (entry == null) {
+                log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) for hash " + receivedUrlhash + " from peer " + iam +
+                              "\n\tURL properties: "+ propStr);
+            } else {
+                plasmaCrawlLURLEntry.Components comp = entry.comp();
+            if (comp.url() == null) {
+                log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + receivedUrlhash + " from peer " + iam +
                               "\n\tURL properties: "+ propStr);
             } else try {
                 // put new entry into database
@@ -134,18 +139,18 @@ public final class crawlReceipt {
                 switchboard.urlPool.loadedURL.stack(entry, youare, iam, 1);
                 
                 // generating url hash
-                String newUrlHash = indexURL.urlHash(entry.url());
-                String oldUrlHash = indexURL.oldurlHash(entry.url());
+                String newUrlHash = indexURL.urlHash(comp.url());
+                String oldUrlHash = indexURL.oldurlHash(comp.url());
                 
                 // removing URL from notice URL                
                 switchboard.urlPool.noticeURL.remove(newUrlHash);
                 switchboard.urlPool.noticeURL.remove(oldUrlHash); 
                 
-                log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + receivedUrlhash + ":" + entry.url());
+                log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + receivedUrlhash + ":" + comp.url().toNormalform());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            
+            }            
             // ready for more
             prop.put("delay", "10");
         } else {

@@ -289,6 +289,7 @@ public class plasmaSnippetCache {
      * @return the parsed document as {@link plasmaParserDocument}
      */
     public plasmaParserDocument retrieveDocument(URL url, boolean fetchOnline) {
+        if (url == null) return null;
         IResourceInfo docInfo = null;
         try {
             // trying to load the resource body from cache
@@ -634,11 +635,12 @@ public class plasmaSnippetCache {
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         while ((acc.hasMoreElements()) && (i < fetchcount) && (System.currentTimeMillis() < limitTime)) {
             urlentry = acc.nextElement();
-            if (urlentry.url().getHost().endsWith(".yacyh")) continue;
-            urlstring = urlentry.url().toNormalform();
+            plasmaCrawlLURLEntry.Components comp = urlentry.comp();
+            if (comp.url().getHost().endsWith(".yacyh")) continue;
+            urlstring = comp.url().toNormalform();
             if ((urlstring.matches(urlmask)) &&
-                (!(existsInCache(urlentry.url(), queryhashes)))) {
-                new Fetcher(urlentry.url(), queryhashes, (int) maxTime).start();
+                (!(existsInCache(comp.url(), queryhashes)))) {
+                new Fetcher(comp.url(), queryhashes, (int) maxTime).start();
                 i++;
             }
         }

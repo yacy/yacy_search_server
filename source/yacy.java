@@ -958,7 +958,8 @@ public final class yacy {
                 while (eiter.hasNext()) {
                     try {
                         entry = (plasmaCrawlLURLEntry) eiter.next();
-                        if ((entry != null) && (entry.url() != null)) doms.put(entry.url().getHost(), null);
+                        plasmaCrawlLURLEntry.Components comp = entry.comp();
+                        if ((entry != null) && (comp.url() != null)) doms.put(comp.url().getHost(), null);
                     } catch (Exception e) {
                         // here a MalformedURLException may occur
                         // just ignore
@@ -1068,12 +1069,13 @@ public final class yacy {
                 plasmaCrawlLURLEntry entry;
                 while (eiter.hasNext()) {
                     entry = (plasmaCrawlLURLEntry) eiter.next();
-                    if ((entry != null) && (entry.url() != null)) {
+                    plasmaCrawlLURLEntry.Components comp = entry.comp();
+                    if ((entry != null) && (comp.url() != null)) {
                         if (html) {
-                            bos.write(("<a href=\"" + entry.url() + "\">" + entry.descr() + "</a><br>").getBytes("UTF-8"));
+                            bos.write(("<a href=\"" + comp.url().toNormalform() + "\">" + comp.descr() + "</a><br>").getBytes("UTF-8"));
                             bos.write(serverCore.crlf);
                         } else {
-                            bos.write(entry.url().toString().getBytes());
+                            bos.write(comp.url().toNormalform().getBytes());
                             bos.write(serverCore.crlf);
                         }
                     }
@@ -1128,7 +1130,8 @@ public final class yacy {
             plasmaCrawlLURLEntry entry;
             while (eiter.hasNext()) {
                 entry = (plasmaCrawlLURLEntry) eiter.next();
-                if ((entry != null) && (entry.url() != null)) {
+                plasmaCrawlLURLEntry.Components comp = entry.comp();
+                if ((entry != null) && (comp.url() != null)) {
                     fsp.put(entry.toRowEntry(), entry.loaddate());
                 }
             }

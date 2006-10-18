@@ -337,6 +337,7 @@ public class PerformanceMemory_p {
     }
     
     private static void putprop(serverObjects prop, serverSwitch env, String wdb, String db, String set) {
+        if ((slt == null) || (ost == null)) return;
         usd = chk * slt[1] + obj * ost[2] /*hit*/ + kelondroTree.cacheObjectMissSize * ost[3] /*miss*/;
         bst = (((((long) chk) * ((long) req)) >> 10) + 1) << 10;
         if (set.equals("setBest")) env.setConfig("ramCache" + db, bst);

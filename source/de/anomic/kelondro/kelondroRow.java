@@ -40,7 +40,7 @@ public class kelondroRow {
     protected kelondroColumn[] row;
     protected int[]            colstart;
     protected int              objectsize;
-    protected Map              nickref = null;
+    protected Map              nickref = null; // a mapping from nicknames to Object[2]{kelondroColumn, Integer(colstart)}
     
     public kelondroRow(kelondroColumn[] row) {
         this.row = row;
@@ -142,7 +142,12 @@ public class kelondroRow {
         if (external == null) return null;
         return new Entry(external);
     }
-    
+    /*
+    public Entry newEntry(Properties prop) {
+        if (prop == null) return null;
+        return new Entry(prop);
+    }
+    */
     public class Entry implements Comparable {
 
         private byte[] rowinstance;
@@ -202,7 +207,19 @@ public class kelondroRow {
                 }
             }
         }
-        
+        /*
+        public Entry(Properties prop) {
+            // parse external form
+            if (nickref == null) genNickRef();
+            rowinstance = new byte[objectsize];
+            Iterator i = prop.entrySet().iterator();
+            Map.Entry entry;
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                setCol(((String) entry.getKey()).trim(), ((String) entry.getValue()).trim().getBytes());
+            }
+        }
+        */
         public int compareTo(Object o) {
             if (o instanceof Entry) {
                 return kelondroNaturalOrder.naturalOrder.compare(this.rowinstance, ((Entry) o).rowinstance);
@@ -354,7 +371,7 @@ public class kelondroRow {
             return getColLong(row[column].encoder(), colstart[column], row[column].cellwidth());
         }
 
-        public long getColLong(int encoder, int offset, int length) {
+        private long getColLong(int encoder, int offset, int length) {
             // start - fix for badly stored parameters
             if ((length >= 3) && (rowinstance[offset] == '[') && (rowinstance[offset + 1] == 'B') && (rowinstance[offset + 2] == '@')) return 0;
             if ((length == 2) && (rowinstance[offset] == '[') && (rowinstance[offset + 1] == 'B')) return 0;
@@ -378,6 +395,13 @@ public class kelondroRow {
             throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
         }
 
+        public byte getColByte(String nickname, byte dflt) {
+            if (nickref == null) genNickRef();
+            Object[] ref = (Object[]) nickref.get(nickname);
+            if (ref == null) return dflt;
+            return rowinstance[((Integer) ref[1]).intValue()];
+        }
+        
         public byte getColByte(int column) {
             return rowinstance[colstart[column]];
         }

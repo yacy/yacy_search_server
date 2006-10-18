@@ -334,7 +334,7 @@ public class plasmaSwitchboardQueue {
             if (referrerURL == null) {
                 if ((referrerHash == null) || (referrerHash.equals(indexURL.dummyHash))) return null;
                 plasmaCrawlLURLEntry entry = lurls.load(referrerHash, null);
-                if (entry == null) referrerURL = null; else referrerURL = entry.url();
+                if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
             }
             return referrerURL;
         }

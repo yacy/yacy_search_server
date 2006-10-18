@@ -197,8 +197,9 @@ public class plasmaSearchRankingProfile {
         long ranking = preranking;
 
         // prefer hit with 'prefer' pattern
-        if (page.url().toString().matches(query.prefer)) ranking += 256 << ((Integer) coeff.get(PREFER)).intValue();
-        if (page.descr().toString().matches(query.prefer)) ranking += 256 << ((Integer) coeff.get(PREFER)).intValue();
+        plasmaCrawlLURLEntry.Components comp = page.comp();
+        if (comp.url().toNormalform().matches(query.prefer)) ranking += 256 << ((Integer) coeff.get(PREFER)).intValue();
+        if (comp.descr().matches(query.prefer)) ranking += 256 << ((Integer) coeff.get(PREFER)).intValue();
         
         // apply 'common-sense' heuristic using references
         for (int j = 0; j < urlcomps.length; j++) {
@@ -220,11 +221,11 @@ public class plasmaSearchRankingProfile {
         }
 
         // prefer short urls
-        ranking += (256 - page.url().toString().length()) << ((Integer) coeff.get(URLLENGTH)).intValue();
+        ranking += (256 - comp.url().toNormalform().length()) << ((Integer) coeff.get(URLLENGTH)).intValue();
         ranking += (8 * Math.max(0, 32 - urlcomps.length)) << ((Integer) coeff.get(URLCOMPS)).intValue();
 
         // prefer long descriptions
-        ranking += (256 * page.descr().length() / 80) << ((Integer) coeff.get(DESCRLENGTH)).intValue();
+        ranking += (256 * comp.url().toNormalform().length() / 80) << ((Integer) coeff.get(DESCRLENGTH)).intValue();
         ranking += (256 * (12 - Math.abs(12 - Math.min(12, descrcomps.length))) / 12) << ((Integer) coeff.get(DESCRCOMPS)).intValue();
 
         return ranking;
