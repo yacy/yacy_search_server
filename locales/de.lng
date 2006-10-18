@@ -1825,9 +1825,13 @@ Local Crawler==Lokaler Crawler
 
 #File: env/templates/simpleheader.template
 #---------------------------
-Project Home==Projektseite
-Help / Wiki==Hilfe / Wiki
+#Peer Administration==Peer Administration
+Web Search==Web Suche
 Peer Owner Profile==Impressum dieses Peers
+Help / Wiki==Hilfe / Wiki
+Surftips==Surftipps
+Project Home==Projektseite
+
 #-----------------------------
 
 #File: env/templates/header.template

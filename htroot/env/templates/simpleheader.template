@@ -2,7 +2,7 @@
 <ul class="SubMenu">
 <li style="width:16%;"><a href="/Status.html" class="MenuItemLink">Peer Administration</a></li>
 <li style="width:16%;"><a href="/index.html" class="MenuItemLink">Web Search</a></li>
-<li style="width:16%;"><a href="/Surftipps.html" class="MenuItemLink">Surftipps</a></li>
+<li style="width:16%;"><a href="/Surftips.html" class="MenuItemLink">Surftips</a></li>
 <li style="width:16%;"><a href="/ViewProfile.html?hash=localhash" class="MenuItemLink">Peer Owner Profile</a></li>
 <li style="width:16%;"><a href="http://www.yacy-websearch.net/wiki/" class="MenuItemLink">Help / Wiki</a></li>
 <li style="width:16%;"><a href="http://www.yacy.net/yacy/" class="MenuItemLink">Project Home</a></li>
