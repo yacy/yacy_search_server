@@ -157,7 +157,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     
     public long[] assortmentsCacheObjectStatus() {
         if (assortmentCluster != null) return assortmentCluster.cacheObjectStatus();
-        return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     }
     
     public void setMaxWordCount(int maxWords) {
