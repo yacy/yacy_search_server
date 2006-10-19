@@ -62,6 +62,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -121,7 +122,7 @@ public class yacyCore {
 
     private static TimeZone GMTTimeZone = TimeZone.getTimeZone("America/Los_Angeles");
     public static String universalDateShortPattern = "yyyyMMddHHmmss";
-    public static SimpleDateFormat shortFormatter = new SimpleDateFormat(universalDateShortPattern);
+    private static SimpleDateFormat shortFormatter = new SimpleDateFormat(universalDateShortPattern);
 
     public static long universalTime() {
         return universalDate().getTime();
@@ -136,14 +137,36 @@ public class yacyCore {
     }
 
     public static String universalDateShortString(Date date) {
-        return shortFormatter.format(date);
+        /*
+         * This synchronized is needed because SimpleDateFormat is not thread-safe.
+         * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
+         */
+    	synchronized(yacyCore.shortFormatter) {    	
+    		return shortFormatter.format(date);
+    	}
+    }
+    
+    public static Date parseUniversalDate(String timeString) throws ParseException {
+        /*
+         * This synchronized is needed because SimpleDateFormat is not thread-safe.
+         * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
+         */
+    	synchronized(yacyCore.shortFormatter) {
+    		return yacyCore.shortFormatter.parse(timeString);
+    	}
     }
 
     public static Date parseUniversalDate(String remoteTimeString, String remoteUTCOffset) {
         if (remoteTimeString == null || remoteTimeString.length() == 0) { return new Date(); }
         if (remoteUTCOffset == null || remoteUTCOffset.length() == 0) { return new Date(); }
         try {
-            return new Date(yacyCore.shortFormatter.parse(remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
+            /*
+             * This synchronized is needed because SimpleDateFormat is not thread-safe.
+             * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
+             */        	
+        	synchronized(yacyCore.shortFormatter) {
+        		return new Date(yacyCore.shortFormatter.parse(remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
+        	}
         } catch (java.text.ParseException e) {
             log.logFinest("parseUniversalDate " + e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
             return new Date();

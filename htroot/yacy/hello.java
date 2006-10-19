@@ -157,7 +157,7 @@ public final class hello {
             yacyCore.peerActions.peerArrival(remoteSeed, true);
         } else {
             prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
-            remoteSeed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - remoteSeed.getUTCDiff())) );
+            remoteSeed.put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - remoteSeed.getUTCDiff())) );
             yacyCore.peerActions.juniorConnects++; // update statistics
             remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
             yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip);

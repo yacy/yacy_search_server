@@ -325,7 +325,7 @@ public class yacyPeerActions {
                 dtimeUTC0 = 0; // never disconnected: virtually disconnected maximum time ago
             } else {
                 try {
-                    dtimeUTC0 = yacyCore.shortFormatter.parse(disconnectedSeed.get("disconnected", "20040101000000")).getTime() - seed.getUTCDiff();
+                    dtimeUTC0 = yacyCore.parseUniversalDate(disconnectedSeed.get("disconnected", "20040101000000")).getTime() - seed.getUTCDiff();
                 } catch (java.text.ParseException e) {
                     dtimeUTC0 = 0;
                 }
@@ -371,7 +371,7 @@ public class yacyPeerActions {
                     try {
                         // if the old LastSeen date is later then the other
                         // info, then we reject the info
-                        if ((ctimeUTC0 < (yacyCore.shortFormatter.parse(connectedSeed.get(yacySeed.LASTSEEN, "20040101000000")).getTime() - connectedSeed.getUTCDiff() + serverDate.UTCDiff())) && (!(direct))) {
+                        if ((ctimeUTC0 < (yacyCore.parseUniversalDate(connectedSeed.get(yacySeed.LASTSEEN, "20040101000000")).getTime() - connectedSeed.getUTCDiff() + serverDate.UTCDiff())) && (!(direct))) {
                             yacyCore.log.logFine("connect: rejecting old info about peer '" + seed.getName() + "'");
                             return false;
                         }

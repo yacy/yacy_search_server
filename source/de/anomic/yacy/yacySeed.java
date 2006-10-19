@@ -270,7 +270,7 @@ public class yacySeed {
     public final void setJunior()                { put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR); }
     public final void setSenior()                { put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); }
     public final void setPrincipal()             { put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL); }
-    public final void setLastSeen()              { put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - getUTCDiff()))); }
+    public final void setLastSeen()              { put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - getUTCDiff()))); }
 
     public final void put(String key, String value) {
         synchronized (this.dna) {
@@ -367,7 +367,7 @@ public class yacySeed {
 
     public final long getLastSeenTime() {
         try {
-            final long t = yacyCore.shortFormatter.parse(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
+            final long t = yacyCore.parseUniversalDate(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
             // the problem here is: getTime applies a time shift according to local time zone:
             // it substracts the local UTF offset, but it should subtract the remote UTC offset
             // so we correct it by first adding the local UTF offset and then subtracting the remote
@@ -384,7 +384,7 @@ public class yacySeed {
     public final int getAge() {
         // returns the age as number of days
         try {
-            final long t = yacyCore.shortFormatter.parse(get(yacySeed.BDATE, "20040101000000")).getTime();
+            final long t = yacyCore.parseUniversalDate(get(yacySeed.BDATE, "20040101000000")).getTime();
             return (int) ((System.currentTimeMillis() - (t - getUTCDiff() + serverDate.UTCDiff())) / 1000 / 60 / 60 / 24);
         } catch (java.text.ParseException e) {
             return -1;
@@ -395,7 +395,7 @@ public class yacySeed {
 
     public final void setLastSeenTime() {
         // if we set a last seen time, then we need to respect the seeds UTC offset
-        put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(System.currentTimeMillis() - serverDate.UTCDiff() + getUTCDiff())));
+        put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date(System.currentTimeMillis() - serverDate.UTCDiff() + getUTCDiff())));
     }
 
     public void setPeerTags(Set keys) {
