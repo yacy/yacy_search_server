@@ -473,6 +473,8 @@ public final class httpd implements serverHandler {
                 } else if ((errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset"))) {
                     // client closed the connection, so we just end silently
                     this.log.logInfo("Client unexpectedly closed connection");
+                } else if (errorMsg.equals("400 Bad request")) {
+                	this.log.logInfo("Bad client request.");
                 } else {
                     this.log.logSevere("Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(),e);
                 }
