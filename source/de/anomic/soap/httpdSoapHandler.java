@@ -45,14 +45,17 @@
 
 package de.anomic.soap;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
@@ -142,7 +145,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
       +     "</service>"
       + "</deployment>";       
     
-    public static final String[] services = new String[] {
+    private static final String[] defaultServices = new String[] {
         "search=de.anomic.soap.services.SearchService",
         "crawl=de.anomic.soap.services.CrawlService",
         "status=de.anomic.soap.services.StatusService"
@@ -183,6 +186,8 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     private File htRootPath;
     private File htTemplatePath;
     
+    private static Properties additionalServices = null;
+    
     /* 
      * Creating and configuring an apache Axis server.
      * This is only needed once.
@@ -194,8 +199,8 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         // setting some options ...
         engine.setShouldSaveConfig(false);
         
-        for (int i=0; i < services.length; i++) {
-            String[] nextService = services[i].split("=");
+        for (int i=0; i < defaultServices.length; i++) {
+            String[] nextService = defaultServices[i].split("=");
             String deploymentStr = serviceDeploymentString
                                    .replaceAll("@serviceName@", nextService[0])
                                    .replaceAll("@className@", nextService[1]);
@@ -230,7 +235,48 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
             this.provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
         }
         
-        if (this.templates == null) this.templates = loadTemplates(this.htTemplatePath);        
+        if (this.templates == null) this.templates = loadTemplates(this.htTemplatePath); 
+        
+        synchronized (engine) {
+        	if (additionalServices == null) {
+        		additionalServices = new Properties();
+        		
+        		// getting the property filename containing the file list
+        		String fileName = switchboard.getConfig("soap.serviceDeploymentList","");
+        		if (fileName.length() > 0) {
+        			BufferedInputStream fileInput = null;
+        			try {
+        				File deploymentFile = new File(switchboard.getRootPath(),fileName);        				
+        				fileInput = new BufferedInputStream(new FileInputStream(deploymentFile));
+        				
+        				// load property list
+        				additionalServices.load(fileInput);
+        				fileInput.close();  
+        				
+        				// loop through and deploy services
+        				if (additionalServices.size() > 0) {
+        					Enumeration serviceNameEnum = additionalServices.keys();
+        					while (serviceNameEnum.hasMoreElements()) {
+        						String serviceName = (String) serviceNameEnum.nextElement();
+        						String className = additionalServices.getProperty(serviceName);
+        						
+        						String deploymentStr = serviceDeploymentString
+        						.replaceAll("@serviceName@", serviceName)
+        						.replaceAll("@className@", className);
+        						
+        						// deploy the service 
+        						deployService(deploymentStr,engine);        					
+        					}
+        				}
+        			} catch (Exception e) {
+        				this.theLogger.logSevere("Unable to deploy additional services: " + e.getMessage(), e);
+        			} finally {
+        				if (fileInput != null) try { fileInput.close(); } catch (Exception e){/* ignore this */}
+        			}
+        		}
+        	}
+
+		}
     }
     
     private byte[] readRequestBody(httpHeader requestHeader, PushbackInputStream body) throws SoapException {

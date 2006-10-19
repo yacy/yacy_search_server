@@ -823,3 +823,23 @@ tableTypeForPreNURL=2
 
 # flag to show surftipps on index.html page
 showSurftipps = true
+
+# a Java Properties file containig a list of SOAP services that should deployed
+# additionally to the default services. E.g.
+#    soap.serviceDeploymentList = DATA/SETTINGS/myServices.properties
+#
+# One entry in the property file should must have the following format:
+#    servicename=fullClassname
+#
+# e.g.
+#    test=org.myservices.test
+#
+# Servicename is the name that shoud be used to access the service, e.g.
+# if the service name is "test" then the service can be reached using
+#    http://localhost:8080/soap/test
+#
+# The WSDL document that belongs to the deployed service could be reached
+# using 
+#    http://localhost:8080/soap/test?wsdl
+#
+soap.serviceDeploymentList =
