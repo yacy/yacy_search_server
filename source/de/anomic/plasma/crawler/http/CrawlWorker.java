@@ -409,10 +409,14 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 "'. Retrying request.");
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_BIND_EXCEPTION;                
                 retryCrawling = true;
-            } else if ((errorMsg != null) && (errorMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
+            } else if ((errorMsg != null) && (
+            		(errorMsg.indexOf("Corrupt GZIP trailer") >= 0) ||
+            		(errorMsg.indexOf("Not in GZIP format") >= 0)
+            )) {
                 this.log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + this.url.toString() +
                 "'. Retrying request without using gzip content encoding.");
                 failreason = plasmaCrawlEURL.DENIED_CONTENT_DECODING_ERROR;
+                this.acceptEncoding = null;
                 retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Read timed out") >= 0)) {
                 this.log.logWarning("CRAWLER Read timeout while receiving content from '" + this.url.toString() +
