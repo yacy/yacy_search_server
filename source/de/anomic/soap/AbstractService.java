@@ -55,6 +55,7 @@ import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.axis.AxisFault;
 import org.apache.axis.Message;
@@ -62,6 +63,7 @@ import org.apache.axis.MessageContext;
 import org.apache.axis.message.SOAPEnvelope;
 import org.apache.axis.message.SOAPHeaderElement;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpTemplate;
@@ -295,5 +297,25 @@ public abstract class AbstractService {
         
         return doc;
     }        
+    
+    public Document createNewXMLDocument(String rootElementName) throws ParserConfigurationException {
+    	// creating a new document builder factory
+    	DocumentBuilderFactory newDocBuilderFactory = DocumentBuilderFactory.newInstance();
+
+    	// creating a new document builder
+    	DocumentBuilder newDocBuilder = newDocBuilderFactory.newDocumentBuilder();
+
+    	// creating a new xml document
+    	Document newXMLDocument = newDocBuilder.newDocument();
+
+    	if (rootElementName != null) {
+    		// creating the xml root document
+    		Element rootElement = newXMLDocument.createElement(rootElementName);    
+    		newXMLDocument.appendChild(rootElement);
+    	}
+
+    	return newXMLDocument;
+    }
+
         
 }
