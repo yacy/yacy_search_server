@@ -98,11 +98,11 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
     
     public static byte[] encodeComp(URL url, String descr, String author, String tags, String ETag) {
         serverCharBuffer s = new serverCharBuffer(200);
-        s.append(url.toNormalform()).append((char) 10);
-        s.append(descr).append((char) 10);
-        s.append(author).append((char) 10);
-        s.append(tags).append((char) 10);
-        s.append(ETag).append((char) 10);
+        s.append(url.toNormalform()).append(10);
+        s.append(descr).append(10);
+        s.append(author).append(10);
+        s.append(tags).append(10);
+        s.append(ETag).append(10);
         return s.toString().getBytes();
     }
     
