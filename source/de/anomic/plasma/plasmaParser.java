@@ -346,6 +346,9 @@ public final class plasmaParser {
     public static String getRealCharsetEncoding(String encoding) {
     	if ((encoding == null) || (encoding.length() == 0)) return "ISO-8859-1";
     	
+    	// trim encoding string
+    	encoding = encoding.trim();
+    	
     	if (encoding.toLowerCase().startsWith("windows") && encoding.length() > 7) {
     		char c = encoding.charAt(7);
     		if (c == '_') encoding = "windows-" + encoding.substring(8);
@@ -364,6 +367,23 @@ public final class plasmaParser {
     		else if ((c >= '0') && (c <= '9')) encoding = encoding.substring(0,8) + "-" + encoding.substring(8);    		
     	}    	
 
+    	
+    	// converting cp\d{4} -> windows-\d{4}
+    	if (encoding.toLowerCase().matches("cp([_-])?125[0-8]")) {
+    		char c = encoding.charAt(2);
+    		if (c == '_' || c == '-') encoding = "windows-" + encoding.substring(3);
+    		else if ((c >= '0') && (c <= '9')) encoding = "windows-" + encoding.substring(2);    		
+    	}    	
+    	
+    	if (encoding.toLowerCase().matches("gb[_-]?2312([-_]80)?")) {
+    		encoding = "x-EUC-CN";
+    	}
+    	
+    	if (encoding.toLowerCase().matches(".*utf[-_]?8.*")) {
+    		encoding = "UTF-8";
+    	}
+    	
+    	
     	return encoding;
     }
     
