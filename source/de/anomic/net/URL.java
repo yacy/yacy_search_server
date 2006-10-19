@@ -72,11 +72,11 @@ public class URL {
                 path = url.substring(q);
             }
             
-            resolveBackpath();
+            path = resolveBackpath(path);
             identPort(url);
             identRef();
             identQuest();
-            if (path.indexOf('%')==-1) escapePath(); 
+            escape();
         } else {
             // this is not a http or ftp url
             if (protocol.equals("mailto")) {
@@ -142,10 +142,10 @@ public class URL {
             this.quest = baseURL.quest;
             this.ref = baseURL.ref;
 
-            resolveBackpath();
+            path = resolveBackpath(path);
             identRef();
             identQuest();
-            if (path.indexOf('%')==-1) escapePath(); 
+            escape();
         }
     }
     
@@ -157,27 +157,74 @@ public class URL {
         this.path = path;
         identRef();
         identQuest();
-        if (path.indexOf('%')==-1) escapePath(); 
+        escape();
     }
 
-    private void resolveBackpath() throws MalformedURLException {
-        // resolve '..'
+    //  resolve '..'
+    private String resolveBackpath(String path) /* throws MalformedURLException */ {
+        /* original version by [MC]
         int p;
         while ((p = path.indexOf("/..")) >= 0) {
             String head = path.substring(0, p);
             int q = head.lastIndexOf('/');
             if (q < 0) throw new MalformedURLException("backpath cannot be resolved in path = " + path);
             path = head.substring(0, q) + path.substring(p + 3);
+        }*/
+        
+        /* by [MT] */
+        if (path.length() == 0 || path.charAt(0) != '/') { path = "/" + path; }
+
+        Pattern pathPattern = Pattern.compile("(/[^/\\.]+/)[.]{2}(?=/)|/\\.(?=/)|/(?=/)");
+        Matcher matcher = pathPattern.matcher(path);
+        while (matcher.find()) {
+            path = matcher.replaceAll("");
+            matcher.reset(path);
         }
+        
+        /* another version at http://www.yacy-forum.de/viewtopic.php?p=26871#26871 */
+        
+        return path;
+    }
+    
+    /**
+     * Escapes the following parts of the url, this object already contains:
+     * <ul>
+     * <li>path: see {@link: escape(String)}</li>
+     * <li>ref: same as above</li>
+     * <li>quest: same as above without the ampersand ("&amp;") and the equals symbol</li>
+     * </ul>
+     */
+    private void escape() {
+        if (path != null && path.indexOf('%') == -1) escapePath();
+        if (quest != null && quest.indexOf('%') == -1) escapeQuest();
+        if (ref != null && ref.indexOf('%') == -1) escapeRef();
     }
     
     private void escapePath() {
-        String[] pathp = path.split("/",-1);
+        String[] pathp = path.split("/", -1);
         String ptmp = "";
-        for (int i = 0; i<pathp.length; i++) {
-            ptmp += "/" + de.anomic.net.URL.escape(pathp[i]);
+        for (int i = 0; i < pathp.length; i++) {
+            ptmp += "/" + escape(pathp[i]);
         }
-        path = ptmp.substring((ptmp.length()>0) ? 1 : 0);
+        path = ptmp.substring((ptmp.length() > 0) ? 1 : 0);
+    }
+    
+    private void escapeRef() {
+        ref = escape(ref);
+    }
+    
+    private void escapeQuest() {
+        String[] questp = quest.split("&", -1);
+        String qtmp = "";
+        for (int i = 0; i < questp.length; i++) {
+            if (questp[i].indexOf('=') != -1) {
+                qtmp += "&" + escape(questp[i].substring(0, questp[i].indexOf('=')));
+                qtmp += "=" + escape(questp[i].substring(questp[i].indexOf('=') + 1));
+            } else {
+                qtmp += "&" + escape(questp[i]);
+            }
+        }
+        quest = qtmp.substring((qtmp.length() > 0) ? 1 : 0);
     }
     
     final static String[] hex = {
@@ -220,21 +267,19 @@ public class URL {
      * with the UTF-8-in-URL proposal. This is what happens:
      *
      * <ul>
-     * <li><p>The ASCII characters 'a' through 'z', 'A' through 'Z',
-     *        and '0' through '9' remain the same.
+     * <li>The ASCII characters 'a' through 'z', 'A' through 'Z',
+     *     and '0' through '9' remain the same.
      *
-     * <li><p>The unreserved characters - _ . ! ~ * ' ( ) remain the same.
+     * <li>The unreserved characters - _ . ! ~ * ' ( ) remain the same.
      *
-     * <li><p>The space character ' ' is converted into a plus sign '+'.
+     * <li>All other ASCII characters are converted into the
+     *     3-character string "%xy", where xy is
+     *     the two-digit hexadecimal representation of the character
+     *     code
      *
-     * <li><p>All other ASCII characters are converted into the
-     *        3-character string "%xy", where xy is
-     *        the two-digit hexadecimal representation of the character
-     *        code
-     *
-     * <li><p>All non-ASCII characters are encoded in two steps: first
-     *        to a sequence of 2 or 3 bytes, using the UTF-8 algorithm;
-     *        secondly each of these bytes is encoded as "%xx".
+     * <li>All non-ASCII characters are encoded in two steps: first
+     *     to a sequence of 2 or 3 bytes, using the UTF-8 algorithm;
+     *     secondly each of these bytes is encoded as "%xx".
      * </ul>
      *
      * @param s The string to be encoded
@@ -259,7 +304,7 @@ public class URL {
                     || ch == '.' || ch == '!'
                     || ch == '~' || ch == '*'
                     || ch == '\'' || ch == '('
-                    || ch == ')' || ch == '%') {
+                    || ch == ')') {
                 sbuf.append((char)ch);
             } else if (ch <= 0x007f) {              // other ASCII
                 sbuf.append(hex[ch]);
@@ -277,29 +322,25 @@ public class URL {
     
     // from: http://www.w3.org/International/unescape.java
     public static String unescape(String s) {
-        StringBuffer sbuf = new StringBuffer () ;
+        StringBuffer sbuf = new StringBuffer();
         int l  = s.length();
         int ch = -1;
         int b, sumb = 0;
-        for (int i = 0, more = -1 ; i < l ; i++) {
+        for (int i = 0, more = -1; i < l; i++) {
             /* Get next byte b from URL segment s */
             switch (ch = s.charAt(i)) {
-            case '%':
-                ch = s.charAt (++i) ;
-                int hb = (Character.isDigit ((char) ch) 
-                        ? ch - '0'
-                                : 10+Character.toLowerCase((char) ch) - 'a') & 0xF ;
-                ch = s.charAt (++i) ;
-                int lb = (Character.isDigit ((char) ch)
-                        ? ch - '0'
-                                : 10+Character.toLowerCase ((char) ch)-'a') & 0xF ;
-                b = (hb << 4) | lb ;
-                break ;
-            case '+':
-                b = ' ' ;
-                break ;
-            default:
-                b = ch ;
+                case '%':
+                    ch = s.charAt(++i) ;
+                    int hb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
+                    ch = s.charAt(++i) ;
+                    int lb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase ((char) ch) - 'a') & 0xF;
+                    b = (hb << 4) | lb;
+                    break;
+                case '+':
+                    b = ' ';
+                    break;
+                default:
+                    b = ch;
             }
             /* Decode byte b as UTF-8, sumb collects incomplete chars */
             if ((b & 0xc0) == 0x80) {               // 10xxxxxx (continuation byte)
@@ -325,7 +366,7 @@ public class URL {
             }
             /* We don't test if the UTF-8 encoding is well-formed */
         }
-        return sbuf.toString() ;
+        return sbuf.toString();
     }
     
     private void identPort(String inputURL) throws MalformedURLException {
@@ -427,19 +468,16 @@ public class URL {
         } else if (this.protocol.equals("https")) {
             if (this.port < 0 || this.port == 443) { defaultPort = true; }
         }
-        String path = this.getFile(includeReference);
-
-        if (path.length() == 0 || path.charAt(0) != '/') { path = "/" + path; }
-
-        Pattern pathPattern = Pattern.compile("(/[^/\\.]+/)[.]{2}(?=/)|/\\.(?=/)|/(?=/)");
-        Matcher matcher = pathPattern.matcher(path);
-        while (matcher.find()) {
-            path = matcher.replaceAll("");
-            matcher.reset(path);
-        }
+        String path = resolveBackpath(this.getFile(includeReference));
         
-        if (defaultPort) { return this.protocol + "://" + (this.userInfo!=null?this.userInfo+"@":"") + this.getHost().toLowerCase() + path; }
-        return this.protocol + "://" + (this.userInfo!=null?this.userInfo+"@":"")+ this.getHost().toLowerCase() + ((defaultPort) ? "" : (":" + this.port)) + path;
+        if (defaultPort) {
+            return this.protocol + "://" +
+                   ((this.userInfo != null) ? (this.userInfo + "@") : ("")) +
+                   this.getHost().toLowerCase() + path;
+        }
+        return this.protocol + "://" +
+               ((this.userInfo != null) ? (this.userInfo + "@") : ("")) +
+               this.getHost().toLowerCase() + ((defaultPort) ? ("") : (":" + this.port)) + path;
     }
     
     public boolean equals(URL other) {
@@ -486,7 +524,9 @@ public class URL {
           new String[]{null,"http://www.bla.org/bli bla blo"},
           new String[]{null,"http://www.blubb.org/bli bla/ blo blubb/bla.html"},
           new String[]{null,"http://california-press-release.com/30/Hendrick Chevrolet, the renowned car dealer for Chevrolet in Cary, North Carolina (NC) announces the arrival of 2007 Chevrolet Cobalt SS  Coupe For further information, call Hendrick Chevrolet on (800)-857-4909.php"},
-          new String[]{"http://california-press-release.com","30/Hendrick Chevrolet, the renowned car dealer for Chevrolet in Cary, North Carolina (NC) announces the arrival of 2007 Chevrolet Cobalt SS  Coupe For further information, call Hendrick Chevrolet on (800)-857-4909.php"}
+          new String[]{"http://california-press-release.com","/30/Hendrick%20Chevrolet%2c%20the%20renowned%20car%20dealer%20for%20Chevrolet%20in%20Cary%2c%20North%20Carolina%20(NC)%20announces%20the%20arrival%20of%202007%20Chevrolet%20Cobalt%20SS%20%20Coupe%20For%20further%20information%2c%20call%20Hendrick%20Chevrolet%20on%20(800)-857-4909.php"},
+          new String[]{null, "http://www.anomic.de/home/test?x=1&täst=xyß#höme"},
+          new String[]{null, "http://www.anomic.de/home/test?x&test=#"}
         };
         String environment, url;
         de.anomic.net.URL aURL = null;
@@ -500,15 +540,15 @@ public class URL {
             } else {
                 try {aURL = new de.anomic.net.URL(new de.anomic.net.URL(environment), url);} catch (MalformedURLException e) {aURL = null;}
                 try {jURL = new java.net.URL(new java.net.URL(environment), url);} catch (MalformedURLException e) {jURL = null;}
-            }/*
+            }
             if (((aURL == null) && (jURL != null)) ||
                 ((aURL != null) && (jURL == null)) ||
-                ((aURL != null) && (jURL != null) && (!(jURL.toString().equals(aURL.toString()))))) {*/
+                ((aURL != null) && (jURL != null) && (!(jURL.toString().equals(aURL.toString()))))) {
                 System.out.println("Difference for environment=" + environment + ", url=" + url + ":");
                 System.out.println((jURL == null) ? "jURL rejected input" : "jURL=" + jURL.toString());
                 System.out.println((aURL == null) ? "aURL rejected input" : "aURL=" + aURL.toString());
-                System.out.println();
-            //}
+                System.out.println((aURL == null || unescape(aURL.toString()) == null) ? "aURL rejected input" : "back=" + unescape(aURL.toString()));
+            }
         }
     }
 }
