@@ -69,6 +69,7 @@ public class SearchService extends AbstractService
     private static final String TEMPLATE_SEARCH = "yacysearch.soap";
     private static final String TEMPLATE_URLINFO = "ViewFile.soap";
     private static final String TEMPLATE_SNIPPET = "xml/snippet.xml";
+    private static final String TEMPLATE_OPENSEARCH = "opensearchdescription.xml";
 
         
     /**
@@ -263,6 +264,43 @@ public class SearchService extends AbstractService
        } catch (Exception e)  {
            throw new AxisFault(e.getMessage());
        }           
+   }
+
+   /**
+    * Returns the OpenSearch-Description of this peer
+    * @return a XML document of the following format:
+    * <pre>
+	* &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+	* &lt;OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"&gt;
+	*   &lt;ShortName&gt;YaCy/peerName&lt;/ShortName&gt;
+	*   &lt;LongName&gt;YaCy.net - P2P WEB SEARCH&lt;/LongName&gt;
+	*   &lt;Image type="image/gif"&gt;http://ip-address:port/env/grafics/yacy.gif&lt;/Image&gt;
+	*   &lt;Image type="image/vnd.microsoft.icon"&gt;http://ip-address:port/env/grafics/yacy.ico&lt;/Image&gt;
+	*   &lt;Language&gt;en-us&lt;/Language&gt;
+	*   &lt;OutputEncoding&gt;UTF-8&lt;/OutputEncoding&gt;
+	*   &lt;InputEncoding&gt;UTF-8&lt;/InputEncoding&gt;
+	*   &lt;AdultContent&gt;true&lt;/AdultContent&gt;
+	*   &lt;Description&gt;YaCy is a open-source GPL-licensed software that can be used for stand-alone search engine installations or as a client for a multi-user P2P-based web indexing cluster. This is the access to peer 'peername'.&lt;/Description&gt;
+	*   &lt;Url type="application/rss+xml" template="http://ip-address:port/yacysearch.rss?search={searchTerms}&amp;Enter=Search" /&gt;
+	*   &lt;Developer&gt;See http://developer.berlios.de/projects/yacy/&lt;/Developer&gt;
+	*   &lt;Query role="example" searchTerms="yacy" /&gt;
+	*   &lt;Tags&gt;YaCy P2P Web Search&lt;/Tags&gt;
+	*   &lt;Contact&gt;See http://ip-address:port/ViewProfile.html?hash=localhash&lt;/Contact&gt;
+	*   &lt;Attribution&gt;YaCy Software &amp;copy; 2004-2006 by Michael Christen et al., YaCy.net; Content: ask peer owner&lt;/Attribution&gt;
+	*   &lt;SyndicationRight&gt;open&lt;/SyndicationRight&gt;
+	* &lt;/OpenSearchDescription&gt;
+	* </pre>
+    * @throws Exception
+    */
+   public Document getOpenSearchDescription() throws Exception {
+       // extracting the message context
+       extractMessageContext(false);          	
+       
+       // generating the template containing the network status information
+       byte[] result = writeTemplate(TEMPLATE_OPENSEARCH, new serverObjects());
+       
+       // sending back the result to the client
+       return this.convertContentToXML(result);   	   
    }
 
 }
