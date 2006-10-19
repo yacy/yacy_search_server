@@ -69,6 +69,7 @@ import de.anomic.kelondro.kelondroRecords;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
@@ -680,69 +681,117 @@ public final class yacySeedDB {
             serverLog.logFine("YACY","SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
             log = uploader.uploadSeedFile(sb,seedDB,seedFile);
             
-            // check also if the result can be retrieved again
-            serverLog.logFine("YACY","SaveSeedList: Checking uploading success ...");
-            if (checkCache(uv, seedURL))
+            // test download
+            serverLog.logFine("YACY","SaveSeedList: Trying to download seed-file '" + seedURL + "'.");
+            ArrayList check = downloadSeedFile(seedURL);
+            
+            // Comparing if local copy and uploaded copy are equal
+            String errorMsg = checkCache(uv, check);
+            if (errorMsg == null)
                 log = log + "UPLOAD CHECK - Success: the result vectors are equal" + serverCore.crlfString;
             else {
-                throw new Exception("UPLOAD CHECK - Error: the result vector is different" + serverCore.crlfString);
+                throw new Exception("UPLOAD CHECK - Error: the result vector is different. " + errorMsg + serverCore.crlfString);
             }
         } finally {
-            if (seedFile != null) seedFile.delete();
+            if (seedFile != null) try { seedFile.delete(); } catch (Exception e) {/* ignore this */}
         }
         
         return log;
     }
-        
-    public String copyCache(File seedFile, URL seedURL) throws IOException {
-        if (seedURL == null) return "COPY - Error: URL not given";
-        ArrayList uv = storeCache(seedFile, true);
+    
+    private ArrayList downloadSeedFile(URL seedURL) throws IOException {
+    	httpc remote = null;
         try {
-            // check also if the result can be retrieved again
-            if (checkCache(uv, seedURL))
-                return "COPY CHECK - Success: the result vectors are equal" + serverCore.crlfString;
-            else
-                return "COPY CHECK - Error: the result vector is different" + serverCore.crlfString;
-        } catch (IOException e) {
-            return "COPY CHECK - Error: IO problem " + e.getMessage() + serverCore.crlfString;
-        }
+            // init httpc
+        	if ((sb.remoteProxyConfig == null)||(!sb.remoteProxyConfig.useProxy())) {
+            remote = httpc.getInstance(
+            		seedURL.getHost(),
+            		seedURL.getHost(),
+            		seedURL.getPort(),
+            		10000,
+            		seedURL.getProtocol().equalsIgnoreCase("https"));
+        	} else {
+                remote = httpc.getInstance(
+                		seedURL.getHost(),
+                		seedURL.getHost(),
+                		seedURL.getPort(),
+                		10000,
+                		seedURL.getProtocol().equalsIgnoreCase("https"),
+                		sb.remoteProxyConfig);        		
+        	}
+            
+            // Configure http headers
+            httpHeader reqHeader = new httpHeader();
+            reqHeader.put(httpHeader.PRAGMA, "no-cache");
+            reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?            
+            
+            // send request
+            httpc.response res = remote.GET(seedURL.getFile(), reqHeader);
+            
+            // check response code
+            if (res.statusCode != 200) {
+            	throw new IOException("Server returned status: " + res.status);
+            }
+            
+            
+            // read byte array
+            byte[] content = serverFileUtils.read(res.getContentInputStream());
+            
+            // uncompress it if it is gzipped
+            content = serverFileUtils.uncompressGZipArray(content);
+
+            // convert it into an array
+            return nxTools.strings(content,"UTF-8");
+        } catch (Exception e) {
+        	throw new IOException("Unable to download seed file '" + seedURL + "'. " + e.getMessage());
+        } finally {
+        	if (remote != null) try { httpc.returnInstance(remote); } catch (Exception e) {}
+        } 	
+    }
+        
+    /**
+     * @deprecated: Function seems to be unused
+     */
+    public String copyCache(File seedFile, URL seedURL) throws IOException {
+    	if (seedURL == null) return "COPY - Error: URL not given";
+    	
+    	try {
+    		// getting the current list
+    		ArrayList uv = storeCache(seedFile, true);
+    		
+    		// test download
+    		serverLog.logFine("YACY","Trying to download seed-file '" + seedURL + "'.");
+    		ArrayList check = downloadSeedFile(seedURL);
+    		
+    		// Comparing if local copy and uploaded copy are equal
+    		String errorMsg = checkCache(uv, check);
+    		if (errorMsg == null) {        	        
+    			return "COPY CHECK - Success: the result vectors are equal" + serverCore.crlfString;
+    		} else {
+    			return "COPY CHECK - Error: the result vector is different. " + errorMsg + serverCore.crlfString;
+    		}
+    	} catch (IOException e) {
+    		return "COPY CHECK - Error: IO problem " + e.getMessage() + serverCore.crlfString;
+    	}
     }
 
-    private boolean checkCache(ArrayList uv, URL seedURL) throws IOException {        
-        // check if the result can be retrieved again
-        // TODO: should we check the useProxy4Yacy option here???
-        httpHeader reqHeader = new httpHeader();
-        reqHeader.put(httpHeader.PRAGMA, "no-cache");
-        reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
-        ArrayList check  = nxTools.strings(httpc.wget(
-                seedURL,
-                seedURL.getHost(),
-                10000, 
-                null, 
-                null, 
-                sb.remoteProxyConfig,
-                reqHeader
-        ), "UTF-8");
-        
-        if (check == null) {
-            serverLog.logFine("YACY","SaveSeedList: Testing download failed ...");
-        }
-                
+    private String checkCache(ArrayList uv, ArrayList check) throws IOException {                
         if ((check == null) || (uv == null) || (uv.size() != check.size())) {
             serverLog.logFine("YACY","SaveSeedList: Local and uploades seed-list " +
                                "contains varying numbers of entries." +
                                "\n\tLocal seed-list:  " + uv.size() + " entries" + 
                                "\n\tRemote seed-list: " + check.size() + " enties");
-            return false;
-        } else {
-            serverLog.logFine("YACY","SaveSeedList: Comparing local and uploades seed-list entries ...");
-            int i;
-            for (i = 0; i < uv.size(); i++) {
-                if (!(((String) uv.get(i)).equals((String) check.get(i)))) return false;
-            }
-            if (i == uv.size()) return true;
+            return "Entry count is different";
+        } 
+        	
+        serverLog.logFine("YACY","SaveSeedList: Comparing local and uploades seed-list entries ...");
+        int i;
+        for (i = 0; i < uv.size(); i++) {
+        	if (!(((String) uv.get(i)).equals((String) check.get(i)))) return "Element at position " + i + " is different.";
         }
-        return false;
+        
+        // no difference found
+        return null;
     }
 
     public String resolveYacyAddress(String host) {

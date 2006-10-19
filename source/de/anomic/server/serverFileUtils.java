@@ -64,6 +64,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -283,7 +284,9 @@ public final class serverFileUtils {
                                    : new ByteArrayOutputStream();
         copy(source, baos, count);
         baos.close();
-        return baos.toByteArray();
+        
+        // convert Stream into array
+        return baos.toByteArray();        
     }
 
     public static byte[] read(File source) throws IOException {
@@ -345,6 +348,42 @@ public final class serverFileUtils {
 
     public static void write(byte[] source, File dest) throws IOException {
         copy(new ByteArrayInputStream(source), dest);
+    }
+    
+    /**
+     * This function determines if a byte array is gzip compressed and uncompress it
+     * @param source properly gzip compressed byte array
+     * @return uncompressed byte array
+     * @throws IOException
+     */
+    public static byte[] uncompressGZipArray(byte[] source) throws IOException {
+    	if (source == null) return null;
+    	
+        // support of gzipped data (requested by roland)      
+        if ((source.length > 1) && (((source[1] << 8) | source[0]) == GZIPInputStream.GZIP_MAGIC)) {
+            try {
+                ByteArrayInputStream byteInput = new ByteArrayInputStream(source);
+                ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
+                GZIPInputStream zippedContent = new GZIPInputStream(byteInput);
+                byte[] data = new byte[1024];
+                int read = 0;
+                
+                // reading gzip file and store it uncompressed
+                while((read = zippedContent.read(data, 0, 1024)) != -1) {
+                    byteOutput.write(data, 0, read);
+                }
+                zippedContent.close();
+                byteOutput.close();   
+                
+                source = byteOutput.toByteArray();
+            } catch (Exception e) {
+                if (!e.getMessage().equals("Not in GZIP format")) {
+                    throw new IOException(e.getMessage());
+                }
+            }
+        }    
+        
+        return source;
     }
 
     public static HashSet loadList(File file) {

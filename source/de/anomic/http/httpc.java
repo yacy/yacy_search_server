@@ -324,6 +324,8 @@ public final class httpc {
             boolean ssl,
             httpRemoteProxyConfig remoteProxyConfig
             ) throws IOException {
+    	if (remoteProxyConfig == null) throw new NullPointerException("Proxy object must not be null.");
+    	
         return getInstance(server,vhost,port,timeout,ssl,remoteProxyConfig,null,null);
     }
 
@@ -1338,29 +1340,9 @@ do upload
         if (a == null) return null;
         
         // support of gzipped data (requested by roland)      
-        if ((a.length > 1) && (((a[1] << 8) | a[0]) == GZIPInputStream.GZIP_MAGIC)) {
-            try {
-                ByteArrayInputStream byteInput = new ByteArrayInputStream(a);
-                ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
-                GZIPInputStream zippedContent = new GZIPInputStream(byteInput);
-                byte[] data = new byte[1024];
-                int read = 0;
-                
-                // reading gzip file and store it uncompressed
-                while((read = zippedContent.read(data, 0, 1024)) != -1) {
-                    byteOutput.write(data, 0, read);
-                }
-                zippedContent.close();
-                byteOutput.close();   
-                
-                a = byteOutput.toByteArray();
-            } catch (Exception e) {
-                if (!e.getMessage().equals("Not in GZIP format")) {
-                    throw new IOException(e.getMessage());
-                }
-            }
-        }
-        
+        a = serverFileUtils.uncompressGZipArray(a);
+
+        // return result
         return a;
     }
 
