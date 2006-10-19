@@ -545,7 +545,15 @@ public final class httpc {
     */
     public static String dateString(Date date) {
         if (date == null) return "";
-        return HTTPGMTFormatter.format(date);
+        
+        /*
+         * This synchronized is needed because SimpleDateFormat
+         * is not thread-safe.
+         * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
+         */
+        synchronized(HTTPGMTFormatter) {
+        	return HTTPGMTFormatter.format(date);
+        }
     }
 
     /**
