@@ -1121,57 +1121,6 @@ public final class yacy {
         }
     }
     
-    /*
-    private static void migratelurls(String homePath) {
-        File root = new File(homePath);
-        try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, false, 1000, false, 1000, false, 10000);
-            kelondroFlexSplitTable fsp = new kelondroFlexSplitTable(new File(root, "DATA/INDEX/PUBLIC/TEXT"), "urls", 1000, -1, plasmaCrawlLURLNewEntry.rowdef, kelondroBase64Order.enhancedCoder);
-
-            long start = System.currentTimeMillis();
-            long last = start;
-            int tc = pool.loadedURL.size(), c = 0;
-            Iterator eiter = pool.loadedURL.entries(true, false, null);
-            plasmaCrawlLURLEntry oldentry;
-            kelondroRow.Entry newentry;
-            while (eiter.hasNext()) {
-                oldentry = (plasmaCrawlLURLEntry) eiter.next();
-                if (oldentry != null) {
-                    plasmaCrawlLURLEntry.Components comp = oldentry.comp();
-                    newentry = plasmaCrawlLURLNewEntry.rowdef.newEntry();
-                    newentry.setCol("hash", indexURL.urlHash(comp.url()), null);
-                    newentry.setCol("comp", plasmaCrawlLURLNewEntry.encodeComp(comp.url(), comp.descr(), "", "", ""));
-                    newentry.setCol("mod", plasmaCrawlLURLNewEntry.encodeDate(oldentry.moddate()));
-                    newentry.setCol("load", plasmaCrawlLURLNewEntry.encodeDate(oldentry.loaddate()));
-                    newentry.setCol("referrer", oldentry.referrerHash().getBytes());
-                    newentry.setCol("md5", new byte[0]);
-                    newentry.setCol("size", oldentry.size());
-                    newentry.setCol("wc", oldentry.wordCount());
-                    newentry.setCol("dt", oldentry.doctype());
-                    newentry.setCol("flags", new bitfield(4).getBytes());
-                    newentry.setCol("lang", oldentry.language().getBytes());
-                    newentry.setCol("llocal", 0);
-                    newentry.setCol("lother", 0);
-                    newentry.setCol("limage", 0);
-                    newentry.setCol("laudio", 0);
-                    newentry.setCol("lvideo", 0);
-                    newentry.setCol("lapp", 0);
-                    fsp.put(newentry, oldentry.loaddate());
-                }
-                c++;
-                if (System.currentTimeMillis() - last > 60000) {
-                    System.out.println("Migrated " + c + " from " + tc + " urls. Estimated remaining time: " + ((System.currentTimeMillis() - start) * (tc - c) / c / 60000) + " minutes");
-                    last = System.currentTimeMillis();
-                }
-            }
-            System.out.println("MIGRATION OF " + c + " URLs FINISHED");
-            pool.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    */
-    
     private static void migratelurls(File root, File urlHash) {
         try {
             plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, true, 1000, true, 1000, true, 10000);
@@ -1212,7 +1161,7 @@ public final class yacy {
                 }
                 c++;
                 if (System.currentTimeMillis() - last > 60000) {
-                    System.out.println("Migrated " + c + " from " + tc + " urls. Estimated remaining time: " + ((System.currentTimeMillis() - start) * (tc - c) * Math.sqrt(Math.sqrt(tc - c)) / c / 60000) + " minutes");
+                    System.out.println("Migrated " + c + " from " + tc + " urls. Estimated remaining time: " + ((System.currentTimeMillis() - start) * (tc - c)  / c / 60000) + " minutes");
                     last = System.currentTimeMillis();
                 }
             }
