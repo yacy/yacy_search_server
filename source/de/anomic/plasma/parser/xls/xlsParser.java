@@ -64,8 +64,8 @@ import de.anomic.plasma.parser.ParserException;
 
 public class xlsParser extends AbstractParser implements Parser, HSSFListener {
 
-    //StringBuffer which contains the found strings after parsing the XLS file
-    private StringBuffer sbFoundStrings = new StringBuffer();
+    //StringBuffer for parsed text
+    private StringBuffer sbFoundStrings = null;
     
     //sstrecord needed for event parsing
     private SSTRecord sstrec;
@@ -106,6 +106,9 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
             String charset, InputStream source) throws ParserException,
             InterruptedException {
         try {
+            //generate new StringBuffer for parsing
+            sbFoundStrings = new StringBuffer();
+            
             //create a new org.apache.poi.poifs.filesystem.Filesystem
             POIFSFileSystem poifs = new POIFSFileSystem(source);
             //get the Workbook (excel part) stream in a InputStream
@@ -154,6 +157,8 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
             String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
             this.theLogger.logSevere(errorMsg);            
             throw new ParserException(errorMsg, location);
+        } finally {
+            sbFoundStrings = null;
         }
     }
     
