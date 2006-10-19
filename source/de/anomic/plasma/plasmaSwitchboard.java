@@ -199,7 +199,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     // storage management
     public  File                        htCachePath;
     private File                        plasmaPath;
-    public  File                        indexPublicTextPath;
+    public  File                        indexPath;
     public  File                        listsPath;
     public  File                        htDocsPath;
     public  File                        rankingPath;
@@ -279,8 +279,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // load values from configs
         this.plasmaPath   = new File(rootPath, getConfig("dbPath", "DATA/PLASMADB"));
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
-        this.indexPublicTextPath = new File(rootPath, getConfig("indexPublicTextPath", "DATA/INDEX/PUBLIC/TEXT"));
-        this.log.logConfig("Index Path: " + this.indexPublicTextPath.toString());
+        this.indexPath = new File(rootPath, getConfig("indexPath", "DATA/INDEX"));
+        this.log.logConfig("Index Path: " + this.indexPath.toString());
         this.listsPath      = new File(rootPath, getConfig("listsPath", "DATA/LISTS"));
         this.log.logConfig("Lists Path:     " + this.listsPath.toString());
         this.htDocsPath   = new File(rootPath, getConfig("htDocsPath", "DATA/HTDOCS"));
@@ -418,12 +418,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // start indexing management
         log.logConfig("Starting Indexing Management");
-        urlPool = new plasmaURLPool(plasmaPath,
+        urlPool = new plasmaURLPool(plasmaPath, indexPath,
                                     ramLURL, getConfigBool("useFlexTableForLURL", false),
                                     ramNURL, getConfigBool("useFlexTableForNURL", false),
                                     ramEURL, getConfigBool("useFlexTableForEURL", true),
                                     ramLURL_time);
-        wordIndex = new plasmaWordIndex(plasmaPath, indexPublicTextPath, ramRWI, ramRWI_time, log, getConfigBool("useCollectionIndex", false));
+        wordIndex = new plasmaWordIndex(plasmaPath, indexPath, true, ramRWI, ramRWI_time, log, getConfigBool("useCollectionIndex", false));
 
         // set a high maximum cache size to current size; this is adopted later automatically
         int wordCacheMaxCount = Math.max((int) getConfigLong("wordCacheInitCount", 30000),
@@ -1559,20 +1559,23 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     
                     // create a new loaded URL db entry
                     plasmaCrawlLURLEntry newEntry = urlPool.loadedURL.newEntry(
-                            entry.url().toNormalform(),                             // URL
-                            docDescription,                                         // document description
-                            docDate,                                                // modification date
-                            new Date(),                                             // loaded date
-                            referrerUrlHash,                                        // referer hash
-                            0,                                                      // copy count
-                            true,                                                   // local need
-                            condenser.RESULT_WORD_ENTROPHY,                         // quality
-                            indexEntryAttribute.language(entry.url()),              // language
-                            indexEntryAttribute.docType(document.getMimeType()),    // doctype
-                            (int) entry.size(),                                     // size
-                            condenser.RESULT_NUMB_WORDS                             // word count
+                            entry.url(),                                         // URL
+                            docDescription,                                      // document description
+                            "",                                                  // author
+                            "",                                                  // tags
+                            "",                                                  // ETag
+                            docDate,                                             // modification date
+                            new Date(),                                          // loaded date
+                            new Date(),                                          // freshdate 
+                            referrerUrlHash,                                     // referer hash
+                            new byte[0],                                         // md5
+                            (int) entry.size(),                                  // size
+                            condenser.RESULT_NUMB_WORDS,                         // word count
+                            indexEntryAttribute.docType(document.getMimeType()), // doctype
+                            new bitfield(4),                                     // flags
+                            indexEntryAttribute.language(entry.url()),           // language
+                            0,0,0,0,0,0
                     );
-                    
                     /* ========================================================================
                      * STORE URL TO LOADED-URL-DB
                      * ======================================================================== */
@@ -1968,7 +1971,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         String lurl = (String) page.get("lurl");
                         if ((lurl != null) && (lurl.length() != 0)) {
                             String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));
-                            plasmaCrawlLURLEntry entry = urlPool.loadedURL.newEntry(propStr, true);
+                            plasmaCrawlLURLEntry entry = urlPool.loadedURL.newEntry(propStr);
                             urlPool.loadedURL.store(entry);
                             urlPool.loadedURL.stack(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
                             urlPool.noticeURL.remove(entry.hash());

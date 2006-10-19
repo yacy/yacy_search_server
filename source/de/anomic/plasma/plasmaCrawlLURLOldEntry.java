@@ -36,7 +36,9 @@ import de.anomic.index.indexURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.net.URL;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 
 public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
@@ -56,7 +58,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
             "Cardinal size-" + indexURL.urlSizeLength + " {b64e}, " + // size of file in bytes
             "Cardinal wc-" + indexURL.urlWordCountLength + " {b64e}"); // word count
 
-    private String url;
+    private URL url;
     private String descr;
     private Date moddate;
     private Date loaddate;
@@ -72,24 +74,42 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
     private String snippet;
     private indexEntry word; // this is only used if the url is transported via remote search requests
 
-    public plasmaCrawlLURLOldEntry(String url, String descr, Date moddate,
-            Date loaddate, String referrerHash, int copyCount,
-            boolean localNeed, int quality, String language, char doctype,
-            int size, int wordCount) {
+    public plasmaCrawlLURLOldEntry(
+            URL url,
+            String descr,
+            String author,
+            String tags,
+            String ETag,
+            Date mod,
+            Date load,
+            Date fresh,
+            String referrer,
+            byte[] md5,
+            long size,
+            int wc,
+            char dt,
+            bitfield flags,
+            String lang,
+            int llocal,
+            int lother,
+            int laudio,
+            int limage,
+            int lvideo,
+            int lapp) {
         // create new entry and store it into database
         this.urlHash = indexURL.urlHash(url);
         this.url = url;
         this.descr = (descr == null) ? this.url.toString() : descr;
-        this.moddate = moddate;
-        this.loaddate = loaddate;
+        this.moddate = mod;
+        this.loaddate = load;
         this.referrerHash = (referrerHash == null) ? indexURL.dummyHash : referrerHash;
-        this.copyCount = copyCount; // the number of remote (global) copies of this object without this one
-        this.flags = (localNeed) ? "L " : "  ";
-        this.quality = quality;
+        this.copyCount = 0; // the number of remote (global) copies of this object without this one
+        this.flags = "  ";
+        this.quality = 0;
         this.language = (language == null) ? "uk" : language;
-        this.doctype = doctype;
-        this.size = size;
-        this.wordCount = wordCount;
+        this.doctype = dt;
+        this.size = (int) size;
+        this.wordCount = wc;
         this.snippet = null;
         this.word = null;
     }
@@ -97,7 +117,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
     public plasmaCrawlLURLOldEntry(kelondroRow.Entry entry, indexEntry searchedWord) throws IOException {
         try {
             this.urlHash = entry.getColString(0, null);
-            this.url = entry.getColString(1, "UTF-8").trim();
+            this.url = new URL(entry.getColString(1, "UTF-8").trim());
             this.descr = (entry.empty(2)) ? this.url.toString() : entry.getColString(2, "UTF-8").trim();
             this.moddate = new Date(86400000 * entry.getColLong(3));
             this.loaddate = new Date(86400000 * entry.getColLong(4));
@@ -118,7 +138,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
         }
     }
 
-    public plasmaCrawlLURLOldEntry(Properties prop, boolean setGlobal) {
+    public plasmaCrawlLURLOldEntry(Properties prop) {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
@@ -130,8 +150,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
             this.loaddate = indexURL.shortDayFormatter.parse(prop.getProperty("load", "20000101"));
             this.copyCount = Integer.parseInt(prop.getProperty("cc", "0"));
             this.flags = ((prop.getProperty("local", "true").equals("true")) ? "L " : "  ");
-            if (setGlobal) this.flags = "G ";
-            this.url = crypt.simpleDecode(prop.getProperty("url", ""), null);
+            this.url = new URL(crypt.simpleDecode(prop.getProperty("url", ""), null));
             this.descr = crypt.simpleDecode(prop.getProperty("descr", ""), null);
             if (this.descr == null) this.descr = this.url.toString();
             this.quality = (int) kelondroBase64Order.enhancedCoder.decodeLong(prop.getProperty("q", ""));
@@ -154,6 +173,10 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
         }
     }
 
+    public static kelondroRow rowdef() {
+        return rowdef;
+    }
+    
     public kelondroRow.Entry toRowEntry() throws IOException {
         final String moddatestr = kelondroBase64Order.enhancedCoder.encodeLong(moddate.getTime() / 86400000, indexURL.urlDateLength);
         final String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, indexURL.urlDateLength);
@@ -192,6 +215,10 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
     }
 
     public Date loaddate() {
+        return loaddate;
+    }
+
+    public Date freshdate() {
         return loaddate;
     }
 

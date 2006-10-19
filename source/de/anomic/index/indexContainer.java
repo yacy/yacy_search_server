@@ -78,7 +78,7 @@ public class indexContainer extends kelondroRowSet {
     }
 
     public int add(indexEntry entry) {
-        this.add(entry.toKelondroEntry());
+        this.addUnique(entry.toKelondroEntry());
         return 1;
     }
 

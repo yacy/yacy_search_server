@@ -114,6 +114,14 @@ public class kelondroSplittedTree implements kelondroIndex {
         return put(row);
     }
     
+    public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+    
+    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+    
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
         return ktfs[partition(row.getColBytes(0))].put(row);
     }

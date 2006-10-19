@@ -148,7 +148,7 @@ public class kelondroRecords {
     protected int readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     
     // optional logger
-    protected Logger theLogger = null;
+    protected Logger theLogger = Logger.getLogger("KELONDRO"); // default logger
     
     // tracking of file cration
     protected boolean fileExisted;
@@ -1046,19 +1046,38 @@ public class kelondroRecords {
         synchronized (USAGE) {
             if (USAGE.FREEC != 0) {
                 Handle h = USAGE.FREEH;
+                long repair_position = POS_FREEH;
+                int iter = 0;
                 while (h.index != NUL) {
-                    //System.out.println("handle=0x" + Integer.toHexString(h.index));
+                    // check handle
+                    seekp = seekpos(h);
+                    if (seekp > entryFile.length()) {
+                        // repair last hande store position
+                        this.theLogger.severe("KELONDRO WARNING " + this.filename + ": seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize) + " after " + iter + " iterations");
+                        entryFile.writeInt(repair_position, NUL);
+                        return markedDeleted;
+                    }
+
+                    // handle seems to be corrent. store handle
+                    markedDeleted.add(h);
+                    
+                    // move to next handle
+                    repair_position = seekp;
+                    h = new Handle(entryFile.readInt(seekp));
+                    
+                    // double-check for already stored handles: detect loops
                     if (markedDeleted.contains(h)) {
                         // loop detection
                         this.theLogger.severe("KELONDRO WARNING " + this.filename + ": FREE-Queue contains loops");
-                        return markedDeleted; // TODO: automatic fix
+                        entryFile.writeInt(repair_position, NUL);
+                        return markedDeleted;
                     }
-                    markedDeleted.add(h);
-                    seekp = seekpos(h);
-                    if (seekp > entryFile.length()) throw new kelondroException("deletedHandles: seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
-                    h = new Handle(entryFile.readInt(seekp));
+                    
+                    // this appears to be correct. go on.
+                    iter++;
                     if (System.currentTimeMillis() > timeLimit) throw new kelondroException(filename, "time limit of " + maxTime + " exceeded; > " + markedDeleted.size() + " deleted entries");
                 }
+                System.out.println("\nDEBUG: " + iter + " deleted entries in " + entryFile.name());
             }
         }
         return markedDeleted;

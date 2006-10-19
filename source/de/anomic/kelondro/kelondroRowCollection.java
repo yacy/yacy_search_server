@@ -24,6 +24,7 @@
 
 package de.anomic.kelondro;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -198,10 +199,14 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public void add(kelondroRow.Entry a) {
-        add(a.bytes(), 0, a.bytes().length);
+    public void addUnique(kelondroRow.Entry row) {
+        add(row.bytes(), 0, row.bytes().length);
     }
     
+    public void addUnique(kelondroRow.Entry row, Date entryDate) {
+        addUnique(row);
+    }
+
     public void add(byte[] a) {
         add(a, 0, a.length);
     }
@@ -225,7 +230,7 @@ public class kelondroRowCollection {
         kelondroRow.Entry entry;
         while (i.hasNext()) {
             entry = (kelondroRow.Entry) i.next();
-            add(entry);
+            addUnique(entry);
         }
     }
     

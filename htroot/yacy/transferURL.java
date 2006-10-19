@@ -97,7 +97,7 @@ public final class transferURL {
                 if (urls == null) {
                     yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
                 } else {
-                    lEntry = sb.urlPool.loadedURL.newEntry(urls, true);
+                    lEntry = sb.urlPool.loadedURL.newEntry(urls);
                     if (lEntry == null) {
                         yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                         // TODO: should we send back an error message???

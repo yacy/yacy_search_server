@@ -75,6 +75,14 @@ public class kelondroRAMIndex implements kelondroIndex {
         return (kelondroRow.Entry) index.put(row.getColBytes(0), row);
     }
 
+    public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+    
+    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
     public synchronized Entry remove(byte[] key) {
         return (kelondroRow.Entry) index.remove(key);
     }

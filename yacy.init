@@ -201,7 +201,7 @@ promoteSearchPageGreeting =
 dbPath=DATA/PLASMADB
 
 # the path to the public reverse word index for text files (web pages)
-indexPublicTextPath=DATA/INDEX/PUBLIC/TEXT
+indexPath=DATA/INDEX
 
 # the path to the LISTS files. Most lists are used to filter web content
 listsPath=DATA/LISTS
@@ -819,6 +819,7 @@ currentSkin=
 useCollectionIndex=false
 useFlexTableForNURL=false
 useFlexTableForEURL=true
+useFlexTableForLURL=false
 tableTypeForPreNURL=2
 
 # flag to show surftipps on index.html page

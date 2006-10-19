@@ -553,6 +553,14 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         return result;
     }
 
+    public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+    
+    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+    
     private void assignChild(Node parentNode, Node childNode, int childType) throws IOException {
         parentNode.setOHHandle(childType, childNode.handle());
         childNode.setOHHandle(parent, parentNode.handle());

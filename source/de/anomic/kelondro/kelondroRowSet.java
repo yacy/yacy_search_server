@@ -97,7 +97,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
                 set(index, entry);
                 removeMarker.remove(new Integer(index));
             } else if (index < 0) {
-                add(entry);
+                addUnique(entry);
             } else {
                 oldentry = get(index);
                 set(index, entry);

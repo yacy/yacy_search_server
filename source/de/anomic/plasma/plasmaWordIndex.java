@@ -72,7 +72,7 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
     public        boolean                          useCollectionIndex;   // flag for usage of new collectionIndex db
     private       int idleDivisor, busyDivisor;
     
-    public plasmaWordIndex(File oldDatabaseRoot, File newIndexRoot, int bufferkb, long preloadTime, serverLog log, boolean useCollectionIndex) {
+    public plasmaWordIndex(File oldDatabaseRoot, File newIndexRoot, boolean dummy, int bufferkb, long preloadTime, serverLog log, boolean useCollectionIndex) {
         this.oldDatabaseRoot = oldDatabaseRoot;
         this.backend = new plasmaWordIndexFileCluster(oldDatabaseRoot, log);
         this.dhtOutCache = new indexRAMCacheRI(oldDatabaseRoot, (useCollectionIndex) ? 1024 : 64, "indexDump1.array", log);
@@ -83,9 +83,10 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         this.assortmentBufferSize = bufferkb;
         
         // create collections storage path
-        if (!(newIndexRoot.exists())) newIndexRoot.mkdirs();
+        File textindexpath = new File(newIndexRoot, "PUBLIC/TEXT");
+        if (!(textindexpath.exists())) textindexpath.mkdirs();
         if (useCollectionIndex) {
-            this.collections = new indexCollectionRI(newIndexRoot, "test_generation1", bufferkb * 1024, preloadTime);
+            this.collections = new indexCollectionRI(textindexpath, "test_generation1", bufferkb * 1024, preloadTime);
             if (assortmentClusterPath.exists())
                 this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, assortmentBufferSize, preloadTime, log);
             else
@@ -855,8 +856,8 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
         // System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
         // System.out.println(new Date(reverseMicroDateDays(microDateDays(System.currentTimeMillis()))));
         File plasmadb = new File("D:\\dev\\proxy\\DATA\\PLASMADB");
-        File indexdb = new File("D:\\dev\\proxy\\DATA\\INDEX\\PRIVATE\\TEXT");
-        plasmaWordIndex index = new plasmaWordIndex(plasmadb, indexdb, 555, 1000, new serverLog("TESTAPP"), false);
+        File indexdb = new File("D:\\dev\\proxy\\DATA\\INDEX");
+        plasmaWordIndex index = new plasmaWordIndex(plasmadb, indexdb, true, 555, 1000, new serverLog("TESTAPP"), false);
         try {
             Iterator containerIter = index.wordContainers("5A8yhZMh_Kmv", plasmaWordIndex.RL_WORDFILES, true);
             while (containerIter.hasNext()) {

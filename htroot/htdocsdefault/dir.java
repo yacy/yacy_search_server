@@ -73,6 +73,7 @@ import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.bitfield;
 import de.anomic.tools.dirlistComparator;
 import de.anomic.tools.md5DirFileFilter;
 import de.anomic.yacy.yacyCore;
@@ -174,14 +175,15 @@ public class dir {
             final byte[] binary = (byte[]) post.get("file$file", new byte[0]);
             try {
                 serverFileUtils.write(binary, newfile);
-                String md5s = serverCodings.encodeMD5Hex(newfile);
+                byte[] md5 = serverCodings.encodeMD5Raw(newfile);
+                String md5s = serverCodings.encodeHex(md5);
                 serverFileUtils.write((md5s + "\n" + description).getBytes("UTF-8"), newfilemd5); // generate md5
 
                 // index file info
                 if (post.get("indexing", "").equals("on")) {
                     final String urlstring = yacyhURL(yacyCore.seedDB.mySeed, filename, md5s);
                     final String phrase = filename.replace('.', ' ').replace('_', ' ').replace('-', ' ');
-                    indexPhrase(switchboard, urlstring, phrase, description);
+                    indexPhrase(switchboard, urlstring, phrase, description, md5);
                 }
             } catch (IOException e) {}
         } else if (action.equals("newdir") && (uploadAuthorization || adminAuthorization)) {
@@ -354,20 +356,27 @@ public class dir {
         return "http://share." + seed.getHexHash() + ".yacyh/" + filename + "?md5=" + md5;
     }
 
-    public static void indexPhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr) {
+    public static void indexPhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr, byte[] md5) {
         try {
             final URL url = new URL(urlstring);
             final plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()));
             final plasmaCrawlLURLEntry newEntry = switchboard.urlPool.loadedURL.newEntry(
-                url.toNormalform(), "YaCyShare: " + descr, new Date(), new Date(),
-                "AAAAAAAAAAAA", /*referrer*/
-                0, /*copycount*/
-                false, /*localneed*/
-                condenser.RESULT_WORD_ENTROPHY,
-                "**", /*language*/
-                indexEntryAttribute.DT_SHARE, /*doctype*/
-                phrase.length(), /*size*/
-                condenser.RESULT_NUMB_WORDS
+                url,
+                "YaCyShare: " + descr,
+                yacyCore.seedDB.mySeed.getName(),
+                "", // tags
+                "", // ETag
+                new Date(), // modification
+                new Date(), // loadtime
+                new Date(), // freshtime
+                "AAAAAAAAAAAA", // referrer
+                md5, // md5
+                (long) phrase.length(), // size
+                condenser.RESULT_NUMB_WORDS, // word count
+                indexEntryAttribute.DT_SHARE, // doctype
+                new bitfield(4),
+                "**", // language
+                0,0,0,0,0,0
             );
             switchboard.urlPool.loadedURL.store(newEntry);
             switchboard.urlPool.loadedURL.stack(

@@ -37,33 +37,20 @@ import de.anomic.index.indexEntry;
 public interface plasmaCrawlLURLEntry {
 
     public kelondroRow.Entry toRowEntry() throws IOException;
-
     public String hash();
-
     public Components comp();
-
     public Date moddate();
-
     public Date loaddate();
-
+    public Date freshdate();
     public String referrerHash();
-
     public char doctype();
-
     public String language();
-
     public int size();
-
     public int wordCount();
-
     public String snippet();
-
     public indexEntry word();
-
     public boolean isOlder(plasmaCrawlLURLEntry other);
-
     public String toString(String snippet);
-
     public String toString();
 
     public class Components {
@@ -76,6 +63,13 @@ public interface plasmaCrawlLURLEntry {
             } catch (MalformedURLException e) {
                 this.url = null;
             }
+            this.descr = descr;
+            this.author = author;
+            this.tags = tags;
+            this.ETag = ETag;
+        }
+        public Components(URL url, String descr, String author, String tags, String ETag) {
+            this.url = url;
             this.descr = descr;
             this.author = author;
             this.tags = tags;

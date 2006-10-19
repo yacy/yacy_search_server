@@ -171,6 +171,16 @@ public class plasmaCrawlEURL extends indexURL {
         return new Entry(url, referrer, initiator, executor, name, failreason, flags);
     }
 
+    public boolean remove(String hash) {
+        if (hash == null) return false;
+        try {
+            urlIndexFile.remove(hash.getBytes());
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    
     public synchronized void stackPushEntry(Entry e) {
         rejectedStack.add(e.hash);
     }

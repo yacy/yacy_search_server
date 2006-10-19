@@ -64,6 +64,8 @@ public interface kelondroIndex {
     public kelondroRow.Entry get(byte[] key) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException;
+    public void addUnique(kelondroRow.Entry row) throws IOException; // no double-check
+    public void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException; // no double-check
     public kelondroRow.Entry remove(byte[] key) throws IOException;
     public kelondroRow.Entry removeOne() throws IOException;
     public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException;

@@ -243,6 +243,13 @@ public class kelondroRow {
             return rowinstance[colstart[column]] == 0;
         }
         
+        public void setCol(String nickname, char c) {
+            if (nickref == null) genNickRef();
+            Object[] ref = (Object[]) nickref.get(nickname);
+            if (ref == null) return;
+            rowinstance[((Integer) ref[1]).intValue()] = (byte) c;
+        }
+        
         public void setCol(String nickname, byte[] cell) {
             if (nickref == null) genNickRef();
             Object[] ref = (Object[]) nickref.get(nickname);

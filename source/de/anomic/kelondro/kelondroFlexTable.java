@@ -93,7 +93,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             indexentry = ri.row().newEntry();
             indexentry.setCol(0, node.getValueRow());
             indexentry.setCol(1, i);
-            ri.add(indexentry);
+            ri.addUnique(indexentry);
             if ((i % 10000) == 0) {
                 System.out.print('.');
                 System.out.flush();
@@ -139,7 +139,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             return super.get(i);
     }
 
-    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+    public synchronized kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
         return put(row);
     }
     
@@ -150,6 +150,14 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             return null;
         }
         return super.set(i, row);
+    }
+    
+    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
+        addUnique(row);
+    }
+    
+    public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
+        index.addi(row.getColBytes(0), super.add(row));
     }
     
     public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {

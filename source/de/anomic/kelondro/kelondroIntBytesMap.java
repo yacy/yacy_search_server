@@ -58,7 +58,7 @@ public class kelondroIntBytesMap {
             newentry = index.row().newEntry();
             newentry.setCol(0, (long) ii);
             newentry.setCol(1, value);
-            index.add(newentry);
+            index.addUnique(newentry);
         } catch (IOException e) {}
     }
 

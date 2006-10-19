@@ -75,10 +75,10 @@ import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroDyn;
-import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlLURL;
@@ -98,6 +98,7 @@ import de.anomic.server.serverPlainSwitch;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.bitfield;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
@@ -651,11 +652,11 @@ public final class yacy {
         final serverSwitch sps = new serverPlainSwitch(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
-        File indexRoot = new File(new File(homePath), "DATA/INDEX/PUBLIC/TEXT");
+        File indexRoot = new File(new File(homePath), "DATA/INDEX");
         serverLog log = new serverLog("WORDMIGRATION");
         log.logInfo("STARTING MIGRATION");
         boolean useCollectionIndex = sps.getConfigBool("useCollectionIndex", false);
-        plasmaWordIndex wordIndexCache = new plasmaWordIndex(dbroot, indexRoot, 20000, 10000, log, useCollectionIndex);
+        plasmaWordIndex wordIndexCache = new plasmaWordIndex(dbroot, indexRoot, true, 20000, 10000, log, useCollectionIndex);
         enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
         String wordhash;
         File wordfile;
@@ -696,8 +697,8 @@ public final class yacy {
         // run with "java -classpath classes yacy -minimizeUrlDB"
         final serverSwitch sps = new serverPlainSwitch(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
-        File dbroot = new File(new File(homePath), "DATA/PLASMADB");
-        File indexRoot = new File(new File(homePath), "DATA/INDEX/PUBLIC/TEXT");
+        File plasmaroot = new File(new File(homePath), "DATA/PLASMADB");
+        File indexRoot = new File(new File(homePath), "DATA/INDEX");
         serverLog log = new serverLog("URL-CLEANUP");
         try {
             log.logInfo("STARTING URL CLEANUP");
@@ -705,16 +706,16 @@ public final class yacy {
             // db containing all currently loades urls
             int cache = dbcache * 1024; // in KB
             log.logFine("URLDB-Caches: "+cache+" bytes");
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(dbroot, cache, 10000, false);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(plasmaroot, indexRoot, cache, 10000, false);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(dbroot, "minimized"), cache, 10000, false);
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(plasmaroot, "minimized"), indexRoot, cache, 10000, false);
             
             Runtime rt = Runtime.getRuntime();
             int cacheMem = (int)((serverMemory.max-rt.totalMemory())/1024)-(2*cache + 8*1024);
             if (cacheMem < 2048) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            plasmaWordIndex wordIndex = new plasmaWordIndex(dbroot, indexRoot, cacheMem, 10000, log, sps.getConfigBool("useCollectionIndex", false));
+            plasmaWordIndex wordIndex = new plasmaWordIndex(plasmaroot, indexRoot, true, cacheMem, 10000, log, sps.getConfigBool("useCollectionIndex", false));
             Iterator indexContainerIterator = wordIndex.wordContainers("------------", plasmaWordIndex.RL_WORDFILES, false);
             
             long urlCounter = 0, wordCounter = 0;
@@ -944,7 +945,7 @@ public final class yacy {
     	
     	File root = new File(homePath);
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, false, 1000, false, 1000, false, 10000);
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, false, 1000, false, 1000, false, 10000);
             HashMap doms = new HashMap();
             System.out.println("Started domain list extraction from " + pool.loadedURL.size() + " url entries.");
             System.out.println("a dump will be written after double-check of all extracted domains.");
@@ -1060,7 +1061,7 @@ public final class yacy {
     private static void urllist(String homePath, String source, boolean html, String targetName) {
         File root = new File(homePath);
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, false, 1000, false, 1000, false, 10000);
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, false, 1000, false, 1000, false, 10000);
             File file = new File(root, targetName);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
             
@@ -1120,23 +1121,104 @@ public final class yacy {
         }
     }
     
+    /*
     private static void migratelurls(String homePath) {
         File root = new File(homePath);
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), 16000, false, 1000, false, 1000, false, 10000);
-            kelondroFlexSplitTable fsp = new kelondroFlexSplitTable(new File(root, "DATA//INDEX/PUBLIC/TEXT"), "urls", 1000, -1, plasmaCrawlLURLOldEntry.rowdef, kelondroNaturalOrder.naturalOrder);
-            
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, false, 1000, false, 1000, false, 10000);
+            kelondroFlexSplitTable fsp = new kelondroFlexSplitTable(new File(root, "DATA/INDEX/PUBLIC/TEXT"), "urls", 1000, -1, plasmaCrawlLURLNewEntry.rowdef, kelondroBase64Order.enhancedCoder);
+
+            long start = System.currentTimeMillis();
+            long last = start;
+            int tc = pool.loadedURL.size(), c = 0;
             Iterator eiter = pool.loadedURL.entries(true, false, null);
-            plasmaCrawlLURLEntry entry;
+            plasmaCrawlLURLEntry oldentry;
+            kelondroRow.Entry newentry;
             while (eiter.hasNext()) {
-                entry = (plasmaCrawlLURLEntry) eiter.next();
-                plasmaCrawlLURLEntry.Components comp = entry.comp();
-                if ((entry != null) && (comp.url() != null)) {
-                    fsp.put(entry.toRowEntry(), entry.loaddate());
+                oldentry = (plasmaCrawlLURLEntry) eiter.next();
+                if (oldentry != null) {
+                    plasmaCrawlLURLEntry.Components comp = oldentry.comp();
+                    newentry = plasmaCrawlLURLNewEntry.rowdef.newEntry();
+                    newentry.setCol("hash", indexURL.urlHash(comp.url()), null);
+                    newentry.setCol("comp", plasmaCrawlLURLNewEntry.encodeComp(comp.url(), comp.descr(), "", "", ""));
+                    newentry.setCol("mod", plasmaCrawlLURLNewEntry.encodeDate(oldentry.moddate()));
+                    newentry.setCol("load", plasmaCrawlLURLNewEntry.encodeDate(oldentry.loaddate()));
+                    newentry.setCol("referrer", oldentry.referrerHash().getBytes());
+                    newentry.setCol("md5", new byte[0]);
+                    newentry.setCol("size", oldentry.size());
+                    newentry.setCol("wc", oldentry.wordCount());
+                    newentry.setCol("dt", oldentry.doctype());
+                    newentry.setCol("flags", new bitfield(4).getBytes());
+                    newentry.setCol("lang", oldentry.language().getBytes());
+                    newentry.setCol("llocal", 0);
+                    newentry.setCol("lother", 0);
+                    newentry.setCol("limage", 0);
+                    newentry.setCol("laudio", 0);
+                    newentry.setCol("lvideo", 0);
+                    newentry.setCol("lapp", 0);
+                    fsp.put(newentry, oldentry.loaddate());
+                }
+                c++;
+                if (System.currentTimeMillis() - last > 60000) {
+                    System.out.println("Migrated " + c + " from " + tc + " urls. Estimated remaining time: " + ((System.currentTimeMillis() - start) * (tc - c) / c / 60000) + " minutes");
+                    last = System.currentTimeMillis();
                 }
             }
-            
+            System.out.println("MIGRATION OF " + c + " URLs FINISHED");
             pool.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    */
+    
+    private static void migratelurls(File root, File urlHash) {
+        try {
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, true, 1000, true, 1000, true, 10000);
+            kelondroTree oldindex = new kelondroTree(urlHash, 1000, -1, kelondroTree.defaultObjectCachePercent, plasmaCrawlLURLOldEntry.rowdef);
+            
+            long start = System.currentTimeMillis();
+            long last = start;
+            int tc = oldindex.size(), c = 0;
+            Iterator eiter = oldindex.contentRows(-1);
+            kelondroRow.Entry oldrow;
+            plasmaCrawlLURLEntry oldentry;
+            plasmaCrawlLURLEntry newentry;
+            plasmaCrawlLURLEntry.Components comp;
+            byte[] dummymd5 = new byte[0];
+            while (eiter.hasNext()) {
+                oldrow = (kelondroRow.Entry) eiter.next();
+                if (oldrow != null) {
+                    oldentry = new plasmaCrawlLURLOldEntry(oldrow, null);
+                    comp = oldentry.comp();
+                    newentry = pool.loadedURL.newEntry(
+                            comp.url(), 
+                            comp.descr(), 
+                            "", 
+                            "", 
+                            "", 
+                            oldentry.moddate(), 
+                            oldentry.loaddate(),
+                            oldentry.freshdate(), 
+                            oldentry.referrerHash(), 
+                            dummymd5, 
+                            oldentry.size(), 
+                            oldentry.wordCount(), 
+                            oldentry.doctype(), 
+                            new bitfield(4), 
+                            oldentry.language(), 
+                            0, 0, 0, 0, 0, 0);
+                    pool.loadedURL.store(newentry);
+                }
+                c++;
+                if (System.currentTimeMillis() - last > 60000) {
+                    System.out.println("Migrated " + c + " from " + tc + " urls. Estimated remaining time: " + ((System.currentTimeMillis() - start) * (tc - c) * Math.sqrt(Math.sqrt(tc - c)) / c / 60000) + " minutes");
+                    last = System.currentTimeMillis();
+                }
+            }
+            pool.close();
+            oldindex.close();
+            System.out.println("MIGRATION OF " + c + " URLs FINISHED");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -1157,11 +1239,12 @@ public final class yacy {
      */
     private static void urldbcleanup(String homePath) {
         File root = new File(homePath);
-        File dbroot = new File(root, "DATA/PLASMADB");
+        File plasmaroot = new File(root, "DATA/PLASMADB");
+        File indexroot = new File(root, "DATA/INDEX");
         serverLog log = new serverLog("URLDBCLEANUP");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         try {
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(dbroot, 4194304, 10000, false);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(plasmaroot, indexroot, 4194304, 10000, false);
             currentUrlDB.urldbcleanup();
             currentUrlDB.close();
         } catch (IOException e) {
@@ -1174,7 +1257,7 @@ public final class yacy {
         serverLog log = new serverLog("HASHLIST");
         final serverSwitch sps = new serverPlainSwitch(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
         File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
-        File indexRoot = new File(new File(homePath), "DATA/INDEX/PUBLIC/TEXT");
+        File indexRoot = new File(new File(homePath), "DATA/INDEX");
         String wordChunkStartHash = "------------";
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
@@ -1182,7 +1265,7 @@ public final class yacy {
         try {
             Iterator indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex(homeDBroot, indexRoot, 8*1024*1024, 3000, log, sps.getConfigBool("useCollectionIndex", false));
+                WordIndex = new plasmaWordIndex(homeDBroot, indexRoot, true, 8*1024*1024, 3000, log, sps.getConfigBool("useCollectionIndex", false));
                 indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
             } else if (resource.equals("assortments")) {
                 plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, 3000, log);
@@ -1394,7 +1477,8 @@ public final class yacy {
             String outfile = "urllist_" + source + "_" + System.currentTimeMillis() + ((html) ? ".html" : ".txt");
             urllist(applicationRoot, source, html, outfile);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-migratelurls"))) {
-            migratelurls(applicationRoot);            
+            File root = new File(applicationRoot);
+            migratelurls(root, new File(root, "DATA/PLASMADB/urlHash.db"));
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file
             if (args.length == 2) applicationRoot= args[1];

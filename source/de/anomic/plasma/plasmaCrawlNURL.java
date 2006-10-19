@@ -239,6 +239,16 @@ public class plasmaCrawlNURL extends indexURL {
         }
     }
     
+    public boolean remove(String hash) {
+        if (hash == null) return false;
+        try {
+            urlIndexFile.remove(hash.getBytes());
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    
     private static String normalizeHandle(int h) {
         String d = Integer.toHexString(h);
         while (d.length() < urlHandleLength) d = "0" + d;

@@ -411,7 +411,7 @@ public class kelondroAttrSeq {
             kelondroRowCollection collection = new kelondroRowCollection(structure.seqrow, seq.size());
             Iterator i = seq.iterator();
             while (i.hasNext()) {
-                collection.add(structure.seqrow.newEntry(((String) i.next()).getBytes()));
+                collection.addUnique(structure.seqrow.newEntry(((String) i.next()).getBytes()));
             }
             return collection;
         }

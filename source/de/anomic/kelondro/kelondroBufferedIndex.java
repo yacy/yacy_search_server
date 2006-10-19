@@ -90,26 +90,21 @@ public class kelondroBufferedIndex implements kelondroIndex {
     }
 
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
-        long handle = index.profile().startRead();
+        long handle = (index instanceof kelondroFlexSplitTable) ? -1 : index.profile().startRead();
         kelondroRow.Entry entry = null;
         entry = (kelondroRow.Entry) buffer.get(key);
         if (entry == null) entry = index.get(key);
-        index.profile().stopRead(handle);
+        if (handle >= 0) index.profile().stopRead(handle);
         return entry;
     }
 
-    public synchronized void add(kelondroRow.Entry newentry) throws IOException {
-        assert (index instanceof kelondroRowSet);
-        ((kelondroRowSet) index).add(newentry);
+    public synchronized kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
+        return put(row, null);
     }
     
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
-        return put(row);
-    }
-
-    public synchronized kelondroRow.Entry put(kelondroRow.Entry newentry) throws IOException {
-        long handle = index.profile().startWrite();
-        byte[] key = newentry.getColBytes(index.primarykey());
+        long handle = (index instanceof kelondroFlexSplitTable) ? -1 : index.profile().startWrite();
+        byte[] key = row.getColBytes(index.primarykey());
         kelondroRow.Entry oldentry = null;
         oldentry = (kelondroRow.Entry) buffer.get(key);
         if (oldentry == null) {
@@ -117,45 +112,67 @@ public class kelondroBufferedIndex implements kelondroIndex {
             oldentry = index.get(key);
             if (oldentry == null) {
                 // this was not anywhere
-                buffer.put(key, newentry);
-                if (((buffer.size() > bufferFlushMinimum) && (serverMemory.available() > memBlockLimit))
-                  || (buffer.size() > bufferFlushLimit))
-                    flush();
+                if (entryDate == null) {
+                    buffer.put(key, row);
+                    if (((buffer.size() > bufferFlushMinimum) && (serverMemory.available() > memBlockLimit))
+                      || (buffer.size() > bufferFlushLimit))
+                        flush();
+                } else {
+                    index.put(row, entryDate);
+                }
             } else {
                 // replace old entry
-                index.put(newentry);
+                if (entryDate == null) {
+                    index.put(row);
+                } else {
+                    index.put(row, entryDate);
+                }
             }
         } else {
             // the entry is already in buffer
             // simply replace old entry
-            buffer.put(key, newentry);
+            if (entryDate == null) {
+                buffer.put(key, row);
+            } else {
+                buffer.remove(key);
+                index.put(row, entryDate);
+            }
         }
-        index.profile().stopWrite(handle);
+        if (handle >= 0) index.profile().stopWrite(handle);
         return oldentry;
     }
 
+    public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
+        assert (index instanceof kelondroRowSet);
+        ((kelondroRowSet) index).addUnique(row);
+    }
+    
+    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
+        addUnique(row);
+    }
+    
     public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
-        long handle = index.profile().startDelete();
+        long handle = (index instanceof kelondroFlexSplitTable) ? -1 : index.profile().startDelete();
         kelondroRow.Entry oldentry = null;
         oldentry = (kelondroRow.Entry) buffer.remove(key);
         if (oldentry == null) {
             // try the collection
             return index.remove(key);
         }
-        index.profile().stopDelete(handle);
+        if (handle >= 0) index.profile().stopDelete(handle);
         return oldentry;
     }
     
     public synchronized kelondroRow.Entry removeOne() throws IOException {
-        long handle = index.profile().startDelete();
+        long handle = (index instanceof kelondroFlexSplitTable) ? -1 : index.profile().startDelete();
         if (buffer.size() > 0) {
             byte[] key = (byte[]) buffer.keySet().iterator().next();
             kelondroRow.Entry entry = (kelondroRow.Entry) buffer.remove(key);
-            index.profile().stopDelete(handle);
+            if (handle >= 0) index.profile().stopDelete(handle);
             return entry;
         } else {
             kelondroRow.Entry entry = index.removeOne();
-            index.profile().stopDelete(handle);
+            if (handle >= 0) index.profile().stopDelete(handle);
             return entry;
         }
     }

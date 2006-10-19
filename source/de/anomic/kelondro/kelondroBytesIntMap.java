@@ -52,6 +52,13 @@ public class kelondroBytesIntMap {
         return (int) oldentry.getColLong(1);
     }
     
+    public synchronized void addi(byte[] key, int i) throws IOException {
+        kelondroRow.Entry newentry = ki.row().newEntry();
+        newentry.setCol(0, key);
+        newentry.setCol(1, i);
+        ki.addUnique(newentry);
+    }
+    
     public synchronized int removei(byte[] key) throws IOException {
         // returns the integer index of the key, if the key can be found and was removed
         // and -1 if the key was not found.

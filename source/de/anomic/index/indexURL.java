@@ -425,16 +425,6 @@ public class indexURL {
     }
  }
  
- public boolean remove(String hash) {
-     if (hash == null) return false;
-     try {
-         urlIndexFile.remove(hash.getBytes());
-         return true;
-     } catch (IOException e) {
-         return false;
-     }
- }
- 
  public void close() throws IOException {
      if (urlIndexFile != null) {
          urlIndexFile.close();

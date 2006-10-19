@@ -14,7 +14,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
-import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.tools.crypt;
 import de.anomic.tools.bitfield;
@@ -27,8 +27,9 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         "String comp-360, " +           // components: the url, description, author and tags. As 5th element, an ETag is possible
         "Cardinal mod-4 {b256}, " +     // last-modified from the httpd
         "Cardinal load-4 {b256}, " +    // time when the url was loaded
+        "Cardinal fresh-4 {b256}, " +   // time until this url is fresh
         "String referrer-12, " +        // (one of) the url's referrer hash(es)
-        "byte[] md5-8" +                // the md5 of the url content (to identify changes)
+        "byte[] md5-8, " +              // the md5 of the url content (to identify changes)
         "Cardinal size-6 {b256}, " +    // size of file in bytes
         "Cardinal wc-3 {b256}, " +      // size of file by number of words; for video and audio: seconds
         "byte[] dt-1, " +               // doctype, taken from extension or any other heuristic
@@ -53,11 +54,12 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
             String ETag,
             Date mod,
             Date load,
+            Date fresh,
             String referrer,
             byte[] md5,
             long size,
             int wc,
-            byte dt,
+            char dt,
             bitfield flags,
             String lang,
             int llocal,
@@ -72,6 +74,7 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         this.entry.setCol("comp", encodeComp(url, descr, author, tags, ETag));
         this.entry.setCol("mod", encodeDate(mod));
         this.entry.setCol("load", encodeDate(load));
+        this.entry.setCol("fresh", encodeDate(fresh));
         this.entry.setCol("referrer", referrer.getBytes());
         this.entry.setCol("md5", md5);
         this.entry.setCol("size", size);
@@ -89,17 +92,18 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         this.word = null;
     }
 
-    byte[] encodeDate(Date d) {
+    public static byte[] encodeDate(Date d) {
         return kelondroNaturalOrder.encodeLong(d.getTime() / 86400000, 4);
     }
     
-    byte[] encodeComp(URL url, String descr, String author, String tags, String ETag) {
-        serverByteBuffer s = new serverByteBuffer(200);
+    public static byte[] encodeComp(URL url, String descr, String author, String tags, String ETag) {
+        serverCharBuffer s = new serverCharBuffer(200);
         s.append(url.toNormalform()).append((char) 10);
+        s.append(descr).append((char) 10);
         s.append(author).append((char) 10);
         s.append(tags).append((char) 10);
         s.append(ETag).append((char) 10);
-        return s.getBytes();
+        return s.toString().getBytes();
     }
     
     public plasmaCrawlLURLNewEntry(kelondroRow.Entry entry, indexEntry searchedWord) throws IOException {
@@ -108,7 +112,7 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         this.word = searchedWord;
     }
 
-    public plasmaCrawlLURLNewEntry(Properties prop, boolean setGlobal) throws IOException {
+    public plasmaCrawlLURLNewEntry(Properties prop){
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
@@ -116,7 +120,7 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         try {
             url = new URL(crypt.simpleDecode(prop.getProperty("url", ""), null));
         } catch (MalformedURLException e) {
-            throw new IOException("URL is not proper: " + crypt.simpleDecode(prop.getProperty("url", ""), null));
+            url = null;
         }
         String descr = crypt.simpleDecode(prop.getProperty("descr", ""), null); if (descr == null) descr = "";
         String author = crypt.simpleDecode(prop.getProperty("author", ""), null); if (author == null) author = "";
@@ -136,8 +140,13 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         } catch (ParseException e) {
             this.entry.setCol("load", encodeDate(new Date()));
         }
+        try {
+            this.entry.setCol("fresh", encodeDate(indexURL.shortDayFormatter.parse(prop.getProperty("fresh", "20000101"))));
+        } catch (ParseException e) {
+            this.entry.setCol("fresh", encodeDate(new Date()));
+        }
         this.entry.setCol("referrer", prop.getProperty("referrer", indexURL.dummyHash).getBytes());
-        this.entry.setCol("md5", serverCodings.decodeHex(prop.getProperty("md5", indexURL.dummyHash)));
+        this.entry.setCol("md5", serverCodings.decodeHex(prop.getProperty("md5", "")));
         this.entry.setCol("size", Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol("wc", Integer.parseInt(prop.getProperty("wc", "0")));
         this.entry.setCol("dt", prop.getProperty("dt", "t").charAt(0));
@@ -166,6 +175,7 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
             s.append(",ETag=").append(crypt.simpleEncode(comp.ETag()));
             s.append(",mod=").append(indexURL.shortDayFormatter.format(moddate()));
             s.append(",load=").append(indexURL.shortDayFormatter.format(loaddate()));
+            s.append(",fresh=").append(indexURL.shortDayFormatter.format(freshdate()));
             s.append(",referrer=").append(referrerHash());
             s.append(",md5=").append(md5());
             s.append(",size=").append(size());
@@ -207,7 +217,7 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         return this.entry.getColString("hash", "", null);
     }
 
-    public de.anomic.plasma.plasmaCrawlLURLEntry.Components comp() {
+    public plasmaCrawlLURLEntry.Components comp() {
         ArrayList cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
         return new de.anomic.plasma.plasmaCrawlLURLEntry.Components(
                 (cl.size() > 0) ? (String) cl.get(0) : "",
@@ -223,6 +233,10 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
 
     public Date loaddate() {
         return new Date(86400000 * entry.getColLong("load", 0));
+    }
+
+    public Date freshdate() {
+        return new Date(86400000 * entry.getColLong("fresh", 0));
     }
 
     public String referrerHash() {

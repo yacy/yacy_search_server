@@ -159,7 +159,7 @@ public class kelondroCollectionIndex {
                     ientry.setCol(idx_col_lastread,   t);
                     ientry.setCol(idx_col_lastwrote,  t);
                     if (index instanceof kelondroBufferedIndex)
-                        ((kelondroBufferedIndex) index).add(ientry);
+                        ((kelondroBufferedIndex) index).addUnique(ientry);
                     else
                         index.put(ientry);
                     
@@ -540,13 +540,13 @@ public class kelondroCollectionIndex {
             
             // fill index with values
             kelondroRowSet collection = new kelondroRowSet(rowdef);
-            collection.add(rowdef.newEntry(new byte[][]{"abc".getBytes(), "efg".getBytes()}));
+            collection.addUnique(rowdef.newEntry(new byte[][]{"abc".getBytes(), "efg".getBytes()}));
             collectionIndex.put("erstes".getBytes(), collection);
             
             for (int i = 0; i <= 17; i++) {
                 collection = new kelondroRowSet(rowdef);
                 for (int j = 0; j < i; j++) {
-                    collection.add(rowdef.newEntry(new byte[][]{("abc" + j).getBytes(), "xxx".getBytes()}));
+                    collection.addUnique(rowdef.newEntry(new byte[][]{("abc" + j).getBytes(), "xxx".getBytes()}));
                 }
                 System.out.println("put key-" + i + ": " + collection.toString());
                 collectionIndex.put(("key-" + i).getBytes(), collection);
@@ -556,7 +556,7 @@ public class kelondroCollectionIndex {
             for (int i = 0; i <= 17; i++) {
                 collection = new kelondroRowSet(rowdef);
                 for (int j = 0; j < i; j++) {
-                    collection.add(rowdef.newEntry(new byte[][]{("def" + j).getBytes(), "xxx".getBytes()}));
+                    collection.addUnique(rowdef.newEntry(new byte[][]{("def" + j).getBytes(), "xxx".getBytes()}));
                 }
                 collectionIndex.merge(("key-" + i).getBytes(), collection);
             }

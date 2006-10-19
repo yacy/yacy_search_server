@@ -57,12 +57,12 @@ public class plasmaURLPool {
     public  final plasmaCrawlNURL        noticeURL;
     public  final plasmaCrawlEURL        errorURL;
     
-    public plasmaURLPool(File plasmaPath,
+    public plasmaURLPool(File plasmaPath, File indexPath,
                          int ramLURL, boolean newLURL,
                          int ramNURL, boolean newNURL,
                          int ramEURL, boolean newEURL,
                          long preloadTime) {
-        loadedURL = new plasmaCrawlLURL(plasmaPath, ramLURL, preloadTime, newLURL);
+        loadedURL = new plasmaCrawlLURL(plasmaPath, indexPath, ramLURL, preloadTime, newLURL);
         noticeURL = new plasmaCrawlNURL(plasmaPath, ramNURL, -1, newNURL);
         errorURL = new plasmaCrawlEURL(plasmaPath, ramEURL, -1, newEURL);
     }

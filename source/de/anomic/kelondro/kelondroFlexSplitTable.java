@@ -53,6 +53,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         
         // initialized tables map
         this.tables = new HashMap();
+        if (!(path.exists())) path.mkdirs();
         String[] dir = path.list();
         String date;
         
@@ -78,7 +79,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         StringBuffer suffix = new StringBuffer(6);
         synchronized (thisCalendar) {
             thisCalendar.setTime(date);
-            month = thisCalendar.get(Calendar.MONTH);
+            month = thisCalendar.get(Calendar.MONTH) + 1;
             year = thisCalendar.get(Calendar.YEAR);
         }
         if ((year < 1970) && (year >= 70)) suffix.append("19").append(Integer.toString(year));
@@ -136,7 +137,6 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
         kelondroRow.Entry r = remove(row.getColBytes(0));
-        
         String suffix = dateSuffix(entryDate);
         if (suffix == null) return null;
         kelondroFlexTable table = (kelondroFlexTable) tables.get(suffix);
@@ -148,6 +148,22 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     
         table.put(row);
         return r;
+    }
+    
+    public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
+        addUnique(row, new Date());
+    }
+    
+    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
+        String suffix = dateSuffix(entryDate);
+        if (suffix == null) return;
+        kelondroFlexTable table = (kelondroFlexTable) tables.get(suffix);
+        if (table == null) {
+            // make new table
+            table = new kelondroFlexTable(path, tablename + "." + suffix, buffersize / (tables.size() + 1), -1, rowdef, objectOrder);
+            tables.put(suffix, table);
+        }
+        table.addUnique(row, entryDate);
     }
     
     public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {

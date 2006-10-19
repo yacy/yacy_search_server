@@ -124,7 +124,7 @@ public final class crawlReceipt {
             prop.put("delay", "3600");
         } else if (result.equals("fill")) {
             // generating a new loaded URL entry
-            plasmaCrawlLURLEntry entry = switchboard.urlPool.loadedURL.newEntry(propStr, true);
+            plasmaCrawlLURLEntry entry = switchboard.urlPool.loadedURL.newEntry(propStr);
             if (entry == null) {
                 log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) for hash " + receivedUrlhash + " from peer " + iam +
                               "\n\tURL properties: "+ propStr);
