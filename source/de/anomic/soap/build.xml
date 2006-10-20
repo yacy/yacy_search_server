@@ -16,6 +16,10 @@
   	<!-- defining the classpath that should be used for compiling -->   
   	<path id="soap.class.path">
 	  	  <pathelement location="${build}" />	
+  		
+  	      <!-- libs needed for the yacy thread/object-pools -->
+  	      <pathelement location="${lib}/commons-collections.jar" />
+  	      <pathelement location="${lib}/commons-pool-1.2.jar" />      		
 	  	
 		  <!-- all needed libs -->  	
  		  <pathelement location="${libx}/axis.jar" />  	  		    	
