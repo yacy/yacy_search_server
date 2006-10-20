@@ -288,9 +288,9 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %config %dir /var/lib/yacy/
 %dir /var/log/yacy/
-%attr (755) /usr/share/yacy/startYACY.sh
-%attr (755) /usr/share/yacy/stopYACY.sh
-%attr (755) /usr/share/yacy/killYACY.sh
+%attr (755,root,root) /usr/share/yacy/startYACY.sh
+%attr (755,root,root) /usr/share/yacy/stopYACY.sh
+%attr (755,root,root) /usr/share/yacy/killYACY.sh
 %defattr(644,root,root,755)
 /usr/share/yacy/*
 /usr/lib/yacy/lib/*

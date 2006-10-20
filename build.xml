@@ -741,9 +741,6 @@
   <delete>
     <fileset dir="${build}" includes="**/*.class" />
   </delete>	
-  <move file="${release}/WINDOWS/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
-		tofile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe" />
-  <delete dir="${release}/WINDOWS" failonerror="false" />
 </target>	
 
 <target name="distWinExe" depends="makeWinExe,distAllInOne">	
@@ -763,6 +760,8 @@
 	
 	<delete dir="${release}/SPECS" failonerror="false" />
 	<delete dir="${release}/RPMS" failonerror="false" />
+	<delete dir="${release}/WINDOWS" failonerror="false" />
+	<delete dir="${release_ext}" failonerror="false" />
 </target>
 
 <target name="exe" depends="all" description="Creates the windows installer.exe">
