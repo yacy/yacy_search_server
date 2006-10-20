@@ -21,6 +21,7 @@ Requires:		wget
 Requires:		jre >= 1.4.2
 BuildArch:		noarch
 BuildRoot:		@REPL_YACY_ROOT_DIR@/RELEASE/BUILD
+Packager:		Franz Brauße <mike-nought@gmx.de>
 
 %description
 YaCy is a Java-based peer-2-peer search engine.
@@ -29,7 +30,7 @@ It contains a proxy which gathers all the web-pages
 you retrieve with it. All private data stays private and
 is not indexed or processed in any way. Furthermore
 you'll get a individual .yacy-domain which makes you
-independant of the traditional DNS system.
+independent of the traditional DNS system.
 
 Also included in YaCy is a Wiki, a P2P-message-system, a
 Blog and a bookmark management system. YaCy can be configured
@@ -116,8 +117,6 @@ if [ ! -e /etc/yacy ]; then ln -s /var/lib/yacy/SETTINGS /etc/yacy; fi	# SETTING
 
 chown yacy -R /var/lib/yacy
 chown yacy -R /var/log/yacy
-chmod -R 750 /var/lib/yacy
-chmod -R 750 /var/log/yacy
 chmod +x /usr/share/yacy/startYACY.sh
 chmod +x /usr/share/yacy/stopYACY.sh
 chmod +x /usr/share/yacy/killYACY.sh
@@ -287,13 +286,16 @@ if [ `getent passwd yacy` ]; then userdel yacy &> /dev/null; fi
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%attr(750,yacy,root) %config %dir /var/lib/yacy/
-%attr(750,yacy,root) %dir /var/log/yacy/
+%config %dir /var/lib/yacy/
+%dir /var/log/yacy/
+%attr (755) /usr/share/yacy/startYACY.sh
+%attr (755) /usr/share/yacy/stopYACY.sh
+%attr (755) /usr/share/yacy/killYACY.sh
 %defattr(644,root,root,755)
 /usr/share/yacy/*
 /usr/lib/yacy/lib/*
 /usr/lib/yacy/classes/*
-/usr/share/doc/yacy/*
+%doc /usr/share/doc/yacy/*
 
 %files libx
 #%dir /usr/lib/yacy/libx
@@ -321,7 +323,11 @@ rm -rf $RPM_BUILD_ROOT
 #/usr/lib/yacy/classes/de/anomic/yacy/seedUpload/*
 
 %changelog
+* Fri Oct 20 2006 Franz Brauße <mike-nought@gmx.de>
+- added Packager-Tag
+- marked documentation-files as such
+- fixed permissions
+
 * Sat Oct 14 2006 Franz Brauße <mike-nought@gmx.de>
 - initial spec file based on yacy-0.48-3.spec
 - some adaptions for build with ant
-

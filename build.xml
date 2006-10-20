@@ -181,8 +181,6 @@
   <!-- deleting old file -->
   <delete file="${build}/yacy.java" failonerror="false"/>
   <copy file="${src}/yacy.java" tofile="${build}/yacy.java" overwrite="true" filtering="true" />
-  <copy file="yacy-svn-3.spec" tofile="${release}/SPECS/yacy-svn.spec" overwrite="true" filtering="true" />
-  <copy file="yacy.nsi" tofile="${release}/WINDOWS/yacy.nsi" overwrite="true" filtering="true" />
   <!--<copy file="${doc}/Download.html" tofile="${doc}/Download.html.up" filtering="true" />-->
 </target>
   	
@@ -577,6 +575,8 @@
 	
 	<delete dir="${release_main}"/>
 	<delete dir="${release_ext}"/>	
+	<delete dir="${release}/WINDOWS" failonerror="false" />
+	<delete dir="${release}/SPECS" failonerror="false" />
 </target>
 
 <!-- make dist file including main sources and extensions -->   
@@ -736,12 +736,14 @@
   <taskdef name="jsmoothgen"
            classname="net.charabia.jsmoothgen.ant.JSmoothGen"
            classpath="addon/jsmooth/lib/jsmoothgen-ant.jar" />
+  <jsmoothgen project="addon/jsmooth/yacy.jsmooth" skeletonroot="addon/jsmooth/skeletons" />
 	
-    <jsmoothgen project="addon/jsmooth/yacy.jsmooth" skeletonroot="addon/jsmooth/skeletons"/>
-	
-	  <delete>
-	    <fileset dir="${build}" includes="**/*.class" />
-	  </delete>	
+  <delete>
+    <fileset dir="${build}" includes="**/*.class" />
+  </delete>	
+  <move file="${release}/WINDOWS/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
+		tofile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe" />
+  <delete dir="${release}/WINDOWS" failonerror="false" />
 </target>	
 
 <target name="distWinExe" depends="makeWinExe,distAllInOne">	
@@ -750,23 +752,30 @@
 <target name="rpm" depends="all" description="Creates the main rpm-package and another for libx">
 	<mkdir dir="${release}/RPMS/noarch" />
 	<mkdir dir="${release}/BUILD" />
+	<copy file="yacy-svn-4.spec" tofile="${release}/SPECS/yacy-svn.spec" overwrite="true" filtering="true" />
+	
 	<rpm specFile="yacy-svn.spec" topDir="${release}" />
-	<delete dir="${release}/SPECS" failonerror="false" />
-	<delete dir="${release}/WINDOWS" failonerror="false" />
+	
 	<move file="${release}/RPMS/noarch/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm"
 		  tofile="${release}/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
 	<move file="${release}/RPMS/noarch/yacy-libx-${releaseVersion}_${releaseNr}-3.noarch.rpm"
 		  tofile="${release}/yacy-libx-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
+	
+	<delete dir="${release}/SPECS" failonerror="false" />
 	<delete dir="${release}/RPMS" failonerror="false" />
 </target>
 
 <target name="exe" depends="all" description="Creates the windows installer.exe">
 	<!-- http://nsisant.sourceforge.net/ -->
+	<copy file="yacy.nsi" tofile="${release}/WINDOWS/yacy.nsi" overwrite="true" filtering="true" />
 	<taskdef name="nsis" classname="net.sf.nsisant.Task">
 		    <classpath location="nsisant-1.2.jar"/>
 	</taskdef>
 	<mkdir dir="${release}/WINDOWS" />
 	<nsis script="${release}/WINDOWS/yacy.nsi" nocd="yes" />
+	<move file="${release}/WINDOWS/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
+		  tofile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe" />
+	<delete dir="${release}/WINDOWS" failonerror="false" />
 </target>
 
 </project>
