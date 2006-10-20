@@ -1122,25 +1122,29 @@ public final class yacy {
     }
     
     private static void migratelurls(File root, File urlHash) {
+        plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, true, 1000, true, 1000, true, 10000);
+        kelondroTree oldindex = null;
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, true, 1000, true, 1000, true, 10000);
-            kelondroTree oldindex = new kelondroTree(urlHash, 1000, -1, kelondroTree.defaultObjectCachePercent, plasmaCrawlLURLOldEntry.rowdef);
+            oldindex = new kelondroTree(urlHash, 1000, -1, kelondroTree.defaultObjectCachePercent, plasmaCrawlLURLOldEntry.rowdef);
+        } catch (IOException e) {
+            System.out.println("ERROR: CANNOT OPEN OLD INDEX: " + e.getMessage());
+        }
             
-            long start = System.currentTimeMillis();
-            long last = start;
-            int tc = oldindex.size(), c = 0;
-            Iterator eiter = oldindex.contentRows(-1);
-            kelondroRow.Entry oldrow;
-            plasmaCrawlLURLEntry oldentry;
-            plasmaCrawlLURLEntry newentry;
-            plasmaCrawlLURLEntry.Components comp;
-            byte[] dummymd5 = new byte[0];
-            while (eiter.hasNext()) {
-                oldrow = (kelondroRow.Entry) eiter.next();
-                if (oldrow != null) {
-                    oldentry = new plasmaCrawlLURLOldEntry(oldrow, null);
-                    comp = oldentry.comp();
-                    newentry = pool.loadedURL.newEntry(
+        long start = System.currentTimeMillis();
+        long last = start;
+        int tc = oldindex.size(), c = 0;
+        Iterator eiter = oldindex.contentRows(-1);
+        kelondroRow.Entry oldrow;
+        plasmaCrawlLURLEntry oldentry;
+        plasmaCrawlLURLEntry newentry;
+        plasmaCrawlLURLEntry.Components comp;
+        byte[] dummymd5 = new byte[0];
+        while (eiter.hasNext()) {
+            oldrow = (kelondroRow.Entry) eiter.next();
+            if (oldrow != null) try {
+                oldentry = new plasmaCrawlLURLOldEntry(oldrow, null);
+                comp = oldentry.comp();
+                newentry = pool.loadedURL.newEntry(
                             comp.url(), 
                             comp.descr(), 
                             "", 
@@ -1157,20 +1161,19 @@ public final class yacy {
                             new bitfield(4), 
                             oldentry.language(), 
                             0, 0, 0, 0, 0, 0);
-                    pool.loadedURL.store(newentry);
-                }
+                pool.loadedURL.store(newentry);
                 c++;
-                if (System.currentTimeMillis() - last > 60000) {
-                    System.out.println("Migrated " + c + " from " + tc + " urls. Estimated remaining time: " + ((System.currentTimeMillis() - start) * (tc - c)  / c / 60000) + " minutes");
-                    last = System.currentTimeMillis();
-                }
+            } catch (IOException e) {
+                // ignore
             }
-            pool.close();
-            oldindex.close();
-            System.out.println("MIGRATION OF " + c + " URLs FINISHED");
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (System.currentTimeMillis() - last > 60000) {
+                System.out.println("Migrated " + c + " from " + tc + " urls. Estimated remaining time: " + ((System.currentTimeMillis() - start) * (tc - c)  / c / 60000) + " minutes");
+                last = System.currentTimeMillis();
+            }
         }
+        pool.close();
+        try { oldindex.close(); } catch (IOException e) { }
+        System.out.println("MIGRATION OF " + c + " URLs FINISHED");
     }
     
     private static String[] shift(String[] args, int pos, int count) {
