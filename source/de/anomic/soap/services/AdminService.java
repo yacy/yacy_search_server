@@ -57,6 +57,7 @@ import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
+import de.anomic.server.serverThread;
 import de.anomic.soap.AbstractService;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -365,6 +366,52 @@ public class AdminService extends AbstractService {
         
         // Terminate the peer in 3 seconds (this gives us enough time to finish the request
         ((plasmaSwitchboard)this.switchboard).terminate(3000);        
+    }
+    
+    /**
+     * This function can be used to configure Remote Triggered Crawling for this peer.
+     * 
+     * @param enableRemoteTriggeredCrawls to enable remote triggered crawling
+     * @param maximumAllowedPPM to configure the maximum allowed pages per minute that should be crawled. 
+     *                          Set this to <code>0</code> for unlimited crawling.
+     * 
+     * @throws AxisFault
+     */
+    public void setDistributedCrawling(
+    		Boolean enableRemoteTriggeredCrawls,
+    		Integer maximumAllowedPPM
+    ) throws AxisFault {
+        // extracting the message context
+        extractMessageContext(true);     
+        
+        // if the ppm was set, change it
+        if (maximumAllowedPPM != null) {
+        	long newBusySleep;
+        	
+        	// calculate the new sleep time for the remote triggered crawl thread
+        	if (maximumAllowedPPM.intValue() < 1) {
+        		// unlimited crawling
+        		newBusySleep = 100;
+        	} else {
+        		// limited crawling
+                newBusySleep = 60000 / maximumAllowedPPM.intValue();
+                if (newBusySleep < 100) newBusySleep = 100;        		
+        	}
+        	
+        	// get the server thread
+            serverThread rct = this.switchboard.getThread("62_remotetriggeredcrawl");
+            
+            // set the new sleep time
+            if (rct != null) rct.setBusySleep(newBusySleep);
+            
+            // store it
+            this.switchboard.setConfig("62_remotetriggeredcrawl_busysleep", Long.toString(newBusySleep));        	        	
+        }
+        
+        // if set enable/disable remote triggered crawls
+        if (enableRemoteTriggeredCrawls != null) {
+        	this.switchboard.setConfig("crawlResponse", enableRemoteTriggeredCrawls.toString());
+        }
     }
     
     public void setTransferProperties(
