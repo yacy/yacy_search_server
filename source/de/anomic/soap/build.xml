@@ -29,6 +29,10 @@
  		  <pathelement location="${libx}/jaxrpc.jar" />   		     		  
  		  <pathelement location="${libx}/saaj.jar" />   		     		  
  		  <pathelement location="${libx}/wsdl4j.jar" />    
+  		
+  		  <pathelement location="${libx}/gnumail.jar" />
+  		  <pathelement location="${libx}/activation.jar" />
+  		  
   	</path>	
 	
 	
@@ -94,7 +98,7 @@
 		<!-- define the wasdl2java task -->
 		<taskdef name="axis-wsdl2java" classname="org.apache.axis.tools.ant.wsdl.Wsdl2javaAntTask" classpathref="soap.class.path"/>		
 		
-		<axis-wsdl2java
+		<axis-wsdl2java 
 		  output="${clientStubSrc}"
 		  url="file:///${wsdlFileName}" >
 		    <mapping
