@@ -979,6 +979,8 @@ public class kelondroRecords {
         // delete element with handle h
         // this element is then connected to the deleted-chain and can be
         // re-used change counter
+        assert (h.index >= 0);
+        assert (h.index != NUL);
         long sp = seekpos(h);
         if (sp >= entryFile.length()) {
             // a deletion of a node that cannot exist is wrong
@@ -1279,7 +1281,7 @@ public class kelondroRecords {
                         index = USAGE.USEDC - 1;
                     } else {
                         index = USAGE.FREEH.index;
-                        
+                        //System.out.println("*DEBUG* ALLOCATED DELETED INDEX " + index);
                         // check for valid seek position
                         long seekp = seekpos(USAGE.FREEH);
                         if (seekp > entryFile.length()) throw new kelondroException("new Handle: seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));

@@ -120,15 +120,9 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     }
     
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
-        Iterator i = tables.values().iterator();
-        kelondroFlexTable table;
-        kelondroRow.Entry entry;
-        while (i.hasNext()) {
-            table = (kelondroFlexTable) i.next();
-            entry = table.get(key);
-            if (entry != null) return entry;
-        }
-        return null;
+        Object[] keeper = keeperOf(key);
+        if (keeper == null) return null;
+        return (kelondroRow.Entry) keeper[1];
     }
     
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
@@ -136,7 +130,8 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     }
     
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
-        kelondroRow.Entry r = remove(row.getColBytes(0));
+        Object[] keeper = keeperOf(row.getColBytes(0));
+        if (keeper != null) return ((kelondroFlexTable) keeper[0]).put(row, entryDate);
         String suffix = dateSuffix(entryDate);
         if (suffix == null) return null;
         kelondroFlexTable table = (kelondroFlexTable) tables.get(suffix);
@@ -145,9 +140,20 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             table = new kelondroFlexTable(path, tablename + "." + suffix, buffersize / (tables.size() + 1), -1, rowdef, objectOrder);
             tables.put(suffix, table);
         }
-    
         table.put(row);
-        return r;
+        return null;
+    }
+    
+    public synchronized Object[] keeperOf(byte[] key) throws IOException {
+        Iterator i = tables.values().iterator();
+        kelondroFlexTable table;
+        kelondroRow.Entry entry;
+        while (i.hasNext()) {
+            table = (kelondroFlexTable) i.next();
+            entry = table.get(key);
+            if (entry != null) return new Object[]{table, entry};
+        }
+        return null;
     }
     
     public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
