@@ -520,13 +520,7 @@ public class URL {
           new String[]{"http://www.anomic.de/home", "news:de.test"},
           new String[]{"http://www.anomic.de/home", "ftp://ftp.anomic.de/src"},
           new String[]{null, "ftp://ftp.delegate.org/"},
-          new String[]{"http://www.anomic.de/home", "ftp://ftp.delegate.org/"},
-          new String[]{null,"http://www.bla.org/bli bla blo"},
-          new String[]{null,"http://www.blubb.org/bli bla/ blo blubb/bla.html"},
-          new String[]{null,"http://california-press-release.com/30/Hendrick Chevrolet, the renowned car dealer for Chevrolet in Cary, North Carolina (NC) announces the arrival of 2007 Chevrolet Cobalt SS  Coupe For further information, call Hendrick Chevrolet on (800)-857-4909.php"},
-          new String[]{"http://california-press-release.com","/30/Hendrick%20Chevrolet%2c%20the%20renowned%20car%20dealer%20for%20Chevrolet%20in%20Cary%2c%20North%20Carolina%20(NC)%20announces%20the%20arrival%20of%202007%20Chevrolet%20Cobalt%20SS%20%20Coupe%20For%20further%20information%2c%20call%20Hendrick%20Chevrolet%20on%20(800)-857-4909.php"},
-          new String[]{null, "http://www.anomic.de/home/test?x=1&täst=xyß#höme"},
-          new String[]{null, "http://www.anomic.de/home/test?x&test=#"}
+          new String[]{"http://www.anomic.de/home", "ftp://ftp.delegate.org/"}
         };
         String environment, url;
         de.anomic.net.URL aURL = null;
@@ -547,7 +541,6 @@ public class URL {
                 System.out.println("Difference for environment=" + environment + ", url=" + url + ":");
                 System.out.println((jURL == null) ? "jURL rejected input" : "jURL=" + jURL.toString());
                 System.out.println((aURL == null) ? "aURL rejected input" : "aURL=" + aURL.toString());
-                System.out.println((aURL == null || unescape(aURL.toString()) == null) ? "aURL rejected input" : "back=" + unescape(aURL.toString()));
             }
         }
     }

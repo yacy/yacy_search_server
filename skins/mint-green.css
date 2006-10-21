@@ -1,0 +1,224 @@
+/* Skin */
+
+body {
+  background-color:#F8F8FF;
+}
+
+a:link {
+  color:#186B1B;
+}
+a:link:hover 
+{
+  color:#186B1B;
+}
+
+
+/* Menu */
+
+.menugroup h3, .SubMenugroup h3, .SubMenu h3 {
+  background-color: #5E862E;
+  color:white;
+}
+
+a.MenuItemLink, ul.SubMenu em {
+  background-color: #cae1ae;
+  color: black;  
+}
+
+a:hover.MenuItemLink {
+  background-color: #70a037;
+  color: white;    
+}
+
+/* Head */
+
+div.head h1 
+{
+  background-color: #5E862E;
+  color:white;
+}
+
+/* Tables */
+
+.TableHeader {
+  background-color: #5E862E;
+  color:White;
+}
+
+.TableCellDark {
+  background-color: #b1c598;
+}
+
+.TableCellLight {
+  background-color: #cee5b1;
+}
+
+.TableCellSummary {
+  background-color: #b7e281;
+  font-weight:bold;
+}
+
+.TableCellPassive {
+  background-color: lightgrey;
+}
+
+.TableCellActive {  	 
+  background-color: #E1E5B1; 	 
+}
+
+/* Blog and Wiki*/
+
+.Post {
+  background-color:#E5FFC5;
+}
+
+.PostSubject {
+  background-color:#b1c598;
+}
+
+.PostSubject a {
+  color:black;
+}
+
+.PostInfo {
+  background-color:#cee5b1;
+}
+
+/* Wiki */
+
+.WikiTOCBox {
+  border: 1px solid #aaa;
+  background-color: #E5FFC5;
+}
+
+a.unknown {
+  color:#990000;
+}
+
+a.known {
+  color:#009900;
+}
+
+a.extern {
+  color:#000099;
+}
+
+/* in Bookmarks */
+
+.bookmark {
+  border-bottom:1px #000 dashed;
+}
+
+a.bookmarkTitle {
+  color: #135616;
+}
+
+a:hover.bookmarkTitle {
+  color: #135616;
+}
+
+a.bookmarkTags {
+  color: #196E1C;
+}
+
+a:hover.bookmarkTags {
+  color: #196E1C;
+}
+
+a.bookmarkAction {
+  color: #999999;
+}
+
+.Tags {
+  border-left: 2px solid black;
+}
+
+
+/* in Status.html */
+
+.ProgressBar {
+  border: #76895F solid 1px;
+}
+
+/* Copyright info */
+
+.info {
+  border-top:1px solid gray;
+}
+
+/* Searchresults */
+
+.searchresults {
+  border-top:1px #000 dashed;
+}
+
+.searchresults .url a {
+  color:#008000;
+}
+
+.snippetLoading {
+  color:#999999;
+}
+
+.snippetError {
+  color:red;
+}
+
+/* other */
+
+.settingsValue {
+  color:#196E1C;
+}
+
+.Headline {
+  background-color: #196E1C;
+  color: white;
+}
+
+.Heading {
+  background-color: #196E1C;
+}
+
+.error, .warning {
+  color:red;
+}
+
+.success {
+  color:green;
+}
+
+.Message {
+  background-color: #eeeeee;
+}
+
+.example {
+  background-color:#D3D3D3;
+}
+
+
+/* Log */
+
+body#ViewLog pre {
+  background-color:white;
+}
+
+/* Forms */
+
+fieldset {
+  background-color:#DCF5BD;
+  border:1px solid #aaa;
+}
+
+legend {
+  background-color: #5E862E;
+  font-size:1.1em;
+  color:White;
+}
+
+form dt, dl.pairs dt {
+  background-color:#B0CB8D;
+}
+
+form dd, dl.pairs dd {
+  background-color:#cee5b1;
+}
