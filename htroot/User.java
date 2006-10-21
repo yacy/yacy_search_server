@@ -55,11 +55,12 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.servletProperties;
 
 public class User{
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        serverObjects prop = new serverObjects();
+        servletProperties prop = new servletProperties();
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         userDB.Entry entry=null;
 

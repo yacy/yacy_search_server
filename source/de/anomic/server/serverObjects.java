@@ -69,22 +69,9 @@ import java.util.Map;
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 
-public final class serverObjects extends Hashtable implements Cloneable {
+public class serverObjects extends Hashtable implements Cloneable {
 
     private static final long serialVersionUID = 1L;
-    private  httpHeader outgoingHeader;
-    public void setOutgoingHeader(httpHeader outgoingHeader)
-    {
-    	this.outgoingHeader=outgoingHeader;
-    }
-    public httpHeader getOutgoingHeader()
-    {
-        if(outgoingHeader!=null)
-            return outgoingHeader;
-        else
-            return new httpHeader();
-    }
-    
     
 	public serverObjects() {
         super();

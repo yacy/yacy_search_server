@@ -52,6 +52,7 @@ import java.util.Map.Entry;
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.servletProperties;
 
 public class CookieTest {
 
@@ -66,7 +67,7 @@ public class CookieTest {
             return prop;
         }
         
-        final serverObjects prop = new serverObjects();
+        final servletProperties prop = new servletProperties();
         if(post.containsKey("act")&&post.get("act").equals("clear_cookie"))
         {
          httpHeader outgoingHeader=new httpHeader();

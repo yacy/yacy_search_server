@@ -113,6 +113,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.servletProperties;
 import de.anomic.server.logging.serverLog;
 import de.anomic.ymage.ymageMatrixPainter;
 import de.anomic.ymage.ymagePNGEncoderAWT;
@@ -342,7 +343,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     httpHeader headers = getDefaultHeaders(path);
                     headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
                     //httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
-                    serverObjects tp=new serverObjects();
+                    servletProperties tp=new servletProperties();
                     tp.put("returnto", path);
                     //TODO: separate errorpage Wrong Login / No Login
                     httpd.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, headers);
@@ -476,7 +477,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
             //File targetClass = rewriteClassFile(targetFile);
             //We need tp here
-            serverObjects tp = new serverObjects();
+            servletProperties tp = new servletProperties();
             Date targetDate;
             boolean nocache = false;
             
@@ -571,7 +572,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null);                
                 
                 // in case that there are no args given, args = null or empty hashmap
-                /* serverObjects tp = (serverObjects) */ invokeServlet(targetClass, requestHeader, args);
+                /* servletProperties tp = (servletProperties) */ invokeServlet(targetClass, requestHeader, args);
                 this.forceConnectionClose();
                 return;                
             } else if ((targetFile.exists()) && (targetFile.canRead())) {
@@ -607,9 +608,9 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
                             requestHeader.put("PATH", path);
                             // in case that there are no args given, args = null or empty hashmap
-                            tp = (serverObjects) invokeServlet(targetClass, requestHeader, args);
+                            tp = (servletProperties) invokeServlet(targetClass, requestHeader, args);
                             // if no args given , then tp will be an empty Hashtable object (not null)
-                            if (tp == null) tp = new serverObjects();
+                            if (tp == null) tp = new servletProperties();
                             // check if the servlets requests authentification
                             if (tp.containsKey("AUTHENTICATE")) {
                                 // handle brute-force protection
@@ -753,9 +754,9 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 
                                 //further processing of page.html (via page.class)?
                                 if (pageClass != null && pageClass.exists()) 
-                                    tp = (serverObjects) invokeServlet(pageClass, requestHeader, args);
+                                    tp = (servletProperties) invokeServlet(pageClass, requestHeader, args);
                                 else
-                                    tp = new serverObjects();
+                                    tp = new servletProperties();
                                 tp.put("header", header_s);
                                 tp.put("page", content_s);
                                 fis=new BufferedInputStream(new FileInputStream(pageFile));
