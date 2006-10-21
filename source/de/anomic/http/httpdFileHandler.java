@@ -608,7 +608,12 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
                             requestHeader.put("PATH", path);
                             // in case that there are no args given, args = null or empty hashmap
-                            tp = (servletProperties) invokeServlet(targetClass, requestHeader, args);
+                            Object o = invokeServlet(targetClass, requestHeader, args); 
+                            if(o instanceof serverObjects){
+                                tp=new servletProperties((serverObjects)o);
+                            }else{
+                                tp=(servletProperties)o;
+                            }
                             // if no args given , then tp will be an empty Hashtable object (not null)
                             if (tp == null) tp = new servletProperties();
                             // check if the servlets requests authentification

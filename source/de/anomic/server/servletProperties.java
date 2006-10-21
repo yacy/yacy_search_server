@@ -27,6 +27,12 @@ public class servletProperties extends serverObjects {
     private String prefix="";
     
     private  httpHeader outgoingHeader;
+    public servletProperties(){
+        super();
+    }
+    public servletProperties(serverObjects so){
+        super(so);
+    }
     public void setOutgoingHeader(httpHeader outgoingHeader)
     {
         this.outgoingHeader=outgoingHeader;
