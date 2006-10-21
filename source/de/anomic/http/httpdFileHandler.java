@@ -572,7 +572,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null);                
                 
                 // in case that there are no args given, args = null or empty hashmap
-                /* servletProperties tp = (servletProperties) */ invokeServlet(targetClass, requestHeader, args);
+                /* servletProperties tp = (servlerObjects) */ invokeServlet(targetClass, requestHeader, args);
                 this.forceConnectionClose();
                 return;                
             } else if ((targetFile.exists()) && (targetFile.canRead())) {
@@ -608,11 +608,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
                             requestHeader.put("PATH", path);
                             // in case that there are no args given, args = null or empty hashmap
-                            Object o = invokeServlet(targetClass, requestHeader, args); 
-                            if(o instanceof serverObjects){
-                                tp=new servletProperties((serverObjects)o);
+                            Object tmp = invokeServlet(targetClass, requestHeader, args); 
+                            if(tmp instanceof serverObjects){
+                                tp=new servletProperties((serverObjects)tmp);
                             }else{
-                                tp=(servletProperties)o;
+                                tp=(servletProperties)tmp;
                             }
                             // if no args given , then tp will be an empty Hashtable object (not null)
                             if (tp == null) tp = new servletProperties();
@@ -758,9 +758,14 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 header_s=o.toString();
                                 
                                 //further processing of page.html (via page.class)?
-                                if (pageClass != null && pageClass.exists()) 
-                                    tp = (servletProperties) invokeServlet(pageClass, requestHeader, args);
-                                else
+                                if (pageClass != null && pageClass.exists()){
+                                    Object tmp = invokeServlet(pageClass, requestHeader, args); 
+                                    if(tmp instanceof serverObjects){
+                                        tp=new servletProperties((serverObjects)tmp);
+                                    }else{
+                                        tp=(servletProperties)tmp;
+                                    }
+                                }else
                                     tp = new servletProperties();
                                 tp.put("header", header_s);
                                 tp.put("page", content_s);
