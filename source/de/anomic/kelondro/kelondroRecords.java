@@ -1066,6 +1066,7 @@ public class kelondroRecords {
                     // move to next handle
                     repair_position = seekp;
                     h = new Handle(entryFile.readInt(seekp));
+                    if (h.index == NUL) break;
                     
                     // double-check for already stored handles: detect loops
                     if (markedDeleted.contains(h)) {
@@ -1332,9 +1333,9 @@ public class kelondroRecords {
         }
 
         public int compareTo(Object h) {
-            // this is needed for a treeMap
-            assert (index != NUL);
-            assert (((Handle) h).index != NUL);
+            // this is needed for a TreeMap
+            assert (index != NUL) : "this.index is NUL in compareTo";
+            assert (((Handle) h).index != NUL) : "handle.index is NUL in compareTo";
             if (index < ((Handle) h).index) return -1;
             if (index > ((Handle) h).index) return 1;
             return 0;

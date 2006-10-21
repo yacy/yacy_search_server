@@ -169,9 +169,11 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         Integer nxt = (Integer) removeMarker.first();
         removeMarker.remove(nxt);
         int idx = nxt.intValue();
+        assert (idx < sortBound);
         int d = 1;
         while (removeMarker.size() > 0) {
             nxt = (Integer) removeMarker.first();
+            assert (nxt.intValue() < sortBound);
             removeMarker.remove(nxt);
             super.removeShift(idx, d, nxt.intValue());
             idx = nxt.intValue() - d;
@@ -179,6 +181,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
         super.removeShift(idx, d, chunkcount);
         chunkcount -= d;
+        sortBound -= d; // there are all markers below the sortBound
         removeMarker.clear();
     }
     

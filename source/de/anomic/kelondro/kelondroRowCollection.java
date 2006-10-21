@@ -152,22 +152,22 @@ public class kelondroRowCollection {
             int needed = chunkcount * rowdef.objectsize();
             if (chunkcache.length == needed) return;
             byte[] newChunkcache = new byte[needed];
-            System.arraycopy(chunkcache, 0, newChunkcache, 0, newChunkcache.length);
+            System.arraycopy(chunkcache, 0, newChunkcache, 0, Math.min(chunkcache.length, newChunkcache.length));
             chunkcache = newChunkcache;
             newChunkcache = null;
         }
     }
-    
+    /*
     public void implantRows(byte[] b) {
         assert (b.length % rowdef.objectsize() == 0);
         synchronized (chunkcache) {
             chunkcache = b;
             chunkcount = b.length / rowdef.objectsize();
-            sortBound = chunkcount;
+            sortBound = 0;
             lastTimeWrote = System.currentTimeMillis();
         }
     }
-    
+    */
     public final long lastRead() {
         return lastTimeRead;
     }
@@ -177,7 +177,8 @@ public class kelondroRowCollection {
     }
     
     public final kelondroRow.Entry get(int index) {
-        assert (index < chunkcount);
+        assert (index >= 0) : "get: access with index " + index + " is below zero";
+        assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount;
         byte[] a = new byte[rowdef.objectsize()];
         synchronized (chunkcache) {
             System.arraycopy(chunkcache, index * rowdef.objectsize(), a, 0, rowdef.objectsize());
@@ -191,7 +192,8 @@ public class kelondroRowCollection {
     }
     
     public final void set(int index, byte[] a, int astart, int alength) {
-        assert (index < this.chunkcount);
+        assert (index >= 0) : "get: access with index " + index + " is below zero";
+        assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount;
         int l = Math.min(rowdef.objectsize(), Math.min(alength, a.length - astart));
         synchronized (chunkcache) {
             System.arraycopy(a, astart, chunkcache, index * rowdef.objectsize(), l);
@@ -238,13 +240,13 @@ public class kelondroRowCollection {
         System.arraycopy(chunkcache, (pos + dist) * rowdef.objectsize(),
                          chunkcache, pos * rowdef.objectsize(),
                          (upBound - pos - dist) * rowdef.objectsize());
-        if ((pos < sortBound) && (upBound >= sortBound)) sortBound -= dist;
     }
     
     public final void removeShift(int p) {
         assert ((p >= 0) && (p < chunkcount) && (chunkcount > 0));
         //System.out.println("REMOVE at pos " + p + ", chunkcount=" + chunkcount + ", sortBound=" + sortBound);
         synchronized (chunkcache) {
+            if (p < sortBound) sortBound--;
             removeShift(p, 1, chunkcount--);
         }
         this.lastTimeWrote = System.currentTimeMillis();
@@ -253,10 +255,11 @@ public class kelondroRowCollection {
     public kelondroRow.Entry removeOne() {
         synchronized (chunkcache) {
             if (chunkcount == 0) return null;
+            kelondroRow.Entry r = get(chunkcount - 1);
             if (chunkcount == sortBound) sortBound--;
             chunkcount--;
             this.lastTimeWrote = System.currentTimeMillis();
-            return get(chunkcount);
+            return r;
         }
     }
     
@@ -294,6 +297,7 @@ public class kelondroRowCollection {
         public void remove() {
             p--;
             System.arraycopy(chunkcache, (p + 1) * rowdef.objectsize(), chunkcache, p * rowdef.objectsize(), (chunkcount - p - 1) * rowdef.objectsize());
+            if (chunkcount == sortBound) sortBound--;
             chunkcount--;
         }
     }
@@ -336,7 +340,7 @@ public class kelondroRowCollection {
 
     private final void qsort(int L, int S, int R) {
         //System.out.println("QSORT: chunkcache.length=" + chunkcache.length + ", chunksize=" + chunksize + ", L=" + L + ", S=" + S + ", R=" + R);
-        assert (S <= R);
+        assert (S <= R) : "S > R: S = " + S + ", R = " + R;
         if (L >= R - 1) return;
         if (S >= R) return;
 
