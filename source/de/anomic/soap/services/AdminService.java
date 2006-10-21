@@ -63,7 +63,34 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class AdminService extends AbstractService {
-
+	
+	/* =====================================================================
+	 * Used Plasmaswitchboard config properties
+	 * ===================================================================== */
+	private static final String _10_HTTPD = "10_httpd";	
+	private static final String _62_REMOTETRIGGEREDCRAWL_BUSYSLEEP = "62_remotetriggeredcrawl_busysleep";
+	private static final String _62_REMOTETRIGGEREDCRAWL = "62_remotetriggeredcrawl";
+	private static final String PORT = "port";
+	private static final String PEER_NAME = "peerName";	
+	private static final String RESTART = "restart";
+	private static final String REMOTE_PROXY_USE = "remoteProxyUse";	
+	private static final String REMOTE_PROXY_USE4SSL = "remoteProxyUse4SSL";
+	private static final String REMOTE_PROXY_USE4YACY = "remoteProxyUse4Yacy";
+	private static final String REMOTE_PROXY_NO_PROXY = "remoteProxyNoProxy";
+	private static final String REMOTE_PROXY_PWD = "remoteProxyPwd";
+	private static final String REMOTE_PROXY_USER = "remoteProxyUser";
+	private static final String REMOTE_PROXY_PORT = "remoteProxyPort";
+	private static final String REMOTE_PROXY_HOST = "remoteProxyHost";
+	private static final String CRAWL_RESPONSE = "crawlResponse";
+	private static final String INDEX_RECEIVE_BLOCK_BLACKLIST = "indexReceiveBlockBlacklist";
+	private static final String ALLOW_RECEIVE_INDEX = "allowReceiveIndex";
+	private static final String ALLOW_DISTRIBUTE_INDEX_WHILE_CRAWLING = "allowDistributeIndexWhileCrawling";
+	private static final String ALLOW_DISTRIBUTE_INDEX = "allowDistributeIndex";
+	
+	
+	/* =====================================================================
+	 * Used XML Templates
+	 * ===================================================================== */
     private static final String TEMPLATE_CONFIG_XML = "xml/config_p.xml";   
     private static final String TEMPLATE_VERSION_XML = "xml/version.xml";
     
@@ -224,7 +251,7 @@ public class AdminService extends AbstractService {
         extractMessageContext(true);                    
         
         // get the previous name
-        String prevName = this.switchboard.getConfig("peerName", "");
+        String prevName = this.switchboard.getConfig(PEER_NAME, "");
         if (prevName.equals("newName")) return;
         
         // take a look if there is already an other peer with this name
@@ -244,7 +271,7 @@ public class AdminService extends AbstractService {
         }
         
         // use the new name
-        this.switchboard.setConfig("peerName", newName);
+        this.switchboard.setConfig(PEER_NAME, newName);
     }
     
     /**
@@ -263,14 +290,14 @@ public class AdminService extends AbstractService {
         extractMessageContext(true);        
         
         // get the old value
-        int oldPort = (int) this.switchboard.getConfigLong("port", 8080);
+        int oldPort = (int) this.switchboard.getConfigLong(PORT, 8080);
         if (oldPort == newPort) return;
         
         // getting the server thread
-        serverCore theServerCore = (serverCore) this.switchboard.getThread("10_httpd");
+        serverCore theServerCore = (serverCore) this.switchboard.getThread(_10_HTTPD);
         
         // store the new value
-        this.switchboard.setConfig("port", newPort);
+        this.switchboard.setConfig(PORT, newPort);
         
         // restart the port listener
         // TODO: check if the port is free
@@ -287,15 +314,15 @@ public class AdminService extends AbstractService {
         extractMessageContext(true);   
         
         // check for errors
-        String proxyHost = this.switchboard.getConfig("remoteProxyHost", "");
+        String proxyHost = this.switchboard.getConfig(REMOTE_PROXY_HOST, "");
         if (proxyHost.length() == 0) throw new AxisFault("Remote proxy hostname is not configured");
         
-        String proxyPort = this.switchboard.getConfig("remoteProxyPort", "");
+        String proxyPort = this.switchboard.getConfig(REMOTE_PROXY_PORT, "");
         if (proxyPort.length() == 0) throw new AxisFault("Remote proxy port is not configured");
         
         // store the new state
         plasmaSwitchboard sb = (plasmaSwitchboard) this.switchboard;
-        sb.setConfig("remoteProxyUse",Boolean.toString(enableProxy));
+        sb.setConfig(REMOTE_PROXY_USE,Boolean.toString(enableProxy));
         sb.remoteProxyConfig = httpRemoteProxyConfig.init(sb);         
     }
     
@@ -330,25 +357,25 @@ public class AdminService extends AbstractService {
         extractMessageContext(true);       	
         
         if (proxyHost != null)
-        	this.switchboard.setConfig("remoteProxyHost", proxyHost);
+        	this.switchboard.setConfig(REMOTE_PROXY_HOST, proxyHost);
         
         if (proxyPort != null)
-        	this.switchboard.setConfig("remoteProxyPort", proxyPort.toString());
+        	this.switchboard.setConfig(REMOTE_PROXY_PORT, proxyPort.toString());
         
         if (proxyUserName != null)
-        	this.switchboard.setConfig("remoteProxyUser", proxyUserName);        
+        	this.switchboard.setConfig(REMOTE_PROXY_USER, proxyUserName);        
         
         if (proxyPwd != null)
-        	this.switchboard.setConfig("remoteProxyPwd", proxyPwd);         
+        	this.switchboard.setConfig(REMOTE_PROXY_PWD, proxyPwd);         
         
         if (noProxyList != null)
-        	this.switchboard.setConfig("remoteProxyNoProxy", noProxyList);         
+        	this.switchboard.setConfig(REMOTE_PROXY_NO_PROXY, noProxyList);         
         
         if (useProxy4YaCy != null)
-        	this.switchboard.setConfig("remoteProxyUse4Yacy", useProxy4YaCy.toString());         
+        	this.switchboard.setConfig(REMOTE_PROXY_USE4YACY, useProxy4YaCy.toString());         
         
         if (useProxy4SSL != null)
-        	this.switchboard.setConfig("remoteProxyUse4SSL", useProxy4SSL.toString());           
+        	this.switchboard.setConfig(REMOTE_PROXY_USE4SSL, useProxy4SSL.toString());           
         
         // enable remote proxy usage
         if (enableRemoteProxy != null) this.enableRemoteProxy(enableRemoteProxy.booleanValue());
@@ -362,7 +389,7 @@ public class AdminService extends AbstractService {
         // extracting the message context
         extractMessageContext(true);        
         
-        this.switchboard.setConfig("restart", "false");
+        this.switchboard.setConfig(RESTART, "false");
         
         // Terminate the peer in 3 seconds (this gives us enough time to finish the request
         ((plasmaSwitchboard)this.switchboard).terminate(3000);        
@@ -399,18 +426,18 @@ public class AdminService extends AbstractService {
         	}
         	
         	// get the server thread
-            serverThread rct = this.switchboard.getThread("62_remotetriggeredcrawl");
+            serverThread rct = this.switchboard.getThread(_62_REMOTETRIGGEREDCRAWL);
             
             // set the new sleep time
             if (rct != null) rct.setBusySleep(newBusySleep);
             
             // store it
-            this.switchboard.setConfig("62_remotetriggeredcrawl_busysleep", Long.toString(newBusySleep));        	        	
+            this.switchboard.setConfig(_62_REMOTETRIGGEREDCRAWL_BUSYSLEEP, Long.toString(newBusySleep));        	        	
         }
         
         // if set enable/disable remote triggered crawls
         if (enableRemoteTriggeredCrawls != null) {
-        	this.switchboard.setConfig("crawlResponse", enableRemoteTriggeredCrawls.toString());
+        	this.switchboard.setConfig(CRAWL_RESPONSE, enableRemoteTriggeredCrawls.toString());
         }
     }
     
@@ -425,22 +452,22 @@ public class AdminService extends AbstractService {
         
         // index Distribution on/off
         if (indexDistribution != null) {
-        	this.switchboard.setConfig("allowDistributeIndex", indexDistribution.toString());
+        	this.switchboard.setConfig(ALLOW_DISTRIBUTE_INDEX, indexDistribution.toString());
         }
         
         // Index Distribution while crawling
         if (indexDistributeWhileCrawling != null) {
-        	this.switchboard.setConfig("allowDistributeIndexWhileCrawling", indexDistributeWhileCrawling.toString());
+        	this.switchboard.setConfig(ALLOW_DISTRIBUTE_INDEX_WHILE_CRAWLING, indexDistributeWhileCrawling.toString());
         }     
         
         // Index Receive
         if (indexReceive != null) {
-        	this.switchboard.setConfig("allowReceiveIndex", indexReceive.toString());
+        	this.switchboard.setConfig(ALLOW_RECEIVE_INDEX, indexReceive.toString());
         }          
         
         // block URLs received by DHT by blocklist
         if (indexReceiveBlockBlacklist != null) {
-        	this.switchboard.setConfig("indexReceiveBlockBlacklist", indexReceiveBlockBlacklist.toString());
+        	this.switchboard.setConfig(INDEX_RECEIVE_BLOCK_BLACKLIST, indexReceiveBlockBlacklist.toString());
         }             
     }
     
@@ -453,20 +480,20 @@ public class AdminService extends AbstractService {
     	Document xmlDoc = createNewXMLDocument("transferProperties");
     	Element xmlRoot = xmlDoc.getDocumentElement();
     	    	
-    	xmlElement = xmlDoc.createElement("allowDistributeIndex");
-    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(this.switchboard.getConfigBool("allowDistributeIndex",true))));
+    	xmlElement = xmlDoc.createElement(ALLOW_DISTRIBUTE_INDEX);
+    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(this.switchboard.getConfigBool(ALLOW_DISTRIBUTE_INDEX,true))));
     	xmlRoot.appendChild(xmlElement);
     	
-    	xmlElement = xmlDoc.createElement("allowDistributeIndexWhileCrawling");
-    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(this.switchboard.getConfigBool("allowDistributeIndexWhileCrawling",true))));
+    	xmlElement = xmlDoc.createElement(ALLOW_DISTRIBUTE_INDEX_WHILE_CRAWLING);
+    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(this.switchboard.getConfigBool(ALLOW_DISTRIBUTE_INDEX_WHILE_CRAWLING,true))));
     	xmlRoot.appendChild(xmlElement);    	
     	
-    	xmlElement = xmlDoc.createElement("allowReceiveIndex");
-    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(this.switchboard.getConfigBool("allowReceiveIndex",true))));
+    	xmlElement = xmlDoc.createElement(ALLOW_RECEIVE_INDEX);
+    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(this.switchboard.getConfigBool(ALLOW_RECEIVE_INDEX,true))));
     	xmlRoot.appendChild(xmlElement);    	
     	
-    	xmlElement = xmlDoc.createElement("indexReceiveBlockBlacklist");
-    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(this.switchboard.getConfigBool("indexReceiveBlockBlacklist",true))));
+    	xmlElement = xmlDoc.createElement(INDEX_RECEIVE_BLOCK_BLACKLIST);
+    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(this.switchboard.getConfigBool(INDEX_RECEIVE_BLOCK_BLACKLIST,true))));
     	xmlRoot.appendChild(xmlElement);       	
     	
     	return xmlDoc;

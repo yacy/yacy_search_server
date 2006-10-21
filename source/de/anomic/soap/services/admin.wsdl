@@ -5,151 +5,173 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
   </wsdl:message>
   <wsdl:message name="shutdownPeerResponse">
   </wsdl:message>
+  <wsdl:message name="createNewXMLDocumentRequest">
+    <wsdl:part name="rootElementName" type="soapenc:string"/>
+  </wsdl:message>
   <wsdl:message name="enableRemoteProxyRequest">
+
     <wsdl:part name="enableProxy" type="xsd:boolean"/>
   </wsdl:message>
   <wsdl:message name="setPeerNameRequest">
-
     <wsdl:part name="newName" type="soapenc:string"/>
   </wsdl:message>
   <wsdl:message name="getConfigPropertyRequest">
     <wsdl:part name="key" type="soapenc:string"/>
   </wsdl:message>
   <wsdl:message name="getTransferPropertiesRequest">
+
   </wsdl:message>
   <wsdl:message name="setRemoteProxyResponse">
   </wsdl:message>
-
   <wsdl:message name="getConfigPropertyListRequest">
   </wsdl:message>
   <wsdl:message name="enableRemoteProxyResponse">
   </wsdl:message>
   <wsdl:message name="getConfigPropertiesResponse">
     <wsdl:part name="getConfigPropertiesReturn" type="impl:ArrayOf_soapenc_string"/>
+
+  </wsdl:message>
+  <wsdl:message name="createNewXMLDocumentResponse">
+    <wsdl:part name="createNewXMLDocumentReturn" type="apachesoap:Document"/>
   </wsdl:message>
   <wsdl:message name="getConfigPropertiesRequest">
     <wsdl:part name="keys" type="impl:ArrayOf_soapenc_string"/>
-
   </wsdl:message>
   <wsdl:message name="getVersionRequest">
   </wsdl:message>
+
   <wsdl:message name="setPeerPortResponse">
   </wsdl:message>
   <wsdl:message name="setTransferPropertiesRequest">
     <wsdl:part name="indexDistribution" type="soapenc:boolean"/>
     <wsdl:part name="indexDistributeWhileCrawling" type="soapenc:boolean"/>
     <wsdl:part name="indexReceive" type="soapenc:boolean"/>
-
     <wsdl:part name="indexReceiveBlockBlacklist" type="soapenc:boolean"/>
   </wsdl:message>
   <wsdl:message name="getConfigPropertyListResponse">
+
     <wsdl:part name="getConfigPropertyListReturn" type="apachesoap:Document"/>
   </wsdl:message>
   <wsdl:message name="setPeerPortRequest">
     <wsdl:part name="newPort" type="xsd:int"/>
   </wsdl:message>
   <wsdl:message name="getTransferPropertiesResponse">
-
     <wsdl:part name="getTransferPropertiesReturn" type="apachesoap:Document"/>
   </wsdl:message>
   <wsdl:message name="getConfigPropertyResponse">
+
     <wsdl:part name="getConfigPropertyReturn" type="soapenc:string"/>
   </wsdl:message>
   <wsdl:message name="setPropertiesRequest">
     <wsdl:part name="keys" type="impl:ArrayOf_soapenc_string"/>
     <wsdl:part name="values" type="impl:ArrayOf_soapenc_string"/>
   </wsdl:message>
-
   <wsdl:message name="setRemoteProxyRequest">
     <wsdl:part name="enableRemoteProxy" type="soapenc:boolean"/>
     <wsdl:part name="proxyHost" type="soapenc:string"/>
+
     <wsdl:part name="proxyPort" type="soapenc:int"/>
     <wsdl:part name="proxyUserName" type="soapenc:string"/>
     <wsdl:part name="proxyPwd" type="soapenc:string"/>
     <wsdl:part name="noProxyList" type="soapenc:string"/>
     <wsdl:part name="useProxy4YaCy" type="soapenc:boolean"/>
     <wsdl:part name="useProxy4SSL" type="soapenc:boolean"/>
-
   </wsdl:message>
   <wsdl:message name="setConfigPropertyResponse">
+  </wsdl:message>
+
+  <wsdl:message name="setDistributedCrawlingRequest">
+    <wsdl:part name="enableRemoteTriggeredCrawls" type="soapenc:boolean"/>
+    <wsdl:part name="maximumAllowedPPM" type="soapenc:int"/>
   </wsdl:message>
   <wsdl:message name="getVersionResponse">
     <wsdl:part name="getVersionReturn" type="apachesoap:Document"/>
   </wsdl:message>
   <wsdl:message name="setPropertiesResponse">
   </wsdl:message>
-  <wsdl:message name="setPeerNameResponse">
 
+  <wsdl:message name="setPeerNameResponse">
   </wsdl:message>
   <wsdl:message name="setConfigPropertyRequest">
     <wsdl:part name="key" type="soapenc:string"/>
     <wsdl:part name="value" type="soapenc:string"/>
   </wsdl:message>
+  <wsdl:message name="setDistributedCrawlingResponse">
+  </wsdl:message>
   <wsdl:message name="shutdownPeerRequest">
+
   </wsdl:message>
   <wsdl:portType name="AdminService">
     <wsdl:operation name="setProperties" parameterOrder="keys values">
-
       <wsdl:input message="impl:setPropertiesRequest" name="setPropertiesRequest"/>
       <wsdl:output message="impl:setPropertiesResponse" name="setPropertiesResponse"/>
     </wsdl:operation>
     <wsdl:operation name="getVersion">
       <wsdl:input message="impl:getVersionRequest" name="getVersionRequest"/>
       <wsdl:output message="impl:getVersionResponse" name="getVersionResponse"/>
+
     </wsdl:operation>
     <wsdl:operation name="setConfigProperty" parameterOrder="key value">
       <wsdl:input message="impl:setConfigPropertyRequest" name="setConfigPropertyRequest"/>
-
       <wsdl:output message="impl:setConfigPropertyResponse" name="setConfigPropertyResponse"/>
     </wsdl:operation>
     <wsdl:operation name="getConfigProperty" parameterOrder="key">
       <wsdl:input message="impl:getConfigPropertyRequest" name="getConfigPropertyRequest"/>
       <wsdl:output message="impl:getConfigPropertyResponse" name="getConfigPropertyResponse"/>
     </wsdl:operation>
+
     <wsdl:operation name="getConfigProperties" parameterOrder="keys">
       <wsdl:input message="impl:getConfigPropertiesRequest" name="getConfigPropertiesRequest"/>
       <wsdl:output message="impl:getConfigPropertiesResponse" name="getConfigPropertiesResponse"/>
-
     </wsdl:operation>
     <wsdl:operation name="getConfigPropertyList">
       <wsdl:input message="impl:getConfigPropertyListRequest" name="getConfigPropertyListRequest"/>
       <wsdl:output message="impl:getConfigPropertyListResponse" name="getConfigPropertyListResponse"/>
     </wsdl:operation>
     <wsdl:operation name="setPeerName" parameterOrder="newName">
+
       <wsdl:input message="impl:setPeerNameRequest" name="setPeerNameRequest"/>
       <wsdl:output message="impl:setPeerNameResponse" name="setPeerNameResponse"/>
     </wsdl:operation>
-
     <wsdl:operation name="setPeerPort" parameterOrder="newPort">
       <wsdl:input message="impl:setPeerPortRequest" name="setPeerPortRequest"/>
       <wsdl:output message="impl:setPeerPortResponse" name="setPeerPortResponse"/>
     </wsdl:operation>
     <wsdl:operation name="enableRemoteProxy" parameterOrder="enableProxy">
       <wsdl:input message="impl:enableRemoteProxyRequest" name="enableRemoteProxyRequest"/>
+
       <wsdl:output message="impl:enableRemoteProxyResponse" name="enableRemoteProxyResponse"/>
     </wsdl:operation>
     <wsdl:operation name="setRemoteProxy" parameterOrder="enableRemoteProxy proxyHost proxyPort proxyUserName proxyPwd noProxyList useProxy4YaCy useProxy4SSL">
-
       <wsdl:input message="impl:setRemoteProxyRequest" name="setRemoteProxyRequest"/>
       <wsdl:output message="impl:setRemoteProxyResponse" name="setRemoteProxyResponse"/>
     </wsdl:operation>
     <wsdl:operation name="shutdownPeer">
       <wsdl:input message="impl:shutdownPeerRequest" name="shutdownPeerRequest"/>
       <wsdl:output message="impl:shutdownPeerResponse" name="shutdownPeerResponse"/>
+
+    </wsdl:operation>
+    <wsdl:operation name="setDistributedCrawling" parameterOrder="enableRemoteTriggeredCrawls maximumAllowedPPM">
+      <wsdl:input message="impl:setDistributedCrawlingRequest" name="setDistributedCrawlingRequest"/>
+      <wsdl:output message="impl:setDistributedCrawlingResponse" name="setDistributedCrawlingResponse"/>
     </wsdl:operation>
     <wsdl:operation name="setTransferProperties" parameterOrder="indexDistribution indexDistributeWhileCrawling indexReceive indexReceiveBlockBlacklist">
       <wsdl:input message="impl:setTransferPropertiesRequest" name="setTransferPropertiesRequest"/>
-
       <wsdl:output message="impl:setTransferPropertiesResponse" name="setTransferPropertiesResponse"/>
     </wsdl:operation>
+
     <wsdl:operation name="getTransferProperties">
       <wsdl:input message="impl:getTransferPropertiesRequest" name="getTransferPropertiesRequest"/>
       <wsdl:output message="impl:getTransferPropertiesResponse" name="getTransferPropertiesResponse"/>
     </wsdl:operation>
+    <wsdl:operation name="createNewXMLDocument" parameterOrder="rootElementName">
+      <wsdl:input message="impl:createNewXMLDocumentRequest" name="createNewXMLDocumentRequest"/>
+      <wsdl:output message="impl:createNewXMLDocumentResponse" name="createNewXMLDocumentResponse"/>
+    </wsdl:operation>
   </wsdl:portType>
+
   <wsdl:binding name="adminSoapBinding" type="impl:AdminService">
     <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
-
     <wsdl:operation name="setProperties">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setPropertiesRequest">
@@ -157,9 +179,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="setPropertiesResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
-
     <wsdl:operation name="getVersion">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getVersionRequest">
@@ -167,9 +189,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="getVersionResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
-
     <wsdl:operation name="setConfigProperty">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setConfigPropertyRequest">
@@ -177,9 +199,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="setConfigPropertyResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
-
     <wsdl:operation name="getConfigProperty">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getConfigPropertyRequest">
@@ -187,9 +209,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="getConfigPropertyResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
-
     <wsdl:operation name="getConfigProperties">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getConfigPropertiesRequest">
@@ -197,9 +219,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="getConfigPropertiesResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
-
     <wsdl:operation name="getConfigPropertyList">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getConfigPropertyListRequest">
@@ -207,9 +229,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="getConfigPropertyListResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
-
     <wsdl:operation name="setPeerName">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setPeerNameRequest">
@@ -217,9 +239,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="setPeerNameResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
-
     <wsdl:operation name="setPeerPort">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setPeerPortRequest">
@@ -227,9 +249,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="setPeerPortResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
-
     <wsdl:operation name="enableRemoteProxy">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="enableRemoteProxyRequest">
@@ -237,9 +259,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="enableRemoteProxyResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
-
     <wsdl:operation name="setRemoteProxy">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setRemoteProxyRequest">
@@ -247,9 +269,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="setRemoteProxyResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
-
     <wsdl:operation name="shutdownPeer">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="shutdownPeerRequest">
@@ -257,9 +279,19 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="shutdownPeerResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="setDistributedCrawling">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="setDistributedCrawlingRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="setDistributedCrawlingResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
 
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="setTransferProperties">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setTransferPropertiesRequest">
@@ -267,9 +299,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="setTransferPropertiesResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
-
     <wsdl:operation name="getTransferProperties">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getTransferPropertiesRequest">
@@ -277,9 +309,19 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       </wsdl:input>
       <wsdl:output name="getTransferPropertiesResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="createNewXMLDocument">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="createNewXMLDocumentRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="createNewXMLDocumentResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
 
+      </wsdl:output>
+    </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="AdminServiceService">
     <wsdl:port binding="impl:adminSoapBinding" name="admin">

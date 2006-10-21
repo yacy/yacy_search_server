@@ -1,8 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wsdl:definitions targetNamespace="http://yacy:8080/soap/status" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://yacy:8080/soap/status" xmlns:intf="http://yacy:8080/soap/status" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><!--WSDL created by Apache Axis version: 1.2RC2
 Built on Nov 16, 2004 (12:19:44 EST)-->
+  <wsdl:message name="getQueueStatusResponse">
+    <wsdl:part name="getQueueStatusReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="createNewXMLDocumentResponse">
+    <wsdl:part name="createNewXMLDocumentReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="createNewXMLDocumentRequest">
+    <wsdl:part name="rootElementName" type="soapenc:string"/>
+
+  </wsdl:message>
+  <wsdl:message name="getQueueStatusRequest">
+    <wsdl:part name="localqueueCount" type="soapenc:int"/>
+    <wsdl:part name="loaderqueueCount" type="soapenc:int"/>
+    <wsdl:part name="localcrawlerqueueCount" type="soapenc:int"/>
+    <wsdl:part name="remotecrawlerqueueCount" type="soapenc:int"/>
+  </wsdl:message>
   <wsdl:message name="networkResponse">
     <wsdl:part name="networkReturn" type="apachesoap:Document"/>
+
   </wsdl:message>
   <wsdl:message name="networkRequest">
   </wsdl:message>
@@ -11,8 +28,18 @@ Built on Nov 16, 2004 (12:19:44 EST)-->
       <wsdl:input message="impl:networkRequest" name="networkRequest"/>
       <wsdl:output message="impl:networkResponse" name="networkResponse"/>
     </wsdl:operation>
+    <wsdl:operation name="getQueueStatus" parameterOrder="localqueueCount loaderqueueCount localcrawlerqueueCount remotecrawlerqueueCount">
+
+      <wsdl:input message="impl:getQueueStatusRequest" name="getQueueStatusRequest"/>
+      <wsdl:output message="impl:getQueueStatusResponse" name="getQueueStatusResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="createNewXMLDocument" parameterOrder="rootElementName">
+      <wsdl:input message="impl:createNewXMLDocumentRequest" name="createNewXMLDocumentRequest"/>
+      <wsdl:output message="impl:createNewXMLDocumentResponse" name="createNewXMLDocumentResponse"/>
+    </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="statusSoapBinding" type="impl:StatusService">
+
     <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
     <wsdl:operation name="network">
       <wsdlsoap:operation soapAction=""/>
@@ -22,6 +49,27 @@ Built on Nov 16, 2004 (12:19:44 EST)-->
       <wsdl:output name="networkResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/status" use="encoded"/>
       </wsdl:output>
+
+    </wsdl:operation>
+    <wsdl:operation name="getQueueStatus">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getQueueStatusRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getQueueStatusResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/status" use="encoded"/>
+      </wsdl:output>
+
+    </wsdl:operation>
+    <wsdl:operation name="createNewXMLDocument">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="createNewXMLDocumentRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="createNewXMLDocumentResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/status" use="encoded"/>
+      </wsdl:output>
+
     </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="StatusServiceService">

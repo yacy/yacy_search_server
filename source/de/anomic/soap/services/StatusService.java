@@ -53,10 +53,15 @@ import de.anomic.soap.AbstractService;
 
 public class StatusService extends AbstractService {
     
+	/* =====================================================================
+	 * Used XML Templates
+	 * ===================================================================== */	
     /**
      * Constant: template for the network status page
      */    
     private static final String TEMPLATE_NETWORK_XML = "Network.xml";    
+    private static final String TEMPLATE_QUEUES_XML = "xml/queues_p.xml";
+    
     
     /**
      * Service used to query the network properties
@@ -75,5 +80,50 @@ public class StatusService extends AbstractService {
         } catch (Exception e) {
             throw new AxisFault(e.getMessage());
         }
+    }
+    
+    
+	/**
+	 * Returns the current status of the following queues
+	 * <ul>
+	 * 	<li>Indexing Queue</li>
+	 * 	<li>Loader Queue</li> 
+	 * 	<li>Local Crawling Queue </li>
+	 *  <li>Remote Triggered Crawling Queue</li> 
+	 * </ul>
+	 * @param localqueueCount the amount of items that should be returned. If this is <code>null</code> 10 items will be returned
+	 * @param loaderqueueCount the amount of items that should be returned. This parameter will be ignored at the moment
+	 * @param localcrawlerqueueCount the amount of items that should be returned. This parameter will be ignored at the moment
+	 * @param remotecrawlerqueueCount the amount of items that should be returned. This parameter will be ignored at the moment
+	 * @return a XML document containing the status information. For the detailed format, take a look into the template file
+	 *         <code>htroot/xml/queues_p.xml</code>
+	 *         
+	 * @throws AxisFault if authentication failed
+	 * @throws Exception on other unexpected errors
+	 * 
+	 * @since 2835
+	 */
+    public Document getQueueStatus(
+    		Integer localqueueCount,
+    		Integer loaderqueueCount,
+    		Integer localcrawlerqueueCount,
+    		Integer remotecrawlerqueueCount    		
+    ) throws Exception {
+        // extracting the message context
+        extractMessageContext(true);      
+        
+        // passing parameters to servlet
+        serverObjects input = new serverObjects();        
+        if (localqueueCount != null) input.put("num",localqueueCount.toString());
+        //if (loaderqueueCount != null) input.put("num",loaderqueueCount.toString());
+        //if (localcrawlerqueueCount != null) input.put("num",localcrawlerqueueCount.toString());
+        //if (remotecrawlerqueueCount != null) input.put("num",remotecrawlerqueueCount.toString());
+        
+        
+        // generating the template containing the network status information
+        byte[] result = writeTemplate(TEMPLATE_QUEUES_XML, input);
+        
+        // sending back the result to the client
+        return this.convertContentToXML(result);        
     }
 }
