@@ -1140,7 +1140,13 @@ public final class yacy {
         plasmaCrawlLURLEntry.Components comp;
         byte[] dummymd5 = new byte[0];
         while (eiter.hasNext()) {
-            oldrow = (kelondroRow.Entry) eiter.next();
+            try {
+                oldrow = (kelondroRow.Entry) eiter.next();
+            } catch (Exception e) {
+                // an IOException may occur here
+                e.printStackTrace();
+                oldrow = null;
+            }
             if (oldrow != null) try {
                 oldentry = new plasmaCrawlLURLOldEntry(oldrow, null);
                 comp = oldentry.comp();
