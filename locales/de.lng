@@ -762,33 +762,33 @@ Some processes occur double to document the complex index migration structure.==
 This is the list of web pages that this peer initiated to crawl,==Dies ist eine Liste von Internetseiten, bei der Ihr Peer den Crawl initiiert hat,
 but had been crawled by <i>other</i> peers.==die aber von <i>anderen</i> Peers gecrawlt wurden.
 This is the 'mirror'-case of process \(6\).==Dies ist der 'Gegensatz' Prozess zu (6)
-<i>Use Case:</i> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<i>Anwendungsfall:</i> Sie erhalten hier Eintr&auml;ge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
+<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Anwendungsfall:</em> Sie erhalten hier Eintr&auml;ge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
 'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==die 'Remote Indexierung' aktivieren. Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde,
 is reported back and can be monitored here.==wird nun zur&uuml;ck gemeldet und hier angezeigt.
 \(2\) Index Monitor for Result of Search Queries==(2) Index Monitor f&uuml;r Resultate bei Suchanfragen
 This index transfer was initiated by your peer by doing a search query.==Dieser Index Transfer wurde von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
 The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecrawlt und nun Ihnen breitgestellt.
-<i>Use Case:</i> This list fills up if you do a search query on the 'Search Page'==<i>Anwendungsfall:</i> Diese Liste f&uuml;llt sich, wenn Sie eine Suchanfrage auf der 'Suchseite' starten.
+<em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==<em>Anwendungsfall:</em> Diese Liste f&uuml;llt sich, wenn Sie eine Suchanfrage auf der 'Suchseite' starten.
 \(3\) Index Monitor for Index Transfer.==(3) Index Monitor f&uuml;r die DHT-Verteilung
 The url fetch was initiated and executed by other peers.==Die URL Indexierung wurde von anderen Peers initiiert und durchgef&uuml;hrt.
 These links here have been transmitted to you because your peer is the most appropriate for storage according to==Diese Links wurden an Ihren Peer &uuml;bermittelt, da er am angemessensten zur Speicherung
 the logic of the Global Distributed Hash Table.==&uuml;bereinstimmend mit der Logic der verteilten Hash Tabelle ist.
-<i>Use Case:</i> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<i>Anwendung:</i> Dies Liste f&uuml;llt sich, wenn Sie die 'Index Empfang' Option auf der 'Index Kontrolle' Seite aktiviert haben.
+<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>Anwendung:</em> Dies Liste f&uuml;llt sich, wenn Sie die 'Index Empfang' Option auf der 'Index Kontrolle' Seite aktiviert haben.
 \(4\) Index Monitor for Proxy Indexing==(4) Index Monitor f&uuml;r die Proxy Indexierung
 These web pages had been indexed as result of your proxy usage.==Diese Internetseiten wurden durch die Benutzung des Proxy indexiert.
 No personal or protected page is indexed==Weder pers&ouml;nliche noch gesch&uuml;tzte Seiten werden indexiert
 such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Solche Seiten werden durch die Benutzung von Cookies oder POST-Parametern (in der URL oder im HTTP Protokoll) identifiziert
 and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
-<i>Use Case:</i> You must use YaCy as proxy to fill up this table.==<i>Anwendung:</i> Sie m&uuml;ssen YaCy als Proxy benutzen, um diese Tabelle zu f&uuml;llen.
+<em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>Anwendung:</em> Sie m&uuml;ssen YaCy als Proxy benutzen, um diese Tabelle zu f&uuml;llen.
 Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihres Browsers auf den selben Port, der
 on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
 \(5\) Index Monitor for Local Crawling.==(5) Index Monitor f&uuml;r das lokale Crawlen
 These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen lokalen Crawl auf der 'Index erzeugen' Seite gestartet haben.
-<i>Use Case:</i> start a crawl by setting a crawl start point on the 'Index Create' page.==<i>Anwendung:</i> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
+<em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>Anwendung:</em> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
 \(6\) Index Monitor for Global Crawling==(6) Index Monitor f&uuml;r das globale Crawlen
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen Peer initiiert (remote-Crawl).
 This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
-<i>Use Case:</i> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<i>Anwendung:</i> Diese Liste f&uuml;llt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
+<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Anwendung:</em> Diese Liste f&uuml;llt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
 The stack is empty.==Die Liste ist leer.
 Showing all \#\[all\]\# entries in this stack.==Zeigt alle #[all]# Eintr&auml;ge in diesem Bereich.
 Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt die letzten #[count]# Eintr&auml;ge aus diesem Bereich von insgesamt #[all]# Eintr&auml;gen.
@@ -1235,31 +1235,24 @@ but <strong>forgot your administration password</strong>, you must stop the prox
 delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/httpProxy.conf' im YaCy Hauptordner l&ouml;schen und YaCy neu starten.
 Administration Account Settings==Administrations Konto Einstellungen
 Server Access Settings==Server Zugangs-Einstellungen
-General Settings==Generelle Einstellungen
-System Behaviour Settings==System Einstellungen
-Server Access Settings==Server Zugangs Einstellungen
-Seed Upload Settings==Seed Upload Einstellungen
-HTTP Networking==HTTP Netzwerk
-Message Forwarding \(optional\)==Nachrichten Weiterleitung (optional)
-#Remote Proxy \(optional\)==Remote Proxy (optional)
+Proxy Access Settings==Proxy Zugangs-Einstellungen
 Content Parser Settings==Inhalt Parser Einstellungen
+Crawler Settings==Crawler Einstellungen
+HTTP Networking==HTTP Netzwerk
+#Remote Proxy \(optional\)==Remote Proxy (optional)
 Port Forwarding \(optional\)==Port Weiterleitung (optional)
-#-----------------------------
+System Behaviour Settings==System Einstellungen
+Seed Upload Settings==Seed Upload Einstellungen
+Message Forwarding \(optional\)==Nachrichten Weiterleitung (optional)
 
-#File: Settings_General.inc
-#---------------------------
-General Settings==Generelle Einstellungen
-<b>Your peer name defines also a new '.yacy' - domain, which can be accessed from every peer running this proxy.</b>==<b>Ihr Peer Name erzeugt auch eine '.yacy'-domain die von jedem Nutzer dieses Proxys erreicht werden kann.</b>
-Using your 'Home Page' and 'File Share' - zones you also have a platform to provide content to your new domain.==Mittels Ihrer 'Homepage' und 'File Share'-Zonen haben Sie auch eine Plattform, um Inhalte f&uuml;r Ihre neue Domain bereit zu stellen.
-staticIP ==statische IP
-<b>The staticIP can help that your peer can be reached by other peers in case that your==<b>Die statische IP kann helfen Ihren Peer f&uuml;r andere Peers erreichbar zu machen, falls Sie
-peer is behind a firewall or proxy.</b>==hinter einer Firewall oder einem Proxy sind.</b>
 #-----------------------------
-
+
 #File: Settings_ProxyAccess.inc
 #---------------------------
-Server Access Settings==Serverzugangseinstellungen
+Proxy Access Settings==Proxyzugangs Einstellungen
 These settings configure the access method to your own http proxy and server.==Diese Einstellungen beeinflussen den Zugriff auf Ihren HTTP-Proxy und -Server.
+All traffic is routed throug one single port, for both proxy and server.==Alle Verbindungen werden durch einen einzigen Port hergestellt, f&uuml;r beides (Proxy und Server).
+
 Server/Proxy Port Configuration==Server/Proxy Port Konfiguration
 The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Peers oder HTTP-Clients warten soll.
 You have four possibilities to specify the address:==Sie haben vier M&ouml;glichkeiten die Adresse anzugeben:
@@ -1336,16 +1329,29 @@ Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
 
 #File: Settings_ServerAccess.inc
 #---------------------------
-Server Access Settings==Server Zugangs Einstellungen
-Here you can restrict access to the server.==Hier k&ouml;nnen Sie den Zugang zum Server beschr&auml;nken.
-By default, the access is not limited, because this function is needed to spawn the p2p index-sharing function.==Standardm&auml;&szlig;ig ist der Zugang unbeschr&auml;nkt, da dies notwendig ist um den p2p-indextausch zu erm&ouml;glichen.
-If you block access to your server==Wenn Sie den Zugang zu Ihrem Server blockieren
-setting anything else than==Einstellen von irgendetwas anderem als
-then you will also be blocked from using other peers' indexes for search service.==dann werden Sie auch davon ausgeschlossen den Index anderer Peers zur Suche zu verwenden.
-However, blocking access may be correct in enterprise environments where you only want to index your company's own web pages.==Wie auch immer, in Unternehmensumgebungen kann ein Blockieren richtig sein, wenn Sie nur die Unternehmenseigenen Websites indexieren wollen.
-ATTENTION: Your current IP is recognized as==ACHTUNG: Ihre aktuelle IP wird als
-. If the value you enter here does not match with this IP, you will not be able to access the server pages anymore== erkannt. Falls der Wert den Sie hier eingeben nicht auf diese IP zutrifft, werden Sie nicht mehr in der Lage sein diese Seite zu erreichen.
+Server Access Settings==Serverzugangs Einstellungen 
 IP-Number filter:==IP-Addressfilter:
+Here you can restrict access to the server.==Hier k&ouml;nnen Sie den Zugang zum Server beschr&auml;nken.
+By default, the access is not limited,==Standardm&auml;&szlig;ig ist der Zugang unbeschr&auml;nkt,
+because this function is needed to spawn the p2p index-sharing function.==da dies notwendig ist um den P2P-Indextausch zu erm&ouml;glichen.
+If you block access to your server \(setting anything else than \'\*\'\), then you will also be blocked==Wenn Sie den Zugang zu Ihrem Server blockieren (Einstellen von irgendetwas anderem als '*') dann werden Sie auch davon ausgeschlossen
+from using other peers' indexes for search service.==den Index anderer Peers zur Suche zu verwenden.
+However, blocking access may be correct in enterprise environments where you only want to index your==Wie auch immer, in Unternehmensumgebungen kann ein Blockieren richtig sein,
+company's own web pages.==wenn Sie nur die Unternehmenseigenen Websites indexieren wollen.
+staticIP \(optional\):==statische IP (optional):
+<b>The staticIP can help that your peer can be reached by other peers in case that your==<b>Die statische IP kann helfen Ihren Peer f&uuml;r andere Peers erreichbar zu machen, falls Sie
+peer is behind a firewall or proxy.</b> You can create a tunnel through the firewall/proxy==hinter einer Firewall oder einem Proxy sind.</b> Sie k&ouml;nnen einen Tunnel durch die Firewall/Proxy erzeugen
+\(look out for 'tunneling through https proxy with connect command'\) and create==(sehen Sie nach "Tunnelung durch einen https Proxy mit verbinden-Befehl") und erzeugen Sie
+an access point for incoming connections.==einen Zugriffspunkt f&uuml;r eingehende Verbindungen.
+This access address can be set here \(either as IP number or domain name\).==Diese Zugrifssadresse kann hier angegeben werden (oder als IP Nummer oder Domain-Name).
+If the address of outgoing connections is equal to the address of incoming connections,==Wenn die Zugriffsadresse der ausgehenden Verbindungen dieselbe ist wie die der eingehenden Verbindungen, 
+you don't need to set anything here, please leave it blank.==brauchen Sie hier nichts angeben. Bitte lassen Sie das Feld leer.
+ATTENTION: Your current IP is recognized as "#\[clientIP\]#".==ACHTUNG: Ihre aktuelle IP wird als "#[clientIP]#" erkannt.
+If the value you enter here does not match with this IP,==Wenn der Wert, den Sie hier eingegeben haben, nicht mit dieser IP &uuml;bereinstimmt,
+you will not be able to access the server pages anymore.==wird es nicht m&ouml;glich sein auf die Serverseiten zuzugreifen.
+
+value="submit"==value="speichern"
+
 #-----------------------------
 
 #File: Settings_Seed.inc
@@ -1841,7 +1847,7 @@ Global&nbsp;Index==Globaler Index
 Crawler Control==Crawler Steuerung
 Local Proxy==Lokaler Proxy
 Communication / Publication==Kommunikation / Publikation
-Peer&nbsp;Control==Peer-Verwaltung
+Peer Control==Peer-Verwaltung
 The Project==Das Projekt
 Search Page==Suchseite
 Detailed Search==Detailsuche

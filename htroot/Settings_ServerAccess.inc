@@ -1,5 +1,5 @@
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend id="general">General Settings</legend>
+<fieldset><legend id="general">Server Access Settings</legend>
 <p>
 <table border="0" cellspacing="5">
   <tr valign="top">
@@ -41,7 +41,7 @@
            you don't need to set anything here, please leave it blank.<br>
            ATTENTION: Your current IP is recognized as "#[clientIP]#".
            If the value you enter here does not match with this IP,
-           you will not be able to access the server pages anymore</td>
+           you will not be able to access the server pages anymore.</td>
   </tr>
   <tr valign="top">
     <td colspan="3"><input type="submit" name="serveraccount" value="submit"></td>

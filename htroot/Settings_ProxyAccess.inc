@@ -1,5 +1,5 @@
 <p><form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
-<fieldset><legend id="ProxyAccess">Server Access Settings</legend>
+<fieldset><legend id="ProxyAccess">Proxy Access Settings</legend>
 These settings configure the access method to your own http proxy and server.
 All traffic is routed throug one single port, for both proxy and server.<br>
 <br><b>Server/Proxy Port Configuration</b><br>
