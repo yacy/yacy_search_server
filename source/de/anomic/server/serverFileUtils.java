@@ -175,9 +175,14 @@ public final class serverFileUtils {
         char[] buffer = new char[4096];
         int count = 0;
         int n = 0;
-        while (-1 != (n = source.read(buffer))) {
-            dest.write(buffer, 0, n);
-            count += n;
+        try {
+            while (-1 != (n = source.read(buffer))) {
+                dest.write(buffer, 0, n);
+                count += n;
+            }
+        } catch (Exception e) {
+            // an "sun.io.MalformedInputException: Missing byte-order mark" - exception may occur here
+            throw new IOException(e.getMessage());
         }
         return count;
     }
