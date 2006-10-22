@@ -60,6 +60,7 @@ was removed from blacklist==bol z blacklistu vymazany
 was added to the blacklist==bol do blacklistu pridany
 File:==Subor:
 or==alebo
+Activate this list for==Tento zoznam je platny pre
 
 #-----------------------------------------------------------
 #File: Blog.html
@@ -537,7 +538,7 @@ Do Remote Indexing:==Indexovanie inych peerov:
 Describe your intention to start this global crawl \(optional\):==Popiste preco chcete zacat tento globalny crawl (popis je nepovinny):
 This message will appear in the 'Other Peer Crawl Start' table of other peers.==Tento popis sa u ostatnych peerov objavi v tabulke 'Start crawlingu ineho peera'.
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Ak aktivovane tak crawler bude kontaktovat inych peerov and bude ich vyuzivat ako vzdialenych indexatorov pre Vas crawl.
-If you need your crawling results locally, you should switch this off.==Aktivujte tuto volbu, ak potrebujete mat vysledy crawlingu lokalne.
+If you need your crawling results locally, you should switch this off.==Vypnite tuto volbu, ak potrebujete mat vysledy crawlingu lokalne.
 Only senior and principal peers can initiate or receive remote crawls.==Len Senior a Principal peeri mozu odstartovat alebo obdrzat vzialene crawly.
 <b>A YaCyNews message will be created to inform all peers about a global crawl</b>, so they can omit starting a crawl with the same start point.==<b>YaCy sprava bude vytvorena na informovanie ostatnych peerov o globalnom crawle</b>, aby sa zabranilo odstartovaniu crawlu z rovnakeho startovacieho bodu.
 Exclude <i>static</i> Stop-Words==Vyluc <i>staticke</i> stop slova
@@ -1550,6 +1551,8 @@ Only Proxy-cache ist available in this mode.==Iba proxy cache je v tomto mode do
 After a short while you should see the effect on the==Za kratky uvidite zmeny na 
 You can now go back to the==Mozete sa vratit do
 Settings</a> page if you want to make more changes.==Nastaveni</a> a vykonat dalsie zmeny.
+Port rebinding will be done in a few seconds==Novy port bude aktivovany za niekolko sekund.
+You can reach your YaCy server under the new location==Vas YaCy server je pristupny pod novou adresou:
 
 #-------------------------------------------------------
 #File: Settings_Admin.inc
