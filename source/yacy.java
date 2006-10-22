@@ -766,12 +766,12 @@ public final class yacy {
                     if (wordIdxContainer != null) try { wordIdxContainer = null; } catch (Exception e) {}
                 }
             }
+            log.logInfo("current LURL DB contains " + currentUrlDB.size() + " entries.");
+            log.logInfo("mimimized LURL DB contains " + minimizedUrlDB.size() + " entries.");
+            
             currentUrlDB.close();
             minimizedUrlDB.close();
             wordIndex.close(600);
-            
-            log.logInfo("current LURL DB contains " + currentUrlDB.size() + " entries.");
-            log.logInfo("mimimized LURL DB contains " + minimizedUrlDB.size() + " entries.");
             
             // TODO: rename the mimimized UrlDB to the name of the previous UrlDB            
             
