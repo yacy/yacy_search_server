@@ -127,7 +127,7 @@ public final class userDB {
         }
     }    
     
-    public Entry createEntry(String userName, HashMap userProps) {
+    public Entry createEntry(String userName, HashMap userProps) throws IllegalArgumentException{
         Entry entry = new Entry(userName,userProps);
         return entry;
     }
@@ -329,7 +329,7 @@ public final class userDB {
         private String userName;
 		private Calendar oldDate, newDate;
         
-        public Entry(String userName, Map mem) {
+        public Entry(String userName, Map mem) throws IllegalArgumentException {
             if ((userName == null) || (userName.length() == 0)) 
                 throw new IllegalArgumentException("Username needed.");
             if(userName.length()>128){

@@ -150,10 +150,15 @@ public class User_p {
                 mem.put(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
                 mem.put(userDB.Entry.BLOG_RIGHT, blogRight);
 
-                entry=sb.userDB.createEntry(username, mem);
-                sb.userDB.addEntry(entry);
-				prop.put("page_text_username", username);
-				prop.put("page_text", 1);
+                try{
+                    entry=sb.userDB.createEntry(username, mem);
+                    sb.userDB.addEntry(entry);
+                    prop.put("page_text_username", username);
+                    prop.put("page_text", 1);
+                }catch(IllegalArgumentException e){
+                    prop.put("page_error", 3);
+                }
+                
                 
             } else { //edit user
 
