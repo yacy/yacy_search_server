@@ -97,6 +97,7 @@
 	<taskdef resource="svnRevNrParser.properties" classpath="${lib}/svnRevNr.jar"/>
 	
 	<!-- determine the revision number -->
+	<echo message="Trying to read Revision number from file ${svnEntriesFile}"/>
 	<svnrevnr file="${svnEntriesFile}" property="baseRevisionNr"/>
  
     <!-- replacing the old with the new revision number -->   

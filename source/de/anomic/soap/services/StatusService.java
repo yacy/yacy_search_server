@@ -70,7 +70,7 @@ public class StatusService extends AbstractService {
     public Document network() throws AxisFault {
         try {
             // extracting the message context
-            extractMessageContext(false);  
+            extractMessageContext(NO_AUTHENTICATION);  
             
             // generating the template containing the network status information
             byte[] result = writeTemplate(TEMPLATE_NETWORK_XML, new serverObjects());
@@ -110,7 +110,7 @@ public class StatusService extends AbstractService {
     		Integer remotecrawlerqueueCount    		
     ) throws Exception {
         // extracting the message context
-        extractMessageContext(true);      
+        extractMessageContext(AUTHENTICATION_NEEDED);      
         
         // passing parameters to servlet
         serverObjects input = new serverObjects();        

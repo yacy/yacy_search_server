@@ -30,9 +30,10 @@
  		  <pathelement location="${libx}/saaj.jar" />   		     		  
  		  <pathelement location="${libx}/wsdl4j.jar" />    
   		
+  		  <!-- optional libraries needed for soap attachments -->
   		  <pathelement location="${libx}/gnumail.jar" />
   		  <pathelement location="${libx}/activation.jar" />
-  		  
+  		  <pathelement location="${libx}/inetlib.jar" />
   	</path>	
 	
 	

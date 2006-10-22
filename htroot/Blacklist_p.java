@@ -224,7 +224,7 @@ public class Blacklist_p {
                 }                
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                     if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
-                        plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],oldEntry.substring(0, pos), oldEntry.substring(pos + 1));
+                        plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],oldEntry.substring(0, pos));
                     }                
                 }                    
                 

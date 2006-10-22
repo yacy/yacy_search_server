@@ -79,6 +79,10 @@ public abstract class AbstractService {
     protected httpHeader requestHeader;
     protected MessageContext messageContext;
     
+    protected static final boolean NO_AUTHENTICATION = false;
+    protected static final boolean AUTHENTICATION_NEEDED = true;
+    
+    
     /**
      * This function is called by the available service functions to
      * extract all needed informations from the SOAP message context.
@@ -166,6 +170,8 @@ public abstract class AbstractService {
     		return tp;
     	} catch (Exception e) {
     		if (e instanceof AxisFault) throw (AxisFault) e;
+    		
+    		e.printStackTrace();
     		
     		// create a new AxisFault Object
     		throw new AxisFault(e.getMessage());
