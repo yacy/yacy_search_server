@@ -1122,7 +1122,9 @@ public class kelondroRecords {
             while (hasNext()) {
                 Node nn = next0();
                 byte[] key = nn.getKey();
-                if ((key == null) || ((key[0] == 0) && (key[1] == 0)) || ((key[2] == 0) && (key[3] == 0))) {
+                if ((key == null) ||
+                    ((key.length > 1) && ((key[0] == 0) && (key[1] == 0))) ||
+                    ((key.length > 3) && ((key[2] == 0) && (key[3] == 0)))) {
                     // this is an deleted node; probably not commited with dispose
                     if (fullyMarked) try {dispose(nn.handle);} catch (IOException e) {} // mark this now as deleted
                     continue;
