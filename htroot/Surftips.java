@@ -95,6 +95,7 @@ public class Surftips {
                 map.put("description", crypt.simpleDecode(post.get("description", ""), null));
                 map.put("vote", "positive");
                 map.put("refid", post.get("refid", ""));
+                map.put("comment", post.get("comment", ""));
                 yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
             }
         
