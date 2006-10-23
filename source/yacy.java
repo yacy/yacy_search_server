@@ -1325,6 +1325,12 @@ public final class yacy {
      */
     public static void main(String args[]) {
 
+        // check assertion status
+        //ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
+        boolean assertionenabled = false;
+        assert assertionenabled = true;
+        if (assertionenabled) System.out.println("Asserts are enabled");
+        
         // check memory amount
         System.gc();
         long startupMemFree  = Runtime.getRuntime().freeMemory(); // the amount of free memory in the Java Virtual Machine

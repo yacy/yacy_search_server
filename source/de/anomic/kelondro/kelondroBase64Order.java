@@ -48,15 +48,17 @@ package de.anomic.kelondro;
 
 import java.util.Comparator;
 
+import de.anomic.server.logging.serverLog;
+
 public class kelondroBase64Order extends kelondroAbstractOrder implements kelondroOrder, kelondroCoding, Comparator {
 
     private static final char[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     private static final char[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
-    private static final byte[] ahpla_standard = new byte[256];
-    private static final byte[] ahpla_enhanced = new byte[256];
+    private static final byte[] ahpla_standard = new byte[128];
+    private static final byte[] ahpla_enhanced = new byte[128];
     
     static {
-        for (int i = 0; i < 256; i++) {
+        for (int i = 0; i < 128; i++) {
             ahpla_standard[i] = -1;
             ahpla_enhanced[i] = -1;
         }
@@ -279,13 +281,28 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
     }
     
     public final int compares(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
+        assert (aoffset + alength <= a.length) : "a.length = " + a.length + ", aoffset = " + aoffset + ", alength = " + alength;
+        assert (boffset + blength <= b.length) : "b.length = " + b.length + ", boffset = " + boffset + ", blength = " + blength;
+        assert (ahpla.length == 128);
         int i = 0;
         final int al = Math.min(alength, a.length - aoffset);
         final int bl = Math.min(blength, b.length - boffset);
         final int len = (al > bl) ? bl : al;
+        byte ac, bc;
+        byte acc, bcc;
         while (i < len) {
-            if (ahpla[a[i + aoffset]] > ahpla[b[i + boffset]]) return 1;
-            if (ahpla[a[i + aoffset]] < ahpla[b[i + boffset]]) return -1;
+            assert (i + aoffset < a.length) : "i = " + i + ", aoffset = " + aoffset + ", a.length = " + a.length + ", a = " + serverLog.arrayList(a, aoffset, len);
+            assert (i + boffset < b.length) : "i = " + i + ", boffset = " + boffset + ", b.length = " + b.length + ", b = " + serverLog.arrayList(b, boffset, len);
+            ac = a[aoffset + i];
+            assert (ac >= 0) && (ac < 128) : "ac = " + ac + ", a = " + serverLog.arrayList(a, aoffset, len);
+            bc = b[boffset + i];
+            assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + serverLog.arrayList(b, boffset, len);
+            acc = ahpla[ac];
+            assert (acc >= 0) : "acc = " + acc + ", a = " + serverLog.arrayList(a, aoffset, len);
+            bcc = ahpla[bc];
+            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + serverLog.arrayList(b, boffset, len);
+            if (acc > bcc) return 1;
+            if (acc < bcc) return -1;
             // else the bytes are equal and it may go on yet undecided
             i++;
         }

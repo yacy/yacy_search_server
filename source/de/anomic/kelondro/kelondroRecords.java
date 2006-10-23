@@ -1096,10 +1096,12 @@ public class kelondroRecords {
         private byte[] bulk;
         private int bulksize;
         private int bulkstart;  // the offset of the bulk array to the node position
+        private boolean fullyMarked;
         
         public contentNodeIterator(long maxInitTime) throws IOException, kelondroException {
             // initialize markedDeleted set of deleted Handles
             markedDeleted = deletedHandles(maxInitTime);
+            fullyMarked = (maxInitTime < 0);
             
             // seek first position according the delete node set
             pos = new Handle(0);
@@ -1116,6 +1118,21 @@ public class kelondroRecords {
         }
 
         public Object next() {
+            // read Objects until a non-deleted Node appears
+            while (hasNext()) {
+                Node nn = next0();
+                byte[] key = nn.getKey();
+                if ((key == null) || ((key[0] == 0) && (key[1] == 0)) || ((key[2] == 0) && (key[3] == 0))) {
+                    // this is an deleted node; probably not commited with dispose
+                    if (fullyMarked) try {dispose(nn.handle);} catch (IOException e) {} // mark this now as deleted
+                    continue;
+                }
+                return nn;
+            }
+            return null;
+        }
+        
+        public Node next0() {
             try {
                 // see if the next record is in the bulk, and if not re-fill the bulk
                 if ((pos.index - bulkstart) >= bulksize) {

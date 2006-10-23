@@ -453,10 +453,13 @@ public class kelondroRowCollection {
     }
 
     private final int compare(int i, int j) {
-        assert (i < chunkcount);
-        assert (j < chunkcount);
+        assert (chunkcount * this.rowdef.objectsize() <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize() + ", chunkcache.length = " + chunkcache.length;
+        assert (i >= 0) && (i < chunkcount) : "i = " + i + ", chunkcount = " + chunkcount;
+        assert (j >= 0) && (j < chunkcount) : "j = " + j + ", chunkcount = " + chunkcount;
         if (i == j) return 0;
+        assert (this.sortColumn == 0) : "this.sortColumn = " + this.sortColumn;
         int keylength = this.rowdef.width(this.sortColumn);
+        assert (keylength <= 12) : "keylength = " + keylength;
         int colstart  = this.rowdef.colstart[this.sortColumn];
         int c = this.sortOrder.compare(
                 chunkcache,

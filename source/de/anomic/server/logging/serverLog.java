@@ -217,4 +217,12 @@ public final class serverLog {
         for (int i = l + n; i > n; n--) sb.insert(0, fillChar);
         return sb.toString();
     }
+    
+    public static final String arrayList(byte[] b, int start, int length) {
+        StringBuffer sb = new StringBuffer(b.length * 4);
+        sb.append('[').append(Integer.toString((int) b[start])).append(',');
+        for (int i = 1; i < length; i++) sb.append(' ').append(Integer.toString((int) b[start + i])).append(',');
+        sb.append(']');
+        return sb.toString();
+    }
 }

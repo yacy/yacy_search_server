@@ -264,11 +264,13 @@ public class kelondroRow {
         
         private void setCol(int encoding, int offset, int length, byte[] cell) {
             if (cell == null) {
-                while (length-- > 0) rowinstance[offset + length] = 0;
+                while (length-- >= 0) rowinstance[offset + length] = 0;
             } else {
-                System.arraycopy(cell, 0, rowinstance, offset, Math.min(cell.length, length));
                 if (cell.length < length) {
-                    while (length-- > cell.length) rowinstance[offset + length] = 0;
+                    System.arraycopy(cell, 0, rowinstance, offset, cell.length);
+                    while (length-- >= cell.length) rowinstance[offset + length] = 0;
+                } else {
+                    System.arraycopy(cell, 0, rowinstance, offset, length);
                 }
             }
         }

@@ -91,7 +91,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             node = (kelondroRecords.Node) content.next();
             i = node.handle().hashCode();
             indexentry = ri.row().newEntry();
-            indexentry.setCol(0, node.getValueRow());
+            indexentry.setCol(0, node.getKey());
             indexentry.setCol(1, i);
             ri.addUnique(indexentry);
             if ((i % 10000) == 0) {
