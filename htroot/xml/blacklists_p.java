@@ -77,7 +77,7 @@ public class blacklists_p {
                     if (nextEntry.length() == 0) continue;
                     if (nextEntry.startsWith("#")) continue;
         
-                    prop.put("lists_" + blacklistCount + "_items_" + count + "_item", nextEntry);
+                    prop.putNoHTML("lists_" + blacklistCount + "_items_" + count + "_item", nextEntry);
                     count++;
                 }
                 prop.put("lists_" + blacklistCount + "_items", count);
