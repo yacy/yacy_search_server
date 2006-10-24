@@ -1,9 +1,17 @@
 package de.anomic.soap.services;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.xml.rpc.ServiceException;
 
+import org.apache.axis.attachments.AttachmentPart;
+import org.apache.axis.attachments.Attachments;
+import org.apache.axis.attachments.PlainTextDataSource;
+import org.apache.axis.client.Call;
+import org.apache.axis.client.Stub;
 import org.apache.axis.utils.XMLUtils;
 import org.w3c.dom.Document;
 
@@ -60,6 +68,31 @@ public class BlacklistServiceTest extends AbstractServiceTest {
 		
 		// delete blacklist
 		bl.deleteBlacklist(blacklistName);
+	}
+	
+	public void testBacklistImport() throws IOException {
+		BlacklistService bl = ((BlacklistService)service);
+		
+		// create datasource to hold the attachment content
+        DataSource data =  new PlainTextDataSource("import.txt","www.yacy.net/.*\r\n" +
+        														"www.yacy-websuche.de/.*");
+        DataHandler attachmentFile = new DataHandler(data);   
+        
+        // creating attachment part
+        AttachmentPart part = new AttachmentPart();
+        part.setDataHandler(attachmentFile);
+        part.setContentType("text/plain");
+
+        // setting the attachment format that should be used
+        ((Stub)service)._setProperty(org.apache.axis.client.Call.ATTACHMENT_ENCAPSULATION_FORMAT,org.apache.axis.client.Call.ATTACHMENT_ENCAPSULATION_FORMAT_MIME);
+        ((Stub)service).addAttachment(part);               
+        
+        // import it
+        String blacklistName = "junit_test_" + System.currentTimeMillis();
+        bl.importBlacklist(blacklistName);
+        
+        // delete blacklist
+        bl.deleteBlacklist(blacklistName);
 	}
 
 }

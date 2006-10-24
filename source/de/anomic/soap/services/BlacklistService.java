@@ -1,14 +1,23 @@
 package de.anomic.soap.services;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import javax.activation.DataHandler;
+import javax.xml.soap.SOAPException;
+
 import org.apache.axis.AxisFault;
+import org.apache.axis.Message;
+import org.apache.axis.MessageContext;
+import org.apache.axis.attachments.AttachmentPart;
+import org.apache.axis.attachments.Attachments;
 import org.w3c.dom.Document;
 
 import de.anomic.data.listManager;
@@ -62,7 +71,7 @@ public class BlacklistService extends AbstractService {
 		// extracting the message context
 		extractMessageContext(AUTHENTICATION_NEEDED);
 		
-        // initialize the list manager
+		// initialize the list manager
 		initBlacklistManager();
 		
 		// check if the blacklist already exists
@@ -243,9 +252,83 @@ public class BlacklistService extends AbstractService {
 		removeBlacklistItemFromBlacklist(blacklistItem,blacklistName);
     }
     
+    public void importBlacklist(String blacklistName) throws IOException, SOAPException {
+    	// Check for errors
+    	if ((blacklistName == null)||(blacklistName.length() == 0)) 
+    		throw new IllegalArgumentException("Blacklist name must not be null or empty.");   
+    	
+		// extracting the message context
+		extractMessageContext(AUTHENTICATION_NEEDED);    
+		
+        // initialize the list manager
+		initBlacklistManager();		    	
+		
+		// check if the blacklist file exists
+		if (!blacklistExists(blacklistName)) {
+			// create blacklist
+			createBlacklistFile(blacklistName);
+		}
+		
+		// get attachment
+        MessageContext msgContext = MessageContext.getCurrentContext();
+
+        // getting the request message
+        Message reqMsg = msgContext.getRequestMessage();
+        
+        // getting the attachment implementation
+        Attachments messageAttachments = reqMsg.getAttachmentsImpl();
+        if (messageAttachments == null) {
+            throw new AxisFault("Attachments not supported");
+        }		
+        
+        int attachmentCount= messageAttachments.getAttachmentCount();
+        if (attachmentCount == 0) 
+            throw new AxisFault("No attachment found");
+        else if (attachmentCount != 1)
+            throw new AxisFault("Too many attachments as expected.");     
+        
+        // getting the attachments
+        AttachmentPart[] attachments = (AttachmentPart[])messageAttachments.getAttachments().toArray(new AttachmentPart[attachmentCount]);
+        
+        // getting the content of the attachment
+        DataHandler dh = attachments[0].getDataHandler();
+        
+        PrintWriter writer = null;
+        BufferedReader reader = null;
+        try {
+        	// getting a reader
+        	reader = new BufferedReader(new InputStreamReader(dh.getInputStream(),"UTF-8"));
+        	
+        	// getting blacklist file writer
+        	writer = getBlacklistFileWriter(blacklistName);
+        	
+        	// read new item
+        	String blacklistItem = null;
+        	while ((blacklistItem = reader.readLine()) != null) {
+        		// convert it into a proper format
+        		blacklistItem = prepareBlacklistItem(blacklistItem);
+        		
+        		// TODO: check if the item already exits
+        		
+        		// write item to blacklist file
+        		writer.println(blacklistItem);
+        		writer.flush();
+        		
+        		// inform blacklist engine about new item
+        		addBlacklistItemToBlacklist(blacklistItem, blacklistName);
+        	}
+        } finally {
+        	if (reader != null) try { reader.close(); } catch (Exception e) {/* */}
+        	if (writer != null) try { writer.close(); } catch (Exception e) {/* */}
+        }
+    }
+    
     public String[] getBlacklistTypes() throws AxisFault {
 		// extracting the message context
 		extractMessageContext(AUTHENTICATION_NEEDED);
+		
+		// initialize the list manager
+		initBlacklistManager();		
 		
 		// return supported types
 		return getSupportedBlacklistTypeArray();
@@ -271,14 +354,23 @@ public class BlacklistService extends AbstractService {
     private void addBlacklistItemToFile(String blacklistItem, String blacklistName) throws AxisFault {
         PrintWriter pw = null;
         try {
-            pw = new PrintWriter(new FileWriter(getBlacklistFile(blacklistName), true));
+            pw = getBlacklistFileWriter(blacklistName);
             pw.println(blacklistItem);
+            pw.flush();
             pw.close();
         } catch (IOException e) {
             throw new AxisFault("Unable to append blacklist entry.",e);
         } finally {
             if (pw != null) try { pw.close(); } catch (Exception e){ /* */}
         }            	
+    }
+    
+    private PrintWriter getBlacklistFileWriter(String blacklistName) throws AxisFault {
+    	try {
+    	return new PrintWriter(new FileWriter(getBlacklistFile(blacklistName), true));
+    	} catch (IOException e) {
+    		throw new AxisFault("Unable to open blacklist file.",e);
+    	}
     }
     
     private void removeBlacklistItemFromBlacklistFile(String blacklistItem, String blacklistName) {

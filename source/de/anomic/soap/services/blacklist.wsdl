@@ -21,94 +21,104 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
     <wsdl:part name="getBlacklistTypesReturn" type="impl:ArrayOf_soapenc_string"/>
 
   </wsdl:message>
+  <wsdl:message name="importBlacklistRequest">
+    <wsdl:part name="blacklistName" type="soapenc:string"/>
+  </wsdl:message>
   <wsdl:message name="getBlacklistTypesRequest">
   </wsdl:message>
   <wsdl:message name="removeBlacklistItemRequest">
     <wsdl:part name="blacklistName" type="soapenc:string"/>
     <wsdl:part name="blacklistItem" type="soapenc:string"/>
+
   </wsdl:message>
   <wsdl:message name="addBlacklistItemResponse">
   </wsdl:message>
-
   <wsdl:message name="shareBlacklistResponse">
   </wsdl:message>
   <wsdl:message name="getBlacklistListResponse">
     <wsdl:part name="getBlacklistListReturn" type="apachesoap:Document"/>
   </wsdl:message>
   <wsdl:message name="createBlacklistResponse">
+
   </wsdl:message>
   <wsdl:message name="getBlacklistListRequest">
   </wsdl:message>
-
   <wsdl:message name="unshareBlacklistRequest">
     <wsdl:part name="blacklistName" type="soapenc:string"/>
   </wsdl:message>
   <wsdl:message name="shareBlacklistRequest">
     <wsdl:part name="blacklistName" type="soapenc:string"/>
   </wsdl:message>
+
   <wsdl:message name="deleteBlacklistResponse">
   </wsdl:message>
   <wsdl:message name="activateBlacklistRequest">
-
     <wsdl:part name="blacklistName" type="soapenc:string"/>
     <wsdl:part name="activateForBlacklistTypes" type="impl:ArrayOf_soapenc_string"/>
   </wsdl:message>
   <wsdl:message name="createBlacklistRequest">
     <wsdl:part name="blacklistName" type="soapenc:string"/>
     <wsdl:part name="shareBlacklist" type="xsd:boolean"/>
+
     <wsdl:part name="activateForBlacklistTypes" type="impl:ArrayOf_soapenc_string"/>
   </wsdl:message>
+  <wsdl:message name="importBlacklistResponse">
+  </wsdl:message>
   <wsdl:message name="deleteBlacklistRequest">
-
     <wsdl:part name="blacklistName" type="soapenc:string"/>
   </wsdl:message>
   <wsdl:message name="deactivateBlacklistRequest">
     <wsdl:part name="blacklistName" type="soapenc:string"/>
+
     <wsdl:part name="deactivateForBlacklistTypes" type="impl:ArrayOf_soapenc_string"/>
   </wsdl:message>
   <wsdl:message name="createNewXMLDocumentResponse">
     <wsdl:part name="createNewXMLDocumentReturn" type="apachesoap:Document"/>
   </wsdl:message>
-
   <wsdl:portType name="BlacklistService">
     <wsdl:operation name="getBlacklistList">
       <wsdl:input message="impl:getBlacklistListRequest" name="getBlacklistListRequest"/>
       <wsdl:output message="impl:getBlacklistListResponse" name="getBlacklistListResponse"/>
+
     </wsdl:operation>
     <wsdl:operation name="createBlacklist" parameterOrder="blacklistName shareBlacklist activateForBlacklistTypes">
       <wsdl:input message="impl:createBlacklistRequest" name="createBlacklistRequest"/>
       <wsdl:output message="impl:createBlacklistResponse" name="createBlacklistResponse"/>
     </wsdl:operation>
-
     <wsdl:operation name="shareBlacklist" parameterOrder="blacklistName">
       <wsdl:input message="impl:shareBlacklistRequest" name="shareBlacklistRequest"/>
       <wsdl:output message="impl:shareBlacklistResponse" name="shareBlacklistResponse"/>
     </wsdl:operation>
+
     <wsdl:operation name="deleteBlacklist" parameterOrder="blacklistName">
       <wsdl:input message="impl:deleteBlacklistRequest" name="deleteBlacklistRequest"/>
       <wsdl:output message="impl:deleteBlacklistResponse" name="deleteBlacklistResponse"/>
     </wsdl:operation>
     <wsdl:operation name="unshareBlacklist" parameterOrder="blacklistName">
-
       <wsdl:input message="impl:unshareBlacklistRequest" name="unshareBlacklistRequest"/>
       <wsdl:output message="impl:unshareBlacklistResponse" name="unshareBlacklistResponse"/>
     </wsdl:operation>
     <wsdl:operation name="activateBlacklist" parameterOrder="blacklistName activateForBlacklistTypes">
+
       <wsdl:input message="impl:activateBlacklistRequest" name="activateBlacklistRequest"/>
       <wsdl:output message="impl:activateBlacklistResponse" name="activateBlacklistResponse"/>
     </wsdl:operation>
     <wsdl:operation name="deactivateBlacklist" parameterOrder="blacklistName deactivateForBlacklistTypes">
       <wsdl:input message="impl:deactivateBlacklistRequest" name="deactivateBlacklistRequest"/>
-
       <wsdl:output message="impl:deactivateBlacklistResponse" name="deactivateBlacklistResponse"/>
     </wsdl:operation>
     <wsdl:operation name="addBlacklistItem" parameterOrder="blacklistName blacklistItem">
       <wsdl:input message="impl:addBlacklistItemRequest" name="addBlacklistItemRequest"/>
+
       <wsdl:output message="impl:addBlacklistItemResponse" name="addBlacklistItemResponse"/>
     </wsdl:operation>
     <wsdl:operation name="removeBlacklistItem" parameterOrder="blacklistName blacklistItem">
       <wsdl:input message="impl:removeBlacklistItemRequest" name="removeBlacklistItemRequest"/>
       <wsdl:output message="impl:removeBlacklistItemResponse" name="removeBlacklistItemResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="importBlacklist" parameterOrder="blacklistName">
+      <wsdl:input message="impl:importBlacklistRequest" name="importBlacklistRequest"/>
+      <wsdl:output message="impl:importBlacklistResponse" name="importBlacklistResponse"/>
 
     </wsdl:operation>
     <wsdl:operation name="getBlacklistTypes">
@@ -209,6 +219,16 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
       </wsdl:input>
       <wsdl:output name="removeBlacklistItemResponse">
+
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="importBlacklist">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="importBlacklistRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="importBlacklistResponse">
 
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
