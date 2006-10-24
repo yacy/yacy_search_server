@@ -58,15 +58,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
-public class kelondroDyn extends kelondroTree {
+import de.anomic.server.logging.serverLog;
+
+public class kelondroDyn {
 
     private static final int counterlen = 8;
 
     protected int keylen;
     private int reclen;
-    private int segmentCount;
+    //private int segmentCount;
     private char fillChar;
+    private kelondroIndex index;
     private kelondroObjectBuffer buffer;
+    private kelondroRow rowdef;
     
     public kelondroDyn(File file, long buffersize /*bytes*/, long preloadTime, int key, int nodesize, char fillChar) throws IOException {
         this(file, buffersize, preloadTime, key, nodesize, fillChar, new kelondroNaturalOrder(true));
@@ -75,12 +79,14 @@ public class kelondroDyn extends kelondroTree {
     public kelondroDyn(File file, long buffersize /* bytes */, long preloadTime, int key,
             int nodesize, char fillChar, kelondroOrder objectOrder) throws IOException {
         // creates or opens a dynamic tree
-        super(file, buffersize, preloadTime,  kelondroTree.defaultObjectCachePercent, new kelondroRow("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize), objectOrder, 1, 8);
-        this.keylen = row().width(0) - counterlen;
-        this.reclen = row().width(1);
+        rowdef = new kelondroRow("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize);
+        kelondroTree tree = new kelondroTree(file, buffersize / 2, preloadTime, rowdef, objectOrder, 1, 8);
+        this.index = new kelondroCachedIndex(tree, buffersize / 2);
+        this.keylen = index.row().width(0) - counterlen;
+        this.reclen = index.row().width(1);
         this.fillChar = fillChar;
-        this.segmentCount = 0;
-        if (!(super.fileExisted)) writeSegmentCount();
+        //this.segmentCount = 0;
+        //if (!(tree.fileExisted)) writeSegmentCount();
         buffer = new kelondroObjectBuffer(file.toString());
     }
     
@@ -99,7 +105,7 @@ public class kelondroDyn extends kelondroTree {
             try {
                 return new kelondroDyn(file, buffersize, preloadTime, key, nodesize, fillChar, objectOrder);
             } catch (IOException ee) {
-                log.severe("cannot open or create file " + file.toString());
+                serverLog.logSevere("kelondroDyn", "cannot open or create file " + file.toString());
                 e.printStackTrace();
                 ee.printStackTrace();
                 return null;
@@ -107,6 +113,7 @@ public class kelondroDyn extends kelondroTree {
         }
     }
     
+    /*
     private void writeSegmentCount() {
         try {
             setText(0, kelondroBase64Order.enhancedCoder.encodeLong(segmentCount, 8).getBytes());
@@ -114,12 +121,33 @@ public class kelondroDyn extends kelondroTree {
             
         }
     }
+    */
     
-    public synchronized int sizeDyn() {
+    public kelondroRow row() {
+        return this.rowdef;
+    }
+    
+    public int cacheNodeChunkSize() {
+        return index.cacheNodeChunkSize();
+    }
+
+    public int cacheObjectChunkSize() {
+        return index.cacheObjectChunkSize();
+    }
+
+    public int[] cacheNodeStatus() {
+        return index.cacheNodeStatus();
+    }
+    
+    public long[] cacheObjectStatus() {
+        return index.cacheObjectStatus();
+    }
+    
+    public synchronized int sizeDyn() throws IOException {
         //this.segmentCount = 0;
         //Iterator i = keys(true); while (i.hasNext()) segmentCount++;
         //return segmentCount;
-        return super.size();
+        return index.size();
     }
     
     private static String counter(int c) {
@@ -174,7 +202,7 @@ public class kelondroDyn extends kelondroTree {
             kelondroRow.Entry nt;
             while (ri.hasNext()) {
                 nt = (kelondroRow.Entry) ri.next();
-                if (nt == null) throw new kelondroException(filename, "no more elements available");
+                if (nt == null) throw new kelondroException("no more elements available");
                 g = nt.getColBytes(0);
                 if (g == null) return null;
                 k = new String(g, 0, keylen);
@@ -193,11 +221,11 @@ public class kelondroDyn extends kelondroTree {
     public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating) throws IOException {
         // iterates only the keys of the Nodes
         // enumerated objects are of type String
-        return new dynKeyIterator(super.rows(up, rotating, null));
+        return new dynKeyIterator(index.rows(up, rotating, null));
     }
 
     public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        return new dynKeyIterator(super.rows(up, rotating, firstKey));
+        return new dynKeyIterator(index.rows(up, rotating, firstKey));
     }
     
     private byte[] getValueCached(byte[] key) throws IOException {
@@ -207,7 +235,7 @@ public class kelondroDyn extends kelondroTree {
         if (buffered != null) return buffered;
         
         // read from db
-        kelondroRow.Entry result = get(key);
+        kelondroRow.Entry result = index.get(key);
         if (result == null) return null;
 
         // return result
@@ -217,7 +245,7 @@ public class kelondroDyn extends kelondroTree {
     private synchronized void setValueCached(byte[] key, byte[] value) throws IOException {
         // update storage
         synchronized (this) {
-            put(key, value);
+            index.put(rowdef.newEntry(new byte[][]{key, value}));
             buffer.put(key, value);
         }
     }
@@ -318,8 +346,8 @@ public class kelondroDyn extends kelondroTree {
         if (key == null) return;
         int recpos = 0;
         byte[] k;
-        while (super.get(k = dynKey(key, recpos)) != null) {
-            super.remove(k);
+        while (index.get(k = dynKey(key, recpos)) != null) {
+            index.remove(k);
             buffer.remove(k);
             recpos++;
         }
@@ -442,6 +470,10 @@ public class kelondroDyn extends kelondroTree {
                 }
         }
     }
+    
+    public synchronized void close() throws IOException {
+        index.close();
+    }
 
     public static void main(String[] args) {
         // test app for DB functions
@@ -449,13 +481,11 @@ public class kelondroDyn extends kelondroTree {
         // arguments:
         // {-f2db/-db2f} <db-name> <key> <filename>
 
-        if (args.length == 0) {
-            randomtest(20);
-        } else if (args.length == 1) {
+        if (args.length == 1) {
             // open a db and list keys
             try {
                 kelondroDyn kd = new kelondroDyn(new File(args[0]), 0x100000, 0, 4 ,100, '_');
-                System.out.println(kd.size() + " elements in DB");
+                System.out.println(kd.sizeDyn() + " elements in DB");
                 Iterator i = kd.dynKeys(true, false);
                 while (i.hasNext())
                     System.out.println((String) i.next());
@@ -479,59 +509,6 @@ public class kelondroDyn extends kelondroTree {
             } catch (IOException e) {
                 System.out.println("ERROR: " + e.toString());
             }
-        }
-    }
-    
-    public static void randomtest(int elements) {
-        System.out.println("random " + elements + ":");
-        String s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".substring(0, elements);
-        String t, d;
-        char c;
-        kelondroDyn tt;
-        File testFile = new File("test.db");
-        byte[] b;
-        byte[] cont;
-        try {
-            int steps = 0;
-            while (true) {
-                if (testFile.exists()) testFile.delete();
-                tt = new kelondroDyn(testFile, 0, 0, 4 ,100, '_');
-                steps = ((int) System.currentTimeMillis() % 7) * (((int) System.currentTimeMillis() + 17) % 11);
-                t = s;
-                d = "";
-                System.out.println("NEW SESSION");
-                for (int i = 0; i < steps; i++) {
-                    if ((d.length() < 3) || ((t.length() > 0) && (((int) System.currentTimeMillis() % 7) < 3))) {
-                        // add one
-                        c = t.charAt((int) (System.currentTimeMillis() % t.length()));
-                        b = testWord(c);
-                        cont = new byte[(int) (System.currentTimeMillis() % 777L)];
-                        tt.putDyn(new String(b), 0, cont, 0, cont.length);
-                        d = d + c;
-                        t = t.substring(0, t.indexOf(c)) + t.substring(t.indexOf(c) + 1);
-                        System.out.println("added " + new String(b) + ", " + cont.length + " bytes");
-                    } else {
-                        // delete one
-                        c = d.charAt((int) (System.currentTimeMillis() % d.length()));
-                        b = testWord(c);
-                        tt.remove(new String(b));
-                        d = d.substring(0, d.indexOf(c)) + d.substring(d.indexOf(c) + 1);
-                        t = t + c;
-                        System.out.println("removed " + new String(b));
-                    }
-                    if (countElementsDyn(tt) != tt.sizeDyn()) {
-                        System.out.println("wrong size: count=" + countElementsDyn(tt) + ", size=" + tt.sizeDyn() + "; Tree:");
-                        //tt.print();
-                        //break;
-                    }
-                }
-                //tt.print();
-                tt.close();
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("TERMINATED");
         }
     }
     

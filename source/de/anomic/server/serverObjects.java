@@ -67,7 +67,6 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import de.anomic.data.wikiCode;
-import de.anomic.http.httpHeader;
 
 public class serverObjects extends Hashtable implements Cloneable {
 

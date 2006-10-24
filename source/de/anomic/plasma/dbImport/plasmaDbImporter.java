@@ -1,6 +1,7 @@
 package de.anomic.plasma.dbImport;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -75,7 +76,12 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         }         
         
         this.log.logFine("Initializing source word index db.");
-        this.importWordIndex = new plasmaWordIndex(this.importPath, this.indexPath, true, (this.cacheSize/2)/1024, preloadTime / 2, this.log, sb.getConfigBool("useCollectionIndex", false));
+        try {
+            this.importWordIndex = new plasmaWordIndex(this.importPath, this.indexPath, true, (this.cacheSize/2)/1024, preloadTime / 2, this.log, sb.getConfigBool("useCollectionIndex", false));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
         this.log.logFine("Initializing import URL db.");
         this.importUrlDB = new plasmaCrawlLURL(this.importPath, this.indexPath, (this.cacheSize/2)/1024, preloadTime / 2, false);
         this.importStartSize = this.importWordIndex.size();

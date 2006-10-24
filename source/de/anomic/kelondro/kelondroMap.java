@@ -150,6 +150,9 @@ public class kelondroMap {
     }
 
     public synchronized void set(String key, Map newMap) throws IOException {
+        assert (key != null);
+        assert (key.length() > 0);
+        assert (newMap != null);
         // update elementCount
         if ((sortfields != null) || (accfields != null)) {
             final Map oldMap = get(key, false);
@@ -330,7 +333,11 @@ public class kelondroMap {
 
     public synchronized int size() {
         if ((sortfields != null) || (accfields != null)) return elementCount;
-        return dyn.size();
+        try {
+            return dyn.sizeDyn();
+        } catch (IOException e) {
+            return 0;
+        }
     }
 
     public void close() throws IOException {
@@ -373,7 +380,7 @@ public class kelondroMap {
             }
             try {
                 final Map map = get(nextKey);
-                if (map == null) throw new kelondroException(dyn.filename, "no more elements available");
+                if (map == null) throw new kelondroException("no more elements available");
                 map.put("key", nextKey);
                 return map;
             } catch (IOException e) {

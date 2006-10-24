@@ -87,11 +87,11 @@ public class kelondroMapTable {
         mTables.put(tablename, map);
     }
     
-    public void declareTree(String tablename, kelondroRow rowdef, long buffersize /*bytes*/, long preloadTime)  {
+    public void declareTree(String tablename, kelondroRow rowdef, long buffersize /*bytes*/, long preloadTime) throws IOException  {
         if (mTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareTree: table '" + tablename + "' declared already in other context.");
         if (tTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareTree: table '" + tablename + "' declared twice.");
         File tablefile = new File(tablesPath, "table." + tablename + ".tdb");
-        kelondroTree Tree = kelondroTree.open(tablefile, buffersize, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
+        kelondroIndex Tree = new kelondroCachedIndex(kelondroTree.open(tablefile, buffersize / 2, preloadTime, rowdef), buffersize / 2);
         tTables.put(tablename, Tree);
     }
 
@@ -104,7 +104,7 @@ public class kelondroMapTable {
     }
     
     public synchronized void update(String tablename, kelondroRow.Entry row /* first element is the unique key = index */) throws IOException {
-        kelondroTree tree = (kelondroTree) tTables.get(tablename);
+        kelondroIndex tree = (kelondroIndex) tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.update: tree table '" + tablename + "' does not exist.");
         tree.put(row);
         tTables.put(tablename, tree);
@@ -118,7 +118,7 @@ public class kelondroMapTable {
     }
 
     public synchronized kelondroRow.Entry selectByte(String tablename, String key) throws IOException {
-        kelondroTree tree = (kelondroTree) tTables.get(tablename);
+        kelondroIndex tree = (kelondroIndex) tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.selectByte: tree table '" + tablename + "' does not exist.");
         return tree.get(key.getBytes());
     }
@@ -142,7 +142,7 @@ public class kelondroMapTable {
     }
     
     public synchronized Iterator /* of kelondroRow.Entry-Elements */ rows(String tablename, boolean up, boolean rotating, byte[] firstKey) throws IOException {
-       kelondroTree tree = (kelondroTree) tTables.get(tablename);
+       kelondroIndex tree = (kelondroIndex) tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.bytes: tree table '" + tablename + "' does not exist.");
         return tree.rows(up, rotating, firstKey);
     }
@@ -154,7 +154,7 @@ public class kelondroMapTable {
         if (key.length() > table.keySize()) key = key.substring(0, table.keySize());
         if (table != null) {table.remove(key); mTables.put(tablename, table); return;}
       
-        kelondroTree Tree = (kelondroTree) tTables.get(tablename);
+        kelondroIndex Tree = (kelondroIndex) tTables.get(tablename);
         if (Tree != null) {Tree.remove(key.getBytes()); tTables.put(tablename, Tree); return;}
         
         throw new RuntimeException("kelondroTables.delete: table '" + tablename + "' does not exist.");
@@ -170,8 +170,8 @@ public class kelondroMapTable {
         kelondroMap table = (kelondroMap) mTables.get(tablename);
         if (table != null) return table.size();
         
-        kelondroTree Tree = (kelondroTree) tTables.get(tablename);
-        if (Tree != null) return Tree.size();
+        kelondroIndex Tree = (kelondroIndex) tTables.get(tablename);
+        if (Tree != null) try { return Tree.size(); } catch (IOException e) {return 0;}
         
         throw new RuntimeException("kelondroTables.accumulator: table '" + tablename + "' does not exist.");
     }
@@ -182,7 +182,7 @@ public class kelondroMapTable {
         mTables = null;
         
         Iterator TreeIt = tTables.values().iterator();
-        while (TreeIt.hasNext()) ((kelondroTree) TreeIt.next()).close();
+        while (TreeIt.hasNext()) ((kelondroIndex) TreeIt.next()).close();
         tTables = null;
     }
     

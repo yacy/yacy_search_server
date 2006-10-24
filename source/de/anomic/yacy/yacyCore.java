@@ -209,7 +209,12 @@ public class yacyCore {
         int memNews = Integer.parseInt(switchboard.getConfig("ramCacheNews", "1024")) / 1024;
         long memNews_time = Long.parseLong(switchboard.getConfig("ramCacheNews_time", "1000"));
         log.logConfig("News Cache memory = " + memNews + " KB");
-        newsPool = new yacyNewsPool(yacyDBPath, memNews, memNews_time);
+        try {
+            newsPool = new yacyNewsPool(yacyDBPath, memNews, memNews_time);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
 
         loadSeedUploadMethods();
 

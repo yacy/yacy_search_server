@@ -24,6 +24,9 @@ package de.anomic.server;
 import de.anomic.http.httpHeader;
 
 public class servletProperties extends serverObjects {
+
+    private static final long serialVersionUID = 1L;
+
     private String prefix="";
     
     private  httpHeader outgoingHeader;

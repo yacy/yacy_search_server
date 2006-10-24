@@ -52,6 +52,7 @@ import java.util.Iterator;
 
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBufferedIndex;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroRecords;
@@ -98,7 +99,7 @@ public class plasmaCrawlNURL extends indexURL {
     private kelondroStack movieStack;     // links pointing to movie resources
     private kelondroStack musicStack;     // links pointing to music resources
 
-    private final HashSet stackIndex;           // to find out if a specific link is already on any stack
+    private final HashSet stackIndex;     // to find out if a specific link is already on any stack
     private File cacheStacksPath;
     private int bufferkb;
     private long preloadTime;
@@ -156,7 +157,7 @@ public class plasmaCrawlNURL extends indexURL {
             String newCacheName = "urlNotice4.table";
             cacheStacksPath.mkdirs();
             try {
-                urlIndexFile = new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder);
+                urlIndexFile = new kelondroBufferedIndex(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder));
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(-1);
@@ -164,7 +165,7 @@ public class plasmaCrawlNURL extends indexURL {
         } else {
             File oldCacheFile = new File(cacheStacksPath, "urlNotice1.db");
             oldCacheFile.getParentFile().mkdirs();
-            urlIndexFile = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
+            urlIndexFile = new kelondroBufferedIndex(kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, rowdef));
         }
     }
     

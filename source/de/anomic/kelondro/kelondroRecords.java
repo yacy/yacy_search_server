@@ -451,11 +451,23 @@ public class kelondroRecords {
         return new File(filename);
     }
     
+    public final int cacheObjectChunkSize() {
+        // dummy method
+        return -1;
+    }
+    
+    public long[] cacheObjectStatus() {
+        // dummy method
+        return null;
+    }
+    
     public final int cacheNodeChunkSize() {
+        // returns the size that the node cache uses for a single entry
         return this.headchunksize + element_in_cache;
     }
     
     public final int[] cacheNodeStatus() {
+        // a collection of different node cache status values
         if (cacheHeaders == null) return new int[]{0,0,0,0,0,0,0,0,0,0};
         return new int[]{
                 cacheSize,
@@ -1097,6 +1109,7 @@ public class kelondroRecords {
         private int bulksize;
         private int bulkstart;  // the offset of the bulk array to the node position
         private boolean fullyMarked;
+        private Node next;
         
         public contentNodeIterator(long maxInitTime) throws IOException, kelondroException {
             // initialize markedDeleted set of deleted Handles
@@ -1111,16 +1124,27 @@ public class kelondroRecords {
             bulksize = Math.min(65536 / recordsize, USAGE.allCount());
             bulkstart = -bulksize;
             bulk = new byte[bulksize * recordsize];
-        }
-
-        public boolean hasNext() {
-            return pos.index < USAGE.allCount();
+            next = (hasNext0()) ? next0() : null;
         }
 
         public Object next() {
+            Node n = next;
+            next = next0();
+            return n;
+        }
+        
+        public boolean hasNext() {
+            return next != null;
+        }
+
+        public boolean hasNext0() {
+            return pos.index < USAGE.allCount();
+        }
+        
+        public Node next0() {
             // read Objects until a non-deleted Node appears
-            while (hasNext()) {
-                Node nn = next0();
+            while (hasNext0()) {
+                Node nn = next00();
                 byte[] key = nn.getKey();
                 if ((key == null) ||
                     ((key.length > 1) && ((key[0] == 0) && (key[1] == 0))) ||
@@ -1134,7 +1158,7 @@ public class kelondroRecords {
             return null;
         }
         
-        public Node next0() {
+        public Node next00() {
             try {
                 // see if the next record is in the bulk, and if not re-fill the bulk
                 if ((pos.index - bulkstart) >= bulksize) {

@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
+import de.anomic.server.logging.serverLog;
+
 public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondroIndex {
 
     protected kelondroBytesIntMap index;
@@ -53,7 +55,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         if (indexfile.exists()) {
             // use existing index file
             System.out.println("*** Using File index " + indexfile);
-            ki = kelondroTree.open(indexfile, buffersize, preloadTime, 10, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80);
+            ki = new kelondroCachedIndex(kelondroTree.open(indexfile, buffersize / 2, preloadTime, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80), buffersize / 2);
         } else if ((preloadTime >= 0) && (stt > preloadTime)) {
             // generate new index file
             System.out.print("*** Generating File index for " + size() + " entries from " + indexfile);
@@ -105,8 +107,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return ri;
     }
     
-    private kelondroTree initializeTreeIndex(File indexfile, long buffersize, long preloadTime, kelondroOrder objectOrder) throws IOException {
-        kelondroTree treeindex = new kelondroTree(indexfile, buffersize, preloadTime, 10, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80);
+    private kelondroIndex initializeTreeIndex(File indexfile, long buffersize, long preloadTime, kelondroOrder objectOrder) throws IOException {
+        kelondroIndex treeindex = new kelondroCachedIndex(new kelondroTree(indexfile, buffersize / 2, preloadTime, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80), buffersize / 2);
         Iterator content = super.col[0].contentNodes(-1);
         kelondroRecords.Node node;
         kelondroRow.Entry indexentry;
@@ -144,6 +146,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
+        assert (row != null);
+        assert (!(serverLog.allZero(row.getColBytes(0))));
         int i = index.geti(row.getColBytes(0));
         if (i < 0) {
             index.puti(row.getColBytes(0), super.add(row));
@@ -221,6 +225,31 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
     public kelondroProfile profile() {
         return index.profile();
+    }
+    
+    public final int cacheObjectChunkSize() {
+        // dummy method
+        return -1;
+    }
+    
+    public long[] cacheObjectStatus() {
+        // dummy method
+        return null;
+    }
+    
+    public final int cacheNodeChunkSize() {
+        // returns the size that the node cache uses for a single entry
+        return -1;
+    }
+    
+    public final int[] cacheNodeStatus() {
+        // a collection of different node cache status values
+        return new int[]{0,0,0,0,0,0,0,0,0,0};
+    }
+    
+    public synchronized void close() throws IOException {
+        index.close();
+        super.close();
     }
     
 }

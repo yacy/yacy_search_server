@@ -1,15 +1,10 @@
 // kelondroObjectCache.java
-// ------------------------
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2006
-//
-// This is a part of the kelondro database, which is a part of YaCy
+// (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
+// first published 2006 on http://www.anomic.de
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
 // $LastChangedRevision: 1986 $
 // $LastChangedBy: orbiter $
-//
 //
 // LICENSE
 // 
@@ -26,33 +21,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-//
-// A NOTE FROM THE AUTHOR TO THE USERS:
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// 
-// A NOTE FROM THE AUTHOR TO DEVELOPERS:
-//
-// Contributions and changes to the program code should be marked as such:
-// Please enter your own (C) notice below; they must be compatible with the GPL.
-// Please mark also all changes in the code; if you don't mark them then they
-// can't be identified; thus all unmarked code belong to the copyright holder
-// as mentioned above. A good documentation of code authorities will also help
-// to maintain the code and the project.
-// A re-distribution must contain the intact and unchanged copyright statement.
-
 
 package de.anomic.kelondro;
 

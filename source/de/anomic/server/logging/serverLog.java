@@ -225,4 +225,27 @@ public final class serverLog {
         sb.append(']');
         return sb.toString();
     }
+    
+    public static final String table(byte[] b, int marker) {
+        StringBuffer sb = new StringBuffer(b.length * 4);
+        for (int i = 0; i < b.length; i++) {
+            if (i % 16 == 0)
+                sb.append('\n').append("# ").append(Integer.toHexString(i));
+            else
+                sb.append(',');
+            sb.append(' ').append(Integer.toString((int) b[i]));
+        }
+        sb.append('\n');
+        return sb.toString();
+    }
+    
+    public static final boolean allZero(byte[] a) {
+        return allZero(a, 0, a.length);
+    }
+    
+    public static final boolean allZero(byte[] a, int astart, int alength) {
+        for (int i = 0; i < alength; i++) if (a[astart + i] != 0) return false;
+        return true;
+    }
+
 }

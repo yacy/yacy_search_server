@@ -1,4 +1,4 @@
-// plasmaWordIndexEntity.java
+// plasmaWordIndexFile.java
 // --------------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@anomic.de
@@ -90,7 +90,7 @@ public final class plasmaWordIndexFile {
         if (fp != null) fp.mkdirs();
         long cacheSize = theLocation.length();
         if (cacheSize > 1048576) cacheSize = 1048576;
-        return kelondroTree.open(theLocation, cacheSize, 0, kelondroTree.defaultObjectCachePercent,
+        return kelondroTree.open(theLocation, cacheSize, 0, 
                     new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength + ", byte[] ba-" + indexURLEntry.encodedByteArrayFormLength(false)));
     }
 

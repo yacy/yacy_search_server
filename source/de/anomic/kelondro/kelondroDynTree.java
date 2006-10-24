@@ -86,7 +86,7 @@ public class kelondroDynTree {
     public void close() throws IOException {
         Enumeration e = treeRAHandles.keys();
         while (e.hasMoreElements()) closeTree((String) e.nextElement());
-        int size = table.size();
+        int size = table.sizeDyn();
         table.close();
         if (size == 0) this.file.delete();
     }
@@ -107,7 +107,7 @@ public class kelondroDynTree {
         kelondroRA ra = table.getRA(key); // works always, even with no-existing entry
         treeRAHandles.put(key, ra);
         try {
-            return new kelondroTree(ra, buffersize, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef, false);
+            return new kelondroTree(ra, buffersize, preloadTime, rowdef, false);
         } catch (RuntimeException e) {
             throw new IOException(e.getMessage());
         }
@@ -117,7 +117,7 @@ public class kelondroDynTree {
         if (table.existsDyn(key)) {
             kelondroRA ra = table.getRA(key);
             treeRAHandles.put(key, ra);
-            return new kelondroTree(ra, buffersize, preloadTime, kelondroTree.defaultObjectCachePercent);
+            return new kelondroTree(ra, buffersize, preloadTime);
         }
         return null;
     }
@@ -299,7 +299,7 @@ public class kelondroDynTree {
             File file = new File("D:\\bin\\testDyn.db");
             if (file.exists()) {
                 kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30"), '_');
-                System.out.println("opened: table keylength=" + dt.table.row().width(0) + ", sectorsize=" + dt.table.row().width(1) + ", " + dt.table.size() + " entries.");
+                System.out.println("opened: table keylength=" + dt.table.row().width(0) + ", sectorsize=" + dt.table.row().width(1) + ", " + dt.table.sizeDyn() + " entries.");
             } else {
                 kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30"), '_');
                 String name;

@@ -91,7 +91,7 @@ public class yacyNewsPool {
     private int maxDistribution;
     
     
-    public yacyNewsPool(File yacyDBPath, int bufferkb, long preloadTime) {
+    public yacyNewsPool(File yacyDBPath, int bufferkb, long preloadTime) throws IOException {
         newsDB = new yacyNewsDB(new File(yacyDBPath, "news1.db"), bufferkb, preloadTime);
         outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut1.stack"), newsDB);
         publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished1.stack"), newsDB);
@@ -101,7 +101,12 @@ public class yacyNewsPool {
     }
     
     public int dbSize() {
-        return newsDB.size();
+        try {
+            return newsDB.size();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
     
     public int cacheNodeChunkSize() {

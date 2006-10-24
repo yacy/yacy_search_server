@@ -158,7 +158,7 @@ public class plasmaCrawlEURL extends indexURL {
         } else {
             File oldCacheFile = new File(cachePath, "urlErr0.db");
             oldCacheFile.getParentFile().mkdirs();
-            urlIndexFile = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, rowdef);
+            urlIndexFile = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, rowdef);
         }
     }
 

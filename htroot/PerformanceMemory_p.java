@@ -49,7 +49,7 @@ import java.util.Map;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.kelondro.kelondroTree;
+import de.anomic.kelondro.kelondroCachedIndex;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
@@ -338,7 +338,7 @@ public class PerformanceMemory_p {
     
     private static void putprop(serverObjects prop, serverSwitch env, String wdb, String db, String set) {
         if ((slt == null) || (ost == null)) return;
-        usd = chk * slt[1] + obj * ost[2] /*hit*/ + kelondroTree.cacheObjectMissSize * ost[3] /*miss*/;
+        usd = chk * slt[1] + obj * ost[2] /*hit*/ + kelondroCachedIndex.cacheObjectMissSize * ost[3] /*miss*/;
         bst = (((((long) chk) * ((long) req)) >> 10) + 1) << 10;
         if (set.equals("setBest")) env.setConfig("ramCache" + db, bst);
         prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "nodsz" + db, chk);

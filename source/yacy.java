@@ -656,7 +656,13 @@ public final class yacy {
         serverLog log = new serverLog("WORDMIGRATION");
         log.logInfo("STARTING MIGRATION");
         boolean useCollectionIndex = sps.getConfigBool("useCollectionIndex", false);
-        plasmaWordIndex wordIndexCache = new plasmaWordIndex(dbroot, indexRoot, true, 20000, 10000, log, useCollectionIndex);
+        plasmaWordIndex wordIndexCache = null;
+        try {
+            wordIndexCache = new plasmaWordIndex(dbroot, indexRoot, true, 20000, 10000, log, useCollectionIndex);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            System.exit(-1);
+        }
         enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
         String wordhash;
         File wordfile;
@@ -1125,7 +1131,7 @@ public final class yacy {
         plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, true, 1000, true, 1000, true, 10000);
         kelondroTree oldindex = null;
         try {
-            oldindex = new kelondroTree(urlHash, 1000, -1, kelondroTree.defaultObjectCachePercent, plasmaCrawlLURLOldEntry.rowdef);
+            oldindex = new kelondroTree(urlHash, 1000, -1, plasmaCrawlLURLOldEntry.rowdef);
         } catch (IOException e) {
             System.out.println("ERROR: CANNOT OPEN OLD INDEX: " + e.getMessage());
         }
@@ -1144,7 +1150,7 @@ public final class yacy {
                 oldrow = (kelondroRow.Entry) eiter.next();
             } catch (Exception e) {
                 // an IOException may occur here
-                e.printStackTrace();
+                //e.printStackTrace();
                 oldrow = null;
             }
             if (oldrow != null) try {

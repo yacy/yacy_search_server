@@ -61,6 +61,8 @@ import de.anomic.data.robotsParser;
 import de.anomic.http.httpc;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBufferedIndex;
+import de.anomic.kelondro.kelondroCachedIndex;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
@@ -681,7 +683,7 @@ public final class plasmaCrawlStacker {
                 String newCacheName = "urlPreNotice1.table";
                 cacheStacksPath.mkdirs();
                 try {
-                    this.urlEntryCache = new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb * 0x400, preloadTime, plasmaCrawlNURL.rowdef, kelondroBase64Order.enhancedCoder);
+                    this.urlEntryCache = new kelondroBufferedIndex(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb * 0x400, preloadTime, plasmaCrawlNURL.rowdef, kelondroBase64Order.enhancedCoder));
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(-1);
@@ -690,7 +692,7 @@ public final class plasmaCrawlStacker {
             if (this.dbtype == QUEUE_DB_TYPE_TREE) {
                 File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
                 cacheFile.getParentFile().mkdirs();
-                this.urlEntryCache = kelondroTree.open(cacheFile, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlNURL.rowdef);
+                this.urlEntryCache = new kelondroBufferedIndex(kelondroTree.open(cacheFile, bufferkb * 0x400, preloadTime, plasmaCrawlNURL.rowdef));
             }
         }
 
@@ -705,12 +707,12 @@ public final class plasmaCrawlStacker {
         }
         
         public int cacheObjectChunkSize() {
-            if (urlEntryCache instanceof kelondroTree) return ((kelondroTree) urlEntryCache).cacheObjectChunkSize();
+            if (urlEntryCache instanceof kelondroCachedIndex) return ((kelondroCachedIndex) urlEntryCache).cacheObjectChunkSize();
             return 0;
         }
         
         public long[] cacheObjectStatus() {
-            if (urlEntryCache instanceof kelondroTree) return ((kelondroTree) urlEntryCache).cacheObjectStatus();
+            if (urlEntryCache instanceof kelondroCachedIndex) return ((kelondroCachedIndex) urlEntryCache).cacheObjectStatus();
             return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
         }
         

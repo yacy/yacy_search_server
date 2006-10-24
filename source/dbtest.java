@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.Random;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroCachedIndex;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
@@ -174,7 +175,7 @@ public class dbtest {
             kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength);
             if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
-                table = new kelondroTree(tablefile, buffer, preload, kelondroTree.defaultObjectCachePercent, testRow);
+                table = new kelondroCachedIndex(new kelondroTree(tablefile, buffer / 2, preload, testRow), buffer / 2);
             }
             if (dbe.equals("kelondroSplittedTree")) {
                 File tablepath = new File(tablename).getParentFile();
@@ -616,6 +617,23 @@ final class dbTable implements kelondroIndex {
         return new kelondroProfile();
     }
     
+    public final int cacheObjectChunkSize() {
+        // dummy method
+        return -1;
+    }
+    
+    public long[] cacheObjectStatus() {
+        // dummy method
+        return null;
+    }
+    
+    public final int cacheNodeChunkSize() {
+        return -1;
+    }
+    
+    public final int[] cacheNodeStatus() {
+        return new int[]{0,0,0,0,0,0,0,0,0,0};
+    }
 }
 
 

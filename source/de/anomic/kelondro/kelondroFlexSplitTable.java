@@ -243,6 +243,26 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         
     }
     
+    public final int cacheObjectChunkSize() {
+        // dummy method
+        return -1;
+    }
+    
+    public long[] cacheObjectStatus() {
+        // dummy method
+        return null;
+    }
+    
+    public final int cacheNodeChunkSize() {
+        // returns the size that the node cache uses for a single entry
+        return -1;
+    }
+    
+    public final int[] cacheNodeStatus() {
+        // a collection of different node cache status values
+        return new int[]{0,0,0,0,0,0,0,0,0,0};
+    }
+    
     public synchronized void close() throws IOException {
         Iterator i = tables.values().iterator();
         while (i.hasNext()) ((kelondroFlexTable) i.next()).close();

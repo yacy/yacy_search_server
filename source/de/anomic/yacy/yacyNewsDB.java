@@ -50,7 +50,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroCachedIndex;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
@@ -61,19 +63,19 @@ public class yacyNewsDB {
     private File path;
     private int bufferkb;
     private long preloadTime;
-    protected kelondroTree news;
+    protected kelondroIndex news;
 
-    public yacyNewsDB(File path, int bufferkb, long preloadTime) {
+    public yacyNewsDB(File path, int bufferkb, long preloadTime) throws IOException {
         this.path = path;
         this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
-        this.news = kelondroTree.open(path, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, yacyNewsRecord.rowdef);
+        this.news = new kelondroCachedIndex(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400);
     }
 
-    private void resetDB() {
+    private void resetDB() throws IOException {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
-        this.news = kelondroTree.open(path, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, yacyNewsRecord.rowdef);
+        this.news = new kelondroCachedIndex(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400);
     }
 
     public int cacheNodeChunkSize() {
@@ -101,7 +103,7 @@ public class yacyNewsDB {
         close();
     }
 
-    public int size() {
+    public int size() throws IOException {
         return news.size();
     }
 
@@ -164,7 +166,7 @@ public class yacyNewsDB {
         );
     }
 
-    protected final kelondroRow.Entry r2b(yacyNewsRecord r) {
+    protected final kelondroRow.Entry r2b(yacyNewsRecord r) throws IOException {
         try {
             if (r == null) return null;
             String attributes = r.attributes().toString();

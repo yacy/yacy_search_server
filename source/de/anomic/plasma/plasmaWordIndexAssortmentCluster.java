@@ -73,7 +73,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
     private plasmaWordIndexAssortment[] assortments;
     private long completeBufferKB;
 
-    public plasmaWordIndexAssortmentCluster(File assortmentsPath, int clusterCount, int bufferkb, long preloadTime, serverLog log) {
+    public plasmaWordIndexAssortmentCluster(File assortmentsPath, int clusterCount, int bufferkb, long preloadTime, serverLog log) throws IOException {
         // set class variables
         if (!(assortmentsPath.exists())) assortmentsPath.mkdirs();
         this.clusterCount = clusterCount;
@@ -112,7 +112,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         }
     }
 
-    private indexContainer storeSingular(indexContainer newContainer) {
+    private indexContainer storeSingular(indexContainer newContainer) throws IOException {
         // this tries to store the record. If the record does not fit, or a same hash already
         // exists and would not fit together with the new record, then the record is deleted from
         // the assortmen(s) and returned together with the newRecord.
@@ -129,14 +129,14 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
         return null;
     }
     
-    private void storeForced(indexContainer newContainer) {
+    private void storeForced(indexContainer newContainer) throws IOException {
         // this stores the record and overwrites an existing record.
         // this is safe if we can be shure that the record does not exist before.
         if ((newContainer == null) || (newContainer.size() == 0) || (newContainer.size() > clusterCount)) return; // it will not fit
         assortments[newContainer.size() - 1].store(newContainer);
     }
     
-    private void storeStretched(indexContainer newContainer) {
+    private void storeStretched(indexContainer newContainer) throws IOException {
         // this stores the record and stretches the storage over
         // all the assortments that are necessary to fit in the record
         // IMPORTANT: it must be ensured that the wordHash does not exist in the cluster before
@@ -209,18 +209,30 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
                     assert (i.hasNext());
                     c.add((indexEntry) i.next(), newContainer.updated());
                 }
-                storeForced(c);
+                try {
+                    storeForced(c);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             return null;
         }
         
-        if (newContainer.size() <= clusterCount) newContainer = storeSingular(newContainer);
+        if (newContainer.size() <= clusterCount) try {
+                newContainer = storeSingular(newContainer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         if (newContainer == null) return null;
         
         // clean up the whole thing and try to insert the container then
         newContainer.add(deleteContainer(newContainer.getWordHash(), -1), -1);
         if (newContainer.size() > clusterCapacity) return newContainer;
-        storeStretched(newContainer);
+        try {
+            storeStretched(newContainer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
     

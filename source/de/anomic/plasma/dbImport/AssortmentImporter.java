@@ -1,6 +1,7 @@
 package de.anomic.plasma.dbImport;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
@@ -60,7 +61,12 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
 
         // initializing the import assortment db
         this.log.logInfo("Initializing source assortment file");
-        this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath,assortmentNr, this.cacheSize/1024, preloadTime, this.log);
+        try {
+            this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath,assortmentNr, this.cacheSize/1024, preloadTime, this.log);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
         this.importStartSize = this.assortmentFile.size();
     }
     

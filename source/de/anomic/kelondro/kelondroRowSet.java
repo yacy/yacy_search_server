@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.TreeSet;
 
+import de.anomic.server.logging.serverLog;
+
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
 
     private static final int collectionReSortLimit = 90;
@@ -88,6 +90,9 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry entry) {
+        assert (entry != null);
+        assert (entry.getColBytes(super.sortColumn) != null);
+        assert (!(serverLog.allZero(entry.getColBytes(super.sortColumn))));
         long handle = profile.startWrite();
         int index = -1;
         kelondroRow.Entry oldentry = null;
@@ -359,6 +364,26 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
     public void close() {
         // just for compatibility with kelondroIndex interface; do nothing
+    }
+    
+    public final int cacheObjectChunkSize() {
+        // dummy method
+        return -1;
+    }
+    
+    public long[] cacheObjectStatus() {
+        // dummy method
+        return null;
+    }
+    
+    public final int cacheNodeChunkSize() {
+        // returns the size that the node cache uses for a single entry
+        return -1;
+    }
+    
+    public final int[] cacheNodeStatus() {
+        // a collection of different node cache status values
+        return new int[]{0,0,0,0,0,0,0,0,0,0};
     }
     
     public static void main(String[] args) {

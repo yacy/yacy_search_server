@@ -67,6 +67,7 @@ import de.anomic.http.httpc.response;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBufferedIndex;
+import de.anomic.kelondro.kelondroCachedIndex;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
@@ -101,13 +102,11 @@ public final class plasmaCrawlLURL extends indexURL {
         
         try {
             if (newdb) {
-                urlIndexFile = new kelondroBufferedIndex(
-                    new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", bufferkb * 0x400, preloadTime, plasmaCrawlLURLNewEntry.rowdef, kelondroBase64Order.enhancedCoder));
+                urlIndexFile = new kelondroBufferedIndex(new kelondroCachedIndex(new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", bufferkb / 2 * 0x400, preloadTime, plasmaCrawlLURLNewEntry.rowdef, kelondroBase64Order.enhancedCoder), bufferkb / 2 * 0x400));
             } else {
                 File oldLURLDB = new File(plasmaPath, "urlHash.db");
                 oldLURLDB.getParentFile().mkdirs();
-                urlIndexFile = new kelondroBufferedIndex(
-                    new kelondroTree(oldLURLDB, bufferkb * 0x400, preloadTime, kelondroTree.defaultObjectCachePercent, plasmaCrawlLURLOldEntry.rowdef));
+                urlIndexFile = new kelondroBufferedIndex(new kelondroCachedIndex(new kelondroTree(oldLURLDB, bufferkb / 2 * 0x400, preloadTime, plasmaCrawlLURLOldEntry.rowdef), bufferkb / 2 * 0x400));
             }
         } catch (IOException e) {
             e.printStackTrace();

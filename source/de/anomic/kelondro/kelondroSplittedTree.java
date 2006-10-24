@@ -82,8 +82,7 @@ public class kelondroSplittedTree implements kelondroIndex {
         File f;
         for (int i = 0; i < forkfactor; i++) {
             f = dbFile(pathToFiles, filenameStub, forkfactor, rowdef.columns(), i);
-            ktfs[i] = kelondroTree.open(f, buffersize/forkfactor, preloadTime / forkfactor, kelondroTree.defaultObjectCachePercent,
-                        rowdef, objectOrder, txtProps, txtPropsWidth);
+            ktfs[i] = kelondroTree.open(f, buffersize/forkfactor, preloadTime / forkfactor, rowdef, objectOrder, txtProps, txtPropsWidth);
         }
         this.order = objectOrder;
         ff = forkfactor;
@@ -238,4 +237,23 @@ public class kelondroSplittedTree implements kelondroIndex {
         return kelondroProfile.consolidate(profiles);
     }
     
+    public final int cacheObjectChunkSize() {
+        // dummy method
+        return -1;
+    }
+    
+    public long[] cacheObjectStatus() {
+        // dummy method
+        return null;
+    }
+    
+    public final int cacheNodeChunkSize() {
+        // returns the size that the node cache uses for a single entry
+        return -1;
+    }
+    
+    public final int[] cacheNodeStatus() {
+        // a collection of different node cache status values
+        return new int[]{0,0,0,0,0,0,0,0,0,0};
+    }
 }

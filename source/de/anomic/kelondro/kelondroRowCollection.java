@@ -28,6 +28,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
+import de.anomic.server.logging.serverLog;
+
 public class kelondroRowCollection {
 
     protected byte[]        chunkcache;
@@ -214,6 +216,11 @@ public class kelondroRowCollection {
     }
     
     private final void add(byte[] a, int astart, int alength) {
+        assert (a != null);
+        assert (astart >= 0) && (astart < a.length) : " astart = " + a;
+        assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
+        assert (alength > 0);
+        assert (astart + alength <= a.length);
         int l = Math.min(rowdef.objectsize(), Math.min(alength, a.length - astart));
         synchronized (chunkcache) {
             ensureSize(chunkcount + 1);

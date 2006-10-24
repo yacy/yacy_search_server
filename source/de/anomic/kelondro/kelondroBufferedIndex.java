@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.server.serverMemory;
+import de.anomic.server.logging.serverLog;
 
 public class kelondroBufferedIndex implements kelondroIndex {
     
@@ -50,7 +51,7 @@ public class kelondroBufferedIndex implements kelondroIndex {
     }
     
     public synchronized void flush() throws IOException {
-        if (buffer.size() == 0) return;
+        if ((buffer == null) || (buffer.size() == 0)) return;
         Iterator i = buffer.entrySet().iterator();
         Map.Entry entry;
         while (i.hasNext()) {
@@ -103,6 +104,9 @@ public class kelondroBufferedIndex implements kelondroIndex {
     }
     
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+        assert (row != null);
+        assert (row.getColBytes(index.primarykey()) != null);
+        assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
         long handle = (index instanceof kelondroFlexSplitTable) ? -1 : index.profile().startWrite();
         byte[] key = row.getColBytes(index.primarykey());
         kelondroRow.Entry oldentry = null;
@@ -211,4 +215,25 @@ public class kelondroBufferedIndex implements kelondroIndex {
     public static kelondroBufferedIndex getRAMIndex(kelondroRow rowdef, int initSize) {
         return new kelondroBufferedIndex(new kelondroRowSet(rowdef, kelondroNaturalOrder.naturalOrder, 0, initSize));
     }
+
+    public final int cacheObjectChunkSize() {
+        // dummy method
+        return -1;
+    }
+    
+    public long[] cacheObjectStatus() {
+        // dummy method
+        return null;
+    }
+    
+    public final int cacheNodeChunkSize() {
+        // returns the size that the node cache uses for a single entry
+        return index.cacheNodeChunkSize();
+    }
+    
+    public final int[] cacheNodeStatus() {
+        // a collection of different node cache status values
+        return index.cacheNodeStatus();
+    }
+    
 }
