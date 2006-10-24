@@ -161,7 +161,7 @@ public class URL {
     }
 
     //  resolve '..'
-    private String resolveBackpath(String path) /* throws MalformedURLException */ {
+    String resolveBackpath(String path) /* throws MalformedURLException */ {
         /* original version by [MC]
         int p;
         while ((p = path.indexOf("/..")) >= 0) {
@@ -174,7 +174,7 @@ public class URL {
         /* by [MT] */
         if (path.length() == 0 || path.charAt(0) != '/') { path = "/" + path; }
 
-        Pattern pathPattern = Pattern.compile("(/[^/\\.]+/)[.]{2}(?=/)|/\\.(?=/)|/(?=/)");
+        Pattern pathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
         Matcher matcher = pathPattern.matcher(path);
         while (matcher.find()) {
             path = matcher.replaceAll("");
@@ -183,7 +183,7 @@ public class URL {
         
         /* another version at http://www.yacy-forum.de/viewtopic.php?p=26871#26871 */
         
-        return path;
+        return path.equals("")?"/":path;
     }
     
     /**
