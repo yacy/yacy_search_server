@@ -460,10 +460,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 }
                 //no defaultfile, send a dirlisting
                 if(targetFile == null || !targetFile.exists()){
-                    targetFile = getOverlayedFile("/htdocsdefault/dir.html");
-                    targetClass=getOverlayedClass("/htdocsdefault/dir.html");
+                	String dirlistFormat = (args==null)?"html":args.get("format","html");
+                    targetFile = getOverlayedFile("/htdocsdefault/dir." + dirlistFormat);
+                    targetClass=getOverlayedClass("/htdocsdefault/dir." + dirlistFormat);
                     if(! (( targetFile != null && targetFile.exists()) && ( targetClass != null && targetClass.exists())) ){
-                        httpd.sendRespondError(this.connectionProperties,out,3,500,"dir.html or dir.class not found.",null,null);
+                        httpd.sendRespondError(this.connectionProperties,out,3,500,"dir." + dirlistFormat + " or dir.class not found.",null,null);
                     }
                 }
             }else{

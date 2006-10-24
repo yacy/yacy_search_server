@@ -238,7 +238,7 @@ public class dir {
             // tree += "<span class=\"tt\">path&nbsp;=&nbsp;" + path + "</span><br><br>";
             if (list != null) {
                 int filecount = 0, fileIdx = 0;
-                prop.put("path", path);
+                prop.putNoHTML("path", path);
                 
                 boolean dark = false;
                 for (int i = 0; i < list.length; i++) {
@@ -280,8 +280,9 @@ public class dir {
 
                     // last modification date if the entry
                     prop.put("dirlist_" + fileIdx + "_dir_date" , dateString(new Date(f.lastModified())));
+                    prop.put("dirlist_" + fileIdx + "_dir_timestamp" , Long.toString(f.lastModified()));
                     // the entry name
-                    prop.put("dirlist_" + fileIdx + "_dir_name" , fileName);                                                    
+                    prop.putNoHTML("dirlist_" + fileIdx + "_dir_name" , fileName);                                                    
 
                     if (f.isDirectory()) {
                         // the entry is a directory
@@ -293,9 +294,10 @@ public class dir {
                         // the entry is a file
                         prop.put("dirlist_" + fileIdx + "_dir" , 0);
                         // the file size
-                        prop.put("dirlist_" + fileIdx + "_dir_size" , serverMemory.bytesToString(f.length()).replaceAll(" ", "&nbsp;"));
+                        prop.put("dirlist_" + fileIdx + "_dir_size" , serverMemory.bytesToString(f.length()));
+                        prop.put("dirlist_" + fileIdx + "_dir_sizeBytes" , Long.toString(f.length()));
                         // the unique url
-                        prop.put("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed, fileName, md5s));
+                        prop.putNoHTML("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed, fileName, md5s));
                         // the md5 sum of the file
                         prop.put("dirlist_" + fileIdx + "_dir_md5s",md5s);
                         // description mode: 0...image preview, 1...description text 
@@ -303,7 +305,7 @@ public class dir {
                         if (showImage) {
                             prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_image",fileName);
                         } else {
-                            prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);
+                            prop.putNoHTML("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);
                         }                            
                     }
 
