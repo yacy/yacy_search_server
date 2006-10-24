@@ -938,7 +938,7 @@ public class kelondroRecords {
 
     protected final long seekpos(Handle handle) {
         assert (handle.index >= 0): "handle index too low: " + handle.index;
-        assert (handle.index < USAGE.allCount()): "handle index too high:" + handle.index;
+        //assert (handle.index < USAGE.allCount()): "handle index too high:" + handle.index;
         return POS_NODES + ((long) recordsize * handle.index);
     }
 
@@ -1067,7 +1067,7 @@ public class kelondroRecords {
                     seekp = seekpos(h);
                     if (seekp > entryFile.length()) {
                         // repair last hande store position
-                        this.theLogger.severe("KELONDRO WARNING " + this.filename + ": seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize) + " after " + iter + " iterations");
+                        this.theLogger.severe("KELONDRO WARNING " + this.filename + ": seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize) + " after " + iter + " iterations; patched wrong node");
                         entryFile.writeInt(repair_position, NUL);
                         return markedDeleted;
                     }

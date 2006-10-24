@@ -91,7 +91,7 @@ public class kelondroBufferedIndex implements kelondroIndex {
     }
 
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
-        long handle = (index instanceof kelondroFlexSplitTable) ? -1 : index.profile().startRead();
+        long handle = (index instanceof kelondroTree) ? index.profile().startRead() : -1;
         kelondroRow.Entry entry = null;
         entry = (kelondroRow.Entry) buffer.get(key);
         if (entry == null) entry = index.get(key);
@@ -107,7 +107,7 @@ public class kelondroBufferedIndex implements kelondroIndex {
         assert (row != null);
         assert (row.getColBytes(index.primarykey()) != null);
         assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
-        long handle = (index instanceof kelondroFlexSplitTable) ? -1 : index.profile().startWrite();
+        long handle = (index instanceof kelondroTree) ? index.profile().startWrite() : -1;
         byte[] key = row.getColBytes(index.primarykey());
         kelondroRow.Entry oldentry = null;
         oldentry = (kelondroRow.Entry) buffer.get(key);
@@ -156,7 +156,7 @@ public class kelondroBufferedIndex implements kelondroIndex {
     }
     
     public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
-        long handle = (index instanceof kelondroFlexSplitTable) ? -1 : index.profile().startDelete();
+        long handle = (index instanceof kelondroTree) ? index.profile().startDelete() : -1;
         kelondroRow.Entry oldentry = null;
         oldentry = (kelondroRow.Entry) buffer.remove(key);
         if (oldentry == null) {
@@ -168,7 +168,7 @@ public class kelondroBufferedIndex implements kelondroIndex {
     }
     
     public synchronized kelondroRow.Entry removeOne() throws IOException {
-        long handle = (index instanceof kelondroFlexSplitTable) ? -1 : index.profile().startDelete();
+        long handle = (index instanceof kelondroTree) ? index.profile().startDelete() : -1;
         if (buffer.size() > 0) {
             byte[] key = (byte[]) buffer.keySet().iterator().next();
             kelondroRow.Entry entry = (kelondroRow.Entry) buffer.remove(key);
