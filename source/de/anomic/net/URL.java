@@ -371,13 +371,15 @@ public class URL {
     
     private void identPort(String inputURL) throws MalformedURLException {
         // identify ref in file
-        int r = host.indexOf(':');
+        int r = this.host.indexOf(':');
         if (r < 0) {
             this.port = -1;
-        } else {
+        } else {        	
             try {
-                this.port = Integer.parseInt(host.substring(r + 1));
-                this.host = host.substring(0, r);
+            	String portStr = this.host.substring(r + 1);
+                if (portStr.trim().length() > 0) this.port = Integer.parseInt(portStr);
+                else this.port =  -1;             	
+                this.host = this.host.substring(0, r);
             } catch (NumberFormatException e) {
                 throw new MalformedURLException("wrong port in host fragment '" + this.host + "' of input url '" + inputURL + "'");
             }
