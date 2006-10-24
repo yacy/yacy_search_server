@@ -85,6 +85,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpdAbstractHandler;
 import de.anomic.http.httpdHandler;
+import de.anomic.plasma.plasmaParser;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
@@ -196,13 +197,16 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
      */
     static  {
         // create an Axis server
+    	serverLog.logInfo("SOAP","Init soap engine ...");
         engine = new AxisServer();
         
         // setting some options ...
         engine.setShouldSaveConfig(false);
         
+        serverLog.logInfo("SOAP","Deploying default services ...");
         for (int i=0; i < defaultServices.length; i++) {
             String[] nextService = defaultServices[i].split("=");
+            serverLog.logInfo("SOAP","Deploying service " + nextService[0] + ":" + nextService[1]);
             String deploymentStr = serviceDeploymentString
                                    .replaceAll("@serviceName@", nextService[0])
                                    .replaceAll("@className@", nextService[1]);
@@ -279,18 +283,6 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         	}
 
 		}
-    }
-    
-    private byte[] readRequestBody(httpHeader requestHeader, PushbackInputStream body) throws SoapException {
-        try {
-            // getting an input stream to handle transfer encoding and content encoding properly        
-            InputStream soapInput = getBodyInputStream(requestHeader, body);
-
-            // read the content
-            return serverFileUtils.read(soapInput);
-        } catch (IOException e) {
-            throw new SoapException(500,"Read error",e.getMessage());
-        }
     }
     
     private InputStream getBodyInputStream(httpHeader requestHeader, PushbackInputStream body) throws SoapException{
@@ -446,16 +438,17 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
              * GENERATE REQUEST MESSAGE
              * ======================================================================== */
             // read the request message
-            byte[] buffer = readRequestBody(requestHeader, body);
+            InputStream bodyStream = getBodyInputStream(requestHeader, body);
             
             // generating the SOAP message context that will be passed over to the invoked service
             MessageContext msgContext = this.generateMessageContext(path, requestHeader, conProp);
             
             // Generating a SOAP Request Message Object
+            String mime = plasmaParser.getRealMimeType(requestHeader.mime()); // this is important !!!!
             Message requestMsg = new Message(
-                    buffer, 
+            		bodyStream, 
                     false, 
-                    requestHeader.mime(), 
+                    mime, 
                     (String)requestHeader.get(httpHeader.CONTENT_LOCATION)
             );
             msgContext.setRequestMessage(requestMsg);
@@ -713,7 +706,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         // getting the content type
         String contentType = null;
         try {
-        contentType = soapMessage.getContentType(soapMessage.getMessageContext().getSOAPConstants());
+        	contentType = soapMessage.getContentType(soapMessage.getMessageContext().getSOAPConstants());
         } catch (AxisFault e) {
             throw new SoapException(500,"Unable to get content-type for SOAP message",e.getMessage());
         }
