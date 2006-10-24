@@ -91,6 +91,9 @@ public class BlacklistServiceTest extends AbstractServiceTest {
         String blacklistName = "junit_test_" + System.currentTimeMillis();
         bl.importBlacklist(blacklistName);
         
+        // clear attachment
+        ((Stub)service).clearAttachments();         
+        
         // delete blacklist
         bl.deleteBlacklist(blacklistName);
 	}

@@ -151,7 +151,8 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         "crawl=de.anomic.soap.services.CrawlService",
         "status=de.anomic.soap.services.StatusService",
         "admin=de.anomic.soap.services.AdminService",
-        "blacklist=de.anomic.soap.services.BlacklistService"
+        "blacklist=de.anomic.soap.services.BlacklistService",
+        "share=de.anomic.soap.services.ShareService"
     };
     
     /* ===============================================================

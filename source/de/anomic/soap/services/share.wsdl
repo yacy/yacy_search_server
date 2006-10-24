@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://yacy:8080/soap/share" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://yacy:8080/soap/share" xmlns:intf="http://yacy:8080/soap/share" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+  <wsdl:message name="getFileResponse">
+    <wsdl:part name="getFileReturn" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="getDirListResponse">
+    <wsdl:part name="getDirListReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="deleteResponse">
+  </wsdl:message>
+
+  <wsdl:message name="uploadFileResponse">
+  </wsdl:message>
+  <wsdl:message name="changeCommentResponse">
+  </wsdl:message>
+  <wsdl:message name="createNewXMLDocumentRequest">
+    <wsdl:part name="rootElementName" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="deleteRequest">
+    <wsdl:part name="workingDirPath" type="xsd:string"/>
+
+    <wsdl:part name="nameToDelete" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="getDirListRequest">
+    <wsdl:part name="workingDirPath" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="createNewXMLDocumentResponse">
+    <wsdl:part name="createNewXMLDocumentReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="uploadFileRequest">
+
+    <wsdl:part name="workingDirPath" type="xsd:string"/>
+    <wsdl:part name="indexFile" type="xsd:boolean"/>
+    <wsdl:part name="comment" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="createDirectoryResponse">
+  </wsdl:message>
+  <wsdl:message name="changeCommentRequest">
+    <wsdl:part name="workingDirPath" type="xsd:string"/>
+    <wsdl:part name="fileName" type="xsd:string"/>
+
+    <wsdl:part name="comment" type="xsd:string"/>
+    <wsdl:part name="indexFile" type="xsd:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="createDirectoryRequest">
+    <wsdl:part name="workingDirPath" type="xsd:string"/>
+    <wsdl:part name="newDirName" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="getFileRequest">
+    <wsdl:part name="workingDirPath" type="xsd:string"/>
+
+    <wsdl:part name="fileName" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:portType name="ShareService">
+    <wsdl:operation name="delete" parameterOrder="workingDirPath nameToDelete">
+      <wsdl:input message="impl:deleteRequest" name="deleteRequest"/>
+      <wsdl:output message="impl:deleteResponse" name="deleteResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="createDirectory" parameterOrder="workingDirPath newDirName">
+      <wsdl:input message="impl:createDirectoryRequest" name="createDirectoryRequest"/>
+
+      <wsdl:output message="impl:createDirectoryResponse" name="createDirectoryResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getFile" parameterOrder="workingDirPath fileName">
+      <wsdl:input message="impl:getFileRequest" name="getFileRequest"/>
+      <wsdl:output message="impl:getFileResponse" name="getFileResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getDirList" parameterOrder="workingDirPath">
+      <wsdl:input message="impl:getDirListRequest" name="getDirListRequest"/>
+      <wsdl:output message="impl:getDirListResponse" name="getDirListResponse"/>
+
+    </wsdl:operation>
+    <wsdl:operation name="uploadFile" parameterOrder="workingDirPath indexFile comment">
+      <wsdl:input message="impl:uploadFileRequest" name="uploadFileRequest"/>
+      <wsdl:output message="impl:uploadFileResponse" name="uploadFileResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="changeComment" parameterOrder="workingDirPath fileName comment indexFile">
+      <wsdl:input message="impl:changeCommentRequest" name="changeCommentRequest"/>
+      <wsdl:output message="impl:changeCommentResponse" name="changeCommentResponse"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="createNewXMLDocument" parameterOrder="rootElementName">
+      <wsdl:input message="impl:createNewXMLDocumentRequest" name="createNewXMLDocumentRequest"/>
+      <wsdl:output message="impl:createNewXMLDocumentResponse" name="createNewXMLDocumentResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="shareSoapBinding" type="impl:ShareService">
+    <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="delete">
+      <wsdlsoap:operation soapAction=""/>
+
+      <wsdl:input name="deleteRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="deleteResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/share" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="createDirectory">
+      <wsdlsoap:operation soapAction=""/>
+
+      <wsdl:input name="createDirectoryRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="createDirectoryResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/share" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getFile">
+      <wsdlsoap:operation soapAction=""/>
+
+      <wsdl:input name="getFileRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getFileResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/share" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getDirList">
+      <wsdlsoap:operation soapAction=""/>
+
+      <wsdl:input name="getDirListRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getDirListResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/share" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="uploadFile">
+      <wsdlsoap:operation soapAction=""/>
+
+      <wsdl:input name="uploadFileRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="uploadFileResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/share" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="changeComment">
+      <wsdlsoap:operation soapAction=""/>
+
+      <wsdl:input name="changeCommentRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="changeCommentResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/share" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="createNewXMLDocument">
+      <wsdlsoap:operation soapAction=""/>
+
+      <wsdl:input name="createNewXMLDocumentRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="createNewXMLDocumentResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/share" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ShareServiceService">
+
+    <wsdl:port binding="impl:shareSoapBinding" name="share">
+      <wsdlsoap:address location="http://yacy:8080/soap/share"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
