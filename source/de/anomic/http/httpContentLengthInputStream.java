@@ -66,11 +66,20 @@ public class httpContentLengthInputStream extends httpdByteCountInputStream {
         return this.closed;
     }
     
+    /**
+     * Closes this input stream.
+     * <b>Attention:</b> This does not close the wrapped input stream, because
+     * otherwise keep-alive connections would terminate
+     */
     public void close() throws IOException {
-        if (!this.closed) {
-            this.closed = true;
-            super.close();            
-        }
+    	if (!this.closed) {    		
+    		try {
+    			// read to the end of the stream and throw read bytes away
+    			httpChunkedInputStream.exhaustInputStream(this);
+    		} finally {
+    			this.closed = true;
+    		}        	         
+    	}
     }
     
     public int read() throws IOException {
