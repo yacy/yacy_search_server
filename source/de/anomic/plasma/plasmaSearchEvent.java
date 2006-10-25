@@ -172,11 +172,13 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 
                 // evaluate index abstracts and start a secondary search
                 // this is temporary debugging code to learn that the index abstracts are fetched correctly
+                /*
                 while (System.currentTimeMillis() < secondaryTimeout + 10000) {
                     if (yacySearch.remainingWaiting(primarySearchThreads) == 0) break; // all threads have finished
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
                 if (query.size() > 1) prepareSecondarySearch();
+                */
                 
                 // catch up global results:
                 // wait until primary timeout passed
@@ -356,7 +358,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         preorderTime = preorderTime - (System.currentTimeMillis() - pst);
         if (preorderTime < 0) preorderTime = 200;
         plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, searchResult, preorderTime);
-        preorder.remove(true, true);
+        if (searchResult.size() > query.wantedResults) preorder.remove(true, true);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_PRESORT, rcLocal.size());
         
@@ -440,11 +442,11 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         if (primarySearchThreads == null) return;
         long starttime = System.currentTimeMillis();
         while (true) {
+            flushGlobalResults(); // must be flushed before first check of remaining threads, othervise it is possible that NO results are flushed at all
+            
             remaining = yacySearch.remainingWaiting(primarySearchThreads);
             if (secondarySearchThreads != null) remaining += yacySearch.remainingWaiting(secondarySearchThreads);
             if (remaining == 0) break;
-
-            flushGlobalResults();
   
             // wait a little bit before trying again
             try {Thread.sleep(1000);} catch (InterruptedException e) {}
