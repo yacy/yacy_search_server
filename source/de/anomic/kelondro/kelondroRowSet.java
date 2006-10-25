@@ -166,6 +166,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         synchronized (chunkcache) {
             resolveMarkedRemoved();
             super.sort();
+            //if (super.rowdef.column(0).cellwidth() == 4) System.out.println("TABLE OF " + super.rowdef.toString() + "\n" + serverLog.table(super.chunkcache, super.rowdef.objectsize, 0)); // DEBUG
         }
     }
     

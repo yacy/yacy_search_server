@@ -67,6 +67,7 @@ public class kelondroBufferedIndex implements kelondroIndex {
         Map.Entry entry;
         if (i.hasNext()) {
             entry = (Map.Entry) i.next();
+            System.out.println("*** DEBUG: flushed " + ((kelondroRow.Entry) entry.getValue()).getColString(0, null));
             index.put((kelondroRow.Entry) entry.getValue());
         }
     }

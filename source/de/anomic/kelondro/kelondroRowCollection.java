@@ -83,8 +83,10 @@ public class kelondroRowCollection {
     
     public kelondroRowCollection(kelondroRow rowdef, byte[] exportedCollectionRowinstance) {
         this.rowdef = rowdef;
-        kelondroRow.Entry exportedCollection = exportRow(exportedCollectionRowinstance.length - exportOverheadSize).newEntry(exportedCollectionRowinstance);
+        int chunkcachelength = exportedCollectionRowinstance.length - exportOverheadSize;
+        kelondroRow.Entry exportedCollection = exportRow(chunkcachelength).newEntry(exportedCollectionRowinstance);
         this.chunkcount = (int) exportedCollection.getColLong(exp_chunkcount);
+        assert (this.chunkcount <= chunkcachelength / rowdef.objectsize) : "chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize;
         this.lastTimeRead = (exportedCollection.getColLong(exp_last_read) + 10957) * day;
         this.lastTimeWrote = (exportedCollection.getColLong(exp_last_wrote) + 10957) * day;
         String sortOrderKey = exportedCollection.getColString(exp_order_type, null);

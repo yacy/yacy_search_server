@@ -81,6 +81,7 @@ public class kelondroBytesIntMap {
     public synchronized int removeonei() throws IOException {
         if (ki.size() == 0) return -1;
         kelondroRow.Entry indexentry = ki.removeOne();
+        assert (indexentry != null);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }

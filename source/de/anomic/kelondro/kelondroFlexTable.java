@@ -89,11 +89,14 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         kelondroRecords.Node node;
         kelondroRow.Entry indexentry;
         int i;
+        byte[] key;
         while (content.hasNext()) {
             node = (kelondroRecords.Node) content.next();
             i = node.handle().hashCode();
+            key = node.getKey();
+            assert (key != null) : "DEBUG: empty key in initializeRamIndex"; // should not happen; if it does, it is an error of the condentNodes iterator
             indexentry = ri.row().newEntry();
-            indexentry.setCol(0, node.getKey());
+            indexentry.setCol(0, key);
             indexentry.setCol(1, i);
             ri.addUnique(indexentry);
             if ((i % 10000) == 0) {

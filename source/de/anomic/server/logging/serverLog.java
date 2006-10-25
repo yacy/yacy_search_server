@@ -219,6 +219,8 @@ public final class serverLog {
     }
     
     public static final String arrayList(byte[] b, int start, int length) {
+        if (b == null) return "NULL";
+        if (b.length == 0) return "[]";
         StringBuffer sb = new StringBuffer(b.length * 4);
         sb.append('[').append(Integer.toString((int) b[start])).append(',');
         for (int i = 1; i < length; i++) sb.append(' ').append(Integer.toString((int) b[start + i])).append(',');
@@ -226,14 +228,17 @@ public final class serverLog {
         return sb.toString();
     }
     
-    public static final String table(byte[] b, int marker) {
+    public static final String table(byte[] b, int linewidth, int marker) {
+        if (b == null) return "NULL";
+        if (b.length == 0) return "[]";
         StringBuffer sb = new StringBuffer(b.length * 4);
         for (int i = 0; i < b.length; i++) {
-            if (i % 16 == 0)
+            if (i % linewidth == 0)
                 sb.append('\n').append("# ").append(Integer.toHexString(i));
             else
                 sb.append(',');
-            sb.append(' ').append(Integer.toString((int) b[i]));
+            sb.append(' ').append(Integer.toString(0xff & (int) b[i]));
+            if (i >= 65535) break;
         }
         sb.append('\n');
         return sb.toString();

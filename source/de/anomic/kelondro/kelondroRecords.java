@@ -1072,7 +1072,7 @@ public class kelondroRecords {
                         return markedDeleted;
                     }
 
-                    // handle seems to be corrent. store handle
+                    // handle seems to be correct. store handle
                     markedDeleted.add(h);
                     
                     // move to next handle
@@ -1147,9 +1147,10 @@ public class kelondroRecords {
                 Node nn = next00();
                 byte[] key = nn.getKey();
                 if ((key == null) ||
-                    ((key.length > 1) && ((key[0] == 0) && (key[1] == 0))) ||
-                    ((key.length > 3) && ((key[2] == 0) && (key[3] == 0)))) {
-                    // this is an deleted node; probably not commited with dispose
+                    ((key.length == 1) && (key[0] == (byte) 0x80)) || // the NUL pointer ('lost' chain terminator)
+                    ((key.length  > 0) && (key[0] == 0))              // a 'lost' pointer within a deleted-chain
+                   ) {
+                    // this is a deleted node; probably not commited with dispose
                     if (fullyMarked) try {dispose(nn.handle);} catch (IOException e) {} // mark this now as deleted
                     continue;
                 }
