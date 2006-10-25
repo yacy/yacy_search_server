@@ -257,6 +257,7 @@
   <subant target="${extensionTarget}">
     <property name="src" location="${src}"/>
     <property name="build" location="${build}"/>
+    <property name="lib" location="${lib}"/>
     <property name="libx" location="${libx}"/>
     <property name="release" location="${release_ext}"/>
     <property name="releaseDir" value="${releaseDir}"/>
