@@ -57,9 +57,9 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexRI;
+import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroObjectCache;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.server.logging.serverLog;
 
@@ -382,7 +382,7 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
     public long[] cacheObjectStatus() {
         long[][] a = new long[assortments.length][];
         for (int i = assortments.length - 1; i >= 0; i--) a[i] = assortments[i].cacheObjectStatus();
-        return kelondroObjectCache.combinedStatus(a, a.length);
+        return kelondroCache.combinedStatus(a, a.length);
     }
     
     public void close(int waitingSeconds) {

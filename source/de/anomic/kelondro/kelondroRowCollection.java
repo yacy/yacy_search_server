@@ -98,6 +98,11 @@ public class kelondroRowCollection {
         }
         this.sortColumn = (int) exportedCollection.getColLong(exp_order_col);
         this.sortBound = (int) exportedCollection.getColLong(exp_order_bound);
+        //assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
+        if (sortBound > chunkcount) {
+            serverLog.logWarning("RowCollection", "corrected wrong sortBound; sortBound = " + sortBound + ", chunkcount = " + chunkcount);
+            this.sortBound = chunkcount;
+        }
         this.chunkcache = exportedCollection.getColBytes(exp_collection);        
     }
     
@@ -127,7 +132,8 @@ public class kelondroRowCollection {
         trim();
         kelondroRow row = exportRow(chunkcache.length);
         kelondroRow.Entry entry = row.newEntry();
-        entry.setCol(exp_chunkcount, size());
+        assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
+        entry.setCol(exp_chunkcount, this.chunkcount);
         entry.setCol(exp_last_read, daysSince2000(this.lastTimeRead));
         entry.setCol(exp_last_wrote, daysSince2000(this.lastTimeWrote));
         entry.setCol(exp_order_type, (this.sortOrder == null) ? "__".getBytes() : this.sortOrder.signature().getBytes());
@@ -161,17 +167,7 @@ public class kelondroRowCollection {
             newChunkcache = null;
         }
     }
-    /*
-    public void implantRows(byte[] b) {
-        assert (b.length % rowdef.objectsize() == 0);
-        synchronized (chunkcache) {
-            chunkcache = b;
-            chunkcount = b.length / rowdef.objectsize();
-            sortBound = 0;
-            lastTimeWrote = System.currentTimeMillis();
-        }
-    }
-    */
+
     public final long lastRead() {
         return lastTimeRead;
     }
@@ -182,7 +178,7 @@ public class kelondroRowCollection {
     
     public final kelondroRow.Entry get(int index) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
-        assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount;
+        assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
         byte[] a = new byte[rowdef.objectsize()];
         synchronized (chunkcache) {
             System.arraycopy(chunkcache, index * rowdef.objectsize(), a, 0, rowdef.objectsize());
@@ -305,9 +301,7 @@ public class kelondroRowCollection {
         
         public void remove() {
             p--;
-            System.arraycopy(chunkcache, (p + 1) * rowdef.objectsize(), chunkcache, p * rowdef.objectsize(), (chunkcount - p - 1) * rowdef.objectsize());
-            if (chunkcount == sortBound) sortBound--;
-            chunkcount--;
+            removeShift(p);
         }
     }
     

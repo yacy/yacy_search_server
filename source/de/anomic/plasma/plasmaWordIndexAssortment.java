@@ -60,7 +60,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURLEntry;
-import de.anomic.kelondro.kelondroCachedIndex;
+import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
@@ -82,7 +82,7 @@ public final class plasmaWordIndexAssortment {
     private File assortmentFile;
     private int assortmentLength;
     private serverLog log;
-    private kelondroCachedIndex assortments;
+    private kelondroCache assortments;
     private long bufferSize;
     private long preloadTime;
 
@@ -118,7 +118,7 @@ public final class plasmaWordIndexAssortment {
         this.log = log;
         // open assortment tree file
         long start = System.currentTimeMillis();
-        assortments = new kelondroCachedIndex(kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength)), bufferSize / 2);
+        assortments = new kelondroCache(kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength)), bufferSize / 2, true, true);
         long stop = System.currentTimeMillis();
         if (log != null) log.logConfig("Opened Assortment, " +
                                   assortments.size() + " entries, width " +
@@ -248,7 +248,7 @@ public final class plasmaWordIndexAssortment {
             assortmentFile.renameTo(backupFile);
             log.logInfo("a back-up of the deleted assortment file is in " + backupFile.toString());
             if (assortmentFile.exists()) assortmentFile.delete();
-            assortments = new kelondroCachedIndex(kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength)), bufferSize / 2);
+            assortments = new kelondroCache(kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength)), bufferSize / 2, true, true);
         } catch (Exception e) {
             // if this fails, delete the file
             if (!(assortmentFile.delete())) throw new RuntimeException("cannot delete assortment database");

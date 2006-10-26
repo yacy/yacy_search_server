@@ -518,11 +518,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     }
 
     public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
-        throw new UnsupportedOperationException();
+        this.put(row);
     }
     
     public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
-        throw new UnsupportedOperationException();
+        this.put(row, entryDate);
     }
     
     private void assignChild(Node parentNode, Node childNode, int childType) throws IOException {

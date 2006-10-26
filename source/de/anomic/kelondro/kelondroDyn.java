@@ -81,7 +81,7 @@ public class kelondroDyn {
         // creates or opens a dynamic tree
         rowdef = new kelondroRow("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize);
         kelondroTree tree = new kelondroTree(file, buffersize / 2, preloadTime, rowdef, objectOrder, 1, 8);
-        this.index = new kelondroCachedIndex(tree, buffersize / 2);
+        this.index = new kelondroCache(tree, buffersize / 2, true, true);
         this.keylen = index.row().width(0) - counterlen;
         this.reclen = index.row().width(1);
         this.fillChar = fillChar;

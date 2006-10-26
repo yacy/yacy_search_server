@@ -50,7 +50,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroCachedIndex;
+import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
@@ -69,13 +69,13 @@ public class yacyNewsDB {
         this.path = path;
         this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
-        this.news = new kelondroCachedIndex(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400);
+        this.news = new kelondroCache(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400, true, true);
     }
 
     private void resetDB() throws IOException {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
-        this.news = new kelondroCachedIndex(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400);
+        this.news = new kelondroCache(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400, true, true);
     }
 
     public int cacheNodeChunkSize() {

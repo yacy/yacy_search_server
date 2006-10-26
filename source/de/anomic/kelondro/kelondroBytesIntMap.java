@@ -27,8 +27,6 @@ package de.anomic.kelondro;
 import java.io.IOException;
 import java.util.Iterator;
 
-import de.anomic.server.logging.serverLog;
-
 public class kelondroBytesIntMap {
     
     private kelondroIndex ki;
@@ -41,7 +39,7 @@ public class kelondroBytesIntMap {
     
     public synchronized int geti(byte[] key) throws IOException {
         assert (key != null);
-        assert (!(serverLog.allZero(key)));
+        //assert (!(serverLog.allZero(key)));
         kelondroRow.Entry indexentry = ki.get(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
@@ -49,7 +47,7 @@ public class kelondroBytesIntMap {
     
     public synchronized int puti(byte[] key, int i) throws IOException {
         assert (key != null);
-        assert (!(serverLog.allZero(key)));
+        //assert (!(serverLog.allZero(key)));
         kelondroRow.Entry newentry = ki.row().newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, i);
@@ -60,7 +58,7 @@ public class kelondroBytesIntMap {
     
     public synchronized void addi(byte[] key, int i) throws IOException {
         assert (key != null);
-        assert (!(serverLog.allZero(key)));
+        //assert (!(serverLog.allZero(key)));
         kelondroRow.Entry newentry = ki.row().newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, i);
@@ -69,7 +67,7 @@ public class kelondroBytesIntMap {
     
     public synchronized int removei(byte[] key) throws IOException {
         assert (key != null);
-        assert (!(serverLog.allZero(key)));
+        //assert (!(serverLog.allZero(key)));
         // returns the integer index of the key, if the key can be found and was removed
         // and -1 if the key was not found.
         if (ki.size() == 0) return -1;

@@ -60,11 +60,11 @@ import java.util.Map;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
+import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
-import de.anomic.kelondro.kelondroObjectCache;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -197,7 +197,7 @@ public final class yacySeedDB {
     }
     
     public long[] cacheObjectStatus() {
-        return kelondroObjectCache.combinedStatus(new long[][] {
+        return kelondroCache.combinedStatus(new long[][] {
                 seedActiveDB.cacheObjectStatus(),
                 seedPassiveDB.cacheObjectStatus(),
                 seedPotentialDB.cacheObjectStatus() }, 3);

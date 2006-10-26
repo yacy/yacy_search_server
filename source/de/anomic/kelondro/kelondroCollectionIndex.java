@@ -99,8 +99,7 @@ public class kelondroCollectionIndex {
 
         boolean ramIndexGeneration = false;
         boolean fileIndexGeneration = !(new File(path, filenameStub + ".index").exists());
-        //if (ramIndexGeneration) index = new kelondroRAMIndex(indexOrder, indexRow());
-        if (ramIndexGeneration) index = new kelondroBufferedIndex(new kelondroRowSet(indexRow(), indexOrder, 0, 0));
+        if (ramIndexGeneration) index = new kelondroRowSet(indexRow(), indexOrder, 0, 0);
         if (fileIndexGeneration) index = new kelondroFlexTable(path, filenameStub + ".index", buffersize, preloadTime, indexRow(), indexOrder);
                    
         // open array files
@@ -158,10 +157,7 @@ public class kelondroCollectionIndex {
                     ientry.setCol(idx_col_indexpos,   j);
                     ientry.setCol(idx_col_lastread,   t);
                     ientry.setCol(idx_col_lastwrote,  t);
-                    if (index instanceof kelondroBufferedIndex)
-                        ((kelondroBufferedIndex) index).addUnique(ientry);
-                    else
-                        index.put(ientry);
+                    index.addUnique(ientry);
                     
                     // write a log
                     if (System.currentTimeMillis() - lastlog > 30000) {
@@ -177,7 +173,7 @@ public class kelondroCollectionIndex {
             long buffersize, long preloadTime,
             int loadfactor, kelondroRow rowdef) throws IOException {
         // open/create index table
-        kelondroIndex theindex = new kelondroCachedIndex(new kelondroFlexTable(path, filenameStub + ".index", buffersize / 2, preloadTime, indexRow(), indexOrder), buffersize / 2);
+        kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", buffersize / 2, preloadTime, indexRow(), indexOrder), buffersize / 2, true, true);
 
         // save/check property file for this array
         File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize());
@@ -295,6 +291,7 @@ public class kelondroCollectionIndex {
                 // join with new collection
                 oldcollection.addAll(collection);
                 oldcollection.shape();
+                oldcollection.trim();
                 collection = oldcollection;
             }
 

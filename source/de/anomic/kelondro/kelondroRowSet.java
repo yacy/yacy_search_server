@@ -30,8 +30,6 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.TreeSet;
 
-import de.anomic.server.logging.serverLog;
-
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
 
     private static final int collectionReSortLimit = 90;
@@ -92,7 +90,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     public kelondroRow.Entry put(kelondroRow.Entry entry) {
         assert (entry != null);
         assert (entry.getColBytes(super.sortColumn) != null);
-        assert (!(serverLog.allZero(entry.getColBytes(super.sortColumn))));
+        //assert (!(serverLog.allZero(entry.getColBytes(super.sortColumn))));
         long handle = profile.startWrite();
         int index = -1;
         kelondroRow.Entry oldentry = null;
@@ -132,28 +130,23 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
                 // the entry is not there
                 profile.stopDelete(handle);
                 return null;
-            }
-            
-            // there is an entry
-            entry = get(p);
-            if (p < sortBound) {
-                removeMarker.add(new Integer(p));
             } else {
-                super.swap(p, --chunkcount, 0);
-            }
-        
-            // check case when complete chunkcache is marked as deleted
-            if (removeMarker.size() == chunkcount) {
-                this.clear();
-                removeMarker.clear();
+                // there is an entry
+                entry = get(p);
+                if (p < sortBound) {
+                    // mark entry as to-be-deleted
+                    removeMarker.add(new Integer(p));
+                    if (removeMarker.size() > removeMaxSize) resolveMarkedRemoved();
+                } else {
+                    // remove directly by swap
+                    if (chunkcount == sortBound) sortBound--;
+                    super.swap(p, --chunkcount, 0);
+                }
+
+                profile.stopDelete(handle);
+                return entry;
             }
         }
-        
-        // check if removeMarker is full
-        if (removeMarker.size() >= removeMaxSize) resolveMarkedRemoved();
-
-        profile.stopDelete(handle);
-        return entry;
     }
     
     private boolean isMarkedRemoved(int index) {
@@ -172,6 +165,14 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
     private void resolveMarkedRemoved() {
         if (removeMarker.size() == 0) return;
+        
+        // check case when complete chunkcache is marked as deleted
+        if (removeMarker.size() == chunkcount) {
+            this.clear();
+            removeMarker.clear();
+            return;
+        }
+        
         Integer nxt = (Integer) removeMarker.first();
         removeMarker.remove(nxt);
         int idx = nxt.intValue();
@@ -385,6 +386,10 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     public final int[] cacheNodeStatus() {
         // a collection of different node cache status values
         return new int[]{0,0,0,0,0,0,0,0,0,0};
+    }
+    
+    public static kelondroIndex getRAMIndex(kelondroRow rowdef, int initSize) {
+        return new kelondroRowSet(rowdef, kelondroNaturalOrder.naturalOrder, 0, initSize);
     }
     
     public static void main(String[] args) {

@@ -31,10 +31,10 @@ import java.util.Iterator;
 
 public class kelondroIntBytesMap {
 
-    private kelondroBufferedIndex index;
+    private kelondroIndex index;
     
     public kelondroIntBytesMap(int payloadSize, int initSize) {
-        index = kelondroBufferedIndex.getRAMIndex(new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize), initSize);
+        index = kelondroRowSet.getRAMIndex(new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize), initSize);
     }
     
     public int size() {
@@ -101,14 +101,17 @@ public class kelondroIntBytesMap {
     
     public Iterator rows() {
         try {
-            return index.rows();
+            return index.rows(true, false, null);
         } catch (IOException e) {
             return null;
         }
     }
     
     public void flush() {
-        try {index.flush();} catch (IOException e) {}
+        if (index instanceof kelondroRowSet) {
+            ((kelondroRowSet) index).shape();
+            ((kelondroRowSet) index).trim();
+        }
     }
     
     public kelondroProfile profile() {

@@ -68,7 +68,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
                 (dir[i].length() == tablename.length() + 7)) {
                 // open table
                 date = dir[i].substring(tablename.length() + 1);
-                this.tables.put(date, new kelondroFlexTable(path, dir[i], buffersize / count, preloadTime, rowdef, objectOrder));
+                this.tables.put(date, new kelondroCache(new kelondroFlexTable(path, dir[i], buffersize / count / 2, preloadTime, rowdef, objectOrder), buffersize / count / 2, true, true));
             }
         }
     }
@@ -102,7 +102,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         Iterator i = tables.values().iterator();
         int s = 0;
         while (i.hasNext()) {
-            s += ((kelondroFlexTable) i.next()).size();
+            s += ((kelondroIndex) i.next()).size();
         }
         return s;
     }
@@ -111,8 +111,29 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         kelondroProfile[] profiles = new kelondroProfile[tables.size()];
         Iterator i = tables.values().iterator();
         int c = 0;
-        while (i.hasNext()) profiles[c++] = ((kelondroFlexTable) i.next()).profile();
+        while (i.hasNext()) profiles[c++] = ((kelondroIndex) i.next()).profile();
         return kelondroProfile.consolidate(profiles);
+    }
+    
+    public int writeBufferSize() {
+        Iterator i = tables.values().iterator();
+        int s = 0;
+        kelondroIndex ki;
+        while (i.hasNext()) {
+            ki = ((kelondroIndex) i.next());
+            if (ki instanceof kelondroCache) s += ((kelondroCache) ki).writeBufferSize();
+        }
+        return s;
+    }
+    
+    public void flushSome() {
+        Iterator i = tables.values().iterator();
+        kelondroIndex ki;
+        while (i.hasNext()) {
+            ki = ((kelondroIndex) i.next());
+            if (ki instanceof kelondroCache)
+                try {((kelondroCache) ki).flushSome();} catch (IOException e) {}
+        }
     }
     
     public kelondroRow row() throws IOException {
@@ -131,10 +152,10 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
         Object[] keeper = keeperOf(row.getColBytes(0));
-        if (keeper != null) return ((kelondroFlexTable) keeper[0]).put(row, entryDate);
+        if (keeper != null) return ((kelondroIndex) keeper[0]).put(row);
         String suffix = dateSuffix(entryDate);
         if (suffix == null) return null;
-        kelondroFlexTable table = (kelondroFlexTable) tables.get(suffix);
+        kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
             // make new table
             table = new kelondroFlexTable(path, tablename + "." + suffix, buffersize / (tables.size() + 1), -1, rowdef, objectOrder);
@@ -146,10 +167,10 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     
     public synchronized Object[] keeperOf(byte[] key) throws IOException {
         Iterator i = tables.values().iterator();
-        kelondroFlexTable table;
+        kelondroIndex table;
         kelondroRow.Entry entry;
         while (i.hasNext()) {
-            table = (kelondroFlexTable) i.next();
+            table = (kelondroIndex) i.next();
             entry = table.get(key);
             if (entry != null) return new Object[]{table, entry};
         }
@@ -163,7 +184,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
         String suffix = dateSuffix(entryDate);
         if (suffix == null) return;
-        kelondroFlexTable table = (kelondroFlexTable) tables.get(suffix);
+        kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
             // make new table
             table = new kelondroFlexTable(path, tablename + "." + suffix, buffersize / (tables.size() + 1), -1, rowdef, objectOrder);
@@ -174,10 +195,10 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     
     public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
         Iterator i = tables.values().iterator();
-        kelondroFlexTable table;
+        kelondroIndex table;
         kelondroRow.Entry entry;
         while (i.hasNext()) {
-            table = (kelondroFlexTable) i.next();
+            table = (kelondroIndex) i.next();
             entry = table.remove(key);
             if (entry != null) return entry;
         }
@@ -186,10 +207,10 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     
     public synchronized kelondroRow.Entry removeOne() throws IOException {
         Iterator i = tables.values().iterator();
-        kelondroFlexTable table, maxtable = null;
+        kelondroIndex table, maxtable = null;
         int maxcount = -1;
         while (i.hasNext()) {
-            table = (kelondroFlexTable) i.next();
+            table = (kelondroIndex) i.next();
             if (table.size() > maxcount) {
                 maxtable = table;
                 maxcount = table.size();
@@ -223,7 +244,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             if (t.hasNext()) {
                 if ((tt == null) || (!(tt.hasNext()))) {
                     try {
-                        tt = ((kelondroFlexTable) t.next()).rows(true, false, null);
+                        tt = ((kelondroIndex) t.next()).rows(true, false, null);
                     } catch (IOException e) {
                         return null;
                     }
@@ -265,7 +286,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     
     public synchronized void close() throws IOException {
         Iterator i = tables.values().iterator();
-        while (i.hasNext()) ((kelondroFlexTable) i.next()).close();
+        while (i.hasNext()) ((kelondroIndex) i.next()).close();
         tables = null;
     }
     

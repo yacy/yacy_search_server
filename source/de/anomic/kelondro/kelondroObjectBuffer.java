@@ -58,6 +58,9 @@ package de.anomic.kelondro;
 
 public class kelondroObjectBuffer {
 
+    // this is a buffer for a single (only one) key/value object
+    // without an index-backend
+    
     private int    readHit, readMiss, writeUnique, writeDouble;
     private String name;
     private byte[] key;
