@@ -204,9 +204,11 @@ public class translator {
                     relativePath="wrong path"; //not in translationLists
                 } 
 				if(translationLists.containsKey(relativePath)){
-					if( translateFile(sourceFiles[i], new File(destDir, sourceFiles[i].getName().replace('/', File.separatorChar)), (Hashtable)translationLists.get(relativePath))){
-						serverLog.logInfo("TRANSLATOR", "Translated file: "+ relativePath);
-					}else{
+                    serverLog.logInfo("TRANSLATOR", "Translating file: "+ relativePath);
+					if(!translateFile(
+                                      sourceFiles[i]
+                                    , new File(destDir, sourceFiles[i].getName().replace('/', File.separatorChar))
+                                    , (Hashtable)translationLists.get(relativePath))){
 						serverLog.logSevere("TRANSLATOR", "File error while translating file "+relativePath);
 					}
 				}else{
