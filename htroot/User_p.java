@@ -93,21 +93,25 @@ public class User_p {
         //current_user = edited user
 		} else if(post.containsKey("user") && !((String)post.get("user")).equals("newuser")){
 			if(post.containsKey("change_user")){
-	            //defaults for newuser are set above
+	            //defaults for newuser are set above                
 		        entry=sb.userDB.getEntry((String)post.get("user"));
-			    //TODO: set username read-only in html
-				prop.put("page_current_user", post.get("user"));
-	            prop.put("page_username", post.get("user"));
-		        prop.put("page_firstname", entry.getFirstName());
-			    prop.put("page_lastname", entry.getLastName());
-	            prop.put("page_address", entry.getAddress());
-		        prop.put("page_timelimit", entry.getTimeLimit());
-			    prop.put("page_timeused", entry.getTimeUsed());
-                prop.put("page_proxyRight", (entry.hasProxyRight()?1:0));
-                prop.put("page_uploadRight", (entry.hasUploadRight()?1:0));
-                prop.put("page_downloadRight", (entry.hasDownloadRight()?1:0));
-                prop.put("page_adminRight", (entry.hasAdminRight()?1:0));
-                prop.put("page_blogRight", (entry.hasBlogRight()?1:0));
+		        // program crashes if a submit with emty username was made on previous mask and the user clicked on the 
+		        // link: "If you want to manage more Users, return to the user page." (parameter "user" is empty)
+                if (entry != null) {
+    			    //TODO: set username read-only in html
+    				prop.put("page_current_user", post.get("user"));
+    	            prop.put("page_username", post.get("user"));
+    		        prop.put("page_firstname", entry.getFirstName());
+    			    prop.put("page_lastname", entry.getLastName());
+    	            prop.put("page_address", entry.getAddress());
+    		        prop.put("page_timelimit", entry.getTimeLimit());
+    			    prop.put("page_timeused", entry.getTimeUsed());
+                    prop.put("page_proxyRight", (entry.hasProxyRight()?1:0));
+                    prop.put("page_uploadRight", (entry.hasUploadRight()?1:0));
+                    prop.put("page_downloadRight", (entry.hasDownloadRight()?1:0));
+                    prop.put("page_adminRight", (entry.hasAdminRight()?1:0));
+                    prop.put("page_blogRight", (entry.hasBlogRight()?1:0));
+                }
 			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
 				sb.userDB.removeEntry((String)post.get("user"));
 			}
