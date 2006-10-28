@@ -108,15 +108,15 @@ public class BlacklistService extends AbstractService {
     	if ((blacklistName == null)||(blacklistName.length() == 0)) 
     		throw new IllegalArgumentException("Blacklist name must not be null or empty.");
     	
+    	if (blacklistName.indexOf("/") != -1)
+    		throw new IllegalArgumentException("Blacklist name must not contain '/'.");    	
+    	
+		// extracting the message context
+		extractMessageContext(AUTHENTICATION_NEEDED);    	
+    	
     	// check if we know all types passed to this function
     	checkForKnownBlacklistTypes(activateForBlacklistTypes);
     	
-    	if (blacklistName.indexOf("/") != -1)
-    		throw new IllegalArgumentException("Blacklist name must not contain '/'.");
-    	
-		// extracting the message context
-		extractMessageContext(AUTHENTICATION_NEEDED);
-		
 		// initialize the list manager
 		initBlacklistManager();
 		
