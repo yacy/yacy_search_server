@@ -192,5 +192,23 @@ public final class plasmaSearchQuery {
             if (blueList.contains(word)) it.remove();
         }
     }
+    
+    public String anonymizedQueryHashes() {
+        // create a more anonymized representation of euqery hashes for logging
+        StringBuffer sb = new StringBuffer(queryHashes.size() * 14 + 2);
+        Iterator i = queryHashes.iterator();
+        sb.append("[");
+        String hash;
+        if (i.hasNext()) {
+            hash = (String) i.next();
+            sb.append(hash.substring(0, 3)).append(".........");
+        }
+        while (i.hasNext()) {
+            hash = (String) i.next();
+            sb.append(", ").append(hash.substring(0, 3)).append(".........");
+        }
+        sb.append("]");
+        return new String(sb);
+    }
 
 }
