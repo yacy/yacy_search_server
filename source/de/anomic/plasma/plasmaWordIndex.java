@@ -37,7 +37,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexCollectionRI;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
@@ -56,7 +55,7 @@ import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyDHTAction;
 
-public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
+public final class plasmaWordIndex implements indexRI {
 
     private static final String indexAssortmentClusterPath = "ACLUSTER";
     private static final int assortmentCount = 64;
@@ -185,7 +184,13 @@ public final class plasmaWordIndex extends indexAbstractRI implements indexRI {
             }
         }
     }
-
+    
+    public long getUpdateTime(String wordHash) {
+        indexContainer entries = getContainer(wordHash, null, false, -1);
+        if (entries == null) return 0;
+        return entries.updated();
+    }
+    
     public indexContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtInCase) {
         // set dhtInCase depending on wordHash
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(wordHash))) dhtInCase = true;

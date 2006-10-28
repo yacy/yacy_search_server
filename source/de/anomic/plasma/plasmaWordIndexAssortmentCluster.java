@@ -52,7 +52,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexEntry;
@@ -63,7 +62,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.server.logging.serverLog;
 
-public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI implements indexRI {
+public final class plasmaWordIndexAssortmentCluster implements indexRI {
     
     // class variables
     private int clusterCount;   // number of cluster files
@@ -172,6 +171,18 @@ public final class plasmaWordIndexAssortmentCluster extends indexAbstractRI impl
             }
             storeForced(c);
         }
+    }
+    
+    public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
+        indexContainer container = new indexContainer(wordHash);
+        container.add(newEntry);
+        return addEntries(container, updateTime, dhtCase);
+    }
+    
+    public long getUpdateTime(String wordHash) {
+        indexContainer entries = getContainer(wordHash, null, false, -1);
+        if (entries == null) return 0;
+        return entries.updated();
     }
     
     public indexContainer addEntries(indexContainer newContainer, long creationTime, boolean dhtCase) {

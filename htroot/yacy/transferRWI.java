@@ -114,13 +114,13 @@ public final class transferRWI {
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
-        } else if ((checkLimit && sb.wordIndex.dhtOutCacheSize() > sb.getConfigLong("wordCacheMaxCount", 20000)) || ((sb.wordIndex.busyCacheFlush) && (!shortCacheFlush))) {
+        } /* else if ((checkLimit && sb.wordIndex.dhtOutCacheSize() > sb.getConfigLong("wordCacheMaxCount", 20000)) || ((sb.wordIndex.busyCacheFlush) && (!shortCacheFlush))) {
             // we are too busy flushing the ramCache to receive indexes
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (wordcachesize=" + sb.wordIndex.dhtOutCacheSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 300000;
-        } else {
+        } */ else {
             // we want and can receive indexes
             // log value status (currently added to find outOfMemory error
             sb.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);

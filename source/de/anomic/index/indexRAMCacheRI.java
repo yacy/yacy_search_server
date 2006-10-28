@@ -42,7 +42,7 @@ import de.anomic.plasma.plasmaWordIndexAssortment;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
+public final class indexRAMCacheRI implements indexRI {
 
     // environment constants
     public  static final long wCacheMaxAge         = 1000 * 60 * 30; // milliseconds; 30 minutes
@@ -87,6 +87,12 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         }
     }
 
+    public synchronized long getUpdateTime(String wordHash) {
+        indexContainer entries = getContainer(wordHash, null, false, -1);
+        if (entries == null) return 0;
+        return entries.updated();
+    }
+    
     private void dump(int waitingSeconds) throws IOException {
         log.logConfig("creating dump for index cache '" + indexArrayFileName + "', " + cache.size() + " words (and much more urls)");
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
@@ -217,18 +223,18 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         return this.cacheMaxCount;
     }
     
-    public int size() {
+    public synchronized int size() {
         return cache.size();
     }
 
-    public int indexSize(String wordHash) {
+    public synchronized int indexSize(String wordHash) {
         int size = 0;
         indexContainer cacheIndex = (indexContainer) cache.get(wordHash);
         if (cacheIndex != null) size += cacheIndex.size();
         return size;
     }
 
-    public Iterator wordContainers(String startWordHash, boolean rot) {
+    public synchronized Iterator wordContainers(String startWordHash, boolean rot) {
         // we return an iterator object that creates top-level-clones of the indexContainers
         // in the cache, so that manipulations of the iterated objects do not change
         // objects in the cache.
@@ -276,14 +282,13 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         
     }
 
-    public String bestFlushWordHash() {
+    public synchronized String bestFlushWordHash() {
         // select appropriate hash
         // we have 2 different methods to find a good hash:
         // - the oldest entry in the cache
         // - the entry with maximum count
         if (cache.size() == 0) return null;
         try {
-            synchronized (cache) {
                 String hash = null;
                 int count = hashScore.getMaxScore();
                 if ((count >= cacheReferenceLimit) &&
@@ -307,7 +312,6 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     hash = (String) hashDate.getMinObject(); // flush oldest entries
                 }
                 return hash;
-            }
         } catch (Exception e) {
             log.logSevere("flushFromMem: " + e.getMessage(), e);
         }
@@ -322,7 +326,7 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         return (((long) intTime) * (long) 1000) + initTime;
     }
     
-    public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxtime_dummy) {
+    public synchronized indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxtime_dummy) {
 
         // retrieve container
         indexContainer container = (indexContainer) cache.get(wordHash);
@@ -339,46 +343,53 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
         return container;
     }
 
-    public indexContainer deleteContainer(String wordHash) {
+    public synchronized indexContainer deleteContainer(String wordHash) {
         // returns the index that had been deleted
-        synchronized (cache) {
-            indexContainer container = (indexContainer) cache.remove(wordHash);
-            hashScore.deleteScore(wordHash);
-            hashDate.deleteScore(wordHash);
-            return container;
-        }
+        indexContainer container = (indexContainer) cache.remove(wordHash);
+        hashScore.deleteScore(wordHash);
+        hashDate.deleteScore(wordHash);
+        return container;
     }
 
-    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
-        synchronized (cache) {
-            indexContainer c = (indexContainer) deleteContainer(wordHash);
-            if (c != null) {
-                if (c.removeEntry(wordHash, urlHash, deleteComplete)) return true;
-                this.addEntries(c, System.currentTimeMillis(), false);
+    public synchronized boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+        indexContainer c = (indexContainer) cache.get(wordHash);
+        if ((c != null) && (c.removeEntry(wordHash, urlHash, deleteComplete))) {
+            // removal successful
+            if ((c.size() == 0) && (deleteComplete)) {
+                deleteContainer(wordHash);
+            } else {
+                cache.put(wordHash, c);
+                hashScore.decScore(wordHash);
+                hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
             }
+            return true;
         }
         return false;
     }
     
-    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
+    public synchronized int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
         if (urlHashes.size() == 0) return 0;
-        int count = 0;
-        synchronized (cache) {
-            indexContainer c = (indexContainer) deleteContainer(wordHash);
-            if (c != null) {
-                count = c.removeEntries(wordHash, urlHashes, deleteComplete);
-                if (c.size() != 0) this.addEntries(c, System.currentTimeMillis(), false);
+        indexContainer c = (indexContainer) cache.get(wordHash);
+        int count;
+        if ((c != null) && ((count = c.removeEntries(wordHash, urlHashes, deleteComplete)) > 0)) {
+            // removal successful
+            if ((c.size() == 0) && (deleteComplete)) {
+                deleteContainer(wordHash);
+            } else {
+                cache.put(wordHash, c);
+                hashScore.setScore(wordHash, c.size());
+                hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
             }
+            return count;
         }
-        return count;
+        return 0;
     }
  
-    public int tryRemoveURLs(String urlHash) {
+    public synchronized int tryRemoveURLs(String urlHash) {
         // this tries to delete an index from the cache that has this
         // urlHash assigned. This can only work if the entry is really fresh
         // Such entries must be searched in the latest entries
         int delCount = 0;
-        synchronized (cache) {
             Iterator i = cache.entrySet().iterator();
             Map.Entry entry;
             String wordhash;
@@ -398,16 +409,14 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                     delCount++;
                 }
             }
-        }
         return delCount;
     }
     
-    public indexContainer addEntries(indexContainer container, long updateTime, boolean dhtCase) {
+    public synchronized indexContainer addEntries(indexContainer container, long updateTime, boolean dhtCase) {
         // this puts the entries into the cache, not into the assortment directly
         int added = 0;
 
         // put new words into cache
-        synchronized (cache) {
             // put container into wCache
             String wordHash = container.getWordHash();
             indexContainer entries = (indexContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
@@ -419,12 +428,10 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
                 hashDate.setScore(wordHash, intTime(updateTime));
             }
             entries = null;
-        }
         return null;
     }
 
-    public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
-        synchronized (cache) {
+    public synchronized indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
             indexContainer container = (indexContainer) cache.get(wordHash);
             if (container == null) container = new indexContainer(wordHash);
             indexEntry[] entries = new indexEntry[] { newEntry };
@@ -437,10 +444,9 @@ public final class indexRAMCacheRI extends indexAbstractRI implements indexRI {
             container = null;
             entries = null;
             return null;
-        }
     }
 
-    public void close(int waitingSeconds) {
+    public synchronized void close(int waitingSeconds) {
         // dump cache
         try {
             dump(waitingSeconds);

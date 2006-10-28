@@ -50,7 +50,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.index.indexAbstractRI;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexRI;
@@ -58,7 +57,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public class plasmaWordIndexFileCluster extends indexAbstractRI implements indexRI {
+public class plasmaWordIndexFileCluster implements indexRI {
     
     // class variables
     private final File      databaseRoot;
@@ -106,7 +105,6 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
         }
         
     }
-    
     
     public Iterator wordHashes(String startHash, boolean rot) {
         // outdated method: to be replaced by wordContainers
@@ -299,6 +297,12 @@ public class plasmaWordIndexFileCluster extends indexAbstractRI implements index
         } finally {
             if (pi != null) try{pi.close();}catch(Exception e){}
         } else return 0;
+    }
+    
+    public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
+        indexContainer container = new indexContainer(wordHash);
+        container.add(newEntry);
+        return addEntries(container, updateTime, dhtCase);
     }
     
     public indexContainer addEntries(indexContainer container, long creationTime, boolean highPriority) {

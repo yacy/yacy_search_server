@@ -40,7 +40,7 @@ import de.anomic.kelondro.kelondroRowCollection;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.server.logging.serverLog;
 
-public class indexCollectionRI extends indexAbstractRI implements indexRI {
+public class indexCollectionRI implements indexRI {
 
     kelondroCollectionIndex collectionIndex;
     
@@ -61,7 +61,13 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         }
     }
     
-    public int size() {
+    public long getUpdateTime(String wordHash) {
+        indexContainer entries = getContainer(wordHash, null, false, -1);
+        if (entries == null) return 0;
+        return entries.updated();
+    }
+    
+    public synchronized int size() {
         try {
             return collectionIndex.size();
         } catch (IOException e) {
@@ -70,7 +76,7 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         }
     }
     
-    public int indexSize(String wordHash) {
+    public synchronized int indexSize(String wordHash) {
         try {
             return collectionIndex.indexSize(wordHash.getBytes());
         } catch (IOException e) {
@@ -78,7 +84,7 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         }
     }
 
-    public Iterator wordContainers(String startWordHash, boolean rot) {
+    public synchronized Iterator wordContainers(String startWordHash, boolean rot) {
         return new wordContainersIterator(startWordHash, rot);
     }
 
@@ -108,7 +114,7 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
 
     }
      
-    public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxtime) {
+    public synchronized indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxtime) {
         try {
             kelondroRowSet collection = collectionIndex.get(wordHash.getBytes(), deleteIfEmpty);
             if (collection != null) collection.select(urlselection);
@@ -119,7 +125,7 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         }
     }
 
-    public indexContainer deleteContainer(String wordHash) {
+    public synchronized indexContainer deleteContainer(String wordHash) {
         try {
             kelondroRowSet collection = collectionIndex.delete(wordHash.getBytes());
             if (collection == null) return null;
@@ -129,13 +135,13 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         }
     }
 
-    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+    public synchronized boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
         HashSet hs = new HashSet();
         hs.add(urlHash.getBytes());
         return removeEntries(wordHash, hs, deleteComplete) == 1;
     }
     
-    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
+    public synchronized int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
         try {
             return collectionIndex.remove(wordHash.getBytes(), urlHashes, deleteComplete);
         } catch (kelondroOutOfLimitsException e) {
@@ -147,7 +153,13 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         }
     }
 
-    public indexContainer addEntries(indexContainer newEntries, long creationTime, boolean dhtCase) {
+    public synchronized indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
+        indexContainer container = new indexContainer(wordHash);
+        container.add(newEntry);
+        return addEntries(container, updateTime, dhtCase);
+    }
+    
+    public synchronized indexContainer addEntries(indexContainer newEntries, long creationTime, boolean dhtCase) {
         String wordHash = newEntries.getWordHash();
         try {
             collectionIndex.merge(wordHash.getBytes(), (kelondroRowCollection) newEntries);
@@ -160,7 +172,7 @@ public class indexCollectionRI extends indexAbstractRI implements indexRI {
         }
     }
 
-    public void close(int waitingSeconds) {
+    public synchronized void close(int waitingSeconds) {
         try {
             collectionIndex.close();
         } catch (IOException e) {
