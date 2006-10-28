@@ -161,7 +161,7 @@ public class kelondroCollectionIndex {
                     
                     // write a log
                     if (System.currentTimeMillis() - lastlog > 30000) {
-                        serverLog.logFine("STARTUP", "created " + j + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.USAGE.allCount() - j) / j) / 60000) + " minutes remaining for this array");
+                        serverLog.logFine("STARTUP", "created " + j + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.USAGE.allCount() - j) / ((j == 0) ? 1 : j)) / 60000) + " minutes remaining for this array");
                         lastlog = System.currentTimeMillis();
                     }
                 }

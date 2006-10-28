@@ -247,7 +247,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
     }
 
     public String language() {
-        return language;
+        return (language == null) ? "en" : language;
     }
 
     public int size() {
