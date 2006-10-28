@@ -126,7 +126,7 @@ public class Status {
         }
 
         // version information
-        prop.put("versionpp", yacy.combinedVersionString2PrettyString(env.getConfig("version","0.1")));
+        prop.put("versionpp", yacy.combined2prettyVersion(env.getConfig("version","0.1")));
         double thisVersion = Double.parseDouble(env.getConfig("version","0.1"));
         // cut off the SVN Rev in the Version
         try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (NumberFormatException e) {}

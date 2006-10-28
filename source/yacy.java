@@ -158,11 +158,14 @@ public final class yacy {
     *         If the major version is &gt;= 0.11 - major version is replaced by "dev" and separated SVN-version by '/', e.g."dev/01818" <br> 
     *         "dev/00000" - If the input does not matcht the regular expression above 
     */
-    public static String combinedVersionString2PrettyString(String ver) {
+    public static String combined2prettyVersion(String ver) {
+        return combined2prettyVersion(ver, "");
+    }
+    public static String combined2prettyVersion(String ver, String computerName) {
         final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{3})(\\d{4}|\\d{5})\\z").matcher(ver); 
 
         if (!matcher.find()) { 
-            serverLog.logWarning("STARTUP", "Wrong format of version-string: '" + ver + "'. Using default pretty string 'dev/00000' instead");   
+            serverLog.logWarning("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");   
             return "dev/00000";
         } 
         return (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1)) + "/" + matcher.group(2);
@@ -298,7 +301,7 @@ public final class yacy {
             }
 
             sb.setConfig("version", Double.toString(version));
-            sb.setConfig("vString", combinedVersionString2PrettyString(Double.toString(version)));
+            sb.setConfig("vString", combined2prettyVersion(Double.toString(version)));
             sb.setConfig("vdate", vDATE);
             sb.setConfig("applicationRoot", homePath);
             sb.setConfig("startupTime", Long.toString(startup));

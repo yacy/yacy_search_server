@@ -218,7 +218,7 @@ public class YPStats_p {
         req = sb1.profiles.size();
         putprop(prop, sb, "Profiles");
         
-        prop.put("versionpp", yacy.combinedVersionString2PrettyString(sb.getConfig("version","0.1")));
+        prop.put("versionpp", yacy.combined2prettyVersion(sb.getConfig("version","0.1")));
         
         prop.put("links", yacyCore.seedDB.mySeed.get(yacySeed.LCOUNT, "unknown"));
         prop.put("words", yacyCore.seedDB.mySeed.get(yacySeed.ICOUNT, "unknown"));
