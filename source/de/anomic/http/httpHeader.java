@@ -626,6 +626,7 @@ public final class httpHeader extends TreeMap implements Map {
             args = args.substring(7);
             sep = args.indexOf("/");
             if (sep < 0) {
+            	/*
                 // this is a malformed url, something like
                 // http://index.html
                 // we are lazy and guess that it means
@@ -633,6 +634,9 @@ public final class httpHeader extends TreeMap implements Map {
                 // which is a localhost access to the file servlet
                 prop.setProperty(httpHeader.CONNECTION_PROP_HOST, virtualHost);
                 prop.setProperty(httpHeader.CONNECTION_PROP_PATH, "/" + args);
+                */
+                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, args);
+                prop.setProperty(httpHeader.CONNECTION_PROP_PATH, "/");            	
             } else {
                 // THIS IS THE "GOOD" CASE
                 // a perfect formulated url
@@ -657,6 +661,14 @@ public final class httpHeader extends TreeMap implements Map {
             }
         }
         return prop;
+    }    
+    
+    public static boolean supportChunkedEncoding(Properties conProp) {
+    	// getting the http version of the soap client
+    	String httpVer = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER); 
+    	
+    	// only clients with http version 1.1 supports chunk
+        return !(httpVer.equals(httpHeader.HTTP_VERSION_0_9) || httpVer.equals(httpHeader.HTTP_VERSION_1_0));
     }    
     
     /**

@@ -45,7 +45,14 @@
 
 package de.anomic.soap;
 
+import javax.xml.namespace.QName;
+
+import org.apache.axis.AxisFault;
+import org.apache.axis.Constants;
 import org.apache.axis.Message;
+import org.apache.axis.MessageContext;
+import org.apache.axis.message.SOAPEnvelope;
+import org.apache.axis.message.SOAPFault;
 
 import de.anomic.http.httpHeader;
 
@@ -54,23 +61,41 @@ public class SoapException extends Exception {
     private static final long serialVersionUID = 1L;
     private int statusCode = 500;
     private String statusText = (String) httpHeader.http1_1.get(Integer.toString(this.statusCode));
-    private Object errorMsg = this.statusText;
+    private AxisFault fault = new AxisFault(this.statusText);
     
     public SoapException(int httpStatusCode, String httpStatusText, String errorMsg) {
-        super(httpStatusCode + " " + httpStatusText);
-                
         this.statusCode = httpStatusCode;
         this.statusText = httpStatusText;
-        this.errorMsg = errorMsg;    
+        this.fault = new AxisFault(errorMsg);    
     }
     
-    public SoapException(int httpStatusCode, String httpStatusText, Message errorMsg) {
+    public SoapException(int httpStatusCode, String httpStatusText, Exception e) {
         super(httpStatusCode + " " + httpStatusText);
-                
+        
         this.statusCode = httpStatusCode;
-        this.statusText = httpStatusText;
-        this.errorMsg = errorMsg; 
-    }    
+        this.statusText = httpStatusText;    	
+        
+        // convert the exception into an axisfault
+        this.fault = AxisFault.makeFault(e);
+    }
+    
+    public SoapException(AxisFault soapFault) {
+
+        QName faultCode = soapFault.getFaultCode();
+        if (Constants.FAULT_SOAP12_SENDER.equals(faultCode))  {
+        	this.statusCode = 400;
+        	this.statusText = "Bad request";
+        } else if ("Server.Unauthorized".equals(faultCode.getLocalPart()))  {
+        	this.statusCode = 401; 
+        	this.statusText = "Unauthorized";
+        } else {
+        	this.statusCode = 500; 
+        	this.statusText = "Internal server error";
+        }           
+        
+        // convert the exception into an axisfault
+        this.fault = soapFault; 
+    }
     
     public int getStatusCode() {
         return this.statusCode;
@@ -80,7 +105,28 @@ public class SoapException extends Exception {
         return this.statusText;
     }
     
-    public Object getErrorMsg() {
-        return this.errorMsg;
+    public Object getFault() {
+        return this.fault;
+    }
+    
+    public Message getFaultMessage(MessageContext msgContext) {
+    	Message responseMsg = msgContext.getResponseMessage();
+        if (responseMsg == null) {
+        	responseMsg = new Message(this.fault);
+        	responseMsg.setMessageContext(msgContext);
+        }  else  {
+            try {
+                SOAPEnvelope env = responseMsg.getSOAPEnvelope();
+                env.clearBody();
+                env.addBodyElement(new SOAPFault(this.fault));
+            } catch (AxisFault e)  {
+                // Should never reach here!
+            }
+        }     
+        return responseMsg;
+    }    
+    
+    public String getMessage() {
+    	return this.statusCode + " " + this.statusText;
     }
 }

@@ -47,42 +47,39 @@ package de.anomic.soap;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPException;
 
 import org.apache.axis.AxisFault;
-import org.apache.axis.Constants;
 import org.apache.axis.EngineConfiguration;
 import org.apache.axis.Message;
 import org.apache.axis.MessageContext;
 import org.apache.axis.WSDDEngineConfiguration;
 import org.apache.axis.deployment.wsdd.WSDDDeployment;
 import org.apache.axis.deployment.wsdd.WSDDDocument;
-import org.apache.axis.message.SOAPEnvelope;
-import org.apache.axis.message.SOAPFault;
 import org.apache.axis.server.AxisServer;
 import org.apache.axis.utils.XMLUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import de.anomic.http.httpChunkedInputStream;
+import de.anomic.http.httpChunkedOutputStream;
 import de.anomic.http.httpContentLengthInputStream;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
+import de.anomic.http.httpd;
 import de.anomic.http.httpdAbstractHandler;
 import de.anomic.http.httpdHandler;
 import de.anomic.plasma.plasmaParser;
@@ -298,6 +295,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
          * Handle TRANSFER ENCODING
          * =========================================================================== */
         if (transferEncoding != null && !transferEncoding.equalsIgnoreCase("identity")) {
+        	// read using transfer encoding
             if (transferEncoding.equalsIgnoreCase("chunked")) {
                 input = new httpChunkedInputStream(body);
             } else {         
@@ -306,8 +304,10 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
                 throw new SoapException(501,"Not Implemented",errorMsg);
             }
         } else if (contentLength > 0) {
+        	// read contentLength bytes
             input = new httpContentLengthInputStream(body,contentLength);
         } else {
+        	// read until EOF
             input = body;
         }
         
@@ -325,7 +325,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
                 }
             }
         } catch (IOException e) {
-            throw new SoapException(400,"Bad Request",e.getMessage());
+            throw new SoapException(400,"Bad Request",e);
         }
         
         return input;
@@ -340,8 +340,8 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
      * 
      * @see de.anomic.http.httpdHandler#doHead(java.util.Properties, de.anomic.http.httpHeader, java.io.OutputStream)
      */
-    public void doHead(Properties conProp, httpHeader header, OutputStream clientOut) throws IOException {
-        sendMessage(clientOut, 501, "Not Implemented", "Connection method is not supported by this handler",null); 
+    public void doHead(Properties conProp, httpHeader requestHeader, OutputStream clientOut) throws IOException {
+        sendMessage(conProp, requestHeader, clientOut, 501, "Not Implemented", "Connection method is not supported by this handler",null); 
         conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
     }
     
@@ -357,7 +357,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
      * @see de.anomic.http.httpdHandler#doConnect(java.util.Properties, de.anomic.http.httpHeader, java.io.InputStream, java.io.OutputStream)
      */
     public void doConnect(Properties conProp, httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) throws IOException {
-        sendMessage(clientOut, 501, "Not Implemented", "Connection method is not supported by this handler",null);
+        sendMessage(conProp, requestHeader, clientOut, 501, "Not Implemented", "Connection method is not supported by this handler",null);
         conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
     }        
     
@@ -374,18 +374,14 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
      * @see de.anomic.http.httpdHandler#doGet(java.util.Properties, de.anomic.http.httpHeader, java.io.OutputStream)
      */
     public void doGet(Properties conProp, httpHeader requestHeader, OutputStream response) throws IOException {
+    	MessageContext msgContext = null;
         String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
         try {
-            MessageContext msgContext = this.generateMessageContext(path, requestHeader, conProp);
+        	// generating message context
+            msgContext = this.generateMessageContext(path, requestHeader, conProp);
             
-            Document doc = null;
-            try {
-                engine.generateWSDL(msgContext);
-                doc = (Document) msgContext.getProperty("WSDL");
-            } catch (AxisFault ex) {
-                Message errorMsg = faultToMessage(null, msgContext, ex);
-                throw new SoapException(500,"Unable to generate WSDL",errorMsg);
-            }
+            // generating wsdl file
+            Document doc = generateWSDL(msgContext);
             
             if (doc != null) {
                 // Converting the the wsdl document into a byte-array
@@ -393,30 +389,22 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
                 byte[] result = responseDoc.getBytes("UTF-8");
                 
                 // send back the result
-                sendMessage(response, 200, "OK", "text/xml; charset=utf-8", result);
+                sendMessage(conProp, requestHeader, response, 200, "OK", "text/xml; charset=utf-8", result);
                 
-                if (!(requestHeader.get("Connection", "close").equals("keep-alive"))) {
+                if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {
                     // wait a little time until everything closes so that clients can read from the streams/sockets
                     try {Thread.currentThread().join(200);} catch (InterruptedException e) {/* ignore this */}
                   }
             } else {
                 // if we where unable to generate the wsdl file ....
                 String errorMsg = "Internal Server Error: Unable to generate the WSDL file.";
-                sendMessage(response, 500, "Internal Error", "text/plain",errorMsg.getBytes("UTF-8"));            
+                sendMessage(conProp, requestHeader, response, 500, "Internal Error", "text/plain",errorMsg.getBytes("UTF-8"));            
             }
             
             return;
-        } catch (SoapException e) {
-            try {
-                sendSoapException(response, e);
-            } catch (Exception ex) {                
-                this.theLogger.logSevere("Unexpected Exception while sending error message",e);
-            } finally {
-                conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");                
-            }
         } catch (Exception e) {
-            conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
-            this.theLogger.logSevere("Unexpected Exception with query: " + path,e);            
+        	// handle error
+        	handleException(conProp,requestHeader,msgContext,response,e);        	
         }
         
     }
@@ -428,11 +416,11 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
      * @param response {@link OutputStream} to the client
      * @param body the request body containing the SOAP message
      * 
-     * @throws IOException 
-     * 
      * @see de.anomic.http.httpdHandler#doPost(java.util.Properties, de.anomic.http.httpHeader, java.io.OutputStream, java.io.PushbackInputStream)
      */
-    public void doPost(Properties conProp, httpHeader requestHeader, OutputStream response, PushbackInputStream body) throws IOException {
+    public void doPost(Properties conProp, httpHeader requestHeader, OutputStream response, PushbackInputStream body) {
+    	
+    	MessageContext msgContext = null;
         String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
         try {            
             /* ========================================================================
@@ -442,7 +430,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
             InputStream bodyStream = getBodyInputStream(requestHeader, body);
             
             // generating the SOAP message context that will be passed over to the invoked service
-            MessageContext msgContext = this.generateMessageContext(path, requestHeader, conProp);
+            msgContext = this.generateMessageContext(path, requestHeader, conProp);
             
             // Generating a SOAP Request Message Object
             String mime = plasmaParser.getRealMimeType(requestHeader.mime()); // this is important !!!!
@@ -461,84 +449,69 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
             Message responseMsg = this.invokeService(msgContext);
             
             if (responseMsg != null) {
-                sendMessage(response, 200, "OK", responseMsg);
+                sendMessage(conProp, requestHeader, response, 200, "OK", responseMsg);
             } else {
-                sendMessage(response, 202, "Accepted", "text/plain", null);          
+                sendMessage(conProp, requestHeader, response, 202, "Accepted", "text/plain", null);          
             }
             
             return;
-        } catch (SoapException e) {
-            try {
-                sendSoapException(response, e);
-            } catch (Exception ex) {                
-                this.theLogger.logSevere("Unexpected Exception while sending error message",e);
-            } finally {
-                conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");                
-            }
         } catch (Exception e) {
-            conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
-            this.theLogger.logSevere("Unexpected Exception",e);
+        	// handle error
+        	handleException(conProp, requestHeader, msgContext, response,e);
         }
     }
     
+    private void handleException(Properties conProp, httpHeader requestHeader, MessageContext messageContext, OutputStream response, Exception e) {
+    	try {
+    		Message soapErrorMsg = null;
+    		
+    		if (!conProp.containsKey(httpHeader.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
+    			SoapException soapEx = null;
+    			if (!(e instanceof SoapException)) {
+    				soapEx = new SoapException(500,"internal server error",e);
+    			} else {
+    				soapEx = (SoapException) e;
+    			}
+    			// generating a soap error message
+    			soapErrorMsg = soapEx.getFaultMessage(messageContext);
+    			
+    			// send error message back to the client
+    			sendMessage(conProp,requestHeader,response,soapEx.getStatusCode(),soapEx.getStatusText(),soapErrorMsg);
+    		} else {
+    			this.theLogger.logSevere("Unexpected Exception while sending data to client",e);
+    		}
+		} catch (Exception ex) {                
+			this.theLogger.logSevere("Unexpected Exception while sending error message",e);
+		} finally {
+			conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");                
+		}
+    }
+    
+    private Document generateWSDL(MessageContext msgContext) throws SoapException {
+        try {
+            engine.generateWSDL(msgContext);
+            Document doc = (Document) msgContext.getProperty("WSDL");
+            return doc;
+        } catch (Exception ex) {
+        	if (ex instanceof AxisFault) throw new SoapException((AxisFault)ex);
+            throw new SoapException(500,"Unable to generate WSDL",ex);
+        }    	
+    }
+    
     protected Message invokeService(MessageContext msgContext) throws SoapException {
-        
-        int    invocationStatusCode = 200;
-        String invocationStatusText = "OK";
         try {
             // invoke the service
             engine.invoke(msgContext);
     
             // Retrieve the response from Axis
             return msgContext.getResponseMessage();                  
-        } catch (Exception ex) {
-            Message errorMsg;
-            AxisFault soapFault;
-            if (ex instanceof AxisFault) {
-                soapFault = (AxisFault) ex;
-                
-                QName faultCode = soapFault.getFaultCode();
-                if (Constants.FAULT_SOAP12_SENDER.equals(faultCode))  {
-                    invocationStatusCode = 400;
-                    invocationStatusText = "Bad request";
-                } else if ("Server.Unauthorized".equals(faultCode.getLocalPart()))  {
-                    invocationStatusCode = 401; 
-                    invocationStatusText = "Unauthorized";
-                } else {
-                    invocationStatusCode = 500; 
-                    invocationStatusText = "Internal server error";
-                }                    
-            } else {                 
-                invocationStatusCode = 500; 
-                invocationStatusText = "Internal server error";
-                soapFault = AxisFault.makeFault(ex);
-            }
-            
-            // There may be headers we want to preserve in the
-            // response message - so if it's there, just add the
-            // FaultElement to it. Otherwise, make a new one.
-            errorMsg = msgContext.getResponseMessage();
-            errorMsg = faultToMessage(errorMsg, msgContext, soapFault);
-            throw new SoapException(invocationStatusCode,invocationStatusText,errorMsg);
+        } catch (Exception ex) {        	
+            if (ex instanceof AxisFault) throw new SoapException((AxisFault)ex);
+			throw new SoapException(500,"Unable to invoke service",ex);
         }
     }
     
-    protected Message faultToMessage(Message errorMsg, MessageContext msgContext, AxisFault soapFault) {
-        Message theErrorMsg = errorMsg;
-        if (theErrorMsg == null) {
-            theErrorMsg = new Message(soapFault);
-            theErrorMsg.setMessageContext(msgContext);
-        }  else  {
-            try {
-                SOAPEnvelope env = theErrorMsg.getSOAPEnvelope();
-                env.clearBody();
-                env.addBodyElement(new SOAPFault(soapFault));
-            } catch (AxisFault fault)  {
-                // Should never reach here!
-            }
-        }     
-        return theErrorMsg;
-    }
+
 
     /**
      * This function deplays all java classes that should be available via SOAP call.
@@ -636,8 +609,9 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
             msgContext.setTargetService(serviceName);
             
             return msgContext;
-        } catch (AxisFault e) {
-            throw new SoapException(500,"Unable to set the target service",e.getMessage());
+        } catch (Exception e) {
+        	if (e instanceof AxisFault) throw new SoapException((AxisFault)e);
+			throw new SoapException(500,"Unable to generate message context",e);
         }
     }
     
@@ -666,79 +640,102 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         return result;
         }    
     
-    protected void sendSoapException(OutputStream out, SoapException e) throws UnsupportedEncodingException, IOException, SOAPException {
-        Object errorMsg = e.getErrorMsg();
-        String contentType = null;
-
-        // getting the error message body and content length
-        ByteArrayOutputStream bout = new ByteArrayOutputStream(); 
-        if (errorMsg instanceof String) {
-            bout.write(((String)errorMsg).getBytes("UTF-8"));  
-            contentType = "text/plain; charset=UTF-8";
-        } else {
-            Message soapErrorMsg = (Message)errorMsg;
-            soapErrorMsg.writeTo(bout);
-            contentType = soapErrorMsg.getContentType(soapErrorMsg.getMessageContext().getSOAPConstants());
-        }
-
-        // send out the message
-        sendMessage(out, e.getStatusCode(), e.getStatusText(), contentType, bout.toByteArray());
-    }
+//    protected void sendException(Properties conProp, OutputStream out, Exception e) throws UnsupportedEncodingException, IOException, SOAPException {
+//    	
+//    	Message soapErrorMsg = null;
+//    	if (e instanceof SoapException) {
+//    		Object errorMsg = ((SoapException)e).getErrorMsg();
+//    		String contentType = null;
+//    		
+//    		// getting the error message body and content length
+//    		ByteArrayOutputStream bout = new ByteArrayOutputStream(); 
+//    		if (errorMsg instanceof String) {
+//    			bout.write(((String)errorMsg).getBytes("UTF-8"));  
+//    			contentType = "text/plain; charset=UTF-8";
+//    		} else {
+//    			Message soapErrorMsg = (Message)errorMsg;
+//    			soapErrorMsg.writeTo(bout);
+//    			contentType = soapErrorMsg.getContentType(soapErrorMsg.getMessageContext().getSOAPConstants());
+//    		}
+//    	}
+//
+//        // send out the message
+//        sendMessage(conProp, out, e.getStatusCode(), e.getStatusText(), contentType, bout.toByteArray());
+//    }
     
-    protected void sendMessage(OutputStream out, int statusCode, String statusText, String contentType, byte[] MessageBody) throws IOException {
+    protected void sendMessage(Properties conProp, httpHeader requestHeader, OutputStream out, int statusCode, String statusText, String contentType, byte[] MessageBody) throws IOException {
         // write out the response header
-        respondHeader(out, statusCode, statusText, (MessageBody==null)?null:contentType, (MessageBody==null)?-1:MessageBody.length);
+        respondHeader(conProp, out, statusCode, statusText, (MessageBody==null)?null:contentType, (MessageBody==null)?-1:MessageBody.length, null, null);
         
         // write the message body
         if (MessageBody != null) out.write(MessageBody);
         out.flush();
     }
-    
-    protected void sendMessage(OutputStream out, int statusCode, String statusText, Message soapMessage) throws IOException, SoapException {
-        // getting the content body
-        ByteArrayOutputStream bout = new ByteArrayOutputStream(); 
         
-        try {
-            soapMessage.writeTo(bout);
-        } catch (SOAPException e) {
-            throw new SoapException(500,"Unable to externalize SOAP message",e.getMessage());
-        }
-        
+    protected void sendMessage(Properties conProp, httpHeader requestHeader, OutputStream out, int statusCode, String statusText, Message soapMessage) throws IOException, SOAPException {
+    	httpChunkedOutputStream chunkedOut = null;
+    	GZIPOutputStream gzipOut = null;
+    	OutputStream bodyOut = out;
+    	
         // getting the content type
-        String contentType = null;
-        try {
-        	contentType = soapMessage.getContentType(soapMessage.getMessageContext().getSOAPConstants());
-        } catch (AxisFault e) {
-            throw new SoapException(500,"Unable to get content-type for SOAP message",e.getMessage());
-        }
+        String contentType = soapMessage.getContentType(soapMessage.getMessageContext().getSOAPConstants());
+
+        // getting the content length
+        String transferEncoding = null;
+        String contentEncoding = null;
+        long contentLength = -1;
         
-        // sending the message
-        sendMessage(out, statusCode, statusText, contentType, bout.toByteArray());
+        if (httpHeader.supportChunkedEncoding(conProp)) {
+        	transferEncoding = "chunked";        	
+        } else {
+        	contentLength = soapMessage.getContentLength();
+        }
+        if (requestHeader.acceptGzip()) {
+        	contentEncoding = "gzip";        	
+        }
+        	
+        // sending the soap header
+        respondHeader(conProp, out, statusCode, statusText, contentType, contentLength, contentEncoding, transferEncoding);
+
+        if (transferEncoding != null) bodyOut = chunkedOut = new httpChunkedOutputStream(bodyOut);
+        if (contentEncoding != null) bodyOut = gzipOut = new GZIPOutputStream(bodyOut);
+        
+        // sending the body        
+        soapMessage.writeTo(bodyOut);            
+        bodyOut.flush();
+        
+        if (gzipOut != null) {
+        	gzipOut.flush();
+        	gzipOut.finish();
+        }
+        if (chunkedOut != null) {
+            chunkedOut.finish();
+        }
     }
     
-    /**
-     * This method was copied from {@link httpdFileHandler}. Maybe it would be a good idea
-     * to move this function up into {@link httpdAbstractHandler} 
-     * 
-     * @param out the {@link OutputStream} to the client
-     * @param retcode the http code 
-     * @param conttype the content type and encoding
-     * @param contlength the content length
-     * @throws IOException
-     */
-    protected void respondHeader(OutputStream out, int retcode, String returnStatus, String conttype, long contlength) throws IOException {
-        try {
-            out.write(("HTTP/1.1 " + retcode + " " + returnStatus + "\r\n").getBytes());
-            out.write(("Server: AnomicHTTPD (www.anomic.de)\r\n").getBytes());
-            out.write(("Date: " + httpc.dateString(httpc.nowDate()) + "\r\n").getBytes());
-            if (conttype != null) out.write((httpHeader.CONTENT_TYPE +  ": " + conttype + "\r\n").getBytes());
-            if (contlength != -1) out.write((httpHeader.CONTENT_LENGTH + ": " + contlength +"\r\n").getBytes());
-            out.write(("\r\n").getBytes());
-            out.flush();
-        } catch (Exception e) {
-            // any interruption may be caused be network error or because the user has closed
-            // the windows during transmission. We simply pass it as IOException
-            throw new IOException(e.getMessage());
-        }
+    
+    
+    protected void respondHeader(
+    		Properties conProp,
+    		OutputStream respond, 
+    		int httpStatusCode, 
+    		String httpStatusText, 
+    		String conttype, 
+    		long contlength,
+    		String contentEncoding,
+    		String transferEncoding
+    ) throws IOException {
+    	httpHeader outgoingHeader = new httpHeader();
+    	outgoingHeader.put(httpHeader.SERVER,"AnomicHTTPD (www.anomic.de)");
+    	if (conttype != null) outgoingHeader.put(httpHeader.CONTENT_TYPE,conttype); 
+    	if (contlength != -1) outgoingHeader.put(httpHeader.CONTENT_LENGTH, Long.toString(contlength)); 
+        if (contentEncoding != null) outgoingHeader.put(httpHeader.CONTENT_ENCODING, contentEncoding);
+        if (transferEncoding != null) outgoingHeader.put(httpHeader.TRANSFER_ENCODING, transferEncoding);    	
+    	
+    	// getting the http version of the soap client
+    	String httpVer = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);     	
+    	
+    	// sending http headers
+    	httpd.sendRespondHeader(conProp,respond,httpVer,httpStatusCode,httpStatusText,outgoingHeader);
     }     
 }

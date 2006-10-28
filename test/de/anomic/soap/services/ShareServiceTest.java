@@ -1,7 +1,6 @@
 package de.anomic.soap.services;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.Date;
 
 import javax.activation.DataHandler;
@@ -15,10 +14,9 @@ import org.apache.axis.client.Stub;
 import org.apache.axis.utils.XMLUtils;
 import org.w3c.dom.Document;
 
-import de.anomic.server.serverFileUtils;
-
 import yacy.soap.share.ShareService;
 import yacy.soap.share.ShareServiceServiceLocator;
+import de.anomic.server.serverFileUtils;
 
 public class ShareServiceTest extends AbstractServiceTest {
 

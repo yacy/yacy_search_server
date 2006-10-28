@@ -4,15 +4,16 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.rmi.Remote;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import javax.xml.rpc.ServiceException;
 
-import org.apache.axis.client.Stub;
-
-import yacy.soap.status.StatusService;
-import yacy.soap.status.StatusServiceServiceLocator;
 import junit.framework.TestCase;
+
+import org.apache.axis.MessageContext;
+import org.apache.axis.client.Stub;
+import org.apache.axis.transport.http.HTTPConstants;
 
 public abstract class AbstractServiceTest extends TestCase {
 	protected static final String SOAP_HEADER_NAMESPACE = "http://http.anomic.de/header";
@@ -23,7 +24,7 @@ public abstract class AbstractServiceTest extends TestCase {
 	protected static Remote service;
 	
 	protected void setUp() throws Exception {
-		if (peerPort == null) this.loadConfigProperties();
+		this.loadConfigProperties();
 		super.setUp();
 	}
 	
@@ -57,6 +58,14 @@ public abstract class AbstractServiceTest extends TestCase {
 			
 			// setting the authentication header
 			((Stub)service).setHeader(SOAP_HEADER_NAMESPACE,SOAP_HEADER_AUTHORIZATION,authString);
+			
+			// configure axis to use HTTP 1.1
+			((Stub)service)._setProperty(MessageContext.HTTP_TRANSPORT_VERSION,HTTPConstants.HEADER_PROTOCOL_V11);
+			
+			// configure axis to use chunked transfer encoding
+			Hashtable userHeaderTable = new Hashtable();
+			userHeaderTable.put(HTTPConstants.HEADER_TRANSFER_ENCODING, HTTPConstants.HEADER_TRANSFER_ENCODING_CHUNKED);
+			((Stub)service)._setProperty(HTTPConstants.REQUEST_HEADERS,userHeaderTable);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

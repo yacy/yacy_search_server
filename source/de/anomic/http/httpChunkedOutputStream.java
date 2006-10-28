@@ -47,7 +47,7 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-final class httpChunkedOutputStream extends FilterOutputStream
+public final class httpChunkedOutputStream extends FilterOutputStream
 {
     private boolean finished = false;
     private static final byte[] crlf = {(byte)13,(byte)10};    

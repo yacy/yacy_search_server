@@ -158,7 +158,15 @@ public class ShareService extends AbstractService {
     private File getWorkingFile(File workingDir, String workingFileName) throws AxisFault, IOException {
     	if (workingDir == null) throw new NullPointerException("Working dir is null");
     	
+    	// getting file-share directory
     	File share = getShareDir();
+    	
+    	// check filename for illegal characters
+    	if (workingFileName != null) {
+    		if ((workingFileName.indexOf("/") != -1) || (workingFileName.indexOf("/") != -1))
+    			throw new AxisFault("Filename contains illegal characters.");    			
+    	}
+    	
         File workingFile = (workingFileName==null)?workingDir:new File(workingDir, workingFileName);
         
     	if (workingFile.getAbsolutePath().length() > serverSystem.maxPathLength) 

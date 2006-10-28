@@ -256,7 +256,7 @@ public final class httpd implements serverHandler {
         // afterwards. In HTTP/1.1 (and above, in the future?) connections are
         // persistent by default, but closed with the "Connection: close"
         // property.
-        boolean persistent = !(httpVersion.equals("HTTP/0.9") || httpVersion.equals("HTTP/1.0"));
+        boolean persistent = !(httpVersion.equals(httpHeader.HTTP_VERSION_0_9) || httpVersion.equals(httpHeader.HTTP_VERSION_1_0));
         if (((String)header.get(httpHeader.CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1 || 
             ((String)header.get(httpHeader.PROXY_CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1) {
             persistent = false;
@@ -1279,7 +1279,7 @@ public final class httpd implements serverHandler {
         
         if (respond == null) throw new NullPointerException("The outputstream must not be null.");
         if (conProp == null) throw new NullPointerException("The connection property structure must not be null.");
-        if (httpVersion == null) httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER,"HTTP/1.1");
+        if (httpVersion == null) httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER,httpHeader.HTTP_VERSION_1_1);
         if (header == null) header = new httpHeader();
         
         try {                        
@@ -1294,7 +1294,7 @@ public final class httpd implements serverHandler {
             StringBuffer headerStringBuffer = new StringBuffer(560);
             
             // "HTTP/0.9" does not have a status line or header in the response
-            if (! httpVersion.toUpperCase().equals("HTTP/0.9")) {                
+            if (! httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_0_9)) {                
                 // write status line
                 headerStringBuffer.append(httpVersion).append(" ")
                                   .append(Integer.toString(httpStatusCode)).append(" ")
