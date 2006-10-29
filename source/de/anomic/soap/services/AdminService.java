@@ -68,11 +68,13 @@ public class AdminService extends AbstractService {
 	 * Used Plasmaswitchboard config properties
 	 * ===================================================================== */
 	private static final String _10_HTTPD = "10_httpd";	
-	private static final String _62_REMOTETRIGGEREDCRAWL_BUSYSLEEP = "62_remotetriggeredcrawl_busysleep";
-	private static final String _62_REMOTETRIGGEREDCRAWL = "62_remotetriggeredcrawl";
+	private static final String RESTART = "restart";
+	
+	// peer properties
 	private static final String PORT = "port";
 	private static final String PEER_NAME = "peerName";	
-	private static final String RESTART = "restart";
+	
+	// remote proxy properties
 	private static final String REMOTE_PROXY_USE = "remoteProxyUse";	
 	private static final String REMOTE_PROXY_USE4SSL = "remoteProxyUse4SSL";
 	private static final String REMOTE_PROXY_USE4YACY = "remoteProxyUse4Yacy";
@@ -81,11 +83,23 @@ public class AdminService extends AbstractService {
 	private static final String REMOTE_PROXY_USER = "remoteProxyUser";
 	private static final String REMOTE_PROXY_PORT = "remoteProxyPort";
 	private static final String REMOTE_PROXY_HOST = "remoteProxyHost";
+	
+	// remote triggered crawl properties
 	private static final String CRAWL_RESPONSE = "crawlResponse";
+	private static final String _62_REMOTETRIGGEREDCRAWL_BUSYSLEEP = "62_remotetriggeredcrawl_busysleep";
+	private static final String _62_REMOTETRIGGEREDCRAWL = "62_remotetriggeredcrawl";
+	
+	// index transfer properties
 	private static final String INDEX_RECEIVE_BLOCK_BLACKLIST = "indexReceiveBlockBlacklist";
 	private static final String ALLOW_RECEIVE_INDEX = "allowReceiveIndex";
 	private static final String ALLOW_DISTRIBUTE_INDEX_WHILE_CRAWLING = "allowDistributeIndexWhileCrawling";
 	private static final String ALLOW_DISTRIBUTE_INDEX = "allowDistributeIndex";
+	
+	// message forwarding properties
+	private static final String MSG_FORWARDING_TO = "msgForwardingTo";
+	private static final String MSG_FORWARDING_CMD = "msgForwardingCmd";
+	private static final String MSG_FORWARDING_ENABLED = "msgForwardingEnabled";
+	private static final String MSG_FORWARDING = "msgForwarding";
 	
 	
 	/* =====================================================================
@@ -473,7 +487,7 @@ public class AdminService extends AbstractService {
     
     public Document getTransferProperties() throws AxisFault, ParserConfigurationException {    	
         // extracting the message context
-        extractMessageContext(true);         	
+        extractMessageContext(AUTHENTICATION_NEEDED);         	
     	
         // creating XML document
         Element xmlElement = null;
@@ -494,6 +508,77 @@ public class AdminService extends AbstractService {
     	
     	xmlElement = xmlDoc.createElement(INDEX_RECEIVE_BLOCK_BLACKLIST);
     	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(this.switchboard.getConfigBool(INDEX_RECEIVE_BLOCK_BLACKLIST,true))));
+    	xmlRoot.appendChild(xmlElement);       	
+    	
+    	return xmlDoc;
+    }
+    
+    /**
+     * 
+     * @param enableForwarding
+     * @param forwardingCommand
+     * @param forwardingTo
+     * @throws AxisFault
+     * 
+     * @link <a href="http://localhost:8080/Settings_p.html?page=messageForwarding">Peer Configuration - Message Forwarding</a>
+     */
+    public void setMessageForwarding(
+    		Boolean enableForwarding,
+    		String forwardingCommand,
+    		String forwardingTo
+    )  throws AxisFault {
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);       
+        
+        // index Distribution on/off
+        if (enableForwarding != null) {
+        	this.switchboard.setConfig(MSG_FORWARDING_ENABLED, enableForwarding.toString());
+        }    
+        
+        if (forwardingCommand != null) {
+        	this.switchboard.setConfig(MSG_FORWARDING_CMD, forwardingCommand);
+        }    
+        
+        if (forwardingTo != null) {
+        	this.switchboard.setConfig(MSG_FORWARDING_TO, forwardingTo);
+        }           
+    }
+    
+    /**
+     * 
+     * @return a XML document of the following format
+     * <pre>
+     * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+     * &lt;msgForwarding&gt;
+     *   &lt;msgForwardingEnabled&gt;false&lt;/msgForwardingEnabled&gt;
+     *   &lt;msgForwardingCmd&gt;/usr/sbin/sendmail&lt;/msgForwardingCmd&gt;
+     *   &lt;msgForwardingTo&gt;root@localhost&lt;/msgForwardingTo&gt;
+     * &lt;/msgForwarding&gt;
+     * </pre>
+     * @throws AxisFault
+     * @throws ParserConfigurationException
+     * 
+     * @link <a href="http://localhost:8080/Settings_p.html?page=messageForwarding">Peer Configuration - Message Forwarding</a>
+     */
+    public Document getMessageForwarding() throws AxisFault, ParserConfigurationException {
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);     
+        
+        // creating XML document
+        Element xmlElement = null;
+    	Document xmlDoc = createNewXMLDocument(MSG_FORWARDING);
+    	Element xmlRoot = xmlDoc.getDocumentElement();        
+    	
+    	xmlElement = xmlDoc.createElement(MSG_FORWARDING_ENABLED);
+    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(this.switchboard.getConfigBool(MSG_FORWARDING_ENABLED,false))));
+    	xmlRoot.appendChild(xmlElement);    	
+    	
+    	xmlElement = xmlDoc.createElement(MSG_FORWARDING_CMD);
+    	xmlElement.appendChild(xmlDoc.createTextNode(this.switchboard.getConfig(MSG_FORWARDING_CMD,"")));
+    	xmlRoot.appendChild(xmlElement);       	
+    	
+    	xmlElement = xmlDoc.createElement(MSG_FORWARDING_TO);
+    	xmlElement.appendChild(xmlDoc.createTextNode(this.switchboard.getConfig(MSG_FORWARDING_TO,"")));
     	xmlRoot.appendChild(xmlElement);       	
     	
     	return xmlDoc;

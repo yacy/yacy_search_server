@@ -122,7 +122,7 @@ public class BlacklistService extends AbstractService {
 		
 		// check if the blacklist already exists
 		if (blacklistExists(blacklistName))
-			throw new AxisFault("Blacklist with name '" + blacklistName + "' already exist.");		
+			throw new AxisFault("Blacklist with name '" + blacklistName + "' already exist.");
 		
         // creating the new file
 		createBlacklistFile(blacklistName);
