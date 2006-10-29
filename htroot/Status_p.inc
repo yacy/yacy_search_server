@@ -1,6 +1,6 @@
 <table class="StatusTable">
   <tr class="TableHeader">
-    <td colspan="3"><b>Private System Properties</b></td>
+    <td colspan="3"><strong>Private System Properties</strong></td>
   </tr>
   <tr class="TableCellLight">
     <td>System Resources</td>
@@ -11,7 +11,7 @@
     <td>Protection</td>
     <td>
       #(protection)#
-      <b>Your settings are _not_ protected!</b> Please go to the <a href="Settings_p.html?page=admin">settings</a> page <b>immediately</b> and set an administration password.
+      <strong>Your settings are _not_ protected!</strong> Please go to the <a href="Settings_p.html?page=admin">settings</a> page <strong>immediately</strong> and set an administration password.
       ::
       Your settings are protected by a password.
       #(/protection)#
