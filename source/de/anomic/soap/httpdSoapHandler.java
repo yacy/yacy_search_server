@@ -466,6 +466,8 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     		Message soapErrorMsg = null;
     		
     		if (!conProp.containsKey(httpHeader.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
+    			// if no header was send until now we can send back an error message
+    			
     			SoapException soapEx = null;
     			if (!(e instanceof SoapException)) {
     				soapEx = new SoapException(500,"internal server error",e);
@@ -480,9 +482,11 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     		} else {
     			this.theLogger.logSevere("Unexpected Exception while sending data to client",e);
     		}
-		} catch (Exception ex) {                
+		} catch (Exception ex) {
+			// the http response header was already send. Just log the error
 			this.theLogger.logSevere("Unexpected Exception while sending error message",e);
 		} finally {
+			// force connection close
 			conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");                
 		}
     }
@@ -623,45 +627,22 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
      * @return a hasmap containing all templates 
      */
     private static HashMap loadTemplates(File path) {
-        // reads all templates from a path
-        // we use only the folder from the given file path
-        HashMap result = new HashMap();
-        if (path == null) return result;
-        if (!(path.isDirectory())) path = path.getParentFile();
-        if ((path == null) || (!(path.isDirectory()))) return result;
-        String[] templates = path.list();
-        for (int i = 0; i < templates.length; i++) {
-            if (templates[i].endsWith(".template")) try {
-            //System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));
-            result.put(templates[i].substring(0, templates[i].length() - 9),
-                               new String(serverFileUtils.read(new File(path, templates[i])), "UTF-8"));
-            } catch (Exception e) {}
-        }
-        return result;
-        }    
-    
-//    protected void sendException(Properties conProp, OutputStream out, Exception e) throws UnsupportedEncodingException, IOException, SOAPException {
-//    	
-//    	Message soapErrorMsg = null;
-//    	if (e instanceof SoapException) {
-//    		Object errorMsg = ((SoapException)e).getErrorMsg();
-//    		String contentType = null;
-//    		
-//    		// getting the error message body and content length
-//    		ByteArrayOutputStream bout = new ByteArrayOutputStream(); 
-//    		if (errorMsg instanceof String) {
-//    			bout.write(((String)errorMsg).getBytes("UTF-8"));  
-//    			contentType = "text/plain; charset=UTF-8";
-//    		} else {
-//    			Message soapErrorMsg = (Message)errorMsg;
-//    			soapErrorMsg.writeTo(bout);
-//    			contentType = soapErrorMsg.getContentType(soapErrorMsg.getMessageContext().getSOAPConstants());
-//    		}
-//    	}
-//
-//        // send out the message
-//        sendMessage(conProp, out, e.getStatusCode(), e.getStatusText(), contentType, bout.toByteArray());
-//    }
+    	// reads all templates from a path
+    	// we use only the folder from the given file path
+    	HashMap result = new HashMap();
+    	if (path == null) return result;
+    	if (!(path.isDirectory())) path = path.getParentFile();
+    	if ((path == null) || (!(path.isDirectory()))) return result;
+    	String[] templates = path.list();
+    	for (int i = 0; i < templates.length; i++) {
+    		if (templates[i].endsWith(".template")) try {
+    			//System.out.println("TEMPLATE " + templates[i].substring(0, templates[i].length() - 9) + ": " + new String(buf, 0, c));
+    			result.put(templates[i].substring(0, templates[i].length() - 9),
+    					new String(serverFileUtils.read(new File(path, templates[i])), "UTF-8"));
+    		} catch (Exception e) {}
+    	}
+    	return result;
+    }    
     
     protected void sendMessage(Properties conProp, httpHeader requestHeader, OutputStream out, int statusCode, String statusText, String contentType, byte[] MessageBody) throws IOException {
         // write out the response header
@@ -677,7 +658,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     	GZIPOutputStream gzipOut = null;
     	OutputStream bodyOut = out;
     	
-        // getting the content type
+        // getting the content type of the response
         String contentType = soapMessage.getContentType(soapMessage.getMessageContext().getSOAPConstants());
 
         // getting the content length
@@ -686,12 +667,22 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         long contentLength = -1;
         
         if (httpHeader.supportChunkedEncoding(conProp)) {
+        	// we use chunked transfer encoding
         	transferEncoding = "chunked";        	
         } else {
         	contentLength = soapMessage.getContentLength();
         }
         if (requestHeader.acceptGzip()) {
-        	contentEncoding = "gzip";        	
+        	// send the response gzip encoded
+        	contentEncoding = "gzip";      
+        	
+        	// we don't know the content length of the compressed body
+        	contentLength = -1;
+        	
+        	// if chunked transfer encoding is not used we need to close the connection
+        	if (!transferEncoding.equals("chunked")) {
+        		conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
+        	}
         }
         	
         // sending the soap header
