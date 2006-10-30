@@ -202,7 +202,7 @@ public class kelondroRowCollection {
     }
     
     public void addUnique(kelondroRow.Entry row) {
-        add(row.bytes(), 0, row.bytes().length);
+        addUnique(row.bytes(), 0, row.bytes().length);
     }
     
     public void addUnique(kelondroRow.Entry row, Date entryDate) {
@@ -210,10 +210,10 @@ public class kelondroRowCollection {
     }
 
     public void add(byte[] a) {
-        add(a, 0, a.length);
+        addUnique(a, 0, a.length);
     }
     
-    private final void add(byte[] a, int astart, int alength) {
+    private final void addUnique(byte[] a, int astart, int alength) {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + a;
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);

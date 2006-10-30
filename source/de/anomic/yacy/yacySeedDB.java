@@ -854,12 +854,14 @@ public final class yacySeedDB {
                 it = (firstKey == null) ? database.maps(up, rot) : database.maps(up, rot, firstKey);
                 nextSeed = internalNext();
             } catch (IOException e) {
-                yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                e.printStackTrace();
+                yacyCore.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
                 it = null;
             } catch (kelondroException e) {
-                yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                e.printStackTrace();
+                yacyCore.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
                 it = null;
@@ -872,7 +874,8 @@ public final class yacySeedDB {
                 it = database.maps(up, field);
                 nextSeed = internalNext();
             } catch (kelondroException e) {
-                yacyCore.log.logFine("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                e.printStackTrace();
+                yacyCore.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
                 if (database == seedPotentialDB) seedPotentialDB = resetSeedTable(seedPotentialDB, seedPotentialDBFile);

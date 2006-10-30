@@ -595,7 +595,8 @@ public class kelondroRecords {
         protected Node(Handle handle, byte[] bulkchunk, int offset) {
             // this initializer is used to create nodes from bulk-read byte arrays
             this.handle = handle;
-
+            assert (bulkchunk.length >= offset + headchunksize) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", headchunksize = " + headchunksize;
+            
             // create empty chunks
             this.headChunk = new byte[headchunksize];
             this.tailChunk = new byte[tailchunksize];
@@ -1008,7 +1009,7 @@ public class kelondroRecords {
             USAGE.write();
         }
     }
-
+    
     public final Iterator contentRows(long maxInitTime) throws kelondroException {
         return new contentRowIterator(maxInitTime);
     }
@@ -1029,7 +1030,8 @@ public class kelondroRecords {
 
         public Object next() {
             try {
-                return row().newEntry(((Node) nodeIterator.next()).getValueRow());
+                Node n = (Node) nodeIterator.next();
+                return row().newEntry(n.getValueRow(), n.handle.index);
             } catch (IOException e) {
                 throw new kelondroException(filename, e.getMessage());
             }
@@ -1121,7 +1123,7 @@ public class kelondroRecords {
             while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
             
             // initialize bulk
-            bulksize = Math.min(65536 / recordsize, USAGE.allCount());
+            bulksize = Math.max(1, Math.min(65536 / recordsize, USAGE.allCount()));
             bulkstart = -bulksize;
             bulk = new byte[bulksize * recordsize];
             next = (hasNext0()) ? next0() : null;
@@ -1148,6 +1150,7 @@ public class kelondroRecords {
                 byte[] key = nn.getKey();
                 if ((key == null) ||
                     ((key.length == 1) && (key[0] == (byte) 0x80)) || // the NUL pointer ('lost' chain terminator)
+                    ((key.length  > 3) && (key[0] == (byte) 0x80) && (key[1] == 0) && (key[2] == 0) && (key[3] == 0)) ||
                     ((key.length  > 0) && (key[0] == 0))              // a 'lost' pointer within a deleted-chain
                    ) {
                     // this is a deleted node; probably not commited with dispose

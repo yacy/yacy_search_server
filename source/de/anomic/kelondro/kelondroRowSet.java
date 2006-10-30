@@ -24,7 +24,6 @@
 
 package de.anomic.kelondro;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
@@ -83,7 +82,23 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return entry;
     }
     
-    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+    public void addUnique(kelondroRow.Entry row) {
+        if (removeMarker.size() == 0) {
+            super.addUnique(row);
+        } else {
+            this.put(row);
+        }
+    }
+    
+    public void addUnique(kelondroRow.Entry row, Date entryDate) {
+        if (removeMarker.size() == 0) {
+            super.addUnique(row, entryDate);
+        } else {
+            this.put(row, entryDate);
+        }
+    }
+    
+    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) {
         return put(row);
     }
     
@@ -100,7 +115,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
                 set(index, entry);
                 removeMarker.remove(new Integer(index));
             } else if (index < 0) {
-                addUnique(entry);
+                super.addUnique(entry);
             } else {
                 oldentry = get(index);
                 set(index, entry);

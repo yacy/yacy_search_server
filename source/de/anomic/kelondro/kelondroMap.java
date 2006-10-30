@@ -380,6 +380,7 @@ public class kelondroMap {
             }
             try {
                 final Map map = get(nextKey);
+                //assert (map != null) : "nextKey = " + nextKey;
                 if (map == null) throw new kelondroException("no more elements available");
                 map.put("key", nextKey);
                 return map;

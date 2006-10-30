@@ -128,6 +128,11 @@ public class kelondroRow {
         return new Entry(rowinstance);
     }
     
+    public EntryIndex newEntry(byte[] rowinstance, int index) {
+        if (rowinstance == null) return null;
+        return new EntryIndex(rowinstance, index);
+    }
+    
     public Entry newEntry(byte[] rowinstance, int start, int length) {
         if (rowinstance == null) return null;
         return new Entry(rowinstance, start, length);
@@ -142,12 +147,7 @@ public class kelondroRow {
         if (external == null) return null;
         return new Entry(external);
     }
-    /*
-    public Entry newEntry(Properties prop) {
-        if (prop == null) return null;
-        return new Entry(prop);
-    }
-    */
+
     public class Entry implements Comparable {
 
         private byte[] rowinstance;
@@ -207,19 +207,7 @@ public class kelondroRow {
                 }
             }
         }
-        /*
-        public Entry(Properties prop) {
-            // parse external form
-            if (nickref == null) genNickRef();
-            rowinstance = new byte[objectsize];
-            Iterator i = prop.entrySet().iterator();
-            Map.Entry entry;
-            while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                setCol(((String) entry.getKey()).trim(), ((String) entry.getValue()).trim().getBytes());
-            }
-        }
-        */
+
         public int compareTo(Object o) {
             if (o instanceof Entry) {
                 return kelondroNaturalOrder.naturalOrder.compare(this.rowinstance, ((Entry) o).rowinstance);
@@ -445,6 +433,17 @@ public class kelondroRow {
             return toPropertyForm(true, false, false);
         }
 
+    }
+    
+    public final class EntryIndex extends Entry {
+        private int index;
+        public EntryIndex(byte[] row, int i) {
+            super(row);
+            this.index = i;
+        }
+        public int index() {
+            return index;
+        }
     }
     
     public final static void long2bytes(long x, byte[] b, int offset, int length) {
