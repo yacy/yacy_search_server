@@ -68,7 +68,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
                 (dir[i].length() == tablename.length() + 7)) {
                 // open table
                 date = dir[i].substring(tablename.length() + 1);
-                this.tables.put(date, new kelondroCache(new kelondroFlexTable(path, dir[i], buffersize / count / 2, preloadTime, rowdef, objectOrder), buffersize / count / 2, true, true));
+                this.tables.put(date, new kelondroCache(new kelondroFlexTable(path, dir[i], buffersize / count / 2, preloadTime, rowdef, objectOrder), buffersize / count / 2, true, false));
             }
         }
     }

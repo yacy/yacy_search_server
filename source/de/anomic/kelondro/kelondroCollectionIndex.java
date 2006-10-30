@@ -178,7 +178,7 @@ public class kelondroCollectionIndex {
             long buffersize, long preloadTime,
             int loadfactor, kelondroRow rowdef) throws IOException {
         // open/create index table
-        kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", buffersize / 2, preloadTime, indexRow(), indexOrder), buffersize / 2, true, true);
+        kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", buffersize / 2, preloadTime, indexRow(), indexOrder), buffersize / 2, true, false);
 
         // save/check property file for this array
         File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize());

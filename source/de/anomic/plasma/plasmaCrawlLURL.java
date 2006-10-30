@@ -105,7 +105,7 @@ public final class plasmaCrawlLURL extends indexURL {
             } else {
                 File oldLURLDB = new File(plasmaPath, "urlHash.db");
                 oldLURLDB.getParentFile().mkdirs();
-                urlIndexFile = new kelondroCache(new kelondroTree(oldLURLDB, bufferkb / 2 * 0x400, preloadTime, plasmaCrawlLURLOldEntry.rowdef), bufferkb / 2 * 0x400, true, true);
+                urlIndexFile = new kelondroCache(new kelondroTree(oldLURLDB, bufferkb / 2 * 0x400, preloadTime, plasmaCrawlLURLOldEntry.rowdef), bufferkb / 2 * 0x400, true, false);
             }
         } catch (IOException e) {
             e.printStackTrace();
