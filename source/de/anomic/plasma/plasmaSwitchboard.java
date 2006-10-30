@@ -1724,6 +1724,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         }
                         storageEndTime = System.currentTimeMillis();
                         
+                        //increment number of indexed urls
+                		long indexedurls = getConfigLong("indexedc",0) + 1;
+                		setConfig("indexedc",indexedurls);
+                        
                         if (log.isInfo()) {
                             // TODO: UTF-8 docDescription seems not to be displayed correctly because
                             // of string concatenation

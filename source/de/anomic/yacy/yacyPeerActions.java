@@ -109,15 +109,11 @@ public class yacyPeerActions {
             seedDB.mySeed.put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
         }
         
-        long uptime = ((System.currentTimeMillis() - Long.parseLong(sb.getConfig("startupTime", "0"))) / 1000);
-		long uptimediff = uptime - Long.parseLong(sb.getConfig("lastseedcheckUptime", "0")); //TODO: Do not use the switchboard?
-		int indexing_cluster = Integer.parseInt(sb.getConfig("80_indexing_cluster", "1"));
-        if (indexing_cluster < 1) indexing_cluster = 1;
-        long indexedc = 0;
-        for(int i=0;i<indexing_cluster;++i)
-        	indexedc += sb.getThread((80+i)+"_indexing").getBusyCycles();
-		long indexedcdiff = indexedc - Long.parseLong(sb.getConfig("lastseedcheckIndexedc", "0"));
-		if( uptimediff > 300 || ((String)sb.getConfig("lastseedcheckUptime", "-1")).equals("-1") ){
+        long uptime = ((System.currentTimeMillis() - sb.getConfigLong("startupTime", 0)) / 1000);
+		long uptimediff = uptime - sb.getConfigLong("lastseedcheckUptime", 0); //TODO: Do not use the switchboard?
+		long indexedc = sb.getConfigLong("indexedc",0);
+		long indexedcdiff = indexedc - sb.getConfigLong("lastseedcheckIndexedc", 0);
+		if( uptimediff > 300 || sb.getConfigLong("lastseedcheckUptime", -1) == -1 ){
 			sb.setConfig("lastseedcheckUptime", uptime);
 			sb.setConfig("lastseedcheckIndexedc", indexedc);
 		}
