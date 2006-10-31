@@ -235,7 +235,7 @@ public class kelondroCache implements kelondroIndex {
         return (serverMemory.available() < 2000000);
     }
     
-    private void checkMissSpace() throws IOException {
+    private void checkMissSpace() {
         if ((readMissCache != null) &&
             ((readMissCache.size() >= maxmiss) || (shortMemory()))
            ) {readMissCache.clear(); readMissCache.trim();}
@@ -248,7 +248,7 @@ public class kelondroCache implements kelondroIndex {
         if (((s = sumRecords()) >= maxrecords) && (readHitCache != null)) {
             readHitCache.clear();
             readHitCache.trim();
-        };
+        }
         if (shortMemory()) {
             flushUnique();
             flushDoubles();

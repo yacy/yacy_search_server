@@ -752,7 +752,7 @@ public final class yacySeedDB {
     /**
      * @deprecated: Function seems to be unused
      */
-    public String copyCache(File seedFile, URL seedURL) throws IOException {
+    public String copyCache(File seedFile, URL seedURL) {
     	if (seedURL == null) return "COPY - Error: URL not given";
     	
     	try {
@@ -775,7 +775,7 @@ public final class yacySeedDB {
     	}
     }
 
-    private String checkCache(ArrayList uv, ArrayList check) throws IOException {                
+    private String checkCache(ArrayList uv, ArrayList check) {                
         if ((check == null) || (uv == null) || (uv.size() != check.size())) {
             serverLog.logFine("YACY","SaveSeedList: Local and uploades seed-list " +
                                "contains varying numbers of entries." +

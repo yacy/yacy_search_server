@@ -106,7 +106,7 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         return s.toString().getBytes();
     }
     
-    public plasmaCrawlLURLNewEntry(kelondroRow.Entry entry, indexEntry searchedWord) throws IOException {
+    public plasmaCrawlLURLNewEntry(kelondroRow.Entry entry, indexEntry searchedWord) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;

@@ -64,6 +64,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFlexTable;
+import de.anomic.kelondro.kelondroFlexWidthArray;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
@@ -664,7 +665,7 @@ public final class plasmaCrawlStacker {
                 // do nothing..
             } 
             if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
-                kelondroFlexTable.delete(cacheStacksPath, "urlPreNotice1.table");
+                kelondroFlexWidthArray.delete(cacheStacksPath, "urlPreNotice1.table");
             } 
             if (this.dbtype == QUEUE_DB_TYPE_TREE) {
                 File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");

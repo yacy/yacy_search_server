@@ -295,7 +295,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         doResponse(conProp, requestHeader, response, body);
     }
     
-    public void doResponse(Properties conProp, httpHeader requestHeader, OutputStream out, InputStream body) throws IOException {
+    public void doResponse(Properties conProp, httpHeader requestHeader, OutputStream out, InputStream body) {
         
         this.connectionProperties = conProp;
         

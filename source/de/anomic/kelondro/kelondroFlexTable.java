@@ -96,7 +96,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return index.geti(key) >= 0;
     }
     
-    private kelondroIndex initializeRamIndex(kelondroOrder objectOrder) throws IOException {
+    private kelondroIndex initializeRamIndex(kelondroOrder objectOrder) {
         kelondroRowSet ri = new kelondroRowSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}), objectOrder, 0, 0);
         //kelondroRowSet ri = new kelondroRowSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}), 0);
         //ri.setOrdering(objectOrder, 0);
