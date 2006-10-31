@@ -93,7 +93,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.snippetCache = snippetCache;
         this.rcContainers = new indexContainer(null);
         this.rcContainerFlushCount = 0;
-        this.rcAbstracts = new TreeMap();
+        this.rcAbstracts = (query.size() > 1) ? new TreeMap() : null; // generate abstracts only for combined searches
         this.profileLocal = localTiming;
         this.profileGlobal = remoteTiming;
         this.postsort = postsort;
@@ -134,7 +134,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 // do a global search
                 // the result of the fetch is then in the rcGlobal
                 log.logFine("STARTING " + fetchpeers + " THREADS TO CATCH EACH " + profileGlobal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT) + " URLs WITHIN " + (profileGlobal.duetime() / 1000) + " SECONDS");
-                long secondaryTimeout = System.currentTimeMillis() + profileGlobal.duetime() / 2;
+                long secondaryTimeout = System.currentTimeMillis() + profileGlobal.duetime() / 3 * 2;
                 long primaryTimeout = System.currentTimeMillis() + profileGlobal.duetime();
                 primarySearchThreads = yacySearch.primaryRemoteSearches(plasmaSearchQuery.hashSet2hashString(query.queryHashes), "",
                         query.prefer, query.urlMask, query.maxDistance, urlStore, rcContainers, rcAbstracts,
@@ -144,7 +144,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 Map searchContainerMap = localSearchContainers(null);
                 
                 // use the search containers to fill up rcAbstracts locally
-                if (searchContainerMap != null) {
+                /*
+                if ((rcAbstracts != null) && (searchContainerMap != null)) {
                     Iterator i, ci = searchContainerMap.entrySet().iterator();
                     Map.Entry entry;
                     String wordhash;
@@ -165,20 +166,19 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                         }
                     }
                 }
+                */
                 
                 // try to pre-fetch some LURLs if there is enough time
                 indexContainer rcLocal = localSearchJoin((searchContainerMap == null) ? null : searchContainerMap.values());
                 prefetchLocal(rcLocal, secondaryTimeout);
                 
-                // evaluate index abstracts and start a secondary search
                 // this is temporary debugging code to learn that the index abstracts are fetched correctly
-                /*
-                while (System.currentTimeMillis() < secondaryTimeout + 10000) {
+                while (System.currentTimeMillis() < secondaryTimeout) {
                     if (yacySearch.remainingWaiting(primarySearchThreads) == 0) break; // all threads have finished
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
-                if (query.size() > 1) prepareSecondarySearch();
-                */
+                // evaluate index abstracts and start a secondary search
+                if (rcAbstracts != null) prepareSecondarySearch();
                 
                 // catch up global results:
                 // wait until primary timeout passed
@@ -187,6 +187,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                         ((secondarySearchThreads == null) || (yacySearch.remainingWaiting(secondarySearchThreads) == 0))) break; // all threads have finished
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
+
                 int globalContributions = rcContainers.size();
                 
                 // finished searching
@@ -243,19 +244,22 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             String url, urls, peer, peers;
             String mypeerhash = yacyCore.seedDB.mySeed.hash;
             boolean mypeerinvolved = false;
+            int mypeercount;
             while (i1.hasNext()) {
                 entry1 = (Map.Entry) i1.next();
                 url = (String) entry1.getKey();
                 peers = (String) entry1.getValue();
                 System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peers);
+                mypeercount = 0;
                 for (int j = 0; j < peers.length(); j = j + 12) {
                     peer = peers.substring(j, j + 12);
-                    if (peers.indexOf(peer) < j) continue; // avoid doubles that may appear in the abstractJoin
+                    if ((peer.equals(mypeerhash)) && (mypeercount++ > 1)) continue;
+                    //if (peers.indexOf(peer) < j) continue; // avoid doubles that may appear in the abstractJoin
                     urls = (String) secondarySearchURLs.get(peer);
                     urls = (urls == null) ? url : urls + url;
                     secondarySearchURLs.put(peer, urls);
-                    if (peer.equals(mypeerhash)) mypeerinvolved = true;
                 }
+                if (mypeercount == 1) mypeerinvolved = true;
             }
             
             // compute words for secondary search and start the secondary searches
@@ -269,8 +273,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 if (peer.equals(mypeerhash)) continue; // we dont need to ask ourself
                 urls = (String) entry1.getValue();
                 words = wordsFromPeer(peer, urls);
-                System.out.println("DEBUG-INDEXABSTRACT: peer " + peer + "   has urls: " + urls);
-                System.out.println("DEBUG-INDEXABSTRACT: peer " + peer + " from words: " + words);
+                System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
+                System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
                         words, urls, urlStore, rcContainers, peer, plasmaSwitchboard.urlBlacklist, snippetCache,
                         profileGlobal, ranking);

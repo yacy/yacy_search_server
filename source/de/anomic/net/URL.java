@@ -44,6 +44,8 @@ public class URL {
     
     public void parseURLString(String url) throws MalformedURLException {
         // identify protocol
+        assert (url != null);
+        url = url.trim();
         int p = url.indexOf(':');
         if (p < 0) throw new MalformedURLException("protocol is not given in '" + url + "'");
         this.protocol = url.substring(0, p).toLowerCase().trim();
@@ -104,6 +106,7 @@ public class URL {
 
     public URL(URL baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
+        if (relPath == null) throw new MalformedURLException("relPath is null");
         int p = relPath.indexOf(':');
         String relprotocol = (p < 0) ? null : relPath.substring(0, p).toLowerCase();
         if (relprotocol != null) {

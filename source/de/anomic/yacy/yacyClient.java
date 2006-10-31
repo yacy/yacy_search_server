@@ -433,7 +433,8 @@ public final class yacyClient {
             obj.put("maxdist", maxDistance);
             obj.put("rankingProfile", rankingProfile.toExternalString());
             obj.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
-
+            if (abstractCache != null) obj.put("abstracts", "auto");
+            
             //yacyCore.log.logDebug("yacyClient.search url=" + url);
             final long timestamp = System.currentTimeMillis();
             
@@ -553,26 +554,27 @@ public final class yacyClient {
             for (int m = 0; m < words; m++) { containerCache.add(container[m], -1); }
 
             // read index abstract
-            Iterator i = result.entrySet().iterator();
-            Map.Entry entry;
-            TreeMap singleAbstract;
-            String wordhash;
-            serverByteBuffer ci;
-            while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                if (((String) entry.getKey()).startsWith("indexabstract.")) {
-                    wordhash = ((String) entry.getKey()).substring(14);
-                    synchronized (abstractCache) {
-                        singleAbstract = (TreeMap) abstractCache.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
-                        if (singleAbstract == null) singleAbstract = new TreeMap();
-                        ci = new serverByteBuffer(((String) entry.getValue()).getBytes());
-                        //System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
-                        indexURL.decompressIndex(singleAbstract, ci, targetPeer.hash);
-                        abstractCache.put(wordhash, singleAbstract);
+            if (abstractCache != null) {
+                Iterator i = result.entrySet().iterator();
+                Map.Entry entry;
+                TreeMap singleAbstract;
+                String wordhash;
+                serverByteBuffer ci;
+                while (i.hasNext()) {
+                    entry = (Map.Entry) i.next();
+                    if (((String) entry.getKey()).startsWith("indexabstract.")) {
+                        wordhash = ((String) entry.getKey()).substring(14);
+                        synchronized (abstractCache) {
+                            singleAbstract = (TreeMap) abstractCache.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
+                            if (singleAbstract == null) singleAbstract = new TreeMap();
+                            ci = new serverByteBuffer(((String) entry.getValue()).getBytes());
+                            System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
+                            indexURL.decompressIndex(singleAbstract, ci, targetPeer.hash);
+                            abstractCache.put(wordhash, singleAbstract);
+                        }
                     }
                 }
             }
-            
             // generate statistics
             long searchtime;
             try {

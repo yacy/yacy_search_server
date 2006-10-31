@@ -117,7 +117,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
     public plasmaCrawlLURLOldEntry(kelondroRow.Entry entry, indexEntry searchedWord) throws IOException {
         try {
             this.urlHash = entry.getColString(0, null);
-            this.url = new URL(entry.getColString(1, "UTF-8").trim());
+            this.url = new URL(entry.getColString(1, "UTF-8"));
             this.descr = (entry.empty(2)) ? this.url.toString() : entry.getColString(2, "UTF-8").trim();
             this.moddate = new Date(86400000 * entry.getColLong(3));
             this.loaddate = new Date(86400000 * entry.getColLong(4));

@@ -56,7 +56,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         if (indexfile.exists()) {
             // use existing index file
             System.out.println("*** Using File index " + indexfile);
-            ki = new kelondroCache(kelondroTree.open(indexfile, buffersize / 2, preloadTime, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80), buffersize / 2, true, true);
+            ki = new kelondroCache(kelondroTree.open(indexfile, buffersize / 2, preloadTime, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80), buffersize / 2, true, false);
             RAMIndex = false;
         } else if ((preloadTime >= 0) && (stt > preloadTime)) {
             // generate new index file
@@ -127,21 +127,25 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     private kelondroIndex initializeTreeIndex(File indexfile, long buffersize, long preloadTime, kelondroOrder objectOrder) throws IOException {
-        kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, buffersize / 2, preloadTime, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80), buffersize / 2, true, true);
+        kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, buffersize / 2, preloadTime, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80), buffersize / 2, true, false);
         Iterator content = super.col[0].contentNodes(-1);
         kelondroRecords.Node node;
         kelondroRow.Entry indexentry;
-        int i;
+        int i, c = 0, all = super.col[0].size();
+        long start = System.currentTimeMillis();
+        long last = start;
         while (content.hasNext()) {
             node = (kelondroRecords.Node) content.next();
             i = node.handle().hashCode();
             indexentry = treeindex.row().newEntry();
             indexentry.setCol(0, node.getValueRow());
             indexentry.setCol(1, i);
-            treeindex.put(indexentry);
-            if ((i % 10000) == 0) {
-                System.out.print('.');
+            treeindex.addUnique(indexentry);
+            c++;
+            if (System.currentTimeMillis() - last > 30000) {
+                System.out.println(".. generated " + c+ " entries, " + ((System.currentTimeMillis() - start) / c * (all - c) / 60000) + " minutes remaining");
                 System.out.flush();
+                last = System.currentTimeMillis();
             }
         }
         return treeindex;

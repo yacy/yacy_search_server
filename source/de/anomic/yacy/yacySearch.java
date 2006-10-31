@@ -237,6 +237,7 @@ public class yacySearch extends Thread {
         if (searchThreads == null) return 0;
         int alive = 0;
         for (int i = 0; i < searchThreads.length; i++) {
+            if (searchThreads == null) break; // may occur
             if (searchThreads[i].isAlive()) alive++;
         }
         return alive;
