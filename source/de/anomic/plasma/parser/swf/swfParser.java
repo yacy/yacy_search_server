@@ -120,19 +120,9 @@ public class swfParser extends AbstractParser implements Parser {
                 urlEnd = contents.indexOf(linebreak,urlStart);
                 url = contents.substring(urlStart,urlEnd);
                 urlnr = (new Integer(++urls)).toString();
-                anchors.put(urlnr,url);
-                //contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
+                anchors.put(url,urlnr);
+                contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
             }
-
-//             if(anchors.isEmpty()){
-//                 anchors=null;
-//                 String msg = "NONE xxxxxxxxxxxxxxx";
-//                 this.theLogger.logSevere(msg);
-//             }
-//             else{
-//                 String msg = "xxxxxxx "+anchors.get("1").toString();
-//                 this.theLogger.logSevere(msg);
-//             }
 
            // As the result of parsing this function must return a plasmaParserDocument object
             plasmaParserDocument theDoc = new plasmaParserDocument(
