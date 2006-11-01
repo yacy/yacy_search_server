@@ -142,8 +142,8 @@ public class indexURLEntry implements Cloneable, indexEntry {
     
     public byte[] toEncodedByteArrayForm(boolean includeHash) {
         if (includeHash) return entry.bytes();
-        byte[] b = new byte[urlEntryRow.objectsize() - indexURL.urlLanguageLength];
-        System.arraycopy(entry.bytes(), indexURL.urlLanguageLength, b, 0, b.length);
+        byte[] b = new byte[urlEntryRow.objectsize() - indexURL.urlHashLength];
+        System.arraycopy(entry.bytes(), indexURL.urlHashLength, b, 0, b.length);
         return b;
     }
 
