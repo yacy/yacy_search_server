@@ -129,7 +129,7 @@ public class PerformanceMemory_p {
                 if (xmx < xms) xmx = xms;
                 env.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
             } else if (xmx < xms) {
-                env.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
+                env.setConfig("javastart_Xmx", "Xmx" + xms + "m");
             }
         }
         
