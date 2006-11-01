@@ -135,19 +135,7 @@ public class indexURLEntry implements Cloneable, indexEntry {
         return new indexURLEntry(b);
     }
     
-    public static int encodedByteArrayFormLength(boolean includingHeader) {
-        // the size of the index entry attributes when encoded to string
-        return (includingHeader) ? urlEntryRow.objectsize() : urlEntryRow.objectsize() - indexURL.urlHashLength;
-    }
-    
-    public byte[] toEncodedByteArrayForm(boolean includeHash) {
-        if (includeHash) return entry.bytes();
-        byte[] b = new byte[urlEntryRow.objectsize() - indexURL.urlHashLength];
-        System.arraycopy(entry.bytes(), indexURL.urlHashLength, b, 0, b.length);
-        return b;
-    }
-
-   public String toPropertyForm(boolean displayFormat) {
+    public String toPropertyForm(boolean displayFormat) {
         return entry.toPropertyForm(true, displayFormat, displayFormat);
     }
 

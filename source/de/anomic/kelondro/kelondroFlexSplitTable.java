@@ -151,6 +151,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     }
     
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
+        assert row.bytes().length <= this.rowdef.objectsize;
         Object[] keeper = keeperOf(row.getColBytes(0));
         if (keeper != null) return ((kelondroIndex) keeper[0]).put(row);
         String suffix = dateSuffix(entryDate);
@@ -182,6 +183,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     }
     
     public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
+        assert row.bytes().length <= this.rowdef.objectsize;
         String suffix = dateSuffix(entryDate);
         if (suffix == null) return;
         kelondroIndex table = (kelondroIndex) tables.get(suffix);

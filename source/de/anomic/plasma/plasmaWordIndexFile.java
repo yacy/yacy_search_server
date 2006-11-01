@@ -91,7 +91,7 @@ public final class plasmaWordIndexFile {
         long cacheSize = theLocation.length();
         if (cacheSize > 1048576) cacheSize = 1048576;
         return kelondroTree.open(theLocation, cacheSize, 0, 
-                    new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength + ", byte[] ba-" + indexURLEntry.encodedByteArrayFormLength(false)));
+                    new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength + ", byte[] ba-" + (indexURLEntry.urlEntryRow.objectsize() - indexURL.urlHashLength)));
     }
 
     public static File wordHash2path(File databaseRoot, String hash) {
@@ -148,7 +148,7 @@ public final class plasmaWordIndexFile {
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this entity
             return false;
         }
-        return (theIndex.put(entry.urlHash().getBytes(), entry.toEncodedByteArrayForm(false)) == null);
+        return (theIndex.put(entry.toKelondroEntry()) == null);
     }
     
     public int addEntries(indexContainer container) throws IOException {

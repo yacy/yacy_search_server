@@ -171,6 +171,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
         assert (row != null);
         assert (!(serverLog.allZero(row.getColBytes(0))));
+        assert row.bytes().length <= this.rowdef.objectsize;
         int i = index.geti(row.getColBytes(0));
         if (i < 0) {
             index.puti(row.getColBytes(0), super.add(row));
@@ -184,6 +185,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
+        assert row.bytes().length <= this.rowdef.objectsize;
         index.addi(row.getColBytes(0), super.add(row));
     }
     

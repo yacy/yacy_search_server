@@ -379,6 +379,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         assert (newrow != null);
         assert (newrow.columns() == row().columns());
         assert (!(serverLog.allZero(newrow.getColBytes(primarykey()))));
+        assert newrow.bytes().length <= super.ROW.objectsize;
         // Associates the specified value with the specified key in this map
         kelondroRow.Entry result = null;
         //writeLock.stay(2000, 1000);

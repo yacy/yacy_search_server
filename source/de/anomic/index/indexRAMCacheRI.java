@@ -38,15 +38,19 @@ import de.anomic.kelondro.kelondroFixedWidthArray;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.plasma.plasmaWordIndexAssortment;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
 public final class indexRAMCacheRI implements indexRI {
 
     // environment constants
-    public  static final long wCacheMaxAge         = 1000 * 60 * 30; // milliseconds; 30 minutes
-    
+    public  static final long wCacheMaxAge = 1000 * 60 * 30; // milliseconds; 30 minutes
+    public  static final kelondroRow bufferStructureBasis = new kelondroRow(
+            "byte[] wordhash-" + indexEntryAttribute.wordHashLength + ", " +
+            "Cardinal occ-4 {b256}, " +
+            "Cardinal time-8 {b256}, " +
+            "byte[] urlprops-" + indexURLEntry.urlEntryRow.objectsize());
+        
     // class variables
     private final File databaseRoot;
     protected final TreeMap cache; // wordhash-container
@@ -64,7 +68,7 @@ public final class indexRAMCacheRI implements indexRI {
         maxKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += 'z';
         //minKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
-
+    
     public indexRAMCacheRI(File databaseRoot, int wCacheReferenceLimitInit, String dumpname, serverLog log) {
 
         // creates a new index cache
@@ -98,7 +102,7 @@ public final class indexRAMCacheRI implements indexRI {
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (indexDumpFile.exists()) indexDumpFile.delete();
         kelondroFixedWidthArray dumpArray = null;
-            dumpArray = new kelondroFixedWidthArray(indexDumpFile, plasmaWordIndexAssortment.bufferStructureBasis, 0);
+            dumpArray = new kelondroFixedWidthArray(indexDumpFile, bufferStructureBasis, 0);
             long startTime = System.currentTimeMillis();
             long messageTime = System.currentTimeMillis() + 5000;
             long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
@@ -127,8 +131,7 @@ public final class indexRAMCacheRI implements indexRI {
                             row.setCol(0, wordHash.getBytes());
                             row.setCol(1, kelondroNaturalOrder.encodeLong(container.size(), 4));
                             row.setCol(2, kelondroNaturalOrder.encodeLong(updateTime, 8));
-                            row.setCol(3, iEntry.urlHash().getBytes());
-                            row.setCol(4, iEntry.toEncodedByteArrayForm(false));
+                            row.setCol(3, iEntry.toKelondroEntry().bytes());
                             dumpArray.set((int) urlcount++, row);
                         }
                     }
@@ -152,7 +155,7 @@ public final class indexRAMCacheRI implements indexRI {
     private long restore() throws IOException {
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (!(indexDumpFile.exists())) return 0;
-        kelondroFixedWidthArray dumpArray = new kelondroFixedWidthArray(indexDumpFile, plasmaWordIndexAssortment.bufferStructureBasis, 0);
+        kelondroFixedWidthArray dumpArray = new kelondroFixedWidthArray(indexDumpFile, bufferStructureBasis, 0);
         log.logConfig("restore array dump of index cache '" + indexArrayFileName + "', " + dumpArray.size() + " word/URL relations");
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;
@@ -168,10 +171,10 @@ public final class indexRAMCacheRI implements indexRI {
                 while (i.hasNext()) {
                     // get out one entry
                     row = (kelondroRow.Entry) i.next();
-                    if ((row == null) || (row.empty(0)) || (row.empty(3)) || (row.empty(4))) continue;
+                    if ((row == null) || (row.empty(0)) || (row.empty(3))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new indexURLEntry(row.getColString(3, null), row.getColString(4, null));
+                    wordEntry = new indexURLEntry(row.getColBytes(3));
                     // store to cache
                     addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;

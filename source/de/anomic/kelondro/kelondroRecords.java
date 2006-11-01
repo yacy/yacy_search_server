@@ -925,16 +925,22 @@ public class kelondroRecords {
     private final void assignRowdef(kelondroRow rowdef) {
         // overwrites a given rowdef
         // the new rowdef must be compatible
-        if (rowdef.columns() < ROW.columns())
+        /*
+        if ((rowdef.columns() != ROW.columns()) &&
+            ((rowdef.columns() + 1 != ROW.columns()) ||
+             (rowdef.column(rowdef.columns() - 1).cellwidth() != (ROW.column(ROW.columns() - 1).cellwidth() + ROW.column(ROW.columns() - 2).cellwidth()))))
             throw new kelondroException(this.filename,
                     "new rowdef '" + rowdef.toString() + "' is not compatible with old rowdef '" + ROW.toString() + "', they have a different number of columns");
-
+         */
         // adopt encoder and cell type
+        /*
         kelondroColumn col;
         for (int i = 0; i < ROW.columns(); i++) {
             col = rowdef.column(i);
             ROW.column(i).setAttributes(col.nickname(), col.celltype(), col.encoder());
         }
+        */
+        this.ROW = rowdef;
     }
 
     protected final long seekpos(Handle handle) {

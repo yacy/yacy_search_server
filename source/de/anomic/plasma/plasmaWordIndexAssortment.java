@@ -58,7 +58,7 @@ import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
-import de.anomic.index.indexEntryAttribute;
+import de.anomic.index.indexRAMCacheRI;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroColumn;
@@ -71,12 +71,6 @@ public final class plasmaWordIndexAssortment {
     
     // environment constants
     private static final String assortmentFileName = "indexAssortment";
-    public  static final kelondroRow bufferStructureBasis = new kelondroRow(
-        "byte[] wordhash-" + indexEntryAttribute.wordHashLength + ", " +
-        "Cardinal occ-4 {b256}, " +
-        "Cardinal time-8 {b256}, " +
-        "byte[] urlhash-" + indexEntryAttribute.urlHashLength + ", " +
-        "byte[] urlattr-" + indexURLEntry.encodedByteArrayFormLength(false));
     
     // class variables
     private File assortmentFile;
@@ -93,19 +87,18 @@ public final class plasmaWordIndexAssortment {
     }
 
     private static kelondroRow bufferStructure(int assortmentCapacity) {
-        kelondroColumn[] structure = new kelondroColumn[3 + 2 * assortmentCapacity];
-        structure[0] = bufferStructureBasis.column(0);
-        structure[1] = bufferStructureBasis.column(1);
-        structure[2] = bufferStructureBasis.column(2);
+        kelondroColumn[] structure = new kelondroColumn[3 + assortmentCapacity];
+        structure[0] = indexRAMCacheRI.bufferStructureBasis.column(0);
+        structure[1] = indexRAMCacheRI.bufferStructureBasis.column(1);
+        structure[2] = indexRAMCacheRI.bufferStructureBasis.column(2);
         for (int i = 0; i < assortmentCapacity; i++) {
-            structure[3 + 2 * i] = bufferStructureBasis.column(3);
-            structure[4 + 2 * i] = bufferStructureBasis.column(4);
+            structure[3 + i] = indexRAMCacheRI.bufferStructureBasis.column(3);
         }
         return new kelondroRow(structure);
     }
     
     private static int assortmentCapacity(int rowsize) {
-        return (rowsize - bufferStructureBasis.width(0) - bufferStructureBasis.width(1) - bufferStructureBasis.width(2)) / (bufferStructureBasis.width(3) + bufferStructureBasis.width(4));
+        return (rowsize - indexRAMCacheRI.bufferStructureBasis.width(0) - indexRAMCacheRI.bufferStructureBasis.width(1) - indexRAMCacheRI.bufferStructureBasis.width(2)) / indexRAMCacheRI.bufferStructureBasis.width(3);
     }
 
     public plasmaWordIndexAssortment(File storagePath, int assortmentLength, int bufferkb, long preloadTime, serverLog log) throws IOException {
@@ -141,8 +134,7 @@ public final class plasmaWordIndexAssortment {
         indexEntry entry;
         for (int i = 0; i < assortmentLength; i++) {
             entry = (indexEntry) entries.next();
-            row.setCol(3 + 2 * i, entry.urlHash().getBytes());
-            row.setCol(4 + 2 * i, entry.toEncodedByteArrayForm(false));
+            row.setCol(3 + i, entry.toKelondroEntry().bytes());
         }
         kelondroRow.Entry oldrow = null;
         try {
@@ -227,9 +219,7 @@ public final class plasmaWordIndexAssortment {
         indexContainer container = new indexContainer(wordHash);
         int al = assortmentCapacity(row.objectsize());
         for (int i = 0; i < al; i++) {
-            container.add(
-                    new indexEntry[] { new indexURLEntry(
-                            new String(row.getColBytes(3 + 2 * i)), new String(row.getColBytes(4 + 2 * i))) }, updateTime);
+            container.add(new indexEntry[] { new indexURLEntry(row.getColBytes(3 + i)) }, updateTime);
         }
         return container;
     }

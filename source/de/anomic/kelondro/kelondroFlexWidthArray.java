@@ -160,6 +160,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
     }
     
     public kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException {
+        assert rowentry.bytes().length <= this.rowdef.objectsize;
         int c = 0;
         kelondroRow.Entry e0, e1, p;
         p = rowdef.newEntry();
@@ -183,6 +184,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
     }
     
     public int add(kelondroRow.Entry rowentry) throws IOException {
+        assert rowentry.bytes().length <= this.rowdef.objectsize;
         kelondroRow.Entry e;
         int index = -1;
         int lastcol;
