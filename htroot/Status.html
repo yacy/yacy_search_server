@@ -19,7 +19,7 @@
     </form>
     
     <table class="StatusTable">
-      <tr class="TableHeader"><td colspan="2"><b>Public System Properties</b></td></tr>
+      <tr class="TableHeader"><td colspan="2"><strong>Public System Properties</strong></td></tr>
       <tr class="TableCellLight"><td>System version</td><td>
       #[versionpp]# #(versioncomment)#:: - the latest public version is #[latestVersion]#. Click here to <a href="http://www.yacy.net/yacy/Download.html">download</a> it.#(/versioncomment)#
       </td></tr>
@@ -29,7 +29,7 @@
       ::
       Not assigned. The peer must go online to get an address.
       The peer does not go online until you use the proxy to surf the internet,
-      thus proving that you <i>want</i> to go online.
+      thus proving that you <em>want</em> to go online.
       If you don't know how to configure your system to use a proxy,
       see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installation instructions</a>.
       ::
@@ -60,7 +60,7 @@
       <tr class="TableCellDark"><td>Other peers</td><td>#(otherPeers)#not online::#[num]# other peers online.#(/otherPeers)#</td></tr>
       <tr class="TableCellLight"><td>Online-mode</td><td>
       #(omode)#
-      You are in <i>Cache-browsing</i> mode.<br />
+      You are in <em>Cache-browsing</em> mode.<br />
       Only websites from the proxy-cache are accessible.
       To switch online-mode, press one of the following buttons:
       <form action="SettingsAck_p.html" method="get">
@@ -68,7 +68,7 @@
         <input type="submit" name="pmode" value="Permanent Mode" /></div>
       </form>
       ::
-      You are in <i>event-based</i> online mode.<br />
+      You are in <em>event-based</em> online mode.<br />
       The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.
       Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.
       Use this only if you have a flatrate or you have an always-on connection.
@@ -78,7 +78,7 @@
         <input type="submit" name="cmode" value="Go to Cache-Mode" /></div>
       </form>
       ::
-      You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.
+      You are in <em>permanent</em> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.
       To switch online-mode, press one of the following buttons:
       <form action="SettingsAck_p.html" method="get">
         <div><input type="submit" name="emode" value="event-based Mode" />
@@ -92,7 +92,7 @@
     ::
     #(/showPrivateTable)#
     #%[privateStatusTable]%#
-    <p><i>Last Refresh:</i> #[date]#</p>
+    <p><em>Last Refresh:</em> #[date]#</p>
     
     #%env/templates/footer.template%#
   </body>

@@ -38,7 +38,7 @@ not shared::shared==nicht freigegeben::freigegeben
 New list:==Neue Liste:
 "create"=="anlegen"
 Settings for this list==Einstellungen dieser Liste
-Enable/disable this list==Liste an/ausschalten
+Save==Speichern
 Share/don't share this list==Liste freigeben/nicht freigeben
 Delete this list==Liste l&ouml;schen
 Edit this list==Diese Liste bearbeiten
@@ -567,7 +567,7 @@ Index Creation/Indexing Queue==Index Erzeugung/Indexier Warteschlange
 Index Creation: Indexing Queue==Index Erzeugung: Indexier Warteschlange
 The indexing queue is empty==Die Indexier Warteschlange ist leer.
 "clear indexing queue"=="Warteschlange l&ouml;schen"
-There are <strong>\#\[num\]\#</strong> entries in the indexing queue. Showing <strong>\#\[show\]\#</strong> entries with a total size of <b>\#\[totalSize\]\#</b>.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in der Indexier Warteschlange. <strong>#[show]#</strong> Eintr&auml;ge mit einer Gr&ouml;sse von <strong>#[totalSize]#</strong> werden angezeigt.
+There are <strong>\#\[num\]\#</strong> entries in the indexing queue. Showing <strong>\#\[show\]\#</strong> entries with a total size of <strong>\#\[totalSize\]\#</strong>.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in der Indexier Warteschlange. <strong>#[show]#</strong> Eintr&auml;ge mit einer Gr&ouml;sse von <strong>#[totalSize]#</strong> werden angezeigt.
 Show last==Zeige die letzten
 </a> entries.==</a> Eintr&auml;ge.
 Initiator==Initiator
@@ -1508,15 +1508,15 @@ Welcome to YaCy!==Willkommen bei YaCy!
 Public System Properties==Allgemeine Systemangaben
 System version==Systemversion
 the latest public version is==Die neueste stabile Version ist
-Click here to==Klicken Sie
-download</a> it.==hier</a>, um sie herunterzuladen.
+Click here to==Klicken Sie hier,
+download</a> it.==um sie herunterzuladen</a>.
 This&nbsp;peer's&nbsp;address==Adresse dieses Peers
 #Not assigned==nicht zugewiesen
 enabled==aktiviert
 Not assigned. The peer must go online to get an address.==Nicht zugewiesen. Ihr Peer muss online gehen, um eine Adresse zu bekommen.
 #---
 The peer does not go online until you use the proxy to surf the internet,==Ihr Peer geht nicht online, bis Sie den Proxy benutzen,
-thus proving that you <i>want</i> to go online.==wodurch Sie signalisieren, online gehen zu <i>wollen</i>.
+thus proving that you <em>want</em> to go online.==wodurch Sie signalisieren, online gehen zu <em>wollen</em>.
 #---
 If you don't know how to configure your system to use a proxy,==Wenn Sie nicht wissen, wie Sie Ihr System konfigurieren, sodass es einen Proxy benutzt,
 see the <a==lesen Sie die <a
@@ -1542,20 +1542,21 @@ Other peers==Andere Peers
 other peers online.==andere Peers online.
 not online==nicht online
 Online-mode==Onlinemodus
-You are in <i>Cache-browsing</i> mode.==Sie sind im <i>Cache</i> Modus.
+You are in <em>Cache-browsing</em> mode.==Sie sind im <em>Cache</em> Modus.
 Only websites from the proxy-cache are accessible.==Nur Webseiten aus dem Proxycache sind abrufbar.
 To switch online-mode, press one of the following buttons:==Um den Online Modus zu wechseln, klicken Sie auf einen der folgenden Buttons:
 "event-based Mode"=="aktivit&auml;tsbasierten Modus"
 "Permanent Mode"=="Permanenter Modus"
-You are in <i>event-based</i> online mode.==Sie sind im <i>aktivit&auml;tsbasierten</i> Onlinemodus.
+You are in <em>event-based</em> online mode.==Sie sind im <em>aktivit&auml;tsbasierten</em> Onlinemodus.
 The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.==Das YaCy-P2P-Netzwerk wird aktiviert, wenn Sie den Proxy das erste Mal benutzen oder in den permanenten Modus wechseln.
 Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.==Vorsicht: Das Benutzen des Proxys im permanenten Modus h&auml;lt ihre Internetverbindung so lange offen, wie YaCy l&auml;uft.
 Use this only if you have a flatrate or you have an always-on connection.==Benutzen Sie das nur, wenn Sie eine Flatrate haben oder immer online sind.
 "Go on-line"=="Online gehen"
 "Go to Cache-Mode"=="In Cache-Modus gehen"
-You are in <i>permanent</i> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <i>permanenten</i> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein m&ouml;chten, m&uuml;ssen Sie den Proxy abschalten um offline zu gehen.
+You are in <em>permanent</em> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <em>permanenten</em> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein m&ouml;chten, m&uuml;ssen Sie den Proxy abschalten um offline zu gehen.
 Last Refresh:==Letzte Aktualisierung:
-Click here to <a href="Status.html?login=">log in</a> as administrator and see full status.==<a href="Status.html?login=">Klicken Sie hier</a>, um sich als Administrator einzuloggen.
+Click here to==Klicken Sie hier,
+log in</a> as administrator and see full status.==um sich als Administrator einzuloggen</a> und den vollst&auml;ndigen Status zu sehen.
 
 #-----------------------------
 
