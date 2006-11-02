@@ -702,6 +702,8 @@ indexDistribution.minChunkSize = 5
 indexDistribution.maxChunkSize = 1000
 indexDistribution.startChunkSize = 50
 
+indexDistribution.maxChunkFails = 1
+
 # defines if the peer should reject incoming index transfer
 # request if a given limit is reached
 indexDistribution.transferRWIReceiptLimitEnabled = true

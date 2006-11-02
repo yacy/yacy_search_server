@@ -81,6 +81,8 @@ public class plasmaDHTChunk {
     private long selectionStartTime = 0;
     private long selectionEndTime = 0;
     
+    private int transferFailedCounter = 0;
+    
     public indexContainer firstContainer() {
         return indexContainers[0];
     }
@@ -312,5 +314,13 @@ public class plasmaDHTChunk {
     public long getSelectionTime() {
         if (this.selectionStartTime == 0 || this.selectionEndTime == 0) return -1;
         return this.selectionEndTime-this.selectionStartTime;
+    }
+
+    public void incTransferFailedCounter() {
+        this.transferFailedCounter++;
+    }
+
+    public int getTransferFailedCounter() {
+        return transferFailedCounter;
     }
 }

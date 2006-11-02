@@ -2408,8 +2408,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // show success
             return true;
         } else {
-            dhtTransferChunk.setStatus(plasmaDHTChunk.chunkStatus_FAILED);
-            log.logFine("DHT distribution: transfer FAILED");
+            dhtTransferChunk.incTransferFailedCounter();
+            int maxChunkFails = (int) getConfigLong("indexDistribution.maxChunkFails", 1);
+            if (dhtTransferChunk.getTransferFailedCounter() >= maxChunkFails) {
+                System.out.println("DEBUG: " + dhtTransferChunk.getTransferFailedCounter() + " of " + maxChunkFails + " sendings failed for this chunk, aborting!");
+                dhtTransferChunk.setStatus(plasmaDHTChunk.chunkStatus_FAILED);
+                log.logFine("DHT distribution: transfer FAILED");   
+            }
+            else {
+                System.out.println("DEBUG: " + dhtTransferChunk.getTransferFailedCounter() + " of " + maxChunkFails + " sendings failed for this chunk, retrying!");
+                log.logFine("DHT distribution: transfer FAILED, sending this chunk again");   
+            }
             return false;
         }
     }
