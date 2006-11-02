@@ -66,6 +66,7 @@ public class swfParser extends AbstractParser implements Parser {
     public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();
     static {
         SUPPORTED_MIME_TYPES.put("application/x-shockwave-flash","swf");
+        SUPPORTED_MIME_TYPES.put("application/x-shockwave-flash2-preview","swf");
     }
 
     /**
