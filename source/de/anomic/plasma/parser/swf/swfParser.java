@@ -72,7 +72,7 @@ public class swfParser extends AbstractParser implements Parser {
      * a list of library names that are needed by this parser
      * @see Parser#getLibxDependences()
      */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {"webcat.jar"};
+    private static final String[] LIBX_DEPENDENCIES = new String[] {"webcat-0.1-swf.jar"};
 
     public swfParser() {
         super(LIBX_DEPENDENCIES);
