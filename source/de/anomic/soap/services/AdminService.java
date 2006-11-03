@@ -616,13 +616,16 @@ public class AdminService extends AbstractService {
         
         // format them into xml
     	XMLFormatter formatter = new XMLFormatter();
-    	buffer.append(formatter.getHead(logHandler));
+    	
+    	// adding header and removing DTD definition
+    	buffer.append(formatter.getHead(logHandler).replaceAll("<!DOCTYPE.*>", ""));
     	
     	// format the logging entries
     	for (int i=0; i < log.length; i++) {
     		buffer.append(formatter.format(log[i]));
     	}    	
     	
+    	// adding tailer
     	buffer.append(formatter.getTail(logHandler));
     	
     	// convert into dom
