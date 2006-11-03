@@ -63,4 +63,9 @@ public class AdminServiceTest extends AbstractServiceTest {
 				(String)oldValues.get("msgForwardingTo")
 		);
 	}
+	
+	public void testGetServerLog() throws RemoteException {
+		Document xml = ((AdminService)service).getServerLog(0);
+		System.out.println(XMLUtils.DocumentToString(xml));
+	}
 }

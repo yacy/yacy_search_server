@@ -118,6 +118,8 @@ import de.anomic.server.logging.serverLog;
  */
 public final class httpdSoapHandler extends httpdAbstractHandler implements httpdHandler 
 {
+	public static final String SOAP_HANDLER_VERSION = "YaCySOAP V0.1";
+	
  
     /* ===============================================================
      * Constants needed to set some SOAP properties
@@ -216,12 +218,12 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     
     /**
      * Constructor of this class
-     * @param switchboard
+     * @param theSwitchboard
      */
-    public httpdSoapHandler(serverSwitch switchboard) {
+    public httpdSoapHandler(serverSwitch theSwitchboard) {
         super();
         
-        this.switchboard = switchboard;
+        this.switchboard = theSwitchboard;
         this.theLogger = new serverLog("SOAP");
 
         // create a htRootPath: system pages
@@ -231,7 +233,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         }        
         
         if (this.htTemplatePath == null) {
-            this.htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
+            this.htTemplatePath = new File(theSwitchboard.getRootPath(), theSwitchboard.getConfig("htTemplatePath","htroot/env/templates"));
             // if (!(this.htTemplatePath.exists())) this.htTemplatePath.mkdir();
         }        
         
@@ -246,11 +248,11 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         		additionalServices = new Properties();
         		
         		// getting the property filename containing the file list
-        		String fileName = switchboard.getConfig("soap.serviceDeploymentList","");
+        		String fileName = theSwitchboard.getConfig("soap.serviceDeploymentList","");
         		if (fileName.length() > 0) {
         			BufferedInputStream fileInput = null;
         			try {
-        				File deploymentFile = new File(switchboard.getRootPath(),fileName);        				
+        				File deploymentFile = new File(theSwitchboard.getRootPath(),fileName);        				
         				fileInput = new BufferedInputStream(new FileInputStream(deploymentFile));
         				
         				// load property list
@@ -384,6 +386,8 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
             Document doc = generateWSDL(msgContext);
             
             if (doc != null) {
+            	// TODO: what about doc.getInputEncoding()?
+            	// TODO: what about getXmlEncoding?           
                 // Converting the the wsdl document into a byte-array
                 String responseDoc = XMLUtils.DocumentToString(doc);
                 byte[] result = responseDoc.getBytes("UTF-8");
@@ -481,6 +485,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     			sendMessage(conProp,requestHeader,response,soapEx.getStatusCode(),soapEx.getStatusText(),soapErrorMsg);
     		} else {
     			this.theLogger.logSevere("Unexpected Exception while sending data to client",e);
+    			
     		}
 		} catch (Exception ex) {
 			// the http response header was already send. Just log the error
@@ -644,6 +649,10 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     	return result;
     }    
     
+    /**
+     * TODO: handle accept-charset http header
+     * TODO: what about content-encoding, transfer-encoding here?
+     */
     protected void sendMessage(Properties conProp, httpHeader requestHeader, OutputStream out, int statusCode, String statusText, String contentType, byte[] MessageBody) throws IOException {
         // write out the response header
         respondHeader(conProp, out, statusCode, statusText, (MessageBody==null)?null:contentType, (MessageBody==null)?-1:MessageBody.length, null, null);
@@ -653,6 +662,9 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         out.flush();
     }
         
+    /**
+     * TODO: handle accept-charset http header
+     */    
     protected void sendMessage(Properties conProp, httpHeader requestHeader, OutputStream out, int statusCode, String statusText, Message soapMessage) throws IOException, SOAPException {
     	httpChunkedOutputStream chunkedOut = null;
     	GZIPOutputStream gzipOut = null;
@@ -717,7 +729,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     		String transferEncoding
     ) throws IOException {
     	httpHeader outgoingHeader = new httpHeader();
-    	outgoingHeader.put(httpHeader.SERVER,"AnomicHTTPD (www.anomic.de)");
+    	outgoingHeader.put(httpHeader.SERVER, SOAP_HANDLER_VERSION);
     	if (conttype != null) outgoingHeader.put(httpHeader.CONTENT_TYPE,conttype); 
     	if (contlength != -1) outgoingHeader.put(httpHeader.CONTENT_LENGTH, Long.toString(contlength)); 
         if (contentEncoding != null) outgoingHeader.put(httpHeader.CONTENT_ENCODING, contentEncoding);

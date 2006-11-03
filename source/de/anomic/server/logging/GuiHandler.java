@@ -45,6 +45,7 @@
 package de.anomic.server.logging;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.ErrorManager;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
@@ -143,23 +144,24 @@ public class GuiHandler extends Handler{
             this.start++;
         }     
     }
-
-    /**
-     * Push any buffered output to the target <tt>Handler</tt>.
-     * <p>
-     * The buffer is then cleared.
-     */
+    
     public synchronized LogRecord[] getLogArray() {
-        
-        LogRecord[] tempBuffer = new LogRecord[this.count];
+    	return this.getLogArray(null);
+    }
+
+
+    public synchronized LogRecord[] getLogArray(Long sequenceNumberStart) {
+        ArrayList tempBuffer = new ArrayList(this.count);
         
         for (int i = 0; i < this.count; i++) {
             int ix = (this.start+i)%this.buffer.length;
             LogRecord record = this.buffer[ix];
-            tempBuffer[i] = record;
+            if ((sequenceNumberStart == null) || (record.getSequenceNumber() >= sequenceNumberStart.longValue())) {
+            	tempBuffer.add(record);
+            }
         }
         
-        return tempBuffer;
+        return (LogRecord[]) tempBuffer.toArray(new LogRecord[tempBuffer.size()]);
     }    
     
     public synchronized String getLog(boolean reversed, int lineCount) { 

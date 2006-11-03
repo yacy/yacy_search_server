@@ -46,6 +46,10 @@
 package de.anomic.soap.services;
 
 import java.util.ArrayList;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.XMLFormatter;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -58,6 +62,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverThread;
+import de.anomic.server.logging.GuiHandler;
 import de.anomic.soap.AbstractService;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -514,13 +519,14 @@ public class AdminService extends AbstractService {
     }
     
     /**
+     * Function to configure the message forwarding settings of a peer.
+     * @see <a href="http://localhost:8080/Settings_p.html?page=messageForwarding">Peer Configuration - Message Forwarding</a>
      * 
-     * @param enableForwarding
-     * @param forwardingCommand
-     * @param forwardingTo
-     * @throws AxisFault
+     * @param enableForwarding specifies if forwarding should be enabled
+     * @param forwardingCommand the forwarding command to use. e.g. <code>/usr/sbin/sendmail</code>
+     * @param forwardingTo the delivery destination. e.g. <code>root@localhost</code>
      * 
-     * @link <a href="http://localhost:8080/Settings_p.html?page=messageForwarding">Peer Configuration - Message Forwarding</a>
+     * @throws AxisFault if authentication failed
      */
     public void setMessageForwarding(
     		Boolean enableForwarding,
@@ -545,6 +551,8 @@ public class AdminService extends AbstractService {
     }
     
     /**
+     * Function to query the current message forwarding configuration of a peer.
+     * @see <a href="http://localhost:8080/Settings_p.html?page=messageForwarding">Peer Configuration - Message Forwarding</a>
      * 
      * @return a XML document of the following format
      * <pre>
@@ -555,10 +563,9 @@ public class AdminService extends AbstractService {
      *   &lt;msgForwardingTo&gt;root@localhost&lt;/msgForwardingTo&gt;
      * &lt;/msgForwarding&gt;
      * </pre>
-     * @throws AxisFault
-     * @throws ParserConfigurationException
      * 
-     * @link <a href="http://localhost:8080/Settings_p.html?page=messageForwarding">Peer Configuration - Message Forwarding</a>
+     * @throws AxisFault if authentication failed
+     * @throws ParserConfigurationException on XML parser errors
      */
     public Document getMessageForwarding() throws AxisFault, ParserConfigurationException {
         // extracting the message context
@@ -582,5 +589,43 @@ public class AdminService extends AbstractService {
     	xmlRoot.appendChild(xmlElement);       	
     	
     	return xmlDoc;
+    }
+    
+    public Document getServerLog(Long sequenceNumber) throws Exception {
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);     
+        
+        Handler logHandler = null;
+        LogRecord[] log = null;
+        
+        // getting the root handler
+        Logger logger = Logger.getLogger("");
+        
+        // take a look for the GuiHandler
+        Handler[] handlers = logger.getHandlers();
+        for (int i=0; i<handlers.length; i++) {
+            if (handlers[i] instanceof GuiHandler) {
+            	// getting the log records
+            	logHandler = handlers[i];
+                log = ((GuiHandler)logHandler).getLogArray(sequenceNumber);
+                break;
+            }
+        }
+    	
+        StringBuffer buffer = new StringBuffer();
+        
+        // format them into xml
+    	XMLFormatter formatter = new XMLFormatter();
+    	buffer.append(formatter.getHead(logHandler));
+    	
+    	// format the logging entries
+    	for (int i=0; i < log.length; i++) {
+    		buffer.append(formatter.format(log[i]));
+    	}    	
+    	
+    	buffer.append(formatter.getTail(logHandler));
+    	
+    	// convert into dom
+    	return convertContentToXML(buffer.toString());
     }
 }
