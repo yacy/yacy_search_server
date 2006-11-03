@@ -5,4 +5,16 @@
   <wordCacheWSize>#[wordCacheWSize]#</wordCacheWSize>
   <wordCacheKSize>#[wordCacheKSize]#</wordCacheKSize>
   <wordCacheMaxCount>#[wordCacheMaxCount]#</wordCacheMaxCount>
+
+  <memory>
+    <free>#[freeMemory]#</free>
+    <total>#[totalMemory]#</total>
+    <max>#[maxMemory]#</max>
+  </memory>
+  <processors>#[processors]#</processors>
+  <traffic>
+	<in>#[trafficIn]#</in>
+	<out>#[trafficOut]#</out>
+	<crawler>#[trafficCrawler]#</crawler>
+  </traffic>
 </status>

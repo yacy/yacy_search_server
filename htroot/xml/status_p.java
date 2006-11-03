@@ -1,12 +1,9 @@
 // /xml.queues/status_p.java
 // -------------------------------
-// part of the AnomicHTTPD caching proxy
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004, 2005
+// part of the yacy
 //
-// last major change: 06.02.2006
-// this file is contributed by Alexander Schier
+// (C) 2006 Alexander Schier
+// last major change: 03.11.2006
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,8 +16,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// along with this program; if not, write to the Free Software Foundation, Inc., 
+// 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 //
 // Using this software in any meaning (reading, learning, copying, compiling,
 // running) means that you agree that the Author(s) is (are) not responsible
@@ -41,18 +38,16 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-// You must compile this file with
-// javac -classpath .:../classes IndexCreate_p.java
-// if the shell's current path is HTROOT
-
-//package xml.queues;
 package xml;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverMemory;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.http.httpdByteCountInputStream;
+import de.anomic.http.httpdByteCountOutputStream;
 
 public class status_p {
     
@@ -68,6 +63,19 @@ public class status_p {
         prop.put("wordCacheWSize", switchboard.wordIndex.dhtOutCacheSize());
         prop.put("wordCacheKSize", switchboard.wordIndex.dhtInCacheSize());
         prop.put("wordCacheMaxCount", switchboard.getConfig("wordCacheMaxCount", "10000"));
+
+		//
+		// memory usage and system attributes
+		final Runtime rt = Runtime.getRuntime();
+        prop.put("freeMemory", rt.freeMemory());
+        prop.put("totalMemory", rt.totalMemory());
+        prop.put("maxMemory", serverMemory.max);
+        prop.put("processors", rt.availableProcessors());
+
+		// proxy traffic
+		prop.put("trafficIn", httpdByteCountInputStream.getGlobalCount());
+		prop.put("trafficOut", httpdByteCountOutputStream.getGlobalCount());
+		prop.put("trafficCrawler", httpdByteCountInputStream.getAccountCount("CRAWLER"));
 
         // return rewrite properties
         return prop;
