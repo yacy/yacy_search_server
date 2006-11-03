@@ -498,8 +498,8 @@ public final class plasmaCrawlStacker {
         } 
         
         public stackCrawlMessage(String urlHash, kelondroRow.Entry entry) {
-            if (urlHash == null) throw new NullPointerException();
-            if (entry == null) throw new NullPointerException();
+            if (urlHash == null) throw new NullPointerException("Url hash was null");
+            if (entry == null) throw new NullPointerException("kelondroRow.Entry was null");
 
             try {
                 this.urlHash       = urlHash;
