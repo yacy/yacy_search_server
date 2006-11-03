@@ -293,11 +293,11 @@ public abstract class AbstractService {
         try {
             DocumentBuilderFactory newDocBuilderFactory = DocumentBuilderFactory.newInstance();
             
-            // disable dtd validation
-            newDocBuilderFactory.setValidating(false);
-            newDocBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            newDocBuilderFactory.setFeature("http://xml.org/sax/features/validation", false);
-            
+//            // disable dtd validation
+//            newDocBuilderFactory.setValidating(false);
+//            newDocBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+//            newDocBuilderFactory.setFeature("http://xml.org/sax/features/validation", false);
+//            
             DocumentBuilder newDocBuilder = newDocBuilderFactory.newDocumentBuilder();
             
             ByteArrayInputStream byteIn = new ByteArrayInputStream(content);
