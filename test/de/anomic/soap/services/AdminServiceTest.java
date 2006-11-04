@@ -7,13 +7,12 @@ import javax.xml.rpc.ServiceException;
 import javax.xml.transform.TransformerException;
 
 import org.apache.axis.utils.XMLUtils;
+import org.apache.xpath.XPathAPI;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 
 import yacy.soap.admin.AdminService;
 import yacy.soap.admin.AdminServiceServiceLocator;
-
-import com.sun.org.apache.xpath.internal.XPathAPI;
 
 public class AdminServiceTest extends AbstractServiceTest {
 

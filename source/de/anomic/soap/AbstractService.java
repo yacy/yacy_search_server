@@ -98,7 +98,13 @@ public abstract class AbstractService {
         this.requestHeader = (httpHeader) this.messageContext.getProperty(httpdSoapHandler.MESSAGE_CONTEXT_HTTP_HEADER);
         
         if (authenticate) {
-            this.doAuthentication();
+            String authInfo = this.doAuthentication();
+            
+            // modify headers
+            // This is needed for plasmaSwitchboard.adminAuthenticated to work
+            this.requestHeader.put(httpHeader.AUTHORIZATION,"Basic " + authInfo);
+            this.requestHeader.put("CLIENTIP","localhost");
+            
         }                        
     }
     
@@ -216,7 +222,7 @@ public abstract class AbstractService {
      * 
      * @throws AxisFault if the authentication could not be done successfully
      */
-    protected void doAuthentication() throws AxisFault {
+    protected String doAuthentication() throws AxisFault {
         // accessing the SOAP request message
         Message message = this.messageContext.getRequestMessage();
         
@@ -235,8 +241,9 @@ public abstract class AbstractService {
             } else if (!(adminAccountBase64MD5.equals(authString))) {
                 throw new AxisFault("log-in required");
             }
+            return adminAccountBase64MD5;
         }
-        else throw new AxisFault("log-in required");
+		throw new AxisFault("log-in required");
     }
     
     /**

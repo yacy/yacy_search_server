@@ -591,6 +591,37 @@ public class AdminService extends AbstractService {
     	return xmlDoc;
     }
     
+    /**
+     * Function to query the last peer logging records. Please note that the maximum amount of records
+     * depends on the peer GuiHandler logging configuration.<br> 
+     * Per default a maximum of 400 entries are kept in memory.
+     * 
+     * See: DATA/LOG/yacy.logging:
+     * <pre>de.anomic.server.logging.GuiHandler.size = 400</pre>
+     * 
+     * @param sequenceNumber all logging records with a squence number greater than this parameter are fetched. 
+     * 
+     * @return a XML document of the following format
+     * <pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+     * &lt;log&gt;
+     * &lt;record&gt;
+     *   &lt;date&gt;2006-11-03T15:35:09&lt;/date&gt;
+     *   &lt;millis&gt;1162564509850&lt;/millis&gt;
+     *   &lt;sequence&gt;15&lt;/sequence&gt;
+     *   &lt;logger&gt;KELONDRO&lt;/logger&gt;
+     *   &lt;level&gt;FINE&lt;/level&gt;
+     *   &lt;thread&gt;10&lt;/thread&gt;
+     *   &lt;message&gt;KELONDRO DEBUG /home/yacy/DATA/PLASMADB/ACLUSTER/indexAssortment009.db: preloaded 1 records into cache&lt;/message&gt;
+     * &lt;/record&gt;
+     * [...]
+     * &lt;/log&gt;
+     * </pre>
+     * This is the default format of the java logging {@link XMLFormatter} class. 
+     * See: <a href="http://java.sun.com/j2se/1.4.2/docs/guide/util/logging/overview.html#2.4">Sample XML Output</a>
+     * 
+     * @throws AxisFault if authentication failed
+     * @throws ParserConfigurationException on XML parser errors
+    **/    
     public Document getServerLog(Long sequenceNumber) throws Exception {
         // extracting the message context
         extractMessageContext(AUTHENTICATION_NEEDED);     
@@ -611,6 +642,9 @@ public class AdminService extends AbstractService {
                 break;
             }
         }
+        
+        // if the logging handler was not found report the error
+        if (logHandler == null) throw new AxisFault("GuiHandler not found");
     	
         StringBuffer buffer = new StringBuffer();
         

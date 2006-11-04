@@ -151,7 +151,8 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         "status=de.anomic.soap.services.StatusService",
         "admin=de.anomic.soap.services.AdminService",
         "blacklist=de.anomic.soap.services.BlacklistService",
-        "share=de.anomic.soap.services.ShareService"
+        "share=de.anomic.soap.services.ShareService",
+        "bookmarks=de.anomic.soap.services.BookmarkService"
     };
     
     /* ===============================================================
@@ -607,7 +608,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
             // the used http verson
             String version = conProps.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
             msgContext.setProperty(MessageContext.HTTP_TRANSPORT_VERSION,version);
-            
+                        
             // YaCy specific objects
             msgContext.setProperty(MESSAGE_CONTEXT_HTTP_ROOT_PATH  ,this.htRootPath.toString());
             msgContext.setProperty(MESSAGE_CONTEXT_SERVER_SWITCH,this.switchboard);

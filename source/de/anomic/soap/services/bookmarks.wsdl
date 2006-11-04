@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://yacy:8080/soap/bookmarks" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://yacy:8080/soap/bookmarks" xmlns:intf="http://yacy:8080/soap/bookmarks" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http://yacy:8080/soap/bookmarks" xmlns="http://www.w3.org/2001/XMLSchema"><import namespace="http://xml.apache.org/xml-soap"/><import namespace="http://schemas.xmlsoap.org/soap/encoding/"/><complexType name="ArrayOf_xsd_string"><complexContent><restriction base="soapenc:Array"><attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:string[]"/></restriction></complexContent></complexType></schema></wsdl:types>
+  <wsdl:message name="addBookmarkResponse">
+    <wsdl:part name="addBookmarkReturn" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="getBookmarkTagListResponse">
+    <wsdl:part name="getBookmarkTagListReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="getBookmarkTagListRequest">
+  </wsdl:message>
+
+  <wsdl:message name="deleteBookmarkByHashRequest">
+    <wsdl:part name="urlHash" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="createNewXMLDocumentResponse">
+    <wsdl:part name="createNewXMLDocumentReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="getBookmarkListResponse">
+    <wsdl:part name="getBookmarkListReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+
+  <wsdl:message name="renameTagRequest">
+    <wsdl:part name="oldTagName" type="xsd:string"/>
+    <wsdl:part name="newTagName" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="deleteBookmarkRequest">
+    <wsdl:part name="url" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="editBookmarkRequest">
+    <wsdl:part name="urlHash" type="xsd:string"/>
+
+    <wsdl:part name="url" type="xsd:string"/>
+    <wsdl:part name="title" type="xsd:string"/>
+    <wsdl:part name="description" type="xsd:string"/>
+    <wsdl:part name="tags" type="impl:ArrayOf_xsd_string"/>
+    <wsdl:part name="isPublic" type="xsd:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="createNewXMLDocumentRequest">
+    <wsdl:part name="rootElementName" type="xsd:string"/>
+  </wsdl:message>
+
+  <wsdl:message name="renameTagResponse">
+  </wsdl:message>
+  <wsdl:message name="addBookmarkRequest">
+    <wsdl:part name="url" type="xsd:string"/>
+    <wsdl:part name="title" type="xsd:string"/>
+    <wsdl:part name="description" type="xsd:string"/>
+    <wsdl:part name="tags" type="impl:ArrayOf_xsd_string"/>
+    <wsdl:part name="isPublic" type="xsd:boolean"/>
+  </wsdl:message>
+
+  <wsdl:message name="getBookmarkListRequest">
+    <wsdl:part name="tag" type="xsd:string"/>
+    <wsdl:part name="date" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="editBookmarkResponse">
+    <wsdl:part name="editBookmarkReturn" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="deleteBookmarkResponse">
+  </wsdl:message>
+
+  <wsdl:message name="deleteBookmarkByHashResponse">
+  </wsdl:message>
+  <wsdl:portType name="BookmarkService">
+    <wsdl:operation name="renameTag" parameterOrder="oldTagName newTagName">
+      <wsdl:input message="impl:renameTagRequest" name="renameTagRequest"/>
+      <wsdl:output message="impl:renameTagResponse" name="renameTagResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="addBookmark" parameterOrder="url title description tags isPublic">
+      <wsdl:input message="impl:addBookmarkRequest" name="addBookmarkRequest"/>
+
+      <wsdl:output message="impl:addBookmarkResponse" name="addBookmarkResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="deleteBookmarkByHash" parameterOrder="urlHash">
+      <wsdl:input message="impl:deleteBookmarkByHashRequest" name="deleteBookmarkByHashRequest"/>
+      <wsdl:output message="impl:deleteBookmarkByHashResponse" name="deleteBookmarkByHashResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="deleteBookmark" parameterOrder="url">
+      <wsdl:input message="impl:deleteBookmarkRequest" name="deleteBookmarkRequest"/>
+      <wsdl:output message="impl:deleteBookmarkResponse" name="deleteBookmarkResponse"/>
+
+    </wsdl:operation>
+    <wsdl:operation name="editBookmark" parameterOrder="urlHash url title description tags isPublic">
+      <wsdl:input message="impl:editBookmarkRequest" name="editBookmarkRequest"/>
+      <wsdl:output message="impl:editBookmarkResponse" name="editBookmarkResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getBookmarkList" parameterOrder="tag date">
+      <wsdl:input message="impl:getBookmarkListRequest" name="getBookmarkListRequest"/>
+      <wsdl:output message="impl:getBookmarkListResponse" name="getBookmarkListResponse"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="getBookmarkTagList">
+      <wsdl:input message="impl:getBookmarkTagListRequest" name="getBookmarkTagListRequest"/>
+      <wsdl:output message="impl:getBookmarkTagListResponse" name="getBookmarkTagListResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="createNewXMLDocument" parameterOrder="rootElementName">
+      <wsdl:input message="impl:createNewXMLDocumentRequest" name="createNewXMLDocumentRequest"/>
+      <wsdl:output message="impl:createNewXMLDocumentResponse" name="createNewXMLDocumentResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="bookmarksSoapBinding" type="impl:BookmarkService">
+    <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="renameTag">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="renameTagRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="renameTagResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/bookmarks" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addBookmark">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="addBookmarkRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="addBookmarkResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/bookmarks" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deleteBookmarkByHash">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="deleteBookmarkByHashRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="deleteBookmarkByHashResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/bookmarks" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deleteBookmark">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="deleteBookmarkRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="deleteBookmarkResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/bookmarks" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="editBookmark">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="editBookmarkRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="editBookmarkResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/bookmarks" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getBookmarkList">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getBookmarkListRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getBookmarkListResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/bookmarks" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getBookmarkTagList">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getBookmarkTagListRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getBookmarkTagListResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/bookmarks" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="createNewXMLDocument">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="createNewXMLDocumentRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="createNewXMLDocumentResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/bookmarks" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="BookmarkServiceService">
+    <wsdl:port binding="impl:bookmarksSoapBinding" name="bookmarks">
+      <wsdlsoap:address location="http://yacy:8080/soap/bookmarks"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
