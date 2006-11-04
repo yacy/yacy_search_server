@@ -389,9 +389,10 @@ public final class httpd implements serverHandler {
             parseRequestLine(httpHeader.METHOD_GET,arg);
             
             // we now know the HTTP version. depending on that, we read the header            
-            String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
-            httpHeader header = (httpVersion.equals("HTTP/0.9")) ? new httpHeader(reverseMappingCache) 
-                                                                 : httpHeader.readHeader(this.prop,this.session);                  
+            String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
+            httpHeader header = (httpVersion.equals(httpHeader.HTTP_VERSION_0_9)) 
+            			      ? new httpHeader(reverseMappingCache) 
+                              : httpHeader.readHeader(this.prop,this.session);                  
             
             // handling transparent proxy support
             httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy); 
@@ -413,7 +414,7 @@ public final class httpd implements serverHandler {
                                 Constructor classConstructor = soapHandlerClass.getConstructor( new Class[] { serverSwitch.class } );
                                 this.soapHandler  = (httpdHandler) classConstructor.newInstance(new Object[] { switchboard });
                             } catch (Exception e) {
-                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
+                                sendRespondError(this.prop,this.session.out,4,501,null,"Error while initializing SOAP Excension",e);
                                 return serverCore.TERMINATE_CONNECTION;
                             } catch (NoClassDefFoundError e) {
                                 sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
@@ -490,8 +491,8 @@ public final class httpd implements serverHandler {
             
             // we now know the HTTP version. depending on that, we read the header
             httpHeader header;
-            String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
-            if (httpVersion.equals("HTTP/0.9")) header = new httpHeader(reverseMappingCache);
+            String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
+            if (httpVersion.equals(httpHeader.HTTP_VERSION_0_9)) header = new httpHeader(reverseMappingCache);
             else  header = httpHeader.readHeader(this.prop,this.session);
             
             // handle transparent proxy support
@@ -501,7 +502,7 @@ public final class httpd implements serverHandler {
             handlePersistentConnection(header);
             
             // return multi-line message
-            if (this.prop.getProperty("HOST").equals(virtualHost)) {
+            if (this.prop.getProperty(httpHeader.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (allowServer) {
                     if (handleServerAuthentication(header)) {
@@ -543,8 +544,8 @@ public final class httpd implements serverHandler {
             
             // we now know the HTTP version. depending on that, we read the header
             httpHeader header;
-            String httpVersion = this.prop.getProperty("HTTP", "HTTP/0.9");
-            if (httpVersion.equals("HTTP/0.9"))  header = new httpHeader(reverseMappingCache);
+            String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
+            if (httpVersion.equals(httpHeader.HTTP_VERSION_0_9))  header = new httpHeader(reverseMappingCache);
             else header = httpHeader.readHeader(this.prop,this.session);
             
             // handle transparent proxy support
@@ -554,14 +555,14 @@ public final class httpd implements serverHandler {
             handlePersistentConnection(header);
             
             // return multi-line message
-            if (prop.getProperty("HOST").equals(virtualHost)) {
+            if (prop.getProperty(httpHeader.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (allowServer) {
                     
                     /*
                      * Handling SOAP Requests here ...
                      */
-                    if (this.prop.containsKey("PATH") && this.prop.getProperty("PATH").startsWith("/soap/")) {
+                    if (this.prop.containsKey(httpHeader.CONNECTION_PROP_PATH) && this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH).startsWith("/soap/")) {
                         if (this.soapHandler == null) {
                             try {
                                 // creating the soap handler class by name
@@ -573,7 +574,7 @@ public final class httpd implements serverHandler {
                                 // creating the new object
                                 this.soapHandler = (httpdHandler)soapHandlerConstructor.newInstance( new Object[] { switchboard } );   
                             } catch (Exception e) {
-                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
+                            	sendRespondError(this.prop,this.session.out,4,501,null,"Error while initializing SOAP Excension",e);
                                 return serverCore.TERMINATE_CONNECTION;
                             } catch (NoClassDefFoundError e) {
                                 sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
