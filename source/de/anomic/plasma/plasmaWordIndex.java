@@ -197,6 +197,10 @@ public final class plasmaWordIndex implements indexRI {
         return entries.updated();
     }
     
+    public indexContainer emptyContainer(String wordHash) {
+    	return new indexContainer(wordHash, payloadrow);
+    }
+    
     public indexContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtInCase) {
         // set dhtInCase depending on wordHash
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(wordHash))) dhtInCase = true;
