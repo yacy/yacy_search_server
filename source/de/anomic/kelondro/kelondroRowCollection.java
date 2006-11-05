@@ -150,7 +150,7 @@ public class kelondroRowCollection {
     private final void ensureSize(int elements) {
         int needed = elements * rowdef.objectsize();
         if (chunkcache.length >= needed) return;
-        byte[] newChunkcache = new byte[needed * 2];
+        byte[] newChunkcache = new byte[needed * 12 / 10]; // increase space by 20%
         System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
         chunkcache = newChunkcache;
         newChunkcache = null;
