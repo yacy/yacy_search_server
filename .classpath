@@ -34,13 +34,6 @@
 	<classpathentry kind="lib" path="libx/xerces.jar"/>
 	<classpathentry kind="lib" path="libx/poi-3.0-alpha2-20060616.jar"/>
 	<classpathentry kind="lib" path="libx/poi-scratchpad-3.0-alpha2-20060616.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/axis.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/axis-ant.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/saaj.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/wsdl4j.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/commons-discovery.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/commons-logging.jar"/>
 	<classpathentry kind="lib" path="libx/inetlib.jar"/>
 	<classpathentry kind="lib" path="libx/gnumail.jar"/>
 	<classpathentry kind="lib" path="libx/activation.jar"/>
