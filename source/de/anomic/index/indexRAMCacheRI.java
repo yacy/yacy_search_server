@@ -45,11 +45,6 @@ public final class indexRAMCacheRI implements indexRI {
 
     // environment constants
     public  static final long wCacheMaxAge = 1000 * 60 * 30; // milliseconds; 30 minutes
-    public  static final kelondroRow bufferStructureBasis = new kelondroRow(
-            "byte[] wordhash-" + indexEntryAttribute.wordHashLength + ", " +
-            "Cardinal occ-4 {b256}, " +
-            "Cardinal time-8 {b256}, " +
-            "byte[] urlprops-" + indexURLEntry.urlEntryRow.objectsize());
         
     // class variables
     private final File databaseRoot;
@@ -61,6 +56,8 @@ public final class indexRAMCacheRI implements indexRI {
     public  int   cacheReferenceLimit;
     private final serverLog log;
     private String indexArrayFileName;
+    private kelondroRow payloadrow;
+    private kelondroRow bufferStructureBasis;
     
     // calculated constants
     private static String maxKey;
@@ -69,7 +66,7 @@ public final class indexRAMCacheRI implements indexRI {
         //minKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
     
-    public indexRAMCacheRI(File databaseRoot, int wCacheReferenceLimitInit, String dumpname, serverLog log) {
+    public indexRAMCacheRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceLimitInit, String dumpname, serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
@@ -81,7 +78,13 @@ public final class indexRAMCacheRI implements indexRI {
         this.cacheMaxCount = 10000;
         this.cacheReferenceLimit = wCacheReferenceLimitInit;
         this.log = log;
-        indexArrayFileName = dumpname;
+        this.indexArrayFileName = dumpname;
+        this.payloadrow = payloadrow;
+        this.bufferStructureBasis = new kelondroRow(
+                "byte[] wordhash-" + indexEntryAttribute.wordHashLength + ", " +
+                "Cardinal occ-4 {b256}, " +
+                "Cardinal time-8 {b256}, " +
+                "byte[] urlprops-" + payloadrow.objectsize());
         
         // read in dump of last session
         try {
@@ -91,6 +94,7 @@ public final class indexRAMCacheRI implements indexRI {
         }
     }
 
+    
     public synchronized long getUpdateTime(String wordHash) {
         indexContainer entries = getContainer(wordHash, null, false, -1);
         if (entries == null) return 0;
@@ -423,7 +427,7 @@ public final class indexRAMCacheRI implements indexRI {
             // put container into wCache
             String wordHash = container.getWordHash();
             indexContainer entries = (indexContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
-            if (entries == null) entries = new indexContainer(wordHash);
+            if (entries == null) entries = new indexContainer(wordHash, container.row());
             added = entries.add(container, -1);
             if (added > 0) {
                 cache.put(wordHash, entries);
@@ -436,7 +440,7 @@ public final class indexRAMCacheRI implements indexRI {
 
     public synchronized indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
             indexContainer container = (indexContainer) cache.get(wordHash);
-            if (container == null) container = new indexContainer(wordHash);
+            if (container == null) container = new indexContainer(wordHash, this.payloadrow);
             indexEntry[] entries = new indexEntry[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
                 cache.put(wordHash, container);

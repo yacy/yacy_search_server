@@ -50,6 +50,7 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.logging.serverLog;
@@ -59,6 +60,7 @@ public final class plasmaWordIndex implements indexRI {
 
     private static final String indexAssortmentClusterPath = "ACLUSTER";
     private static final int assortmentCount = 64;
+    private static final kelondroRow payloadrow = indexURLEntry.urlEntryRow;
     
     private final File                             oldDatabaseRoot;
     private final kelondroOrder                    indexOrder = new kelondroNaturalOrder(true);
@@ -73,9 +75,9 @@ public final class plasmaWordIndex implements indexRI {
     
     public plasmaWordIndex(File oldDatabaseRoot, File newIndexRoot, boolean dummy, int bufferkb, long preloadTime, serverLog log, boolean useCollectionIndex) throws IOException {
         this.oldDatabaseRoot = oldDatabaseRoot;
-        this.backend = new plasmaWordIndexFileCluster(oldDatabaseRoot, log);
-        this.dhtOutCache = new indexRAMCacheRI(oldDatabaseRoot, (useCollectionIndex) ? 1024 : 64, "indexDump1.array", log);
-        this.dhtInCache  = new indexRAMCacheRI(oldDatabaseRoot, (useCollectionIndex) ? 1024 : 64, "indexDump2.array", log);
+        this.backend = new plasmaWordIndexFileCluster(oldDatabaseRoot, payloadrow, log);
+        this.dhtOutCache = new indexRAMCacheRI(oldDatabaseRoot, payloadrow, (useCollectionIndex) ? 1024 : 64, "indexDump1.array", log);
+        this.dhtInCache  = new indexRAMCacheRI(oldDatabaseRoot, payloadrow, (useCollectionIndex) ? 1024 : 64, "indexDump2.array", log);
 
         // create assortment cluster path
         File assortmentClusterPath = new File(oldDatabaseRoot, indexAssortmentClusterPath);
@@ -85,15 +87,15 @@ public final class plasmaWordIndex implements indexRI {
         File textindexpath = new File(newIndexRoot, "PUBLIC/TEXT");
         if (!(textindexpath.exists())) textindexpath.mkdirs();
         if (useCollectionIndex) {
-            this.collections = new indexCollectionRI(textindexpath, "test_generation1", bufferkb * 1024, preloadTime);
+            this.collections = new indexCollectionRI(textindexpath, "test_generation1", bufferkb * 1024, preloadTime, payloadrow);
             if (assortmentClusterPath.exists())
-                this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, assortmentBufferSize, preloadTime, log);
+                this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, payloadrow, assortmentBufferSize, preloadTime, log);
             else
                 this.assortmentCluster = null;
         } else {
             this.collections = null;
             if (!(assortmentClusterPath.exists())) assortmentClusterPath.mkdirs();
-            this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, assortmentBufferSize, preloadTime, log);
+            this.assortmentCluster = new plasmaWordIndexAssortmentCluster(assortmentClusterPath, assortmentCount, payloadrow, assortmentBufferSize, preloadTime, log);
         }
         
         busyCacheFlush = false;
@@ -102,6 +104,10 @@ public final class plasmaWordIndex implements indexRI {
         this.idleDivisor = 420;
     }
 
+    public kelondroRow payloadrow() {
+        return payloadrow;
+    }
+    
     public File getRoot() {
         return oldDatabaseRoot;
     }
@@ -459,7 +465,7 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public indexContainer deleteContainer(String wordHash) {
-            indexContainer c = new indexContainer(wordHash);
+            indexContainer c = new indexContainer(wordHash, payloadrow);
             c.add(dhtInCache.deleteContainer(wordHash), -1);
             c.add(dhtOutCache.deleteContainer(wordHash), -1);
             if (useCollectionIndex) c.add(collections.deleteContainer(wordHash), -1);
@@ -712,7 +718,7 @@ public final class plasmaWordIndex implements indexRI {
         try {
             entity = new plasmaWordIndexFile(oldDatabaseRoot, wordhash, true);
             int size = entity.size();
-            indexContainer container = new indexContainer(wordhash);
+            indexContainer container = new indexContainer(wordhash, payloadrow);
 
             try {
                 Iterator entries = entity.elements(true);

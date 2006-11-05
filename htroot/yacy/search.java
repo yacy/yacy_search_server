@@ -207,10 +207,15 @@ public final class search {
 
                 // join and order the result
                 indexContainer localResults = theSearch.localSearchJoin(containers.values());
-                joincount = localResults.size();
-                prop.put("joincount", Integer.toString(joincount));
-                acc = theSearch.orderFinal(localResults);
-
+                if (localResults == null) {
+                    joincount = 0;
+                    prop.put("joincount", 0);
+                    acc = null;
+                } else {
+                    joincount = localResults.size();
+                    prop.put("joincount", Integer.toString(joincount));
+                    acc = theSearch.orderFinal(localResults);
+                }
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search

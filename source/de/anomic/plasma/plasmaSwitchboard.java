@@ -1662,7 +1662,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = indexEntryAttribute.word2hash(word);
-                                indexContainer wordIdxContainer = new indexContainer(wordHash);
                                 indexEntry wordIdxEntry = new indexURLEntry(
                                         urlHash,
                                         urlLength, urlComps,
@@ -1684,6 +1683,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                         ioLinks[1].intValue(),
                                         true
                                 );
+                                indexContainer wordIdxContainer = new indexContainer(wordHash, wordIndex.payloadrow());
                                 wordIdxContainer.add(wordIdxEntry);
                                 tmpContainers.add(wordIdxContainer);
                             }

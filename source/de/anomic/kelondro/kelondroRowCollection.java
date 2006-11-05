@@ -417,13 +417,13 @@ public class kelondroRowCollection {
         if (this.chunkcount * this.rowdef.objectsize() < this.chunkcache.length) {
             // there is space in the chunkcache that we can use as buffer
             System.arraycopy(chunkcache, this.rowdef.objectsize() * i, chunkcache, chunkcache.length - this.rowdef.objectsize(), this.rowdef.objectsize());
-            System.arraycopy(chunkcache, this.rowdef.objectsize() *j , chunkcache, this.rowdef.objectsize() * i, this.rowdef.objectsize());
+            System.arraycopy(chunkcache, this.rowdef.objectsize() * j, chunkcache, this.rowdef.objectsize() * i, this.rowdef.objectsize());
             System.arraycopy(chunkcache, chunkcache.length - this.rowdef.objectsize(), chunkcache, this.rowdef.objectsize() * j, this.rowdef.objectsize());
         } else {
             // allocate a chunk to use as buffer
             byte[] a = new byte[this.rowdef.objectsize()];
             System.arraycopy(chunkcache, this.rowdef.objectsize() * i, a, 0, this.rowdef.objectsize());
-            System.arraycopy(chunkcache, this.rowdef.objectsize() * j , chunkcache, this.rowdef.objectsize() * i, this.rowdef.objectsize());
+            System.arraycopy(chunkcache, this.rowdef.objectsize() * j, chunkcache, this.rowdef.objectsize() * i, this.rowdef.objectsize());
             System.arraycopy(a, 0, chunkcache, this.rowdef.objectsize() * j, this.rowdef.objectsize());
         }
         if (i == p) return j; else if (j == p) return i; else return p;

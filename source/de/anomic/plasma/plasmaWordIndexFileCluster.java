@@ -54,6 +54,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexRI;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -63,9 +64,11 @@ public class plasmaWordIndexFileCluster implements indexRI {
     private final File      databaseRoot;
     private final serverLog log;
     private int       size;
+    private kelondroRow payloadrow;
 
-    public plasmaWordIndexFileCluster(File databaseRoot, serverLog log) {
-	this.databaseRoot = databaseRoot;
+    public plasmaWordIndexFileCluster(File databaseRoot, kelondroRow payloadrow, serverLog log) {
+        this.databaseRoot = databaseRoot;
+        this.payloadrow = payloadrow;
         this.log = log;
         this.size = 0;
     }
@@ -231,7 +234,7 @@ public class plasmaWordIndexFileCluster implements indexRI {
         if ((maxTime < 0) || (maxTime > 60000)) maxTime=60000; // maximum is one minute
         if (exists(wordHash)) {
             plasmaWordIndexFile entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
-            indexContainer container = new indexContainer(wordHash);
+            indexContainer container = new indexContainer(wordHash, payloadrow);
             indexEntry entry;
             Iterator i = entity.elements(true);
             while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) {
@@ -240,7 +243,7 @@ public class plasmaWordIndexFileCluster implements indexRI {
             }
             return container;
         } else {
-            return new indexContainer(wordHash);
+            return new indexContainer(wordHash, payloadrow);
         }
     }
     
@@ -255,7 +258,7 @@ public class plasmaWordIndexFileCluster implements indexRI {
     
     public indexContainer deleteContainer(String wordHash) {
         plasmaWordIndexFile.removePlasmaIndex(databaseRoot, wordHash);
-        return new indexContainer(wordHash);
+        return new indexContainer(wordHash, payloadrow);
     }
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
@@ -300,7 +303,7 @@ public class plasmaWordIndexFileCluster implements indexRI {
     }
     
     public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
-        indexContainer container = new indexContainer(wordHash);
+        indexContainer container = new indexContainer(wordHash, payloadrow);
         container.add(newEntry);
         return addEntries(container, updateTime, dhtCase);
     }

@@ -43,7 +43,6 @@
 
 package de.anomic.plasma.parser.swf;
 
-import java.io.File;
 import java.io.InputStream;
 import de.anomic.net.URL;
 import java.util.Hashtable;

@@ -494,7 +494,7 @@ public final class yacyClient {
             final int words = wordhashes.length() / indexEntryAttribute.wordHashLength;
             indexContainer[] container = new indexContainer[words];
             for (int i = 0; i < words; i++) {
-                container[i] = new indexContainer(wordhashes.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
+                container[i] = new indexContainer(wordhashes.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength), indexURLEntry.urlEntryRow);
             }
 
             // insert results to containers

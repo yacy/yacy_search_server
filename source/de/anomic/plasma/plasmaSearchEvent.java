@@ -91,7 +91,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.ranking = ranking;
         this.urlStore = urlStore;
         this.snippetCache = snippetCache;
-        this.rcContainers = new indexContainer(null);
+        this.rcContainers = new indexContainer(null, wordIndex.payloadrow());
         this.rcContainerFlushCount = 0;
         this.rcAbstracts = (query.size() > 1) ? new TreeMap() : null; // generate abstracts only for combined searches
         this.profileLocal = localTiming;
@@ -195,12 +195,14 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
                 // combine the result and order
                 plasmaSearchResult result = orderFinal(rcLocal);
-                result.globalContributions = globalContributions;
-                result.localContributions = rcLocal.size();
-                
-                // flush results in a separate thread
-                this.start(); // start to flush results
+                if (result != null) {
+                    result.globalContributions = globalContributions;
+                    result.localContributions = rcLocal.size();
 
+                    // flush results in a separate thread
+                    this.start(); // start to flush results
+                }
+                
                 // return search result
                 log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
                 lastEvent = this;
@@ -209,7 +211,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 Map searchContainerMap = localSearchContainers(null);
                 indexContainer rcLocal = localSearchJoin((searchContainerMap == null) ? null : searchContainerMap.values());
                 plasmaSearchResult result = orderFinal(rcLocal);
-                result.localContributions = rcLocal.size();
+                result.localContributions = (rcLocal == null) ? 0 : rcLocal.size();
 
                 // return search result
                 log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
@@ -333,9 +335,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // join a search result and return the joincount (number of pages after join)
 
         // since this is a conjunction we return an empty entity if any word is not known
-        if (containers == null) {
-            return new indexContainer(null);
-        }
+        if (containers == null) return null;
 
         // join the result
         profileLocal.startTimer();
@@ -352,7 +352,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
-        indexContainer searchResult = new indexContainer(null);
+        if (rcLocal == null) return null;
+        indexContainer searchResult = new indexContainer(null, rcLocal.row());
         long preorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         
         profileLocal.startTimer();
@@ -416,6 +417,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private void prefetchLocal(indexContainer rcLocal, long timeout) {
         // pre-fetch some urls to fill LURL ram cache
 
+        if (rcLocal == null) return;
         plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, rcLocal, timeout - System.currentTimeMillis());
         preorder.remove(true, true);
         

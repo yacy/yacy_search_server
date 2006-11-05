@@ -37,12 +37,18 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     private kelondroProfile profile;
     private TreeSet removeMarker;
 
+    public kelondroRowSet(kelondroRow rowdef, int objectCount, byte[] cache, kelondroOrder sortOrder, int sortColumn, int sortBound) {
+        super(rowdef, objectCount, cache, sortOrder, sortColumn, sortBound);
+        this.removeMarker = new TreeSet();
+        this.profile = new kelondroProfile();
+    }
+        
     public kelondroRowSet(kelondroRowSet rs) {
         super(rs);
         this.profile = rs.profile;
         this.removeMarker = rs.removeMarker;
     }
-    
+
     public kelondroRowSet(kelondroRow rowdef) {
         super(rowdef, 0);
         this.removeMarker = new TreeSet();

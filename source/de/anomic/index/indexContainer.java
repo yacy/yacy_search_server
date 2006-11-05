@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
@@ -43,8 +42,13 @@ public class indexContainer extends kelondroRowSet {
 
     private String wordHash;
 
-    public indexContainer(String wordHash) {
-        this(wordHash, new kelondroNaturalOrder(true), 0);
+    public indexContainer(String wordHash, kelondroRow rowdef, int objectCount, byte[] cache) {
+        super(rowdef, objectCount, cache, kelondroBase64Order.enhancedCoder, 0, 0);
+        this.wordHash = wordHash;
+    }
+    
+    public indexContainer(String wordHash, kelondroRow rowdef) {
+        this(wordHash, rowdef, kelondroBase64Order.enhancedCoder, 0);
     }
     
     public indexContainer(String wordHash, kelondroRowSet collection) {
@@ -52,15 +56,15 @@ public class indexContainer extends kelondroRowSet {
         this.wordHash = wordHash;
     }
     
-    public indexContainer(String wordHash, kelondroOrder ordering, int column) {
-        super(indexURLEntry.urlEntryRow);
+    public indexContainer(String wordHash, kelondroRow rowdef, kelondroOrder ordering, int column) {
+        super(rowdef);
         this.wordHash = wordHash;
         this.lastTimeWrote = 0;
         this.setOrdering(ordering, column);
     }
     
     public indexContainer topLevelClone() {
-        indexContainer newContainer = new indexContainer(this.wordHash, this.sortOrder, this.sortColumn);
+        indexContainer newContainer = new indexContainer(this.wordHash, this.rowdef, this.sortOrder, this.sortColumn);
         newContainer.add(this, -1);
         return newContainer;
     }
@@ -220,7 +224,7 @@ public class indexContainer extends kelondroRowSet {
             singleContainer = (indexContainer) i.next();
             
             // check result
-            if ((singleContainer == null) || (singleContainer.size() == 0)) return new indexContainer(null); // as this is a cunjunction of searches, we have no result if any word is not known
+            if ((singleContainer == null) || (singleContainer.size() == 0)) return null; // as this is a cunjunction of searches, we have no result if any word is not known
             
             // store result in order of result size
             map.put(new Long(singleContainer.size() * 1000 + count), singleContainer);
@@ -228,7 +232,7 @@ public class indexContainer extends kelondroRowSet {
         }
         
         // check if there is any result
-        if (map.size() == 0) return new indexContainer(null); // no result, nothing found
+        if (map.size() == 0) return null; // no result, nothing found
         
         // the map now holds the search results in order of number of hits per word
         // we now must pairwise build up a conjunction of these sets
@@ -247,7 +251,7 @@ public class indexContainer extends kelondroRowSet {
         }
 
         // in 'searchResult' is now the combined search result
-        if (searchResult.size() == 0) return new indexContainer(null);
+        if (searchResult.size() == 0) return null;
         return searchResult;
     }
     
@@ -260,7 +264,7 @@ public class indexContainer extends kelondroRowSet {
     
     public static indexContainer joinConstructive(indexContainer i1, indexContainer i2, long time, int maxDistance) {
         if ((i1 == null) || (i2 == null)) return null;
-        if ((i1.size() == 0) || (i2.size() == 0)) return new indexContainer(null);
+        if ((i1.size() == 0) || (i2.size() == 0)) return null;
         
         // decide which method to use
         int high = ((i1.size() > i2.size()) ? i1.size() : i2.size());
@@ -281,7 +285,8 @@ public class indexContainer extends kelondroRowSet {
     
     private static indexContainer joinConstructiveByTest(indexContainer small, indexContainer large, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY TEST");
-        indexContainer conj = new indexContainer(null); // start with empty search result
+        assert small.rowdef.equals(large);
+        indexContainer conj = new indexContainer(null, small.rowdef); // start with empty search result
         Iterator se = small.entries();
         indexEntry ie0, ie1;
         long stamp = System.currentTimeMillis();
@@ -299,7 +304,8 @@ public class indexContainer extends kelondroRowSet {
     
     private static indexContainer joinConstructiveByEnumeration(indexContainer i1, indexContainer i2, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
-        indexContainer conj = new indexContainer(null); // start with empty search result
+        assert i1.rowdef.equals(i2);
+        indexContainer conj = new indexContainer(null, i1.rowdef); // start with empty search result
         if (!((i1.order().signature().equals(i2.order().signature())) &&
               (i1.primarykey() == i2.primarykey()))) return conj; // ordering must be equal
         Iterator e1 = i1.entries();

@@ -32,8 +32,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCollectionIndex;
-import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOutOfLimitsException;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowCollection;
@@ -44,18 +44,17 @@ public class indexCollectionRI implements indexRI {
 
     kelondroCollectionIndex collectionIndex;
     
-    public indexCollectionRI(File path, String filenameStub, long buffersize, long preloadTime) {
-        kelondroRow rowdef = indexURLEntry.urlEntryRow;
+    public indexCollectionRI(File path, String filenameStub, long buffersize, long preloadTime, kelondroRow payloadrow) {
         try {
             collectionIndex = new kelondroCollectionIndex(
                     path,
                     filenameStub,
                     12 /*keyLength*/,
-                    kelondroNaturalOrder.naturalOrder,
+                    kelondroBase64Order.enhancedCoder,
                     buffersize,
                     preloadTime,
                     4 /*loadfactor*/,
-                    rowdef);
+                    payloadrow);
         } catch (IOException e) {
             serverLog.logSevere("PLASMA", "unable to open collection index at " + path.toString() + ":" + e.getMessage());
         }
@@ -154,7 +153,7 @@ public class indexCollectionRI implements indexRI {
     }
 
     public synchronized indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
-        indexContainer container = new indexContainer(wordHash);
+        indexContainer container = new indexContainer(wordHash, collectionIndex.payloadRow());
         container.add(newEntry);
         return addEntries(container, updateTime, dhtCase);
     }

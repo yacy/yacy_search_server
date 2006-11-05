@@ -74,6 +74,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
@@ -1235,7 +1236,7 @@ public final class yacy {
                 WordIndex = new plasmaWordIndex(homeDBroot, indexRoot, true, 8*1024*1024, 3000, log, sps.getConfigBool("useCollectionIndex", false));
                 indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
             } else if (resource.equals("assortments")) {
-                plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, 16*1024*1024, 3000, log);
+                plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, indexURLEntry.urlEntryRow, 16*1024*1024, 3000, log);
                 indexContainerIterator = assortmentCluster.wordContainers(wordChunkStartHash, true, false);
             } /*else if (resource.startsWith("assortment")) {
                 int a = Integer.parseInt(resource.substring(10));

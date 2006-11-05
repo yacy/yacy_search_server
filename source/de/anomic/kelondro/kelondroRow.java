@@ -470,4 +470,12 @@ public class kelondroRow {
         return true;
     }
     
+    public boolean equals(kelondroRow otherRow) {
+        if (this.objectsize != otherRow.objectsize) return false;
+        for (int i = 0; i < otherRow.row.length; i++) {
+            if (!(this.row[i].equals(otherRow.row[i]))) return false;
+        }
+        return true;
+    }
+    
 }

@@ -43,7 +43,7 @@ public class kelondroCollectionIndex {
     private String        filenameStub;
     private int           loadfactor;
     private Map           arrays; // Map of (partitionNumber"-"chunksize)/kelondroFixedWidthArray - Objects
-    private kelondroRow   playloadrow; // definition of the payload (chunks inside the collections)
+    private kelondroRow   payloadrow; // definition of the payload (chunks inside the collections)
     //  private int partitions;  // this is the maxmimum number of array files; yet not used
     
     private static final int idx_col_key        = 0;  // the index
@@ -66,6 +66,10 @@ public class kelondroCollectionIndex {
             "short lastread-2 {b256}, " +
             "short lastwrote-2 {b256}"
             );
+    }
+    
+    public kelondroRow payloadRow() {
+        return this.payloadrow;
     }
     
     private static String fillZ(String s, int len) {
@@ -94,7 +98,7 @@ public class kelondroCollectionIndex {
         this.path = path;
         this.filenameStub = filenameStub;
         this.keylength = keyLength;
-        this.playloadrow = rowdef;
+        this.payloadrow = rowdef;
         this.loadfactor = loadfactor;
 
         boolean ramIndexGeneration = false;
@@ -151,7 +155,7 @@ public class kelondroCollectionIndex {
                     key = aentry.getColBytes(0);
                     assert (key != null);
                     if (key == null) continue; // skip deleted entries
-                    kelondroRowSet indexrows = new kelondroRowSet(this.playloadrow, aentry.getColBytes(1));
+                    kelondroRowSet indexrows = new kelondroRowSet(this.payloadrow, aentry.getColBytes(1));
                     ientry = irow.newEntry();
                     ientry.setCol(idx_col_key,        key);
                     ientry.setCol(idx_col_chunksize,  chunksize);
@@ -199,11 +203,11 @@ public class kelondroCollectionIndex {
     }
     
     private kelondroFixedWidthArray openArrayFile(int partitionNumber, int serialNumber, boolean create) throws IOException {
-        File f = arrayFile(path, filenameStub, loadfactor, playloadrow.objectsize(), partitionNumber, serialNumber);
+        File f = arrayFile(path, filenameStub, loadfactor, payloadrow.objectsize(), partitionNumber, serialNumber);
         int load = arrayCapacity(partitionNumber);
         kelondroRow rowdef = new kelondroRow(
                 "byte[] key-" + keylength + "," +
-                "byte[] collection-" + (kelondroRowCollection.exportOverheadSize + load * this.playloadrow.objectsize())
+                "byte[] collection-" + (kelondroRowCollection.exportOverheadSize + load * this.payloadrow.objectsize())
                 );
         if ((!(f.exists())) && (!create)) return null;
         kelondroFixedWidthArray a = new kelondroFixedWidthArray(f, rowdef, 0);
@@ -270,7 +274,7 @@ public class kelondroCollectionIndex {
                 // the collection is new
                 int newPartitionNumber = arrayIndex(collection.size());
                 indexrow = index.row().newEntry();
-                kelondroFixedWidthArray array = getArray(newPartitionNumber, 0, this.playloadrow.objectsize());
+                kelondroFixedWidthArray array = getArray(newPartitionNumber, 0, this.payloadrow.objectsize());
                     
                 // define row
                 kelondroRow.Entry arrayEntry = array.row().newEntry();
@@ -282,7 +286,7 @@ public class kelondroCollectionIndex {
                    
                 // store the new row number in the index
                 indexrow.setCol(idx_col_key, key);
-                indexrow.setCol(idx_col_chunksize, this.playloadrow.objectsize());
+                indexrow.setCol(idx_col_chunksize, this.payloadrow.objectsize());
                 indexrow.setCol(idx_col_chunkcount, collection.size());
                 indexrow.setCol(idx_col_clusteridx, (byte) newPartitionNumber);
                 indexrow.setCol(idx_col_flags, (byte) 0);
@@ -348,7 +352,7 @@ public class kelondroCollectionIndex {
                 // we don't need a new slot, just write into the old one
 
                 // find array file
-                kelondroFixedWidthArray array = getArray(newPartitionNumber, newSerialNumber, this.playloadrow.objectsize());
+                kelondroFixedWidthArray array = getArray(newPartitionNumber, newSerialNumber, this.payloadrow.objectsize());
 
                 // define row
                 kelondroRow.Entry arrayEntry = array.row().newEntry();
@@ -372,7 +376,7 @@ public class kelondroCollectionIndex {
                 array.remove(oldrownumber);
 
                 // write a new entry in the other array
-                array = getArray(newPartitionNumber, 0, this.playloadrow.objectsize());
+                array = getArray(newPartitionNumber, 0, this.payloadrow.objectsize());
                 
                 // define row
                 kelondroRow.Entry arrayEntry = array.row().newEntry();
@@ -438,7 +442,7 @@ public class kelondroCollectionIndex {
         if (arrayrow == null) throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString(), "array does not contain expected row");
 
         // read the row and define a collection
-        kelondroRowSet collection = new kelondroRowSet(this.playloadrow, arrayrow.getColBytes(1)); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
+        kelondroRowSet collection = new kelondroRowSet(this.payloadrow, arrayrow.getColBytes(1)); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
         byte[] key = indexrow.getColBytes(idx_col_key);
         if (index.order().compare(arrayrow.getColBytes(0), key) != 0) {
             // check if we got the right row; this row is wrong. Fix it:
@@ -446,7 +450,7 @@ public class kelondroCollectionIndex {
             // store the row number in the index; this may be a double-entry, but better than nothing
             kelondroRow.Entry indexEntry = index.row().newEntry();
             indexEntry.setCol(idx_col_key, arrayrow.getColBytes(0));
-            indexEntry.setCol(idx_col_chunksize, this.playloadrow.objectsize());
+            indexEntry.setCol(idx_col_chunksize, this.payloadrow.objectsize());
             indexEntry.setCol(idx_col_chunkcount, collection.size());
             indexEntry.setCol(idx_col_clusteridx, (byte) clusteridx);
             indexEntry.setCol(idx_col_flags, (byte) 0);
