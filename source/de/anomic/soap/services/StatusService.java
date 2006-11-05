@@ -61,6 +61,7 @@ public class StatusService extends AbstractService {
      */    
     private static final String TEMPLATE_NETWORK_XML = "Network.xml";    
     private static final String TEMPLATE_QUEUES_XML = "xml/queues_p.xml";
+    private static final String TEMPLATE_STATUS_XML = "xml/status_p.xml";
     
     
     /**
@@ -126,4 +127,20 @@ public class StatusService extends AbstractService {
         // sending back the result to the client
         return this.convertContentToXML(result);        
     }
+    
+    /**
+     * Query status information about this peer
+     * @return
+     * @throws Exception
+     */
+    public Document getStatus() throws Exception {
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);          	
+        
+        // generating the template containing the network status information
+        byte[] result = writeTemplate(TEMPLATE_STATUS_XML, new serverObjects());
+        
+        // sending back the result to the client
+        return this.convertContentToXML(result);        
+    }       
 }

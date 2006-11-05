@@ -26,7 +26,12 @@ public class StatusServiceTest extends AbstractServiceTest {
 	}
 	
 	public void testGetQueueStatus() throws RemoteException {
-		Document xml = ((StatusService)service).getQueueStatus(null,null,null,null);
+		Document xml = ((StatusService)service).getQueueStatus(10,10,10,10);
+		System.out.println(XMLUtils.DocumentToString(xml));
+	}
+	
+	public void testStatus() throws RemoteException {
+		Document xml = ((StatusService)service).getStatus();
 		System.out.println(XMLUtils.DocumentToString(xml));
 	}
 }

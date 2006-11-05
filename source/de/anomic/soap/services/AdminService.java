@@ -130,7 +130,7 @@ public class AdminService extends AbstractService {
 	 * ===================================================================== */
     private static final String TEMPLATE_CONFIG_XML = "xml/config_p.xml";   
     private static final String TEMPLATE_VERSION_XML = "xml/version.xml";
-    private static final String TEMPLATE_PROFILE_XML = "ViewProfile.xml";
+    private static final String TEMPLATE_PROFILE_XML = "ViewProfile.xml";    
     
     /**
      * This function can be used to set a configuration option
@@ -143,7 +143,7 @@ public class AdminService extends AbstractService {
     	if ((key == null)||(key.length() == 0)) throw new IllegalArgumentException("Key must not be null or empty.");
     	
         // extracting the message context
-        extractMessageContext(true);  
+        extractMessageContext(AUTHENTICATION_NEEDED);  
     	
     	// add key to switchboard
         if (value == null) value = "";
@@ -164,7 +164,7 @@ public class AdminService extends AbstractService {
     	if (keys.length != values.length) throw new IllegalArgumentException("Invalid input. " + keys.length + " keys but " + values.length + " values received.");
     	
         // extracting the message context
-        extractMessageContext(true);
+        extractMessageContext(AUTHENTICATION_NEEDED);
         
         for (int i=0; i < keys.length; i++) {
         	// get the key
@@ -191,7 +191,7 @@ public class AdminService extends AbstractService {
     	if ((key == null)||(key.length() == 0)) throw new IllegalArgumentException("Key must not be null or empty.");
     	
         // extracting the message context
-        extractMessageContext(true);  
+        extractMessageContext(AUTHENTICATION_NEEDED);  
         
         // get the config property
     	return this.switchboard.getConfig(key,null);    	
@@ -208,7 +208,7 @@ public class AdminService extends AbstractService {
     	if ((keys == null)||(keys.length== 0)) throw new IllegalArgumentException("Key array must not be null or empty.");
     	
         // extracting the message context
-        extractMessageContext(true);      	
+        extractMessageContext(AUTHENTICATION_NEEDED);      	
     	
     	// get the properties
         ArrayList returnValues = new ArrayList(keys.length);
@@ -242,7 +242,7 @@ public class AdminService extends AbstractService {
      */
     public Document getConfigPropertyList() throws Exception {
         // extracting the message context
-        extractMessageContext(true);          	
+        extractMessageContext(AUTHENTICATION_NEEDED);          	
         
         // generating the template containing the network status information
         byte[] result = writeTemplate(TEMPLATE_CONFIG_XML, new serverObjects());
@@ -267,14 +267,14 @@ public class AdminService extends AbstractService {
      */
     public Document getVersion() throws Exception {
         // extracting the message context
-        extractMessageContext(true);          	
+        extractMessageContext(AUTHENTICATION_NEEDED);          	
         
         // generating the template containing the network status information
         byte[] result = writeTemplate(TEMPLATE_VERSION_XML, new serverObjects());
         
         // sending back the result to the client
         return this.convertContentToXML(result);        
-    }    
+    }        
     
     /**
      * This function can be used to configure the peer name
@@ -286,7 +286,7 @@ public class AdminService extends AbstractService {
     	if ((newName == null)||(newName.length() == 0)) throw new IllegalArgumentException("The peer name must not be null or empty.");    	
     	
         // extracting the message context
-        extractMessageContext(true);                    
+        extractMessageContext(AUTHENTICATION_NEEDED);                    
         
         // get the previous name
         String prevName = this.switchboard.getConfig(PEER_NAME, "");
@@ -325,7 +325,7 @@ public class AdminService extends AbstractService {
     	if (newPort <= 0) throw new IllegalArgumentException("Invalid port number");
     	
         // extracting the message context
-        extractMessageContext(true);        
+        extractMessageContext(AUTHENTICATION_NEEDED);        
         
         // get the old value
         int oldPort = (int) this.switchboard.getConfigLong(PORT, 8080);
@@ -349,7 +349,7 @@ public class AdminService extends AbstractService {
      */
     public void enableRemoteProxy(boolean enableProxy) throws AxisFault {
         // extracting the message context
-        extractMessageContext(true);   
+        extractMessageContext(AUTHENTICATION_NEEDED);   
         
         // check for errors
         String proxyHost = this.switchboard.getConfig(REMOTE_PROXY_HOST, "");
@@ -392,7 +392,7 @@ public class AdminService extends AbstractService {
     		Boolean useProxy4SSL    		
     ) throws AxisFault {
         // extracting the message context
-        extractMessageContext(true);       	
+        extractMessageContext(AUTHENTICATION_NEEDED);       	
         
         if (proxyHost != null)
         	this.switchboard.setConfig(REMOTE_PROXY_HOST, proxyHost);
@@ -425,7 +425,7 @@ public class AdminService extends AbstractService {
      */
     public void shutdownPeer() throws AxisFault {
         // extracting the message context
-        extractMessageContext(true);        
+        extractMessageContext(AUTHENTICATION_NEEDED);        
         
         this.switchboard.setConfig(RESTART, "false");
         
@@ -447,7 +447,7 @@ public class AdminService extends AbstractService {
     		Integer maximumAllowedPPM
     ) throws AxisFault {
         // extracting the message context
-        extractMessageContext(true);     
+        extractMessageContext(AUTHENTICATION_NEEDED);     
         
         // if the ppm was set, change it
         if (maximumAllowedPPM != null) {
@@ -486,7 +486,7 @@ public class AdminService extends AbstractService {
     		Boolean indexReceiveBlockBlacklist
     ) throws AxisFault {
         // extracting the message context
-        extractMessageContext(true);       
+        extractMessageContext(AUTHENTICATION_NEEDED);       
         
         // index Distribution on/off
         if (indexDistribution != null) {
