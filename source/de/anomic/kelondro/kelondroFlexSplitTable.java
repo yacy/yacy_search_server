@@ -32,6 +32,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class kelondroFlexSplitTable implements kelondroIndex {
 
@@ -57,19 +58,33 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         String[] dir = path.list();
         String date;
         
-        // first pass: count tables
-        int count = 0;
-        for (int i = 0; i < dir.length; i++) if (dir[i].startsWith(tablename)) count++;
-        
-        // second pass: open tables
+        // first pass: find tables
+        HashMap t = new HashMap(); // file/Integer(size) relation
+        int size, sum = 0;
         for (int i = 0; i < dir.length; i++) {
             if ((dir[i].startsWith(tablename)) &&
                 (dir[i].charAt(tablename.length()) == '.') &&
                 (dir[i].length() == tablename.length() + 7)) {
-                // open table
-                date = dir[i].substring(tablename.length() + 1);
-                this.tables.put(date, new kelondroCache(new kelondroFlexTable(path, dir[i], buffersize / count / 2, preloadTime, rowdef, objectOrder), buffersize / count / 2, true, false));
+                size = kelondroFlexTable.staticSize(path, dir[i]);
+                if (size > 0) {
+                    t.put(dir[i], new Integer(size));
+                    sum += size;
+                }
             }
+        }
+        
+        // second pass: open tables
+        Iterator i = t.entrySet().iterator();
+        Map.Entry entry;
+        String f;
+        long bs;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            f = (String) entry.getKey();
+            size = ((Integer) entry.getValue()).intValue();
+            date = f.substring(tablename.length() + 1);
+            bs = buffersize * size / sum;
+            tables.put(date, new kelondroCache(new kelondroFlexTable(path, f, bs / 2, preloadTime, rowdef, objectOrder), bs / 2, true, false));
         }
     }
         

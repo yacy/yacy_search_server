@@ -104,6 +104,21 @@ public class kelondroFlexWidthArray implements kelondroArray {
         }
     }
     
+    public static int staticsize(File path, String tablename) {
+        
+        // check if table directory exists
+        File tabledir = new File(path, tablename);
+        if (tabledir.exists()) {
+            if (!(tabledir.isDirectory())) return 0;
+        } else {
+            return 0;
+        }
+
+        // open existing files
+        File file = new File(tabledir, "col.000.list");
+        return kelondroRecords.staticsize(file);
+    }
+    
     public static void delete(File path, String tablename) {
         File tabledir = new File(path, tablename);
         if ((tabledir.exists()) && (!(tabledir.isDirectory()))) {

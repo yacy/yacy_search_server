@@ -69,6 +69,7 @@
 package de.anomic.kelondro;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -192,6 +193,24 @@ public class kelondroRecords {
             return this.USEDC + this.FREEC;
         }
     }
+
+    public static int staticsize(File file) {
+        if (!(file.exists())) return 0;
+        try {
+            kelondroRA ra = new kelondroFileRA(file.getCanonicalPath());
+            kelondroIOChunks entryFile = new kelondroRAIOChunks(ra, ra.name());
+
+            int USEDC = entryFile.readInt(POS_USEDC);
+            entryFile.close();
+            ra.close();
+            return USEDC;
+        } catch (FileNotFoundException e) {
+            return 0;
+        } catch (IOException e) {
+            return 0;
+        }
+    }
+
     
     public kelondroRecords(File file, long buffersize /* bytes */, long preloadTime,
                            short ohbytec, short ohhandlec,

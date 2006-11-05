@@ -38,8 +38,13 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     private boolean RAMIndex;
     
     public kelondroFlexTable(File path, String tablename, long buffersize, long preloadTime, kelondroRow rowdef, kelondroOrder objectOrder) throws IOException {
-        super(path, tablename, rowdef);
-        File newpath = new File(path, tablename);
+    	// the buffersize applies to a possible load of the ram-index
+    	// if the ram is not sufficient, a tree file is generated
+    	// if, and only if a tree file exists, the preload time is applied
+    	super(path, tablename, rowdef);
+    	long neededRAM = (super.row().column(0).cellwidth() + 4) * 12 / 10 * super.size();
+    	
+    	File newpath = new File(path, tablename);
         File indexfile = new File(newpath, "col.000.index");
         kelondroIndex ki = null;
         String description = new String(this.col[0].getDescription());
@@ -48,28 +53,16 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         System.out.println("*** Last Startup time: " + stt + " milliseconds");
         long start = System.currentTimeMillis();
 
-        if ((preloadTime < 0) && (indexfile.exists())) {
-            // delete existing index file
-            System.out.println("*** Delete File index " + indexfile);
-            indexfile.delete();
-        }
-        if (indexfile.exists()) {
-            // use existing index file
-            System.out.println("*** Using File index " + indexfile);
-            ki = new kelondroCache(kelondroTree.open(indexfile, buffersize / 2, preloadTime, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80), buffersize / 2, true, false);
-            RAMIndex = false;
-        } else if ((preloadTime >= 0) && (stt > preloadTime)) {
-            // generate new index file
-            System.out.print("*** Generating File index for " + size() + " entries from " + indexfile);
-            ki = initializeTreeIndex(indexfile, buffersize, preloadTime, objectOrder);
-
-            System.out.println(" -done-");
-            System.out.println(ki.size()
-                    + " entries indexed from "
-                    + super.col[0].size() + " keys.");
-            RAMIndex = false;
-        } else {
-            // fill the index
+        if (buffersize >= neededRAM) {
+        	// we can use a RAM index
+        	
+        	if (indexfile.exists()) {
+                // delete existing index file
+                System.out.println("*** Delete File index " + indexfile);
+                indexfile.delete();
+        	}
+        	
+        	// fill the index
             System.out.print("*** Loading RAM index for " + size() + " entries from "+ newpath);
             ki = initializeRamIndex(objectOrder);
             
@@ -78,11 +71,32 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
                     + " index entries initialized and sorted from "
                     + super.col[0].size() + " keys.");
             RAMIndex = true;
+        } else {
+            // too less ram for a ram index
+            if (indexfile.exists()) {
+                // use existing index file
+                System.out.println("*** Using File index " + indexfile);
+                ki = new kelondroCache(kelondroTree.open(indexfile, buffersize / 3 * 2, preloadTime, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80), buffersize / 3, true, false);
+                RAMIndex = false;
+            } else if ((preloadTime >= 0) && (stt > preloadTime)) {
+                // generate new index file
+                System.out.print("*** Generating File index for " + size() + " entries from " + indexfile);
+                System.out.print("*** Cause: too less RAM configured. Assign at least " + neededRAM + " bytes buffersize to enable a RAM index.");
+                ki = initializeTreeIndex(indexfile, buffersize, preloadTime, objectOrder);
+
+                System.out.println(" -done-");
+                System.out.println(ki.size() + " entries indexed from " + super.col[0].size() + " keys.");
+                RAMIndex = false;
+            }
         }
         // assign index to wrapper
         index = new kelondroBytesIntMap(ki);
         description = "stt=" + Long.toString(System.currentTimeMillis() - start) + ";";
         super.col[0].setDescription(description.getBytes());
+    }
+    
+    public static int staticSize(File path, String tablename) {
+        return kelondroFlexWidthArray.staticsize(path, tablename);
     }
     
     public boolean hasRAMIndex() {
@@ -127,7 +141,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     private kelondroIndex initializeTreeIndex(File indexfile, long buffersize, long preloadTime, kelondroOrder objectOrder) throws IOException {
-        kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, buffersize / 2, preloadTime, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80), buffersize / 2, true, false);
+        kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, buffersize / 3 * 2, preloadTime, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80), buffersize / 3, true, false);
         Iterator content = super.col[0].contentNodes(-1);
         kelondroRecords.Node node;
         kelondroRow.Entry indexentry;
