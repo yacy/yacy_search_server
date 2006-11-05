@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://yacy:8080/soap/messages" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://yacy:8080/soap/messages" xmlns:intf="http://yacy:8080/soap/messages" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http://yacy:8080/soap/messages" xmlns="http://www.w3.org/2001/XMLSchema"><import namespace="http://xml.apache.org/xml-soap"/><import namespace="http://schemas.xmlsoap.org/soap/encoding/"/><complexType name="ArrayOf_xsd_string"><complexContent><restriction base="soapenc:Array"><attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:string[]"/></restriction></complexContent></complexType></schema></wsdl:types>
+  <wsdl:message name="createNewXMLDocumentRequest">
+    <wsdl:part name="rootElementName" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="deleteMessageResponse">
+  </wsdl:message>
+  <wsdl:message name="getMessageSendPermissionResponse">
+    <wsdl:part name="getMessageSendPermissionReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+
+  <wsdl:message name="deleteMessageRequest">
+    <wsdl:part name="messageID" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="getMessageHeaderListResponse">
+    <wsdl:part name="getMessageHeaderListReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="getMessageResponse">
+    <wsdl:part name="getMessageReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+
+  <wsdl:message name="getMessageIDsResponse">
+    <wsdl:part name="getMessageIDsReturn" type="impl:ArrayOf_xsd_string"/>
+  </wsdl:message>
+  <wsdl:message name="deleteMessagesResponse">
+  </wsdl:message>
+  <wsdl:message name="sendMessageResponse">
+    <wsdl:part name="sendMessageReturn" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="sendMessageRequest">
+
+    <wsdl:part name="destinationPeerHash" type="xsd:string"/>
+    <wsdl:part name="subject" type="xsd:string"/>
+    <wsdl:part name="message" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="getMessageIDsRequest">
+  </wsdl:message>
+  <wsdl:message name="getMessageHeaderListRequest">
+  </wsdl:message>
+  <wsdl:message name="deleteMessagesRequest">
+
+    <wsdl:part name="messageIDs" type="impl:ArrayOf_xsd_string"/>
+  </wsdl:message>
+  <wsdl:message name="createNewXMLDocumentResponse">
+    <wsdl:part name="createNewXMLDocumentReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="getMessageSendPermissionRequest">
+    <wsdl:part name="destinationPeerHash" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="getMessageRequest">
+
+    <wsdl:part name="messageID" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:portType name="MessageService">
+    <wsdl:operation name="getMessage" parameterOrder="messageID">
+      <wsdl:input message="impl:getMessageRequest" name="getMessageRequest"/>
+      <wsdl:output message="impl:getMessageResponse" name="getMessageResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="sendMessage" parameterOrder="destinationPeerHash subject message">
+      <wsdl:input message="impl:sendMessageRequest" name="sendMessageRequest"/>
+
+      <wsdl:output message="impl:sendMessageResponse" name="sendMessageResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getMessageIDs">
+      <wsdl:input message="impl:getMessageIDsRequest" name="getMessageIDsRequest"/>
+      <wsdl:output message="impl:getMessageIDsResponse" name="getMessageIDsResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getMessageHeaderList">
+      <wsdl:input message="impl:getMessageHeaderListRequest" name="getMessageHeaderListRequest"/>
+      <wsdl:output message="impl:getMessageHeaderListResponse" name="getMessageHeaderListResponse"/>
+
+    </wsdl:operation>
+    <wsdl:operation name="deleteMessage" parameterOrder="messageID">
+      <wsdl:input message="impl:deleteMessageRequest" name="deleteMessageRequest"/>
+      <wsdl:output message="impl:deleteMessageResponse" name="deleteMessageResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="deleteMessages" parameterOrder="messageIDs">
+      <wsdl:input message="impl:deleteMessagesRequest" name="deleteMessagesRequest"/>
+      <wsdl:output message="impl:deleteMessagesResponse" name="deleteMessagesResponse"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="getMessageSendPermission" parameterOrder="destinationPeerHash">
+      <wsdl:input message="impl:getMessageSendPermissionRequest" name="getMessageSendPermissionRequest"/>
+      <wsdl:output message="impl:getMessageSendPermissionResponse" name="getMessageSendPermissionResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="createNewXMLDocument" parameterOrder="rootElementName">
+      <wsdl:input message="impl:createNewXMLDocumentRequest" name="createNewXMLDocumentRequest"/>
+      <wsdl:output message="impl:createNewXMLDocumentResponse" name="createNewXMLDocumentResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+
+  <wsdl:binding name="messagesSoapBinding" type="impl:MessageService">
+    <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getMessage">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getMessageRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getMessageResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/messages" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="sendMessage">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="sendMessageRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="sendMessageResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/messages" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getMessageIDs">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getMessageIDsRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getMessageIDsResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/messages" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getMessageHeaderList">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getMessageHeaderListRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getMessageHeaderListResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/messages" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deleteMessage">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="deleteMessageRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="deleteMessageResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/messages" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deleteMessages">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="deleteMessagesRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="deleteMessagesResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/messages" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getMessageSendPermission">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getMessageSendPermissionRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="getMessageSendPermissionResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/messages" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="createNewXMLDocument">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="createNewXMLDocumentRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+      <wsdl:output name="createNewXMLDocumentResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/messages" use="encoded"/>
+
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MessageServiceService">
+    <wsdl:port binding="impl:messagesSoapBinding" name="messages">
+      <wsdlsoap:address location="http://yacy:8080/soap/messages"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -125,9 +125,9 @@
 	  <delete file="${}/yacySoapClient.jar" />
 		
 	  <!-- copy all source and class files into the jar -->
-	  <jar destfile="${clientStub}/yacySoapClient.jar" basedir="${clientStub}/">
+	  <jar destfile="${clientStub}/yacySoapClient.jar">
 	    <fileset dir="${clientStubSrc}"/>
-	    <fileset dir="${clientStubBuild}"/>	  	
+	    <fileset dir="${clientStubBuild}"/>	  		  	
 	  </jar>
 		
 	  <!-- remove old temp directories -->

@@ -124,6 +124,7 @@ public class Messages_p {
             prop.put("mode", 1); //view
             String key = post.get("object", "");
             message = switchboard.messageDB.read(key);
+            if (message == null) throw new NullPointerException("Message with ID " + key + " does not exist");
             
             prop.put("mode_from", message.author());
             prop.put("mode_to", message.recipient());
