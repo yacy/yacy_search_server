@@ -67,4 +67,9 @@ public class AdminServiceTest extends AbstractServiceTest {
 		Document xml = ((AdminService)service).getServerLog(0);
 		System.out.println(XMLUtils.DocumentToString(xml));
 	}
+	
+	public void testGetPeerProfile() throws RemoteException {
+		Document xml = ((AdminService)service).getPeerProfile("localhash");
+		System.out.println(XMLUtils.DocumentToString(xml));		
+	}
 }

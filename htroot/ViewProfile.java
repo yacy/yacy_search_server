@@ -50,6 +50,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -139,7 +140,7 @@ public class ViewProfile {
         }
         Map.Entry entry;
         // all known keys which should be set as they are
-        ArrayList knownKeys = new ArrayList();
+        HashSet knownKeys = new HashSet();
         knownKeys.add("name");
         knownKeys.add("nickname");
         // knownKeys.add("homepage");//+http
@@ -160,7 +161,7 @@ public class ViewProfile {
         int numUnknown = 0;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            String key = (String) entry.getKey();
+            String key = ((String) entry.getKey());
             String value = new String();
 
             // only comments get "wikified"
@@ -172,16 +173,20 @@ public class ViewProfile {
             }
 
             //all known Keys which should be set as they are
-            if ((knownKeys.contains(key)) && (value.length() > 0)) {
-                prop.put("success_" + key, 1);
-                prop.put("success_" + key + "_value", value);
-                //special handling, hide flower if no icq uin is set
-            } else if ((key.equals("homepage")) && (value.length() > 0)) {
-                if (!(value.startsWith("http"))) {
-                    value = "http://" + value;
-                }
-                prop.put("success_" + key, 1);
-                prop.put("success_" + key + "_value", value);
+            if (knownKeys.contains(key)) {
+            	if (value.length() > 0) {
+            		prop.put("success_" + key, 1);
+            		prop.put("success_" + key + "_value", value);
+            	}
+            	//special handling, hide flower if no icq uin is set
+            } else if (key.equals("homepage")) {
+            	if (value.length() > 0) {
+            		if (!(value.startsWith("http"))) {
+            			value = "http://" + value;
+            		}
+            		prop.put("success_" + key, 1);
+            		prop.put("success_" + key + "_value", value);
+            	}
                 //This will display unknown items(of newer versions) as plaintext
             } else {
                 //unknown

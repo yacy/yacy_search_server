@@ -45,7 +45,12 @@
 
 package de.anomic.soap.services;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -65,6 +70,7 @@ import de.anomic.server.serverThread;
 import de.anomic.server.logging.GuiHandler;
 import de.anomic.soap.AbstractService;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 
 public class AdminService extends AbstractService {
@@ -106,12 +112,25 @@ public class AdminService extends AbstractService {
 	private static final String MSG_FORWARDING_ENABLED = "msgForwardingEnabled";
 	private static final String MSG_FORWARDING = "msgForwarding";
 	
+	// peer profile
+	private static final String PEERPROFILE_COMMENT = "comment";
+	private static final String PEERPROFILE_MSN = "msn";
+	private static final String PEERPROFILE_YAHOO = "yahoo";
+	private static final String PEERPROFILE_JABBER = "jabber";
+	private static final String PEERPROFILE_ICQ = "icq";
+	private static final String PEERPROFILE_EMAIL = "email";
+	private static final String PEERPROFILE_HOMEPAGE = "homepage";
+	private static final String PEERPROFILE_NICKNAME = "nickname";
+	private static final String PEERPROFILE_NAME = "name";
+	private static final String PEER_PROFILE_FETCH_SUCCESS = "success";
+	private static final String PEER_HASH = "hash";	
 	
 	/* =====================================================================
 	 * Used XML Templates
 	 * ===================================================================== */
     private static final String TEMPLATE_CONFIG_XML = "xml/config_p.xml";   
     private static final String TEMPLATE_VERSION_XML = "xml/version.xml";
+    private static final String TEMPLATE_PROFILE_XML = "ViewProfile.xml";
     
     /**
      * This function can be used to set a configuration option
@@ -664,5 +683,134 @@ public class AdminService extends AbstractService {
     	
     	// convert into dom
     	return convertContentToXML(buffer.toString());
+    }
+    
+    /**
+     * Function to configure the profile of this peer.
+     * If a input parameters is <code>null</code> the old value will not be overwritten.
+     *  
+     * @param name the name of the peer owner
+     * @param nickname peer owner nick name
+     * @param homepage 
+     * @param email
+     * @param icq
+     * @param jabber
+     * @param yahoo
+     * @param msn
+     * @param comments
+     * 
+     * @throws AxisFault if authentication failed
+     */
+    public void setLocalPeerProfile(
+    		String name,
+    		String nickname,
+    		String homepage,
+    		String email,
+    		String icq,
+    		String jabber,
+    		String yahoo,
+    		String msn,
+    		String comments
+    ) throws AxisFault {
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);     
+        
+        // load peer properties
+        final Properties profile = new Properties();
+        FileInputStream fileIn = null;
+        try {
+            fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
+            profile.load(fileIn);
+        } catch(IOException e) {
+        	throw new AxisFault("Unable to load the peer profile");
+        } finally {
+            if (fileIn != null) try { fileIn.close(); } catch (Exception e) {/* */}
+        }
+        
+        // set all properties
+        if (name != null) profile.setProperty(PEERPROFILE_NAME,name);
+        if (nickname != null) profile.setProperty(PEERPROFILE_NICKNAME,nickname);
+        if (homepage != null) profile.setProperty(PEERPROFILE_HOMEPAGE,homepage);
+        if (email != null) profile.setProperty(PEERPROFILE_EMAIL,email);
+        if (icq != null) profile.setProperty(PEERPROFILE_ICQ,icq);
+        if (jabber != null) profile.setProperty(PEERPROFILE_JABBER,jabber);
+        if (yahoo != null) profile.setProperty(PEERPROFILE_YAHOO,yahoo);
+        if (msn != null) profile.setProperty(PEERPROFILE_MSN,msn);
+        if (comments != null) profile.setProperty(PEERPROFILE_COMMENT,comments);
+        
+        // store it
+        FileOutputStream fileOut = null;
+        try {
+            fileOut = new FileOutputStream(new File("DATA/SETTINGS/profile.txt"));
+            profile.store(fileOut , null );
+
+            // generate a news message
+            Properties news = profile;
+            news.remove(PEERPROFILE_COMMENT);
+            yacyCore.newsPool.publishMyNews(new yacyNewsRecord("prfleupd", news));
+        } catch(IOException e) {
+        	throw new AxisFault("Unable to write profile data to file");
+        } finally {
+            if (fileOut != null) try { fileOut.close(); } catch (Exception e) {/* */}
+        }        
+    }
+    
+    /**
+     * Returns the peer profile of this peer
+     * @return a xml document in the same format as returned by function {@link #getPeerProfile(String)}
+     * @throws Exception 
+     */
+    public Document getLocalPeerProfile() throws Exception {
+    	return this.getPeerProfile("localhash");
+    }    
+    
+    /**
+     * Function to query the profile of a remote peer
+     * @param peerhash the peer hash
+     * @return a xml document in the following format
+     * <pre>
+     * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+     * &lt;profile&gt;
+     * 	&lt;status code="3"&gt;Peer profile successfully fetched&lt;/status&gt;
+     * 	&lt;name&gt;&lt;![CDATA[myName]]&gt;&lt;/name&gt;
+     * 	&lt;nickname&gt;&lt;![CDATA[myNickName]]&gt;&lt;/nickname&gt;
+     * 	&lt;homepage&gt;&lt;![CDATA[http://myhompage.de]]&gt;&lt;/homepage&gt;
+     * 	&lt;email/&gt;
+     * 	&lt;icq/&gt;
+     * 	&lt;jabber/&gt;
+     * 	&lt;yahoo/&gt;
+     * 	&lt;msn/&gt;
+     * 	&lt;comment&gt;&lt;![CDATA[Comments]]&gt;&lt;/comment&gt;
+     * &lt;/profile&gt;
+     * </pre>
+     * @throws Exception if authentication failed
+     */
+    public Document getPeerProfile(String peerhash) throws Exception {
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);          	
+        
+        // generating the template containing the network status information
+        serverObjects args = new serverObjects();
+        args.put(PEER_HASH,peerhash);
+        
+    	// invoke servlet
+    	serverObjects tp = invokeServlet(TEMPLATE_PROFILE_XML,args);
+        
+    	// query status
+    	if (tp.containsKey(PEER_PROFILE_FETCH_SUCCESS)) {
+    		String success = tp.get(PEER_PROFILE_FETCH_SUCCESS,"3");
+    		if (success.equals("0")) throw new AxisFault("Invalid parameters passed to servlet.");
+    		else if (success.equals("1")) throw new AxisFault("The requested peer is unknown or can not be accessed.");
+    		else if (success.equals("2")) throw new AxisFault("The requested peer is offline");
+    	} else {
+    		throw new AxisFault("Unkown error. Unable to determine profile fetching status.");
+    	}
+    	
+    	
+    	// generate output
+    	byte[] result = buildServletOutput(TEMPLATE_PROFILE_XML, tp);        
+        
+        // sending back the result to the client
+        return this.convertContentToXML(result);     
     }
 }

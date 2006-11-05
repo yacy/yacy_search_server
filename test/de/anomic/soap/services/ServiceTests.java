@@ -13,6 +13,7 @@ public class ServiceTests {
 		suite.addTestSuite(StatusServiceTest.class);
 		suite.addTestSuite(BlacklistServiceTest.class);
 		suite.addTestSuite(BookmarkServiceTest.class);
+		suite.addTestSuite(MessageServiceTest.class);
 		//$JUnit-END$
 		return suite;
 	}
