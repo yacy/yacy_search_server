@@ -197,7 +197,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 plasmaSearchResult result = orderFinal(rcLocal);
                 if (result != null) {
                     result.globalContributions = globalContributions;
-                    result.localContributions = rcLocal.size();
+                    result.localContributions = (rcLocal == null) ? 0 : rcLocal.size();
 
                     // flush results in a separate thread
                     this.start(); // start to flush results
@@ -343,7 +343,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN),
                 query.maxDistance);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_JOIN);
-        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_JOIN, rcLocal.size());
+        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_JOIN, (rcLocal == null) ? 0 : rcLocal.size());
 
         return rcLocal;
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="source"/>
-	<classpathentry excluding="htdocsdefault/|locale/|proxymsg/|yacy/|env/|env/" output="htroot" kind="src" path="htroot"/>
+	<classpathentry excluding="htdocsdefault/|locale/|proxymsg/|yacy/|env/|env/" kind="src" output="htroot" path="htroot"/>
 	<classpathentry kind="src" path="htroot/htdocsdefault"/>
 	<classpathentry kind="src" path="htroot/yacy"/>
 	<classpathentry kind="src" path="htroot/env"/>
@@ -34,5 +34,16 @@
 	<classpathentry kind="lib" path="libx/xerces.jar"/>
 	<classpathentry kind="lib" path="libx/poi-3.0-alpha2-20060616.jar"/>
 	<classpathentry kind="lib" path="libx/poi-scratchpad-3.0-alpha2-20060616.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/axis.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/axis-ant.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/saaj.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/wsdl4j.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/commons-discovery.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Magneto/dev/workspace/trunk/libx/commons-logging.jar"/>
+	<classpathentry kind="lib" path="libx/inetlib.jar"/>
+	<classpathentry kind="lib" path="libx/gnumail.jar"/>
+	<classpathentry kind="lib" path="libx/activation.jar"/>
+	<classpathentry kind="lib" path="libx/webcat-0.1-swf.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
