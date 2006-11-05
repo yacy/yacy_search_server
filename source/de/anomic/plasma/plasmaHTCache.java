@@ -712,7 +712,7 @@ public final class plasmaHTCache {
      * This is a helper funktion that extracts the Hash from the filename
      */
     public static String getHash(final File f) {
-        if ((f.getPath().indexOf("hash")) < 0) return null;
+        if ((!f.isFile()) || (f.getPath().indexOf("hash") < 0)) return null;
         String hexHash = f.getName().substring(0,18);
         if (hexHash.indexOf('.') >= 0) return null;
         try {
