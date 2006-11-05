@@ -225,24 +225,22 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
     }
     
-    /*
-     * Returns the path of a (existing) localized File, or the english one, if not availible.
-     * @param path is relative from htroot
-     * @return the function returns a Filehandle to the translated file, or if not availitble to the english one.
-     */
-	public static File getLocalizedFile(String path){
-        plasmaSwitchboard switchboard=plasmaSwitchboard.getSwitchboard();
-        // create htLocaleDefault, htLocalePath
+    /** Returns a path to the localized or default file according to the htLocaleSelection (from he switchboard)
+     * @param path relative from htroot */
+    public static File getLocalizedFile(String path){
+        return getLocalizedFile(path, switchboard.getConfig("htLocaleSelection","default"));
+    }
+    
+    /** Returns a path to the localized or default file according to the parameter localeSelection
+	 * @param path relative from htroot
+	 * @param localeSelection language of localized file; htLocaleSelection from switchboard is used if localeSelection.equals("") */
+	public static File getLocalizedFile(String path, String localeSelection){
         if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
         if (htLocalePath == null) htLocalePath = new File(switchboard.getRootPath(), switchboard.getConfig("htLocalePath","htroot/locale"));
-        //htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
 
-        // find locales or alternatives in htDocsPath
-        String htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
-        // look if we have a localization of that file
-        if (!(htLocaleSelection.equals("default"))) {
-            File localePath = new File(htLocalePath, htLocaleSelection + "/" + path);
-            if (localePath.exists())
+        if (!(localeSelection.equals("default"))) {
+            File localePath = new File(htLocalePath, localeSelection + "/" + path);
+            if (localePath.exists())  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled
                 return localePath;
         }
         return new File(htDefaultPath, path);
@@ -443,7 +441,13 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 
             // locate the file
             if (!(path.startsWith("/"))) path = "/" + path; // attach leading slash
-            File   targetFile  = getLocalizedFile(path);
+            
+            // a different language can be desired (by i.e. ConfigBasic.html) than the one stored in the htLocaleSelection
+            String localeSelection = switchboard.getConfig("htLocaleSelection","default");
+            if (args != null) 
+                localeSelection = args.get("language", localeSelection);
+            
+            File   targetFile  = getLocalizedFile(path, localeSelection);
             String targetExt   = conProp.getProperty("EXT","");
             targetClass = rewriteClassFile(new File(htDefaultPath, path));
             if (path.endsWith("/")) {
@@ -1012,8 +1016,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         Method m = null;
         // now make a class out of the stream
         try {
-            if (useTemplateCache) {
-                
+            if (useTemplateCache) {                
                 SoftReference ref = (SoftReference) templateMethodCache.get(classFile);
                 if (ref != null) {
                     m = (Method) ref.get();
@@ -1025,7 +1028,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     }
                     
                 }          
-            } 
+            }
             
             //System.out.println("**DEBUG** loading class file " + classFile);
             Class c = provider.loadClass(classFile);
