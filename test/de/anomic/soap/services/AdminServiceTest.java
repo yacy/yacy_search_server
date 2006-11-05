@@ -27,9 +27,9 @@ public class AdminServiceTest extends AbstractServiceTest {
 	private HashMap getMessageForwardingProperties(Document xml) throws DOMException, TransformerException {
 		HashMap result = new HashMap();
 		
-		result.put("msgForwardingEnabled",Boolean.valueOf(XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingEnabled").getTextContent()));
-		result.put("msgForwardingCmd",XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingCmd").getTextContent());
-		result.put("msgForwardingTo",XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingTo").getTextContent());			
+		result.put("msgForwardingEnabled",Boolean.valueOf(XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingEnabled").getFirstChild().getNodeValue()));
+		result.put("msgForwardingCmd",XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingCmd").getFirstChild().getNodeValue());
+		result.put("msgForwardingTo",XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingTo").getFirstChild().getNodeValue());			
 		
 		return result;
 	}
@@ -48,9 +48,9 @@ public class AdminServiceTest extends AbstractServiceTest {
 		Document xml = ((AdminService)service).getMessageForwarding();
 		
 		// check if values are equal
-		assertEquals(msgEnabled,Boolean.valueOf(XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingEnabled").getTextContent()));
-		assertEquals(msgCmd,XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingCmd").getTextContent());
-		assertEquals(msgTo,XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingTo").getTextContent());		
+		assertEquals(msgEnabled,Boolean.valueOf(XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingEnabled").getFirstChild().getNodeValue()));
+		assertEquals(msgCmd,XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingCmd").getFirstChild().getNodeValue());
+		assertEquals(msgTo,XPathAPI.selectSingleNode(xml,"/msgForwarding/msgForwardingTo").getFirstChild().getNodeValue());		
 
 		// print it out
 		System.out.println(XMLUtils.DocumentToString(xml));

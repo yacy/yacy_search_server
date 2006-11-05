@@ -181,7 +181,9 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     
     /* ===============================================================
      * Other object fields
-     * =============================================================== */    
+     * =============================================================== */
+    private static final Object initSync = new Object();
+    
     private serverClassLoader provider = null;
     private HashMap templates;
     private serverSwitch switchboard;
@@ -191,32 +193,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     private File htTemplatePath;
     
     private static Properties additionalServices = null;
-    
-    /* 
-     * Creating and configuring an apache Axis server.
-     * This is only needed once.
-     */
-    static  {
-        // create an Axis server
-    	serverLog.logInfo("SOAP","Init soap engine ...");
-        engine = new AxisServer();
         
-        // setting some options ...
-        engine.setShouldSaveConfig(false);
-        
-        serverLog.logInfo("SOAP","Deploying default services ...");
-        for (int i=0; i < defaultServices.length; i++) {
-            String[] nextService = defaultServices[i].split("=");
-            serverLog.logInfo("SOAP","Deploying service " + nextService[0] + ":" + nextService[1]);
-            String deploymentStr = serviceDeploymentString
-                                   .replaceAll("@serviceName@", nextService[0])
-                                   .replaceAll("@className@", nextService[1]);
-        
-            // deploy the service 
-            deployService(deploymentStr,engine);
-        }
-    }
-    
     /**
      * Constructor of this class
      * @param theSwitchboard
@@ -242,49 +219,75 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
             this.provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
         }
         
-        if (this.templates == null) this.templates = loadTemplates(this.htTemplatePath); 
-        
-        synchronized (engine) {
-        	if (additionalServices == null) {
-        		additionalServices = new Properties();
-        		
-        		// getting the property filename containing the file list
-        		String fileName = theSwitchboard.getConfig("soap.serviceDeploymentList","");
-        		if (fileName.length() > 0) {
-        			BufferedInputStream fileInput = null;
-        			try {
-        				File deploymentFile = new File(theSwitchboard.getRootPath(),fileName);        				
-        				fileInput = new BufferedInputStream(new FileInputStream(deploymentFile));
-        				
-        				// load property list
-        				additionalServices.load(fileInput);
-        				fileInput.close();  
-        				
-        				// loop through and deploy services
-        				if (additionalServices.size() > 0) {
-        					Enumeration serviceNameEnum = additionalServices.keys();
-        					while (serviceNameEnum.hasMoreElements()) {
-        						String serviceName = (String) serviceNameEnum.nextElement();
-        						String className = additionalServices.getProperty(serviceName);
-        						
-        						String deploymentStr = serviceDeploymentString
-        						.replaceAll("@serviceName@", serviceName)
-        						.replaceAll("@className@", className);
-        						
-        						// deploy the service 
-        						deployService(deploymentStr,engine);        					
-        					}
-        				}
-        			} catch (Exception e) {
-        				this.theLogger.logSevere("Unable to deploy additional services: " + e.getMessage(), e);
-        			} finally {
-        				if (fileInput != null) try { fileInput.close(); } catch (Exception e){/* ignore this */}
-        			}
-        		}
-        	}
+        if (this.templates == null) {
+        	this.templates = loadTemplates(this.htTemplatePath); 
+        }
 
-		}
+        // deploy default soap services
+        if (engine == null) synchronized (initSync) { deployDefaultServices(); }
+        
+        // init additional soap services
+        if (additionalServices == null) synchronized (initSync) { deployAdditionalServices(); }
     }
+    
+    private void deployDefaultServices() {
+    	// create an Axis server
+    	this.theLogger.logInfo("Init soap engine ...");
+    	engine = new AxisServer();
+    	
+    	// setting some options ...
+    	engine.setShouldSaveConfig(false);
+    	
+    	this.theLogger.logInfo("Deploying default services ...");
+    	for (int i=0; i < defaultServices.length; i++) {
+    		String[] nextService = defaultServices[i].split("=");
+    		this.theLogger.logInfo("Deploying service " + nextService[0] + ": " + nextService[1]);
+    		String deploymentStr = serviceDeploymentString
+    		.replaceAll("@serviceName@", nextService[0])
+    		.replaceAll("@className@", nextService[1]);
+    		
+    		// deploy the service 
+    		deployService(deploymentStr,engine);
+    	}    	
+    }
+    
+    private void deployAdditionalServices() {
+    	additionalServices = new Properties();
+    	
+    	// getting the property filename containing the file list
+    	String fileName = this.switchboard.getConfig("soap.serviceDeploymentList","");
+    	if (fileName.length() > 0) {
+    		BufferedInputStream fileInput = null;
+    		try {
+    			File deploymentFile = new File(this.switchboard.getRootPath(),fileName);        				
+    			fileInput = new BufferedInputStream(new FileInputStream(deploymentFile));
+    			
+    			// load property list
+    			additionalServices.load(fileInput);
+    			fileInput.close();  
+    			
+    			// loop through and deploy services
+    			if (additionalServices.size() > 0) {
+    				Enumeration serviceNameEnum = additionalServices.keys();
+    				while (serviceNameEnum.hasMoreElements()) {
+    					String serviceName = (String) serviceNameEnum.nextElement();
+    					String className = additionalServices.getProperty(serviceName);
+    					
+    					String deploymentStr = serviceDeploymentString
+    					.replaceAll("@serviceName@", serviceName)
+    					.replaceAll("@className@", className);
+    					
+    					// deploy the service 
+    					deployService(deploymentStr,engine);        					
+    				}
+    			}
+    		} catch (Exception e) {
+    			this.theLogger.logSevere("Unable to deploy additional services: " + e.getMessage(), e);
+    		} finally {
+    			if (fileInput != null) try { fileInput.close(); } catch (Exception e){/* ignore this */}
+    		}
+    	}
+    }          
     
     private InputStream getBodyInputStream(httpHeader requestHeader, PushbackInputStream body) throws SoapException{
         InputStream input;

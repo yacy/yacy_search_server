@@ -44,6 +44,9 @@ package de.anomic.data;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -433,58 +436,92 @@ public class bookmarksDB {
     public void addBookmark(String url, String title, ArrayList tags){
         
     }
-    public void importFromBookmarks(URL baseURL, String input, String tag, boolean importPublic){
-        HashMap links=new HashMap();
-        Iterator it;
-        String url,title;
-        Bookmark bm;
-        HashSet tags=listManager.string2hashset(tag); //this allow multiple default tags
-        try {
-            //load the links
-            htmlFilterContentScraper scraper = new htmlFilterContentScraper(baseURL);
-            //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-            Writer writer= new htmlFilterWriter(null,null,scraper, null, false);
-            serverFileUtils.write(input,writer);
-            writer.close();
-            links = (HashMap) scraper.getAnchors();
-        } catch (IOException e) {}
-        it=links.keySet().iterator();
-        while(it.hasNext()){
-            url=(String) it.next();
-            title=(String) links.get(url);
-            if(title.equals("")){//cannot be displayed
-                title=url;
-            }
-            bm=new Bookmark(url);
-            bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
-            bm.setTags(tags);
-            bm.setPublic(importPublic);
-            saveBookmark(bm);
-        }
-        flushBookmarkCache();
-        flushTagCache();
+    
+    public int importFromBookmarks(URL baseURL, String input, String tag, boolean importPublic){
+		try {
+			// convert string to inputstream
+			ByteArrayInputStream byteIn = new ByteArrayInputStream(input.getBytes("UTF-8"));
+			InputStreamReader reader = new InputStreamReader(byteIn,"UTF-8");
+			
+			// import stream
+			return this.importFromBookmarks(baseURL,reader,tag,importPublic);
+		} catch (UnsupportedEncodingException e) { 
+			return 0;
+		}        	
     }
-    public void importFromXML(String input, boolean importPublic){
-        DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
-        factory.setValidating(false);
-        factory.setNamespaceAware(false);
-        DocumentBuilder builder;
-        try {
-            builder = factory.newDocumentBuilder();
-            Document doc=builder.parse(new ByteArrayInputStream(input.getBytes()));
-            parseXMLimport(doc, importPublic);
-        } catch (ParserConfigurationException e) {  
-        } catch (SAXException e) {
-        } catch (IOException e) {
-        }
-        
+    public int importFromBookmarks(URL baseURL, InputStreamReader input, String tag, boolean importPublic){
+    	int importCount = 0;
+    	
+    	HashMap links=new HashMap();
+    	Iterator it;
+    	String url,title;
+    	Bookmark bm;
+    	HashSet tags=listManager.string2hashset(tag); //this allow multiple default tags
+    	try {
+    		//load the links
+    		htmlFilterContentScraper scraper = new htmlFilterContentScraper(baseURL);
+    		//OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
+    		Writer writer= new htmlFilterWriter(null,null,scraper, null, false);
+    		serverFileUtils.copy(input,writer);
+    		writer.close();
+    		links = (HashMap) scraper.getAnchors();
+    	} catch (IOException e) {}
+    	it=links.keySet().iterator();
+    	while(it.hasNext()){
+    		url=(String) it.next();
+    		title=(String) links.get(url);
+    		if(title.equals("")){//cannot be displayed
+    			title=url;
+    		}
+    		bm=new Bookmark(url);
+    		bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
+    		bm.setTags(tags);
+    		bm.setPublic(importPublic);
+    		saveBookmark(bm);
+    		
+    		importCount++;
+    	}
+    	flushBookmarkCache();
+    	flushTagCache();
+    	
+    	return importCount;
     }
-    public void parseXMLimport(Node doc, boolean importPublic){
+    
+    public int importFromXML(String input, boolean importPublic){    	
+		try {
+			// convert string to inputstream
+			ByteArrayInputStream byteIn = new ByteArrayInputStream(input.getBytes("UTF-8"));
+			
+			// import stream
+			return this.importFromXML(byteIn,importPublic);
+		} catch (UnsupportedEncodingException e) { 
+			return 0;
+		}    	
+    }
+    
+    public int importFromXML(InputStream input, boolean importPublic){
+    	DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+    	factory.setValidating(false);
+    	factory.setNamespaceAware(false);
+    	DocumentBuilder builder;
+    	try {
+    		builder = factory.newDocumentBuilder();
+    		Document doc=builder.parse(input);
+    		return parseXMLimport(doc, importPublic);
+    	} catch (ParserConfigurationException e) {  
+    	} catch (SAXException e) {
+    	} catch (IOException e) {
+    	}
+    	return 0;
+    	
+    }
+    public int parseXMLimport(Node doc, boolean importPublic){
+    	int importCount = 0;
         if(doc.getNodeName()=="post"){
             NamedNodeMap attributes = doc.getAttributes();
             String url=attributes.getNamedItem("href").getNodeValue();
             if(url.equals("")){
-                return;
+                return 0;
             }
             Bookmark bm=new Bookmark(url);
             String tagsString="";
@@ -520,15 +557,19 @@ public class bookmarksDB {
             }
             bm.setPublic(importPublic);
             saveBookmark(bm);
+            
+            importCount++;
         }
         NodeList children=doc.getChildNodes();
         if(children != null){
             for (int i=0; i<children.getLength(); i++) {
-                parseXMLimport(children.item(i), importPublic);
+            	importCount += parseXMLimport(children.item(i), importPublic);
             }
         }
         flushBookmarkCache();
         flushTagCache();
+        
+        return importCount;
     }
     /**
      * Subclass, which stores an Tag

@@ -46,14 +46,25 @@
 
 package de.anomic.soap.services;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import javax.activation.DataHandler;
+import javax.xml.soap.SOAPException;
+
 import org.apache.axis.AxisFault;
+import org.apache.axis.Message;
+import org.apache.axis.MessageContext;
+import org.apache.axis.attachments.AttachmentPart;
+import org.apache.axis.attachments.Attachments;
 import org.w3c.dom.Document;
 
 import de.anomic.data.bookmarksDB;
 import de.anomic.index.indexURL;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.soap.AbstractService;
@@ -67,12 +78,58 @@ public class BookmarkService extends AbstractService {
     private static final String TEMPLATE_BOOKMARK_LIST_XML = "xml/bookmarks/posts/get.xml";
     private static final String TEMPLATE_BOOKMARK_TAGS_XML = "xml/bookmarks/tags/get.xml"; 
 	
+    /**
+     * @return a handler to the YaCy Bookmark DB
+     */
+    private bookmarksDB getBookmarkDB() {
+    	assert (this.switchboard != null) : "Switchboard object is null";
+    	assert (this.switchboard instanceof plasmaSwitchboard) : "Incorrect switchboard object";
+    	assert (((plasmaSwitchboard)this.switchboard).bookmarksDB != null) : "Bookmark DB is null";
+    	
+    	return ((plasmaSwitchboard)this.switchboard).bookmarksDB;
+    }
+    
+    /**
+     * @return returns the input stream of a soap attachment
+     * @throws AxisFault if no attachment was found or attachments are not supported
+     * @throws SOAPException if attachment decoding didn't work
+     * @throws IOException on attachment read errors
+     */
+    private InputStream getAttachmentInputstream() throws AxisFault, SOAPException, IOException {
+		// get the current message context
+        MessageContext msgContext = MessageContext.getCurrentContext();
+
+        // getting the request message
+        Message reqMsg = msgContext.getRequestMessage();		
+		
+        // getting the attachment implementation
+        Attachments messageAttachments = reqMsg.getAttachmentsImpl();
+        if (messageAttachments == null) {
+            throw new AxisFault("Attachments not supported");
+        }		
+        
+        int attachmentCount= messageAttachments.getAttachmentCount();
+        if (attachmentCount == 0) 
+            throw new AxisFault("No attachment found");
+        else if (attachmentCount != 1)
+            throw new AxisFault("Too many attachments as expected.");     
+        
+        // getting the attachments
+        AttachmentPart[] attachments = (AttachmentPart[])messageAttachments.getAttachments().toArray(new AttachmentPart[attachmentCount]);
+    	
+        // getting the content of the attachment        
+        DataHandler dh = attachments[0].getDataHandler();	
+        
+        // return the input stream
+        return dh.getInputStream();
+    }
+    
 	/**
 	 * Converts an array of tags into a HashSet
 	 * @param tagArray the array of tags
 	 * @return the HashSet
 	 */
-	private HashSet stringArrayToHashSet(String[] tagArray) {
+	private HashSet tagArrayToHashSet(String[] tagArray) {
 		HashSet tagSet = new HashSet();
 		if (tagArray == null) return tagSet;
 		
@@ -82,6 +139,25 @@ public class BookmarkService extends AbstractService {
 		}
 		
 		return tagSet;
+	}
+	
+	/**
+	 * Converts the tag array into a space separated list
+	 * @param tagArray the tag array
+	 * @return space separated list of tags
+	 */
+	private String tagArrayToSepString(String[] tagArray, String sep) {
+		StringBuffer buffer = new StringBuffer();
+		
+		for (int i=0; i < tagArray.length; i++) {
+			String nextTag = tagArray[i].trim();
+			if (nextTag.length() > 0) {
+				if (i > 0) buffer.append(sep);
+				buffer.append(nextTag);
+			}
+		}
+		
+		return buffer.toString();		
 	}
 	
 	/**
@@ -98,14 +174,14 @@ public class BookmarkService extends AbstractService {
         if (tags == null || tags.length == 0) tags = new String[]{"unsorted"};				
 		
         // convert tag array into hashset
-        HashSet tagSet = stringArrayToHashSet(tags);	        
+        String tagString = tagArrayToSepString(tags," ");	        
         
         // create a news message
         HashMap map = new HashMap();
         map.put("url", url.replace(',', '|'));
         map.put("title", title.replace(',', ' '));
         map.put("description", description.replace(',', ' '));
-        map.put("tags", tagSet.toString().replace(',', ' '));
+        map.put("tags", tagString);
         yacyCore.newsPool.publishMyNews(new yacyNewsRecord("bkmrkadd", map));		
 	}
 	
@@ -132,7 +208,7 @@ public class BookmarkService extends AbstractService {
 		
         // convert tag array into hashset
 		HashSet tagSet = null;
-        if (tags != null) tagSet = stringArrayToHashSet(tags);		
+        if (tags != null) tagSet = tagArrayToHashSet(tags);		
 		
         // set properties
         if (url != null) bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_URL, url);
@@ -167,7 +243,7 @@ public class BookmarkService extends AbstractService {
         if (url == null || url.length()==0) throw new IllegalArgumentException("The url must not be null or empty");
         
         // create new bookmark object
-        bookmarksDB.Bookmark bookmark = ((plasmaSwitchboard)this.switchboard).bookmarksDB.createBookmark(url);
+        bookmarksDB.Bookmark bookmark = getBookmarkDB().createBookmark(url);
         
         // set bookmark properties
         if(bookmark != null){
@@ -176,7 +252,7 @@ public class BookmarkService extends AbstractService {
                 // create a news message
                 publisNewBookmarkNews(url,title,description,tags);
             } 
-            ((plasmaSwitchboard)this.switchboard).bookmarksDB.saveBookmark(bookmark);
+            getBookmarkDB().saveBookmark(bookmark);
         } else {
         	throw new AxisFault("Unable to create bookmark. Unknown reason.");
         }        
@@ -197,7 +273,21 @@ public class BookmarkService extends AbstractService {
         if (urlHash == null || urlHash.length()==0) throw new IllegalArgumentException("The url hash must not be null or empty");
         
         // delete bookmark
-        ((plasmaSwitchboard)this.switchboard).bookmarksDB.removeBookmark(urlHash);
+        getBookmarkDB().removeBookmark(urlHash);
+	}
+	
+	public void deleteBookmarksByHash(String[] urlHashs) throws AxisFault {
+        // extracting the message context		
+        extractMessageContext(AUTHENTICATION_NEEDED);        
+        if (urlHashs == null || urlHashs.length==0) throw new IllegalArgumentException("The url hash array must not be null or empty");
+        
+        for (int i=0; i < urlHashs.length; i++) {
+        	String urlHash = urlHashs[i];
+        	 if (urlHash == null || urlHash.length()==0) throw new IllegalArgumentException("The url hash at position " + i + " is null or empty.");
+        	
+            // delete bookmark
+        	 getBookmarkDB().removeBookmark(urlHash);        	
+        }
 	}
 	
 	public void deleteBookmark(String url) throws AxisFault {
@@ -208,6 +298,22 @@ public class BookmarkService extends AbstractService {
 		
 		// delete url
 		this.deleteBookmarkByHash(hash);
+	}
+	
+	public void deleteBookmarks(String[] urls) throws AxisFault {
+		if (urls == null || urls.length==0) throw new IllegalArgumentException("The url array must not be null or empty");
+		
+		String[] hashs = new String[urls.length];
+		for (int i=0; i < urls.length; i++) {
+			String url = urls[i];
+			if (url == null || url.length()==0) throw new IllegalArgumentException("The url at position " + i + " is null or empty");
+			
+			// generating the url hash
+			hashs[i] = indexURL.urlHash(url);
+		}
+		
+		// delete url
+		this.deleteBookmarksByHash(hashs);	
 	}
 	
 	/**
@@ -238,7 +344,7 @@ public class BookmarkService extends AbstractService {
         if (urlHash == null || urlHash.length()==0) throw new IllegalArgumentException("The url hash must not be null or empty");
         
         // getting the bookmark
-        bookmarksDB.Bookmark bookmark = ((plasmaSwitchboard)this.switchboard).bookmarksDB.getBookmark(urlHash);
+        bookmarksDB.Bookmark bookmark = getBookmarkDB().getBookmark(urlHash);
         if (bookmark == null) throw new AxisFault("Bookmark with hash " + urlHash + " could not be found");
         
         // edit values
@@ -261,7 +367,7 @@ public class BookmarkService extends AbstractService {
         if (oldTagName == null || oldTagName.length()==0) throw new IllegalArgumentException("The old tag name not be null or empty");
         if (newTagName == null || newTagName.length()==0) throw new IllegalArgumentException("The nwe tag name not be null or empty");
         
-        boolean success = ((plasmaSwitchboard)this.switchboard).bookmarksDB.renameTag(oldTagName,newTagName);
+        boolean success = getBookmarkDB().renameTag(oldTagName,newTagName);
         if (!success) throw new AxisFault("Unable to rename tag. Unknown reason.");
 	}
 	
@@ -323,5 +429,61 @@ public class BookmarkService extends AbstractService {
         
         // sending back the result to the client
         return this.convertContentToXML(result);    
+	}
+	
+	/**
+	 * Function to import YaCy from XML (transfered via SOAP Attachment).<br>
+	 * This function expects a xml document in the same format as returned by 
+	 * function {@link #getBookmarkList(String, String)}.
+	 * @param isPublic specifies if the imported bookmarks are public or local
+	 * @return the amount of imported bookmarks
+	 * 
+	 * @throws SOAPException if there is no data in the attachment
+	 * @throws IOException if authentication failed or the attachment could not be read 
+	 */
+	public int importBookmarkXML(boolean isPublic) throws SOAPException, IOException {
+		
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);    
+        
+        // getting the attachment input stream
+        InputStream xmlIn = getAttachmentInputstream();
+        
+        // import bookmarks
+        int importCount = getBookmarkDB().importFromXML(xmlIn, isPublic);
+        
+        // return amount of imported bookmarks
+        return importCount;
+	}
+	
+	/**
+	 * Function to import YaCy from a html document (transfered via SOAP Attachment).<br>
+	 * This function expects a well formed html document.
+	 * 
+	 * @param baseURL the base url. This is needed to generate absolut URLs from relative URLs
+	 * @param tags a list of bookmarks tags that should be assigned to the new bookmarks
+	 * @param isPublic specifies if the imported bookmarks are public or local
+	 * @return the amount of imported bookmarks
+	 * 
+	 * @throws SOAPException if there is no data in the attachment
+	 * @throws IOException if authentication failed or the attachment could not be read 
+	 */
+	public int importHtmlBookmarkFile(String baseURL, String[] tags, boolean isPublic) throws SOAPException, IOException {
+		if (tags == null || tags.length == 0) tags = new String[]{"unsorted"};
+				
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);    		
+		
+        // getting the attachment input stream
+        InputStream htmlIn = getAttachmentInputstream();
+        InputStreamReader htmlReader = new InputStreamReader(htmlIn,"UTF-8");
+        
+        // import bookmarks
+        URL theBaseURL = new URL(baseURL);
+        String tagList = tagArrayToSepString(tags,",");
+        int importCount = getBookmarkDB().importFromBookmarks(theBaseURL,htmlReader, tagList,isPublic);
+        
+        // return amount of imported bookmarks
+		return importCount;
 	}
 }
