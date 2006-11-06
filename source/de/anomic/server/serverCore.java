@@ -121,6 +121,15 @@ public final class serverCore extends serverAbstractThread implements serverThre
     Hashtable denyHost;
     int commandMaxLength;
     
+    private static InetAddress[] localAddresses = null;
+    static {
+        try {
+            localAddresses = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
+        } catch (UnknownHostException e) {
+            localAddresses = new InetAddress[0];
+        }
+    }
+    
     /**
      * The session-object pool
      */
@@ -402,13 +411,29 @@ public final class serverCore extends serverAbstractThread implements serverThre
         return isNotLocal(url.getHost());
     }
     
-    static boolean isNotLocal(String ip) {
-	if ((ip.equals("localhost")) ||
-	    (ip.startsWith("127")) ||
-	    (ip.startsWith("192.168")) ||
-	    (ip.startsWith("10."))
-	    ) return false;
-	return true;
+    public static boolean isNotLocal(String ip) {
+        // generate ip address if ip is given by host
+        assert (ip != null);
+        final InetAddress clientAddress = httpc.dnsResolve(ip);
+        if (clientAddress != null) {
+            if ((clientAddress.isAnyLocalAddress()) || (clientAddress.isLoopbackAddress())) return false;
+            if (ip.charAt(0) > '9') ip = clientAddress.getHostAddress();
+        }
+        
+        // check local ip addresses
+        if ((ip.equals("localhost")) ||
+            (ip.startsWith("127")) ||
+	        (ip.startsWith("192.168")) ||
+	        (ip.startsWith("10."))
+	       ) return false;
+        
+        // finally check if there are other local IP adresses that are not in the standard IP range
+        for (int i = 0; i < localAddresses.length; i++) {
+            if (localAddresses[i].equals(clientAddress)) return false;
+        }
+        
+        // the address must be a gloabl IP address
+        return true;
     }
     
     public static String publicIP() {

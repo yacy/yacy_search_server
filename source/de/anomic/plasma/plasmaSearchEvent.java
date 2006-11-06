@@ -43,6 +43,7 @@
 package de.anomic.plasma;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -169,7 +170,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 */
                 
                 // try to pre-fetch some LURLs if there is enough time
-                indexContainer rcLocal = localSearchJoin((searchContainerMap == null) ? null : searchContainerMap.values());
+                indexContainer rcLocal = localSearchJoin(searchContainerMap.values());
                 prefetchLocal(rcLocal, secondaryTimeout);
                 
                 // this is temporary debugging code to learn that the index abstracts are fetched correctly
@@ -324,9 +325,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                         true,
                         true,
                         profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_COLLECTION));
-        if (containers.size() < query.size()) containers = null; // prevent that only a subset is returned
+        if ((containers.size() != 0) && (containers.size() < query.size())) containers = new HashMap(); // prevent that only a subset is returned
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_COLLECTION);
-        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_COLLECTION, (containers == null) ? 0 : containers.size());
+        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_COLLECTION, containers.size());
 
         return containers;
     }
@@ -342,8 +343,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         indexContainer rcLocal = indexContainer.joinContainer(containers,
                 profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN),
                 query.maxDistance);
+        if (rcLocal == null) rcLocal = wordIndex.emptyContainer(null);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_JOIN);
-        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_JOIN, (rcLocal == null) ? 0 : rcLocal.size());
+        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_JOIN, rcLocal.size());
 
         return rcLocal;
     }

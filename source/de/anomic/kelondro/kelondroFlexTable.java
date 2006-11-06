@@ -42,7 +42,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     	// if the ram is not sufficient, a tree file is generated
     	// if, and only if a tree file exists, the preload time is applied
     	super(path, tablename, rowdef);
-    	long neededRAM = (super.row().column(0).cellwidth() + 4) * 12 / 10 * super.size();
+    	long neededRAM = (super.row().column(0).cellwidth() + 4) * super.size();
     	
     	File newpath = new File(path, tablename);
         File indexfile = new File(newpath, "col.000.index");
@@ -78,10 +78,10 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
                 System.out.println("*** Using File index " + indexfile);
                 ki = new kelondroCache(kelondroTree.open(indexfile, buffersize / 3 * 2, preloadTime, treeIndexRow(rowdef.width(0)), objectOrder, 2, 80), buffersize / 3, true, false);
                 RAMIndex = false;
-            } else if ((preloadTime >= 0) && (stt > preloadTime)) {
+            } else {
                 // generate new index file
-                System.out.print("*** Generating File index for " + size() + " entries from " + indexfile);
-                System.out.print("*** Cause: too less RAM configured. Assign at least " + neededRAM + " bytes buffersize to enable a RAM index.");
+                System.out.println("*** Generating File index for " + size() + " entries from " + indexfile);
+                System.out.println("*** Cause: too less RAM (" + (buffersize / 1024 / 1024) + " MB) configured. Assign at least " + (neededRAM / 1024 / 1024) + " MB buffersize to enable a RAM index.");
                 ki = initializeTreeIndex(indexfile, buffersize, preloadTime, objectOrder);
 
                 System.out.println(" -done-");
@@ -97,6 +97,10 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
     public static int staticSize(File path, String tablename) {
         return kelondroFlexWidthArray.staticsize(path, tablename);
+    }
+    
+    public static int staticRAMIndexNeed(File path, String tablename, kelondroRow rowdef) {
+        return (rowdef.column(0).cellwidth() + 4) * staticSize(path, tablename);
     }
     
     public boolean hasRAMIndex() {
@@ -157,7 +161,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             treeindex.addUnique(indexentry);
             c++;
             if (System.currentTimeMillis() - last > 30000) {
-                System.out.println(".. generated " + c+ " entries, " + ((System.currentTimeMillis() - start) / c * (all - c) / 60000) + " minutes remaining");
+                System.out.println(".. generated " + c + "/" + all + " entries, " + ((System.currentTimeMillis() - start) / c * (all - c) / 60000) + " minutes remaining");
                 System.out.flush();
                 last = System.currentTimeMillis();
             }

@@ -46,11 +46,9 @@
 // javac -classpath .:../../classes hello.java
 // if the shell's current path is HTROOT
 
-import java.net.InetAddress;
 import java.util.Date;
 
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -109,35 +107,14 @@ public final class hello {
 
         // if the previous attempt (using the reported ip address) was not successful, try the ip where 
         // the request came from
-        if (urls < 0) {                        
-            boolean isLocalIP = false;
-            if (serverCore.portForwardingEnabled || serverCore.useStaticIP) {
-                try {
-                    final InetAddress clientAddress = httpc.dnsResolve(clientip);   
-                    if (clientAddress != null) {                        
-                        if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) {
-                            isLocalIP = true;
-                        } else {
-                            final InetAddress[] localAddress = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
-                            for (i = 0; i < localAddress.length; i++) {
-                                if (localAddress[i].equals(clientAddress)) {
-                                    isLocalIP = true;
-                                    break;
-                                }
-                            }  
-                        }
-                    }
-                } catch (Exception e) {}
-            }
-
+        if ((urls < 0) && (serverCore.portForwardingEnabled || serverCore.useStaticIP) && (serverCore.isNotLocal(clientip))) {
             // we are only allowed to connect to the client IP address if it's not our own address
-            if (!isLocalIP) {
-                serverCore.checkInterruption();
+            
+            serverCore.checkInterruption();
                 
-                prop.put(yacySeed.YOURIP, clientip);
-                remoteSeed.put(yacySeed.IP, clientip);
-                urls = yacyClient.queryUrlCount(remoteSeed);
-            }
+            prop.put(yacySeed.YOURIP, clientip);
+            remoteSeed.put(yacySeed.IP, clientip);
+            urls = yacyClient.queryUrlCount(remoteSeed);
         }
 
 //      System.out.println("YACYHELLO: YOUR IP=" + clientip);

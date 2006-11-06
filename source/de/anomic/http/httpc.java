@@ -423,11 +423,8 @@ public final class httpc {
     */
     public static InetAddress dnsResolve(String host) {
         if ((host == null)||(host.length() == 0)) return null;
-        host = host.toLowerCase().trim();
+        host = host.toLowerCase().trim();        
         
-        // flushing old entries before accsessing
-        flushNameCacheHit();
-
         // trying to resolve host by doing a name cache lookup
         InetAddress ip = (InetAddress) nameCacheHit.get(host);
         if (ip != null) return ip;
@@ -456,6 +453,10 @@ public final class httpc {
             }
             
             if (doCaching) {
+                // remove old entries
+                flushNameCacheHit();
+                
+                // add new entries
                 synchronized (nameCacheHit) {
                     nameCacheHit.put(ip.getHostName(), ip);
                     nameCacheAges.setScore(ip.getHostName(), intTime(System.currentTimeMillis()));

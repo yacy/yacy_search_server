@@ -353,6 +353,7 @@ public class kelondroCache implements kelondroIndex {
         // remove entry from miss- and hit-cache
         if (readMissCache != null) {
             if (readMissCache.remove(key) != null) {
+                this.hasnotHit++;
                 // the entry does not exist before                
                 if (writeBufferUnique != null) {
                     // since we know that the entry does not exist, we know that new
@@ -547,6 +548,7 @@ public class kelondroCache implements kelondroIndex {
             if (dummy == null) {
                 this.hasnotUnique++;
             } else {
+                this.hasnotHit++;
                 this.hasnotDouble++;
                 return null;
             }

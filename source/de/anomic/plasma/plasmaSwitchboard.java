@@ -150,6 +150,7 @@ import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
@@ -367,12 +368,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // read memory amount
         int  ramLURL         = (int) getConfigLong("ramCacheLURL", 1024) / 1024;
         long ramLURL_time    = getConfigLong("ramCacheLURL_time", 1000);
+        ramLURL = Math.max((int)  (serverMemory.available() / 2 / 1024), ramLURL);
+        setConfig("ramCacheLURL", ramLURL * 1024);
         int  ramNURL         = (int) getConfigLong("ramCacheNURL", 1024) / 1024;
         long ramNURL_time    = getConfigLong("ramCacheNURL_time", 1000);
+        ramNURL = Math.max((int)  (serverMemory.available() / 10 / 1024), ramNURL);
+        setConfig("ramCacheNURL", ramNURL * 1024);
         int  ramEURL         = (int) getConfigLong("ramCacheEURL", 1024) / 1024;
         long ramEURL_time    = getConfigLong("ramCacheEURL_time", 1000);
+        ramEURL = Math.max((int)  (serverMemory.available() / 20 / 1024), ramEURL);
+        setConfig("ramCacheEURL", ramEURL * 1024);
         int  ramRWI          = (int) getConfigLong("ramCacheRWI",  1024) / 1024;
         long ramRWI_time     = getConfigLong("ramCacheRWI_time", 1000);
+        ramRWI = Math.max((int)  (serverMemory.available() / 4 / 1024), ramRWI);
+        setConfig("ramCacheRWI", ramRWI * 1024);
         int  ramHTTP         = (int) getConfigLong("ramCacheHTTP", 1024) / 1024;
         long ramHTTP_time    = getConfigLong("ramCacheHTTP_time", 1000);
         int  ramMessage      = (int) getConfigLong("ramCacheMessage", 1024) / 1024;
@@ -383,6 +392,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         long ramProfiles_time= getConfigLong("ramCacheProfiles_time", 1000);
         int  ramPreNURL      = (int) getConfigLong("ramCachePreNURL", 1024) / 1024;
         long ramPreNURL_time = getConfigLong("ramCachePreNURL_time", 1000);
+        ramPreNURL = Math.max((int)  (serverMemory.available() / 10 / 1024), ramPreNURL);
+        setConfig("ramCachePreNURL", ramPreNURL * 1024);
         int  ramWiki         = (int) getConfigLong("ramCacheWiki", 1024) / 1024;
         long ramWiki_time    = getConfigLong("ramCacheWiki_time", 1000);
         int  ramBlog         = (int) getConfigLong("ramCacheBlog", 1024) / 1024;

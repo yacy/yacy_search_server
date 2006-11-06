@@ -60,31 +60,54 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         
         // first pass: find tables
         HashMap t = new HashMap(); // file/Integer(size) relation
-        int size, sum = 0;
+        long ram, sum = 0;
         for (int i = 0; i < dir.length; i++) {
             if ((dir[i].startsWith(tablename)) &&
                 (dir[i].charAt(tablename.length()) == '.') &&
                 (dir[i].length() == tablename.length() + 7)) {
-                size = kelondroFlexTable.staticSize(path, dir[i]);
-                if (size > 0) {
-                    t.put(dir[i], new Integer(size));
-                    sum += size;
+                ram = kelondroFlexTable.staticRAMIndexNeed(path, dir[i], rowdef);
+                if (ram > 0) {
+                    t.put(dir[i], new Long(ram));
+                    sum += ram;
                 }
             }
         }
         
         // second pass: open tables
-        Iterator i = t.entrySet().iterator();
+        Iterator i;
         Map.Entry entry;
-        String f;
-        long bs;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            f = (String) entry.getKey();
-            size = ((Integer) entry.getValue()).intValue();
-            date = f.substring(tablename.length() + 1);
-            bs = buffersize * size / sum;
-            tables.put(date, new kelondroCache(new kelondroFlexTable(path, f, bs / 2, preloadTime, rowdef, objectOrder), bs / 2, true, false));
+        String f, maxf;
+        long maxram;
+        kelondroIndex table;
+        while (t.size() > 0) {
+            // find maximum table
+            maxram = 0;
+            maxf = null;
+            i = t.entrySet().iterator();
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                f = (String) entry.getKey();
+                ram = ((Long) entry.getValue()).longValue();
+                if (ram > maxram) {
+                    maxf = f;
+                    maxram = ram;
+                }
+            }
+            
+            // open next biggest table
+            t.remove(maxf);
+            date = maxf.substring(tablename.length() + 1);
+            if (maxram <= sum) {
+                // this will cause usage of a complete RAM index
+                table = new kelondroCache(new kelondroFlexTable(path, maxf, maxram, preloadTime, rowdef, objectOrder), maxram / 10, true, false);
+                sum -= maxram;
+                sum -= maxram / 10;
+            } else {
+                // this will cause a generation of a file index
+                table = new kelondroFlexTable(path, maxf, sum / (t.size() + 1), preloadTime, rowdef, objectOrder);
+                sum -= sum / (t.size() + 1);
+            }
+            tables.put(date, table);
         }
     }
         

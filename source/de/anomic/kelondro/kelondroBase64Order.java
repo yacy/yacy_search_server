@@ -298,9 +298,9 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
             bc = b[boffset + i];
             assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + serverLog.arrayList(b, boffset, len);
             acc = ahpla[ac];
-            assert (acc >= 0) : "acc = " + acc + ", a = " + serverLog.arrayList(a, aoffset, len) + ", aoffset = 0x" + Integer.toHexString(aoffset) + serverLog.table(a, 16, aoffset);
+            assert (acc >= 0) : "acc = " + acc + ", a = " + serverLog.arrayList(a, aoffset, len) + ", aoffset = 0x" + Integer.toHexString(aoffset) + ", i = " + i + "\n" + serverLog.table(a, 16, aoffset);
             bcc = ahpla[bc];
-            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + serverLog.arrayList(b, boffset, len) + ", boffset = 0x" + Integer.toHexString(boffset) + serverLog.table(b, 16, boffset);
+            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + serverLog.arrayList(b, boffset, len) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + serverLog.table(b, 16, boffset);
             if (acc > bcc) return 1;
             if (acc < bcc) return -1;
             // else the bytes are equal and it may go on yet undecided

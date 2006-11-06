@@ -285,7 +285,7 @@ public class indexContainer extends kelondroRowSet {
     
     private static indexContainer joinConstructiveByTest(indexContainer small, indexContainer large, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY TEST");
-        assert small.rowdef.equals(large);
+        assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
         indexContainer conj = new indexContainer(null, small.rowdef); // start with empty search result
         Iterator se = small.entries();
         indexEntry ie0, ie1;
@@ -304,7 +304,7 @@ public class indexContainer extends kelondroRowSet {
     
     private static indexContainer joinConstructiveByEnumeration(indexContainer i1, indexContainer i2, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
-        assert i1.rowdef.equals(i2);
+        assert i1.rowdef.equals(i2.rowdef) : "i1 = " + i1.rowdef.toString() + "; i2 = " + i2.rowdef.toString();
         indexContainer conj = new indexContainer(null, i1.rowdef); // start with empty search result
         if (!((i1.order().signature().equals(i2.order().signature())) &&
               (i1.primarykey() == i2.primarykey()))) return conj; // ordering must be equal

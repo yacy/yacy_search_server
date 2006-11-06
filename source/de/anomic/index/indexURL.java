@@ -40,6 +40,7 @@ import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverCore;
 import de.anomic.yacy.yacySeedDB;
 
 public class indexURL {
@@ -133,6 +134,7 @@ public class indexURL {
     // and culturally close to europe
      "AD=Andorra",
      "AL=Albania",
+     "AQ=Antarctica",
      "AT=Austria",
      "BA=Bosnia and Herzegovina",
      "BE=Belgium",
@@ -190,6 +192,7 @@ public class indexURL {
      "IQ=Iraq",
      "IR=Iran",
      "PK=Pakistan",
+     "TR=Turkey",
      "YE=Yemen"
  };
  private static final String[] TLD_SouthEastAsia = {
@@ -270,10 +273,7 @@ public class indexURL {
      "PRO=",
      "ARPA=",
      "INT=International",
-     "ARPA=Arpanet"
- };
- private static final String[] TLD_Unassigned = {
-     "AQ=Antarctica",
+     "ARPA=Arpanet",
      "NT=Neutral Zone"
  };
 
@@ -349,7 +349,6 @@ public class indexURL {
      "TM=Turkmenistan",
      "TO=Tonga",
      "TP=East Timor",
-     "TR=Turkey",
      "TT=Trinidad and Tobago",
      "TV=Tuvalu",
      "TW=Taiwan",
@@ -406,7 +405,7 @@ public class indexURL {
      insertTLDProps(TLD_NorthAmericaOceania, 4);
      insertTLDProps(TLD_Africa, 5);
      insertTLDProps(TLD_Generic, 6);
-     insertTLDProps(TLD_Unassigned, 7);
+     // the id=7 is used to flag local addresses
  }
  
  
@@ -479,8 +478,8 @@ public class indexURL {
          tld = host.substring(p + 1);
          dom = host.substring(0, p);
      }
-     Integer ID = (Integer) TLDID.get(tld);
-     int id = (ID == null) ? 7 : ID.intValue();
+     Integer ID = (serverCore.isNotLocal(tld)) ? (Integer) TLDID.get(tld) : null; // identify local addresses
+     int id = (ID == null) ? 7 : ID.intValue(); // local addresses are flagged with id=7
      boolean isHTTP = url.getProtocol().equals("http");
      p = dom.lastIndexOf('.'); // locate subdomain
      String subdom = "";
@@ -506,18 +505,23 @@ public class indexURL {
      if (p > 0) {
          rootpath = path.substring(0, p);
      }
+     
      // we collected enough information to compute the fragments that are basis for hashes
      int l = dom.length();
      int domlengthKey = (l <= 8) ? 0 : (l <= 12) ? 1 : (l <= 16) ? 2 : 3;
      byte flagbyte = (byte) (((isHTTP) ? 0 : 32) | (id << 2) | domlengthKey);
+
+     // combine the attributes
+     StringBuffer hash = new StringBuffer(12);
      // form the 'local' part of the hash
-     String hash3 = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.toNormalform())).substring(0, 5);
-     char   hash2 = subdomPortPath(subdom, port, rootpath);
+     hash.append(kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.toNormalform())).substring(0, 5)); // 5 chars
+     hash.append(subdomPortPath(subdom, port, rootpath)); // 1 char
      // form the 'global' part of the hash
-     String hash1 = protocolHostPort(url.getProtocol(), host, port);
-     char   hash0 = kelondroBase64Order.enhancedCoder.encodeByte(flagbyte);
-     // combine the hashes
-     return hash3 + hash2 + hash1 + hash0;
+     hash.append(protocolHostPort(url.getProtocol(), host, port)); // 5 chars
+     hash.append(kelondroBase64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
+
+     // return result hash
+     return new String(hash);
  }
  
  private static char subdomPortPath(String subdom, int port, String rootpath) {
@@ -557,6 +561,8 @@ public class indexURL {
  
  public static final int domLengthEstimation(String urlHash) {
      // generates an estimation of the original domain length
+     assert (urlHash != null);
+     assert (urlHash.length() == 12) : "urlhash = " + urlHash;
      int flagbyte = kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
      int domLengthKey = flagbyte & 3;
      switch (domLengthKey) {
@@ -568,9 +574,21 @@ public class indexURL {
      return 20;
  }
  
- public static int domLengthNormalized(String urlHash) {
-     return 255 * domLengthEstimation(urlHash) / 30;
- }
+    public static int domLengthNormalized(String urlHash) {
+        return 255 * domLengthEstimation(urlHash) / 30;
+    }
+ 
+    public static final int domDomain(String urlHash) {
+        // returns the ID of the domain of the domain
+        assert (urlHash != null);
+        assert (urlHash.length() == 12) : "urlhash = " + urlHash;
+        int flagbyte = kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
+        return (flagbyte & 12) >> 2;
+    }
+    
+    public static boolean isGlobalDomain(String urlhash) {
+        return domDomain(urlhash) != 7;
+    }
  
  public static final String oldurlHash(URL url) {
     if (url == null) return null;
@@ -583,7 +601,6 @@ public class indexURL {
      String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(new URL(url).toNormalform())).substring(0, urlHashLength);
      return hash;
  }
- 
 
  public static final serverByteBuffer compressIndex(indexContainer inputContainer, indexContainer excludeContainer, long maxtime) {
      // collect references according to domains
