@@ -51,7 +51,6 @@ other YaCy peers:==anderen YaCy Peers:
 file:==Datei:
 "Load new blacklist items"=="Lade neue Blacklist"
 #URL:==URL:
-Import blacklist items from file:==Importiere Blacklist aus Datei:
 was removed from blacklist==wurde aus Blacklist entfernt
 was added to the blacklist==wurde zur Blacklist hinzugef&uuml;gt
 Activate this list for==Diese Liste ist g&uuml;ltig f&uuml;r
@@ -60,7 +59,7 @@ Activate this list for==Diese Liste ist g&uuml;ltig f&uuml;r
 #File: Blog.html
 #---------------------------
 by==von
->edit==>editieren
+>edit==>bearbeiten
 >delete==>l&ouml;schen
 show more entries==zeige weitere Eintr&auml;ge
 new entry==Neuer Eintrag
@@ -71,7 +70,7 @@ Author:==Autor:
 Subject:==Titel:
 #Text:==Text:
 You can use==Sie k&ouml;nnen hier
-Yacy-Wiki Code==YaCy-Wiki Code
+Yacy-Wiki Code==YaCy-Wiki Befehle
 here.==benutzen.
 "Submit"=="Absenden"
 "Preview"=="Vorschau"
@@ -800,7 +799,7 @@ Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdat
 #File: Lab.html
 #---------------------------
 
-The YACY Lab==Das YaCy Labor
+The YaCy Lab==Das YaCy Labor
 This is the place where we try new functions of the YaCy search engine.==Dies ist ein Platz, an dem wir neue Funktionen der YaCy Suchmaschine testen.
 All these things here are to be considered as probably unstable, and/or experimental.==Alle neuen Funktionen hier sind wahrscheinlich noch unstabil und in einer Experementierphase.
 You may try out these things but please do not care about bugs.==Sie k&ouml;nnen die neuen Funktionen gerne ausprobieren. K&uuml;mmern Sie sich bitte nicht um die Fehler.
@@ -852,7 +851,7 @@ Hash==Hash
 Type==Typ
 Release/<br />SVN==YaCy Version/<br />SVN
 Contact==Kontakt
-Last<br>Seen==Zuletzt<br />online
+Last<br />Seen==Zuletzt<br />online
 Location==Ort
 Offset==Versatz
 Uptime==Uptime
@@ -1508,11 +1507,10 @@ Welcome to YaCy!==Willkommen bei YaCy!
 Public System Properties==Allgemeine Systemangaben
 System version==Systemversion
 the latest public version is==Die neueste stabile Version ist
-Click here to==Klicken Sie hier,
-download</a> it.==um sie herunterzuladen</a>.
+Click here to==Klicken Sie
+download</a> it.==hier</a>, um sie herunterzuladen.
 This&nbsp;peer's&nbsp;address==Adresse dieses Peers
 #Not assigned==nicht zugewiesen
-enabled==aktiviert
 Not assigned. The peer must go online to get an address.==Nicht zugewiesen. Ihr Peer muss online gehen, um eine Adresse zu bekommen.
 #---
 The peer does not go online until you use the proxy to surf the internet,==Ihr Peer geht nicht online, bis Sie den Proxy benutzen,
@@ -1555,8 +1553,8 @@ Use this only if you have a flatrate or you have an always-on connection.==Benut
 "Go to Cache-Mode"=="In Cache-Modus gehen"
 You are in <em>permanent</em> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <em>permanenten</em> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein m&ouml;chten, m&uuml;ssen Sie den Proxy abschalten um offline zu gehen.
 Last Refresh:==Letzte Aktualisierung:
-Click here to==Klicken Sie hier,
-log in</a> as administrator and see full status.==um sich als Administrator einzuloggen</a> und den vollst&auml;ndigen Status zu sehen.
+Click here to==Klicken Sie
+log in</a> as administrator and see full status.==hier</a>, um sich als Administrator einzuloggen und den vollst&auml;ndigen Status zu sehen.
 
 #-----------------------------
 
@@ -1587,6 +1585,8 @@ Memory Usage==Speicherverbrauch
 free:==Frei:
 total:==Total:
 max:==Maximal:
+Configure==Einstellen
+Reset</a>==Zur&uuml;cksetzen</a>
 Connections Incoming==Eingehende Verbindungen
 Active:==Aktiv:
 Idle:==Wartend:
@@ -1715,8 +1715,67 @@ Comment==Kommentar
 
 #File: Wiki.html
 #---------------------------
-yacyWiki==YaCyWiki
+YaCyWiki page:==YaCyWiki Seite:
+last edited by==zuletzt bearbeitet von
+change date==&Auml;nderungsdatum
+Edit</a>==Bearbeiten</a>
+Start Page==Startseite
+#Index==Index
+Author:==Autor:
+#Text:==Text:
+You can use==Sie k&ouml;nnen hier
+Wiki Code</a> here.==Wiki Befehle</a> benutzen.
+"edit"=="bearbeiten"
+"Submit"=="Absenden"
+"Preview"=="Vorschau"
+"Discard"=="Verwerfen"
+>Preview==>Vorschau
+No changes have been submitted so far!==Es wurden noch keine &Auml;nderungen &uuml;bertragen!
+Subject==Titel
+Change Date==&Auml;nderungsdatum
+Last Author==Letzter Autor
+IO Error reading wiki database:==I0 Fehler beim Lesen der Wiki Datenbank:
 Changes will be published as announcement on YaCyNews==&Auml;nderungen werden &uuml;ber den YaCy News Service bekannt gegeben.
+#-----------------------------
+
+#File: WikiHelp.html
+#-----------------------------
+Wiki Help==Wiki Hilfe
+Index Creation==Index erzeugen
+This table contains a short description of the tags that can be used in the Wiki and several other servlets of YaCy. For a more detailed description visit the==Diese Tabelle ent&auml;lt eine kurze Beschreibung der Tags, die in diesem Wiki und an anderen Stellen in YaCy benutzen k&ouml;nnen. F&uuml;r eine detailliertere Beschreibung besuchen Sie bitte das 
+#YaCy Wiki==YaCy Wiki
+Code==Befehl
+Description==Beschreibung
+\=\=headline====&Uuml;berschrift
+This tags create headlines. If a page has three or more headlines, a directory will be created automaticly.==Diese Tags erzeugen &Uuml;berschriften. Wenn die Seite drei oder mehr &Uuml;berschriften enth&auml;lt, wird automatisch ein Inhaltsverzeichnis erstellt.
+#text==Text
+This tags create stressed texts. Most browsers will display the texts in italics, bold, and a combination of both.==Diese Tags erzeugen hervorgehobenen Text. Die meissten Browser zeigen die Texte kursiv, fett und in einer Kombination aus beidem.
+Lines will be indented. This tag is supposed to mark citations.==Der Text erscheint einger&uuml;ckt. Dieser Tag eigenet sich, um Zitate zu markieren.  
+point==Punkt
+This tags create a numbered list.==Diese Tags erstellen eine nummerierte Liste.
+something==etwas
+another thing==was anderes
+and yet another==und wieder was anderes
+something else==irgendwas
+This tags create a unnumbered list.==Diese Tags erstellen eine unnummerierte Liste.
+word==Wort
+\:definition==:Definition
+This tags create a definition list.==Diese Tags erstellen eine definierte Liste.
+This tag creates a horizontal line.==Dieser Tag erzeugt eine horizontale Linie.
+pagename==Seitenname
+description==Beschreibung
+This tag creates links to other pages of the wiki.==Dieser Tag erzeugt einen Link zu einer anderen Seite im Wiki.
+url==URL
+This tag creates links to external websites.==Dieser Tag erstellt einen Link zu einer externen Internetseite.
+Image==Bild
+alt==Beschreibung
+align==Ausrichtung
+This tag displays an image, it can be aligned left, right or center.==Dieser Tag f&uuml;gt ein Bild ein, es kann links (left), rechts (right) oder mittig (center) ausgerichtet werden.
+This tags create a table.==Diese Tags erstellen eine Tabelle.
+The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as regular text.==Durch diesen Tag wird der Text, der zwischen den Klammern steht, nicht interpretiert und unformatiert als normaler Text ausgegeben. 
+A text between this tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Ein Text zwischen diesen Tags wird alle Leerzeichen und Zeilenumbr&uuml;che beinhalten. Gut geeignet f&uuml;r ASCII-Kunst und Programm Code.  
+If a line starts with a space, it will be displayed in a non-proportional font.==Wenn eine Zeile mit einem Leerzeichen anf&auml;ngt, wird dieser als nicht-proportionale Schriftart dargestellt.
+
 #-----------------------------
 
 #File: yacysearch.html
@@ -1745,8 +1804,6 @@ available for everyone. Then stay online to support crawls from other peers. Tha
 results from==Resultate aus
 ordered links of a total number of==gefunden Links von insgesamt
 known.==bekannten Links.
-Catch up more links==Sammel mehr Links
-from 'late' peers.==von sp&auml;t antwortenden Peers.
 Refine your search with these topwords==Verfeinere die Suche mit diesen Topw&ouml;rtern
 You can enrich the search results by using the 'global' option==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen
 This will search also other YaCy peers==So werden auch andere YaCy Peers zum Suchen benutzt.
