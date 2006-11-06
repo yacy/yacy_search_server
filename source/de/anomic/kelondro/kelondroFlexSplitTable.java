@@ -97,18 +97,19 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             // open next biggest table
             t.remove(maxf);
             date = maxf.substring(tablename.length() + 1);
-            if (maxram <= sum) {
+            if (buffersize >= maxram) {
                 // this will cause usage of a complete RAM index
                 table = new kelondroCache(new kelondroFlexTable(path, maxf, maxram, preloadTime, rowdef, objectOrder), maxram / 10, true, false);
-                sum -= maxram;
-                sum -= maxram / 10;
+                buffersize -= maxram;
+                buffersize -= maxram / 10;
             } else {
                 // this will cause a generation of a file index
-                table = new kelondroFlexTable(path, maxf, sum / (t.size() + 1), preloadTime, rowdef, objectOrder);
-                sum -= sum / (t.size() + 1);
+                table = new kelondroFlexTable(path, maxf, buffersize / (t.size() + 1), preloadTime, rowdef, objectOrder);
+                buffersize -= buffersize / (t.size() + 1);
             }
             tables.put(date, table);
         }
+        System.out.println("*** remaining buffer RAM (not used): " + buffersize);
     }
         
     private static final Calendar thisCalendar = Calendar.getInstance();
