@@ -504,6 +504,7 @@ public final class yacyClient {
                 // get one single search result
                 urlEntry = urlManager.newEntry((String) result.get("resource" + n));
                 if (urlEntry == null) continue;
+                assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
                 plasmaCrawlLURLEntry.Components comp = urlEntry.comp();
                 if (blacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, comp.url())) continue; // block with backlist
                 urlManager.store(urlEntry);

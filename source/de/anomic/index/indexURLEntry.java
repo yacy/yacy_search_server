@@ -92,7 +92,7 @@ public class indexURLEntry implements Cloneable, indexEntry {
         // more needed attributes:
         // - boolean: appearance attributes: title, appears in header, anchor-descr, image-tag, hervorhebungen, meta-tags, word in link etc
         // - boolean: URL attributes
-
+        assert (urlHash.length() == 12) : "urlhash = " + urlHash;
         if ((language == null) || (language.length() != indexURL.urlLanguageLength)) language = "uk";
         this.entry = urlEntryRow.newEntry();
         this.entry.setCol(col_urlhash, urlHash, null);
@@ -247,6 +247,9 @@ public class indexURLEntry implements Cloneable, indexEntry {
     }
 
     static void normalize(indexURLEntry t, indexEntry min, indexEntry max) {
+        assert (t.urlHash().length() == 12) : "turlhash = " + t.urlHash();
+        assert (min.urlHash().length() == 12) : "minurlhash = " + min.urlHash();
+        assert (max.urlHash().length() == 12) : "maxurlhash = " + max.urlHash();
         if (1 + max.worddistance() - min.worddistance() == 0) System.out.println("min = " + min.toPropertyForm(true) + "\nmax=" + max.toPropertyForm(true));
         //System.out.println("Normalize:\nentry = " + t.toPropertyForm(true));
         //System.out.println("min   = " + min.toPropertyForm(true));

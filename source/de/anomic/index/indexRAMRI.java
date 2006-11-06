@@ -41,7 +41,7 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public final class indexRAMCacheRI implements indexRI {
+public final class indexRAMRI implements indexRI {
 
     // environment constants
     public  static final long wCacheMaxAge = 1000 * 60 * 30; // milliseconds; 30 minutes
@@ -66,7 +66,7 @@ public final class indexRAMCacheRI implements indexRI {
         //minKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
     
-    public indexRAMCacheRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceLimitInit, String dumpname, serverLog log) {
+    public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceLimitInit, String dumpname, serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
@@ -235,10 +235,9 @@ public final class indexRAMCacheRI implements indexRI {
     }
 
     public synchronized int indexSize(String wordHash) {
-        int size = 0;
         indexContainer cacheIndex = (indexContainer) cache.get(wordHash);
-        if (cacheIndex != null) size += cacheIndex.size();
-        return size;
+        if (cacheIndex == null) return 0;
+        return cacheIndex.size();
     }
 
     public synchronized Iterator wordContainers(String startWordHash, boolean rot) {

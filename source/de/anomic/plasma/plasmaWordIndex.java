@@ -42,7 +42,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexEntry;
 import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexRAMCacheRI;
+import de.anomic.index.indexRAMRI;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -64,7 +64,7 @@ public final class plasmaWordIndex implements indexRI {
     
     private final File                             oldDatabaseRoot;
     private final kelondroOrder                    indexOrder = new kelondroNaturalOrder(true);
-    private final indexRAMCacheRI                  dhtOutCache, dhtInCache;
+    private final indexRAMRI                  dhtOutCache, dhtInCache;
     private final indexCollectionRI                collections;          // new database structure to replace AssortmentCluster and FileCluster
     private int                                    assortmentBufferSize; // kb
     private final plasmaWordIndexAssortmentCluster assortmentCluster;    // old database structure, to be replaced by CollectionRI
@@ -76,8 +76,8 @@ public final class plasmaWordIndex implements indexRI {
     public plasmaWordIndex(File oldDatabaseRoot, File newIndexRoot, boolean dummy, int bufferkb, long preloadTime, serverLog log, boolean useCollectionIndex) throws IOException {
         this.oldDatabaseRoot = oldDatabaseRoot;
         this.backend = new plasmaWordIndexFileCluster(oldDatabaseRoot, payloadrow, log);
-        this.dhtOutCache = new indexRAMCacheRI(oldDatabaseRoot, payloadrow, (useCollectionIndex) ? 1024 : 64, "indexDump1.array", log);
-        this.dhtInCache  = new indexRAMCacheRI(oldDatabaseRoot, payloadrow, (useCollectionIndex) ? 1024 : 64, "indexDump2.array", log);
+        this.dhtOutCache = new indexRAMRI(oldDatabaseRoot, payloadrow, (useCollectionIndex) ? 1024 : 64, "indexDump1.array", log);
+        this.dhtInCache  = new indexRAMRI(oldDatabaseRoot, payloadrow, (useCollectionIndex) ? 1024 : 64, "indexDump2.array", log);
 
         // create assortment cluster path
         File assortmentClusterPath = new File(oldDatabaseRoot, indexAssortmentClusterPath);
@@ -234,7 +234,7 @@ public final class plasmaWordIndex implements indexRI {
         flushCacheSome(dhtInCache, busy);
     }
     
-    private void flushCacheSome(indexRAMCacheRI ram, boolean busy) {
+    private void flushCacheSome(indexRAMRI ram, boolean busy) {
         int flushCount;
         if (ram.size() > ram.getMaxWordCount()) {
             flushCount = ram.size() + 100 - ram.getMaxWordCount();
@@ -246,7 +246,7 @@ public final class plasmaWordIndex implements indexRI {
         flushCache(ram, flushCount);
     }
     
-    private void flushCache(indexRAMCacheRI ram, int count) {
+    private void flushCache(indexRAMRI ram, int count) {
         if (count <= 0) return;
         busyCacheFlush = true;
         String wordHash;

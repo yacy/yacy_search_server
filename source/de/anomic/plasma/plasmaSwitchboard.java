@@ -2083,6 +2083,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     urlentry = acc.nextElement();
                     plasmaCrawlLURLEntry.Components comp = urlentry.comp();
                     urlhash = urlentry.hash();
+                    assert (urlhash != null);
+                    assert (urlhash.length() == 12) : "urlhash = " + urlhash;
                     host = comp.url().getHost();
                     if (host.endsWith(".yacyh")) {
                         // translate host into current IP
