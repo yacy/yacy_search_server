@@ -66,7 +66,7 @@ public class plasmaParserDocument {
     String charset;     // the charset of the document
     String[] keywords;  // most resources provide a keyword field
     String shortTitle;  // a shortTitle mostly appears in the window header (border)
-    String longTitle;   // the real title of the document, commonly h1-tags
+    private String longTitle;   // the real title of the document, commonly h1-tags
     String[] sections;  // if present: more titles/headlines appearing in the document
     String abstrct;     // an abstract, if present: short content description
     private Object text;  // the clear text, all that is visible

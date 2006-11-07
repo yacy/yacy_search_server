@@ -1677,7 +1677,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                         urlHash,
                                         urlLength, urlComps,
                                         wordStat.count,
-                                        document.longTitle.length(),
+                                        document.getMainLongTitle().length(),
                                         condenser.RESULT_SIMI_WORDS,
                                         condenser.RESULT_SIMI_SENTENCES,
                                         wordStat.posInText,

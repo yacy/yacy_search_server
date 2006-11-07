@@ -45,7 +45,6 @@
 package de.anomic.server.logging;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.logging.ErrorManager;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;

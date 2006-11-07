@@ -513,7 +513,12 @@ public final class plasmaCrawlStacker {
                 this.anchors       = (int) entry.getColLong(8);
                 this.forkfactor    = (int) entry.getColLong(9);
                 this.flags         = new bitfield(entry.getColBytes(10));
-                this.handle        = Integer.parseInt(new String(entry.getColBytes(11), "UTF-8"));
+                try {
+                    this.handle        = Integer.parseInt(new String(entry.getColBytes(11), "UTF-8"));
+                } catch (NumberFormatException ee) {
+                    System.out.println("BUG in stackCrawlMessage. entry = " + entry.toString());
+                    throw new RuntimeException(ee.getMessage());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new IllegalStateException(e.toString());

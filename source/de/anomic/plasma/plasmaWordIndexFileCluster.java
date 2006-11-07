@@ -334,4 +334,8 @@ public class plasmaWordIndexFileCluster implements indexRI {
         
     }
 
+    public int indexSize(String wordHash) {
+        throw new UnsupportedOperationException();
+    }
+
 }

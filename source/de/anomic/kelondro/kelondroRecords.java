@@ -700,6 +700,10 @@ public class kelondroRecords {
             if (value == null) {
                 while (valuewidth-- > 0) targetarray[targetoffset++] = 0;
             } else {
+                assert ((valueoffset >= 0) && (valueoffset < value.length)) : "valueoffset = " + valueoffset;
+                assert ((valueoffset + valuewidth <= value.length)) : "valueoffset = " + valueoffset + ", valuewidth = " + valuewidth + ", value.length = " + value.length;
+                assert ((targetoffset >= 0) && (targetoffset < targetarray.length)) : "targetoffset = " + targetoffset;
+                assert ((targetoffset + valuewidth <= targetarray.length)) : "targetoffset = " + targetoffset + ", valuewidth = " + valuewidth + ", targetarray.length = " + targetarray.length;
                 System.arraycopy(value, valueoffset, targetarray, targetoffset, Math.min(value.length, valuewidth)); // error?
                 while (valuewidth-- > value.length) targetarray[targetoffset + valuewidth] = 0;
             }

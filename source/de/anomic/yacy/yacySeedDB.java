@@ -205,7 +205,13 @@ public final class yacySeedDB {
     
     private synchronized kelondroMap openSeedTable(File seedDBFile) {
         new File(seedDBFile.getParent()).mkdirs();
-        return new kelondroMap(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#'), sortFields, accFields);
+        try {
+            return new kelondroMap(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#'), sortFields, accFields);
+        } catch (Exception e) {
+            seedDBFile.delete();
+            // try again
+            return new kelondroMap(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#'), sortFields, accFields);
+        }
     }
     
     protected synchronized kelondroMap resetSeedTable(kelondroMap seedDB, File seedDBFile) {

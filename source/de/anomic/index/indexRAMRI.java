@@ -1,4 +1,4 @@
-// indexRAMCacheRI.java
+// indexRAMRI.java
 // (C) 2005, 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 2005 on http://www.anomic.de
 //

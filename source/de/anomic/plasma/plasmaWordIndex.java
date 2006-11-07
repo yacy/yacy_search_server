@@ -64,7 +64,7 @@ public final class plasmaWordIndex implements indexRI {
     
     private final File                             oldDatabaseRoot;
     private final kelondroOrder                    indexOrder = new kelondroNaturalOrder(true);
-    private final indexRAMRI                  dhtOutCache, dhtInCache;
+    private final indexRAMRI                       dhtOutCache, dhtInCache;
     private final indexCollectionRI                collections;          // new database structure to replace AssortmentCluster and FileCluster
     private int                                    assortmentBufferSize; // kb
     private final plasmaWordIndexAssortmentCluster assortmentCluster;    // old database structure, to be replaced by CollectionRI
@@ -334,7 +334,7 @@ public final class plasmaWordIndex implements indexRI {
             // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
             wordHash = indexEntryAttribute.word2hash(word);
             ientry = new indexURLEntry(urlHash,
-                                             urlLength, urlComps, (document == null) ? urlLength : document.longTitle.length(),
+                                             urlLength, urlComps, (document == null) ? urlLength : document.getMainLongTitle().length(),
                                              wprop.count,
                                              condenser.RESULT_SIMI_WORDS,
                                              condenser.RESULT_SIMI_SENTENCES,
@@ -630,7 +630,7 @@ public final class plasmaWordIndex implements indexRI {
         return null;
     }
     
-    private class rotatingContainerIterator implements Iterator {
+    public class rotatingContainerIterator implements Iterator {
         Iterator i;
         int resourceLevel;
 
