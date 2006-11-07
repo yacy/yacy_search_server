@@ -4,6 +4,8 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 //
+// Contains contributions by Marc Nause [MN]
+//
 // $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
@@ -79,6 +81,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         linkTags0.add("meta");
         linkTags0.add("area");
         linkTags0.add("link");
+        linkTags0.add("embed");     //added by [MN]
+        linkTags0.add("param");     //added by [MN]
 
         linkTags1 = new TreeSet(insensitiveCollator);
         linkTags1.add("a");
@@ -203,7 +207,18 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
                 }
             }
         }
-        
+        //start contrib [MN]
+        if (tagname.equalsIgnoreCase("embed")) {
+            anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
+        }
+        if (tagname.equalsIgnoreCase("param")) {
+            String name = tagopts.getProperty("name", "");
+            if (name.equalsIgnoreCase("movie")) {
+                anchors.put(absolutePath(tagopts.getProperty("value", "")),name);
+            }
+        }
+        //end contrib [MN]
+
         // fire event
         fireScrapeTag0(tagname, tagopts);
     }
