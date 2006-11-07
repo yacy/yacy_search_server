@@ -55,6 +55,7 @@ public class kelondroCache implements kelondroIndex {
     private int            hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete, hasnotFlush;
     
     public kelondroCache(kelondroIndex backupIndex, long buffersize, boolean read, boolean write) throws IOException {
+        assert write == false;
         this.index = backupIndex;
         this.keyrow = new kelondroRow(new kelondroColumn[]{index.row().column(index.primarykey())});
         this.readHitCache = (read) ? new kelondroRowSet(index.row()) : null;

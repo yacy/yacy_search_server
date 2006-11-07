@@ -688,7 +688,7 @@ public final class plasmaCrawlStacker {
                 String newCacheName = "urlPreNotice1.table";
                 cacheStacksPath.mkdirs();
                 try {
-                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, plasmaCrawlNURL.rowdef, kelondroBase64Order.enhancedCoder), bufferkb / 2 * 0x400, true, true);
+                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, plasmaCrawlNURL.rowdef, kelondroBase64Order.enhancedCoder), bufferkb / 2 * 0x400, true, false);
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(-1);

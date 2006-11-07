@@ -157,7 +157,7 @@ public class plasmaCrawlNURL extends indexURL {
             String newCacheName = "urlNotice4.table";
             cacheStacksPath.mkdirs();
             try {
-                urlIndexFile = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder), bufferkb / 2 * 0x400, true, true);
+                urlIndexFile = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder), bufferkb / 2 * 0x400, true, false);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(-1);

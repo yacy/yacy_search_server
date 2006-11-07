@@ -69,13 +69,13 @@ public class yacyNewsDB {
         this.path = path;
         this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
-        this.news = new kelondroCache(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400, true, true);
+        this.news = new kelondroCache(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400, true, false);
     }
 
     private void resetDB() throws IOException {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
-        this.news = new kelondroCache(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400, true, true);
+        this.news = new kelondroCache(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400, true, false);
     }
 
     public int cacheNodeChunkSize() {

@@ -252,11 +252,11 @@ public class kelondroRow {
         
         private void setCol(int encoding, int offset, int length, byte[] cell) {
             if (cell == null) {
-                while (length-- >= 0) rowinstance[offset + length] = 0;
+                while (length-- > 0) rowinstance[offset + length] = 0;
             } else {
                 if (cell.length < length) {
                     System.arraycopy(cell, 0, rowinstance, offset, cell.length);
-                    while (length-- >= cell.length) rowinstance[offset + length] = 0;
+                    while (length-- > cell.length) rowinstance[offset + length] = 0;
                 } else {
                     System.arraycopy(cell, 0, rowinstance, offset, length);
                 }
