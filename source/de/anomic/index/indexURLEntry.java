@@ -271,6 +271,7 @@ public class indexURLEntry implements Cloneable, indexEntry {
     }
 
     public indexEntry generateNormalized(indexEntry min, indexEntry max) {
+        assert (this.urlHash().length() == 12) : "this.urlhash = " + this.urlHash();
         indexURLEntry e = (indexURLEntry) this.clone();
         e.normalize(min, max);
         return e;

@@ -203,7 +203,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
-        assert row.bytes().length <= this.rowdef.objectsize;
+        assert row.bytes().length == this.rowdef.objectsize;
         index.addi(row.getColBytes(0), super.add(row));
     }
     

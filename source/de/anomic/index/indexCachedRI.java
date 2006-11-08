@@ -45,14 +45,14 @@ public class indexCachedRI implements indexRI {
 
     private kelondroRow   payloadrow;
     private kelondroOrder indexOrder = new kelondroNaturalOrder(true);
-    private indexRAMRI    dhtOutCache, dhtInCache;
+    private indexRAMRI    riExtern, riIntern;
     private indexRI       backend;
     public  boolean       busyCacheFlush;            // shows if a cache flush is currently performed
     private int           idleDivisor, busyDivisor;
     
-    public indexCachedRI(indexRAMRI dhtOutCache, indexRAMRI dhtInCache, indexRI backend, kelondroRow payloadrow, serverLog log) {
-        this.dhtOutCache = dhtOutCache;
-        this.dhtInCache  = dhtInCache;
+    public indexCachedRI(indexRAMRI riExtern, indexRAMRI riIntern, indexRI backend, kelondroRow payloadrow, serverLog log) {
+        this.riExtern = riExtern;
+        this.riIntern  = riIntern;
         this.backend = backend;
         this.payloadrow = payloadrow;
         this.busyCacheFlush = false;
@@ -72,11 +72,11 @@ public class indexCachedRI implements indexRI {
     public void flushControl() {
         // check for forced flush
         synchronized (this) {
-            if (dhtOutCache.size() > dhtOutCache.getMaxWordCount()) {
-                flushCache(dhtOutCache, dhtOutCache.size() + 500 - dhtOutCache.getMaxWordCount());
+            if (riExtern.size() > riExtern.getMaxWordCount()) {
+                flushCache(riExtern, riExtern.size() + 500 - riExtern.getMaxWordCount());
             }
-            if (dhtInCache.size() > dhtInCache.getMaxWordCount()) {
-                flushCache(dhtInCache, dhtInCache.size() + 500 - dhtInCache.getMaxWordCount());
+            if (riIntern.size() > riIntern.getMaxWordCount()) {
+                flushCache(riIntern, riIntern.size() + 500 - riIntern.getMaxWordCount());
             }
         }
     }
@@ -91,47 +91,44 @@ public class indexCachedRI implements indexRI {
         return new indexContainer(wordHash, payloadrow);
     }
     
-    public indexContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean dhtInCase) {        
+    public indexContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean intern) {        
         // add the entry
-        if (dhtInCase) {
-            dhtInCache.addEntry(wordHash, entry, updateTime, true);
+        if (intern) {
+            riIntern.addEntry(wordHash, entry, updateTime, true);
         } else {
-            dhtOutCache.addEntry(wordHash, entry, updateTime, false);
+            riExtern.addEntry(wordHash, entry, updateTime, false);
             flushControl();
         }
         return null;
     }
     
-    public indexContainer addEntries(indexContainer entries, long updateTime, boolean dhtInCase) {
+    public indexContainer addEntries(indexContainer entries, long updateTime, boolean intern) {
         // add the entry
-        if (dhtInCase) {
-            dhtInCache.addEntries(entries, updateTime, true);
+        if (intern) {
+            riIntern.addEntries(entries, updateTime, true);
         } else {
-            dhtOutCache.addEntries(entries, updateTime, false);
+            riExtern.addEntries(entries, updateTime, false);
             flushControl();
         }
         return null;
     }
 
     public void flushCacheSome(boolean busy) {
-        flushCacheSome(dhtOutCache, busy);
-        flushCacheSome(dhtInCache, busy);
+        flushCacheSome(riExtern, busy);
+        flushCacheSome(riIntern, busy);
     }
     
     private void flushCacheSome(indexRAMRI ram, boolean busy) {
-        int flushCount;
-        if (ram.size() > ram.getMaxWordCount()) {
-            flushCount = ram.size() + 100 - ram.getMaxWordCount();
-        } else {
-            flushCount = (busy) ? ram.size() / busyDivisor : ram.size() / idleDivisor;
-            if (flushCount > 100) flushCount = 100;
-            if (flushCount < 1) flushCount = Math.min(1, ram.size());
-        }
+        int flushCount = (busy) ? ram.size() / busyDivisor : ram.size() / idleDivisor;
+        if (flushCount > 100) flushCount = 100;
+        if (flushCount < 1) flushCount = Math.min(1, ram.size());
         flushCache(ram, flushCount);
+        while (ram.maxURLinCache() > 1024) flushCache(ram, 1);
     }
     
     private void flushCache(indexRAMRI ram, int count) {
         if (count <= 0) return;
+        if (count > 1000) count = 1000;
         busyCacheFlush = true;
         String wordHash;
         for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
@@ -149,7 +146,7 @@ public class indexCachedRI implements indexRI {
                 }
                 
                 // pause to next loop to give other processes a chance to use IO
-                try {this.wait(8);} catch (InterruptedException e) {}
+                //try {this.wait(8);} catch (InterruptedException e) {}
             }
         }
         busyCacheFlush = false;
@@ -189,11 +186,11 @@ public class indexCachedRI implements indexRI {
 
     public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxTime) {
         // get from cache
-        indexContainer container = dhtOutCache.getContainer(wordHash, urlselection, true, maxTime);
+        indexContainer container = riExtern.getContainer(wordHash, urlselection, true, maxTime);
         if (container == null) {
-            container = dhtInCache.getContainer(wordHash, urlselection, true, maxTime);
+            container = riIntern.getContainer(wordHash, urlselection, true, maxTime);
         } else {
-            container.add(dhtInCache.getContainer(wordHash, urlselection, true, maxTime), maxTime);
+            container.add(riIntern.getContainer(wordHash, urlselection, true, maxTime), maxTime);
         }
 
         // get from collection index
@@ -236,52 +233,52 @@ public class indexCachedRI implements indexRI {
     }
 
     public int size() {
-        return java.lang.Math.max(backend.size(), java.lang.Math.max(dhtInCache.size(), dhtOutCache.size()));
+        return java.lang.Math.max(backend.size(), java.lang.Math.max(riIntern.size(), riExtern.size()));
     }
 
     public int indexSize(String wordHash) {
         int size = backend.indexSize(wordHash);
-        size += dhtInCache.indexSize(wordHash);
-        size += dhtOutCache.indexSize(wordHash);
+        size += riIntern.indexSize(wordHash);
+        size += riExtern.indexSize(wordHash);
         return size;
     }
 
     public void close(int waitingBoundSeconds) {
         synchronized (this) {
-            dhtInCache.close(waitingBoundSeconds);
-            dhtOutCache.close(waitingBoundSeconds);
+            riIntern.close(waitingBoundSeconds);
+            riExtern.close(waitingBoundSeconds);
             backend.close(-1);
         }
     }
 
     public indexContainer deleteContainer(String wordHash) {
         indexContainer c = new indexContainer(wordHash, payloadrow);
-        c.add(dhtInCache.deleteContainer(wordHash), -1);
-        c.add(dhtOutCache.deleteContainer(wordHash), -1);
+        c.add(riIntern.deleteContainer(wordHash), -1);
+        c.add(riExtern.deleteContainer(wordHash), -1);
         c.add(backend.deleteContainer(wordHash), -1);
         return c;
     }
     
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
         boolean removed = false;
-        removed = removed | (dhtInCache.removeEntry(wordHash, urlHash, deleteComplete));
-        removed = removed | (dhtOutCache.removeEntry(wordHash, urlHash, deleteComplete));
+        removed = removed | (riIntern.removeEntry(wordHash, urlHash, deleteComplete));
+        removed = removed | (riExtern.removeEntry(wordHash, urlHash, deleteComplete));
         removed = removed | (backend.removeEntry(wordHash, urlHash, deleteComplete));
         return removed;
     }
     
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
         int removed = 0;
-        removed += dhtInCache.removeEntries(wordHash, urlHashes, deleteComplete);
-        removed += dhtOutCache.removeEntries(wordHash, urlHashes, deleteComplete);
+        removed += riIntern.removeEntries(wordHash, urlHashes, deleteComplete);
+        removed += riExtern.removeEntries(wordHash, urlHashes, deleteComplete);
         removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
         return removed;
     }
     
     public String removeEntriesExpl(String wordHash, Set urlHashes, boolean deleteComplete) {
         String removed = "";
-        removed += dhtInCache.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
-        removed += dhtOutCache.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
+        removed += riIntern.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
+        removed += riExtern.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
         removed += backend.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
         return removed;
     }
@@ -293,7 +290,7 @@ public class indexCachedRI implements indexRI {
         containerOrder.rotate(startHash.getBytes());
         TreeSet containers = new TreeSet(containerOrder);
         Iterator i = wordContainers(startHash, ramOnly, rot);
-        if (ramOnly) count = Math.min(dhtOutCache.size(), count);
+        if (ramOnly) count = Math.min(riExtern.size(), count);
         indexContainer container;
         while ((count > 0) && (i.hasNext())) {
             container = (indexContainer) i.next();
@@ -313,10 +310,10 @@ public class indexCachedRI implements indexRI {
     public Iterator wordContainers(String startHash, boolean ramOnly, boolean rot) {
         if (rot) return new rotatingContainerIterator(startHash, ramOnly);
         if (ramOnly) {
-            return dhtOutCache.wordContainers(startHash, false);
+            return riExtern.wordContainers(startHash, false);
         }
         return new kelondroMergeIterator(
-                            dhtOutCache.wordContainers(startHash, false),
+                            riExtern.wordContainers(startHash, false),
                             backend.wordContainers(startHash, false),
                             new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
                             indexContainer.containerMergeMethod,

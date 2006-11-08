@@ -86,7 +86,7 @@ public class kelondroRowCollection {
         int chunkcachelength = exportedCollectionRowinstance.length - exportOverheadSize;
         kelondroRow.Entry exportedCollection = exportRow(chunkcachelength).newEntry(exportedCollectionRowinstance);
         this.chunkcount = (int) exportedCollection.getColLong(exp_chunkcount);
-        assert (this.chunkcount <= chunkcachelength / rowdef.objectsize) : "chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize;
+        //assert (this.chunkcount <= chunkcachelength / rowdef.objectsize) : "chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize;
         if ((this.chunkcount > chunkcachelength / rowdef.objectsize)) {
             serverLog.logWarning("RowCollection", "corrected wrong chunkcount; chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize);
             this.chunkcount = chunkcachelength / rowdef.objectsize; // patch problem
@@ -137,6 +137,7 @@ public class kelondroRowCollection {
         kelondroRow row = exportRow(chunkcache.length);
         kelondroRow.Entry entry = row.newEntry();
         assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
+        assert (this.chunkcount <= chunkcache.length / rowdef.objectsize) : "chunkcount = " + this.chunkcount + ", chunkcache.length = " + chunkcache.length + ", rowdef.objectsize = " + rowdef.objectsize;
         entry.setCol(exp_chunkcount, this.chunkcount);
         entry.setCol(exp_last_read, daysSince2000(this.lastTimeRead));
         entry.setCol(exp_last_wrote, daysSince2000(this.lastTimeWrote));
@@ -183,6 +184,9 @@ public class kelondroRowCollection {
     public final kelondroRow.Entry get(int index) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
+        assert (index * rowdef.objectsize < chunkcache.length);
+        if (index >= chunkcount) return null;
+        if (index * rowdef.objectsize() >= chunkcache.length) return null;
         byte[] a = new byte[rowdef.objectsize()];
         synchronized (chunkcache) {
             System.arraycopy(chunkcache, index * rowdef.objectsize(), a, 0, rowdef.objectsize());
@@ -198,6 +202,8 @@ public class kelondroRowCollection {
     public final void set(int index, byte[] a, int astart, int alength) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount;
+        assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
+        if (bugappearance(a, astart, alength)) return; // TODO: this is temporary; remote peers may still submit bad entries
         int l = Math.min(rowdef.objectsize(), Math.min(alength, a.length - astart));
         synchronized (chunkcache) {
             System.arraycopy(a, astart, chunkcache, index * rowdef.objectsize(), l);
@@ -223,6 +229,8 @@ public class kelondroRowCollection {
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
+        assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
+        if (bugappearance(a, astart, alength)) return; // TODO: this is temporary; remote peers may still submit bad entries
         int l = Math.min(rowdef.objectsize(), Math.min(alength, a.length - astart));
         synchronized (chunkcache) {
             ensureSize(chunkcount + 1);
@@ -230,6 +238,18 @@ public class kelondroRowCollection {
             chunkcount++;
         }
         this.lastTimeWrote = System.currentTimeMillis();
+    }
+    
+    private static boolean bugappearance(byte[] a, int astart, int alength) {
+        // check strange appearances of '@[B', which is not a b64-value or any other hash fragment
+        if (astart + 3 > alength) return false;
+        loop: for (int i = astart; i <= alength - 3; i++) {
+            if (a[i    ] != 64) continue loop;
+            if (a[i + 1] != 91) continue loop;
+            if (a[i + 2] != 66) continue loop;
+            return true;
+        }
+        return false;
     }
     
     public final void addAll(kelondroRowCollection c) {

@@ -235,19 +235,16 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     private void flushCacheSome(indexRAMRI ram, boolean busy) {
-        int flushCount;
-        if (ram.size() > ram.getMaxWordCount()) {
-            flushCount = ram.size() + 100 - ram.getMaxWordCount();
-        } else {
-            flushCount = (busy) ? ram.size() / busyDivisor : ram.size() / idleDivisor;
-            if (flushCount > 100) flushCount = 100;
-            if (flushCount < 1) flushCount = Math.min(1, ram.size());
-        }
+        int flushCount = (busy) ? ram.size() / busyDivisor : ram.size() / idleDivisor;
+        if (flushCount > 100) flushCount = 100;
+        if (flushCount < 1) flushCount = Math.min(1, ram.size());
         flushCache(ram, flushCount);
+        while (ram.maxURLinCache() > ((useCollectionIndex) ? 1024 : 64)) flushCache(ram, 1);
     }
     
     private void flushCache(indexRAMRI ram, int count) {
         if (count <= 0) return;
+        if (count > 1000) count = 1000;
         busyCacheFlush = true;
         String wordHash;
         //System.out.println("DEBUG-Started flush of " + count + " entries from RAM to DB");
@@ -274,7 +271,7 @@ public final class plasmaWordIndex implements indexRI {
                 }
                 
                 // pause to next loop to give other processes a chance to use IO
-                try {this.wait(8);} catch (InterruptedException e) {}
+                //try {this.wait(8);} catch (InterruptedException e) {}
             }
         }
         //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");

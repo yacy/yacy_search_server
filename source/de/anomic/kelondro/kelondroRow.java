@@ -158,20 +158,14 @@ public class kelondroRow {
         }
         
         public Entry(byte[] rowinstance) {
-            if (rowinstance.length == objectsize) {
-                this.rowinstance = rowinstance;
-            } else {
-                this.rowinstance = new byte[objectsize];
-                int ll = Math.min(objectsize, rowinstance.length);
-                System.arraycopy(rowinstance, 0, this.rowinstance, 0, ll);
-                for (int i = ll; i < objectsize; i++) this.rowinstance[i] = 0;
-            }
+            this(rowinstance, 0, rowinstance.length);
         }
         
         public Entry(byte[] rowinstance, int start, int length) {
-            this.rowinstance = new byte[length];
-            System.arraycopy(rowinstance, start, this.rowinstance, 0, length);
-            for (int i = rowinstance.length; i < objectsize; i++) this.rowinstance[i] = 0;
+            this.rowinstance = new byte[objectsize];
+            int ll = Math.min(objectsize, length);
+            System.arraycopy(rowinstance, start, this.rowinstance, 0, ll);
+            for (int i = ll; i < objectsize; i++) this.rowinstance[i] = 0;
         }
         
         public Entry(byte[][] cols) {
@@ -432,7 +426,7 @@ public class kelondroRow {
         public String toString() {
             return toPropertyForm(true, false, false);
         }
-
+        
     }
     
     public final class EntryIndex extends Entry {
