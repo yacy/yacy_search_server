@@ -35,10 +35,6 @@ import de.anomic.yacy.yacySeedDB;
 
 public class indexEntryAttribute {
 
-    // the size of a word hash
-    public static final int wordHashLength   = yacySeedDB.commonHashLength; // 12
-    public static final int  urlHashLength   = yacySeedDB.commonHashLength; // 12
-
     // doctypes:
     public static final char DT_PDFPS   = 'p';
     public static final char DT_TEXT    = 't';
@@ -86,7 +82,7 @@ public class indexEntryAttribute {
     
     // create a word hash
     public static String word2hash(String word) {
-        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase())).substring(0, indexEntryAttribute.wordHashLength);
+        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase())).substring(0, yacySeedDB.commonHashLength);
     }
 
     // doctype calculation

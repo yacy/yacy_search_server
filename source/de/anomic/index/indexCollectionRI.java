@@ -152,7 +152,7 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public synchronized indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
+    public synchronized indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
         indexContainer container = new indexContainer(wordHash, collectionIndex.payloadRow());
         container.add(newEntry);
         return addEntries(container, updateTime, dhtCase);

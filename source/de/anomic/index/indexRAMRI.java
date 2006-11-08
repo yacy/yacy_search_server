@@ -81,7 +81,7 @@ public final class indexRAMRI implements indexRI {
         this.indexArrayFileName = dumpname;
         this.payloadrow = payloadrow;
         this.bufferStructureBasis = new kelondroRow(
-                "byte[] wordhash-" + indexEntryAttribute.wordHashLength + ", " +
+                "byte[] wordhash-" + yacySeedDB.commonHashLength + ", " +
                 "Cardinal occ-4 {b256}, " +
                 "Cardinal time-8 {b256}, " +
                 "byte[] urlprops-" + payloadrow.objectsize());
@@ -114,7 +114,7 @@ public final class indexRAMRI implements indexRI {
             String wordHash;
             indexContainer container;
             long updateTime;
-            indexEntry iEntry;
+            indexRWIEntry iEntry;
             kelondroRow.Entry row = dumpArray.row().newEntry();
       
             // write wCache
@@ -131,7 +131,7 @@ public final class indexRAMRI implements indexRI {
                     if (container != null) {
                         Iterator ci = container.entries();
                         while (ci.hasNext()) {
-                            iEntry = (indexEntry) ci.next();
+                            iEntry = (indexRWIEntry) ci.next();
                             row.setCol(0, wordHash.getBytes());
                             row.setCol(1, kelondroNaturalOrder.encodeLong(container.size(), 4));
                             row.setCol(2, kelondroNaturalOrder.encodeLong(updateTime, 8));
@@ -169,7 +169,7 @@ public final class indexRAMRI implements indexRI {
                 Iterator i = dumpArray.contentRows(-1);
                 String wordHash;
                 //long creationTime;
-                indexEntry wordEntry;
+                indexRWIEntry wordEntry;
                 kelondroRow.Entry row;
                 //Runtime rt = Runtime.getRuntime();
                 while (i.hasNext()) {
@@ -178,7 +178,7 @@ public final class indexRAMRI implements indexRI {
                     if ((row == null) || (row.empty(0)) || (row.empty(3))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new indexURLEntry(row.getColBytes(3));
+                    wordEntry = new indexRWIEntryOld(row.getColBytes(3));
                     // store to cache
                     addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;
@@ -437,10 +437,10 @@ public final class indexRAMRI implements indexRI {
         return null;
     }
 
-    public synchronized indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
+    public synchronized indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
             indexContainer container = (indexContainer) cache.get(wordHash);
             if (container == null) container = new indexContainer(wordHash, this.payloadrow);
-            indexEntry[] entries = new indexEntry[] { newEntry };
+            indexRWIEntry[] entries = new indexRWIEntry[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
                 cache.put(wordHash, container);
                 hashScore.incScore(wordHash);

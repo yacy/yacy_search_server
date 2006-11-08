@@ -50,8 +50,9 @@ import java.io.IOException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexRWIEntryOld;
+import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaCrawlEURL;
-import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -124,12 +125,12 @@ public final class crawlReceipt {
             prop.put("delay", "3600");
         } else if (result.equals("fill")) {
             // generating a new loaded URL entry
-            plasmaCrawlLURLEntry entry = switchboard.urlPool.loadedURL.newEntry(propStr);
+            indexURLEntry entry = switchboard.urlPool.loadedURL.newEntry(propStr);
             if (entry == null) {
                 log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) for hash " + receivedUrlhash + " from peer " + iam +
                               "\n\tURL properties: "+ propStr);
             } else {
-                plasmaCrawlLURLEntry.Components comp = entry.comp();
+                indexURLEntry.Components comp = entry.comp();
             if (comp.url() == null) {
                 log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + receivedUrlhash + " from peer " + iam +
                               "\n\tURL properties: "+ propStr);
@@ -156,7 +157,7 @@ public final class crawlReceipt {
         } else {
             try {
                 plasmaCrawlNURL.Entry en = switchboard.urlPool.noticeURL.getEntry(receivedUrlhash);
-                plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(indexURL.urlFlagLength));
+                plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(indexRWIEntryOld.urlFlagLength));
                 ee.store();
                 switchboard.urlPool.errorURL.stackPushEntry(ee);
                 switchboard.urlPool.noticeURL.remove(receivedUrlhash);

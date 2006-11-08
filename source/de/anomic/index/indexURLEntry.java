@@ -1,6 +1,6 @@
-// plasmaCrawlLURLEntry.java
+// indexURLEntry.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
-// first published 13.10.2006 on http://www.anomic.de
+// first published 2006 on http://www.anomic.de
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -24,7 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma;
+
+package de.anomic.index;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -32,9 +33,9 @@ import java.util.Date;
 
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
 
-public interface plasmaCrawlLURLEntry {
+public interface indexURLEntry {
 
     public kelondroRow.Entry toRowEntry() throws IOException;
     public String hash();
@@ -48,8 +49,8 @@ public interface plasmaCrawlLURLEntry {
     public int size();
     public int wordCount();
     public String snippet();
-    public indexEntry word();
-    public boolean isOlder(plasmaCrawlLURLEntry other);
+    public indexRWIEntry word();
+    public boolean isOlder(indexURLEntry other);
     public String toString(String snippet);
     public String toString();
 

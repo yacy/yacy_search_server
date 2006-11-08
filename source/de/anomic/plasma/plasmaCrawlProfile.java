@@ -48,7 +48,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.index.indexURL;
+import de.anomic.index.indexRWIEntryOld;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
@@ -68,7 +68,7 @@ public class plasmaCrawlProfile {
         this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
         profileTableFile.getParentFile().mkdirs();
-        kelondroDyn dyn = kelondroDyn.open(profileTableFile, bufferkb * 1024, preloadTime, indexURL.urlCrawlProfileHandleLength, 2000, '#');
+        kelondroDyn dyn = kelondroDyn.open(profileTableFile, bufferkb * 1024, preloadTime, indexRWIEntryOld.urlCrawlProfileHandleLength, 2000, '#');
         profileTable = new kelondroMap(dyn);
         domsCache = new HashMap();
     }
@@ -94,7 +94,7 @@ public class plasmaCrawlProfile {
         if (profileTable != null) try { profileTable.close(); } catch (IOException e) {}
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
-        kelondroDyn dyn = kelondroDyn.open(profileTableFile, bufferkb * 1024, preloadTime, indexURL.urlCrawlProfileHandleLength, 2000, '#');
+        kelondroDyn dyn = kelondroDyn.open(profileTableFile, bufferkb * 1024, preloadTime, indexRWIEntryOld.urlCrawlProfileHandleLength, 2000, '#');
         profileTable = new kelondroMap(dyn);
     }
     
@@ -256,7 +256,7 @@ public class plasmaCrawlProfile {
                      boolean storeHTCache, boolean storeTXCache,
                      boolean localIndexing, boolean remoteIndexing,
                      boolean xsstopw, boolean xdstopw, boolean xpstopw) {
-            String handle = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, indexURL.urlCrawlProfileHandleLength);
+            String handle = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, indexRWIEntryOld.urlCrawlProfileHandleLength);
             mem = new HashMap();
             mem.put("handle", handle);
             mem.put("name", name);

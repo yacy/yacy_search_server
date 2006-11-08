@@ -55,8 +55,8 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
-import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -147,10 +147,10 @@ public class Bookmarks {
                     bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        plasmaCrawlLURLEntry urlentry = switchboard.urlPool.loadedURL.load(urlHash, null);
+                        indexURLEntry urlentry = switchboard.urlPool.loadedURL.load(urlHash, null);
                         plasmaParserDocument document = null;
                         if (urlentry != null) {
-                            plasmaCrawlLURLEntry.Components comp = urlentry.comp();
+                            indexURLEntry.Components comp = urlentry.comp();
                             document = switchboard.snippetCache.retrieveDocument(comp.url(), true);
                             prop.put("mode_edit", 0); // create mode
                             prop.put("mode_url", comp.url().toNormalform());

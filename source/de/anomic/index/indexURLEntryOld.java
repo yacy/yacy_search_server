@@ -24,39 +24,37 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma;
+package de.anomic.index;
 
 import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
 
 import de.anomic.http.httpc;
-import de.anomic.index.indexEntry;
-import de.anomic.index.indexURL;
-import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
+import de.anomic.yacy.yacySeedDB;
 
-public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
+public class indexURLEntryOld implements indexURLEntry {
 
     public static final kelondroRow rowdef = new kelondroRow(
-            "String urlhash-" + indexURL.urlHashLength + ", " + // the url's hash
-            "String urlstring-" + indexURL.urlStringLength + ", " + // the url as string
-            "String urldescr-" + indexURL.urlDescrLength + ", " + // the description of the url
-            "Cardinal moddate-" + indexURL.urlDateLength + " {b64e}, " + // last-modified from the httpd
-            "Cardinal loaddate-" + indexURL.urlDateLength + " {b64e}, " + // time when the url was loaded
-            "String refhash-" + indexURL.urlHashLength + ", " + // the url's referrer hash
-            "Cardinal copycount-" + indexURL.urlCopyCountLength + " {b64e}, " + //
-            "byte[] flags-" + indexURL.urlFlagLength + ", " + // flags
-            "Cardinal quality-" + indexURL.urlQualityLength + " {b64e}, " + // 
-            "String language-" + indexURL.urlLanguageLength + ", " + //
-            "byte[] doctype-" + indexURL.urlDoctypeLength + ", " + //
-            "Cardinal size-" + indexURL.urlSizeLength + " {b64e}, " + // size of file in bytes
-            "Cardinal wc-" + indexURL.urlWordCountLength + " {b64e}"); // word count
+            "String urlhash-" + yacySeedDB.commonHashLength + ", " + // the url's hash
+            "String urlstring-" + indexRWIEntryOld.urlStringLength + ", " + // the url as string
+            "String urldescr-" + indexRWIEntryOld.urlDescrLength + ", " + // the description of the url
+            "Cardinal moddate-" + indexRWIEntryOld.urlDateLength + " {b64e}, " + // last-modified from the httpd
+            "Cardinal loaddate-" + indexRWIEntryOld.urlDateLength + " {b64e}, " + // time when the url was loaded
+            "String refhash-" + yacySeedDB.commonHashLength + ", " + // the url's referrer hash
+            "Cardinal copycount-" + indexRWIEntryOld.urlCopyCountLength + " {b64e}, " + //
+            "byte[] flags-" + indexRWIEntryOld.urlFlagLength + ", " + // flags
+            "Cardinal quality-" + indexRWIEntryOld.urlQualityLength + " {b64e}, " + // 
+            "String language-" + indexRWIEntryOld.urlLanguageLength + ", " + //
+            "byte[] doctype-" + indexRWIEntryOld.urlDoctypeLength + ", " + //
+            "Cardinal size-" + indexRWIEntryOld.urlSizeLength + " {b64e}, " + // size of file in bytes
+            "Cardinal wc-" + indexRWIEntryOld.urlWordCountLength + " {b64e}"); // word count
 
     private URL url;
     private String descr;
@@ -72,9 +70,9 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
     private int size;
     private int wordCount;
     private String snippet;
-    private indexEntry word; // this is only used if the url is transported via remote search requests
+    private indexRWIEntry word; // this is only used if the url is transported via remote search requests
 
-    public plasmaCrawlLURLOldEntry(
+    public indexURLEntryOld(
             URL url,
             String descr,
             String author,
@@ -114,7 +112,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
         this.word = null;
     }
 
-    public plasmaCrawlLURLOldEntry(kelondroRow.Entry entry, indexEntry searchedWord) throws IOException {
+    public indexURLEntryOld(kelondroRow.Entry entry, indexRWIEntry searchedWord) throws IOException {
         try {
             this.urlHash = entry.getColString(0, null);
             this.url = new URL(entry.getColString(1, "UTF-8"));
@@ -138,7 +136,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
         }
     }
 
-    public plasmaCrawlLURLOldEntry(Properties prop) {
+    public indexURLEntryOld(Properties prop) {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
@@ -161,7 +159,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
             this.snippet = prop.getProperty("snippet", "");
             if (snippet.length() == 0) snippet = null;
             else snippet = crypt.simpleDecode(snippet, null);
-            this.word = (prop.containsKey("word")) ? new indexURLEntry(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word", ""))) : null;
+            this.word = (prop.containsKey("word")) ? new indexRWIEntryOld(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word", ""))) : null;
         } catch (Exception e) {
             serverLog.logSevere("PLASMA",
                     "INTERNAL ERROR in plasmaLURL.entry/2:"
@@ -178,8 +176,8 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
     }
     
     public kelondroRow.Entry toRowEntry() throws IOException {
-        final String moddatestr = kelondroBase64Order.enhancedCoder.encodeLong(moddate.getTime() / 86400000, indexURL.urlDateLength);
-        final String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, indexURL.urlDateLength);
+        final String moddatestr = kelondroBase64Order.enhancedCoder.encodeLong(moddate.getTime() / 86400000, indexRWIEntryOld.urlDateLength);
+        final String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, indexRWIEntryOld.urlDateLength);
 
         final byte[][] entry = new byte[][] {
                 urlHash.getBytes(),
@@ -188,13 +186,13 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
                 moddatestr.getBytes(),
                 loaddatestr.getBytes(),
                 referrerHash.getBytes(),
-                kelondroBase64Order.enhancedCoder.encodeLong(copyCount, indexURL.urlCopyCountLength).getBytes(),
+                kelondroBase64Order.enhancedCoder.encodeLong(copyCount, indexRWIEntryOld.urlCopyCountLength).getBytes(),
                 flags.getBytes(),
-                kelondroBase64Order.enhancedCoder.encodeLong(quality, indexURL.urlQualityLength).getBytes(),
+                kelondroBase64Order.enhancedCoder.encodeLong(quality, indexRWIEntryOld.urlQualityLength).getBytes(),
                 language.getBytes(),
                 new byte[] { (byte) doctype },
-                kelondroBase64Order.enhancedCoder.encodeLong(size, indexURL.urlSizeLength).getBytes(),
-                kelondroBase64Order.enhancedCoder.encodeLong(wordCount, indexURL.urlWordCountLength).getBytes()};
+                kelondroBase64Order.enhancedCoder.encodeLong(size, indexRWIEntryOld.urlSizeLength).getBytes(),
+                kelondroBase64Order.enhancedCoder.encodeLong(wordCount, indexRWIEntryOld.urlWordCountLength).getBytes()};
         return rowdef.newEntry(entry);
     }
 
@@ -264,11 +262,11 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
         return snippet;
     }
 
-    public indexEntry word() {
+    public indexRWIEntry word() {
         return word;
     }
 
-    public boolean isOlder(plasmaCrawlLURLEntry other) {
+    public boolean isOlder(indexURLEntry other) {
         if (other == null) return false;
         if (moddate.before(other.moddate())) return true;
         if (moddate.equals(other.moddate())) {
@@ -292,7 +290,7 @@ public class plasmaCrawlLURLOldEntry implements plasmaCrawlLURLEntry {
                             ",local=").append(((local()) ? "true" : "false"))
                     .append(",q=").append(
                             kelondroBase64Order.enhancedCoder.encodeLong(
-                                    quality, indexURL.urlQualityLength))
+                                    quality, indexRWIEntryOld.urlQualityLength))
                     .append(",dt=").append(doctype).append(",lang=").append(
                             language).append(",url=").append(
                             crypt.simpleEncode(url.toString())).append(

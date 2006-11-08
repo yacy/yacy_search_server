@@ -51,6 +51,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.anomic.index.indexURL;
+import de.anomic.index.indexRWIEntryOld;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
@@ -79,14 +81,14 @@ public class plasmaSwitchboardQueue {
 
     private void initQueueStack() {
         kelondroRow rowdef = new kelondroRow(
-                "String url-"          + indexURL.urlStringLength             + ", " +        // the url
-                "String refhash-"      + indexURL.urlHashLength               + ", " +        // the url's referrer hash
-                "Cardinal modifiedsince-11"                                   + " {b64e}, " + // from ifModifiedSince
-                "byte[] flags-1"                                              + ", " +        // flags
-                "String initiator-"    + yacySeedDB.commonHashLength          + ", " +        // the crawling initiator
-                "Cardinal depth-"      + indexURL.urlCrawlDepthLength         + " {b64e}, " + // the prefetch depth so far, starts at 0
-                "String profile-"      + indexURL.urlCrawlProfileHandleLength + ", " +        // the name of the prefetch profile handle
-                "String urldescr-"     + indexURL.urlDescrLength);                            //
+                "String url-"          + yacySeedDB.commonHashLength               + ", " +        // the url
+                "String refhash-"      + yacySeedDB.commonHashLength               + ", " +        // the url's referrer hash
+                "Cardinal modifiedsince-11"                                        + " {b64e}, " + // from ifModifiedSince
+                "byte[] flags-1"                                                   + ", " +        // flags
+                "String initiator-"    + yacySeedDB.commonHashLength               + ", " +        // the crawling initiator
+                "Cardinal depth-"      + indexRWIEntryOld.urlCrawlDepthLength         + " {b64e}, " + // the prefetch depth so far, starts at 0
+                "String profile-"      + indexRWIEntryOld.urlCrawlProfileHandleLength + ", " +        // the name of the prefetch profile handle
+                "String urldescr-"     + indexRWIEntryOld.urlDescrLength);                            //
             
         sbQueueStack = kelondroStack.open(sbQueueStackPath, rowdef);
     }
@@ -108,7 +110,7 @@ public class plasmaSwitchboardQueue {
             kelondroBase64Order.enhancedCoder.encodeLong((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
             new byte[]{entry.flags},
             (entry.initiator == null) ? indexURL.dummyHash.getBytes() : entry.initiator.getBytes(),
-            kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, indexURL.urlCrawlDepthLength).getBytes(),
+            kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, indexRWIEntryOld.urlCrawlDepthLength).getBytes(),
             (entry.profileHandle == null) ? indexURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
             (entry.anchorName == null) ? "-".getBytes("UTF-8") : entry.anchorName.getBytes("UTF-8")
         }));
@@ -333,7 +335,7 @@ public class plasmaSwitchboardQueue {
         public URL referrerURL() {
             if (referrerURL == null) {
                 if ((referrerHash == null) || (referrerHash.equals(indexURL.dummyHash))) return null;
-                plasmaCrawlLURLEntry entry = lurls.load(referrerHash, null);
+                indexURLEntry entry = lurls.load(referrerHash, null);
                 if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
             }
             return referrerURL;

@@ -54,7 +54,7 @@ import java.util.Enumeration;
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.plasma.plasmaCrawlLURLEntry;
+import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -106,7 +106,7 @@ public class ViewFile {
             String viewMode = post.get("viewMode","sentences");
 
             // getting the urlEntry that belongs to the url hash
-            plasmaCrawlLURLEntry urlEntry = null;
+            indexURLEntry urlEntry = null;
             urlEntry = sb.urlPool.loadedURL.load(urlHash, null);
             if (urlEntry == null) {
                 prop.put("error",2);
@@ -115,7 +115,7 @@ public class ViewFile {
             }            
 
             // gettin the url that belongs to the entry
-            plasmaCrawlLURLEntry.Components comp = urlEntry.comp();
+            indexURLEntry.Components comp = urlEntry.comp();
             if ((comp == null) || (comp.url() == null)) {
                 prop.put("error",3);
                 prop.put("viewMode",VIEW_MODE_NO_TEXT);

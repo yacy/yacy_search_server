@@ -7,10 +7,10 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaCrawlLURL;
-import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverDate;
@@ -134,13 +134,13 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                     // loop throug the entities of the container and get the
                     // urlhash
                     Iterator importWordIdxEntries = newContainer.entries();
-                    indexEntry importWordIdxEntry;
+                    indexRWIEntry importWordIdxEntry;
                     while (importWordIdxEntries.hasNext()) {
                         // testing if import process was aborted
                         if (isAborted()) break;
 
                         // getting next word index entry
-                        importWordIdxEntry = (indexEntry) importWordIdxEntries.next();
+                        importWordIdxEntry = (indexRWIEntry) importWordIdxEntries.next();
                         String urlHash = importWordIdxEntry.urlHash();
                         entityUrls.add(urlHash);
                     }
@@ -162,7 +162,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                             // we need to import the url
 
                             // getting the url entry
-                            plasmaCrawlLURLEntry urlEntry = this.importUrlDB.load(urlHash, null);
+                            indexURLEntry urlEntry = this.importUrlDB.load(urlHash, null);
                             if (urlEntry != null) {
 
                                 /* write it into the home url db */

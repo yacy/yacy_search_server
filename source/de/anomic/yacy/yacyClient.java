@@ -55,14 +55,14 @@ import java.util.TreeMap;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlLURL;
-import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -491,33 +491,33 @@ public final class yacyClient {
             //System.out.println("***result count " + results);
             
             // create containers
-            final int words = wordhashes.length() / indexEntryAttribute.wordHashLength;
+            final int words = wordhashes.length() / yacySeedDB.commonHashLength;
             indexContainer[] container = new indexContainer[words];
             for (int i = 0; i < words; i++) {
-                container[i] = new indexContainer(wordhashes.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength), indexURLEntry.urlEntryRow);
+                container[i] = new indexContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), indexRWIEntryOld.urlEntryRow);
             }
 
             // insert results to containers
-            plasmaCrawlLURLEntry urlEntry;
+            indexURLEntry urlEntry;
             String[] urls = new String[results];
             for (int n = 0; n < results; n++) {
                 // get one single search result
                 urlEntry = urlManager.newEntry((String) result.get("resource" + n));
                 if (urlEntry == null) continue;
                 assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
-                plasmaCrawlLURLEntry.Components comp = urlEntry.comp();
+                indexURLEntry.Components comp = urlEntry.comp();
                 if (blacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, comp.url())) continue; // block with backlist
                 urlManager.store(urlEntry);
                 urlManager.stack(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
 
                 // save the url entry
-                final indexEntry entry;
+                final indexRWIEntry entry;
                 if (urlEntry.word() == null) {
                     // the old way to define words
                     int urlLength = comp.url().toNormalform().length();
                     int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()).length;
                     
-                    entry = new indexURLEntry(
+                    entry = new indexRWIEntryOld(
                                                      urlEntry.hash(),
                                                      urlLength,
                                                      urlComps,
@@ -545,7 +545,7 @@ public final class yacyClient {
                 }
                 // add the url entry to the word indexes
                 for (int m = 0; m < words; m++) {
-                    container[m].add(new indexEntry[]{entry}, System.currentTimeMillis());
+                    container[m].add(new indexRWIEntry[]{entry}, System.currentTimeMillis());
                 }
                 // store url hash for statistics
                 urls[n] = urlEntry.hash();
@@ -869,7 +869,7 @@ public final class yacyClient {
         -er crawlt, Ergebnis erscheint aber unter falschem initiator
      */
 
-    public static HashMap crawlReceipt(yacySeed targetSeed, String process, String result, String reason, plasmaCrawlLURLEntry entry, String wordhashes) {
+    public static HashMap crawlReceipt(yacySeed targetSeed, String process, String result, String reason, indexURLEntry entry, String wordhashes) {
         if (targetSeed == null) { return null; }
         if (yacyCore.seedDB.mySeed == null) { return null; }
         if (yacyCore.seedDB.mySeed == targetSeed) { return null; }
@@ -943,11 +943,11 @@ public final class yacyClient {
             
             // check if we got all necessary urls in the urlCache (only for debugging)
             Iterator eenum;
-            indexEntry entry;
+            indexRWIEntry entry;
             for (int i = 0; i < indexes.length; i++) {
                 eenum = indexes[i].entries();
                 while (eenum.hasNext()) {
-                    entry = (indexEntry) eenum.next();
+                    entry = (indexRWIEntry) eenum.next();
                     if (urlCache.get(entry.urlHash()) == null) {
                         yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.urlHash() + "' is not contained in urlCache");
                     }
@@ -988,9 +988,9 @@ public final class yacyClient {
             if (uhs.length == 0) { return resultObj; } // all url's known
             
             // extract the urlCache from the result
-            plasmaCrawlLURLEntry[] urls = new plasmaCrawlLURLEntry[uhs.length];
+            indexURLEntry[] urls = new indexURLEntry[uhs.length];
             for (int i = 0; i < uhs.length; i++) {
-                urls[i] = (plasmaCrawlLURLEntry) urlCache.get(uhs[i]);
+                urls[i] = (indexURLEntry) urlCache.get(uhs[i]);
                 if (urls[i] == null) {
                     yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
                 }
@@ -1051,11 +1051,11 @@ public final class yacyClient {
         int indexcount = 0;
         final StringBuffer entrypost = new StringBuffer(indexes.length*73);
         Iterator eenum;
-        indexEntry entry;
+        indexRWIEntry entry;
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].entries();
             while (eenum.hasNext()) {
-                entry = (indexEntry) eenum.next();
+                entry = (indexRWIEntry) eenum.next();
                 entrypost.append(indexes[i].getWordHash()) 
                          .append(entry.toPropertyForm(false)) 
                          .append(serverCore.crlfString);
@@ -1099,7 +1099,7 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap transferURL(yacySeed targetSeed, plasmaCrawlLURLEntry[] urls, boolean gzipBody, int timeout) {
+    private static HashMap transferURL(yacySeed targetSeed, indexURLEntry[] urls, boolean gzipBody, int timeout) {
         // this post a message to the remote message board
         final String address = targetSeed.getAddress();
         if (address == null) { return null; }

@@ -51,6 +51,7 @@ import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCharBuffer;
+import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaSearchQuery {
     
@@ -120,16 +121,16 @@ public final class plasmaSearchQuery {
     
     public static Set hashes2Set(String query) {
         if (query == null) return new HashSet();
-        final HashSet keyhashes = new HashSet(query.length() / indexEntryAttribute.wordHashLength);
-        for (int i = 0; i < (query.length() / indexEntryAttribute.wordHashLength); i++) {
-            keyhashes.add(query.substring(i * indexEntryAttribute.wordHashLength, (i + 1) * indexEntryAttribute.wordHashLength));
+        final HashSet keyhashes = new HashSet(query.length() / yacySeedDB.commonHashLength);
+        for (int i = 0; i < (query.length() / yacySeedDB.commonHashLength); i++) {
+            keyhashes.add(query.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength));
         }
         return keyhashes;
     }
     
     public static String hashSet2hashString(Set words) {
         Iterator i = words.iterator();
-        StringBuffer sb = new StringBuffer(words.size() * indexEntryAttribute.wordHashLength);
+        StringBuffer sb = new StringBuffer(words.size() * yacySeedDB.commonHashLength);
         while (i.hasNext()) sb.append((String) i.next());
         return new String(sb);
     }

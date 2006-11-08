@@ -51,7 +51,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRI;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
@@ -235,10 +235,10 @@ public class plasmaWordIndexFileCluster implements indexRI {
         if (exists(wordHash)) {
             plasmaWordIndexFile entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
             indexContainer container = new indexContainer(wordHash, payloadrow);
-            indexEntry entry;
+            indexRWIEntry entry;
             Iterator i = entity.elements(true);
             while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) {
-                entry = (indexEntry) i.next();
+                entry = (indexRWIEntry) i.next();
                 if ((urlselection == null) || (urlselection.contains(entry.urlHash()))) container.add(entry);
             }
             return container;
@@ -302,7 +302,7 @@ public class plasmaWordIndexFileCluster implements indexRI {
         } else return 0;
     }
     
-    public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
+    public indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
         indexContainer container = new indexContainer(wordHash, payloadrow);
         container.add(newEntry);
         return addEntries(container, updateTime, dhtCase);

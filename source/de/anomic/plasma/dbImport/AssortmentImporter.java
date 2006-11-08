@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexRWIEntryOld;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndexAssortment;
 
@@ -63,7 +63,7 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
         // initializing the import assortment db
         this.log.logInfo("Initializing source assortment file");
         try {
-            this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath, indexURLEntry.urlEntryRow, assortmentNr, this.cacheSize/1024, preloadTime, this.log);
+            this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath, indexRWIEntryOld.urlEntryRow, assortmentNr, this.cacheSize/1024, preloadTime, this.log);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);

@@ -91,7 +91,7 @@ public class indexCachedRI implements indexRI {
         return new indexContainer(wordHash, payloadrow);
     }
     
-    public indexContainer addEntry(String wordHash, indexEntry entry, long updateTime, boolean intern) {        
+    public indexContainer addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean intern) {        
         // add the entry
         if (intern) {
             riIntern.addEntry(wordHash, entry, updateTime, true);

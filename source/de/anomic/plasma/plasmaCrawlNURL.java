@@ -51,6 +51,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.index.indexURL;
+import de.anomic.index.indexRWIEntryOld;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroException;
@@ -62,6 +63,7 @@ import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
+import de.anomic.yacy.yacySeedDB;
 
 public class plasmaCrawlNURL extends indexURL {
 
@@ -78,18 +80,18 @@ public class plasmaCrawlNURL extends indexURL {
      * column length definition for the {@link plasmaURL#urlIndexFile} DB
      */
     public final static kelondroRow rowdef = new kelondroRow(
-        "String urlhash-"      + urlHashLength               + ", " +        // the url's hash
-        "String initiator-"    + urlHashLength               + ", " +        // the crawling initiator
-        "String urlstring-"    + urlStringLength             + ", " +        // the url as string
-        "String refhash-"      + urlHashLength               + ", " +        // the url's referrer hash
-        "String urlname-"      + urlNameLength               + ", " +        // the name of the url, from anchor tag <a>name</a>
-        "Cardinal appdate-"    + urlDateLength               + " {b64e}, " + // the time when the url was first time appeared
-        "String profile-"      + urlCrawlProfileHandleLength + ", " +        // the name of the prefetch profile handle
-        "Cardinal depth-"      + urlCrawlDepthLength         + " {b64e}, " + // the prefetch depth so far, starts at 0
-        "Cardinal parentbr-"   + urlParentBranchesLength     + " {b64e}, " + // number of anchors of the parent
-        "Cardinal forkfactor-" + urlForkFactorLength         + " {b64e}, " + // sum of anchors of all ancestors
-        "byte[] flags-"        + urlFlagLength               + ", " +        // flags
-        "String handle-"       + urlHandleLength);                           // extra handle
+        "String urlhash-"      + yacySeedDB.commonHashLength               + ", " +        // the url's hash
+        "String initiator-"    + yacySeedDB.commonHashLength               + ", " +        // the crawling initiator
+        "String urlstring-"    + indexRWIEntryOld.urlStringLength             + ", " +        // the url as string
+        "String refhash-"      + yacySeedDB.commonHashLength               + ", " +        // the url's referrer hash
+        "String urlname-"      + indexRWIEntryOld.urlNameLength               + ", " +        // the name of the url, from anchor tag <a>name</a>
+        "Cardinal appdate-"    + indexRWIEntryOld.urlDateLength               + " {b64e}, " + // the time when the url was first time appeared
+        "String profile-"      + indexRWIEntryOld.urlCrawlProfileHandleLength + ", " +        // the name of the prefetch profile handle
+        "Cardinal depth-"      + indexRWIEntryOld.urlCrawlDepthLength         + " {b64e}, " + // the prefetch depth so far, starts at 0
+        "Cardinal parentbr-"   + indexRWIEntryOld.urlParentBranchesLength     + " {b64e}, " + // number of anchors of the parent
+        "Cardinal forkfactor-" + indexRWIEntryOld.urlForkFactorLength         + " {b64e}, " + // sum of anchors of all ancestors
+        "byte[] flags-"        + indexRWIEntryOld.urlFlagLength               + ", " +        // flags
+        "String handle-"       + indexRWIEntryOld.urlHandleLength);                           // extra handle
     
     private final plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
     private final plasmaCrawlBalancer limitStack;     // links found by crawling at target depth
@@ -128,7 +130,7 @@ public class plasmaCrawlNURL extends indexURL {
         limitStack = new plasmaCrawlBalancer(limitStackFile);
         overhangStack = new plasmaCrawlBalancer(overhangStackFile);
         remoteStack = new plasmaCrawlBalancer(remoteStackFile);
-        kelondroRow rowdef = new kelondroRow("byte[] urlhash-" + indexURL.urlHashLength);
+        kelondroRow rowdef = new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength);
         imageStack = kelondroStack.open(imageStackFile, rowdef);
         movieStack = kelondroStack.open(movieStackFile, rowdef);
         musicStack = kelondroStack.open(musicStackFile, rowdef);
@@ -257,7 +259,7 @@ public class plasmaCrawlNURL extends indexURL {
     
     private static String normalizeHandle(int h) {
         String d = Integer.toHexString(h);
-        while (d.length() < urlHandleLength) d = "0" + d;
+        while (d.length() < indexRWIEntryOld.urlHandleLength) d = "0" + d;
         return d;
     }
 
@@ -479,7 +481,7 @@ public class plasmaCrawlNURL extends indexURL {
             this.depth         = depth;
             this.anchors       = anchors;
             this.forkfactor    = forkfactor;
-            this.flags         = new bitfield(urlFlagLength);
+            this.flags         = new bitfield(indexRWIEntryOld.urlFlagLength);
             this.handle        = 0;
             this.stored        = false;
         }
@@ -533,7 +535,7 @@ public class plasmaCrawlNURL extends indexURL {
         public void store() {
             // stores the values from the object variables into the database
             if (this.stored) return;
-            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, urlDateLength);
+            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, indexRWIEntryOld.urlDateLength);
             // store the hash in the hash cache
             try {
                 // even if the entry exists, we simply overwrite it
@@ -545,9 +547,9 @@ public class plasmaCrawlNURL extends indexURL {
                     this.name.getBytes("UTF-8"),
                     loaddatestr.getBytes(),
                     (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, urlCrawlDepthLength).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, urlParentBranchesLength).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, urlForkFactorLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, indexRWIEntryOld.urlCrawlDepthLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, indexRWIEntryOld.urlParentBranchesLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, indexRWIEntryOld.urlForkFactorLength).getBytes(),
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
                 };

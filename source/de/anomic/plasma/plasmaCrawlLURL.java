@@ -55,17 +55,18 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Locale;
 
 import de.anomic.http.httpc;
 import de.anomic.http.httpc.response;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLEntryNew;
+import de.anomic.index.indexURLEntryOld;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -74,12 +75,9 @@ import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
-import de.anomic.tools.nxTools;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaCrawlLURL extends indexURL {
 
@@ -101,11 +99,11 @@ public final class plasmaCrawlLURL extends indexURL {
         
         try {
             if (newdb) {
-                urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", bufferkb * 0x400, preloadTime, plasmaCrawlLURLNewEntry.rowdef, kelondroBase64Order.enhancedCoder);
+                urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", bufferkb * 0x400, preloadTime, indexURLEntryNew.rowdef, kelondroBase64Order.enhancedCoder);
             } else {
                 File oldLURLDB = new File(plasmaPath, "urlHash.db");
                 oldLURLDB.getParentFile().mkdirs();
-                urlIndexFile = new kelondroCache(new kelondroTree(oldLURLDB, bufferkb / 2 * 0x400, preloadTime, plasmaCrawlLURLOldEntry.rowdef), bufferkb / 2 * 0x400, true, false);
+                urlIndexFile = new kelondroCache(new kelondroTree(oldLURLDB, bufferkb / 2 * 0x400, preloadTime, indexURLEntryOld.rowdef), bufferkb / 2 * 0x400, true, false);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -121,7 +119,7 @@ public final class plasmaCrawlLURL extends indexURL {
         gcrawlResultStack = new LinkedList();
     }
     
-    public synchronized void stack(plasmaCrawlLURLEntry e, String initiatorHash, String executorHash, int stackType) {
+    public synchronized void stack(indexURLEntry e, String initiatorHash, String executorHash, int stackType) {
         if (e == null) { return; }
         try {
             if (initiatorHash == null) { initiatorHash = dummyHash; }
@@ -159,7 +157,7 @@ public final class plasmaCrawlLURL extends indexURL {
         return 0;
     }
     
-    public synchronized plasmaCrawlLURLEntry load(String urlHash, indexEntry searchedWord) {
+    public synchronized indexURLEntry load(String urlHash, indexRWIEntry searchedWord) {
         // generates an plasmaLURLEntry using the url hash
         // to speed up the access, the url-hashes are buffered
         // in the hash cache.
@@ -171,17 +169,17 @@ public final class plasmaCrawlLURL extends indexURL {
             kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
             if (newdb)
-                return new plasmaCrawlLURLNewEntry(entry, searchedWord);
+                return new indexURLEntryNew(entry, searchedWord);
             else
-                return new plasmaCrawlLURLOldEntry(entry, searchedWord);
+                return new indexURLEntryOld(entry, searchedWord);
         } catch (IOException e) {
             return null;
         }
     }
 
-    public synchronized void store(plasmaCrawlLURLEntry entry) throws IOException {
+    public synchronized void store(indexURLEntry entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
-        plasmaCrawlLURLEntry oldEntry;
+        indexURLEntry oldEntry;
         try {
             if (exists(entry.hash())) {
                 oldEntry = load(entry.hash(), null);
@@ -202,18 +200,18 @@ public final class plasmaCrawlLURL extends indexURL {
         urlIndexFile.put(entry.toRowEntry(), entry.loaddate());
     }
     
-    public synchronized plasmaCrawlLURLEntry newEntry(String propStr) {
+    public synchronized indexURLEntry newEntry(String propStr) {
         if (propStr.startsWith("{") && propStr.endsWith("}")) {
             if (newdb)
-                return new plasmaCrawlLURLNewEntry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
+                return new indexURLEntryNew(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
             else
-                return new plasmaCrawlLURLOldEntry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
+                return new indexURLEntryOld(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
         } else {
             return null;
         }
     }
 
-    public synchronized plasmaCrawlLURLEntry newEntry(
+    public synchronized indexURLEntry newEntry(
             URL url,
             String descr,
             String author,
@@ -236,10 +234,10 @@ public final class plasmaCrawlLURL extends indexURL {
             int lvideo,
             int lapp) {
         if (newdb)
-            return new plasmaCrawlLURLNewEntry(url, descr, author, tags, ETag, mod, load, fresh, referrer, md5,
+            return new indexURLEntryNew(url, descr, author, tags, ETag, mod, load, fresh, referrer, md5,
                     size, wc, dt, flags, lang, llocal, lother, laudio, limage, lvideo, lapp);
         else
-            return new plasmaCrawlLURLOldEntry(url, descr, author, tags, ETag, mod, load, fresh, referrer, md5,
+            return new indexURLEntryOld(url, descr, author, tags, ETag, mod, load, fresh, referrer, md5,
                     size, wc, dt, flags, lang, llocal, lother, laudio, limage, lvideo, lapp);
     }
     
@@ -257,36 +255,36 @@ public final class plasmaCrawlLURL extends indexURL {
 
     public synchronized String getUrlHash(int stack, int pos) {
         switch (stack) {
-            case 1: return ((String) externResultStack.get(pos)).substring(0, urlHashLength);
-            case 2: return ((String) searchResultStack.get(pos)).substring(0, urlHashLength);
-            case 3: return ((String) transfResultStack.get(pos)).substring(0, urlHashLength);
-            case 4: return ((String) proxyResultStack.get(pos)).substring(0, urlHashLength);
-            case 5: return ((String) lcrawlResultStack.get(pos)).substring(0, urlHashLength);
-            case 6: return ((String) gcrawlResultStack.get(pos)).substring(0, urlHashLength);
+            case 1: return ((String) externResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
+            case 2: return ((String) searchResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
+            case 3: return ((String) transfResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
+            case 4: return ((String) proxyResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
+            case 5: return ((String) lcrawlResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
+            case 6: return ((String) gcrawlResultStack.get(pos)).substring(0, yacySeedDB.commonHashLength);
         }
         return null;
     }
 
     public synchronized String getInitiatorHash(int stack, int pos) {
         switch (stack) {
-            case 1: return ((String) externResultStack.get(pos)).substring(urlHashLength, urlHashLength * 2);
-            case 2: return ((String) searchResultStack.get(pos)).substring(urlHashLength, urlHashLength * 2);
-            case 3: return ((String) transfResultStack.get(pos)).substring(urlHashLength, urlHashLength * 2);
-            case 4: return ((String) proxyResultStack.get(pos)).substring(urlHashLength, urlHashLength * 2);
-            case 5: return ((String) lcrawlResultStack.get(pos)).substring(urlHashLength, urlHashLength * 2);
-            case 6: return ((String) gcrawlResultStack.get(pos)).substring(urlHashLength, urlHashLength * 2);
+            case 1: return ((String) externResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
+            case 2: return ((String) searchResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
+            case 3: return ((String) transfResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
+            case 4: return ((String) proxyResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
+            case 5: return ((String) lcrawlResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
+            case 6: return ((String) gcrawlResultStack.get(pos)).substring(yacySeedDB.commonHashLength, yacySeedDB.commonHashLength * 2);
         }
         return null;
     }
 
     public synchronized String getExecutorHash(int stack, int pos) {
         switch (stack) {
-            case 1: return ((String) externResultStack.get(pos)).substring(urlHashLength * 2, urlHashLength * 3);
-            case 2: return ((String) searchResultStack.get(pos)).substring(urlHashLength * 2, urlHashLength * 3);
-            case 3: return ((String) transfResultStack.get(pos)).substring(urlHashLength * 2, urlHashLength * 3);
-            case 4: return ((String) proxyResultStack.get(pos)).substring(urlHashLength * 2, urlHashLength * 3);
-            case 5: return ((String) lcrawlResultStack.get(pos)).substring(urlHashLength * 2, urlHashLength * 3);
-            case 6: return ((String) gcrawlResultStack.get(pos)).substring(urlHashLength * 2, urlHashLength * 3);
+            case 1: return ((String) externResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
+            case 2: return ((String) searchResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
+            case 3: return ((String) transfResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
+            case 4: return ((String) proxyResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
+            case 5: return ((String) lcrawlResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
+            case 6: return ((String) gcrawlResultStack.get(pos)).substring(yacySeedDB.commonHashLength * 2, yacySeedDB.commonHashLength * 3);
         }
         return null;
     }
@@ -341,88 +339,10 @@ public final class plasmaCrawlLURL extends indexURL {
             return false;
         }
     }
-    
-    private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
-    private static String daydate(Date date) {
-        if (date == null) {
-            return "";
-        } else {
-            return dayFormatter.format(date);
-        }
-    }
 
-    public serverObjects genTableProps(int tabletype, int lines, boolean showInit, boolean showExec, String dfltInit, String dfltExec, String feedbackpage, boolean makeLink) {
-/*      serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps tabletype=" + tabletype    +    " lines=" + lines    +
-                                                                    " showInit=" + showInit     + " showExec=" + showExec +
-                                                                    " dfltInit=" + dfltInit     + " dfltExec=" + dfltExec +
-                                                                " feedbackpage=" + feedbackpage + " makeLink=" + makeLink); */
-        final serverObjects prop = new serverObjects();
-        if (getStackSize(tabletype) == 0) {
-            prop.put("table", 0);
-            return prop;
-        }
-        prop.put("table", 1);
-        if (lines > getStackSize(tabletype)) lines = getStackSize(tabletype);
-        if (lines == getStackSize(tabletype)) {
-            prop.put("table_size", 0);
-        } else {
-            prop.put("table_size", 1);
-            prop.put("table_size_count", lines);
-        }
-        prop.put("table_size_all", getStackSize(tabletype));
-        prop.put("table_feedbackpage", feedbackpage);
-        prop.put("table_tabletype", tabletype);
-        prop.put("table_showInit", (showInit) ? 1 : 0);
-        prop.put("table_showExec", (showExec) ? 1 : 0);
-
-        boolean dark = true;
-        String urlHash, initiatorHash, executorHash;
-        String cachepath, urlstr, urltxt;
-        yacySeed initiatorSeed, executorSeed;
-        plasmaCrawlLURLEntry urle;
-
-        // needed for getCachePath(url)
-        final plasmaSwitchboard switchboard = plasmaSwitchboard.getSwitchboard();
-        final plasmaHTCache cacheManager = switchboard.getCacheManager();
-
-        int i, cnt = 0;
-        for (i = getStackSize(tabletype) - 1; i >= (getStackSize(tabletype) - lines); i--) {
-            initiatorHash = getInitiatorHash(tabletype, i);
-            executorHash = getExecutorHash(tabletype, i);
-//          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps initiatorHash=" + initiatorHash + " executorHash=" + executorHash);
-            urlHash = getUrlHash(tabletype, i);
-//          serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
-            try {
-                urle = load(urlHash, null);
-                plasmaCrawlLURLEntry.Components comp = urle.comp();
-//              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
-                initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
-                executorSeed = yacyCore.seedDB.getConnected(executorHash);
-
-                urlstr = comp.url().toNormalform();
-                urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
-                cachepath = cacheManager.getCachePath(new URL(urlstr)).toString().replace('\\', '/').substring(cacheManager.cachePath.toString().length() + 1);
-
-                prop.put("table_indexed_" + cnt + "_dark", (dark) ? 1 : 0);
-                prop.put("table_indexed_" + cnt + "_feedbackpage", feedbackpage);
-                prop.put("table_indexed_" + cnt + "_tabletype", tabletype);
-                prop.put("table_indexed_" + cnt + "_urlhash", urlHash);
-                prop.put("table_indexed_" + cnt + "_showInit", (showInit) ? 1 : 0);
-                prop.put("table_indexed_" + cnt + "_showInit_initiatorSeed", (initiatorSeed == null) ? dfltInit : initiatorSeed.getName());
-                prop.put("table_indexed_" + cnt + "_showExec", (showExec) ? 1 : 0);
-                prop.put("table_indexed_" + cnt + "_showExec_executorSeed", (executorSeed == null) ? dfltExec : executorSeed.getName());
-                prop.put("table_indexed_" + cnt + "_moddate", daydate(urle.moddate()));
-                prop.put("table_indexed_" + cnt + "_wordcount", urle.wordCount());
-                prop.put("table_indexed_" + cnt + "_urldescr", comp.descr());
-                prop.put("table_indexed_" + cnt + "_url", (cachepath == null) ? "-not-cached-" : ((makeLink) ? ("<a href=\"CacheAdmin_p.html?action=info&path=" + cachepath + "\" class=\"small\" title=\"" + urlstr + "\">" + urltxt + "</a>") : urlstr));
-                dark = !dark;
-                cnt++;
-            } catch (Exception e) {
-                serverLog.logSevere("PLASMA", "genTableProps", e);
-            }
-        }
-        prop.put("table_indexed", cnt);
-        return prop;
+    public Iterator entries(boolean up, boolean rotating, String firstHash) throws IOException {
+        // enumerates entry elements
+        return new kiter(up, rotating, firstHash);
     }
     
     public class kiter implements Iterator {
@@ -445,9 +365,9 @@ public final class plasmaCrawlLURL extends indexURL {
             if (e == null) return null;
             try {
                 if (newdb) 
-                    return new plasmaCrawlLURLNewEntry(e, null);
+                    return new indexURLEntryNew(e, null);
                 else
-                    return new plasmaCrawlLURLOldEntry(e, null);
+                    return new indexURLEntryOld(e, null);
             } catch (IOException ex) {
                 throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getColString(0, null));
             }
@@ -459,11 +379,6 @@ public final class plasmaCrawlLURL extends indexURL {
         
     }
 
-    public Iterator entries(boolean up, boolean rotating, String firstHash) throws IOException {
-        // enumerates entry elements
-        return new kiter(up, rotating, firstHash);
-    }
-    
     /**
      * Uses an Iteration over urlHash.db to detect malformed URL-Entries.
      * Damaged URL-Entries will be marked in a HashSet and removed at the end of the function.
@@ -578,8 +493,8 @@ public final class plasmaCrawlLURL extends indexURL {
                         }
                     }
                     
-                    plasmaCrawlLURLEntry entry = (plasmaCrawlLURLEntry) eiter.next();
-                    plasmaCrawlLURLEntry.Components comp = entry.comp();
+                    indexURLEntry entry = (indexURLEntry) eiter.next();
+                    indexURLEntry.Components comp = entry.comp();
                     totalSearchedUrls++;
                     if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, comp.url()) ||
                         plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, comp.url())) {
@@ -650,7 +565,7 @@ public final class plasmaCrawlLURL extends indexURL {
             final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), new File(args[2]), 1, 0, false);
             final Iterator enu = urls.entries(true, false, null);
             while (enu.hasNext()) {
-                System.out.println(((plasmaCrawlLURLEntry) enu.next()).toString());
+                System.out.println(((indexURLEntry) enu.next()).toString());
             }
         } catch (Exception e) {
             e.printStackTrace();

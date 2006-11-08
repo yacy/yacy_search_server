@@ -132,9 +132,10 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
@@ -1429,14 +1430,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     private plasmaParserDocument parseResource(plasmaSwitchboardQueue.Entry entry, String initiatorHash) throws InterruptedException, ParserException {
-        plasmaParserDocument document = null;
-
+        
         // the mimetype of this entry
         String mimeType = entry.getMimeType();
         String charset = entry.getCharacterEncoding();        
 
         // the parser logger
-        serverLog parserLogger = parser.getLogger();
+        //serverLog parserLogger = parser.getLogger();
 
         // parse the document
         return parseResource(entry.url(), mimeType, charset, entry.cacheFile());
@@ -1497,7 +1497,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (document == null) return;
             } catch (ParserException e) {
                 this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
-                addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorPeerHash, entry.anchorName(), e.getErrorCode(), new bitfield(indexURL.urlFlagLength));
+                addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorPeerHash, entry.anchorName(), e.getErrorCode(), new bitfield(indexRWIEntryOld.urlFlagLength));
                 if (document != null) {
                     document.close();
                     document = null;
@@ -1574,7 +1574,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     checkInterruption();
                     
                     // create a new loaded URL db entry
-                    plasmaCrawlLURLEntry newEntry = urlPool.loadedURL.newEntry(
+                    indexURLEntry newEntry = urlPool.loadedURL.newEntry(
                             entry.url(),                                         // URL
                             docDescription,                                      // document description
                             "",                                                  // author
@@ -1660,7 +1660,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             
                             String language = indexEntryAttribute.language(entry.url());                            
                             char doctype = indexEntryAttribute.docType(document.getMimeType());
-                            plasmaCrawlLURLEntry.Components comp = newEntry.comp();
+                            indexURLEntry.Components comp = newEntry.comp();
                             int urlLength = comp.url().toNormalform().length();
                             int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()).length;
 
@@ -1673,7 +1673,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = indexEntryAttribute.word2hash(word);
-                                indexEntry wordIdxEntry = new indexURLEntry(
+                                indexRWIEntry wordIdxEntry = new indexRWIEntryOld(
                                         urlHash,
                                         urlLength, urlComps,
                                         wordStat.count,
@@ -1764,7 +1764,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         }
                     } else {
                         log.logFine("Not Indexed Resource '" + entry.normalizedURLString() + "': process case=" + processCase);
-                        addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new bitfield(indexURL.urlFlagLength));
+                        addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new bitfield(indexRWIEntryOld.urlFlagLength));
                     }
                 } catch (Exception ee) {
                     if (ee instanceof InterruptedException) throw (InterruptedException)ee;
@@ -1776,7 +1776,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
                         yacyClient.crawlReceipt(initiatorPeer, "crawl", "exception", ee.getMessage(), null, "");
                     }
-                    addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new bitfield(indexURL.urlFlagLength));
+                    addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new bitfield(indexRWIEntryOld.urlFlagLength));
                 }
                 
             } else {
@@ -1784,7 +1784,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 checkInterruption();
                 
                 log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
-                addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, noIndexReason, new bitfield(indexURL.urlFlagLength));
+                addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, noIndexReason, new bitfield(indexRWIEntryOld.urlFlagLength));
                 if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
                     yacyClient.crawlReceipt(initiatorPeer, "crawl", "rejected", noIndexReason, null, "");
                 }
@@ -1991,7 +1991,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         String lurl = (String) page.get("lurl");
                         if ((lurl != null) && (lurl.length() != 0)) {
                             String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));
-                            plasmaCrawlLURLEntry entry = urlPool.loadedURL.newEntry(propStr);
+                            indexURLEntry entry = urlPool.loadedURL.newEntry(propStr);
                             urlPool.loadedURL.store(entry);
                             urlPool.loadedURL.stack(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
                             urlPool.noticeURL.remove(entry.hash());
@@ -2070,7 +2070,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 prop.put("type_globalresults", acc.globalContributions);
                 int i = 0;
                 int p;
-                plasmaCrawlLURLEntry urlentry;
+                indexURLEntry urlentry;
                 String urlstring, urlname, filename, urlhash;
                 String host, hash, address;
                 yacySeed seed;
@@ -2081,7 +2081,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (targetTime < System.currentTimeMillis()) targetTime = System.currentTimeMillis() + 1000;
                 while ((acc.hasMoreElements()) && (i < query.wantedResults) && (System.currentTimeMillis() < targetTime)) {
                     urlentry = acc.nextElement();
-                    plasmaCrawlLURLEntry.Components comp = urlentry.comp();
+                    indexURLEntry.Components comp = urlentry.comp();
                     urlhash = urlentry.hash();
                     assert (urlhash != null);
                     assert (urlhash.length() == 12) : "urlhash = " + urlhash;
@@ -2218,9 +2218,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // finally, delete the url entry
         
         // determine the url string
-        plasmaCrawlLURLEntry entry = urlPool.loadedURL.load(urlhash, null);
+        indexURLEntry entry = urlPool.loadedURL.load(urlhash, null);
         if (entry == null) return 0;
-        plasmaCrawlLURLEntry.Components comp = entry.comp();
+        indexURLEntry.Components comp = entry.comp();
         if (comp.url() == null) return 0;
         
         InputStream resourceContent = null;

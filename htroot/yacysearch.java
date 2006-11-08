@@ -54,10 +54,10 @@ import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.net.URL;
-import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchImages;
 import de.anomic.plasma.plasmaSearchPreOrder;
@@ -189,9 +189,9 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                plasmaCrawlLURLEntry urlentry = sb.urlPool.loadedURL.load(recommendHash, null);
+                indexURLEntry urlentry = sb.urlPool.loadedURL.load(recommendHash, null);
                 if (urlentry != null) {
-                    plasmaCrawlLURLEntry.Components comp = urlentry.comp();
+                    indexURLEntry.Components comp = urlentry.comp();
                     plasmaParserDocument document;
                     document = sb.snippetCache.retrieveDocument(comp.url(), true);
                     if (document != null) {

@@ -58,6 +58,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.net.URL;
 import de.anomic.plasma.cache.IResourceInfo;
@@ -630,12 +631,12 @@ public class plasmaSnippetCache {
     public void fetch(plasmaSearchResult acc, Set queryhashes, String urlmask, int fetchcount, long maxTime) {
         // fetch snippets
         int i = 0;
-        plasmaCrawlLURLEntry urlentry;
+        indexURLEntry urlentry;
         String urlstring;
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         while ((acc.hasMoreElements()) && (i < fetchcount) && (System.currentTimeMillis() < limitTime)) {
             urlentry = acc.nextElement();
-            plasmaCrawlLURLEntry.Components comp = urlentry.comp();
+            indexURLEntry.Components comp = urlentry.comp();
             if (comp.url().getHost().endsWith(".yacyh")) continue;
             urlstring = comp.url().toNormalform();
             if ((urlstring.matches(urlmask)) &&

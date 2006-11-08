@@ -61,10 +61,10 @@ import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
-import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -362,7 +362,7 @@ public class dir {
         try {
             final URL url = new URL(urlstring);
             final plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()));
-            final plasmaCrawlLURLEntry newEntry = switchboard.urlPool.loadedURL.newEntry(
+            final indexURLEntry newEntry = switchboard.urlPool.loadedURL.newEntry(
                 url,
                 "YaCyShare: " + descr,
                 yacyCore.seedDB.mySeed.getName(),

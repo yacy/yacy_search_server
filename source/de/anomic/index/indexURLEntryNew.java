@@ -1,4 +1,4 @@
-package de.anomic.plasma;
+package de.anomic.index;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -7,9 +7,6 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.ArrayList;
 
-import de.anomic.index.indexEntry;
-import de.anomic.index.indexURL;
-import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
@@ -20,8 +17,10 @@ import de.anomic.tools.crypt;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.nxTools;
 
-public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
+public class indexURLEntryNew implements indexURLEntry {
 
+    // this object stores attributes for URL entries
+    
     public static final kelondroRow rowdef = new kelondroRow(
         "String hash-12, " +            // the url's hash
         "String comp-360, " +           // components: the url, description, author and tags. As 5th element, an ETag is possible
@@ -37,16 +36,16 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         "String lang-2, " +             // language
         "Cardinal llocal-2 {b256}, " +  // # of outlinks to same domain; for video and image: width 
         "Cardinal lother-2 {b256}, " +  // # of outlinks to outside domain; for video and image: height
-        "Cardinal limage-2 {b256}, " + // # of embedded image links
+        "Cardinal limage-2 {b256}, " +  // # of embedded image links
         "Cardinal laudio-2 {b256}, " +  // # of embedded audio links; for audio: track number; for video: number of audio tracks
         "Cardinal lvideo-2 {b256}, " +  // # of embedded video links
-        "Cardinal lapp-2 {b256}");   // # of embedded links to applications
+        "Cardinal lapp-2 {b256}");      // # of embedded links to applications
     
     private kelondroRow.Entry entry;
     private String snippet;
-    private indexEntry word; // this is only used if the url is transported via remote search requests
+    private indexRWIEntry word; // this is only used if the url is transported via remote search requests
 
-    public plasmaCrawlLURLNewEntry(
+    public indexURLEntryNew(
             URL url,
             String descr,
             String author,
@@ -106,13 +105,13 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         return s.toString().getBytes();
     }
     
-    public plasmaCrawlLURLNewEntry(kelondroRow.Entry entry, indexEntry searchedWord) {
+    public indexURLEntryNew(kelondroRow.Entry entry, indexRWIEntry searchedWord) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
     }
 
-    public plasmaCrawlLURLNewEntry(Properties prop){
+    public indexURLEntryNew(Properties prop){
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
@@ -159,12 +158,12 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         this.entry.setCol("lvideo", Integer.parseInt(prop.getProperty("lvideo", "0")));
         this.entry.setCol("lapp", Integer.parseInt(prop.getProperty("lapp", "0")));
         this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""), null);
-        this.word = (prop.containsKey("word")) ? new indexURLEntry(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word", ""))) : null;
+        this.word = (prop.containsKey("word")) ? new indexRWIEntryOld(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word", ""))) : null;
     }
 
     private StringBuffer corePropList() {
         // generate a parseable string; this is a simple property-list
-        plasmaCrawlLURLEntry.Components comp = this.comp();
+        indexURLEntry.Components comp = this.comp();
         final StringBuffer s = new StringBuffer(300);
         try {
             s.append("hash=").append(hash());
@@ -217,9 +216,9 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         return this.entry.getColString("hash", "", null);
     }
 
-    public plasmaCrawlLURLEntry.Components comp() {
+    public indexURLEntry.Components comp() {
         ArrayList cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
-        return new de.anomic.plasma.plasmaCrawlLURLEntry.Components(
+        return new indexURLEntry.Components(
                 (cl.size() > 0) ? (String) cl.get(0) : "",
                 (cl.size() > 1) ? (String) cl.get(1) : "",
                 (cl.size() > 2) ? (String) cl.get(2) : "",
@@ -299,11 +298,11 @@ public class plasmaCrawlLURLNewEntry implements plasmaCrawlLURLEntry {
         return snippet;
     }
 
-    public indexEntry word() {
+    public indexRWIEntry word() {
         return word;
     }
 
-    public boolean isOlder(plasmaCrawlLURLEntry other) {
+    public boolean isOlder(indexURLEntry other) {
         if (other == null) return false;
         Date tmoddate = moddate();
         Date omoddate = other.moddate();

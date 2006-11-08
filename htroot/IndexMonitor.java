@@ -43,22 +43,33 @@
 // javac -classpath .:../Classes Settings_p.java
 // if the shell's current path is HTROOT
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURLEntry;
+import de.anomic.net.URL;
+import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
+import de.anomic.tools.nxTools;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class IndexMonitor {
 
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 	// return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
 	serverObjects prop = new serverObjects();
         
-        int showIndexedCount = 40;
-        boolean si = false;
-        boolean se = false;
+        int lines = 40;
+        boolean showInit = false;
+        boolean showExec = false;
         
         
         if (post == null) {
@@ -67,20 +78,20 @@ public class IndexMonitor {
         }
         
         // find process number
-        int process;
+        int tabletype;
         try {
-            process = Integer.parseInt(post.get("process", "0"));
+            tabletype = Integer.parseInt(post.get("process", "0"));
         } catch (NumberFormatException e) {
-            process = 0;
+            tabletype = 0;
         }
         
         // check if authorization is needed and/or given
-        if (((process > 0) && (process < 6)) ||
+        if (((tabletype > 0) && (tabletype < 6)) ||
             (post.containsKey("clearlist")) ||
             (post.containsKey("deleteentry"))) {
             String authorization = ((String) header.get("Authorization", "xxxxxx"));
             if (authorization.length() != 0) {
-                if (! switchboard.verifyAuthentication(header, true)){
+                if (! sb.verifyAuthentication(header, true)){
                     // force log-in (again, because wrong password was given)
                     prop.put("AUTHENTICATE", "admin log-in");
                     return prop;
@@ -94,33 +105,102 @@ public class IndexMonitor {
         
         // custom number of lines
         if (post.containsKey("count")) {
-            showIndexedCount = Integer.parseInt(post.get("count", "40"));
+            lines = Integer.parseInt(post.get("count", "40"));
         }
         
         // do the commands
-        if (post.containsKey("clearlist")) switchboard.urlPool.loadedURL.clearStack(process);
+        if (post.containsKey("clearlist")) sb.urlPool.loadedURL.clearStack(tabletype);
         if (post.containsKey("deleteentry")) {
                 String hash = post.get("hash", null);
                 if (hash != null) {
                     // delete from database
-                    switchboard.urlPool.loadedURL.remove(hash);
+                    sb.urlPool.loadedURL.remove(hash);
                 }
             }
         if (post.containsKey("moreIndexed")) {
-            showIndexedCount = Integer.parseInt(post.get("showIndexed", "40"));
+            lines = Integer.parseInt(post.get("showIndexed", "40"));
         }
-        if (post.get("si") != null) si = true;
-        if (post.get("se") != null) se = true;
+        if (post.get("si") != null) showInit = true;
+        if (post.get("se") != null) showExec = true;
         
         // create table
-        if (process == 0) {
+        if (tabletype == 0) {
             prop.put("table", 2);
+        } else if (sb.urlPool.loadedURL.getStackSize(tabletype) == 0) {
+            prop.put("table", 0);
         } else {
-            prop.putAll(switchboard.urlPool.loadedURL.genTableProps(process, showIndexedCount, si, se, "unknown", null, "IndexMonitor.html", true));
+            prop.put("table", 1);
+            if (lines > sb.urlPool.loadedURL.getStackSize(tabletype)) lines = sb.urlPool.loadedURL.getStackSize(tabletype);
+            if (lines == sb.urlPool.loadedURL.getStackSize(tabletype)) {
+                prop.put("table_size", 0);
+            } else {
+                prop.put("table_size", 1);
+                prop.put("table_size_count", lines);
+            }
+            prop.put("table_size_all", sb.urlPool.loadedURL.getStackSize(tabletype));
+            prop.put("table_feedbackpage", "IndexMonitor.html");
+            prop.put("table_tabletype", tabletype);
+            prop.put("table_showInit", (showInit) ? 1 : 0);
+            prop.put("table_showExec", (showExec) ? 1 : 0);
+
+            boolean dark = true;
+            String urlHash, initiatorHash, executorHash;
+            String cachepath, urlstr, urltxt;
+            yacySeed initiatorSeed, executorSeed;
+            indexURLEntry urle;
+
+            // needed for getCachePath(url)
+            final plasmaHTCache cacheManager = sb.getCacheManager();
+
+            int i, cnt = 0;
+            for (i = sb.urlPool.loadedURL.getStackSize(tabletype) - 1; i >= (sb.urlPool.loadedURL.getStackSize(tabletype) - lines); i--) {
+                initiatorHash = sb.urlPool.loadedURL.getInitiatorHash(tabletype, i);
+                executorHash = sb.urlPool.loadedURL.getExecutorHash(tabletype, i);
+//              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps initiatorHash=" + initiatorHash + " executorHash=" + executorHash);
+                urlHash = sb.urlPool.loadedURL.getUrlHash(tabletype, i);
+//              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
+                try {
+                    urle = sb.urlPool.loadedURL.load(urlHash, null);
+                    indexURLEntry.Components comp = urle.comp();
+//                  serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
+                    initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
+                    executorSeed = yacyCore.seedDB.getConnected(executorHash);
+
+                    urlstr = comp.url().toNormalform();
+                    urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
+                    cachepath = cacheManager.getCachePath(new URL(urlstr)).toString().replace('\\', '/').substring(cacheManager.cachePath.toString().length() + 1);
+
+                    prop.put("table_indexed_" + cnt + "_dark", (dark) ? 1 : 0);
+                    prop.put("table_indexed_" + cnt + "_feedbackpage", "IndexMonitor.html");
+                    prop.put("table_indexed_" + cnt + "_tabletype", tabletype);
+                    prop.put("table_indexed_" + cnt + "_urlhash", urlHash);
+                    prop.put("table_indexed_" + cnt + "_showInit", (showInit) ? 1 : 0);
+                    prop.put("table_indexed_" + cnt + "_showInit_initiatorSeed", (initiatorSeed == null) ? "unknown" : initiatorSeed.getName());
+                    prop.put("table_indexed_" + cnt + "_showExec", (showExec) ? 1 : 0);
+                    prop.put("table_indexed_" + cnt + "_showExec_executorSeed", (executorSeed == null) ? "unknown" : executorSeed.getName());
+                    prop.put("table_indexed_" + cnt + "_moddate", daydate(urle.moddate()));
+                    prop.put("table_indexed_" + cnt + "_wordcount", urle.wordCount());
+                    prop.put("table_indexed_" + cnt + "_urldescr", comp.descr());
+                    prop.put("table_indexed_" + cnt + "_url", (cachepath == null) ? "-not-cached-" : "<a href=\"CacheAdmin_p.html?action=info&path=" + cachepath + "\" class=\"small\" title=\"" + urlstr + "\">" + urltxt + "</a>");
+                    dark = !dark;
+                    cnt++;
+                } catch (Exception e) {
+                    serverLog.logSevere("PLASMA", "genTableProps", e);
+                }
+            }
+            prop.put("table_indexed", cnt);
         }
-        prop.put("process", process);
-	// return rewrite properties
-	return prop;
+        prop.put("process", tabletype);
+        // return rewrite properties
+        return prop;
     }
     
+    private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
+    private static String daydate(Date date) {
+        if (date == null) {
+            return "";
+        } else {
+            return dayFormatter.format(date);
+        }
+    }
 }

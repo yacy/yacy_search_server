@@ -50,7 +50,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURL;
 import de.anomic.kelondro.kelondroBinSearch;
 import de.anomic.server.serverCodings;
@@ -61,7 +61,7 @@ public final class plasmaSearchPreOrder {
     public  static kelondroBinSearch[] ybrTables = null; // block-rank tables
     private static boolean useYBR = true;
     
-    private indexEntry entryMin, entryMax;
+    private indexRWIEntry entryMin, entryMax;
     private TreeMap pageAcc; // key = order hash; value = plasmaLURL.entry
     private plasmaSearchQuery query;
     private plasmaSearchRankingProfile ranking;
@@ -79,7 +79,7 @@ public final class plasmaSearchPreOrder {
         this.ranking = ranking;
         
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
-        indexEntry iEntry;
+        indexRWIEntry iEntry;
 
         // first pass: find min/max to obtain limits for normalization
         Iterator i = container.entries();
@@ -88,9 +88,9 @@ public final class plasmaSearchPreOrder {
         this.entryMax = null;
         while (i.hasNext()) {
             if (System.currentTimeMillis() > limitTime) break;
-            iEntry = (indexEntry) i.next();
-            if (this.entryMin == null) this.entryMin = (indexEntry) iEntry.clone(); else this.entryMin.min(iEntry);
-            if (this.entryMax == null) this.entryMax = (indexEntry) iEntry.clone(); else this.entryMax.max(iEntry);
+            iEntry = (indexRWIEntry) i.next();
+            if (this.entryMin == null) this.entryMin = (indexRWIEntry) iEntry.clone(); else this.entryMin.min(iEntry);
+            if (this.entryMax == null) this.entryMax = (indexRWIEntry) iEntry.clone(); else this.entryMax.max(iEntry);
             count++;
         }
         
@@ -98,7 +98,7 @@ public final class plasmaSearchPreOrder {
         i = container.entries();
         this.pageAcc = new TreeMap();
         for (int j = 0; j < count; j++) {
-            iEntry = (indexEntry) i.next();
+            iEntry = (indexRWIEntry) i.next();
             pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax), query.words("")), 16) + iEntry.urlHash(), iEntry);
         }
     }
@@ -110,13 +110,13 @@ public final class plasmaSearchPreOrder {
         HashSet doubleDoms = new HashSet();
         Iterator i = pageAcc.entrySet().iterator();
         Map.Entry entry;
-        indexEntry iEntry;
+        indexRWIEntry iEntry;
         String hashpart;
         boolean isWordRootURL;
         while (i.hasNext()) {
             if (pageAcc.size() <= query.wantedResults) break;
             entry = (Map.Entry) i.next();
-            iEntry = (indexEntry) entry.getValue();
+            iEntry = (indexRWIEntry) entry.getValue();
             hashpart = iEntry.urlHash().substring(6);
             isWordRootURL = indexURL.isWordRootURL(iEntry.urlHash(), query.words(""));
             if ((!(isWordRootURL)) &&
@@ -192,11 +192,11 @@ public final class plasmaSearchPreOrder {
             e.printStackTrace();
             preranking = new Long(0);
         }
-        return new Object[]{(indexEntry) pageAcc.remove(top), preranking};
+        return new Object[]{(indexRWIEntry) pageAcc.remove(top), preranking};
     }
     
-    public indexEntry[] getNormalizer() {
-        return new indexEntry[] {entryMin, entryMax};
+    public indexRWIEntry[] getNormalizer() {
+        return new indexRWIEntry[] {entryMin, entryMax};
     }
 
     public static int ybr_p(String urlHash) {

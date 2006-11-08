@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverDate;
@@ -101,7 +102,7 @@ public final class plasmaSearchImages {
     public plasmaSearchImages(plasmaSnippetCache sc, long maxTime, plasmaSearchResult sres, int depth) {
         long start = System.currentTimeMillis();
         this.images = new TreeSet();
-        plasmaCrawlLURLEntry urlentry;
+        indexURLEntry urlentry;
         while (sres.hasMoreElements()) {
             urlentry = sres.nextElement();
             addAll(new plasmaSearchImages(sc, serverDate.remainingTime(start, maxTime, 10), urlentry.comp().url(), depth));

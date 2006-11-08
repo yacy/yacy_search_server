@@ -50,29 +50,6 @@ public class indexURL {
  // day formatter for entry export
  public static final SimpleDateFormat shortDayFormatter = new SimpleDateFormat("yyyyMMdd");
  
- // statics for value lengths
- public static final int urlHashLength               = yacySeedDB.commonHashLength; // 12
- public static final int urlStringLength             = 256;// not too short for links without parameters
- public static final int urlDescrLength              = 80; // The headline of a web page (meta-tag or <h1>)
- public static final int urlNameLength               = 40; // the tag content between <a> and </a>
- public static final int urldescrtagsLength          = 320;// the url, the description and tags in one string
- public static final int urlErrorLength              = 80; // a reason description for unavailable urls
- public static final int urlDateLength               = 4;  // any date, shortened
- public static final int urlCopyCountLength          = 2;  // counter for numbers of copies of this index
- public static final int urlFlagLength               = 2;  // any stuff
- public static final int urlQualityLength            = 3;  // taken from heuristic
- public static final int urlLanguageLength           = 2;  // taken from TLD suffix as quick-hack
- public static final int urlDoctypeLength            = 1;  // taken from extension
- public static final int urlSizeLength               = 6;  // the source size, from cache
- public static final int urlWordCountLength          = 3;  // the number of words, from condenser
- public static final int urlCrawlProfileHandleLength = 4;  // name of the prefetch profile
- public static final int urlCrawlDepthLength         = 2;  // prefetch depth, first is '0'
- public static final int urlParentBranchesLength     = 3;  // number of anchors of the parent
- public static final int urlForkFactorLength         = 4;  // sum of anchors of all ancestors
- public static final int urlRetryLength              = 2;  // number of load retries
- public static final int urlHostLength               = 8;  // the host as struncated name
- public static final int urlHandleLength             = 4;  // a handle
- 
  private static final String[] TLD_NorthAmericaOceania={
     // primary english-speaking countries
     // english-speaking countries from central america are also included
@@ -397,7 +374,7 @@ public class indexURL {
  static {
      // create a dummy hash
      dummyHash = "";
-     for (int i = 0; i < urlHashLength; i++) dummyHash += "-";
+     for (int i = 0; i < yacySeedDB.commonHashLength; i++) dummyHash += "-";
      
      // assign TLD-ids and names
      insertTLDProps(TLD_EuropaRussia, 0);
@@ -602,13 +579,13 @@ public class indexURL {
  
  public static final String oldurlHash(URL url) {
     if (url == null) return null;
-     String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.toNormalform())).substring(0, urlHashLength);
+     String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.toNormalform())).substring(0, yacySeedDB.commonHashLength);
      return hash;
  }
      
  public static final String oldurlHash(String url) throws MalformedURLException {
     if ((url == null) || (url.length() < 10)) return null;
-     String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(new URL(url).toNormalform())).substring(0, urlHashLength);
+     String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(new URL(url).toNormalform())).substring(0, yacySeedDB.commonHashLength);
      return hash;
  }
 
@@ -618,10 +595,10 @@ public class indexURL {
      TreeMap doms = new TreeMap();
      synchronized(inputContainer) {
          Iterator i = inputContainer.entries();
-         indexEntry iEntry;
+         indexRWIEntry iEntry;
          String dom, paths;
          while (i.hasNext()) {
-             iEntry = (indexEntry) i.next();
+             iEntry = (indexRWIEntry) i.next();
              if ((excludeContainer != null) && (excludeContainer.get(iEntry.urlHash()) != null)) continue; // do not include urls that are in excludeContainer
              dom = iEntry.urlHash().substring(6);
              if ((paths = (String) doms.get(dom)) == null) {

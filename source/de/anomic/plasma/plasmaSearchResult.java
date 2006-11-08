@@ -54,6 +54,7 @@ import java.util.TreeMap;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.net.URL;
 import de.anomic.server.serverCodings;
@@ -99,16 +100,16 @@ public final class plasmaSearchResult {
         return pageAcc.size() > 0;
     }
     
-    public plasmaCrawlLURLEntry nextElement() {
+    public indexURLEntry nextElement() {
         Object top = pageAcc.firstKey();
         //System.out.println("postorder-key: " + ((String) top));
-        return (plasmaCrawlLURLEntry) pageAcc.remove(top);
+        return (indexURLEntry) pageAcc.remove(top);
     }
     
-    protected void addResult(plasmaCrawlLURLEntry page, Long preranking) {
+    protected void addResult(indexURLEntry page, Long preranking) {
         
         // take out relevant information for reference computation
-        plasmaCrawlLURLEntry.Components comp = page.comp();
+        indexURLEntry.Components comp = page.comp();
         if ((comp.url() == null) || (comp.descr() == null)) return;
         String[] urlcomps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()); // word components of the url
         String[] descrcomps = comp.descr().toLowerCase().split(htmlFilterContentScraper.splitrex); // words in the description
@@ -131,12 +132,12 @@ public final class plasmaSearchResult {
         for (int i = 0; i < references.length; i++) commonSense.add(references[i]);
         
         Object[] resultVector;
-        plasmaCrawlLURLEntry page;
+        indexURLEntry page;
         long ranking;
         for (int i = 0; i < results.size(); i++) {
             // take out values from result array
             resultVector = (Object[]) results.get(i);
-            page = (plasmaCrawlLURLEntry) resultVector[0];
+            page = (indexURLEntry) resultVector[0];
             
             // calculate ranking
             if (postsort)
@@ -172,7 +173,7 @@ public final class plasmaSearchResult {
         // first scan all entries and find all urls that are referenced
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            path = urlPath(((plasmaCrawlLURLEntry) entry.getValue()).comp().url());
+            path = urlPath(((indexURLEntry) entry.getValue()).comp().url());
             paths.put(path, entry.getKey());
             //if (path != null) path = shortenPath(path);
             //if (path != null) paths.put(path, entry.getKey());
@@ -183,7 +184,7 @@ public final class plasmaSearchResult {
         String shorten;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            path = urlPath(((plasmaCrawlLURLEntry) entry.getValue()).comp().url());
+            path = urlPath(((indexURLEntry) entry.getValue()).comp().url());
             shorten = shortenPath(path);
             // scan all subpaths of the url
             while (shorten != null) {

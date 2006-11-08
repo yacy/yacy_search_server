@@ -54,7 +54,7 @@ import java.util.Set;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRI;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroMergeIterator;
@@ -168,7 +168,7 @@ public final class plasmaWordIndexAssortmentCluster implements indexRI {
             c = new indexContainer(newContainer.getWordHash(), payloadrow);
             for (int k = 0; k < j; k++) {
                 if (i.hasNext()) {
-                    c.add((indexEntry) i.next(), newContainer.updated());
+                    c.add((indexRWIEntry) i.next(), newContainer.updated());
                 } else {
                     storeForced(c);
                     return;
@@ -178,7 +178,7 @@ public final class plasmaWordIndexAssortmentCluster implements indexRI {
         }
     }
     
-    public indexContainer addEntry(String wordHash, indexEntry newEntry, long updateTime, boolean dhtCase) {
+    public indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
         indexContainer container = new indexContainer(wordHash, payloadrow);
         container.add(newEntry);
         return addEntries(container, updateTime, dhtCase);
@@ -223,7 +223,7 @@ public final class plasmaWordIndexAssortmentCluster implements indexRI {
                 c = new indexContainer(newContainer.getWordHash(), payloadrow);
                 for (int k = 0; k <= j; k++) {
                     assert (i.hasNext());
-                    c.add((indexEntry) i.next(), newContainer.updated());
+                    c.add((indexRWIEntry) i.next(), newContainer.updated());
                 }
                 try {
                     storeForced(c);
@@ -306,9 +306,9 @@ public final class plasmaWordIndexAssortmentCluster implements indexRI {
             if (buffer != null) {
                 // sort out url hashes that shall be deleted
                 Iterator bi = buffer.entries();
-                indexEntry entry;
+                indexRWIEntry entry;
                 while (bi.hasNext()) {
-                    entry = (indexEntry) bi.next();
+                    entry = (indexRWIEntry) bi.next();
                     if (urlHashes.remove(entry.urlHash())) bi.remove();
                 }
                 record.add(buffer, -1);

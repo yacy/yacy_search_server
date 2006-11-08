@@ -81,18 +81,18 @@ public class indexContainer extends kelondroRowSet {
         return wordHash;
     }
 
-    public int add(indexEntry entry) {
+    public int add(indexRWIEntry entry) {
         this.addUnique(entry.toKelondroEntry());
         return 1;
     }
 
-    public int add(indexEntry entry, long updateTime) {
+    public int add(indexRWIEntry entry, long updateTime) {
         this.add(entry);
         this.lastTimeWrote = updateTime;
         return 1;
     }
 
-    public int add(indexEntry[] entries, long updateTime) {
+    public int add(indexRWIEntry[] entries, long updateTime) {
         for (int i = 0; i < entries.length; i++) this.add(entries[i], updateTime);
         return entries.length;
     }
@@ -106,7 +106,7 @@ public class indexContainer extends kelondroRowSet {
             Iterator i = c.entries();
             while (i.hasNext()) {
                 try {
-                    if (addi((indexEntry) i.next())) x++;
+                    if (addi((indexRWIEntry) i.next())) x++;
                 } catch (ConcurrentModificationException e) {
                     e.printStackTrace();
                 }
@@ -117,13 +117,13 @@ public class indexContainer extends kelondroRowSet {
         return x;
     }
     
-    private boolean addi(indexEntry entry) {
+    private boolean addi(indexRWIEntry entry) {
         // returns true if the new entry was added, false if it already existed
         kelondroRow.Entry oldEntryRow = this.put(entry.toKelondroEntry());
         if (oldEntryRow == null) {
             return true;
         } else {
-            indexEntry oldEntry = new indexURLEntry(oldEntryRow); // FIXME: see if cloning is necessary
+            indexRWIEntry oldEntry = new indexRWIEntryOld(oldEntryRow); // FIXME: see if cloning is necessary
             if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
                 this.put(oldEntry.toKelondroEntry()); // put it back
                 return false;
@@ -133,16 +133,16 @@ public class indexContainer extends kelondroRowSet {
         }
     }
 
-    public indexEntry get(String urlHash) {
+    public indexRWIEntry get(String urlHash) {
         kelondroRow.Entry entry = this.get(urlHash.getBytes());
         if (entry == null) return null;
-        return new indexURLEntry(entry);
+        return new indexRWIEntryOld(entry);
     }
 
-    public indexEntry remove(String urlHash) {
+    public indexRWIEntry remove(String urlHash) {
         kelondroRow.Entry entry = this.remove(urlHash.getBytes());
         if (entry == null) return null;
-        return new indexURLEntry(entry);
+        return new indexRWIEntryOld(entry);
     }
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
@@ -178,7 +178,7 @@ public class indexContainer extends kelondroRowSet {
         public Object next() {
             kelondroRow.Entry rentry = (kelondroRow.Entry) rowEntryIterator.next();
             if (rentry == null) return null;
-            return new indexURLEntry(rentry);
+            return new indexRWIEntryOld(rentry);
         }
 
         public void remove() {
@@ -288,10 +288,10 @@ public class indexContainer extends kelondroRowSet {
         assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
         indexContainer conj = new indexContainer(null, small.rowdef); // start with empty search result
         Iterator se = small.entries();
-        indexEntry ie0, ie1;
+        indexRWIEntry ie0, ie1;
         long stamp = System.currentTimeMillis();
             while ((se.hasNext()) && ((System.currentTimeMillis() - stamp) < time)) {
-                ie0 = (indexEntry) se.next();
+                ie0 = (indexRWIEntry) se.next();
                 ie1 = large.get(ie0.urlHash());
                 if (ie1 != null) {
                     // this is a hit. Calculate word distance:
@@ -312,25 +312,25 @@ public class indexContainer extends kelondroRowSet {
         Iterator e2 = i2.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
-            indexEntry ie1;
-            indexEntry ie2;
-            ie1 = (indexEntry) e1.next();
-            ie2 = (indexEntry) e2.next();
+            indexRWIEntry ie1;
+            indexRWIEntry ie2;
+            ie1 = (indexRWIEntry) e1.next();
+            ie2 = (indexRWIEntry) e2.next();
 
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
                 c = i1.order().compare(ie1.urlHash(), ie2.urlHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
-                    if (e1.hasNext()) ie1 = (indexEntry) e1.next(); else break;
+                    if (e1.hasNext()) ie1 = (indexRWIEntry) e1.next(); else break;
                 } else if (c > 0) {
-                    if (e2.hasNext()) ie2 = (indexEntry) e2.next(); else break;
+                    if (e2.hasNext()) ie2 = (indexRWIEntry) e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
                     ie1.combineDistance(ie2);
                     if (ie1.worddistance() <= maxDistance) conj.add(ie1);
-                    if (e1.hasNext()) ie1 = (indexEntry) e1.next(); else break;
-                    if (e2.hasNext()) ie2 = (indexEntry) e2.next(); else break;
+                    if (e1.hasNext()) ie1 = (indexRWIEntry) e1.next(); else break;
+                    if (e2.hasNext()) ie2 = (indexRWIEntry) e2.next(); else break;
                 }
             }
         }

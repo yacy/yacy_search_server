@@ -48,7 +48,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.serverCodings;
@@ -200,8 +201,8 @@ public class plasmaDHTChunk {
             Iterator indexContainerIterator = wordIndex.indexContainerSet(hash, resourceLevel, true, maxcount).iterator();
             indexContainer container;
             Iterator urlIter;
-            indexEntry iEntry;
-            plasmaCrawlLURLEntry lurl;
+            indexRWIEntry iEntry;
+            indexURLEntry lurl;
             int refcount = 0;
             int wholesize;
             
@@ -227,7 +228,7 @@ public class plasmaDHTChunk {
                     urlIter = container.entries();
                     // iterate over indexes to fetch url entries and store them in the urlCache
                     while ((urlIter.hasNext()) && (maxcount > refcount) && (System.currentTimeMillis() < timeout)) {
-                        iEntry = (indexEntry) urlIter.next();
+                        iEntry = (indexRWIEntry) urlIter.next();
                         lurl = lurls.load(iEntry.urlHash(), iEntry);
                         if ((lurl == null) || (lurl.comp().url() == null)) {
                             //yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + iEntry.urlHash() + "' for word hash " + container.getWordHash());
@@ -243,7 +244,7 @@ public class plasmaDHTChunk {
 
                     // remove all remaining; we have enough
                     while (urlIter.hasNext()) {
-                        iEntry = (indexEntry) urlIter.next();
+                        iEntry = (indexRWIEntry) urlIter.next();
                         urlIter.remove();
                     }
 
@@ -285,7 +286,7 @@ public class plasmaDHTChunk {
     
     public synchronized String deleteTransferIndexes() {
         Iterator urlIter;
-        indexEntry iEntry;
+        indexRWIEntry iEntry;
         HashSet urlHashes;
         String count = "0";
         
@@ -299,7 +300,7 @@ public class plasmaDHTChunk {
             urlHashes = new HashSet(this.indexContainers[i].size());
             urlIter = this.indexContainers[i].entries();
             while (urlIter.hasNext()) {
-                iEntry = (indexEntry) urlIter.next();
+                iEntry = (indexRWIEntry) urlIter.next();
                 urlHashes.add(iEntry.urlHash());
             }
             String wordHash = indexContainers[i].getWordHash();

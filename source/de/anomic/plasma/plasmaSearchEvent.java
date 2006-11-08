@@ -51,7 +51,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.server.logging.serverLog;
@@ -379,8 +380,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         //if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
         //if (searchResult.size() == 0) return acc; // case that we have nothing to do
 
-        indexEntry entry;
-        plasmaCrawlLURLEntry page;
+        indexRWIEntry entry;
+        indexURLEntry page;
         Long preranking;
         Object[] preorderEntry;
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
@@ -388,7 +389,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             while (preorder.hasNext()) {
                 if ((System.currentTimeMillis() >= postorderLimitTime) && (acc.sizeFetched() >= minEntries)) break;
                 preorderEntry = preorder.next();
-                entry = (indexEntry) preorderEntry[0];
+                entry = (indexRWIEntry) preorderEntry[0];
                 // load only urls if there was not yet a root url of that hash
                 preranking = (Long) preorderEntry[1];
                 // find the url entry
@@ -425,11 +426,11 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         preorder.remove(true, true);
         
         // start url-fetch
-        indexEntry entry;
+        indexRWIEntry entry;
         try {
             while (preorder.hasNext()) {
                 if (System.currentTimeMillis() >= timeout) break;
-                entry = (indexEntry) (preorder.next()[0]);
+                entry = (indexRWIEntry) (preorder.next()[0]);
                 // find and fetch the url entry
                 urlStore.load(entry.urlHash(), entry);
             }

@@ -51,8 +51,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexEntry;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIEntryOld;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
@@ -146,7 +146,7 @@ public final class transferRWI {
             int p;
             String wordHash;
             String urlHash;
-            indexEntry iEntry;
+            indexRWIEntry iEntry;
             int wordhashesSize = v.size();
             final HashSet unknownURL = new HashSet();
             final HashSet knownURL = new HashSet();
@@ -162,7 +162,7 @@ public final class transferRWI {
                 if (p > 0) {
                     wordHash = estring.substring(0, p);
                     wordhashes[received] = wordHash;
-                    iEntry = new indexURLEntry(estring.substring(p));
+                    iEntry = new indexRWIEntryOld(estring.substring(p));
                     urlHash = iEntry.urlHash();
                     if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(plasmaURLPattern.BLACKLIST_DHT, urlHash))) {
                         int deleted = sb.wordIndex.tryRemoveURLs(urlHash);

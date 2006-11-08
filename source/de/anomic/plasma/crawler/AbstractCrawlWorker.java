@@ -51,6 +51,7 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.index.indexURL;
+import de.anomic.index.indexRWIEntryOld;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
@@ -297,7 +298,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
                 yacyCore.seedDB.mySeed.hash,
                 this.name,
                 (failreason==null)?"Unknown reason":failreason,
-                new bitfield(indexURL.urlFlagLength)
+                new bitfield(indexRWIEntryOld.urlFlagLength)
         );
         
         // store the entry

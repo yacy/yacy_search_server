@@ -57,15 +57,15 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
-import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIEntryOld;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaWordIndexAssortment {
     
@@ -89,7 +89,7 @@ public final class plasmaWordIndexAssortment {
 
     private kelondroRow bufferStructure(int assortmentCapacity) {
         kelondroColumn[] structure = new kelondroColumn[3 + assortmentCapacity];
-        structure[0] = new kelondroColumn("byte[] wordhash-" + indexEntryAttribute.wordHashLength);
+        structure[0] = new kelondroColumn("byte[] wordhash-" + yacySeedDB.commonHashLength);
         structure[1] = new kelondroColumn("Cardinal occ-4 {b256}");
         structure[2] = new kelondroColumn("Cardinal time-8 {b256}");
         kelondroColumn p = new kelondroColumn("byte[] urlprops-" + payloadrow.objectsize());
@@ -98,7 +98,7 @@ public final class plasmaWordIndexAssortment {
     }
     
     private int assortmentCapacity(int rowsize) {
-        return (rowsize - indexEntryAttribute.wordHashLength - 12) / payloadrow.objectsize();
+        return (rowsize - yacySeedDB.commonHashLength - 12) / payloadrow.objectsize();
     }
     
     public plasmaWordIndexAssortment(File storagePath, kelondroRow payloadrow, int assortmentLength, int bufferkb, long preloadTime, serverLog log) throws IOException {
@@ -133,9 +133,9 @@ public final class plasmaWordIndexAssortment {
         row.setCol(1, 1);
         row.setCol(2, newContainer.updated());
         Iterator entries = newContainer.entries();
-        indexEntry entry;
+        indexRWIEntry entry;
         for (int i = 0; i < assortmentLength; i++) {
-            entry = (indexEntry) entries.next();
+            entry = (indexRWIEntry) entries.next();
             row.setCol(3 + i, entry.toKelondroEntry().bytes());
         }
         kelondroRow.Entry oldrow = null;
@@ -221,7 +221,7 @@ public final class plasmaWordIndexAssortment {
         indexContainer container = new indexContainer(wordHash, payloadrow);
         int al = assortmentCapacity(row.objectsize());
         for (int i = 0; i < al; i++) {
-            container.add(new indexEntry[] { new indexURLEntry(row.getColBytes(3 + i)) }, updateTime);
+            container.add(new indexRWIEntry[] { new indexRWIEntryOld(row.getColBytes(3 + i)) }, updateTime);
         }
         return container;
     }

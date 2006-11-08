@@ -71,10 +71,11 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexURL;
+import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLEntryOld;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
@@ -83,8 +84,6 @@ import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlLURL;
-import de.anomic.plasma.plasmaCrawlLURLEntry;
-import de.anomic.plasma.plasmaCrawlLURLOldEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURLPool;
@@ -623,7 +622,7 @@ public final class yacy {
         kelondroMScoreCluster hs = new kelondroMScoreCluster();
         while (ef.hasMoreElements()) {
             f = (File) ef.nextElement();
-            h = f.getName().substring(0, indexURL.urlHashLength);
+            h = f.getName().substring(0, yacySeedDB.commonHashLength);
             hs.addScore(h, (int) f.length());
         }
 
@@ -740,12 +739,12 @@ public final class yacy {
                     
                     // the combined container will fit, read the container
                     Iterator wordIdxEntries = wordIdxContainer.entries();
-                    indexEntry iEntry;
+                    indexRWIEntry iEntry;
                     while (wordIdxEntries.hasNext()) {
-                        iEntry = (indexEntry) wordIdxEntries.next();
+                        iEntry = (indexRWIEntry) wordIdxEntries.next();
                         String urlHash = iEntry.urlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            plasmaCrawlLURLEntry urlEntry = currentUrlDB.load(urlHash, null);                       
+                            indexURLEntry urlEntry = currentUrlDB.load(urlHash, null);                       
                             urlCounter++;
                             minimizedUrlDB.store(urlEntry);
                             if (urlCounter % 500 == 0) {
@@ -965,11 +964,11 @@ public final class yacy {
             long start = System.currentTimeMillis();
             if (source.equals("lurl")) {
                 Iterator eiter = pool.loadedURL.entries(true, false, null);
-                plasmaCrawlLURLEntry entry;
+                indexURLEntry entry;
                 while (eiter.hasNext()) {
                     try {
-                        entry = (plasmaCrawlLURLEntry) eiter.next();
-                        plasmaCrawlLURLEntry.Components comp = entry.comp();
+                        entry = (indexURLEntry) eiter.next();
+                        indexURLEntry.Components comp = entry.comp();
                         if ((entry != null) && (comp.url() != null)) doms.put(comp.url().getHost(), null);
                     } catch (Exception e) {
                         // here a MalformedURLException may occur
@@ -1077,10 +1076,10 @@ public final class yacy {
             
             if (source.equals("lurl")) {
                 Iterator eiter = pool.loadedURL.entries(true, false, null);
-                plasmaCrawlLURLEntry entry;
+                indexURLEntry entry;
                 while (eiter.hasNext()) {
-                    entry = (plasmaCrawlLURLEntry) eiter.next();
-                    plasmaCrawlLURLEntry.Components comp = entry.comp();
+                    entry = (indexURLEntry) eiter.next();
+                    indexURLEntry.Components comp = entry.comp();
                     if ((entry != null) && (comp.url() != null)) {
                         if (html) {
                             bos.write(("<a href=\"" + comp.url().toNormalform() + "\">" + comp.descr() + "</a><br>").getBytes("UTF-8"));
@@ -1135,7 +1134,7 @@ public final class yacy {
         plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, true, 1000, true, 1000, true, 10000);
         kelondroTree oldindex = null;
         try {
-            oldindex = new kelondroTree(urlHash, 1000, -1, plasmaCrawlLURLOldEntry.rowdef);
+            oldindex = new kelondroTree(urlHash, 1000, -1, indexURLEntryOld.rowdef);
         } catch (IOException e) {
             System.out.println("ERROR: CANNOT OPEN OLD INDEX: " + e.getMessage());
         }
@@ -1145,9 +1144,9 @@ public final class yacy {
         int tc = oldindex.size(), c = 0;
         Iterator eiter = oldindex.contentRows(-1);
         kelondroRow.Entry oldrow;
-        plasmaCrawlLURLEntry oldentry;
-        plasmaCrawlLURLEntry newentry;
-        plasmaCrawlLURLEntry.Components comp;
+        indexURLEntry oldentry;
+        indexURLEntry newentry;
+        indexURLEntry.Components comp;
         byte[] dummymd5 = new byte[0];
         while (eiter.hasNext()) {
             try {
@@ -1158,7 +1157,7 @@ public final class yacy {
                 oldrow = null;
             }
             if (oldrow != null) try {
-                oldentry = new plasmaCrawlLURLOldEntry(oldrow, null);
+                oldentry = new indexURLEntryOld(oldrow, null);
                 comp = oldentry.comp();
                 newentry = pool.loadedURL.newEntry(
                             comp.url(), 
@@ -1236,7 +1235,7 @@ public final class yacy {
                 WordIndex = new plasmaWordIndex(homeDBroot, indexRoot, true, 8*1024*1024, 3000, log, sps.getConfigBool("useCollectionIndex", false));
                 indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
             } else if (resource.equals("assortments")) {
-                plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, indexURLEntry.urlEntryRow, 16*1024*1024, 3000, log);
+                plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, indexRWIEntryOld.urlEntryRow, 16*1024*1024, 3000, log);
                 indexContainerIterator = assortmentCluster.wordContainers(wordChunkStartHash, true, false);
             } /*else if (resource.startsWith("assortment")) {
                 int a = Integer.parseInt(resource.substring(10));

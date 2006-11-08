@@ -1,4 +1,4 @@
-// indexEntry.java
+// indexRWIEntry.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 20.05.2006 on http://www.anomic.de
 //
@@ -28,7 +28,7 @@ package de.anomic.index;
 
 import de.anomic.kelondro.kelondroRow;
 
-public interface indexEntry {
+public interface indexRWIEntry {
 
     public Object clone();
     public String toPropertyForm(boolean displayFormat);
@@ -48,13 +48,13 @@ public interface indexEntry {
     public char getType();
     public boolean isLocal();
     
-    public void combineDistance(indexEntry oe);
+    public void combineDistance(indexRWIEntry oe);
     public int worddistance();
-    public void min(indexEntry other);
-    public void max(indexEntry other);
-    public void normalize(indexEntry min, indexEntry max);
-    public indexEntry generateNormalized(indexEntry min, indexEntry max);
-    public boolean isNewer(indexEntry other);
-    public boolean isOlder(indexEntry other);
+    public void min(indexRWIEntry other);
+    public void max(indexRWIEntry other);
+    public void normalize(indexRWIEntry min, indexRWIEntry max);
+    public indexRWIEntry generateNormalized(indexRWIEntry min, indexRWIEntry max);
+    public boolean isNewer(indexRWIEntry other);
+    public boolean isOlder(indexRWIEntry other);
    
 }

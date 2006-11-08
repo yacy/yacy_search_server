@@ -54,7 +54,7 @@ import java.util.Set;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexURL;
-import de.anomic.plasma.plasmaCrawlLURLEntry;
+import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -249,10 +249,10 @@ public final class search {
             StringBuffer links = new StringBuffer();
             String resource = "";
             //plasmaIndexEntry pie;
-            plasmaCrawlLURLEntry urlentry;
+            indexURLEntry urlentry;
             plasmaSnippetCache.Snippet snippet;
             while ((acc.hasMoreElements()) && (i < squery.wantedResults)) {
-                urlentry = (plasmaCrawlLURLEntry) acc.nextElement();
+                urlentry = (indexURLEntry) acc.nextElement();
                 if (includesnippet) {
                     snippet = sb.snippetCache.retrieveSnippet(urlentry.comp().url(), squery.queryHashes, false, 260, 1000);
                 } else {

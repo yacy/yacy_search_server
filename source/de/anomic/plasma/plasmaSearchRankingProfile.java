@@ -46,8 +46,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexURLEntry;
 
 public class plasmaSearchRankingProfile {
 
@@ -164,7 +165,7 @@ public class plasmaSearchRankingProfile {
         return new String(ext);
     }
     
-    public long preRanking(indexEntry normalizedEntry, String searchedWord) {
+    public long preRanking(indexRWIEntry normalizedEntry, String searchedWord) {
         // the normalizedEntry must be a normalized indexEntry
         long ranking = 0;
         ranking += normalizedEntry.quality() << ((Integer) coeff.get(ENTROPY)).intValue();
@@ -191,13 +192,13 @@ public class plasmaSearchRankingProfile {
                     Set topwords,
                     String[] urlcomps,
                     String[] descrcomps,
-                    plasmaCrawlLURLEntry page) {
+                    indexURLEntry page) {
 
         // apply pre-calculated order attributes
         long ranking = preranking;
 
         // prefer hit with 'prefer' pattern
-        plasmaCrawlLURLEntry.Components comp = page.comp();
+        indexURLEntry.Components comp = page.comp();
         if (comp.url().toNormalform().matches(query.prefer)) ranking += 256 << ((Integer) coeff.get(PREFER)).intValue();
         if (comp.descr().matches(query.prefer)) ranking += 256 << ((Integer) coeff.get(PREFER)).intValue();
         

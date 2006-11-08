@@ -57,11 +57,11 @@ import java.util.TreeMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexEntry;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexURL;
+import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
-import de.anomic.plasma.plasmaCrawlLURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
@@ -161,7 +161,7 @@ public class IndexControl_p {
                 int i = 0;
                 urlx = new String[index.size()];
                 while (en.hasNext()) {
-                    urlx[i++] = ((indexEntry) en.next()).urlHash();
+                    urlx[i++] = ((indexRWIEntry) en.next()).urlHash();
                 }
                 index = null;
             }
@@ -218,7 +218,7 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            plasmaCrawlLURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+            indexURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -263,10 +263,10 @@ public class IndexControl_p {
             Iterator urlIter = index.entries();
             HashMap knownURLs = new HashMap();
             HashSet unknownURLEntries = new HashSet();
-            indexEntry iEntry;
-            plasmaCrawlLURLEntry lurl;
+            indexRWIEntry iEntry;
+            indexURLEntry lurl;
             while (urlIter.hasNext()) {
-                iEntry = (indexEntry) urlIter.next();
+                iEntry = (indexRWIEntry) urlIter.next();
                 lurl = switchboard.urlPool.loadedURL.load(iEntry.urlHash(), null);
                 if (lurl == null) {
                     unknownURLEntries.add(iEntry.urlHash());
@@ -320,7 +320,7 @@ public class IndexControl_p {
                 URL url = new URL(urlstring);
                 urlhash = indexURL.urlHash(url);
                 prop.put("urlhash", urlhash);
-                plasmaCrawlLURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+                indexURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
                 if (entry == null) {
                     prop.put("urlstring", "unknown url: " + urlstring);
                     prop.put("urlhash", "");
@@ -334,7 +334,7 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            plasmaCrawlLURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+            indexURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -348,12 +348,12 @@ public class IndexControl_p {
             try {
                 final Iterator entryIt = switchboard.urlPool.loadedURL.entries(true, true, urlhash); 
                 StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br>");
-                plasmaCrawlLURLEntry entry;
+                indexURLEntry entry;
                 int i = 0;
                 int rows = 0, cols = 0;
                 prop.put("urlhashsimilar", 1);
                 while (entryIt.hasNext() && i < 256) {
-                    entry = (plasmaCrawlLURLEntry) entryIt.next();
+                    entry = (indexURLEntry) entryIt.next();
                     prop.put("urlhashsimilar_rows_"+rows+"_cols_"+cols+"_urlHash", entry.hash());
                     cols++;
                     if (cols==8) {
@@ -400,16 +400,16 @@ public class IndexControl_p {
         return prop;
     }
 
-    public static serverObjects genUrlProfile(plasmaSwitchboard switchboard, plasmaCrawlLURLEntry entry, String urlhash) {
+    public static serverObjects genUrlProfile(plasmaSwitchboard switchboard, indexURLEntry entry, String urlhash) {
         serverObjects prop = new serverObjects();
         if (entry == null) {
             prop.put("genUrlProfile", 1);
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        plasmaCrawlLURLEntry.Components comp = entry.comp();
+        indexURLEntry.Components comp = entry.comp();
         String referrer = null;
-        plasmaCrawlLURLEntry le = switchboard.urlPool.loadedURL.load(entry.referrerHash(), null);
+        indexURLEntry le = switchboard.urlPool.loadedURL.load(entry.referrerHash(), null);
         if (le == null) {
             referrer = "<unknown>";
         } else {
@@ -453,11 +453,11 @@ public class IndexControl_p {
                 int i = 0;
 
                 final TreeMap tm = new TreeMap();
-                indexEntry xi;
+                indexRWIEntry xi;
                 while (en.hasNext()) {
-                    xi = (indexEntry) en.next();
+                    xi = (indexRWIEntry) en.next();
                     uh = new String[]{xi.urlHash(), Integer.toString(xi.posintext())};
-                    plasmaCrawlLURLEntry le = switchboard.urlPool.loadedURL.load(uh[0], null);
+                    indexURLEntry le = switchboard.urlPool.loadedURL.load(uh[0], null);
                     if (le == null) {
                         tm.put(uh[0], uh);
                     } else {

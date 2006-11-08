@@ -90,6 +90,7 @@ import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaHTCache {
 
@@ -173,7 +174,7 @@ public final class plasmaHTCache {
         // open the response header database
         File dbfile = new File(this.cachePath, "responseHeader.db");
         try {
-            this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, preloadTime, indexURL.urlHashLength, 150, '#'));
+            this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, preloadTime, yacySeedDB.commonHashLength, 150, '#'));
         } catch (IOException e) {
             this.log.logSevere("the request header database could not be opened: " + e.getMessage());
             System.exit(0);
@@ -717,7 +718,7 @@ public final class plasmaHTCache {
         if (hexHash.indexOf('.') >= 0) return null;
         try {
             String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.decodeHex(hexHash));
-            if (hash.length() == indexURL.urlHashLength) return hash;
+            if (hash.length() == yacySeedDB.commonHashLength) return hash;
             return null;
         } catch (Exception e) {
             //log.logWarning("getHash: " + e.getMessage(), e);

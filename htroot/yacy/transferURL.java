@@ -48,7 +48,7 @@
 import java.io.IOException;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlLURLEntry;
+import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
@@ -90,7 +90,7 @@ public final class transferURL {
             final int sizeBefore = sb.urlPool.loadedURL.size();
             // read the urls from the other properties and store
             String urls;
-            plasmaCrawlLURLEntry lEntry;
+            indexURLEntry lEntry;
             for (int i = 0; i < urlc; i++) {
                 serverCore.checkInterruption();
                 urls = (String) post.get("url" + i);
@@ -102,7 +102,7 @@ public final class transferURL {
                         yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                         // TODO: should we send back an error message???
                     } else {
-                        plasmaCrawlLURLEntry.Components comp = lEntry.comp();
+                        indexURLEntry.Components comp = lEntry.comp();
                         if (comp.url() == null) {
                             yacyCore.log.logWarning("transferURL: received invalid URL (url null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                             // TODO: should we send back an error message???
