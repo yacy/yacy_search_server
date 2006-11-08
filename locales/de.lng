@@ -1525,7 +1525,7 @@ This peer's name==Name dieses Peers
 This peer's statistics==Statistik dieses Peers
 Unknown==unbekannt
 Uptime==Online seit
-Connects==Verbindungen
+Connects \(==Verbindungen (
 "connected Juniors"=="verbundene Juniors"
 "connected Seniors"=="verbundene Seniors"
 "connected Principals"=="verbundene Principals"
