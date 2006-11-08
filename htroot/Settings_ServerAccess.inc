@@ -5,7 +5,7 @@
   <tr valign="top">
     <td>IP-Number filter:</td>
     <td><input name="serverfilter" type="text" size="50" maxlength="1000" value="#[serverfilter]#"></td>
-    <td><b>Here you can restrict access to the server.</b>  By default, the access is not limited,
+    <td><strong>Here you can restrict access to the server.</strong>  By default, the access is not limited,
            because this function is needed to spawn the p2p index-sharing function.
            If you block access to your server (setting anything else than '*'), then you will also be blocked
            from using other peers' indexes for search service.
@@ -32,8 +32,8 @@
   <tr valign="top">
     <td>staticIP (optional):</td>
     <td><input name="staticIP" type="text" size="32" maxlength="80" value="#[staticIP]#"></td>
-    <td><b>The staticIP can help that your peer can be reached by other peers in case that your
-           peer is behind a firewall or proxy.</b> You can create a tunnel through the firewall/proxy
+    <td><strong>The staticIP can help that your peer can be reached by other peers in case that your
+           peer is behind a firewall or proxy.</strong> You can create a tunnel through the firewall/proxy
            (look out for 'tunneling through https proxy with connect command') and create
            an access point for incoming connections.
            This access address can be set here (either as IP number or domain name).

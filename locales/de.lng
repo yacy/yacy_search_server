@@ -1020,7 +1020,7 @@ free memory in the JVM within total amount==freier Speicher in der JVM innerhalb
 >Used<==>Belegt<
 used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
 Re-Configuration of Startup Paramenters:==Neukonfiguration der Startparameter:
-Changes take effect after <b>re-start</b> of YaCy==&Auml;nderungen werden erst nach <b>Neustart</b> von YaCy wirksam
+Changes take effect after <strong>re-start</strong> of YaCy==&Auml;nderungen werden erst nach <strong>Neustart</strong> von YaCy wirksam
 RAM Cache for Database Files:==RAM-Cache f&uuml;r Datenbank-Dateien:
 Chunk Size==Chunk Gr&ouml;&szlig;e
 #Slots==
@@ -1204,20 +1204,20 @@ Server/Proxy Port Configuration==Server/Proxy Port Konfiguration
 The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Peers oder HTTP-Clients warten soll.
 You have four possibilities to specify the address:==Sie haben vier M&ouml;glichkeiten die Adresse anzugeben:
 defining a port only==nur einen Port angeben
-<i>e.g. 8080</i>==<i>z.B. 8080</i>
+<em>e.g. 8080</em>==<em>z.B. 8080</em>
 defining IP address and port==eine IP-Adresse und Port angeben
-<i>e.g. 192.168.0.1:8080</i>==<i>z.B. 192.168.0.1:8080</i>
+<em>e.g. 192.168.0.1:8080</em>==<em>z.B. 192.168.0.1:8080</em>
 defining host name and port==einen Hostnamen und Port angeben
-<i>e.g. home:8080</i>==<i>z.B. home:8080</i>
+<em>e.g. home:8080</em>==<em>z.B. home:8080</em>
 defining interface name and port==einen Interface-namen und Port angeben
-<i>e.g. #eth0:8080</i>==<i>z.B. #eth0:8080</i>
+<em>e.g. #eth0:8080</em>==<em>z.B. #eth0:8080</em>
 Hint: Dont forget to change your firewall configuration after you have changed the port.==Hinweis: Denken Sie daran Ihre Firewalleinstellungen zu &auml;ndern nachdem Sie den Port ge&auml;ndert haben.
 Proxy and http-Server Administration Port:==Proxy und HTTP-Server Administrations Port:
 Changes will take effect in 5-10 seconds==Die &Auml;nderungen werden in 5-10 Sekunden wirksam
 Server Access Restrictions==Server Zugangsbeschr&auml;nkungen
 You can restrict the access to this proxy/server using a two-stage security barrier:==Sie k&ouml;nnen den Zugang zu diesem Proxy/Server mit einer 2-stufigen Sicherheitsbarriere einschr&auml;nken:
-define an <i>access domain</i> with a list of granted client IP-numbers or with wildcards==geben Sie einen <i>Netzwerkadressraum</i> mithilfe einer Liste zugelassener Client-IP-Adressen oder mit Platzhaltern an
-define an <i>user account</i> with an user:password - pair==geben Sie einen <i>Nutzeraccount</i> mit einem nutzer:passwort-Paar an
+define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==geben Sie einen <em>Netzwerkadressraum</em> mithilfe einer Liste zugelassener Client-IP-Adressen oder mit Platzhaltern an
+define an <em>user account</em> with an user:password - pair==geben Sie einen <em>Nutzeraccount</em> mit einem nutzer:passwort-Paar an
 This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gew&auml;hrt wird.
 You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet.==Sie wollen den Proxy vermutlich nicht im Internet zur Verf&uuml;gung stellen, deshalb sollten Sie den IP-Adressraum so einstellen, dass er auf Ihr lokales Intranet zutrifft.
 The default setting should be right in most cases.==Die Standardwerte sollten in den meisten F&auml;llen richtig sein.
@@ -1243,7 +1243,7 @@ Use remote proxy:==Nutze Remote Proxy:
 Enables the usage of the remote proxy by yacy==Aktiviert die Nutzung des Remote Proxies durch YaCy
 Use remote proxy for yacy <-> yacy communication==Nutze Remote Proxy f&uuml;r YaCy <-> YaCy Kommunikation
 Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==Gibt an, ob der Remote Proxy f&uuml;r Kommunikation zwischen diesem und anderen YaCy-Peers genutzt werden soll.
-<i>Hint:</i> Enabling this option could cause this peer to remain in junior status.==<i>Hinweis:</i> Dies k&ouml;nnte dazu f&uuml;hren, dass dieser Peer im Junior-Status verbleibt.
+<em>Hint:</em> Enabling this option could cause this peer to remain in junior status.==<em>Hinweis:</em> Dies k&ouml;nnte dazu f&uuml;hren, dass dieser Peer im Junior-Status verbleibt.
 Use remote proxy for https==Nutze Remote Proxy f&uuml;r HTTPS
 Specifies if YaCy should forward ssl connections to the remote proxy.==Gibt an, ob YaCy SSL-Verbindungen zum Remote Proxy weiterleiten soll.
 The ip address or domain name of the remote proxy==Die IP-Adresse oder der Domainname des Remote Proxy
@@ -1286,8 +1286,8 @@ from using other peers' indexes for search service.==den Index anderer Peers zur
 However, blocking access may be correct in enterprise environments where you only want to index your==Wie auch immer, in Unternehmensumgebungen kann ein Blockieren richtig sein,
 company's own web pages.==wenn Sie nur die Unternehmenseigenen Websites indexieren wollen.
 staticIP \(optional\):==statische IP (optional):
-<b>The staticIP can help that your peer can be reached by other peers in case that your==<b>Die statische IP kann helfen Ihren Peer f&uuml;r andere Peers erreichbar zu machen, falls Sie
-peer is behind a firewall or proxy.</b> You can create a tunnel through the firewall/proxy==hinter einer Firewall oder einem Proxy sind.</b> Sie k&ouml;nnen einen Tunnel durch die Firewall/Proxy erzeugen
+<strong>The staticIP can help that your peer can be reached by other peers in case that your==<strong>Die statische IP kann helfen Ihren Peer f&uuml;r andere Peers erreichbar zu machen, falls Sie
+peer is behind a firewall or proxy.</strong> You can create a tunnel through the firewall/proxy==hinter einer Firewall oder einem Proxy sind.</strong> Sie k&ouml;nnen einen Tunnel durch die Firewall/Proxy erzeugen
 \(look out for 'tunneling through https proxy with connect command'\) and create==(sehen Sie nach "Tunnelung durch einen https Proxy mit verbinden-Befehl") und erzeugen Sie
 an access point for incoming connections.==einen Zugriffspunkt f&uuml;r eingehende Verbindungen.
 This access address can be set here \(either as IP number or domain name\).==Diese Zugrifssadresse kann hier angegeben werden (oder als IP Nummer oder Domain-Name).
@@ -1400,9 +1400,9 @@ Your proxy access setting has been changed.==Ihre Proxy Zugangs Einstellung wurd
 Your new proxy account name is \#\[user\]\#. The password has been accepted.==Ihr neuer Proxy Account Name ist #[user]#. Ihr Passwort wurde akzeptiert.
 If you open any public web page through the proxy, you must log-in then.==
 Your server access filter is now set to #[filter]#
-Auto pop-up of the Status page is now <b>disabled</b>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <b>deaktiviert.</b>
-Auto pop-up of the Status page is now <b>enabled</b>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <b>aktiviert.</b>
-You are now permanently <b>online</b>.==Sie sind nun im <b>permanenten Online Modus</b>.
+Auto pop-up of the Status page is now <strong>disabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>deaktiviert.</strong>
+Auto pop-up of the Status page is now <strong>enabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>aktiviert.</strong>
+You are now permanently <strong>online</strong>.==Sie sind nun im <strong>permanenten Online Modus</strong>.
 After a short while you should see the effect on the====Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
 status</a> page.==Status-Seite</a> sehen.
 The Peer Name is:==Der Name dieses Peers ist:
@@ -1438,9 +1438,9 @@ Port Forwarding uses proxy:
 Port Forwarding Settings changed, but something is wrong.
 Port Forwarding was deactivated automatically.
 Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zur&uuml;ck und modifizieren Sie die Daten.
-You are now <b>event-based online</b>.==Sie sind nun im  <b>aktivit&auml;tsbasierten Modus</b>.
+You are now <strong>event-based online</strong>.==Sie sind nun im  <strong>aktivit&auml;tsbasierten Modus</strong>.
 After a short while you should see the effect on the==Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
-You are now in <b>Cache Mode</b>.==Sie sind nun im <b>Cache Modus</b>.
+You are now in <strong>Cache Mode</strong>.==Sie sind nun im <strong>Cache Modus</strong>.
 Only Proxy-cache ist available in this mode.==Nur der Proxy Cache ist in diesem Modus verf&uuml;gbar.
 After a short while you should see the effect on the==Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
 You can now go back to the==Sie k&ouml;nnen nun zur&uuml;ck zu den
@@ -1525,7 +1525,11 @@ This peer's name==Name dieses Peers
 This peer's statistics==Statistik dieses Peers
 Unknown==unbekannt
 Uptime==Online seit
-Connects ==Verbindungen
+Connects==Verbindungen
+"connected Juniors"=="verbundene Juniors"
+"connected Seniors"=="verbundene Seniors"
+"connected Principals"=="verbundene Principals"
+"disconnected peers"=="nichtverbundene Peers"
 peers/hour==Peers/Stunde
 This peer's status==Status dieses Peers
 Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil Sie den Proxy noch nicht benutzt haben. Wenn Sie Ihren Browser korrekt auf den Proxy eingestellt haben
@@ -1948,12 +1952,12 @@ value="\#\[peername\]\#'s Console"==value="#[peername]#s Konsole"
 Welcome! You are identified and authorized as==Willkommen! Sie sind identifiziert und authorisiert als
 #-----------------------------
 
-#File: htdocsdefault/welcome.html
+#File: www/welcome.html
 #---------------------------
 YACY: Default Page for Individual Peer Content==YACY: Standardseite f&uuml;r eigene Peer-Inhalte
 Individual&nbsp;Web&nbsp;Page==eigene Webseite
-Welcome to your own web page<br>in the <b>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br />im <b>YaCy-Netzwerk
+Welcome to your own web page<br />in the <strong>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br />im <strong>YaCy-Netzwerk
 THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE F&Uuml;R IHREN EIGENEN WEB SERVER!
 PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
-&lt;YaCy-application-home&gt;<b>\#\[wwwpath\]\#</b>==&lt;YaCy-Programmpfad&gt;<b>#[wwwpath]#</b> ABLEGEN.
+&lt;YaCy-application-home&gt;<strong>\#\[wwwpath\]\#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
 #-----------------------------

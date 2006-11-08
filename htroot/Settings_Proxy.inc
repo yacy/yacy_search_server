@@ -13,8 +13,8 @@
   <tr valign="top">
     <td colspan="2">Use remote proxy for yacy <-> yacy communication</td>
     <td><input type="checkbox" name="remoteProxyUse4Yacy" align="top" #(remoteProxyUse4Yacy)#::checked#(/remoteProxyUse4Yacy)#></td>
-  	<td>Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.<br>
-  	    <i>Hint:</i> Enabling this option could cause this peer to remain in junior status.</td>  
+  	<td>Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.<br />
+  	    <em>Hint:</em> Enabling this option could cause this peer to remain in junior status.</td>  
   </tr>
   <tr valign="top">
     <td colspan="2">Use remote proxy for https</td>
@@ -58,8 +58,8 @@
   
   <!-- submit button -->
   <tr valign="top">
-    <td colspan="4"><input type="submit" name="proxysettings" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
+    <td colspan="4"><input type="submit" name="proxysettings" value="submit">&nbsp;  <em>Changes will take effect immediately.</em></td>
   </tr>
 </table>
 </fieldset>
-</form><br>
+</form><br />
