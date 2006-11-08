@@ -81,11 +81,11 @@ public class plasmaSwitchboardQueue {
 
     private void initQueueStack() {
         kelondroRow rowdef = new kelondroRow(
-                "String url-"          + yacySeedDB.commonHashLength               + ", " +        // the url
-                "String refhash-"      + yacySeedDB.commonHashLength               + ", " +        // the url's referrer hash
-                "Cardinal modifiedsince-11"                                        + " {b64e}, " + // from ifModifiedSince
-                "byte[] flags-1"                                                   + ", " +        // flags
-                "String initiator-"    + yacySeedDB.commonHashLength               + ", " +        // the crawling initiator
+                "String url-"          + indexRWIEntryOld.urlStringLength             + ", " +        // the url
+                "String refhash-"      + yacySeedDB.commonHashLength                  + ", " +        // the url's referrer hash
+                "Cardinal modifiedsince-11"                                           + " {b64e}, " + // from ifModifiedSince
+                "byte[] flags-1"                                                      + ", " +        // flags
+                "String initiator-"    + yacySeedDB.commonHashLength                  + ", " +        // the crawling initiator
                 "Cardinal depth-"      + indexRWIEntryOld.urlCrawlDepthLength         + " {b64e}, " + // the prefetch depth so far, starts at 0
                 "String profile-"      + indexRWIEntryOld.urlCrawlProfileHandleLength + ", " +        // the name of the prefetch profile handle
                 "String urldescr-"     + indexRWIEntryOld.urlDescrLength);                            //
