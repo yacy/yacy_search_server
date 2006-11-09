@@ -444,8 +444,15 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
             // a different language can be desired (by i.e. ConfigBasic.html) than the one stored in the htLocaleSelection
             String localeSelection = switchboard.getConfig("htLocaleSelection","default");
-            if (args != null) 
+            if (args != null && (args.containsKey("language"))) 
+            {
+                // TODO 9.11.06 Bost: a class with information about available languages is needed. 
+                // the indexOf(".") is just a workaround because there from ConfigLanguage.html commes "de.lng" and
+                // from ConfigBasic.html comes just "de" in the "language" parameter
                 localeSelection = args.get("language", localeSelection);
+                if (localeSelection.indexOf(".") != -1)
+                    localeSelection = localeSelection.substring(0, localeSelection.indexOf("."));
+            }
             
             File   targetFile  = getLocalizedFile(path, localeSelection);
             String targetExt   = conProp.getProperty("EXT","");
