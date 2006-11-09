@@ -60,7 +60,6 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
-import de.anomic.index.indexRWIEntryOld;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlProfile;
@@ -205,7 +204,7 @@ public class IndexCreate_p {
                                 prop.put("error_reasonString", reasonString);
                                 
                                 plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(crawlingStartURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
-                                                                                                 crawlingStartURL.getHost(), reasonString, new bitfield(indexRWIEntryOld.urlFlagLength));
+                                                                                                 crawlingStartURL.getHost(), reasonString, new bitfield());
                                 ee.store();
                                 switchboard.urlPool.errorURL.stackPushEntry(ee);
                             }
@@ -283,7 +282,7 @@ public class IndexCreate_p {
                                         c++;
                                     } else {
                                         plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(nexturlURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
-                                                                                                         (String) e.getValue(), rejectReason, new bitfield(indexRWIEntryOld.urlFlagLength));
+                                                                                                         (String) e.getValue(), rejectReason, new bitfield());
                                         ee.store();
                                         switchboard.urlPool.errorURL.stackPushEntry(ee);
                                     }

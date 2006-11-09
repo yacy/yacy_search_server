@@ -162,6 +162,7 @@ public class kelondroRow {
         }
         
         public Entry(byte[] rowinstance, int start, int length) {
+            assert objectsize == length;
             this.rowinstance = new byte[objectsize];
             int ll = Math.min(objectsize, length);
             System.arraycopy(rowinstance, start, this.rowinstance, 0, ll);
@@ -169,15 +170,20 @@ public class kelondroRow {
         }
         
         public Entry(byte[][] cols) {
+            assert row.length == cols.length;
             rowinstance = new byte[objectsize];
             int ll;
+            int cs, cw;
             for (int i = 0; i < row.length; i++) {
+                cs = colstart[i];
+                cw = row[i].cellwidth();
                 if ((i >= cols.length) || (cols[i] == null)) {
-                    for (int j = 0; j < row[i].cellwidth(); j++) this.rowinstance[colstart[i] + j] = 0;
+                    for (int j = 0; j < cw; j++) this.rowinstance[cs + j] = 0;
                 } else {
-                    ll = Math.min(cols[i].length, row[i].cellwidth());
-                    System.arraycopy(cols[i], 0, rowinstance, colstart[i], ll);
-                    for (int j = ll; j < row[i].cellwidth(); j++) this.rowinstance[colstart[i] + j] = 0;
+                    //assert cols[i].length <= cw : "i = " + i + ", cols[i].length = " + cols[i].length + ", cw = " + cw;
+                    ll = Math.min(cols[i].length, cw);
+                    System.arraycopy(cols[i], 0, rowinstance, cs, ll);
+                    for (int j = ll; j < cw; j++) this.rowinstance[cs + j] = 0;
                 }
             }
         }
@@ -252,6 +258,7 @@ public class kelondroRow {
                     System.arraycopy(cell, 0, rowinstance, offset, cell.length);
                     while (length-- > cell.length) rowinstance[offset + length] = 0;
                 } else {
+                    //assert cell.length == length;
                     System.arraycopy(cell, 0, rowinstance, offset, length);
                 }
             }

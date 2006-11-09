@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import de.anomic.index.indexURL;
-import de.anomic.index.indexRWIEntryOld;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroRow;
@@ -133,20 +132,22 @@ public class plasmaCrawlEURL extends indexURL {
      * ======================================================================= */        
     private LinkedList rejectedStack = new LinkedList(); // strings: url
     
+    public final static kelondroRow rowdef = new kelondroRow(
+            "String urlhash-"   + yacySeedDB.commonHashLength + ", " + // the url's hash
+            "String refhash-"   + yacySeedDB.commonHashLength + ", " + // the url's referrer hash
+            "String initiator-" + yacySeedDB.commonHashLength + ", " + // the crawling initiator
+            "String executor-"  + yacySeedDB.commonHashLength + ", " + // the crawling executor
+            "String urlstring-256, " +                                 // the url as string
+            "String urlname-40, " +                                    // the name of the url, from anchor tag <a>name</a>
+            "Cardinal appdate-4 {b64e}, " +                            // the time when the url was first time appeared
+            "Cardinal loaddate-4 {b64e}, " +                           // the time when the url was last time tried to load
+            "Cardinal retrycount-2 {b64e}, " +                         // number of load retries
+            "String failcause-80, " +                                  // string describing load failure
+            "byte[] flags-2");                                         // extra space
+    
     public plasmaCrawlEURL(File cachePath, int bufferkb, long preloadTime, boolean newdb) {
         super();
-        kelondroRow rowdef = new kelondroRow(
-            "String urlhash-"      + yacySeedDB.commonHashLength   + ", " +        // the url's hash
-            "String refhash-"      + yacySeedDB.commonHashLength   + ", " +        // the url's referrer hash
-            "String initiator-"    + yacySeedDB.commonHashLength   + ", " +        // the crawling initiator
-            "String executor-"     + yacySeedDB.commonHashLength   + ", " +        // the crawling executor
-            "String urlstring-"    + indexRWIEntryOld.urlStringLength + ", " +        // the url as string
-            "String urlname-"      + indexRWIEntryOld.urlNameLength   + ", " +        // the name of the url, from anchor tag <a>name</a>
-            "Cardinal appdate-"    + indexRWIEntryOld.urlDateLength   + " {b64e}, " + // the time when the url was first time appeared
-            "Cardinal loaddate-"   + indexRWIEntryOld.urlDateLength   + " {b64e}, " + // the time when the url was last time tried to load
-            "Cardinal retrycount-" + indexRWIEntryOld.urlRetryLength  + " {b64e}, " + // number of load retries
-            "String failcause-"    + indexRWIEntryOld.urlErrorLength  + ", " +        // string describing load failure
-            "byte[] flags-"        + indexRWIEntryOld.urlFlagLength);                 // extra space
+        
 
         if (newdb) {
             String newCacheName = "urlErr3.table";
@@ -291,8 +292,8 @@ public class plasmaCrawlEURL extends indexURL {
 	        // stores the values from the object variables into the database
             if (this.stored) return;
             if (this.hash == null) return;
-            String initdatestr = kelondroBase64Order.enhancedCoder.encodeLong(initdate.getTime() / 86400000, indexRWIEntryOld.urlDateLength);
-            String trydatestr = kelondroBase64Order.enhancedCoder.encodeLong(trydate.getTime() / 86400000, indexRWIEntryOld.urlDateLength);
+            String initdatestr = kelondroBase64Order.enhancedCoder.encodeLong(initdate.getTime() / 86400000, rowdef.width(6));
+            String trydatestr = kelondroBase64Order.enhancedCoder.encodeLong(trydate.getTime() / 86400000, rowdef.width(7));
 
             // store the hash in the hash cache
             try {
@@ -306,7 +307,7 @@ public class plasmaCrawlEURL extends indexURL {
                     this.name.getBytes(),
                     initdatestr.getBytes(),
                     trydatestr.getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.trycount, indexRWIEntryOld.urlRetryLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.trycount, rowdef.width(8)).getBytes(),
                     this.failreason.getBytes(),
                     this.flags.getBytes()
                 };

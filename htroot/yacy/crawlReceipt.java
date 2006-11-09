@@ -50,7 +50,6 @@ import java.io.IOException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURL;
-import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlNURL;
@@ -157,7 +156,7 @@ public final class crawlReceipt {
         } else {
             try {
                 plasmaCrawlNURL.Entry en = switchboard.urlPool.noticeURL.getEntry(receivedUrlhash);
-                plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield(indexRWIEntryOld.urlFlagLength));
+                plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield());
                 ee.store();
                 switchboard.urlPool.errorURL.stackPushEntry(ee);
                 switchboard.urlPool.noticeURL.remove(receivedUrlhash);

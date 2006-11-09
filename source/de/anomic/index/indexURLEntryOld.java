@@ -40,21 +40,21 @@ import de.anomic.tools.crypt;
 import de.anomic.yacy.yacySeedDB;
 
 public class indexURLEntryOld implements indexURLEntry {
-
+    
     public static final kelondroRow rowdef = new kelondroRow(
             "String urlhash-" + yacySeedDB.commonHashLength + ", " + // the url's hash
-            "String urlstring-" + indexRWIEntryOld.urlStringLength + ", " + // the url as string
-            "String urldescr-" + indexRWIEntryOld.urlDescrLength + ", " + // the description of the url
-            "Cardinal moddate-" + indexRWIEntryOld.urlDateLength + " {b64e}, " + // last-modified from the httpd
-            "Cardinal loaddate-" + indexRWIEntryOld.urlDateLength + " {b64e}, " + // time when the url was loaded
+            "String urlstring-256, " +                               // the url as string
+            "String urldescr-80, " +                                 // the description of the url
+            "Cardinal moddate-4 {b64e}, " +                          // last-modified from the httpd
+            "Cardinal loaddate-4 {b64e}, " +                         // time when the url was loaded
             "String refhash-" + yacySeedDB.commonHashLength + ", " + // the url's referrer hash
-            "Cardinal copycount-" + indexRWIEntryOld.urlCopyCountLength + " {b64e}, " + //
-            "byte[] flags-" + indexRWIEntryOld.urlFlagLength + ", " + // flags
-            "Cardinal quality-" + indexRWIEntryOld.urlQualityLength + " {b64e}, " + // 
-            "String language-" + indexRWIEntryOld.urlLanguageLength + ", " + //
-            "byte[] doctype-" + indexRWIEntryOld.urlDoctypeLength + ", " + //
-            "Cardinal size-" + indexRWIEntryOld.urlSizeLength + " {b64e}, " + // size of file in bytes
-            "Cardinal wc-" + indexRWIEntryOld.urlWordCountLength + " {b64e}"); // word count
+            "Cardinal copycount-2 {b64e}, " +                        // not used
+            "byte[] flags-2, " +                                     // flags
+            "Cardinal quality-3 {b64e}, " +                          // deprecated
+            "String language-2, " +                                  // language key; mainly the TDL
+            "byte[] doctype-1, " +                                   //
+            "Cardinal size-6 {b64e}, " +                             // size of file in bytes
+            "Cardinal wc-3 {b64e}");                                 // word count
 
     private URL url;
     private String descr;
@@ -176,8 +176,8 @@ public class indexURLEntryOld implements indexURLEntry {
     }
     
     public kelondroRow.Entry toRowEntry() throws IOException {
-        final String moddatestr = kelondroBase64Order.enhancedCoder.encodeLong(moddate.getTime() / 86400000, indexRWIEntryOld.urlDateLength);
-        final String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, indexRWIEntryOld.urlDateLength);
+        final String moddatestr = kelondroBase64Order.enhancedCoder.encodeLong(moddate.getTime() / 86400000, rowdef.width(3));
+        final String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, rowdef.width(4));
 
         final byte[][] entry = new byte[][] {
                 urlHash.getBytes(),
@@ -186,13 +186,13 @@ public class indexURLEntryOld implements indexURLEntry {
                 moddatestr.getBytes(),
                 loaddatestr.getBytes(),
                 referrerHash.getBytes(),
-                kelondroBase64Order.enhancedCoder.encodeLong(copyCount, indexRWIEntryOld.urlCopyCountLength).getBytes(),
+                kelondroBase64Order.enhancedCoder.encodeLong(copyCount, rowdef.width(6)).getBytes(),
                 flags.getBytes(),
-                kelondroBase64Order.enhancedCoder.encodeLong(quality, indexRWIEntryOld.urlQualityLength).getBytes(),
+                kelondroBase64Order.enhancedCoder.encodeLong(quality, rowdef.width(8)).getBytes(),
                 language.getBytes(),
                 new byte[] { (byte) doctype },
-                kelondroBase64Order.enhancedCoder.encodeLong(size, indexRWIEntryOld.urlSizeLength).getBytes(),
-                kelondroBase64Order.enhancedCoder.encodeLong(wordCount, indexRWIEntryOld.urlWordCountLength).getBytes()};
+                kelondroBase64Order.enhancedCoder.encodeLong(size, rowdef.width(11)).getBytes(),
+                kelondroBase64Order.enhancedCoder.encodeLong(wordCount, rowdef.width(12)).getBytes()};
         return rowdef.newEntry(entry);
     }
 
@@ -288,9 +288,7 @@ public class indexURLEntryOld implements indexURLEntry {
                     .append(",size=").append(size).append(",wc=").append(
                             wordCount).append(",cc=").append(copyCount).append(
                             ",local=").append(((local()) ? "true" : "false"))
-                    .append(",q=").append(
-                            kelondroBase64Order.enhancedCoder.encodeLong(
-                                    quality, indexRWIEntryOld.urlQualityLength))
+                    .append(",q=0")
                     .append(",dt=").append(doctype).append(",lang=").append(
                             language).append(",url=").append(
                             crypt.simpleEncode(url.toString())).append(

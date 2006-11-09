@@ -51,7 +51,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.index.indexURL;
-import de.anomic.index.indexRWIEntryOld;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroException;
@@ -66,7 +65,7 @@ import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacySeedDB;
 
 public class plasmaCrawlNURL extends indexURL {
-
+    
     public static final int STACK_TYPE_NULL     =  0; // do not stack
     public static final int STACK_TYPE_CORE     =  1; // put on local stack
     public static final int STACK_TYPE_LIMIT    =  2; // put on global stack
@@ -80,18 +79,19 @@ public class plasmaCrawlNURL extends indexURL {
      * column length definition for the {@link plasmaURL#urlIndexFile} DB
      */
     public final static kelondroRow rowdef = new kelondroRow(
-        "String urlhash-"      + yacySeedDB.commonHashLength               + ", " +        // the url's hash
-        "String initiator-"    + yacySeedDB.commonHashLength               + ", " +        // the crawling initiator
-        "String urlstring-"    + indexRWIEntryOld.urlStringLength             + ", " +        // the url as string
-        "String refhash-"      + yacySeedDB.commonHashLength               + ", " +        // the url's referrer hash
-        "String urlname-"      + indexRWIEntryOld.urlNameLength               + ", " +        // the name of the url, from anchor tag <a>name</a>
-        "Cardinal appdate-"    + indexRWIEntryOld.urlDateLength               + " {b64e}, " + // the time when the url was first time appeared
-        "String profile-"      + indexRWIEntryOld.urlCrawlProfileHandleLength + ", " +        // the name of the prefetch profile handle
-        "Cardinal depth-"      + indexRWIEntryOld.urlCrawlDepthLength         + " {b64e}, " + // the prefetch depth so far, starts at 0
-        "Cardinal parentbr-"   + indexRWIEntryOld.urlParentBranchesLength     + " {b64e}, " + // number of anchors of the parent
-        "Cardinal forkfactor-" + indexRWIEntryOld.urlForkFactorLength         + " {b64e}, " + // sum of anchors of all ancestors
-        "byte[] flags-"        + indexRWIEntryOld.urlFlagLength               + ", " +        // flags
-        "String handle-"       + indexRWIEntryOld.urlHandleLength);                           // extra handle
+        "String urlhash-" + yacySeedDB.commonHashLength + ", " +    // the url's hash
+        "String initiator-" + yacySeedDB.commonHashLength + ", " +  // the crawling initiator
+        "String urlstring-256, " +                                  // the url as string
+        "String refhash-" + yacySeedDB.commonHashLength + ", " +    // the url's referrer hash
+        "String urlname-40, " +                                     // the name of the url, from anchor tag <a>name</a>
+        "Cardinal appdate-4 {b64e}, " +                             // the time when the url was first time appeared
+        "String profile-4, " +                                      // the name of the prefetch profile handle
+        "Cardinal depth-2 {b64e}, " +                               // the prefetch depth so far, starts at 0
+        "Cardinal parentbr-3 {b64e}, " +                            // number of anchors of the parent
+        "Cardinal forkfactor-4 {b64e}, " +                          // sum of anchors of all ancestors
+        "byte[] flags-2, " +                                        // flags
+        "String handle-4"                                           // extra handle
+        );
     
     private final plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
     private final plasmaCrawlBalancer limitStack;     // links found by crawling at target depth
@@ -259,7 +259,7 @@ public class plasmaCrawlNURL extends indexURL {
     
     private static String normalizeHandle(int h) {
         String d = Integer.toHexString(h);
-        while (d.length() < indexRWIEntryOld.urlHandleLength) d = "0" + d;
+        while (d.length() < rowdef.width(11)) d = "0" + d;
         return d;
     }
 
@@ -481,7 +481,7 @@ public class plasmaCrawlNURL extends indexURL {
             this.depth         = depth;
             this.anchors       = anchors;
             this.forkfactor    = forkfactor;
-            this.flags         = new bitfield(indexRWIEntryOld.urlFlagLength);
+            this.flags         = new bitfield(rowdef.width(10));
             this.handle        = 0;
             this.stored        = false;
         }
@@ -535,7 +535,7 @@ public class plasmaCrawlNURL extends indexURL {
         public void store() {
             // stores the values from the object variables into the database
             if (this.stored) return;
-            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, indexRWIEntryOld.urlDateLength);
+            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, rowdef.width(5));
             // store the hash in the hash cache
             try {
                 // even if the entry exists, we simply overwrite it
@@ -547,9 +547,9 @@ public class plasmaCrawlNURL extends indexURL {
                     this.name.getBytes("UTF-8"),
                     loaddatestr.getBytes(),
                     (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, indexRWIEntryOld.urlCrawlDepthLength).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, indexRWIEntryOld.urlParentBranchesLength).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, indexRWIEntryOld.urlForkFactorLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, rowdef.width(7)).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, rowdef.width(8)).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, rowdef.width(9)).getBytes(),
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
                 };

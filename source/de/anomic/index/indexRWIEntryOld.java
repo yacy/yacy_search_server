@@ -36,35 +36,14 @@ import de.anomic.yacy.yacySeedDB;
 public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
 
     // this object stores attributes to URL references inside RWI collections
-    
-    // statics for value lengths
-    public static final int urlStringLength             = 256;// not too short for links without parameters
-    public static final int urlDescrLength              = 80; // The headline of a web page (meta-tag or <h1>)
-    public static final int urlNameLength               = 40; // the tag content between <a> and </a>
-    public static final int urldescrtagsLength          = 320;// the url, the description and tags in one string
-    public static final int urlErrorLength              = 80; // a reason description for unavailable urls
-    public static final int urlDateLength               = 4;  // any date, shortened
-    public static final int urlCopyCountLength          = 2;  // counter for numbers of copies of this index
-    public static final int urlFlagLength               = 2;  // any stuff
-    public static final int urlLanguageLength           = 2;  // taken from TLD suffix as quick-hack
-    public static final int urlDoctypeLength            = 1;  // taken from extension
-    public static final int urlSizeLength               = 6;  // the source size, from cache
-    public static final int urlWordCountLength          = 3;  // the number of words, from condenser
-    public static final int urlCrawlProfileHandleLength = 4;  // name of the prefetch profile
-    public static final int urlCrawlDepthLength         = 2;  // prefetch depth, first is '0'
-    public static final int urlParentBranchesLength     = 3;  // number of anchors of the parent
-    public static final int urlForkFactorLength         = 4;  // sum of anchors of all ancestors
-    public static final int urlRetryLength              = 2;  // number of load retries
-    public static final int urlHostLength               = 8;  // the host as struncated name
-    public static final int urlHandleLength             = 4;  // a handle
-    public static final int urlQualityLength            = 3;  // taken from heuristic
+
     
     public static kelondroRow urlEntryRow = new kelondroRow(new kelondroColumn[]{
             new kelondroColumn("h", kelondroColumn.celltype_string,    kelondroColumn.encoder_bytes, yacySeedDB.commonHashLength, "urlhash"),
-            new kelondroColumn("q", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, urlQualityLength, "quality"),
+            new kelondroColumn("q", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 3, "quality"),
             new kelondroColumn("a", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 3, "lastModified"),
             new kelondroColumn("c", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 2, "hitcount"),
-            new kelondroColumn("l", kelondroColumn.celltype_string,    kelondroColumn.encoder_bytes, urlLanguageLength, "language"),
+            new kelondroColumn("l", kelondroColumn.celltype_string,    kelondroColumn.encoder_bytes, 2, "language"),
             new kelondroColumn("d", kelondroColumn.celltype_binary,    kelondroColumn.encoder_bytes, 1, "doctype"),
             new kelondroColumn("f", kelondroColumn.celltype_binary,    kelondroColumn.encoder_bytes, 1, "localflag"),
             new kelondroColumn("t", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 2, "posintext"),
@@ -118,7 +97,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         // - boolean: appearance attributes: title, appears in header, anchor-descr, image-tag, hervorhebungen, meta-tags, word in link etc
         // - boolean: URL attributes
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
-        if ((language == null) || (language.length() != urlLanguageLength)) language = "uk";
+        if ((language == null) || (language.length() != urlEntryRow.width(col_language))) language = "uk";
         this.entry = urlEntryRow.newEntry();
         this.entry.setCol(col_urlhash, urlHash, null);
         this.entry.setCol(col_quality, quality);

@@ -1179,6 +1179,8 @@ public class kelondroRecords {
                 byte[] key = nn.getKey();
                 if ((key == null) ||
                     ((key.length == 1) && (key[0] == (byte) 0x80)) || // the NUL pointer ('lost' chain terminator)
+                    (key.length < 3) ||
+                    ((key.length  > 3) && (key[2] == 0) && (key[3] == 0)) ||
                     ((key.length  > 3) && (key[0] == (byte) 0x80) && (key[1] == 0) && (key[2] == 0) && (key[3] == 0)) ||
                     ((key.length  > 0) && (key[0] == 0))              // a 'lost' pointer within a deleted-chain
                    ) {

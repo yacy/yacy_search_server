@@ -1497,7 +1497,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (document == null) return;
             } catch (ParserException e) {
                 this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
-                addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorPeerHash, entry.anchorName(), e.getErrorCode(), new bitfield(indexRWIEntryOld.urlFlagLength));
+                addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorPeerHash, entry.anchorName(), e.getErrorCode(), new bitfield());
                 if (document != null) {
                     document.close();
                     document = null;
@@ -1764,7 +1764,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         }
                     } else {
                         log.logFine("Not Indexed Resource '" + entry.normalizedURLString() + "': process case=" + processCase);
-                        addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new bitfield(indexRWIEntryOld.urlFlagLength));
+                        addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new bitfield());
                     }
                 } catch (Exception ee) {
                     if (ee instanceof InterruptedException) throw (InterruptedException)ee;
@@ -1776,7 +1776,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
                         yacyClient.crawlReceipt(initiatorPeer, "crawl", "exception", ee.getMessage(), null, "");
                     }
-                    addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new bitfield(indexRWIEntryOld.urlFlagLength));
+                    addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new bitfield());
                 }
                 
             } else {
@@ -1784,7 +1784,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 checkInterruption();
                 
                 log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
-                addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, noIndexReason, new bitfield(indexRWIEntryOld.urlFlagLength));
+                addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, noIndexReason, new bitfield());
                 if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
                     yacyClient.crawlReceipt(initiatorPeer, "crawl", "rejected", noIndexReason, null, "");
                 }

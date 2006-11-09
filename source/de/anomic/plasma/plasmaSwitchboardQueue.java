@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.anomic.index.indexURL;
-import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
@@ -78,18 +77,18 @@ public class plasmaSwitchboardQueue {
 
         initQueueStack();
     }
-
+    
+    public static final kelondroRow rowdef = new kelondroRow(
+            "String url-256, " +                                       // the url
+            "String refhash-" + yacySeedDB.commonHashLength + ", " +   // the url's referrer hash
+            "Cardinal modifiedsince-11 {b64e}, " +                     // from ifModifiedSince
+            "byte[] flags-1, " +                                       // flags
+            "String initiator-" + yacySeedDB.commonHashLength + ", " + // the crawling initiator
+            "Cardinal depth-2 {b64e}, " +                              // the prefetch depth so far, starts at 0
+            "String profile-" + plasmaCrawlProfile.crawlProfileHandleLength + ", " + // the name of the prefetch profile handle
+            "String urldescr-80");
+    
     private void initQueueStack() {
-        kelondroRow rowdef = new kelondroRow(
-                "String url-"          + indexRWIEntryOld.urlStringLength             + ", " +        // the url
-                "String refhash-"      + yacySeedDB.commonHashLength                  + ", " +        // the url's referrer hash
-                "Cardinal modifiedsince-11"                                           + " {b64e}, " + // from ifModifiedSince
-                "byte[] flags-1"                                                      + ", " +        // flags
-                "String initiator-"    + yacySeedDB.commonHashLength                  + ", " +        // the crawling initiator
-                "Cardinal depth-"      + indexRWIEntryOld.urlCrawlDepthLength         + " {b64e}, " + // the prefetch depth so far, starts at 0
-                "String profile-"      + indexRWIEntryOld.urlCrawlProfileHandleLength + ", " +        // the name of the prefetch profile handle
-                "String urldescr-"     + indexRWIEntryOld.urlDescrLength);                            //
-            
         sbQueueStack = kelondroStack.open(sbQueueStackPath, rowdef);
     }
     
@@ -110,7 +109,7 @@ public class plasmaSwitchboardQueue {
             kelondroBase64Order.enhancedCoder.encodeLong((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
             new byte[]{entry.flags},
             (entry.initiator == null) ? indexURL.dummyHash.getBytes() : entry.initiator.getBytes(),
-            kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, indexRWIEntryOld.urlCrawlDepthLength).getBytes(),
+            kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, rowdef.width(5)).getBytes(),
             (entry.profileHandle == null) ? indexURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
             (entry.anchorName == null) ? "-".getBytes("UTF-8") : entry.anchorName.getBytes("UTF-8")
         }));

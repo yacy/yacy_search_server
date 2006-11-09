@@ -60,7 +60,6 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import de.anomic.data.robotsParser;
 import de.anomic.http.httpc;
 import de.anomic.index.indexURL;
-import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
@@ -492,7 +491,7 @@ public final class plasmaCrawlStacker {
                 this.depth         = depth;
                 this.anchors       = anchors;
                 this.forkfactor    = forkfactor;
-                this.flags         = new bitfield(indexRWIEntryOld.urlFlagLength);
+                this.flags         = new bitfield();
                 this.handle        = 0;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -571,11 +570,11 @@ public final class plasmaCrawlStacker {
                //.append("flags: ").append((flags==null) ? "null" : flags.toString())
                ;
                return str.toString();
-        }                      
+        }
         
         public byte[][] getBytes() {
             // stores the values from the object variables into the database
-            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, indexRWIEntryOld.urlDateLength);
+            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, plasmaCrawlNURL.rowdef.width(5));
             // store the hash in the hash cache
 
             // even if the entry exists, we simply overwrite it
@@ -589,19 +588,19 @@ public final class plasmaCrawlStacker {
                     this.name.getBytes("UTF-8"),
                     loaddatestr.getBytes(),
                     (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, indexRWIEntryOld.urlCrawlDepthLength).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, indexRWIEntryOld.urlParentBranchesLength).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, indexRWIEntryOld.urlForkFactorLength).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, plasmaCrawlNURL.rowdef.width(7)).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, plasmaCrawlNURL.rowdef.width(8)).getBytes(),
+                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, plasmaCrawlNURL.rowdef.width(9)).getBytes(),
                     this.flags.getBytes(),
                     normalizeHandle(this.handle).getBytes()
-            };
+                };
             } catch (UnsupportedEncodingException e) { /* ignore this */ }
             return entry;
         }        
         
         private String normalizeHandle(int h) {
             String d = Integer.toHexString(h);
-            while (d.length() < indexRWIEntryOld.urlHandleLength) d = "0" + d;
+            while (d.length() < plasmaCrawlNURL.rowdef.width(11)) d = "0" + d;
             return d;
         }
     }      
@@ -1059,7 +1058,7 @@ public final class plasmaCrawlStacker {
                                 yacyCore.seedDB.mySeed.hash,
                                 this.theMsg.name,
                                 rejectReason,
-                                new bitfield(indexRWIEntryOld.urlFlagLength)
+                                new bitfield()
                         );
                         ee.store();
                         sb.urlPool.errorURL.stackPushEntry(ee);
