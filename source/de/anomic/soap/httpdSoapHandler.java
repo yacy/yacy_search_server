@@ -137,7 +137,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         "<deployment "
       +     "xmlns=\"http://xml.apache.org/axis/wsdd/\" " 
       +     "xmlns:java=\"http://xml.apache.org/axis/wsdd/providers/java\" >"
-      +     "<service name=\"@serviceName@\" provider=\"java:RPC\" >"
+      +     "<service name=\"@serviceName@\" provider=\"java:RPC\">"
       +         "<parameter name=\"typeMappingVersion\" value=\"1.1\"/>"
       +         "<parameter name=\"scope\" value=\"Request\"/>"
       +         "<parameter name=\"className\" value=\"@className@\" />"
@@ -198,8 +198,9 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     /**
      * Constructor of this class
      * @param theSwitchboard
+     * @throws Exception 
      */
-    public httpdSoapHandler(serverSwitch theSwitchboard) {
+    public httpdSoapHandler(serverSwitch theSwitchboard) throws Exception {
         super();
         
         this.switchboard = theSwitchboard;
@@ -231,25 +232,36 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         if (additionalServices == null) synchronized (initSync) { deployAdditionalServices(); }
     }
     
-    private void deployDefaultServices() {
-    	// create an Axis server
-    	this.theLogger.logInfo("Init soap engine ...");
-    	engine = new AxisServer();
-    	
-    	// setting some options ...
-    	engine.setShouldSaveConfig(false);
-    	
-    	this.theLogger.logInfo("Deploying default services ...");
-    	for (int i=0; i < defaultServices.length; i++) {
-    		String[] nextService = defaultServices[i].split("=");
-    		this.theLogger.logInfo("Deploying service " + nextService[0] + ": " + nextService[1]);
-    		String deploymentStr = serviceDeploymentString
-    		.replaceAll("@serviceName@", nextService[0])
-    		.replaceAll("@className@", nextService[1]);
+    private void deployDefaultServices() throws Exception {
+    	try {
+    		// create an Axis server
+    		this.theLogger.logInfo("Init soap engine ...");
+    		engine = new AxisServer();
     		
-    		// deploy the service 
-    		deployService(deploymentStr,engine);
-    	}    	
+    		// setting some options ...
+    		engine.setShouldSaveConfig(false);
+    		
+    	} catch (Exception e) {
+    		this.theLogger.logSevere("Unable to initialize soap engine",e);
+    		throw e;
+    	}
+    	
+    	try {
+    		this.theLogger.logInfo("Deploying default services ...");
+    		for (int i=0; i < defaultServices.length; i++) {
+    			String[] nextService = defaultServices[i].split("=");
+    			this.theLogger.logInfo("Deploying service " + nextService[0] + ": " + nextService[1]);
+    			String deploymentStr = serviceDeploymentString
+    			.replaceAll("@serviceName@", nextService[0])
+    			.replaceAll("@className@", nextService[1]);
+    			
+    			// deploy the service 
+    			deployService(deploymentStr,engine);
+    		}    	
+    	} catch (Exception e) {
+    		this.theLogger.logSevere("Unable to deploy default soap services.",e);
+    		throw e;
+    	}
     }
     
     private void deployAdditionalServices() {
