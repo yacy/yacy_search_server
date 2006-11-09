@@ -262,12 +262,15 @@ public final class httpd implements serverHandler {
             persistent = false;
         }        
         
+        String transferEncoding = (String) header.get(httpHeader.TRANSFER_ENCODING, "identity");
+        boolean isPostRequest = this.prop.getProperty(httpHeader.CONNECTION_PROP_METHOD).equals(httpHeader.METHOD_POST);
+        boolean hasContentLength = header.containsKey(httpHeader.CONTENT_LENGTH);
+        boolean hasTransferEncoding = header.containsKey(httpHeader.TRANSFER_ENCODING) && !transferEncoding.equalsIgnoreCase("identity");
+        
         // if the request does not contain a content-length we have to close the connection
         // independently of the value of the connection header
-        if (persistent && 
-            this.prop.getProperty(httpHeader.CONNECTION_PROP_METHOD).equals(httpHeader.METHOD_POST) && 
-            !header.containsKey(httpHeader.CONTENT_LENGTH)) 
-              this.prop.put(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
+        if (persistent && isPostRequest && !(hasContentLength || hasTransferEncoding)) 
+        	  this.prop.put(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
         else  this.prop.put(httpHeader.CONNECTION_PROP_PERSISTENT,persistent?"keep-alive":"close");
         
         return persistent;
