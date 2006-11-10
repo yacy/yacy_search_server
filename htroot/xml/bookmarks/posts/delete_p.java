@@ -43,7 +43,7 @@
 
 package xml.bookmarks.posts;
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -54,7 +54,7 @@ public class delete_p {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         if(post!= null){
-        	if( post.containsKey("url") && switchboard.bookmarksDB.removeBookmark(indexURL.urlHash(post.get("url", "nourl"))) ){
+        	if( post.containsKey("url") && switchboard.bookmarksDB.removeBookmark(plasmaURL.urlHash(post.get("url", "nourl"))) ){
         		prop.put("result", 1);
         	}else if(post.containsKey("urlhash") && switchboard.bookmarksDB.removeBookmark(post.get("urlhash", "nohash"))){
         		prop.put("result", 1);

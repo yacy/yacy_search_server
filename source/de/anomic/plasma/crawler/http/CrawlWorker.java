@@ -60,7 +60,7 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpdBoundedSizeOutputStream;
 import de.anomic.http.httpdLimitExceededException;
 import de.anomic.http.httpdProxyHandler;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlLoader;
@@ -339,7 +339,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                         }
 
                         // generating url hash
-                        String urlhash = indexURL.urlHash(redirectionUrl);
+                        String urlhash = plasmaURL.urlHash(redirectionUrl);
                         
                         // removing url from loader queue
                         plasmaCrawlLoader.switchboard.urlPool.noticeURL.remove(urlhash);

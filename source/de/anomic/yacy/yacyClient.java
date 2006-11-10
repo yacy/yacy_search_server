@@ -56,8 +56,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -570,7 +569,7 @@ public final class yacyClient {
                             if (singleAbstract == null) singleAbstract = new TreeMap();
                             ci = new serverByteBuffer(((String) entry.getValue()).getBytes());
                             System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
-                            indexURL.decompressIndex(singleAbstract, ci, targetPeer.hash);
+                            plasmaURL.decompressIndex(singleAbstract, ci, targetPeer.hash);
                             abstractCache.put(wordhash, singleAbstract);
                         }
                     }
@@ -1200,7 +1199,7 @@ public final class yacyClient {
             /*final yacyCore core =*/ new yacyCore(sb);
             yacyCore.peerActions.loadSeedLists();
             final yacySeed target = yacyCore.seedDB.getConnected(args[1]);
-            final String wordhashe = indexEntryAttribute.word2hash("test");
+            final String wordhashe = plasmaURL.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
             // should we use the proxy?

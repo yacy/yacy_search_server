@@ -30,6 +30,7 @@ package de.anomic.index;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRow.Entry;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.yacy.yacySeedDB;
 
@@ -105,7 +106,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         this.entry.setCol(col_hitcount, hitcount);
         this.entry.setCol(col_language, language, null);
         this.entry.setCol(col_doctype, (byte) doctype);
-        this.entry.setCol(col_localflag, (byte) ((local) ? indexEntryAttribute.LT_LOCAL : indexEntryAttribute.LT_GLOBAL));
+        this.entry.setCol(col_localflag, (byte) ((local) ? plasmaURL.LT_LOCAL : plasmaURL.LT_GLOBAL));
         this.entry.setCol(col_posintext, posintext);
         this.entry.setCol(col_posinphrase, posinphrase);
         this.entry.setCol(col_posofphrase, posofphrase);
@@ -196,7 +197,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
     }
 
     public boolean isLocal() {
-        return this.entry.getColByte(col_localflag) == indexEntryAttribute.LT_LOCAL;
+        return this.entry.getColByte(col_localflag) == plasmaURL.LT_LOCAL;
     }
     
     public static indexRWIEntryOld combineDistance(indexRWIEntryOld ie1, indexRWIEntry ie2) {

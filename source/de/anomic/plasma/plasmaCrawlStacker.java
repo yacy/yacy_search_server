@@ -59,7 +59,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.data.robotsParser;
 import de.anomic.http.httpc;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
@@ -267,7 +267,7 @@ public final class plasmaCrawlStacker {
         String reason = null; // failure reason
 
         // getting the initiator peer hash
-        if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = indexURL.dummyHash;        
+        if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = plasmaURL.dummyHash;        
         
         // strange errors
         if (nexturlString == null) {
@@ -286,7 +286,7 @@ public final class plasmaCrawlStacker {
                 referrerString = null;
             }
         }
-        String referrerHash = (referrerString==null)?null:indexURL.urlHash(referrerString);
+        String referrerHash = (referrerString==null)?null:plasmaURL.urlHash(referrerString);
 
         // check for malformed urls
         URL nexturl = null;
@@ -390,7 +390,7 @@ public final class plasmaCrawlStacker {
 
         // check if the url is double registered
         checkInterruption();
-        String nexturlhash = indexURL.urlHash(nexturl);
+        String nexturlhash = plasmaURL.urlHash(nexturl);
         String dbocc = this.sb.urlPool.exists(nexturlhash);
         indexURLEntry oldEntry = null;
         oldEntry = this.sb.urlPool.loadedURL.load(nexturlhash, null);
@@ -418,7 +418,7 @@ public final class plasmaCrawlStacker {
         }
         
         // store information
-        boolean local = ((initiatorHash.equals(indexURL.dummyHash)) || (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)));
+        boolean local = ((initiatorHash.equals(plasmaURL.dummyHash)) || (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)));
         boolean global = 
             (profile != null) &&
             (profile.remoteIndexing()) /* granted */ &&
@@ -481,10 +481,10 @@ public final class plasmaCrawlStacker {
                 int forkfactor) {
             try {
                 // create new entry and store it into database
-                this.urlHash       = indexURL.urlHash(urlString);
+                this.urlHash       = plasmaURL.urlHash(urlString);
                 this.initiator     = initiator;
                 this.url           = urlString;
-                this.referrerHash  = (referrerUrlString == null) ? indexURL.dummyHash : indexURL.urlHash(referrerUrlString);
+                this.referrerHash  = (referrerUrlString == null) ? plasmaURL.dummyHash : plasmaURL.urlHash(referrerUrlString);
                 this.name          = (name == null) ? "" : name;
                 this.loaddate      = (loaddate == null) ? new Date() : loaddate;
                 this.profileHandle = profileHandle; // must not be null
@@ -506,7 +506,7 @@ public final class plasmaCrawlStacker {
                 this.urlHash       = urlHash;
                 this.initiator     = entry.getColString(1, "UTF-8");
                 this.url           = entry.getColString(2, "UTF-8").trim();
-                this.referrerHash  = (entry.empty(3)) ? indexURL.dummyHash : entry.getColString(3, "UTF-8");
+                this.referrerHash  = (entry.empty(3)) ? plasmaURL.dummyHash : entry.getColString(3, "UTF-8");
                 this.name          = (entry.empty(4)) ? "" : entry.getColString(4, "UTF-8").trim();
                 this.loaddate      = new Date(86400000 * entry.getColLong(5));
                 this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, "UTF-8").trim();
@@ -561,7 +561,7 @@ public final class plasmaCrawlStacker {
             str.append("urlHash: ").append(urlHash==null ? "null" : urlHash).append(" | ")
                .append("initiator: ").append(initiator==null?"null":initiator).append(" | ")
                .append("url: ").append(url==null?"null":url).append(" | ")
-               .append("referrer: ").append((referrerHash == null) ? indexURL.dummyHash : referrerHash).append(" | ")
+               .append("referrer: ").append((referrerHash == null) ? plasmaURL.dummyHash : referrerHash).append(" | ")
                .append("name: ").append((name == null) ? "null" : name).append(" | ")
                .append("loaddate: ").append((loaddate == null) ? new Date() : loaddate).append(" | ")
                .append("profile: ").append(profileHandle==null?"null":profileHandle).append(" | ")

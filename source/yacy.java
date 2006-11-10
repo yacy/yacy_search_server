@@ -72,7 +72,6 @@ import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.index.indexURLEntryOld;
@@ -86,6 +85,7 @@ import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexAssortmentCluster;
@@ -808,7 +808,7 @@ public final class yacy {
         try {
             String word;
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(wordlist)));
-            while ((word = br.readLine()) != null) wordmap.put(indexEntryAttribute.word2hash(word),word);
+            while ((word = br.readLine()) != null) wordmap.put(plasmaURL.word2hash(word),word);
             br.close();
         } catch (IOException e) {}
         return wordmap;
@@ -913,7 +913,7 @@ public final class yacy {
         Iterator i = stopwords.iterator();
         while (i.hasNext()) {
             w = (String) i.next();
-            f = plasmaWordIndexFile.wordHash2path(dbRoot, indexEntryAttribute.word2hash(w));
+            f = plasmaWordIndexFile.wordHash2path(dbRoot, plasmaURL.word2hash(w));
             if (f.exists()) {
                 thisamount = f.length();
                 if (f.delete()) {

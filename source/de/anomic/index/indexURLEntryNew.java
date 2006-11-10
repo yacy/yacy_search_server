@@ -11,6 +11,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.tools.crypt;
@@ -69,7 +70,7 @@ public class indexURLEntryNew implements indexURLEntry {
             int lapp) {
         // create new entry and store it into database
         this.entry = rowdef.newEntry();
-        this.entry.setCol("hash", indexURL.urlHash(url), null);
+        this.entry.setCol("hash", plasmaURL.urlHash(url), null);
         this.entry.setCol("comp", encodeComp(url, descr, author, tags, ETag));
         this.entry.setCol("mod", encodeDate(mod));
         this.entry.setCol("load", encodeDate(load));
@@ -127,24 +128,24 @@ public class indexURLEntryNew implements indexURLEntry {
         String ETag = crypt.simpleDecode(prop.getProperty("ETag", ""), null); if (ETag == null) ETag = "";
         
         this.entry = rowdef.newEntry();
-        this.entry.setCol("hash", indexURL.urlHash(url), null);
+        this.entry.setCol("hash", plasmaURL.urlHash(url), null);
         this.entry.setCol("comp", encodeComp(url, descr, author, tags, ETag));
         try {
-            this.entry.setCol("mod", encodeDate(indexURL.shortDayFormatter.parse(prop.getProperty("mod", "20000101"))));
+            this.entry.setCol("mod", encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("mod", "20000101"))));
         } catch (ParseException e) {
             this.entry.setCol("mod", encodeDate(new Date()));
         }
         try {
-            this.entry.setCol("load", encodeDate(indexURL.shortDayFormatter.parse(prop.getProperty("load", "20000101"))));
+            this.entry.setCol("load", encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("load", "20000101"))));
         } catch (ParseException e) {
             this.entry.setCol("load", encodeDate(new Date()));
         }
         try {
-            this.entry.setCol("fresh", encodeDate(indexURL.shortDayFormatter.parse(prop.getProperty("fresh", "20000101"))));
+            this.entry.setCol("fresh", encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("fresh", "20000101"))));
         } catch (ParseException e) {
             this.entry.setCol("fresh", encodeDate(new Date()));
         }
-        this.entry.setCol("referrer", prop.getProperty("referrer", indexURL.dummyHash).getBytes());
+        this.entry.setCol("referrer", prop.getProperty("referrer", plasmaURL.dummyHash).getBytes());
         this.entry.setCol("md5", serverCodings.decodeHex(prop.getProperty("md5", "")));
         this.entry.setCol("size", Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol("wc", Integer.parseInt(prop.getProperty("wc", "0")));
@@ -172,9 +173,9 @@ public class indexURLEntryNew implements indexURLEntry {
             s.append(",author=").append(crypt.simpleEncode(comp.author()));
             s.append(",tags=").append(crypt.simpleEncode(comp.tags()));
             s.append(",ETag=").append(crypt.simpleEncode(comp.ETag()));
-            s.append(",mod=").append(indexURL.shortDayFormatter.format(moddate()));
-            s.append(",load=").append(indexURL.shortDayFormatter.format(loaddate()));
-            s.append(",fresh=").append(indexURL.shortDayFormatter.format(freshdate()));
+            s.append(",mod=").append(plasmaURL.shortDayFormatter.format(moddate()));
+            s.append(",load=").append(plasmaURL.shortDayFormatter.format(loaddate()));
+            s.append(",fresh=").append(plasmaURL.shortDayFormatter.format(freshdate()));
             s.append(",referrer=").append(referrerHash());
             s.append(",md5=").append(md5());
             s.append(",size=").append(size());
@@ -240,12 +241,12 @@ public class indexURLEntryNew implements indexURLEntry {
 
     public String referrerHash() {
         // return the creator's hash
-        return entry.getColString("referrer", indexURL.dummyHash, null);
+        return entry.getColString("referrer", plasmaURL.dummyHash, null);
     }
 
     public String md5() {
         // returns the md5 in hex representation
-        return serverCodings.encodeHex(entry.getCol("md5", indexURL.dummyHash.getBytes()));
+        return serverCodings.encodeHex(entry.getCol("md5", plasmaURL.dummyHash.getBytes()));
     }
 
     public char doctype() {

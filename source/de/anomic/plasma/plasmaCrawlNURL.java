@@ -50,11 +50,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFlexTable;
+import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
@@ -64,7 +65,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacySeedDB;
 
-public class plasmaCrawlNURL extends indexURL {
+public class plasmaCrawlNURL {
     
     public static final int STACK_TYPE_NULL     =  0; // do not stack
     public static final int STACK_TYPE_CORE     =  1; // put on local stack
@@ -108,6 +109,9 @@ public class plasmaCrawlNURL extends indexURL {
     private boolean newdb;
     initStackIndex initThead;
     
+    // the class object
+    private kelondroIndex urlIndexFile = null;
+
     public plasmaCrawlNURL(File cachePath, int bufferkb, long preloadTime, boolean newdb) {
         super();
         this.cacheStacksPath = cachePath;
@@ -138,6 +142,42 @@ public class plasmaCrawlNURL extends indexURL {
         // init stack Index
         stackIndex = new HashSet();
         (initThead = new initStackIndex()).start();
+    }
+
+    public int size() {
+        try {
+           return urlIndexFile.size() ;
+       } catch (IOException e) {
+           return 0;
+       }
+    }
+    
+    public int cacheNodeChunkSize() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeChunkSize();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeChunkSize();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeChunkSize();
+        return 0;
+    }
+    
+    public int[] cacheNodeStatus() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeStatus();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeStatus();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeStatus();
+        return new int[]{0,0,0,0,0,0,0,0,0,0};
+    }
+    
+    public int cacheObjectChunkSize() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectChunkSize();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectChunkSize();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectChunkSize();
+        return 0;
+    }
+    
+    public long[] cacheObjectStatus() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectStatus();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectStatus();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectStatus();
+        return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     }
     
     public void waitOnInitThread() {
@@ -195,7 +235,10 @@ public class plasmaCrawlNURL extends indexURL {
         try {imageStack.close();} catch (IOException e) {}
         try {movieStack.close();} catch (IOException e) {}
         try {musicStack.close();} catch (IOException e) {}
-        try { super.close(); } catch (IOException e) {}
+        if (urlIndexFile != null) try {
+            urlIndexFile.close();
+            urlIndexFile = null;
+        } catch (IOException e) {}
     }
 
     public class initStackIndex extends Thread {
@@ -471,10 +514,10 @@ public class plasmaCrawlNURL extends indexURL {
                      int forkfactor
         ) {
             // create new entry and store it into database
-            this.hash          = urlHash(url);
+            this.hash          = plasmaURL.urlHash(url);
             this.initiator     = initiator;
             this.url           = url;
-            this.referrer      = (referrer == null) ? dummyHash : referrer;
+            this.referrer      = (referrer == null) ? plasmaURL.dummyHash : referrer;
             this.name          = (name == null) ? "" : name;
             this.loaddate      = (loaddate == null) ? new Date() : loaddate;
             this.profileHandle = profileHandle; // must not be null
@@ -520,7 +563,7 @@ public class plasmaCrawlNURL extends indexURL {
             this.hash = entry.getColString(0, null);
             this.initiator = entry.getColString(1, null);
             this.url = new URL(urlstring);
-            this.referrer = (entry.empty(3)) ? dummyHash : entry.getColString(3, null);
+            this.referrer = (entry.empty(3)) ? plasmaURL.dummyHash : entry.getColString(3, null);
             this.name = (entry.empty(4)) ? "" : entry.getColString(4, "UTF-8").trim();
             this.loaddate = new Date(86400000 * entry.getColLong(5));
             this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, null).trim();
@@ -573,7 +616,7 @@ public class plasmaCrawlNURL extends indexURL {
             str.append("hash: ").append(hash==null ? "null" : hash).append(" | ")
                .append("initiator: ").append(initiator==null?"null":initiator).append(" | ")
                .append("url: ").append(url==null?"null":url.toString()).append(" | ")
-               .append("referrer: ").append((referrer == null) ? dummyHash : referrer).append(" | ")
+               .append("referrer: ").append((referrer == null) ? plasmaURL.dummyHash : referrer).append(" | ")
                .append("name: ").append((name == null) ? "null" : name).append(" | ")
                .append("loaddate: ").append((loaddate == null) ? new Date() : loaddate).append(" | ")
                .append("profile: ").append(profileHandle==null?"null":profileHandle).append(" | ")

@@ -56,8 +56,7 @@ import java.util.Set;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.net.URL;
@@ -160,7 +159,7 @@ public class plasmaSnippetCache {
                     }
 
                     //end contrib [MN]
-                    if (indexEntryAttribute.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
+                    if (plasmaURL.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
                     w[j] = prefix + w[j] + postfix;
                 }
             }
@@ -178,7 +177,7 @@ public class plasmaSnippetCache {
     
     public boolean existsInCache(URL url, Set queryhashes) {
         String hashes = yacySearch.set2string(queryhashes);
-        return retrieveFromCache(hashes, indexURL.urlHash(url)) != null;
+        return retrieveFromCache(hashes, plasmaURL.urlHash(url)) != null;
     }
     
     public Snippet retrieveSnippet(URL url, Set queryhashes, boolean fetchOnline, int snippetMaxLength, int timeout) {
@@ -187,7 +186,7 @@ public class plasmaSnippetCache {
             //System.out.println("found no queryhashes for URL retrieve " + url);
             return new Snippet(null, ERROR_NO_HASH_GIVEN, "no query hashes given");
         }
-        String urlhash = indexURL.urlHash(url);
+        String urlhash = plasmaURL.urlHash(url);
         
         // try to get snippet from snippetCache
         int source = SOURCE_CACHE;
@@ -481,7 +480,7 @@ public class plasmaSnippetCache {
         String word;
         while (words.hasMoreElements()) {
             word = (String) words.nextElement();
-            map.put(indexEntryAttribute.word2hash(word), new Integer(pos));
+            map.put(plasmaURL.word2hash(word), new Integer(pos));
             pos += word.length() + 1;
         }
         return map;

@@ -47,7 +47,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 
 public class plasmaSearchRankingProfile {
@@ -174,9 +174,9 @@ public class plasmaSearchRankingProfile {
         ranking += (normalizedEntry.posintext() == 0) ? 0 : (256 - normalizedEntry.posintext()) << ((Integer) coeff.get(POSINTEXT)).intValue();
         ranking += (normalizedEntry.worddistance() == 0) ? 0 : (256 - normalizedEntry.worddistance()) << ((Integer) coeff.get(WORDDISTANCE)).intValue();
         ranking += (normalizedEntry.hitcount() == 0) ? 0 : normalizedEntry.hitcount() << ((Integer) coeff.get(HITCOUNT)).intValue();
-        ranking += (256 - indexURL.domLengthNormalized(normalizedEntry.urlHash())) << ((Integer) coeff.get(DOMLENGTH)).intValue();
-        ranking += (indexURL.probablyRootURL(normalizedEntry.urlHash())) ? 16 << ((Integer) coeff.get(URLLENGTH)).intValue() : 0;
-        ranking += (indexURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord) != null) ? 256 << ((Integer) coeff.get(QUERYINURL)).intValue() : 0;
+        ranking += (256 - plasmaURL.domLengthNormalized(normalizedEntry.urlHash())) << ((Integer) coeff.get(DOMLENGTH)).intValue();
+        ranking += (plasmaURL.probablyRootURL(normalizedEntry.urlHash())) ? 16 << ((Integer) coeff.get(URLLENGTH)).intValue() : 0;
+        ranking += (plasmaURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord) != null) ? 256 << ((Integer) coeff.get(QUERYINURL)).intValue() : 0;
         /*
         if (indexURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord))
             System.out.println("DEBUG - hash " + normalizedEntry.urlHash() + " contains word " + searchedWord + ", weighted " + ((Integer) coeff.get(QUERYINURL)).intValue() + ", ranking = " + ranking);

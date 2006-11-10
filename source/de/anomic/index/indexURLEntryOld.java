@@ -34,6 +34,7 @@ import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
@@ -95,12 +96,12 @@ public class indexURLEntryOld implements indexURLEntry {
             int lvideo,
             int lapp) {
         // create new entry and store it into database
-        this.urlHash = indexURL.urlHash(url);
+        this.urlHash = plasmaURL.urlHash(url);
         this.url = url;
         this.descr = (descr == null) ? this.url.toString() : descr;
         this.moddate = mod;
         this.loaddate = load;
-        this.referrerHash = (referrerHash == null) ? indexURL.dummyHash : referrerHash;
+        this.referrerHash = (referrerHash == null) ? plasmaURL.dummyHash : referrerHash;
         this.copyCount = 0; // the number of remote (global) copies of this object without this one
         this.flags = "  ";
         this.quality = 0;
@@ -119,7 +120,7 @@ public class indexURLEntryOld implements indexURLEntry {
             this.descr = (entry.empty(2)) ? this.url.toString() : entry.getColString(2, "UTF-8").trim();
             this.moddate = new Date(86400000 * entry.getColLong(3));
             this.loaddate = new Date(86400000 * entry.getColLong(4));
-            this.referrerHash = (entry.empty(5)) ? indexURL.dummyHash : entry.getColString(5, "UTF-8");
+            this.referrerHash = (entry.empty(5)) ? plasmaURL.dummyHash : entry.getColString(5, "UTF-8");
             this.copyCount = (int) entry.getColLong(6);
             this.flags = entry.getColString(7, "UTF-8");
             this.quality = (int) entry.getColLong(8);
@@ -140,12 +141,12 @@ public class indexURLEntryOld implements indexURLEntry {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
-        this.urlHash = prop.getProperty("hash", indexURL.dummyHash);
+        this.urlHash = prop.getProperty("hash", plasmaURL.dummyHash);
         try {
-            this.referrerHash = prop.getProperty("referrer", indexURL.dummyHash);
-            this.moddate = indexURL.shortDayFormatter.parse(prop.getProperty("mod", "20000101"));
+            this.referrerHash = prop.getProperty("referrer", plasmaURL.dummyHash);
+            this.moddate = plasmaURL.shortDayFormatter.parse(prop.getProperty("mod", "20000101"));
             //System.out.println("DEBUG: moddate = " + moddate + ", prop=" + prop.getProperty("mod"));
-            this.loaddate = indexURL.shortDayFormatter.parse(prop.getProperty("load", "20000101"));
+            this.loaddate = plasmaURL.shortDayFormatter.parse(prop.getProperty("load", "20000101"));
             this.copyCount = Integer.parseInt(prop.getProperty("cc", "0"));
             this.flags = ((prop.getProperty("local", "true").equals("true")) ? "L " : "  ");
             this.url = new URL(crypt.simpleDecode(prop.getProperty("url", ""), null));
@@ -282,9 +283,9 @@ public class indexURLEntryOld implements indexURLEntry {
         try {
             corePropStr.append("hash=").append(urlHash).append(",referrer=")
                     .append(referrerHash).append(",mod=").append(
-                            indexURL.shortDayFormatter.format(moddate)).append(
+                            plasmaURL.shortDayFormatter.format(moddate)).append(
                             ",load=").append(
-                            indexURL.shortDayFormatter.format(loaddate))
+                            plasmaURL.shortDayFormatter.format(loaddate))
                     .append(",size=").append(size).append(",wc=").append(
                             wordCount).append(",cc=").append(copyCount).append(
                             ",local=").append(((local()) ? "true" : "false"))

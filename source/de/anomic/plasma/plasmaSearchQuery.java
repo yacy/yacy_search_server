@@ -48,7 +48,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
-import de.anomic.index.indexEntryAttribute;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacySeedDB;
@@ -102,20 +101,20 @@ public final class plasmaSearchQuery {
 
     public static Set words2hashSet(String[] words) {
         TreeSet hashes = new TreeSet();
-        for (int i = 0; i < words.length; i++) hashes.add(indexEntryAttribute.word2hash(words[i]));
+        for (int i = 0; i < words.length; i++) hashes.add(plasmaURL.word2hash(words[i]));
         return hashes;
     }
 
     public static String words2hashString(String[] words) {
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < words.length; i++) sb.append(indexEntryAttribute.word2hash(words[i]));
+        for (int i = 0; i < words.length; i++) sb.append(plasmaURL.word2hash(words[i]));
         return new String(sb);
     }
 
     public static Set words2hashes(Set words) {
         Iterator i = words.iterator();
         TreeSet hashes = new TreeSet();
-        while (i.hasNext()) hashes.add(indexEntryAttribute.word2hash((String) i.next()));
+        while (i.hasNext()) hashes.add(plasmaURL.word2hash((String) i.next()));
         return hashes;
     }
     

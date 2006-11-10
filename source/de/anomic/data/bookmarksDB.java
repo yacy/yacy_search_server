@@ -72,8 +72,7 @@ import org.xml.sax.SAXException;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
@@ -89,7 +88,7 @@ public class bookmarksDB {
     HashMap bookmarkCache;
     
     public static String tagHash(String tagName){
-        return indexEntryAttribute.word2hash(tagName.toLowerCase());
+        return plasmaURL.word2hash(tagName.toLowerCase());
     }
     public static String dateToiso8601(Date date){
     	return new SimpleDateFormat("yyyy-MM-dd").format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z";
@@ -749,7 +748,7 @@ public class bookmarksDB {
             if(!url.toLowerCase().startsWith("http://")){
                 url="http://"+url;
             }
-            this.urlHash=indexURL.urlHash(url);
+            this.urlHash=plasmaURL.urlHash(url);
             mem=new HashMap();
             mem.put(BOOKMARK_URL, url);
             this.timestamp=System.currentTimeMillis();

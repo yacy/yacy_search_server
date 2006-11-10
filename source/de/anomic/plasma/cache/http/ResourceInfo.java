@@ -52,7 +52,7 @@ import java.util.Date;
 import java.util.Map;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.cache.IResourceInfo;
@@ -76,7 +76,7 @@ public class ResourceInfo implements IResourceInfo {
         
         // generating the url hash
         this.url = objectURL;
-        this.urlHash = indexURL.urlHash(this.url.toNormalform());
+        this.urlHash = plasmaURL.urlHash(this.url.toNormalform());
         
         // create the http header object
         this.responseHeader =  new httpHeader(null, objectInfo);
@@ -88,7 +88,7 @@ public class ResourceInfo implements IResourceInfo {
         
         // generating the url hash
         this.url = objectURL;
-        this.urlHash = indexURL.urlHash(this.url.toNormalform());
+        this.urlHash = plasmaURL.urlHash(this.url.toNormalform());
         
         this.requestHeader = requestHeaders;
         this.responseHeader = responseHeaders;

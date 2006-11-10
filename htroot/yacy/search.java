@@ -53,7 +53,7 @@ import java.util.Set;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
@@ -150,7 +150,7 @@ public final class search {
                     entry = (Map.Entry) ci.next();
                     wordhash = (String) entry.getKey();
                     indexContainer container = (indexContainer) entry.getValue();
-                    indexabstract.append("indexabstract." + wordhash + "=").append(indexURL.compressIndex(container, null, 1000).toString()).append(serverCore.crlfString);                
+                    indexabstract.append("indexabstract." + wordhash + "=").append(plasmaURL.compressIndex(container, null, 1000).toString()).append(serverCore.crlfString);                
                 }
             }
             
@@ -200,7 +200,7 @@ public final class search {
                     }
                     indexcount.append("indexcount.").append(container.getWordHash()).append('=').append(Integer.toString(container.size())).append(serverCore.crlfString);
                     if ((abstractSet != null) && (abstractSet.contains(wordhash))) {
-                        indexabstract.append("indexabstract." + wordhash + "=").append(indexURL.compressIndex(container, null,1000).toString()).append(serverCore.crlfString);
+                        indexabstract.append("indexabstract." + wordhash + "=").append(plasmaURL.compressIndex(container, null,1000).toString()).append(serverCore.crlfString);
                     }
                 }
                 prop.put("indexcount", new String(indexcount));
@@ -222,10 +222,10 @@ public final class search {
                 if ((maxcounthash == null) || (urls.length() != 0) || (keyhashes.size() == 1) || (abstracts.length() == 0)) {
                     prop.put("indexabstract", "");
                 } else if (abstracts.equals("auto")) {
-                    indexabstract.append("indexabstract." + maxcounthash + "=").append(indexURL.compressIndex(((indexContainer) containers.get(maxcounthash)),localResults, 1000).toString()).append(serverCore.crlfString);
+                    indexabstract.append("indexabstract." + maxcounthash + "=").append(plasmaURL.compressIndex(((indexContainer) containers.get(maxcounthash)),localResults, 1000).toString()).append(serverCore.crlfString);
                     if ((neardhthash != null)
                             && (!(neardhthash.equals(maxcounthash)))) {
-                        indexabstract.append("indexabstract." + neardhthash + "=").append(indexURL.compressIndex(((indexContainer) containers.get(neardhthash)), localResults, 1000).toString()).append(serverCore.crlfString);
+                        indexabstract.append("indexabstract." + neardhthash + "=").append(plasmaURL.compressIndex(((indexContainer) containers.get(neardhthash)), localResults, 1000).toString()).append(serverCore.crlfString);
                     }
                     //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
                     //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);

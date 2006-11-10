@@ -63,7 +63,7 @@ import org.apache.axis.attachments.Attachments;
 import org.w3c.dom.Document;
 
 import de.anomic.data.bookmarksDB;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -294,7 +294,7 @@ public class BookmarkService extends AbstractService {
 		if (url == null || url.length()==0) throw new IllegalArgumentException("The url must not be null or empty");
 		
 		// generating the url hash
-		String hash = indexURL.urlHash(url);
+		String hash = plasmaURL.urlHash(url);
 		
 		// delete url
 		this.deleteBookmarkByHash(hash);
@@ -309,7 +309,7 @@ public class BookmarkService extends AbstractService {
 			if (url == null || url.length()==0) throw new IllegalArgumentException("The url at position " + i + " is null or empty");
 			
 			// generating the url hash
-			hashs[i] = indexURL.urlHash(url);
+			hashs[i] = plasmaURL.urlHash(url);
 		}
 		
 		// delete url

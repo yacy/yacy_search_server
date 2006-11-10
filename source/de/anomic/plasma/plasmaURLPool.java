@@ -47,7 +47,7 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
 
@@ -79,7 +79,7 @@ public class plasmaURLPool {
     }
     
     public URL getURL(String urlhash) throws IOException {
-        if (urlhash.equals(indexURL.dummyHash)) return null;
+        if (urlhash.equals(plasmaURL.dummyHash)) return null;
         try {
             plasmaCrawlNURL.Entry ne = noticeURL.getEntry(urlhash);
             if (ne != null) return ne.url();

@@ -49,7 +49,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -249,7 +249,7 @@ public final class crawlOrder {
             // case where we have already the url loaded;
             reason = reasonString;
             // send lurl-Entry as response
-            indexURLEntry entry = switchboard.urlPool.loadedURL.load(indexURL.urlHash(url), null);
+            indexURLEntry entry = switchboard.urlPool.loadedURL.load(plasmaURL.urlHash(url), null);
             if (entry == null) {
                 response = "rejected";
                 lurl = "";

@@ -53,16 +53,18 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexTable;
+import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacySeedDB;
 
-public class plasmaCrawlEURL extends indexURL {
+public class plasmaCrawlEURL {
 
     /* =======================================================================
      * Failure reason constants
@@ -144,7 +146,10 @@ public class plasmaCrawlEURL extends indexURL {
             "Cardinal retrycount-2 {b64e}, " +                         // number of load retries
             "String failcause-80, " +                                  // string describing load failure
             "byte[] flags-2");                                         // extra space
-    
+
+    // the class object
+    private kelondroIndex urlIndexFile = null;
+
     public plasmaCrawlEURL(File cachePath, int bufferkb, long preloadTime, boolean newdb) {
         super();
         
@@ -165,11 +170,55 @@ public class plasmaCrawlEURL extends indexURL {
         }
     }
 
+
+    public int size() {
+        try {
+           return urlIndexFile.size() ;
+       } catch (IOException e) {
+           return 0;
+       }
+    }
+    
+    public void close() throws IOException {
+        if (urlIndexFile != null) {
+            urlIndexFile.close();
+            urlIndexFile = null;
+        }
+    }
+    
+    public int cacheNodeChunkSize() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeChunkSize();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeChunkSize();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeChunkSize();
+        return 0;
+    }
+    
+    public int[] cacheNodeStatus() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeStatus();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeStatus();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeStatus();
+        return new int[]{0,0,0,0,0,0,0,0,0,0};
+    }
+    
+    public int cacheObjectChunkSize() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectChunkSize();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectChunkSize();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectChunkSize();
+        return 0;
+    }
+    
+    public long[] cacheObjectStatus() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectStatus();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectStatus();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectStatus();
+        return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    }
+
     public synchronized Entry newEntry(URL url, String referrer, String initiator, String executor,
 				       String name, String failreason, bitfield flags) {
-        if ((referrer == null) || (referrer.length() < yacySeedDB.commonHashLength)) referrer = dummyHash;
-        if ((initiator == null) || (initiator.length() < yacySeedDB.commonHashLength)) initiator = dummyHash;
-        if ((executor == null) || (executor.length() < yacySeedDB.commonHashLength)) executor = dummyHash;
+        if ((referrer == null) || (referrer.length() < yacySeedDB.commonHashLength)) referrer = plasmaURL.dummyHash;
+        if ((initiator == null) || (initiator.length() < yacySeedDB.commonHashLength)) initiator = plasmaURL.dummyHash;
+        if ((executor == null) || (executor.length() < yacySeedDB.commonHashLength)) executor = plasmaURL.dummyHash;
         if (failreason == null) failreason = "unknown";
         return new Entry(url, referrer, initiator, executor, name, failreason, flags);
     }
@@ -236,8 +285,8 @@ public class plasmaCrawlEURL extends indexURL {
         public Entry(URL url, String referrer, String initiator,
                      String executor, String name, String failreason, bitfield flags) {
             // create new entry
-            this.hash = urlHash(url);
-            this.referrer = (referrer == null) ? dummyHash : referrer;
+            this.hash = plasmaURL.urlHash(url);
+            this.referrer = (referrer == null) ? plasmaURL.dummyHash : referrer;
             this.initiator = initiator;
             this.executor = executor;
             this.url = url;

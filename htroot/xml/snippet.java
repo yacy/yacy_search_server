@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSearchQuery;
@@ -47,11 +47,11 @@ public class snippet {
         } else {
             String error = snippet.getError();
             if (error.equals("no matching snippet found")) {
-                switchboard.removeReferences(indexURL.urlHash(url), query);
+                switchboard.removeReferences(plasmaURL.urlHash(url), query);
             }
             prop.put("text", error);
         }
-        prop.put("urlHash",indexURL.urlHash(url));
+        prop.put("urlHash",plasmaURL.urlHash(url));
         
         
         // return rewrite properties

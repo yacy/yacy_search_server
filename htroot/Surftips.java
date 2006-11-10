@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -290,7 +290,7 @@ public class Surftips {
 
             // add/subtract votes and write record
             if (entry != null) {
-                urlhash = indexURL.urlHash(url);
+                urlhash = plasmaURL.urlHash(url);
                 if (urlhash == null) {
                     System.out.println("Surftips: bad url '" + url + "' from news record " + record.toString());
                     continue;

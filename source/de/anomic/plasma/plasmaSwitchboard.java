@@ -133,8 +133,7 @@ import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -924,7 +923,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // enqueue for further crawling
             enQueue(this.sbQueue.newEntry(
                     entry.url(), 
-                    indexURL.urlHash(entry.referrerURL()),
+                    plasmaURL.urlHash(entry.referrerURL()),
                     entry.ifModifiedSince(), 
                     entry.requestWithCookie(),
                     entry.initiator(), 
@@ -1466,8 +1465,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // 6) local fetching for global crawling (other known or unknwon initiator)
             int processCase = PROCESSCASE_0_UNKNOWN;
             yacySeed initiatorPeer = null;
-            String initiatorPeerHash = (entry.proxy()) ? indexURL.dummyHash : entry.initiator();
-            if (initiatorPeerHash.equals(indexURL.dummyHash)) {
+            String initiatorPeerHash = (entry.proxy()) ? plasmaURL.dummyHash : entry.initiator();
+            if (initiatorPeerHash.equals(plasmaURL.dummyHash)) {
                 // proxy-load
                 processCase = PROCESSCASE_4_PROXY_LOAD;
             } else if (initiatorPeerHash.equals(yacyCore.seedDB.mySeed.hash)) {
@@ -1546,8 +1545,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
              * ========================================================================= */  
             String docDescription = document.getMainLongTitle();
             URL referrerURL = entry.referrerURL();
-            String referrerUrlHash = indexURL.urlHash(referrerURL);
-            if (referrerUrlHash == null) referrerUrlHash = indexURL.dummyHash;
+            String referrerUrlHash = plasmaURL.urlHash(referrerURL);
+            if (referrerUrlHash == null) referrerUrlHash = plasmaURL.dummyHash;
 
             String noIndexReason = plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
             if (processCase == PROCESSCASE_4_PROXY_LOAD) {
@@ -1587,9 +1586,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             new byte[0],                                         // md5
                             (int) entry.size(),                                  // size
                             condenser.RESULT_NUMB_WORDS,                         // word count
-                            indexEntryAttribute.docType(document.getMimeType()), // doctype
+                            plasmaURL.docType(document.getMimeType()), // doctype
                             new bitfield(4),                                     // flags
-                            indexEntryAttribute.language(entry.url()),           // language
+                            plasmaURL.language(entry.url()),           // language
                             0,0,0,0,0,0
                     );
                     /* ========================================================================
@@ -1644,8 +1643,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                     (int) entry.size(),                                     // document size
                                     document,                                               // document content
                                     condenser,                                              // document condenser
-                                    indexEntryAttribute.language(entry.url()),              // document language
-                                    indexEntryAttribute.docType(document.getMimeType()),    // document type
+                                    plasmaURL.language(entry.url()),              // document language
+                                    plasmaURL.docType(document.getMimeType()),    // document type
                                     ioLinks[0].intValue(),                                  // outlinkSame
                                     ioLinks[1].intValue()                                   // outlinkOthers
                             );
@@ -1658,8 +1657,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             
                             ArrayList tmpContainers = new ArrayList(condenser.RESULT_SIMI_WORDS);
                             
-                            String language = indexEntryAttribute.language(entry.url());                            
-                            char doctype = indexEntryAttribute.docType(document.getMimeType());
+                            String language = plasmaURL.language(entry.url());                            
+                            char doctype = plasmaURL.docType(document.getMimeType());
                             indexURLEntry.Components comp = newEntry.comp();
                             int urlLength = comp.url().toNormalform().length();
                             int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()).length;
@@ -1672,7 +1671,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 wentry = (Map.Entry) i.next();
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
-                                String wordHash = indexEntryAttribute.word2hash(word);
+                                String wordHash = plasmaURL.word2hash(word);
                                 indexRWIEntry wordIdxEntry = new indexRWIEntryOld(
                                         urlHash,
                                         urlLength, urlComps,
@@ -1724,8 +1723,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                         (int) entry.size(),
                                         document, 
                                         condenser,
-                                        indexEntryAttribute.language(entry.url()),
-                                        indexEntryAttribute.docType(document.getMimeType()),
+                                        plasmaURL.language(entry.url()),
+                                        plasmaURL.docType(document.getMimeType()),
                                         ioLinks[0].intValue(), 
                                         ioLinks[1].intValue()
                                 );
@@ -1835,7 +1834,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int GCount = 0;
         int LCount = 0;
         while (it.hasNext()) {
-            nexturlhash = indexURL.urlHash((String) ((Map.Entry) it.next()).getKey());
+            nexturlhash = plasmaURL.urlHash((String) ((Map.Entry) it.next()).getKey());
             if (nexturlhash != null) {
                 if (nexturlhash.substring(6).equals(lhp)) {
                     cpl.append(nexturlhash.substring(0, 6));
@@ -1911,7 +1910,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // convert the referrer hash into the corresponding URL
         URL refererURL = null;
         String refererHash = urlEntry.referrerHash();
-        if ((refererHash != null) && (!refererHash.equals(indexURL.dummyHash))) try {
+        if ((refererHash != null) && (!refererHash.equals(plasmaURL.dummyHash))) try {
             refererURL = this.urlPool.getURL(refererHash);
         } catch (IOException e) {
             refererURL = null;
@@ -1941,7 +1940,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logFine("ERROR: plasmaSwitchboard.processRemoteCrawlTrigger - url is null. name=" + urlEntry.name());
             return true;
         }
-        String urlhash = indexURL.urlHash(urlEntry.url());
+        String urlhash = plasmaURL.urlHash(urlEntry.url());
         
         // check remote crawl
         yacySeed remoteSeed = yacyCore.dhtAgent.getCrawlSeed(urlhash);
@@ -2141,9 +2140,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             prop.put("type_results_" + i + "_size", Long.toString(urlentry.size()));
                             prop.put("type_results_" + i + "_words", URLEncoder.encode(query.queryWords.toString(),"UTF-8"));
                             prop.put("type_results_" + i + "_former", formerSearch);
-                            prop.put("type_results_" + i + "_rankingprops", urlentry.word().toPropertyForm(true) + ", domLengthEstimated=" + indexURL.domLengthEstimation(urlhash) +
-                                    ((indexURL.probablyRootURL(urlhash)) ? ", probablyRootURL" : "") + 
-                                    (((wordURL = indexURL.probablyWordURL(urlhash, query.words(""))) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
+                            prop.put("type_results_" + i + "_rankingprops", urlentry.word().toPropertyForm(true) + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(urlhash) +
+                                    ((plasmaURL.probablyRootURL(urlhash)) ? ", probablyRootURL" : "") + 
+                                    (((wordURL = plasmaURL.probablyWordURL(urlhash, query.words(""))) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
                             // adding snippet if available
                             if ((snippet != null) && (snippet.exists())) {
                                 prop.put("type_results_" + i + "_snippet", 1);
@@ -2210,7 +2209,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     // method for index deletion
     public int removeAllUrlReferences(URL url, boolean fetchOnline) {
-        return removeAllUrlReferences(indexURL.urlHash(url), fetchOnline);
+        return removeAllUrlReferences(plasmaURL.urlHash(url), fetchOnline);
     }
     
     public int removeAllUrlReferences(String urlhash, boolean fetchOnline) {
@@ -2253,7 +2252,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public int removeReferences(URL url, Set words) {
-        return removeReferences(indexURL.urlHash(url), words);
+        return removeReferences(plasmaURL.urlHash(url), words);
     }
     
     public int removeReferences(final String urlhash, final Set words) {
@@ -2265,7 +2264,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         while (iter.hasNext()) {
             word = (String) iter.next();
             // delete the URL reference in this word index
-            if (wordIndex.removeEntry(indexEntryAttribute.word2hash(word), urlhash, true)) count++;
+            if (wordIndex.removeEntry(plasmaURL.word2hash(word), urlhash, true)) count++;
         }
         return count;
     }
@@ -2280,7 +2279,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             entry = (Map.Entry) wordStatPropIterator.next();
             word = (String) entry.getKey();
             // delete the URL reference in this word index
-            if (wordIndex.removeEntry(indexEntryAttribute.word2hash(word), urlhash, true)) count++;
+            if (wordIndex.removeEntry(plasmaURL.word2hash(word), urlhash, true)) count++;
         }
         return count;
     }

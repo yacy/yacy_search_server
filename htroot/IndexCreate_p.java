@@ -59,7 +59,7 @@ import de.anomic.data.wikiCode;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlProfile;
@@ -167,7 +167,7 @@ public class IndexCreate_p {
                             
                             // stack request
                             // first delete old entry, if exists
-                            String urlhash = indexURL.urlHash(crawlingStart);
+                            String urlhash = plasmaURL.urlHash(crawlingStart);
                             switchboard.urlPool.loadedURL.remove(urlhash);
                             switchboard.urlPool.noticeURL.remove(urlhash);
                             switchboard.urlPool.errorURL.remove(urlhash);
@@ -517,8 +517,8 @@ public class IndexCreate_p {
             //table += "Sorry, cannot show any crawl output now because the system is not completely initialised. Please re-try.";
             prop.put("error", 3);
         } else {
-            Enumeration crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(indexURL.dummyHash, true);
-            Enumeration crawlpendi = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(indexURL.dummyHash, false);
+            Enumeration crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(plasmaURL.dummyHash, true);
+            Enumeration crawlpendi = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(plasmaURL.dummyHash, false);
             if ((!(crawlavail.hasMoreElements())) && (!(crawlpendi.hasMoreElements()))) {
                 prop.put("remoteCrawlPeers", 0); //no peers availible
             } else {

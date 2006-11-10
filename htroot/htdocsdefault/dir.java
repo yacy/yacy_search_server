@@ -59,8 +59,7 @@ import java.util.Map;
 
 import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
@@ -375,7 +374,7 @@ public class dir {
                 md5, // md5
                 (long) phrase.length(), // size
                 condenser.RESULT_NUMB_WORDS, // word count
-                indexEntryAttribute.DT_SHARE, // doctype
+                plasmaURL.DT_SHARE, // doctype
                 new bitfield(4),
                 "**", // language
                 0,0,0,0,0,0
@@ -389,18 +388,18 @@ public class dir {
                 );
             
             final String urlHash = newEntry.hash();
-            /*final int words =*/ switchboard.wordIndex.addPageIndex(url, urlHash, new Date(), phrase.length() + descr.length() + 13, null, condenser, "**", indexEntryAttribute.DT_SHARE, 0, 0);
+            /*final int words =*/ switchboard.wordIndex.addPageIndex(url, urlHash, new Date(), phrase.length() + descr.length() + 13, null, condenser, "**", plasmaURL.DT_SHARE, 0, 0);
         } catch (IOException e) {}
     }
 
     public static void deletePhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr) {
         try {
-            final String urlhash = indexURL.urlHash(new URL(urlstring));
+            final String urlhash = plasmaURL.urlHash(new URL(urlstring));
             final Iterator words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"));
             Map.Entry entry;
             while (words.hasNext()) {
                 entry = (Map.Entry) words.next();
-                switchboard.wordIndex.removeEntry(indexEntryAttribute.word2hash((String) entry.getKey()), urlhash, true);
+                switchboard.wordIndex.removeEntry(plasmaURL.word2hash((String) entry.getKey()), urlhash, true);
             }
             switchboard.urlPool.loadedURL.remove(urlhash);
         } catch (Exception e) {

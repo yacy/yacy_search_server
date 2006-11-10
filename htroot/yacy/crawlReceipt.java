@@ -49,7 +49,7 @@
 import java.io.IOException;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlNURL;
@@ -139,8 +139,8 @@ public final class crawlReceipt {
                 switchboard.urlPool.loadedURL.stack(entry, youare, iam, 1);
                 
                 // generating url hash
-                String newUrlHash = indexURL.urlHash(comp.url());
-                String oldUrlHash = indexURL.oldurlHash(comp.url());
+                String newUrlHash = plasmaURL.urlHash(comp.url());
+                String oldUrlHash = plasmaURL.oldurlHash(comp.url());
                 
                 // removing URL from notice URL                
                 switchboard.urlPool.noticeURL.remove(newUrlHash);

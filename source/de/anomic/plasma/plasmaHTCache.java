@@ -73,8 +73,7 @@ import java.util.regex.Pattern;
 
 import de.anomic.http.httpc;
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -305,7 +304,7 @@ public final class plasmaHTCache {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
                 this.log.logFinest("Trying to remove responseHeader from URL: " + url.toString());
-                this.responseHeaderDB.remove(indexURL.urlHash(url));
+                this.responseHeaderDB.remove(plasmaURL.urlHash(url));
             } catch (IOException e) {
                 this.log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
             }
@@ -365,7 +364,7 @@ public final class plasmaHTCache {
                                 if (url != null) {
                                     this.log.logFinest("Trying to remove responseHeader for URL: " +
                                         url.toString());
-                                    this.responseHeaderDB.remove(indexURL.urlHash(url));
+                                    this.responseHeaderDB.remove(plasmaURL.urlHash(url));
                                 }
                             }
                         } catch (IOException e) {
@@ -502,7 +501,7 @@ public final class plasmaHTCache {
     public IResourceInfo loadResourceInfo(URL url) throws Exception {    
         
         // getting the URL hash
-        String urlHash = indexURL.urlHash(url.toNormalform());
+        String urlHash = plasmaURL.urlHash(url.toNormalform());
         
         // loading data from database
         Map hdb = this.responseHeaderDB.get(urlHash);
@@ -699,7 +698,7 @@ public final class plasmaHTCache {
     }
     
     private File hashFile(StringBuffer fileName, String prefix, String extention, URL url) {
-        String hexHash = yacySeed.b64Hash2hexHash(indexURL.urlHash(url));
+        String hexHash = yacySeed.b64Hash2hexHash(plasmaURL.urlHash(url));
         StringBuffer f = new StringBuffer(fileName.length() + 30);
         f.append(fileName);
         if (prefix != null) f.append('/').append(prefix);
@@ -993,7 +992,7 @@ public final class plasmaHTCache {
         }
         this.name             = name;
         this.cacheFile        = getCachePath(this.url);
-        this.nomalizedURLHash = indexURL.urlHash(this.nomalizedURLString);
+        this.nomalizedURLHash = plasmaURL.urlHash(this.nomalizedURLString);
 
        // assigned:
         this.initDate       = initDate;
@@ -1008,9 +1007,9 @@ public final class plasmaHTCache {
         this.lastModified = resourceInfo.getModificationDate();
         
         // getting the doctype
-        this.doctype = indexEntryAttribute.docType(resourceInfo.getMimeType());
-        if (this.doctype == indexEntryAttribute.DT_UNKNOWN) this.doctype = indexEntryAttribute.docType(url);
-        this.language = indexEntryAttribute.language(url);
+        this.doctype = plasmaURL.docType(resourceInfo.getMimeType());
+        if (this.doctype == plasmaURL.DT_UNKNOWN) this.doctype = plasmaURL.docType(url);
+        this.language = plasmaURL.language(url);
 
         // to be defined later:
         this.cacheArray     = null;

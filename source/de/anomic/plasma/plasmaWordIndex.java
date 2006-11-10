@@ -41,7 +41,6 @@ import de.anomic.index.indexCollectionRI;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexEntryAttribute;
 import de.anomic.index.indexRAMRI;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexRWIEntryOld;
@@ -330,7 +329,7 @@ public final class plasmaWordIndex implements indexRI {
             word = (String) wentry.getKey();
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
-            wordHash = indexEntryAttribute.word2hash(word);
+            wordHash = plasmaURL.word2hash(word);
             ientry = new indexRWIEntryOld(urlHash,
                                              urlLength, urlComps, (document == null) ? urlLength : document.getMainLongTitle().length(),
                                              wprop.count,

@@ -52,8 +52,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.index.indexEntryAttribute;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.net.URL;
@@ -231,7 +230,7 @@ public final class plasmaSearchResult {
             word = words[i].toLowerCase();
             if ((word.length() > 2) &&
                 ("http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0) &&
-                (!(query.queryHashes.contains(indexEntryAttribute.word2hash(word)))))
+                (!(query.queryHashes.contains(plasmaURL.word2hash(word)))))
                 ref.incScore(word);
         }
     }
@@ -262,14 +261,14 @@ public final class plasmaSearchResult {
             String[] paths1 = new String[urls.length]; for (int i = 0; i < urls.length; i++) {
                 fill = ""; for (int j = 0; j < 35 - urls[i].toString().length(); j++) fill +=" ";
                 paths1[i] = urlPath(urls[i]);
-                hash = indexURL.urlHash(urls[i]);
-                System.out.println("paths1[" + urls[i] + fill +"] = " + hash + ", typeID=" + indexURL.flagTypeID(hash) + ", tldID=" + indexURL.flagTLDID(hash) + ", lengthID=" + indexURL.flagLengthID(hash) + " / " + paths1[i]);
+                hash = plasmaURL.urlHash(urls[i]);
+                System.out.println("paths1[" + urls[i] + fill +"] = " + hash + ", typeID=" + plasmaURL.flagTypeID(hash) + ", tldID=" + plasmaURL.flagTLDID(hash) + ", lengthID=" + plasmaURL.flagLengthID(hash) + " / " + paths1[i]);
             }
             String[] paths2 = new String[urls.length]; for (int i = 0; i < urls.length; i++) {
                 fill = ""; for (int j = 0; j < 35 - urls[i].toString().length(); j++) fill +=" ";
                 paths2[i] = shortenPath(paths1[i]);
-                hash = indexURL.urlHash(urls[i]);
-                System.out.println("paths2[" + urls[i] + fill + "] = " + hash + ", typeID=" + indexURL.flagTypeID(hash) + ", tldID=" + indexURL.flagTLDID(hash) + ", lengthID=" + indexURL.flagLengthID(hash) + " / " + paths2[i]);
+                hash = plasmaURL.urlHash(urls[i]);
+                System.out.println("paths2[" + urls[i] + fill + "] = " + hash + ", typeID=" + plasmaURL.flagTypeID(hash) + ", tldID=" + plasmaURL.flagTLDID(hash) + ", lengthID=" + plasmaURL.flagLengthID(hash) + " / " + paths2[i]);
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();

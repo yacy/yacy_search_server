@@ -50,7 +50,7 @@ package de.anomic.plasma.crawler;
 import java.io.File;
 import java.io.IOException;
 
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
@@ -287,7 +287,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
         this.errorMessage = failreason;
         
         // convert the referrer URL into a hash value
-        String referrerHash = (this.refererURLString==null)?null:indexURL.urlHash(this.refererURLString);
+        String referrerHash = (this.refererURLString==null)?null:plasmaURL.urlHash(this.refererURLString);
         
         // create a new errorURL DB entry
         plasmaCrawlEURL.Entry ee = this.sb.urlPool.errorURL.newEntry(

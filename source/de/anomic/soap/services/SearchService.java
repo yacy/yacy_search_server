@@ -49,7 +49,7 @@ import org.apache.axis.AxisFault;
 import org.w3c.dom.Document;
 
 import de.anomic.data.wikiCode;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.server.serverObjects;
@@ -190,7 +190,7 @@ public class SearchService extends AbstractService
         try {
             // getting the url hash for this url
             URL url = new URL(urlStr);
-            String urlHash = indexURL.urlHash(url);
+            String urlHash = plasmaURL.urlHash(url);
             
             // fetch urlInfo
             return this.urlInfoByHash(urlHash, viewMode);

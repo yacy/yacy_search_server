@@ -63,13 +63,15 @@ import java.util.LinkedList;
 import de.anomic.http.httpc;
 import de.anomic.http.httpc.response;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.index.indexURLEntryNew;
 import de.anomic.index.indexURLEntryOld;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroFlexTable;
+import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
@@ -79,7 +81,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacySeedDB;
 
-public final class plasmaCrawlLURL extends indexURL {
+public final class plasmaCrawlLURL {
 
     // result stacks;
     // these have all entries of form
@@ -93,6 +95,9 @@ public final class plasmaCrawlLURL extends indexURL {
     
     private boolean newdb;
     
+    // the class object
+    private kelondroIndex urlIndexFile = null;
+
     public plasmaCrawlLURL(File plasmaPath, File indexPath, int bufferkb, long preloadTime, boolean newdb) {
         super();
         this.newdb = newdb;
@@ -119,11 +124,54 @@ public final class plasmaCrawlLURL extends indexURL {
         gcrawlResultStack = new LinkedList();
     }
     
+    public int size() {
+        try {
+           return urlIndexFile.size() ;
+       } catch (IOException e) {
+           return 0;
+       }
+    }
+    
+    public void close() throws IOException {
+        if (urlIndexFile != null) {
+            urlIndexFile.close();
+            urlIndexFile = null;
+        }
+    }
+    
+    public int cacheNodeChunkSize() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeChunkSize();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeChunkSize();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeChunkSize();
+        return 0;
+    }
+    
+    public int[] cacheNodeStatus() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeStatus();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeStatus();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeStatus();
+        return new int[]{0,0,0,0,0,0,0,0,0,0};
+    }
+    
+    public int cacheObjectChunkSize() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectChunkSize();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectChunkSize();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectChunkSize();
+        return 0;
+    }
+    
+    public long[] cacheObjectStatus() {
+        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectStatus();
+        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectStatus();
+        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectStatus();
+        return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    }
+
     public synchronized void stack(indexURLEntry e, String initiatorHash, String executorHash, int stackType) {
         if (e == null) { return; }
         try {
-            if (initiatorHash == null) { initiatorHash = dummyHash; }
-            if (executorHash == null) { executorHash = dummyHash; }
+            if (initiatorHash == null) { initiatorHash = plasmaURL.dummyHash; }
+            if (executorHash == null) { executorHash = plasmaURL.dummyHash; }
             switch (stackType) {
                 case 0: break;
                 case 1: externResultStack.add(e.hash() + initiatorHash + executorHash); break;
@@ -558,7 +606,7 @@ public final class plasmaCrawlLURL extends indexURL {
         // returns url-hash
         if (args[0].equals("-h")) try {
             // arg 1 is url
-            System.out.println("HASH: " + urlHash(new URL(args[1])));
+            System.out.println("HASH: " + plasmaURL.urlHash(new URL(args[1])));
         } catch (MalformedURLException e) {}
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache

@@ -54,7 +54,7 @@ import java.net.URLDecoder;
 import java.util.Date;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -148,7 +148,7 @@ public class QuickCrawlLink_p {
                 return prop;
             }
                     
-            String urlhash = indexURL.urlHash(crawlingStart);
+            String urlhash = plasmaURL.urlHash(crawlingStart);
             switchboard.urlPool.loadedURL.remove(urlhash);
             switchboard.urlPool.noticeURL.remove(urlhash);
             switchboard.urlPool.errorURL.remove(urlhash);

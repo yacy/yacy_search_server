@@ -10,7 +10,7 @@ import java.util.Date;
 import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.index.indexURL;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaParser;
@@ -189,7 +189,7 @@ public class urlRedirectord implements serverHandler {
                                 header.mime())
                         ) {
                             // first delete old entry, if exists
-                            String urlhash = indexURL.urlHash(this.nextURL);
+                            String urlhash = plasmaURL.urlHash(this.nextURL);
                             switchboard.urlPool.loadedURL.remove(urlhash);
                             switchboard.urlPool.noticeURL.remove(urlhash);
                             switchboard.urlPool.errorURL.remove(urlhash);                            
