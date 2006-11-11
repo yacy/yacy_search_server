@@ -466,10 +466,15 @@ public final class serverCore extends serverAbstractThread implements serverThre
     
     public static InetAddress publicLocalIP() {            
         try {
-                    
+            String hostName;
+            try {
+                hostName = InetAddress.getLocalHost().getHostName();
+            } catch (java.net.UnknownHostException e) {
+                hostName = "localhost";  // hopin' nothing serious happened only the hostname changed while running yacy   
+                System.err.println("ERROR: (internal) " + e.getMessage());
+            }
             // list all addresses
-            //InetAddress[] ia = InetAddress.getAllByName("localhost");
-            InetAddress[] ia = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
+            InetAddress[] ia = InetAddress.getAllByName(hostName);
             //for (int i = 0; i < ia.length; i++) System.out.println("IP: " + ia[i].getHostAddress()); // DEBUG
             if (ia.length == 0) {
                 try {
