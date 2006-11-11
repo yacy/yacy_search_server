@@ -99,6 +99,7 @@ public final class plasmaSearchPreOrder {
         this.pageAcc = new TreeMap();
         for (int j = 0; j < count; j++) {
             iEntry = (indexRWIEntry) i.next();
+            if (iEntry.urlHash().length() != container.row().width(container.primarykey())) continue;
             pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax), query.words("")), 16) + iEntry.urlHash(), iEntry);
         }
     }

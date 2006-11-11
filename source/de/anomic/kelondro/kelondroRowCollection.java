@@ -229,8 +229,11 @@ public class kelondroRowCollection {
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         assert (alength > 0);
         assert (astart + alength <= a.length);
+        if (bugappearance(a, astart, alength)) {
+            System.out.println("*** DEBUG: patched wrong a = " + serverLog.arrayList(a, astart, alength));
+            return; // TODO: this is temporary; remote peers may still submit bad entries
+        }
         assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
-        if (bugappearance(a, astart, alength)) return; // TODO: this is temporary; remote peers may still submit bad entries
         int l = Math.min(rowdef.objectsize(), Math.min(alength, a.length - astart));
         synchronized (chunkcache) {
             ensureSize(chunkcount + 1);

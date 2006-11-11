@@ -504,6 +504,7 @@ public final class yacyClient {
                 urlEntry = urlManager.newEntry((String) result.get("resource" + n));
                 if (urlEntry == null) continue;
                 assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
+                if (urlEntry.hash().length() != 12) continue; // bad url hash
                 indexURLEntry.Components comp = urlEntry.comp();
                 if (blacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, comp.url())) continue; // block with backlist
                 urlManager.store(urlEntry);

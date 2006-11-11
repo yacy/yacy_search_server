@@ -286,6 +286,8 @@ public class indexContainer extends kelondroRowSet {
     private static indexContainer joinConstructiveByTest(indexContainer small, indexContainer large, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY TEST");
         assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
+        int keylength = small.rowdef.width(0);
+        assert (keylength == large.rowdef.width(0));
         indexContainer conj = new indexContainer(null, small.rowdef); // start with empty search result
         Iterator se = small.entries();
         indexRWIEntry ie0, ie1;
@@ -293,7 +295,9 @@ public class indexContainer extends kelondroRowSet {
             while ((se.hasNext()) && ((System.currentTimeMillis() - stamp) < time)) {
                 ie0 = (indexRWIEntry) se.next();
                 ie1 = large.get(ie0.urlHash());
-                if (ie1 != null) {
+                if ((ie0 != null) && (ie1 != null)) {
+                    assert (ie0.urlHash().length() == keylength) : "ie0.urlHash() = " + ie0.urlHash();
+                    assert (ie1.urlHash().length() == keylength) : "ie1.urlHash() = " + ie1.urlHash();
                     // this is a hit. Calculate word distance:
                     ie0.combineDistance(ie1);
                     if (ie0.worddistance() <= maxDistance) conj.add(ie0);
@@ -305,6 +309,8 @@ public class indexContainer extends kelondroRowSet {
     private static indexContainer joinConstructiveByEnumeration(indexContainer i1, indexContainer i2, long time, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
         assert i1.rowdef.equals(i2.rowdef) : "i1 = " + i1.rowdef.toString() + "; i2 = " + i2.rowdef.toString();
+        int keylength = i1.rowdef.width(0);
+        assert (keylength == i2.rowdef.width(0));
         indexContainer conj = new indexContainer(null, i1.rowdef); // start with empty search result
         if (!((i1.order().signature().equals(i2.order().signature())) &&
               (i1.primarykey() == i2.primarykey()))) return conj; // ordering must be equal
@@ -319,6 +325,8 @@ public class indexContainer extends kelondroRowSet {
 
             long stamp = System.currentTimeMillis();
             while ((System.currentTimeMillis() - stamp) < time) {
+                assert (ie1.urlHash().length() == keylength) : "ie1.urlHash() = " + ie1.urlHash();
+                assert (ie2.urlHash().length() == keylength) : "ie2.urlHash() = " + ie2.urlHash();
                 c = i1.order().compare(ie1.urlHash(), ie2.urlHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
