@@ -1302,7 +1302,7 @@ do upload
     }
     
     public static byte[] wget(URL url) throws IOException{
-        return wget(url, url.getHost(), 6000, null, null, plasmaSwitchboard.getSwitchboard().remoteProxyConfig, null);
+        return wget(url, url.getHost(), 10000, null, null, null, null);
     }
     
     public static byte[] wget(

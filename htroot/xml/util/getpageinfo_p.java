@@ -54,6 +54,7 @@ import de.anomic.data.robotsParser;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
@@ -78,8 +79,8 @@ public class getpageinfo_p {
             }
             if (actions.indexOf("title")>=0) {
                 try {
-                    content = nxTools.strings(httpc.wget(new URL(url)));
-
+                    URL u = new URL(url);
+                    content = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, ((plasmaSwitchboard) env).remoteProxyConfig, null));
                     Iterator it = content.iterator();
                     String line;
                     String title;
