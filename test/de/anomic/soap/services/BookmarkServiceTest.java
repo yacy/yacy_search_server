@@ -17,8 +17,8 @@ import org.w3c.dom.Document;
 import yacy.soap.bookmarks.BookmarkService;
 import yacy.soap.bookmarks.BookmarkServiceServiceLocator;
 import de.anomic.data.bookmarksDB;
-import de.anomic.index.indexURL;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaURL;
 
 public class BookmarkServiceTest extends AbstractServiceTest {
 
@@ -67,7 +67,7 @@ public class BookmarkServiceTest extends AbstractServiceTest {
 		for (int i=0; i < hashs.length; i++) {
 			String url = "/testxmlimport" + i;
 			String title = "YaCy Bookmark XML Import " + i;
-			String hash = indexURL.urlHash("http://www.yacy.de"+ url);
+			String hash = plasmaURL.urlHash("http://www.yacy.de"+ url);
 			
 			xmlStr.append("\t<a href=\"").append(url).append("\">").append(title).append("</a>\r\n");
 			
@@ -114,7 +114,7 @@ public class BookmarkServiceTest extends AbstractServiceTest {
 			URL url = new URL("http://www.yacy.de/testxmlimport" + i);
 			String title = "YaCy Bookmark XML Import " + i;
 			String description = "YaCy Bookmarkx XML Import junit test with url " + i;
-			String hash = indexURL.urlHash(url);
+			String hash = plasmaURL.urlHash(url);
 			String tags = "yacy bookmarks xmlimport";
 			
 			xmlStr.append("\t<post description=\"").append(title).append("\"  extended=\"")
