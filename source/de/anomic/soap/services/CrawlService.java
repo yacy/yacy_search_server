@@ -45,8 +45,11 @@
 
 package de.anomic.soap.services;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.axis.AxisFault;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -54,7 +57,13 @@ import de.anomic.soap.AbstractService;
 
 public class CrawlService extends AbstractService {
     
-    /**
+    private static final String GLOBALCRAWLTRIGGER = "globalcrawltrigger";
+	private static final String REMOTETRIGGEREDCRAWL = "remotetriggeredcrawl";
+	private static final String LOCAL_CRAWL = "localCrawl";
+	private static final String CRAWL_STATE = "crawlState";
+	
+	
+	/**
      * Constant: template for crawling
      */    
     private static final String TEMPLATE_CRAWLING = "QuickCrawlLink_p.xml";    
@@ -168,5 +177,50 @@ public class CrawlService extends AbstractService {
             }
         }        
     }
+    
+    /**
+     * Function to query the current state of the following crawling queues:
+     * <ul>
+     * 	<li>local crawl jobs</li>
+     * 	<li>remote crawl jobs</li>
+     * 	<li>of remote crawl job triggers</li>
+     * </ul>
+     * @return returns a XML document in the following format
+     * <pre>
+     * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+     * &lt;crawlState&gt;
+     * 	&lt;localCrawl&gt;true&lt;/localCrawl&gt;
+     * 	&lt;remotetriggeredcrawl&gt;false&lt;/remotetriggeredcrawl&gt;
+     * 	&lt;globalcrawltrigger&gt;false&lt;/globalcrawltrigger&gt;
+     * &lt;/crawlState&gt;
+     * </pre>
+     * @throws AxisFault if authentication failed
+     * @throws ParserConfigurationException if xml generation failed
+     */
+    public Document getCrawlPauseResumeState() throws AxisFault, ParserConfigurationException {
+    	
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);             
+    	plasmaSwitchboard sb = (plasmaSwitchboard)this.switchboard;
+        
+        // creating XML document
+        Element xmlElement = null;
+    	Document xmlDoc = createNewXMLDocument(CRAWL_STATE);
+    	Element xmlRoot = xmlDoc.getDocumentElement();        
+    	
+    	xmlElement = xmlDoc.createElement(LOCAL_CRAWL);
+    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL))));
+    	xmlRoot.appendChild(xmlElement);    	
+    	
+    	xmlElement = xmlDoc.createElement(REMOTETRIGGEREDCRAWL);
+    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL))));
+    	xmlRoot.appendChild(xmlElement);       	
+    	
+    	xmlElement = xmlDoc.createElement(GLOBALCRAWLTRIGGER);
+    	xmlElement.appendChild(xmlDoc.createTextNode(Boolean.toString(sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER))));
+    	xmlRoot.appendChild(xmlElement);         	
+    	
+    	return xmlDoc;
+    }    
 
 }
