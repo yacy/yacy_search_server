@@ -42,6 +42,26 @@ public class indexURLEntryNew implements indexURLEntry {
         "Cardinal lvideo-2 {b256}, " +  // # of embedded video links
         "Cardinal lapp-2 {b256}");      // # of embedded links to applications
     
+    private static final int col_hash     =  0;
+    private static final int col_comp     =  1;
+    private static final int col_mod      =  2;
+    private static final int col_load     =  3;
+    private static final int col_fresh    =  4;
+    private static final int col_referrer =  5;
+    private static final int col_md5      =  6;
+    private static final int col_size     =  7;
+    private static final int col_wc       =  8;
+    private static final int col_dt       =  9;
+    private static final int col_flags    = 10;
+    private static final int col_lang     = 11;
+    private static final int col_llocal   = 12;
+    private static final int col_lother   = 13;
+    private static final int col_limage   = 14;
+    private static final int col_laudio   = 15;
+    private static final int col_lvideo   = 16;
+    private static final int col_lapp     = 17;
+    
+    
     private kelondroRow.Entry entry;
     private String snippet;
     private indexRWIEntry word; // this is only used if the url is transported via remote search requests
@@ -70,29 +90,30 @@ public class indexURLEntryNew implements indexURLEntry {
             int lapp) {
         // create new entry and store it into database
         this.entry = rowdef.newEntry();
-        this.entry.setCol("hash", plasmaURL.urlHash(url), null);
-        this.entry.setCol("comp", encodeComp(url, descr, author, tags, ETag));
-        this.entry.setCol("mod", encodeDate(mod));
-        this.entry.setCol("load", encodeDate(load));
-        this.entry.setCol("fresh", encodeDate(fresh));
-        this.entry.setCol("referrer", referrer.getBytes());
-        this.entry.setCol("md5", md5);
-        this.entry.setCol("size", size);
-        this.entry.setCol("wc", wc);
-        this.entry.setCol("dt", dt);
-        this.entry.setCol("flags", flags.getBytes());
-        this.entry.setCol("lang", lang.getBytes());
-        this.entry.setCol("llocal", llocal);
-        this.entry.setCol("lother", lother);
-        this.entry.setCol("limage", limage);
-        this.entry.setCol("laudio", laudio);
-        this.entry.setCol("lvideo", lvideo);
-        this.entry.setCol("lapp", lapp);
+        this.entry.setCol(col_hash, plasmaURL.urlHash(url), null);
+        this.entry.setCol(col_comp, encodeComp(url, descr, author, tags, ETag));
+        this.entry.setCol(col_mod, encodeDate(mod));
+        this.entry.setCol(col_load, encodeDate(load));
+        this.entry.setCol(col_fresh, encodeDate(fresh));
+        this.entry.setCol(col_referrer, referrer.getBytes());
+        this.entry.setCol(col_md5, md5);
+        this.entry.setCol(col_size, size);
+        this.entry.setCol(col_wc, wc);
+        this.entry.setCol(col_dt, new byte[]{(byte) dt});
+        this.entry.setCol(col_flags, flags.getBytes());
+        this.entry.setCol(col_lang, lang.getBytes());
+        this.entry.setCol(col_llocal, llocal);
+        this.entry.setCol(col_lother, lother);
+        this.entry.setCol(col_limage, limage);
+        this.entry.setCol(col_laudio, laudio);
+        this.entry.setCol(col_lvideo, lvideo);
+        this.entry.setCol(col_lapp, lapp);
         this.snippet = null;
         this.word = null;
     }
 
     public static byte[] encodeDate(Date d) {
+        // calculates the number of days since 1.1.1970 and returns this as 4-byte array
         return kelondroNaturalOrder.encodeLong(d.getTime() / 86400000, 4);
     }
     
@@ -128,36 +149,36 @@ public class indexURLEntryNew implements indexURLEntry {
         String ETag = crypt.simpleDecode(prop.getProperty("ETag", ""), null); if (ETag == null) ETag = "";
         
         this.entry = rowdef.newEntry();
-        this.entry.setCol("hash", plasmaURL.urlHash(url), null);
-        this.entry.setCol("comp", encodeComp(url, descr, author, tags, ETag));
+        this.entry.setCol(col_hash, plasmaURL.urlHash(url), null);
+        this.entry.setCol(col_comp, encodeComp(url, descr, author, tags, ETag));
         try {
-            this.entry.setCol("mod", encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("mod", "20000101"))));
+            this.entry.setCol(col_mod, encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("mod", "20000101"))));
         } catch (ParseException e) {
-            this.entry.setCol("mod", encodeDate(new Date()));
+            this.entry.setCol(col_mod, encodeDate(new Date()));
         }
         try {
-            this.entry.setCol("load", encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("load", "20000101"))));
+            this.entry.setCol(col_load, encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("load", "20000101"))));
         } catch (ParseException e) {
-            this.entry.setCol("load", encodeDate(new Date()));
+            this.entry.setCol(col_load, encodeDate(new Date()));
         }
         try {
-            this.entry.setCol("fresh", encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("fresh", "20000101"))));
+            this.entry.setCol(col_fresh, encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("fresh", "20000101"))));
         } catch (ParseException e) {
-            this.entry.setCol("fresh", encodeDate(new Date()));
+            this.entry.setCol(col_fresh, encodeDate(new Date()));
         }
-        this.entry.setCol("referrer", prop.getProperty("referrer", plasmaURL.dummyHash).getBytes());
-        this.entry.setCol("md5", serverCodings.decodeHex(prop.getProperty("md5", "")));
-        this.entry.setCol("size", Integer.parseInt(prop.getProperty("size", "0")));
-        this.entry.setCol("wc", Integer.parseInt(prop.getProperty("wc", "0")));
-        this.entry.setCol("dt", prop.getProperty("dt", "t").charAt(0));
-        this.entry.setCol("flags", serverCodings.decodeHex(prop.getProperty("flags", "00000000")));
-        this.entry.setCol("lang", prop.getProperty("lang", "uk").getBytes());
-        this.entry.setCol("llocal", Integer.parseInt(prop.getProperty("llocal", "0")));
-        this.entry.setCol("lother", Integer.parseInt(prop.getProperty("lother", "0")));
-        this.entry.setCol("limage", Integer.parseInt(prop.getProperty("limage", "0")));
-        this.entry.setCol("laudio", Integer.parseInt(prop.getProperty("laudio", "0")));
-        this.entry.setCol("lvideo", Integer.parseInt(prop.getProperty("lvideo", "0")));
-        this.entry.setCol("lapp", Integer.parseInt(prop.getProperty("lapp", "0")));
+        this.entry.setCol(col_referrer, prop.getProperty("referrer", plasmaURL.dummyHash).getBytes());
+        this.entry.setCol(col_md5, serverCodings.decodeHex(prop.getProperty("md5", "")));
+        this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
+        this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
+        this.entry.setCol(col_dt, new byte[]{(byte) prop.getProperty("dt", "t").charAt(0)});
+        this.entry.setCol(col_flags, serverCodings.decodeHex(prop.getProperty("flags", "00000000")));
+        this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes());
+        this.entry.setCol(col_llocal, Integer.parseInt(prop.getProperty("llocal", "0")));
+        this.entry.setCol(col_lother, Integer.parseInt(prop.getProperty("lother", "0")));
+        this.entry.setCol(col_limage, Integer.parseInt(prop.getProperty("limage", "0")));
+        this.entry.setCol(col_laudio, Integer.parseInt(prop.getProperty("laudio", "0")));
+        this.entry.setCol(col_lvideo, Integer.parseInt(prop.getProperty("lvideo", "0")));
+        this.entry.setCol(col_lapp, Integer.parseInt(prop.getProperty("lapp", "0")));
         this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""), null);
         this.word = (prop.containsKey("word")) ? new indexRWIEntryOld(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word", ""))) : null;
     }
@@ -214,7 +235,7 @@ public class indexURLEntryNew implements indexURLEntry {
         // the result is a String of 12 bytes within a 72-bit space
         // (each byte has an 6-bit range)
         // that should be enough for all web pages on the world
-        return this.entry.getColString("hash", "", null);
+        return this.entry.getColString(col_hash, null);
     }
 
     public indexURLEntry.Components comp() {
@@ -228,69 +249,69 @@ public class indexURLEntryNew implements indexURLEntry {
     }
     
     public Date moddate() {
-        return new Date(86400000 * entry.getColLong("mod", 0));
+        return new Date(86400000 * entry.getColLong(col_mod));
     }
 
     public Date loaddate() {
-        return new Date(86400000 * entry.getColLong("load", 0));
+        return new Date(86400000 * entry.getColLong(col_load));
     }
 
     public Date freshdate() {
-        return new Date(86400000 * entry.getColLong("fresh", 0));
+        return new Date(86400000 * entry.getColLong(col_fresh));
     }
 
     public String referrerHash() {
         // return the creator's hash
-        return entry.getColString("referrer", plasmaURL.dummyHash, null);
+        return entry.getColString(col_referrer, null);
     }
 
     public String md5() {
         // returns the md5 in hex representation
-        return serverCodings.encodeHex(entry.getCol("md5", plasmaURL.dummyHash.getBytes()));
+        return serverCodings.encodeHex(entry.getColBytes(col_md5));
     }
 
     public char doctype() {
-        return (char) entry.getColByte("dt", (byte) 't');
+        return (char) entry.getColByte(col_dt);
     }
 
     public String language() {
-        return this.entry.getColString("lang", "uk", null);
+        return this.entry.getColString(col_lang, null);
     }
 
     public int size() {
-        return (int) this.entry.getColLong("size", 0);
+        return (int) this.entry.getColLong(col_size);
     }
 
     public bitfield flags() {
-        return new bitfield(this.entry.getCol("flags", new byte[4]));
+        return new bitfield(this.entry.getColBytes(col_flags));
     }
 
     public int wordCount() {
-        return (int) this.entry.getColLong("wc", 0);
+        return (int) this.entry.getColLong(col_wc);
     }
 
     public int llocal() {
-        return (int) this.entry.getColLong("llocal", 0);
+        return (int) this.entry.getColLong(col_llocal);
     }
 
     public int lother() {
-        return (int) this.entry.getColLong("lother", 0);
+        return (int) this.entry.getColLong(col_lother);
     }
 
     public int limage() {
-        return (int) this.entry.getColLong("limage", 0);
+        return (int) this.entry.getColLong(col_limage);
     }
 
     public int laudio() {
-        return (int) this.entry.getColLong("laudio", 0);
+        return (int) this.entry.getColLong(col_laudio);
     }
 
     public int lvideo() {
-        return (int) this.entry.getColLong("lvideo", 0);
+        return (int) this.entry.getColLong(col_lvideo);
     }
 
     public int lapp() {
-        return (int) this.entry.getColLong("lapp", 0);
+        return (int) this.entry.getColLong(col_lapp);
     }
     
     public String snippet() {
