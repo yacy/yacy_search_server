@@ -115,7 +115,7 @@ public class PerformanceSearch_p {
             } else {
                 t = se.getLocalTiming().getYieldTime(sequence);
                 prop.put("latestLocalTimeAbs_" + sequence, (t < 0) ? "-" : Long.toString(t));
-                prop.put("latestLocalTimeRel_" + sequence, ((t < 0) ? 0 : (t * 100 / time)) + "%");
+                prop.put("latestLocalTimeRel_" + sequence, ((t < 0 || time == 0) ? 0 : (t * 100 / time)) + "%");
                 c = se.getLocalTiming().getYieldCount(sequence);
                 prop.put("latestLocalCountAbs_" + sequence, (c < 0) ? "-" : Integer.toString(c));
             }
