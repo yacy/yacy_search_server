@@ -75,8 +75,9 @@ public class BookmarkService extends AbstractService {
 	/* =====================================================================
 	 * Used XML Templates
 	 * ===================================================================== */
-    private static final String TEMPLATE_BOOKMARK_LIST_XML = "xml/bookmarks/posts/get.xml";
-    private static final String TEMPLATE_BOOKMARK_TAGS_XML = "xml/bookmarks/tags/get.xml"; 
+    private static final String TEMPLATE_BOOKMARK_LIST_GET_XML = "xml/bookmarks/posts/get.xml";
+    private static final String TEMPLATE_BOOKMARK_LIST_ALL_XML = "xml/bookmarks/posts/all.xml";
+    private static final String TEMPLATE_BOOKMARK_TAGS_XML = "xml/bookmarks/tags/get.xml";
 	
     /**
      * @return a handler to the YaCy Bookmark DB
@@ -397,7 +398,7 @@ public class BookmarkService extends AbstractService {
         if (tag != null) args.put("tag",tag);
         if (date != null) args.put("date",date);
         
-        byte[] result = writeTemplate(TEMPLATE_BOOKMARK_LIST_XML, args);
+        byte[] result = writeTemplate((date != null)?TEMPLATE_BOOKMARK_LIST_GET_XML:TEMPLATE_BOOKMARK_LIST_ALL_XML, args);
         
         // sending back the result to the client
         return this.convertContentToXML(result);    		
