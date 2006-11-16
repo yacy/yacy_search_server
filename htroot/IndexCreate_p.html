@@ -46,12 +46,16 @@
           <td>Re-Crawl Option:</td>
           <td>
             Use:<input type="checkbox" name="crawlingIfOlderCheck" #(crawlingIfOlderCheck)#::checked="checked"#(/crawlingIfOlderCheck)# />&nbsp;&nbsp;
-            Interval:<input name="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#" /><br />
-            <input type="radio" name="crawlingIfOlderUnit" value="year"  #(crawlingIfOlderUnitYearCheck)#::checked="checked"#(/crawlingIfOlderUnitYearCheck)# />Year(s)&nbsp;&nbsp;
-            <input type="radio" name="crawlingIfOlderUnit" value="month" #(crawlingIfOlderUnitMonthCheck)#::checked="checked"#(/crawlingIfOlderUnitMonthCheck)# />Month(s)&nbsp;&nbsp;
-            <input type="radio" name="crawlingIfOlderUnit" value="day" #(crawlingIfOlderUnitDayCheck)#::checked="checked"#(/crawlingIfOlderUnitDayCheck)# />Day(s)&nbsp;&nbsp;
-            <input type="radio" name="crawlingIfOlderUnit" value="hour" #(crawlingIfOlderUnitHourCheck)#::checked="checked"#(/crawlingIfOlderUnitHourCheck)# />Hour(s)&nbsp;&nbsp;
-            <input type="radio" name="crawlingIfOlderUnit" value="minute" #(crawlingIfOlderUnitMinuteCheck)#::checked="checked"#(/crawlingIfOlderUnitMinuteCheck)# />Minute(s)
+            Interval:
+			
+			<input name="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#" />
+			<select>
+            <option name="crawlingIfOlderUnit" value="year"   #(crawlingIfOlderUnitYearCheck)#::selected="selected"#(/crawlingIfOlderUnitYearCheck)# />Year(s)&nbsp;&nbsp;
+            <option name="crawlingIfOlderUnit" value="month"  #(crawlingIfOlderUnitMonthCheck)#::selected="selected"#(/crawlingIfOlderUnitMonthCheck)# />Month(s)&nbsp;&nbsp;
+            <option name="crawlingIfOlderUnit" value="day"    #(crawlingIfOlderUnitDayCheck)#::selected="selected"#(/crawlingIfOlderUnitDayCheck)# />Day(s)&nbsp;&nbsp;
+            <option name="crawlingIfOlderUnit" value="hour"   #(crawlingIfOlderUnitHourCheck)#::selected="selected"#(/crawlingIfOlderUnitHourCheck)# />Hour(s)&nbsp;&nbsp;
+            <option name="crawlingIfOlderUnit" value="minute" #(crawlingIfOlderUnitMinuteCheck)#::selected="selected"#(/crawlingIfOlderUnitMinuteCheck)# />Minute(s)
+			</select>
           </td>
           <td>
             If you use this option, web pages that are already existent in your database are crawled and indexed again.
