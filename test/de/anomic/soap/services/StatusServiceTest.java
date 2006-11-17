@@ -34,4 +34,9 @@ public class StatusServiceTest extends AbstractServiceTest {
 		Document xml = ((StatusService)service).getStatus();
 		System.out.println(XMLUtils.DocumentToString(xml));
 	}
+	
+	public void testPeerList() throws RemoteException {
+		Document xml = ((StatusService)service).peerList("active",300,true);
+		System.out.println(XMLUtils.DocumentToString(xml));		
+	}
 }

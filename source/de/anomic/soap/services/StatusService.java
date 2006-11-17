@@ -66,21 +66,78 @@ public class StatusService extends AbstractService {
     
     /**
      * Service used to query the network properties
-     * @throws AxisFault if the service could not be executed propery. 
+     * @throws Exception 
      */
-    public Document network() throws AxisFault {
-        try {
-            // extracting the message context
-            extractMessageContext(NO_AUTHENTICATION);  
-            
-            // generating the template containing the network status information
-            byte[] result = writeTemplate(TEMPLATE_NETWORK_XML, new serverObjects());
-            
-            // sending back the result to the client
-            return this.convertContentToXML(result);
-        } catch (Exception e) {
-            throw new AxisFault(e.getMessage());
-        }
+    public Document network() throws Exception {
+    	// extracting the message context
+    	extractMessageContext(NO_AUTHENTICATION);  
+    	
+    	// generating the template containing the network status information
+    	byte[] result = writeTemplate(TEMPLATE_NETWORK_XML, new serverObjects());
+    	
+    	// sending back the result to the client
+    	return this.convertContentToXML(result);
+    }
+    
+    /**
+     * Returns a list of peers this peer currently knows
+     * @param peerType the peer types to query. This could be
+     * <ul>
+     * <li>active</li>
+     * <li>passive</li>
+     * <li>potential</li>
+     * </ul>
+     * @param maxCount the maximum amount of records to return
+     * @param details if detailed informations should be returned
+     * 
+     * @return a XML document of the following format
+     * <pre>
+     * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+     * &lt;peers&gt;
+     *   &lt;peer&gt;
+     *     &lt;hash&gt;XXXXXXX&lt;/hash&gt;
+     *     &lt;fullname&gt;Peer Name&lt;/fullname&gt;
+     *     &lt;version&gt;0.424/01505&lt;/version&gt;
+     *     &lt;ppm&gt;0&lt;/ppm&gt;
+     *     &lt;uptime&gt;2 days 14:37&lt;/uptime&gt;
+     *     &lt;links&gt;-&lt;/links&gt;
+     *     &lt;words&gt;-&lt;/words&gt;
+     *     &lt;lastseen&gt;48&lt;/lastseen&gt;
+     *     &lt;sendWords&gt;-&lt;/sendWords&gt;
+     *     &lt;receivedWords&gt;-&lt;/receivedWords&gt;
+     *     &lt;sendURLs&gt;-&lt;/sendURLs&gt;
+     *     &lt;receivedURLs&gt;-&lt;/receivedURLs&gt;    
+     *     &lt;age&gt;369&lt;/age&gt;
+     *     &lt;seeds&gt;61&lt;/seeds&gt;
+     *     &lt;connects&gt;2&lt;/connects&gt;
+     *     &lt;address&gt;127.0.0.1:8080&lt;/address&gt;        
+     *   &lt;/peer&gt;
+     * &lt;/peers&gt;
+     * </pre>
+     * @throws Exception
+     */
+    public Document peerList(String peerType, int maxCount, boolean details) throws Exception {
+    	// extracting the message context
+    	extractMessageContext(NO_AUTHENTICATION);  
+    	
+    	if (peerType == null || peerType.length() == 0) throw new IllegalArgumentException("The peer type must not be null or empty.");
+    	if (!(peerType.equalsIgnoreCase("active") || peerType.equalsIgnoreCase("passive") || peerType.equalsIgnoreCase("Potential")))
+    		throw new IllegalArgumentException("Unknown peer type. Should be (active|passive|potential)");
+    	
+    	// configuring output mode
+    	serverObjects args = new serverObjects();
+    	if (peerType.equalsIgnoreCase("active")) args.put("page","1");
+    	else if (peerType.equalsIgnoreCase("passive")) args.put("page","2");
+    	else if (peerType.equalsIgnoreCase("potential")) args.put("page","3");
+    	
+    	// specifying if the detailed list should be returned
+    	if (details) args.put("ip","1");
+    	
+    	// generating the template containing the network status information
+    	byte[] result = writeTemplate(TEMPLATE_NETWORK_XML, args);
+    	
+    	// sending back the result to the client
+    	return this.convertContentToXML(result);  	
     }
     
     

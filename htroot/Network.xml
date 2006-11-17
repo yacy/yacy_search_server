@@ -11,6 +11,18 @@
     <uptime>#[uptime]#</uptime>
     <links>#[links]#</links>
     <words>#[words]#</words>
+    <lastseen>#[lastSeen]#</lastseen>
+    <sendWords>#[sI]#</sendWords>
+    <receivedWords>#[rI]#</receivedWords>
+    <sendURLs>#[sU]#</sendURLs>
+    <receivedURLs>#[rU]#</receivedURLs>
+    #(complete)#
+    ::
+    <age>#[age]#</age>
+    <seeds>#[seeds]#</seeds>
+    <connects>#[connects]#</connects>
+    <address>#[ip]#:#[port]#</address>
+    #(/complete)#    
   </peer>
 #{/list}#
 </peers>
