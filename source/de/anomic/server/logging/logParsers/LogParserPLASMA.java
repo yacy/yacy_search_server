@@ -1,0 +1,267 @@
+package de.anomic.server.logging.logParsers;
+
+import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class LogParserPLASMA implements LogParser{
+    //RegExp for LogLevel I
+    private static Pattern i1 = Pattern.compile("Received (\\d*) URLs from peer [\\w-_]{12}:[\\w-_]*/[\\w.-]* in (\\d*) ms, Blocked (\\d*) URLs");
+    private static Pattern i2 = Pattern.compile("Received (\\d*) Entries (\\d*) Words \\[[\\w-_]{12} .. [\\w-_]{12}\\]/[\\w.-]* from [\\w-_]{12}:[\\w-_]*/[\\w.-]*, processed in (\\d*) milliseconds, requesting (\\d*)/(\\d*) URLs, blocked (\\d*) RWIs");
+    private static Pattern i2_2 = Pattern.compile("Received (\\d*) Entries (\\d*) Words \\[[\\w-_]{12} .. [\\w-_]{12}\\]/[\\w.-]* from [\\w-_]{12}:[\\w-_]*, processed in (\\d*) milliseconds, requesting (\\d*)/(\\d*) URLs, blocked (\\d*) RWIs");
+    private static Pattern i3 = Pattern.compile("Index transfer of (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] to peer ([\\w-_]*):([\\w-_]{12}) in (\\d*) seconds successful \\((\\d*) words/s, (\\d*) Bytes\\)");
+    private static Pattern i4 = Pattern.compile("Index transfer of (\\d*) entries (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] and (\\d*) URLs to peer ([\\w-_]*):([\\w-_]{12}) in (\\d*) seconds successful \\((\\d*) words/s, (\\d*) Bytes\\)");
+    private static Pattern i5 = Pattern.compile("Selected \\w* DHT target peer ([\\w-_]*):([\\w-_]{12}), distance = ([\\w.-]*)");
+    private static Pattern i6 = Pattern.compile("Rejecting RWIs from peer ([\\w-_]{12}):([\\w-_]*)/([\\w.]*) ([\\w. ]*)");
+    private static Pattern i7 = Pattern.compile("DHT distribution: transfer to peer [\\w-]* finished.");
+    private static Pattern i8 = Pattern.compile("Index selection of (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] in (\\d*) seconds");
+    private static Pattern i9 = Pattern.compile("RankingDistribution - transmitted file [\\w-:.\\\\]* to [\\w.]*:\\d* successfully in (\\d)* seconds");
+    private static Pattern i10 = Pattern.compile("RankingDistribution - error transmitting file");
+    private static Pattern i11 = Pattern.compile("Peer [\\w-_]*:[\\w-_]{12} is busy\\. Waiting \\d* ms\\.");
+    //private static Pattern i12 = Pattern.compile("\\*Indexed \\d* words in URL [\\w:.&?/%-~$§@=]* \\[[\\w-_]{12}\\]");
+    private static Pattern i13 = Pattern.compile("WROTE HEADER for |LOCALCRAWL\\[\\d*, \\d*, \\d*, \\d*\\]|REJECTED WRONG STATUS TYPE");
+    //RegExp for LogLevel W
+    private static Pattern w1 = Pattern.compile("found not enough \\(\\d*\\) peers for distribution");
+    private static Pattern w2 = Pattern.compile("Transfer to peer ([\\w-_]*):([\\w-_]{12}) failed:'(\\w*)'");
+    //RegExp for LogLevel E
+    private static Pattern e1 = Pattern.compile("INTERNAL ERROR AT plasmaCrawlLURL:store:de.anomic.kelondro.kelondroException: tried to create (\\w*) node twice in db");
+    private static Pattern e2 = Pattern.compile("INTERNAL ERROR [\\w./: ]* java.net.MalformedURLException");
+
+    private Matcher m;
+    //RegExp for advancedParser
+    //private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-=]* \\[[\\w-_]{12}\\]\\n\\tDescription: ([\\w- ]*)\\n\\tMimeType: ([\\w-_/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)\\n\\tStackingTime: (\\d*) ms \\| ParsingTime: (\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
+    private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-~$§@=]* \\[[\\w-_]{12}\\][\\r\\n]*\\tDescription: ([\\w-\\.,:!?='\"„|/äöüßŸ¶œ¼©³–+@() ]*)[\\r\\n]*\\tMimeType: ([\\w-_~/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)[\\r\\n]*\\tStackingTime:[ ]*(\\d*) ms \\| ParsingTime:[ ]*(\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
+
+    private int urlSum=0;
+    private int urlReqSum=0;
+    private int blockedURLSum=0;
+    private int wordsSum=0;
+    private int rwiSum=0;
+    private int blockedRWISum=0;
+    private long urlTimeSum=0;
+    private long rwiTimeSum=0;
+    private long DHTSendTraffic=0;
+    private int DHTSendURLs=0;
+    private int RWIRejectCount=0;
+    private HashSet RWIRejectPeerNames = new HashSet();
+    private HashSet RWIRejectPeerHashs = new HashSet();
+    private HashSet DHTPeerNames = new HashSet();
+    private HashSet DHTPeerHashs = new HashSet();
+    private int DHTSelectionTargetCount = 0;
+    private int DHTSelectionWordsCount = 0;
+    private int DHTSelectionWordsTimeCount = 0;
+    private double minDHTDist = 1;
+    private double maxDHTDist = 0;
+    private double avgDHTDist = 0;
+    private int busyPeerCount = 0;
+    private int notEnoughDHTPeers = 0;
+    private int failedIndexDistributionCount = 0;
+    private int leftChildTwiceCount = 0;
+    private int rightChildTwiceCount = 0;
+    private int rankingDistributionCount = 0;
+    private int rankingDistributionTime = 0;
+    private int rankingDistributionFailCount = 0;
+    private int malformedURLCount = 0;
+    private int indexedSites = 0;
+    private int indexedWordSum = 0;
+    private int indexedSiteSizeSum = 0;
+    private int indexedAnchorsCount = 0;
+    private int indexedStackingTime = 0;
+    private int indexedParsingTime = 0;
+    private int indexedIndexingTime = 0;
+    private int indexedStorageTime = 0;
+    private final String parserType = "PLASMA";
+    
+    public int parse(String logLevel, String logLine) {
+        if (logLevel.equals("INFO")){
+            m = i1.matcher (logLine);
+            
+            if (m.find ()) {
+                //System.out.println(m.group(1) + " " + m.group(2) + " " + m.group(3));
+                urlSum += Integer.parseInt(m.group(1));
+                urlTimeSum += Integer.parseInt(m.group(2));
+                blockedURLSum += Integer.parseInt(m.group(3));
+                return 0;
+            }
+            m = i2.matcher (logLine);
+            
+            if (m.find ()) {
+                rwiSum += Integer.parseInt(m.group(1));
+                wordsSum += Integer.parseInt(m.group(2));
+                rwiTimeSum += Integer.parseInt(m.group(3));
+                urlReqSum += Integer.parseInt(m.group(4));
+                blockedRWISum += Integer.parseInt(m.group(6));
+                return 0;
+            }
+            m = i2_2.matcher (logLine);
+            
+            if (m.find ()) {
+                rwiSum += Integer.parseInt(m.group(1));
+                wordsSum += Integer.parseInt(m.group(2));
+                rwiTimeSum += Integer.parseInt(m.group(3));
+                urlReqSum += Integer.parseInt(m.group(4));
+                blockedRWISum += Integer.parseInt(m.group(6));
+                return 0;
+            }
+            m = i3.matcher (logLine);
+            
+            if (m.find ()) {
+                DHTSendTraffic += Integer.parseInt(m.group(6));
+                DHTPeerNames.add(m.group(2));
+                DHTPeerHashs.add(m.group(3));
+                return 0;
+            }
+            m = i4.matcher (logLine);
+            
+            if (m.find ()) {
+                DHTSendTraffic += Integer.parseInt(m.group(8));
+                DHTSendURLs += Integer.parseInt(m.group(3));
+                DHTPeerNames.add(m.group(4));
+                DHTPeerHashs.add(m.group(5));
+                return 0;
+            }
+            m = i5.matcher (logLine);
+            
+            if (m.find ()) {
+                minDHTDist = Math.min(minDHTDist, Double.parseDouble(m.group(3)));
+                maxDHTDist = Math.max(maxDHTDist, Double.parseDouble(m.group(3)));
+                avgDHTDist += Double.parseDouble(m.group(3));
+                DHTSelectionTargetCount++;
+                return 0;
+            }
+            m = i6.matcher (logLine);
+            
+            if (m.find ()) {
+                RWIRejectPeerNames.add(m.group(2));
+                RWIRejectPeerHashs.add(m.group(1));
+                RWIRejectCount++;
+                return 0;
+            }
+            m = i7.matcher (logLine);
+            
+            if (m.find ()) {
+                return 0;
+            }
+            m = i8.matcher (logLine);
+            
+            if (m.find ()) {
+                DHTSelectionWordsCount += Double.parseDouble(m.group(1));
+                DHTSelectionWordsTimeCount += Double.parseDouble(m.group(2));
+                return 0;
+            }
+            m = i9.matcher (logLine);
+            
+            if (m.find ()) {
+                rankingDistributionCount++;
+                rankingDistributionTime += Integer.parseInt(m.group(1));
+                return 0;
+            }
+            m = i10.matcher (logLine);
+            
+            if (m.find ()) {
+                rankingDistributionFailCount++;
+                return 0;
+            }
+            m = i11.matcher (logLine);
+            
+            if (m.find ()) {
+                busyPeerCount++;
+                return 0;
+            }
+//            m = i12.matcher (logLine);
+//            
+//            if (m.find ()) {
+//                return 3;
+//            }
+            m = i13.matcher (logLine);
+            
+            if (m.find ()) {
+                return 0;
+            }
+            m = adv1.matcher (logLine);
+            
+            if (m.find ()) {
+                indexedSites++;
+                indexedWordSum += Integer.parseInt(m.group(1));
+                indexedSiteSizeSum += Integer.parseInt(m.group(4));
+                indexedAnchorsCount += Integer.parseInt(m.group(5));
+                indexedStackingTime += Integer.parseInt(m.group(6));
+                indexedParsingTime += Integer.parseInt(m.group(7));
+                indexedIndexingTime += Integer.parseInt(m.group(8));
+                indexedStorageTime += Integer.parseInt(m.group(9));
+            }
+
+        } else if (logLevel.equals("WARNING")){
+            m = w1.matcher (logLine);
+            
+            if (m.find ()) {
+                notEnoughDHTPeers++;
+                return 0;
+            }
+            m = w2.matcher (logLine);
+            
+            if (m.find ()) {
+                failedIndexDistributionCount++;
+                return 0;
+            }
+        } else if (logLevel.equals("SEVERE")){
+            m = e1.matcher (logLine);
+            
+            if (m.find ()) {
+                if (m.group(1).equals("leftchild")) leftChildTwiceCount++;
+                else if (m.group(1).equals("rightchild")) rightChildTwiceCount++;
+                return 0;
+            }
+            m = e2.matcher (logLine);
+            
+            if (m.find ()) {
+                malformedURLCount++;
+                return 0;
+            }
+        }
+        return -1;
+    }
+
+    public void printResults() {
+        if(rankingDistributionCount == 0) rankingDistributionCount = 1;
+        if(DHTSelectionWordsTimeCount == 0) DHTSelectionWordsTimeCount = 1;
+        if(indexedSites != 0) indexedSites++;
+        System.out.println("INDEXER: Indexed " + indexedSites + " sites in " + (indexedStackingTime + indexedParsingTime + indexedIndexingTime + indexedStorageTime) + " milliseconds.");
+        System.out.println("INDEXER: Indexed " + indexedWordSum + " words on " + indexedSites + " sites. (avg. words per site: " + (indexedWordSum / indexedSites) + ").");
+        System.out.println("INDEXER: Total Size of indexed sites: " + indexedSiteSizeSum + " bytes (avg. size per site: " + (indexedSiteSizeSum / indexedSites) + " bytes).");
+        System.out.println("INDEXER: Total Number of Anchors found: " + indexedAnchorsCount + "(avg. Anchors per site: " + (indexedAnchorsCount / indexedSites) + ").");
+        System.out.println("INDEXER: Total StackingTime: " + indexedStackingTime + " milliseconds (avg. StackingTime: " + (indexedStackingTime / indexedSites) + " milliseconds).");
+        System.out.println("INDEXER: Total ParsingTime: " + indexedParsingTime + " milliseconds (avg. ParsingTime: " + (indexedParsingTime / indexedSites) + " milliseconds).");
+        System.out.println("INDEXER: Total IndexingTime: " + indexedIndexingTime + " milliseconds (avg. IndexingTime: " + (indexedIndexingTime / indexedSites) + " milliseconds).");
+        System.out.println("INDEXER: Total StorageTime: " + indexedStorageTime + " milliseconds (avg. StorageTime: " + (indexedStorageTime / indexedSites) + " milliseconds)."); 
+        if(urlSum != 0) urlSum++;
+        System.out.println("DHT: Recieved " + urlSum + " Urls in " + urlTimeSum + " ms. Blocked " + blockedURLSum + " URLs.");
+        System.out.println("DHT: " + urlTimeSum / urlSum + " milliseconds per URL.");            
+        if(rwiSum != 0) rwiSum++;
+        System.out.println("DHT: Recieved " + rwiSum + " RWIs from " + wordsSum + " Words in " + rwiTimeSum + " ms. " + urlReqSum + " requested URLs.");
+        System.out.println("DHT: Blocked " + blockedRWISum + " RWIs before requesting URLs, because URL-Hash was blacklisted.");
+        System.out.println("DHT: " + rwiTimeSum / rwiSum + " milliseconds per RWI.");            
+        System.out.println("DHT: Rejected " + RWIRejectCount + " Indextransfers from " + RWIRejectPeerNames.size() + " PeerNames with " + RWIRejectPeerHashs.size() + " PeerHashs.");
+        System.out.println("DHT: " + ((double)Math.round(DHTSendTraffic*100/(1024*1024)))/100 + " MegaBytes (" + DHTSendTraffic + " Bytes) of DHT-Transfertraffic.");
+        System.out.println("DHT: Sended " + DHTSendURLs + " URLs via DHT.");
+        System.out.println("DHT: DHT Transfers send to " + DHTPeerNames.size() + " Peernames with " + DHTPeerHashs.size() + " Peerhashs.");
+        System.out.println("DHT: Totally selected " + DHTSelectionWordsCount + " words in " + DHTSelectionWordsTimeCount + " seconds (" + (float)DHTSelectionWordsCount/DHTSelectionWordsTimeCount + " words/s)");
+        System.out.println("DHT: Selected " + DHTSelectionTargetCount + " possible DHT Targets (min. Distance: " + minDHTDist + " max. Distance: " + maxDHTDist + " avg. Distance: " + ((double)avgDHTDist/DHTSelectionTargetCount));
+        System.out.println("DHT: " + busyPeerCount + " times a targetpeer was too busy to accept a transfer.");
+        System.out.println("DHT: " + notEnoughDHTPeers + " times there were not enought targetpeers for the selected DHTChunk");
+        System.out.println("DHT: IndexDistribution failed " + failedIndexDistributionCount + " times.");
+        System.out.println("RANKING: Transmitted " + rankingDistributionCount + " Rankingfiles in " + rankingDistributionTime + " seconds (" + rankingDistributionTime/rankingDistributionCount + " seconds/file)");
+        System.out.println("RANKING: RankingDistribution failed " + rankingDistributionFailCount + " times.");
+        if (leftChildTwiceCount != 0)
+            System.out.println("ERRORS: tried " + leftChildTwiceCount + " times to create leftchild node twice in db");
+        if (rightChildTwiceCount != 0)
+            System.out.println("ERRORS: tried " + rightChildTwiceCount + " times to create rightchild node twice in db");
+        if (malformedURLCount != 0)
+            System.out.println("ERRORS: " + malformedURLCount + " MalformedURLExceptions accord.");
+    }
+
+    public String getParserType() {
+        return parserType;
+    }
+
+}
