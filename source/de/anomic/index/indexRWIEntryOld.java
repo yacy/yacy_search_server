@@ -1,6 +1,6 @@
-// indexURLEntryNew.java 
+// indexRWIEntryOld.java 
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
-// first published 21.07.2006 on http://www.anomic.de
+// first published 17.11.2006 on http://www.anomic.de
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -105,7 +105,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         this.entry.setCol(col_lastModified, lastmodified);
         this.entry.setCol(col_hitcount, hitcount);
         this.entry.setCol(col_language, language, null);
-        this.entry.setCol(col_doctype, (byte) doctype);
+        this.entry.setCol(col_doctype, new byte[]{(byte) doctype});
         this.entry.setCol(col_localflag, (byte) ((local) ? plasmaURL.LT_LOCAL : plasmaURL.LT_GLOBAL));
         this.entry.setCol(col_posintext, posintext);
         this.entry.setCol(col_posinphrase, posinphrase);
@@ -122,7 +122,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
     }
     
     public indexRWIEntryOld(String external) {
-        this.entry = urlEntryRow.newEntry(external);
+        this.entry = urlEntryRow.newEntry(external, false);
     }
     
     public indexRWIEntryOld(byte[] row) {
@@ -140,8 +140,8 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         return new indexRWIEntryOld(b);
     }
     
-    public String toPropertyForm(boolean displayFormat) {
-        return entry.toPropertyForm(true, displayFormat, displayFormat);
+    public String toPropertyForm() {
+        return entry.toPropertyForm(true, false, false);
     }
 
     public Entry toKelondroEntry() {
@@ -154,6 +154,10 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
 
     public int quality() {
         return (int) this.entry.getColLong(col_quality);
+    }
+    
+    public char doctype() {
+        return (char) this.entry.getColByte(col_doctype);
     }
 
     public int virtualAge() {
@@ -255,7 +259,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         assert (t.urlHash().length() == 12) : "turlhash = " + t.urlHash();
         assert (min.urlHash().length() == 12) : "minurlhash = " + min.urlHash();
         assert (max.urlHash().length() == 12) : "maxurlhash = " + max.urlHash();
-        if (1 + max.worddistance() - min.worddistance() == 0) System.out.println("min = " + min.toPropertyForm(true) + "\nmax=" + max.toPropertyForm(true));
+        if (1 + max.worddistance() - min.worddistance() == 0) System.out.println("min = " + min.toPropertyForm() + "\nmax=" + max.toPropertyForm());
         //System.out.println("Normalize:\nentry = " + t.toPropertyForm(true));
         //System.out.println("min   = " + min.toPropertyForm(true));
         //System.out.println("max   = " + max.toPropertyForm(true));

@@ -2140,7 +2140,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             prop.put("type_results_" + i + "_size", Long.toString(urlentry.size()));
                             prop.put("type_results_" + i + "_words", URLEncoder.encode(query.queryWords.toString(),"UTF-8"));
                             prop.put("type_results_" + i + "_former", formerSearch);
-                            prop.put("type_results_" + i + "_rankingprops", urlentry.word().toPropertyForm(true) + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(urlhash) +
+                            prop.put("type_results_" + i + "_rankingprops", urlentry.word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(urlhash) +
                                     ((plasmaURL.probablyRootURL(urlhash)) ? ", probablyRootURL" : "") + 
                                     (((wordURL = plasmaURL.probablyWordURL(urlhash, query.words(""))) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
                             // adding snippet if available

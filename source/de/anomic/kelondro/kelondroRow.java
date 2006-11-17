@@ -143,9 +143,9 @@ public class kelondroRow {
         return new Entry(cells);
     }
     
-    public Entry newEntry(String external) {
+    public Entry newEntry(String external, boolean decimalCardinal) {
         if (external == null) return null;
-        return new Entry(external);
+        return new Entry(external, decimalCardinal);
     }
 
     public class Entry implements Comparable {
@@ -188,7 +188,7 @@ public class kelondroRow {
             }
         }
         
-        public Entry(String external) {
+        public Entry(String external, boolean decimalCardinal) {
             // parse external form
             if (external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
             String[] elts = external.split(",");
@@ -202,8 +202,17 @@ public class kelondroRow {
                     nick = elts[i].substring(0, p).trim();
                     if (p + 1 == elts[i].length())
                         setCol(nick, null);
-                    else
-                        setCol(nick, elts[i].substring(p + 1).trim().getBytes());
+                    else {
+                        if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_cardinal)) {
+                            try {
+                                setCol(nick, Long.parseLong(elts[i].substring(p + 1).trim()));
+                            } catch (NumberFormatException e) {
+                                setCol(nick, 0);
+                            }
+                        } else {
+                            setCol(nick, elts[i].substring(p + 1).trim().getBytes());
+                        }
+                    }
                 }
             }
         }
@@ -416,7 +425,7 @@ public class kelondroRow {
             for (int i = 0; i < row.length; i++) {
                 bb.append((longname) ? row[i].description() : row[i].nickname());
                 bb.append('=');
-                if ((row[i].celltype() == kelondroColumn.celltype_cardinal) && (decimalCardinal))
+                if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_cardinal))
                     bb.append(Long.toString(getColLong(i)));
                 else
                     bb.append(rowinstance, colstart[i], row[i].cellwidth());

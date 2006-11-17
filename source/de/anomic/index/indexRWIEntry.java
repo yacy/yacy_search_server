@@ -31,7 +31,7 @@ import de.anomic.kelondro.kelondroRow;
 public interface indexRWIEntry {
 
     public Object clone();
-    public String toPropertyForm(boolean displayFormat);
+    public String toPropertyForm();
     public kelondroRow.Entry toKelondroEntry();
     
     public String urlHash();

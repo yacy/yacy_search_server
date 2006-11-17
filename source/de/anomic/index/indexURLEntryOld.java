@@ -297,7 +297,8 @@ public class indexURLEntryOld implements indexURLEntry {
 
             if (this.word != null) {
                 // append also word properties
-                corePropStr.append(",word=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm(false)));
+                if (this.word instanceof indexRWIEntryOld) corePropStr.append(",word=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm()));
+                if (this.word instanceof indexRWIEntryNew) corePropStr.append(",wi=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm()));
             }
             return corePropStr;
 

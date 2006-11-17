@@ -180,7 +180,13 @@ public class indexURLEntryNew implements indexURLEntry {
         this.entry.setCol(col_lvideo, Integer.parseInt(prop.getProperty("lvideo", "0")));
         this.entry.setCol(col_lapp, Integer.parseInt(prop.getProperty("lapp", "0")));
         this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""), null);
-        this.word = (prop.containsKey("word")) ? new indexRWIEntryOld(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word", ""))) : null;
+        this.word = null;
+        if (prop.containsKey("word")) {
+            this.word = new indexRWIEntryOld(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word", "")));
+        }
+        if (prop.containsKey("wi")) {
+            this.word = new indexRWIEntryNew(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("wi", "")));
+        }
     }
 
     private StringBuffer corePropList() {
@@ -213,7 +219,8 @@ public class indexURLEntryNew implements indexURLEntry {
             
             if (this.word != null) {
                 // append also word properties
-                s.append(",word=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm(false)));
+                if (this.word instanceof indexRWIEntryOld) s.append(",word=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm()));
+                if (this.word instanceof indexRWIEntryNew) s.append(",wi=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm()));
             }
             return s;
 

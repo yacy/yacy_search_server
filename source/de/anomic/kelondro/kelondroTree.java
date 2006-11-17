@@ -1172,12 +1172,12 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         if (hl > hr) return hl + 1;
         return hr + 1;
     }
-        
+    /*
     public String np(Object n) {
         if (n == null) return "NULL";
         return n.toString();
     }
-
+    */
     public void print() throws IOException {
         super.print(false);
         int height = height();

@@ -52,6 +52,7 @@ import java.util.LinkedList;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexRWIEntryOld;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
@@ -162,7 +163,10 @@ public final class transferRWI {
                 if (p > 0) {
                     wordHash = estring.substring(0, p);
                     wordhashes[received] = wordHash;
-                    iEntry = new indexRWIEntryOld(estring.substring(p));
+                    if (estring.indexOf("x=") > 0)
+                        iEntry = new indexRWIEntryNew(estring.substring(p));
+                    else
+                        iEntry = new indexRWIEntryOld(estring.substring(p));
                     urlHash = iEntry.urlHash();
                     if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(plasmaURLPattern.BLACKLIST_DHT, urlHash))) {
                         int deleted = sb.wordIndex.tryRemoveURLs(urlHash);

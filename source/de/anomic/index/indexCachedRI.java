@@ -27,14 +27,12 @@
 
 package de.anomic.index;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
@@ -44,16 +42,17 @@ import de.anomic.server.logging.serverLog;
 public class indexCachedRI implements indexRI {
 
     private kelondroRow   payloadrow;
-    private kelondroOrder indexOrder = new kelondroNaturalOrder(true);
+    private kelondroOrder indexOrder;
     private indexRAMRI    riExtern, riIntern;
     private indexRI       backend;
     public  boolean       busyCacheFlush;            // shows if a cache flush is currently performed
     private int           idleDivisor, busyDivisor;
     
-    public indexCachedRI(indexRAMRI riExtern, indexRAMRI riIntern, indexRI backend, kelondroRow payloadrow, serverLog log) {
+    public indexCachedRI(indexRAMRI riExtern, indexRAMRI riIntern, indexRI backend, kelondroOrder payloadorder, kelondroRow payloadrow, serverLog log) {
         this.riExtern = riExtern;
         this.riIntern  = riIntern;
         this.backend = backend;
+        this.indexOrder = payloadorder;
         this.payloadrow = payloadrow;
         this.busyCacheFlush = false;
         this.busyDivisor = 5000;
@@ -152,38 +151,6 @@ public class indexCachedRI implements indexRI {
         busyCacheFlush = false;
     }
     
-    private static final int hour = 3600000;
-    private static final int day  = 86400000;
-    
-    public static int microDateDays(Date modified) {
-        return microDateDays(modified.getTime());
-    }
-    
-    public static int microDateDays(long modified) {
-        // this calculates a virtual age from a given date
-        // the purpose is to have an age in days of a given modified date
-        // from a fixed standpoint in the past
-        // one day has 60*60*24 seconds = 86400 seconds
-        // we take mod 64**3 = 262144, this is the mask of the storage
-        return (int) ((modified / day) % 262144);
-    }
-        
-    public static String microDateHoursStr(long time) {
-        return kelondroBase64Order.enhancedCoder.encodeLong(microDateHoursInt(time), 3);
-    }
-    
-    public static int microDateHoursInt(long time) {
-        return (int) ((time / hour) % 262144);
-    }
-    
-    public static int microDateHoursAge(String mdhs) {
-        return microDateHoursInt(System.currentTimeMillis()) - (int) kelondroBase64Order.enhancedCoder.decodeLong(mdhs);
-    }
-    
-    public static long reverseMicroDateDays(int microDateDays) {
-        return ((long) microDateDays) * ((long) day);
-    }
-
     public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxTime) {
         // get from cache
         indexContainer container = riExtern.getContainer(wordHash, urlselection, true, maxTime);
