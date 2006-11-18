@@ -52,7 +52,7 @@
     <target name="zip" depends="compile">
   	  <tar destfile="${addonArchive}" compression="gzip">
   	  	<tarfileset dir="${libx}" 
-  	  				includes="axis.jar,axis-ant.jar,commons-discovery.jar,commons-logging.jar,jaxrpc.jar,saaj.jar,wsdl4j.jar" 
+  	  				includes="axis.jar,axis-ant.jar,commons-discovery.jar,commons-logging.jar,jaxrpc.jar,saaj.jar,wsdl4j.jar,gnumail.jar,activation.jar,inetlib.jar" 
   	  				prefix="${releaseDir}/libx/"
 			  		dirmode="755" mode="644"/>
   	  	<tarfileset dir="${src}/de/anomic/soap/" 
@@ -66,7 +66,7 @@
 
     <target name="copy" depends="compile">
         <copy todir="${release}/libx/">
-             <fileset dir="${libx}" includes="axis.jar,axis-ant.jar,commons-discovery.jar,commons-logging.jar,jaxrpc.jar,saaj.jar,wsdl4j.jar"/> 
+             <fileset dir="${libx}" includes="axis.jar,axis-ant.jar,commons-discovery.jar,commons-logging.jar,jaxrpc.jar,saaj.jar,wsdl4j.jar,gnumail.jar,activation.jar,inetlib.jar"/> 
         </copy>
         <copy todir="${release}/source/de/anomic/soap/">
              <fileset dir="${src}/de/anomic/soap/" includes="**/*"/> 
