@@ -58,10 +58,10 @@ public class kelondroCache implements kelondroIndex {
         assert write == false;
         this.index = backupIndex;
         this.keyrow = new kelondroRow(new kelondroColumn[]{index.row().column(index.primarykey())});
-        this.readHitCache = (read) ? new kelondroRowSet(index.row()) : null;
-        this.readMissCache = (read) ? new kelondroRowSet(this.keyrow) : null;
-        this.writeBufferUnique = (write) ? new kelondroRowSet(index.row()) : null;
-        this.writeBufferDoubles = (write) ? new kelondroRowSet(index.row()) : null;
+        this.readHitCache = (read) ? new kelondroRowSet(index.row(), backupIndex.order(), backupIndex.primarykey(), 0) : null;
+        this.readMissCache = (read) ? new kelondroRowSet(this.keyrow, backupIndex.order(), backupIndex.primarykey(), 0) : null;
+        this.writeBufferUnique = (write) ? new kelondroRowSet(index.row(), backupIndex.order(), backupIndex.primarykey(), 0) : null;
+        this.writeBufferDoubles = (write) ? new kelondroRowSet(index.row(), backupIndex.order(), backupIndex.primarykey(), 0) : null;
         this.maxmiss = (read) ? (int) (buffersize / 10 / index.row().column(index.primarykey()).cellwidth()) : 0;
         this.maxrecords = (int) ((buffersize - maxmiss * index.row().column(index.primarykey()).cellwidth()) / index.row().objectsize());
         this.readHit = 0;

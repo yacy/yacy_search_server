@@ -60,10 +60,9 @@ public class indexContainer extends kelondroRowSet {
     }
     
     public indexContainer(String wordHash, kelondroRow rowdef, kelondroOrder ordering, int column, boolean newRWI) {
-        super(rowdef);
+        super(rowdef, ordering, column, 0);
         this.wordHash = wordHash;
         this.lastTimeWrote = 0;
-        this.setOrdering(ordering, column);
         this.newRWI = newRWI;
     }
     

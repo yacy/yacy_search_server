@@ -49,12 +49,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         this.removeMarker = rs.removeMarker;
     }
 
-    public kelondroRowSet(kelondroRow rowdef) {
-        super(rowdef, 0);
-        this.removeMarker = new TreeSet();
-        this.profile = new kelondroProfile();
-    }
-
     public kelondroRowSet(kelondroRow rowdef, int objectCount) {
         super(rowdef, objectCount);
         this.removeMarker = new TreeSet();

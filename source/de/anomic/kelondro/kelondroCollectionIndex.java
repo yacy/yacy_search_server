@@ -537,12 +537,12 @@ public class kelondroCollectionIndex {
                         4 /*loadfactor*/, rowdef);
             
             // fill index with values
-            kelondroRowSet collection = new kelondroRowSet(rowdef);
+            kelondroRowSet collection = new kelondroRowSet(rowdef, kelondroNaturalOrder.naturalOrder, 0, 0);
             collection.addUnique(rowdef.newEntry(new byte[][]{"abc".getBytes(), "efg".getBytes()}));
             collectionIndex.put("erstes".getBytes(), collection);
             
             for (int i = 0; i <= 17; i++) {
-                collection = new kelondroRowSet(rowdef);
+                collection = new kelondroRowSet(rowdef, kelondroNaturalOrder.naturalOrder, 0, 0);
                 for (int j = 0; j < i; j++) {
                     collection.addUnique(rowdef.newEntry(new byte[][]{("abc" + j).getBytes(), "xxx".getBytes()}));
                 }
@@ -552,7 +552,7 @@ public class kelondroCollectionIndex {
             
             // extend collections with more values
             for (int i = 0; i <= 17; i++) {
-                collection = new kelondroRowSet(rowdef);
+                collection = new kelondroRowSet(rowdef, kelondroNaturalOrder.naturalOrder, 0, 0);
                 for (int j = 0; j < i; j++) {
                     collection.addUnique(rowdef.newEntry(new byte[][]{("def" + j).getBytes(), "xxx".getBytes()}));
                 }
