@@ -57,7 +57,6 @@ import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.plasma.plasmaURL;
-import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
@@ -66,6 +65,7 @@ import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
@@ -373,6 +373,7 @@ public final class yacyClient {
             boolean global, 
             yacySeed targetPeer,
             plasmaCrawlLURL urlManager, 
+            plasmaWordIndex wordIndex,
             indexContainer containerCache,
             Map abstractCache,
             plasmaURLPattern blacklist, 
@@ -493,7 +494,7 @@ public final class yacyClient {
             final int words = wordhashes.length() / yacySeedDB.commonHashLength;
             indexContainer[] container = new indexContainer[words];
             for (int i = 0; i < words; i++) {
-                container[i] = new indexContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), indexRWIEntryOld.urlEntryRow);
+                container[i] = wordIndex.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength));
             }
 
             // insert results to containers
@@ -517,7 +518,7 @@ public final class yacyClient {
                     int urlLength = comp.url().toNormalform().length();
                     int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()).length;
                     
-                    entry = new indexRWIEntryOld(
+                    entry = wordIndex.newRWIEntry(
                                                      urlEntry.hash(),
                                                      urlLength,
                                                      urlComps,

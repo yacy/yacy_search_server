@@ -175,8 +175,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     public void shape() {
-        //System.out.println("SHAPE");
-        if (this.sortOrder == null) return; // we cannot shape without an object order
+        assert (this.sortOrder != null); // we cannot shape without an object order
         synchronized (chunkcache) {
             resolveMarkedRemoved();
             super.sort();
@@ -246,7 +245,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     private int find(byte[] a, int astart, int alength) {
         // returns the chunknumber; -1 if not found
         
-        if (this.sortOrder == null) return iterativeSearch(a, astart, alength);
+        if (this.sortOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
         
         // check if a re-sorting make sense
         if ((this.chunkcount - this.sortBound) > collectionReSortLimit) shape();
@@ -256,20 +255,20 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         if (p >= 0) return p;
         
         // then find in unsorted area
-        return iterativeSearch(a, astart, alength);
+        return iterativeSearch(a, astart, alength, this.sortBound, this.chunkcount);
         
     }
     
-    private int iterativeSearch(byte[] key, int astart, int alength) {
+    private int iterativeSearch(byte[] key, int astart, int alength, int leftBorder, int rightBound) {
         // returns the chunknumber
         
         if (this.sortOrder == null) {
-            for (int i = this.sortBound; i < this.chunkcount; i++) {
+            for (int i = leftBorder; i < rightBound; i++) {
                 if (match(key, astart, alength, i)) return i;
             }
             return -1;
         } else {
-            for (int i = this.sortBound; i < this.chunkcount; i++) {
+            for (int i = leftBorder; i < rightBound; i++) {
                 if (compare(key, astart, alength, i) == 0) return i;
             }
             return -1;
@@ -322,7 +321,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     private boolean match(byte[] a, int astart, int alength, int chunknumber) {
         if (chunknumber >= chunkcount) return false;
         int i = 0;
-        int p = chunknumber * this.rowdef.objectsize();
+        int p = chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[this.sortColumn];
         final int len = Math.min(this.rowdef.width(this.sortColumn), Math.min(alength, a.length - astart));
         while (i < len) if (a[astart + i++] != chunkcache[p++]) return false;
         return ((len == this.rowdef.width(this.sortColumn)) || (chunkcache[len] == 0)) ;

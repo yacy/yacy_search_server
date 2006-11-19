@@ -86,10 +86,6 @@ public class indexCachedRI implements indexRI {
         return entries.updated();
     }
     
-    public indexContainer emptyContainer(String wordHash) {
-        return new indexContainer(wordHash, payloadrow);
-    }
-    
     public indexContainer addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean intern) {        
         // add the entry
         if (intern) {
@@ -219,10 +215,9 @@ public class indexCachedRI implements indexRI {
     }
 
     public indexContainer deleteContainer(String wordHash) {
-        indexContainer c = new indexContainer(wordHash, payloadrow);
-        c.add(riIntern.deleteContainer(wordHash), -1);
-        c.add(riExtern.deleteContainer(wordHash), -1);
-        c.add(backend.deleteContainer(wordHash), -1);
+        indexContainer c = riIntern.deleteContainer(wordHash);
+        if (c == null) c = riExtern.deleteContainer(wordHash); else c.add(riExtern.deleteContainer(wordHash), -1);
+        if (c == null) c = backend.deleteContainer(wordHash); else c.add(backend.deleteContainer(wordHash), -1);
         return c;
     }
     

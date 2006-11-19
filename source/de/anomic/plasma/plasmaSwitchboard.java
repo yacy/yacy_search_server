@@ -134,7 +134,6 @@ import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.plasma.plasmaURL;
-import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
@@ -237,6 +236,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  dbImportManager             dbImportManager;
     public  plasmaDHTFlush              transferIdxThread = null;
     private plasmaDHTChunk              dhtTransferChunk = null;
+    private boolean                     newIndex;
     
     /*
      * Remote Proxy configuration
@@ -434,8 +434,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                     ramNURL, getConfigBool("useFlexTableForNURL", false),
                                     ramEURL, getConfigBool("useFlexTableForEURL", true),
                                     ramLURL_time);
+        newIndex = getConfigBool("useCollectionIndex", false);
         try {
-            wordIndex = new plasmaWordIndex(plasmaPath, indexPath, true, ramRWI, ramRWI_time, log, getConfigBool("useCollectionIndex", false));
+            wordIndex = new plasmaWordIndex(plasmaPath, indexPath, true, ramRWI, ramRWI_time, log, newIndex);
         } catch (IOException e1) {
             e1.printStackTrace();
             System.exit(-1);
@@ -1672,28 +1673,28 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = plasmaURL.word2hash(word);
-                                indexRWIEntry wordIdxEntry = new indexRWIEntryOld(
-                                        urlHash,
-                                        urlLength, urlComps,
-                                        wordStat.count,
-                                        document.getMainLongTitle().length(),
-                                        condenser.RESULT_SIMI_WORDS,
-                                        condenser.RESULT_SIMI_SENTENCES,
-                                        wordStat.posInText,
-                                        wordStat.posInPhrase,
-                                        wordStat.numOfPhrase,
-                                        0,
-                                        newEntry.size(),
-                                        docDate.getTime(),
-                                        System.currentTimeMillis(),
-                                        condenser.RESULT_WORD_ENTROPHY,
-                                        language,
-                                        doctype,
-                                        ioLinks[0].intValue(),
-                                        ioLinks[1].intValue(),
-                                        true
-                                );
-                                indexContainer wordIdxContainer = new indexContainer(wordHash, wordIndex.payloadrow());
+                                indexRWIEntry wordIdxEntry = wordIndex.newRWIEntry(
+                                            urlHash,
+                                            urlLength, urlComps,
+                                            wordStat.count,
+                                            document.getMainLongTitle().length(),
+                                            condenser.RESULT_SIMI_WORDS,
+                                            condenser.RESULT_SIMI_SENTENCES,
+                                            wordStat.posInText,
+                                            wordStat.posInPhrase,
+                                            wordStat.numOfPhrase,
+                                            0,
+                                            newEntry.size(),
+                                            docDate.getTime(),
+                                            System.currentTimeMillis(),
+                                            condenser.RESULT_WORD_ENTROPHY,
+                                            language,
+                                            doctype,
+                                            ioLinks[0].intValue(),
+                                            ioLinks[1].intValue(),
+                                            true
+                                        );
+                                indexContainer wordIdxContainer = wordIndex.emptyContainer(wordHash);
                                 wordIdxContainer.add(wordIdxEntry);
                                 tmpContainers.add(wordIdxContainer);
                             }

@@ -58,6 +58,7 @@ public final class indexRAMRI implements indexRI {
     private String indexArrayFileName;
     private kelondroRow payloadrow;
     private kelondroRow bufferStructureBasis;
+    private boolean newRWI;
     
     // calculated constants
     private static String maxKey;
@@ -66,7 +67,7 @@ public final class indexRAMRI implements indexRI {
         //minKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
     
-    public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceLimitInit, String dumpname, serverLog log) {
+    public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceLimitInit, String dumpname, serverLog log, boolean newRWI) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
@@ -78,6 +79,7 @@ public final class indexRAMRI implements indexRI {
         this.cacheMaxCount = 10000;
         this.cacheReferenceLimit = wCacheReferenceLimitInit;
         this.log = log;
+        this.newRWI = newRWI;
         this.indexArrayFileName = dumpname;
         this.payloadrow = payloadrow;
         this.bufferStructureBasis = new kelondroRow(
@@ -178,7 +180,10 @@ public final class indexRAMRI implements indexRI {
                     if ((row == null) || (row.empty(0)) || (row.empty(3))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new indexRWIEntryOld(row.getColBytes(3));
+                    if (newRWI)
+                        wordEntry = new indexRWIEntryNew(row.getColBytes(3));
+                    else
+                        wordEntry = new indexRWIEntryOld(row.getColBytes(3));
                     // store to cache
                     addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;
@@ -421,25 +426,29 @@ public final class indexRAMRI implements indexRI {
     public synchronized indexContainer addEntries(indexContainer container, long updateTime, boolean dhtCase) {
         // this puts the entries into the cache, not into the assortment directly
         int added = 0;
+        if ((container == null) || (container.size() == 0)) return null;
 
         // put new words into cache
-            // put container into wCache
-            String wordHash = container.getWordHash();
-            indexContainer entries = (indexContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
-            if (entries == null) entries = new indexContainer(wordHash, container.row());
+        String wordHash = container.getWordHash();
+        indexContainer entries = (indexContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+        if (entries == null) {
+            entries = container.topLevelClone();
+            added = entries.size();
+        } else {
             added = entries.add(container, -1);
-            if (added > 0) {
-                cache.put(wordHash, entries);
-                hashScore.addScore(wordHash, added);
-                hashDate.setScore(wordHash, intTime(updateTime));
-            }
-            entries = null;
+        }
+        if (added > 0) {
+            cache.put(wordHash, entries);
+            hashScore.addScore(wordHash, added);
+            hashDate.setScore(wordHash, intTime(updateTime));
+        }
+        entries = null;
         return null;
     }
 
     public synchronized indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
             indexContainer container = (indexContainer) cache.get(wordHash);
-            if (container == null) container = new indexContainer(wordHash, this.payloadrow);
+            if (container == null) container = new indexContainer(wordHash, this.payloadrow, newEntry instanceof indexRWIEntryNew);
             indexRWIEntry[] entries = new indexRWIEntry[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
                 cache.put(wordHash, container);

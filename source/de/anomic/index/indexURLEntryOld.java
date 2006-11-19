@@ -160,7 +160,13 @@ public class indexURLEntryOld implements indexURLEntry {
             this.snippet = prop.getProperty("snippet", "");
             if (snippet.length() == 0) snippet = null;
             else snippet = crypt.simpleDecode(snippet, null);
-            this.word = (prop.containsKey("word")) ? new indexRWIEntryOld(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word", ""))) : null;
+            this.word = null;
+            if (prop.containsKey("word")) {
+                this.word = new indexRWIEntryOld(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word", "")));
+            }
+            if (prop.containsKey("wi")) {
+                this.word = new indexRWIEntryNew(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("wi", "")));
+            }
         } catch (Exception e) {
             serverLog.logSevere("PLASMA",
                     "INTERNAL ERROR in plasmaLURL.entry/2:"

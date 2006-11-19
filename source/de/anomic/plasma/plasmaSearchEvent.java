@@ -93,7 +93,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.ranking = ranking;
         this.urlStore = urlStore;
         this.snippetCache = snippetCache;
-        this.rcContainers = new indexContainer(null, wordIndex.payloadrow());
+        this.rcContainers = wordIndex.emptyContainer(null);
         this.rcContainerFlushCount = 0;
         this.rcAbstracts = (query.size() > 1) ? new TreeMap() : null; // generate abstracts only for combined searches
         this.profileLocal = localTiming;
@@ -139,7 +139,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 long secondaryTimeout = System.currentTimeMillis() + profileGlobal.duetime() / 3 * 2;
                 long primaryTimeout = System.currentTimeMillis() + profileGlobal.duetime();
                 primarySearchThreads = yacySearch.primaryRemoteSearches(plasmaSearchQuery.hashSet2hashString(query.queryHashes), "",
-                        query.prefer, query.urlMask, query.maxDistance, urlStore, rcContainers, rcAbstracts,
+                        query.prefer, query.urlMask, query.maxDistance, urlStore, wordIndex, rcContainers, rcAbstracts,
                         fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
 
                 // meanwhile do a local search
@@ -280,7 +280,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
                 System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, urls, urlStore, rcContainers, peer, plasmaSwitchboard.urlBlacklist, snippetCache,
+                        words, urls, urlStore, wordIndex, rcContainers, peer, plasmaSwitchboard.urlBlacklist, snippetCache,
                         profileGlobal, ranking);
 
             }
@@ -357,7 +357,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
         assert (rcLocal != null);
         
-        indexContainer searchResult = new indexContainer(null, rcLocal.row());
+        indexContainer searchResult = wordIndex.emptyContainer(null);
         long preorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_PRESORT);
         
         profileLocal.startTimer();

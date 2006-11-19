@@ -165,7 +165,7 @@ public final class plasmaWordIndexAssortmentCluster implements indexRI {
         indexContainer c;
         Iterator i = newContainer.entries();
         for (int j = clusterStart; j >= 1; j--) {
-            c = new indexContainer(newContainer.getWordHash(), payloadrow);
+            c = new indexContainer(newContainer.getWordHash(), payloadrow, false);
             for (int k = 0; k < j; k++) {
                 if (i.hasNext()) {
                     c.add((indexRWIEntry) i.next(), newContainer.updated());
@@ -179,7 +179,7 @@ public final class plasmaWordIndexAssortmentCluster implements indexRI {
     }
     
     public indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
-        indexContainer container = new indexContainer(wordHash, payloadrow);
+        indexContainer container = new indexContainer(wordHash, payloadrow, false);
         container.add(newEntry);
         return addEntries(container, updateTime, dhtCase);
     }
@@ -220,7 +220,7 @@ public final class plasmaWordIndexAssortmentCluster implements indexRI {
             Iterator i = newContainer.entries();
             for (int j = testsize - 1; j >= 0; j--) {
                 if (spaces[j] == 0) continue;
-                c = new indexContainer(newContainer.getWordHash(), payloadrow);
+                c = new indexContainer(newContainer.getWordHash(), payloadrow, false);
                 for (int k = 0; k <= j; k++) {
                     assert (i.hasNext());
                     c.add((indexRWIEntry) i.next(), newContainer.updated());
@@ -258,7 +258,7 @@ public final class plasmaWordIndexAssortmentCluster implements indexRI {
     
     public indexContainer deleteContainer(String wordHash, long maxTime) {
         // removes all records from all the assortments and return them
-        indexContainer buffer, record = new indexContainer(wordHash, payloadrow);
+        indexContainer buffer, record = new indexContainer(wordHash, payloadrow, false);
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         long remainingTime;
         for (int i = 0; i < clusterCount; i++) {
@@ -283,7 +283,7 @@ public final class plasmaWordIndexAssortmentCluster implements indexRI {
     */
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
-        indexContainer buffer, record = new indexContainer(wordHash, payloadrow);
+        indexContainer buffer, record = new indexContainer(wordHash, payloadrow, false);
         boolean found = false;
         for (int i = 0; i < clusterCount; i++) {
             buffer = assortments[i].remove(wordHash);
@@ -299,7 +299,7 @@ public final class plasmaWordIndexAssortmentCluster implements indexRI {
     }
 
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
-        indexContainer buffer, record = new indexContainer(wordHash, payloadrow);
+        indexContainer buffer, record = new indexContainer(wordHash, payloadrow, false);
         int initialSize = urlHashes.size();
         for (int i = 0; i < clusterCount; i++) {
             buffer = assortments[i].remove(wordHash);
@@ -324,7 +324,7 @@ public final class plasmaWordIndexAssortmentCluster implements indexRI {
 
     public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxTime) {
         // collect all records from all the assortments and return them
-        indexContainer buffer, record = new indexContainer(wordHash, payloadrow);
+        indexContainer buffer, record = new indexContainer(wordHash, payloadrow, false);
         long timeout = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         for (int i = 0; i < clusterCount; i++) {
             buffer = assortments[i].get(wordHash);

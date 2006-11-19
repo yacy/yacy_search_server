@@ -234,7 +234,7 @@ public class plasmaWordIndexFileCluster implements indexRI {
         if ((maxTime < 0) || (maxTime > 60000)) maxTime=60000; // maximum is one minute
         if (exists(wordHash)) {
             plasmaWordIndexFile entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
-            indexContainer container = new indexContainer(wordHash, payloadrow);
+            indexContainer container = new indexContainer(wordHash, payloadrow, false);
             indexRWIEntry entry;
             Iterator i = entity.elements(true);
             while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) {
@@ -243,7 +243,7 @@ public class plasmaWordIndexFileCluster implements indexRI {
             }
             return container;
         } else {
-            return new indexContainer(wordHash, payloadrow);
+            return new indexContainer(wordHash, payloadrow, false);
         }
     }
     
@@ -258,7 +258,7 @@ public class plasmaWordIndexFileCluster implements indexRI {
     
     public indexContainer deleteContainer(String wordHash) {
         plasmaWordIndexFile.removePlasmaIndex(databaseRoot, wordHash);
-        return new indexContainer(wordHash, payloadrow);
+        return new indexContainer(wordHash, payloadrow, false);
     }
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
@@ -303,7 +303,7 @@ public class plasmaWordIndexFileCluster implements indexRI {
     }
     
     public indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
-        indexContainer container = new indexContainer(wordHash, payloadrow);
+        indexContainer container = new indexContainer(wordHash, payloadrow, false);
         container.add(newEntry);
         return addEntries(container, updateTime, dhtCase);
     }

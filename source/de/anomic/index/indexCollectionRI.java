@@ -104,7 +104,7 @@ public class indexCollectionRI implements indexRI {
             byte[] key = (byte[]) oo[0];
             kelondroRowSet collection = (kelondroRowSet) oo[1];
             if (collection == null) return null;
-            return new indexContainer(new String(key), collection);
+            return new indexContainer(new String(key), collection, true);
         }
         
         public void remove() {
@@ -118,7 +118,7 @@ public class indexCollectionRI implements indexRI {
             kelondroRowSet collection = collectionIndex.get(wordHash.getBytes(), deleteIfEmpty);
             if (collection != null) collection.select(urlselection);
             if ((collection == null) || (collection.size() == 0)) return null;
-            return new indexContainer(wordHash, collection);
+            return new indexContainer(wordHash, collection, true);
         } catch (IOException e) {
             return null;
         }
@@ -128,7 +128,7 @@ public class indexCollectionRI implements indexRI {
         try {
             kelondroRowSet collection = collectionIndex.delete(wordHash.getBytes());
             if (collection == null) return null;
-            return new indexContainer(wordHash, collection);
+            return new indexContainer(wordHash, collection, true);
         } catch (IOException e) {
             return null;
         }
@@ -153,7 +153,7 @@ public class indexCollectionRI implements indexRI {
     }
 
     public synchronized indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
-        indexContainer container = new indexContainer(wordHash, collectionIndex.payloadRow());
+        indexContainer container = new indexContainer(wordHash, collectionIndex.payloadRow(), true);
         container.add(newEntry);
         return addEntries(container, updateTime, dhtCase);
     }

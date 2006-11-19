@@ -218,7 +218,7 @@ public final class plasmaWordIndexAssortment {
         if (row == null) return null;
         String wordHash = row.getColString(0, null);
         final long updateTime = row.getColLong(2);
-        indexContainer container = new indexContainer(wordHash, payloadrow);
+        indexContainer container = new indexContainer(wordHash, payloadrow, false);
         int al = assortmentCapacity(row.objectsize());
         for (int i = 0; i < al; i++) {
             container.add(new indexRWIEntry[] { new indexRWIEntryOld(row.getColBytes(3 + i)) }, updateTime);

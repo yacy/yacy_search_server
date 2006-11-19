@@ -130,7 +130,7 @@ public class kelondroRowCollection {
     }
     
     public static final int exportOverheadSize = 14;
-    
+
     public byte[] exportCollection() {
         // returns null if the collection is empty
         trim();
@@ -147,7 +147,7 @@ public class kelondroRowCollection {
         entry.setCol(exp_collection, chunkcache);
         return entry.bytes();
     }
-    
+
     public kelondroRow row() {
         return this.rowdef;
     }
@@ -155,7 +155,7 @@ public class kelondroRowCollection {
     private final void ensureSize(int elements) {
         int needed = elements * rowdef.objectsize();
         if (chunkcache.length >= needed) return;
-        byte[] newChunkcache = new byte[needed * 12 / 10]; // increase space by 20%
+        byte[] newChunkcache = new byte[needed * 2]; // increase space
         System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
         chunkcache = newChunkcache;
         newChunkcache = null;
@@ -441,7 +441,7 @@ public class kelondroRowCollection {
 
     protected final int swap(int i, int j, int p) {
         if (i == j) return p;
-        if (this.chunkcount * this.rowdef.objectsize() < this.chunkcache.length) {
+        if ((this.chunkcount + 1) * this.rowdef.objectsize() < this.chunkcache.length) {
             // there is space in the chunkcache that we can use as buffer
             System.arraycopy(chunkcache, this.rowdef.objectsize() * i, chunkcache, chunkcache.length - this.rowdef.objectsize(), this.rowdef.objectsize());
             System.arraycopy(chunkcache, this.rowdef.objectsize() * j, chunkcache, this.rowdef.objectsize() * i, this.rowdef.objectsize());

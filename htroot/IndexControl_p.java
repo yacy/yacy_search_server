@@ -304,7 +304,8 @@ public class IndexControl_p {
                     }
                     i++;
                 }
-                prop.put("keyhashsimilar_rows", rows);
+                prop.put("keyhashsimilar_rows_"+rows+"_cols", cols);
+                prop.put("keyhashsimilar_rows", rows + 1);
                 prop.put("result", "");
             } catch (IOException e) {
                 prop.put("result", "unknown keys: " + e.getMessage());
@@ -439,7 +440,7 @@ public class IndexControl_p {
 
             prop.put("genUrlList_keyHash", keyhash);
             
-            if (index.size() == 0) {
+            if ((index == null) || (index.size() == 0)) {
                 prop.put("genUrlList", 1);
             } else {
                 final Iterator en = index.entries();

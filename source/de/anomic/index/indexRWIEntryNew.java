@@ -52,7 +52,7 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
             new kelondroColumn("y", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "lother"),
             new kelondroColumn("m", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "urlLength"),
             new kelondroColumn("n", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "urlComps"),
-            new kelondroColumn("g", kelondroColumn.celltype_string,    kelondroColumn.encoder_bytes, 1, "typeofword"),
+            new kelondroColumn("g", kelondroColumn.celltype_binary,    kelondroColumn.encoder_bytes, 1, "typeofword"),
             new kelondroColumn("z", kelondroColumn.celltype_binary,    kelondroColumn.encoder_bytes, 4, "flags"),
             new kelondroColumn("c", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "hitcount"),
             new kelondroColumn("t", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  2, "posintext"),
@@ -132,7 +132,7 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         this.entry.setCol(col_lother, outlinksOther);
         this.entry.setCol(col_urlLength, urlLength);
         this.entry.setCol(col_urlComps, urlComps);
-        this.entry.setCol(col_typeofword, 0); // TODO: grammatical classification
+        this.entry.setCol(col_typeofword, new byte[]{(byte) 0}); // TODO: grammatical classification
         this.entry.setCol(col_flags, null); // TODO: generate flags
         this.entry.setCol(col_hitcount, hitcount);
         this.entry.setCol(col_posintext, posintext);
@@ -159,7 +159,7 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         int domlen = plasmaURL.domLengthEstimation(oldEntry.urlHash());
         this.entry.setCol(col_urlLength, domlen * 2); // estimated
         this.entry.setCol(col_urlComps, domlen / 3); // estimated
-        this.entry.setCol(col_typeofword, 0);
+        this.entry.setCol(col_typeofword, new byte[]{(byte) 0});
         this.entry.setCol(col_flags, null);
         this.entry.setCol(col_hitcount, oldEntry.hitcount());
         this.entry.setCol(col_posintext, oldEntry.posintext());
