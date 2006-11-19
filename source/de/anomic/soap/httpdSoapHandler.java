@@ -244,6 +244,9 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     	} catch (Exception e) {
     		this.theLogger.logSevere("Unable to initialize soap engine",e);
     		throw e;
+    	} catch (Error e) {
+    		this.theLogger.logSevere("Unable to initialize soap engine",e);
+    		throw e;    		
     	}
     	
     	try {
@@ -261,6 +264,9 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     	} catch (Exception e) {
     		this.theLogger.logSevere("Unable to deploy default soap services.",e);
     		throw e;
+    	} catch (Error e) {
+    		this.theLogger.logSevere("Unable to deploy default soap services.",e);
+    		throw e;    		
     	}
     }
     
