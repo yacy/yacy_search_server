@@ -175,7 +175,7 @@ public class dbtest {
             kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength);
             if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
-                table = new kelondroCache(new kelondroTree(tablefile, buffer / 2, preload, testRow), buffer / 2, true, true);
+                table = new kelondroCache(new kelondroTree(tablefile, buffer / 2, preload, testRow), buffer / 2, true, false);
             }
             if (dbe.equals("kelondroSplittedTree")) {
                 File tablepath = new File(tablename).getParentFile();

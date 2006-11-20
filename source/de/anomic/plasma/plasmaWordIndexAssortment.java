@@ -112,7 +112,7 @@ public final class plasmaWordIndexAssortment {
         this.log = log;
         // open assortment tree file
         long start = System.currentTimeMillis();
-        assortments = new kelondroCache(kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength)), bufferSize / 2, true, true);
+        assortments = new kelondroCache(kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength)), bufferSize / 2, true, false);
         long stop = System.currentTimeMillis();
         if (log != null) log.logConfig("Opened Assortment, " +
                                   assortments.size() + " entries, width " +
@@ -240,7 +240,7 @@ public final class plasmaWordIndexAssortment {
             assortmentFile.renameTo(backupFile);
             log.logInfo("a back-up of the deleted assortment file is in " + backupFile.toString());
             if (assortmentFile.exists()) assortmentFile.delete();
-            assortments = new kelondroCache(kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength)), bufferSize / 2, true, true);
+            assortments = new kelondroCache(kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength)), bufferSize / 2, true, false);
         } catch (Exception e) {
             // if this fails, delete the file
             if (!(assortmentFile.delete())) throw new RuntimeException("cannot delete assortment database");

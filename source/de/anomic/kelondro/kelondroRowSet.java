@@ -341,12 +341,12 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         private int p, bound;
         
         public rowIterator(boolean up, boolean rotating, byte[] firstKey) {
+            // see that all elements are sorted
+            shape();
             this.up = up;
             this.rot = rotating;
             this.first = firstKey;
             this.bound = sortBound;
-            // see that all elements are sorted
-            shape();
             if (first == null) {
                 p = 0;
             } else {
