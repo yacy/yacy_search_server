@@ -27,7 +27,7 @@ package de.anomic.kelondro;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
 
@@ -35,11 +35,11 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     private static final int removeMaxSize = 100;
 
     private kelondroProfile profile;
-    private TreeSet removeMarker;
+    private TreeMap removeMarker;
 
     public kelondroRowSet(kelondroRow rowdef, int objectCount, byte[] cache, kelondroOrder sortOrder, int sortColumn, int sortBound) {
         super(rowdef, objectCount, cache, sortOrder, sortColumn, sortBound);
-        this.removeMarker = new TreeSet();
+        this.removeMarker = new TreeMap();
         this.profile = new kelondroProfile();
     }
         
@@ -51,13 +51,13 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
 
     public kelondroRowSet(kelondroRow rowdef, int objectCount) {
         super(rowdef, objectCount);
-        this.removeMarker = new TreeSet();
+        this.removeMarker = new TreeMap();
         this.profile = new kelondroProfile();
     }
     
     public kelondroRowSet(kelondroRow rowdef, byte[] exportedCollectionRowinstance) {
         super(rowdef, exportedCollectionRowinstance);
-        this.removeMarker = new TreeSet();
+        this.removeMarker = new TreeMap();
         this.profile = new kelondroProfile();
     }
     
@@ -150,7 +150,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
                 entry = get(p);
                 if (p < sortBound) {
                     // mark entry as to-be-deleted
-                    removeMarker.add(new Integer(p));
+                    removeMarker.put(new Integer(p), entry.getColBytes(super.sortColumn));
                     if (removeMarker.size() > removeMaxSize) resolveMarkedRemoved();
                 } else {
                     // remove directly by swap
@@ -165,7 +165,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     private boolean isMarkedRemoved(int index) {
-        return removeMarker.contains(new Integer(index));
+        return removeMarker.containsKey(new Integer(index));
     }
     
     public void shape() {
@@ -187,15 +187,17 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             return;
         }
         
-        Integer nxt = (Integer) removeMarker.first();
+        Integer nxt = (Integer) removeMarker.firstKey();
         removeMarker.remove(nxt);
         int idx = nxt.intValue();
         assert (idx < sortBound);
         int d = 1;
+        byte[] a;
         while (removeMarker.size() > 0) {
-            nxt = (Integer) removeMarker.first();
+            nxt = (Integer) removeMarker.firstKey();
+            a = (byte[]) removeMarker.remove(nxt);
+            assert kelondroNaturalOrder.compares(a, 0, a.length, get(nxt.intValue()).getColBytes(this.sortColumn), 0, a.length) == 0;
             assert (nxt.intValue() < sortBound);
-            removeMarker.remove(nxt);
             super.removeShift(idx, d, nxt.intValue());
             idx = nxt.intValue() - d;
             d++;

@@ -85,11 +85,13 @@ public class indexContainer extends kelondroRowSet {
     }
 
     public int add(indexRWIEntry entry) {
+        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
         this.addUnique(entry.toKelondroEntry());
         return 1;
     }
 
     public int add(indexRWIEntry entry, long updateTime) {
+        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
         this.add(entry);
         this.lastTimeWrote = updateTime;
         return 1;
@@ -121,6 +123,7 @@ public class indexContainer extends kelondroRowSet {
     }
     
     private boolean addi(indexRWIEntry entry) {
+        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
         // returns true if the new entry was added, false if it already existed
         kelondroRow.Entry oldEntryRow = this.put(entry.toKelondroEntry());
         if (oldEntryRow == null) {

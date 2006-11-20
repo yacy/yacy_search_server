@@ -56,6 +56,8 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIEntryNew;
+import de.anomic.index.indexRWIEntryOld;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -512,7 +514,7 @@ public final class yacyClient {
                 urlManager.stack(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
 
                 // save the url entry
-                final indexRWIEntry entry;
+                indexRWIEntry entry;
                 if (urlEntry.word() == null) {
                     // the old way to define words
                     int urlLength = comp.url().toNormalform().length();
@@ -546,6 +548,9 @@ public final class yacyClient {
                 }
                 // add the url entry to the word indexes
                 for (int m = 0; m < words; m++) {
+                    if ((wordIndex.useCollectionIndex) && (entry instanceof indexRWIEntryOld)) {
+                        entry = new indexRWIEntryNew((indexRWIEntryOld) entry);
+                    }
                     container[m].add(new indexRWIEntry[]{entry}, System.currentTimeMillis());
                 }
                 // store url hash for statistics
