@@ -49,6 +49,8 @@
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
@@ -150,13 +152,9 @@ public class ConfigBasic {
 
         // check if peer name already exists
         yacySeed oldSeed = yacyCore.seedDB.lookupByName(peerName);
-        if ((peerName.length() >= 3) && (oldSeed == null) && (!(env.getConfig("peerName", "").equals(peerName)))) {
+        if ((oldSeed == null) && (!(env.getConfig("peerName", "").equals(peerName)))) {
             // the name is new
-            boolean nameOK = (peerName.length() <= 80);
-            for (int i = 0; i < peerName.length(); i++) {
-                if ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_".indexOf(peerName.charAt(i)) < 0)
-                    nameOK = false;
-            }
+        	boolean nameOK = Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches();
             if (nameOK) env.setConfig("peerName", peerName);
         }
  
