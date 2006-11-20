@@ -224,7 +224,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaRankingDistribution   rankingOwnDistribution;
     public  plasmaRankingDistribution   rankingOtherDistribution;
     public  HashMap                     outgoingCookies, incomingCookies;
-    public  kelondroMapTable              facilityDB;
+    public  kelondroMapTable            facilityDB;
     public  plasmaParser                parser;
     public  long                        proxyLastAccess;
     public  yacyCore                    yc;

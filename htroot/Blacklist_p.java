@@ -318,7 +318,7 @@ public class Blacklist_p {
             int peerCount = 0;
             try {
                 TreeMap hostList = new TreeMap();
-                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null);
+                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
                 while (e.hasMoreElements()) {
                     yacySeed seed = (yacySeed) e.nextElement();
                     if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);

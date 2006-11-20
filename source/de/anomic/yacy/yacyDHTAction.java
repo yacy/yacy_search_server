@@ -59,7 +59,7 @@ public class yacyDHTAction implements yacyPeerAction {
         this.seedCrawlReady = new kelondroMScoreCluster();
         // init crawl-ready table
         try {
-            Enumeration en = seedDB.seedsConnected(true, false, null);
+            Enumeration en = seedDB.seedsConnected(true, false, null, (float) 0.0);
             yacySeed ys;
             while (en.hasMoreElements()) {
                 ys = (yacySeed) en.nextElement();
@@ -69,27 +69,29 @@ public class yacyDHTAction implements yacyPeerAction {
         }
     }
    
-    public Enumeration getDHTSeeds(boolean up, String firstHash) {
+    public Enumeration getDHTSeeds(boolean up, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
-	return new seedDHTEnum(up, firstHash);
+        return new seedDHTEnum(up, firstHash, minVersion);
     }
 
     class seedDHTEnum implements Enumeration {
 
-	Enumeration e1, e2;
+        Enumeration e1, e2;
         boolean up;
         int steps;
+        float minVersion;
         
-	public seedDHTEnum(boolean up, String firstHash) {
+        public seedDHTEnum(boolean up, String firstHash, float minVersion) {
             this.steps = seedDB.sizeConnected();
             this.up = up;
-            this.e1 = seedDB.seedsConnected(up, false, firstHash);
+            this.minVersion = minVersion;
+            this.e1 = seedDB.seedsConnected(up, false, firstHash, minVersion);
             this.e2 = null;
-	}
+        }
         
         public boolean hasMoreElements() {
-	    return (steps > 0) && ((e2 == null) || (e2.hasMoreElements()));
-	}
+            return (steps > 0) && ((e2 == null) || (e2.hasMoreElements()));
+        }
 
         public Object nextElement() {
             if (steps == 0) return null;
@@ -98,13 +100,13 @@ public class yacyDHTAction implements yacyPeerAction {
                 Object n = e1.nextElement();
                 if (!(e1.hasMoreElements())) {
                     e1 = null;
-                    e2 = seedDB.seedsConnected(up, false, null);
+                    e2 = seedDB.seedsConnected(up, false, null, minVersion);
                 }
                 return n;
             } else {
                 if (e2 == null) {
                     e1 = null;
-                    e2 = seedDB.seedsConnected(up, false, null);
+                    e2 = seedDB.seedsConnected(up, false, null, minVersion);
                 }
                 return e2.nextElement();
             }
@@ -120,17 +122,17 @@ public class yacyDHTAction implements yacyPeerAction {
     
     class acceptRemoteIndexSeedEnum implements Enumeration {
 
-	Enumeration se;
+        Enumeration se;
         yacySeed nextSeed;
         
-	public acceptRemoteIndexSeedEnum(String starthash) {
-            se = getDHTSeeds(true, starthash);
+        public acceptRemoteIndexSeedEnum(String starthash) {
+            se = getDHTSeeds(true, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX);
             nextSeed = nextInternal();
-	}
+        }
         
         public boolean hasMoreElements() {
-	    return nextSeed != null;
-	}
+            return nextSeed != null;
+        }
 
         private yacySeed nextInternal() {
             yacySeed s;
@@ -148,11 +150,11 @@ public class yacyDHTAction implements yacyPeerAction {
             return null;
         }
         
-	public Object nextElement() {
+        public Object nextElement() {
             yacySeed next = nextSeed;
             nextSeed = nextInternal();
             return next;
-	}
+        }
 
     }
     
@@ -162,25 +164,25 @@ public class yacyDHTAction implements yacyPeerAction {
     
     class acceptRemoteCrawlSeedEnum implements Enumeration {
 
-	Enumeration se;
+        Enumeration se;
         yacySeed nextSeed;
         boolean available;
         
-	public acceptRemoteCrawlSeedEnum(String starthash, boolean available) {
-            this.se = getDHTSeeds(true, starthash);
+        public acceptRemoteCrawlSeedEnum(String starthash, boolean available) {
+            this.se = getDHTSeeds(true, starthash, (float) 0.0);
             this.available = available;
             nextSeed = nextInternal();
-	}
+        }
         
         public boolean hasMoreElements() {
-	    return nextSeed != null;
-	}
+            return nextSeed != null;
+        }
 
         private yacySeed nextInternal() {
             yacySeed s;
             while (se.hasMoreElements()) {
                 s = (yacySeed) se.nextElement();
-		if (s == null) return null;
+                if (s == null) return null;
                 s.available = seedCrawlReady.getScore(s.hash);
                 if (available) {
                     if (seedCrawlReady.getScore(s.hash) < yacyCore.yacyTime()) return s;
@@ -191,11 +193,11 @@ public class yacyDHTAction implements yacyPeerAction {
             return null;
         }
         
-	public Object nextElement() {
+        public Object nextElement() {
             yacySeed next = nextSeed;
             nextSeed = nextInternal();
             return next;
-	}
+        }
 
     }
     

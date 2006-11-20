@@ -150,7 +150,7 @@ public class plasmaGrafics {
         // draw connected senior and principals
         int count = 0;
         int totalCount = 0;
-        Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null);
+        Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
         while (e.hasMoreElements() && count < maxCount) {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {

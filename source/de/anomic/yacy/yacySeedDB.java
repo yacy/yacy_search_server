@@ -257,32 +257,25 @@ public final class yacySeedDB {
         return new seedEnum(up, field, seedPotentialDB);
     }
     
-    public Enumeration seedsConnected(boolean up, boolean rot, String firstHash) {
+    public Enumeration seedsConnected(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
-        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedActiveDB);
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedActiveDB, minVersion);
     }
     
-    public Enumeration seedsDisconnected(boolean up, boolean rot, String firstHash) {
+    public Enumeration seedsDisconnected(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
-        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedPassiveDB);
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedPassiveDB, minVersion);
     }
     
-    public Enumeration seedsPotential(boolean up, boolean rot, String firstHash) {
+    public Enumeration seedsPotential(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
-        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedPotentialDB);
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedPotentialDB, minVersion);
     }
     
     public yacySeed anySeedVersion(float minVersion) {
         // return just any seed that has a specific minimum version number
-        yacySeed seed;
-        Enumeration e = seedsConnected(true, true, yacySeed.randomHash());
-        int maxtry = seedActiveDB.size();
-        for (int i = 0; i < maxtry; i++) {
-            seed = (yacySeed) e.nextElement();
-            System.out.println("ENUMSEED: " + ((seed == null) ? "NULL" : (seed.hash + ":" + seed.getName())));
-            if ((seed != null) && (seed.getVersion() >= minVersion)) return seed;
-        }
-        return null;
+        Enumeration e = seedsConnected(true, true, yacySeed.randomHash(), minVersion);
+        return (yacySeed) e.nextElement();
     }
 
     public yacySeed[] seedsByAge(boolean up, int count) {
@@ -292,7 +285,7 @@ public final class yacySeedDB {
         kelondroMScoreCluster seedScore = new kelondroMScoreCluster();
         yacySeed ys;
         long absage;
-        Enumeration s = seedsConnected(true, false, null);
+        Enumeration s = seedsConnected(true, false, null, (float) 0.0);
         int searchcount = 1000;
         if (searchcount > sizeConnected()) searchcount = sizeConnected();
         try {
@@ -508,7 +501,7 @@ public final class yacySeedDB {
         if (seed != null) return seed;
 
         // enumerate the cache and simultanous insert values
-        Enumeration e = seedsConnected(true, false, null);
+        Enumeration e = seedsConnected(true, false, null, (float) 0.0);
         String name;
         while (e.hasMoreElements()) {
             seed = (yacySeed) e.nextElement();
@@ -551,7 +544,7 @@ public final class yacySeedDB {
         
         if (lookupConnected) {
             // enumerate the cache and simultanous insert values
-            Enumeration e = seedsConnected(true, false, null);
+            Enumeration e = seedsConnected(true, false, null, (float) 0.0);
 
             while (e.hasMoreElements()) {
                 try {
@@ -571,7 +564,7 @@ public final class yacySeedDB {
         
         if (lookupDisconnected) {
             // enumerate the cache and simultanous insert values
-            Enumeration e = seedsDisconnected(true, false, null);
+            Enumeration e = seedsDisconnected(true, false, null, (float) 0.0);
 
             while (e.hasMoreElements()) {
                 try {
@@ -591,7 +584,7 @@ public final class yacySeedDB {
         
         if (lookupPotential) {
             // enumerate the cache and simultanous insert values
-            Enumeration e = seedsPotential(true, false, null);
+            Enumeration e = seedsPotential(true, false, null, (float) 0.0);
 
             while (e.hasMoreElements()) {
                 try {
@@ -646,7 +639,7 @@ public final class yacySeedDB {
             
             // store other seeds
             yacySeed ys;
-            Enumeration se = seedsConnected(true, false, null);
+            Enumeration se = seedsConnected(true, false, null, (float) 0.0);
             while (se.hasMoreElements()) {
                 ys = (yacySeed) se.nextElement();
                 if (ys != null) {
@@ -853,12 +846,18 @@ public final class yacySeedDB {
         kelondroMap.mapIterator it;
         yacySeed nextSeed;
         kelondroMap database;
+        float minVersion;
         
-        public seedEnum(boolean up, boolean rot, byte[] firstKey, kelondroMap database) {
+        public seedEnum(boolean up, boolean rot, byte[] firstKey, kelondroMap database, float minVersion) {
             this.database = database;
+            this.minVersion = minVersion;
             try {
                 it = (firstKey == null) ? database.maps(up, rot) : database.maps(up, rot, firstKey);
-                nextSeed = internalNext();
+                while (true) {
+                    nextSeed = internalNext();
+                    if (nextSeed == null) break;
+                    if (nextSeed.getVersion() >= this.minVersion) break;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 yacyCore.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
@@ -896,6 +895,7 @@ public final class yacySeedDB {
         public yacySeed internalNext() {
             if ((it == null) || (!(it.hasNext()))) return null;
             Map dna = (Map) it.next();
+            if (dna == null) return null;
             String hash = (String) dna.remove("key");
             //while (hash.length() < commonHashLength) { hash = hash + "_"; }
             return new yacySeed(hash, dna);
@@ -903,7 +903,11 @@ public final class yacySeedDB {
         
         public Object nextElement() {
             yacySeed seed = nextSeed;
-            nextSeed = internalNext();
+            while (true) {
+                nextSeed = internalNext();
+                if (nextSeed == null) break;
+                if (nextSeed.getVersion() >= this.minVersion) break;
+            }
             return seed;
         }
         
