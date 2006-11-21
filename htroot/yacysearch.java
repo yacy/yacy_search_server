@@ -140,7 +140,7 @@ public class yacysearch {
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
-        //if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
+        if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
         final long searchtime = 1000 * Long.parseLong(post.get("time", "10"));
         String urlmask = "";
         if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {

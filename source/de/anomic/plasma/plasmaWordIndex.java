@@ -49,7 +49,6 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
-import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
@@ -65,7 +64,7 @@ public final class plasmaWordIndex implements indexRI {
     private static final kelondroRow payloadrownew = indexRWIEntryNew.urlEntryRow;
     
     private final File                             oldDatabaseRoot;
-    private final kelondroOrder                    indexOrder = new kelondroNaturalOrder(true);
+    private final kelondroOrder                    indexOrder = kelondroBase64Order.enhancedCoder;
     private final indexRAMRI                       dhtOutCache, dhtInCache;
     private final indexCollectionRI                collections;          // new database structure to replace AssortmentCluster and FileCluster
     private int                                    assortmentBufferSize; // kb
@@ -618,6 +617,8 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     private Iterator wordContainers(String startWordHash, int resourceLevel) throws IOException {
+        kelondroOrder containerOrder = new indexContainerOrder((kelondroOrder) indexOrder.clone());
+        containerOrder.rotate(startWordHash.getBytes());
         if (resourceLevel == plasmaWordIndex.RL_RAMCACHE) {
             return dhtOutCache.wordContainers(startWordHash, false);
         }
@@ -625,7 +626,7 @@ public final class plasmaWordIndex implements indexRI {
             return new kelondroMergeIterator(
                             dhtOutCache.wordContainers(startWordHash, false),
                             collections.wordContainers(startWordHash, false),
-                            new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                            containerOrder,
                             indexContainer.containerMergeMethod,
                             true);
         } else {
@@ -633,7 +634,7 @@ public final class plasmaWordIndex implements indexRI {
                 return new kelondroMergeIterator(
                             dhtOutCache.wordContainers(startWordHash, false),
                             (assortmentCluster == null) ? null : assortmentCluster.wordContainers(startWordHash, true, false),
-                            new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                            containerOrder,
                             indexContainer.containerMergeMethod,
                             true);
             }
@@ -642,11 +643,11 @@ public final class plasmaWordIndex implements indexRI {
                             new kelondroMergeIterator(
                                      dhtOutCache.wordContainers(startWordHash, false),
                                      (assortmentCluster == null) ? null : assortmentCluster.wordContainers(startWordHash, true, false),
-                                     new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                                     containerOrder,
                                      indexContainer.containerMergeMethod,
                                      true),
                             backend.wordContainers(startWordHash, false),
-                            new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                            containerOrder,
                             indexContainer.containerMergeMethod,
                             true);
             }

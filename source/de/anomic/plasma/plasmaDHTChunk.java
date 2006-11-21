@@ -229,6 +229,10 @@ public class plasmaDHTChunk {
                     // iterate over indexes to fetch url entries and store them in the urlCache
                     while ((urlIter.hasNext()) && (maxcount > refcount) && (System.currentTimeMillis() < timeout)) {
                         iEntry = (indexRWIEntry) urlIter.next();
+                        if ((iEntry == null) || (iEntry.urlHash() == null)) {
+                            urlIter.remove();
+                            continue;
+                        }
                         lurl = lurls.load(iEntry.urlHash(), iEntry);
                         if ((lurl == null) || (lurl.comp().url() == null)) {
                             //yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + iEntry.urlHash() + "' for word hash " + container.getWordHash());
