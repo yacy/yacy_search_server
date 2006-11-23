@@ -52,6 +52,7 @@ import java.util.Map;
 
 import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCollectionIndex;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
@@ -60,7 +61,6 @@ import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
-import de.anomic.tools.bitfield;
 
 public class plasmaRankingCRProcess {
     
@@ -98,11 +98,11 @@ public class plasmaRankingCRProcess {
         String key;
         kelondroAttrSeq.Entry new_entry, acc_entry;
         int FUDate, FDDate, LUDate, UCount, PCount, ACount, VCount, Vita;
-        bitfield acc_flags, new_flags;
+        kelondroBitfield acc_flags, new_flags;
         while (el.hasNext()) {
             key = (String) el.next();
             new_entry = source_cr.getEntry(key);
-            new_flags = new bitfield(kelondroBase64Order.enhancedCoder.encodeLong((long) new_entry.getAttr("Flags", 0), 1).getBytes());
+            new_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong((long) new_entry.getAttr("Flags", 0), 1).getBytes());
             // enrich information with additional values
             if ((acc_entry = acc.getEntry(key)) != null) {
                 FUDate = (int) acc_entry.getAttr("FUDate", 0);
@@ -123,11 +123,11 @@ public class plasmaRankingCRProcess {
                 VCount += (new_flags.get(3)) ? 1 : 0;
                 
                 // 'OR' the flags
-                acc_flags = new bitfield(kelondroBase64Order.enhancedCoder.encodeLong((long) acc_entry.getAttr("Flags", 0), 1).getBytes());
+                acc_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong((long) acc_entry.getAttr("Flags", 0), 1).getBytes());
                 for (int i = 0; i < 6; i++) {
                     if (new_flags.get(i)) acc_flags.set(i, true);
                 }
-                acc_entry.setAttr("Flags", (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(acc_flags.getBytes())));
+                acc_entry.setAttr("Flags", (int) kelondroBase64Order.enhancedCoder.decodeLong(acc_flags.exportB64()));
             } else {
                 // initialize counters and dates
                 acc_entry = acc.newEntry(key, new_entry.getAttrs(), new_entry.getSeqSet());
@@ -172,11 +172,11 @@ public class plasmaRankingCRProcess {
         kelondroAttrSeq.Entry new_entry;
         kelondroRow.Entry acc_entry;
         int FUDate, FDDate, LUDate, UCount, PCount, ACount, VCount, Vita;
-        bitfield acc_flags, new_flags;
+        kelondroBitfield acc_flags, new_flags;
         while (el.hasNext()) {
             key = (String) el.next();
             new_entry = source_cr.getEntry(key);
-            new_flags = new bitfield(kelondroBase64Order.enhancedCoder.encodeLong((long) new_entry.getAttr("Flags", 0), 1).getBytes());
+            new_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong((long) new_entry.getAttr("Flags", 0), 1).getBytes());
             // enrich information with additional values
             if ((acc_entry = acc.get(key.getBytes())) != null) {
                 FUDate = (int) acc_entry.getColLong("FUDate", 0);
@@ -197,11 +197,11 @@ public class plasmaRankingCRProcess {
                 VCount += (new_flags.get(3)) ? 1 : 0;
                 
                 // 'OR' the flags
-                acc_flags = new bitfield(kelondroBase64Order.enhancedCoder.encodeLong(acc_entry.getColLong("Flags", 0), 1).getBytes());
+                acc_flags = new kelondroBitfield(kelondroBase64Order.enhancedCoder.encodeLong(acc_entry.getColLong("Flags", 0), 1).getBytes());
                 for (int i = 0; i < 6; i++) {
                     if (new_flags.get(i)) acc_flags.set(i, true);
                 }
-                acc_entry.setCol("Flags", (int) kelondroBase64Order.enhancedCoder.decodeLong(new String(acc_flags.getBytes())));
+                acc_entry.setCol("Flags", (int) kelondroBase64Order.enhancedCoder.decodeLong(acc_flags.exportB64()));
             } else {
                 // initialize counters and dates
                 acc_entry = acc.row().newEntry();

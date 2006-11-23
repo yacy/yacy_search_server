@@ -136,6 +136,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroMapTable;
@@ -155,7 +156,6 @@ import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyClient;
@@ -1497,7 +1497,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (document == null) return;
             } catch (ParserException e) {
                 this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
-                addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorPeerHash, entry.anchorName(), e.getErrorCode(), new bitfield());
+                addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorPeerHash, entry.anchorName(), e.getErrorCode(), new kelondroBitfield());
                 if (document != null) {
                     document.close();
                     document = null;
@@ -1587,9 +1587,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             new byte[0],                                         // md5
                             (int) entry.size(),                                  // size
                             condenser.RESULT_NUMB_WORDS,                         // word count
-                            plasmaURL.docType(document.getMimeType()), // doctype
-                            new bitfield(4),                                     // flags
-                            plasmaURL.language(entry.url()),           // language
+                            plasmaURL.docType(document.getMimeType()),           // doctype
+                            condenser.RESULT_FLAGS,                              // flags
+                            plasmaURL.language(entry.url()),                     // language
                             0,0,0,0,0,0
                     );
                     /* ========================================================================
@@ -1672,7 +1672,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 wentry = (Map.Entry) i.next();
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
-                                String wordHash = plasmaURL.word2hash(word);
+                                String wordHash = plasmaCondenser.word2hash(word);
                                 indexRWIEntry wordIdxEntry = wordIndex.newRWIEntry(
                                             urlHash,
                                             urlLength, urlComps,
@@ -1692,7 +1692,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                             doctype,
                                             ioLinks[0].intValue(),
                                             ioLinks[1].intValue(),
-                                            true
+                                            condenser.RESULT_FLAGS
                                         );
                                 indexContainer wordIdxContainer = wordIndex.emptyContainer(wordHash);
                                 wordIdxContainer.add(wordIdxEntry);
@@ -1764,7 +1764,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         }
                     } else {
                         log.logFine("Not Indexed Resource '" + entry.normalizedURLString() + "': process case=" + processCase);
-                        addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new bitfield());
+                        addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
                     }
                 } catch (Exception ee) {
                     if (ee instanceof InterruptedException) throw (InterruptedException)ee;
@@ -1776,7 +1776,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
                         yacyClient.crawlReceipt(initiatorPeer, "crawl", "exception", ee.getMessage(), null, "");
                     }
-                    addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new bitfield());
+                    addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new kelondroBitfield());
                 }
                 
             } else {
@@ -1784,7 +1784,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 checkInterruption();
                 
                 log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
-                addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, noIndexReason, new bitfield());
+                addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, noIndexReason, new kelondroBitfield());
                 if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
                     yacyClient.crawlReceipt(initiatorPeer, "crawl", "rejected", noIndexReason, null, "");
                 }
@@ -2265,7 +2265,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         while (iter.hasNext()) {
             word = (String) iter.next();
             // delete the URL reference in this word index
-            if (wordIndex.removeEntry(plasmaURL.word2hash(word), urlhash, true)) count++;
+            if (wordIndex.removeEntry(plasmaCondenser.word2hash(word), urlhash, true)) count++;
         }
         return count;
     }
@@ -2280,7 +2280,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             entry = (Map.Entry) wordStatPropIterator.next();
             word = (String) entry.getKey();
             // delete the URL reference in this word index
-            if (wordIndex.removeEntry(plasmaURL.word2hash(word), urlhash, true)) count++;
+            if (wordIndex.removeEntry(plasmaCondenser.word2hash(word), urlhash, true)) count++;
         }
         return count;
     }
@@ -2516,7 +2516,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             String initiator, 
             String name, 
             String failreason, 
-            bitfield flags
+            kelondroBitfield flags
     ) {
         // create a new errorURL DB entry
         plasmaCrawlEURL.Entry ee = this.urlPool.errorURL.newEntry(

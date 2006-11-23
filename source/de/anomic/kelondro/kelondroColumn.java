@@ -34,6 +34,7 @@ public class kelondroColumn {
     public static final int celltype_binary     = 2;
     public static final int celltype_string     = 3;
     public static final int celltype_cardinal   = 4;
+    public static final int celltype_bitfield   = 5;
     
     public static final int encoder_none   = 0;
     public static final int encoder_b64e   = 1;
@@ -97,6 +98,9 @@ public class kelondroColumn {
                 this.cellwidth = -1; // yet undefined
             } else if (typename.equals("Cardinal")) {
                 this.celltype = celltype_cardinal;
+                this.cellwidth = -1; // yet undefined
+            } else if (typename.equals("Bitfield")) {
+                this.celltype = celltype_bitfield;
                 this.cellwidth = -1; // yet undefined
             } else {
                 throw new kelondroException("kelondroColumn - undefined type def '" + typename + "'");
@@ -232,6 +236,12 @@ public class kelondroColumn {
             break;
         case celltype_cardinal:
             s.append("Cardinal ");
+            s.append(nickname);
+            s.append('-');
+            s.append(cellwidth);
+            break;
+        case celltype_bitfield:
+            s.append("Bitfield ");
             s.append(nickname);
             s.append('-');
             s.append(cellwidth);

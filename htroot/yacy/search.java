@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.index.indexContainer;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
@@ -93,6 +94,7 @@ public final class search {
         final String  prefer = post.get("prefer", "");
         final String  filter = post.get("filter", ".*");
         final boolean includesnippet = post.get("includesnippet", "false").equals("true");
+        final kelondroBitfield constraint = kelondroBitfield(4, post.get("constraint", "______"));
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
@@ -131,7 +133,7 @@ public final class search {
         plasmaSearchQuery squery = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            squery = new plasmaSearchQuery(abstractSet, maxdist, prefer, count, duetime, filter);
+            squery = new plasmaSearchQuery(abstractSet, maxdist, prefer, count, duetime, filter, plasmaSearchQuery.catchall_constraint);
             squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + squery.anonymizedQueryHashes() + " - " + squery.wantedResults + " links");
 
@@ -158,7 +160,7 @@ public final class search {
             prop.put("joincount", 0);
         } else {
             // retrieve index containers from search request
-            squery = new plasmaSearchQuery(keyhashes, maxdist, prefer, count, duetime, filter);
+            squery = new plasmaSearchQuery(keyhashes, maxdist, prefer, count, duetime, filter, constraint);
             squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + squery.anonymizedQueryHashes() + " - " + squery.wantedResults + " links");
 
@@ -297,6 +299,11 @@ public final class search {
         yacyCore.seedDB.mySeed.incSI(links);
         yacyCore.seedDB.mySeed.incSU(links);
         return prop;
+    }
+
+    private static kelondroBitfield kelondroBitfield(int i, String string) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

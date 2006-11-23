@@ -75,17 +75,18 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.index.indexURLEntryOld;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexAssortmentCluster;
@@ -98,7 +99,6 @@ import de.anomic.server.serverPlainSwitch;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.bitfield;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
@@ -808,7 +808,7 @@ public final class yacy {
         try {
             String word;
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(wordlist)));
-            while ((word = br.readLine()) != null) wordmap.put(plasmaURL.word2hash(word),word);
+            while ((word = br.readLine()) != null) wordmap.put(plasmaCondenser.word2hash(word),word);
             br.close();
         } catch (IOException e) {}
         return wordmap;
@@ -913,7 +913,7 @@ public final class yacy {
         Iterator i = stopwords.iterator();
         while (i.hasNext()) {
             w = (String) i.next();
-            f = plasmaWordIndexFile.wordHash2path(dbRoot, plasmaURL.word2hash(w));
+            f = plasmaWordIndexFile.wordHash2path(dbRoot, plasmaCondenser.word2hash(w));
             if (f.exists()) {
                 thisamount = f.length();
                 if (f.delete()) {
@@ -1173,7 +1173,7 @@ public final class yacy {
                             oldentry.size(), 
                             oldentry.wordCount(), 
                             oldentry.doctype(), 
-                            new bitfield(4), 
+                            new kelondroBitfield(4), 
                             oldentry.language(), 
                             0, 0, 0, 0, 0, 0);
                 pool.loadedURL.store(newentry);

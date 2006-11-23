@@ -27,6 +27,7 @@
 package de.anomic.index;
 
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroBitfield;
 
 public interface indexRWIEntry {
 
@@ -46,7 +47,7 @@ public interface indexRWIEntry {
     public int phrasecount();
     public String getLanguage();
     public char getType();
-    public boolean isLocal();
+    public kelondroBitfield flags();
     
     public void combineDistance(indexRWIEntry oe);
     public int worddistance();

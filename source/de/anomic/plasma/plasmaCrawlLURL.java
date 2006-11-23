@@ -67,6 +67,7 @@ import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.index.indexURLEntryNew;
 import de.anomic.index.indexURLEntryOld;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -78,7 +79,6 @@ import de.anomic.net.URL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaCrawlLURL {
@@ -273,7 +273,7 @@ public final class plasmaCrawlLURL {
             long size,
             int wc,
             char dt,
-            bitfield flags,
+            kelondroBitfield flags,
             String lang,
             int llocal,
             int lother,

@@ -51,6 +51,7 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.plasma.plasmaURL;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
@@ -58,7 +59,6 @@ import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
 
 public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlWorker {
@@ -297,7 +297,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
                 yacyCore.seedDB.mySeed.hash,
                 this.name,
                 (failreason==null)?"Unknown reason":failreason,
-                new bitfield()
+                new kelondroBitfield()
         );
         
         // store the entry

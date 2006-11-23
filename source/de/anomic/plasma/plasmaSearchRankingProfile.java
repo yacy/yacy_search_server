@@ -211,8 +211,8 @@ public class plasmaSearchRankingProfile {
         }
 
         // apply query-in-result matching
-        Set urlcomph = plasmaSearchQuery.words2hashSet(urlcomps);
-        Set descrcomph = plasmaSearchQuery.words2hashSet(descrcomps);
+        Set urlcomph = plasmaCondenser.words2hashSet(urlcomps);
+        Set descrcomph = plasmaCondenser.words2hashSet(descrcomps);
         Iterator shi = query.queryHashes.iterator();
         String queryhash;
         while (shi.hasNext()) {

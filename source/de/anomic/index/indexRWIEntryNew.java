@@ -27,6 +27,7 @@
 
 package de.anomic.index;
 
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRow.Entry;
@@ -53,7 +54,7 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
             new kelondroColumn("m", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "urlLength"),
             new kelondroColumn("n", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "urlComps"),
             new kelondroColumn("g", kelondroColumn.celltype_binary,    kelondroColumn.encoder_bytes, 1, "typeofword"),
-            new kelondroColumn("z", kelondroColumn.celltype_binary,    kelondroColumn.encoder_bytes, 4, "flags"),
+            new kelondroColumn("z", kelondroColumn.celltype_bitfield,  kelondroColumn.encoder_bytes, 4, "flags"),
             new kelondroColumn("c", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "hitcount"),
             new kelondroColumn("t", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  2, "posintext"),
             new kelondroColumn("r", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "posinphrase"),
@@ -79,7 +80,7 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
 
     // dynamic properties    
     private static final int col_typeofword    = 12; // g  1 grammatical classification
-    private static final int col_flags         = 13; // z  4 b64-encoded flags; this has space for 24 bit
+    private static final int col_flags         = 13; // z  4 b64-encoded appearance flags (24 bit, see definition below)
     private static final int col_hitcount      = 14; // c  1 number of occurrences of this word in text
     private static final int col_posintext     = 15; // t  2 first appearance of word in text
     private static final int col_posinphrase   = 16; // r  1 position of word in its phrase
@@ -87,32 +88,37 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
     private static final int col_worddistance  = 18; // i  1 initial zero; may be used as reserve: is filled during search
     private static final int col_reserve       = 19; // k  1 reserve
     
-    //  more needed attributes:
-    // - boolean: appearance attributes: title, appears in header, anchor-descr, image-tag, hervorhebungen, meta-tags, word in link,  etc
-    // - boolean: URL attributes
-    
+    // appearance flags, used in RWI entry
+    // the flags 0..15 are identical to the category flags in plasmaCondenser
+    public  static final int flag_app_url           = 16; // word appears in url
+    public  static final int flag_app_descr         = 17; // word appears in headline (or any description part)
+    public  static final int flag_app_author        = 18; // word appears in author
+    public  static final int flag_app_tags          = 19; // word appears in header tags
+    public  static final int flag_app_reference     = 20; // word appears in anchor description text (the reference to an url), or any alternative text field of a link
+    public  static final int flag_app_emphasized    = 21; // word is emphasized in text (i.e. bold, italics, special size)
+   
     private kelondroRow.Entry entry;
     
     public indexRWIEntryNew(String  urlHash,
-            int     urlLength,    // byte-length of complete URL
-            int     urlComps,     // number of path components
-            int     titleLength,  // length of description/length (longer are better?)
-            int     hitcount,     // how often appears this word in the text
-            int     wordcount,    // total number of words
-            int     phrasecount,  // total number of phrases
-            int     posintext,    // position of word in all words
-            int     posinphrase,  // position of word in its phrase
-            int     posofphrase,  // number of the phrase where word appears
-            int     worddistance, // word distance; this is 0 by default, and set to the difference of posintext from two indexes if these are combined (simultanous search). If stored, this shows that the result was obtained by remote search
-            int     sizeOfPage,   // # of bytes of the page TODO: not needed any more
-            long    lastmodified, // last-modified time of the document where word appears
-            long    updatetime,   // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
-            int     quality,      // the entropy value
-            String  language,     // (guessed) language of document
-            char    doctype,      // type of document
-            int     outlinksSame, // outlinks to same domain
-            int     outlinksOther,// outlinks to other domain
-            boolean local         // not needed. TODO: remove this
+            int      urlLength,     // byte-length of complete URL
+            int      urlComps,      // number of path components
+            int      titleLength,   // length of description/length (longer are better?)
+            int      hitcount,      // how often appears this word in the text
+            int      wordcount,     // total number of words
+            int      phrasecount,   // total number of phrases
+            int      posintext,     // position of word in all words
+            int      posinphrase,   // position of word in its phrase
+            int      posofphrase,   // number of the phrase where word appears
+            int      worddistance,  // word distance; this is 0 by default, and set to the difference of posintext from two indexes if these are combined (simultanous search). If stored, this shows that the result was obtained by remote search
+            int      sizeOfPage,    // # of bytes of the page TODO: not needed any more
+            long     lastmodified,  // last-modified time of the document where word appears
+            long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
+            int      quality,       // the entropy value
+            String   language,      // (guessed) language of document
+            char     doctype,       // type of document
+            int      outlinksSame,  // outlinks to same domain
+            int      outlinksOther, // outlinks to other domain
+            kelondroBitfield flags  // attributes to the url and to the word according the url
     ) {
 
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
@@ -133,7 +139,7 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         this.entry.setCol(col_urlLength, urlLength);
         this.entry.setCol(col_urlComps, urlComps);
         this.entry.setCol(col_typeofword, new byte[]{(byte) 0}); // TODO: grammatical classification
-        this.entry.setCol(col_flags, null); // TODO: generate flags
+        this.entry.setCol(col_flags, flags.bytes());
         this.entry.setCol(col_hitcount, hitcount);
         this.entry.setCol(col_posintext, posintext);
         this.entry.setCol(col_posinphrase, posinphrase);
@@ -160,7 +166,7 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         this.entry.setCol(col_urlLength, domlen * 2); // estimated
         this.entry.setCol(col_urlComps, domlen / 3); // estimated
         this.entry.setCol(col_typeofword, new byte[]{(byte) 0});
-        this.entry.setCol(col_flags, null);
+        this.entry.setCol(col_flags, (new kelondroBitfield(4)).bytes());
         this.entry.setCol(col_hitcount, oldEntry.hitcount());
         this.entry.setCol(col_posintext, oldEntry.posintext());
         this.entry.setCol(col_posinphrase, oldEntry.posinphrase());
@@ -254,8 +260,8 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         return (char) this.entry.getColByte(col_doctype);
     }
 
-    public boolean isLocal() {
-        return false; // not used
+    public kelondroBitfield flags() {
+        return new kelondroBitfield(this.entry.getColBytes(col_flags));
     }
     
     public static indexRWIEntryNew combineDistance(indexRWIEntryNew ie1, indexRWIEntry ie2) {

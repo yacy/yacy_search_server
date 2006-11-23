@@ -72,6 +72,7 @@ import org.xml.sax.SAXException;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
@@ -88,7 +89,7 @@ public class bookmarksDB {
     HashMap bookmarkCache;
     
     public static String tagHash(String tagName){
-        return plasmaURL.word2hash(tagName.toLowerCase());
+        return plasmaCondenser.word2hash(tagName.toLowerCase());
     }
     public static String dateToiso8601(Date date){
     	return new SimpleDateFormat("yyyy-MM-dd").format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z";

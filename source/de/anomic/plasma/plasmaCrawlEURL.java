@@ -55,13 +55,13 @@ import java.util.LinkedList;
 
 import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
-import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacySeedDB;
 
 public class plasmaCrawlEURL {
@@ -215,7 +215,7 @@ public class plasmaCrawlEURL {
     }
 
     public synchronized Entry newEntry(URL url, String referrer, String initiator, String executor,
-				       String name, String failreason, bitfield flags) {
+				       String name, String failreason, kelondroBitfield flags) {
         if ((referrer == null) || (referrer.length() < yacySeedDB.commonHashLength)) referrer = plasmaURL.dummyHash;
         if ((initiator == null) || (initiator.length() < yacySeedDB.commonHashLength)) initiator = plasmaURL.dummyHash;
         if ((executor == null) || (executor.length() < yacySeedDB.commonHashLength)) executor = plasmaURL.dummyHash;
@@ -279,11 +279,11 @@ public class plasmaCrawlEURL {
         private Date     trydate;    // the time when the url was last time tried to load
         private int      trycount;   // number of tryings
         private String   failreason; // string describing reason for load fail
-        private bitfield flags;      // extra space
+        private kelondroBitfield flags;      // extra space
         private boolean  stored;
 
         public Entry(URL url, String referrer, String initiator,
-                     String executor, String name, String failreason, bitfield flags) {
+                     String executor, String name, String failreason, kelondroBitfield flags) {
             // create new entry
             this.hash = plasmaURL.urlHash(url);
             this.referrer = (referrer == null) ? plasmaURL.dummyHash : referrer;
@@ -333,7 +333,7 @@ public class plasmaCrawlEURL {
             this.trydate = new Date(86400000 * entry.getColLong(7));
             this.trycount = (int) entry.getColLong(8);
             this.failreason = entry.getColString(9, "UTF-8");
-            this.flags = new bitfield(entry.getColBytes(10));
+            this.flags = new kelondroBitfield(entry.getColBytes(10));
             return;
         }
         
@@ -358,7 +358,7 @@ public class plasmaCrawlEURL {
                     trydatestr.getBytes(),
                     kelondroBase64Order.enhancedCoder.encodeLong(this.trycount, rowdef.width(8)).getBytes(),
                     this.failreason.getBytes(),
-                    this.flags.getBytes()
+                    this.flags.bytes()
                 };
                 urlIndexFile.put(urlIndexFile.row().newEntry(entry));
                 this.stored = true;

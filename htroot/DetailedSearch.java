@@ -137,7 +137,7 @@ public class DetailedSearch {
         // do the search
         plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, wdist, "", count, searchtime, urlmask,
                                                              ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
-                                                             "", 20);
+                                                             "", 20, plasmaSearchQuery.catchall_constraint);
         plasmaSearchRankingProfile localRanking = new plasmaSearchRankingProfile("local", post.toString());
         plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);

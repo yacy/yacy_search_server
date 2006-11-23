@@ -61,7 +61,9 @@ import de.anomic.index.indexRWIEntryOld;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
@@ -381,7 +383,8 @@ public final class yacyClient {
             plasmaURLPattern blacklist, 
             plasmaSnippetCache snippets, 
             plasmaSearchTimingProfile timingProfile,
-            plasmaSearchRankingProfile rankingProfile
+            plasmaSearchRankingProfile rankingProfile,
+            kelondroBitfield constraint
     ) {
         // send a search request to peer with remote Hash
         // this mainly converts the words into word hashes
@@ -434,6 +437,7 @@ public final class yacyClient {
             obj.put("profile", timingProfile.targetToString()); // new duetimes splitted by specific search tasks
             obj.put("maxdist", maxDistance);
             obj.put("rankingProfile", rankingProfile.toExternalString());
+            obj.put("constraint", constraint.exportB64());
             obj.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
             if (abstractCache != null) obj.put("abstracts", "auto");
             
@@ -534,7 +538,7 @@ public final class yacyClient {
                                                      urlEntry.language(),
                                                      urlEntry.doctype(),
                                                      0,0,
-                                                     false
+                                                     new kelondroBitfield(4)
                                                     );
                 } else {
                     // the new way: the search-result-url transports all the attributes of word indexes
@@ -1206,7 +1210,7 @@ public final class yacyClient {
             /*final yacyCore core =*/ new yacyCore(sb);
             yacyCore.peerActions.loadSeedLists();
             final yacySeed target = yacyCore.seedDB.getConnected(args[1]);
-            final String wordhashe = plasmaURL.word2hash("test");
+            final String wordhashe = plasmaCondenser.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
             // should we use the proxy?

@@ -7,15 +7,16 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.ArrayList;
 
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.tools.crypt;
-import de.anomic.tools.bitfield;
 import de.anomic.tools.nxTools;
 
 public class indexURLEntryNew implements indexURLEntry {
@@ -33,7 +34,7 @@ public class indexURLEntryNew implements indexURLEntry {
         "Cardinal size-6 {b256}, " +    // size of file in bytes
         "Cardinal wc-3 {b256}, " +      // size of file by number of words; for video and audio: seconds
         "byte[] dt-1, " +               // doctype, taken from extension or any other heuristic
-        "byte[] flags-4, " +            // flags; any stuff (see Word-Entity definition)
+        "Bitfield flags-4, " +          // flags; any stuff (see Word-Entity definition)
         "String lang-2, " +             // language
         "Cardinal llocal-2 {b256}, " +  // # of outlinks to same domain; for video and image: width 
         "Cardinal lother-2 {b256}, " +  // # of outlinks to outside domain; for video and image: height
@@ -61,7 +62,6 @@ public class indexURLEntryNew implements indexURLEntry {
     private static final int col_lvideo   = 16;
     private static final int col_lapp     = 17;
     
-    
     private kelondroRow.Entry entry;
     private String snippet;
     private indexRWIEntry word; // this is only used if the url is transported via remote search requests
@@ -80,7 +80,7 @@ public class indexURLEntryNew implements indexURLEntry {
             long size,
             int wc,
             char dt,
-            bitfield flags,
+            kelondroBitfield flags,
             String lang,
             int llocal,
             int lother,
@@ -100,7 +100,7 @@ public class indexURLEntryNew implements indexURLEntry {
         this.entry.setCol(col_size, size);
         this.entry.setCol(col_wc, wc);
         this.entry.setCol(col_dt, new byte[]{(byte) dt});
-        this.entry.setCol(col_flags, flags.getBytes());
+        this.entry.setCol(col_flags, flags.bytes());
         this.entry.setCol(col_lang, lang.getBytes());
         this.entry.setCol(col_llocal, llocal);
         this.entry.setCol(col_lother, lother);
@@ -171,7 +171,8 @@ public class indexURLEntryNew implements indexURLEntry {
         this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
         this.entry.setCol(col_dt, new byte[]{(byte) prop.getProperty("dt", "t").charAt(0)});
-        this.entry.setCol(col_flags, serverCodings.decodeHex(prop.getProperty("flags", "00000000")));
+        String flags = prop.getProperty("flags", "AAAAAA");
+        this.entry.setCol(col_flags, (flags.length() > 6) ? plasmaSearchQuery.empty_constraint.bytes() : (new kelondroBitfield(4, flags)).bytes());
         this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes());
         this.entry.setCol(col_llocal, Integer.parseInt(prop.getProperty("llocal", "0")));
         this.entry.setCol(col_lother, Integer.parseInt(prop.getProperty("lother", "0")));
@@ -208,7 +209,7 @@ public class indexURLEntryNew implements indexURLEntry {
             s.append(",size=").append(size());
             s.append(",wc=").append(wordCount());
             s.append(",dt=").append(doctype());
-            s.append(",flags=").append(serverCodings.encodeHex(flags().getBytes()));
+            s.append(",flags=").append(flags().exportB64());
             s.append(",lang=").append(language());
             s.append(",llocal=").append(llocal());
             s.append(",lother=").append(lother());
@@ -289,8 +290,8 @@ public class indexURLEntryNew implements indexURLEntry {
         return (int) this.entry.getColLong(col_size);
     }
 
-    public bitfield flags() {
-        return new bitfield(this.entry.getColBytes(col_flags));
+    public kelondroBitfield flags() {
+        return new kelondroBitfield(this.entry.getColBytes(col_flags));
     }
 
     public int wordCount() {

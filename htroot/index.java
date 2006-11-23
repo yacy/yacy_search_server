@@ -108,6 +108,7 @@ public class index {
         prop.put("searchoptions_urlmaskoptions_urlmaskfilter", ".*");
         prop.put("searchoptions_prefermaskoptions", 0);
         prop.put("searchoptions_prefermaskoptions_prefermaskfilter", "");
+        prop.put("searchoptions_indexofChecked", "");
         prop.put("results", "");
         prop.put("cat", "href");
         prop.put("type", "0");

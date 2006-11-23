@@ -47,6 +47,7 @@ import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
@@ -133,15 +134,15 @@ public final class plasmaWordIndex implements indexRI {
             char    doctype,
             int     outlinksSame,
             int     outlinksOther,
-            boolean local ) {
+            kelondroBitfield flags ) {
         if (useCollectionIndex)
             return new indexRWIEntryNew(urlHash, urlLength, urlComps, titleLength, hitcount, wordcount, phrasecount,
                 posintext, posinphrase, posofphrase, worddistance, sizeOfPage, lastmodified, updatetime, quality, language, doctype,
-                outlinksSame, outlinksOther, local);
+                outlinksSame, outlinksOther, flags);
         else
             return new indexRWIEntryOld(urlHash, urlLength, urlComps, titleLength, hitcount, wordcount, phrasecount,
                     posintext, posinphrase, posofphrase, worddistance, sizeOfPage, lastmodified, updatetime, quality, language, doctype,
-                    outlinksSame, outlinksOther, local);
+                    outlinksSame, outlinksOther, false);
     }
     
     public File getRoot() {
@@ -381,7 +382,7 @@ public final class plasmaWordIndex implements indexRI {
             word = (String) wentry.getKey();
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
-            wordHash = plasmaURL.word2hash(word);
+            wordHash = plasmaCondenser.word2hash(word);
             ientry = newRWIEntry(urlHash,
                         urlLength, urlComps, (document == null) ? urlLength : document.getMainLongTitle().length(),
                         wprop.count,
@@ -398,7 +399,7 @@ public final class plasmaWordIndex implements indexRI {
                         language,
                         doctype,
                         outlinksSame, outlinksOther,
-                        true);
+                        condenser.RESULT_FLAGS);
             addEntry(wordHash, ientry, System.currentTimeMillis(), false);
         }
         // System.out.println("DEBUG: plasmaSearch.addPageIndex: added " +

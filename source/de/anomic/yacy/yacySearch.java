@@ -51,6 +51,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.index.indexContainer;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchQuery;
@@ -77,12 +78,14 @@ public class yacySearch extends Thread {
     final private plasmaSearchTimingProfile timingProfile;
     final private plasmaSearchRankingProfile rankingProfile;
     final private String prefer, filter;
+    final private kelondroBitfield constraint;
     
     public yacySearch(String wordhashes, String urlhashes, String prefer, String filter, int maxDistance, 
                       boolean global, yacySeed targetPeer, plasmaCrawlLURL urlManager, plasmaWordIndex wordIndex,
                       indexContainer containerCache, Map abstractCache,
                       plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
-                      plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile) {
+                      plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile,
+                      kelondroBitfield constraint) {
         super("yacySearch_" + targetPeer.getName());
         System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.length() == 0) ? "(primary)" : "(secondary)"));
         this.wordhashes = wordhashes;
@@ -101,10 +104,11 @@ public class yacySearch extends Thread {
         this.maxDistance = maxDistance;
         this.timingProfile = (plasmaSearchTimingProfile) timingProfile.clone();
         this.rankingProfile = rankingProfile;
+        this.constraint = constraint;
     }
 
     public void run() {
-        this.urls = yacyClient.search(wordhashes, urlhashes, prefer, filter, maxDistance, global, targetPeer, urlManager, wordIndex, containerCache, abstractCache, blacklist, snippetCache, timingProfile, rankingProfile);
+        this.urls = yacyClient.search(wordhashes, urlhashes, prefer, filter, maxDistance, global, targetPeer, urlManager, wordIndex, containerCache, abstractCache, blacklist, snippetCache, timingProfile, rankingProfile, constraint);
         if (urls != null) {
             StringBuffer urllist = new StringBuffer(this.urls.length * 13);
             for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
@@ -201,7 +205,8 @@ public class yacySearch extends Thread {
                            plasmaCrawlLURL urlManager, plasmaWordIndex wordIndex,
                            indexContainer containerCache, Map abstractCache,
                            int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
-                           plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile) {
+                           plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile,
+                           kelondroBitfield constraint) {
         // check own peer status
         if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return null; }
 
@@ -214,7 +219,7 @@ public class yacySearch extends Thread {
         yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {
             searchThreads[i]= new yacySearch(wordhashes, urlhashes, prefer, filter, maxDist, true, targetPeers[i],
-                    urlManager, wordIndex, containerCache, abstractCache, blacklist, snippetCache, timingProfile, rankingProfile);
+                    urlManager, wordIndex, containerCache, abstractCache, blacklist, snippetCache, timingProfile, rankingProfile, constraint);
             searchThreads[i].start();
             //try {Thread.sleep(20);} catch (InterruptedException e) {}
         }
@@ -225,7 +230,8 @@ public class yacySearch extends Thread {
             plasmaCrawlLURL urlManager, plasmaWordIndex wordIndex,
             indexContainer containerCache,
             String targethash, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
-            plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile) {
+            plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile,
+            kelondroBitfield constraint) {
         // check own peer status
         if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return null; }
 
@@ -234,8 +240,8 @@ public class yacySearch extends Thread {
         final yacySeed targetPeer = yacyCore.seedDB.getConnected(targethash);
         if (targetPeer == null) return null;
         yacySearch searchThread = new yacySearch(wordhashes, urlhashes, "", "", 9999, true, targetPeer,
-                                             urlManager, wordIndex, containerCache, new TreeMap(), blacklist, snippetCache, timingProfile, rankingProfile);
-        searchThread.start();       
+                                             urlManager, wordIndex, containerCache, new TreeMap(), blacklist, snippetCache, timingProfile, rankingProfile, constraint);
+        searchThread.start();
         return searchThread;
     }
     

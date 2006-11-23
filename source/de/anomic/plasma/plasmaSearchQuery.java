@@ -48,6 +48,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacySeedDB;
@@ -60,6 +61,9 @@ public final class plasmaSearchQuery {
     public static final int SEARCHDOM_GLOBALDHT = 3;
     public static final int SEARCHDOM_GLOBALALL = 4;
     
+    public static final kelondroBitfield empty_constraint    = new kelondroBitfield(4, "AAAAAA");
+    public static final kelondroBitfield catchall_constraint = new kelondroBitfield(4, "______");
+    
     public Set queryWords, queryHashes;
     public int wantedResults;
     public String prefer;
@@ -69,24 +73,28 @@ public final class plasmaSearchQuery {
     public String domGroupName;
     public int domMaxTargets;
     public int maxDistance;
+    public kelondroBitfield constraint;
 
     public plasmaSearchQuery(Set queryWords, int maxDistance, String prefer,
                              int wantedResults, long maximumTime, String urlMask,
-                             int domType, String domGroupName, int domMaxTargets) {
+                             int domType, String domGroupName, int domMaxTargets,
+                             kelondroBitfield constraint) {
         this.queryWords = queryWords;
         this.maxDistance = maxDistance;
         this.prefer = prefer;
-        this.queryHashes = words2hashes(queryWords);
+        this.queryHashes = plasmaCondenser.words2hashes(queryWords);
         this.wantedResults = wantedResults;
         this.maximumTime = maximumTime;
         this.urlMask = urlMask;
         this.domType = domType;
         this.domGroupName = domGroupName;
         this.domMaxTargets = domMaxTargets;
+        this.constraint = constraint;
     }
     
     public plasmaSearchQuery(Set queryHashes, int maxDistance, String prefer,
-                             int wantedResults, long maximumTime, String urlMask) {
+                             int wantedResults, long maximumTime, String urlMask,
+                             kelondroBitfield constraint) {
         this.queryWords = null;
         this.maxDistance = maxDistance;
         this.prefer = prefer;
@@ -97,25 +105,7 @@ public final class plasmaSearchQuery {
         this.domType = -1;
         this.domGroupName = null;
         this.domMaxTargets = -1;
-    }
-
-    public static Set words2hashSet(String[] words) {
-        TreeSet hashes = new TreeSet();
-        for (int i = 0; i < words.length; i++) hashes.add(plasmaURL.word2hash(words[i]));
-        return hashes;
-    }
-
-    public static String words2hashString(String[] words) {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < words.length; i++) sb.append(plasmaURL.word2hash(words[i]));
-        return new String(sb);
-    }
-
-    public static Set words2hashes(Set words) {
-        Iterator i = words.iterator();
-        TreeSet hashes = new TreeSet();
-        while (i.hasNext()) hashes.add(plasmaURL.word2hash((String) i.next()));
-        return hashes;
+        this.constraint = constraint;
     }
     
     public static Set hashes2Set(String query) {

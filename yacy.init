@@ -818,10 +818,10 @@ currentSkin=
 # temporary flag for new database structure. set only true for testing
 # ALL DATA THAT IS CREATED WITH THIS FLAG ON WILL BE VOID IN A FINAL VERSION
 # table-types: RAM = 0, TREE = 1, FLEX = 2;
-useCollectionIndex=false
-useFlexTableForNURL=false
+useCollectionIndex=true
+useFlexTableForNURL=true
 useFlexTableForEURL=true
-useFlexTableForLURL=false
+useFlexTableForLURL=true
 tableTypeForPreNURL=2
 
 # flag to show surftipps on index.html page

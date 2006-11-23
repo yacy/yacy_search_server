@@ -62,6 +62,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -72,7 +73,6 @@ import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.bitfield;
 import de.anomic.tools.dirlistComparator;
 import de.anomic.tools.md5DirFileFilter;
 import de.anomic.yacy.yacyCore;
@@ -375,7 +375,7 @@ public class dir {
                 (long) phrase.length(), // size
                 condenser.RESULT_NUMB_WORDS, // word count
                 plasmaURL.DT_SHARE, // doctype
-                new bitfield(4),
+                new kelondroBitfield(4),
                 "**", // language
                 0,0,0,0,0,0
             );
@@ -399,7 +399,7 @@ public class dir {
             Map.Entry entry;
             while (words.hasNext()) {
                 entry = (Map.Entry) words.next();
-                switchboard.wordIndex.removeEntry(plasmaURL.word2hash((String) entry.getKey()), urlhash, true);
+                switchboard.wordIndex.removeEntry(plasmaCondenser.word2hash((String) entry.getKey()), urlhash, true);
             }
             switchboard.urlPool.loadedURL.remove(urlhash);
         } catch (Exception e) {

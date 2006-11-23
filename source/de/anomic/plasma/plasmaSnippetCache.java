@@ -159,7 +159,7 @@ public class plasmaSnippetCache {
                     }
 
                     //end contrib [MN]
-                    if (plasmaURL.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
+                    if (plasmaCondenser.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
                     w[j] = prefix + w[j] + postfix;
                 }
             }
@@ -480,7 +480,7 @@ public class plasmaSnippetCache {
         String word;
         while (words.hasMoreElements()) {
             word = (String) words.nextElement();
-            map.put(plasmaURL.word2hash(word), new Integer(pos));
+            map.put(plasmaCondenser.word2hash(word), new Integer(pos));
             pos += word.length() + 1;
         }
         return map;

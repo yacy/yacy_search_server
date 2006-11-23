@@ -8,6 +8,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -37,7 +38,7 @@ public class snippet {
         }        
         
         // do the search
-        Set queryHashes = plasmaSearchQuery.words2hashes(query);
+        Set queryHashes = plasmaCondenser.words2hashes(query);
         
         plasmaSnippetCache.Snippet snippet = switchboard.snippetCache.retrieveSnippet(url, queryHashes, true, 260, 10000);
         prop.put("status",snippet.getSource());

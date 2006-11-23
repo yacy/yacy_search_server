@@ -52,10 +52,10 @@ import de.anomic.server.logging.serverLog;
 
 public class kelondroBase64Order extends kelondroAbstractOrder implements kelondroOrder, kelondroCoding, Comparator {
 
-    private static final char[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
-    private static final char[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
-    private static final byte[] ahpla_standard = new byte[128];
-    private static final byte[] ahpla_enhanced = new byte[128];
+    protected static final char[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+    protected static final char[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
+    protected static final byte[] ahpla_standard = new byte[128];
+    protected static final byte[] ahpla_enhanced = new byte[128];
     
     static {
         for (int i = 0; i < 128; i++) {

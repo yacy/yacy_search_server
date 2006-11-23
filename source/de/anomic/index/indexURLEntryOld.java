@@ -32,11 +32,11 @@ import java.util.Properties;
 
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacySeedDB;
 
@@ -87,7 +87,7 @@ public class indexURLEntryOld implements indexURLEntry {
             long size,
             int wc,
             char dt,
-            bitfield flags,
+            kelondroBitfield flags,
             String lang,
             int llocal,
             int lother,

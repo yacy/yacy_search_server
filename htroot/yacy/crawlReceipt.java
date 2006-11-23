@@ -51,13 +51,13 @@ import java.io.IOException;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -156,7 +156,7 @@ public final class crawlReceipt {
         } else {
             try {
                 plasmaCrawlNURL.Entry en = switchboard.urlPool.noticeURL.getEntry(receivedUrlhash);
-                plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new bitfield());
+                plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new kelondroBitfield());
                 ee.store();
                 switchboard.urlPool.errorURL.stackPushEntry(ee);
                 switchboard.urlPool.noticeURL.remove(receivedUrlhash);

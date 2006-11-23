@@ -62,6 +62,7 @@ import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFlexTable;
@@ -74,7 +75,6 @@ import de.anomic.net.URL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacyCore;
 
 public final class plasmaCrawlStacker {
@@ -465,7 +465,7 @@ public final class plasmaCrawlStacker {
         private int      depth;         // the prefetch depth so far, starts at 0
         private int      anchors;       // number of anchors of the parent
         private int      forkfactor;    // sum of anchors of all ancestors
-        private bitfield flags;
+        private kelondroBitfield flags;
         private int      handle;
         
         // loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
@@ -491,7 +491,7 @@ public final class plasmaCrawlStacker {
                 this.depth         = depth;
                 this.anchors       = anchors;
                 this.forkfactor    = forkfactor;
-                this.flags         = new bitfield();
+                this.flags         = new kelondroBitfield();
                 this.handle        = 0;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -513,7 +513,7 @@ public final class plasmaCrawlStacker {
                 this.depth         = (int) entry.getColLong(7);
                 this.anchors       = (int) entry.getColLong(8);
                 this.forkfactor    = (int) entry.getColLong(9);
-                this.flags         = new bitfield(entry.getColBytes(10));
+                this.flags         = new kelondroBitfield(entry.getColBytes(10));
                 try {
                     this.handle        = Integer.parseInt(new String(entry.getColBytes(11), "UTF-8"));
                 } catch (NumberFormatException ee) {
@@ -591,7 +591,7 @@ public final class plasmaCrawlStacker {
                     kelondroBase64Order.enhancedCoder.encodeLong(this.depth, plasmaCrawlNURL.rowdef.width(7)).getBytes(),
                     kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, plasmaCrawlNURL.rowdef.width(8)).getBytes(),
                     kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, plasmaCrawlNURL.rowdef.width(9)).getBytes(),
-                    this.flags.getBytes(),
+                    this.flags.bytes(),
                     normalizeHandle(this.handle).getBytes()
                 };
             } catch (UnsupportedEncodingException e) { /* ignore this */ }
@@ -671,7 +671,7 @@ public final class plasmaCrawlStacker {
                 // do nothing..
             } 
             if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
-                kelondroFlexWidthArray.delete(cacheStacksPath, "urlPreNotice1.table");
+                kelondroFlexWidthArray.delete(cacheStacksPath, "urlPreNotice2.table");
             } 
             if (this.dbtype == QUEUE_DB_TYPE_TREE) {
                 File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
@@ -686,7 +686,7 @@ public final class plasmaCrawlStacker {
                 this.urlEntryCache = new kelondroRowSet(plasmaCrawlNURL.rowdef, kelondroBase64Order.enhancedCoder, 0, 0);
             } 
             if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
-                String newCacheName = "urlPreNotice1.table";
+                String newCacheName = "urlPreNotice2.table";
                 cacheStacksPath.mkdirs();
                 try {
                     this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, plasmaCrawlNURL.rowdef, kelondroBase64Order.enhancedCoder), bufferkb / 2 * 0x400, true, false);
@@ -1058,7 +1058,7 @@ public final class plasmaCrawlStacker {
                                 yacyCore.seedDB.mySeed.hash,
                                 this.theMsg.name,
                                 rejectReason,
-                                new bitfield()
+                                new kelondroBitfield()
                         );
                         ee.store();
                         sb.urlPool.errorURL.stackPushEntry(ee);

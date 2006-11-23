@@ -230,7 +230,7 @@ public final class plasmaSearchResult {
             word = words[i].toLowerCase();
             if ((word.length() > 2) &&
                 ("http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0) &&
-                (!(query.queryHashes.contains(plasmaURL.word2hash(word)))))
+                (!(query.queryHashes.contains(plasmaCondenser.word2hash(word)))))
                 ref.incScore(word);
         }
     }

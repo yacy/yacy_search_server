@@ -209,6 +209,8 @@ public class kelondroRow {
                             } catch (NumberFormatException e) {
                                 setCol(nick, 0);
                             }
+                        } else if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_bitfield)) {
+                            setCol(nick, (new kelondroBitfield(row[i].cellwidth(), elts[i].substring(p + 1).trim())).bytes());
                         } else {
                             setCol(nick, elts[i].substring(p + 1).trim().getBytes());
                         }
@@ -257,6 +259,12 @@ public class kelondroRow {
         
         public void setCol(int column, byte[] cell) {
             setCol(row[column].encoder(), colstart[column], row[column].cellwidth(), cell);
+        }
+        
+        public void setCol(int column, char[] cell) {
+            int offset = colstart[column];
+            for (int i = 0; i < cell.length; i++) rowinstance[offset + i] = (byte) cell[i];
+            for (int i = cell.length; i < row[column].cellwidth(); i++) rowinstance[offset + i] = 0;
         }
         
         private void setCol(int encoding, int offset, int length, byte[] cell) {
@@ -419,16 +427,25 @@ public class kelondroRow {
             return c;
         }
         
+        public char[] getColChars(int column) {
+            char[] c = new char[row[column].cellwidth()];
+            System.arraycopy(rowinstance, colstart[column], c, 0, row[column].cellwidth());
+            return c;
+        }
+        
         public String toPropertyForm(boolean includeBraces, boolean decimalCardinal, boolean longname) {
             serverByteBuffer bb = new serverByteBuffer();
             if (includeBraces) bb.append('{');
             for (int i = 0; i < row.length; i++) {
                 bb.append((longname) ? row[i].description() : row[i].nickname());
                 bb.append('=');
-                if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_cardinal))
+                if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_cardinal)) {
                     bb.append(Long.toString(getColLong(i)));
-                else
+                } else if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_bitfield)) {
+                    bb.append((new kelondroBitfield(getColBytes(i))).exportB64());
+                } else {
                     bb.append(rowinstance, colstart[i], row[i].cellwidth());
+                }
                 if (i < row.length - 1) {
                     bb.append(',');
                     if (longname) bb.append(' ');
@@ -475,6 +492,9 @@ public class kelondroRow {
         // and possibly some more
         if (this.objectsize < otherRow.objectsize) return false;
         for (int i = 0; i < otherRow.row.length; i++) {
+            if ((this.row[i].cellwidth() == otherRow.row[i].cellwidth()) &&
+                (this.row[i].celltype() == kelondroColumn.celltype_bitfield) &&
+                (otherRow.row[i].celltype() == kelondroColumn.celltype_binary)) continue;
             if (!(this.row[i].equals(otherRow.row[i]))) return false;
         }
         return true;

@@ -27,9 +27,11 @@
 
 package de.anomic.index;
 
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRow.Entry;
+import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.yacy.yacySeedDB;
@@ -200,8 +202,8 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         return (char) this.entry.getColByte(col_doctype);
     }
 
-    public boolean isLocal() {
-        return this.entry.getColByte(col_localflag) == plasmaURL.LT_LOCAL;
+    public kelondroBitfield flags() {
+        return plasmaSearchQuery.empty_constraint;
     }
     
     public static indexRWIEntryOld combineDistance(indexRWIEntryOld ie1, indexRWIEntry ie2) {

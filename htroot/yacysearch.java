@@ -55,9 +55,11 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchImages;
 import de.anomic.plasma.plasmaSearchPreOrder;
@@ -113,6 +115,7 @@ public class yacysearch {
             prop.put("time", 6);
             prop.put("urlmaskfilter", ".*");
             prop.put("prefermaskfilter", "");
+            prop.put("indexof", "off");
             prop.put("cat", "href");
             prop.put("depth", "0");
             prop.put("type", 0);
@@ -141,6 +144,7 @@ public class yacysearch {
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
+        final boolean indexof = post.get("indexof","").equals("on"); 
         final long searchtime = 1000 * Long.parseLong(post.get("time", "10"));
         String urlmask = "";
         if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
@@ -151,6 +155,12 @@ public class yacysearch {
         String prefermask = post.get("prefermaskfilter", "");
         if ((prefermask.length() > 0) && (prefermask.indexOf(".*") < 0)) prefermask = ".*" + prefermask + ".*";
 
+        kelondroBitfield constraint = post.containsKey("constraint") ? new kelondroBitfield(4, post.get("constraint", "______")) : plasmaSearchQuery.catchall_constraint;
+        if (indexof) {
+            constraint = new kelondroBitfield();
+            constraint.set(plasmaCondenser.flag_cat_indexof, true);
+        }
+        
         serverObjects prop = new serverObjects();
 
         if (post.get("cat", "href").equals("href")) {
@@ -233,7 +243,7 @@ public class yacysearch {
                     urlmask,
                     ((global) && (yacyonline) && (!(env.getConfig(
                             "last-search", "").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT
-                            : plasmaSearchQuery.SEARCHDOM_LOCAL, "", 20);
+                            : plasmaSearchQuery.SEARCHDOM_LOCAL, "", 20, constraint);
             plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile( new String[] { order1, order2, order3 });
             plasmaSearchTimingProfile localTiming = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
             plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
@@ -393,6 +403,8 @@ public class yacysearch {
         prop.put("urlmaskfilter", urlmask);
         prop.put("prefermaskfilter", prefermask);
         prop.put("display", display);
+        prop.put("indexof", (indexof) ? "on" : "off");
+        prop.put("constraint", constraint.exportB64());
 
         // return rewrite properties
         return prop;

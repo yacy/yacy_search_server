@@ -47,6 +47,8 @@ package de.anomic.plasma;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,14 +60,45 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.server.serverCodings;
+import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaCondenser {
 
+    // this is the page analysis class
+    
+    // category flags that show how the page can be distinguished in different interest groups
+    public  static final int flag_cat_indexof       =  0; // a directory listing page (i.e. containing 'index of')
+    public  static final int flag_cat_opencontent   =  1; // open source, any free stuff
+    public  static final int flag_cat_business      =  2; // web shops, marketing, trade
+    public  static final int flag_cat_stockfinance  =  3; // stock exchange (quotes), finance, economy
+    public  static final int flag_cat_health        =  4; // health
+    public  static final int flag_cat_sport         =  5; // any sport, cars etc.
+    public  static final int flag_cat_lifestyle     =  6; // travel, lifestyle
+    public  static final int flag_cat_politics      =  7; // politics
+    public  static final int flag_cat_news          =  8; // blogs, news pages
+    public  static final int flag_cat_children      =  9; // toys, childrens education, help for parents
+    public  static final int flag_cat_entertainment = 10; // boulevard, entertainment, cultural content
+    public  static final int flag_cat_knowledge     = 11; // science, school stuff, help for homework
+    public  static final int flag_cat_computer      = 12; // any computer related stuff, networks, operation systems
+    public  static final int flag_cat_p2p           = 13; // p2p support, filesharing archives etc.
+    public  static final int flag_cat_sex           = 14; // sexual content
+    public  static final int flag_cat_spam          = 15; // pages that anybody would consider as not interesting
+    public  static final int flag_cat_linux         = 16; // pages about linux software
+    public  static final int flag_cat_macos         = 17; // pages about macintosh, apple computers and the mac os
+    public  static final int flag_cat_windows       = 18; // pages about windows os and softare
+    public  static final int flag_cat_osreserve     = 19; // reserve
+    
+    
     private final static int numlength = 5;
 
     //private Properties analysis;
@@ -82,6 +115,7 @@ public final class plasmaCondenser {
     public int RESULT_NUMB_SENTENCES = -1;
     public int RESULT_DIFF_SENTENCES = -1;
     public int RESULT_SIMI_SENTENCES = -1;
+    public kelondroBitfield RESULT_FLAGS = new kelondroBitfield(4);
     
     public plasmaCondenser(InputStream text) {
         this(text, 3, 2);
@@ -96,6 +130,30 @@ public final class plasmaCondenser {
         createCondensement(text);
     }
 
+    // create a word hash
+    public static final String word2hash(String word) {
+        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase())).substring(0, yacySeedDB.commonHashLength);
+    }
+    
+    public static final Set words2hashSet(String[] words) {
+        TreeSet hashes = new TreeSet();
+        for (int i = 0; i < words.length; i++) hashes.add(word2hash(words[i]));
+        return hashes;
+    }
+
+    public static final String words2hashString(String[] words) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < words.length; i++) sb.append(word2hash(words[i]));
+        return new String(sb);
+    }
+
+    public static final Set words2hashes(Set words) {
+        Iterator i = words.iterator();
+        TreeSet hashes = new TreeSet();
+        while (i.hasNext()) hashes.add(word2hash((String) i.next()));
+        return hashes;
+    }
+    
     public int excludeWords(TreeSet stopwords) {
         // subtracts the given stopwords from the word list
         // the word list shrinkes. This returns the number of shrinked words
@@ -186,12 +244,15 @@ public final class plasmaCondenser {
         int idx;
         int wordInSentenceCounter = 1;
         Iterator it, it1;
-
+        boolean comb_indexof = false, comb_lastmodified = false, last_last = false, last_index = false;
+        
         // read source
         sievedWordsEnum wordenum = new sievedWordsEnum(is, wordminsize);
         while (wordenum.hasMoreElements()) {
             word = ((String) wordenum.nextElement()).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             // System.out.println("PARSED-WORD " + word);
+            
+            // distinguish punctuation and words
             wordlen = word.length();
             if ((wordlen == 1) && (htmlFilterContentScraper.punctuation(word.charAt(0)))) {
                 // store sentence
@@ -223,6 +284,12 @@ public final class plasmaCondenser {
                 currsentwords.clear();
                 wordInSentenceCounter = 1;
             } else {
+                // check index.of detection
+                if ((last_last) && (word.equals("modified"))) comb_lastmodified = true;
+                if ((last_index) && (word.equals("of"))) comb_indexof = true;
+                last_last = word.equals("last");
+                last_index = word.equals("index");
+                
                 // store word
                 allwordcounter++;
                 currsentwords.add(word);
@@ -353,7 +420,7 @@ public final class plasmaCondenser {
         this.RESULT_NUMB_SENTENCES = allsentencecounter;
         this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
         this.RESULT_SIMI_SENTENCES = sentences.size();
-        //this.RESULT_INFORMATION_VALUE = (allwordcounter == 0) ? 0 : (wordenum.count() * words.size() / allwordcounter / 16);
+        this.RESULT_FLAGS.set(flag_cat_indexof, comb_indexof && comb_lastmodified);
     }
 
     public void print() {
@@ -505,7 +572,7 @@ public final class plasmaCondenser {
             loop: while (e.hasMoreElements()) {
                 s = (String) e.nextElement();
                 if ((s.length() == 1) && (htmlFilterContentScraper.punctuation(s.charAt(0)))) return s;
-                if (s.length() < ml) continue loop;
+                if ((s.length() < ml) && (!(s.equals("of")))) continue loop;
                 for (int i = 0; i < s.length(); i++) {
                     c = s.charAt(i);
                     // TODO: Bugfix needed for UTF-8
@@ -730,27 +797,6 @@ public final class plasmaCondenser {
         return new String(s);
         
     }
-    /*
-    private static void addLineSearchProp(Properties prop, String s, String[] searchwords, HashSet foundsearch) {
-        // we store lines containing a key in search vector
-        int p;
-        String r;
-        s = " " + s.toLowerCase() + " ";
-        for (int i = 0; i < searchwords.length; i++) {
-            if (!(foundsearch.contains(searchwords[i]))) {
-                p = s.indexOf((String) searchwords[i]);
-                if (p >= 0) {
-                    // we found one key in the result text
-                    // prepare a line and put it to the property
-                    r = s.substring(0, p) + "<B>" + s.substring(p, p + searchwords[i].length()) + "</B>" + s.substring(p + searchwords[i].length());
-                    prop.setProperty("key-" + searchwords[i], r);
-                    // remember that we found this
-                    foundsearch.add(searchwords[i]);
-                }
-            }
-        }
-    }
-    */
     
     public static Iterator getWords(InputStream input) {
         if (input == null) return null;
@@ -765,47 +811,30 @@ public final class plasmaCondenser {
     }
         
     public static void main(String[] args) {
-//        if ((args.length == 0) || (args.length > 3))
-//            System.out.println("wrong number of arguments: plasmaCondenser -text|-html <infile> <outfile>");
-//        else
-//            try {
-//                plasmaCondenser pc = null;
-//
-//                // read and analyse file
-//                File file = new File(args[1]);
-//                InputStream textStream = null;
-//                if (args[0].equals("-text")) {
-//                    // read a text file
-//                    textStream = new FileInputStream(file);
-//                } else if (args[0].equals("-html")) {
-//                    // read a html file
-//                    htmlFilterContentScraper cs = new htmlFilterContentScraper(new de.anomic.net.URL("http://localhost/"));
-//                    htmlFilterOutputStream fos = new htmlFilterOutputStream(null, cs, null, false);
-//                    FileInputStream fis = new FileInputStream(file);
-//                    byte[] buffer = new byte[512];
-//                    int i;
-//                    while ((i = fis.read(buffer)) > 0) fos.write(buffer, 0, i);
-//                    fis.close();
-//                    fos.close();
-//                    // cs.print();
-//                    // System.out.println("TEXT:" + new String(cs.getText()));
-//                    textStream = new ByteArrayInputStream(cs.getText());
-//                } else {
-//                    System.out.println("first argument must be either '-text' or '-html'");
-//                    System.exit(-1);
-//                }
-//                
-//                // call condenser
-//                pc = new plasmaCondenser(textStream, 1, 0);
-//                textStream.close();
-//                
-//                // output result
-//                pc.writeMapToFile(new File(args[2]));
-//                pc.print();
-//                //System.out.println("ANALYSIS:" + pc.getAnalysis().toString());
-//            } catch (IOException e) {
-//                System.out.println("Problem with input file: " + e.getMessage());
-//            }
+        // read a property file and converty them into configuration lines
+        try {
+            File f = new File(args[0]);
+            Properties p = new Properties();
+            p.load(new FileInputStream(f));
+            StringBuffer sb = new StringBuffer();
+            sb.append("{\n");
+            for (int i = 0; i <= 15; i++) {
+                sb.append('"');
+                String s = p.getProperty("keywords" + i);
+                String[] l = s.split(",");
+                for (int j = 0; j < l.length; j++) {
+                    sb.append(word2hash(l[j]));
+                }
+                if (i < 15) sb.append(",\n");
+            }
+            sb.append("}\n");
+            System.out.println(new String(sb));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
     }
 
 }

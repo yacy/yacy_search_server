@@ -140,7 +140,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 long primaryTimeout = System.currentTimeMillis() + profileGlobal.duetime();
                 primarySearchThreads = yacySearch.primaryRemoteSearches(plasmaSearchQuery.hashSet2hashString(query.queryHashes), "",
                         query.prefer, query.urlMask, query.maxDistance, urlStore, wordIndex, rcContainers, rcAbstracts,
-                        fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking);
+                        fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking, query.constraint);
 
                 // meanwhile do a local search
                 Map searchContainerMap = localSearchContainers(null);
@@ -281,7 +281,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
                         words, urls, urlStore, wordIndex, rcContainers, peer, plasmaSwitchboard.urlBlacklist, snippetCache,
-                        profileGlobal, ranking);
+                        profileGlobal, ranking, query.constraint);
 
             }
         }

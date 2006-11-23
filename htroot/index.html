@@ -29,6 +29,7 @@
         <input type="hidden" name="time" value="6" />
         <input type="hidden" name="urlmaskfilter" value=".*" />
         <input type="hidden" name="prefermaskfilter" value="" />
+        <input type="hidden" name="indexof" value="off" />
       </fieldset>
       <p><a href="/index.html?searchoptions=1&amp;display=#[display]#" onclick="this.href='/index.html?searchoptions=1&amp;display=#[display]#&amp;handover='+document.searchform.search.value">more options...</a></p>
       ::
@@ -102,6 +103,14 @@
             <input type="radio" name="prefermask" value="yes" checked="checked" /> restrict on <input name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#" />
             <input type="radio" name="prefermask" value="no" /> show all
             #(/prefermaskoptions)#
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Constraints:
+          </td>
+          <td>
+            <input type="checkbox" name="indexof" #[indexofChecked]# /> only index pages
           </td>
         </tr>
       </table>

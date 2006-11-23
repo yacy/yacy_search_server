@@ -100,6 +100,7 @@ public final class plasmaSearchPreOrder {
         for (int j = 0; j < count; j++) {
             iEntry = (indexRWIEntry) i.next();
             if (iEntry.urlHash().length() != container.row().width(container.primarykey())) continue;
+            if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) && (!(iEntry.flags().allOf(query.constraint)))) continue; // filter out entries that do not match the search constraint
             pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax), query.words("")), 16) + iEntry.urlHash(), iEntry);
         }
     }

@@ -1,6 +1,6 @@
 <div class="SubMenu">
 <ul class="SubMenu">
-<li style="width:16%;"><a href="/Status.html?login=true" class="MenuItemLink">Peer Administration</a></li>
+<li style="width:16%;"><a href="/Status.html" class="MenuItemLink">Peer Administration</a></li>
 <li style="width:16%;"><a href="/index.html" onclick="this.href='/index.html?handover='+document.searchform.search.value" class="MenuItemLink">Web Search</a></li>
 <li style="width:16%;"><a href="/Surftips.html" class="MenuItemLink">Surftips</a></li>
 <li style="width:16%;"><a href="/ViewProfile.html?hash=localhash" class="MenuItemLink">Peer Owner Profile</a></li>

@@ -52,6 +52,7 @@ import java.util.Iterator;
 
 import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFlexTable;
@@ -62,7 +63,6 @@ import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.bitfield;
 import de.anomic.yacy.yacySeedDB;
 
 public class plasmaCrawlNURL {
@@ -90,7 +90,7 @@ public class plasmaCrawlNURL {
         "Cardinal depth-2 {b64e}, " +                               // the prefetch depth so far, starts at 0
         "Cardinal parentbr-3 {b64e}, " +                            // number of anchors of the parent
         "Cardinal forkfactor-4 {b64e}, " +                          // sum of anchors of all ancestors
-        "byte[] flags-2, " +                                        // flags
+        "byte[] flags-4, " +                                        // flags
         "String handle-4"                                           // extra handle
         );
     
@@ -196,7 +196,7 @@ public class plasmaCrawlNURL {
     
     private void openHashCache() {
         if (newdb) {
-            String newCacheName = "urlNotice4.table";
+            String newCacheName = "urlNotice5.table";
             cacheStacksPath.mkdirs();
             try {
                 urlIndexFile = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder), bufferkb / 2 * 0x400, true, false);
@@ -499,7 +499,7 @@ public class plasmaCrawlNURL {
         private int      depth;         // the prefetch depth so far, starts at 0
         private int      anchors;       // number of anchors of the parent
         private int      forkfactor;    // sum of anchors of all ancestors
-        private bitfield flags;
+        private kelondroBitfield flags;
         private int      handle;
         private boolean  stored;
 
@@ -524,7 +524,7 @@ public class plasmaCrawlNURL {
             this.depth         = depth;
             this.anchors       = anchors;
             this.forkfactor    = forkfactor;
-            this.flags         = new bitfield(rowdef.width(10));
+            this.flags         = new kelondroBitfield(rowdef.width(10));
             this.handle        = 0;
             this.stored        = false;
         }
@@ -570,7 +570,7 @@ public class plasmaCrawlNURL {
             this.depth = (int) entry.getColLong(7);
             this.anchors = (int) entry.getColLong(8);
             this.forkfactor = (int) entry.getColLong(9);
-            this.flags = new bitfield(entry.getColBytes(10));
+            this.flags = new kelondroBitfield(entry.getColBytes(10));
             this.handle = Integer.parseInt(entry.getColString(11, null), 16);
             return;
         }
@@ -593,7 +593,7 @@ public class plasmaCrawlNURL {
                     kelondroBase64Order.enhancedCoder.encodeLong(this.depth, rowdef.width(7)).getBytes(),
                     kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, rowdef.width(8)).getBytes(),
                     kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, rowdef.width(9)).getBytes(),
-                    this.flags.getBytes(),
+                    this.flags.bytes(),
                     normalizeHandle(this.handle).getBytes()
                 };
                 if (urlIndexFile == null) System.out.println("urlHashCache is NULL");
@@ -622,7 +622,7 @@ public class plasmaCrawlNURL {
                .append("profile: ").append(profileHandle==null?"null":profileHandle).append(" | ")
                .append("depth: ").append(Integer.toString(depth)).append(" | ")
                .append("forkfactor: ").append(Integer.toString(forkfactor)).append(" | ")
-               .append("flags: ").append((flags==null) ? "null" : flags.toString());
+               .append("flags: ").append((flags==null) ? "null" : flags.exportB64());
                return str.toString();
         }
 

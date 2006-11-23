@@ -61,6 +61,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
@@ -175,7 +176,7 @@ public class IndexControl_p {
             switchboard.wordIndex.deleteContainer(keyhash);
             post.remove("keyhashdeleteall");
             if (keystring.length() > 0 &&
-                plasmaURL.word2hash(keystring).equals(keyhash)) {
+                plasmaCondenser.word2hash(keystring).equals(keyhash)) {
                 post.put("keystringsearch", "generated");
             } else {
                 post.put("keyhashsearch", "generated");
@@ -198,7 +199,7 @@ public class IndexControl_p {
             // this shall lead to a presentation of the list; so handle that the remaining program
             // thinks that it was called for a list presentation
             post.remove("keyhashdelete");
-            if (keystring.length() > 0 && plasmaURL.word2hash(keystring).equals(keyhash)) {
+            if (keystring.length() > 0 && plasmaCondenser.word2hash(keystring).equals(keyhash)) {
                 post.put("keystringsearch", "generated");
             } else {
                 post.put("keyhashsearch", "generated");
@@ -228,7 +229,7 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("keystringsearch")) {
-            keyhash = plasmaURL.word2hash(keystring);
+            keyhash = plasmaCondenser.word2hash(keystring);
             prop.put("keyhash", keyhash);
             prop.put("urlstring", "");
             prop.put("urlhash", "");
@@ -236,7 +237,7 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("keyhashsearch")) {
-            if (keystring.length() == 0 || !plasmaURL.word2hash(keystring).equals(keyhash)) {
+            if (keystring.length() == 0 || !plasmaCondenser.word2hash(keystring).equals(keyhash)) {
                 prop.put("keystring", "<not possible to compute word from hash>");
             }
             prop.put("urlstring", "");
@@ -246,7 +247,7 @@ public class IndexControl_p {
 
         // transfer to other peer
         if (post.containsKey("keyhashtransfer")) {
-            if (keystring.length() == 0 || !plasmaURL.word2hash(keystring).equals(keyhash)) {
+            if (keystring.length() == 0 || !plasmaCondenser.word2hash(keystring).equals(keyhash)) {
                 prop.put("keystring", "<not possible to compute word from hash>");
             }
             prop.put("urlstring", "");

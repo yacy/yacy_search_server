@@ -665,11 +665,6 @@ public class plasmaURL {
     // local flag attributes
     public static final char LT_LOCAL   = 'L';
     public static final char LT_GLOBAL  = 'G';
-    
-    // create a word hash
-    public static String word2hash(String word) {
-        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase())).substring(0, yacySeedDB.commonHashLength);
-    }
 
     // doctype calculation
     public static char docType(URL url) {
