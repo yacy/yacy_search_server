@@ -94,7 +94,7 @@ public final class search {
         final String  prefer = post.get("prefer", "");
         final String  filter = post.get("filter", ".*");
         final boolean includesnippet = post.get("includesnippet", "false").equals("true");
-        final kelondroBitfield constraint = kelondroBitfield(4, post.get("constraint", "______"));
+        final kelondroBitfield constraint = new kelondroBitfield(4, post.get("constraint", "______"));
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
@@ -299,11 +299,6 @@ public final class search {
         yacyCore.seedDB.mySeed.incSI(links);
         yacyCore.seedDB.mySeed.incSU(links);
         return prop;
-    }
-
-    private static kelondroBitfield kelondroBitfield(int i, String string) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

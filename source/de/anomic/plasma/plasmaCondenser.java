@@ -250,7 +250,7 @@ public final class plasmaCondenser {
         sievedWordsEnum wordenum = new sievedWordsEnum(is, wordminsize);
         while (wordenum.hasMoreElements()) {
             word = ((String) wordenum.nextElement()).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
-            // System.out.println("PARSED-WORD " + word);
+            //System.out.println("PARSED-WORD " + word);
             
             // distinguish punctuation and words
             wordlen = word.length();
@@ -740,6 +740,7 @@ public final class plasmaCondenser {
         private Object nextElement0() {
             try {
                 String s = readSentence(raf);
+                //System.out.println(" SENTENCE='" + s + "'"); // DEBUG 
                 if (s == null) {
                     raf.close();
                     return null;
@@ -782,7 +783,10 @@ public final class plasmaCondenser {
         // find sentence end
         for (;;) {
             nextChar = reader.read();
-            if (nextChar < 0) return null;
+            //System.out.print((char) nextChar); // DEBUG    
+            if (nextChar < 0) {
+                if (s.length() == 0) return null; else break;
+            }
             c = (char) nextChar;
             s.append(c);
             if (htmlFilterContentScraper.punctuation(c)) break;
