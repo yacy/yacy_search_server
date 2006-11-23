@@ -130,6 +130,15 @@ public class ViewFile {
         // this can be used as a simple tool to test the text parser
         String urlString = post.get("url", "");
         if (urlString.length() > 0) try {
+            // this call forces the peer to download  web pages
+            // it is therefore protected by the admin password
+            
+            if (!sb.verifyAuthentication(header, false)) {
+                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                return prop;
+            }
+
+            // define an url by post parameter
             url = new URL(urlString);
         } catch (MalformedURLException e) {}
         
