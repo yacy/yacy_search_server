@@ -209,6 +209,13 @@ public class kelondroRow {
                             } catch (NumberFormatException e) {
                                 setCol(nick, 0);
                             }
+                        } else if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_binary)) {
+                            assert row[i].cellwidth() == 1;
+                            try {
+                                setCol(nick, new byte[]{(byte) Integer.parseInt(elts[i].substring(p + 1).trim())});
+                            } catch (NumberFormatException e) {
+                                setCol(nick, new byte[]{0});
+                            }
                         } else if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_bitfield)) {
                             setCol(nick, (new kelondroBitfield(row[i].cellwidth(), elts[i].substring(p + 1).trim())).bytes());
                         } else {
@@ -443,6 +450,9 @@ public class kelondroRow {
                     bb.append(Long.toString(getColLong(i)));
                 } else if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_bitfield)) {
                     bb.append((new kelondroBitfield(getColBytes(i))).exportB64());
+                } else if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_binary)) {
+                    assert row[i].cellwidth() == 1;
+                    bb.append(Integer.toString((int) (0xff & getColByte(i))));
                 } else {
                     bb.append(rowinstance, colstart[i], row[i].cellwidth());
                 }

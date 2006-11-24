@@ -37,7 +37,8 @@
               #{hosts}#
               <option value="#[hosthash]#">#[hostname]#</option>
               #{/hosts}#
-            </select>
+            </select><br />
+            <input type="text" name="host" value="" size="21" maxlength="21" />
           </td>
         </tr>
       </table>
@@ -125,7 +126,7 @@
     ::
     No URL entries related to this word hash <span class="tt">#[keyHash]#</span>.
     ::
-    URL entries related to this word hash <span class="tt">#[keyHash]#</span><br /><br />
+    #[count]# URL entries related to this word hash <span class="tt">#[keyHash]#</span><br /><br />
     <form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
     #{urlList}# #(urlExists)#
     <input type="checkbox" name="urlhx.#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" /><span class="tt">#[urlhxValue]#&nbsp;&lt;unresolved URL Hash&gt;</span><br />

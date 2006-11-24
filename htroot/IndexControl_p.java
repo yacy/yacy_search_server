@@ -250,6 +250,24 @@ public class IndexControl_p {
             if (keystring.length() == 0 || !plasmaCondenser.word2hash(keystring).equals(keyhash)) {
                 prop.put("keystring", "<not possible to compute word from hash>");
             }
+            
+            // find host & peer
+            String host = post.get("host", ""); // get host from input field
+            yacySeed seed = null;
+            if (host.length() != 0) {
+                if (host.length() == 12) {
+                    // the host string is a peer hash
+                    seed = yacyCore.seedDB.getConnected(host);
+                } else {
+                    // the host string can be a host name
+                    seed = yacyCore.seedDB.lookupByName(host);
+                }
+            } else {
+                host = post.get("hostHash", ""); // if input field is empty, get from select box
+                seed = yacyCore.seedDB.getConnected(host);
+            }
+            
+            // prepare index
             prop.put("urlstring", "");
             prop.put("urlhash", "");
             indexContainer index;
@@ -272,11 +290,12 @@ public class IndexControl_p {
                     knownURLs.put(iEntry.urlHash(), lurl);
                 }
             }
-            // use whats remaining           
+            
+            // transport to other peer
             String gzipBody = switchboard.getConfig("indexControl.gzipBody","false");
             int timeout = (int) switchboard.getConfigLong("indexControl.timeout",60000);
             HashMap resultObj = yacyClient.transferIndex(
-                         yacyCore.seedDB.getConnected(post.get("hostHash", "")),
+                         seed,
                          new indexContainer[]{index},
                          knownURLs,
                          "true".equalsIgnoreCase(gzipBody),
@@ -443,6 +462,7 @@ public class IndexControl_p {
             
             if ((index == null) || (index.size() == 0)) {
                 prop.put("genUrlList", 1);
+                prop.put("genUrlList_count", 0);
             } else {
                 final Iterator en = index.entries();
                 prop.put("genUrlList", 2);
@@ -491,6 +511,7 @@ public class IndexControl_p {
                 }
                 prop.put("genUrlList_urlList", i);
                 prop.put("genUrlList_keyString", keystring);
+                prop.put("genUrlList_count", i);
             }
             index = null;
             return prop;

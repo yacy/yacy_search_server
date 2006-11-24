@@ -48,7 +48,7 @@
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexRWIEntry;
@@ -59,6 +59,7 @@ import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacySeed;
@@ -128,14 +129,8 @@ public final class transferRWI {
             final long startProcess = System.currentTimeMillis();
 
             // decode request
-            final LinkedList v = new LinkedList();
-            int s = 0;
-            int e;
-            while (s < indexes.length) {
-                e = s; while (e < indexes.length) if (indexes[e++] < 32) {e--; break;}
-                if ((e - s) > 0) v.add(new String(indexes, s, e - s));
-                s = e; while (s < indexes.length) if (indexes[s++] >= 32) {s--; break;}
-            }
+            final List v = nxTools.strings(indexes, null);
+
             // free memory
             indexes = null;
             
@@ -148,17 +143,17 @@ public final class transferRWI {
             String wordHash;
             String urlHash;
             indexRWIEntry iEntry;
-            int wordhashesSize = v.size();
             final HashSet unknownURL = new HashSet();
             final HashSet knownURL = new HashSet();
             String[] wordhashes = new String[v.size()];
             int received = 0;
             int blocked = 0;
             int receivedURL = 0;
-            for (int i = 0; i < wordhashesSize; i++) {
+            Iterator i = v.iterator();
+            while (i.hasNext()) {
                 serverCore.checkInterruption();
                 
-                estring = (String) v.removeFirst();
+                estring = (String) i.next();
                 p = estring.indexOf("{");
                 if (p > 0) {
                     wordHash = estring.substring(0, p);

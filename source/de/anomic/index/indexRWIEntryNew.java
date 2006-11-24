@@ -264,6 +264,10 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         return new kelondroBitfield(this.entry.getColBytes(col_flags));
     }
     
+    public String toString() {
+        return toPropertyForm();
+    }
+    
     public static indexRWIEntryNew combineDistance(indexRWIEntryNew ie1, indexRWIEntry ie2) {
         // returns a modified entry of the first argument
         ie1.entry.setCol(col_worddistance, ie1.worddistance() + ie2.worddistance() + Math.abs(ie1.posintext() - ie2.posintext()));
