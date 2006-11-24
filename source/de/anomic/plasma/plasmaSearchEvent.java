@@ -395,7 +395,18 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 // find the url entry
                 page = urlStore.load(entry.urlHash(), entry);
                 // add a result
-                if (page != null) acc.addResult(page, preranking);
+                if (page != null) {
+                    if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) &&
+                        (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
+                        (!(page.comp().descr().startsWith("Index of")))) {
+                        log.logFine("filtered out " + page.comp().url().toString());
+                        // filter out bad results
+                        Iterator wi = query.queryHashes.iterator();
+                        while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash(), true);
+                    } else {
+                        acc.addResult(page, preranking);
+                    }
+                }
             }
         } catch (kelondroException ee) {
             serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);

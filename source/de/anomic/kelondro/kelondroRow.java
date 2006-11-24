@@ -162,7 +162,7 @@ public class kelondroRow {
         }
         
         public Entry(byte[] rowinstance, int start, int length) {
-            assert objectsize == length;
+            assert objectsize == length : "objectsize = " + objectsize + ", length = " + length;
             this.rowinstance = new byte[objectsize];
             int ll = Math.min(objectsize, length);
             System.arraycopy(rowinstance, start, this.rowinstance, 0, ll);

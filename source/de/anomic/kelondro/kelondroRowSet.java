@@ -190,7 +190,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         Integer nxt = (Integer) removeMarker.firstKey();
         removeMarker.remove(nxt);
         int idx = nxt.intValue();
-        assert (idx < sortBound);
+        assert (idx < sortBound) : "idx = " + idx + ", sortBound = " + sortBound;
         int d = 1;
         byte[] a;
         while (removeMarker.size() > 0) {
