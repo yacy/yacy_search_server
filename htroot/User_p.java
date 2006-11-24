@@ -111,6 +111,7 @@ public class User_p {
                     prop.put("page_downloadRight", (entry.hasDownloadRight()?1:0));
                     prop.put("page_adminRight", (entry.hasAdminRight()?1:0));
                     prop.put("page_blogRight", (entry.hasBlogRight()?1:0));
+                    prop.put("page_wikiAdminRight", (entry.hasWikiAdminRight()?1:0));
                 }
 			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
 				sb.userDB.removeEntry((String)post.get("user"));
@@ -138,6 +139,7 @@ public class User_p {
             String downloadRight=( post.containsKey("downloadRight")&&((String)post.get("downloadRight")).equals("on") ? "true" : "false");
             String adminRight=( post.containsKey("adminRight")&&((String)post.get("adminRight")).equals("on") ? "true" : "false");
             String blogRight=( post.containsKey("blogRight")&&((String)post.get("blogRight")).equals("on") ? "true" : "false");
+            String wikiAdminRight=( post.containsKey("wikiAdminRight")&&((String)post.get("wikiAdminRight")).equals("on") ? "true" : "false");
             HashMap mem=new HashMap();
             if( post.get("current_user").equals("newuser")){ //new user
                 
@@ -153,6 +155,7 @@ public class User_p {
                 mem.put(userDB.Entry.UPLOAD_RIGHT, uploadRight);
                 mem.put(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
                 mem.put(userDB.Entry.BLOG_RIGHT, blogRight);
+                mem.put(userDB.Entry.WIKIADMIN_RIGHT, wikiAdminRight);
 
                 try{
                     entry=sb.userDB.createEntry(username, mem);
@@ -182,6 +185,7 @@ public class User_p {
                         entry.setProperty(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
                         entry.setProperty(userDB.Entry.ADMIN_RIGHT, adminRight);
                         entry.setProperty(userDB.Entry.BLOG_RIGHT, blogRight);
+                        entry.setProperty(userDB.Entry.WIKIADMIN_RIGHT, wikiAdminRight);
 		            }catch (IOException e){
 					}
                 }else{

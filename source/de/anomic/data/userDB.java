@@ -318,6 +318,7 @@ public final class userDB {
         public static final String ADMIN_RIGHT = "adminRight";
         public static final String PROXY_RIGHT = "proxyRight";
         public static final String BLOG_RIGHT = "blogRight";
+        public static final String WIKIADMIN_RIGHT = "wikiAdminRight";
         
         public static final int PROXY_ALLOK = 0; //can Surf
         public static final int PROXY_ERROR = 1; //unknown error
@@ -513,6 +514,9 @@ public final class userDB {
         }
         public boolean hasBlogRight() {
             return (this.mem.containsKey(BLOG_RIGHT)?((String)this.mem.get(BLOG_RIGHT)).equals("true"):false);
+        }
+        public boolean hasWikiAdminRight() {
+            return (this.mem.containsKey(WIKIADMIN_RIGHT)?((String)this.mem.get(WIKIADMIN_RIGHT)).equals("true"):false);
         }
         public boolean isLoggedOut(){
         	   return (this.mem.containsKey(LOGGED_OUT)?((String)this.mem.get(LOGGED_OUT)).equals("true"):false);
