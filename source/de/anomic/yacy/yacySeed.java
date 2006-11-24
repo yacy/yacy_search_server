@@ -347,8 +347,9 @@ public class yacySeed {
         String ip   = (String) this.dna.get(yacySeed.IP);
         if (ip == null) { return null; }
         if (ip.length() < 8) { return null; } // 10.0.0.0
-        if (ip.equals(yacyCore.seedDB.mySeed.dna.get(yacySeed.IP))) ip = "127.0.0.1";
-
+        // if (ip.equals(yacyCore.seedDB.mySeed.dna.get(yacySeed.IP))) ip = "127.0.0.1";
+        // if (this.hash.equals("xxxxxxxxxxxx")) return "192.168.100.1:3300";
+        
         final String port = (String) this.dna.get(yacySeed.PORT);
         if (port == null) { return null; }
         if (port.length() < 2) { return null; }
