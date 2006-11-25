@@ -269,7 +269,7 @@ public class plasmaSnippetCache {
          * COMPUTE SNIPPET
          * =========================================================================== */        
         // we have found a parseable non-empty file: use the lines
-        line = computeSnippet(sentences, queryhashes, 8 + 6 * queryhashes.size(), snippetMaxLength);
+        line = computeSnippet(sentences, queryhashes, 3 * queryhashes.size(), snippetMaxLength);
         //System.out.println("loaded snippet for URL " + url + ": " + line);
         if (line == null) return new Snippet(null, ERROR_NO_MATCH, "no matching snippet found");
         if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
@@ -378,7 +378,7 @@ public class plasmaSnippetCache {
             String sentence;
             while (sentences.hasMoreElements()) {
                 sentence = (String) sentences.nextElement();
-                //System.out.println("Sentence " + i + ": " + sentences[i]);
+                //System.out.println("Snippet-Sentence :" + sentence); // DEBUG
                 if (sentence.length() > minLength) {
                     hs = hashSentence(sentence);
                     j = queryhashes.iterator();

@@ -25,6 +25,9 @@ public class snippet {
         String urlString = post.get("url", "");
         URL url = new URL(urlString);
         
+        // if 'remove' is set to true, then RWI references to URLs that do not have the snippet are removed
+        boolean remove = post.get("remove", "false").equals("true");
+        
         String querystring = post.get("search", "").trim();
         if ((querystring.length() > 2) && (querystring.charAt(0) == '"') && (querystring.charAt(querystring.length() - 1) == '"')) {
             querystring = querystring.substring(1, querystring.length() - 1).trim();
@@ -47,7 +50,7 @@ public class snippet {
             prop.put("text", (snippet.exists()) ? "<![CDATA["+snippet.getLineMarked(queryHashes)+"]]>" : "unknown"); 
         } else {
             String error = snippet.getError();
-            if (error.equals("no matching snippet found")) {
+            if ((remove) && (error.equals("no matching snippet found"))) {
                 switchboard.removeReferences(plasmaURL.urlHash(url), query);
             }
             prop.put("text", error);

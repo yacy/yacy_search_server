@@ -13,7 +13,7 @@ function AllSnippets() {
 
 function requestSnippet(url, query){
 	var request=createRequestObject();
-	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&search=' + escape(query),true);
+	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&search=' + escape(query) + '&remove=true',true);
 	request.onreadystatechange = function () {handleState(request)};
 	request.send(null);
 }
