@@ -205,7 +205,7 @@ public class plasmaCrawlNURL {
                 System.exit(-1);
             }
         } else {
-            File oldCacheFile = new File(cacheStacksPath, "urlNotice1.db");
+            File oldCacheFile = new File(cacheStacksPath, "urlNotice2.db");
             oldCacheFile.getParentFile().mkdirs();
             try {
                 urlIndexFile = new kelondroCache(kelondroTree.open(oldCacheFile, bufferkb / 2 * 0x400, preloadTime, rowdef), bufferkb / 2 * 0x400, true, true);
@@ -220,7 +220,7 @@ public class plasmaCrawlNURL {
         if (urlIndexFile != null) {
             try {urlIndexFile.close();} catch (IOException e) {}
             urlIndexFile = null;
-            File cacheFile = new File(cacheStacksPath, "urlNotice1.db");
+            File cacheFile = new File(cacheStacksPath, "urlNotice2.db");
             cacheFile.delete();
         }
         openHashCache();
