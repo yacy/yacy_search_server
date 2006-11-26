@@ -1,85 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wsdl:definitions targetNamespace="http://yacy:8080/soap/blacklist" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://yacy:8080/soap/blacklist" xmlns:intf="http://yacy:8080/soap/blacklist" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><!--WSDL created by Apache Axis version: 1.2RC2
-Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http://yacy:8080/soap/blacklist" xmlns="http://www.w3.org/2001/XMLSchema"><import namespace="http://xml.apache.org/xml-soap"/><import namespace="http://schemas.xmlsoap.org/soap/encoding/"/><complexType name="ArrayOf_soapenc_string"><complexContent><restriction base="soapenc:Array"><attribute ref="soapenc:arrayType" wsdl:arrayType="soapenc:string[]"/></restriction></complexContent></complexType></schema></wsdl:types>
+<wsdl:definitions targetNamespace="http://yacy:8080/soap/blacklist" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://yacy:8080/soap/blacklist" xmlns:intf="http://yacy:8080/soap/blacklist" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http://yacy:8080/soap/blacklist" xmlns="http://www.w3.org/2001/XMLSchema"><import namespace="http://xml.apache.org/xml-soap"/><import namespace="http://schemas.xmlsoap.org/soap/encoding/"/><complexType name="ArrayOf_xsd_string"><complexContent><restriction base="soapenc:Array"><attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:string[]"/></restriction></complexContent></complexType></schema></wsdl:types>
   <wsdl:message name="unshareBlacklistResponse">
   </wsdl:message>
-  <wsdl:message name="deactivateBlacklistResponse">
-  </wsdl:message>
   <wsdl:message name="createNewXMLDocumentRequest">
-    <wsdl:part name="rootElementName" type="soapenc:string"/>
+    <wsdl:part name="rootElementName" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="urlIsBlacklistedRequest">
+    <wsdl:part name="blacklistType" type="xsd:string"/>
+    <wsdl:part name="urlString" type="xsd:string"/>
+
   </wsdl:message>
   <wsdl:message name="addBlacklistItemRequest">
-
-    <wsdl:part name="blacklistName" type="soapenc:string"/>
-    <wsdl:part name="blacklistItem" type="soapenc:string"/>
-  </wsdl:message>
-  <wsdl:message name="removeBlacklistItemResponse">
+    <wsdl:part name="blacklistName" type="xsd:string"/>
+    <wsdl:part name="blacklistItem" type="xsd:string"/>
   </wsdl:message>
   <wsdl:message name="activateBlacklistResponse">
   </wsdl:message>
-  <wsdl:message name="getBlacklistTypesResponse">
-    <wsdl:part name="getBlacklistTypesReturn" type="impl:ArrayOf_soapenc_string"/>
+  <wsdl:message name="urlIsBlacklistedResponse">
+    <wsdl:part name="urlIsBlacklistedReturn" type="xsd:boolean"/>
 
   </wsdl:message>
-  <wsdl:message name="importBlacklistRequest">
-    <wsdl:part name="blacklistName" type="soapenc:string"/>
+  <wsdl:message name="removeBlacklistItemRequest">
+    <wsdl:part name="blacklistName" type="xsd:string"/>
+    <wsdl:part name="blacklistItem" type="xsd:string"/>
   </wsdl:message>
   <wsdl:message name="getBlacklistTypesRequest">
   </wsdl:message>
-  <wsdl:message name="removeBlacklistItemRequest">
-    <wsdl:part name="blacklistName" type="soapenc:string"/>
-    <wsdl:part name="blacklistItem" type="soapenc:string"/>
+  <wsdl:message name="activateBlacklistRequest">
+    <wsdl:part name="blacklistName" type="xsd:string"/>
 
-  </wsdl:message>
-  <wsdl:message name="addBlacklistItemResponse">
-  </wsdl:message>
-  <wsdl:message name="shareBlacklistResponse">
-  </wsdl:message>
-  <wsdl:message name="getBlacklistListResponse">
-    <wsdl:part name="getBlacklistListReturn" type="apachesoap:Document"/>
-  </wsdl:message>
-  <wsdl:message name="createBlacklistResponse">
-
-  </wsdl:message>
-  <wsdl:message name="getBlacklistListRequest">
-  </wsdl:message>
-  <wsdl:message name="unshareBlacklistRequest">
-    <wsdl:part name="blacklistName" type="soapenc:string"/>
+    <wsdl:part name="activateForBlacklistTypes" type="impl:ArrayOf_xsd_string"/>
   </wsdl:message>
   <wsdl:message name="shareBlacklistRequest">
-    <wsdl:part name="blacklistName" type="soapenc:string"/>
-  </wsdl:message>
-
-  <wsdl:message name="deleteBlacklistResponse">
-  </wsdl:message>
-  <wsdl:message name="activateBlacklistRequest">
-    <wsdl:part name="blacklistName" type="soapenc:string"/>
-    <wsdl:part name="activateForBlacklistTypes" type="impl:ArrayOf_soapenc_string"/>
+    <wsdl:part name="blacklistName" type="xsd:string"/>
   </wsdl:message>
   <wsdl:message name="createBlacklistRequest">
-    <wsdl:part name="blacklistName" type="soapenc:string"/>
+    <wsdl:part name="blacklistName" type="xsd:string"/>
     <wsdl:part name="shareBlacklist" type="xsd:boolean"/>
+    <wsdl:part name="activateForBlacklistTypes" type="impl:ArrayOf_xsd_string"/>
 
-    <wsdl:part name="activateForBlacklistTypes" type="impl:ArrayOf_soapenc_string"/>
   </wsdl:message>
   <wsdl:message name="importBlacklistResponse">
   </wsdl:message>
-  <wsdl:message name="deleteBlacklistRequest">
-    <wsdl:part name="blacklistName" type="soapenc:string"/>
-  </wsdl:message>
   <wsdl:message name="deactivateBlacklistRequest">
-    <wsdl:part name="blacklistName" type="soapenc:string"/>
-
-    <wsdl:part name="deactivateForBlacklistTypes" type="impl:ArrayOf_soapenc_string"/>
+    <wsdl:part name="blacklistName" type="xsd:string"/>
+    <wsdl:part name="deactivateForBlacklistTypes" type="impl:ArrayOf_xsd_string"/>
   </wsdl:message>
   <wsdl:message name="createNewXMLDocumentResponse">
     <wsdl:part name="createNewXMLDocumentReturn" type="apachesoap:Document"/>
+
+  </wsdl:message>
+  <wsdl:message name="deactivateBlacklistResponse">
+  </wsdl:message>
+  <wsdl:message name="removeBlacklistItemResponse">
+  </wsdl:message>
+  <wsdl:message name="getBlacklistTypesResponse">
+    <wsdl:part name="getBlacklistTypesReturn" type="impl:ArrayOf_xsd_string"/>
+  </wsdl:message>
+  <wsdl:message name="importBlacklistRequest">
+
+    <wsdl:part name="blacklistName" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="shareBlacklistResponse">
+  </wsdl:message>
+  <wsdl:message name="addBlacklistItemResponse">
+  </wsdl:message>
+  <wsdl:message name="createBlacklistResponse">
+  </wsdl:message>
+  <wsdl:message name="getBlacklistListResponse">
+
+    <wsdl:part name="getBlacklistListReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="unshareBlacklistRequest">
+    <wsdl:part name="blacklistName" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:message name="getBlacklistListRequest">
+  </wsdl:message>
+  <wsdl:message name="deleteBlacklistResponse">
+  </wsdl:message>
+
+  <wsdl:message name="deleteBlacklistRequest">
+    <wsdl:part name="blacklistName" type="xsd:string"/>
   </wsdl:message>
   <wsdl:portType name="BlacklistService">
+    <wsdl:operation name="urlIsBlacklisted" parameterOrder="blacklistType urlString">
+      <wsdl:input message="impl:urlIsBlacklistedRequest" name="urlIsBlacklistedRequest"/>
+      <wsdl:output message="impl:urlIsBlacklistedResponse" name="urlIsBlacklistedResponse"/>
+    </wsdl:operation>
     <wsdl:operation name="getBlacklistList">
+
       <wsdl:input message="impl:getBlacklistListRequest" name="getBlacklistListRequest"/>
       <wsdl:output message="impl:getBlacklistListResponse" name="getBlacklistListResponse"/>
-
     </wsdl:operation>
     <wsdl:operation name="createBlacklist" parameterOrder="blacklistName shareBlacklist activateForBlacklistTypes">
       <wsdl:input message="impl:createBlacklistRequest" name="createBlacklistRequest"/>
@@ -87,9 +99,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
     </wsdl:operation>
     <wsdl:operation name="shareBlacklist" parameterOrder="blacklistName">
       <wsdl:input message="impl:shareBlacklistRequest" name="shareBlacklistRequest"/>
+
       <wsdl:output message="impl:shareBlacklistResponse" name="shareBlacklistResponse"/>
     </wsdl:operation>
-
     <wsdl:operation name="deleteBlacklist" parameterOrder="blacklistName">
       <wsdl:input message="impl:deleteBlacklistRequest" name="deleteBlacklistRequest"/>
       <wsdl:output message="impl:deleteBlacklistResponse" name="deleteBlacklistResponse"/>
@@ -97,9 +109,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="unshareBlacklist" parameterOrder="blacklistName">
       <wsdl:input message="impl:unshareBlacklistRequest" name="unshareBlacklistRequest"/>
       <wsdl:output message="impl:unshareBlacklistResponse" name="unshareBlacklistResponse"/>
+
     </wsdl:operation>
     <wsdl:operation name="activateBlacklist" parameterOrder="blacklistName activateForBlacklistTypes">
-
       <wsdl:input message="impl:activateBlacklistRequest" name="activateBlacklistRequest"/>
       <wsdl:output message="impl:activateBlacklistResponse" name="activateBlacklistResponse"/>
     </wsdl:operation>
@@ -107,9 +119,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdl:input message="impl:deactivateBlacklistRequest" name="deactivateBlacklistRequest"/>
       <wsdl:output message="impl:deactivateBlacklistResponse" name="deactivateBlacklistResponse"/>
     </wsdl:operation>
+
     <wsdl:operation name="addBlacklistItem" parameterOrder="blacklistName blacklistItem">
       <wsdl:input message="impl:addBlacklistItemRequest" name="addBlacklistItemRequest"/>
-
       <wsdl:output message="impl:addBlacklistItemResponse" name="addBlacklistItemResponse"/>
     </wsdl:operation>
     <wsdl:operation name="removeBlacklistItem" parameterOrder="blacklistName blacklistItem">
@@ -117,9 +129,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdl:output message="impl:removeBlacklistItemResponse" name="removeBlacklistItemResponse"/>
     </wsdl:operation>
     <wsdl:operation name="importBlacklist" parameterOrder="blacklistName">
+
       <wsdl:input message="impl:importBlacklistRequest" name="importBlacklistRequest"/>
       <wsdl:output message="impl:importBlacklistResponse" name="importBlacklistResponse"/>
-
     </wsdl:operation>
     <wsdl:operation name="getBlacklistTypes">
       <wsdl:input message="impl:getBlacklistTypesRequest" name="getBlacklistTypesRequest"/>
@@ -127,19 +139,29 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
     </wsdl:operation>
     <wsdl:operation name="createNewXMLDocument" parameterOrder="rootElementName">
       <wsdl:input message="impl:createNewXMLDocumentRequest" name="createNewXMLDocumentRequest"/>
+
       <wsdl:output message="impl:createNewXMLDocumentResponse" name="createNewXMLDocumentResponse"/>
     </wsdl:operation>
-
   </wsdl:portType>
   <wsdl:binding name="blacklistSoapBinding" type="impl:BlacklistService">
     <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="urlIsBlacklisted">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="urlIsBlacklistedRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
+      </wsdl:input>
+      <wsdl:output name="urlIsBlacklistedResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="getBlacklistList">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getBlacklistListRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="getBlacklistListResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -147,9 +169,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="createBlacklistRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="createBlacklistResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -157,9 +179,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="shareBlacklistRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="shareBlacklistResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -167,9 +189,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="deleteBlacklistRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="deleteBlacklistResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -177,9 +199,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="unshareBlacklistRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="unshareBlacklistResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -187,9 +209,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="activateBlacklistRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="activateBlacklistResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -197,9 +219,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="deactivateBlacklistRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="deactivateBlacklistResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -207,9 +229,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="addBlacklistItemRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="addBlacklistItemResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -217,9 +239,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="removeBlacklistItemRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="removeBlacklistItemResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -227,9 +249,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="importBlacklistRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="importBlacklistResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -237,9 +259,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getBlacklistTypesRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="getBlacklistTypesResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -247,9 +269,9 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="createNewXMLDocumentRequest">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="createNewXMLDocumentResponse">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/blacklist" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
@@ -257,7 +279,7 @@ Built on Nov 16, 2004 (12:19:44 EST)--><wsdl:types><schema targetNamespace="http
   <wsdl:service name="BlacklistServiceService">
     <wsdl:port binding="impl:blacklistSoapBinding" name="blacklist">
       <wsdlsoap:address location="http://yacy:8080/soap/blacklist"/>
+
     </wsdl:port>
   </wsdl:service>
-
 </wsdl:definitions>

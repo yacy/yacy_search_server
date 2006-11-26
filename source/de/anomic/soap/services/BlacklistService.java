@@ -52,6 +52,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -67,7 +68,10 @@ import org.apache.axis.attachments.Attachments;
 import org.w3c.dom.Document;
 
 import de.anomic.data.listManager;
+import de.anomic.http.httpd;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverObjects;
 import de.anomic.soap.AbstractService;
 
@@ -85,8 +89,25 @@ public class BlacklistService extends AbstractService {
     private static final String TEMPLATE_BLACKLIST_XML = "xml/blacklists_p.xml";
     
     
-
-        
+    public boolean urlIsBlacklisted(String blacklistType, String urlString) throws AxisFault, MalformedURLException {
+    	if (blacklistType == null || blacklistType.length() == 0) throw new IllegalArgumentException("The blacklist type must not be null or empty.");
+    	if (urlString == null || urlString.length() == 0) throw new IllegalArgumentException("The url must not be null or empty.");
+    	
+		// extracting the message context
+		extractMessageContext(AUTHENTICATION_NEEDED);    
+		
+    	// check if we know all type passed to this function
+    	checkForKnownBlacklistTypes(new String[]{blacklistType});	
+    	
+    	// check for url validity
+    	URL url = new URL(urlString);    	
+    	String hostlow = url.getHost().toLowerCase();
+    	String file = url.getFile();
+    	
+    	// check if the specified url is listed
+        return (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_PROXY, hostlow, file));
+    }    
+    
     public Document getBlacklistList() throws Exception {
     	try {
     		// extracting the message context

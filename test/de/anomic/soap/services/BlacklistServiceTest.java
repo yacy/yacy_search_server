@@ -8,9 +8,7 @@ import javax.activation.DataSource;
 import javax.xml.rpc.ServiceException;
 
 import org.apache.axis.attachments.AttachmentPart;
-import org.apache.axis.attachments.Attachments;
 import org.apache.axis.attachments.PlainTextDataSource;
-import org.apache.axis.client.Call;
 import org.apache.axis.client.Stub;
 import org.apache.axis.utils.XMLUtils;
 import org.w3c.dom.Document;
@@ -32,7 +30,7 @@ public class BlacklistServiceTest extends AbstractServiceTest {
 		Document xml = ((BlacklistService)service).getBlacklistList();
 		System.out.println(XMLUtils.DocumentToString(xml));
 	}
-	
+
 	public void testBlacklist() throws RemoteException {
 		BlacklistService bl = ((BlacklistService)service);
 		
@@ -54,8 +52,12 @@ public class BlacklistServiceTest extends AbstractServiceTest {
 		bl.addBlacklistItem(blacklistName,item);
 		
 		// getting the blacklist list
-		Document xml = ((BlacklistService)service).getBlacklistList();
+		Document xml = bl.getBlacklistList();
 		System.out.println(XMLUtils.DocumentToString(xml));		
+		
+		// test is listed
+		boolean isListed = bl.urlIsBlacklisted("proxy","http://www.yacy.net/blacklisttest");
+		assertEquals(true,isListed);		
 		
 		// remove blacklist item
 		bl.removeBlacklistItem(blacklistName,item);
