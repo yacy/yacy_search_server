@@ -131,7 +131,8 @@ public final class httpc {
     private static final kelondroMScoreCluster nameCacheHitAges = new kelondroMScoreCluster();
     private static final kelondroMScoreCluster nameCacheMissAges = new kelondroMScoreCluster();
     private static final long startTime = System.currentTimeMillis();
-    private static final int maxNameCacheAge = 24 * 60 * 60; // 24 hours in minutes
+    private static final int maxNameCacheHitAge = 24 * 60 * 60; // 24 hours in minutes
+    private static final int maxNameCacheMissAge = 24 * 60 * 60; // 24 hours in minutes
     private static final int maxNameCacheHitSize = 3000; 
     private static final int maxNameCacheMissSize = 3000; 
     public  static final List nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList());
@@ -455,7 +456,7 @@ public final class httpc {
             
             if (doCaching) {
                 // remove old entries
-                flushNameCacheHit();
+                flushHitNameCache();
                 
                 // add new entries
                 synchronized (nameCacheHit) {
@@ -465,6 +466,10 @@ public final class httpc {
             }
             return ip;
         } catch (UnknownHostException e) {
+            // remove old entries
+            flushMissNameCache();
+            
+            // add new entries
             nameCacheMiss.add(host);
             nameCacheMissAges.setScore(host, intTime(System.currentTimeMillis()));
         }
@@ -526,10 +531,10 @@ public final class httpc {
     }
 
     /**
-    * Removes old entries from the dns cache
+    * Removes old entries from the dns hit cache
     */
-    public static void flushNameCacheHit() {
-        int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheAge;
+    public static void flushHitNameCache() {
+        int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheHitAge;
         int size;
         String k;
         synchronized (nameCacheHit) {
@@ -542,6 +547,16 @@ public final class httpc {
                 size--; // size = nameCacheAges.size();
             }
         }
+        
+    }
+    
+    /**
+     * Removes old entries from the dns miss cache
+     */
+     public static void flushMissNameCache() {
+        int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheMissAge;
+        int size;
+        String k;
         synchronized (nameCacheMiss) {
             size = nameCacheMissAges.size();
             while ((size > 0) &&
