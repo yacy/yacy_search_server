@@ -127,14 +127,16 @@ public final class httpc {
 
     // the dns cache
     private static final Map nameCacheHit = Collections.synchronizedMap(new HashMap()); // a not-synchronized map resulted in deadlocks
-    private static final kelondroMScoreCluster nameCacheAges = new kelondroMScoreCluster();
+    private static final Set nameCacheMiss = Collections.synchronizedSet(new HashSet());
+    private static final kelondroMScoreCluster nameCacheHitAges = new kelondroMScoreCluster();
+    private static final kelondroMScoreCluster nameCacheMissAges = new kelondroMScoreCluster();
     private static final long startTime = System.currentTimeMillis();
     private static final int maxNameCacheAge = 24 * 60 * 60; // 24 hours in minutes
-    private static final int maxNameCacheSize = 5000; 
+    private static final int maxNameCacheHitSize = 3000; 
+    private static final int maxNameCacheMissSize = 3000; 
     public  static final List nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList());
     private static final Set nameCacheNoCachingList = Collections.synchronizedSet(new HashSet());
-    //private static HashSet nameCacheMiss = new HashSet();
-
+    
     /**
      * A Object Pool containing all pooled httpc-objects.
      * @see httpcPool
@@ -428,8 +430,8 @@ public final class httpc {
         InetAddress ip = (InetAddress) nameCacheHit.get(host);
         if (ip != null) return ip;
         
-        // if (nameCacheMiss.contains(host)) return null;
-        try {  
+        if (nameCacheMiss.contains(host)) return null;
+        try {
             boolean doCaching = true;
             ip = InetAddress.getByName(host);
             if (
@@ -458,12 +460,13 @@ public final class httpc {
                 // add new entries
                 synchronized (nameCacheHit) {
                     nameCacheHit.put(ip.getHostName(), ip);
-                    nameCacheAges.setScore(ip.getHostName(), intTime(System.currentTimeMillis()));
+                    nameCacheHitAges.setScore(ip.getHostName(), intTime(System.currentTimeMillis()));
                 }
             }
             return ip;
         } catch (UnknownHostException e) {
-            //nameCacheMiss.add(host);
+            nameCacheMiss.add(host);
+            nameCacheMissAges.setScore(host, intTime(System.currentTimeMillis()));
         }
         return null;
     }
@@ -499,6 +502,10 @@ public final class httpc {
         return nameCacheHit.size();
     }
 
+    public static int nameCacheMissSize() {
+        return nameCacheMiss.size();
+    }
+
     /**
     * Returns the number of entries in the nameCacheNoCachingList list
     *
@@ -526,15 +533,26 @@ public final class httpc {
         int size;
         String k;
         synchronized (nameCacheHit) {
-            size = nameCacheAges.size();
+            size = nameCacheHitAges.size();
             while ((size > 0) &&
-                   (size > maxNameCacheSize) || (nameCacheAges.getMinScore() < cutofftime)) {
-                k = (String) nameCacheAges.getMinObject();
+                   (size > maxNameCacheHitSize) || (nameCacheHitAges.getMinScore() < cutofftime)) {
+                k = (String) nameCacheHitAges.getMinObject();
                 nameCacheHit.remove(k);
-                nameCacheAges.deleteScore(k);
+                nameCacheHitAges.deleteScore(k);
                 size--; // size = nameCacheAges.size();
             }
         }
+        synchronized (nameCacheMiss) {
+            size = nameCacheMissAges.size();
+            while ((size > 0) &&
+                   (size > maxNameCacheMissSize) || (nameCacheMissAges.getMinScore() < cutofftime)) {
+                k = (String) nameCacheMissAges.getMinObject();
+                nameCacheMiss.remove(k);
+                nameCacheMissAges.deleteScore(k);
+                size--; // size = nameCacheAges.size();
+            }
+        }
+        
     }
 
     /**
