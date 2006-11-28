@@ -106,6 +106,7 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -1564,10 +1565,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 
                 checkInterruption();
                 log.logFine("Condensing for '" + entry.normalizedURLString() + "'");
-                plasmaCondenser condenser = new plasmaCondenser(document.getText());
+                plasmaCondenser condenser = new plasmaCondenser(document.getText(), document.charset);
                 
                 // generate citation reference
-                Integer[] ioLinks = generateCitationReference(entry.urlHash(), docDate, document, condenser);
+                Integer[] ioLinks = generateCitationReference(entry.urlHash(), docDate, document, condenser); // [outlinksSame, outlinksOther]
                 
                 try {        
                     // check for interruption
@@ -1575,22 +1576,27 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     
                     // create a new loaded URL db entry
                     indexURLEntry newEntry = urlPool.loadedURL.newEntry(
-                            entry.url(),                                         // URL
-                            docDescription,                                      // document description
-                            "",                                                  // author
-                            "",                                                  // tags
-                            "",                                                  // ETag
-                            docDate,                                             // modification date
-                            new Date(),                                          // loaded date
-                            new Date(),                                          // freshdate 
-                            referrerUrlHash,                                     // referer hash
-                            new byte[0],                                         // md5
-                            (int) entry.size(),                                  // size
-                            condenser.RESULT_NUMB_WORDS,                         // word count
-                            plasmaURL.docType(document.getMimeType()),           // doctype
-                            condenser.RESULT_FLAGS,                              // flags
-                            plasmaURL.language(entry.url()),                     // language
-                            0,0,0,0,0,0
+                            entry.url(),                               // URL
+                            docDescription,                            // document description
+                            "",                                        // author
+                            "",                                        // tags
+                            "",                                        // ETag
+                            docDate,                                   // modification date
+                            new Date(),                                // loaded date
+                            new Date(),                                // freshdate 
+                            referrerUrlHash,                           // referer hash
+                            new byte[0],                               // md5
+                            (int) entry.size(),                        // size
+                            condenser.RESULT_NUMB_WORDS,               // word count
+                            plasmaURL.docType(document.getMimeType()), // doctype
+                            condenser.RESULT_FLAGS,                    // flags
+                            plasmaURL.language(entry.url()),           // language
+                            ioLinks[0].intValue(),                     // llocal
+                            ioLinks[1].intValue(),                     // lother
+                            document.audiolinks.size(),                // laudio
+                            document.imagelinks.size(),                // limage
+                            document.videolinks.size(),                // lvideo
+                            document.applinks.size()                   // lapp
                     );
                     /* ========================================================================
                      * STORE URL TO LOADED-URL-DB
@@ -1598,7 +1604,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     urlPool.loadedURL.store(newEntry);
                     urlPool.loadedURL.stack(
                             newEntry,                       // loaded url db entry
-                            initiatorPeerHash,                  // initiator peer hash
+                            initiatorPeerHash,              // initiator peer hash
                             yacyCore.seedDB.mySeed.hash,    // executor peer hash
                             processCase                     // process case
                     );                    
@@ -2094,7 +2100,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         filename = comp.url().getFile();
                         if ((seed == null) || ((address = seed.getAddress()) == null)) {
                             // seed is not known from here
-                            removeReferences(urlentry.hash(), plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.descr()).getBytes()));
+                            removeReferences(urlentry.hash(), plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.descr()).getBytes(), "UTF-8"));
                             urlPool.loadedURL.remove(urlentry.hash()); // clean up
                             continue; // next result
                         }
@@ -2121,7 +2127,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     URL wordURL;
                     if (urlstring.matches(query.urlMask)) { //.* is default
                         if (includeSnippets) {
-                            snippet = snippetCache.retrieveSnippet(comp.url(), query.queryHashes, false, 260, 1000);
+                            snippet = snippetCache.retrieveSnippet(comp.url(), query.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
                         } else {
                             snippet = null;
                         }
@@ -2237,10 +2243,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             InputStream docBodyInputStream = document.getText();
             
             // getting word iterator
-            Iterator witer = plasmaCondenser.getWords(docBodyInputStream);
+            Iterator witer = null;
+            try {
+                witer = plasmaCondenser.getWords(docBodyInputStream, document.charset);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             
             // delete all word references
-            int count = removeReferences(urlhash, witer);
+            int count = 0;
+            if (witer != null) count = removeReferences(urlhash, witer);
             
             // finally delete the url entry itself
             urlPool.loadedURL.remove(urlhash);

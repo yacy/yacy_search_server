@@ -420,8 +420,7 @@ public class plasmaURL {
             tld = host.substring(p + 1);
             dom = host.substring(0, p);
         }
-        Integer ID = (serverCore.isNotLocal(tld)) ? (Integer) TLDID.get(tld)
-                : null; // identify local addresses
+        Integer ID = (serverCore.isNotLocal(tld)) ? (Integer) TLDID.get(tld) : null; // identify local addresses
         int id = (ID == null) ? 7 : ID.intValue(); // local addresses are flagged with id=7
         boolean isHTTP = url.getProtocol().equals("http");
         p = dom.lastIndexOf('.'); // locate subdomain

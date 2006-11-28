@@ -35,6 +35,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
@@ -261,6 +262,10 @@ public class indexURLEntryOld implements indexURLEntry {
 
     public int wordCount() {
         return wordCount;
+    }
+    
+    public kelondroBitfield flags() {
+        return plasmaSearchQuery.empty_constraint;
     }
 
     public String snippet() {

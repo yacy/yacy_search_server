@@ -75,8 +75,7 @@ public class plasmaParserDocument {
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    Map hyperlinks;
-    Map medialinks;
+    Map hyperlinks, audiolinks, videolinks, imagelinks, applinks;
     Map emaillinks;
     plasmaCondenser condenser;
     boolean resorted;
@@ -98,7 +97,10 @@ public class plasmaParserDocument {
         this.anchors = (anchors==null)?new HashMap(0):anchors;
         this.images = (images==null)?new TreeSet():images;
         this.hyperlinks = null;
-        this.medialinks = null;
+        this.audiolinks = null;
+        this.videolinks = null;
+        this.imagelinks = null;
+        this.applinks = null;
         this.emaillinks = null;
         this.condenser = null;
         this.resorted = false;
@@ -121,7 +123,10 @@ public class plasmaParserDocument {
         this.anchors = (anchors==null)?new HashMap(0):anchors;
         this.images = (images==null)?new TreeSet():images;
         this.hyperlinks = null;
-        this.medialinks = null;
+        this.audiolinks = null;
+        this.videolinks = null;
+        this.imagelinks = null;
+        this.applinks = null;
         this.emaillinks = null;
         this.condenser = null;
         this.resorted = false;
@@ -190,9 +195,11 @@ public class plasmaParserDocument {
         return -1; 
     }
     
-    public Enumeration getSentences(String charset) {
+    public Enumeration getSentences(boolean pre) {
         if (this.text == null) return null;
-        return plasmaCondenser.sentencesFromInputStream(getText(), charset);
+        plasmaCondenser.sentencesFromInputStreamEnum e = plasmaCondenser.sentencesFromInputStream(getText(), this.charset);
+        e.pre(pre);
+        return e;
     }
     
     public String getKeywords(char separator) {
@@ -232,10 +239,24 @@ public class plasmaParserDocument {
         return hyperlinks;
     }
     
-    public Map getMedialinks() {
-        // this is partly subset of getAnchor and getImage: all non-hyperrefs
+    public Map getAudiolinks() {
         if (!resorted) resortLinks();
-        return medialinks;
+        return this.audiolinks;
+    }
+    
+    public Map getVideolinks() {
+        if (!resorted) resortLinks();
+        return this.videolinks;
+    }
+    
+    public Map getImagelinks() {
+        if (!resorted) resortLinks();
+        return this.imagelinks;
+    }
+    
+    public Map getApplinks() {
+        if (!resorted) resortLinks();
+        return this.applinks;
     }
     
     public Map getEmaillinks() {
@@ -248,69 +269,70 @@ public class plasmaParserDocument {
         
         // extract hyperlinks, medialinks and emaillinks from anchorlinks
         Iterator i;
-        String url;
+        URL url;
+        String u;
         int extpos, qpos;
         String ext = null;
         i = anchors.entrySet().iterator();
         hyperlinks = new HashMap();
-        medialinks = new HashMap();
+        imagelinks = new HashMap();
+        videolinks = new HashMap();
+        audiolinks = new HashMap();
+        applinks   = new HashMap();
         emaillinks = new HashMap();
         TreeSet collectedImages = new TreeSet(); // this is a set that is collected now and joined later to the imagelinks
         Map.Entry entry;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            url = (String) entry.getKey();
-            if ((url != null) && (url.startsWith("mailto:"))) {
-                emaillinks.put(url.substring(7), entry.getValue());
+            u = (String) entry.getKey();
+            if ((u != null) && (u.startsWith("mailto:"))) {
+                emaillinks.put(u.substring(7), entry.getValue());
             } else {
-                extpos = url.lastIndexOf(".");
-                String normal;
+                extpos = u.lastIndexOf(".");
                 if (extpos > 0) {
-                    if (((qpos = url.indexOf("?")) >= 0) && (qpos > extpos)) {
-                        ext = url.substring(extpos, qpos).toLowerCase();
+                    if (((qpos = u.indexOf("?")) >= 0) && (qpos > extpos)) {
+                        ext = u.substring(extpos + 1, qpos).toLowerCase();
                     } else {
-                        ext = url.substring(extpos).toLowerCase();
+                        ext = u.substring(extpos + 1).toLowerCase();
                     }
-                    try {normal = new URL(url).toNormalform();} catch (MalformedURLException e1) {
-                        normal = null;
-                    }
-                    if (normal != null) { //TODO: extension function is not correct
-                        if (plasmaParser.mediaExtContains(ext.substring(1))) {
+                    try {
+                        url = new URL(u);
+                        u = url.toNormalform();
+                        if (plasmaParser.mediaExtContains(ext)) {
                             // this is not a normal anchor, its a media link
-                            medialinks.put(normal, entry.getValue());
+                            if (plasmaParser.imageExtContains(ext)) {
+                                imagelinks.put(u, entry.getValue());
+                                collectedImages.add(new htmlFilterImageEntry(url, "", -1, -1));
+                            }
+                            else if (plasmaParser.audioExtContains(ext)) audiolinks.put(u, entry.getValue());
+                            else if (plasmaParser.videoExtContains(ext)) videolinks.put(u, entry.getValue());
+                            else if (plasmaParser.appsExtContains(ext)) applinks.put(u, entry.getValue());
                         } else {
-                            hyperlinks.put(normal, entry.getValue());
+                            hyperlinks.put(u, entry.getValue());
                         }
-                        if (plasmaParser.imageExtContains(ext.substring(1))) {
-                            try {
-                                collectedImages.add(new htmlFilterImageEntry(new URL(normal), "", -1, -1));
-                            } catch (MalformedURLException e) {}
-                        }
+                    } catch (MalformedURLException e1) {
                     }
                 }
             }
-        }
-        
-        // add the images to the medialinks
-        i = images.iterator();
-        String normal;
-        htmlFilterImageEntry iEntry;
-        while (i.hasNext()) {
-            iEntry = (htmlFilterImageEntry) i.next();
-            normal = iEntry.url().toNormalform();
-            if (normal != null) medialinks.put(normal, iEntry.alt()); // avoid NullPointerException
         }
         
         // expand the hyperlinks:
         // we add artificial hyperlinks to the hyperlink set
         // that can be calculated from given hyperlinks and imagelinks
         hyperlinks.putAll(plasmaParser.allReflinks(hyperlinks));
-        hyperlinks.putAll(plasmaParser.allReflinks(medialinks));
+        hyperlinks.putAll(plasmaParser.allReflinks(imagelinks));
+        hyperlinks.putAll(plasmaParser.allReflinks(audiolinks));
+        hyperlinks.putAll(plasmaParser.allReflinks(videolinks));
+        hyperlinks.putAll(plasmaParser.allReflinks(applinks));
         hyperlinks.putAll(plasmaParser.allSubpaths(hyperlinks));
-        hyperlinks.putAll(plasmaParser.allSubpaths(medialinks));
+        hyperlinks.putAll(plasmaParser.allSubpaths(imagelinks));
+        hyperlinks.putAll(plasmaParser.allSubpaths(audiolinks));
+        hyperlinks.putAll(plasmaParser.allSubpaths(videolinks));
+        hyperlinks.putAll(plasmaParser.allSubpaths(applinks));
         
         // finally add image links that we collected from the anchors to the image map
         i = collectedImages.iterator();
+        htmlFilterImageEntry iEntry;
         while (i.hasNext()) {
             iEntry = (htmlFilterImageEntry) i.next();
             if (!images.contains(iEntry)) images.add(iEntry);

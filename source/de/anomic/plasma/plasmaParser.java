@@ -139,9 +139,12 @@ public final class plasmaParser {
     private static final HashSet mediaExtSet = new HashSet();
     
     /**
-     * A list of image extensions that should be handleable by image viewer apps
+     * A list of image, audio, video and application extensions
      */
     private static final HashSet imageExtSet = new HashSet();
+    private static final HashSet audioExtSet = new HashSet();
+    private static final HashSet videoExtSet = new HashSet();
+    private static final HashSet appsExtSet = new HashSet();
     
     /**
      * This {@link FilenameFilter} is used to find all classes based on there filenames 
@@ -169,17 +172,23 @@ public final class plasmaParser {
      * @see #initMediaExt(String)
      */
     static {
+        String apps = "sit,hqx,img,dmg,exe,com,bat,sh";
+        String audio = "mp2,mp3,ogg,aac,aif,aiff,wav";
+        String video = "swf,avi,wmv,rm,mov,mpg,mpeg,ram,m4v";
+        String image = "jpg,jpeg,jpe,gif,png";
         initMediaExt(extString2extList(
-                "sit,hqx,img,dmg,exe,com,bat,sh" +   // application container
-                "tar,gz,bz2,arj,zip,rar," +          // archive formats
-                "ps,xls,ppt,asf," +                  // text formats without support
-                "mp3,ogg,aac," +                     // audio formats
-                "swf,avi,wmv,rm,mov,mpg,mpeg,ram," + // video formats
-                "jpg,jpeg,jpe,gif,png"               // image formats
+                apps + "," +  // application container
+                "tar,gz,bz2,arj,zip,rar," + // archive formats
+                "ps,xls,ppt,asf," +         // text formats without support
+                audio + "," +               // audio formats
+                video + "," +               // video formats
+                image                       // image formats
                 ));
-        initImageExt(extString2extList(
-                "jpg,jpeg,jpe,gif,png"               // image formats
-                ));
+        initImageExt(extString2extList(image));  // image formats
+        initAudioExt(extString2extList(audio));  // audio formats
+        initVideoExt(extString2extList(video));  // video formats
+        initAppsExt(extString2extList(apps));    // application formats
+                
         
         /* ===================================================
          * initializing the parser object pool
@@ -272,6 +281,27 @@ public final class plasmaParser {
         }
     }
     
+    public static void initAudioExt(List audioExtList) {
+        synchronized (audioExtSet) {
+            audioExtSet.clear();
+            audioExtSet.addAll(audioExtList);
+        }
+    }
+    
+    public static void initVideoExt(List videoExtList) {
+        synchronized (videoExtSet) {
+            videoExtSet.clear();
+            videoExtSet.addAll(videoExtList);
+        }
+    }
+    
+    public static void initAppsExt(List appsExtList) {
+        synchronized (appsExtSet) {
+            appsExtSet.clear();
+            appsExtSet.addAll(appsExtList);
+        }
+    }
+    
     public static String getMediaExtList() {
         synchronized (mediaExtSet) {
             return mediaExtSet.toString();
@@ -340,6 +370,27 @@ public final class plasmaParser {
         if (imageExt == null) return false;
         synchronized (imageExtSet) {
             return imageExtSet.contains(imageExt.trim().toLowerCase());
+        }
+    }
+
+    public static boolean audioExtContains(String audioExt) {
+        if (audioExt == null) return false;
+        synchronized (audioExtSet) {
+            return audioExtSet.contains(audioExt.trim().toLowerCase());
+        }
+    }
+
+    public static boolean videoExtContains(String videoExt) {
+        if (videoExt == null) return false;
+        synchronized (videoExtSet) {
+            return videoExtSet.contains(videoExt.trim().toLowerCase());
+        }
+    }
+
+    public static boolean appsExtContains(String appsExt) {
+        if (appsExt == null) return false;
+        synchronized (appsExtSet) {
+            return appsExtSet.contains(appsExt.trim().toLowerCase());
         }
     }
 
@@ -887,7 +938,7 @@ public final class plasmaParser {
                 System.out.println(document.getMainLongTitle());
                 
                 // found text
-                final Enumeration sentences = document.getSentences(null); // FIXME: apply correct charset
+                final Enumeration sentences = document.getSentences(false);
                 int i = 0;
                 if (sentences != null) while (sentences.hasMoreElements()) {
                         System.out.print("line " + i + ": ");

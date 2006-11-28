@@ -167,13 +167,11 @@ public final class plasmaSearchResult {
         Iterator i = pageAcc.entrySet().iterator();
         HashMap paths = new HashMap(); // a url-subpath to pageAcc-key relation
         Map.Entry entry;
-        String path = null;
         
         // first scan all entries and find all urls that are referenced
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            path = urlPath(((indexURLEntry) entry.getValue()).comp().url());
-            paths.put(path, entry.getKey());
+            paths.put(((indexURLEntry) entry.getValue()).comp().url().toNormalform(), entry.getKey());
             //if (path != null) path = shortenPath(path);
             //if (path != null) paths.put(path, entry.getKey());
         }
@@ -183,8 +181,7 @@ public final class plasmaSearchResult {
         String shorten;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            path = urlPath(((indexURLEntry) entry.getValue()).comp().url());
-            shorten = shortenPath(path);
+            shorten = shortenPath(((indexURLEntry) entry.getValue()).comp().url().toNormalform());
             // scan all subpaths of the url
             while (shorten != null) {
                 if (pageAcc.size() <= query.wantedResults) break;
@@ -206,7 +203,7 @@ public final class plasmaSearchResult {
         if (pos < 0) return null;
         return path.substring(0, pos);
     }
-    
+    /*
     private static String urlPath(URL url) {
         String port = ((url.getPort() < 0) ? "" : ":" + url.getPort());
         String path = url.getPath();
@@ -217,7 +214,7 @@ public final class plasmaSearchResult {
         }
         return url.getHost() + port + path;
     }
-    
+    */
     public Object[] getReferences(int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
@@ -260,7 +257,7 @@ public final class plasmaSearchResult {
             String hash, fill;
             String[] paths1 = new String[urls.length]; for (int i = 0; i < urls.length; i++) {
                 fill = ""; for (int j = 0; j < 35 - urls[i].toString().length(); j++) fill +=" ";
-                paths1[i] = urlPath(urls[i]);
+                paths1[i] = urls[i].toNormalform();
                 hash = plasmaURL.urlHash(urls[i]);
                 System.out.println("paths1[" + urls[i] + fill +"] = " + hash + ", typeID=" + plasmaURL.flagTypeID(hash) + ", tldID=" + plasmaURL.flagTLDID(hash) + ", lengthID=" + plasmaURL.flagLengthID(hash) + " / " + paths1[i]);
             }

@@ -56,6 +56,7 @@ import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.index.indexContainer;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
+import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -256,7 +257,7 @@ public final class search {
             while ((acc.hasMoreElements()) && (i < squery.wantedResults)) {
                 urlentry = (indexURLEntry) acc.nextElement();
                 if (includesnippet) {
-                    snippet = sb.snippetCache.retrieveSnippet(urlentry.comp().url(), squery.queryHashes, false, 260, 1000);
+                    snippet = sb.snippetCache.retrieveSnippet(urlentry.comp().url(), squery.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
                 } else {
                     snippet = null;
                 }

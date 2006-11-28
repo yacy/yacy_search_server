@@ -180,7 +180,7 @@ public class plasmaSnippetCache {
         return retrieveFromCache(hashes, plasmaURL.urlHash(url)) != null;
     }
     
-    public Snippet retrieveSnippet(URL url, Set queryhashes, boolean fetchOnline, int snippetMaxLength, int timeout) {
+    public Snippet retrieveSnippet(URL url, Set queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout) {
         // heise = "0OQUNU3JSs05"
         if (queryhashes.size() == 0) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
@@ -257,7 +257,7 @@ public class plasmaSnippetCache {
         if (document == null) return new Snippet(null, ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
                 
         //System.out.println("loaded document for URL " + url);
-        final Enumeration sentences = document.getSentences(null); // FIXME: apply correct charset
+        final Enumeration sentences = document.getSentences(pre);
         document.close();
         //System.out.println("----" + url.toString()); for (int l = 0; l < sentences.length; l++) System.out.println(sentences[l]);
         if (sentences == null) {
@@ -475,7 +475,7 @@ public class plasmaSnippetCache {
     private HashMap hashSentence(String sentence) {
         // generates a word-wordPos mapping
         HashMap map = new HashMap();
-        Enumeration words = plasmaCondenser.wordTokenizer(sentence, 0);
+        Enumeration words = plasmaCondenser.wordTokenizer(sentence, "UTF-8", 0);
         int pos = 0;
         String word;
         while (words.hasMoreElements()) {
@@ -640,7 +640,7 @@ public class plasmaSnippetCache {
             urlstring = comp.url().toNormalform();
             if ((urlstring.matches(urlmask)) &&
                 (!(existsInCache(comp.url(), queryhashes)))) {
-                new Fetcher(comp.url(), queryhashes, (int) maxTime).start();
+                new Fetcher(comp.url(), queryhashes, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), (int) maxTime).start();
                 i++;
             }
         }
@@ -650,15 +650,17 @@ public class plasmaSnippetCache {
         URL url;
         Set queryhashes;
         int timeout;
-        public Fetcher(URL url, Set queryhashes, int timeout) {
+        boolean pre;
+        public Fetcher(URL url, Set queryhashes, boolean pre, int timeout) {
             if (url.getHost().endsWith(".yacyh")) return;
             this.url = url;
             this.queryhashes = queryhashes;
             this.timeout = timeout;
+            this.pre = pre;
         }
         public void run() {
             log.logFine("snippetFetcher: try to get URL " + url);
-            plasmaSnippetCache.Snippet snippet = retrieveSnippet(url, queryhashes, true, 260, timeout);
+            plasmaSnippetCache.Snippet snippet = retrieveSnippet(url, queryhashes, true, pre, 260, timeout);
             if (snippet.line == null)
                 log.logFine("snippetFetcher: cannot get URL " + url + ". error(" + snippet.source + "): " + snippet.error);
             else

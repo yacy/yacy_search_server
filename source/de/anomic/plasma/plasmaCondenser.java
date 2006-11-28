@@ -107,7 +107,7 @@ public final class plasmaCondenser {
     private int wordminsize;
     private int wordcut;
 
-    public int RESULT_NUMB_TEXT_BYTES = -1;
+    //public int RESULT_NUMB_TEXT_BYTES = -1;
     public int RESULT_NUMB_WORDS = -1;
     public int RESULT_DIFF_WORDS = -1;
     public int RESULT_SIMI_WORDS = -1;
@@ -117,17 +117,17 @@ public final class plasmaCondenser {
     public int RESULT_SIMI_SENTENCES = -1;
     public kelondroBitfield RESULT_FLAGS = new kelondroBitfield(4);
     
-    public plasmaCondenser(InputStream text) {
-        this(text, 3, 2);
+    public plasmaCondenser(InputStream text, String charset) throws UnsupportedEncodingException {
+        this(text, charset, 3, 2);
     }
 
-    public plasmaCondenser(InputStream text, int wordminsize, int wordcut) {
+    public plasmaCondenser(InputStream text, String charset, int wordminsize, int wordcut) throws UnsupportedEncodingException {
         this.wordminsize = wordminsize;
         this.wordcut = wordcut;
         // analysis = new Properties();
         words = new TreeMap();
         sentences = new HashMap();
-        createCondensement(text);
+        createCondensement(text, charset);
     }
 
     // create a word hash
@@ -225,7 +225,7 @@ public final class plasmaCondenser {
         return s;
     }
 
-    private void createCondensement(InputStream is) {
+    private void createCondensement(InputStream is, String charset) throws UnsupportedEncodingException {
 
         words = new TreeMap(/*kelondroNaturalOrder.naturalOrder*/);
         sentences = new HashMap();
@@ -244,10 +244,10 @@ public final class plasmaCondenser {
         int idx;
         int wordInSentenceCounter = 1;
         Iterator it, it1;
-        boolean comb_indexof = false, comb_lastmodified = false, last_last = false, last_index = false;
+        boolean comb_indexof = false, last_last = false, last_index = false;
         
         // read source
-        sievedWordsEnum wordenum = new sievedWordsEnum(is, wordminsize);
+        sievedWordsEnum wordenum = new sievedWordsEnum(is, charset, wordminsize);
         while (wordenum.hasMoreElements()) {
             word = ((String) wordenum.nextElement()).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             //System.out.println("PARSED-WORD " + word);
@@ -285,7 +285,10 @@ public final class plasmaCondenser {
                 wordInSentenceCounter = 1;
             } else {
                 // check index.of detection
-                if ((last_last) && (word.equals("modified"))) comb_lastmodified = true;
+                if ((last_last) && (comb_indexof) && (word.equals("modified"))) {
+                    this.RESULT_FLAGS.set(flag_cat_indexof, true);
+                    wordenum.pre(true); // parse lines as they come with CRLF
+                }
                 if ((last_index) && (word.equals("of"))) comb_indexof = true;
                 last_last = word.equals("last");
                 last_index = word.equals("index");
@@ -412,7 +415,7 @@ public final class plasmaCondenser {
         }
 
         // store result
-        this.RESULT_NUMB_TEXT_BYTES = wordenum.count();
+        //this.RESULT_NUMB_TEXT_BYTES = wordenum.count();
         this.RESULT_NUMB_WORDS = allwordcounter;
         this.RESULT_DIFF_WORDS = wordHandleCount;
         this.RESULT_SIMI_WORDS = words.size();
@@ -420,7 +423,6 @@ public final class plasmaCondenser {
         this.RESULT_NUMB_SENTENCES = allsentencecounter;
         this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
         this.RESULT_SIMI_SENTENCES = sentences.size();
-        this.RESULT_FLAGS.set(flag_cat_indexof, comb_indexof && comb_lastmodified);
     }
 
     public void print() {
@@ -544,10 +546,9 @@ public final class plasmaCondenser {
         return ("$%&/()=\"$%&/()=`^+*~#'-_:;,|<>[]\\".indexOf(c) >= 0);
     }
 
-    public static Enumeration wordTokenizer(String s, int minLength) {
+    public static Enumeration wordTokenizer(String s, String charset, int minLength) {
         try {
-            // TODO: Bugfix for UTF-8 needed
-            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), minLength);
+            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), charset, minLength);
         } catch (Exception e) {
             return null;
         }
@@ -560,13 +561,17 @@ public final class plasmaCondenser {
         unsievedWordsEnum e;
         int ml;
 
-        public sievedWordsEnum(InputStream is, int minLength) {
-            e = new unsievedWordsEnum(is);
+        public sievedWordsEnum(InputStream is, String charset, int minLength) throws UnsupportedEncodingException {
+            e = new unsievedWordsEnum(is, charset);
             buffer = nextElement0();
             ml = minLength;
         }
 
-	    private Object nextElement0() {
+        public void pre(boolean x) {
+            e.pre(x);
+        }
+        
+        private Object nextElement0() {
             String s;
             char c;
             loop: while (e.hasMoreElements()) {
@@ -596,23 +601,24 @@ public final class plasmaCondenser {
             return r;
         }
 
-        public int count() {
-            return e.count();
-        }
     }
 
     private static class unsievedWordsEnum implements Enumeration {
         
         Object buffer = null;
-        linesFromFileEnum e;
+        sentencesFromInputStreamEnum e;
         String s;
 
-        public unsievedWordsEnum(InputStream is) {
-            e = new linesFromFileEnum(is);
+        public unsievedWordsEnum(InputStream is, String charset) throws UnsupportedEncodingException {
+            e = new sentencesFromInputStreamEnum(is, charset);
             s = "";
             buffer = nextElement0();
         }
 
+        public void pre(boolean x) {
+            e.pre(x);
+        }
+        
         private Object nextElement0() {
             String r;
             StringBuffer sb;
@@ -656,66 +662,9 @@ public final class plasmaCondenser {
             return r;
         }
 
-        public int count() {
-            return e.count();
-        }
-    }
-
-    private static class linesFromFileEnum implements Enumeration {
-        // read in lines from a given input stream
-        // every line starting with a '#' is treated as a comment.
-
-        Object buffer = null;
-        BufferedReader raf;
-        int counter = 0;
-
-        public linesFromFileEnum(InputStream is) {
-            raf = new BufferedReader(new InputStreamReader(is)); // TODO: bugfix needed for UTF-8, use charset for reader
-            buffer = nextElement0();
-            counter = 0;
-        }
-
-        private Object nextElement0() {
-            try {
-                String s;
-                while (true) {
-                    s = raf.readLine();
-                    if (s == null) {
-                        raf.close();
-                        return null;
-                    }
-                    if (!(s.startsWith("#"))) return s;
-                }
-            } catch (IOException e) {
-                try {
-                    raf.close();
-                } catch (Exception ee) {
-                }
-                return null;
-            }
-        }
-
-        public boolean hasMoreElements() {
-            return buffer != null;
-        }
-
-        public Object nextElement() {
-            if (buffer == null) {
-                return null;
-            } else {
-                counter = counter + ((String) buffer).length() + 1;
-                Object r = buffer;
-                buffer = nextElement0();
-                return r;
-            }
-        }
-
-        public int count() {
-            return counter;
-        }
     }
     
-    public static Enumeration sentencesFromInputStream(InputStream is, String charset) {
+    public static sentencesFromInputStreamEnum sentencesFromInputStream(InputStream is, String charset) {
         try {
             return new sentencesFromInputStreamEnum(is, charset);
         } catch (UnsupportedEncodingException e) {
@@ -723,23 +672,29 @@ public final class plasmaCondenser {
         }
     }
     
-    private static class sentencesFromInputStreamEnum implements Enumeration {
+    public static class sentencesFromInputStreamEnum implements Enumeration {
         // read sentences from a given input stream
         // this enumerates String objects
         
         Object buffer = null;
         BufferedReader raf;
         int counter = 0;
+        boolean pre = false;
 
         public sentencesFromInputStreamEnum(InputStream is, String charset) throws UnsupportedEncodingException {
             raf = new BufferedReader((charset == null) ? new InputStreamReader(is) : new InputStreamReader(is, charset));
             buffer = nextElement0();
             counter = 0;
+            pre = false;
         }
 
+        public void pre(boolean x) {
+            this.pre = x;
+        }
+        
         private Object nextElement0() {
             try {
-                String s = readSentence(raf);
+                String s = readSentence(raf, pre);
                 //System.out.println(" SENTENCE='" + s + "'"); // DEBUG 
                 if (s == null) {
                     raf.close();
@@ -775,7 +730,7 @@ public final class plasmaCondenser {
         }
     }
 
-    static String readSentence(Reader reader) throws IOException {
+    static String readSentence(Reader reader, boolean pre) throws IOException {
         StringBuffer s = new StringBuffer();
         int nextChar;
         char c;
@@ -789,7 +744,11 @@ public final class plasmaCondenser {
             }
             c = (char) nextChar;
             s.append(c);
-            if (htmlFilterContentScraper.punctuation(c)) break;
+            if (pre) {
+                if ((c == (char) 10) || (c == (char) 13)) break;
+            } else {
+                if (htmlFilterContentScraper.punctuation(c)) break;
+            }
         }
 
         // replace line endings and tabs by blanks
@@ -802,16 +761,16 @@ public final class plasmaCondenser {
         
     }
     
-    public static Iterator getWords(InputStream input) {
+    public static Iterator getWords(InputStream input, String charset) throws UnsupportedEncodingException {
         if (input == null) return null;
-        plasmaCondenser condenser = new plasmaCondenser(input);
+        plasmaCondenser condenser = new plasmaCondenser(input, charset);
         return condenser.words();        
     }
     
-    public static Iterator getWords(byte[] text) {
+    public static Iterator getWords(byte[] text, String charset) throws UnsupportedEncodingException {
         if (text == null) return null;
         ByteArrayInputStream buffer = new ByteArrayInputStream(text);
-        return getWords(buffer);
+        return getWords(buffer, charset);
     }
         
     public static void main(String[] args) {

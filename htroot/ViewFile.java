@@ -57,6 +57,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -99,7 +100,8 @@ public class ViewFile {
         URL url = null;
         String descr = "";
         int wordCount = 0;
-        int size = 0;    
+        int size = 0;
+        boolean pre = false;
         
         // getting the url hash from which the content should be loaded
         String urlHash = post.get("urlHash","");       
@@ -124,6 +126,7 @@ public class ViewFile {
             descr = comp.descr();
             urlEntry.wordCount();
             size = urlEntry.size();
+            pre = urlEntry.flags().get(plasmaCondenser.flag_cat_indexof);
         }
 
         // alternatively, get the url simply from a url String
@@ -140,6 +143,7 @@ public class ViewFile {
 
             // define an url by post parameter
             url = new URL(urlString);
+            pre = post.get("pre", "false").equals("true");
         } catch (MalformedURLException e) {}
         
         
@@ -303,14 +307,13 @@ public class ViewFile {
                 prop.put("viewMode_parsedText", content);
             } else {
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_SENTENCES);
-                final Enumeration sentences = document.getSentences(null); // FIXME: apply correct charset
+                final Enumeration sentences = document.getSentences(pre);
 
                 boolean dark = true;
                 int i = 0;
                 if (sentences != null)
                     while (sentences.hasMoreElements()) {
-                        String currentSentence = wikiCode
-                                .replaceHTML((String) sentences.nextElement());
+                        String currentSentence = wikiCode.replaceHTML((String) sentences.nextElement());
 
                         // Search word highlighting
                         String words = post.get("words", null);

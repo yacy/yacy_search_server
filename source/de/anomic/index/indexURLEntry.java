@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
 
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
 import de.anomic.index.indexRWIEntry;
@@ -49,6 +50,7 @@ public interface indexURLEntry {
     public int size();
     public int wordCount();
     public String snippet();
+    public kelondroBitfield flags();
     public indexRWIEntry word();
     public boolean isOlder(indexURLEntry other);
     public String toString(String snippet);

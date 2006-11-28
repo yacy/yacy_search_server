@@ -188,7 +188,7 @@ parseableMimeTypes.URLREDIRECTOR=
 # a comma-separated list of extensions that denote media file formats
 # this is important to recognize <a href> - tags as not-html reference
 # These files will be excluded from indexing _(Please keep extensions in alphabetical order)_
-mediaExt=7z,ace,arj,asf,asx,avi,bin,bz2,css,db,dcm,deb,doc,dll,dmg,gif,gz,hqx,ico,img,iso,jar,jpe,jpg,jpeg,lx,lxl,mpeg,mov,mp3,mpg,ogg,png,pdf,ppt,ps,ram,rar,rm,rpm,scr,sit,so,swf,sxc,sxd,sxi,sxw,tar,tbz,tgz,torrent,war,wmv,xcf,xls,zip
+mediaExt=7z,ace,aif,aiff,arj,asf,asx,avi,bin,bz2,css,db,dcm,deb,doc,dll,dmg,gif,gz,hqx,ico,img,iso,jar,jpe,jpg,jpeg,lx,lxl,m4v,mpeg,mov,mp3,mpg,ogg,png,pdf,ppt,ps,ram,rar,rm,rpm,scr,sit,so,swf,sxc,sxd,sxi,sxw,tar,tbz,tgz,torrent,war,wav,wmv,xcf,xls,zip
 parseableExt=html,htm,txt,php,shtml,asp,aspx,jsp
 
 # Promotion Strings

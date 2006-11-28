@@ -124,11 +124,14 @@ public class CacheAdmin_p {
                     info.append("<b>TITLE:</b><br>").append(scraper.getTitle()).append("<br>").append("<br>")
                         .append("<b>SECTION HEADLINES:</b><br>").append(formatTitles(document.getSectionTitles())).append("<br>")
                         .append("<b>HREF:</b><br>").append(formatAnchor(document.getHyperlinks())).append("<br>")
-                        .append("<b>MEDIA:</b><br>").append(formatAnchor(document.getMedialinks())).append("<br>")
+                        .append("<b>IMAGE:</b><br>").append(formatAnchor(document.getImagelinks())).append("<br>")
+                        .append("<b>AUDIO:</b><br>").append(formatAnchor(document.getAudiolinks())).append("<br>")
+                        .append("<b>VIDEO:</b><br>").append(formatAnchor(document.getVideolinks())).append("<br>")
+                        .append("<b>APPS:</b><br>").append(formatAnchor(document.getApplinks())).append("<br>")
                         .append("<b>EMAIL:</b><br>").append(formatAnchor(document.getEmaillinks())).append("<br>")
                         .append("<b>TEXT:</b><br><span class=\"small\">").append(new String(scraper.getText())).append("</span><br>")
                         .append("<b>LINES:</b><br><span class=\"small\">");
-                    final Enumeration sentences = document.getSentences(null); // FIXME: apply correct charset
+                    final Enumeration sentences = document.getSentences(false);
                     if (sentences != null) while (sentences.hasMoreElements()) {
                         info.append((String) sentences.nextElement()).append("<br>");
                     }

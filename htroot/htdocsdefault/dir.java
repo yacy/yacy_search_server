@@ -360,7 +360,7 @@ public class dir {
     public static void indexPhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr, byte[] md5) {
         try {
             final URL url = new URL(urlstring);
-            final plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()));
+            final plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()), "UTF-8");
             final indexURLEntry newEntry = switchboard.urlPool.loadedURL.newEntry(
                 url,
                 "YaCyShare: " + descr,
@@ -395,7 +395,7 @@ public class dir {
     public static void deletePhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr) {
         try {
             final String urlhash = plasmaURL.urlHash(new URL(urlstring));
-            final Iterator words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"));
+            final Iterator words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"), "UTF-8");
             Map.Entry entry;
             while (words.hasNext()) {
                 entry = (Map.Entry) words.next();

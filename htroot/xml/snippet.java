@@ -28,6 +28,9 @@ public class snippet {
         // if 'remove' is set to true, then RWI references to URLs that do not have the snippet are removed
         boolean remove = post.get("remove", "false").equals("true");
         
+        // boolean line_end_with_punctuation
+        boolean pre = post.get("pre", "false").equals("true");
+        
         String querystring = post.get("search", "").trim();
         if ((querystring.length() > 2) && (querystring.charAt(0) == '"') && (querystring.charAt(querystring.length() - 1) == '"')) {
             querystring = querystring.substring(1, querystring.length() - 1).trim();
@@ -40,10 +43,9 @@ public class snippet {
             kelondroMSetTools.excludeDestructive(query, plasmaSwitchboard.stopwords);
         }        
         
-        // do the search
-        Set queryHashes = plasmaCondenser.words2hashes(query);
-        
-        plasmaSnippetCache.Snippet snippet = switchboard.snippetCache.retrieveSnippet(url, queryHashes, true, 260, 10000);
+        // find snippet
+        Set queryHashes = plasmaCondenser.words2hashes(query);        
+        plasmaSnippetCache.Snippet snippet = switchboard.snippetCache.retrieveSnippet(url, queryHashes, true, pre, 260, 10000);
         prop.put("status",snippet.getSource());
         if (snippet.getSource() < 11) {
             //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
