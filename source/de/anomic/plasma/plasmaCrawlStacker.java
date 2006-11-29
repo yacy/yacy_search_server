@@ -189,12 +189,14 @@ public final class plasmaCrawlStacker {
             checkInterruption();
             stackCrawlMessage theMsg = this.queue.waitForMessage();
             
-            // getting a free session thread from the pool
-            checkInterruption();
-            Worker worker = (Worker) this.theWorkerPool.borrowObject();
-            
-            // processing the new request
-            worker.execute(theMsg);
+            if (theMsg != null) {
+                // getting a free session thread from the pool
+                checkInterruption();
+                Worker worker = (Worker) this.theWorkerPool.borrowObject();
+                
+                // processing the new request
+                worker.execute(theMsg);
+            }
         } catch (Exception e) {
             if (e instanceof InterruptedException) {
                 this.log.logFine("Interruption detected.");
@@ -768,9 +770,9 @@ public final class plasmaCrawlStacker {
             this.readSync.P();         
             this.writeSync.P();
             
+            if (this.urlEntryHashCache.size() == 0) return null;
             String urlHash = null;
             kelondroRow.Entry entry = null;
-            stackCrawlMessage newMessage = null;
             try {
                 synchronized(this.urlEntryHashCache) {               
                     urlHash = (String) this.urlEntryHashCache.removeFirst();
@@ -781,8 +783,8 @@ public final class plasmaCrawlStacker {
                 this.writeSync.V();
             }
             
-            newMessage = new stackCrawlMessage(urlHash, entry);
-            return newMessage;
+            if ((urlHash == null) || (entry == null)) return null;
+            return new stackCrawlMessage(urlHash, entry);
         }
     }    
     
