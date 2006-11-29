@@ -166,7 +166,7 @@ proxyCacheSize = 200
 # to the new location and thus be accessible immediately. so an accumulated
 # cache is still usable after the switch.
 # possible values are {tree, hash}
-proxyCacheLayout = tree
+proxyCacheLayout = hash
 
 # the migration flag shows, if the different layout shall be migrated from one to another
 proxyCacheMigration = true

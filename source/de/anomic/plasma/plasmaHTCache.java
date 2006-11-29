@@ -62,6 +62,7 @@ import java.io.InputStream;
 import java.lang.StringBuffer;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -98,7 +99,7 @@ public final class plasmaHTCache {
 
     kelondroMap responseHeaderDB = null;
     private final LinkedList cacheStack;
-    private final TreeMap cacheAge; // a <date+hash, cache-path> - relation
+    private final Map cacheAge; // a <date+hash, cache-path> - relation
     public long curCacheSize;
     public long maxCacheSize;
     public final File cachePath;
@@ -183,7 +184,7 @@ public final class plasmaHTCache {
         this.cacheStack = new LinkedList();
 
         // init cache age and size management
-        this.cacheAge = new TreeMap();
+        this.cacheAge = Collections.synchronizedMap(new TreeMap());
         this.curCacheSize = 0;
         this.maxCacheSize = maxCacheSize;
 
@@ -285,22 +286,27 @@ public final class plasmaHTCache {
         return true;
     }
 
+    private long lastcleanup = System.currentTimeMillis();
     public void writeFileAnnouncement(File file) {
         synchronized (this.cacheAge) {
             if (file.exists()) {
                 this.curCacheSize += file.length();
+                if (System.currentTimeMillis() - lastcleanup > 300000) {
+                    // call the cleanup job only every 5 minutes
+                    cleanup();
+                    lastcleanup = System.currentTimeMillis();
+                }
                 this.cacheAge.put(ageString(file.lastModified(), file), file);
-                cleanup();
             }
         }
     }
 
     public boolean deleteFile(URL url) {
-        return deleteURLfromCache(url, "FROM");
+        return deleteURLfromCache("", url, "FROM");
     }
 
-    private boolean deleteURLfromCache(URL url, String msg) {
-        if (deleteFileandDirs(getCachePath(url), msg)) {
+    private boolean deleteURLfromCache(String key, URL url, String msg) {
+        if (deleteFileandDirs(key, getCachePath(url), msg)) {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
                 this.log.logFinest("Trying to remove responseHeader from URL: " + url.toString());
@@ -324,9 +330,9 @@ public final class plasmaHTCache {
        return false;
     }
 
-    private boolean deleteFileandDirs (File obj, String msg) {
+    private boolean deleteFileandDirs(String key, File obj, String msg) {
         if (deleteFile(obj)) {
-            this.log.logInfo("DELETED " + msg + " CACHE : " + obj.toString());
+            this.log.logInfo("DELETED " + msg + " CACHE [" + key + "]: " + obj.toString());
             obj = obj.getParentFile();
             // If the has been emptied, remove it
             // Loop as long as we produce empty driectoriers, but stop at HTCACHE
@@ -340,36 +346,36 @@ public final class plasmaHTCache {
     }
 
     private void cleanupDoIt(long newCacheSize) {
-        File obj;
+        File file;
         synchronized (cacheAge) {
-            Iterator iter = this.cacheAge.keySet().iterator();
+            Iterator iter = this.cacheAge.entrySet().iterator();
+            Map.Entry entry;
             while (iter.hasNext() && this.curCacheSize >= newCacheSize) {
                 if (Thread.currentThread().isInterrupted()) return;
-
-                Object key = iter.next();
-                obj = (File) this.cacheAge.get(key);
-                if (obj != null) {
-                    if (filesInUse.contains(obj)) continue;
-                    this.log.logFinest("Trying to delete old file: " + obj.toString());
-                    if (deleteFileandDirs (obj, "OLD")) {
+                entry = (Map.Entry) iter.next();
+                String key = (String) entry.getKey();
+                file = (File) entry.getValue();
+                long t = Long.parseLong(key.substring(0, 16), 16);
+                if (System.currentTimeMillis() - t < 300000) break; // files must have been at least 5 minutes in the cache before they are deleted
+                if (file != null) {
+                    if (filesInUse.contains(file)) continue;
+                    this.log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
+                    if (deleteFileandDirs(key, file, "OLD")) {
                         try {
                             // As the file is gone, the entry in responseHeader.db is not needed anymore
-                            String urlHash = getHash(obj);
+                            String urlHash = getHash(file);
                             if (urlHash != null) {
-                                this.log.logFinest("Trying to remove responseHeader for URLhash: " +
-                                    urlHash);
+                                this.log.logFinest("Trying to remove responseHeader for URLhash: " + urlHash);
                                 this.responseHeaderDB.remove(urlHash);
                             } else {
-                                URL url = getURL(obj);
+                                URL url = getURL(file);
                                 if (url != null) {
-                                    this.log.logFinest("Trying to remove responseHeader for URL: " +
-                                        url.toString());
+                                    this.log.logFinest("Trying to remove responseHeader for URL: " + url.toString());
                                     this.responseHeaderDB.remove(plasmaURL.urlHash(url));
                                 }
                             }
                         } catch (IOException e) {
-                            this.log.logInfo("IOExeption removing response header from DB: " +
-                                    e.getMessage(), e);
+                            this.log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
                         }
                     }
                 }
@@ -431,13 +437,15 @@ public final class plasmaHTCache {
         }
         //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
         long ageHours = 0;
-        try {
-        	if (!this.cacheAge.isEmpty()) {
-        		ageHours = (System.currentTimeMillis() -
-                            Long.parseLong(((String) this.cacheAge.firstKey()).substring(0, 16), 16)) / 3600000;
-        	}
-        } catch (NumberFormatException e) {
-            //e.printStackTrace();
+        if (!this.cacheAge.isEmpty()) {
+            Iterator i = this.cacheAge.keySet().iterator();
+            if (i.hasNext()) try {
+                ageHours = (System.currentTimeMillis() - Long.parseLong(((String) i.next()).substring(0, 16), 16)) / 3600000;
+            } catch (NumberFormatException e) {
+                ageHours = 0;
+            } else {
+                ageHours = 0;
+            }
         }
         this.log.logConfig("CACHE SCANNED, CONTAINS " + fileCount +
                       " FILES = " + this.curCacheSize/1048576 + "MB, OLDEST IS " + 
