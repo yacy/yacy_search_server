@@ -1175,8 +1175,6 @@ Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zur Crawl
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Einstellungen
 <h2>Settings</h2>==<h2>Einstellungen</h2>
-This is the configuration page for YaCy. Access to this page should be limited to an administration person only.==Dies ist die Konfigurationsseite f&uuml;r YaCy. Zugriff auf diese Seite sollte nur der Administrator haben.
-To restrict the access to this page, please set an administrator account and password <a href="#admin">below.</a>==Um den Zugriff auf diese Seite zu beschr&auml;nken, richten Sie bitte <a href="#admin">hier</a> ein Administrator Konto mit Passwort ein.
 If you want to restore all settings to the default values,==Wenn Sie alle Einstellungen auf die urspr&uuml;nglichen Werte zur&uuml;cksetzen wollen,
 but <strong>forgot your administration password</strong>, you must stop the proxy,==aber Ihr <strong>Administatorpasswort vergessen haben</strong>, m&uuml;ssen Sie YaCy stoppen,
 delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/httpProxy.conf' im YaCy Hauptordner l&ouml;schen und YaCy neu starten.
@@ -1723,6 +1721,9 @@ YaCyWiki page:==YaCyWiki Seite:
 last edited by==zuletzt bearbeitet von
 change date==&Auml;nderungsdatum
 Edit</a>==Bearbeiten</a>
+only granted to admin==nur als Admin erlaubt
+Grant Write Access to Everybody==Erlaube allen Benutzern das Wiki zu bearbeiten 
+Grant Write Access to Admin only==Erlaube nur dem Admin das Wiki zu bearbeiten
 Start Page==Startseite
 #Index==Index
 Author:==Autor:
@@ -1820,6 +1821,10 @@ To do this, press this button:==Um dies zu tun, klicken Sie bitte auf folgenden 
 "go online"=="gehe online"
 you must also switch to online mode==Sie m&uuml;ssen aber erst in den online Modus wechseln
 \(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen) um auch am globalen Index beizutragen.
+"bookmark"=="Lesezeichen"
+"recommend"=="empfehlen"
+loading snippet==Auszug wird geladen
+Pictures==Bilder
 The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;lt #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
