@@ -81,6 +81,7 @@ public class Wiki {
             post.put("page", "start");
         }
 
+        String access = switchboard.getConfig("WikiAccess", "admin");
         String pagename = post.get("page", "start");
         String ip = post.get("CLIENTIP", "127.0.0.1");
         String author = post.get("author", "anonymous");
@@ -91,8 +92,29 @@ public class Wiki {
                 else author = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous");
             }
         }
-
+        
+        if (post.containsKey("access")) {
+            // only the administrator may change the access right
+            if (!switchboard.verifyAuthentication(header, true)) {
+                // check access right for admin
+                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                return prop;
+            }
+            
+            access = post.get("access", "admin");
+            switchboard.setConfig("WikiAccess", access);
+        }
+        if (access.equals("admin")) prop.put("mode_access", 0);
+        if (access.equals("all"))   prop.put("mode_access", 1);
+        
         if (post.containsKey("submit")) {
+            
+            if ((access.equals("admin") && (!switchboard.verifyAuthentication(header, true)))) {
+                // check access right for admin
+                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                return prop;
+            }
+            
             // store a new page
             byte[] content;
             try {
@@ -111,6 +133,12 @@ public class Wiki {
         wikiBoard.entry page = switchboard.wikiDB.read(pagename);
 
         if (post.containsKey("edit")) {
+            if ((access.equals("admin") && (!switchboard.verifyAuthentication(header, true)))) {
+                // check access right for admin
+                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                return prop;
+            }
+            
             // edit the page
             try {
                 prop.put("mode", 1); //edit

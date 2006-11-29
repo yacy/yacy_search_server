@@ -846,3 +846,12 @@ showSurftipps = true
 #    http://localhost:8080/soap/test?wsdl
 #
 soap.serviceDeploymentList =
+
+
+# Wiki access rights
+# the built - in wiki system allowes by default only that the administration is allowed to make changes
+# this can be changed. There are three options:
+# admin - only the admin has write right
+# all   - everybody has write right
+# user  - the admin and every user registered in the user db has write right
+WikiAccess = admin
