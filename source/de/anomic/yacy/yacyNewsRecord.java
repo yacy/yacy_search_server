@@ -82,9 +82,9 @@ public class yacyNewsRecord {
         this.attributes = serverCodings.string2map(newsString, ",");
         this.received = (attributes.containsKey("rec")) ? yacyCore.parseUniversalDate((String) attributes.get("rec"), serverDate.UTCDiffString()) : new Date();
         this.created = (attributes.containsKey("cre")) ? yacyCore.parseUniversalDate((String) attributes.get("cre"), serverDate.UTCDiffString()) : new Date();
-        this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : null;
+        this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : "";
         this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt((String) attributes.get("dis")) : 0;
-        this.originator = (attributes.containsKey("ori")) ? (String) attributes.get("ori") : null;
+        this.originator = (attributes.containsKey("ori")) ? (String) attributes.get("ori") : "";
         removeStandards();
     }
 
