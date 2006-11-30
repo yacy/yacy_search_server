@@ -74,7 +74,7 @@ public class LogParserPLASMA implements LogParser{
     private Matcher m;
     //RegExp for advancedParser
     //private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-=]* \\[[\\w-_]{12}\\]\\n\\tDescription: ([\\w- ]*)\\n\\tMimeType: ([\\w-_/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)\\n\\tStackingTime: (\\d*) ms \\| ParsingTime: (\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
-    private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-~$§@=]* \\[[\\w-_]{12}\\][\\r\\n]*\\tDescription: ([\\w-\\.,:!?='\"„|/–+@() ]*)[\\r\\n]*\\tMimeType: ([\\w-_~/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)[\\r\\n]*\\tStackingTime:[ ]*(\\d*) ms \\| ParsingTime:[ ]*(\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
+    private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-~$§@=]* \\[[\\w-_]{12}\\][\\r\\n]*\\tDescription: ([\\w-\\.,:!?='\"|/+@() ]*)[\\r\\n]*\\tMimeType: ([\\w-_~/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)[\\r\\n]*\\tStackingTime:[ ]*(\\d*) ms \\| ParsingTime:[ ]*(\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
 
     private int urlSum=0;
     private int urlReqSum=0;
