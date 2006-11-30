@@ -396,7 +396,7 @@ public class IndexControl_p {
                 seed = (yacySeed) e.nextElement();
                 if (seed != null) {
                     prop.put("hosts_" + hc + "_hosthash", seed.hash);
-                    prop.put("hosts_" + hc + "_hostname", /*seed.hash + " " +*/ seed.get(yacySeed.NAME, "nameless"));
+                    prop.put("hosts_" + hc + "_hostname", seed.hash + " " + seed.get(yacySeed.NAME, "nameless"));
                     hc++;
                 }
             }

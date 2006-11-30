@@ -269,17 +269,33 @@ public class kelondroRowCollection {
     }
     
     protected final void removeShift(int pos, int dist, int upBound) {
+        assert ((pos + dist) * rowdef.objectsize() >= 0) : "pos = " + pos + ", dist = " + dist + ", rowdef.objectsize() = " + rowdef.objectsize;
+        assert (pos * rowdef.objectsize() >= 0) : "pos = " + pos + ", rowdef.objectsize() = " + rowdef.objectsize;
+        assert ((pos + dist) * rowdef.objectsize() + (upBound - pos - dist) * rowdef.objectsize() <= chunkcache.length) : "pos = " + pos + ", dist = " + dist + ", rowdef.objectsize() = " + rowdef.objectsize + ", upBound = " + upBound + ", chunkcache.length = " + chunkcache.length;
+        assert (pos * rowdef.objectsize() + (upBound - pos - dist) * rowdef.objectsize() <= chunkcache.length) : "pos = " + pos + ", dist = " + dist + ", rowdef.objectsize() = " + rowdef.objectsize + ", upBound = " + upBound + ", chunkcache.length = " + chunkcache.length;
         System.arraycopy(chunkcache, (pos + dist) * rowdef.objectsize(),
                          chunkcache, pos * rowdef.objectsize(),
                          (upBound - pos - dist) * rowdef.objectsize());
     }
     
-    public final void removeShift(int p) {
-        assert ((p >= 0) && (p < chunkcount) && (chunkcount > 0));
-        //System.out.println("REMOVE at pos " + p + ", chunkcount=" + chunkcount + ", sortBound=" + sortBound);
+    protected final void copytop(int i) {
+        // copies the topmost row element to given position
+        if (i == chunkcount - 1) return;
+        System.arraycopy(chunkcache, this.rowdef.objectsize() * (chunkcount - 1), chunkcache, this.rowdef.objectsize() * i, this.rowdef.objectsize());
+    }
+    
+    protected final void removeRow(int p) {
+        assert ((p >= 0) && (p < chunkcount) && (chunkcount > 0)) : "p = " + p + ", chunkcount = " + chunkcount;
         synchronized (chunkcache) {
-            if (p < sortBound) sortBound--;
-            removeShift(p, 1, chunkcount--);
+            if (p < sortBound) {
+                sortBound--;
+                removeShift(p, 1, chunkcount);
+                chunkcount--;
+            } else {
+                copytop(p);
+                chunkcount--;
+            }
+            
         }
         this.lastTimeWrote = System.currentTimeMillis();
     }
@@ -328,7 +344,7 @@ public class kelondroRowCollection {
         
         public void remove() {
             p--;
-            removeShift(p);
+            removeRow(p);
         }
     }
     
@@ -466,7 +482,7 @@ public class kelondroRowCollection {
             while (i < chunkcount - 1) {
                 if (compare(i, i + 1) == 0) {
                     //System.out.println("DOUBLE: " + new String(this.chunkcache, this.chunksize * i, this.chunksize));
-                    removeShift(i);
+                    removeRow(i);
                 } else {
                     i++;
                 }

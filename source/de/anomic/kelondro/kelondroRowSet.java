@@ -154,8 +154,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
                     if (removeMarker.size() > removeMaxSize) resolveMarkedRemoved();
                 } else {
                     // remove directly by swap
-                    if (chunkcount == sortBound) sortBound--;
-                    super.swap(p, --chunkcount, 0);
+                    super.copytop(p);
+                    chunkcount--;
                 }
 
                 profile.stopDelete(handle);
