@@ -77,9 +77,17 @@ public class serverCoreSocket extends Socket {
     private void detectSSL() throws IOException {
         InputStream in = getInputStream();    
         
-        // read the first 6 bytes to determine the protocol type
+        // read the first 5 bytes to determine the protocol type
         byte[] preRead = new byte[5];
-        int read = in.read(preRead);
+        int read, count = 0;
+        while ((count < preRead.length) && ((read = in.read()) != -1)) {
+        	preRead[count] = (byte) read;
+        	count++;
+        }
+        if (count < preRead.length) {
+        	((PushbackInputStream) in).unread(preRead,0,count);
+        	return;
+        }
         
         int idx = 0;
         if ((preRead[0] & 0xFF) == 22) {
@@ -114,7 +122,7 @@ public class serverCoreSocket extends Socket {
         }
 
         // unread pre read bytes
-        ((PushbackInputStream) in).unread(preRead,0,read);    
+        ((PushbackInputStream) in).unread(preRead);    
     }
     
     public InetAddress getInetAddress() {
