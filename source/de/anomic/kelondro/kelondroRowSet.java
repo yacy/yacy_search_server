@@ -223,6 +223,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         if ((this.sortOrder == null) ||
                 (!(this.sortOrder.signature().equals(newOrder.signature()))) ||
                 (newColumn != this.sortColumn)) {
+            resolveMarkedRemoved();
             this.sortOrder = newOrder;
             this.sortBound = 0;
             this.sortColumn = newColumn;

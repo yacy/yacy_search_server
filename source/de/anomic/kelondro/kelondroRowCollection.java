@@ -361,17 +361,6 @@ public class kelondroRowCollection {
         }
     }
     
-    protected final void sort(kelondroOrder newOrder, int newColumn) {
-        if ((this.sortOrder == null) ||
-            (!(this.sortOrder.signature().equals(newOrder.signature()))) ||
-            (newColumn != this.sortColumn)) {
-            this.sortOrder = newOrder;
-            this.sortBound = 0;
-            this.sortColumn = newColumn;
-        }
-        sort();
-    }
-
     protected final void sort() {
         assert (this.sortOrder != null);
         if (this.sortBound == this.chunkcount) return; // this is already sorted
