@@ -297,7 +297,7 @@ public class kelondroRow {
                 setCol(column, cell.getBytes());
             else
                 try {
-                    setCol(column, cell.getBytes(encoding));
+                    setCol(column, (cell == null) ? null : cell.getBytes(encoding));
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }

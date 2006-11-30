@@ -159,7 +159,7 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         this.entry.setCol(col_wordsInText, oldEntry.wordcount());
         this.entry.setCol(col_phrasesInText, oldEntry.phrasecount());
         this.entry.setCol(col_doctype, new byte[]{(byte) oldEntry.doctype()});
-        this.entry.setCol(col_language, oldEntry.getLanguage(), null);
+        this.entry.setCol(col_language, (oldEntry.getLanguage() == null) ? "en" : oldEntry.getLanguage(), null);
         this.entry.setCol(col_llocal, 0);
         this.entry.setCol(col_lother, 0);
         int domlen = plasmaURL.domLengthEstimation(oldEntry.urlHash());
