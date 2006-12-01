@@ -61,24 +61,23 @@ import de.anomic.net.URL;
 
 public class plasmaParserDocument {
     
-    URL location;       // the source url
-    String mimeType;    // mimeType as taken from http header
-    String charset;     // the charset of the document
-    String[] keywords;  // most resources provide a keyword field
-    String shortTitle;  // a shortTitle mostly appears in the window header (border)
+    private URL location;       // the source url
+    private String mimeType;    // mimeType as taken from http header
+    private String charset;     // the charset of the document
+    private String[] keywords;  // most resources provide a keyword field
+    private String shortTitle;  // a shortTitle mostly appears in the window header (border)
     private String longTitle;   // the real title of the document, commonly h1-tags
-    String[] sections;  // if present: more titles/headlines appearing in the document
-    String abstrct;     // an abstract, if present: short content description
+    private String[] sections;  // if present: more titles/headlines appearing in the document
+    private String abstrct;     // an abstract, if present: short content description
     private Object text;  // the clear text, all that is visible
-    Map anchors;        // all links embedded as clickeable entities (anchor tags)
-    TreeSet images;     // all visible pictures in document
+    private Map anchors;        // all links embedded as clickeable entities (anchor tags)
+    private TreeSet images;     // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    Map hyperlinks, audiolinks, videolinks, imagelinks, applinks;
-    Map emaillinks;
-    plasmaCondenser condenser;
-    boolean resorted;
+    private Map hyperlinks, audiolinks, videolinks, applinks;
+    private Map emaillinks;
+    private boolean resorted;
     private InputStream textStream; 
                     
     public plasmaParserDocument(URL location, String mimeType, String charset,
@@ -99,10 +98,8 @@ public class plasmaParserDocument {
         this.hyperlinks = null;
         this.audiolinks = null;
         this.videolinks = null;
-        this.imagelinks = null;
         this.applinks = null;
         this.emaillinks = null;
-        this.condenser = null;
         this.resorted = false;
     }
     
@@ -125,13 +122,15 @@ public class plasmaParserDocument {
         this.hyperlinks = null;
         this.audiolinks = null;
         this.videolinks = null;
-        this.imagelinks = null;
         this.applinks = null;
         this.emaillinks = null;
-        this.condenser = null;
         this.resorted = false;
     }    
 
+    public URL getLocation() {
+        return this.location;
+    }
+    
     public String getMimeType() {
         return this.mimeType;
     }
@@ -139,7 +138,7 @@ public class plasmaParserDocument {
     /**
      * @return the supposed charset of this document or <code>null</code> if unknown
      */
-    public String getSourceCharset() {
+    public String getCharset() {
         return this.charset;
     }
     
@@ -224,12 +223,6 @@ public class plasmaParserDocument {
         return anchors;
     }
     
-    public TreeSet getImages() {
-        // returns all links enbedded as pictures (visible in document)
-        // this resturns a htmlFilterImageEntry collection
-        if (!resorted) resortLinks();
-        return images;
-    }
     
     // the next three methods provide a calculated view on the getAnchors/getImages:
     
@@ -249,9 +242,11 @@ public class plasmaParserDocument {
         return this.videolinks;
     }
     
-    public Map getImagelinks() {
+    public TreeSet getImages() {
+        // returns all links enbedded as pictures (visible in document)
+        // this resturns a htmlFilterImageEntry collection
         if (!resorted) resortLinks();
-        return this.imagelinks;
+        return images;
     }
     
     public Map getApplinks() {
@@ -275,7 +270,6 @@ public class plasmaParserDocument {
         String ext = null;
         i = anchors.entrySet().iterator();
         hyperlinks = new HashMap();
-        imagelinks = new HashMap();
         videolinks = new HashMap();
         audiolinks = new HashMap();
         applinks   = new HashMap();
@@ -301,8 +295,7 @@ public class plasmaParserDocument {
                         if (plasmaParser.mediaExtContains(ext)) {
                             // this is not a normal anchor, its a media link
                             if (plasmaParser.imageExtContains(ext)) {
-                                imagelinks.put(u, entry.getValue());
-                                collectedImages.add(new htmlFilterImageEntry(url, "", -1, -1));
+                                collectedImages.add(new htmlFilterImageEntry(url, (String) entry.getValue(), -1, -1));
                             }
                             else if (plasmaParser.audioExtContains(ext)) audiolinks.put(u, entry.getValue());
                             else if (plasmaParser.videoExtContains(ext)) videolinks.put(u, entry.getValue());
@@ -316,27 +309,27 @@ public class plasmaParserDocument {
             }
         }
         
-        // expand the hyperlinks:
-        // we add artificial hyperlinks to the hyperlink set
-        // that can be calculated from given hyperlinks and imagelinks
-        hyperlinks.putAll(plasmaParser.allReflinks(hyperlinks));
-        hyperlinks.putAll(plasmaParser.allReflinks(imagelinks));
-        hyperlinks.putAll(plasmaParser.allReflinks(audiolinks));
-        hyperlinks.putAll(plasmaParser.allReflinks(videolinks));
-        hyperlinks.putAll(plasmaParser.allReflinks(applinks));
-        hyperlinks.putAll(plasmaParser.allSubpaths(hyperlinks));
-        hyperlinks.putAll(plasmaParser.allSubpaths(imagelinks));
-        hyperlinks.putAll(plasmaParser.allSubpaths(audiolinks));
-        hyperlinks.putAll(plasmaParser.allSubpaths(videolinks));
-        hyperlinks.putAll(plasmaParser.allSubpaths(applinks));
-        
-        // finally add image links that we collected from the anchors to the image map
+        // add image links that we collected from the anchors to the image map
         i = collectedImages.iterator();
         htmlFilterImageEntry iEntry;
         while (i.hasNext()) {
             iEntry = (htmlFilterImageEntry) i.next();
             if (!images.contains(iEntry)) images.add(iEntry);
         }
+        
+        // expand the hyperlinks:
+        // we add artificial hyperlinks to the hyperlink set
+        // that can be calculated from given hyperlinks and imagelinks
+        hyperlinks.putAll(plasmaParser.allReflinks(hyperlinks.keySet()));
+        hyperlinks.putAll(plasmaParser.allReflinks(images));
+        hyperlinks.putAll(plasmaParser.allReflinks(audiolinks.keySet()));
+        hyperlinks.putAll(plasmaParser.allReflinks(videolinks.keySet()));
+        hyperlinks.putAll(plasmaParser.allReflinks(applinks.keySet()));
+        hyperlinks.putAll(plasmaParser.allSubpaths(hyperlinks.keySet()));
+        hyperlinks.putAll(plasmaParser.allSubpaths(images));
+        hyperlinks.putAll(plasmaParser.allSubpaths(audiolinks.keySet()));
+        hyperlinks.putAll(plasmaParser.allSubpaths(videolinks.keySet()));
+        hyperlinks.putAll(plasmaParser.allSubpaths(applinks.keySet()));
         
         // don't do this again
         this.resorted = true;

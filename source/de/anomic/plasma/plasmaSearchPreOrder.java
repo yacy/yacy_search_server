@@ -101,6 +101,12 @@ public final class plasmaSearchPreOrder {
             iEntry = (indexRWIEntry) i.next();
             if (iEntry.urlHash().length() != container.row().width(container.primarykey())) continue;
             if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) && (!(iEntry.flags().allOf(query.constraint)))) continue; // filter out entries that do not match the search constraint
+            if (query.contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) {
+                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasaudio)))) continue;
+                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasvideo)))) continue;
+                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasimage)))) continue;
+                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasapp  )))) continue;
+            }
             pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax), query.words("")), 16) + iEntry.urlHash(), iEntry);
         }
     }

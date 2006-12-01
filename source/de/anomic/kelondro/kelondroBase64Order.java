@@ -46,6 +46,7 @@
 
 package de.anomic.kelondro;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
 
 import de.anomic.server.logging.serverLog;
@@ -179,13 +180,18 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
     }
 
     public final String encodeString(String in) {
-        return encode(in.getBytes());
+        try {
+            return encode(in.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            return "";
+        }
     }
 
     // we will use this encoding to encode strings with 2^8 values to
     // b64-Strings
     // we will do that by grouping each three input bytes to four output bytes.
     public final String encode(byte[] in) {
+        if (in.length == 0) return "";
         StringBuffer out = new StringBuffer(in.length / 3 * 4 + 3);
         int pos = 0;
         long l;
@@ -195,11 +201,8 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
             out = out.append(encodeLong(l, 4));
         }
         // now there may be remaining bytes
-        if (in.length % 3 != 0)
-            out = out.append((in.length % 3 == 2) ? encodeLong((((0XffL & (long) in[pos]) << 8) + (0XffL & (long) in[pos + 1])) << 8, 4).substring(0, 3) : encodeLong((((0XffL & (long) in[pos])) << 8) << 8, 4).substring(0, 2));
-        if (rfc1113compliant)
-            while (out.length() % 4 > 0)
-                out.append("=");
+        if (in.length % 3 != 0) out = out.append((in.length % 3 == 2) ? encodeLong((((0XffL & (long) in[pos]) << 8) + (0XffL & (long) in[pos + 1])) << 8, 4).substring(0, 3) : encodeLong((((0XffL & (long) in[pos])) << 8) << 8, 4).substring(0, 2));
+        if (rfc1113compliant) while (out.length() % 4 > 0) out.append("=");
         // return result
         return out.toString();
     }
@@ -215,12 +218,11 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
     }
 
     public final byte[] decode(String in) {
+        if ((in == null) || (in.length() == 0)) return new byte[0];
         try {
             int posIn = 0;
             int posOut = 0;
-            if (rfc1113compliant)
-                while (in.charAt(in.length() - 1) == '=')
-                    in = in.substring(0, in.length() - 1);
+            if (rfc1113compliant) while (in.charAt(in.length() - 1) == '=') in = in.substring(0, in.length() - 1);
             byte[] out = new byte[in.length() / 4 * 3 + (((in.length() % 4) == 0) ? 0 : in.length() % 4 - 1)];
             long l;
             while (posIn + 3 < in.length()) {

@@ -49,6 +49,12 @@ public interface indexURLEntry {
     public String language();
     public int size();
     public int wordCount();
+    public int llocal();
+    public int lother();
+    public int limage();
+    public int laudio();
+    public int lvideo();
+    public int lapp();
     public String snippet();
     public kelondroBitfield flags();
     public indexRWIEntry word();

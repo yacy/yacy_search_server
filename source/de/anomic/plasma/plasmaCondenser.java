@@ -97,7 +97,10 @@ public final class plasmaCondenser {
     public  static final int flag_cat_macos         = 17; // pages about macintosh, apple computers and the mac os
     public  static final int flag_cat_windows       = 18; // pages about windows os and softare
     public  static final int flag_cat_osreserve     = 19; // reserve
-    
+    public  static final int flag_cat_hasimage      = 20; // the page refers to (at least one) images
+    public  static final int flag_cat_hasaudio      = 21; // the page refers to (at least one) audio file
+    public  static final int flag_cat_hasvideo      = 22; // the page refers to (at least one) videos
+    public  static final int flag_cat_hasapp        = 23; // the page refers to (at least one) application file
     
     private final static int numlength = 5;
 
@@ -117,6 +120,14 @@ public final class plasmaCondenser {
     public int RESULT_SIMI_SENTENCES = -1;
     public kelondroBitfield RESULT_FLAGS = new kelondroBitfield(4);
     
+    public plasmaCondenser(plasmaParserDocument document) throws UnsupportedEncodingException {
+        this(document.getText(), document.getCharset());
+        if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
+        if (document.getAudiolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasaudio, true);
+        if (document.getVideolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasvideo, true);
+        if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
+    }
+    
     public plasmaCondenser(InputStream text, String charset) throws UnsupportedEncodingException {
         this(text, charset, 3, 2);
     }
@@ -129,7 +140,7 @@ public final class plasmaCondenser {
         sentences = new HashMap();
         createCondensement(text, charset);
     }
-
+    
     // create a word hash
     public static final String word2hash(String word) {
         return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase())).substring(0, yacySeedDB.commonHashLength);
@@ -760,7 +771,7 @@ public final class plasmaCondenser {
         return new String(s);
         
     }
-    
+
     public static Iterator getWords(InputStream input, String charset) throws UnsupportedEncodingException {
         if (input == null) return null;
         plasmaCondenser condenser = new plasmaCondenser(input, charset);
@@ -772,7 +783,7 @@ public final class plasmaCondenser {
         ByteArrayInputStream buffer = new ByteArrayInputStream(text);
         return getWords(buffer, charset);
     }
-        
+    
     public static void main(String[] args) {
         // read a property file and converty them into configuration lines
         try {

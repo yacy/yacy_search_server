@@ -240,6 +240,7 @@ public class yacysearch {
                     query,
                     maxDistance,
                     prefermask,
+                    plasmaSearchQuery.CONTENTDOM_TEXT,
                     count,
                     searchtime,
                     urlmask,

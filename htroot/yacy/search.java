@@ -93,6 +93,7 @@ public final class search {
         final int     count  = post.getInt("count", 10); // maximum number of wanted results
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
+        final String  contentdom = post.get("contentdom", "text");
         final String  filter = post.get("filter", ".*");
         final boolean includesnippet = post.get("includesnippet", "false").equals("true");
         final kelondroBitfield constraint = new kelondroBitfield(4, post.get("constraint", "______"));
@@ -134,7 +135,7 @@ public final class search {
         plasmaSearchQuery squery = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            squery = new plasmaSearchQuery(abstractSet, maxdist, prefer, count, duetime, filter, plasmaSearchQuery.catchall_constraint);
+            squery = new plasmaSearchQuery(abstractSet, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, plasmaSearchQuery.catchall_constraint);
             squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + squery.anonymizedQueryHashes() + " - " + squery.wantedResults + " links");
 
@@ -161,7 +162,7 @@ public final class search {
             prop.put("joincount", 0);
         } else {
             // retrieve index containers from search request
-            squery = new plasmaSearchQuery(keyhashes, maxdist, prefer, count, duetime, filter, constraint);
+            squery = new plasmaSearchQuery(keyhashes, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, constraint);
             squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + squery.anonymizedQueryHashes() + " - " + squery.wantedResults + " links");
 

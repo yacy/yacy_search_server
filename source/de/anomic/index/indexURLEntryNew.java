@@ -194,6 +194,7 @@ public class indexURLEntryNew implements indexURLEntry {
         // generate a parseable string; this is a simple property-list
         indexURLEntry.Components comp = this.comp();
         final StringBuffer s = new StringBuffer(300);
+        //System.out.println("author=" + comp.author());
         try {
             s.append("hash=").append(hash());
             s.append(",url=").append(crypt.simpleEncode(comp.url().toNormalform()));
@@ -249,11 +250,11 @@ public class indexURLEntryNew implements indexURLEntry {
     public indexURLEntry.Components comp() {
         ArrayList cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
         return new indexURLEntry.Components(
-                (cl.size() > 0) ? (String) cl.get(0) : "",
-                (cl.size() > 1) ? (String) cl.get(1) : "",
-                (cl.size() > 2) ? (String) cl.get(2) : "",
-                (cl.size() > 3) ? (String) cl.get(3) : "",
-                (cl.size() > 4) ? (String) cl.get(4) : "");
+                (cl.size() > 0) ? ((String) cl.get(0)).trim() : "",
+                (cl.size() > 1) ? ((String) cl.get(1)).trim() : "",
+                (cl.size() > 2) ? ((String) cl.get(2)).trim() : "",
+                (cl.size() > 3) ? ((String) cl.get(3)).trim() : "",
+                (cl.size() > 4) ? ((String) cl.get(4)).trim() : "");
     }
     
     public Date moddate() {

@@ -1565,7 +1565,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 
                 checkInterruption();
                 log.logFine("Condensing for '" + entry.normalizedURLString() + "'");
-                plasmaCondenser condenser = new plasmaCondenser(document.getText(), document.charset);
+                plasmaCondenser condenser = new plasmaCondenser(document);
                 
                 // generate citation reference
                 Integer[] ioLinks = generateCitationReference(entry.urlHash(), docDate, document, condenser); // [outlinksSame, outlinksOther]
@@ -1593,10 +1593,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             plasmaURL.language(entry.url()),           // language
                             ioLinks[0].intValue(),                     // llocal
                             ioLinks[1].intValue(),                     // lother
-                            document.audiolinks.size(),                // laudio
-                            document.imagelinks.size(),                // limage
-                            document.videolinks.size(),                // lvideo
-                            document.applinks.size()                   // lapp
+                            document.getAudiolinks().size(),           // laudio
+                            document.getImages().size(),               // limage
+                            document.getVideolinks().size(),           // lvideo
+                            document.getApplinks().size()              // lapp
                     );
                     /* ========================================================================
                      * STORE URL TO LOADED-URL-DB
@@ -1751,9 +1751,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
                                     " [" + entry.urlHash() + "]" +
                                     "\n\tDescription:  " + docDescription +
-                                    "\n\tMimeType: "  + document.getMimeType() + " | Charset: " + document.getSourceCharset() + " | " +
+                                    "\n\tMimeType: "  + document.getMimeType() + " | Charset: " + document.getCharset() + " | " +
                                     "Size: " + document.getTextLength() + " bytes | " +
-                                    "Anchors: " + ((document.anchors==null)?0:document.anchors.size()) +
+                                    "Anchors: " + ((document.getAnchors() == null) ? 0 : document.getAnchors().size()) +
                                     "\n\tStackingTime:  " + (stackEndTime-stackStartTime) + " ms | " +
                                     "ParsingTime:  " + (parsingEndTime-parsingStartTime) + " ms | " +
                                     "IndexingTime: " + (indexingEndTime-indexingStartTime) + " ms | " +
@@ -2239,13 +2239,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // parse the resource
             plasmaParserDocument document = snippetCache.parseDocument(comp.url(), resourceContentLength.longValue(), resourceContent);
             
-            // getting parsed body input stream
-            InputStream docBodyInputStream = document.getText();
-            
             // getting word iterator
             Iterator witer = null;
             try {
-                witer = plasmaCondenser.getWords(docBodyInputStream, document.charset);
+                witer = new plasmaCondenser(document).words();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }

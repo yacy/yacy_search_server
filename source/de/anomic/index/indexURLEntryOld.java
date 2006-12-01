@@ -363,4 +363,29 @@ public class indexURLEntryOld implements indexURLEntry {
         System.out.println();
     }
 
+    // compatibility methods
+    public int lapp() {
+        return 0;
+    }
+
+    public int laudio() {
+        return 0;
+    }
+
+    public int limage() {
+        return 0;
+    }
+
+    public int llocal() {
+        return 0;
+    }
+
+    public int lother() {
+        return 0;
+    }
+
+    public int lvideo() {
+        return 0;
+    }
+
 }

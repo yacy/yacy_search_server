@@ -72,6 +72,7 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpc;
@@ -819,46 +820,62 @@ public final class plasmaParser {
     }   
     */
     
-    static Map allReflinks(Map links) {
+    static Map allReflinks(Set links) {
+        // links is either a Set of Strings (with urls) or htmlFilterImageEntries
         // we find all links that are part of a reference inside a url
         HashMap v = new HashMap();
-        Iterator i = links.keySet().iterator();
-        String s;
+        Iterator i = links.iterator();
+        Object o;
+        String url;
         int pos;
         loop: while (i.hasNext()) {
-            s = (String) i.next();
-            if ((pos = s.toLowerCase().indexOf("http://",7)) > 0) {
+            o = i.next();
+            if (o instanceof String) url = (String) o;
+            else if (o instanceof htmlFilterImageEntry) url = ((htmlFilterImageEntry) o).url().toNormalform();
+            else {
+                assert false;
+                continue;
+            }
+            if ((pos = url.toLowerCase().indexOf("http://",7)) > 0) {
                 i.remove();
-                s = s.substring(pos);
-                while ((pos = s.toLowerCase().indexOf("http://",7)) > 0) s = s.substring(pos);
-                if (!(v.containsKey(s))) v.put(s, "ref");
+                url = url.substring(pos);
+                while ((pos = url.toLowerCase().indexOf("http://",7)) > 0) url = url.substring(pos);
+                if (!(v.containsKey(url))) v.put(url, "ref");
                 continue loop;
             }
-            if ((pos = s.toLowerCase().indexOf("/www.",7)) > 0) {
+            if ((pos = url.toLowerCase().indexOf("/www.",7)) > 0) {
                 i.remove();
-                s = "http:/" + s.substring(pos);
-                while ((pos = s.toLowerCase().indexOf("/www.",7)) > 0) s = "http:/" + s.substring(pos);
-                if (!(v.containsKey(s))) v.put(s, "ref");
+                url = "http:/" + url.substring(pos);
+                while ((pos = url.toLowerCase().indexOf("/www.",7)) > 0) url = "http:/" + url.substring(pos);
+                if (!(v.containsKey(url))) v.put(url, "ref");
                 continue loop;
             }
         }
         return v;
     }
     
-    static Map allSubpaths(Map links) {
+    static Map allSubpaths(Set links) {
+        // links is either a Set of Strings (urls) or a Set of htmlFilterImageEntries
         HashMap v = new HashMap();
-        Iterator i = links.keySet().iterator();
-        String s;
+        Iterator i = links.iterator();
+        Object o;
+        String url;
         int pos;
         while (i.hasNext()) {
-            s = (String) i.next();
-            if (s.endsWith("/")) s = s.substring(0, s.length() - 1);
-            pos = s.lastIndexOf("/");
+            o = i.next();
+            if (o instanceof String) url = (String) o;
+            else if (o instanceof htmlFilterImageEntry) url = ((htmlFilterImageEntry) o).url().toNormalform();
+            else {
+                assert false;
+                continue;
+            }
+            if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
+            pos = url.lastIndexOf("/");
             while (pos > 8) {
-                s = s.substring(0, pos + 1);
-                if (!(v.containsKey(s))) v.put(s, "sub");
-                s = s.substring(0, pos);
-                pos = s.lastIndexOf("/");
+                url = url.substring(0, pos + 1);
+                if (!(v.containsKey(url))) v.put(url, "sub");
+                url = url.substring(0, pos);
+                pos = url.lastIndexOf("/");
             }
         }
         return v;

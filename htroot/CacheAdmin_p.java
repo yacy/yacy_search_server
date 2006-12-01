@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
@@ -124,7 +125,7 @@ public class CacheAdmin_p {
                     info.append("<b>TITLE:</b><br>").append(scraper.getTitle()).append("<br>").append("<br>")
                         .append("<b>SECTION HEADLINES:</b><br>").append(formatTitles(document.getSectionTitles())).append("<br>")
                         .append("<b>HREF:</b><br>").append(formatAnchor(document.getHyperlinks())).append("<br>")
-                        .append("<b>IMAGE:</b><br>").append(formatAnchor(document.getImagelinks())).append("<br>")
+                        .append("<b>IMAGE:</b><br>").append(formatImageAnchor(document.getImages())).append("<br>")
                         .append("<b>AUDIO:</b><br>").append(formatAnchor(document.getAudiolinks())).append("<br>")
                         .append("<b>VIDEO:</b><br>").append(formatAnchor(document.getVideolinks())).append("<br>")
                         .append("<b>APPS:</b><br>").append(formatAnchor(document.getApplinks())).append("<br>")
@@ -237,6 +238,18 @@ public class CacheAdmin_p {
             descr = ((String) entry.getValue()).trim();
             if (descr.length() == 0) { descr = "-"; }
             result.append("<tr valign=\"top\"><td><span class=\"small\">").append(descr).append("&nbsp;</span></td><td class=\"tt\">").append(url).append("</td></tr>");
+        }
+        return result.append("</table>").toString();
+    }
+
+    private static String formatImageAnchor(TreeSet anchor) {
+        final StringBuffer result = new StringBuffer((anchor.size() + 1) * 256);
+        result.append("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">");
+        final Iterator iter = anchor.iterator();
+        htmlFilterImageEntry ie;
+        while (iter.hasNext()) {
+            ie = (htmlFilterImageEntry) iter.next();
+            result.append("<tr valign=\"top\"><td><span class=\"small\">").append(ie.alt()).append("&nbsp;</span></td><td class=\"tt\">").append(ie.url().toNormalform()).append("</td></tr>");
         }
         return result.append("</table>").toString();
     }

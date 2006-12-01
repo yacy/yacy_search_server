@@ -61,12 +61,19 @@ public final class plasmaSearchQuery {
     public static final int SEARCHDOM_GLOBALDHT = 3;
     public static final int SEARCHDOM_GLOBALALL = 4;
     
+    public static final int CONTENTDOM_TEXT  = 0;
+    public static final int CONTENTDOM_IMAGE = 1;
+    public static final int CONTENTDOM_AUDIO = 2;
+    public static final int CONTENTDOM_VIDEO = 3;
+    public static final int CONTENTDOM_APP   = 4;
+    
     public static final kelondroBitfield empty_constraint    = new kelondroBitfield(4, "AAAAAA");
     public static final kelondroBitfield catchall_constraint = new kelondroBitfield(4, "______");
     
     public Set queryWords, queryHashes;
     public int wantedResults;
     public String prefer;
+    public int contentdom;
     public long maximumTime;
     public String urlMask;
     public int domType;
@@ -75,13 +82,14 @@ public final class plasmaSearchQuery {
     public int maxDistance;
     public kelondroBitfield constraint;
 
-    public plasmaSearchQuery(Set queryWords, int maxDistance, String prefer,
+    public plasmaSearchQuery(Set queryWords, int maxDistance, String prefer, int contentdom,
                              int wantedResults, long maximumTime, String urlMask,
                              int domType, String domGroupName, int domMaxTargets,
                              kelondroBitfield constraint) {
         this.queryWords = queryWords;
         this.maxDistance = maxDistance;
         this.prefer = prefer;
+        this.contentdom = contentdom;
         this.queryHashes = plasmaCondenser.words2hashes(queryWords);
         this.wantedResults = wantedResults;
         this.maximumTime = maximumTime;
@@ -92,12 +100,13 @@ public final class plasmaSearchQuery {
         this.constraint = constraint;
     }
     
-    public plasmaSearchQuery(Set queryHashes, int maxDistance, String prefer,
+    public plasmaSearchQuery(Set queryHashes, int maxDistance, String prefer, int contentdom,
                              int wantedResults, long maximumTime, String urlMask,
                              kelondroBitfield constraint) {
         this.queryWords = null;
         this.maxDistance = maxDistance;
         this.prefer = prefer;
+        this.contentdom = contentdom;
         this.queryHashes = queryHashes;
         this.wantedResults = wantedResults;
         this.maximumTime = maximumTime;
@@ -106,6 +115,15 @@ public final class plasmaSearchQuery {
         this.domGroupName = null;
         this.domMaxTargets = -1;
         this.constraint = constraint;
+    }
+    
+    public static int contentdomParser(String dom) {
+        if (dom.equals("text")) return CONTENTDOM_TEXT;
+        else if (dom.equals("image")) return CONTENTDOM_IMAGE;
+        else if (dom.equals("audio")) return CONTENTDOM_AUDIO;
+        else if (dom.equals("video")) return CONTENTDOM_VIDEO;
+        else if (dom.equals("app")) return CONTENTDOM_APP;
+        return CONTENTDOM_TEXT;
     }
     
     public static Set hashes2Set(String query) {

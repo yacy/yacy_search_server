@@ -165,7 +165,7 @@ public class nxTools {
             e = s;
             while (e < a.length) {
                 b = a[e];
-                if ((b == 10) || (b == 13)) break;
+                if ((b == 10) || (b == 13) || (b == 0)) break;
                 e++;
             }
             
