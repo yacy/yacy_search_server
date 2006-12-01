@@ -1433,7 +1433,7 @@ do upload
         }
     }
 
-    public static ArrayList wput(
+    public static byte[] wput(
             URL url,
             String vhost,
             int timeout, 
@@ -1455,16 +1455,16 @@ do upload
                 files
         );
         
+        if (a == null) return null;
+        
+        // support of gzipped data  
+        a = serverFileUtils.uncompressGZipArray(a);
+
+        // return result
+        return a;
+        
         //System.out.println("wput-out=" + new String(a));
-        int s = 0;
-        int e;
-        ArrayList v = new ArrayList();
-        while (s < a.length) {
-            e = s; while (e < a.length) if (a[e++] < 32) {e--; break;}
-            v.add(new String(a, s, e - s));
-            s = e; while (s < a.length) if (a[s++] >= 32) {s--; break;}
-        }
-        return v;
+        //return nxTools.strings(a);
     }
 
     public static void main(String[] args) {

@@ -72,6 +72,7 @@ public class nxTools {
     }
     
     public static HashMap table(ArrayList list) {
+        if (list == null) return new HashMap();
         Iterator i = list.iterator();
         int pos;
         String line;
@@ -154,6 +155,7 @@ public class nxTools {
     }
     
     public static ArrayList strings(byte[] a, String encoding) {
+        if (a == null) return new ArrayList();
         int s = 0;
         int e;
         ArrayList v = new ArrayList();

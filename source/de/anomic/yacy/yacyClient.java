@@ -140,7 +140,7 @@ public final class yacyClient {
                                (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
                                obj,
                                null
-                    )
+                    ), "UTF-8"
             );
         } catch (Exception e) {
             if (Thread.currentThread().isInterrupted()) {
@@ -457,7 +457,7 @@ public final class yacyClient {
                             (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
                             obj,
                             null
-                    )
+                    ), "UTF-8"
                 );
             } catch (IOException e) {
                 yacyCore.log.logFine("SEARCH failed FROM " + targetPeer.hash + ":" + targetPeer.getName() + " (" + e.getMessage() + "), score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes));
@@ -636,7 +636,7 @@ public final class yacyClient {
                             (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
                             post,
                             null
-                    )
+                    ), "UTF-8"
             );
         } catch (Exception e) {
             // most probably a network time-out exception
@@ -672,7 +672,8 @@ public final class yacyClient {
         
         // sending request
         try {
-            final ArrayList v = httpc.wput(
+            return nxTools.table(
+                httpc.wput(
                     new URL("http://" + address + "/yacy/message.html"),
                     yacySeed.b64Hash2hexHash(targetHash) + ".yacyh",
                     20000, 
@@ -681,9 +682,7 @@ public final class yacyClient {
                     (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null, 
                     post,
                     null
-            );
-
-            return nxTools.table(v);
+               ), "UTF-8");
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.postMessage error:" + e.getMessage());
             return null;
@@ -736,7 +735,7 @@ public final class yacyClient {
                             (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
                             post,
                             null
-                    )
+                    ), "UTF-8"
             );
         } catch (Exception e) {
             // most probably a network time-out exception
@@ -769,7 +768,8 @@ public final class yacyClient {
         // sending request
         try {
             final URL url = new URL("http://" + targetAddress + "/yacy/transfer.html");
-            final ArrayList v = httpc.wput(
+            return nxTools.table(
+                httpc.wput(
                     url,
                     url.getHost(), // yacyCore.seedDB.mySeed.getHexHash() + ".yacyh",
                     20000, 
@@ -778,9 +778,7 @@ public final class yacyClient {
                     (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null, 
                     post,
                     files
-            );
-
-            return nxTools.table(v);
+                ), "UTF-8");
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.postMessage error:" + e.getMessage());
             return null;
@@ -863,7 +861,7 @@ public final class yacyClient {
                             (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null, 
                             post,
                             null
-                    )
+                    ), "UTF-8"
             );
         } catch (Exception e) {
             // most probably a network time-out exception
@@ -1084,7 +1082,8 @@ public final class yacyClient {
         post.put("entryc", Integer.toString(indexcount));
         post.put("indexes", entrypost.toString());
         try {
-            final ArrayList v = httpc.wput(
+            final ArrayList v = nxTools.strings(
+                httpc.wput(
                     new URL("http://" + address + "/yacy/transferRWI.html"), 
                     targetSeed.getHexHash() + ".yacyh",
                     timeout, 
@@ -1093,9 +1092,9 @@ public final class yacyClient {
                     (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null, 
                     post,
                     null
-            );
+                ), "UTF-8");
             // this should return a list of urlhashes that are unknwon
-            if (v != null) {
+            if ((v != null) && (v.size() > 0)) {
                 yacyCore.seedDB.mySeed.incSI(indexcount);
             }
             
@@ -1146,7 +1145,8 @@ public final class yacyClient {
         }
         post.put("urlc", Integer.toString(urlc));
         try {
-            final ArrayList v = httpc.wput(
+            final ArrayList v = nxTools.strings(
+                httpc.wput(
                     new URL("http://" + address + "/yacy/transferURL.html"),
                     targetSeed.getHexHash() + ".yacyh",
                     timeout, 
@@ -1155,9 +1155,9 @@ public final class yacyClient {
                     (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null, 
                     post,
                     null
-            );
+                ), "UTF-8");
             
-            if (v != null) {
+            if ((v != null) && (v.size() > 0)) {
                 yacyCore.seedDB.mySeed.incSU(urlc);
             }
             
@@ -1185,7 +1185,8 @@ public final class yacyClient {
         String address = targetSeed.getAddress();
         if (address == null) { address = "localhost:8080"; }
         try {
-            final ArrayList v = httpc.wput(
+            return nxTools.table(
+                httpc.wput(
                     new URL("http://" + address + "/yacy/profile.html"), 
                     targetSeed.getHexHash() + ".yacyh",
                     10000, 
@@ -1194,9 +1195,7 @@ public final class yacyClient {
                     (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null, 
                     post,
                     null
-            );
-            
-            return nxTools.table(v);
+                ), "UTF-8");
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.getProfile error:" + e.getMessage());
             return null;
