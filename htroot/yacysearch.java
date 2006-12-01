@@ -116,6 +116,7 @@ public class yacysearch {
             prop.put("urlmaskfilter", ".*");
             prop.put("prefermaskfilter", "");
             prop.put("indexof", "off");
+            prop.put("constraint", plasmaSearchQuery.catchall_constraint.exportB64());
             prop.put("cat", "href");
             prop.put("depth", "0");
             prop.put("type", 0);
@@ -128,8 +129,7 @@ public class yacysearch {
             return prop;
         }
 
-        // SEARCH
-        // process search words
+        // collect search attributes
         int maxDistance = Integer.MAX_VALUE;
         String querystring = post.get("search", "").trim();
         if ((querystring.length() > 2) && (querystring.charAt(0) == '"') && (querystring.charAt(querystring.length() - 1) == '"')) {
@@ -141,9 +141,6 @@ public class yacysearch {
         final int count = Integer.parseInt(post.get("count", "10"));
         final String order = post.get("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
-        final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
-        final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
-        if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
         final boolean indexof = post.get("indexof","").equals("on"); 
         final long searchtime = 1000 * Long.parseLong(post.get("time", "10"));
         String urlmask = "";
@@ -160,6 +157,11 @@ public class yacysearch {
             constraint = new kelondroBitfield();
             constraint.set(plasmaCondenser.flag_cat_indexof, true);
         }
+        
+        // SEARCH
+        final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
+        final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
+        if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
         
         serverObjects prop = new serverObjects();
 

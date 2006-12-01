@@ -35,6 +35,7 @@ import java.util.HashMap;
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSearchPreOrder;
+import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
@@ -47,18 +48,24 @@ public class index {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         
-        boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
-        
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
-        int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
+        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
+        final int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
+        final String former = (post == null) ? "" : post.get("former", "");
+        final int count = (post == null) ? 10 : post.getInt("count", 10);
+        final int time = (post == null) ? 10 : post.getInt("time", 6);
+        final String urlmaskfilter = (post == null) ? ".*" : post.get("urlmaskfilter", ".*");
+        final String prefermaskfilter = (post == null) ? "" : post.get("prefermaskfilter", "");
+        final String constraint = (post == null) ? plasmaSearchQuery.catchall_constraint.exportB64() : post.get("constraint", "______");
+        final String cat = (post == null) ? "href" : post.get("cat", "href");
+        final int type = (post == null) ? 0 : post.getInt("type", 0);
+        
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
-        final String handover = (post == null) ? "" : post.get("handover", "");
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
 
         final String referer = (String) header.get("Referer");
-
         if (referer != null) {
             URL url;
             try {
@@ -80,16 +87,16 @@ public class index {
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("former", handover);
+        prop.put("former", former);
         prop.put("num-results", 0);
         prop.put("excluded", 0);
         prop.put("combine", 0);
         prop.put("resultbottomline", 0);
         prop.put("searchoptions", searchoptions);
-        prop.put("searchoptions_count-10", 1);
-        prop.put("searchoptions_count-50", 0);
-        prop.put("searchoptions_count-100", 0);
-        prop.put("searchoptions_count-1000", 0);
+        prop.put("searchoptions_count-10", (count == 10) ? 1 : 0);
+        prop.put("searchoptions_count-50", (count == 50) ? 1 : 0);
+        prop.put("searchoptions_count-100", (count == 100) ? 1 : 0);
+        prop.put("searchoptions_count-1000", (count == 1000) ? 1 : 0);
         prop.put("searchoptions_order-ybr-date-quality", plasmaSearchPreOrder.canUseYBR() ? 1 : 0);
         prop.put("searchoptions_order-ybr-quality-date", 0);
         prop.put("searchoptions_order-date-ybr-quality", 0);
@@ -98,22 +105,23 @@ public class index {
         prop.put("searchoptions_order-quality-date-ybr", 0);
         prop.put("searchoptions_resource-global", ((global) ? 1 : 0));
         prop.put("searchoptions_resource-local", ((global) ? 0 : 1));
-        prop.put("searchoptions_time-1", 0);
-        prop.put("searchoptions_time-3", 0);
-        prop.put("searchoptions_time-6", 1);
-        prop.put("searchoptions_time-10", 0);
-        prop.put("searchoptions_time-30", 0);
-        prop.put("searchoptions_time-60", 0);
+        prop.put("searchoptions_time-1", (time == 1) ? 1 : 0);
+        prop.put("searchoptions_time-3", (time == 3) ? 1 : 0);
+        prop.put("searchoptions_time-6", (time == 6) ? 1 : 0);
+        prop.put("searchoptions_time-10", (time == 10) ? 1 : 0);
+        prop.put("searchoptions_time-30", (time == 30) ? 1 : 0);
+        prop.put("searchoptions_time-60", (time == 60) ? 1 : 0);
         prop.put("searchoptions_urlmaskoptions", 0);
-        prop.put("searchoptions_urlmaskoptions_urlmaskfilter", ".*");
+        prop.put("searchoptions_urlmaskoptions_urlmaskfilter", urlmaskfilter);
         prop.put("searchoptions_prefermaskoptions", 0);
-        prop.put("searchoptions_prefermaskoptions_prefermaskfilter", "");
+        prop.put("searchoptions_prefermaskoptions_prefermaskfilter", prefermaskfilter);
         prop.put("searchoptions_indexofChecked", "");
         prop.put("results", "");
-        prop.put("cat", "href");
-        prop.put("type", "0");
+        prop.put("cat", cat);
+        prop.put("type", type);
         prop.put("depth", "0");
         prop.put("display", display);
+        prop.put("constraint", constraint);
         prop.put("searchoptions_display", display);
         
         
