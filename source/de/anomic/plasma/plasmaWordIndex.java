@@ -239,8 +239,11 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public indexContainer addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean dhtInCase) {
-        if ((useCollectionIndex) && (entry instanceof indexRWIEntryOld)) entry = new indexRWIEntryNew((indexRWIEntryOld) entry);
-        
+        if ((useCollectionIndex) && (entry instanceof indexRWIEntryOld)) {
+            if (entry.urlHash() == null) return null;
+            entry = new indexRWIEntryNew((indexRWIEntryOld) entry);
+        }
+
         // set dhtInCase depending on wordHash
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(wordHash))) dhtInCase = true;
         
@@ -261,7 +264,9 @@ public final class plasmaWordIndex implements indexRI {
         indexRWIEntryOld old;
         while (i.hasNext()) {
             old = (indexRWIEntryOld) i.next();
-            newentries.add(new indexRWIEntryNew(old));
+            if (old.urlHash() != null) {
+                newentries.add(new indexRWIEntryNew(old));
+            }
         }
         return newentries;
     }

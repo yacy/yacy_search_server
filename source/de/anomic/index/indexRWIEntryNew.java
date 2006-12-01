@@ -149,6 +149,7 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
     }
 
     public indexRWIEntryNew(indexRWIEntryOld oldEntry) {
+        assert oldEntry.urlHash() != null;
         this.entry = urlEntryRow.newEntry();
         int mddlm = plasmaWordIndex.microDateDays(oldEntry.lastModified());
         int mddct = plasmaWordIndex.microDateDays(System.currentTimeMillis());

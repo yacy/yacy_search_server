@@ -99,6 +99,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         // more needed attributes:
         // - boolean: appearance attributes: title, appears in header, anchor-descr, image-tag, hervorhebungen, meta-tags, word in link etc
         // - boolean: URL attributes
+        assert (urlHash != null);
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
         if ((language == null) || (language.length() != urlEntryRow.width(col_language))) language = "uk";
         this.entry = urlEntryRow.newEntry();

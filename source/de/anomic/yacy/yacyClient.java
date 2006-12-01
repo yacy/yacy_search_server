@@ -553,6 +553,7 @@ public final class yacyClient {
                 // add the url entry to the word indexes
                 for (int m = 0; m < words; m++) {
                     if ((wordIndex.useCollectionIndex) && (entry instanceof indexRWIEntryOld)) {
+                        if (entry.urlHash() == null) continue; 
                         entry = new indexRWIEntryNew((indexRWIEntryOld) entry);
                     }
                     container[m].add(new indexRWIEntry[]{entry}, System.currentTimeMillis());
