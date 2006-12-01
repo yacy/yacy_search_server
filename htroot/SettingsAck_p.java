@@ -291,17 +291,27 @@ public class SettingsAck_p {
         
         // server access
         if (post.containsKey("serveraccount")) {
-            
+
             // static IP
-            String staticIP =  (String)post.get("staticIP");
-            if(staticIP.equals("")){
-                serverCore.useStaticIP=false;
-            }else{
-                serverCore.useStaticIP=true;
+            String staticIP =  ((String) post.get("staticIP")).trim();
+            if (staticIP.length() == 0) {
+                serverCore.useStaticIP = false;
+            } else {
+                if (staticIP.startsWith("http://")) {
+                    if (staticIP.length() > 7) { staticIP = staticIP.substring(7); } else { staticIP = ""; }
+                } else if (staticIP.startsWith("https://")) {
+                    if (staticIP.length() > 8) { staticIP = staticIP.substring(8); } else { staticIP = ""; }
+                }
+                if (staticIP.indexOf(":") > 0) {
+                    staticIP = staticIP.substring(0, staticIP.indexOf(":"));
+                } else {
+                    staticIP = "";
+                }
+                serverCore.useStaticIP = true;
             }
+            yacyCore.seedDB.mySeed.put(yacySeed.IP, staticIP);
             env.setConfig("staticIP", staticIP);
-            if (staticIP.length() > 0) yacyCore.seedDB.mySeed.put(yacySeed.IP, staticIP);
-            
+
             // server access data
             String filter = ((String) post.get("serverfilter")).trim();
             /*String user   = (String) post.get("serveruser");
