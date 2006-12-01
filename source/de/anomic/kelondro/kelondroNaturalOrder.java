@@ -55,6 +55,13 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         this.asc = ascending;
         this.zero = null;
     }
+    public boolean wellformed(byte[] a) {
+        return true;
+    }
+    
+    public boolean wellformed(byte[] a, int astart, int alength) {
+        return true;
+    }
     
     public final Object clone() {
         kelondroNaturalOrder o = new kelondroNaturalOrder(this.asc);

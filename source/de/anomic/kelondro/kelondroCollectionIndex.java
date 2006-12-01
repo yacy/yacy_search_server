@@ -442,11 +442,19 @@ public class kelondroCollectionIndex {
         if (arrayrow == null) throw new kelondroException(arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString(), "array does not contain expected row");
 
         // read the row and define a collection
+        byte[] indexkey = indexrow.getColBytes(idx_col_key);
+        byte[] arraykey = arrayrow.getColBytes(0);
+        if (!(index.order().wellformed(arraykey))) {
+            // cleanup for a bad bug that corrupted the database
+            index.remove(indexkey);  // the RowCollection must be considered lost
+            array.remove(rownumber); // loose the RowCollection (we don't know how much is lost)
+            serverLog.logSevere("kelondroCollectionIndex." + array.filename, "lost a RowCollection because of a bad arraykey");
+            return new kelondroRowSet(this.payloadrow, 0);
+        }
         kelondroRowSet collection = new kelondroRowSet(this.payloadrow, arrayrow.getColBytes(1)); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
-        byte[] key = indexrow.getColBytes(idx_col_key);
-        if (index.order().compare(arrayrow.getColBytes(0), key) != 0) {
+        if ((!(index.order().wellformed(indexkey))) || (index.order().compare(arraykey, indexkey) != 0)) {
             // check if we got the right row; this row is wrong. Fix it:
-            index.remove(key); // the wrong row cannot be fixed
+            index.remove(indexkey); // the wrong row cannot be fixed
             // store the row number in the index; this may be a double-entry, but better than nothing
             kelondroRow.Entry indexEntry = index.row().newEntry();
             indexEntry.setCol(idx_col_key, arrayrow.getColBytes(0));
@@ -458,7 +466,7 @@ public class kelondroCollectionIndex {
             indexEntry.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
             indexEntry.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
             index.put(indexEntry);
-            throw new kelondroException(array.filename, "array contains wrong row '" + new String(arrayrow.getColBytes(0)) + "', expected is '" + new String(indexrow.getColBytes(idx_col_key)) + "', the row has been fixed");
+            serverLog.logSevere("kelondroCollectionIndex." + array.filename, "array contains wrong row '" + new String(arrayrow.getColBytes(0)) + "', expected is '" + new String(indexrow.getColBytes(idx_col_key)) + "', the row has been fixed");
         }
         int chunkcountInArray = collection.size();
         if (chunkcountInArray != chunkcount) {

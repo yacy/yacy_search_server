@@ -49,6 +49,9 @@ import java.util.Comparator;
 
 public interface kelondroOrder extends Comparator {
 
+    public boolean wellformed(byte[] a); // returns true if and only if a has only characters that belong to the implemented order
+    public boolean wellformed(byte[] a, int astart, int alength);
+    
     public Object clone();
     
     public void direction(boolean ascending); // the ordering direction can be changed at any time

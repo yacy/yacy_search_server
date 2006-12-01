@@ -496,6 +496,8 @@ public class kelondroRowCollection {
         assert (this.sortColumn == 0) : "this.sortColumn = " + this.sortColumn;
         int keylength = this.rowdef.width(this.sortColumn);
         int colstart  = this.rowdef.colstart[this.sortColumn];
+        if (bugappearance(chunkcache, i * this.rowdef.objectsize() + colstart, keylength)) throw new kelondroException("bugappearance i");
+        if (bugappearance(chunkcache, j * this.rowdef.objectsize() + colstart, keylength)) throw new kelondroException("bugappearance j");
         int c = this.sortOrder.compare(
                 chunkcache,
                 i * this.rowdef.objectsize() + colstart,

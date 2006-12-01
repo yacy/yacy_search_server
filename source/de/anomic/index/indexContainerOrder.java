@@ -10,6 +10,14 @@ public class indexContainerOrder implements kelondroOrder {
         this.embeddedOrder = embedOrder;
     }
 
+    public boolean wellformed(byte[] a) {
+        return embeddedOrder.wellformed(a);
+    }
+    
+    public boolean wellformed(byte[] a, int astart, int alength) {
+        return embeddedOrder.wellformed(a, astart, alength);
+    }
+    
     public void direction(boolean ascending) {
         this.embeddedOrder.direction(ascending);
     }

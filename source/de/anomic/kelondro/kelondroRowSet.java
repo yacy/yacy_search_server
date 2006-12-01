@@ -29,6 +29,8 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.TreeMap;
 
+import de.anomic.server.logging.serverLog;
+
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
 
     private static final int collectionReSortLimit = 90;
@@ -171,8 +173,14 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     public void shape() {
         assert (this.sortOrder != null); // we cannot shape without an object order
         synchronized (chunkcache) {
-            resolveMarkedRemoved();
-            super.sort();
+            try {
+                resolveMarkedRemoved();
+                super.sort();
+            } catch (kelondroException e) {
+                // bad bug, cannot be fixed. We abandon all data
+                serverLog.logSevere("kelondroRowSet", "abandoned row");
+                this.clear();
+            }
             //if (super.rowdef.column(0).cellwidth() == 4) System.out.println("TABLE OF " + super.rowdef.toString() + "\n" + serverLog.table(super.chunkcache, super.rowdef.objectsize, 0)); // DEBUG
         }
     }

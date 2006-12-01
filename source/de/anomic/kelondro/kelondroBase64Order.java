@@ -90,6 +90,20 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         return o;
     }
     
+    public final boolean wellformed(byte[] a) {
+        return wellformed(a, 0, a.length);
+    }
+    
+    public final boolean wellformed(byte[] a, int astart, int alength) {
+        assert (astart + alength <= a.length) : "astart = " + astart + ", alength = " + alength + ", a.length = " + a.length;
+        int b;
+        for (int i = astart + alength - 1; i >= astart; i--) {
+            b = a[i];
+            if ((b < 0) || (b >= 128) || (ahpla[b] == -1)) return false;
+        }
+        return true;
+    }
+    
     public final static kelondroOrder bySignature(String signature) {
         if (signature.equals("Bd")) return new kelondroBase64Order(false, false);
         if (signature.equals("bd")) return new kelondroBase64Order(false, true);
