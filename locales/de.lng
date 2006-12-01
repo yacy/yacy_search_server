@@ -371,6 +371,8 @@ restrict on==beschr&auml;nken auf
 show all==alle zeigen
 #überarbeiten!!!
 Prefer mask:==Vorzugsmaske:
+Constraints:==Einschr&auml;nkungen:
+only index pages==Nur Index Seiten
 #-----------------------------
 
 #File: IndexCleaner_p.html
@@ -965,7 +967,7 @@ Words in RAM Cache:==W&ouml;rter im RAM-Cache
 This is the current size of the word cache.==Dies ist die momentane Gr&ouml;&szlig;e des Wort-Caches.
 The smaller this number, the faster the shut-down procedure will be.==Je kleiner diese Zahl ist, desto schneller wird das Herunterfahren von YaCy gehen.
 The maximum of this cache can be set below.==Die Maximalgr&ouml;&szlig;e dieses Cache kann nachfolgend eingestellt werden.
-Maximum URLs currently assigned<br>to one cached word:==h&ouml;chste Anzahl URLs die derzeit einem Wort im Zwischenspeicher zugewiesen wurde:
+Maximum URLs currently assigned<br />to one cached word:==h&ouml;chste Anzahl URLs die derzeit einem Wort im Zwischenspeicher zugewiesen wurde:
 This is the maximum size of URLs assigned to a single word cache entry.==Dies ist die maximale Menge an URLs, die einem einzelnen Wort-Cache Eintrag zugewiesen wurden.
 If this is a big number, it shows that the caching works efficiently.==Wenn diese Zahl hoch ist, hei&szlig;t das, dass der Wort-Cache effizient arbeitet.
 Maximum Age of Word in cache:==h&ouml;chstes Alter eines Wortes im Cache:
@@ -1025,7 +1027,7 @@ RAM Cache for Database Files:==RAM-Cache f&uuml;r Datenbank-Dateien:
 Chunk Size==Chunk Gr&ouml;&szlig;e
 #Slots==
 Memory Occupation==Speicherbeanspruchung
-Needed<br>==Ben&ouml;tigt<br />
+Needed<br />==Ben&ouml;tigt<br />
 &nbsp;DB&nbsp;Size==&nbsp;DB&nbsp;Gr&ouml;&szlig;e
 >Empty==>Frei
 High Prio==hohe Prio
@@ -1074,10 +1076,10 @@ Increasing this cache may speed up crawling, but not much space is needed, so th
 Sum of memory amounts==Summe der Speichermengen
 Re-Configuration:==Neukonfiguration:
 "Set"=="Setzen"
-these<br>custom<br>values==dieser<br />nutzerdef.<br />Werte
-all<br>default<br>values==aller<br />Standard-<br />werte
-all<br>recom-<br>mended values==aller<br />empfohlenen<br />Werte
-all<br>optimum<br>values==aller<br />Optimal-<br />werte
+these<br />custom<br />values==dieser<br />nutzerdef.<br />Werte
+all<br />default<br />values==aller<br />Standard-<br />werte
+all<br />recom-<br />mended values==aller<br />empfohlenen<br />Werte
+all<br />optimum<br />values==aller<br />Optimal-<br />werte
 #Write Cache Object Allocation:==
 #now alive in write cache==
 #currently held in write buffer heap==
@@ -1144,7 +1146,7 @@ The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DAT
 Please delete that file and restart.==Bitte l&ouml;schen Sie diese Datei und starten Sie YaCy neu.
 Pre-fetch is now set to depth==Proxy Indizierung erfolgt nun bis zu einer Tiefe von
 Caching is now \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Proxy Speichern im Cache ist nun #(caching)#aus::an#(/caching)#.
-Cachepath is now set to \'\#\[return\]\#\'.</b> Please move the old data in the new directory.==Der Cache ist nun im Verzeichnis '#[return]#'.</b> Bitte verschieben Sie Ihre alten Daten in das neue Verzeichnis.
+Cachepath is now set to \'\#\[return\]\#\'.</strong> Please move the old data in the new directory.==Der Cache ist nun im Verzeichnis '#[return]#'.</strong> Bitte verschieben Sie Ihre alten Daten in das neue Verzeichnis.
 Cachesize is now set to \#\[return\]\#MB.==Die Cache Gr&ouml;sse ist nun auf #[return]#MB gesetzt.
 Changes will take effect after restart only.==&Auml;nderungen werden erst nach einem Neustart von YaCy wirksam.
 Remote Indexing is now \#\(crawlOrder\)\#off::on==Remote-Indexieren ist nun #(crawlOrder)#aus::an
@@ -1346,9 +1348,9 @@ With this settings you can activate or deactivate forwarding of yacy-messages vi
 Enable message forwarding:==Aktiviere Nachrichten Weiterleitung:
 Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
 Forwarding Command:==Weiterleitungskommando:
-The command-line program that should be used to forward the message.<br>e.g.:==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />z.B.:
+The command-line program that should be used to forward the message.<br />e.g.:==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />z.B.:
 Forwarding To:==Weiterleiten An:
-The recipient email-address.<br> e.g.:==Die E-Mail Adresse des Empf&auml;ngers.<br />z.B.:
+The recipient email-address.<br /> e.g.:==Die E-Mail Adresse des Empf&auml;ngers.<br />z.B.:
 Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
 #-----------------------------
 
@@ -1384,11 +1386,11 @@ Nothing changed==Nichts wurde ver&auml;ndert.
 Error with submitted information.==Es gab einen Fehler bei der &Uuml;bertragung der Informationen.
 Nothing changed.==Nichts wurde ver&auml;ndert.
 The user name must be given.==Der User Name muss angegeben werden
-Your request cannot be processed.<br>Nothing changed.==Ihre Anfrage konnte nicht bearbeitet werden.<br />Nichts wurde ver&auml;ndert.
+Your request cannot be processed.<br />Nothing changed.==Ihre Anfrage konnte nicht bearbeitet werden.<br />Nichts wurde ver&auml;ndert.
 The password redundancy check failed. You have probably misstyped your password.==Die Passwort&uuml;berpr&uuml;fung schlug fehl. Sie haben sich wahrscheinlich vertippt.
-Shutting down.</b><br>Application will terminate after working off all crawling tasks.==Runterfahren</b><br />Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
+Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==Runterfahren</strong><br />Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
 Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
-Your new administration account name is \#\[user\]\#. The password has been accepted.<br>If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br />Wenn Sie zur&uuml;ck zu den Einstellungen gehen wollen, m&uuml;ssen Sie sich neu einloggen.
+Your new administration account name is \#\[user\]\#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br />Wenn Sie zur&uuml;ck zu den Einstellungen gehen wollen, m&uuml;ssen Sie sich neu einloggen.
 Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden ge&auml;ndert.
 Your proxy account check has been disabled, since you did not supply a password.==
 The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
@@ -1410,10 +1412,10 @@ Seed Settings changed, but something is wrong.==Seed Einstellungen wurden ge&aum
 Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
 Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zur&uuml;ck und modifizieren Sie die Daten.
 The remote-proxy setting has been changed==Die remote-proxy Einstellungen wurden ge&auml;ndert.
-The new setting is effective immediately, you don't need to re-start.
-The submitted peer name is already used by another peer. Please choose a different name.</b> The Peer name has not been changed.
+The new setting is effective immediately, you don't need to re-start.==Die neuen Einstellungen wirken sofort. Sie brauchen den Peer nicht neu zu starten.
+The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==Der eingegebene Peername wird bereits von einem anderen Peer benutzt. Bitte w&auml;hlen Sie einen anderen Namen.</strong> Der Peername wurde nicht ge&auml;ndert.  
 Your Peer Language is:==Ihre Peer Sprache ist:
-The submitted peer name is not well-formed. Please choose a different name.</b> The Peer name has not been changed.
+The submitted peer name is not well-formed. Please choose a different name.</strong> The Peer name has not been changed.
 Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
 The new parser settings where changed successfully.==Die neuen Parser Einstellungen wurden erfolgreich gespeichert.
 Parsing of the following mime-types was enabled:
@@ -1422,19 +1424,19 @@ You are now a principal peer.==Sie sind nun ein Principal Peer.
 Seed Upload Method:==Seed Upload Methode:
 Seed File URL:==Seed Datei URL:
 Your proxy networking settings have been changed.==Ihre Proxy Netzwerk Einstellungen wurden ge&auml;ndert.
-Transparent Proxy Support is:
-Connection Keep-Alive Support is:
+Transparent Proxy Support is:==Durchsichtige Proxy Unterst&uuml;tzung ist: 
+Connection Keep-Alive Support is:==Verbindung aufrecht erhalten Unterst&uuml;tzung ist:
 Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleitungseinstellungen haben sich ge&auml;ndert.
 Message Forwarding Support is:==Nachrichten Weiterleitungs Unterst&uml;tzung:
 Message Forwarding Command:==Nachrichten Weiterleitungskommando:
 Recipient Address:==Empf&auml;nger Adresse:
-Your port forwarding settings have been changed.
-Port Forwarding Support is:
-Port Forwarding Port:
-Port Forwarding Host:
-Port Forwarding uses proxy:
-Port Forwarding Settings changed, but something is wrong.
-Port Forwarding was deactivated automatically.
+Your port forwarding settings have been changed.==Ihre Port Weiterleitungs-Einstellungen wurden ge&auml;ndert.
+Port Forwarding Support is:==Port Weiterleitungs Unterst&uuml;tzung ist:
+Port Forwarding Port:==Port Weiterleitungs Port:
+Port Forwarding Host:==Port Weiterleitungs Host:
+Port Forwarding uses proxy:==Port Weiterleitung benutzt Proxy:
+Port Forwarding Settings changed, but something is wrong.==Port Weiterleitungs-Einstellungen wurden ge&auml;ndert. aber etwas ist falsch.
+Port Forwarding was deactivated automatically.==Port Weiterleitung wurde automatisch deaktiviert.
 Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zur&uuml;ck und modifizieren Sie die Daten.
 You are now <strong>event-based online</strong>.==Sie sind nun im  <strong>aktivit&auml;tsbasierten Modus</strong>.
 After a short while you should see the effect on the==Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
@@ -1463,37 +1465,7 @@ System Behaviour Settings==System Einstellungen
 Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite beim Start von YaCy:
 "enable"=="Aktivieren"
 "disable"=="Deaktivieren"
-#-----------------------------
 
-#File: simple_search.html
-#---------------------------
-YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
-"Search for \#\[former\]\#"=="Suche f&uuml;r #[former]#"
-P2P WEB SEARCH==P2P Internet Suche
-"Search"==Suchen
-Max. number of results:==Max. Anzahl Ergebnisse:
-No Results.==Keine Ergebnisse.
-length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
-If you think this is unsatisfactory then you may consider to support==Wenn Sie das unbefriedigend finden, sollten Sie &uuml;berlegen,
-the global index by running your own proxy/peer.==den globalen Index durch das Betreiben  eines eigenen Proxies/Peers zu unterst&uuml;tzen.
-If everybody contributes, the results will get better.==Wenn jeder etwas beitr&auml;gt, werden die Ergebnisse besser.
-Other possible reasons for no result:==Andere m&ouml;gliche Gr&uuml;nde daf&uuml;r, dass Sie keine Ergebnisse erhalten haben:
-The search time was too short. Search again with same query to catch up 'late peers'==Die Zeit zum suchen war zu kurz. Suchen Sie erneut mit erh&ouml;hter max. Suchdauer nach dem gleichen Begriff, um so auch Ergebnisse von langsameren Peers zu erhalten.
-There is currently no support for german umlaute. Please use ae/oe/ue instead==Zur Zeit gibt es keine Unterst&uuml;tzung der deutschen Umlaute. Bitte benutzen Sie stattdessen ae/oe/ue.
-Words of length < 3 are not indexed. Please omit such words==W&ouml;rter mit weniger als drei Buchstaben werden nicht indiziert.
-YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indiziert nur den Singular eines Wortes. Bitte suchen Sie daher auch nur nach dem Singular.
-Only complete words are indexed, not parts of words==Nur komplette W&ouml;rter sind indiziert, keine Teile eines Wortes.
-Don't use stopwords as search words==Benutzen Sie bitte keine Stopwords in der Suche.
-During this test phase the reaction time of remote peers is unknown.==W&auml;hrend dieser Testphase ist die Reaktionszeit des remote Peers unbekannt.
-Please repeat your search to see if there are late-responses from remote peers==Bitte wiederholen Sie jede Suche, um zu sehen, wie lange der remote Peer zum antworten braucht.
-If you think the information you searched should exist in the global index,==Wenn Sie glauben, die Information, nach der Sie suchen, sollte im globalen Index stehen,
-then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen crawl nach der gesuchten Information, um sie
-available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um crawls von anderen Peers zu erlauben. Danke!
-results from a total number of==Resultate aus
-known links.==bekannten Links.
-You can try to==Sie k&ouml;nnen versuchen
-catch up more links==mehr Links zu sammeln
-from 'late' peers to enrich this search result.==um mehr Treffer zu erzielen.
 #-----------------------------
 
 #File: Status.html
@@ -1639,7 +1611,7 @@ title="negative vote"==title="Negative Bewertung"
 alt="Give negative vote"==alt="Link negativ bewerten"
 provided by YaCy peers using public bookmarks, link votes and crawl start points==bereitgestellt von YaCy-Peers durch öffentliche Lesezeichen, Link Bewertungen und Crawl Startpunkte
 Hide surftips==Verberge Surftipps
-
+"Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
 #File: User_p.html
 #---------------------------
 new User==neuer Benutzer
@@ -1787,8 +1759,8 @@ If a line starts with a space, it will be displayed in a non-proportional font.=
 #---------------------------
 Search Page==Suchseite
 "Search"=="Suchen"
-"delete"=="l&ouml;schen"
 "search again - catch up more links"=="Erneut suchen - mehr Links sammeln" 
+more options==Mehr Optionen
 The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
 No Results.==Keine Ergebnisse.
 length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
@@ -1807,7 +1779,7 @@ If you think the information you searched should exist in the global index,==Wen
 then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen Crawl nach der gesuchten Information, um sie
 available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um Crawls von anderen Peers zu erlauben. Danke!
 results from==Resultate aus
-ordered links of a total number of==gefunden Links von insgesamt
+ordered links of a total number of==gefundenen Links von insgesamt
 known.==bekannten Links.
 Refine your search with these topwords==Verfeinere die Suche mit diesen Topw&ouml;rtern
 You can enrich the search results by using the 'global' option==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen
@@ -1823,6 +1795,7 @@ you must also switch to online mode==Sie m&uuml;ssen aber erst in den online Mod
 \(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen) um auch am globalen Index beizutragen.
 "bookmark"=="Lesezeichen"
 "recommend"=="empfehlen"
+"delete"=="l&ouml;schen"
 loading snippet==Auszug wird geladen
 Pictures==Bilder
 The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;lt #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
