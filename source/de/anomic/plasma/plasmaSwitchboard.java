@@ -2387,7 +2387,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return "no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size();
         }
         if ((getConfig("allowDistributeIndexWhileCrawling","false").equalsIgnoreCase("false")) &&
-            ((urlPool.noticeURL.stackSize() > 0) || (sbQueue.size() > 0))) {
+            ((urlPool.noticeURL.stackSize() > 0) || (sbQueue.size() > 3))) {
             return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + urlPool.noticeURL.stackSize() + ", sbQueue.size() = " + sbQueue.size();
         }
         return null;

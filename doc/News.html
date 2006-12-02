@@ -84,6 +84,64 @@ globalheader();
 </ul>
 -->
 
+<br><p>v0.49_20061202_3040
+<ul>
+<li>Enhanced search service</li>
+  <ul>
+  <li>Web searches are faster because of the new data structures implemented in this version (see below)
+      and because bugs had been found and fixed.</li>
+  <li>Searches can be re-done with changed search properties. Please use the 'more options' link at the search page.</li>
+  <li>Added search constraints. These are search restrictions to web searches which are applied to information that is scraped
+      from the web pages during page parsing. The first application of search constraints is a search restricted to
+      index pages ('index of'). Please use the flag at the extended search functions.</li>
+  <li>Enabled index-abstracts search; this should solve the distributed-combined search challenge (still beeing tested).</li>
+  </ul>
+<li>New Database Structures for Index and URL storage</li>
+  <ul>
+  <li>The new 'Collections' Data Structure is now the default data structure.</li>
+  <li>Index entries and URL entries carry more ranking and selection attributes, b.o. for image, video, audio and application search.</li>
+  <li>Enhanced Storage of URLs: they are now divided into different creation times. This enables easy deletion
+      of outdated URLs, enables a index-limitation function and solves the problem that the URL database was too
+      big to fit into a 2 GB file.</li>
+  <li>Search requests can now be answered in less time.</li>
+  <li>The index organization needs less IO.</li>
+  <li>Index transfers will now only be done to latest peers supporting the collection data structure.</li>
+  <li>Index transfers from old peers to new peers are translated automatically to new data format.</li>
+  <li>Assortments are no longer supported.</li>
+  </ul>
+<li>Enhanced SOAP support</li>
+  <ul>
+  <li>Added protocol for peer administration, custom services, status queries, blacklist management,
+      file share management, support for outgoing transfer- and content-encoding, better error handling,
+      function to get and set message forwarding, handling of yacy bookmarks, log display,
+      manage peer messages, get and set peer profile, query peer status, query the pause/resume state of the crawling queues,
+      and a check if a specific url is blacklisted.</li>
+  <li>Added new ant target to allow generation of client stub classes for yacy soap api.</li>
+  </ul>
+<li>Other new Features</li>
+  <ul>
+  <li>Added DNS-cache-miss caching.</li>
+  <li>Added Flash (experimental), MS Excel and Powerpoint parser.</li>
+  <li>New mint-green and dark skin.</li>
+  <li>Better non-7bit ascii character support.</li>
+  <li>Added ant support for rpms.</li>
+  <li>Added ant target for windows installer.</li>
+  <li>Added template to display file share in xml format.</li>
+  <li>Better object caching for kelondro database (combined read/write object cache with synergy effects).</li>
+  <li>More anonymization in logging.</li>
+  <li>New HTCACHE layout using files hashes; tree- and hash-layout can be used simultanously; hash-layout is now default.</li>
+  <li>Access to wiki is now limited to administrator, if wanted. This can be confugured at the wiki page.</li>
+  <li>..and many bugfixes.</>
+  </ul>
+<li>New 'Sattelite' Projects: these applications work as service applications for the YaCy application (start-up/experimental status)</li>
+  <ul>
+  <li>YaCy admin: a swing-based client, that is able to administrate yacy using the SOAP interface.</li>
+  <li>YaCy Screen Saver: presentation of the peer status in a screen saver</li>
+  <li>YaCy Updater: automated donwloads/updates</li>
+  <li>YaCy logalizer: analyze of the YaCy log</li>
+  </ul>
+</ul>
+
 <br><p>v0.48_20061010_2743
 <ul>
 <li>New Features</li>
