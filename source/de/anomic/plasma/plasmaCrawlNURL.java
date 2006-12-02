@@ -106,13 +106,12 @@ public class plasmaCrawlNURL {
     private File cacheStacksPath;
     private int bufferkb;
     private long preloadTime;
-    private boolean newdb;
     initStackIndex initThead;
     
     // the class object
     private kelondroIndex urlIndexFile = null;
 
-    public plasmaCrawlNURL(File cachePath, int bufferkb, long preloadTime, boolean newdb) {
+    public plasmaCrawlNURL(File cachePath, int bufferkb, long preloadTime) {
         super();
         this.cacheStacksPath = cachePath;
         this.bufferkb = bufferkb;
@@ -120,7 +119,6 @@ public class plasmaCrawlNURL {
         
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
-        this.newdb = newdb;
         openHashCache();
 
         File coreStackFile = new File(cachePath, "urlNoticeLocal0.stack");
@@ -195,24 +193,13 @@ public class plasmaCrawlNURL {
     }
     
     private void openHashCache() {
-        if (newdb) {
-            String newCacheName = "urlNotice5.table";
-            cacheStacksPath.mkdirs();
-            try {
-                urlIndexFile = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder), bufferkb / 2 * 0x400, true, false);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(-1);
-            }
-        } else {
-            File oldCacheFile = new File(cacheStacksPath, "urlNotice2.db");
-            oldCacheFile.getParentFile().mkdirs();
-            try {
-                urlIndexFile = new kelondroCache(kelondroTree.open(oldCacheFile, bufferkb / 2 * 0x400, preloadTime, rowdef), bufferkb / 2 * 0x400, true, true);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(-1);
-            }
+        String newCacheName = "urlNotice5.table";
+        cacheStacksPath.mkdirs();
+        try {
+            urlIndexFile = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder), bufferkb / 2 * 0x400, true, false);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
         }
     }
     

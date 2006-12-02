@@ -41,7 +41,6 @@
 
 package de.anomic.plasma;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -273,12 +272,6 @@ public class plasmaDHTChunk {
             
             return refcount;
         } catch (kelondroException e) {
-            log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
-            indexContainers = new indexContainer[0];
-            urlCache = new HashMap();
-            this.status = chunkStatus_FAILED;
-            return 0;
-        } catch (IOException e) {
             log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
             indexContainers = new indexContainer[0];
             urlCache = new HashMap();

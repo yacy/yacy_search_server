@@ -166,17 +166,7 @@ public class PerformanceMemory_p {
         dfltTotal = 0;
         bestTotal = 0;
         
-        if (sb.wordIndex.useCollectionIndex) {
-            prop.put("useRWICache", 0);
-        } else {
-            prop.put("useRWICache", 1);
-            req = sb.wordIndex.size();
-            chk = sb.wordIndex.assortmentsCacheChunkSizeAvg();
-            obj = sb.wordIndex.assortmentsCacheObjectSizeAvg();
-            slt = sb.wordIndex.assortmentsCacheNodeStatus();
-            ost = sb.wordIndex.assortmentsCacheObjectStatus();
-            putprop(prop, env, "useRWICache", "RWI", set);
-        }
+        prop.put("useRWICache", 0);
          
         req = sb.cacheManager.dbSize();
         chk = sb.cacheManager.cacheNodeChunkSize();

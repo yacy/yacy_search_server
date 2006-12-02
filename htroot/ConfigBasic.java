@@ -49,7 +49,6 @@
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.anomic.data.translator;

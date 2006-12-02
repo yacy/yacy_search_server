@@ -307,7 +307,6 @@ public class IndexControl_p {
 
         // generate list
         if (post.containsKey("keyhashsimilar")) {
-            try {
             final Iterator containerIt = switchboard.wordIndex.indexContainerSet(keyhash, plasmaWordIndex.RL_WORDFILES, true, 256).iterator();
                 indexContainer container;
                 int i = 0;
@@ -327,9 +326,6 @@ public class IndexControl_p {
                 prop.put("keyhashsimilar_rows_"+rows+"_cols", cols);
                 prop.put("keyhashsimilar_rows", rows + 1);
                 prop.put("result", "");
-            } catch (IOException e) {
-                prop.put("result", "unknown keys: " + e.getMessage());
-            }
         }
 
         if (post.containsKey("urlstringsearch")) {

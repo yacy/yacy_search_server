@@ -66,7 +66,6 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.index.indexURLEntryNew;
-import de.anomic.index.indexURLEntryOld;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexSplitTable;
@@ -93,23 +92,14 @@ public final class plasmaCrawlLURL {
     private final LinkedList lcrawlResultStack; // 5 - local index: result of local crawling
     private final LinkedList gcrawlResultStack; // 6 - local index: triggered external
     
-    private boolean newdb;
-    
     // the class object
     private kelondroIndex urlIndexFile = null;
 
-    public plasmaCrawlLURL(File plasmaPath, File indexPath, int bufferkb, long preloadTime, boolean newdb) {
+    public plasmaCrawlLURL(File plasmaPath, File indexPath, int bufferkb, long preloadTime) {
         super();
-        this.newdb = newdb;
         
         try {
-            if (newdb) {
-                urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", bufferkb * 0x400, preloadTime, indexURLEntryNew.rowdef, kelondroBase64Order.enhancedCoder);
-            } else {
-                File oldLURLDB = new File(plasmaPath, "urlHash.db");
-                oldLURLDB.getParentFile().mkdirs();
-                urlIndexFile = new kelondroCache(new kelondroTree(oldLURLDB, bufferkb / 2 * 0x400, preloadTime, indexURLEntryOld.rowdef), bufferkb / 2 * 0x400, true, false);
-            }
+            urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", bufferkb * 0x400, preloadTime, indexURLEntryNew.rowdef, kelondroBase64Order.enhancedCoder);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);
@@ -216,10 +206,7 @@ public final class plasmaCrawlLURL {
         try {
             kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
-            if (newdb)
-                return new indexURLEntryNew(entry, searchedWord);
-            else
-                return new indexURLEntryOld(entry, searchedWord);
+            return new indexURLEntryNew(entry, searchedWord);
         } catch (IOException e) {
             return null;
         }
@@ -250,10 +237,7 @@ public final class plasmaCrawlLURL {
     
     public synchronized indexURLEntry newEntry(String propStr) {
         if (propStr.startsWith("{") && propStr.endsWith("}")) {
-            if (newdb)
-                return new indexURLEntryNew(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
-            else
-                return new indexURLEntryOld(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
+            return new indexURLEntryNew(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
         } else {
             return null;
         }
@@ -281,11 +265,7 @@ public final class plasmaCrawlLURL {
             int limage,
             int lvideo,
             int lapp) {
-        if (newdb)
-            return new indexURLEntryNew(url, descr, author, tags, ETag, mod, load, fresh, referrer, md5,
-                    size, wc, dt, flags, lang, llocal, lother, laudio, limage, lvideo, lapp);
-        else
-            return new indexURLEntryOld(url, descr, author, tags, ETag, mod, load, fresh, referrer, md5,
+        return new indexURLEntryNew(url, descr, author, tags, ETag, mod, load, fresh, referrer, md5,
                     size, wc, dt, flags, lang, llocal, lother, laudio, limage, lvideo, lapp);
     }
     
@@ -411,14 +391,7 @@ public final class plasmaCrawlLURL {
         public Object next() throws RuntimeException {
             kelondroRow.Entry e = (kelondroRow.Entry) i.next();
             if (e == null) return null;
-            try {
-                if (newdb) 
-                    return new indexURLEntryNew(e, null);
-                else
-                    return new indexURLEntryOld(e, null);
-            } catch (IOException ex) {
-                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getColString(0, null));
-            }
+            return new indexURLEntryNew(e, null);
         }
         
         public void remove() {
@@ -610,7 +583,7 @@ public final class plasmaCrawlLURL {
         } catch (MalformedURLException e) {}
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache
-            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), new File(args[2]), 1, 0, false);
+            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[1]), new File(args[2]), 1, 0);
             final Iterator enu = urls.entries(true, false, null);
             while (enu.hasNext()) {
                 System.out.println(((indexURLEntry) enu.next()).toString());

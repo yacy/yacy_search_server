@@ -46,7 +46,6 @@ package de.anomic.plasma.parser.swf;
 import java.io.InputStream;
 import de.anomic.net.URL;
 import java.util.Hashtable;
-import java.util.TreeSet;
 import java.util.HashMap;
 
 import pt.tumba.parser.swf.*;
@@ -102,7 +101,7 @@ public class swfParser extends AbstractParser implements Parser {
             String longTitle = null;
             String[] sections =  null;
             String abstrct = null;
-            TreeSet images = null;
+            //TreeSet images = null;
             HashMap anchors = new HashMap();
             int urls = 0;
             int urlStart = -1;

@@ -95,8 +95,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
-import de.anomic.server.serverPlainSwitch;
-import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
@@ -652,20 +650,13 @@ public final class yacy {
     */
     public static void migrateWords(String homePath) {
         // run with "java -classpath classes yacy -migratewords"
-        final serverSwitch sps = new serverPlainSwitch(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         File dbroot = new File(new File(homePath), "DATA/PLASMADB");
         File indexRoot = new File(new File(homePath), "DATA/INDEX");
         serverLog log = new serverLog("WORDMIGRATION");
         log.logInfo("STARTING MIGRATION");
-        boolean useCollectionIndex = sps.getConfigBool("useCollectionIndex", false);
         plasmaWordIndex wordIndexCache = null;
-        try {
-            wordIndexCache = new plasmaWordIndex(dbroot, indexRoot, true, 20000, 10000, log, useCollectionIndex);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            System.exit(-1);
-        }
+        wordIndexCache = new plasmaWordIndex(dbroot, indexRoot, true, 20000, 10000, log);
         enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
         String wordhash;
         File wordfile;
@@ -675,10 +666,7 @@ public final class yacy {
                 wordfile = (File) words.nextElement();
                 wordhash = wordfile.getName().substring(0, 12);
                 // System.out.println("NOW: " + wordhash);
-                if (useCollectionIndex)
-                    migrationStatus = wordIndexCache.migrateWords2index(wordhash);
-                else
-                    migrationStatus = wordIndexCache.migrateWords2Assortment(wordhash);
+                migrationStatus = wordIndexCache.migrateWords2index(wordhash);
                 if (migrationStatus instanceof Integer) {
                     int migrationCount = ((Integer) migrationStatus).intValue();
                     if (migrationCount == 0)
@@ -704,7 +692,6 @@ public final class yacy {
      */
     public static void minimizeUrlDB(String homePath, int dbcache) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
-        final serverSwitch sps = new serverPlainSwitch(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         File plasmaroot = new File(new File(homePath), "DATA/PLASMADB");
         File indexRoot = new File(new File(homePath), "DATA/INDEX");
@@ -715,16 +702,16 @@ public final class yacy {
             // db containing all currently loades urls
             int cache = dbcache * 1024; // in KB
             log.logFine("URLDB-Caches: "+cache+" bytes");
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(plasmaroot, indexRoot, cache, 10000, false);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(plasmaroot, indexRoot, cache, 10000);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(plasmaroot, "minimized"), indexRoot, cache, 10000, false);
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(plasmaroot, "minimized"), indexRoot, cache, 10000);
             
             Runtime rt = Runtime.getRuntime();
             int cacheMem = (int)((serverMemory.max-rt.totalMemory())/1024)-(2*cache + 8*1024);
             if (cacheMem < 2048) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            plasmaWordIndex wordIndex = new plasmaWordIndex(plasmaroot, indexRoot, true, cacheMem, 10000, log, sps.getConfigBool("useCollectionIndex", false));
+            plasmaWordIndex wordIndex = new plasmaWordIndex(plasmaroot, indexRoot, true, cacheMem, 10000, log);
             Iterator indexContainerIterator = wordIndex.wordContainers("------------", plasmaWordIndex.RL_WORDFILES, false);
             
             long urlCounter = 0, wordCounter = 0;
@@ -954,7 +941,7 @@ public final class yacy {
     	
     	File root = new File(homePath);
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, false, 1000, false, 1000, false, 10000);
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, 1000, 1000, 10000);
             HashMap doms = new HashMap();
             System.out.println("Started domain list extraction from " + pool.loadedURL.size() + " url entries.");
             System.out.println("a dump will be written after double-check of all extracted domains.");
@@ -1070,7 +1057,7 @@ public final class yacy {
     private static void urllist(String homePath, String source, boolean html, String targetName) {
         File root = new File(homePath);
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, false, 1000, false, 1000, false, 10000);
+            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, 1000, 1000, 10000);
             File file = new File(root, targetName);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
             
@@ -1131,7 +1118,7 @@ public final class yacy {
     }
     
     private static void migratelurls(File root, File urlHash) {
-        plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, true, 1000, true, 1000, true, 10000);
+        plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, 1000, 1000, 10000);
         kelondroTree oldindex = null;
         try {
             oldindex = new kelondroTree(urlHash, 1000, -1, indexURLEntryOld.rowdef);
@@ -1211,7 +1198,7 @@ public final class yacy {
         serverLog log = new serverLog("URLDBCLEANUP");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         try {
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(plasmaroot, indexroot, 4194304, 10000, false);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(plasmaroot, indexroot, 4194304, 10000);
             currentUrlDB.urldbcleanup();
             currentUrlDB.close();
         } catch (IOException e) {
@@ -1222,7 +1209,6 @@ public final class yacy {
     private static void RWIHashList(String homePath, String targetName, String resource, String format) {
         plasmaWordIndex WordIndex = null;
         serverLog log = new serverLog("HASHLIST");
-        final serverSwitch sps = new serverPlainSwitch(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
         File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
         File indexRoot = new File(new File(homePath), "DATA/INDEX");
         String wordChunkStartHash = "------------";
@@ -1232,7 +1218,7 @@ public final class yacy {
         try {
             Iterator indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex(homeDBroot, indexRoot, true, 8*1024*1024, 3000, log, sps.getConfigBool("useCollectionIndex", false));
+                WordIndex = new plasmaWordIndex(homeDBroot, indexRoot, true, 8*1024*1024, 3000, log);
                 indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
             } else if (resource.equals("assortments")) {
                 plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, indexRWIEntryOld.urlEntryRow, 16*1024*1024, 3000, log);

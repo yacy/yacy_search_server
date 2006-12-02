@@ -80,6 +80,7 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import de.anomic.server.serverMemory;
+import de.anomic.server.logging.serverLog;
 
 public class kelondroRecords {
 
@@ -1175,7 +1176,13 @@ public class kelondroRecords {
         public Node next0() {
             // read Objects until a non-deleted Node appears
             while (hasNext0()) {
-                Node nn = next00();
+                Node nn;
+                try {
+                    nn = next00();
+                } catch (IOException e) {
+                    serverLog.logSevere("kelondroRecords", filename + " failed with " + e.getMessage());
+                    return null;
+                }
                 byte[] key = nn.getKey();
                 if ((key == null) ||
                     ((key.length == 1) && (key[0] == (byte) 0x80)) || // the NUL pointer ('lost' chain terminator)
@@ -1193,24 +1200,19 @@ public class kelondroRecords {
             return null;
         }
         
-        public Node next00() {
-            try {
-                // see if the next record is in the bulk, and if not re-fill the bulk
-                if ((pos.index - bulkstart) >= bulksize) {
-                    bulkstart = pos.index;
-                    int maxlength = Math.min(USAGE.allCount() - bulkstart, bulksize);
-                    entryFile.readFully(POS_NODES + bulkstart * recordsize, bulk, 0, maxlength * recordsize);
-                }
-                
-                // read node from bulk
-                Node n = new Node(new Handle(pos.index), bulk, (pos.index - bulkstart) * recordsize);
-                pos.index++;
-                while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
-                return n;
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new kelondroException(filename, e.getMessage());
+        public Node next00() throws IOException {
+            // see if the next record is in the bulk, and if not re-fill the bulk
+            if ((pos.index - bulkstart) >= bulksize) {
+                bulkstart = pos.index;
+                int maxlength = Math.min(USAGE.allCount() - bulkstart, bulksize);
+                entryFile.readFully(POS_NODES + bulkstart * recordsize, bulk, 0, maxlength * recordsize);
             }
+                
+            // read node from bulk
+            Node n = new Node(new Handle(pos.index), bulk, (pos.index - bulkstart) * recordsize);
+            pos.index++;
+            while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
+            return n;
         }
 
         public void remove() {

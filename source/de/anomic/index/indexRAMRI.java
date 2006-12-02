@@ -448,7 +448,7 @@ public final class indexRAMRI implements indexRI {
 
     public synchronized indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
             indexContainer container = (indexContainer) cache.get(wordHash);
-            if (container == null) container = new indexContainer(wordHash, this.payloadrow, newEntry instanceof indexRWIEntryNew);
+            if (container == null) container = new indexContainer(wordHash, this.payloadrow, true);
             indexRWIEntry[] entries = new indexRWIEntry[] { newEntry };
             if (container.add(entries, updateTime) > 0) {
                 cache.put(wordHash, container);

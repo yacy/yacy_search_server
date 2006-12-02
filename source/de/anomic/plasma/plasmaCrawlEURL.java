@@ -150,23 +150,15 @@ public class plasmaCrawlEURL {
     // the class object
     private kelondroIndex urlIndexFile = null;
 
-    public plasmaCrawlEURL(File cachePath, int bufferkb, long preloadTime, boolean newdb) {
+    public plasmaCrawlEURL(File cachePath, int bufferkb, long preloadTime) {
         super();
-        
-
-        if (newdb) {
-            String newCacheName = "urlErr3.table";
-            cachePath.mkdirs();
-            try {
-                urlIndexFile = new kelondroFlexTable(cachePath, newCacheName, bufferkb * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(-1);
-            }
-        } else {
-            File oldCacheFile = new File(cachePath, "urlErr0.db");
-            oldCacheFile.getParentFile().mkdirs();
-            urlIndexFile = kelondroTree.open(oldCacheFile, bufferkb * 0x400, preloadTime, rowdef);
+        String newCacheName = "urlErr3.table";
+        cachePath.mkdirs();
+        try {
+            urlIndexFile = new kelondroFlexTable(cachePath, newCacheName, bufferkb * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
         }
     }
 

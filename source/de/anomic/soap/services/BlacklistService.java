@@ -68,7 +68,6 @@ import org.apache.axis.attachments.Attachments;
 import org.w3c.dom.Document;
 
 import de.anomic.data.listManager;
-import de.anomic.http.httpd;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
@@ -501,11 +500,13 @@ public class BlacklistService extends AbstractService {
     	};
     }
     
+    /* not used
     private String[] getSharedBlacklistArray() {
         String sharedBlacklists = this.switchboard.getConfig(BLACKLIST_SHARED, "");
         String[] supportedBlacklistTypeArray = sharedBlacklists.split(",");
         return supportedBlacklistTypeArray;    	
     }
+    */
     
     private File getBlacklistFile(String blacklistName) {
     	File blacklistFile = new File(listManager.listsPath, blacklistName);
@@ -517,11 +518,13 @@ public class BlacklistService extends AbstractService {
     	return blacklistFile.exists();
     }
     
+    /* not used
     private HashSet getSharedBlacklistSet() {
         HashSet supportedTypesSet = new HashSet(Arrays.asList(getSharedBlacklistArray()));
         return supportedTypesSet;    	
     }
-        
+    */
+    
     private String[] getSupportedBlacklistTypeArray() {
         String supportedBlacklistTypesStr = this.switchboard.getConfig(BLACKLISTS_TYPES, "");
         String[] supportedBlacklistTypeArray = supportedBlacklistTypesStr.split(",");
@@ -555,10 +558,12 @@ public class BlacklistService extends AbstractService {
     		listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig(LIST_MANAGER_LISTS_PATH, "DATA/LISTS"));
     }
     
+    /* not used
     private void ativateBlacklistForAllTypes(String blacklistName) {
     	String[] supportedBlacklistTypes = getSupportedBlacklistTypeArray();
     	this.activateBlacklistForTypes(blacklistName,supportedBlacklistTypes);
     }    
+    */
     
     private void activateBlacklistForTypes(String blacklistName, String[] activateForBlacklistTypes) {
     	if (activateForBlacklistTypes == null) return;

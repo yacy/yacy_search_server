@@ -280,24 +280,6 @@ public class PerformanceQueues_p {
         prop.put("onlineCautionDelay", switchboard.getConfig("onlineCautionDelay", "30000"));
         prop.put("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
         
-        int[] asizes = switchboard.wordIndex.assortmentsSizes();
-        if (asizes != null) {
-            for (int i = 0; i < asizes.length; i += 8) {
-                prop.put("assortmentCluster_" + (i/8) + "_assortmentSlots", (i + 1) + "-" + (i + 8));
-                prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeA", asizes[i]);
-                prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeB", asizes[i + 1]);
-                prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeC", asizes[i + 2]);
-                prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeD", asizes[i + 3]);
-                prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeE", asizes[i + 4]);
-                prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeF", asizes[i + 5]);
-                prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeG", asizes[i + 6]);
-                prop.put("assortmentCluster_" + (i/8) + "_assortmentSizeH", asizes[i + 7]);
-            }
-            prop.put("assortmentCluster", asizes.length / 8);
-        } else {
-            prop.put("assortmentCluster", 0);
-        }
-        
         // table thread pool settings
         GenericKeyedObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
         prop.put("pool_0_name","Crawler Pool");

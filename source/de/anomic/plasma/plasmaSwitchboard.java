@@ -237,7 +237,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  dbImportManager             dbImportManager;
     public  plasmaDHTFlush              transferIdxThread = null;
     private plasmaDHTChunk              dhtTransferChunk = null;
-    private boolean                     newIndex;
     
     /*
      * Remote Proxy configuration
@@ -431,17 +430,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // start indexing management
         log.logConfig("Starting Indexing Management");
         urlPool = new plasmaURLPool(plasmaPath, indexPath,
-                                    ramLURL, getConfigBool("useFlexTableForLURL", false),
-                                    ramNURL, getConfigBool("useFlexTableForNURL", false),
-                                    ramEURL, getConfigBool("useFlexTableForEURL", true),
+                                    ramLURL,
+                                    ramNURL,
+                                    ramEURL,
                                     ramLURL_time);
-        newIndex = getConfigBool("useCollectionIndex", false);
-        try {
-            wordIndex = new plasmaWordIndex(plasmaPath, indexPath, true, ramRWI, ramRWI_time, log, newIndex);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            System.exit(-1);
-        }
+        wordIndex = new plasmaWordIndex(plasmaPath, indexPath, true, ramRWI, ramRWI_time, log);
 
         // set a high maximum cache size to current size; this is adopted later automatically
         int wordCacheMaxCount = Math.max((int) getConfigLong("wordCacheInitCount", 30000),
