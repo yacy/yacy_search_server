@@ -388,11 +388,12 @@ public final class plasmaCrawlLURL {
         }
 
         public Object next() throws RuntimeException {
-            kelondroRow.Entry e = (kelondroRow.Entry) i.next();
-            if (e == null) return null;
+            kelondroRow.Entry e = null;
+            if (i.hasNext()) { e = (kelondroRow.Entry) i.next(); }
+            if (e == null) { return null; }
             return new indexURLEntryNew(e, null);
         }
-        
+
         public void remove() {
             i.remove();
         }
@@ -495,13 +496,13 @@ public final class plasmaCrawlLURL {
         
         public Cleaner() {
         }
-        
+
         public void run() {
             try {
                 serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
-                Iterator eiter = entries(true, false, null);
+                final Iterator eiter = entries(true, false, null);
                 while (eiter.hasNext() && run) {
-                    synchronized(this) {
+                    synchronized (this) {
                         if (this.pause) {
                             try {
                                 this.wait();
@@ -512,34 +513,29 @@ public final class plasmaCrawlLURL {
                             }
                         }
                     }
-                    if (eiter.hasNext()) {
-                        indexURLEntry entry = (indexURLEntry) eiter.next();
-                        if (entry == null) {
-                            serverLog.logFine("URLDBCLEANER", "entry == null");
-                        } else {
-                            indexURLEntry.Components comp = entry.comp();
-                            totalSearchedUrls++;
-                            if (entry.hash() == null) {
-                                serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + " hash == null");
-                            } else if (comp.url() == null) {
-                                serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " URL == null");
-                                remove(entry.hash());
-                                lastHash = entry.hash();
-                            } else if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, comp.url()) ||
-                                       plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, comp.url())) {
-                                lastBlacklistedUrl = comp.url().toNormalform();
-                                lastBlacklistedHash = entry.hash();
-                                serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " " + comp.url().toNormalform());
-                                remove(entry.hash());
-                                if (blacklistedUrls % 100 == 0) {
-                                    serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
-                                }
-                                lastUrl = comp.url().toNormalform();
-                                lastHash = entry.hash();
-                            }
-                        }
+                    final indexURLEntry entry = (indexURLEntry) eiter.next();
+                    if (entry == null) {
+                        serverLog.logFine("URLDBCLEANER", "entry == null");
+                    } else if (entry.hash() == null) {
+                        serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + "hash == null");
                     } else {
-                        serverLog.logFine("URLDBCLEANER", "Iterator == null");
+                        final indexURLEntry.Components comp = entry.comp();
+                        totalSearchedUrls++;
+                        if (comp.url() == null) {
+                            serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + "URL == null");
+                            remove(entry.hash());
+                        } else if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, comp.url()) ||
+                                   plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, comp.url())) {
+                            lastBlacklistedUrl = comp.url().toNormalform();
+                            lastBlacklistedHash = entry.hash();
+                            serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + " " + comp.url().toNormalform());
+                            remove(entry.hash());
+                            if (blacklistedUrls % 100 == 0) {
+                                serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
+                            }
+                            lastUrl = comp.url().toNormalform();
+                        }
+                        lastHash = entry.hash();
                     }
                 }
             } catch (RuntimeException e) {
@@ -556,7 +552,7 @@ public final class plasmaCrawlLURL {
             }
             serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread stopped");
         }
-        
+
         public void abort() {
             synchronized(this) {
                 run = false;
