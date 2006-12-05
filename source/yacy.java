@@ -72,11 +72,12 @@ import de.anomic.http.httpdFileHandler;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIEntryOld;
+import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexURLEntry;
 import de.anomic.index.indexURLEntryOld;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMap;
 import de.anomic.kelondro.kelondroRow;
@@ -87,10 +88,11 @@ import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURLPool;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.plasma.plasmaWordIndexAssortmentCluster;
+import de.anomic.plasma.plasmaWordIndexAssortment;
 import de.anomic.plasma.plasmaWordIndexFile;
+import de.anomic.plasma.plasmaWordIndexFileCluster;
+import de.anomic.plasma.dbImport.AssortmentImporter;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
@@ -655,34 +657,96 @@ public final class yacy {
         File indexRoot = new File(new File(homePath), "DATA/INDEX");
         serverLog log = new serverLog("WORDMIGRATION");
         log.logInfo("STARTING MIGRATION");
-        plasmaWordIndex wordIndexCache = null;
-        wordIndexCache = new plasmaWordIndex(dbroot, indexRoot, true, 20000, 10000, log);
+        plasmaWordIndex wordIndexCache = new plasmaWordIndex(indexRoot, 60000000, 60000000, 10000, log);
         enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
         String wordhash;
         File wordfile;
-        Object migrationStatus;
+        int migrationCount;
         while (words.hasMoreElements())
             try {
                 wordfile = (File) words.nextElement();
                 wordhash = wordfile.getName().substring(0, 12);
                 // System.out.println("NOW: " + wordhash);
-                migrationStatus = wordIndexCache.migrateWords2index(wordhash);
-                if (migrationStatus instanceof Integer) {
-                    int migrationCount = ((Integer) migrationStatus).intValue();
+                migrationCount = migrateWords2index(dbroot, wordhash, wordIndexCache);
+                if (migrationCount >= 0) {
                     if (migrationCount == 0)
                         log.logInfo("SKIPPED  " + wordhash + ": empty");
                     else if (migrationCount > 0)
                         log.logInfo("MIGRATED " + wordhash + ": " + migrationCount + " entries");
                     else
                         log.logInfo("REVERSED " + wordhash + ": " + (-migrationCount) + " entries");
-                } else if (migrationStatus instanceof String) {
-                    log.logInfo("SKIPPED  " + wordhash + ": " + migrationStatus);
+                } else {
+                    log.logInfo("SKIPPED  " + wordhash);
                 }
             } catch (Exception e) {
                 log.logSevere("Exception", e);
             }
         log.logInfo("FINISHED MIGRATION JOB, WAIT FOR DUMP");
-        wordIndexCache.close(60);
+        wordIndexCache.close();
+        log.logInfo("TERMINATED MIGRATION");
+    }    
+    
+
+    public static int migrateWords2index(File oldDatabaseRoot, String wordhash, plasmaWordIndex wi) throws IOException {
+        // returns the number of entries that had been added to the assortments
+        // can be negative if some assortments have been moved to the backend
+        File db = plasmaWordIndexFile.wordHash2path(oldDatabaseRoot, wordhash);
+        if (!(db.exists())) {
+            serverLog.logSevere("migrateWordIndex", "word index file for hash " + wordhash + " not found");
+            return -1;
+        }
+        plasmaWordIndexFile entity = null;
+        try {
+            entity = new plasmaWordIndexFile(oldDatabaseRoot, wordhash, true);
+            int size = entity.size();
+            indexContainer container = new indexContainer(wordhash, indexRWIEntryNew.urlEntryRow);
+
+            try {
+                Iterator entries = entity.elements(true);
+                indexRWIEntry entry;
+                while (entries.hasNext()) {
+                    entry = (indexRWIEntry) entries.next();
+                    // System.out.println("ENTRY = " + entry.getUrlHash());
+                    container.add(new indexRWIEntry[] { entry }, System.currentTimeMillis());
+                }
+                // we have read all elements, now delete the entity
+                entity.deleteComplete();
+                entity.close();
+                entity = null;
+
+                wi.addEntries(container, container.updated(), false);
+                return size;
+            } catch (kelondroException e) {
+                // database corrupted, we simply give up the database and delete it
+                try { entity.close(); } catch (Exception ee) { }
+                entity = null;
+                try { db.delete(); } catch (Exception ee) { }
+                serverLog.logSevere("migrateWordIndex", "database for hash " + wordhash + " corrupted; deleted");
+                return -1;
+            }
+        } finally {
+            if (entity != null) try {entity.close();}catch(Exception e){}
+        }
+    }
+    
+    public static void migrateAssortments(String homePath) {
+        // run with "java -classpath classes yacy -migrateassortments"
+        try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
+        serverLog log = new serverLog("ASSORTMENTMIGRATION");
+        File aclusterroot = new File(new File(homePath), "DATA/PLASMADB/ACLUSTER");
+        File indexRoot = new File(new File(homePath), "DATA/INDEX");
+        plasmaWordIndex wordIndexCache = new plasmaWordIndex(indexRoot, 60000000, 60000000, 10000, log);
+        log.logInfo("STARTING MIGRATION");
+        String[] a = aclusterroot.list();
+        AssortmentImporter importer = new AssortmentImporter(wordIndexCache);
+        for (int i = a.length - 1; i >= 0; i--) {
+            if (a[i].startsWith("indexAssortment")) {
+                importer.init(new File(aclusterroot, a[i]), 16000000, 2000);
+                importer.run();
+            }
+        }
+        log.logInfo("FINISHED MIGRATION JOB, WAIT FOR DUMP");
+        wordIndexCache.close();
         log.logInfo("TERMINATED MIGRATION");
     }    
     
@@ -693,7 +757,6 @@ public final class yacy {
     public static void minimizeUrlDB(String homePath, int dbcache) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
-        File plasmaroot = new File(new File(homePath), "DATA/PLASMADB");
         File indexRoot = new File(new File(homePath), "DATA/INDEX");
         serverLog log = new serverLog("URL-CLEANUP");
         try {
@@ -702,17 +765,17 @@ public final class yacy {
             // db containing all currently loades urls
             int cache = dbcache * 1024; // in KB
             log.logFine("URLDB-Caches: "+cache+" bytes");
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(plasmaroot, indexRoot, cache, 10000);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexRoot, cache, 10000);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(new File(plasmaroot, "minimized"), indexRoot, cache, 10000);
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot, cache, 10000);
             
             Runtime rt = Runtime.getRuntime();
-            int cacheMem = (int)((serverMemory.max-rt.totalMemory())/1024)-(2*cache + 8*1024);
-            if (cacheMem < 2048) throw new OutOfMemoryError("Not enough memory available to start clean up.");
+            int cacheMem = (int)(serverMemory.max-rt.totalMemory());
+            if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            plasmaWordIndex wordIndex = new plasmaWordIndex(plasmaroot, indexRoot, true, cacheMem, 10000, log);
-            Iterator indexContainerIterator = wordIndex.wordContainers("------------", plasmaWordIndex.RL_WORDFILES, false);
+            plasmaWordIndex wordIndex = new plasmaWordIndex(indexRoot, cacheMem, cacheMem, 10000, log);
+            Iterator indexContainerIterator = wordIndex.wordContainers("------------", false, false);
             
             long urlCounter = 0, wordCounter = 0;
             long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
@@ -767,7 +830,7 @@ public final class yacy {
             
             currentUrlDB.close();
             minimizedUrlDB.close();
-            wordIndex.close(600);
+            wordIndex.close();
             
             // TODO: rename the mimimized UrlDB to the name of the previous UrlDB            
             
@@ -941,16 +1004,16 @@ public final class yacy {
     	
     	File root = new File(homePath);
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, 1000, 1000, 10000);
+            final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
             HashMap doms = new HashMap();
-            System.out.println("Started domain list extraction from " + pool.loadedURL.size() + " url entries.");
+            System.out.println("Started domain list extraction from " + sb.wordIndex.loadedURL.size() + " url entries.");
             System.out.println("a dump will be written after double-check of all extracted domains.");
             System.out.println("This process may fail in case of too less memory. To increase memory, start with");
             System.out.println("java -Xmx<megabytes>m -classpath classes yacy -domlist [ -source { nurl | lurl | eurl } ] [ -format { text  | zip | gzip | html } ] [ <path to DATA folder> ]");
             int c = 0;
             long start = System.currentTimeMillis();
             if (source.equals("lurl")) {
-                Iterator eiter = pool.loadedURL.entries(true, false, null);
+                Iterator eiter = sb.wordIndex.loadedURL.entries(true, false, null);
                 indexURLEntry entry;
                 while (eiter.hasNext()) {
                     try {
@@ -966,11 +1029,11 @@ public final class yacy {
                             c + " urls checked, " +
                             doms.size() + " domains collected, " +
                             ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() + Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB available, " + 
-                            ((System.currentTimeMillis() - start) * (pool.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
+                            ((System.currentTimeMillis() - start) * (sb.wordIndex.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
                 }
             }
             if (source.equals("eurl")) {
-                Iterator eiter = pool.errorURL.entries(true, false, null);
+                Iterator eiter = sb.errorURL.entries(true, false, null);
                 plasmaCrawlEURL.Entry entry;
                 while (eiter.hasNext()) {
                     try {
@@ -985,11 +1048,11 @@ public final class yacy {
                             c + " urls checked, " +
                             doms.size() + " domains collected, " +
                             ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() + Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB available, " + 
-                            ((System.currentTimeMillis() - start) * (pool.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
+                            ((System.currentTimeMillis() - start) * (sb.wordIndex.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
                 }
             }
             if (source.equals("nurl")) {
-                Iterator eiter = pool.noticeURL.entries(true, false, null);
+                Iterator eiter = sb.noticeURL.entries(true, false, null);
                 plasmaCrawlNURL.Entry entry;
                 while (eiter.hasNext()) {
                     try {
@@ -1004,7 +1067,7 @@ public final class yacy {
                             c + " urls checked, " +
                             doms.size() + " domains collected, " +
                             ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() + Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB available, " + 
-                            ((System.currentTimeMillis() - start) * (pool.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
+                            ((System.currentTimeMillis() - start) * (sb.wordIndex.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
                 }
             }
             
@@ -1048,7 +1111,7 @@ public final class yacy {
                 System.out.println("Started domain list dump to file " + file);
                 serverFileUtils.saveSet(file, "plain", doms.keySet(), new String(serverCore.crlf));
             }
-            pool.close();
+            sb.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -1057,12 +1120,12 @@ public final class yacy {
     private static void urllist(String homePath, String source, boolean html, String targetName) {
         File root = new File(homePath);
         try {
-            plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, 1000, 1000, 10000);
+            final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
             File file = new File(root, targetName);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
             
             if (source.equals("lurl")) {
-                Iterator eiter = pool.loadedURL.entries(true, false, null);
+                Iterator eiter = sb.wordIndex.loadedURL.entries(true, false, null);
                 indexURLEntry entry;
                 while (eiter.hasNext()) {
                     entry = (indexURLEntry) eiter.next();
@@ -1079,7 +1142,7 @@ public final class yacy {
                 }
             }
             if (source.equals("eurl")) {
-                Iterator eiter = pool.errorURL.entries(true, false, null);
+                Iterator eiter = sb.errorURL.entries(true, false, null);
                 plasmaCrawlEURL.Entry entry;
                 while (eiter.hasNext()) {
                     entry = (plasmaCrawlEURL.Entry) eiter.next();
@@ -1095,7 +1158,7 @@ public final class yacy {
                 }
             }
             if (source.equals("nurl")) {
-                Iterator eiter = pool.noticeURL.entries(true, false, null);
+                Iterator eiter = sb.noticeURL.entries(true, false, null);
                 plasmaCrawlNURL.Entry entry;
                 while (eiter.hasNext()) {
                     entry = (plasmaCrawlNURL.Entry) eiter.next();
@@ -1111,14 +1174,14 @@ public final class yacy {
                 }
             }
             bos.close();
-            pool.close();
+            sb.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
-    private static void migratelurls(File root, File urlHash) {
-        plasmaURLPool pool = new plasmaURLPool(new File(root, "DATA/PLASMADB"), new File(root, "DATA/INDEX"), 16000, 1000, 1000, 10000);
+    private static void migratelurls(String homePath, File urlHash) {
+        final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
         kelondroTree oldindex = null;
         try {
             oldindex = new kelondroTree(urlHash, 1000, -1, indexURLEntryOld.rowdef);
@@ -1146,7 +1209,7 @@ public final class yacy {
             if (oldrow != null) try {
                 oldentry = new indexURLEntryOld(oldrow, null);
                 comp = oldentry.comp();
-                newentry = pool.loadedURL.newEntry(
+                newentry = sb.wordIndex.loadedURL.newEntry(
                             comp.url(), 
                             comp.descr(), 
                             "", 
@@ -1163,7 +1226,7 @@ public final class yacy {
                             new kelondroBitfield(4), 
                             oldentry.language(), 
                             0, 0, 0, 0, 0, 0);
-                pool.loadedURL.store(newentry);
+                sb.wordIndex.loadedURL.store(newentry);
                 c++;
             } catch (IOException e) {
                 // ignore
@@ -1173,7 +1236,7 @@ public final class yacy {
                 last = System.currentTimeMillis();
             }
         }
-        pool.close();
+        sb.close();
         try { oldindex.close(); } catch (IOException e) { }
         System.out.println("MIGRATION OF " + c + " URLs FINISHED");
     }
@@ -1193,12 +1256,11 @@ public final class yacy {
      */
     private static void urldbcleanup(String homePath) {
         File root = new File(homePath);
-        File plasmaroot = new File(root, "DATA/PLASMADB");
         File indexroot = new File(root, "DATA/INDEX");
         serverLog log = new serverLog("URLDBCLEANUP");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         try {
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(plasmaroot, indexroot, 4194304, 10000);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot, 4194304, 10000);
             currentUrlDB.urldbcleanup();
             currentUrlDB.close();
         } catch (IOException e) {
@@ -1218,19 +1280,16 @@ public final class yacy {
         try {
             Iterator indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex(homeDBroot, indexRoot, true, 8*1024*1024, 3000, log);
-                indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
-            } else if (resource.equals("assortments")) {
-                plasmaWordIndexAssortmentCluster assortmentCluster = new plasmaWordIndexAssortmentCluster(new File(homeDBroot, "ACLUSTER"), 64, indexRWIEntryOld.urlEntryRow, 16*1024*1024, 3000, log);
-                indexContainerIterator = assortmentCluster.wordContainers(wordChunkStartHash, true, false);
-            } /*else if (resource.startsWith("assortment")) {
+                WordIndex = new plasmaWordIndex(indexRoot, 8*1024*1024, 8*1024*1024, 3000, log);
+                indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, false, false);
+            } else if (resource.startsWith("assortment")) {
                 int a = Integer.parseInt(resource.substring(10));
                 plasmaWordIndexAssortment assortment = new plasmaWordIndexAssortment(new File(homeDBroot, "ACLUSTER"), a, 8*1024*1024, 3000, null);
-                indexContainerIterator = assortment.hashes(wordChunkStartHash, true, false);
+                indexContainerIterator = assortment.wordContainers(wordChunkStartHash, true, false);
             } else if (resource.equals("words")) {
-                plasmaWordIndexFileCluster fileDB = new plasmaWordIndexFileCluster(homeDBroot, log);
-                indexContainerIterator = fileDB.wordContainers(wordChunkStartHash, true, false);
-            }*/ // *** FIXME ***
+                plasmaWordIndexFileCluster fileDB = new plasmaWordIndexFileCluster(homeDBroot);
+                indexContainerIterator = fileDB.wordContainers(wordChunkStartHash, false);
+            }
             int counter = 0;
             indexContainer container = null;
             if (format.equals("zip")) {
@@ -1269,7 +1328,7 @@ public final class yacy {
             log.logSevere("IOException", e);
         }
         if (WordIndex != null) {
-            WordIndex.close(60);
+            WordIndex.close();
             WordIndex = null;
         }
     }
@@ -1354,10 +1413,15 @@ public final class yacy {
             if (args.length == 2) applicationRoot= args[1];
             shutdown(applicationRoot);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-migratewords"))) {
-            // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
+            // migrate words from DATA/PLASMADB/WORDS path to collection index
             // attention: this may run long and should not be interrupted!
             if (args.length == 2) applicationRoot= args[1];
             migrateWords(applicationRoot);
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-migrateassortments"))) {
+            // migrate assortments from DATA/PLASMADB/ACLUSTER path to collection index
+            // attention: this may run long and should not be interrupted!
+            if (args.length == 2) applicationRoot= args[1];
+            migrateAssortments(applicationRoot);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-minimizeurldb"))) {
             // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
             // attention: this may run long and should not be interrupted!
@@ -1437,7 +1501,7 @@ public final class yacy {
             urllist(applicationRoot, source, html, outfile);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-migratelurls"))) {
             File root = new File(applicationRoot);
-            migratelurls(root, new File(root, "DATA/PLASMADB/urlHash.db"));
+            migratelurls(applicationRoot, new File(root, "DATA/PLASMADB/urlHash.db"));
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file
             if (args.length == 2) applicationRoot= args[1];

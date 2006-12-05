@@ -90,8 +90,8 @@ public class IndexCreateWWWLocalQueue_p {
                 String pattern = post.get("pattern", ".*").trim();
                 String option  = post.get("option", ".*").trim();
                 if (pattern.equals(".*")) {
-                    c = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
-                    switchboard.urlPool.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
+                    c = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+                    switchboard.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
                     try { switchboard.cleanProfiles(); } catch (InterruptedException e) {/* ignore this */}
                 } else{
                     Pattern compiledPattern = null;
@@ -100,13 +100,13 @@ public class IndexCreateWWWLocalQueue_p {
                         compiledPattern = Pattern.compile(pattern);
                         
                         // iterating through the list of URLs
-                        Iterator iter = switchboard.urlPool.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
+                        Iterator iter = switchboard.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
                         while (iter.hasNext()) {
                             String value = null;
                             String nextHash = new String((byte[]) iter.next());
                             Entry entry = null;
                             try {
-                                entry = switchboard.urlPool.noticeURL.getEntry(nextHash);
+                                entry = switchboard.noticeURL.getEntry(nextHash);
                             } catch (IOException e) {
                                 continue;
                             }
@@ -137,7 +137,7 @@ public class IndexCreateWWWLocalQueue_p {
                             if (value != null) {
                                 Matcher matcher = compiledPattern.matcher(value);
                                 if (matcher.find()) {
-                                    switchboard.urlPool.noticeURL.remove(nextHash);
+                                    switchboard.noticeURL.remove(nextHash);
                                 }                                    
                             }
                             
@@ -151,18 +151,18 @@ public class IndexCreateWWWLocalQueue_p {
                 prop.put("info_numEntries", c);
             } else if (post.containsKey("deleteEntry")) {
                 String urlHash = (String) post.get("deleteEntry");
-                switchboard.urlPool.noticeURL.remove(urlHash);
+                switchboard.noticeURL.remove(urlHash);
                 prop.put("LOCATION","");
                 return prop;
             }
         }
 
-        int showNum = 0, stackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+        int showNum = 0, stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
         if (stackSize == 0) {
             prop.put("crawler-queue", 0);
         } else {
             prop.put("crawler-queue", 1);
-            plasmaCrawlNURL.Entry[] crawlerList = switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
+            plasmaCrawlNURL.Entry[] crawlerList = switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
 
             plasmaCrawlNURL.Entry urle;
             boolean dark = true;

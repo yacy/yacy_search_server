@@ -124,7 +124,7 @@ public final class crawlReceipt {
             prop.put("delay", "3600");
         } else if (result.equals("fill")) {
             // generating a new loaded URL entry
-            indexURLEntry entry = switchboard.urlPool.loadedURL.newEntry(propStr);
+            indexURLEntry entry = switchboard.wordIndex.loadedURL.newEntry(propStr);
             if (entry == null) {
                 log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) for hash " + receivedUrlhash + " from peer " + iam +
                               "\n\tURL properties: "+ propStr);
@@ -135,16 +135,16 @@ public final class crawlReceipt {
                               "\n\tURL properties: "+ propStr);
             } else try {
                 // put new entry into database
-                switchboard.urlPool.loadedURL.store(entry);
-                switchboard.urlPool.loadedURL.stack(entry, youare, iam, 1);
+                switchboard.wordIndex.loadedURL.store(entry);
+                switchboard.wordIndex.loadedURL.stack(entry, youare, iam, 1);
                 
                 // generating url hash
                 String newUrlHash = plasmaURL.urlHash(comp.url());
                 String oldUrlHash = plasmaURL.oldurlHash(comp.url());
                 
                 // removing URL from notice URL                
-                switchboard.urlPool.noticeURL.remove(newUrlHash);
-                switchboard.urlPool.noticeURL.remove(oldUrlHash); 
+                switchboard.noticeURL.remove(newUrlHash);
+                switchboard.noticeURL.remove(oldUrlHash); 
                 
                 log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + receivedUrlhash + ":" + comp.url().toNormalform());
             } catch (IOException e) {
@@ -155,11 +155,11 @@ public final class crawlReceipt {
             prop.put("delay", "10");
         } else {
             try {
-                plasmaCrawlNURL.Entry en = switchboard.urlPool.noticeURL.getEntry(receivedUrlhash);
-                plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new kelondroBitfield());
+                plasmaCrawlNURL.Entry en = switchboard.noticeURL.getEntry(receivedUrlhash);
+                plasmaCrawlEURL.Entry ee = switchboard.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new kelondroBitfield());
                 ee.store();
-                switchboard.urlPool.errorURL.stackPushEntry(ee);
-                switchboard.urlPool.noticeURL.remove(receivedUrlhash);
+                switchboard.errorURL.stackPushEntry(ee);
+                switchboard.noticeURL.remove(receivedUrlhash);
             } catch (IOException e) {
 
             }

@@ -58,7 +58,6 @@ public final class indexRAMRI implements indexRI {
     private String indexArrayFileName;
     private kelondroRow payloadrow;
     private kelondroRow bufferStructureBasis;
-    private boolean newRWI;
     
     // calculated constants
     private static String maxKey;
@@ -67,7 +66,7 @@ public final class indexRAMRI implements indexRI {
         //minKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
     }
     
-    public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceLimitInit, String dumpname, serverLog log, boolean newRWI) {
+    public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceLimitInit, String dumpname, serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
@@ -79,7 +78,6 @@ public final class indexRAMRI implements indexRI {
         this.cacheMaxCount = 10000;
         this.cacheReferenceLimit = wCacheReferenceLimitInit;
         this.log = log;
-        this.newRWI = newRWI;
         this.indexArrayFileName = dumpname;
         this.payloadrow = payloadrow;
         this.bufferStructureBasis = new kelondroRow(
@@ -103,7 +101,7 @@ public final class indexRAMRI implements indexRI {
         return entries.updated();
     }
     
-    private void dump(int waitingSeconds) throws IOException {
+    private void dump() throws IOException {
         log.logConfig("creating dump for index cache '" + indexArrayFileName + "', " + cache.size() + " words (and much more urls)");
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (indexDumpFile.exists()) indexDumpFile.delete();
@@ -180,10 +178,7 @@ public final class indexRAMRI implements indexRI {
                     if ((row == null) || (row.empty(0)) || (row.empty(3))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
-                    if (newRWI)
-                        wordEntry = new indexRWIEntryNew(row.getColBytes(3));
-                    else
-                        wordEntry = new indexRWIEntryOld(row.getColBytes(3));
+                    wordEntry = new indexRWIEntryNew(row.getColBytes(3));
                     // store to cache
                     addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;
@@ -423,10 +418,10 @@ public final class indexRAMRI implements indexRI {
         return delCount;
     }
     
-    public synchronized indexContainer addEntries(indexContainer container, long updateTime, boolean dhtCase) {
+    public synchronized void addEntries(indexContainer container, long updateTime, boolean dhtCase) {
         // this puts the entries into the cache, not into the assortment directly
         int added = 0;
-        if ((container == null) || (container.size() == 0)) return null;
+        if ((container == null) || (container.size() == 0)) return;
 
         // put new words into cache
         String wordHash = container.getWordHash();
@@ -443,28 +438,26 @@ public final class indexRAMRI implements indexRI {
             hashDate.setScore(wordHash, intTime(updateTime));
         }
         entries = null;
-        return null;
     }
 
-    public synchronized indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
-            indexContainer container = (indexContainer) cache.get(wordHash);
-            if (container == null) container = new indexContainer(wordHash, this.payloadrow, true);
-            indexRWIEntry[] entries = new indexRWIEntry[] { newEntry };
-            if (container.add(entries, updateTime) > 0) {
-                cache.put(wordHash, container);
-                hashScore.incScore(wordHash);
-                hashDate.setScore(wordHash, intTime(updateTime));
-                return null;
-            }
-            container = null;
-            entries = null;
-            return null;
+    public synchronized void addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
+        indexContainer container = (indexContainer) cache.get(wordHash);
+        if (container == null) container = new indexContainer(wordHash, this.payloadrow);
+        indexRWIEntry[] entries = new indexRWIEntry[] { newEntry };
+        if (container.add(entries, updateTime) > 0) {
+            cache.put(wordHash, container);
+            hashScore.incScore(wordHash);
+            hashDate.setScore(wordHash, intTime(updateTime));
+            return;
+        }
+        container = null;
+        entries = null;
     }
 
-    public synchronized void close(int waitingSeconds) {
+    public synchronized void close() {
         // dump cache
         try {
-            dump(waitingSeconds);
+            dump();
         } catch (IOException e){
             log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }

@@ -149,9 +149,9 @@ public class QuickCrawlLink_p {
             }
                     
             String urlhash = plasmaURL.urlHash(crawlingStart);
-            switchboard.urlPool.loadedURL.remove(urlhash);
-            switchboard.urlPool.noticeURL.remove(urlhash);
-            switchboard.urlPool.errorURL.remove(urlhash);
+            switchboard.wordIndex.loadedURL.remove(urlhash);
+            switchboard.noticeURL.remove(urlhash);
+            switchboard.errorURL.remove(urlhash);
             
             // create crawling profile
             plasmaCrawlProfile.entry pe = null;

@@ -290,7 +290,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
         String referrerHash = (this.refererURLString==null)?null:plasmaURL.urlHash(this.refererURLString);
         
         // create a new errorURL DB entry
-        plasmaCrawlEURL.Entry ee = this.sb.urlPool.errorURL.newEntry(
+        plasmaCrawlEURL.Entry ee = this.sb.errorURL.newEntry(
                 this.url,
                 referrerHash,
                 this.initiator,
@@ -304,7 +304,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
         ee.store();
         
         // push it onto the stack
-        this.sb.urlPool.errorURL.stackPushEntry(ee);
+        this.sb.errorURL.stackPushEntry(ee);
         
         // delete the cache file
         File cacheFile = this.cacheManager.getCachePath(this.url);

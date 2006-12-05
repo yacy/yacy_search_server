@@ -76,7 +76,7 @@ public class IndexCreateIndexingQueue_p {
             }    
             
             if (post.containsKey("clearRejected")) {
-                switchboard.urlPool.errorURL.clearStack();
+                switchboard.errorURL.clearStack();
             } 
             if (post.containsKey("moreRejected")) {
                 showRejectedCount = Integer.parseInt(post.get("showRejected", "10"));
@@ -172,11 +172,11 @@ public class IndexCreateIndexingQueue_p {
         }
         
         // failure cases
-        if (switchboard.urlPool.errorURL.stackSize() != 0) {
-            if (showRejectedCount > switchboard.urlPool.errorURL.stackSize()) showRejectedCount = switchboard.urlPool.errorURL.stackSize();
+        if (switchboard.errorURL.stackSize() != 0) {
+            if (showRejectedCount > switchboard.errorURL.stackSize()) showRejectedCount = switchboard.errorURL.stackSize();
             prop.put("rejected", 1);
-            prop.put("rejected_num", switchboard.urlPool.errorURL.stackSize());
-            if (showRejectedCount != switchboard.urlPool.errorURL.stackSize()) {
+            prop.put("rejected_num", switchboard.errorURL.stackSize());
+            if (showRejectedCount != switchboard.errorURL.stackSize()) {
                 prop.put("rejected_only-latest", 1);
                 prop.put("rejected_only-latest_num", showRejectedCount);
                 prop.put("rejected_only-latest_newnum", ((int) (showRejectedCount * 1.5)));
@@ -189,9 +189,9 @@ public class IndexCreateIndexingQueue_p {
             plasmaCrawlEURL.Entry entry;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
-            for (int i = switchboard.urlPool.errorURL.stackSize() - 1; i >= (switchboard.urlPool.errorURL.stackSize() - showRejectedCount); i--) {
+            for (int i = switchboard.errorURL.stackSize() - 1; i >= (switchboard.errorURL.stackSize() - showRejectedCount); i--) {
                 try {
-                    entry = switchboard.urlPool.errorURL.stackPopEntry(i);
+                    entry = switchboard.errorURL.stackPopEntry(i);
                     url = entry.url();
                     if (url == null) continue;
                     

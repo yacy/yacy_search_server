@@ -744,7 +744,7 @@ public final class plasmaHTCache {
             URL url = null;
             // try the urlPool
             try {
-                url = plasmaSwitchboard.getSwitchboard().urlPool.getURL(urlHash);
+                url = plasmaSwitchboard.getSwitchboard().getURL(urlHash);
             } catch (Exception e) {
                 log.logWarning("getURL(" + urlHash + "): " /*+ e.getMessage()*/, e);
                 url = null;

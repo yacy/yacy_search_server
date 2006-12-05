@@ -147,7 +147,7 @@ public class Bookmarks {
                     bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        indexURLEntry urlentry = switchboard.urlPool.loadedURL.load(urlHash, null);
+                        indexURLEntry urlentry = switchboard.wordIndex.loadedURL.load(urlHash, null);
                         plasmaParserDocument document = null;
                         if (urlentry != null) {
                             indexURLEntry.Components comp = urlentry.comp();

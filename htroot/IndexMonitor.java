@@ -109,12 +109,12 @@ public class IndexMonitor {
         }
         
         // do the commands
-        if (post.containsKey("clearlist")) sb.urlPool.loadedURL.clearStack(tabletype);
+        if (post.containsKey("clearlist")) sb.wordIndex.loadedURL.clearStack(tabletype);
         if (post.containsKey("deleteentry")) {
                 String hash = post.get("hash", null);
                 if (hash != null) {
                     // delete from database
-                    sb.urlPool.loadedURL.remove(hash);
+                    sb.wordIndex.loadedURL.remove(hash);
                 }
             }
         if (post.containsKey("moreIndexed")) {
@@ -126,18 +126,18 @@ public class IndexMonitor {
         // create table
         if (tabletype == 0) {
             prop.put("table", 2);
-        } else if (sb.urlPool.loadedURL.getStackSize(tabletype) == 0) {
+        } else if (sb.wordIndex.loadedURL.getStackSize(tabletype) == 0) {
             prop.put("table", 0);
         } else {
             prop.put("table", 1);
-            if (lines > sb.urlPool.loadedURL.getStackSize(tabletype)) lines = sb.urlPool.loadedURL.getStackSize(tabletype);
-            if (lines == sb.urlPool.loadedURL.getStackSize(tabletype)) {
+            if (lines > sb.wordIndex.loadedURL.getStackSize(tabletype)) lines = sb.wordIndex.loadedURL.getStackSize(tabletype);
+            if (lines == sb.wordIndex.loadedURL.getStackSize(tabletype)) {
                 prop.put("table_size", 0);
             } else {
                 prop.put("table_size", 1);
                 prop.put("table_size_count", lines);
             }
-            prop.put("table_size_all", sb.urlPool.loadedURL.getStackSize(tabletype));
+            prop.put("table_size_all", sb.wordIndex.loadedURL.getStackSize(tabletype));
             prop.put("table_feedbackpage", "IndexMonitor.html");
             prop.put("table_tabletype", tabletype);
             prop.put("table_showInit", (showInit) ? 1 : 0);
@@ -153,14 +153,14 @@ public class IndexMonitor {
             final plasmaHTCache cacheManager = sb.getCacheManager();
 
             int i, cnt = 0;
-            for (i = sb.urlPool.loadedURL.getStackSize(tabletype) - 1; i >= (sb.urlPool.loadedURL.getStackSize(tabletype) - lines); i--) {
-                initiatorHash = sb.urlPool.loadedURL.getInitiatorHash(tabletype, i);
-                executorHash = sb.urlPool.loadedURL.getExecutorHash(tabletype, i);
+            for (i = sb.wordIndex.loadedURL.getStackSize(tabletype) - 1; i >= (sb.wordIndex.loadedURL.getStackSize(tabletype) - lines); i--) {
+                initiatorHash = sb.wordIndex.loadedURL.getInitiatorHash(tabletype, i);
+                executorHash = sb.wordIndex.loadedURL.getExecutorHash(tabletype, i);
 //              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps initiatorHash=" + initiatorHash + " executorHash=" + executorHash);
-                urlHash = sb.urlPool.loadedURL.getUrlHash(tabletype, i);
+                urlHash = sb.wordIndex.loadedURL.getUrlHash(tabletype, i);
 //              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
                 try {
-                    urle = sb.urlPool.loadedURL.load(urlHash, null);
+                    urle = sb.wordIndex.loadedURL.load(urlHash, null);
                     indexURLEntry.Components comp = urle.comp();
 //                  serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
                     initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);

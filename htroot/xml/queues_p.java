@@ -164,17 +164,17 @@ public class queues_p {
         
         //local crawl queue
         prop.put("localCrawlSize", Integer.toString(switchboard.getThread("50_localcrawl").getJobCount()));
-        int stackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
-        addNTable(prop, "list-local", switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
+        int stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+        addNTable(prop, "list-local", switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
         
         //global crawl queue
         prop.put("remoteCrawlSize", Integer.toString(switchboard.getThread("61_globalcrawltrigger").getJobCount()));
         //prop.put("remoteCrawlSize", Integer.toString(switchboard.getThread("62_remotetriggeredcrawl").getJobCount()));
-        stackSize = switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+        stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
         if (stackSize == 0) {
             prop.put("list-remote", 0);
         } else {
-            addNTable(prop, "list-remote", switchboard.urlPool.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, Math.min(10, stackSize)));
+            addNTable(prop, "list-remote", switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, Math.min(10, stackSize)));
         }
 
         // return rewrite properties

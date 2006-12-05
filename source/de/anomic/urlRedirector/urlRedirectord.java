@@ -190,9 +190,9 @@ public class urlRedirectord implements serverHandler {
                         ) {
                             // first delete old entry, if exists
                             String urlhash = plasmaURL.urlHash(this.nextURL);
-                            switchboard.urlPool.loadedURL.remove(urlhash);
-                            switchboard.urlPool.noticeURL.remove(urlhash);
-                            switchboard.urlPool.errorURL.remove(urlhash);                            
+                            switchboard.wordIndex.loadedURL.remove(urlhash);
+                            switchboard.noticeURL.remove(urlhash);
+                            switchboard.errorURL.remove(urlhash);                            
                             
                             // enqueuing URL for crawling
                             reasonString = switchboard.sbStackCrawlThread.stackCrawl(

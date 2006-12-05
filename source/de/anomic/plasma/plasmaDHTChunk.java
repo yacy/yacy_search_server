@@ -180,12 +180,12 @@ public class plasmaDHTChunk {
     private void selectTransferContainers(String hash, int mincount, int maxcount, int maxtime) throws InterruptedException {        
         try {
             this.selectionStartTime = System.currentTimeMillis();
-            int refcountRAM = selectTransferContainersResource(hash, plasmaWordIndex.RL_RAMCACHE, maxcount, maxtime);
+            int refcountRAM = selectTransferContainersResource(hash, true, maxcount, maxtime);
             if (refcountRAM >= mincount) {
                 log.logFine("DHT selection from RAM: " + refcountRAM + " entries");
                 return;
             }
-            int refcountFile = selectTransferContainersResource(hash, plasmaWordIndex.RL_WORDFILES, maxcount, maxtime);
+            int refcountFile = selectTransferContainersResource(hash, false, maxcount, maxtime);
             log.logFine("DHT selection from FILE: " + refcountFile + " entries, RAM provided only " + refcountRAM + " entries");
             return;
         } finally {
@@ -193,11 +193,11 @@ public class plasmaDHTChunk {
         }
     }
 
-    private int selectTransferContainersResource(String hash, int resourceLevel, int maxcount, int maxtime) throws InterruptedException {
+    private int selectTransferContainersResource(String hash, boolean ram, int maxcount, int maxtime) throws InterruptedException {
         // the hash is a start hash from where the indexes are picked
         ArrayList tmpContainers = new ArrayList(maxcount);
         try {
-            Iterator indexContainerIterator = wordIndex.indexContainerSet(hash, resourceLevel, true, maxcount).iterator();
+            Iterator indexContainerIterator = wordIndex.indexContainerSet(hash, ram, true, maxcount).iterator();
             indexContainer container;
             Iterator urlIter;
             indexRWIEntry iEntry;

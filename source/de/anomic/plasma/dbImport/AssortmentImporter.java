@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIEntryOld;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexAssortment;
 
 public class AssortmentImporter extends AbstractImporter implements dbImporter{
@@ -15,31 +14,29 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
     private int wordEntityCount = 0;
     private int wordEntryCount = 0;
     
-    private File importAssortmentFile;
     private plasmaWordIndexAssortment assortmentFile;
     
-    public AssortmentImporter(plasmaSwitchboard sb) {
-        super(sb);
+    public AssortmentImporter(plasmaWordIndex wi) {
+        super(wi);
         this.jobType = "ASSORTMENT";
     }
     
-    public void init(File theImportAssortmentFile, File theIndexFile, int theCacheSize, long preloadTime) {
-        super.init(theImportAssortmentFile, theIndexFile);
-        this.importAssortmentFile = theImportAssortmentFile;
+    public void init(File theImportAssortmentFile, int theCacheSize, long preloadTime) {
+        super.init(theImportAssortmentFile);
         this.cacheSize = theCacheSize;
         if (this.cacheSize < 2*1024*1024) this.cacheSize = 2*1024*1024;
         
         String errorMsg = null;
-        if (!this.importAssortmentFile.getName().matches("indexAssortment0[0-6][0-9]\\.db")) 
-            errorMsg = "AssortmentFile '" + this.importAssortmentFile + "' has an invalid name.";
-        if (!this.importAssortmentFile.exists()) 
-            errorMsg = "AssortmentFile '" + this.importAssortmentFile + "' does not exist.";
-        else if (this.importAssortmentFile.isDirectory()) 
-            errorMsg = "AssortmentFile '" + this.importAssortmentFile + "' is a directory.";
-        else if (!this.importAssortmentFile.canRead()) 
-            errorMsg = "AssortmentFile '" + this.importAssortmentFile + "' is not readable.";
-        else if (!this.importAssortmentFile.canWrite()) 
-            errorMsg = "AssortmentFile '" + this.importAssortmentFile + "' is not writeable.";
+        if (!this.importPath.getName().matches("indexAssortment0[0-6][0-9]\\.db")) 
+            errorMsg = "AssortmentFile '" + this.importPath + "' has an invalid name.";
+        if (!this.importPath.exists()) 
+            errorMsg = "AssortmentFile '" + this.importPath + "' does not exist.";
+        else if (this.importPath.isDirectory()) 
+            errorMsg = "AssortmentFile '" + this.importPath + "' is a directory.";
+        else if (!this.importPath.canRead()) 
+            errorMsg = "AssortmentFile '" + this.importPath + "' is not readable.";
+        else if (!this.importPath.canWrite()) 
+            errorMsg = "AssortmentFile '" + this.importPath + "' is not writeable.";
         if (errorMsg != null) {
             this.log.logSevere(errorMsg);
             throw new IllegalStateException(errorMsg);
@@ -49,10 +46,10 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
         File importAssortmentPath = null;
         int assortmentNr = -1;
         try {
-            importAssortmentPath = new File(this.importAssortmentFile.getParent());
-            assortmentNr = Integer.valueOf(this.importAssortmentFile.getName().substring("indexAssortment".length(),"indexAssortment".length()+3)).intValue();
+            importAssortmentPath = new File(this.importPath.getParent());
+            assortmentNr = Integer.valueOf(this.importPath.getName().substring("indexAssortment".length(),"indexAssortment".length()+3)).intValue();
             if (assortmentNr <1 || assortmentNr > 64) {
-                errorMsg = "AssortmentFile '" + this.importAssortmentFile + "' has an invalid name.";
+                errorMsg = "AssortmentFile '" + this.importPath + "' has an invalid name.";
             }
         } catch (NumberFormatException e) {
             errorMsg = "Unable to parse the assortment file number.";
@@ -61,9 +58,9 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
         }        
 
         // initializing the import assortment db
-        this.log.logInfo("Initializing source assortment file");
+        this.log.logInfo("Initializing source assortment file " + theImportAssortmentFile);
         try {
-            this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath, indexRWIEntryOld.urlEntryRow, assortmentNr, this.cacheSize/1024, preloadTime, this.log);
+            this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath, assortmentNr, this.cacheSize/1024, preloadTime, this.log);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);
@@ -95,7 +92,7 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
     public void run() {
         try {            
             // getting a content interator
-            Iterator contentIterator = this.assortmentFile.containers(null, true, false);
+            Iterator contentIterator = this.assortmentFile.wordContainers(null, true, false);
             while (contentIterator.hasNext()) {
                 this.wordEntityCount++;                
                 
@@ -105,14 +102,11 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
                 this.wordEntryCount += container.size();
                 
                 // importing entity container to home db
-                this.sb.wordIndex.addEntries(container, System.currentTimeMillis(), false);
+                wi.addEntries(container, System.currentTimeMillis(), false);
                 
-                if (this.wordEntityCount % 500 == 0) {
+                if (this.wordEntityCount % 1000 == 0) {
                     this.log.logFine(this.wordEntityCount + " word entities processed so far.");
                 }
-                if (this.wordEntryCount % 2000 == 0) {
-                    this.log.logFine(this.wordEntryCount + " word entries processed so far.");
-                }                
                 if (isAborted()) break;
             }
         } catch (Exception e) {
@@ -121,8 +115,12 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
         } finally {
             this.log.logInfo("Import process finished.");
             this.globalEnd = System.currentTimeMillis();
-            this.sb.dbImportManager.finishedJobs.add(this);
+            //this.sb.dbImportManager.finishedJobs.add(this);
             this.assortmentFile.close();
+            File bkpPath = new File(importPath.getParentFile(), "imported");
+            bkpPath.mkdirs();
+            File bkpFile = new File(bkpPath, importPath.getName());
+            importPath.renameTo(bkpFile);
         }
     }
 

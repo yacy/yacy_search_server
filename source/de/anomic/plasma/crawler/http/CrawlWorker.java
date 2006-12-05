@@ -342,7 +342,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                         String urlhash = plasmaURL.urlHash(redirectionUrl);
                         
                         // removing url from loader queue
-                        plasmaCrawlLoader.switchboard.urlPool.noticeURL.remove(urlhash);
+                        plasmaCrawlLoader.switchboard.noticeURL.remove(urlhash);
 
                         // retry crawling with new url
                         this.url = redirectionUrl;

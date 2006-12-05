@@ -98,7 +98,7 @@ public final class IndexImport_p {
                     if (startImport) {
                         dbImporter importerThread = switchboard.dbImportManager.getNewImporter(importType);
                         if (importerThread != null) {
-                            importerThread.init(new File(importPath), switchboard.indexPath, cacheSize, 100);
+                            importerThread.init(new File(importPath), cacheSize, 100);
                             importerThread.startIt();                            
                         }
                         prop.put("LOCATION","");
@@ -147,7 +147,7 @@ public final class IndexImport_p {
         }
         
         prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
-        prop.put("ucount", Integer.toString(switchboard.urlPool.loadedURL.size()));
+        prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
         
         /*
          * Loop over all currently running jobs

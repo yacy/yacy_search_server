@@ -63,7 +63,6 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
@@ -87,7 +86,7 @@ public class IndexControl_p {
             prop.put("urlhash", "");
             prop.put("result", "");
             prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
-            prop.put("ucount", Integer.toString(switchboard.urlPool.loadedURL.size()));
+            prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
             prop.put("otherHosts", "");
             prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
             prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? "checked" : "");
@@ -170,7 +169,7 @@ public class IndexControl_p {
             }
             if (delurl || delurlref) {
                 for (int i = 0; i < urlx.length; i++) {
-                    switchboard.urlPool.loadedURL.remove(urlx[i]);
+                    switchboard.wordIndex.loadedURL.remove(urlx[i]);
                 }
             }
             switchboard.wordIndex.deleteContainer(keyhash);
@@ -190,7 +189,7 @@ public class IndexControl_p {
             }
             if (delurl || delurlref) {
                 for (int i = 0; i < urlx.length; i++) {
-                    switchboard.urlPool.loadedURL.remove(urlx[i]);
+                    switchboard.wordIndex.loadedURL.remove(urlx[i]);
                 }
             }
             Set urlHashes = new HashSet();
@@ -217,13 +216,13 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            indexURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+            indexURLEntry entry = switchboard.wordIndex.loadedURL.load(urlhash, null);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
                 urlstring = entry.comp().url().toNormalform();
                 prop.put("urlstring", "");
-                switchboard.urlPool.loadedURL.remove(urlhash);
+                switchboard.wordIndex.loadedURL.remove(urlhash);
                 prop.put("result", "Removed URL " + urlstring);
             }
         }
@@ -282,7 +281,7 @@ public class IndexControl_p {
             indexURLEntry lurl;
             while (urlIter.hasNext()) {
                 iEntry = (indexRWIEntry) urlIter.next();
-                lurl = switchboard.urlPool.loadedURL.load(iEntry.urlHash(), null);
+                lurl = switchboard.wordIndex.loadedURL.load(iEntry.urlHash(), null);
                 if (lurl == null) {
                     unknownURLEntries.add(iEntry.urlHash());
                     urlIter.remove();
@@ -307,7 +306,7 @@ public class IndexControl_p {
 
         // generate list
         if (post.containsKey("keyhashsimilar")) {
-            final Iterator containerIt = switchboard.wordIndex.indexContainerSet(keyhash, plasmaWordIndex.RL_WORDFILES, true, 256).iterator();
+            final Iterator containerIt = switchboard.wordIndex.indexContainerSet(keyhash, false, true, 256).iterator();
                 indexContainer container;
                 int i = 0;
                 int rows = 0, cols = 0;
@@ -333,7 +332,7 @@ public class IndexControl_p {
                 URL url = new URL(urlstring);
                 urlhash = plasmaURL.urlHash(url);
                 prop.put("urlhash", urlhash);
-                indexURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+                indexURLEntry entry = switchboard.wordIndex.loadedURL.load(urlhash, null);
                 if (entry == null) {
                     prop.put("urlstring", "unknown url: " + urlstring);
                     prop.put("urlhash", "");
@@ -347,7 +346,7 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            indexURLEntry entry = switchboard.urlPool.loadedURL.load(urlhash, null);
+            indexURLEntry entry = switchboard.wordIndex.loadedURL.load(urlhash, null);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -359,7 +358,7 @@ public class IndexControl_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator entryIt = switchboard.urlPool.loadedURL.entries(true, true, urlhash); 
+                final Iterator entryIt = switchboard.wordIndex.loadedURL.entries(true, true, urlhash); 
                 StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br>");
                 indexURLEntry entry;
                 int i = 0;
@@ -403,7 +402,7 @@ public class IndexControl_p {
 
         // insert constants
         prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
-        prop.put("ucount", Integer.toString(switchboard.urlPool.loadedURL.size()));
+        prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
         prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
         prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? "checked" : "");
         prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
@@ -422,7 +421,7 @@ public class IndexControl_p {
         }
         indexURLEntry.Components comp = entry.comp();
         String referrer = null;
-        indexURLEntry le = switchboard.urlPool.loadedURL.load(entry.referrerHash(), null);
+        indexURLEntry le = switchboard.wordIndex.loadedURL.load(entry.referrerHash(), null);
         if (le == null) {
             referrer = "<unknown>";
         } else {
@@ -471,7 +470,7 @@ public class IndexControl_p {
                 while (en.hasNext()) {
                     xi = (indexRWIEntry) en.next();
                     uh = new String[]{xi.urlHash(), Integer.toString(xi.posintext())};
-                    indexURLEntry le = switchboard.urlPool.loadedURL.load(uh[0], null);
+                    indexURLEntry le = switchboard.wordIndex.loadedURL.load(uh[0], null);
                     if (le == null) {
                         tm.put(uh[0], uh);
                     } else {

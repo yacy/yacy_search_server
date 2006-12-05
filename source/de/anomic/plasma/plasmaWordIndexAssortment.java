@@ -58,6 +58,7 @@ import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexRWIEntryOld;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroColumn;
@@ -74,12 +75,9 @@ public final class plasmaWordIndexAssortment {
     
     // class variables
     private File assortmentFile;
-    private int assortmentLength;
     private serverLog log;
     private kelondroCache assortments;
     private long bufferSize;
-    private long preloadTime;
-    private kelondroRow payloadrow;
 
     private static String intx(int x) {
         String s = Integer.toString(x);
@@ -92,23 +90,20 @@ public final class plasmaWordIndexAssortment {
         structure[0] = new kelondroColumn("byte[] wordhash-" + yacySeedDB.commonHashLength);
         structure[1] = new kelondroColumn("Cardinal occ-4 {b256}");
         structure[2] = new kelondroColumn("Cardinal time-8 {b256}");
-        kelondroColumn p = new kelondroColumn("byte[] urlprops-" + payloadrow.objectsize());
+        kelondroColumn p = new kelondroColumn("byte[] urlprops-" + indexRWIEntryOld.urlEntryRow.objectsize());
         for (int i = 0; i < assortmentCapacity; i++) structure[3 + i] = p;
         return new kelondroRow(structure);
     }
     
     private int assortmentCapacity(int rowsize) {
-        return (rowsize - yacySeedDB.commonHashLength - 12) / payloadrow.objectsize();
+        return (rowsize - yacySeedDB.commonHashLength - 12) / indexRWIEntryOld.urlEntryRow.objectsize();
     }
     
-    public plasmaWordIndexAssortment(File storagePath, kelondroRow payloadrow, int assortmentLength, int bufferkb, long preloadTime, serverLog log) throws IOException {
+    public plasmaWordIndexAssortment(File storagePath, int assortmentLength, int bufferkb, long preloadTime, serverLog log) throws IOException {
         if (!(storagePath.exists())) storagePath.mkdirs();
-        this.payloadrow = payloadrow;
         this.assortmentFile = new File(storagePath, assortmentFileName + intx(assortmentLength) + ".db");
-        this.assortmentLength = assortmentLength;
 	    //this.bufferStructureLength = 3 + 2 * assortmentLength;
         this.bufferSize = bufferkb * 1024;
-        this.preloadTime = preloadTime;
         this.log = log;
         // open assortment tree file
         long start = System.currentTimeMillis();
@@ -122,138 +117,26 @@ public final class plasmaWordIndexAssortment {
                                   assortments.cacheNodeStatus()[1] + " preloaded"); 
         
     }
-
-    public void store(indexContainer newContainer) throws IOException {
-        // stores a word index to assortment database
-        // this throws an exception if the word hash already existed
-        //log.logDebug("storeAssortment: wordHash=" + wordHash + ", urlHash=" + entry.getUrlHash() + ", time=" + creationTime);
-        if (newContainer.size() != assortmentLength) throw new RuntimeException("plasmaWordIndexAssortment.store: wrong container size");
-        kelondroRow.Entry row = assortments.row().newEntry();
-        row.setCol(0, newContainer.getWordHash().getBytes());
-        row.setCol(1, 1);
-        row.setCol(2, newContainer.updated());
-        Iterator entries = newContainer.entries();
-        indexRWIEntry entry;
-        for (int i = 0; i < assortmentLength; i++) {
-            entry = (indexRWIEntry) entries.next();
-            row.setCol(3 + i, entry.toKelondroEntry().bytes());
-        }
-        kelondroRow.Entry oldrow = null;
-        try {
-            oldrow = assortments.put(row);
-        } catch (IOException e) {
-            e.printStackTrace();
-            log.logSevere("storeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB " + assortmentFile, e);
-            resetDatabase();
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
-            log.logSevere("storeAssortment/IO-error: " + e.getMessage() + " - reset assortment-DB " + assortmentFile, e);
-            resetDatabase();
-        } catch (kelondroException e) {
-            e.printStackTrace();
-            log.logSevere("storeAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB " + assortmentFile, e);
-            resetDatabase();
-        }
-        if (oldrow != null) throw new RuntimeException("Store to assortment ambiguous");
-    }
-
-    public indexContainer remove(String wordHash) {
-		// deletes a word index from assortment database
-		// and returns the content record
-		kelondroRow.Entry row = null;
-		try {
-			row = assortments.remove(wordHash.getBytes());
-		} catch (IOException e) {
-			log.logSevere("removeAssortment/IO-error: " + e.getMessage()
-					+ " - reset assortment-DB " + assortmentFile, e);
-			resetDatabase();
-			return null;
-		} catch (kelondroException e) {
-			log.logSevere("removeAssortment/kelondro-error: " + e.getMessage()
-					+ " - reset assortment-DB " + assortmentFile, e);
-			resetDatabase();
-			return null;
-		}
-        return row2container(row);
-	}
-
-    public boolean contains(String wordHash) {
-        // gets a word index from assortment database
-        // and returns the content record
-        kelondroRow.Entry row = null;
-        try {
-            row = assortments.get(wordHash.getBytes());
-            return (row != null);
-        } catch (IOException e) {
-            return false;
-        } catch (kelondroException e) {
-            log.logSevere("removeAssortment/kelondro-error: " + e.getMessage()
-                    + " - reset assortment-DB " + assortmentFile, e);
-            resetDatabase();
-            return false;
-        }
-    }
-    
-    public indexContainer get(String wordHash) {
-        // gets a word index from assortment database
-        // and returns the content record
-        kelondroRow.Entry row = null;
-        try {
-            row = assortments.get(wordHash.getBytes());
-        } catch (IOException e) {
-            log.logSevere("removeAssortment/IO-error: " + e.getMessage()
-                    + " - reset assortment-DB " + assortmentFile, e);
-            resetDatabase();
-            return null;
-        } catch (kelondroException e) {
-            log.logSevere("removeAssortment/kelondro-error: " + e.getMessage()
-                    + " - reset assortment-DB " + assortmentFile, e);
-            resetDatabase();
-            return null;
-        }
-        return row2container(row);
-    }
     
     public final indexContainer row2container(kelondroRow.Entry row) {
         if (row == null) return null;
         String wordHash = row.getColString(0, null);
         final long updateTime = row.getColLong(2);
-        indexContainer container = new indexContainer(wordHash, payloadrow, false);
+        indexContainer container = new indexContainer(wordHash, indexRWIEntryNew.urlEntryRow);
         int al = assortmentCapacity(row.objectsize());
         for (int i = 0; i < al; i++) {
-            container.add(new indexRWIEntry[] { new indexRWIEntryOld(row.getColBytes(3 + i)) }, updateTime);
+            // fill AND convert old entries to new entries
+            container.add(new indexRWIEntry[] { new indexRWIEntryNew(new indexRWIEntryOld(row.getColBytes(3 + i))) }, updateTime);
         }
         return container;
     }
     
-    private void resetDatabase() {
-        // deletes the assortment database and creates a new one
-        if (assortments != null) try {
-            assortments.close();
-        } catch (IOException e) {}
-        
-        try {
-            // make a back-up
-            File backupPath = new File(assortmentFile.getParentFile(), "ABKP");
-            if (!(backupPath.exists())) backupPath.mkdirs();
-            File backupFile = new File(backupPath, assortmentFile.getName() + System.currentTimeMillis());
-            assortmentFile.renameTo(backupFile);
-            log.logInfo("a back-up of the deleted assortment file is in " + backupFile.toString());
-            if (assortmentFile.exists()) assortmentFile.delete();
-            assortments = new kelondroCache(kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength)), bufferSize / 2, true, false);
-        } catch (Exception e) {
-            // if this fails, delete the file
-            if (!(assortmentFile.delete())) throw new RuntimeException("cannot delete assortment database");
-        }
-    }
-    
-    public Iterator containers(String startWordHash, boolean up, boolean rot) throws IOException {
+    public Iterator wordContainers(String startWordHash, boolean up, boolean rot) throws IOException {
         // returns an iteration of indexContainer elements
         try {
             return new containerIterator(startWordHash, up, rot);
         } catch (kelondroException e) {
             log.logSevere("iterateAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB " + assortmentFile, e);
-            resetDatabase();
             return null;
         }
     }
@@ -287,22 +170,6 @@ public final class plasmaWordIndexAssortment {
         } catch (IOException e) {
             return 0;
         }
-    }
-
-    public int cacheNodeChunkSize() {
-        return assortments.cacheNodeChunkSize();
-    }
-    
-    public int cacheObjectChunkSize() {
-        return assortments.cacheObjectChunkSize();
-    }
-    
-    public int[] cacheNodeStatus() {
-        return assortments.cacheNodeStatus();
-    }
-    
-    public long[] cacheObjectStatus() {
-        return assortments.cacheObjectStatus();
     }
     
     public void close() {

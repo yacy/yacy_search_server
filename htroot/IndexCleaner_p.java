@@ -62,7 +62,7 @@ public class IndexCleaner_p {
             prop.put("bla", "post!=null");
             if (post.get("action").equals("ustart")) {
                 if (urldbCleanerThread==null || !urldbCleanerThread.isAlive()) {
-                    urldbCleanerThread = sb.urlPool.loadedURL.makeCleaner();
+                    urldbCleanerThread = sb.wordIndex.loadedURL.makeCleaner();
                     urldbCleanerThread.start();
                 }
                 else {
@@ -77,7 +77,7 @@ public class IndexCleaner_p {
             }
             else if (post.get("action").equals("rstart")) {
                 if (indexCleanerThread==null || !indexCleanerThread.isAlive()) {
-                    indexCleanerThread = sb.wordIndex.makeCleaner(sb.urlPool.loadedURL, post.get("wordHash","--------"));
+                    indexCleanerThread = sb.wordIndex.makeCleaner(sb.wordIndex.loadedURL, post.get("wordHash","--------"));
                     indexCleanerThread.start();
                 }
                 else {
@@ -98,7 +98,7 @@ public class IndexCleaner_p {
         }
         if (urldbCleanerThread!=null) {
             prop.put("urldb", 1);
-            prop.put("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.urlPool.loadedURL.size())*100 + "");
+            prop.put("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.wordIndex.loadedURL.size())*100 + "");
             prop.put("urldb_blacklisted", urldbCleanerThread.blacklistedUrls);
             prop.put("urldb_total", urldbCleanerThread.totalSearchedUrls);
             prop.put("urldb_lastBlacklistedUrl", urldbCleanerThread.lastBlacklistedUrl);

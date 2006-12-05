@@ -53,7 +53,6 @@ import java.util.List;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryNew;
-import de.anomic.index.indexRWIEntryOld;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
@@ -93,6 +92,7 @@ public final class transferRWI {
         StringBuffer unknownURLs = new StringBuffer();
         int          pause       = 0;
         
+        /*
         boolean shortCacheFlush = false;
         if ((granted) && (sb.wordIndex.busyCacheFlush)) {
             // wait a little bit, maybe we got into a short flush slot
@@ -101,9 +101,10 @@ public final class transferRWI {
                     shortCacheFlush = true;
                     break;
                 }
-                try {Thread.sleep(100);} catch (InterruptedException e) {/* */}
+                try {Thread.sleep(100);} catch (InterruptedException e) {}
             }
         }
+        */
         
         if (!granted) {
             // we dont want to receive indexes
@@ -152,42 +153,45 @@ public final class transferRWI {
             Iterator i = v.iterator();
             while (i.hasNext()) {
                 serverCore.checkInterruption();
-                
                 estring = (String) i.next();
+                
+                // check if RWI entry is well-formed
                 p = estring.indexOf("{");
-                if (p > 0) {
-                    wordHash = estring.substring(0, p);
-                    wordhashes[received] = wordHash;
-                    if (estring.indexOf("x=") > 0)
-                        iEntry = new indexRWIEntryNew(estring.substring(p));
-                    else
-                        iEntry = new indexRWIEntryOld(estring.substring(p));
-                    urlHash = iEntry.urlHash();
-                    if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(plasmaURLPattern.BLACKLIST_DHT, urlHash))) {
-                        int deleted = sb.wordIndex.tryRemoveURLs(urlHash);
-                        yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
-                        blocked++;
-                    } else {
-                        sb.wordIndex.addEntry(wordHash, iEntry, System.currentTimeMillis(), true);
-                        serverCore.checkInterruption();
-
-                        if (!(knownURL.contains(urlHash)||unknownURL.contains(urlHash))) {
-                            try {
-                                if (sb.urlPool.loadedURL.exists(urlHash)) {
-                                    knownURL.add(urlHash);
-                                } else {
-                                    unknownURL.add(urlHash);
-                                }
-                            } catch (Exception ex) {
-                                sb.getLog().logWarning(
-                                  "transferRWI: DB-Error while trying to determine if URL with hash '" +
-                                  urlHash + "' is known.", ex);
-                            }
-                            receivedURL++;
-                        }
-                        received++;
-                    }
+                if ((p < 0) || (estring.indexOf("x=") < 0)) {
+                    blocked++;
+                    continue;
                 }
+                wordHash = estring.substring(0, p);
+                wordhashes[received] = wordHash;
+                iEntry = new indexRWIEntryNew(estring.substring(p));
+                urlHash = iEntry.urlHash();
+                
+                // block blacklisted entries
+                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(plasmaURLPattern.BLACKLIST_DHT, urlHash))) {
+                    int deleted = sb.wordIndex.tryRemoveURLs(urlHash);
+                    yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
+                    blocked++;
+                    continue;
+                }
+                
+                // learn entry
+                sb.wordIndex.addEntry(wordHash, iEntry, System.currentTimeMillis(), true);
+                serverCore.checkInterruption();
+
+                // check if we need to ask for the corresponding URL
+                if (!(knownURL.contains(urlHash)||unknownURL.contains(urlHash)))  try {
+                    if (sb.wordIndex.loadedURL.exists(urlHash)) {
+                        knownURL.add(urlHash);
+                    } else {
+                        unknownURL.add(urlHash);
+                    }
+                    receivedURL++;
+                } catch (Exception ex) {
+                    sb.getLog().logWarning(
+                                "transferRWI: DB-Error while trying to determine if URL with hash '" +
+                                urlHash + "' is known.", ex);
+                }
+                received++;
             }
             yacyCore.seedDB.mySeed.incRI(received);
 

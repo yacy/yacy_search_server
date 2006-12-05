@@ -18,9 +18,10 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
     private int importStartSize;
     private int urlCount = 0;
     private int profileCount = 0;
+    private plasmaSwitchboard sb;
     
     public plasmaCrawlNURLImporter(plasmaSwitchboard theSb) {
-        super(theSb);
+        super(theSb.wordIndex);
         this.jobType="NURL";
     }
 
@@ -45,8 +46,8 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         return theStatus.toString();
     }
 
-    public void init(File theImportPath, File theIndexPath, int theCacheSize, long preloadTime) {
-        super.init(theImportPath, theIndexPath);
+    public void init(File theImportPath, int theCacheSize, long preloadTime) {
+        super.init(theImportPath);
         this.cacheSize = theCacheSize;
         this.preloadTime = preloadTime;
         
@@ -174,10 +175,10 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                         }
                         
                         // if the url does not alredy exists in the destination stack we insert it now
-                        if (!this.sb.urlPool.noticeURL.existsInStack(nextHash)) {
-                            plasmaCrawlNURL.Entry ne = this.sb.urlPool.noticeURL.newEntry(nextEntry);
+                        if (!this.sb.noticeURL.existsInStack(nextHash)) {
+                            plasmaCrawlNURL.Entry ne = this.sb.noticeURL.newEntry(nextEntry);
                             ne.store();
-                            this.sb.urlPool.noticeURL.push((stackTypes[i] != -1) ? stackTypes[i] : plasmaCrawlNURL.STACK_TYPE_CORE, ne.url().getHost(), ne.hash());
+                            this.sb.noticeURL.push((stackTypes[i] != -1) ? stackTypes[i] : plasmaCrawlNURL.STACK_TYPE_CORE, ne.url().getHost(), ne.hash());
                         }
                         
                         // removing hash from the import db

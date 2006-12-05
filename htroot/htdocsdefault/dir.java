@@ -361,7 +361,7 @@ public class dir {
         try {
             final URL url = new URL(urlstring);
             final plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()), "UTF-8");
-            final indexURLEntry newEntry = switchboard.urlPool.loadedURL.newEntry(
+            final indexURLEntry newEntry = switchboard.wordIndex.loadedURL.newEntry(
                 url,
                 "YaCyShare: " + descr,
                 yacyCore.seedDB.mySeed.getName(),
@@ -379,8 +379,8 @@ public class dir {
                 "**", // language
                 0,0,0,0,0,0
             );
-            switchboard.urlPool.loadedURL.store(newEntry);
-            switchboard.urlPool.loadedURL.stack(
+            switchboard.wordIndex.loadedURL.store(newEntry);
+            switchboard.wordIndex.loadedURL.stack(
                     newEntry,
                     "____________", /*initiator*/
                     yacyCore.seedDB.mySeed.hash, /*executor*/
@@ -401,7 +401,7 @@ public class dir {
                 entry = (Map.Entry) words.next();
                 switchboard.wordIndex.removeEntry(plasmaCondenser.word2hash((String) entry.getKey()), urlhash, true);
             }
-            switchboard.urlPool.loadedURL.remove(urlhash);
+            switchboard.wordIndex.loadedURL.remove(urlhash);
         } catch (Exception e) {
             serverLog.logSevere("DIR", "INTERNAL ERROR in dir.deletePhrase", e);
         }

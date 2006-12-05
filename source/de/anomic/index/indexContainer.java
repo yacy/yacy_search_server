@@ -41,33 +41,24 @@ import de.anomic.kelondro.kelondroRowSet;
 public class indexContainer extends kelondroRowSet {
 
     private String wordHash;
-    private boolean newRWI;
 
-    public indexContainer(String wordHash, kelondroRow rowdef, int objectCount, byte[] cache, boolean newRWI) {
-        super(rowdef, objectCount, cache, kelondroBase64Order.enhancedCoder, 0, 0);
-        this.wordHash = wordHash;
-        this.newRWI = newRWI;
+    public indexContainer(String wordHash, kelondroRow rowdef) {
+        this(wordHash, rowdef, kelondroBase64Order.enhancedCoder, 0);
     }
     
-    public indexContainer(String wordHash, kelondroRow rowdef, boolean newRWI) {
-        this(wordHash, rowdef, kelondroBase64Order.enhancedCoder, 0, newRWI);
-    }
-    
-    public indexContainer(String wordHash, kelondroRowSet collection, boolean newRWI) {
+    public indexContainer(String wordHash, kelondroRowSet collection) {
         super(collection);
         this.wordHash = wordHash;
-        this.newRWI = newRWI;
     }
     
-    public indexContainer(String wordHash, kelondroRow rowdef, kelondroOrder ordering, int column, boolean newRWI) {
+    public indexContainer(String wordHash, kelondroRow rowdef, kelondroOrder ordering, int column) {
         super(rowdef, ordering, column, 0);
         this.wordHash = wordHash;
         this.lastTimeWrote = 0;
-        this.newRWI = newRWI;
     }
     
     public indexContainer topLevelClone() {
-        indexContainer newContainer = new indexContainer(this.wordHash, this.rowdef, this.sortOrder, this.sortColumn, this.newRWI);
+        indexContainer newContainer = new indexContainer(this.wordHash, this.rowdef, this.sortOrder, this.sortColumn);
         newContainer.add(this, -1);
         return newContainer;
     }
@@ -133,7 +124,7 @@ public class indexContainer extends kelondroRowSet {
             if (entry instanceof indexRWIEntryNew)
                 oldEntry = new indexRWIEntryNew(oldEntryRow);
             else
-                oldEntry = new indexRWIEntryOld(oldEntryRow); // FIXME: see if cloning is necessary
+                oldEntry = new indexRWIEntryNew(new indexRWIEntryOld(oldEntryRow));
             if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
                 this.put(oldEntry.toKelondroEntry()); // put it back
                 return false;
@@ -146,19 +137,13 @@ public class indexContainer extends kelondroRowSet {
     public indexRWIEntry get(String urlHash) {
         kelondroRow.Entry entry = this.get(urlHash.getBytes());
         if (entry == null) return null;
-        if (this.newRWI)
-            return new indexRWIEntryNew(entry);
-        else
-            return new indexRWIEntryOld(entry);
+        return new indexRWIEntryNew(entry);
     }
 
     public indexRWIEntry remove(String urlHash) {
         kelondroRow.Entry entry = this.remove(urlHash.getBytes());
         if (entry == null) return null;
-        if (this.newRWI)
-            return new indexRWIEntryNew(entry);
-        else
-            return new indexRWIEntryOld(entry);
+        return new indexRWIEntryNew(entry);
     }
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
@@ -194,10 +179,7 @@ public class indexContainer extends kelondroRowSet {
         public Object next() {
             kelondroRow.Entry rentry = (kelondroRow.Entry) rowEntryIterator.next();
             if (rentry == null) return null;
-            if (newRWI)
-                return new indexRWIEntryNew(rentry);
-            else
-                return new indexRWIEntryOld(rentry);
+            return new indexRWIEntryNew(rentry);
         }
 
         public void remove() {
@@ -307,7 +289,7 @@ public class indexContainer extends kelondroRowSet {
         assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
         int keylength = small.rowdef.width(0);
         assert (keylength == large.rowdef.width(0));
-        indexContainer conj = new indexContainer(null, small.rowdef, small.newRWI); // start with empty search result
+        indexContainer conj = new indexContainer(null, small.rowdef); // start with empty search result
         Iterator se = small.entries();
         indexRWIEntry ie0, ie1;
         long stamp = System.currentTimeMillis();
@@ -330,7 +312,7 @@ public class indexContainer extends kelondroRowSet {
         assert i1.rowdef.equals(i2.rowdef) : "i1 = " + i1.rowdef.toString() + "; i2 = " + i2.rowdef.toString();
         int keylength = i1.rowdef.width(0);
         assert (keylength == i2.rowdef.width(0));
-        indexContainer conj = new indexContainer(null, i1.rowdef, i1.newRWI); // start with empty search result
+        indexContainer conj = new indexContainer(null, i1.rowdef); // start with empty search result
         if (!((i1.order().signature().equals(i2.order().signature())) &&
               (i1.primarykey() == i2.primarykey()))) return conj; // ordering must be equal
         Iterator e1 = i1.entries();

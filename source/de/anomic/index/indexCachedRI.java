@@ -86,7 +86,7 @@ public class indexCachedRI implements indexRI {
         return entries.updated();
     }
     
-    public indexContainer addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean intern) {        
+    public void addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean intern) {        
         // add the entry
         if (intern) {
             riIntern.addEntry(wordHash, entry, updateTime, true);
@@ -94,10 +94,9 @@ public class indexCachedRI implements indexRI {
             riExtern.addEntry(wordHash, entry, updateTime, false);
             flushControl();
         }
-        return null;
     }
     
-    public indexContainer addEntries(indexContainer entries, long updateTime, boolean intern) {
+    public void addEntries(indexContainer entries, long updateTime, boolean intern) {
         // add the entry
         if (intern) {
             riIntern.addEntries(entries, updateTime, true);
@@ -105,7 +104,6 @@ public class indexCachedRI implements indexRI {
             riExtern.addEntries(entries, updateTime, false);
             flushControl();
         }
-        return null;
     }
 
     public void flushCacheSome(boolean busy) {
@@ -133,12 +131,7 @@ public class indexCachedRI implements indexRI {
                 
                 // flush the wordHash
                 indexContainer c = ram.deleteContainer(wordHash);
-                if (c != null) {
-                    indexContainer feedback = backend.addEntries(c, c.updated(), false);
-                    if (feedback != null) {
-                        throw new RuntimeException("indexCollectionRI shall not return feedback entries; feedback = " + feedback.toString());
-                    }
-                }
+                if (c != null) backend.addEntries(c, c.updated(), false);
                 
                 // pause to next loop to give other processes a chance to use IO
                 //try {this.wait(8);} catch (InterruptedException e) {}
@@ -206,11 +199,11 @@ public class indexCachedRI implements indexRI {
         return size;
     }
 
-    public void close(int waitingBoundSeconds) {
+    public void close() {
         synchronized (this) {
-            riIntern.close(waitingBoundSeconds);
-            riExtern.close(waitingBoundSeconds);
-            backend.close(-1);
+            riIntern.close();
+            riExtern.close();
+            backend.close();
         }
     }
 

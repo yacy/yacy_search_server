@@ -201,7 +201,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                indexURLEntry urlentry = sb.urlPool.loadedURL.load(recommendHash, null);
+                indexURLEntry urlentry = sb.wordIndex.loadedURL.load(recommendHash, null);
                 if (urlentry != null) {
                     indexURLEntry.Components comp = urlentry.comp();
                     plasmaParserDocument document;

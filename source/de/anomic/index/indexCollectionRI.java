@@ -104,7 +104,7 @@ public class indexCollectionRI implements indexRI {
             byte[] key = (byte[]) oo[0];
             kelondroRowSet collection = (kelondroRowSet) oo[1];
             if (collection == null) return null;
-            return new indexContainer(new String(key), collection, true);
+            return new indexContainer(new String(key), collection);
         }
         
         public void remove() {
@@ -118,7 +118,7 @@ public class indexCollectionRI implements indexRI {
             kelondroRowSet collection = collectionIndex.get(wordHash.getBytes(), deleteIfEmpty);
             if (collection != null) collection.select(urlselection);
             if ((collection == null) || (collection.size() == 0)) return null;
-            return new indexContainer(wordHash, collection, true);
+            return new indexContainer(wordHash, collection);
         } catch (IOException e) {
             return null;
         }
@@ -128,7 +128,7 @@ public class indexCollectionRI implements indexRI {
         try {
             kelondroRowSet collection = collectionIndex.delete(wordHash.getBytes());
             if (collection == null) return null;
-            return new indexContainer(wordHash, collection, true);
+            return new indexContainer(wordHash, collection);
         } catch (IOException e) {
             return null;
         }
@@ -152,26 +152,24 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public synchronized indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
-        indexContainer container = new indexContainer(wordHash, collectionIndex.payloadRow(), true);
+    public synchronized void addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
+        indexContainer container = new indexContainer(wordHash, collectionIndex.payloadRow());
         container.add(newEntry);
-        return addEntries(container, updateTime, dhtCase);
+        addEntries(container, updateTime, dhtCase);
     }
     
-    public synchronized indexContainer addEntries(indexContainer newEntries, long creationTime, boolean dhtCase) {
+    public synchronized void addEntries(indexContainer newEntries, long creationTime, boolean dhtCase) {
         String wordHash = newEntries.getWordHash();
         try {
             collectionIndex.merge(wordHash.getBytes(), (kelondroRowCollection) newEntries);
-            return null; // merge does allways 'eat' up all entries unlike the assortments; they may return an overflow container
         } catch (kelondroOutOfLimitsException e) {
             e.printStackTrace();
-            return null;
         } catch (IOException e) {
-            return null;
+            e.printStackTrace();
         }
     }
 
-    public synchronized void close(int waitingSeconds) {
+    public synchronized void close() {
         try {
             collectionIndex.close();
         } catch (IOException e) {

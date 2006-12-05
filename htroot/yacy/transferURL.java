@@ -87,7 +87,7 @@ public final class transferURL {
         if (granted) {
             int received = 0;
             int blocked = 0;
-            final int sizeBefore = sb.urlPool.loadedURL.size();
+            final int sizeBefore = sb.wordIndex.loadedURL.size();
             // read the urls from the other properties and store
             String urls;
             indexURLEntry lEntry;
@@ -97,7 +97,7 @@ public final class transferURL {
                 if (urls == null) {
                     yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
                 } else {
-                    lEntry = sb.urlPool.loadedURL.newEntry(urls);
+                    lEntry = sb.wordIndex.loadedURL.newEntry(urls);
                     if (lEntry == null) {
                         yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                         // TODO: should we send back an error message???
@@ -113,8 +113,8 @@ public final class transferURL {
                                 lEntry = null;
                                 blocked++;
                             } else try {
-                                sb.urlPool.loadedURL.store(lEntry);
-                                sb.urlPool.loadedURL.stack(lEntry, iam, iam, 3);
+                                sb.wordIndex.loadedURL.store(lEntry);
+                                sb.wordIndex.loadedURL.stack(lEntry, iam, iam, 3);
                                 yacyCore.log.logFine("transferURL: received URL '" + comp.url().toNormalform() + "' from peer " + otherPeerName);
                                 received++;
                             } catch (IOException e) {
@@ -128,7 +128,7 @@ public final class transferURL {
             yacyCore.seedDB.mySeed.incRU(received);
 
             // return rewrite properties
-            final int more = sb.urlPool.loadedURL.size() - sizeBefore;
+            final int more = sb.wordIndex.loadedURL.size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
             sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, Blocked " + blocked + " URLs");
             if ((received - more) > 0) sb.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);

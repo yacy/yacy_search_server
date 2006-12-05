@@ -50,6 +50,7 @@ import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexRWIEntryOld;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
@@ -131,7 +132,7 @@ public final class plasmaWordIndexFile {
     public indexRWIEntry getEntry(String urlhash) throws IOException {
         kelondroRow.Entry n = theIndex.get(urlhash.getBytes());
         if (n == null) return null;
-        return new indexRWIEntryOld(n.getColString(0, null), n.getColString(1, null));
+        return new indexRWIEntryNew(new indexRWIEntryOld(n.getColString(0, null), n.getColString(1, null)));
     }
     
     public boolean contains(String urlhash) throws IOException {
@@ -142,33 +143,12 @@ public final class plasmaWordIndexFile {
         return (theIndex.get(entry.urlHash().getBytes()) != null);
     }
     
-    public boolean addEntry(indexRWIEntry entry) throws IOException {
-        if (entry == null) return false;
-        indexRWIEntry oldEntry = getEntry(entry.urlHash());
-        if ((oldEntry != null) && (entry.isOlder(oldEntry))) { // A more recent Entry is already in this entity
-            return false;
-        }
-        return (theIndex.put(entry.toKelondroEntry()) == null);
+    public void addEntry(indexRWIEntry entry) {
+        throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
     }
     
-    public int addEntries(indexContainer container) throws IOException {
-    //System.out.println("* adding " + newEntries.size() + " cached word index entries for word " + wordHash); // debug
-    // fetch the index cache
-        if ((container == null) || (container.size() == 0)) return 0;
-        
-        // open file
-        int count = 0;
-        
-        // write from vector
-        if (container != null) {
-            Iterator i = container.entries();
-            while (i.hasNext()) {
-                if (addEntry((indexRWIEntry) i.next())) count++;
-            }
-        }
-        
-        // close and return
-        return count;
+    public void addEntries(indexContainer container) {
+        throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
     }
     
     public boolean deleteComplete() {
@@ -228,7 +208,7 @@ public final class plasmaWordIndexFile {
         public Object next() {
             if (i == null) return null;
             kelondroRow.Entry n = (kelondroRow.Entry) i.next();
-            return new indexRWIEntryOld(n.getColString(0, null), n.getColString(1, null));
+            return new indexRWIEntryNew(new indexRWIEntryOld(n.getColString(0, null), n.getColString(1, null)));
         }
         public void remove() {
             throw new UnsupportedOperationException();
@@ -239,8 +219,7 @@ public final class plasmaWordIndexFile {
         return "DB:" + theIndex.toString();
     }
 
-    
-    public void merge(plasmaWordIndexFile otherEntity, long time) throws IOException {
+    public void merge(plasmaWordIndexFile otherEntity, long time) {
         // this is a merge of another entity to this entity
         // the merge is interrupted when the given time is over
         // a time=-1 means: no timeout
@@ -255,174 +234,4 @@ public final class plasmaWordIndexFile {
         }
     }
     
-    /*
-    // join methods
-    private static int log2(int x) {
-        int l = 0;
-        while (x > 0) {x = x >> 1; l++;}
-        return l;
-    }
-    
-    public static plasmaWordIndexEntity joinEntities(Set entities, long time) throws IOException {
-        
-    		// big problem here: there cannot be a time-out for join, since a time-out will leave the joined set too big.
-    		// this will result in a OR behavior of the search instead of an AND behavior
-    	
-        long stamp = System.currentTimeMillis();
-        
-        // order entities by their size
-        TreeMap map = new TreeMap();
-        plasmaWordIndexEntity singleEntity;
-        Iterator i = entities.iterator();
-        int count = 0;
-        while (i.hasNext()) {
-            // get next entity:
-            singleEntity = (plasmaWordIndexEntity) i.next();
-            
-            // check result
-            if ((singleEntity == null) || (singleEntity.size() == 0)) return new plasmaWordIndexEntity(null); // as this is a cunjunction of searches, we have no result if any word is not known
-            
-            // store result in order of result size
-            map.put(new Long(singleEntity.size() * 1000 + count), singleEntity);
-            count++;
-        }
-        
-        // check if there is any result
-        if (map.size() == 0) return new plasmaWordIndexEntity(null); // no result, nothing found
-        
-        // the map now holds the search results in order of number of hits per word
-        // we now must pairwise build up a conjunction of these sets
-        Long k = (Long) map.firstKey(); // the smallest, which means, the one with the least entries
-        plasmaWordIndexEntity searchA, searchB, searchResult = (plasmaWordIndexEntity) map.remove(k);
-        while ((map.size() > 0) && (searchResult.size() > 0)) {
-            // take the first element of map which is a result and combine it with result
-            k = (Long) map.firstKey(); // the next smallest...
-            time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
-            searchA = searchResult;
-            searchB = (plasmaWordIndexEntity) map.remove(k);
-            searchResult = plasmaWordIndexEntity.joinConstructive(searchA, searchB, 2 * time / (map.size() + 1));
-        // close the input files/structures
-        if (searchA != searchResult) searchA.close();
-        if (searchB != searchResult) searchB.close();
-        }
-        searchA = null; // free resources
-        searchB = null; // free resources
-
-        // in 'searchResult' is now the combined search result
-        if (searchResult.size() == 0) return new plasmaWordIndexEntity(null);
-        return searchResult;
-    }
-    
-    
-    public static plasmaWordIndexEntity joinConstructive(plasmaWordIndexEntity i1, plasmaWordIndexEntity i2, long time) throws IOException {
-        if ((i1 == null) || (i2 == null)) return null;
-        if ((i1.size() == 0) || (i2.size() == 0)) return new plasmaWordIndexEntity(null);
-        
-        // decide which method to use
-        int high = ((i1.size() > i2.size()) ? i1.size() : i2.size());
-        int low  = ((i1.size() > i2.size()) ? i2.size() : i1.size());
-        int stepsEnum = 10 * (high + low - 1);
-        int stepsTest = 12 * log2(high) * low;
-        
-        // start most efficient method
-        if (stepsEnum > stepsTest) {
-            if (i1.size() < i2.size())
-                return joinConstructiveByTest(i1, i2, time);
-            else
-                return joinConstructiveByTest(i2, i1, time);
-        } else {
-            return joinConstructiveByEnumeration(i1, i2, time);
-        }
-    }
-    
-    private static plasmaWordIndexEntity joinConstructiveByTest(plasmaWordIndexEntity small, plasmaWordIndexEntity large, long time) throws IOException {
-        System.out.println("DEBUG: JOIN METHOD BY TEST");
-        plasmaWordIndexEntity conj = new plasmaWordIndexEntity(null); // start with empty search result
-        Iterator se = small.elements(true);
-        plasmaWordIndexEntry ie0, ie1;
-        long stamp = System.currentTimeMillis();
-        try {
-            while ((se.hasNext()) && ((System.currentTimeMillis() - stamp) < time)) {
-                ie0 = (plasmaWordIndexEntry) se.next();
-                ie1 = large.getEntry(ie0.getUrlHash());
-                if (ie1 != null) {
-                    // this is a hit. Calculate word distance:
-                    ie0.combineDistance(ie1);
-                    conj.addEntry(ie0);
-                }
-            }
-        }  catch (kelondroException e) {
-            //serverLog.logSevere("PLASMA", "joinConstructiveByTest: Database corrupt (" + e.getMessage() + "), deleting index");
-            small.deleteComplete();
-            return conj;
-        }
-        return conj;
-    }
-    
-    private static plasmaWordIndexEntity joinConstructiveByEnumeration(plasmaWordIndexEntity i1, plasmaWordIndexEntity i2, long time) throws IOException {
-        System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
-        plasmaWordIndexEntity conj = new plasmaWordIndexEntity(null); // start with empty search result
-        Iterator e1 = i1.elements(true);
-        Iterator e2 = i2.elements(true);
-        int c;
-        if ((e1.hasNext()) && (e2.hasNext())) {
-            plasmaWordIndexEntry ie1;
-            plasmaWordIndexEntry ie2;
-            try {
-                ie1 = (plasmaWordIndexEntry) e1.next();
-            }  catch (kelondroException e) {
-                //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database corrupt 1 (" + e.getMessage() + "), deleting index");
-                i1.deleteComplete();
-                return conj;
-            }
-            try {
-                ie2 = (plasmaWordIndexEntry) e2.next();
-            }  catch (kelondroException e) {
-                //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database corrupt 2 (" + e.getMessage() + "), deleting index");
-                i2.deleteComplete();
-                return conj;
-            }
-            long stamp = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - stamp) < time) {
-                c = ie1.getUrlHash().compareTo(ie2.getUrlHash());
-                if (c < 0) {
-                    try {
-                        if (e1.hasNext()) ie1 = (plasmaWordIndexEntry) e1.next(); else break;
-                    } catch (kelondroException e) {
-                        //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
-                        i1.deleteComplete();
-                        break;
-                    }
-                } else if (c > 0) {
-                    try {
-                        if (e2.hasNext()) ie2 = (plasmaWordIndexEntry) e2.next(); else break;
-                    } catch (kelondroException e) {
-                        //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
-                        i2.deleteComplete();
-                        break;
-                    }
-                } else {
-                    // we have found the same urls in different searches!
-                    ie1.combineDistance(ie2);
-                    conj.addEntry(ie1);
-                    try {
-                        if (e1.hasNext()) ie1 = (plasmaWordIndexEntry) e1.next(); else break;
-                    } catch (kelondroException e) {
-                        //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 1 corrupt (" + e.getMessage() + "), deleting index");
-                        i1.deleteComplete();
-                        break;
-                    }
-                    try {
-                        if (e2.hasNext()) ie2 = (plasmaWordIndexEntry) e2.next(); else break;
-                    }  catch (kelondroException e) {
-                        //serverLog.logSevere("PLASMA", "joinConstructiveByEnumeration: Database 2 corrupt (" + e.getMessage() + "), deleting index");
-                        i2.deleteComplete();
-                        break;
-                    }
-                }
-            }
-        }
-        return conj;
-    }
-*/
 }

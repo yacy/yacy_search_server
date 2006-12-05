@@ -43,7 +43,6 @@
 package de.anomic.plasma;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -53,30 +52,25 @@ import java.util.TreeSet;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRI;
+import de.anomic.index.indexRWIEntryNew;
+import de.anomic.index.indexRWIEntryOld;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
 public class plasmaWordIndexFileCluster implements indexRI {
     
     // class variables
-    private final File      databaseRoot;
-    private final serverLog log;
-    private int       size;
-    private kelondroRow payloadrow;
+    private final File databaseRoot;
+    private int        size;
 
-    public plasmaWordIndexFileCluster(File databaseRoot, kelondroRow payloadrow, serverLog log) {
+    public plasmaWordIndexFileCluster(File databaseRoot) {
         this.databaseRoot = databaseRoot;
-        this.payloadrow = payloadrow;
-        this.log = log;
         this.size = 0;
     }
     
     public int size() {
         return size;
     }
-    
     
     public Iterator wordContainers(String startHash, boolean rot) {
         return new containerIterator(wordHashes(startHash, rot));
@@ -234,16 +228,16 @@ public class plasmaWordIndexFileCluster implements indexRI {
         if ((maxTime < 0) || (maxTime > 60000)) maxTime=60000; // maximum is one minute
         if (exists(wordHash)) {
             plasmaWordIndexFile entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
-            indexContainer container = new indexContainer(wordHash, payloadrow, false);
-            indexRWIEntry entry;
+            indexContainer container = new indexContainer(wordHash, indexRWIEntryNew.urlEntryRow);
+            indexRWIEntryNew entry;
             Iterator i = entity.elements(true);
             while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) {
-                entry = (indexRWIEntry) i.next();
+                entry = new indexRWIEntryNew((indexRWIEntryOld) i.next());
                 if ((urlselection == null) || (urlselection.contains(entry.urlHash()))) container.add(entry);
             }
             return container;
         } else {
-            return new indexContainer(wordHash, payloadrow, false);
+            return new indexContainer(wordHash, indexRWIEntryNew.urlEntryRow);
         }
     }
     
@@ -258,80 +252,26 @@ public class plasmaWordIndexFileCluster implements indexRI {
     
     public indexContainer deleteContainer(String wordHash) {
         plasmaWordIndexFile.removePlasmaIndex(databaseRoot, wordHash);
-        return new indexContainer(wordHash, payloadrow, false);
+        return null;
     }
 
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
-        // removes all given url hashes from a single word index. Returns number of deletions.
-        plasmaWordIndexFile pi = null;
-        boolean removed = false;
-        if (exists(wordHash)) try {
-            pi = getEntity(wordHash, true, -1);
-            if (pi.removeEntry(urlHash, deleteComplete)) removed = true;
-            int size = pi.size();
-            pi.close(); pi = null;
-            // check if we can remove the index completely
-            if ((deleteComplete) && (size == 0)) deleteContainer(wordHash);
-            return removed;
-        } catch (IOException e) {
-            log.logSevere("plasmaWordIndexClassic.removeEntries: " + e.getMessage());
-            return false;
-        } finally {
-            if (pi != null) try{pi.close();}catch(Exception e){}
-        } else return false;
+        throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
     }
     
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
-        // removes all given url hashes from a single word index. Returns number of deletions.
-        plasmaWordIndexFile pi = null;
-        int count = 0;
-        if (exists(wordHash)) try {
-            pi = getEntity(wordHash, true, -1);
-            Iterator i = urlHashes.iterator();
-            while (i.hasNext()) if (pi.removeEntry((String) i.next(), deleteComplete)) count++;
-            int size = pi.size();
-            pi.close(); pi = null;
-            // check if we can remove the index completely
-            if ((deleteComplete) && (size == 0)) deleteContainer(wordHash);
-            return count;
-        } catch (IOException e) {
-            log.logSevere("plasmaWordIndexClassic.removeEntries: " + e.getMessage());
-            return count;
-        } finally {
-            if (pi != null) try{pi.close();}catch(Exception e){}
-        } else return 0;
+        throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
     }
     
-    public indexContainer addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
-        indexContainer container = new indexContainer(wordHash, payloadrow, false);
-        container.add(newEntry);
-        return addEntries(container, updateTime, dhtCase);
+    public void addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
+        throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
     }
     
-    public indexContainer addEntries(indexContainer container, long creationTime, boolean highPriority) {
-	//System.out.println("* adding " + newEntries.size() + " cached word index entries for word " + wordHash); // debug
-	// fetch the index cache
-        if ((container == null) || (container.size() == 0)) return null;
-        
-        // open file
-        plasmaWordIndexFile pi = null;
-        try {
-            pi = new plasmaWordIndexFile(databaseRoot, container.getWordHash(), false);
-            pi.addEntries(container);
-            
-            // close and return
-            pi.close(); pi = null;
-            return null;
-        } catch (IOException e) {
-            log.logSevere("plasmaWordIndexClassic.addEntries: " + e.getMessage());
-            return container;
-        } finally {
-            if (pi != null) try{pi.close();}catch (Exception e){}
-        }
+    public void addEntries(indexContainer container, long creationTime, boolean highPriority) {
+        throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
     }
 
-    public void close(int waitingSeconds) {
-        
+    public void close() {
     }
 
     public int indexSize(String wordHash) {

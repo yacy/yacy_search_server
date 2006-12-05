@@ -393,9 +393,9 @@ public final class plasmaCrawlStacker {
         // check if the url is double registered
         checkInterruption();
         String nexturlhash = plasmaURL.urlHash(nexturl);
-        String dbocc = this.sb.urlPool.exists(nexturlhash);
+        String dbocc = this.sb.urlExists(nexturlhash);
         indexURLEntry oldEntry = null;
-        oldEntry = this.sb.urlPool.loadedURL.load(nexturlhash, null);
+        oldEntry = this.sb.wordIndex.loadedURL.load(nexturlhash, null);
         boolean recrawl = (oldEntry != null) && (((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000) > profile.recrawlIfOlder());
         if ((dbocc != null) && (!(recrawl))) {
             reason = plasmaCrawlEURL.DOUBLE_REGISTERED + dbocc + ")";
@@ -437,7 +437,7 @@ public final class plasmaCrawlStacker {
         
         // add the url into the crawling queue
         checkInterruption();
-        plasmaCrawlNURL.Entry ne = this.sb.urlPool.noticeURL.newEntry(initiatorHash, /* initiator, needed for p2p-feedback */
+        plasmaCrawlNURL.Entry ne = this.sb.noticeURL.newEntry(initiatorHash, /* initiator, needed for p2p-feedback */
                 nexturl, /* url clear text string */
                 loadDate, /* load date */
                 referrerHash, /* last url in crawling queue */
@@ -448,7 +448,7 @@ public final class plasmaCrawlStacker {
                 0  /*forkfactor, default value */
         );
         ne.store();
-        this.sb.urlPool.noticeURL.push(
+        this.sb.noticeURL.push(
                 ((global) ? plasmaCrawlNURL.STACK_TYPE_LIMIT :
                 ((local) ? plasmaCrawlNURL.STACK_TYPE_CORE : plasmaCrawlNURL.STACK_TYPE_REMOTE)) /*local/remote stack*/,
                 nexturl.getHost(),
@@ -1053,7 +1053,7 @@ public final class plasmaCrawlStacker {
                     
                     // if the url was rejected we store it into the error URL db
                     if (rejectReason != null) {
-                        plasmaCrawlEURL.Entry ee = sb.urlPool.errorURL.newEntry(
+                        plasmaCrawlEURL.Entry ee = sb.errorURL.newEntry(
                                 new URL(this.theMsg.url()),
                                 this.theMsg.referrerHash(),
                                 this.theMsg.initiatorHash(),
@@ -1063,7 +1063,7 @@ public final class plasmaCrawlStacker {
                                 new kelondroBitfield()
                         );
                         ee.store();
-                        sb.urlPool.errorURL.stackPushEntry(ee);
+                        sb.errorURL.stackPushEntry(ee);
                     }
                 } catch (Exception e) {
                     if (e instanceof InterruptedException) throw (InterruptedException) e;

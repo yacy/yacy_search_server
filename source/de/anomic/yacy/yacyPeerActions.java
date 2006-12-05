@@ -134,8 +134,8 @@ public class yacyPeerActions {
         	sb.setConfig("totalPPM", Long.toString(indexedc / 1)); //no division by zero
 				
         seedDB.mySeed.put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        seedDB.mySeed.put(yacySeed.LCOUNT, Integer.toString(sb.urlPool.loadedURL.size())); // the number of links that the peer has stored (LURL's)
-        seedDB.mySeed.put(yacySeed.NCOUNT, Integer.toString(sb.urlPool.noticeURL.stackSize())); // the number of links that the peer has noticed, but not loaded (NURL's)
+        seedDB.mySeed.put(yacySeed.LCOUNT, Integer.toString(sb.wordIndex.loadedURL.size())); // the number of links that the peer has stored (LURL's)
+        seedDB.mySeed.put(yacySeed.NCOUNT, Integer.toString(sb.noticeURL.stackSize())); // the number of links that the peer has noticed, but not loaded (NURL's)
         seedDB.mySeed.put(yacySeed.ICOUNT, Integer.toString(sb.cacheSizeMin())); // the minimum number of words that the peer has indexed (as it says)
         seedDB.mySeed.put(yacySeed.SCOUNT, Integer.toString(seedDB.sizeConnected())); // the number of seeds that the peer has stored
         seedDB.mySeed.put(yacySeed.CCOUNT, Double.toString(((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)

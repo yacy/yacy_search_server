@@ -2,7 +2,7 @@ package de.anomic.plasma.dbImport;
 
 import java.io.File;
 
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.logging.serverLog;
 
 public abstract class AbstractImporter extends Thread implements dbImporter{
@@ -13,8 +13,7 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     protected boolean stopped = false;
     protected boolean paused = false;
     
-    protected plasmaSwitchboard sb;
-    protected File importPath, indexPath;
+    protected File importPath;
     protected int cacheSize;
     protected long preloadTime;
     
@@ -23,27 +22,27 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     protected long globalPauseLast;
     protected long globalPauseDuration;
     protected String error;
+    protected plasmaWordIndex wi;
     
-    public AbstractImporter(plasmaSwitchboard theSb) {
-        super(theSb.dbImportManager.runningJobs,"");
-        this.sb = theSb;
+    public AbstractImporter(plasmaWordIndex wi) {
+        //super(theSb.dbImportManager.runningJobs,"");
+        this.wi = wi;
     }
     
     public String getError() {
         return this.error;
     }    
     
-    public void init(File theImportPath, File theIndexPath) {
+    public void init(File theImportPath) {
         if (theImportPath == null) throw new NullPointerException("The Import path must not be null.");
         this.importPath = theImportPath;
-        this.indexPath = theIndexPath;
         
         // getting a job id from the import manager
-        this.jobID = this.sb.dbImportManager.getJobID();
+        //this.jobID = this.sb.dbImportManager.getJobID();
         
         // initializing the logger and setting a more verbose thread name
         this.log = new serverLog("IMPORT_" + this.jobType + "_" + this.jobID);
-        this.setName("IMPORT_" + this.jobType + "_" + this.sb.dbImportManager.getJobID());
+        this.setName("IMPORT_" + this.jobType /*+ "_" + this.sb.dbImportManager.getJobID()*/);
     }
     
     public void startIt() {

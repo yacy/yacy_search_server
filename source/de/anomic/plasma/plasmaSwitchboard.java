@@ -134,6 +134,7 @@ import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIEntryNew;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -206,7 +207,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  File                        rankingPath;
     public  File                        workPath;
     public  HashMap                     rankingPermissions;
-    public  plasmaURLPool               urlPool;
+    public  plasmaCrawlNURL             noticeURL;
+    public  plasmaCrawlEURL             errorURL;
     public  plasmaWordIndex             wordIndex;
     public  plasmaHTCache               cacheManager;
     public  plasmaSnippetCache          snippetCache;
@@ -366,10 +368,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
 
         // read memory amount
-        int  ramLURL         = (int) getConfigLong("ramCacheLURL", 1024) / 1024;
+        int  ramLURL         = (int) getConfigLong("ramCacheLURL", 1024);
         long ramLURL_time    = getConfigLong("ramCacheLURL_time", 1000);
-        ramLURL = Math.max((int)  (serverMemory.available() / 2 / 1024), ramLURL);
-        setConfig("ramCacheLURL", ramLURL * 1024);
+        ramLURL = Math.max((int)  (serverMemory.available() / 2), ramLURL);
+        setConfig("ramCacheLURL", ramLURL);
         int  ramNURL         = (int) getConfigLong("ramCacheNURL", 1024) / 1024;
         long ramNURL_time    = getConfigLong("ramCacheNURL_time", 1000);
         ramNURL = Math.max((int)  (serverMemory.available() / 10 / 1024), ramNURL);
@@ -378,10 +380,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         long ramEURL_time    = getConfigLong("ramCacheEURL_time", 1000);
         ramEURL = Math.max((int)  (serverMemory.available() / 20 / 1024), ramEURL);
         setConfig("ramCacheEURL", ramEURL * 1024);
-        int  ramRWI          = (int) getConfigLong("ramCacheRWI",  1024) / 1024;
+        int  ramRWI          = (int) getConfigLong("ramCacheRWI",  1024);
         long ramRWI_time     = getConfigLong("ramCacheRWI_time", 1000);
-        ramRWI = Math.max((int)  (serverMemory.available() / 4 / 1024), ramRWI);
-        setConfig("ramCacheRWI", ramRWI * 1024);
+        ramRWI = Math.max((int)  (serverMemory.available() / 4), ramRWI);
+        setConfig("ramCacheRWI", ramRWI);
         int  ramHTTP         = (int) getConfigLong("ramCacheHTTP", 1024) / 1024;
         long ramHTTP_time    = getConfigLong("ramCacheHTTP_time", 1000);
         int  ramMessage      = (int) getConfigLong("ramCacheMessage", 1024) / 1024;
@@ -429,12 +431,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // start indexing management
         log.logConfig("Starting Indexing Management");
-        urlPool = new plasmaURLPool(plasmaPath, indexPath,
-                                    ramLURL,
-                                    ramNURL,
-                                    ramEURL,
-                                    ramLURL_time);
-        wordIndex = new plasmaWordIndex(plasmaPath, indexPath, true, ramRWI, ramRWI_time, log);
+        wordIndex = new plasmaWordIndex(indexPath, ramRWI, ramLURL, ramRWI_time, log);
+        noticeURL = new plasmaCrawlNURL(plasmaPath, ramNURL, -1);
+        errorURL = new plasmaCrawlEURL(plasmaPath, ramEURL, -1);
 
         // set a high maximum cache size to current size; this is adopted later automatically
         int wordCacheMaxCount = Math.max((int) getConfigLong("wordCacheInitCount", 30000),
@@ -471,7 +470,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * initialize switchboard queue
          * ====================================================================== */
         // create queue
-        this.sbQueue = new plasmaSwitchboardQueue(this.cacheManager, this.urlPool.loadedURL, new File(this.plasmaPath, "switchboardQueue1.stack"), this.profiles);
+        this.sbQueue = new plasmaSwitchboardQueue(this.cacheManager, this.wordIndex.loadedURL, new File(this.plasmaPath, "switchboardQueue1.stack"), this.profiles);
         
         // setting the indexing queue slots
         indexingSlots = (int) getConfigLong("indexer.slots", 100);
@@ -727,6 +726,29 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public boolean isRobinsonMode() {
         return (yacyCore.seedDB.sizeConnected() == 0) && (yacyCore.seedDB.mySeed.isVirgin());
     }
+
+    public String urlExists(String hash) {
+        // tests if hash occurrs in any database
+        // if it exists, the name of the database is returned,
+        // if it not exists, null is returned
+        if (wordIndex.loadedURL.exists(hash)) return "loaded";
+        if (noticeURL.existsInStack(hash)) return "crawler";
+        if (errorURL.exists(hash)) return "errors";
+        return null;
+    }
+    
+    public URL getURL(String urlhash) throws IOException {
+        if (urlhash.equals(plasmaURL.dummyHash)) return null;
+        try {
+            plasmaCrawlNURL.Entry ne = noticeURL.getEntry(urlhash);
+            if (ne != null) return ne.url();
+        } catch (IOException e) {}
+        indexURLEntry le = wordIndex.loadedURL.load(urlhash, null);
+        if (le != null) return le.comp().url();
+        plasmaCrawlEURL.Entry ee = errorURL.getEntry(urlhash);
+        if (ee != null) return ee.url();
+        return null;
+    }
     
     /**
      * This method changes the HTCache size.<br>
@@ -796,7 +818,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public boolean cleanProfiles() throws InterruptedException {
-        if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (urlPool.noticeURL.stackSize() > 0)) return false;
+        if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (noticeURL.stackSize() > 0)) return false;
         final Iterator iter = profiles.profiles(true);
         plasmaCrawlProfile.entry entry;
         boolean hasDoneSomething = false;
@@ -970,9 +992,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         sbQueue.close();
         flushCitationReference(crg, "crg");
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
-        int waitingBoundSeconds = Integer.parseInt(getConfig("maxWaitingWordFlush", "120"));
-        urlPool.close();
-        wordIndex.close(waitingBoundSeconds);
+        noticeURL.close();
+        errorURL.close();
+        wordIndex.close();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
@@ -1017,7 +1039,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // flush some entries from the RAM cache
             // (new permanent cache flushing)
             wordIndex.flushCacheSome(sbQueue.size() != 0);
-            urlPool.loadedURL.flushCacheSome();
+            wordIndex.loadedURL.flushCacheSome();
 
             boolean doneSomething = false;
 
@@ -1041,7 +1063,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             ) {
                 // generate new chunk
                 int minChunkSize = (int) getConfigLong("indexDistribution.minChunkSize", 30);
-                dhtTransferChunk = new plasmaDHTChunk(this.log, this.wordIndex, this.urlPool.loadedURL, minChunkSize, dhtTransferIndexCount, 5000);
+                dhtTransferChunk = new plasmaDHTChunk(this.log, wordIndex, wordIndex.loadedURL, minChunkSize, dhtTransferIndexCount, 5000);
                 doneSomething = true;
             }
 
@@ -1079,10 +1101,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
                 // do one processing step
                 log.logFine("DEQUEUE: sbQueueSize=" + sbQueue.size() +
-                        ", coreStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
-                        ", limitStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) +
-                        ", overhangStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) +
-                        ", remoteStackSize=" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE));
+                        ", coreStackSize=" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
+                        ", limitStackSize=" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) +
+                        ", overhangStackSize=" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) +
+                        ", remoteStackSize=" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE));
                 try {
                     nextentry = sbQueue.pop();
                     if (nextentry == null) {
@@ -1112,9 +1134,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public int cleanupJobSize() {
         int c = 0;
-        if ((urlPool.errorURL.stackSize() > 1000)) c++;
+        if ((errorURL.stackSize() > 1000)) c++;
         for (int i = 1; i <= 6; i++) {
-            if (urlPool.loadedURL.getStackSize(i) > 1000) c++;
+            if (wordIndex.loadedURL.getStackSize(i) > 1000) c++;
         }
         return c;
     }
@@ -1133,17 +1155,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
             // clean up error stack
             checkInterruption();
-            if ((urlPool.errorURL.stackSize() > 1000)) {
-                log.logFine("Cleaning Error-URLs report stack, " + urlPool.errorURL.stackSize() + " entries on stack");
-                urlPool.errorURL.clearStack();
+            if ((errorURL.stackSize() > 1000)) {
+                log.logFine("Cleaning Error-URLs report stack, " + errorURL.stackSize() + " entries on stack");
+                errorURL.clearStack();
                 hasDoneSomething = true;
             }
             // clean up loadedURL stack
             for (int i = 1; i <= 6; i++) {
                 checkInterruption();
-                if (urlPool.loadedURL.getStackSize(i) > 1000) {
-                    log.logFine("Cleaning Loaded-URLs report stack, " + urlPool.loadedURL.getStackSize(i) + " entries on stack " + i);
-                    urlPool.loadedURL.clearStack(i);
+                if (wordIndex.loadedURL.getStackSize(i) > 1000) {
+                    log.logFine("Cleaning Loaded-URLs report stack, " + wordIndex.loadedURL.getStackSize(i) + " entries on stack " + i);
+                    wordIndex.loadedURL.clearStack(i);
                     hasDoneSomething = true;
                 }
             }
@@ -1209,11 +1231,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public int coreCrawlJobSize() {
-        return urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+        return noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
     }
     
     public boolean coreCrawlJob() {
-        if (urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) == 0) {
+        if (noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) == 0) {
             //log.logDebug("CoreCrawl: queue is empty");
             return false;
         }
@@ -1247,10 +1269,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // do a local crawl        
         plasmaCrawlNURL.Entry urlEntry = null;
-        while (urlEntry == null && urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) > 0) {
-            String stats = "LOCALCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
+        while (urlEntry == null && noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) > 0) {
+            String stats = "LOCALCRAWL[" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
             try {
-                urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
+                urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
                 String profileHandle = urlEntry.profileHandle();
                 // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
                 // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
@@ -1276,11 +1298,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public int limitCrawlTriggerJobSize() {
-        return urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+        return noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
     }
     
     public boolean limitCrawlTriggerJob() {
-        if (urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) == 0) {
+        if (noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) == 0) {
             //log.logDebug("LimitCrawl: queue is empty");
             return false;
         }
@@ -1292,7 +1314,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             if (toshift > 1000) toshift = 1000;
             if (toshift > limitCrawlTriggerJobSize()) toshift = limitCrawlTriggerJobSize();
             for (int i = 0; i < toshift; i++) {
-                urlPool.noticeURL.shift(plasmaCrawlNURL.STACK_TYPE_LIMIT, plasmaCrawlNURL.STACK_TYPE_CORE);
+                noticeURL.shift(plasmaCrawlNURL.STACK_TYPE_LIMIT, plasmaCrawlNURL.STACK_TYPE_CORE);
             }
             log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl");
         }
@@ -1312,10 +1334,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // start a global crawl, if possible
-        String stats = "REMOTECRAWLTRIGGER[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", "
-                        + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
+        String stats = "REMOTECRAWLTRIGGER[" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", "
+                        + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
         try {
-            plasmaCrawlNURL.Entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+            plasmaCrawlNURL.Entry urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT);
             String profileHandle = urlEntry.profileHandle();
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
@@ -1327,7 +1349,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             log.logFine("plasmaSwitchboard.limitCrawlTriggerJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter="
                             + profile.generalFilter() + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
 
-            boolean tryRemote = ((urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) != 0) || (sbQueue.size() != 0)) &&
+            boolean tryRemote = ((noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) != 0) || (sbQueue.size() != 0)) &&
                                  (profile.remoteIndexing()) &&
                                  (urlEntry.initiator() != null) &&
                                 // (!(urlEntry.initiator().equals(indexURL.dummyHash))) &&
@@ -1359,7 +1381,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public int remoteTriggeredCrawlJobSize() {
-        return urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE);
+        return noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE);
     }
     
     public boolean remoteTriggeredCrawlJob() {
@@ -1367,7 +1389,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // do nothing if either there are private processes to be done
         // or there is no global crawl on the stack
-        if (urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) == 0) {
+        if (noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) == 0) {
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;
         }
@@ -1398,10 +1420,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
-        String stats = "REMOTETRIGGEREDCRAWL[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", "
-                        + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
+        String stats = "REMOTETRIGGEREDCRAWL[" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", "
+                        + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
         try {
-            plasmaCrawlNURL.Entry urlEntry = urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_REMOTE);
+            plasmaCrawlNURL.Entry urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_REMOTE);
             String profileHandle = urlEntry.profileHandle();
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " +
@@ -1531,7 +1553,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     } catch (MalformedURLException e1) {}                    
                 }
                 log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.normalizedURLString() +
-                        ", NEW CRAWL STACK SIZE IS " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
+                        ", NEW CRAWL STACK SIZE IS " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
             }
             stackEndTime = System.currentTimeMillis();
             
@@ -1568,7 +1590,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     checkInterruption();
                     
                     // create a new loaded URL db entry
-                    indexURLEntry newEntry = urlPool.loadedURL.newEntry(
+                    indexURLEntry newEntry = wordIndex.loadedURL.newEntry(
                             entry.url(),                               // URL
                             docDescription,                            // document description
                             "",                                        // author
@@ -1594,8 +1616,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     /* ========================================================================
                      * STORE URL TO LOADED-URL-DB
                      * ======================================================================== */
-                    urlPool.loadedURL.store(newEntry);
-                    urlPool.loadedURL.stack(
+                    wordIndex.loadedURL.store(newEntry);
+                    wordIndex.loadedURL.stack(
                             newEntry,                       // loaded url db entry
                             initiatorPeerHash,              // initiator peer hash
                             yacyCore.seedDB.mySeed.hash,    // executor peer hash
@@ -1672,7 +1694,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = plasmaCondenser.word2hash(word);
-                                indexRWIEntry wordIdxEntry = wordIndex.newRWIEntry(
+                                indexRWIEntry wordIdxEntry = new indexRWIEntryNew(
                                             urlHash,
                                             urlLength, urlComps,
                                             wordStat.count,
@@ -1807,7 +1829,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
 
             // removing current entry from notice URL queue
-            boolean removed = urlPool.noticeURL.remove(entry.urlHash()); // worked-off
+            boolean removed = noticeURL.remove(entry.urlHash()); // worked-off
             if (!removed) {
                 log.logFinest("Unable to remove indexed URL " + entry.url() + " from Crawler Queue. This could be because of an URL redirect.");
             }
@@ -1911,7 +1933,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         URL refererURL = null;
         String refererHash = urlEntry.referrerHash();
         if ((refererHash != null) && (!refererHash.equals(plasmaURL.dummyHash))) try {
-            refererURL = this.urlPool.getURL(refererHash);
+            refererURL = this.getURL(refererHash);
         } catch (IOException e) {
             refererURL = null;
         }
@@ -1924,7 +1946,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // return true iff another peer has/will index(ed) the url
         if (urlEntry == null) {
-            log.logInfo("REMOTECRAWLTRIGGER[" + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]: urlEntry=null");
+            log.logInfo("REMOTECRAWLTRIGGER[" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]: urlEntry=null");
             return true; // superfluous request; true correct in this context
         }
         
@@ -1952,7 +1974,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // do the request
         try {
-            HashMap page = yacyClient.crawlOrder(remoteSeed, urlEntry.url(), urlPool.getURL(urlEntry.referrerHash()), 6000);
+            HashMap page = yacyClient.crawlOrder(remoteSeed, urlEntry.url(), getURL(urlEntry.referrerHash()), 6000);
         
             // check success
             /*
@@ -1990,10 +2012,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         String lurl = (String) page.get("lurl");
                         if ((lurl != null) && (lurl.length() != 0)) {
                             String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));
-                            indexURLEntry entry = urlPool.loadedURL.newEntry(propStr);
-                            urlPool.loadedURL.store(entry);
-                            urlPool.loadedURL.stack(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
-                            urlPool.noticeURL.remove(entry.hash());
+                            indexURLEntry entry = wordIndex.loadedURL.newEntry(propStr);
+                            wordIndex.loadedURL.store(entry);
+                            wordIndex.loadedURL.stack(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
+                            noticeURL.remove(entry.hash());
                             log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " SUPERFLUOUS. CAUSE: " + page.get("reason") + " (URL=" + urlEntry.url().toString() + "). URL IS CONSIDERED AS 'LOADED!'");
                             return true;
                         } else {
@@ -2051,7 +2073,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             //}
             
             // create a new search event
-            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, postsort, log, wordIndex, urlPool.loadedURL, snippetCache);
+            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, postsort, log, wordIndex, wordIndex.loadedURL, snippetCache);
             plasmaSearchResult acc = theSearch.search();
             
             // fetch snippets
@@ -2094,7 +2116,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if ((seed == null) || ((address = seed.getAddress()) == null)) {
                             // seed is not known from here
                             removeReferences(urlentry.hash(), plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.descr()).getBytes(), "UTF-8"));
-                            urlPool.loadedURL.remove(urlentry.hash()); // clean up
+                            wordIndex.loadedURL.remove(urlentry.hash()); // clean up
                             continue; // next result
                         }
                         urlname = "http://share." + seed.getName() + ".yacy" + filename;
@@ -2217,7 +2239,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // finally, delete the url entry
         
         // determine the url string
-        indexURLEntry entry = urlPool.loadedURL.load(urlhash, null);
+        indexURLEntry entry = wordIndex.loadedURL.load(urlhash, null);
         if (entry == null) return 0;
         indexURLEntry.Components comp = entry.comp();
         if (comp.url() == null) return 0;
@@ -2245,7 +2267,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             if (witer != null) count = removeReferences(urlhash, witer);
             
             // finally delete the url entry itself
-            urlPool.loadedURL.remove(urlhash);
+            wordIndex.loadedURL.remove(urlhash);
             return count;
         } catch (ParserException e) {
             return 0;
@@ -2373,15 +2395,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (getConfig("allowDistributeIndex","false").equalsIgnoreCase("false")) {
             return "no DHT distribution: not enabled";
         }
-        if (urlPool.loadedURL.size() < 10) {
-            return "no DHT distribution: loadedURL.size() = " + urlPool.loadedURL.size();
+        if (wordIndex.loadedURL.size() < 10) {
+            return "no DHT distribution: loadedURL.size() = " + wordIndex.loadedURL.size();
         }
         if (wordIndex.size() < 100) {
             return "no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size();
         }
         if ((getConfig("allowDistributeIndexWhileCrawling","false").equalsIgnoreCase("false")) &&
-            ((urlPool.noticeURL.stackSize() > 0) || (sbQueue.size() > 3))) {
-            return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + urlPool.noticeURL.stackSize() + ", sbQueue.size() = " + sbQueue.size();
+            ((noticeURL.stackSize() > 0) || (sbQueue.size() > 3))) {
+            return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + noticeURL.stackSize() + ", sbQueue.size() = " + sbQueue.size();
         }
         return null;
     }
@@ -2522,7 +2544,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             kelondroBitfield flags
     ) {
         // create a new errorURL DB entry
-        plasmaCrawlEURL.Entry ee = this.urlPool.errorURL.newEntry(
+        plasmaCrawlEURL.Entry ee = this.errorURL.newEntry(
                 url,
                 referrerHash,
                 initiator,
@@ -2534,7 +2556,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // store the entry
         ee.store();
         // push it onto the stack
-        this.urlPool.errorURL.stackPushEntry(ee);
+        this.errorURL.stackPushEntry(ee);
     }    
     
     public void checkInterruption() throws InterruptedException {

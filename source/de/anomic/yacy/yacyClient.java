@@ -52,7 +52,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
@@ -520,30 +519,12 @@ public final class yacyClient {
                 // save the url entry
                 indexRWIEntry entry;
                 if (urlEntry.word() == null) {
-                    // the old way to define words
-                    int urlLength = comp.url().toNormalform().length();
-                    int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()).length;
-                    
-                    entry = wordIndex.newRWIEntry(
-                                                     urlEntry.hash(),
-                                                     urlLength,
-                                                     urlComps,
-                                                     comp.descr().length(),
-                                                     urlEntry.wordCount(),
-                                                     0, 0, 0, 0, 0, 0,
-                                                     urlEntry.size(),
-                                                     urlEntry.moddate().getTime(),
-                                                     System.currentTimeMillis(),
-                                                     0,
-                                                     urlEntry.language(),
-                                                     urlEntry.doctype(),
-                                                     0,0,
-                                                     new kelondroBitfield(4)
-                                                    );
-                } else {
-                    // the new way: the search-result-url transports all the attributes of word indexes
-                    entry = urlEntry.word();
+                    yacyCore.log.logWarning("DEBUG-SEARCH: no word attached from peer " + targetPeer.getName() + ", version " + targetPeer.getVersion());
+                    continue; // no word attached
                 }
+                // the search-result-url transports all the attributes of word indexes
+                entry = urlEntry.word();
+
                 if (urlEntry.snippet() != null) {
                     // we don't store the snippets along the url entry, because they are search-specific.
                     // instead, they are placed in a snipped-search cache.

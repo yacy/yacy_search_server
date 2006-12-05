@@ -44,9 +44,9 @@ public interface indexRI {
     
     public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete);
     public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete);
-    public indexContainer addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean dhtCase);
-    public indexContainer addEntries(indexContainer newEntries, long creationTime, boolean dhtCase);
+    public void addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean dhtCase);
+    public void addEntries(indexContainer newEntries, long creationTime, boolean dhtCase);
 
-    public void close(int waitingSeconds);
+    public void close();
 
 }

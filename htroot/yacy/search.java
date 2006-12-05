@@ -144,7 +144,7 @@ public final class search {
             plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
             plasmaSearchTimingProfile remoteTiming = null;
 
-            plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL, sb.snippetCache);
+            plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.wordIndex.loadedURL, sb.snippetCache);
             Map containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
             if (containers != null) {
                 Iterator ci = containers.entrySet().iterator();
@@ -173,7 +173,7 @@ public final class search {
 
             plasmaSearchEvent theSearch = new plasmaSearchEvent(squery,
                     rankingProfile, localTiming, remoteTiming, true,
-                    yacyCore.log, sb.wordIndex, sb.urlPool.loadedURL,
+                    yacyCore.log, sb.wordIndex, sb.wordIndex.loadedURL,
                     sb.snippetCache);
             Map containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
 

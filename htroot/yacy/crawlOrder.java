@@ -249,13 +249,13 @@ public final class crawlOrder {
             // case where we have already the url loaded;
             reason = reasonString;
             // send lurl-Entry as response
-            indexURLEntry entry = switchboard.urlPool.loadedURL.load(plasmaURL.urlHash(url), null);
+            indexURLEntry entry = switchboard.wordIndex.loadedURL.load(plasmaURL.urlHash(url), null);
             if (entry == null) {
                 response = "rejected";
                 lurl = "";
             } else {
                 response = "double";
-                switchboard.urlPool.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
+                switchboard.wordIndex.loadedURL.notifyGCrawl(entry.hash(), iam, youare);
                 lurl = crypt.simpleEncode(entry.toString());
             }
         } else {

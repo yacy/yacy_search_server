@@ -168,9 +168,9 @@ public class IndexCreate_p {
                             // stack request
                             // first delete old entry, if exists
                             String urlhash = plasmaURL.urlHash(crawlingStart);
-                            switchboard.urlPool.loadedURL.remove(urlhash);
-                            switchboard.urlPool.noticeURL.remove(urlhash);
-                            switchboard.urlPool.errorURL.remove(urlhash);
+                            switchboard.wordIndex.loadedURL.remove(urlhash);
+                            switchboard.noticeURL.remove(urlhash);
+                            switchboard.errorURL.remove(urlhash);
                             
                             // stack url
                             plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, storeHTCache, true, localIndexing, crawlOrder, xsstopw, xdstopw, xpstopw);
@@ -203,10 +203,10 @@ public class IndexCreate_p {
                                 prop.put("error_crawlingURL", wikiCode.replaceHTML(((String) post.get("crawlingURL"))));
                                 prop.put("error_reasonString", reasonString);
                                 
-                                plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(crawlingStartURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
+                                plasmaCrawlEURL.Entry ee = switchboard.errorURL.newEntry(crawlingStartURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
                                                                                                  crawlingStartURL.getHost(), reasonString, new kelondroBitfield());
                                 ee.store();
-                                switchboard.urlPool.errorURL.stackPushEntry(ee);
+                                switchboard.errorURL.stackPushEntry(ee);
                             }
                         } catch (PatternSyntaxException e) {
                             prop.put("error", 8); //crawlfilter does not match url
@@ -281,10 +281,10 @@ public class IndexCreate_p {
                                     if (rejectReason == null) {
                                         c++;
                                     } else {
-                                        plasmaCrawlEURL.Entry ee = switchboard.urlPool.errorURL.newEntry(nexturlURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
+                                        plasmaCrawlEURL.Entry ee = switchboard.errorURL.newEntry(nexturlURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
                                                                                                          (String) e.getValue(), rejectReason, new kelondroBitfield());
                                         ee.store();
-                                        switchboard.urlPool.errorURL.stackPushEntry(ee);
+                                        switchboard.errorURL.stackPushEntry(ee);
                                     }
                                 }                             
                                
@@ -412,7 +412,7 @@ public class IndexCreate_p {
         
         int queueStackSize = switchboard.sbQueue.size();
         int loaderThreadsSize = switchboard.cacheLoader.size();
-        int crawlerListSize = switchboard.urlPool.noticeURL.stackSize();
+        int crawlerListSize = switchboard.noticeURL.stackSize();
         int completequeue = queueStackSize + loaderThreadsSize + crawlerListSize;
         
         if ((completequeue > 0) || ((post != null) && (post.containsKey("refreshpage")))) {

@@ -152,10 +152,9 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         assert oldEntry.urlHash() != null;
         this.entry = urlEntryRow.newEntry();
         int mddlm = plasmaWordIndex.microDateDays(oldEntry.lastModified());
-        int mddct = plasmaWordIndex.microDateDays(System.currentTimeMillis());
         this.entry.setCol(col_urlhash, oldEntry.urlHash(), null);
         this.entry.setCol(col_lastModified, mddlm);
-        this.entry.setCol(col_freshUntil, Math.max(0, mddlm + (mddct - mddlm) * 2)); // TTL computation
+        this.entry.setCol(col_freshUntil, 0);
         this.entry.setCol(col_wordsInTitle, 20); // guessed
         this.entry.setCol(col_wordsInText, oldEntry.wordcount());
         this.entry.setCol(col_phrasesInText, oldEntry.phrasecount());

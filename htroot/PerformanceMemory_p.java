@@ -175,11 +175,11 @@ public class PerformanceMemory_p {
         ost = sb.cacheManager.cacheObjectStatus();
         putprop(prop, env, "", "HTTP", set);
         
-        req = sb.urlPool.loadedURL.size();
-        chk = sb.urlPool.loadedURL.cacheNodeChunkSize();
-        obj = sb.urlPool.loadedURL.cacheObjectChunkSize();
-        slt = sb.urlPool.loadedURL.cacheNodeStatus();
-        ost = sb.urlPool.loadedURL.cacheObjectStatus();
+        req = sb.wordIndex.loadedURL.size();
+        chk = sb.wordIndex.loadedURL.cacheNodeChunkSize();
+        obj = sb.wordIndex.loadedURL.cacheObjectChunkSize();
+        slt = sb.wordIndex.loadedURL.cacheNodeStatus();
+        ost = sb.wordIndex.loadedURL.cacheObjectStatus();
         putprop(prop, env, "", "LURL", set);
         
         if (sb.sbStackCrawlThread.getDBType() != de.anomic.plasma.plasmaCrawlStacker.QUEUE_DB_TYPE_TREE) {
@@ -194,27 +194,27 @@ public class PerformanceMemory_p {
             putprop(prop, env, "usePreNURLCache", "PreNURL", set);
         }
         
-        if (sb.urlPool.noticeURL.getUseNewDB()) {
+        if (sb.noticeURL.getUseNewDB()) {
             prop.put("useNURLCache", 0);
         } else {
             prop.put("useNURLCache", 1);
-            req = sb.urlPool.noticeURL.size();
-            chk = sb.urlPool.noticeURL.cacheNodeChunkSize();
-            obj = sb.urlPool.noticeURL.cacheObjectChunkSize();
-            slt = sb.urlPool.noticeURL.cacheNodeStatus();
-            ost = sb.urlPool.noticeURL.cacheObjectStatus();
+            req = sb.noticeURL.size();
+            chk = sb.noticeURL.cacheNodeChunkSize();
+            obj = sb.noticeURL.cacheObjectChunkSize();
+            slt = sb.noticeURL.cacheNodeStatus();
+            ost = sb.noticeURL.cacheObjectStatus();
             putprop(prop, env, "useNURLCache", "NURL", set);
         }
         
-        if (sb.urlPool.errorURL.getUseNewDB()) {
+        if (sb.errorURL.getUseNewDB()) {
             prop.put("useEURLCache", 0);
         } else {
             prop.put("useEURLCache", 1);
-            req = sb.urlPool.errorURL.size();
-            chk = sb.urlPool.errorURL.cacheNodeChunkSize();
-            obj = sb.urlPool.errorURL.cacheObjectChunkSize();
-            slt = sb.urlPool.errorURL.cacheNodeStatus();
-            ost = sb.urlPool.errorURL.cacheObjectStatus();
+            req = sb.errorURL.size();
+            chk = sb.errorURL.cacheNodeChunkSize();
+            obj = sb.errorURL.cacheObjectChunkSize();
+            slt = sb.errorURL.cacheNodeStatus();
+            ost = sb.errorURL.cacheObjectStatus();
             putprop(prop, env, "useEURLCache", "EURL", set);
         }
         
