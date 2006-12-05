@@ -62,14 +62,13 @@ import java.util.LinkedList;
 
 import de.anomic.http.httpc;
 import de.anomic.http.httpc.response;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexURLEntry;
 import de.anomic.index.indexURLEntryNew;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexSplitTable;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
@@ -513,22 +512,35 @@ public final class plasmaCrawlLURL {
                             }
                         }
                     }
-                    
-                    indexURLEntry entry = (indexURLEntry) eiter.next();
-                    indexURLEntry.Components comp = entry.comp();
-                    totalSearchedUrls++;
-                    if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, comp.url()) ||
-                        plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, comp.url())) {
-                        lastBlacklistedUrl = comp.url().toNormalform();
-                        lastBlacklistedHash = entry.hash();                        
-                        serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " " + comp.url().toNormalform());
-                        remove(entry.hash());
-                        if (blacklistedUrls % 100 == 0) {
-                            serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
+                    if (eiter.hasNext()) {
+                        indexURLEntry entry = (indexURLEntry) eiter.next();
+                        if (entry == null) {
+                            serverLog.logFine("URLDBCLEANER", "entry == null");
+                        } else {
+                            indexURLEntry.Components comp = entry.comp();
+                            totalSearchedUrls++;
+                            if (entry.hash() == null) {
+                                serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + " hash == null");
+                            } else if (comp.url() == null) {
+                                serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " URL == null");
+                                remove(entry.hash());
+                                lastHash = entry.hash();
+                            } else if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, comp.url()) ||
+                                       plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, comp.url())) {
+                                lastBlacklistedUrl = comp.url().toNormalform();
+                                lastBlacklistedHash = entry.hash();
+                                serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double)blacklistedUrls/totalSearchedUrls)*100 + "%): " + entry.hash() + " " + comp.url().toNormalform());
+                                remove(entry.hash());
+                                if (blacklistedUrls % 100 == 0) {
+                                    serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
+                                }
+                                lastUrl = comp.url().toNormalform();
+                                lastHash = entry.hash();
+                            }
                         }
+                    } else {
+                        serverLog.logFine("URLDBCLEANER", "Iterator == null");
                     }
-                    lastUrl = comp.url().toNormalform();
-                    lastHash = entry.hash();
                 }
             } catch (RuntimeException e) {
                 if (e.getMessage() != null && e.getMessage().indexOf("not found in LURL") != -1) {
