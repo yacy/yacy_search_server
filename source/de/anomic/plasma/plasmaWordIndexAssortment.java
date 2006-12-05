@@ -124,10 +124,10 @@ public final class plasmaWordIndexAssortment {
         final long updateTime = row.getColLong(2);
         indexContainer container = new indexContainer(wordHash, indexRWIEntryNew.urlEntryRow);
         int al = assortmentCapacity(row.objectsize());
-        for (int i = 0; i < al; i++) {
+        for (int i = 0; i < al; i++) try {
             // fill AND convert old entries to new entries
             container.add(new indexRWIEntry[] { new indexRWIEntryNew(new indexRWIEntryOld(row.getColBytes(3 + i))) }, updateTime);
-        }
+        } catch (kelondroException e) {}
         return container;
     }
     

@@ -56,7 +56,6 @@ import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryNew;
-import de.anomic.index.indexRWIEntryOld;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -533,10 +532,7 @@ public final class yacyClient {
                 }
                 // add the url entry to the word indexes
                 for (int m = 0; m < words; m++) {
-                    if (entry instanceof indexRWIEntryOld) {
-                        if (entry.urlHash() == null) continue; 
-                        entry = new indexRWIEntryNew((indexRWIEntryOld) entry);
-                    }
+                    assert (entry instanceof indexRWIEntryNew);
                     container[m].add(new indexRWIEntry[]{entry}, System.currentTimeMillis());
                 }
                 // store url hash for statistics

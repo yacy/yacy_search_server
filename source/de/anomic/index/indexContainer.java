@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
@@ -123,8 +124,11 @@ public class indexContainer extends kelondroRowSet {
             indexRWIEntry oldEntry;
             if (entry instanceof indexRWIEntryNew)
                 oldEntry = new indexRWIEntryNew(oldEntryRow);
-            else
+            else try {
                 oldEntry = new indexRWIEntryNew(new indexRWIEntryOld(oldEntryRow));
+            } catch (kelondroException e) {
+                return false;
+            }
             if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
                 this.put(oldEntry.toKelondroEntry()); // put it back
                 return false;

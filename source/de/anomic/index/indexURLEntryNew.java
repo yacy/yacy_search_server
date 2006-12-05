@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.ArrayList;
 
 import de.anomic.kelondro.kelondroBitfield;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
@@ -64,7 +65,7 @@ public class indexURLEntryNew implements indexURLEntry {
     
     private kelondroRow.Entry entry;
     private String snippet;
-    private indexRWIEntry word; // this is only used if the url is transported via remote search requests
+    private indexRWIEntryNew word; // this is only used if the url is transported via remote search requests
 
     public indexURLEntryNew(
             URL url,
@@ -127,7 +128,7 @@ public class indexURLEntryNew implements indexURLEntry {
         return s.toString().getBytes();
     }
     
-    public indexURLEntryNew(kelondroRow.Entry entry, indexRWIEntry searchedWord) {
+    public indexURLEntryNew(kelondroRow.Entry entry, indexRWIEntryNew searchedWord) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
@@ -182,8 +183,11 @@ public class indexURLEntryNew implements indexURLEntry {
         this.entry.setCol(col_lapp, Integer.parseInt(prop.getProperty("lapp", "0")));
         this.snippet = crypt.simpleDecode(prop.getProperty("snippet", ""), null);
         this.word = null;
-        if (prop.containsKey("word")) {
-            this.word = new indexRWIEntryOld(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word", "")));
+        if (prop.containsKey("word")) try {
+            // convert old data format
+            this.word = new indexRWIEntryNew(new indexRWIEntryOld(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("word", ""))));
+        } catch (kelondroException e) {
+            this.word = null;
         }
         if (prop.containsKey("wi")) {
             this.word = new indexRWIEntryNew(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("wi", "")));
@@ -221,8 +225,7 @@ public class indexURLEntryNew implements indexURLEntry {
             
             if (this.word != null) {
                 // append also word properties
-                if (this.word instanceof indexRWIEntryOld) s.append(",word=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm()));
-                if (this.word instanceof indexRWIEntryNew) s.append(",wi=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm()));
+                s.append(",wi=").append(kelondroBase64Order.enhancedCoder.encodeString(word.toPropertyForm()));
             }
             return s;
 

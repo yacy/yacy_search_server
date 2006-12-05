@@ -54,6 +54,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexRWIEntryOld;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.yacy.yacySeedDB;
 
@@ -231,10 +232,10 @@ public class plasmaWordIndexFileCluster implements indexRI {
             indexContainer container = new indexContainer(wordHash, indexRWIEntryNew.urlEntryRow);
             indexRWIEntryNew entry;
             Iterator i = entity.elements(true);
-            while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) {
+            while ((i.hasNext()) && (System.currentTimeMillis() < (start + maxTime))) try {
                 entry = new indexRWIEntryNew((indexRWIEntryOld) i.next());
                 if ((urlselection == null) || (urlselection.contains(entry.urlHash()))) container.add(entry);
-            }
+            } catch (kelondroException e) {}
             return container;
         } else {
             return new indexContainer(wordHash, indexRWIEntryNew.urlEntryRow);

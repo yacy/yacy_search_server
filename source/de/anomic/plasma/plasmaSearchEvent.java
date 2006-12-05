@@ -39,7 +39,6 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-
 package de.anomic.plasma;
 
 import java.util.Collection;
@@ -51,7 +50,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -380,7 +379,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         //if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
         //if (searchResult.size() == 0) return acc; // case that we have nothing to do
 
-        indexRWIEntry entry;
+        indexRWIEntryNew entry;
         indexURLEntry page;
         Long preranking;
         Object[] preorderEntry;
@@ -389,7 +388,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             while (preorder.hasNext()) {
                 if ((System.currentTimeMillis() >= postorderLimitTime) && (acc.sizeFetched() >= minEntries)) break;
                 preorderEntry = preorder.next();
-                entry = (indexRWIEntry) preorderEntry[0];
+                entry = (indexRWIEntryNew) preorderEntry[0];
                 // load only urls if there was not yet a root url of that hash
                 preranking = (Long) preorderEntry[1];
                 // find the url entry
@@ -442,11 +441,11 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         preorder.remove(true, true);
         
         // start url-fetch
-        indexRWIEntry entry;
+        indexRWIEntryNew entry;
         try {
             while (preorder.hasNext()) {
                 if (System.currentTimeMillis() >= timeout) break;
-                entry = (indexRWIEntry) (preorder.next()[0]);
+                entry = (indexRWIEntryNew) (preorder.next()[0]);
                 // find and fetch the url entry
                 urlStore.load(entry.urlHash(), entry);
             }

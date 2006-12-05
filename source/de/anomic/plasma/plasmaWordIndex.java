@@ -43,7 +43,6 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRAMRI;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexRWIEntryNew;
-import de.anomic.index.indexRWIEntryOld;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroMergeIterator;
@@ -150,10 +149,7 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public void addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean dhtInCase) {
-        if (entry instanceof indexRWIEntryOld) {
-            if (entry.urlHash() == null) return;
-            entry = new indexRWIEntryNew((indexRWIEntryOld) entry);
-        }
+        assert (entry instanceof indexRWIEntryNew);
 
         // set dhtInCase depending on wordHash
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(wordHash))) dhtInCase = true;

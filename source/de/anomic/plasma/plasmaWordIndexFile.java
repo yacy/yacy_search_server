@@ -132,7 +132,9 @@ public final class plasmaWordIndexFile {
     public indexRWIEntry getEntry(String urlhash) throws IOException {
         kelondroRow.Entry n = theIndex.get(urlhash.getBytes());
         if (n == null) return null;
-        return new indexRWIEntryNew(new indexRWIEntryOld(n.getColString(0, null), n.getColString(1, null)));
+        try {
+            return new indexRWIEntryNew(new indexRWIEntryOld(n.getColString(0, null), n.getColString(1, null)));
+        } catch (kelondroException e) {return null;}
     }
     
     public boolean contains(String urlhash) throws IOException {
@@ -208,7 +210,9 @@ public final class plasmaWordIndexFile {
         public Object next() {
             if (i == null) return null;
             kelondroRow.Entry n = (kelondroRow.Entry) i.next();
-            return new indexRWIEntryNew(new indexRWIEntryOld(n.getColString(0, null), n.getColString(1, null)));
+            try {
+                return new indexRWIEntryNew(new indexRWIEntryOld(n.getColString(0, null), n.getColString(1, null)));
+            } catch (kelondroException e) { return null; }
         }
         public void remove() {
             throw new UnsupportedOperationException();

@@ -29,6 +29,7 @@ package de.anomic.index;
 
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroColumn;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.plasma.plasmaURL;
@@ -148,8 +149,9 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         this.entry.setCol(col_reserve, 0);
     }
 
-    public indexRWIEntryNew(indexRWIEntryOld oldEntry) {
-        assert oldEntry.urlHash() != null;
+    public indexRWIEntryNew(indexRWIEntryOld oldEntry) throws kelondroException {
+        if (oldEntry.urlHash() == null) throw new kelondroException("hash is null");
+        if (oldEntry.urlHash().length() != 12) throw new kelondroException("hash has wrong length");
         this.entry = urlEntryRow.newEntry();
         int mddlm = plasmaWordIndex.microDateDays(oldEntry.lastModified());
         this.entry.setCol(col_urlhash, oldEntry.urlHash(), null);

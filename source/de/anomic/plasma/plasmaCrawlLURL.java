@@ -62,8 +62,8 @@ import java.util.LinkedList;
 
 import de.anomic.http.httpc;
 import de.anomic.http.httpc.response;
-import de.anomic.index.indexRWIEntry;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexURLEntry;
 import de.anomic.index.indexURLEntryNew;
 import de.anomic.kelondro.kelondroBitfield;
@@ -195,7 +195,7 @@ public final class plasmaCrawlLURL {
         return 0;
     }
     
-    public synchronized indexURLEntry load(String urlHash, indexRWIEntry searchedWord) {
+    public synchronized indexURLEntry load(String urlHash, indexRWIEntryNew searchedWord) {
         // generates an plasmaLURLEntry using the url hash
         // to speed up the access, the url-hashes are buffered
         // in the hash cache.
