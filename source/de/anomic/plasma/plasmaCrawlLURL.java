@@ -370,33 +370,33 @@ public final class plasmaCrawlLURL {
         // enumerates entry elements
         return new kiter(up, rotating, firstHash);
     }
-    
+
     public class kiter implements Iterator {
         // enumerates entry elements
-        Iterator i;
-        boolean error = false;
-        
+        private Iterator iter;
+        private boolean error;
+
         public kiter(boolean up, boolean rotating, String firstHash) throws IOException {
-            i = urlIndexFile.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
-            error = false;
+            this.iter = plasmaCrawlLURL.this.urlIndexFile.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
+            this.error = false;
         }
 
-        public boolean hasNext() {
-            if (error) return false;
-            return i.hasNext();
+        public final boolean hasNext() {
+            if (this.error) { return false; }
+            return this.iter.hasNext();
         }
 
-        public Object next() throws RuntimeException {
+        public final Object next() {
             kelondroRow.Entry e = null;
-            if (i.hasNext()) { e = (kelondroRow.Entry) i.next(); }
+            if (this.iter == null) { return null; }
+            if (this.iter.hasNext()) { e = (kelondroRow.Entry) this.iter.next(); }
             if (e == null) { return null; }
             return new indexURLEntryNew(e, null);
         }
 
-        public void remove() {
-            i.remove();
+        public final void remove() {
+            this.iter.remove();
         }
-        
     }
 
     /**
