@@ -770,7 +770,7 @@
 	<!-- http://nsisant.sourceforge.net/ -->
 	<copy file="yacy.nsi" tofile="${release}/WINDOWS/yacy.nsi" overwrite="true" filtering="true" />
 	<taskdef name="nsis" classname="net.sf.nsisant.Task">
-		    <classpath location="nsisant-1.2.jar"/>
+	<classpath location="nsisant-1.2.jar"/>
 	</taskdef>
 	<mkdir dir="${release}/WINDOWS" />
 	<nsis script="${release}/WINDOWS/yacy.nsi" nocd="yes" />

@@ -79,7 +79,7 @@ public class DetailedSearch {
             prop.put("localWDist", 999);
             //prop.put("globalChecked", "checked");
             prop.put("globalChecked", "");
-            prop.put("postsortChecked", "checked");
+            prop.put("postsortChecked", "checked=\"checked\"");
             prop.put("localTime", 6);
             prop.put("results", "");
             prop.put("urlmaskoptions", 0);
@@ -195,8 +195,8 @@ public class DetailedSearch {
         prop.put("type", "0");
         prop.put("localCount", count);
         prop.put("localWDist", wdist);
-        prop.put("globalChecked", (global) ? "checked" : "");
-        prop.put("postsortChecked", (postsort) ? "checked" : "");
+        prop.put("globalChecked", (global) ? "checked=\"checked\"" : "");
+        prop.put("postsortChecked", (postsort) ? "checked=\"checked\"" : "");
         prop.put("localTime", searchtime/1000);
         prop.put("search", post.get("search", ""));
         prop.putAll(localRanking.toExternalMap("local"));

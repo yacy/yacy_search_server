@@ -257,7 +257,7 @@ Waiting for new request nr.==Warte auf neue Anfrage Nr.
 #---------------------------
 Incoming Cookies Monitor==&Uuml;berwachung eingehender Cookies
 Cookie Monitor: Incoming Cookies==Cookie &Uuml;berwachung: Eingehende Cookies
-This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Dies ist eine Auflistung aller Cookies, die ein Webserver an diesen YaCy Proxy geschickt hat:
+This is a list of cookies that browsers using the YaCy proxy sent to webservers:==Dies ist eine Liste aller Cookies, die die Browser, die den YaCy-Proxy benutzen, an Webserver versandt haben:
 Showing==Angezeigt werden
 entries from a total of==Eintr&auml;ge von insgesamt
 Cookies==Cookies
@@ -1193,7 +1193,8 @@ Seed Upload Settings==Seed Upload Einstellungen
 Message Forwarding \(optional\)==Nachrichten Weiterleitung (optional)
 
 #-----------------------------
-
+
+
 #File: Settings_ProxyAccess.inc
 #---------------------------
 Proxy Access Settings==Proxyzugangs Einstellungen
