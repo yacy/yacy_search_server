@@ -173,10 +173,9 @@ public final class plasmaCondenser {
         return oldsize - words.size();
     }
 
-    public Iterator words() {
-        // returns an entry set iterator
-        // key is a String (the word), value is a wordStatProp Object
-        return words.entrySet().iterator();
+    public Map words() {
+        // returns the words as wod/wordStatProp relation map
+        return words;
     }
     
     public static class wordStatProp {
@@ -772,13 +771,13 @@ public final class plasmaCondenser {
         
     }
 
-    public static Iterator getWords(InputStream input, String charset) throws UnsupportedEncodingException {
+    public static Map getWords(InputStream input, String charset) throws UnsupportedEncodingException {
         if (input == null) return null;
         plasmaCondenser condenser = new plasmaCondenser(input, charset);
-        return condenser.words();        
+        return condenser.words;        
     }
     
-    public static Iterator getWords(byte[] text, String charset) throws UnsupportedEncodingException {
+    public static Map getWords(byte[] text, String charset) throws UnsupportedEncodingException {
         if (text == null) return null;
         ByteArrayInputStream buffer = new ByteArrayInputStream(text);
         return getWords(buffer, charset);

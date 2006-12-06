@@ -119,6 +119,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.data.blogBoard;
@@ -1681,7 +1682,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()).length;
 
                             // iterate over all words
-                            Iterator i = condenser.words();
+                            Iterator i = condenser.words().entrySet().iterator();
                             Map.Entry wentry;
                             plasmaCondenser.wordStatProp wordStat;
                             while (i.hasNext()) {
@@ -2110,7 +2111,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         filename = comp.url().getFile();
                         if ((seed == null) || ((address = seed.getAddress()) == null)) {
                             // seed is not known from here
-                            wordIndex.removeReferences(plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.descr()).getBytes(), "UTF-8"), urlentry.hash());
+                            wordIndex.removeReferences(plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.descr()).getBytes(), "UTF-8").keySet(), urlentry.hash());
                             wordIndex.loadedURL.remove(urlentry.hash()); // clean up
                             continue; // next result
                         }
@@ -2249,17 +2250,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // parse the resource
             plasmaParserDocument document = snippetCache.parseDocument(comp.url(), resourceContentLength.longValue(), resourceContent);
             
-            // getting word iterator
-            Iterator witer = null;
+            // get the word set
+            Set words = null;
             try {
-                witer = new plasmaCondenser(document).words();
+                words = new plasmaCondenser(document).words().keySet();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
             
             // delete all word references
             int count = 0;
-            if (witer != null) count = wordIndex.removeReferences(witer, urlhash);
+            if (words != null) count = wordIndex.removeReferences(words, urlhash);
             
             // finally delete the url entry itself
             wordIndex.loadedURL.remove(urlhash);

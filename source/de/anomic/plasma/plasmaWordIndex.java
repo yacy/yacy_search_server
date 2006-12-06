@@ -252,7 +252,7 @@ public final class plasmaWordIndex implements indexRI {
         // use all the words in one condenser object to simultanous create index entries
         
         // iterate over all words
-        Iterator i = condenser.words();
+        Iterator i = condenser.words().entrySet().iterator();
         Map.Entry wentry;
         String word;
         indexRWIEntry ientry;
@@ -400,21 +400,6 @@ public final class plasmaWordIndex implements indexRI {
         int count = 0;
         while (iter.hasNext()) {
             word = (String) iter.next();
-            // delete the URL reference in this word index
-            if (removeEntry(plasmaCondenser.word2hash(word), urlhash)) count++;
-        }
-        return count;
-    }
-
-    public int removeReferences(Iterator wordStatPropIterator, String urlhash) {
-        // sequentially delete all word references
-        // returns number of deletions
-        Map.Entry entry;
-        String word;
-        int count = 0;
-        while (wordStatPropIterator.hasNext()) {
-            entry = (Map.Entry) wordStatPropIterator.next();
-            word = (String) entry.getKey();
             // delete the URL reference in this word index
             if (removeEntry(plasmaCondenser.word2hash(word), urlhash)) count++;
         }

@@ -55,7 +55,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Map;
 
 import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
@@ -395,11 +394,11 @@ public class dir {
     public static void deletePhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr) {
         try {
             final String urlhash = plasmaURL.urlHash(new URL(urlstring));
-            final Iterator words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"), "UTF-8");
-            Map.Entry entry;
+            final Iterator words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"), "UTF-8").keySet().iterator();
+            String word;
             while (words.hasNext()) {
-                entry = (Map.Entry) words.next();
-                switchboard.wordIndex.removeEntry(plasmaCondenser.word2hash((String) entry.getKey()), urlhash);
+                word = (String) words.next();
+                switchboard.wordIndex.removeEntry(plasmaCondenser.word2hash(word), urlhash);
             }
             switchboard.wordIndex.loadedURL.remove(urlhash);
         } catch (Exception e) {
