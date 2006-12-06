@@ -95,7 +95,7 @@ public class plasmaWordIndexFileCluster implements indexRI {
         }
 
         public Object next() {
-            return getContainer((String) wordIterator.next(), null, true, 100);
+            return getContainer((String) wordIterator.next(), null, 100);
         }
 
         public void remove() {
@@ -224,11 +224,11 @@ public class plasmaWordIndexFileCluster implements indexRI {
         return plasmaWordIndexFile.wordHash2path(databaseRoot, wordHash).exists();
     }
     
-    public synchronized indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxTime) {
+    public synchronized indexContainer getContainer(String wordHash, Set urlselection, long maxTime) {
         long start = System.currentTimeMillis();
         if ((maxTime < 0) || (maxTime > 60000)) maxTime=60000; // maximum is one minute
         if (exists(wordHash)) {
-            plasmaWordIndexFile entity = this.getEntity(wordHash, deleteIfEmpty, (maxTime < 0) ? -1 : maxTime * 9 / 10);
+            plasmaWordIndexFile entity = this.getEntity(wordHash, (maxTime < 0) ? -1 : maxTime * 9 / 10);
             indexContainer container = new indexContainer(wordHash, indexRWIEntryNew.urlEntryRow);
             indexRWIEntryNew entry;
             Iterator i = entity.elements(true);
@@ -242,8 +242,8 @@ public class plasmaWordIndexFileCluster implements indexRI {
         }
     }
     
-    public plasmaWordIndexFile getEntity(String wordHash, boolean deleteIfEmpty, long maxTime) {
-        return new plasmaWordIndexFile(databaseRoot, wordHash, deleteIfEmpty);
+    public plasmaWordIndexFile getEntity(String wordHash, long maxTime) {
+        return new plasmaWordIndexFile(databaseRoot, wordHash);
     }
     
     public long getUpdateTime(String wordHash) {
@@ -256,11 +256,11 @@ public class plasmaWordIndexFileCluster implements indexRI {
         return null;
     }
 
-    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+    public boolean removeEntry(String wordHash, String urlHash) {
         throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
     }
     
-    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
+    public int removeEntries(String wordHash, Set urlHashes) {
         throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
     }
     

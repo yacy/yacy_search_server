@@ -53,7 +53,7 @@ public class snippet {
         } else {
             String error = snippet.getError();
             if ((remove) && (error.equals("no matching snippet found"))) {
-                switchboard.removeReferences(plasmaURL.urlHash(url), query);
+                switchboard.wordIndex.removeReferences(query, plasmaURL.urlHash(url));
             }
             prop.put("text", error);
         }

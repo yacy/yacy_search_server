@@ -61,7 +61,7 @@ public class indexCollectionRI implements indexRI {
     }
     
     public long getUpdateTime(String wordHash) {
-        indexContainer entries = getContainer(wordHash, null, false, -1);
+        indexContainer entries = getContainer(wordHash, null, -1);
         if (entries == null) return 0;
         return entries.updated();
     }
@@ -113,9 +113,9 @@ public class indexCollectionRI implements indexRI {
 
     }
      
-    public synchronized indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxtime) {
+    public synchronized indexContainer getContainer(String wordHash, Set urlselection, long maxtime) {
         try {
-            kelondroRowSet collection = collectionIndex.get(wordHash.getBytes(), deleteIfEmpty);
+            kelondroRowSet collection = collectionIndex.get(wordHash.getBytes());
             if (collection != null) collection.select(urlselection);
             if ((collection == null) || (collection.size() == 0)) return null;
             return new indexContainer(wordHash, collection);
@@ -134,15 +134,15 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public synchronized boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+    public synchronized boolean removeEntry(String wordHash, String urlHash) {
         HashSet hs = new HashSet();
         hs.add(urlHash.getBytes());
-        return removeEntries(wordHash, hs, deleteComplete) == 1;
+        return removeEntries(wordHash, hs) == 1;
     }
     
-    public synchronized int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
+    public synchronized int removeEntries(String wordHash, Set urlHashes) {
         try {
-            return collectionIndex.remove(wordHash.getBytes(), urlHashes, deleteComplete);
+            return collectionIndex.remove(wordHash.getBytes(), urlHashes);
         } catch (kelondroOutOfLimitsException e) {
             e.printStackTrace();
             return 0;

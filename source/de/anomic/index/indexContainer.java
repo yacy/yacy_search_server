@@ -145,12 +145,12 @@ public class indexContainer extends kelondroRowSet {
         return new indexRWIEntryNew(entry);
     }
 
-    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+    public boolean removeEntry(String wordHash, String urlHash) {
         if (!wordHash.equals(this.wordHash)) return false;
         return remove(urlHash) != null;
     }
 
-    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
+    public int removeEntries(String wordHash, Set urlHashes) {
         if (!wordHash.equals(this.wordHash)) return 0;
         int count = 0;
         Iterator i = urlHashes.iterator();

@@ -697,7 +697,7 @@ public final class yacy {
         }
         plasmaWordIndexFile entity = null;
         try {
-            entity = new plasmaWordIndexFile(oldDatabaseRoot, wordhash, true);
+            entity = new plasmaWordIndexFile(oldDatabaseRoot, wordhash);
             int size = entity.size();
             indexContainer container = new indexContainer(wordhash, indexRWIEntryNew.urlEntryRow);
 

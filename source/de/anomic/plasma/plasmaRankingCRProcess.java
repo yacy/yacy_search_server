@@ -421,7 +421,7 @@ public class plasmaRankingCRProcess {
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 
                 // update domain-specific entry
-                rci_entry = rci.get(anchorDom.getBytes(), false);
+                rci_entry = rci.get(anchorDom.getBytes());
                 if (rci_entry == null) rci_entry = new kelondroRowSet(RCI_coli, 0);
                 rci_entry.add(refereeDom.getBytes());
                 

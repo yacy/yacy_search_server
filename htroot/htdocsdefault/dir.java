@@ -399,7 +399,7 @@ public class dir {
             Map.Entry entry;
             while (words.hasNext()) {
                 entry = (Map.Entry) words.next();
-                switchboard.wordIndex.removeEntry(plasmaCondenser.word2hash((String) entry.getKey()), urlhash, true);
+                switchboard.wordIndex.removeEntry(plasmaCondenser.word2hash((String) entry.getKey()), urlhash);
             }
             switchboard.wordIndex.loadedURL.remove(urlhash);
         } catch (Exception e) {

@@ -119,7 +119,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.data.blogBoard;
@@ -1003,10 +1002,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //return processStack.size() + cacheLoader.size() + noticeURL.stackSize();
     }
     
-    public int cacheSizeMin() {
-        return wordIndex.size();
-    }
-    
     public void enQueue(Object job) {
         if (!(job instanceof plasmaSwitchboardQueue.Entry)) {
             System.out.println("internal error at plasmaSwitchboard.enQueue: wrong job type");
@@ -1063,7 +1058,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             ) {
                 // generate new chunk
                 int minChunkSize = (int) getConfigLong("indexDistribution.minChunkSize", 30);
-                dhtTransferChunk = new plasmaDHTChunk(this.log, wordIndex, wordIndex.loadedURL, minChunkSize, dhtTransferIndexCount, 5000);
+                dhtTransferChunk = new plasmaDHTChunk(this.log, wordIndex, minChunkSize, dhtTransferIndexCount, 5000);
                 doneSomething = true;
             }
 
@@ -2115,7 +2110,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         filename = comp.url().getFile();
                         if ((seed == null) || ((address = seed.getAddress()) == null)) {
                             // seed is not known from here
-                            removeReferences(urlentry.hash(), plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.descr()).getBytes(), "UTF-8"));
+                            wordIndex.removeReferences(plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.descr()).getBytes(), "UTF-8"), urlentry.hash());
                             wordIndex.loadedURL.remove(urlentry.hash()); // clean up
                             continue; // next result
                         }
@@ -2264,7 +2259,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // delete all word references
             int count = 0;
-            if (witer != null) count = removeReferences(urlhash, witer);
+            if (witer != null) count = wordIndex.removeReferences(witer, urlhash);
             
             // finally delete the url entry itself
             wordIndex.loadedURL.remove(urlhash);
@@ -2274,39 +2269,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         } finally {
             if (resourceContent != null) try { resourceContent.close(); } catch (Exception e) {/* ignore this */}
         }
-    }
-    
-    public int removeReferences(URL url, Set words) {
-        return removeReferences(plasmaURL.urlHash(url), words);
-    }
-    
-    public int removeReferences(final String urlhash, final Set words) {
-        // sequentially delete all word references
-        // returns number of deletions
-        Iterator iter = words.iterator();
-        String word;
-        int count = 0;
-        while (iter.hasNext()) {
-            word = (String) iter.next();
-            // delete the URL reference in this word index
-            if (wordIndex.removeEntry(plasmaCondenser.word2hash(word), urlhash, true)) count++;
-        }
-        return count;
-    }
-
-    public int removeReferences(final String urlhash, final Iterator wordStatPropIterator) {
-        // sequentially delete all word references
-        // returns number of deletions
-        Map.Entry entry;
-        String word;
-        int count = 0;
-        while (wordStatPropIterator.hasNext()) {
-            entry = (Map.Entry) wordStatPropIterator.next();
-            word = (String) entry.getKey();
-            // delete the URL reference in this word index
-            if (wordIndex.removeEntry(plasmaCondenser.word2hash(word), urlhash, true)) count++;
-        }
-        return count;
     }
 
     public int adminAuthenticated(httpHeader header) {
@@ -2402,7 +2364,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return "no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size();
         }
         if ((getConfig("allowDistributeIndexWhileCrawling","false").equalsIgnoreCase("false")) &&
-            ((noticeURL.stackSize() > 0) || (sbQueue.size() > 3))) {
+            ((noticeURL.stackSize() > 0) /*|| (sbQueue.size() > 3)*/)) {
             return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + noticeURL.stackSize() + ", sbQueue.size() = " + sbQueue.size();
         }
         return null;

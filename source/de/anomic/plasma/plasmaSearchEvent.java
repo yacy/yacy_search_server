@@ -401,7 +401,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                         log.logFine("filtered out " + page.comp().url().toString());
                         // filter out bad results
                         Iterator wi = query.queryHashes.iterator();
-                        while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash(), true);
+                        while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
                     } else if (query.contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) {
                         if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (page.laudio() > 0)) acc.addResult(page, preranking);
                         else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (page.lvideo() > 0)) acc.addResult(page, preranking);

@@ -262,7 +262,7 @@ public class kelondroCollectionIndex {
         putmergeremove(key, collection, true, null);
     }       
 
-    public synchronized int remove(byte[] key, Set removekeys, boolean deletecomplete) throws IOException, kelondroOutOfLimitsException {
+    public synchronized int remove(byte[] key, Set removekeys) throws IOException, kelondroOutOfLimitsException {
         return putmergeremove(key, null, false, removekeys);
     }
 
@@ -406,7 +406,7 @@ public class kelondroCollectionIndex {
         return (int) indexrow.getColLong(idx_col_chunkcount);
     }
     
-    public synchronized kelondroRowSet get(byte[] key, boolean deleteIfEmpty) throws IOException {
+    public synchronized kelondroRowSet get(byte[] key) throws IOException {
         // find an entry, if one exists
         kelondroRow.Entry indexrow = index.get(key);
         if (indexrow == null) return null;

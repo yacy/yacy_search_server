@@ -139,7 +139,7 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     public long getUpdateTime(String wordHash) {
-        indexContainer entries = getContainer(wordHash, null, false, -1);
+        indexContainer entries = getContainer(wordHash, null, -1);
         if (entries == null) return 0;
         return entries.updated();
     }
@@ -163,21 +163,6 @@ public final class plasmaWordIndex implements indexRI {
         }
     }
     
-    /*
-    private indexContainer convertOld2New(indexContainer entries) {
-        // convert old entries to new entries
-        indexContainer newentries = new indexContainer(entries.getWordHash(), indexRWIEntryNew.urlEntryRow);
-        Iterator i = entries.entries();
-        indexRWIEntryOld old;
-        while (i.hasNext()) {
-            old = (indexRWIEntryOld) i.next();
-            if (old.urlHash() != null) {
-                newentries.add(new indexRWIEntryNew(old));
-            }
-        }
-        return newentries;
-    }
-    */
     public void addEntries(indexContainer entries, long updateTime, boolean dhtInCase) {
         assert (entries.row().objectsize() == indexRWIEntryNew.urlEntryRow.objectsize());
         
@@ -306,21 +291,21 @@ public final class plasmaWordIndex implements indexRI {
         return condenser.RESULT_SIMI_WORDS;
     }
 
-    public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxTime) {
+    public indexContainer getContainer(String wordHash, Set urlselection, long maxTime) {
 
         // get from cache
-        indexContainer container = dhtOutCache.getContainer(wordHash, urlselection, true, -1);
+        indexContainer container = dhtOutCache.getContainer(wordHash, urlselection, -1);
         if (container == null) {
-            container = dhtInCache.getContainer(wordHash, urlselection, true, -1);
+            container = dhtInCache.getContainer(wordHash, urlselection, -1);
         } else {
-            container.add(dhtInCache.getContainer(wordHash, urlselection, true, -1), -1);
+            container.add(dhtInCache.getContainer(wordHash, urlselection, -1), -1);
         }
 
         // get from collection index
         if (container == null) {
-            container = collections.getContainer(wordHash, urlselection, true, (maxTime < 0) ? -1 : maxTime);
+            container = collections.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime);
         } else {
-            container.add(collections.getContainer(wordHash, urlselection, true, (maxTime < 0) ? -1 : maxTime), -1);
+            container.add(collections.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime), -1);
         }
         return container;
     }
@@ -345,7 +330,7 @@ public final class plasmaWordIndex implements indexRI {
                 singleHash = (String) i.next();
             
                 // retrieve index
-                singleContainer = getContainer(singleHash, urlselection, deleteIfEmpty, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - containers.size()));
+                singleContainer = getContainer(singleHash, urlselection, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - containers.size()));
             
                 // check result
                 if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap();
@@ -383,39 +368,66 @@ public final class plasmaWordIndex implements indexRI {
         return c;
     }
     
-    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+    public boolean removeEntry(String wordHash, String urlHash) {
         boolean removed = false;
-        removed = removed | (dhtInCache.removeEntry(wordHash, urlHash, deleteComplete));
-        removed = removed | (dhtOutCache.removeEntry(wordHash, urlHash, deleteComplete));
-        removed = removed | (collections.removeEntry(wordHash, urlHash, deleteComplete));
+        removed = removed | (dhtInCache.removeEntry(wordHash, urlHash));
+        removed = removed | (dhtOutCache.removeEntry(wordHash, urlHash));
+        removed = removed | (collections.removeEntry(wordHash, urlHash));
         return removed;
     }
     
-    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
+    public int removeEntries(String wordHash, Set urlHashes) {
         int removed = 0;
-        removed += dhtInCache.removeEntries(wordHash, urlHashes, deleteComplete);
-        removed += dhtOutCache.removeEntries(wordHash, urlHashes, deleteComplete);
-        removed += collections.removeEntries(wordHash, urlHashes, deleteComplete);
+        removed += dhtInCache.removeEntries(wordHash, urlHashes);
+        removed += dhtOutCache.removeEntries(wordHash, urlHashes);
+        removed += collections.removeEntries(wordHash, urlHashes);
         return removed;
     }
     
-    public String removeEntriesExpl(String wordHash, Set urlHashes, boolean deleteComplete) {
+    public String removeEntriesExpl(String wordHash, Set urlHashes) {
         String removed = "";
-        removed += dhtInCache.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
-        removed += dhtOutCache.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
-        removed += collections.removeEntries(wordHash, urlHashes, deleteComplete);
+        removed += dhtInCache.removeEntries(wordHash, urlHashes) + ", ";
+        removed += dhtOutCache.removeEntries(wordHash, urlHashes) + ", ";
+        removed += collections.removeEntries(wordHash, urlHashes);
         return removed;
     }
     
-    public static final int RL_RAMCACHE    = 0;
-    public static final int RL_COLLECTIONS = 1;
+    public int removeReferences(Set words, String urlhash) {
+        // sequentially delete all word references
+        // returns number of deletions
+        Iterator iter = words.iterator();
+        String word;
+        int count = 0;
+        while (iter.hasNext()) {
+            word = (String) iter.next();
+            // delete the URL reference in this word index
+            if (removeEntry(plasmaCondenser.word2hash(word), urlhash)) count++;
+        }
+        return count;
+    }
+
+    public int removeReferences(Iterator wordStatPropIterator, String urlhash) {
+        // sequentially delete all word references
+        // returns number of deletions
+        Map.Entry entry;
+        String word;
+        int count = 0;
+        while (wordStatPropIterator.hasNext()) {
+            entry = (Map.Entry) wordStatPropIterator.next();
+            word = (String) entry.getKey();
+            // delete the URL reference in this word index
+            if (removeEntry(plasmaCondenser.word2hash(word), urlhash)) count++;
+        }
+        return count;
+    }
     
     public int tryRemoveURLs(String urlHash) {
         // this tries to delete an index from the cache that has this
         // urlHash assigned. This can only work if the entry is really fresh
         // and can be found in the RAM cache
         // this returns the number of deletion that had been possible
-        return dhtInCache.tryRemoveURLs(urlHash) | dhtOutCache.tryRemoveURLs(urlHash);
+        int d = dhtInCache.tryRemoveURLs(urlHash);
+        if (d > 0) return d; else return dhtOutCache.tryRemoveURLs(urlHash);
     }
     
     public TreeSet indexContainerSet(String startHash, boolean ram, boolean rot, int count) {
@@ -540,7 +552,7 @@ public final class plasmaWordIndex implements indexRI {
                     }
                 }
                 if (urlHashs.size() > 0) {
-                    int removed = removeEntries(container.getWordHash(), urlHashs, true);
+                    int removed = removeEntries(container.getWordHash(), urlHashs);
                     serverLog.logFine("INDEXCLEANER", container.getWordHash() + ": " + removed + " of " + container.size() + " URL-entries deleted");
                     lastWordHash = container.getWordHash();
                     lastDeletionCounter = urlHashs.size();

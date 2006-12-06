@@ -117,7 +117,7 @@ public class DetailedSearch {
                 return prop;
             }
             final String delHash = post.get("deleteref", "");
-            sb.removeReferences(delHash, query);
+            sb.wordIndex.removeReferences(query, delHash);
         }
         
         // prepare search order

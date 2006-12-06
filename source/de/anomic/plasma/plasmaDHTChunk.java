@@ -71,7 +71,6 @@ public class plasmaDHTChunk {
     
     private plasmaWordIndex wordIndex;
     private serverLog log;
-    private plasmaCrawlLURL lurls;
     
     private int status = chunkStatus_UNDEFINED;
     private String startPointHash;
@@ -124,11 +123,10 @@ public class plasmaDHTChunk {
         return this.status;
     }
     
-    public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, plasmaCrawlLURL lurls, int minCount, int maxCount, int maxtime) {
+    public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, int minCount, int maxCount, int maxtime) {
         try {
             this.log = log;
             this.wordIndex = wordIndex;
-            this.lurls = lurls;
             this.startPointHash = selectTransferStart();
             log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, this.startPointHash));
             selectTransferContainers(this.startPointHash, minCount, maxCount, maxtime);
@@ -144,11 +142,10 @@ public class plasmaDHTChunk {
         }
     }
 
-    public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, plasmaCrawlLURL lurls, int minCount, int maxCount, int maxtime, String startHash) {
+    public plasmaDHTChunk(serverLog log, plasmaWordIndex wordIndex, int minCount, int maxCount, int maxtime, String startHash) {
         try {
             this.log = log;
             this.wordIndex = wordIndex;
-            this.lurls = lurls;
             log.logFine("Demanded hash " + startHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, this.startPointHash));
             selectTransferContainers(startHash, minCount, maxCount, maxtime);
 
@@ -233,12 +230,12 @@ public class plasmaDHTChunk {
                             urlIter.remove();
                             continue;
                         }
-                        lurl = lurls.load(iEntry.urlHash(), iEntry);
+                        lurl = wordIndex.loadedURL.load(iEntry.urlHash(), iEntry);
                         if ((lurl == null) || (lurl.comp().url() == null)) {
                             //yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + iEntry.urlHash() + "' for word hash " + container.getWordHash());
                             notBoundCounter++;
                             urlIter.remove();
-                            wordIndex.removeEntry(container.getWordHash(), iEntry.urlHash(), true);
+                            wordIndex.removeEntry(container.getWordHash(), iEntry.urlHash());
                         } else {
                             urlCache.put(iEntry.urlHash(), lurl);
                             //yacyCore.log.logFine("DEBUG selectTransferContainersResource: added url hash '" + iEntry.urlHash() + "' to urlCache for word hash " + container.getWordHash());
@@ -302,7 +299,7 @@ public class plasmaDHTChunk {
                 urlHashes.add(iEntry.urlHash());
             }
             String wordHash = indexContainers[i].getWordHash();
-            count = wordIndex.removeEntriesExpl(this.indexContainers[i].getWordHash(), urlHashes, true);
+            count = wordIndex.removeEntriesExpl(this.indexContainers[i].getWordHash(), urlHashes);
             if (log.isFine()) 
                 log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash + "; " + this.wordIndex.indexSize(wordHash) + " entries left");
             this.indexContainers[i] = null;

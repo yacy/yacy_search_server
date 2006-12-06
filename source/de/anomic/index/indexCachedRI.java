@@ -80,7 +80,7 @@ public class indexCachedRI implements indexRI {
     }
     
     public long getUpdateTime(String wordHash) {
-        indexContainer entries = getContainer(wordHash, null, false, -1);
+        indexContainer entries = getContainer(wordHash, null, -1);
         if (entries == null) return 0;
         return entries.updated();
     }
@@ -139,25 +139,25 @@ public class indexCachedRI implements indexRI {
         busyCacheFlush = false;
     }
     
-    public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxTime) {
+    public indexContainer getContainer(String wordHash, Set urlselection, long maxTime) {
         // get from cache
-        indexContainer container = riExtern.getContainer(wordHash, urlselection, true, maxTime);
+        indexContainer container = riExtern.getContainer(wordHash, urlselection, maxTime);
         if (container == null) {
-            container = riIntern.getContainer(wordHash, urlselection, true, maxTime);
+            container = riIntern.getContainer(wordHash, urlselection, maxTime);
         } else {
-            container.add(riIntern.getContainer(wordHash, urlselection, true, maxTime), maxTime);
+            container.add(riIntern.getContainer(wordHash, urlselection, maxTime), maxTime);
         }
 
         // get from collection index
         if (container == null) {
-            container = backend.getContainer(wordHash, urlselection, true,  (maxTime < 0) ? -1 : maxTime);
+            container = backend.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime);
         } else {
-            container.add(backend.getContainer(wordHash, urlselection, true, (maxTime < 0) ? -1 : maxTime), maxTime);
+            container.add(backend.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime), maxTime);
         }
         return container;
     }
 
-    public Map getContainers(Set wordHashes, Set urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
+    public Map getContainers(Set wordHashes, Set urlselection, boolean interruptIfEmpty, long maxTime) {
         // return map of wordhash:indexContainer
         
         // retrieve entities that belong to the hashes
@@ -177,7 +177,7 @@ public class indexCachedRI implements indexRI {
                 singleHash = (String) i.next();
             
                 // retrieve index
-                singleContainer = getContainer(singleHash, urlselection, deleteIfEmpty, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - containers.size()));
+                singleContainer = getContainer(singleHash, urlselection, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - containers.size()));
             
                 // check result
                 if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap();
@@ -213,27 +213,27 @@ public class indexCachedRI implements indexRI {
         return c;
     }
     
-    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+    public boolean removeEntry(String wordHash, String urlHash) {
         boolean removed = false;
-        removed = removed | (riIntern.removeEntry(wordHash, urlHash, deleteComplete));
-        removed = removed | (riExtern.removeEntry(wordHash, urlHash, deleteComplete));
-        removed = removed | (backend.removeEntry(wordHash, urlHash, deleteComplete));
+        removed = removed | (riIntern.removeEntry(wordHash, urlHash));
+        removed = removed | (riExtern.removeEntry(wordHash, urlHash));
+        removed = removed | (backend.removeEntry(wordHash, urlHash));
         return removed;
     }
     
-    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
+    public int removeEntries(String wordHash, Set urlHashes) {
         int removed = 0;
-        removed += riIntern.removeEntries(wordHash, urlHashes, deleteComplete);
-        removed += riExtern.removeEntries(wordHash, urlHashes, deleteComplete);
-        removed += backend.removeEntries(wordHash, urlHashes, deleteComplete);
+        removed += riIntern.removeEntries(wordHash, urlHashes);
+        removed += riExtern.removeEntries(wordHash, urlHashes);
+        removed += backend.removeEntries(wordHash, urlHashes);
         return removed;
     }
     
-    public String removeEntriesExpl(String wordHash, Set urlHashes, boolean deleteComplete) {
+    public String removeEntriesExpl(String wordHash, Set urlHashes) {
         String removed = "";
-        removed += riIntern.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
-        removed += riExtern.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
-        removed += backend.removeEntries(wordHash, urlHashes, deleteComplete) + ", ";
+        removed += riIntern.removeEntries(wordHash, urlHashes) + ", ";
+        removed += riExtern.removeEntries(wordHash, urlHashes) + ", ";
+        removed += backend.removeEntries(wordHash, urlHashes) + ", ";
         return removed;
     }
     

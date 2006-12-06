@@ -98,7 +98,7 @@ public final class indexRAMRI implements indexRI {
 
     
     public synchronized long getUpdateTime(String wordHash) {
-        indexContainer entries = getContainer(wordHash, null, false, -1);
+        indexContainer entries = getContainer(wordHash, null, -1);
         if (entries == null) return 0;
         return entries.updated();
     }
@@ -334,7 +334,7 @@ public final class indexRAMRI implements indexRI {
         return (((long) intTime) * (long) 1000) + initTime;
     }
     
-    public synchronized indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxtime_dummy) {
+    public synchronized indexContainer getContainer(String wordHash, Set urlselection, long maxtime_dummy) {
 
         // retrieve container
         indexContainer container = (indexContainer) cache.get(wordHash);
@@ -359,11 +359,11 @@ public final class indexRAMRI implements indexRI {
         return container;
     }
 
-    public synchronized boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete) {
+    public synchronized boolean removeEntry(String wordHash, String urlHash) {
         indexContainer c = (indexContainer) cache.get(wordHash);
-        if ((c != null) && (c.removeEntry(wordHash, urlHash, deleteComplete))) {
+        if ((c != null) && (c.removeEntry(wordHash, urlHash))) {
             // removal successful
-            if ((c.size() == 0) && (deleteComplete)) {
+            if (c.size() == 0) {
                 deleteContainer(wordHash);
             } else {
                 cache.put(wordHash, c);
@@ -375,13 +375,13 @@ public final class indexRAMRI implements indexRI {
         return false;
     }
     
-    public synchronized int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete) {
+    public synchronized int removeEntries(String wordHash, Set urlHashes) {
         if (urlHashes.size() == 0) return 0;
         indexContainer c = (indexContainer) cache.get(wordHash);
         int count;
-        if ((c != null) && ((count = c.removeEntries(wordHash, urlHashes, deleteComplete)) > 0)) {
+        if ((c != null) && ((count = c.removeEntries(wordHash, urlHashes)) > 0)) {
             // removal successful
-            if ((c.size() == 0) && (deleteComplete)) {
+            if (c.size() == 0) {
                 deleteContainer(wordHash);
             } else {
                 cache.put(wordHash, c);

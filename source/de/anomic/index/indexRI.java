@@ -39,11 +39,11 @@ public interface indexRI {
         
     public long getUpdateTime(String wordHash);
     public int indexSize(String wordHash);
-    public indexContainer getContainer(String wordHash, Set urlselection, boolean deleteIfEmpty, long maxtime);
+    public indexContainer getContainer(String wordHash, Set urlselection, long maxtime);
     public indexContainer deleteContainer(String wordHash);
     
-    public boolean removeEntry(String wordHash, String urlHash, boolean deleteComplete);
-    public int removeEntries(String wordHash, Set urlHashes, boolean deleteComplete);
+    public boolean removeEntry(String wordHash, String urlHash);
+    public int removeEntries(String wordHash, Set urlHashes);
     public void addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean dhtCase);
     public void addEntries(indexContainer newEntries, long creationTime, boolean dhtCase);
 

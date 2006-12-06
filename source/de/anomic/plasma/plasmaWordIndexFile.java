@@ -64,12 +64,10 @@ public final class plasmaWordIndexFile {
     private final String theWordHash;
     private kelondroTree theIndex;
     private File         theLocation;
-    private boolean      delete;
 
-    public plasmaWordIndexFile(File databaseRoot, String wordHash, boolean deleteIfEmpty) {
+    public plasmaWordIndexFile(File databaseRoot, String wordHash) {
         theWordHash = wordHash;
         theIndex    = indexFile(databaseRoot, wordHash);
-        delete      = deleteIfEmpty;
     }
 
     public static boolean removePlasmaIndex(File databaseRoot, String wordHash) {
@@ -112,7 +110,7 @@ public final class plasmaWordIndexFile {
     public int size() {
         if (theIndex == null) return 0;
         int size = theIndex.size();
-        if ((size == 0) && (delete)) {
+        if (size == 0) {
             deleteComplete();
             return 0;
         } else {
