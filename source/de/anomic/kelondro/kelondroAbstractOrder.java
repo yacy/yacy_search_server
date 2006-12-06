@@ -85,6 +85,7 @@ public abstract class kelondroAbstractOrder implements kelondroOrder {
     }
     
     public boolean equals(kelondroOrder otherOrder) {
+        if (otherOrder == null) return false;
         String thisSig = this.signature();
         String otherSig = otherOrder.signature();
         if ((thisSig == null) || (otherSig == null)) return false;

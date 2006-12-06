@@ -27,6 +27,7 @@
 
 package de.anomic.index;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroException;
@@ -62,7 +63,9 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
             new kelondroColumn("o", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "posofphrase"),
             new kelondroColumn("i", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "worddistance"),
             new kelondroColumn("k", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b256,  1, "reserve")
-    });
+    },
+    kelondroBase64Order.enhancedCoder,
+    0);
     // available chars: b,e,j,q
     
     // static properties

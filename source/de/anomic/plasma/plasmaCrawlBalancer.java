@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
@@ -59,7 +60,7 @@ public class plasmaCrawlBalancer {
     private HashMap domainStacks;
     
     public plasmaCrawlBalancer(File stackFile) {
-        stack = kelondroStack.open(stackFile, new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength));
+        stack = kelondroStack.open(stackFile, new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 0));
         domainStacks = new HashMap();
     }
 

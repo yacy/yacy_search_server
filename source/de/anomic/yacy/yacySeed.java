@@ -481,62 +481,17 @@ public class yacySeed {
     public final boolean isOnline(final String type) {
         return type.equals(yacySeed.PEERTYPE_SENIOR) || type.equals(yacySeed.PEERTYPE_PRINCIPAL);
     }
-
-    public static String encodeLex(long c, int length) {
-        if (length < 0) { length = 0; }
-        final StringBuffer s = new StringBuffer();
-        if (c == 0) {
-            s.insert(0, '-');
-        } else {
-            while (c > 0) {
-                s.insert(0, (char) (32 + (c % 96)));
-                c = c / 96;
-            }
-        }
-        if (length != 0 && s.length() > length) {
-            throw new RuntimeException("encodeLex result '" + s + "' exceeds demanded length of " + length + " digits");
-        }
-        if (length == 0) { length = 1; } // rare exception for the case that c == 0
-        while (s.length() < length) { s.insert(0, '-'); }
-        return s.toString();
-    }
-
-    public static long decodeLex(String s) {
-        long c = 0;
-        for (int i = 0; i < s.length(); i++) {
-            c = c * 96 + (byte) s.charAt(i) - 32;
-        }
-        return c;
-    }
-
-    private static long maxLex(int len) {
-        // computes the maximum number that can be coded with a lex-encoded String of length len
-        long c = 0;
-        for (int i = 0; i < len; i++) {
-            c = c * 96 + 90;
-        }
-        return c;
-    }
-
-    private static long minLex(int len) {
-        // computes the minimum number that can be coded with a lex-encoded String of length len
-        long c = 0;
-        for (int i = 0; i < len; i++) {
-            c = c * 96 + 13;
-        }
-        return c;
-    }
-
-    public static final long minDHTNumber   = minLex(9);
-    public static final long maxDHTDistance = maxLex(9) - yacySeed.minDHTNumber;
+    
+    public static final long minDHTNumber   = kelondroBase64Order.enhancedCoder.cardinal("AAAAAAAAAAAA".getBytes());
+    public static final long maxDHTDistance = Long.MAX_VALUE;
 
     public final long dhtDistance(String wordhash) {
         // computes a virtual distance, the result must be set in relation to maxDHTDistace
         // if the distance is small, this peer is more responsible for that word hash
         // if the distance is big, this peer is less responsible for that word hash
-        final long myPos = decodeLex(this.hash.substring(0, 9));
-        final long wordPos = decodeLex(wordhash.substring(0, 9));
-        return (myPos > wordPos) ? (myPos - wordPos) : (myPos + yacySeed.maxDHTDistance - wordPos);
+        final long myPos = dhtPosition(this.hash);
+        final long wordPos = dhtPosition(wordhash);
+        return (myPos > wordPos) ? (myPos - wordPos) : (yacySeed.maxDHTDistance - wordPos + myPos);
     }
 
     public final long dhtPosition() {
@@ -546,7 +501,7 @@ public class yacySeed {
 
     public static long dhtPosition(String ahash) {
         // returns an absolute value
-        return decodeLex(ahash.substring(0, 9)) - yacySeed.minDHTNumber;
+        return kelondroBase64Order.enhancedCoder.cardinal(ahash.getBytes());
     }
 
     public static yacySeed genLocalSeed(plasmaSwitchboard sb) {
@@ -691,23 +646,5 @@ public class yacySeed {
             return new yacySeed(this.hash, (HashMap) (new HashMap(this.dna)).clone());
         }
     }
-
-/*  public static void main(String[] argv) {
-        try {
-            plasmaSwitchboard sb = new plasmaSwitchboard("../httpProxy.init", "../httpProxy.conf");
-            yacySeed ys = genLocalSeed(sb);
-            String yp, yz, yc;
-            System.out.println("YACY String    = " + ys.toString());
-            System.out.println("YACY SeedStr/p = " + (yp = ys.genSeedStr('p', null)));
-            //System.out.println("YACY SeedStr/z = " + (yz = ys.genSeedStr('z', null)));
-            System.out.println("YACY SeedStr/c = " + (yc = ys.genSeedStr('c', "abc")));
-            System.out.println("YACY remote/p  = " + genRemoteSeed(yp, null).toString());
-            //System.out.println("YACY remote/z  = " + genRemoteSeed(yz, null).toString());
-            System.out.println("YACY remote/c  = " + genRemoteSeed(yc, "abc").toString());
-            System.exit(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    } */
 
 }

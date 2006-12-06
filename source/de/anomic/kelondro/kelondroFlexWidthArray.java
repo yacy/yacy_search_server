@@ -63,7 +63,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         if (propfile.exists()) {
             props = serverFileUtils.loadHashMap(propfile);
             String stored_rowdef = (String) props.get("rowdef");
-            if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef))))) {
+            if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef, null, 0))))) {
                 System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
                         rowdef + "' for flex table '" + path + "', table " + tablename);
                 System.exit(-1);
@@ -81,7 +81,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
                 
                 kelondroColumn columns[] = new kelondroColumn[colend - colstart + 1];
                 for (int j = colstart; j <= colend; j++) columns[j-colstart] = rowdef.column(j);
-                col[colstart] = new kelondroFixedWidthArray(new File(tabledir, files[i]), new kelondroRow(columns), 16);
+                col[colstart] = new kelondroFixedWidthArray(new File(tabledir, files[i]), new kelondroRow(columns, null, 0), 16);
                 for (int j = colstart; j <= colend; j++) check = check.substring(0, j) + "X" + check.substring(j + 1);
             }
         }
@@ -100,7 +100,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
                 columns[j - p] = rowdef.column(j);
                 check = check.substring(0, j) + "X" + check.substring(j + 1);
             }
-            col[p] = new kelondroFixedWidthArray(new File(tabledir, colfilename(p, q)), new kelondroRow(columns), 16);
+            col[p] = new kelondroFixedWidthArray(new File(tabledir, colfilename(p, q)), new kelondroRow(columns, null, 0), 16);
         }
     }
     
@@ -267,7 +267,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
     public static void main(String[] args) {
         //File f = new File("d:\\\\mc\\privat\\fixtest.db");
         File f = new File("/Users/admin/");
-        kelondroRow rowdef = new kelondroRow("byte[] a-12, byte[] b-4");
+        kelondroRow rowdef = new kelondroRow("byte[] a-12, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0);
         String testname = "flextest";
         try {
             System.out.println("erster Test");

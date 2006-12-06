@@ -77,11 +77,12 @@ public class plasmaRankingCRProcess {
             "Cardinal LCount-2 {b64e}, Cardinal GCount-2 {b64e}, Cardinal ICount-2 {b64e}, Cardinal DCount-2 {b64e}, Cardinal TLength-3 {b64e}, " +
             "Cardinal WACount-3 {b64e}, Cardinal WUCount-3 {b64e}, Cardinal Flags-1 {b64e}, " +
             "Cardinal FUDate-3 {b64e}, Cardinal FDDate-3 {b64e}, Cardinal LUDate-3 {b64e}, " + 
-            "Cardinal UCount-2 {b64e}, Cardinal PCount-2 {b64e}, Cardinal ACount-2 {b64e}, Cardinal VCount-2 {b64e}, Cardinal Vita-2 {b64e}");
-    public static final kelondroRow CRG_colrow = new kelondroRow("byte[] Anchor-12");
+            "Cardinal UCount-2 {b64e}, Cardinal PCount-2 {b64e}, Cardinal ACount-2 {b64e}, Cardinal VCount-2 {b64e}, Cardinal Vita-2 {b64e}",
+            kelondroBase64Order.enhancedCoder, 0);
+    public static final kelondroRow CRG_colrow = new kelondroRow("byte[] Anchor-12", kelondroBase64Order.enhancedCoder, 0);
     public static final String CRG_accname = "CRG-a-attr";
     public static final String CRG_seqname = "CRG-a-coli";
-    public static final kelondroRow RCI_coli = new kelondroRow("byte[] RefereeDom-6");
+    public static final kelondroRow RCI_coli = new kelondroRow("byte[] RefereeDom-6", kelondroBase64Order.enhancedCoder, 0);
     public static final String RCI_colname = "RCI-a-coli";
 
     private static boolean accumulate_upd(File f, kelondroAttrSeq acc) {
@@ -260,7 +261,7 @@ public class plasmaRankingCRProcess {
         kelondroCollectionIndex newseq = null;
         if (newdb) {
             File path = to_file.getParentFile(); // path to storage place
-            newacc = new kelondroFlexTable(path, CRG_accname, 128 * 1024 * 1024, -1, CRG_accrow, kelondroBase64Order.enhancedCoder);
+            newacc = new kelondroFlexTable(path, CRG_accname, 128 * 1024 * 1024, -1, CRG_accrow);
             newseq = new kelondroCollectionIndex(path, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, 2, CRG_colrow);
         } else {
             if (!(to_file.exists())) {
@@ -421,7 +422,7 @@ public class plasmaRankingCRProcess {
 
                 // update domain-specific entry
                 rci_entry = rci.get(anchorDom.getBytes(), false);
-                if (rci_entry == null) rci_entry = new kelondroRowSet(RCI_coli, kelondroBase64Order.enhancedCoder, 0, 0);
+                if (rci_entry == null) rci_entry = new kelondroRowSet(RCI_coli, 0);
                 rci_entry.add(refereeDom.getBytes());
                 
                 // insert entry

@@ -65,7 +65,6 @@ import de.anomic.http.httpc.response;
 import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexURLEntry;
 import de.anomic.index.indexURLEntryNew;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexSplitTable;
@@ -98,7 +97,7 @@ public final class plasmaCrawlLURL {
         super();
         
         try {
-            urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", buffer, preloadTime, indexURLEntryNew.rowdef, kelondroBase64Order.enhancedCoder);
+            urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", buffer, preloadTime, indexURLEntryNew.rowdef);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);

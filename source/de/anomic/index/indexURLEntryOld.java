@@ -56,7 +56,9 @@ public class indexURLEntryOld implements indexURLEntry {
             "String language-2, " +                                  // language key; mainly the TDL
             "byte[] doctype-1, " +                                   //
             "Cardinal size-6 {b64e}, " +                             // size of file in bytes
-            "Cardinal wc-3 {b64e}");                                 // word count
+            "Cardinal wc-3 {b64e}",                                  // word count
+            kelondroBase64Order.enhancedCoder,
+            0);
 
     private URL url;
     private String descr;

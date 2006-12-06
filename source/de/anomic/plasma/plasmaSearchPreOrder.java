@@ -99,7 +99,7 @@ public final class plasmaSearchPreOrder {
         this.pageAcc = new TreeMap();
         for (int j = 0; j < count; j++) {
             iEntry = (indexRWIEntry) i.next();
-            if (iEntry.urlHash().length() != container.row().width(container.primarykey())) continue;
+            if (iEntry.urlHash().length() != container.row().width(container.row().primaryKey())) continue;
             if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) && (!(iEntry.flags().allOf(query.constraint)))) continue; // filter out entries that do not match the search constraint
             if (query.contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) {
                 if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasaudio)))) continue;

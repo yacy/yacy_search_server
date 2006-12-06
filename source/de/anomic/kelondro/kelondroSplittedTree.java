@@ -82,7 +82,7 @@ public class kelondroSplittedTree implements kelondroIndex {
         File f;
         for (int i = 0; i < forkfactor; i++) {
             f = dbFile(pathToFiles, filenameStub, forkfactor, rowdef.columns(), i);
-            ktfs[i] = kelondroTree.open(f, buffersize/forkfactor, preloadTime / forkfactor, rowdef, objectOrder, txtProps, txtPropsWidth);
+            ktfs[i] = kelondroTree.open(f, buffersize/forkfactor, preloadTime / forkfactor, rowdef, txtProps, txtPropsWidth);
         }
         this.order = objectOrder;
         ff = forkfactor;

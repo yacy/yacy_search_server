@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.kelondro.kelondroDynTree;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 
 public class plasmaWordConnotation {
@@ -59,7 +60,7 @@ public class plasmaWordConnotation {
     private kelondroDynTree refDB;
     
     public plasmaWordConnotation(File refDBfile, int bufferkb, long preloadTime, char fillChar) throws IOException {
-        refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, wordlength, nodesize, new kelondroRow("byte[] word-" + wordlength + ", Cardinal count-" + countlength), fillChar);
+        refDB = new kelondroDynTree(refDBfile, bufferkb * 0x400, preloadTime, wordlength, nodesize, new kelondroRow("byte[] word-" + wordlength + ", Cardinal count-" + countlength, kelondroNaturalOrder.naturalOrder, 0), fillChar);
     }
 
     private void addSingleRef(String word, String reference) throws IOException {

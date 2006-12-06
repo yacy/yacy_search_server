@@ -176,7 +176,7 @@ public class kelondroHashtable {
         kelondroColumn[] newCol = new kelondroColumn[rowdef.columns() + 1];
         newCol[0] = new kelondroColumn("Cardinal key-4 {b256}");
         for (int i = 0; i < rowdef.columns(); i++) newCol[i + 1] = rowdef.column(i);
-        return new kelondroRow(newCol);
+        return new kelondroRow(newCol, rowdef.objectOrder, rowdef.primaryKey);
     } 
     
     public static int power2(int x) {

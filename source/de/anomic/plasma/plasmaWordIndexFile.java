@@ -52,6 +52,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexRWIEntryOld;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
@@ -92,7 +93,8 @@ public final class plasmaWordIndexFile {
         long cacheSize = theLocation.length();
         if (cacheSize > 1048576) cacheSize = 1048576;
         return kelondroTree.open(theLocation, cacheSize, 0, 
-                    new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength + ", byte[] ba-" + (indexRWIEntryOld.urlEntryRow.objectsize() - yacySeedDB.commonHashLength)));
+                    new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength + ", byte[] ba-" + (indexRWIEntryOld.urlEntryRow.objectsize() - yacySeedDB.commonHashLength),
+                            kelondroBase64Order.enhancedCoder, 0));
     }
 
     public static File wordHash2path(File databaseRoot, String hash) {

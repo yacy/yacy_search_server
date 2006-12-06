@@ -364,7 +364,7 @@ public final class kelondroStack extends kelondroRecords {
 	for (int i = 0; i < args.length; i++) System.out.print(args[i] + " ");
 	System.out.println("");
 	byte[] ret = null;
-    kelondroRow lens = new kelondroRow("byte[] key-" + Integer.parseInt(args[1]) + ", byte[] value-" + Integer.parseInt(args[2]));
+    kelondroRow lens = new kelondroRow("byte[] key-" + Integer.parseInt(args[1]) + ", byte[] value-" + Integer.parseInt(args[2]), kelondroNaturalOrder.naturalOrder, 0);
 	try {
 	    if ((args.length > 4) || (args.length < 2)) {
 		System.err.println("usage: kelondroStack -c|-p|-v|-g|-i|-s [file]|[key [value]] <db-file>");

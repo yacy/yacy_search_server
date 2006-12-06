@@ -60,6 +60,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexRWIEntryOld;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroException;
@@ -92,7 +93,7 @@ public final class plasmaWordIndexAssortment {
         structure[2] = new kelondroColumn("Cardinal time-8 {b256}");
         kelondroColumn p = new kelondroColumn("byte[] urlprops-" + indexRWIEntryOld.urlEntryRow.objectsize());
         for (int i = 0; i < assortmentCapacity; i++) structure[3 + i] = p;
-        return new kelondroRow(structure);
+        return new kelondroRow(structure, kelondroBase64Order.enhancedCoder, 0);
     }
     
     private int assortmentCapacity(int rowsize) {

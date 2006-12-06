@@ -39,8 +39,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     private kelondroProfile profile;
     private TreeMap removeMarker;
 
-    public kelondroRowSet(kelondroRow rowdef, int objectCount, byte[] cache, kelondroOrder sortOrder, int sortColumn, int sortBound) {
-        super(rowdef, objectCount, cache, sortOrder, sortColumn, sortBound);
+    public kelondroRowSet(kelondroRow rowdef, int objectCount, byte[] cache, int sortBound) {
+        super(rowdef, objectCount, cache, sortBound);
         this.removeMarker = new TreeMap();
         this.profile = new kelondroProfile();
     }
@@ -61,12 +61,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         super(rowdef, exportedCollectionRowinstance);
         this.removeMarker = new TreeMap();
         this.profile = new kelondroProfile();
-    }
-    
-    public kelondroRowSet(kelondroRow rowdef, kelondroOrder objectOrder, int orderColumn, int objectCount) {
-        this(rowdef, objectCount);
-        assert (objectOrder != null);
-        setOrdering(objectOrder, orderColumn);
     }
     
     public kelondroRow.Entry get(byte[] key) {
@@ -106,13 +100,13 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
     public kelondroRow.Entry put(kelondroRow.Entry entry) {
         assert (entry != null);
-        assert (entry.getColBytes(super.sortColumn) != null);
+        assert (entry.getColBytes(rowdef.primaryKey) != null);
         //assert (!(serverLog.allZero(entry.getColBytes(super.sortColumn))));
         long handle = profile.startWrite();
         int index = -1;
         kelondroRow.Entry oldentry = null;
         synchronized (chunkcache) {
-            index = find(entry.bytes(), super.rowdef.colstart[super.sortColumn], super.rowdef.width(super.sortColumn));
+            index = find(entry.bytes(), super.rowdef.colstart[rowdef.primaryKey], super.rowdef.width(rowdef.primaryKey));
             if (isMarkedRemoved(index)) {
                 set(index, entry);
                 removeMarker.remove(new Integer(index));
@@ -152,7 +146,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
                 entry = get(p);
                 if (p < sortBound) {
                     // mark entry as to-be-deleted
-                    removeMarker.put(new Integer(p), entry.getColBytes(super.sortColumn));
+                    removeMarker.put(new Integer(p), entry.getColBytes(rowdef.primaryKey));
                     if (removeMarker.size() > removeMaxSize) resolveMarkedRemoved();
                 } else {
                     // remove directly by swap
@@ -171,7 +165,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     public void shape() {
-        assert (this.sortOrder != null); // we cannot shape without an object order
+        assert (rowdef.objectOrder != null); // we cannot shape without an object order
         synchronized (chunkcache) {
             try {
                 resolveMarkedRemoved();
@@ -204,7 +198,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         while (removeMarker.size() > 0) {
             nxt = (Integer) removeMarker.firstKey();
             a = (byte[]) removeMarker.remove(nxt);
-            assert kelondroNaturalOrder.compares(a, 0, a.length, get(nxt.intValue()).getColBytes(this.sortColumn), 0, a.length) == 0;
+            assert kelondroNaturalOrder.compares(a, 0, a.length, get(nxt.intValue()).getColBytes(rowdef.primaryKey), 0, a.length) == 0;
             assert (nxt.intValue() < sortBound);
             super.removeShift(idx, d, nxt.intValue());
             idx = nxt.intValue() - d;
@@ -228,29 +222,19 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     public void setOrdering(kelondroOrder newOrder, int newColumn) {
-        if ((this.sortOrder == null) ||
-                (!(this.sortOrder.signature().equals(newOrder.signature()))) ||
-                (newColumn != this.sortColumn)) {
+        if ((rowdef.objectOrder == null) ||
+                (!(rowdef.objectOrder.signature().equals(newOrder.signature()))) ||
+                (newColumn != rowdef.primaryKey)) {
             resolveMarkedRemoved();
-            this.sortOrder = newOrder;
+            rowdef.setOrdering(newOrder, newColumn);
             this.sortBound = 0;
-            this.sortColumn = newColumn;
         }
     }
-    
-    public kelondroOrder order() {
-        return this.sortOrder;
-    }
-
-    public int primarykey() {
-        return this.sortColumn;
-    }
-
 
     private int find(byte[] a, int astart, int alength) {
         // returns the chunknumber; -1 if not found
         
-        if (this.sortOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
+        if (rowdef.objectOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
         
         // check if a re-sorting make sense
         if ((this.chunkcount - this.sortBound) > collectionReSortLimit) shape();
@@ -267,7 +251,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     private int iterativeSearch(byte[] key, int astart, int alength, int leftBorder, int rightBound) {
         // returns the chunknumber
         
-        if (this.sortOrder == null) {
+        if (rowdef.objectOrder == null) {
             for (int i = leftBorder; i < rightBound; i++) {
                 if (match(key, astart, alength, i)) return i;
             }
@@ -283,7 +267,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     private int binarySearch(byte[] key, int astart, int alength) {
         // returns the exact position of the key if the key exists,
         // or -1 if the key does not exist
-        assert (this.sortOrder != null);
+        assert (rowdef.objectOrder != null);
         int l = 0;
         int rbound = this.sortBound;
         int p = 0;
@@ -302,7 +286,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         // returns the exact position of the key if the key exists,
         // or a position of an entry that is greater than the key if the
         // key does not exist
-        assert (this.sortOrder != null);
+        assert (rowdef.objectOrder != null);
         int l = 0;
         int rbound = this.sortBound;
         int p = 0;
@@ -319,17 +303,17 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
 
     private int compare(byte[] a, int astart, int alength, int chunknumber) {
         assert (chunknumber < chunkcount);
-        int l = Math.min(this.rowdef.width(this.sortColumn), Math.min(a.length - astart, alength));
-        return this.sortOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[this.sortColumn], this.rowdef.width(this.sortColumn));
+        int l = Math.min(this.rowdef.width(rowdef.primaryKey), Math.min(a.length - astart, alength));
+        return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[rowdef.primaryKey], this.rowdef.width(rowdef.primaryKey));
     }
     
     private boolean match(byte[] a, int astart, int alength, int chunknumber) {
         if (chunknumber >= chunkcount) return false;
         int i = 0;
-        int p = chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[this.sortColumn];
-        final int len = Math.min(this.rowdef.width(this.sortColumn), Math.min(alength, a.length - astart));
+        int p = chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[rowdef.primaryKey];
+        final int len = Math.min(this.rowdef.width(rowdef.primaryKey), Math.min(alength, a.length - astart));
         while (i < len) if (a[astart + i++] != chunkcache[p++]) return false;
-        return ((len == this.rowdef.width(this.sortColumn)) || (chunkcache[len] == 0)) ;
+        return ((len == this.rowdef.width(rowdef.primaryKey)) || (chunkcache[len] == 0)) ;
     }
     
     public kelondroProfile profile() {
@@ -411,10 +395,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     public final int[] cacheNodeStatus() {
         // a collection of different node cache status values
         return new int[]{0,0,0,0,0,0,0,0,0,0};
-    }
-    
-    public static kelondroIndex getRAMIndex(kelondroRow rowdef, int initSize) {
-        return new kelondroRowSet(rowdef, kelondroNaturalOrder.naturalOrder, 0, initSize);
     }
     
     public static void main(String[] args) {
@@ -506,7 +486,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         
         // remove test
         long start = System.currentTimeMillis();
-        kelondroRowSet c = new kelondroRowSet(new kelondroRow("byte[] a-12, byte[] b-12"), 0);
+        kelondroRowSet c = new kelondroRowSet(new kelondroRow("byte[] a-12, byte[] b-12", kelondroBase64Order.enhancedCoder, 0), 0);
         byte[] key;
         int testsize = 5000;
         byte[][] delkeys = new byte[testsize / 5][];

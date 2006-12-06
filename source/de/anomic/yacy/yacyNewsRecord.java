@@ -47,6 +47,7 @@ package de.anomic.yacy;
 import java.util.Date;
 import java.util.Map;
 
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
@@ -75,7 +76,8 @@ public class yacyNewsRecord {
             "String cat-" + categoryStringLength + "," +
             "String rec-" + yacyCore.universalDateShortPattern.length() + "," +
             "short  dis-2 {b64e}," +
-            "String att-" + attributesMaxLength
+            "String att-" + attributesMaxLength,
+            kelondroNaturalOrder.naturalOrder, 0
     );
     
     public yacyNewsRecord(String newsString) {

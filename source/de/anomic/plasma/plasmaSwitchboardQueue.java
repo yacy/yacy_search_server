@@ -54,6 +54,7 @@ import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.net.URL;
@@ -86,7 +87,9 @@ public class plasmaSwitchboardQueue {
             "String initiator-" + yacySeedDB.commonHashLength + ", " + // the crawling initiator
             "Cardinal depth-2 {b64e}, " +                              // the prefetch depth so far, starts at 0
             "String profile-" + plasmaCrawlProfile.crawlProfileHandleLength + ", " + // the name of the prefetch profile handle
-            "String urldescr-80");
+            "String urldescr-80",
+            kelondroNaturalOrder.naturalOrder,
+            0);
     
     private void initQueueStack() {
         sbQueueStack = kelondroStack.open(sbQueueStackPath, rowdef);

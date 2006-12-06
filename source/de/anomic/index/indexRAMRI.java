@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFixedWidthArray;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -84,7 +85,8 @@ public final class indexRAMRI implements indexRI {
                 "byte[] wordhash-" + yacySeedDB.commonHashLength + ", " +
                 "Cardinal occ-4 {b256}, " +
                 "Cardinal time-8 {b256}, " +
-                "byte[] urlprops-" + payloadrow.objectsize());
+                "byte[] urlprops-" + payloadrow.objectsize(),
+                kelondroBase64Order.enhancedCoder, 0);
         
         // read in dump of last session
         try {

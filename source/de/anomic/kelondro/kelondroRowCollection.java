@@ -37,8 +37,6 @@ public class kelondroRowCollection {
     protected long          lastTimeRead, lastTimeWrote;    
     protected kelondroRow   rowdef;
     protected int           sortBound;
-    protected kelondroOrder sortOrder;
-    protected int           sortColumn;
 
     private static final int exp_chunkcount  = 0;
     private static final int exp_last_read   = 1;
@@ -52,8 +50,6 @@ public class kelondroRowCollection {
         this.rowdef = rc.rowdef;
         this.chunkcache = rc.chunkcache;
         this.chunkcount = rc.chunkcount;
-        this.sortColumn = rc.sortColumn;
-        this.sortOrder = rc.sortOrder;
         this.sortBound = rc.sortBound;
         this.lastTimeRead = rc.lastTimeRead;
         this.lastTimeWrote = rc.lastTimeWrote;
@@ -63,19 +59,15 @@ public class kelondroRowCollection {
         this.rowdef = rowdef;
         this.chunkcache = new byte[objectCount * rowdef.objectsize()];
         this.chunkcount = 0;
-        this.sortColumn = 0;
-        this.sortOrder = null;
         this.sortBound = 0;
         this.lastTimeRead = System.currentTimeMillis();
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public kelondroRowCollection(kelondroRow rowdef, int objectCount, byte[] cache, kelondroOrder sortOrder, int sortColumn, int sortBound) {
+    public kelondroRowCollection(kelondroRow rowdef, int objectCount, byte[] cache, int sortBound) {
         this.rowdef = rowdef;
         this.chunkcache = cache;
         this.chunkcount = objectCount;
-        this.sortColumn = sortColumn;
-        this.sortOrder = sortOrder;
         this.sortBound = sortBound;
         this.lastTimeRead = System.currentTimeMillis();
         this.lastTimeWrote = System.currentTimeMillis();
@@ -94,13 +86,17 @@ public class kelondroRowCollection {
         this.lastTimeRead = (exportedCollection.getColLong(exp_last_read) + 10957) * day;
         this.lastTimeWrote = (exportedCollection.getColLong(exp_last_wrote) + 10957) * day;
         String sortOrderKey = exportedCollection.getColString(exp_order_type, null);
+        kelondroOrder oldOrder = null;
         if ((sortOrderKey == null) || (sortOrderKey.equals("__"))) {
-            this.sortOrder = null;
+            oldOrder = null;
         } else {
-            this.sortOrder = kelondroNaturalOrder.bySignature(sortOrderKey);
-            if (this.sortOrder == null) this.sortOrder = kelondroBase64Order.bySignature(sortOrderKey);
+            oldOrder = kelondroNaturalOrder.bySignature(sortOrderKey);
+            if (oldOrder == null) oldOrder = kelondroBase64Order.bySignature(sortOrderKey);
         }
-        this.sortColumn = (int) exportedCollection.getColLong(exp_order_col);
+        if ((rowdef.objectOrder != null) && (oldOrder != null) && (!(rowdef.objectOrder.signature().equals(oldOrder.signature()))))
+            throw new kelondroException("old collection order does not match with new order");
+        if (rowdef.primaryKey != (int) exportedCollection.getColLong(exp_order_col))
+            throw new kelondroException("old collection primary key does not match with new primary key");
         this.sortBound = (int) exportedCollection.getColLong(exp_order_bound);
         //assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
         if (sortBound > chunkcount) {
@@ -125,7 +121,8 @@ public class kelondroRowCollection {
                 "byte[] orderkey-2," +
                 "short ordercol-2 {b256}," +
                 "short orderbound-2 {b256}," +
-                "byte[] collection-" + chunkcachelength
+                "byte[] collection-" + chunkcachelength,
+                null, 0
                 );
     }
     
@@ -141,8 +138,8 @@ public class kelondroRowCollection {
         entry.setCol(exp_chunkcount, this.chunkcount);
         entry.setCol(exp_last_read, daysSince2000(this.lastTimeRead));
         entry.setCol(exp_last_wrote, daysSince2000(this.lastTimeWrote));
-        entry.setCol(exp_order_type, (this.sortOrder == null) ? "__".getBytes() : this.sortOrder.signature().getBytes());
-        entry.setCol(exp_order_col, this.sortColumn);
+        entry.setCol(exp_order_type, (this.rowdef.objectOrder == null) ? "__".getBytes() :this.rowdef.objectOrder.signature().getBytes());
+        entry.setCol(exp_order_col, this.rowdef.primaryKey);
         entry.setCol(exp_order_bound, this.sortBound);
         entry.setCol(exp_collection, chunkcache);
         return entry.bytes();
@@ -362,7 +359,7 @@ public class kelondroRowCollection {
     }
     
     protected final void sort() {
-        assert (this.sortOrder != null);
+        assert (this.rowdef.objectOrder != null);
         if (this.sortBound == this.chunkcount) return; // this is already sorted
         //System.out.println("SORT(chunkcount=" + this.chunkcount + ", sortBound=" + this.sortBound + ")");
         if (this.sortBound > 1) {
@@ -462,7 +459,7 @@ public class kelondroRowCollection {
     }
 
     public void uniq() {
-        assert (this.sortOrder != null);
+        assert (this.rowdef.objectOrder != null);
         // removes double-occurrences of chunks
         // this works only if the collection was ordered with sort before
         synchronized (chunkcache) {
@@ -491,14 +488,14 @@ public class kelondroRowCollection {
         assert (chunkcount * this.rowdef.objectsize() <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize() + ", chunkcache.length = " + chunkcache.length;
         assert (i >= 0) && (i < chunkcount) : "i = " + i + ", chunkcount = " + chunkcount;
         assert (j >= 0) && (j < chunkcount) : "j = " + j + ", chunkcount = " + chunkcount;
-        assert (this.sortOrder != null);
+        assert (this.rowdef.objectOrder != null);
         if (i == j) return 0;
-        assert (this.sortColumn == 0) : "this.sortColumn = " + this.sortColumn;
-        int keylength = this.rowdef.width(this.sortColumn);
-        int colstart  = this.rowdef.colstart[this.sortColumn];
+        assert (this.rowdef.primaryKey == 0) : "this.sortColumn = " + this.rowdef.primaryKey;
+        int keylength = this.rowdef.width(this.rowdef.primaryKey);
+        int colstart  = this.rowdef.colstart[this.rowdef.primaryKey];
         if (bugappearance(chunkcache, i * this.rowdef.objectsize() + colstart, keylength)) throw new kelondroException("bugappearance i");
         if (bugappearance(chunkcache, j * this.rowdef.objectsize() + colstart, keylength)) throw new kelondroException("bugappearance j");
-        int c = this.sortOrder.compare(
+        int c = this.rowdef.objectOrder.compare(
                 chunkcache,
                 i * this.rowdef.objectsize() + colstart,
                 keylength,

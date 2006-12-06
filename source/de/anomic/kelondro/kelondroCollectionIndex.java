@@ -55,7 +55,7 @@ public class kelondroCollectionIndex {
     private static final int idx_col_lastread   = 6;  // a time stamp, update time in days since 1.1.2000
     private static final int idx_col_lastwrote  = 7;  // a time stamp, update time in days since 1.1.2000
 
-    private kelondroRow indexRow() {
+    private static kelondroRow indexRow(int keylength, kelondroOrder payloadOrder) {
         return new kelondroRow(
             "byte[] key-" + keylength + "," +
             "int chunksize-4 {b256}," +
@@ -64,7 +64,8 @@ public class kelondroCollectionIndex {
             "byte flags-1 {b256}," +
             "int indexpos-4 {b256}," +
             "short lastread-2 {b256}, " +
-            "short lastwrote-2 {b256}"
+            "short lastwrote-2 {b256}",
+            payloadOrder, 0
             );
     }
     
@@ -103,8 +104,8 @@ public class kelondroCollectionIndex {
 
         boolean ramIndexGeneration = false;
         boolean fileIndexGeneration = !(new File(path, filenameStub + ".index").exists());
-        if (ramIndexGeneration) index = new kelondroRowSet(indexRow(), indexOrder, 0, 0);
-        if (fileIndexGeneration) index = new kelondroFlexTable(path, filenameStub + ".index", buffersize, preloadTime, indexRow(), indexOrder);
+        if (ramIndexGeneration) index = new kelondroRowSet(indexRow(keyLength, indexOrder), 0);
+        if (fileIndexGeneration) index = new kelondroFlexTable(path, filenameStub + ".index", buffersize, preloadTime, indexRow(keyLength, indexOrder));
                    
         // open array files
         this.arrays = new HashMap(); // all entries will be dynamically created with getArray()
@@ -121,7 +122,7 @@ public class kelondroCollectionIndex {
         String[] list = this.path.list();
         kelondroFixedWidthArray array;
         
-        kelondroRow irow = indexRow();
+        kelondroRow irow = indexRow(keylength, indexOrder);
         int t = kelondroRowCollection.daysSince2000(System.currentTimeMillis());
         for (int i = 0; i < list.length; i++) if (list[i].endsWith(".kca")) {
 
@@ -182,7 +183,7 @@ public class kelondroCollectionIndex {
             long buffersize, long preloadTime,
             int loadfactor, kelondroRow rowdef) throws IOException {
         // open/create index table
-        kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", buffersize / 2, preloadTime, indexRow(), indexOrder), buffersize / 2, true, false);
+        kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", buffersize / 2, preloadTime, indexRow(keylength, indexOrder)), buffersize / 2, true, false);
 
         // save/check property file for this array
         File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize());
@@ -190,7 +191,7 @@ public class kelondroCollectionIndex {
         if (propfile.exists()) {
             props = serverFileUtils.loadHashMap(propfile);
             String stored_rowdef = (String) props.get("rowdef");
-            if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef))))) {
+            if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef, null, 0))))) {
                 System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
                         rowdef + "' for array cluster '" + path + "/" + filenameStub + "'");
                 System.exit(-1);
@@ -207,7 +208,9 @@ public class kelondroCollectionIndex {
         int load = arrayCapacity(partitionNumber);
         kelondroRow rowdef = new kelondroRow(
                 "byte[] key-" + keylength + "," +
-                "byte[] collection-" + (kelondroRowCollection.exportOverheadSize + load * this.payloadrow.objectsize())
+                "byte[] collection-" + (kelondroRowCollection.exportOverheadSize + load * this.payloadrow.objectsize()),
+                index.row().objectOrder,
+                0
                 );
         if ((!(f.exists())) && (!create)) return null;
         kelondroFixedWidthArray a = new kelondroFixedWidthArray(f, rowdef, 0);
@@ -444,7 +447,7 @@ public class kelondroCollectionIndex {
         // read the row and define a collection
         byte[] indexkey = indexrow.getColBytes(idx_col_key);
         byte[] arraykey = arrayrow.getColBytes(0);
-        if (!(index.order().wellformed(arraykey))) {
+        if (!(index.row().objectOrder.wellformed(arraykey))) {
             // cleanup for a bad bug that corrupted the database
             index.remove(indexkey);  // the RowCollection must be considered lost
             array.remove(rownumber); // loose the RowCollection (we don't know how much is lost)
@@ -452,7 +455,7 @@ public class kelondroCollectionIndex {
             return new kelondroRowSet(this.payloadrow, 0);
         }
         kelondroRowSet collection = new kelondroRowSet(this.payloadrow, arrayrow.getColBytes(1)); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
-        if ((!(index.order().wellformed(indexkey))) || (index.order().compare(arraykey, indexkey) != 0)) {
+        if ((!(index.row().objectOrder.wellformed(indexkey))) || (index.row().objectOrder.compare(arraykey, indexkey) != 0)) {
             // check if we got the right row; this row is wrong. Fix it:
             index.remove(indexkey); // the wrong row cannot be fixed
             // store the row number in the index; this may be a double-entry, but better than nothing
@@ -531,7 +534,7 @@ public class kelondroCollectionIndex {
     public static void main(String[] args) {
 
         // define payload structure
-        kelondroRow rowdef = new kelondroRow("byte[] a-10, byte[] b-80");
+        kelondroRow rowdef = new kelondroRow("byte[] a-10, byte[] b-80", kelondroNaturalOrder.naturalOrder, 0);
         
         File path = new File(args[0]);
         String filenameStub = args[1];
@@ -545,12 +548,12 @@ public class kelondroCollectionIndex {
                         4 /*loadfactor*/, rowdef);
             
             // fill index with values
-            kelondroRowSet collection = new kelondroRowSet(rowdef, kelondroNaturalOrder.naturalOrder, 0, 0);
+            kelondroRowSet collection = new kelondroRowSet(rowdef, 0);
             collection.addUnique(rowdef.newEntry(new byte[][]{"abc".getBytes(), "efg".getBytes()}));
             collectionIndex.put("erstes".getBytes(), collection);
             
             for (int i = 0; i <= 17; i++) {
-                collection = new kelondroRowSet(rowdef, kelondroNaturalOrder.naturalOrder, 0, 0);
+                collection = new kelondroRowSet(rowdef, 0);
                 for (int j = 0; j < i; j++) {
                     collection.addUnique(rowdef.newEntry(new byte[][]{("abc" + j).getBytes(), "xxx".getBytes()}));
                 }
@@ -560,7 +563,7 @@ public class kelondroCollectionIndex {
             
             // extend collections with more values
             for (int i = 0; i <= 17; i++) {
-                collection = new kelondroRowSet(rowdef, kelondroNaturalOrder.naturalOrder, 0, 0);
+                collection = new kelondroRowSet(rowdef, 0);
                 for (int j = 0; j < i; j++) {
                     collection.addUnique(rowdef.newEntry(new byte[][]{("def" + j).getBytes(), "xxx".getBytes()}));
                 }
@@ -569,7 +572,7 @@ public class kelondroCollectionIndex {
             
             // printout of index
             collectionIndex.close();
-            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", buffersize, preloadTime, collectionIndex.indexRow(), kelondroNaturalOrder.naturalOrder);
+            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", buffersize, preloadTime, kelondroCollectionIndex.indexRow(9, kelondroNaturalOrder.naturalOrder));
             index.print();
             index.close();
         } catch (IOException e) {

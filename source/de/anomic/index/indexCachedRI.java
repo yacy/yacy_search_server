@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroMergeIterator;
-import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
@@ -270,7 +269,7 @@ public class indexCachedRI implements indexRI {
         return new kelondroMergeIterator(
                             riExtern.wordContainers(startHash, false),
                             backend.wordContainers(startHash, false),
-                            new indexContainerOrder(kelondroNaturalOrder.naturalOrder),
+                            new indexContainerOrder(this.indexOrder),
                             indexContainer.containerMergeMethod,
                             true);
     }

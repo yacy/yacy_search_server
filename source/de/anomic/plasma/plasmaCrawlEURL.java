@@ -145,7 +145,9 @@ public class plasmaCrawlEURL {
             "Cardinal loaddate-4 {b64e}, " +                           // the time when the url was last time tried to load
             "Cardinal retrycount-2 {b64e}, " +                         // number of load retries
             "String failcause-80, " +                                  // string describing load failure
-            "byte[] flags-2");                                         // extra space
+            "byte[] flags-2",                                          // extra space
+            kelondroBase64Order.enhancedCoder,
+            0);
 
     // the class object
     private kelondroIndex urlIndexFile = null;
@@ -155,7 +157,7 @@ public class plasmaCrawlEURL {
         String newCacheName = "urlErr3.table";
         cachePath.mkdirs();
         try {
-            urlIndexFile = new kelondroFlexTable(cachePath, newCacheName, bufferkb * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder);
+            urlIndexFile = new kelondroFlexTable(cachePath, newCacheName, bufferkb * 0x400, preloadTime, rowdef);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);

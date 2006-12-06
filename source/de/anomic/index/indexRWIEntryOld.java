@@ -27,6 +27,7 @@
 
 package de.anomic.index;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroRow;
@@ -55,7 +56,9 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
             new kelondroColumn("i", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 2, "worddistance"),
             new kelondroColumn("w", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 2, "wordcount"),
             new kelondroColumn("p", kelondroColumn.celltype_cardinal,  kelondroColumn.encoder_b64e, 2, "phrasecount")
-    });
+    },
+    kelondroBase64Order.enhancedCoder,
+    0);
 
     private static final int col_urlhash      =  0;
     private static final int col_quality      =  1;

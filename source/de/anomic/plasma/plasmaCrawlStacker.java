@@ -685,13 +685,13 @@ public final class plasmaCrawlStacker {
             if (!(cacheStacksPath.exists())) cacheStacksPath.mkdir(); // make the path
             
             if (this.dbtype == QUEUE_DB_TYPE_RAM) {
-                this.urlEntryCache = new kelondroRowSet(plasmaCrawlNURL.rowdef, kelondroBase64Order.enhancedCoder, 0, 0);
+                this.urlEntryCache = new kelondroRowSet(plasmaCrawlNURL.rowdef, 0);
             } 
             if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
                 String newCacheName = "urlPreNotice2.table";
                 cacheStacksPath.mkdirs();
                 try {
-                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, plasmaCrawlNURL.rowdef, kelondroBase64Order.enhancedCoder), bufferkb / 2 * 0x400, true, false);
+                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, plasmaCrawlNURL.rowdef), bufferkb / 2 * 0x400, true, false);
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(-1);

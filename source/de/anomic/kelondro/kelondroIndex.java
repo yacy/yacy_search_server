@@ -56,8 +56,6 @@ import java.util.Iterator;
 
 public interface kelondroIndex {
 
-    public kelondroOrder order();
-    public int primarykey();
     public int size() throws IOException;
     public kelondroProfile profile();
     public kelondroRow row() throws IOException;

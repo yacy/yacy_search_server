@@ -34,7 +34,7 @@ public class kelondroIntBytesMap {
     private kelondroIndex index;
     
     public kelondroIntBytesMap(int payloadSize, int initSize) {
-        index = kelondroRowSet.getRAMIndex(new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize), initSize);
+        index = new kelondroRowSet(new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, kelondroNaturalOrder.naturalOrder, 0), initSize);
     }
     
     public int size() {

@@ -35,7 +35,6 @@ import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 
@@ -43,23 +42,19 @@ public class indexContainer extends kelondroRowSet {
 
     private String wordHash;
 
-    public indexContainer(String wordHash, kelondroRow rowdef) {
-        this(wordHash, rowdef, kelondroBase64Order.enhancedCoder, 0);
-    }
-    
     public indexContainer(String wordHash, kelondroRowSet collection) {
         super(collection);
         this.wordHash = wordHash;
     }
     
-    public indexContainer(String wordHash, kelondroRow rowdef, kelondroOrder ordering, int column) {
-        super(rowdef, ordering, column, 0);
+    public indexContainer(String wordHash, kelondroRow rowdef) {
+        super(rowdef, 0);
         this.wordHash = wordHash;
         this.lastTimeWrote = 0;
     }
     
     public indexContainer topLevelClone() {
-        indexContainer newContainer = new indexContainer(this.wordHash, this.rowdef, this.sortOrder, this.sortColumn);
+        indexContainer newContainer = new indexContainer(this.wordHash, this.rowdef);
         newContainer.add(this, -1);
         return newContainer;
     }
@@ -317,8 +312,8 @@ public class indexContainer extends kelondroRowSet {
         int keylength = i1.rowdef.width(0);
         assert (keylength == i2.rowdef.width(0));
         indexContainer conj = new indexContainer(null, i1.rowdef); // start with empty search result
-        if (!((i1.order().signature().equals(i2.order().signature())) &&
-              (i1.primarykey() == i2.primarykey()))) return conj; // ordering must be equal
+        if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())) &&
+              (i1.rowdef.primaryKey() == i2.rowdef.primaryKey()))) return conj; // ordering must be equal
         Iterator e1 = i1.entries();
         Iterator e2 = i2.entries();
         int c;
@@ -332,7 +327,7 @@ public class indexContainer extends kelondroRowSet {
             while ((System.currentTimeMillis() - stamp) < time) {
                 assert (ie1.urlHash().length() == keylength) : "ie1.urlHash() = " + ie1.urlHash();
                 assert (ie2.urlHash().length() == keylength) : "ie2.urlHash() = " + ie2.urlHash();
-                c = i1.order().compare(ie1.urlHash(), ie2.urlHash());
+                c = i1.rowdef.getOrdering().compare(ie1.urlHash(), ie2.urlHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = (indexRWIEntry) e1.next(); else break;

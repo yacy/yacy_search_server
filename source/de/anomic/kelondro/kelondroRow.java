@@ -40,10 +40,14 @@ public class kelondroRow {
     protected kelondroColumn[] row;
     protected int[]            colstart;
     protected int              objectsize;
+    protected kelondroOrder    objectOrder;
+    protected int              primaryKey;
     protected Map              nickref = null; // a mapping from nicknames to Object[2]{kelondroColumn, Integer(colstart)}
     
-    public kelondroRow(kelondroColumn[] row) {
+    public kelondroRow(kelondroColumn[] row, kelondroOrder objectOrder, int primaryKey) {
         this.row = row;
+        this.objectOrder = objectOrder;
+        this.primaryKey = primaryKey;
         this.colstart = new int[row.length];
         this.objectsize = 0;
         for (int i = 0; i < row.length; i++) {
@@ -52,7 +56,9 @@ public class kelondroRow {
         }
     }
 
-    public kelondroRow(String structure) {
+    public kelondroRow(String structure, kelondroOrder objectOrder, int primaryKey) {
+        this.objectOrder = objectOrder;
+        this.primaryKey = primaryKey;
         // define row with row syntax
         // example:
         //# Structure=<pivot-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>
@@ -79,6 +85,19 @@ public class kelondroRow {
             this.row[i] = (kelondroColumn) l.get(i);
             this.objectsize += this.row[i].cellwidth();
         }
+    }
+    
+    public void setOrdering(kelondroOrder objectOrder, int primaryKey) {
+        this.objectOrder = objectOrder;
+        this.primaryKey = primaryKey;
+    }
+    
+    public kelondroOrder getOrdering() {
+        return this.objectOrder;
+    }
+
+    public int primaryKey() {
+        return this.primaryKey;
     }
     
     protected void genNickRef() {
@@ -128,11 +147,6 @@ public class kelondroRow {
         return new Entry(rowinstance);
     }
     
-    public EntryIndex newEntry(byte[] rowinstance, int index) {
-        if (rowinstance == null) return null;
-        return new EntryIndex(rowinstance, index);
-    }
-    
     public Entry newEntry(byte[] rowinstance, int start, int length) {
         if (rowinstance == null) return null;
         return new Entry(rowinstance, start, length);
@@ -148,6 +162,11 @@ public class kelondroRow {
         return new Entry(external, decimalCardinal);
     }
 
+    public EntryIndex newEntry(byte[] rowinstance, int index) {
+        if (rowinstance == null) return null;
+        return new EntryIndex(rowinstance, index);
+    }
+    
     public class Entry implements Comparable {
 
         private byte[] rowinstance;
@@ -227,10 +246,11 @@ public class kelondroRow {
         }
 
         public int compareTo(Object o) {
+            if (objectOrder == null) throw new kelondroException("objects cannot be compared, no order given");
             if (o instanceof Entry) {
-                return kelondroNaturalOrder.naturalOrder.compare(this.rowinstance, ((Entry) o).rowinstance);
+                return objectOrder.compare(getColBytes(primaryKey), ((Entry) o).getColBytes(primaryKey));
             }
-            throw new UnsupportedOperationException("works only for Entry objects");
+            throw new UnsupportedOperationException("works only for kelondroRow.Entry objects");
         }
         
         public byte[] bytes() {

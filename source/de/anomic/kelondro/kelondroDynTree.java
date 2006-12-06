@@ -298,10 +298,10 @@ public class kelondroDynTree {
             System.out.println("start");
             File file = new File("D:\\bin\\testDyn.db");
             if (file.exists()) {
-                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30"), '_');
+                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30", kelondroNaturalOrder.naturalOrder, 0), '_');
                 System.out.println("opened: table keylength=" + dt.table.row().width(0) + ", sectorsize=" + dt.table.row().width(1) + ", " + dt.table.sizeDyn() + " entries.");
             } else {
-                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30"), '_');
+                kelondroDynTree dt = new kelondroDynTree(file, 0x100000L, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30", kelondroNaturalOrder.naturalOrder, 0), '_');
                 String name;
                 kelondroTree t;
                 kelondroRow.Entry line;

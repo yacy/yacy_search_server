@@ -91,7 +91,9 @@ public class plasmaCrawlNURL {
         "Cardinal parentbr-3 {b64e}, " +                            // number of anchors of the parent
         "Cardinal forkfactor-4 {b64e}, " +                          // sum of anchors of all ancestors
         "byte[] flags-4, " +                                        // flags
-        "String handle-4"                                           // extra handle
+        "String handle-4",                                          // extra handle
+        kelondroBase64Order.enhancedCoder,
+        0
         );
     
     private final plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
@@ -132,7 +134,7 @@ public class plasmaCrawlNURL {
         limitStack = new plasmaCrawlBalancer(limitStackFile);
         overhangStack = new plasmaCrawlBalancer(overhangStackFile);
         remoteStack = new plasmaCrawlBalancer(remoteStackFile);
-        kelondroRow rowdef = new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength);
+        kelondroRow rowdef = new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 0);
         imageStack = kelondroStack.open(imageStackFile, rowdef);
         movieStack = kelondroStack.open(movieStackFile, rowdef);
         musicStack = kelondroStack.open(musicStackFile, rowdef);
@@ -196,7 +198,7 @@ public class plasmaCrawlNURL {
         String newCacheName = "urlNotice5.table";
         cacheStacksPath.mkdirs();
         try {
-            urlIndexFile = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, rowdef, kelondroBase64Order.enhancedCoder), bufferkb / 2 * 0x400, true, false);
+            urlIndexFile = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, rowdef), bufferkb / 2 * 0x400, true, false);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);

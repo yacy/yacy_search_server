@@ -79,8 +79,8 @@ public class kelondroDyn {
     public kelondroDyn(File file, long buffersize /* bytes */, long preloadTime, int key,
             int nodesize, char fillChar, kelondroOrder objectOrder) throws IOException {
         // creates or opens a dynamic tree
-        rowdef = new kelondroRow("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize);
-        kelondroTree tree = new kelondroTree(file, buffersize / 2, preloadTime, rowdef, objectOrder, 1, 8);
+        rowdef = new kelondroRow("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder, 0);
+        kelondroTree tree = new kelondroTree(file, buffersize / 2, preloadTime, rowdef, 1, 8);
         this.index = new kelondroCache(tree, buffersize / 2, true, false);
         this.keylen = index.row().width(0) - counterlen;
         this.reclen = index.row().width(1);

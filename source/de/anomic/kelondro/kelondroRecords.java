@@ -240,7 +240,18 @@ public class kelondroRecords {
             initNewFile(raf, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, buffersize / 10);
         }
         assignRowdef(rowdef);
-        initCache(buffersize / 10 * 9, preloadTime);        
+        if (fileExisted) {
+            kelondroOrder oldOrder = readOrderType();
+            if ((oldOrder != null) && (!(oldOrder.equals(rowdef.objectOrder)))) {
+                writeOrderType(); // write new order type
+                //throw new IOException("wrong object order upon initialization. new order is " + rowdef.objectOrder.toString() + ", old order was " + oldOrder.toString());
+            }
+        } else {
+            // create new file structure
+            writeOrderType();            
+        }
+        initCache(buffersize / 10 * 9, preloadTime);
+        
     }
 
     public kelondroRecords(kelondroRA ra, long buffersize /* bytes */, long preloadTime,
@@ -254,6 +265,7 @@ public class kelondroRecords {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail) System.exit(-1);
         }
+        writeOrderType();
         initCache(buffersize / 10 * 9, preloadTime);
     }
    
@@ -378,6 +390,7 @@ public class kelondroRecords {
     public kelondroRecords(kelondroRA ra, long buffersize, long preloadTime) throws IOException{
         this.filename = null;
         initExistingFile(ra, buffersize / 10);
+        readOrderType();
         initCache(buffersize / 10 * 9, preloadTime);
     }
 
@@ -412,7 +425,6 @@ public class kelondroRecords {
         for (int i = 0; i < COLDEFS.length; i++) {
             COLDEFS[i] = new kelondroColumn("col-" + i, kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, entryFile.readInt(POS_COLWIDTHS + 4 * i), "");
         }
-        this.ROW = new kelondroRow(COLDEFS);
         for (int i = 0; i < HANDLES.length; i++) {
             HANDLES[i] = new Handle(entryFile.readInt(POS_HANDLES + 4 * i));
         }
@@ -420,13 +432,38 @@ public class kelondroRecords {
             TXTPROPS[i] = new byte[TXTPROPW];
             entryFile.readFully(POS_TXTPROPS + TXTPROPW * i, TXTPROPS[i], 0, TXTPROPS[i].length);
         }
-
+        this.ROW = new kelondroRow(COLDEFS, readOrderType(), 0);
+        
         // assign remaining values that are only present at run-time
         this.overhead = OHBYTEC + 4 * OHHANDLEC;
         this.recordsize = this.overhead;
         this.recordsize = this.overhead + ROW.objectsize();
         this.headchunksize = this.overhead + this.ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
+    }
+    
+    private void writeOrderType() {
+        try {
+            setDescription((this.ROW.objectOrder == null) ? "__".getBytes() : this.ROW.objectOrder.signature().getBytes());
+        } catch (IOException e) {}
+    }
+    
+    private kelondroOrder readOrderType() {
+        try {
+            byte[] d = getDescription();
+            String s = new String(d).substring(0, 2);
+            return orderBySignature(s);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+    
+    public static kelondroOrder orderBySignature(String signature) {
+        kelondroOrder oo = null;
+        if (oo == null) oo = kelondroNaturalOrder.bySignature(signature);
+        if (oo == null) oo = kelondroBase64Order.bySignature(signature);
+        if (oo == null) oo = new kelondroNaturalOrder(true);
+        return oo;
     }
     
     private void initCache(long buffersize, long preloadTime) {

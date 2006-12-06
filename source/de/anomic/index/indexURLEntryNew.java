@@ -42,7 +42,9 @@ public class indexURLEntryNew implements indexURLEntry {
         "Cardinal limage-2 {b256}, " +  // # of embedded image links
         "Cardinal laudio-2 {b256}, " +  // # of embedded audio links; for audio: track number; for video: number of audio tracks
         "Cardinal lvideo-2 {b256}, " +  // # of embedded video links
-        "Cardinal lapp-2 {b256}");      // # of embedded links to applications
+        "Cardinal lapp-2 {b256}",       // # of embedded links to applications
+        kelondroBase64Order.enhancedCoder,
+        0);      
     
     private static final int col_hash     =  0;
     private static final int col_comp     =  1;

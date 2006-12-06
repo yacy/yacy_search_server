@@ -172,7 +172,7 @@ public class dbtest {
             profiler.start();
             
             // create the database access
-            kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength);
+            kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength, kelondroBase64Order.enhancedCoder, 0);
             if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
                 table = new kelondroCache(new kelondroTree(tablefile, buffer / 2, preload, testRow), buffer / 2, true, false);
@@ -186,11 +186,11 @@ public class dbtest {
             }
             if (dbe.equals("kelondroFlexTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), buffer, preload, testRow, kelondroBase64Order.enhancedCoder);
+                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), buffer, preload, testRow);
             }
             if (dbe.equals("kelondroFlexSplitTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexSplitTable(tablepath, new File(tablename).getName(), buffer, preload, testRow, kelondroBase64Order.enhancedCoder);
+                table = new kelondroFlexSplitTable(tablepath, new File(tablename).getName(), buffer, preload, testRow);
             }
             if (dbe.equals("mysql")) {
                 table = new dbTable("mysql", testRow);

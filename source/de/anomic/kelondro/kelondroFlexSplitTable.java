@@ -40,16 +40,14 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     // the set is divided into FlexTables with different entry date
     
     private HashMap tables;
-    private kelondroOrder objectOrder;
     private kelondroRow rowdef;
     private File path;
     private String tablename;
     private long buffersize;
     
-    public kelondroFlexSplitTable(File path, String tablename, long buffersize, long preloadTime, kelondroRow rowdef, kelondroOrder objectOrder) throws IOException {
+    public kelondroFlexSplitTable(File path, String tablename, long buffersize, long preloadTime, kelondroRow rowdef) throws IOException {
         this.path = path;
         this.tablename = tablename;
-        this.objectOrder = objectOrder;
         this.rowdef = rowdef;
         
         // initialized tables map
@@ -99,12 +97,12 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             date = maxf.substring(tablename.length() + 1);
             if (buffersize >= maxram) {
                 // this will cause usage of a complete RAM index
-                table = new kelondroCache(new kelondroFlexTable(path, maxf, maxram, preloadTime, rowdef, objectOrder), maxram / 10, true, false);
+                table = new kelondroCache(new kelondroFlexTable(path, maxf, maxram, preloadTime, rowdef), maxram / 10, true, false);
                 buffersize -= maxram;
                 buffersize -= maxram / 10;
             } else {
                 // this will cause a generation of a file index
-                table = new kelondroFlexTable(path, maxf, buffersize / (t.size() + 1), preloadTime, rowdef, objectOrder);
+                table = new kelondroFlexTable(path, maxf, buffersize / (t.size() + 1), preloadTime, rowdef);
                 buffersize -= buffersize / (t.size() + 1);
             }
             tables.put(date, table);
@@ -127,14 +125,6 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         else suffix.append(Integer.toString(year));
         if (month < 10) suffix.append("0").append(Integer.toString(month)); else suffix.append(Integer.toString(month));
         return new String(suffix);    
-    }
-    
-    public kelondroOrder order() {
-        return this.objectOrder;
-    }
-    
-    public int primarykey() {
-        return 0;
     }
     
     public synchronized int size() throws IOException {
@@ -198,7 +188,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
             // make new table
-            table = new kelondroFlexTable(path, tablename + "." + suffix, buffersize / (tables.size() + 1), -1, rowdef, objectOrder);
+            table = new kelondroFlexTable(path, tablename + "." + suffix, buffersize / (tables.size() + 1), -1, rowdef);
             tables.put(suffix, table);
         }
         table.put(row);
@@ -228,7 +218,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
             // make new table
-            table = new kelondroFlexTable(path, tablename + "." + suffix, buffersize / (tables.size() + 1), -1, rowdef, objectOrder);
+            table = new kelondroFlexTable(path, tablename + "." + suffix, buffersize / (tables.size() + 1), -1, rowdef);
             tables.put(suffix, table);
         }
         table.addUnique(row, entryDate);

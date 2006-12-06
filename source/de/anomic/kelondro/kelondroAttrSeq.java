@@ -335,7 +335,7 @@ public class kelondroAttrSeq {
                 rowdef.append('-');
                 rowdef.append(seq_len[i]);
             }
-            seqrow = new kelondroRow(new String(rowdef));
+            seqrow = new kelondroRow(new String(rowdef), null, 0);
         }
         
         public String toString() {
