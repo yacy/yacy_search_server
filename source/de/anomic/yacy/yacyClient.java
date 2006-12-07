@@ -533,14 +533,14 @@ public final class yacyClient {
                 // add the url entry to the word indexes
                 for (int m = 0; m < words; m++) {
                     assert (entry instanceof indexRWIEntryNew);
-                    container[m].add(new indexRWIEntry[]{entry}, System.currentTimeMillis());
+                    container[m].add(entry, System.currentTimeMillis());
                 }
                 // store url hash for statistics
                 urls[n] = urlEntry.hash();
             }
 
             // insert the containers to the index
-            for (int m = 0; m < words; m++) { containerCache.add(container[m], -1); }
+            for (int m = 0; m < words; m++) { containerCache.addAllUnique(container[m]); }
 
             // read index abstract
             if (abstractCache != null) {

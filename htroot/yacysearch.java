@@ -126,6 +126,12 @@ public class yacysearch {
             prop.put("type_resultbottomline", 0);
             prop.put("type_results", "");
             prop.put("display", display);
+            prop.put("contentdom", "text");
+            prop.put("contentdomCheckText", 1);
+            prop.put("contentdomCheckAudio", 0);
+            prop.put("contentdomCheckVideo", 0);
+            prop.put("contentdomCheckImage", 0);
+            prop.put("contentdomCheckApp", 0);
             return prop;
         }
 
@@ -163,8 +169,16 @@ public class yacysearch {
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
         
+        // find search domain
+        int contentdom = plasmaSearchQuery.CONTENTDOM_TEXT;
+        String cds = post.get("contentdom", "text");
+        if (cds.equals("text")) contentdom = plasmaSearchQuery.CONTENTDOM_TEXT;
+        if (cds.equals("audio")) contentdom = plasmaSearchQuery.CONTENTDOM_AUDIO;
+        if (cds.equals("video")) contentdom = plasmaSearchQuery.CONTENTDOM_VIDEO;
+        if (cds.equals("image")) contentdom = plasmaSearchQuery.CONTENTDOM_IMAGE;
+        if (cds.equals("app")) contentdom = plasmaSearchQuery.CONTENTDOM_APP;
+        
         serverObjects prop = new serverObjects();
-
         if (post.get("cat", "href").equals("href")) {
 
             final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
@@ -234,13 +248,13 @@ public class yacysearch {
             if (order.endsWith("YBR")) order3 = plasmaSearchRankingProfile.ORDER_YBR;
             if (order.endsWith("Date")) order3 = plasmaSearchRankingProfile.ORDER_DATE;
             if (order.endsWith("Quality")) order3 = plasmaSearchRankingProfile.ORDER_QUALITY;
-
+            
             // do the search
             plasmaSearchQuery thisSearch = new plasmaSearchQuery(
                     query,
                     maxDistance,
                     prefermask,
-                    plasmaSearchQuery.CONTENTDOM_TEXT,
+                    contentdom,
                     count,
                     searchtime,
                     urlmask,
@@ -408,6 +422,12 @@ public class yacysearch {
         prop.put("display", display);
         prop.put("indexof", (indexof) ? "on" : "off");
         prop.put("constraint", constraint.exportB64());
+        prop.put("contentdom", cds);
+        prop.put("contentdomCheckText", (contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 1 : 0);
+        prop.put("contentdomCheckAudio", (contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 1 : 0);
+        prop.put("contentdomCheckVideo", (contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);
+        prop.put("contentdomCheckImage", (contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
+        prop.put("contentdomCheckApp", (contentdom == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
 
         // return rewrite properties
         return prop;

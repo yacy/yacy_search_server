@@ -79,6 +79,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     public void addUnique(kelondroRow.Entry row) {
+        // add an entry without doing a double-occurrence test
         if (removeMarker.size() == 0) {
             super.addUnique(row);
         } else {

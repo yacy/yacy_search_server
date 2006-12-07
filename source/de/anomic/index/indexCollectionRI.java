@@ -155,7 +155,13 @@ public class indexCollectionRI implements indexRI {
     public synchronized void addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
         indexContainer container = new indexContainer(wordHash, collectionIndex.payloadRow());
         container.add(newEntry);
-        addEntries(container, updateTime, dhtCase);
+        try {
+            collectionIndex.merge(wordHash.getBytes(), (kelondroRowCollection) container);
+        } catch (kelondroOutOfLimitsException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public synchronized void addEntries(indexContainer newEntries, long creationTime, boolean dhtCase) {

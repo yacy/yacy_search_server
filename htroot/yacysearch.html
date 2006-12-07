@@ -22,12 +22,20 @@
     <p class="yacylogo"><a href="http://yacy.net/yacy/" class="yacylogo"><img src="/env/grafics/yacy.png" alt="yacy" /></a></p>
     <h2>#[promoteSearchPageGreeting]#</h2>
     <fieldset class="maininput">
-	 <table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td width="80%">
-      <input name="search" type="text" size="50" maxlength="80" value="#[former]#" onClick='document.searchform.Enter.value = "Search"' />
-      <input type="submit" name="Enter" value="Search" />
-      </td><td width="20%">
-      <a href="index.html?display=#[display]#&searchoptions=1&count=#[count]#&order=#[order]#&resource=#[resource]#&time=#[time]#&urlmaskfilter=#[urlmaskfilter]#&prefermaskfilter=#[prefermaskfilter]#&cat=#[cat]#&type=#[type]#&constraint=#[constraint]#&former=#[former]#">more options<a>
-      </td></tr>
+	 <table width="100%" border="0" cellspacing="0" cellpadding="0">
+	   <tr><td width="80%">
+       <input name="search" type="text" size="50" maxlength="80" value="#[former]#" onClick='document.searchform.Enter.value = "Search"' />
+       <input type="submit" name="Enter" value="Search" />
+       </td><td width="20%">
+       <a href="index.html?display=#[display]#&searchoptions=1&count=#[count]#&order=#[order]#&resource=#[resource]#&time=#[time]#&urlmaskfilter=#[urlmaskfilter]#&prefermaskfilter=#[prefermaskfilter]#&cat=#[cat]#&type=#[type]#&constraint=#[constraint]#&contentdom=#[contentdom]#&former=#[former]#">more options<a>
+       </td></tr>
+       <tr><td width="100%" colspan="2">
+       <input type="radio"  name="contentdom" value="text" #(contentdomCheckText)#::checked="checked"#(/contentdomCheckText)# />Text&nbsp;&nbsp;
+       <input type="radio"  name="contentdom" value="image" #(contentdomCheckImage)#::checked="checked"#(/contentdomCheckImage)# />Images&nbsp;&nbsp;
+       <input type="radio"  name="contentdom" value="audio" #(contentdomCheckAudio)#::checked="checked"#(/contentdomCheckAudio)# />Audio&nbsp;&nbsp;
+       <input type="radio"  name="contentdom" value="video" #(contentdomCheckVideo)#::checked="checked"#(/contentdomCheckVideo)# />Video&nbsp;&nbsp;
+       <input type="radio"  name="contentdom" value="app" #(contentdomCheckApp)#::checked="checked"#(/contentdomCheckApp)# />Applications
+       </td></tr>
      </table>
   <input type="hidden" name="former" value="#[former]#" />
   <input type="hidden" name="count" value="#[count]#" />

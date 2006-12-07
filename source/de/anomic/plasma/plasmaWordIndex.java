@@ -298,14 +298,14 @@ public final class plasmaWordIndex implements indexRI {
         if (container == null) {
             container = dhtInCache.getContainer(wordHash, urlselection, -1);
         } else {
-            container.add(dhtInCache.getContainer(wordHash, urlselection, -1), -1);
+            container.addAllUnique(dhtInCache.getContainer(wordHash, urlselection, -1));
         }
 
         // get from collection index
         if (container == null) {
             container = collections.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime);
         } else {
-            container.add(collections.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime), -1);
+            container.addAllUnique(collections.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime));
         }
         return container;
     }
@@ -362,9 +362,9 @@ public final class plasmaWordIndex implements indexRI {
 
     public indexContainer deleteContainer(String wordHash) {
         indexContainer c = new indexContainer(wordHash, indexRWIEntryNew.urlEntryRow);
-        c.add(dhtInCache.deleteContainer(wordHash), -1);
-        c.add(dhtOutCache.deleteContainer(wordHash), -1);
-        c.add(collections.deleteContainer(wordHash), -1);
+        c.addAllUnique(dhtInCache.deleteContainer(wordHash));
+        c.addAllUnique(dhtOutCache.deleteContainer(wordHash));
+        c.addAllUnique(collections.deleteContainer(wordHash));
         return c;
     }
     

@@ -42,7 +42,8 @@
 		<a href="?urlHash=#[hash]#&viewMode=iframe&words=#[words]#">Original</a> |   
 		<a href="?urlHash=#[hash]#&viewMode=plain&words=#[words]#">Plain Text</a> |
 		<a href="?urlHash=#[hash]#&viewMode=parsed&words=#[words]#">Parsed Text</a> |
-		<a href="?urlHash=#[hash]#&viewMode=sentences&words=#[words]#">Parsed Sentences</a>		
+		<a href="?urlHash=#[hash]#&viewMode=sentences&words=#[words]#">Parsed Sentences</a> |
+		<a href="?urlHash=#[hash]#&viewMode=links&words=#[words]#">Link List</a>
 	</td>
 </tr>
 </table>
@@ -85,6 +86,19 @@ Unsupported protocol.
 	<h3>Original Resource Content</h3><br>
 	<iframe src="#[url]#" width="800" height="400">
 	</iframe>
+:: <!-- 5 -->
+	<h3>Link List</h3><br>
+	<table border="0" cellpadding="2" cellspacing="1">
+		#{links}#
+			<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+				<td>#[nr]#</td>
+				<td><tt>#[type]#</tt></td>
+				<td><tt>#[text]#</tt></td>
+				<td><tt>#[link]#</tt></td>
+				<td><tt>#[attr]#</tt></td>
+			</tr>
+		#{/links}#
+	</table>	
 #(/viewMode)#
 </p>
 

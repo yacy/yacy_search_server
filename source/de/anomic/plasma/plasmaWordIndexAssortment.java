@@ -57,7 +57,6 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexRWIEntryOld;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -127,7 +126,7 @@ public final class plasmaWordIndexAssortment {
         int al = assortmentCapacity(row.objectsize());
         for (int i = 0; i < al; i++) try {
             // fill AND convert old entries to new entries
-            container.add(new indexRWIEntry[] { new indexRWIEntryNew(new indexRWIEntryOld(row.getColBytes(3 + i))) }, updateTime);
+            container.add(new indexRWIEntryNew(new indexRWIEntryOld(row.getColBytes(3 + i))), updateTime);
         } catch (kelondroException e) {}
         return container;
     }

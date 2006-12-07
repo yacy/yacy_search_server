@@ -145,14 +145,14 @@ public class indexCachedRI implements indexRI {
         if (container == null) {
             container = riIntern.getContainer(wordHash, urlselection, maxTime);
         } else {
-            container.add(riIntern.getContainer(wordHash, urlselection, maxTime), maxTime);
+            container.addAllUnique(riIntern.getContainer(wordHash, urlselection, maxTime));
         }
 
         // get from collection index
         if (container == null) {
             container = backend.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime);
         } else {
-            container.add(backend.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime), maxTime);
+            container.addAllUnique(backend.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime));
         }
         return container;
     }
@@ -208,8 +208,8 @@ public class indexCachedRI implements indexRI {
 
     public indexContainer deleteContainer(String wordHash) {
         indexContainer c = riIntern.deleteContainer(wordHash);
-        if (c == null) c = riExtern.deleteContainer(wordHash); else c.add(riExtern.deleteContainer(wordHash), -1);
-        if (c == null) c = backend.deleteContainer(wordHash); else c.add(backend.deleteContainer(wordHash), -1);
+        if (c == null) c = riExtern.deleteContainer(wordHash); else c.addAllUnique(riExtern.deleteContainer(wordHash));
+        if (c == null) c = backend.deleteContainer(wordHash); else c.addAllUnique(backend.deleteContainer(wordHash));
         return c;
     }
     

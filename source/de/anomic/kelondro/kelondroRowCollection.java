@@ -251,20 +251,17 @@ public class kelondroRowCollection {
         }
         return false;
     }
-    
-    public final void addAll(kelondroRowCollection c) {
-        assert(rowdef.objectsize() >= c.rowdef.objectsize());
+
+    public final void addAllUnique(kelondroRowCollection c) {
+        if (c == null) return;
+        assert(rowdef.objectsize() == c.rowdef.objectsize());
         synchronized(chunkcache) {
             ensureSize(chunkcount + c.size());
-        }
-        Iterator i = c.rows();
-        kelondroRow.Entry entry;
-        while (i.hasNext()) {
-            entry = (kelondroRow.Entry) i.next();
-            addUnique(entry);
+            System.arraycopy(c.chunkcache, 0, chunkcache, rowdef.objectsize() * chunkcount, rowdef.objectsize() * c.size());
+            chunkcount += c.size();
         }
     }
-    
+
     protected final void removeShift(int pos, int dist, int upBound) {
         assert ((pos + dist) * rowdef.objectsize() >= 0) : "pos = " + pos + ", dist = " + dist + ", rowdef.objectsize() = " + rowdef.objectsize;
         assert (pos * rowdef.objectsize() >= 0) : "pos = " + pos + ", rowdef.objectsize() = " + rowdef.objectsize;

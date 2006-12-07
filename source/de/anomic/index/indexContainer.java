@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 
@@ -55,7 +54,7 @@ public class indexContainer extends kelondroRowSet {
     
     public indexContainer topLevelClone() {
         indexContainer newContainer = new indexContainer(this.wordHash, this.rowdef);
-        newContainer.add(this, -1);
+        newContainer.addAllUnique(this);
         return newContainer;
     }
     
@@ -70,60 +69,53 @@ public class indexContainer extends kelondroRowSet {
     public String getWordHash() {
         return wordHash;
     }
-
-    public int add(indexRWIEntry entry) {
+    
+    public void add(indexRWIEntry entry) {
+        // add without double-occurrence test
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
         this.addUnique(entry.toKelondroEntry());
-        return 1;
     }
-
-    public int add(indexRWIEntry entry, long updateTime) {
+    
+    public void add(indexRWIEntry entry, long updateTime) {
+        // add without double-occurrence test
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
         this.add(entry);
         this.lastTimeWrote = updateTime;
-        return 1;
-    }
-
-    public int add(indexRWIEntry[] entries, long updateTime) {
-        for (int i = 0; i < entries.length; i++) this.add(entries[i], updateTime);
-        return entries.length;
-    }
-
-    public int add(indexContainer c, long maxTime) {
-        // returns the number of new elements
-        long timeout = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
-        if (c == null) return 0;
-        int x = 0;
-        synchronized (c) {
-            Iterator i = c.entries();
-            while (i.hasNext()) {
-                try {
-                    if (addi((indexRWIEntry) i.next())) x++;
-                } catch (ConcurrentModificationException e) {
-                    e.printStackTrace();
-                }
-                if (System.currentTimeMillis() > timeout) break;
-            }
-        }
-        this.lastTimeWrote = java.lang.Math.max(this.lastTimeWrote, c.updated());
-        return x;
     }
     
-    private boolean addi(indexRWIEntry entry) {
+    /*
+    public void addAllUnique(indexContainer c) {
+        // this method can be called if all entries in c are known to be unique with reference to
+        // the entries in this container; that means: there are no double occurrences anywhere
+        // in/and between c and this.
+        super.addAllUnique((kelondroRowCollection) c);
+    }
+
+    public static final indexContainer mergeUnique(indexContainer a, boolean aIsClone, indexContainer b, boolean bIsClone) {
+        if ((aIsClone) && (bIsClone)) {
+            if (a.size() > b.size()) return mergeUnique(a, b); else return mergeUnique(b, a);
+        }
+        if (aIsClone) return mergeUnique(a, b);
+        if (bIsClone) return mergeUnique(b, a);
+        if (a.size() > b.size()) return mergeUnique(a, b); else return mergeUnique(b, a);
+    }
+    */
+    
+    public indexRWIEntry put(indexRWIEntry entry) {
+        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
+        kelondroRow.Entry r = super.put(entry.toKelondroEntry());
+        if (r == null) return null;
+        return new indexRWIEntryNew(r);
+    }
+    
+    public boolean putRecent(indexRWIEntry entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
         // returns true if the new entry was added, false if it already existed
         kelondroRow.Entry oldEntryRow = this.put(entry.toKelondroEntry());
         if (oldEntryRow == null) {
             return true;
         } else {
-            indexRWIEntry oldEntry;
-            if (entry instanceof indexRWIEntryNew)
-                oldEntry = new indexRWIEntryNew(oldEntryRow);
-            else try {
-                oldEntry = new indexRWIEntryNew(new indexRWIEntryOld(oldEntryRow));
-            } catch (kelondroException e) {
-                return false;
-            }
+            indexRWIEntry oldEntry = new indexRWIEntryNew(oldEntryRow);
             if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
                 this.put(oldEntry.toKelondroEntry()); // put it back
                 return false;
@@ -133,6 +125,25 @@ public class indexContainer extends kelondroRowSet {
         }
     }
 
+    public int putAllRecent(indexContainer c) {
+        // adds all entries in c and checks every entry for double-occurrence
+        // returns the number of new elements
+        if (c == null) return 0;
+        int x = 0;
+        synchronized (c) {
+            Iterator i = c.entries();
+            while (i.hasNext()) {
+                try {
+                    if (putRecent((indexRWIEntry) i.next())) x++;
+                } catch (ConcurrentModificationException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        this.lastTimeWrote = java.lang.Math.max(this.lastTimeWrote, c.updated());
+        return x;
+    }
+    
     public indexRWIEntry get(String urlHash) {
         kelondroRow.Entry entry = this.get(urlHash.getBytes());
         if (entry == null) return null;
@@ -204,12 +215,13 @@ public class indexContainer extends kelondroRowSet {
         }
     }
 
+    /*
     public static Object containerMerge(Object a, Object b) {
         indexContainer c = (indexContainer) a;
         c.add((indexContainer) b, -1);
         return c;
     }
-    
+    */
     public static indexContainer joinContainer(Collection containers, long time, int maxDistance) {
         
         long stamp = System.currentTimeMillis();

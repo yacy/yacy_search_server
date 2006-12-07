@@ -315,8 +315,9 @@ public class kelondroCollectionIndex {
                 kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false);
                 
                 // join with new collection
-                oldcollection.addAll(collection);
+                oldcollection.addAllUnique(collection);
                 oldcollection.shape();
+                oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
                 oldcollection.trim();
                 collection = oldcollection;
             }

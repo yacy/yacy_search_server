@@ -83,6 +83,15 @@ public class index {
             }
         }
 
+        // search domain
+        int contentdom = plasmaSearchQuery.CONTENTDOM_TEXT;
+        String cds = (post == null) ? "text" : post.get("contentdom", "text");
+        if (cds.equals("text")) contentdom = plasmaSearchQuery.CONTENTDOM_TEXT;
+        if (cds.equals("audio")) contentdom = plasmaSearchQuery.CONTENTDOM_AUDIO;
+        if (cds.equals("video")) contentdom = plasmaSearchQuery.CONTENTDOM_VIDEO;
+        if (cds.equals("image")) contentdom = plasmaSearchQuery.CONTENTDOM_IMAGE;
+        if (cds.equals("app")) contentdom = plasmaSearchQuery.CONTENTDOM_APP;
+        
         // we create empty entries for template strings
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
@@ -123,8 +132,12 @@ public class index {
         prop.put("display", display);
         prop.put("constraint", constraint);
         prop.put("searchoptions_display", display);
-        
-        
+        prop.put("contentdomCheckText", (contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 1 : 0);
+        prop.put("contentdomCheckAudio", (contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 1 : 0);
+        prop.put("contentdomCheckVideo", (contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);
+        prop.put("contentdomCheckImage", (contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
+        prop.put("contentdomCheckApp", (contentdom == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
+
         return prop;
     }
 

@@ -51,8 +51,12 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeSet;
 
 import de.anomic.data.wikiCode;
+import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.index.indexURLEntry;
@@ -75,6 +79,7 @@ public class ViewFile {
     public static final int VIEW_MODE_AS_PARSED_TEXT = 2;
     public static final int VIEW_MODE_AS_PARSED_SENTENCES = 3;
     public static final int VIEW_MODE_AS_IFRAME = 4;
+    public static final int VIEW_MODE_AS_LINKLIST = 5;
 
     public static final String[] highlightingColors = new String[] {
         "255,255,100",
@@ -271,7 +276,7 @@ public class ViewFile {
         } else if (viewMode.equals("iframe")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME);
             prop.put("viewMode_url", url.toNormalform());
-        } else if (viewMode.equals("parsed") || viewMode.equals("sentences")) {
+        } else if (viewMode.equals("parsed") || viewMode.equals("sentences") || viewMode.equals("links")) {
             // parsing the resource content
             plasmaParserDocument document = null;
             try {
@@ -305,44 +310,51 @@ public class ViewFile {
 
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_TEXT);
                 prop.put("viewMode_parsedText", content);
-            } else {
+            } else if (viewMode.equals("sentences")) {
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_SENTENCES);
                 final Enumeration sentences = document.getSentences(pre);
 
                 boolean dark = true;
                 int i = 0;
-                if (sentences != null)
+                if (sentences != null) {
+                    String[] wordArray = wordArray(post.get("words", null));
+                    
+                    // Search word highlighting
                     while (sentences.hasMoreElements()) {
-                        String currentSentence = wikiCode.replaceHTML((String) sentences.nextElement());
-
-                        // Search word highlighting
-                        String words = post.get("words", null);
-                        if (words != null) {
-                            try {
-                                words = URLDecoder.decode(words, "UTF-8");
-                            } catch (UnsupportedEncodingException e) {
-                            }
-
-                            String[] wordArray = words.substring(1,
-                                    words.length() - 1).split(",");
-                            for (int j = 0; j < wordArray.length; j++) {
-                                String currentWord = wordArray[j].trim();
-                                currentSentence = currentSentence.replaceAll(
-                                        currentWord,
-                                        "<b style=\"color: black; background-color: rgb("
-                                                + highlightingColors[j % 6]
-                                                + ");\">" + currentWord
-                                                + "</b>");
-                            }
-                        }
-
                         prop.put("viewMode_sentences_" + i + "_nr", Integer.toString(i + 1));
-                        prop.put("viewMode_sentences_" + i + "_text", currentSentence);
+                        prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, (String) sentences.nextElement()));
                         prop.put("viewMode_sentences_" + i + "_dark", ((dark) ? 1 : 0));
                         dark = !dark;
                         i++;
                     }
+                }
                 prop.put("viewMode_sentences", i);
+
+            } else if (viewMode.equals("links")) {
+                prop.put("viewMode", VIEW_MODE_AS_LINKLIST);
+                String[] wordArray = wordArray(post.get("words", null));
+                boolean dark = true;
+                int i = 0;
+                i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0));
+                i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
+                i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0));
+                dark = (i % 2 == 0);
+                
+                TreeSet ts = document.getImages();
+                Iterator tsi = ts.iterator();
+                htmlFilterImageEntry entry;
+                while (tsi.hasNext()) {
+                    entry = (htmlFilterImageEntry) tsi.next();
+                    prop.put("viewMode_links_" + i + "_nr", i);
+                    prop.put("viewMode_links_" + i + "_dark", ((dark) ? 1 : 0));
+                    prop.put("viewMode_links_" + i + "_type", "image");
+                    prop.put("viewMode_links_" + i + "_text", markup(wordArray, entry.alt()));
+                    prop.put("viewMode_links_" + i + "_link", "<a href=\"" + (String) entry.url().toNormalform() + "\">" + markup(wordArray, (String) entry.url().toNormalform()) + "</a>");
+                    prop.put("viewMode_links_" + i + "_attr", entry.width() + "&nbsp;x&nbsp;" + entry.height());
+                    dark = !dark;
+                    i++;
+                }
+                prop.put("viewMode_links", i);
 
             }
             if (document != null) document.close();
@@ -358,4 +370,46 @@ public class ViewFile {
         return prop;
     }
 
+    private static final String[] wordArray(String words) {
+        String[] w = null;
+        if (words != null) try {
+            words = URLDecoder.decode(words, "UTF-8");
+            w = words.substring(1, words.length() - 1).split(",");
+            if (w.length == 0) return null;
+        } catch (UnsupportedEncodingException e) {}
+        return w;
+    }
+    
+    private static final String markup(String[] wordArray, String message) {
+        message = wikiCode.replaceHTML(message);
+        if (wordArray != null) for (int j = 0; j < wordArray.length; j++) {
+            String currentWord = wordArray[j].trim();
+            message = message.replaceAll(currentWord,
+                            "<b style=\"color: black; background-color: rgb("
+                          + highlightingColors[j % 6]
+                          + ");\">" + currentWord
+                          + "</b>");
+         }
+        return message;
+    }
+    
+    private static int putMediaInfo(serverObjects prop, String[] wordArray, int c, Map media, String name, boolean dark) {
+        Iterator mi = media.entrySet().iterator();
+        Map.Entry entry;
+        int i = 0;
+        while (mi.hasNext()) {
+            entry = (Map.Entry) mi.next();
+            prop.put("viewMode_links_" + c + "_nr", c);
+            prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
+            prop.put("viewMode_links_" + c + "_type", name);
+            prop.put("viewMode_links_" + c + "_text", markup(wordArray, (String) entry.getValue()));
+            prop.put("viewMode_links_" + c + "_link", "<a href=\"" + (String) entry.getKey() + "\">" + markup(wordArray, (String) entry.getKey()) + "</a>");
+            prop.put("viewMode_links_" + c + "_attr", "");
+            dark = !dark;
+            c++;
+            i++;
+        }
+        return i;
+    }
+    
 }

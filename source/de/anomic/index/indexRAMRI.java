@@ -432,7 +432,7 @@ public final class indexRAMRI implements indexRI {
             entries = container.topLevelClone();
             added = entries.size();
         } else {
-            added = entries.add(container, -1);
+            added = entries.putAllRecent(container);
         }
         if (added > 0) {
             cache.put(wordHash, entries);
@@ -445,15 +445,10 @@ public final class indexRAMRI implements indexRI {
     public synchronized void addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
         indexContainer container = (indexContainer) cache.get(wordHash);
         if (container == null) container = new indexContainer(wordHash, this.payloadrow);
-        indexRWIEntry[] entries = new indexRWIEntry[] { newEntry };
-        if (container.add(entries, updateTime) > 0) {
-            cache.put(wordHash, container);
-            hashScore.incScore(wordHash);
-            hashDate.setScore(wordHash, intTime(updateTime));
-            return;
-        }
-        container = null;
-        entries = null;
+        container.put(newEntry);
+        cache.put(wordHash, container);
+        hashScore.incScore(wordHash);
+        hashDate.setScore(wordHash, intTime(updateTime));
     }
 
     public synchronized void close() {

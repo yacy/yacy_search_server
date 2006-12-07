@@ -707,7 +707,7 @@ public final class yacy {
                 while (entries.hasNext()) {
                     entry = (indexRWIEntry) entries.next();
                     // System.out.println("ENTRY = " + entry.getUrlHash());
-                    container.add(new indexRWIEntry[] { entry }, System.currentTimeMillis());
+                    container.add(entry, System.currentTimeMillis());
                 }
                 // we have read all elements, now delete the entity
                 entity.deleteComplete();

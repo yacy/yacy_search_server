@@ -21,8 +21,13 @@
         <input type="hidden" name="display" value="#[display]#" />
         <input name="search" type="text" size="52" maxlength="80" value="#[former]#" />
         <input type="submit" name="Enter" value="Search" />
-        <input type="hidden" name="former" value="#[former]#" />
-        #(searchoptions)#
+        <input type="hidden" name="former" value="#[former]#" /><br />
+        <input type="radio"  name="contentdom" value="text" #(contentdomCheckText)#::checked="checked"#(/contentdomCheckText)# />Text&nbsp;&nbsp;
+        <input type="radio"  name="contentdom" value="image" #(contentdomCheckImage)#::checked="checked"#(/contentdomCheckImage)# />Images&nbsp;&nbsp;
+        <input type="radio"  name="contentdom" value="audio" #(contentdomCheckAudio)#::checked="checked"#(/contentdomCheckAudio)# />Audio&nbsp;&nbsp;
+        <input type="radio"  name="contentdom" value="video" #(contentdomCheckVideo)#::checked="checked"#(/contentdomCheckVideo)# />Video&nbsp;&nbsp;
+        <input type="radio"  name="contentdom" value="app" #(contentdomCheckApp)#::checked="checked"#(/contentdomCheckApp)# />Applications&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      #(searchoptions)#
         <input type="hidden" name="count" value="10" />
         <input type="hidden" name="order" value="Date-YBR-Quality" />
         <input type="hidden" name="resource" value="global" />
