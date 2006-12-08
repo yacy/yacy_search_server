@@ -117,7 +117,6 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
             int      sizeOfPage,    // # of bytes of the page TODO: not needed any more
             long     lastmodified,  // last-modified time of the document where word appears
             long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
-            int      quality,       // the entropy value
             String   language,      // (guessed) language of document
             char     doctype,       // type of document
             int      outlinksSame,  // outlinks to same domain

@@ -46,10 +46,12 @@
 // javac -classpath .:../classes transferRWI.java
 
 import java.io.IOException;
+import java.text.ParseException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -59,11 +61,14 @@ import de.anomic.yacy.yacySeed;
 
 public final class transferURL {
 
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) throws InterruptedException {
         if (post == null || ss == null) { return null; }
 
         long start = System.currentTimeMillis();
-
+        long freshdate = 0;
+        try {freshdate = plasmaURL.shortDayFormatter.parse("20061101").getTime();} catch (ParseException e1) {}
+        
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         final serverObjects prop = new serverObjects();
@@ -93,35 +98,45 @@ public final class transferURL {
             indexURLEntry lEntry;
             for (int i = 0; i < urlc; i++) {
                 serverCore.checkInterruption();
+                
+                // read new lurl-entry
                 urls = (String) post.get("url" + i);
                 if (urls == null) {
                     yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
-                } else {
-                    lEntry = sb.wordIndex.loadedURL.newEntry(urls);
-                    if (lEntry == null) {
-                        yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
-                        // TODO: should we send back an error message???
-                    } else {
-                        indexURLEntry.Components comp = lEntry.comp();
-                        if (comp.url() == null) {
-                            yacyCore.log.logWarning("transferURL: received invalid URL (url null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
-                            // TODO: should we send back an error message???
-                        } else {
-                            if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, lEntry.hash(), comp.url()))) {
-                                int deleted = sb.wordIndex.tryRemoveURLs(lEntry.hash());
-                                yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + comp.url().toNormalform() + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
-                                lEntry = null;
-                                blocked++;
-                            } else try {
-                                sb.wordIndex.loadedURL.store(lEntry);
-                                sb.wordIndex.loadedURL.stack(lEntry, iam, iam, 3);
-                                yacyCore.log.logFine("transferURL: received URL '" + comp.url().toNormalform() + "' from peer " + otherPeerName);
-                                received++;
-                            } catch (IOException e) {
-                                    e.printStackTrace();
-                            }
-                        }
-                    }
+                    continue;
+                }
+
+                // parse new lurl-entry
+                lEntry = sb.wordIndex.loadedURL.newEntry(urls);
+                if (lEntry == null) {
+                    yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
+                    continue;
+                }
+                
+                // check if entry is well-formed
+                indexURLEntry.Components comp = lEntry.comp();
+                if ((comp.url() == null) || (lEntry.freshdate().getTime() <= freshdate)) {
+                    yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
+                    continue;
+                }
+                
+                // check if the entry is blacklisted
+                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, lEntry.hash(), comp.url()))) {
+                    int deleted = sb.wordIndex.tryRemoveURLs(lEntry.hash());
+                    yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + comp.url().toNormalform() + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
+                    lEntry = null;
+                    blocked++;
+                    continue;
+                }
+                
+                // write entry to database
+                try {
+                    sb.wordIndex.loadedURL.store(lEntry);
+                    sb.wordIndex.loadedURL.stack(lEntry, iam, iam, 3);
+                    yacyCore.log.logFine("transferURL: received URL '" + comp.url().toNormalform() + "' from peer " + otherPeerName);
+                    received++;
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
 

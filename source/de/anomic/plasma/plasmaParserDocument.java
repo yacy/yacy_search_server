@@ -220,6 +220,7 @@ public class plasmaParserDocument {
     
     public Map getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
+        // this is a url(String)/text(String) map
         return anchors;
     }
     

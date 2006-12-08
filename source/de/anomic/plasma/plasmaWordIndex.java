@@ -251,22 +251,21 @@ public final class plasmaWordIndex implements indexRI {
         // this is called by the switchboard to put in a new page into the index
         // use all the words in one condenser object to simultanous create index entries
         
-        // iterate over all words
+        int wordCount = 0;
+        int urlLength = url.toString().length();
+        int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
+        
+        // iterate over all words of context text
         Iterator i = condenser.words().entrySet().iterator();
         Map.Entry wentry;
         String word;
         indexRWIEntry ientry;
         plasmaCondenser.wordStatProp wprop;
-        String wordHash;
-        int urlLength = url.toString().length();
-        int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
-        
         while (i.hasNext()) {
             wentry = (Map.Entry) i.next();
             word = (String) wentry.getKey();
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
-            // if ((s.length() > 4) && (c > 1)) System.out.println("# " + s + ":" + c);
-            wordHash = plasmaCondenser.word2hash(word);
+            assert (wprop.flags != null);
             ientry = new indexRWIEntryNew(urlHash,
                         urlLength, urlComps, (document == null) ? urlLength : document.getMainLongTitle().length(),
                         wprop.count,
@@ -279,16 +278,15 @@ public final class plasmaWordIndex implements indexRI {
                         size,
                         urlModified.getTime(),
                         System.currentTimeMillis(),
-                        condenser.RESULT_WORD_ENTROPHY,
                         language,
                         doctype,
                         outlinksSame, outlinksOther,
-                        condenser.RESULT_FLAGS);
-            addEntry(wordHash, ientry, System.currentTimeMillis(), false);
+                        wprop.flags);
+            addEntry(plasmaCondenser.word2hash(word), ientry, System.currentTimeMillis(), false);
+            wordCount++;
         }
-        // System.out.println("DEBUG: plasmaSearch.addPageIndex: added " +
-        // condenser.getWords().size() + " words, flushed " + c + " entries");
-        return condenser.RESULT_SIMI_WORDS;
+        
+        return wordCount;
     }
 
     public indexContainer getContainer(String wordHash, Set urlselection, long maxTime) {

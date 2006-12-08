@@ -52,6 +52,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import de.anomic.http.httpHeader;
@@ -255,27 +256,38 @@ public class plasmaSnippetCache {
             try { resContent.close(); } catch (Exception e) {/* ignore this */}
         }
         if (document == null) return new Snippet(null, ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
-                
-        //System.out.println("loaded document for URL " + url);
-        final Enumeration sentences = document.getSentences(pre);
-        document.close();
-        //System.out.println("----" + url.toString()); for (int l = 0; l < sentences.length; l++) System.out.println(sentences[l]);
-        if (sentences == null) {
-            //System.out.println("found no sentences in url " + url);
-            return new Snippet(null, ERROR_PARSER_NO_LINES, "parser returned no sentences");
-        }
-
+        
+        
         /* ===========================================================================
          * COMPUTE SNIPPET
          * =========================================================================== */        
         // we have found a parseable non-empty file: use the lines
-        line = computeSnippet(sentences, queryhashes, 3 * queryhashes.size(), snippetMaxLength);
-        //System.out.println("loaded snippet for URL " + url + ": " + line);
+
+        // compute snippet from text
+        final Enumeration sentences = document.getSentences(pre);
+        if (sentences == null) return new Snippet(null, ERROR_PARSER_NO_LINES, "parser returned no sentences");
+        String textline = computeTextSnippet(sentences, queryhashes, 3 * queryhashes.size(), snippetMaxLength);
+        
+        // compute snippet from media
+        String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
+        String videoline = computeMediaSnippet(document.getVideolinks(), queryhashes);
+        String appline = computeMediaSnippet(document.getApplinks(), queryhashes);
+        //String hrefline = computeMediaSnippet(document.getAnchors(), queryhashes);
+        //String imageline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
+        
+        line = "";
+        if (audioline != null) line += (line.length() == 0) ? audioline : "<br />" + audioline;
+        if (videoline != null) line += (line.length() == 0) ? videoline : "<br />" + videoline;
+        if (appline   != null) line += (line.length() == 0) ? appline   : "<br />" + appline;
+        //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
+        if (textline  != null) line += (line.length() == 0) ? textline  : "<br />" + textline;
+        
         if (line == null) return new Snippet(null, ERROR_NO_MATCH, "no matching snippet found");
         if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
         storeToCache(wordhashes, urlhash, line);
+        document.close();
         return new Snippet(line, source, null);
     }
 
@@ -366,7 +378,32 @@ public class plasmaSnippetCache {
         return (String) snippetsCache.get(key);
     }
     
-    private String computeSnippet(Enumeration sentences, Set queryhashes, int minLength, int maxLength) {
+    private String computeMediaSnippet(Map media, Set queryhashes) {
+        Iterator i = media.entrySet().iterator();
+        Map.Entry entry;
+        String url, desc;
+        Set s;
+        String result = "";
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            url = (String) entry.getKey();
+            desc = (String) entry.getValue();
+            s = removeAppearanceHashes(url, queryhashes);
+            if (s.size() == 0) {
+                result += "<br /><a href=\"" + url + "\">" + ((desc.length() == 0) ? url : desc) + "</a>";
+                continue;
+            }
+            s = removeAppearanceHashes(desc, s);
+            if (s.size() == 0) {
+                result += "<br /><a href=\"" + url + "\">" + ((desc.length() == 0) ? url : desc) + "</a>";
+                continue;
+            }
+        }
+        if (result.length() == 0) return null;
+        return result.substring(6);
+    }
+    
+    private String computeTextSnippet(Enumeration sentences, Set queryhashes, int minLength, int maxLength) {
         try {
             if (sentences == null) return null;
             if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
@@ -404,20 +441,43 @@ public class plasmaSnippetCache {
                     shortLineLength = ((String) sb.get(i)).length();
                 }
             }
+            
             // find a first result
-            String result = (String) sb.get(shortLineIndex);
-            // remove all hashes that appear in the result
-            hs = hashSentence(result);
+            String result = computeTextSnippet((String) sb.get(shortLineIndex), queryhashes, minLength, maxLength);
+            Set remaininghashes = removeAppearanceHashes(result, queryhashes);
+
+            if (remaininghashes.size() == 0) return result;
+            // the result has not all words in it.
+            // find another sentence that represents the missing other words
+            // and find recursively more sentences
+            maxLength = maxLength - result.length();
+            if (maxLength < 20) maxLength = 20;
+            String nextSnippet = computeTextSnippet(sentences, remaininghashes, minLength, maxLength);
+            if (nextSnippet == null) return null;
+            return result + (" / " + nextSnippet);
+        } catch (IndexOutOfBoundsException e) {
+            log.logSevere("computeSnippet: error with string generation", e);
+            return "";
+        }
+    }
+    
+    private String computeTextSnippet(String sentence, Set queryhashes, int minLength, int maxLength) {
+        try {
+            if (sentence == null) return null;
+            if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
+            Iterator j;
+            HashMap hs;
+            String hash;
+            
+            // find all hashes that appear in the sentence
+            hs = hashSentence(sentence);
             j = queryhashes.iterator();
             Integer pos;
-            Set remaininghashes = new HashSet();
-            int p, minpos = result.length(), maxpos = -1;
+            int p, minpos = sentence.length(), maxpos = -1;
             while (j.hasNext()) {
                 hash = (String) j.next();
                 pos = (Integer) hs.get(hash);
-                if (pos == null) {
-                    remaininghashes.add(new String(hash));
-                } else {
+                if (pos != null) {
                     p = pos.intValue();
                     if (p > maxpos) maxpos = p;
                     if (p < minpos) minpos = p;
@@ -425,51 +485,62 @@ public class plasmaSnippetCache {
             }
             // check result size
             maxpos = maxpos + 10;
-            if (maxpos > result.length()) maxpos = result.length();
+            if (maxpos > sentence.length()) maxpos = sentence.length();
             if (minpos < 0) minpos = 0;
             // we have a result, but is it short enough?
             if (maxpos - minpos + 10 > maxLength) {
                 // the string is too long, even if we cut at both ends
                 // so cut here in the middle of the string
-                int lenb = result.length();
-                result = result.substring(0, (minpos + 20 > result.length()) ? result.length() : minpos + 20).trim() +
+                int lenb = sentence.length();
+                sentence = sentence.substring(0, (minpos + 20 > sentence.length()) ? sentence.length() : minpos + 20).trim() +
                 " [..] " +
-                result.substring((maxpos + 26 > result.length()) ? result.length() : maxpos + 26).trim();
-                maxpos = maxpos + lenb - result.length() + 6;
+                sentence.substring((maxpos + 26 > sentence.length()) ? sentence.length() : maxpos + 26).trim();
+                maxpos = maxpos + lenb - sentence.length() + 6;
             }
             if (maxpos > maxLength) {
                 // the string is too long, even if we cut it at the end
                 // so cut it here at both ends at once
                 int newlen = maxpos - minpos + 10;
                 int around = (maxLength - newlen) / 2;
-                result = "[..] " + result.substring(minpos - around, ((maxpos + around) > result.length()) ? result.length() : (maxpos + around)).trim() + " [..]";
+                sentence = "[..] " + sentence.substring(minpos - around, ((maxpos + around) > sentence.length()) ? sentence.length() : (maxpos + around)).trim() + " [..]";
                 minpos = around;
-                maxpos = result.length() - around - 5;
+                maxpos = sentence.length() - around - 5;
             }
-            if (result.length() > maxLength) {
-                // trim result, 1st step (cut at right side)
-                result = result.substring(0, maxpos).trim() + " [..]";
+            if (sentence.length() > maxLength) {
+                // trim sentence, 1st step (cut at right side)
+                sentence = sentence.substring(0, maxpos).trim() + " [..]";
             }
-            if (result.length() > maxLength) {
-                // trim result, 2nd step (cut at left side)
-                result = "[..] " + result.substring(minpos).trim();
+            if (sentence.length() > maxLength) {
+                // trim sentence, 2nd step (cut at left side)
+                sentence = "[..] " + sentence.substring(minpos).trim();
             }
-            if (result.length() > maxLength) {
-                // trim result, 3rd step (cut in the middle)
-                result = result.substring(6, 20).trim() + " [..] " + result.substring(result.length() - 26, result.length() - 6).trim();
+            if (sentence.length() > maxLength) {
+                // trim sentence, 3rd step (cut in the middle)
+                sentence = sentence.substring(6, 20).trim() + " [..] " + sentence.substring(sentence.length() - 26, sentence.length() - 6).trim();
             }
-            if (queryhashes.size() == 0) return result;
-            // the result has not all words in it.
-            // find another sentence that represents the missing other words
-            // and find recursively more sentences
-            maxLength = maxLength - result.length();
-            if (maxLength < 20) maxLength = 20;
-            String nextSnippet = computeSnippet(sentences, remaininghashes, minLength, maxLength);
-            return result + ((nextSnippet == null) ? "" : (" / " + nextSnippet));
+            return sentence;
         } catch (IndexOutOfBoundsException e) {
             log.logSevere("computeSnippet: error with string generation", e);
-            return "";
+            return null;
         }
+    }
+    
+    private Set removeAppearanceHashes(String sentence, Set queryhashes) {
+        // remove all hashes that appear in the sentence
+        if (sentence == null) return queryhashes;
+        HashMap hs = hashSentence(sentence);
+        Iterator j = queryhashes.iterator();
+        String hash;
+        Integer pos;
+        Set remaininghashes = new HashSet();
+        while (j.hasNext()) {
+            hash = (String) j.next();
+            pos = (Integer) hs.get(hash);
+            if (pos == null) {
+                remaininghashes.add(new String(hash));
+            }
+        }
+        return remaininghashes;
     }
     
     private HashMap hashSentence(String sentence) {

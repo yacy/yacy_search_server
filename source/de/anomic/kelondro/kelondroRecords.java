@@ -1392,7 +1392,7 @@ public class kelondroRecords {
                     USAGE.FREEC--;
                     // take link
                     if (USAGE.FREEH.index == NUL) {
-                        System.out.println("INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records. Affected file: " + filename);
+                        serverLog.logSevere("kelondroRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
                         // try to heal..
                         USAGE.USEDC = USAGE.allCount() + 1;
                         USAGE.FREEC = 0;
@@ -1402,10 +1402,17 @@ public class kelondroRecords {
                         //System.out.println("*DEBUG* ALLOCATED DELETED INDEX " + index);
                         // check for valid seek position
                         long seekp = seekpos(USAGE.FREEH);
-                        if (seekp > entryFile.length()) throw new kelondroException("new Handle: seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
-                        
-                        // read link to next element of FREEH chain
-                        USAGE.FREEH.index = entryFile.readInt(seekp);
+                        if (seekp > entryFile.length()) {
+                            // this is a severe inconsistency. try to heal..
+                            serverLog.logSevere("kelondroRecords/" + filename, "new Handle: lost " + USAGE.FREEC + " marked nodes; seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
+                            index = USAGE.allCount(); // a place at the end of the file
+                            USAGE.USEDC += USAGE.FREEC; // to avoid that non-empty records at the end are overwritten
+                            USAGE.FREEC = 0; // discard all possible empty nodes
+                            USAGE.FREEH.index = NUL;
+                        } else {
+                            // read link to next element of FREEH chain
+                            USAGE.FREEH.index = entryFile.readInt(seekp);
+                        }
                     }
                     USAGE.write();
                 }

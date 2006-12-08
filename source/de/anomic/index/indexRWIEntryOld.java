@@ -33,7 +33,6 @@ import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.plasma.plasmaSearchQuery;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.yacy.yacySeedDB;
 
@@ -66,7 +65,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
     private static final int col_hitcount     =  3;
     private static final int col_language     =  4;
     private static final int col_doctype      =  5;
-    private static final int col_localflag    =  6;
+    //private static final int col_localflag    =  6;
     private static final int col_posintext    =  7;
     private static final int col_posinphrase  =  8;
     private static final int col_posofphrase  =  9;
@@ -77,6 +76,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
     
     private kelondroRow.Entry entry;
     
+    /*
     public indexRWIEntryOld(String  urlHash,
             int     urlLength,    // byte-length of complete URL
             int     urlComps,     // number of path components
@@ -91,7 +91,6 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
             int     sizeOfPage,   // # of bytes of the page
             long    lastmodified, //*last-modified time of the document where word appears
             long    updatetime,   // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
-            int     quality,      //*the entropy value
             String  language,     //*(guessed) language of document
             char    doctype,      //*type of document
             int     outlinksSame, // outlinks to same domain
@@ -107,7 +106,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         if ((language == null) || (language.length() != urlEntryRow.width(col_language))) language = "uk";
         this.entry = urlEntryRow.newEntry();
         this.entry.setCol(col_urlhash, urlHash, null);
-        this.entry.setCol(col_quality, quality);
+        this.entry.setCol(col_quality, 0);
         this.entry.setCol(col_lastModified, lastmodified);
         this.entry.setCol(col_hitcount, hitcount);
         this.entry.setCol(col_language, language, null);
@@ -121,7 +120,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         this.entry.setCol(col_phrasecount, phrasecount);
         //System.out.println("DEBUG-NEWENTRY " + toPropertyForm());
     }
-
+*/
     public indexRWIEntryOld(String urlHash, String code) {
         // the code is the external form of the row minus the leading urlHash entry
         this.entry = urlEntryRow.newEntry((urlHash + code).getBytes());

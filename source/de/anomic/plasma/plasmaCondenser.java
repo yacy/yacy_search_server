@@ -49,7 +49,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -66,6 +65,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.index.indexRWIEntryNew;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -114,20 +115,123 @@ public final class plasmaCondenser {
     public int RESULT_NUMB_WORDS = -1;
     public int RESULT_DIFF_WORDS = -1;
     public int RESULT_SIMI_WORDS = -1;
-    public int RESULT_WORD_ENTROPHY = -1;
     public int RESULT_NUMB_SENTENCES = -1;
     public int RESULT_DIFF_SENTENCES = -1;
     public int RESULT_SIMI_SENTENCES = -1;
     public kelondroBitfield RESULT_FLAGS = new kelondroBitfield(4);
     
-    public plasmaCondenser(plasmaParserDocument document) throws UnsupportedEncodingException {
+    public plasmaCondenser(plasmaParserDocument document, boolean addMedia) throws UnsupportedEncodingException {
+        // if addMedia == true, then all the media links are also parsed and added to the words
+        // added media words are flagged with the approriate media flag
         this(document.getText(), document.getCharset());
+        
+        kelondroBitfield wflags = (kelondroBitfield) RESULT_FLAGS.clone(); // the template for the word flags, only from position 0..19
+        // construct flag set for document
         if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
         if (document.getAudiolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasaudio, true);
         if (document.getVideolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasvideo, true);
         if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
+        
+        // the phrase counter:
+        // phrase   0 are words taken from the URL
+        // phrase   1 is the MainLongTitle
+        // phrase   2 is the MainShortTitle
+        // phrase   3 is the Document Abstract
+        // phrase   4 is the Document Author
+        // phrase   5 are the tags specified in document
+        // phrase  10 and above are the section headlines/titles (88 possible)
+        // phrase  98 is taken from the embedded anchor/hyperlinks description
+        // phrase  99 is taken from the media Link url and anchor description
+        // phrase 100 and above are lines from the text
+      
+        insertTextToWords(document.getMainLongTitle(),  1, indexRWIEntryNew.flag_app_descr, wflags);
+        insertTextToWords(document.getMainShortTitle(), 2, indexRWIEntryNew.flag_app_descr, wflags);
+        insertTextToWords(document.getAbstract(),       3, indexRWIEntryNew.flag_app_descr, wflags);
+        // missing: author!
+        // missing: tags!
+        String[] titles = document.getSectionTitles();
+        for (int i = 0; 1 < titles.length; i++) {
+            insertTextToWords(titles[i], i + 10, indexRWIEntryNew.flag_app_emphasized, wflags);
+        }
+        
+        // anchors
+        Iterator i = document.getAnchors().entrySet().iterator();
+        Map.Entry entry;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            insertTextToWords((String) entry.getKey(), 98, indexRWIEntryNew.flag_app_url, wflags);
+            insertTextToWords((String) entry.getValue(), 98, indexRWIEntryNew.flag_app_url, wflags);
+        }
+        
+        // audio
+        i = document.getAudiolinks().entrySet().iterator();
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            insertTextToWords((String) entry.getKey(), 99, flag_cat_hasaudio, wflags);
+            insertTextToWords((String) entry.getValue(), 99, flag_cat_hasaudio, wflags);
+        }
+
+        // video
+        i = document.getVideolinks().entrySet().iterator();
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            insertTextToWords((String) entry.getKey(), 99, flag_cat_hasvideo, wflags);
+            insertTextToWords((String) entry.getValue(), 99, flag_cat_hasvideo, wflags);
+        }
+
+        // applications
+        i = document.getApplinks().entrySet().iterator();
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            insertTextToWords((String) entry.getKey(), 99, flag_cat_hasapp, wflags);
+            insertTextToWords((String) entry.getValue(), 99, flag_cat_hasapp, wflags);
+        }
+
+        // images
+        i = document.getImages().iterator();
+        htmlFilterImageEntry ientry;
+        while (i.hasNext()) {
+            ientry = (htmlFilterImageEntry) i.next();
+            insertTextToWords((String) ientry.url().toNormalform(), 99, flag_cat_hasimage, wflags);
+            insertTextToWords((String) ientry.alt(), 99, flag_cat_hasimage, wflags);
+        }
+        
+        // finally check all words for missing flag entry
+        i = words.entrySet().iterator();
+        wordStatProp wprop;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            wprop = (wordStatProp) entry.getValue();
+            if (wprop.flags == null) {
+                wprop.flags = (kelondroBitfield) wflags.clone();
+                words.put(entry.getKey(), wprop);
+            }
+        }
     }
     
+    private void insertTextToWords(String text, int phrase, int flagpos, kelondroBitfield flagstemplate) {
+        String word;
+        wordStatProp wprop;
+        sievedWordsEnum wordenum;
+        try {
+            wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes()), "UTF-8", 3);
+        } catch (UnsupportedEncodingException e) {
+            return;
+        }
+        int pip = 0;
+        while (wordenum.hasMoreElements()) {
+            word = ((String) wordenum.nextElement()).toLowerCase();
+            wprop = (wordStatProp) words.get(word);
+            if (wprop == null) wprop = new wordStatProp(0, pip, phrase);
+            if (wprop.flags == null) wprop.flags = (kelondroBitfield) flagstemplate.clone();
+            wprop.numOfPhrase = 1;
+            wprop.posInPhrase = pip;
+            wprop.flags.set(flagpos, true);
+            words.put(word, wprop);
+            pip++;
+        }
+    }
+
     public plasmaCondenser(InputStream text, String charset) throws UnsupportedEncodingException {
         this(text, charset, 3, 2);
     }
@@ -174,18 +278,19 @@ public final class plasmaCondenser {
     }
 
     public Map words() {
-        // returns the words as wod/wordStatProp relation map
+        // returns the words as word/wordStatProp relation map
         return words;
     }
     
     public static class wordStatProp {
         // object carries statistics for words and sentences
         
-        public int count;       // number of occurrences
-        public int posInText;   // unique handle, is initialized with word position (excluding double occurring words)
-        public int posInPhrase; //
-        public int numOfPhrase;
-        public HashSet hash;    //
+        public int              count;       // number of occurrences
+        public int              posInText;   // unique handle, is initialized with word position (excluding double occurring words)
+        public int              posInPhrase; // position of word in phrase
+        public int              numOfPhrase; // number of phrase. 'normal' phrases begin with number 100
+        public HashSet          hash;        // a set of handles to all sentences where this word appears
+        public kelondroBitfield flags;       // the flag bits for each word
 
         public wordStatProp(int handle, int pip, int nop) {
             this.count = 1;
@@ -193,6 +298,7 @@ public final class plasmaCondenser {
             this.posInPhrase = pip;
             this.numOfPhrase = nop;
             this.hash = new HashSet();
+            this.flags = null;
         }
 
         public void inc() {
@@ -314,7 +420,7 @@ public final class plasmaCondenser {
                 } else {
                     // word does not yet exist, create new word entry
                     wordHandle = wordHandleCount++;
-                    wsp = new wordStatProp(wordHandle, wordInSentenceCounter, sentences.size() + 1);
+                    wsp = new wordStatProp(wordHandle, wordInSentenceCounter, sentences.size() + 100);
                 }
                 words.put(word, wsp);
                 // we now have the unique handle of the word, put it into the sentence:
@@ -429,7 +535,6 @@ public final class plasmaCondenser {
         this.RESULT_NUMB_WORDS = allwordcounter;
         this.RESULT_DIFF_WORDS = wordHandleCount;
         this.RESULT_SIMI_WORDS = words.size();
-        this.RESULT_WORD_ENTROPHY = (allwordcounter == 0) ? 0 : (255 * words.size() / allwordcounter);
         this.RESULT_NUMB_SENTENCES = allsentencecounter;
         this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
         this.RESULT_SIMI_SENTENCES = sentences.size();
@@ -508,6 +613,7 @@ public final class plasmaCondenser {
         return orderedSentences;
     }
 
+    /*
     public void writeMapToFile(File out) throws IOException {
         Map.Entry entry;
         String k;
@@ -520,7 +626,7 @@ public final class plasmaCondenser {
         // we reconstruct the word hashtable
         // and sort the entries by the number of occurrences
         // this structure is needed to print out a sorted list of words
-        TreeMap sortedWords = new TreeMap(/*kelondroNaturalOrder.naturalOrder*/);
+        TreeMap sortedWords = new TreeMap(); //kelondroNaturalOrder.naturalOrder
         it = words.entrySet().iterator(); // enumerates the keys in ascending order
         while (it.hasNext()) {
             entry = (Map.Entry) it.next();
@@ -549,7 +655,7 @@ public final class plasmaCondenser {
         }
         writer.close();
     }
-
+*/
     public final static boolean invisible(char c) {
         // TODO: Bugfix for UTF-8: does this work for non ISO-8859-1 chars?
         if ((c < ' ') || (c > 'z')) return true;
@@ -771,16 +877,22 @@ public final class plasmaCondenser {
         
     }
 
-    public static Map getWords(InputStream input, String charset) throws UnsupportedEncodingException {
-        if (input == null) return null;
-        plasmaCondenser condenser = new plasmaCondenser(input, charset);
-        return condenser.words;        
-    }
-    
     public static Map getWords(byte[] text, String charset) throws UnsupportedEncodingException {
+        // returns a word/wordStatProp relation map
         if (text == null) return null;
         ByteArrayInputStream buffer = new ByteArrayInputStream(text);
-        return getWords(buffer, charset);
+        return new plasmaCondenser(buffer, charset, 2, 1).words();
+    }
+    
+    public static Map getWords(String text) {
+        // returns a word/wordStatProp relation map
+        if (text == null) return null;
+        ByteArrayInputStream buffer = new ByteArrayInputStream(text.getBytes());
+        try {
+            return new plasmaCondenser(buffer, "UTF-8", 2, 1).words();
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
     }
     
     public static void main(String[] args) {

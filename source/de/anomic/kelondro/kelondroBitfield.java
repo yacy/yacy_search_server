@@ -24,7 +24,7 @@
 
 package de.anomic.kelondro;
 
-public class kelondroBitfield {
+public class kelondroBitfield implements Cloneable {
 
     // the bitfield implements a binary array. Such arrays may be exported in a base64-String
     
@@ -53,6 +53,12 @@ public class kelondroBitfield {
             assert (b.length <= bytelength) : "exported = " + exported + " has bytelength = " + b.length + " > " + bytelength;
             System.arraycopy(b, 0, bb, 0, Math.min(b.length, bytelength));
         }
+    }
+    
+    public Object clone() {
+        kelondroBitfield theClone = new kelondroBitfield(new byte[this.bb.length]);
+        System.arraycopy(this.bb, 0, theClone.bb, 0, this.bb.length);
+        return theClone;
     }
     
     public void set(int pos, boolean value) {

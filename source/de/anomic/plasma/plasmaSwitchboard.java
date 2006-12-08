@@ -1576,7 +1576,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 
                 checkInterruption();
                 log.logFine("Condensing for '" + entry.normalizedURLString() + "'");
-                plasmaCondenser condenser = new plasmaCondenser(document);
+                plasmaCondenser condenser = new plasmaCondenser(document, true);
                 
                 // generate citation reference
                 Integer[] ioLinks = generateCitationReference(entry.urlHash(), docDate, document, condenser); // [outlinksSame, outlinksOther]
@@ -1586,6 +1586,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     checkInterruption();
                     
                     // create a new loaded URL db entry
+                    long ldate = System.currentTimeMillis();
                     indexURLEntry newEntry = wordIndex.loadedURL.newEntry(
                             entry.url(),                               // URL
                             docDescription,                            // document description
@@ -1594,7 +1595,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             "",                                        // ETag
                             docDate,                                   // modification date
                             new Date(),                                // loaded date
-                            new Date(),                                // freshdate 
+                            new Date(ldate + Math.max(0, ldate - docDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 
                             referrerUrlHash,                           // referer hash
                             new byte[0],                               // md5
                             (int) entry.size(),                        // size
@@ -1655,16 +1656,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                              * STORE PAGE INDEX INTO WORD INDEX DB
                              * ======================================================================== */
                             words = wordIndex.addPageIndex(
-                                    entry.url(),                                            // document url
-                                    urlHash,                                                // document url hash
-                                    docDate,                                                // document mod date
-                                    (int) entry.size(),                                     // document size
-                                    document,                                               // document content
-                                    condenser,                                              // document condenser
+                                    entry.url(),                                  // document url
+                                    urlHash,                                      // document url hash
+                                    docDate,                                      // document mod date
+                                    (int) entry.size(),                           // document size
+                                    document,                                     // document content
+                                    condenser,                                    // document condenser
                                     plasmaURL.language(entry.url()),              // document language
                                     plasmaURL.docType(document.getMimeType()),    // document type
-                                    ioLinks[0].intValue(),                                  // outlinkSame
-                                    ioLinks[1].intValue()                                   // outlinkOthers
+                                    ioLinks[0].intValue(),                        // outlinkSame
+                                    ioLinks[1].intValue()                         // outlinkOthers
                             );
                         } else {
                             /* ========================================================================
@@ -1704,7 +1705,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                             newEntry.size(),
                                             docDate.getTime(),
                                             System.currentTimeMillis(),
-                                            condenser.RESULT_WORD_ENTROPHY,
                                             language,
                                             doctype,
                                             ioLinks[0].intValue(),
@@ -1749,7 +1749,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             }
                             
                             tmpContainers = null;
-                        }
+                        } //end: SEND PAGE INDEX TO STORAGE PEER
+                        
                         storageEndTime = System.currentTimeMillis();
                         
                         //increment number of indexed urls
@@ -2253,7 +2254,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // get the word set
             Set words = null;
             try {
-                words = new plasmaCondenser(document).words().keySet();
+                words = new plasmaCondenser(document, true).words().keySet();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }

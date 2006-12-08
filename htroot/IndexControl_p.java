@@ -300,7 +300,7 @@ public class IndexControl_p {
                          "true".equalsIgnoreCase(gzipBody),
                          timeout);
             result = (String) resultObj.get("result");
-            prop.put("result", (result == null) ? ("Successfully transferred " + index.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds") : result);
+            prop.put("result", (result == null) ? ("Successfully transferred " + knownURLs.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds, " + unknownURLEntries + " URL not found") : result);
             index = null;
         }
 
