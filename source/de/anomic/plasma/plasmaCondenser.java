@@ -150,7 +150,7 @@ public final class plasmaCondenser {
         // missing: author!
         // missing: tags!
         String[] titles = document.getSectionTitles();
-        for (int i = 0; 1 < titles.length; i++) {
+        for (int i = 0; i < titles.length; i++) {
             insertTextToWords(titles[i], i + 10, indexRWIEntryNew.flag_app_emphasized, wflags);
         }
         
