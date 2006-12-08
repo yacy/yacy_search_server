@@ -83,23 +83,21 @@ public class indexContainer extends kelondroRowSet {
         this.lastTimeWrote = updateTime;
     }
     
-    /*
-    public void addAllUnique(indexContainer c) {
-        // this method can be called if all entries in c are known to be unique with reference to
-        // the entries in this container; that means: there are no double occurrences anywhere
-        // in/and between c and this.
-        super.addAllUnique((kelondroRowCollection) c);
-    }
 
     public static final indexContainer mergeUnique(indexContainer a, boolean aIsClone, indexContainer b, boolean bIsClone) {
         if ((aIsClone) && (bIsClone)) {
-            if (a.size() > b.size()) return mergeUnique(a, b); else return mergeUnique(b, a);
+            if (a.size() > b.size()) return (indexContainer) mergeUnique(a, b); else return (indexContainer) mergeUnique(b, a);
         }
-        if (aIsClone) return mergeUnique(a, b);
-        if (bIsClone) return mergeUnique(b, a);
-        if (a.size() > b.size()) return mergeUnique(a, b); else return mergeUnique(b, a);
+        if (aIsClone) return (indexContainer) mergeUnique(a, b);
+        if (bIsClone) return (indexContainer) mergeUnique(b, a);
+        if (a.size() > b.size()) return (indexContainer) mergeUnique(a, b); else return (indexContainer) mergeUnique(b, a);
     }
-    */
+    
+    public static Object mergeUnique(Object a, Object b) {
+        indexContainer c = (indexContainer) a;
+        c.addAllUnique((indexContainer) b);
+        return c;
+    }
     
     public indexRWIEntry put(indexRWIEntry entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
@@ -202,26 +200,19 @@ public class indexContainer extends kelondroRowSet {
     static {
         try {
             Class c = Class.forName("de.anomic.index.indexContainer");
-            containerMergeMethod = c.getMethod("containerMerge", new Class[]{Object.class, Object.class});
+            containerMergeMethod = c.getMethod("mergeUnique", new Class[]{Object.class, Object.class});
         } catch (SecurityException e) {
-            System.out.println("Error while initializing containerMerge: " + e.getMessage());
+            System.out.println("Error while initializing containerMerge.SecurityException: " + e.getMessage());
             containerMergeMethod = null;
         } catch (ClassNotFoundException e) {
-            System.out.println("Error while initializing containerMerge: " + e.getMessage());
+            System.out.println("Error while initializing containerMerge.ClassNotFoundException: " + e.getMessage());
             containerMergeMethod = null;
         } catch (NoSuchMethodException e) {
-            System.out.println("Error while initializing containerMerge: " + e.getMessage());
+            System.out.println("Error while initializing containerMerge.NoSuchMethodException: " + e.getMessage());
             containerMergeMethod = null;
         }
     }
 
-    /*
-    public static Object containerMerge(Object a, Object b) {
-        indexContainer c = (indexContainer) a;
-        c.add((indexContainer) b, -1);
-        return c;
-    }
-    */
     public static indexContainer joinContainer(Collection containers, long time, int maxDistance) {
         
         long stamp = System.currentTimeMillis();
