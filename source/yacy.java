@@ -1273,7 +1273,7 @@ public final class yacy {
         serverLog log = new serverLog("HASHLIST");
         File homeDBroot = new File(new File(homePath), "DATA/PLASMADB");
         File indexRoot = new File(new File(homePath), "DATA/INDEX");
-        String wordChunkStartHash = "------------";
+        String wordChunkStartHash = "AAAAAAAAAAAA";
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
         File root = new File(homePath);
@@ -1285,7 +1285,7 @@ public final class yacy {
             } else if (resource.startsWith("assortment")) {
                 int a = Integer.parseInt(resource.substring(10));
                 plasmaWordIndexAssortment assortment = new plasmaWordIndexAssortment(new File(homeDBroot, "ACLUSTER"), a, 8*1024*1024, 3000, null);
-                indexContainerIterator = assortment.wordContainers(wordChunkStartHash, true, false);
+                indexContainerIterator = assortment.wordContainers();
             } else if (resource.equals("words")) {
                 plasmaWordIndexFileCluster fileDB = new plasmaWordIndexFileCluster(homeDBroot);
                 indexContainerIterator = fileDB.wordContainers(wordChunkStartHash, false);

@@ -60,7 +60,6 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexRWIEntryOld;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
@@ -76,7 +75,7 @@ public final class plasmaWordIndexAssortment {
     // class variables
     private File assortmentFile;
     private serverLog log;
-    private kelondroCache assortments;
+    private kelondroTree assortment;
     private long bufferSize;
 
     private static String intx(int x) {
@@ -99,7 +98,7 @@ public final class plasmaWordIndexAssortment {
         return (rowsize - yacySeedDB.commonHashLength - 12) / indexRWIEntryOld.urlEntryRow.objectsize();
     }
     
-    public plasmaWordIndexAssortment(File storagePath, int assortmentLength, int bufferkb, long preloadTime, serverLog log) throws IOException {
+    public plasmaWordIndexAssortment(File storagePath, int assortmentLength, int bufferkb, long preloadTime, serverLog log) {
         if (!(storagePath.exists())) storagePath.mkdirs();
         this.assortmentFile = new File(storagePath, assortmentFileName + intx(assortmentLength) + ".db");
 	    //this.bufferStructureLength = 3 + 2 * assortmentLength;
@@ -107,15 +106,19 @@ public final class plasmaWordIndexAssortment {
         this.log = log;
         // open assortment tree file
         long start = System.currentTimeMillis();
-        assortments = new kelondroCache(kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength)), bufferSize / 2, true, false);
+        assortment = kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength));
         long stop = System.currentTimeMillis();
         if (log != null) log.logConfig("Opened Assortment, " +
-                                  assortments.size() + " entries, width " +
+                                  assortment.size() + " entries, width " +
                                   assortmentLength + ", " + bufferkb + "kb buffer, " +
                                   preloadTime + " ms preloadTime, " +
                                   (stop - start) + " ms effective, " +
-                                  assortments.cacheNodeStatus()[1] + " preloaded"); 
+                                  assortment.cacheNodeStatus()[1] + " preloaded"); 
         
+    }
+    
+    public String getName() {
+        return this.assortmentFile.toString();
     }
     
     public final indexContainer row2container(kelondroRow.Entry row) {
@@ -131,12 +134,12 @@ public final class plasmaWordIndexAssortment {
         return container;
     }
     
-    public Iterator wordContainers(String startWordHash, boolean up, boolean rot) throws IOException {
+    public Iterator wordContainers() {
         // returns an iteration of indexContainer elements
         try {
-            return new containerIterator(startWordHash, up, rot);
+            return new containerIterator();
         } catch (kelondroException e) {
-            log.logSevere("iterateAssortment/kelondro-error: " + e.getMessage() + " - reset assortment-DB " + assortmentFile, e);
+            log.logSevere("iterateAssortment/kelondro-error: " + e.getMessage(), e);
             return null;
         }
     }
@@ -145,8 +148,8 @@ public final class plasmaWordIndexAssortment {
 
         private Iterator rowIterator;
         
-        public containerIterator(String startWordHash, boolean up, boolean rot) throws IOException {
-            rowIterator = assortments.rows(up, rot, (startWordHash == null) ? null : startWordHash.getBytes());
+        public containerIterator() {
+            rowIterator = assortment.contentRows(-1);
         }
         
         public boolean hasNext() {
@@ -165,16 +168,12 @@ public final class plasmaWordIndexAssortment {
     }
 
     public int size() {
-        try {
-            return assortments.size();
-        } catch (IOException e) {
-            return 0;
-        }
+        return assortment.size();
     }
     
     public void close() {
         try {
-            assortments.close();
+            assortment.close();
         } catch (IOException e){
             log.logSevere("unable to close assortment database: " + e.getMessage(), e);
         }
