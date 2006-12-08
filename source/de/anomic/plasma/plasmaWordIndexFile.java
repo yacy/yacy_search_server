@@ -193,12 +193,8 @@ public final class plasmaWordIndexFile {
             if (theIndex == null) {
                 i = null;
             } else try {
-                i = theIndex.rows(up, false, null);
+                i = theIndex.contentRows(-1);
             } catch (kelondroException e) {
-                e.printStackTrace();
-                theIndex.file().delete();
-                i = null;
-            } catch (IOException e) {
                 e.printStackTrace();
                 theIndex.file().delete();
                 i = null;
