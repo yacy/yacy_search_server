@@ -50,7 +50,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import de.anomic.server.serverFileUtils;
 
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -194,7 +193,7 @@ public class plasmaParserDocument {
         return -1; 
     }
     
-    public Enumeration getSentences(boolean pre) {
+    public Iterator getSentences(boolean pre) {
         if (this.text == null) return null;
         plasmaCondenser.sentencesFromInputStreamEnum e = plasmaCondenser.sentencesFromInputStream(getText(), this.charset);
         e.pre(pre);

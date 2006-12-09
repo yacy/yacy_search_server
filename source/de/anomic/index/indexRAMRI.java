@@ -28,9 +28,11 @@ package de.anomic.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
@@ -49,7 +51,7 @@ public final class indexRAMRI implements indexRI {
         
     // class variables
     private final File databaseRoot;
-    protected final TreeMap cache; // wordhash-container
+    protected final SortedMap cache; // wordhash-container
     private final kelondroMScoreCluster hashScore;
     private final kelondroMScoreCluster hashDate;
     private long  initTime;
@@ -72,7 +74,7 @@ public final class indexRAMRI implements indexRI {
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
         this.databaseRoot = databaseRoot;
-        this.cache = new TreeMap();
+        this.cache = Collections.synchronizedSortedMap(new TreeMap());
         this.hashScore = new kelondroMScoreCluster();
         this.hashDate  = new kelondroMScoreCluster();
         this.initTime = System.currentTimeMillis();

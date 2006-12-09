@@ -740,8 +740,8 @@ public final class plasmaCondenser {
             StringBuffer sb;
             char c;
             while (s.length() == 0) {
-                if (e.hasMoreElements()) {
-                    r = (String) e.nextElement();
+                if (e.hasNext()) {
+                    r = (String) e.next();
                     if (r == null) return null;
                     r = r.trim();
                     sb = new StringBuffer(r.length() * 2);
@@ -788,7 +788,7 @@ public final class plasmaCondenser {
         }
     }
     
-    public static class sentencesFromInputStreamEnum implements Enumeration {
+    public static class sentencesFromInputStreamEnum implements Iterator {
         // read sentences from a given input stream
         // this enumerates String objects
         
@@ -826,11 +826,11 @@ public final class plasmaCondenser {
             }
         }
 
-        public boolean hasMoreElements() {
+        public boolean hasNext() {
             return buffer != null;
         }
 
-        public Object nextElement() {
+        public Object next() {
             if (buffer == null) {
                 return null;
             } else {
@@ -843,6 +843,10 @@ public final class plasmaCondenser {
 
         public int count() {
             return counter;
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
         }
     }
 

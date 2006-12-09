@@ -397,6 +397,7 @@ public final class plasmaCrawlStacker {
         indexURLEntry oldEntry = null;
         oldEntry = this.sb.wordIndex.loadedURL.load(nexturlhash, null);
         boolean recrawl = (oldEntry != null) && (((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000) > profile.recrawlIfOlder());
+        // FIXME: this does not work correctly?
         if ((dbocc != null) && (!(recrawl))) {
             reason = plasmaCrawlEURL.DOUBLE_REGISTERED + dbocc + ")";
             //this.log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");

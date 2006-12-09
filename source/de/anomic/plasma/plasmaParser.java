@@ -56,7 +56,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -955,11 +954,11 @@ public final class plasmaParser {
                 System.out.println(document.getMainLongTitle());
                 
                 // found text
-                final Enumeration sentences = document.getSentences(false);
+                final Iterator sentences = document.getSentences(false);
                 int i = 0;
-                if (sentences != null) while (sentences.hasMoreElements()) {
+                if (sentences != null) while (sentences.hasNext()) {
                         System.out.print("line " + i + ": ");
-                        System.out.println((String) sentences.nextElement());
+                        System.out.println((String) sentences.next());
                         i++;
                 }
                 

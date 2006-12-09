@@ -50,7 +50,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
@@ -312,7 +311,7 @@ public class ViewFile {
                 prop.put("viewMode_parsedText", content);
             } else if (viewMode.equals("sentences")) {
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_SENTENCES);
-                final Enumeration sentences = document.getSentences(pre);
+                final Iterator sentences = document.getSentences(pre);
 
                 boolean dark = true;
                 int i = 0;
@@ -320,9 +319,9 @@ public class ViewFile {
                     String[] wordArray = wordArray(post.get("words", null));
                     
                     // Search word highlighting
-                    while (sentences.hasMoreElements()) {
+                    while (sentences.hasNext()) {
                         prop.put("viewMode_sentences_" + i + "_nr", Integer.toString(i + 1));
-                        prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, (String) sentences.nextElement()));
+                        prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, (String) sentences.next()));
                         prop.put("viewMode_sentences_" + i + "_dark", ((dark) ? 1 : 0));
                         dark = !dark;
                         i++;

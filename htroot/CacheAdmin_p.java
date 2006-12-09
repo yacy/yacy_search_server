@@ -48,7 +48,6 @@
 
 import java.io.File;
 import java.io.Writer;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
@@ -132,9 +131,9 @@ public class CacheAdmin_p {
                         .append("<b>EMAIL:</b><br>").append(formatAnchor(document.getEmaillinks())).append("<br>")
                         .append("<b>TEXT:</b><br><span class=\"small\">").append(new String(scraper.getText())).append("</span><br>")
                         .append("<b>LINES:</b><br><span class=\"small\">");
-                    final Enumeration sentences = document.getSentences(false);
-                    if (sentences != null) while (sentences.hasMoreElements()) {
-                        info.append((String) sentences.nextElement()).append("<br>");
+                    final Iterator sentences = document.getSentences(false);
+                    if (sentences != null) while (sentences.hasNext()) {
+                        info.append((String) sentences.next()).append("<br>");
                     }
                     info.append("</span><br>");
                     if (document != null) document.close();

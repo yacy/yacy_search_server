@@ -47,13 +47,13 @@ package de.anomic.plasma;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -264,7 +264,7 @@ public class plasmaSnippetCache {
         // we have found a parseable non-empty file: use the lines
 
         // compute snippet from text
-        final Enumeration sentences = document.getSentences(pre);
+        final Iterator sentences = document.getSentences(pre);
         if (sentences == null) return new Snippet(null, ERROR_PARSER_NO_LINES, "parser returned no sentences");
         String textline = computeTextSnippet(sentences, queryhashes, 3 * queryhashes.size(), snippetMaxLength);
         
@@ -282,7 +282,7 @@ public class plasmaSnippetCache {
         //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
         if (textline  != null) line += (line.length() == 0) ? textline  : "<br />" + textline;
         
-        if (line == null) return new Snippet(null, ERROR_NO_MATCH, "no matching snippet found");
+        if ((line == null) || (line.length() < 3 /*snippetMinLength*/)) return new Snippet(null, ERROR_NO_MATCH, "no matching snippet found");
         if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
@@ -403,58 +403,64 @@ public class plasmaSnippetCache {
         return result.substring(6);
     }
     
-    private String computeTextSnippet(Enumeration sentences, Set queryhashes, int minLength, int maxLength) {
+    private String computeTextSnippet(Iterator sentences, Set queryhashes, int minLength, int maxLength) {
         try {
             if (sentences == null) return null;
             if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
-            kelondroMScoreCluster hitTable = new kelondroMScoreCluster();
             Iterator j;
             HashMap hs;
             String hash;
-            ArrayList sb = new ArrayList();
             String sentence;
-            while (sentences.hasMoreElements()) {
-                sentence = (String) sentences.nextElement();
+            TreeMap os = new TreeMap();
+            int uniqCounter = 9999;
+            int score;
+            while (sentences.hasNext()) {
+                sentence = (String) sentences.next();
                 //System.out.println("Snippet-Sentence :" + sentence); // DEBUG
                 if (sentence.length() > minLength) {
                     hs = hashSentence(sentence);
                     j = queryhashes.iterator();
+                    score = 0;
                     while (j.hasNext()) {
                         hash = (String) j.next();
                         if (hs.containsKey(hash)) {
                             //System.out.println("hash " + hash + " appears in line " + i);
-                            hitTable.incScore(new Integer(sb.size()));
+                            score++;
                         }
                     }
-                    sb.add(sentence);
-                }
-            }
-            int score = hitTable.getMaxScore(); // best number of hits
-            if (score <= 0) return null;
-            // we found (a) line(s) that have <score> hits.
-            // now find the shortest line of these hits
-            int shortLineIndex = -1;
-            int shortLineLength = Integer.MAX_VALUE;
-            for (int i = 0; i < sb.size(); i++) {
-                if ((hitTable.getScore(new Integer(i)) == score) && (((String) sb.get(i)).length() < shortLineLength)) {
-                    shortLineIndex = i;
-                    shortLineLength = ((String) sb.get(i)).length();
+                    if (score > 0) {
+                        os.put(new Integer(1000000 * score - sentence.length() * 10000 + uniqCounter--), sentence);
+                    }
                 }
             }
             
-            // find a first result
-            String result = computeTextSnippet((String) sb.get(shortLineIndex), queryhashes, minLength, maxLength);
-            Set remaininghashes = removeAppearanceHashes(result, queryhashes);
-
-            if (remaininghashes.size() == 0) return result;
-            // the result has not all words in it.
-            // find another sentence that represents the missing other words
-            // and find recursively more sentences
-            maxLength = maxLength - result.length();
-            if (maxLength < 20) maxLength = 20;
-            String nextSnippet = computeTextSnippet(sentences, remaininghashes, minLength, maxLength);
-            if (nextSnippet == null) return null;
-            return result + (" / " + nextSnippet);
+            String result;
+            Set remaininghashes;
+            while (os.size() > 0) {
+                sentence = (String) os.remove((Integer) os.lastKey()); // sentence with the biggest score
+                result = computeTextSnippet(sentence, queryhashes, minLength, maxLength);
+                if ((result != null) && (result.length() > 0)) {
+                    remaininghashes = removeAppearanceHashes(result, queryhashes);
+                    if (remaininghashes.size() == 0) {
+                        // we have found the snippet
+                        return result;
+                    } else if (remaininghashes.size() < queryhashes.size()) {
+                        // the result has not all words in it.
+                        // find another sentence that represents the missing other words
+                        // and find recursively more sentences
+                        maxLength = maxLength - result.length();
+                        if (maxLength < 20) maxLength = 20;
+                        String nextSnippet = computeTextSnippet(os.values().iterator(), remaininghashes, minLength / 2, maxLength);
+                        if ((nextSnippet == null) || (nextSnippet.length() < (minLength / 2))) return null; // no success
+                        return result + (" / " + nextSnippet);
+                    } else {
+                        // error
+                        //assert remaininghashes.size() < queryhashes.size() : "remaininghashes.size() = " + remaininghashes.size() + ", queryhashes.size() = " + queryhashes.size() + ", sentence = '" + sentence + "', result = '" + result + "'";
+                        continue;
+                    }
+                }
+            }
+            return null;
         } catch (IndexOutOfBoundsException e) {
             log.logSevere("computeSnippet: error with string generation", e);
             return "";
