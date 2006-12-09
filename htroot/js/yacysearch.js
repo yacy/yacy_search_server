@@ -1,24 +1,24 @@
-function AllSnippets() {
+function AllTextSnippets() {
     var query = document.getElementsByName("former")[0].value;
     
 	var span = document.getElementsByTagName("span");
 	for(var x=0;x<span.length;x++) {
 		if (span[x].className == 'snippetLoading') {
 				var url = document.getElementById("url" + span[x].id);
-				requestSnippet(url,query);
+				requestTextSnippet(url,query);
 		}
 	}
 }
 
 
-function requestSnippet(url, query){
+function requestTextSnippet(url, query){
 	var request=createRequestObject();
 	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&search=' + escape(query) + '&remove=true',true);
-	request.onreadystatechange = function () {handleState(request)};
+	request.onreadystatechange = function () {handleTextState(request)};
 	request.send(null);
 }
 
-function handleState(req) {
+function handleTextState(req) {
     if(req.readyState != 4){
 		return;
 	}

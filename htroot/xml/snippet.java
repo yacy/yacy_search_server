@@ -61,6 +61,9 @@ public class snippet {
         }
         prop.put("urlHash",plasmaURL.urlHash(url));
         
+        // attach link information
+        prop.put("links", 0);
+        
         
         // return rewrite properties
         return prop;
