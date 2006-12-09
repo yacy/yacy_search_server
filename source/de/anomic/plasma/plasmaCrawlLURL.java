@@ -89,13 +89,13 @@ public final class plasmaCrawlLURL {
     private final LinkedList proxyResultStack;  // 4 - local index: result of proxy fetch/prefetch
     private final LinkedList lcrawlResultStack; // 5 - local index: result of local crawling
     private final LinkedList gcrawlResultStack; // 6 - local index: triggered external
-    
+
     // the class object
-    private kelondroIndex urlIndexFile = null;
+    private kelondroIndex urlIndexFile;
 
     public plasmaCrawlLURL(File indexPath, long buffer, long preloadTime) {
         super();
-        
+
         try {
             urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", buffer, preloadTime, indexURLEntryNew.rowdef);
         } catch (IOException e) {
@@ -111,43 +111,43 @@ public final class plasmaCrawlLURL {
         lcrawlResultStack = new LinkedList();
         gcrawlResultStack = new LinkedList();
     }
-    
+
     public int size() {
         try {
-           return urlIndexFile.size() ;
-       } catch (IOException e) {
-           return 0;
-       }
+            return urlIndexFile.size();
+        } catch (IOException e) {
+            return 0;
+        }
     }
-    
+
     public void close() throws IOException {
         if (urlIndexFile != null) {
             urlIndexFile.close();
             urlIndexFile = null;
         }
     }
-    
+
     public int cacheNodeChunkSize() {
         if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeChunkSize();
         if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeChunkSize();
         if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeChunkSize();
         return 0;
     }
-    
+
     public int[] cacheNodeStatus() {
         if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeStatus();
         if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeStatus();
         if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeStatus();
         return new int[]{0,0,0,0,0,0,0,0,0,0};
     }
-    
+
     public int cacheObjectChunkSize() {
         if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectChunkSize();
         if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectChunkSize();
         if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectChunkSize();
         return 0;
     }
-    
+
     public long[] cacheObjectStatus() {
         if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectStatus();
         if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectStatus();
@@ -186,13 +186,13 @@ public final class plasmaCrawlLURL {
             if (urlIndexFile instanceof kelondroCache) ((kelondroCache) urlIndexFile).flushSome();
         } catch (IOException e) {}
     }
-    
+
     public synchronized int writeCacheSize() {
         if (urlIndexFile instanceof kelondroFlexSplitTable) return ((kelondroFlexSplitTable) urlIndexFile).writeBufferSize();
         if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).writeBufferSize();
         return 0;
     }
-    
+
     public synchronized indexURLEntry load(String urlHash, indexRWIEntryNew searchedWord) {
         // generates an plasmaLURLEntry using the url hash
         // to speed up the access, the url-hashes are buffered
@@ -232,9 +232,9 @@ public final class plasmaCrawlLURL {
 
         urlIndexFile.put(entry.toRowEntry(), entry.loaddate());
     }
-    
+
     public synchronized indexURLEntry newEntry(String propStr) {
-        if (propStr.startsWith("{") && propStr.endsWith("}")) {
+        if (propStr != null && propStr.startsWith("{") && propStr.endsWith("}")) {
             return new indexURLEntryNew(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
         } else {
             return null;
@@ -266,7 +266,7 @@ public final class plasmaCrawlLURL {
         return new indexURLEntryNew(url, descr, author, tags, ETag, mod, load, fresh, referrer, md5,
                     size, wc, dt, flags, lang, llocal, lother, laudio, limage, lvideo, lapp);
     }
-    
+
     public synchronized int getStackSize(int stack) {
         switch (stack) {
             case 1: return externResultStack.size();
@@ -481,18 +481,18 @@ public final class plasmaCrawlLURL {
     public Cleaner makeCleaner() {
         return new Cleaner();
     }
-    
+
     public class Cleaner extends Thread {
 
         private boolean run = true;
-        private boolean pause = false;    
+        private boolean pause;
         public int blacklistedUrls = 0;
         public int totalSearchedUrls = 1;
         public String lastBlacklistedUrl = "";
         public String lastBlacklistedHash = "";
         public String lastUrl = "";
         public String lastHash = "";
-        
+
         public Cleaner() {
         }
 
@@ -578,8 +578,8 @@ public final class plasmaCrawlLURL {
             }
         }
     }
-    
-    
+
+
     public static void main(String[] args) {
         // test-generation of url hashes for debugging
         // one argument requires, will be treated as url
