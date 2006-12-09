@@ -47,7 +47,7 @@
       </td></tr>
       <tr class="TableCellLight"><td>This peer's status</td><td>
       #(peerStatus)#
-      Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings (see online: <a href="http://www.yacy.net/yacy/Installation.html#wininst">configure your browser's proxy settings</a>), you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!
+      Virgin - You have not published your peer seed yet. This happens automatically, just wait. While you have this status you are not allowed to search other peers.
       ::
       Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured (usually: 8080), or to set up a 'virtual server' in your router settings (often called DMZ). Please be fair, contribute your own index to the global index.
       ::
@@ -69,16 +69,14 @@
       </form>
       ::
       You are in <em>event-based</em> online mode.<br />
-      The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.
-      Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.
-      Use this only if you have a flatrate or you have an always-on connection.
+      The YaCy p2p network will boot when you start using YaCy as a web proxy or you switch to permanent mode.
       To switch online-mode, press one of the following buttons:
       <form action="SettingsAck_p.html" method="get">
         <div><input type="submit" name="pmode" value="Go on-line" />
         <input type="submit" name="cmode" value="Go to Cache-Mode" /></div>
       </form>
       ::
-      You are in <em>permanent</em> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.
+      You are in <em>permanent</em> mode.
       To switch online-mode, press one of the following buttons:
       <form action="SettingsAck_p.html" method="get">
         <div><input type="submit" name="emode" value="event-based Mode" />
