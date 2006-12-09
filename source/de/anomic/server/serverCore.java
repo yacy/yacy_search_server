@@ -501,7 +501,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 if ((b0 != 10) && // class A reserved
                         (b0 != 127) && // loopback
                         ((b0 != 172) || (b1 < 16) || (b1 > 31)) && // class B reserved
-                        ((b0 != 192) || (b0 != 168)) && // class C reserved
+                        ((b0 != 192) || (b1 != 168)) && // class C reserved
                         (ia[i].getHostAddress().indexOf(":") < 0)
                 ) return ia[i];
             }
