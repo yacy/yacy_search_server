@@ -352,6 +352,11 @@ There is ".html" at the end, which is not included with the Regular Expression.=
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
 "Search"=="Suchen"
+#Text==Text
+Images==Bilder
+#Audio==Audio
+V#ideo==Video
+Applications==Anwendungen
 more options...==mehr Optionen...
 Max. number of results:==Max. Anzahl Ergebnisse:
 order by:==sortieren nach:
@@ -1503,10 +1508,7 @@ Connects \(==Verbindungen (
 "disconnected peers"=="nichtverbundene Peers"
 peers/hour==Peers/Stunde
 This peer's status==Status dieses Peers
-Virgin - You have not published your peer yet, because you have not used the proxy yet. If you configured your browser's proxy settings==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt, weil Sie den Proxy noch nicht benutzt haben. Wenn Sie Ihren Browser korrekt auf den Proxy eingestellt haben
-see online: <a==Anleitung online: <a
-configure your browser's proxy settings==Browser konfigurieren
-you must first load any page through the proxy to prove that this works. With this status you are not allowed to search other peers!==laden Sie eine beliebige Seite &uuml;ber den Proxy, um zu beweisen, dass es funktioniert. Mit diesem Status k&ouml;nnen Sie keine anderen Peers durchsuchen!
+Virgin - You have not published your peer seed yet. This happens automatically, just wait. While you have this status you are not allowed to search other peers.==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch. W&auml;hrend Sie diesen Status haben, ist es Ihnen nicht erlaubt andere Peers zu durchsuchen.
 Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured \(usually: 8080\), or to set up a 'virtual server' in your router settings \(often called DMZ\). Please be fair, contribute your own index to the global index.==Junior - Ihr Peer kann nicht von au&szlig;en erreicht werden. Ein m&ouml;glicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem k&ouml;nnen Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Peers von Ihrer Suchseite aus benutzen. Wir m&ouml;chten Sie ermutigen den Port, den Sie f&uuml;r YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu &ouml;ffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
 Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!==Senior - Sie lassen YaCy bei sich laufen und unterst&uuml;tzen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> k&ouml;nnen. Danke!
 Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL==Principal - Sie haben den Senior-Status und laden zus&auml;tzlich Ihre Seed-Liste auf einen &ouml;ffentlich zug&auml;nglichen Server hoch, von wo aus sie unter folgender Adresse erreichbar ist:
@@ -1521,12 +1523,10 @@ To switch online-mode, press one of the following buttons:==Um den Online Modus 
 "event-based Mode"=="aktivit&auml;tsbasierten Modus"
 "Permanent Mode"=="Permanenter Modus"
 You are in <em>event-based</em> online mode.==Sie sind im <em>aktivit&auml;tsbasierten</em> Onlinemodus.
-The YaCy p2p network will boot when you start using the proxy or you switch to permanent mode.==Das YaCy-P2P-Netzwerk wird aktiviert, wenn Sie den Proxy das erste Mal benutzen oder in den permanenten Modus wechseln.
-Attention: Using the proxy in permanent mode will keep your internet connection online as long as YaCy runs.==Vorsicht: Das Benutzen des Proxys im permanenten Modus h&auml;lt ihre Internetverbindung so lange offen, wie YaCy l&auml;uft.
-Use this only if you have a flatrate or you have an always-on connection.==Benutzen Sie das nur, wenn Sie eine Flatrate haben oder immer online sind.
+The YaCy p2p network will boot when you start using YaCy as a web proxy or you switch to permanent mode.==Das YaCy-P2P-Netzwerk wird aktiviert, wenn Sie YaCy zum ersten Mal als Web Proxy benutzen oder Sie in den permanenten Modus wechseln.
 "Go on-line"=="Online gehen"
 "Go to Cache-Mode"=="In Cache-Modus gehen"
-You are in <em>permanent</em> mode. Attention: If you don't have a flatrate or are always-on, you must switch off the proxy to go off-line.==Sie sind im <em>permanenten</em> Modus. Vorsicht: Wenn Sie keine Flatrate haben und nicht dauerhaft online sein m&ouml;chten, m&uuml;ssen Sie den Proxy abschalten um offline zu gehen.
+You are in <em>permanent</em> mode.==Sie sind im <em>permanenten</em> Modus. 
 Last Refresh:==Letzte Aktualisierung:
 Click here to==Klicken Sie
 log in</a> as administrator and see full status.==hier</a>, um sich als Administrator einzuloggen und den vollst&auml;ndigen Status zu sehen.
@@ -1649,6 +1649,7 @@ View as:==Zeige als:
 Plain Text==Quelltext
 Parsed Text==Geparsten Text
 Parsed Sentences==Geparste S&auml;tze
+Link List==Linkliste
 No URL hash submitted.==Es wurde kein URL Hash &uuml;vertragen.
 Unable to find URL Entry in DB==Es war nicht m&ouml;glich den URL Eintrag in der DB zu finden.
 Invalid URL==Ung&uuml;ltige URL
@@ -1686,6 +1687,19 @@ Jabber==Jabber
 Yahoo!==Yahoo!
 MSN==MSN
 Comment==Kommentar
+#-----------------------------
+
+#File: WatchCrawler_p.html
+#---------------------------
+Next update in==Nächste Aktualisierung in
+seconds==Sekunden
+Initiator==Auftraggeber
+Depth==Tiefe
+Modified Date=='Modified'-Datum
+Anchor Name==Linkbezeichnung
+Size==Größe
+Delete==Löschen
+Local Crawler==Lokaler Crawler
 #-----------------------------
 
 #File: Wiki.html
@@ -1762,6 +1776,11 @@ Search Page==Suchseite
 "Search"=="Suchen"
 "search again - catch up more links"=="Erneut suchen - mehr Links sammeln" 
 more options==Mehr Optionen
+#Text==Text
+Images==Bilder
+#Audio==Audio
+V#ideo==Video
+Applications==Anwendungen
 The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
 No Results.==Keine Ergebnisse.
 length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
@@ -1805,18 +1824,6 @@ with the target of implementing a P2P-based global search engine.==mit dem Ziel 
 Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
 #-----------------------------
 
-#File: WatchCrawler_p.html
-#---------------------------
-Next update in==Nächste Aktualisierung in
-seconds==Sekunden
-Initiator==Auftraggeber
-Depth==Tiefe
-Modified Date=='Modified'-Datum
-Anchor Name==Linkbezeichnung
-Size==Größe
-Delete==Löschen
-Local Crawler==Lokaler Crawler
-#-----------------------------
 
 #File: env/templates/simpleheader.template
 #---------------------------
