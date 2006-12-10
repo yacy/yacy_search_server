@@ -236,8 +236,8 @@ abstract class kelondroAbstractRA implements kelondroRA {
         bb.append("# ").append(comment).append("\r\n");
         while (iter.hasNext()) {
             entry = (Map.Entry) iter.next();
-            bb.append((String) entry.getKey()).append('=');
-            if (entry.getValue() != null) { bb.append(entry.getValue().toString()); }
+            bb.append(entry.getKey()).append('=');
+            if (entry.getValue() != null) { bb.append(entry.getValue()); }
             bb.append("\r\n");
         }
         bb.append("# EOF\r\n");
