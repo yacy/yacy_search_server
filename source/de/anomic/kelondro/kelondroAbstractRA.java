@@ -232,25 +232,18 @@ abstract class kelondroAbstractRA implements kelondroRA {
         this.seek(0);
         final Iterator iter = map.entrySet().iterator();
         Map.Entry entry;
-        serverByteBuffer bb = new serverByteBuffer(map.size() * 40);
-        bb.append("# " + comment);
-        bb.append(cr);
-        bb.append(lf);
+        final serverByteBuffer bb = new serverByteBuffer(map.size() * 40);
+        bb.append("# ").append(comment).append("\r\n");
         while (iter.hasNext()) {
             entry = (Map.Entry) iter.next();
-            bb.append((String) entry.getKey());
-            bb.append('=');
-            bb.append((String) entry.getValue());
-            bb.append(cr);
-            bb.append(lf);
+            bb.append((String) entry.getKey()).append('=');
+            if (entry.getValue() != null) { bb.append(entry.getValue().toString()); }
+            bb.append("\r\n");
         }
-        bb.append("# EOF");
-        bb.append(cr);
-        bb.append(lf);
+        bb.append("# EOF\r\n");
         write(bb.getBytes());
     }
 
-    
     public Map readMap() throws IOException {
         this.seek(0);
         byte[] b = readFully();
