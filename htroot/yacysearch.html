@@ -164,6 +164,32 @@ You can enrich the search results by using the 'global' option; you must also sw
 #(display)#
 #%env/templates/simplefooter.template%#
 ::
+<p><strong>Refine your search with these topwords</strong>:</p>
+<p>
+#{words}#
+<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;order=#[order]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>
+#{/words}#
+</p>
+#(/combine)#
+<!-- linklist begin -->
+
+#{results}#
+<!-- link begin -->
+     <div class="searchresults">
+       <p class="snippet"><span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span></p>
+     </div>
+<!-- link end -->
+#{/results}#
+
+<script type="text/javascript">
+AllTextSnippets();
+addHover();
+</script> 
+
+<!-- linklist end -->
+<p>
+#(resultbottomline)#
+::
 #%env/templates/footer.template%#
 #(/display)#
 

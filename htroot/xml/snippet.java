@@ -1,6 +1,7 @@
 package xml;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -46,7 +47,7 @@ public class snippet {
         
         // find snippet
         Set queryHashes = plasmaCondenser.words2hashes(query);        
-        plasmaSnippetCache.Snippet snippet = switchboard.snippetCache.retrieveSnippet(url, queryHashes, true, pre, 260, 10000);
+        plasmaSnippetCache.TextSnippet snippet = switchboard.snippetCache.retrieveTextSnippet(url, queryHashes, true, pre, 260, 10000);
         prop.put("status",snippet.getSource());
         if (snippet.getSource() < 11) {
             //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
@@ -61,8 +62,20 @@ public class snippet {
         }
         prop.put("urlHash",plasmaURL.urlHash(url));
         
+
         // attach link information
-        prop.put("links", 0);
+        ArrayList mediaSnippets = switchboard.snippetCache.retrieveMediaSnippets(url, queryHashes, false, 1000);
+        plasmaSnippetCache.MediaSnippet ms;
+        for (int i = 0; i < mediaSnippets.size(); i++) {
+            ms = (plasmaSnippetCache.MediaSnippet) mediaSnippets.get(i);
+            prop.put("link_" + i + "_type", ms.type);
+            prop.put("link_" + i + "_href", ms.href);
+            prop.put("link_" + i + "_name", ms.name);
+            prop.put("link_" + i + "_attr", ms.attr);
+        }
+        System.out.println("DEBUG: " + mediaSnippets.size() + " ENTRIES IN MEDIA SNIPPET LINKS");
+        prop.put("link", mediaSnippets.size());
+        prop.put("links", mediaSnippets.size());
         
         
         // return rewrite properties

@@ -2092,7 +2092,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 String urlstring, urlname, filename, urlhash;
                 String host, hash, address;
                 yacySeed seed;
-                plasmaSnippetCache.Snippet snippet;
+                plasmaSnippetCache.TextSnippet snippet;
                 boolean includeSnippets = false;
                 String formerSearch = query.words(" ");
                 long targetTime = timestamp + query.maximumTime;
@@ -2139,13 +2139,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     URL wordURL;
                     if (urlstring.matches(query.urlMask)) { //.* is default
                         if (includeSnippets) {
-                            snippet = snippetCache.retrieveSnippet(comp.url(), query.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
+                            snippet = snippetCache.retrieveTextSnippet(comp.url(), query.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
                         } else {
                             snippet = null;
                         }
+                        /*
                         if ((snippet != null) && (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH)) {
                             // suppress line: there is no match in that resource
-                        } else {
+                        } else {*/
                             prop.put("type_results_" + i + "_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", urlstring) == null) ? 1 : 0);
                             prop.put("type_results_" + i + "_recommend_deletelink", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
                             prop.put("type_results_" + i + "_recommend_recommendlink", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
@@ -2171,7 +2172,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 prop.put("type_results_" + i + "_snippet_text", "");
                             }
                             i++;
-                        }
+                        //}
                     }
                 }
                 log.logFine("SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");

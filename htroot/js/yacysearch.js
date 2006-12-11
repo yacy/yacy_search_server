@@ -10,11 +10,29 @@ function AllTextSnippets() {
 	}
 }
 
+function AllAudioSnippets() {
+    var query = document.getElementsByName("former")[0].value;
+    
+	var span = document.getElementsByTagName("span");
+	for(var x=0;x<span.length;x++) {
+		if (span[x].className == 'snippetLoading') {
+				var url = document.getElementById("url" + span[x].id);
+				requestAudioSnippet(url,query);
+		}
+	}
+}
 
 function requestTextSnippet(url, query){
 	var request=createRequestObject();
-	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&search=' + escape(query) + '&remove=true',true);
+	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=text&search=' + escape(query),true);
 	request.onreadystatechange = function () {handleTextState(request)};
+	request.send(null);
+}
+
+function requestAudioSnippet(url, query){
+	var request=createRequestObject();
+	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=audio&search=' + escape(query),true);
+	request.onreadystatechange = function () {handleAudioState(request)};
 	request.send(null);
 }
 
@@ -28,6 +46,7 @@ function handleTextState(req) {
 	var snippetText = response.getElementsByTagName("text")[0].firstChild.data;
 	var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
 	var status = response.getElementsByTagName("status")[0].firstChild.data;
+	var links = response.getElementsByTagName("links")[0].firstChild.data;
 	
 	var span = document.getElementById(urlHash)
 	removeAllChildren(span);
@@ -40,7 +59,7 @@ function handleTextState(req) {
 		span.className = "snippetError";
 		//span.setAttribute("class", "snippetError");
 	}
-	
+
 	// replace "<b>" text by <strong> node
 	var pos1=snippetText.indexOf("<b>");
 	var pos2=snippetText.indexOf("</b>");
@@ -59,10 +78,51 @@ function handleTextState(req) {
 		pos1=snippetText.indexOf("<b>");
 		pos2=snippetText.indexOf("</b>");
 	}
+	
+	if (links > 0) {
+		for (i = 0; i < links; i++) {
+			var type = response.getElementsByTagName("type")[i].firstChild.data;
+			var href = response.getElementsByTagName("href")[i].firstChild.data;
+			var name = response.getElementsByTagName("name")[i].firstChild.data;
+			var attr = response.getElementsByTagName("attr")[i].firstChild.data;
+			span.appendChild(document.createElement("br"));
+			var anchor = document.createElement("a");
+			var hrefattr = document.createAttribute("href");
+			hrefattr.nodeValue = href;
+			anchor.setAttributeNode(hrefattr);
+			anchor.appendChild(document.createTextNode(name));
+			span.appendChild(anchor);
+		}
+	}
+	
 	// add remaining string
 	if (snippetText != "") {
 		span.appendChild(document.createTextNode(snippetText));
 	}
+}
+
+function handleAudioState(req) {
+    if(req.readyState != 4){
+		return;
+	}
+	
+	var response = req.responseXML;
+	var links = response.getElementsByTagName("links")[0].firstChild.data;
+
+	var snippetText = "";
+	if (links > 0) {
+		span.className = "snippetLoaded";
+		for (i = 0; i < links; i++) {
+			var type = response.getElementsByTagName("type")[i].firstChild.data;
+			var href = response.getElementsByTagName("href")[i].firstChild.data;
+			var name = response.getElementsByTagName("name")[i].firstChild.data;
+			var attr = response.getElementsByTagName("attr")[i].firstChild.data;
+		}
+	} else {
+		span.className = "snippetError";
+	}
+	
+	span.appendChild(document.createTextNode(snippetText));
 }
 
 function addHover() {

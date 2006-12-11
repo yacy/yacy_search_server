@@ -251,29 +251,24 @@ public final class search {
             // result is a List of urlEntry elements
             int i = 0;
             StringBuffer links = new StringBuffer();
-            String resource = "";
-            //plasmaIndexEntry pie;
+            String resource = null;
             indexURLEntry urlentry;
-            plasmaSnippetCache.Snippet snippet;
+            plasmaSnippetCache.TextSnippet snippet;
             while ((acc.hasMoreElements()) && (i < squery.wantedResults)) {
                 urlentry = (indexURLEntry) acc.nextElement();
                 if (includesnippet) {
-                    snippet = sb.snippetCache.retrieveSnippet(urlentry.comp().url(), squery.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
+                    snippet = sb.snippetCache.retrieveTextSnippet(urlentry.comp().url(), squery.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
                 } else {
                     snippet = null;
                 }
-                if ((snippet != null) && (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH)) {
-                    // suppress line: there is no match in that resource
+                if ((snippet != null) && (snippet.exists())) {
+                    resource = urlentry.toString(snippet.getLineRaw());
                 } else {
-                    if ((snippet != null) && (snippet.exists())) {
-                        resource = urlentry.toString(snippet.getLineRaw());
-                    } else {
-                        resource = urlentry.toString();
-                    }
-                    if (resource != null) {
-                        links.append("resource").append(i).append('=').append(resource).append(serverCore.crlfString);
-                        i++;
-                    }
+                    resource = urlentry.toString();
+                }
+                if (resource != null) {
+                    links.append("resource").append(i).append('=').append(resource).append(serverCore.crlfString);
+                    i++;
                 }
             }
             prop.put("links", new String(links));
