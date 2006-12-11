@@ -56,8 +56,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
@@ -166,23 +164,31 @@ public class plasmaSnippetCache {
                         w[j] = w[j].substring(0,len-1);
                     }
 
-                    //recursion if there are non-characters or non-numbers in the middle of the string
-                    Pattern p = Pattern.compile("\\A([\\p{L}\\p{N}]+)([^\\p{L}\\p{N}])([\\p{L}\\p{N}]+)\\Z");
-                    Matcher m = p.matcher(w[j]);
-                    if(m.find()) {
-                        String left    = m.group(1);
-                        String pattern = m.group(2);
-                        String right   = m.group(3);
-                        TextSnippet snip = new TextSnippet(left,-1,null);
-                        w[j] = snip.getLineMarked(queryHashes);
-                        w[j] = w[j] + pattern;
-                        snip = new TextSnippet(right,-1,null);
-                        w[j] = w[j] + snip.getLineMarked(queryHashes);
+                    //special treatment if there is a special character in the word
+                    if(w[j].matches("\\A[\\p{L}\\p{N}]+[^\\p{L}\\p{N}].+\\Z")) {
+                        String out = "";
+                        String temp = "";
+                        for(int k=0; k < w[j].length(); k++) {
+                            //is character a special character?
+                            if(w[j].substring(k,k+1).matches("[^\\p{L}\\p{N}]")) {
+                                if (plasmaCondenser.word2hash(temp).equals(h)) temp = "<b>" + temp + "</b>";
+                                out = out + temp + w[j].substring(k,k+1);
+                                temp = "";
+                            }
+                            //last character
+                            else if(k == (w[j].length()-1)) {
+                                temp = temp + w[j].substring(k,k+1);
+                                if (plasmaCondenser.word2hash(temp).equals(h)) temp = "<b>" + temp + "</b>";
+                                out = out + temp;
+                                temp = "";
+                            }
+                            else temp = temp + w[j].substring(k,k+1);
+                        }
+                        w[j] = out;
                     }
 
-                     //end contrib [MN]
-                     if (plasmaCondenser.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
-                     else if (plasmaCondenser.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
+                    //end contrib [MN]
+                    else if (plasmaCondenser.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
 
                     w[j] = prefix + w[j] + postfix;
                 }
