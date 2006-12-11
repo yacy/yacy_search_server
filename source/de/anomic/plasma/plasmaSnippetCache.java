@@ -56,6 +56,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
@@ -151,19 +153,37 @@ public class plasmaSnippetCache {
                     prefix = "";
                     postfix = "";
 
-                    while((w[j].matches("\\A[^\\p{L}\\p{N}].+"))) {
+                    // cut off prefix if it contains of non-characters or non-numbers
+                    while(w[j].matches("\\A[^\\p{L}\\p{N}].+")) {
                         prefix = w[j].substring(0,1) + prefix;
                         w[j] = w[j].substring(1);
                     }
 
-                    while((w[j].matches(".+[^\\p{L}\\p{N}]\\Z"))) {
+                    // cut off postfix if it contains of non-characters or non-numbers
+                    while(w[j].matches(".+[^\\p{L}\\p{N}]\\Z")) {
                         len = w[j].length();
                         postfix = w[j].substring(len-1,len) + postfix;
                         w[j] = w[j].substring(0,len-1);
                     }
 
-                    //end contrib [MN]
-                    if (plasmaCondenser.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
+                    //recursion if there are non-characters or non-numbers in the middle of the string
+                    Pattern p = Pattern.compile("\\A([\\p{L}\\p{N}]+)([^\\p{L}\\p{N}])([\\p{L}\\p{N}]+)\\Z");
+                    Matcher m = p.matcher(w[j]);
+                    if(m.find()) {
+                        String left    = m.group(1);
+                        String pattern = m.group(2);
+                        String right   = m.group(3);
+                        TextSnippet snip = new TextSnippet(left,-1,null);
+                        w[j] = snip.getLineMarked(queryHashes);
+                        w[j] = w[j] + pattern;
+                        snip = new TextSnippet(right,-1,null);
+                        w[j] = w[j] + snip.getLineMarked(queryHashes);
+                    }
+
+                     //end contrib [MN]
+                     if (plasmaCondenser.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
+                     else if (plasmaCondenser.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
+
                     w[j] = prefix + w[j] + postfix;
                 }
             }
