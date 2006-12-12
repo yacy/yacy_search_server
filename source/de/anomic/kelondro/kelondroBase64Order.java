@@ -57,7 +57,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
     protected static final char[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
     protected static final byte[] ahpla_standard = new byte[128];
     protected static final byte[] ahpla_enhanced = new byte[128];
-    
+
     static {
         for (int i = 0; i < 128; i++) {
             ahpla_standard[i] = -1;
@@ -68,7 +68,9 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
             ahpla_enhanced[alpha_enhanced[i]] = (byte) i;
         }
     }
-    
+
+    private final serverLog log;
+
     public static final kelondroBase64Order standardCoder = new kelondroBase64Order(true, true);
     public static final kelondroBase64Order enhancedCoder = new kelondroBase64Order(true, false);
 
@@ -83,6 +85,8 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         this.asc = up;
         alpha = (rfc1113compliant) ? alpha_standard : alpha_enhanced;
         ahpla = (rfc1113compliant) ? ahpla_standard : ahpla_enhanced;
+
+        this.log = new serverLog("BASE64");
     }
 
     public Object clone() {
@@ -254,7 +258,9 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
             return out;
         } catch (ArrayIndexOutOfBoundsException e) {
             // maybe the input was not base64
-            throw new RuntimeException("input probably not base64");
+            // throw new RuntimeException("input probably not base64");
+            this.log.logFine("wrong string receive: [" + in + "]");
+            return new byte[0];
         }
     }
 
@@ -356,5 +362,4 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         }
     }
 
-    
 }
