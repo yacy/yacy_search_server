@@ -6,9 +6,9 @@
 // Frankfurt, Germany, 2005
 // created 03.01.2006
 //
-// $LastChangedDate: 2005-09-22 22:01:26 +0200 (Thu, 22 Sep 2005) $
-// $LastChangedRevision: 774 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
