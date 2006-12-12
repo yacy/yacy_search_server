@@ -56,6 +56,7 @@ document.searchform.Enter.value = "search again - catch up more links";
 </script>
 
 #(type)#
+<!-- type 0: text search -->
 #(excluded)#
 ::
 <p><strong>The following words are stop-words and had been excluded from the search: #[stopwords]#.</strong></p>
@@ -144,7 +145,50 @@ You can enrich the search results by using the 'global' option; you must also sw
 (by using the proxy) to contribute to the global index.
 #(/resultbottomline)#
 </p>
+::<!-- type 1: media search -->
+#(excluded)#
 ::
+<p><strong>The following words are stop-words and had been excluded from the search: #[stopwords]#.</strong></p>
+#(/excluded)#
+#(num-results)#
+::
+<p>No Results.</p>
+::
+<p>No Results. (length of search words must be at least 3 characters)</p>
+::
+<p>No Results. If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.
+If everybody contributes, the results will get better.</p>
+<p>Other possible reasons for no result:<p>
+<ul>
+<li>The search time was too short. Search again with same query to catch up 'late peers'</li>
+<li>There is currently no support for german umlaute. Please use ae/oe/ue instead</li>
+<li>Words of length &lt; 3 are not indexed. Please omit such words</li>
+<li>YaCy tries to index singular instead of plural words. Please use the singular form</li>
+<li>Only complete words are indexed, not parts of words</li>
+<li>Don't use stopwords as search words</li>
+<li>During this test phase the reaction time of remote peers is unknown.
+Please repeat your search to see if there are late-responses from remote peers</li>
+</ul>
+<p>If you think the information you searched should exist in the global index,
+then please run your own peer and start a crawl of your wanted information to make it
+available for everyone. Then stay online to support crawls from other peers. Thank you!</p>
+::
+<p><strong>#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links of a total number of <strong>#[totalcount]#</strong> known.</p>
+#(/num-results)#
+<!-- linklist begin -->
+#{results}#
+<!-- link begin -->
+    <span class="snippetLoading" id="#[urlhash]#">loading snippet from <a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a><br /></span>
+<!-- link end -->
+#{/results}#
+<script type="text/javascript">
+AllMediaSnippets();
+addHover();
+</script> 
+
+<!-- linklist end -->
+::<!-- type 2: image serch: presents image thumbnails -->
+::<!-- type 3: image thumbnail list for one single url -->
 <table border="0" cellspacing="16" cellpadding="0">
 #{results}#
 <tr valign="bottom">
@@ -157,38 +201,12 @@ You can enrich the search results by using the 'global' option; you must also sw
 #{/results}#
 </table>
 #(/type)#
-         <p class="info">YaCy is a GPL'ed project
-           with the target of implementing a P2P-based global search engine.<br />
-           Architecture (C) by Michael Peter Christen,
-<img src="/env/grafics/mcemailh.gif" alt="Mail-Adresse von Michael Peter Christen" /></p>
+<p class="info">
+YaCy is a GPL'ed project with the target of implementing a P2P-based global search engine.<br />
+Architecture (C) by Michael Peter Christen, <img src="/env/grafics/mcemailh.gif" alt="Mail-Adresse von Michael Peter Christen" />
+</p>
 #(display)#
 #%env/templates/simplefooter.template%#
-::
-<p><strong>Refine your search with these topwords</strong>:</p>
-<p>
-#{words}#
-<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;order=#[order]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>
-#{/words}#
-</p>
-#(/combine)#
-<!-- linklist begin -->
-
-#{results}#
-<!-- link begin -->
-     <div class="searchresults">
-       <p class="snippet"><span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span></p>
-     </div>
-<!-- link end -->
-#{/results}#
-
-<script type="text/javascript">
-AllTextSnippets();
-addHover();
-</script> 
-
-<!-- linklist end -->
-<p>
-#(resultbottomline)#
 ::
 #%env/templates/footer.template%#
 #(/display)#

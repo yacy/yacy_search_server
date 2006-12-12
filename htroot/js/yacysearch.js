@@ -10,14 +10,14 @@ function AllTextSnippets() {
 	}
 }
 
-function AllAudioSnippets() {
+function AllMediaSnippets() {
     var query = document.getElementsByName("former")[0].value;
     
 	var span = document.getElementsByTagName("span");
 	for(var x=0;x<span.length;x++) {
 		if (span[x].className == 'snippetLoading') {
 				var url = document.getElementById("url" + span[x].id);
-				requestAudioSnippet(url,query);
+				requestMediaSnippet(url,query);
 		}
 	}
 }
@@ -29,10 +29,10 @@ function requestTextSnippet(url, query){
 	request.send(null);
 }
 
-function requestAudioSnippet(url, query){
+function requestMediaSnippet(url, query){
 	var request=createRequestObject();
 	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=audio&search=' + escape(query),true);
-	request.onreadystatechange = function () {handleAudioState(request)};
+	request.onreadystatechange = function () {handleMediaState(request)};
 	request.send(null);
 }
 
@@ -46,7 +46,6 @@ function handleTextState(req) {
 	var snippetText = response.getElementsByTagName("text")[0].firstChild.data;
 	var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
 	var status = response.getElementsByTagName("status")[0].firstChild.data;
-	var links = response.getElementsByTagName("links")[0].firstChild.data;
 	
 	var span = document.getElementById(urlHash)
 	removeAllChildren(span);
@@ -54,10 +53,8 @@ function handleTextState(req) {
 	
 	if (status < 11) {
 		span.className = "snippetLoaded";
-		//span.setAttribute("class", "snippetLoaded");
 	} else {
 		span.className = "snippetError";
-		//span.setAttribute("class", "snippetError");
 	}
 
 	// replace "<b>" text by <strong> node
@@ -79,37 +76,23 @@ function handleTextState(req) {
 		pos2=snippetText.indexOf("</b>");
 	}
 	
-	if (links > 0) {
-		for (i = 0; i < links; i++) {
-			var type = response.getElementsByTagName("type")[i].firstChild.data;
-			var href = response.getElementsByTagName("href")[i].firstChild.data;
-			var name = response.getElementsByTagName("name")[i].firstChild.data;
-			var attr = response.getElementsByTagName("attr")[i].firstChild.data;
-			span.appendChild(document.createElement("br"));
-			var anchor = document.createElement("a");
-			var hrefattr = document.createAttribute("href");
-			hrefattr.nodeValue = href;
-			anchor.setAttributeNode(hrefattr);
-			anchor.appendChild(document.createTextNode(name));
-			span.appendChild(anchor);
-		}
-	}
-	
 	// add remaining string
 	if (snippetText != "") {
 		span.appendChild(document.createTextNode(snippetText));
 	}
 }
 
-function handleAudioState(req) {
+function handleMediaState(req) {
     if(req.readyState != 4){
 		return;
 	}
 	
 	var response = req.responseXML;
+	var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
 	var links = response.getElementsByTagName("links")[0].firstChild.data;
-
-	var snippetText = "";
+	var span = document.getElementById(urlHash)
+	removeAllChildren(span);
+	
 	if (links > 0) {
 		span.className = "snippetLoaded";
 		for (i = 0; i < links; i++) {
@@ -117,12 +100,39 @@ function handleAudioState(req) {
 			var href = response.getElementsByTagName("href")[i].firstChild.data;
 			var name = response.getElementsByTagName("name")[i].firstChild.data;
 			var attr = response.getElementsByTagName("attr")[i].firstChild.data;
+
+			var nameanchor = document.createElement("a");
+			nameanchor.setAttribute("href", href);
+			nameanchor.appendChild(document.createTextNode(name));
+			
+			var linkanchor = document.createElement("a");
+			linkanchor.setAttribute("href", href);
+			linkanchor.appendChild(document.createTextNode(href));
+			
+			var col1 = document.createElement("td");
+			var width1 = document.createAttribute("width");
+			width1.nodeValue = 200;
+			col1.setAttributeNode(width1);
+			col1.appendChild(nameanchor);
+			var col2 = document.createElement("td");
+			var width2 = document.createAttribute("width");
+			width2.nodeValue = 500;
+			col2.setAttributeNode(width2);
+			col2.appendChild(linkanchor);
+			
+			var row = document.createElement("tr");
+			row.setAttribute("class", "TableCellDark");
+			row.appendChild(col1);
+			row.appendChild(col2);
+
+			var table = document.createElement("table");
+			table.appendChild(row);
+			span.appendChild(table);
 		}
 	} else {
 		span.className = "snippetError";
+		span.appendChild(document.createTextNode(""));
 	}
-	
-	span.appendChild(document.createTextNode(snippetText));
 }
 
 function addHover() {

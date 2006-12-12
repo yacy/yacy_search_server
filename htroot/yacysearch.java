@@ -144,7 +144,7 @@ public class yacysearch {
         }
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
 
-        final int count = Integer.parseInt(post.get("count", "10"));
+        int count = Integer.parseInt(post.get("count", "10"));
         final String order = post.get("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexof = post.get("indexof","").equals("on"); 
@@ -177,6 +177,9 @@ public class yacysearch {
         if (cds.equals("video")) contentdom = plasmaSearchQuery.CONTENTDOM_VIDEO;
         if (cds.equals("image")) contentdom = plasmaSearchQuery.CONTENTDOM_IMAGE;
         if (cds.equals("app")) contentdom = plasmaSearchQuery.CONTENTDOM_APP;
+        
+        // patch until better search profiles are available
+        if ((contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) && (count <= 10)) count = 50;
         
         serverObjects prop = new serverObjects();
         if (post.get("cat", "href").equals("href")) {
@@ -368,7 +371,7 @@ public class yacysearch {
                 }
             }
 
-            prop.put("type", "0");
+            prop.put("type", (thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : 1);
             prop.put("cat", "href");
             prop.put("depth", "0");
 
@@ -406,7 +409,7 @@ public class yacysearch {
             }
             prop.put("type_results", line);
 
-            prop.put("type", 1); // set type of result: image list
+            prop.put("type", 3); // set type of result: image list
             prop.put("cat", "href");
             prop.put("depth", depth);
         }

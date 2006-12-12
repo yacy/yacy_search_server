@@ -212,6 +212,8 @@ public class plasmaSnippetCache {
             this.href = href;
             this.name = name;
             this.attr = attr;
+            if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
+            if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
         }
     }
     
@@ -623,12 +625,12 @@ public class plasmaSnippetCache {
             //result.add(new MediaSnippet(mediatype, url, (desc.length() == 0) ? url : desc, null));
             s = removeAppearanceHashes(url, queryhashes);
             if (s.size() == 0) {
-                result.add(new MediaSnippet(mediatype, url, (desc.length() == 0) ? url : desc, null));
+                result.add(new MediaSnippet(mediatype, url, desc, null));
                 continue;
             }
             s = removeAppearanceHashes(desc, s);
             if (s.size() == 0) {
-                result.add(new MediaSnippet(mediatype, url, (desc.length() == 0) ? url : desc, null));
+                result.add(new MediaSnippet(mediatype, url, desc, null));
                 continue;
             }
         }
@@ -651,12 +653,12 @@ public class plasmaSnippetCache {
             //result.add(new MediaSnippet("image", url, (desc.length() == 0) ? url : desc, ientry.width() + " x " + ientry.height()));
             s = removeAppearanceHashes(url, queryhashes);
             if (s.size() == 0) {
-                result.add(new MediaSnippet("image", url, (desc.length() == 0) ? url : desc, ientry.width() + " x " + ientry.height()));
+                result.add(new MediaSnippet("image", url, desc, ientry.width() + " x " + ientry.height()));
                 continue;
             }
             s = removeAppearanceHashes(desc, s);
             if (s.size() == 0) {
-                result.add(new MediaSnippet("image", url, (desc.length() == 0) ? url : desc, ientry.width() + " x " + ientry.height()));
+                result.add(new MediaSnippet("image", url, desc, ientry.width() + " x " + ientry.height()));
                 continue;
             }
         }

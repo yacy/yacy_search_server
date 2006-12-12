@@ -4,6 +4,7 @@ function removeAllChildren(element){
 	}
 	child=element.firstChild;
 	while(child!=null){
+		removeAllChildren(child);
 		element.removeChild(child);
 		child=element.firstChild;
 	}
