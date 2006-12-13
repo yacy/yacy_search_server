@@ -1,214 +1,192 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <title>YaCy '#[clientname]#': Search Page</title>
-         #%env/templates/metas.template%#
-   <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?search=#[former]#" />
-   
- <script type="text/javascript" src="/js/ajax.js"></script>
- <script type="text/javascript" src="/js/xml.js"></script>
- <script type="text/javascript" src="/js/yacysearch.js"></script>
+	<title>YaCy '#[clientname]#': Search Page</title>
+	#%env/templates/metas.template%#
+	<link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?search=#[former]#" />
+	   
+	<script type="text/javascript" src="/js/ajax.js"></script>
+	<script type="text/javascript" src="/js/xml.js"></script>
+	<script type="text/javascript" src="/js/yacysearch.js"></script>
    
 </head>
 <body id="yacysearch" onload="document.getElementById('search').focus()">
 
 #(display)#
-#%env/templates/simpleheader.template%#
-::
-#%env/templates/header.template%#
+	#%env/templates/simpleheader.template%#
+	::
+	#%env/templates/header.template%#
 #(/display)#
 
- <form class="search small" name="searchform" action="yacysearch.html" method="get">
-    <p class="yacylogo"><a href="http://yacy.net/yacy/" class="yacylogo"><img src="/env/grafics/yacy.png" alt="yacy" /></a></p>
-    <h2>#[promoteSearchPageGreeting]#</h2>
-    <fieldset class="maininput">
-	 <table width="100%" border="0" cellspacing="0" cellpadding="0">
-	   <tr><td width="80%">
-       <input name="search" type="text" size="50" maxlength="80" value="#[former]#" onClick='document.searchform.Enter.value = "Search"' />
-       <input type="submit" name="Enter" value="Search" />
-       </td><td width="20%">
-       <a href="index.html?display=#[display]#&searchoptions=1&count=#[count]#&order=#[order]#&resource=#[resource]#&time=#[time]#&urlmaskfilter=#[urlmaskfilter]#&prefermaskfilter=#[prefermaskfilter]#&cat=#[cat]#&type=#[type]#&constraint=#[constraint]#&contentdom=#[contentdom]#&former=#[former]#">more options<a>
-       </td></tr>
-       <tr><td width="100%" colspan="2">
-       <input type="radio"  name="contentdom" value="text" #(contentdomCheckText)#::checked="checked"#(/contentdomCheckText)# />Text&nbsp;&nbsp;
-       <input type="radio"  name="contentdom" value="image" #(contentdomCheckImage)#::checked="checked"#(/contentdomCheckImage)# />Images&nbsp;&nbsp;
-       <input type="radio"  name="contentdom" value="audio" #(contentdomCheckAudio)#::checked="checked"#(/contentdomCheckAudio)# />Audio&nbsp;&nbsp;
-       <input type="radio"  name="contentdom" value="video" #(contentdomCheckVideo)#::checked="checked"#(/contentdomCheckVideo)# />Video&nbsp;&nbsp;
-       <input type="radio"  name="contentdom" value="app" #(contentdomCheckApp)#::checked="checked"#(/contentdomCheckApp)# />Applications
-       </td></tr>
-     </table>
-  <input type="hidden" name="former" value="#[former]#" />
-  <input type="hidden" name="count" value="#[count]#" />
-  <input type="hidden" name="order" value="#[order]#" />
-  <input type="hidden" name="resource" value="#[resource]#" />
-  <input type="hidden" name="time" value="#[time]#" />
-  <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
-  <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
-  <input type="hidden" name="depth" value="#[depth]#" />
-  <input type="hidden" name="cat" value="#[cat]#" />
-  <input type="hidden" name="type" value="#[type]#" />
-  <input type="hidden" name="display" value="#[display]#" />
-  <input type="hidden" name="constraint" value="#[constraint]#" />
-  </fieldset>
-  </form>
+<form class="search small" name="searchform" action="yacysearch.html" method="get">
+	<p class="yacylogo"><a href="http://yacy.net/yacy/" class="yacylogo"><img src="/env/grafics/yacy.png" alt="yacy" /></a></p>
+	<h2>#[promoteSearchPageGreeting]#</h2>
+	<fieldset class="maininput">
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr><td width="80%">
+			<input name="search" type="text" size="50" maxlength="80" value="#[former]#" onClick='document.searchform.Enter.value = "Search"' />
+			<input type="submit" name="Enter" value="Search" />
+			</td><td width="20%">
+			<a href="index.html?display=#[display]#&searchoptions=1&count=#[count]#&order=#[order]#&resource=#[resource]#&time=#[time]#&urlmaskfilter=#[urlmaskfilter]#&prefermaskfilter=#[prefermaskfilter]#&cat=#[cat]#&type=#[type]#&constraint=#[constraint]#&contentdom=#[contentdom]#&former=#[former]#">more options<a>
+			</td></tr>
+			<tr><td width="100%" colspan="2">
+			<input type="radio"  name="contentdom" value="text" #(contentdomCheckText)#::checked="checked"#(/contentdomCheckText)# />Text&nbsp;&nbsp;
+			<input type="radio"  name="contentdom" value="image" #(contentdomCheckImage)#::checked="checked"#(/contentdomCheckImage)# />Images&nbsp;&nbsp;
+			<input type="radio"  name="contentdom" value="audio" #(contentdomCheckAudio)#::checked="checked"#(/contentdomCheckAudio)# />Audio&nbsp;&nbsp;
+			<input type="radio"  name="contentdom" value="video" #(contentdomCheckVideo)#::checked="checked"#(/contentdomCheckVideo)# />Video&nbsp;&nbsp;
+			<input type="radio"  name="contentdom" value="app" #(contentdomCheckApp)#::checked="checked"#(/contentdomCheckApp)# />Applications
+			</td></tr>
+		</table>
+		<input type="hidden" name="former" value="#[former]#" />
+		<input type="hidden" name="count" value="#[count]#" />
+		<input type="hidden" name="order" value="#[order]#" />
+		<input type="hidden" name="resource" value="#[resource]#" />
+		<input type="hidden" name="time" value="#[time]#" />
+		<input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
+		<input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
+		<input type="hidden" name="depth" value="#[depth]#" />
+		<input type="hidden" name="cat" value="#[cat]#" />
+		<input type="hidden" name="type" value="#[type]#" />
+		<input type="hidden" name="display" value="#[display]#" />
+		<input type="hidden" name="constraint" value="#[constraint]#" />
+	</fieldset>
+</form>
+  
 <script type="text/javascript">
 document.searchform.Enter.value = "search again - catch up more links";
 </script>
 
+<!-- show information about search key handling -->
+#(excluded)#
+	::
+	<p><strong>The following words are stop-words and had been excluded from the search: #[stopwords]#.</strong></p>
+#(/excluded)#
+
+<!-- type the number of results -->
+#(num-results)#
+	::
+	<p>No Results.</p>
+	::
+	<p>No Results. (length of search words must be at least 3 characters)</p>
+	::
+	<p>No Results. If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.
+	If everybody contributes, the results will get better.</p>
+	<p>Other possible reasons for no result:<p>
+	<ul>
+	<li>The search time was too short. Search again with same query to catch up 'late peers'</li>
+	<li>There is currently no support for german umlaute. Please use ae/oe/ue instead</li>
+	<li>Words of length &lt; 3 are not indexed. Please omit such words</li>
+	<li>YaCy tries to index singular instead of plural words. Please use the singular form</li>
+	<li>Only complete words are indexed, not parts of words</li>
+	<li>Don't use stopwords as search words</li>
+	<li>During this test phase the reaction time of remote peers is unknown.
+	Please repeat your search to see if there are late-responses from remote peers</li>
+	</ul>
+	<p>If you think the information you searched should exist in the global index,
+	then please run your own peer and start a crawl of your wanted information to make it
+	available for everyone. Then stay online to support crawls from other peers. Thank you!</p>
+	::
+	<p><strong>#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links from <strong>#[filteredcount]#</strong> filtered links of a total number of <strong>#[totalcount]#</strong> known.</p>
+#(/num-results)#
+
+<!-- view the result list -->
 #(type)#
-<!-- type 0: text search -->
-#(excluded)#
-::
-<p><strong>The following words are stop-words and had been excluded from the search: #[stopwords]#.</strong></p>
-#(/excluded)#
-#(num-results)#
-::
-<p>No Results.</p>
-::
-<p>No Results. (length of search words must be at least 3 characters)</p>
-::
-<p>No Results. If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.
-If everybody contributes, the results will get better.</p>
-<p>Other possible reasons for no result:<p>
-<ul>
-<li>The search time was too short. Search again with same query to catch up 'late peers'</li>
-<li>There is currently no support for german umlaute. Please use ae/oe/ue instead</li>
-<li>Words of length &lt; 3 are not indexed. Please omit such words</li>
-<li>YaCy tries to index singular instead of plural words. Please use the singular form</li>
-<li>Only complete words are indexed, not parts of words</li>
-<li>Don't use stopwords as search words</li>
-<li>During this test phase the reaction time of remote peers is unknown.
-Please repeat your search to see if there are late-responses from remote peers</li>
-</ul>
-<p>If you think the information you searched should exist in the global index,
-then please run your own peer and start a crawl of your wanted information to make it
-available for everyone. Then stay online to support crawls from other peers. Thank you!</p>
-::
-<p><strong>#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links of a total number of <strong>#[totalcount]#</strong> known.</p>
-#(/num-results)#
-#(combine)#
-::
-<p><strong>Refine your search with these topwords</strong>:</p>
-<p>
-#{words}#
-<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;order=#[order]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>
-#{/words}#
-</p>
-#(/combine)#
-<!-- linklist begin -->
-
-#{results}#
-<!-- link begin -->
-     <div class="searchresults">
-       <div class="urlactions">
-         <a href="/Bookmarks.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" class="bookmarkIcon" /></a>
-         #(recommend)#
-         <img src="/env/grafics/empty.gif" title="" alt="" class="recommendIcon" />
-         <img src="/env/grafics/empty.gif" title="" alt="" class="deleteIcon" />
-         ::
-         <a href="#[recommendlink]#" class="recommendlink" title="recommend"><img src="/env/grafics/empty.gif" title="recommend" alt="recommend" class="recommendIcon" /></a>
-         <a href="#[deletelink]#" title="delete" class="deletelink" ><img src="/env/grafics/empty.gif" title="delete" alt="delete" class="deleteIcon" /></a>
-         #(/recommend)#
-       </div>
-       <h4 class="linktitle"><a href="#[url]#">#[description]#</a></h4>
-       <p class="snippet"><span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span></p>
-       <p class="url"><a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a></p>
-       <p class="urlinfo">#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#">Info</a> | <a href="yacysearch.html?cat=image&amp;url=#[url]#&amp;search=#[former]#">Pictures</a></p>
-     </div>
-<!-- link end -->
-#{/results}#
-
-<script type="text/javascript">
-AllTextSnippets();
-addHover();
-</script> 
-
-<!-- linklist end -->
-<p>
-#(resultbottomline)#
-::
-The global search resulted in #[globalresults]# link contributions from other YaCy peers.
-::
-You can enrich the search results by using the 'global' option: This will search also other YaCy peers
-::
-You cannot get global search results because you are not connected to another YaCy peer.
-To connect you must first use the proxy.
-See here for an <a href="http://www.anomic.de/AnomicHTTPProxy/Installation.html#wininst">installation guide</a>.
-Alternatively, you can run the proxy in permanent online mode, which also grants global search.
-To do this, press this button:</p>
-<form action="SettingsAck_p.html" method="get">
-<input type="submit" name="pmode" value="go online">
-</form>
-<p>
-::
-You can enrich the search results by using the 'global' option; you must also switch to online mode
-(by using the proxy) to contribute to the global index.
-#(/resultbottomline)#
-</p>
-::<!-- type 1: media search -->
-#(excluded)#
-::
-<p><strong>The following words are stop-words and had been excluded from the search: #[stopwords]#.</strong></p>
-#(/excluded)#
-#(num-results)#
-::
-<p>No Results.</p>
-::
-<p>No Results. (length of search words must be at least 3 characters)</p>
-::
-<p>No Results. If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.
-If everybody contributes, the results will get better.</p>
-<p>Other possible reasons for no result:<p>
-<ul>
-<li>The search time was too short. Search again with same query to catch up 'late peers'</li>
-<li>There is currently no support for german umlaute. Please use ae/oe/ue instead</li>
-<li>Words of length &lt; 3 are not indexed. Please omit such words</li>
-<li>YaCy tries to index singular instead of plural words. Please use the singular form</li>
-<li>Only complete words are indexed, not parts of words</li>
-<li>Don't use stopwords as search words</li>
-<li>During this test phase the reaction time of remote peers is unknown.
-Please repeat your search to see if there are late-responses from remote peers</li>
-</ul>
-<p>If you think the information you searched should exist in the global index,
-then please run your own peer and start a crawl of your wanted information to make it
-available for everyone. Then stay online to support crawls from other peers. Thank you!</p>
-::
-<p><strong>#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links of a total number of <strong>#[totalcount]#</strong> known.</p>
-#(/num-results)#
-<!-- linklist begin -->
-#{results}#
-<!-- link begin -->
-    <span class="snippetLoading" id="#[urlhash]#">loading snippet from <a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a><br /></span>
-<!-- link end -->
-#{/results}#
-<script type="text/javascript">
-AllMediaSnippets();
-addHover();
-</script> 
-
-<!-- linklist end -->
-::<!-- type 2: image serch: presents image thumbnails -->
-::<!-- type 3: image thumbnail list for one single url -->
-<table border="0" cellspacing="16" cellpadding="0">
-#{results}#
-<tr valign="bottom">
-#{line}#
-<td>
-<a href="#[url]#"><img src="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;url=#[url]#" /></a><br /><a href="#[url]#">#[name]#</a>
-</td>
-#{/line}#
-</tr>
-#{/results}#
-</table>
+	<!-- type 0: text search -->
+	#(combine)#
+		::
+		<p><strong>Refine your search with these topwords</strong>:</p>
+		<p>
+		#{words}#
+		<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;order=#[order]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>
+		#{/words}#
+		</p>
+	#(/combine)#
+	<!-- linklist begin -->
+	
+	#{results}#
+	<!-- link begin -->
+	     <div class="searchresults">
+	       <div class="urlactions">
+	         <a href="/Bookmarks.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" class="bookmarkIcon" /></a>
+	         #(recommend)#
+	         <img src="/env/grafics/empty.gif" title="" alt="" class="recommendIcon" />
+	         <img src="/env/grafics/empty.gif" title="" alt="" class="deleteIcon" />
+	         ::
+	         <a href="#[recommendlink]#" class="recommendlink" title="recommend"><img src="/env/grafics/empty.gif" title="recommend" alt="recommend" class="recommendIcon" /></a>
+	         <a href="#[deletelink]#" title="delete" class="deletelink" ><img src="/env/grafics/empty.gif" title="delete" alt="delete" class="deleteIcon" /></a>
+	         #(/recommend)#
+	       </div>
+	       <h4 class="linktitle"><a href="#[url]#">#[description]#</a></h4>
+	       <p class="snippet"><span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span></p>
+	       <p class="url"><a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a></p>
+	       <p class="urlinfo">#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#">Info</a> | <a href="yacysearch.html?cat=image&amp;url=#[url]#&amp;search=#[former]#">Pictures</a></p>
+	     </div>
+	<!-- link end -->
+	#{/results}#
+	
+	<script type="text/javascript">
+	AllTextSnippets();
+	addHover();
+	</script> 
+	
+	<!-- linklist end -->
+	<p>
+	#(resultbottomline)#
+	::
+	The global search resulted in #[globalresults]# link contributions from other YaCy peers.
+	::
+	You can enrich the search results by using the 'global' option: This will search also other YaCy peers
+	::
+	You cannot get global search results because you are not connected to another YaCy peer.
+	To connect you must first use the proxy.
+	See here for an <a href="http://www.anomic.de/AnomicHTTPProxy/Installation.html#wininst">installation guide</a>.
+	Alternatively, you can run the proxy in permanent online mode, which also grants global search.
+	To do this, press this button:</p>
+	<form action="SettingsAck_p.html" method="get">
+	<input type="submit" name="pmode" value="go online">
+	</form>
+	<p>
+	::
+	You can enrich the search results by using the 'global' option; you must also switch to online mode
+	(by using the proxy) to contribute to the global index.
+	#(/resultbottomline)#
+	</p>
+	::<!-- type 1: media search -->
+	<!-- linklist begin -->
+	#{results}#
+	<!-- link begin -->
+	    <span class="snippetLoading" id="#[urlhash]#">loading snippet from <a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a><br /></span>
+	<!-- link end -->
+	#{/results}#
+	<script type="text/javascript">
+	AllMediaSnippets();
+	addHover();
+	</script> 
+	
+	<!-- linklist end -->
+	::<!-- type 2: image serch: presents image thumbnails -->
+	::<!-- type 3: image thumbnail list for one single url -->
+	<table border="0" cellspacing="16" cellpadding="0">
+	#{results}#
+	<tr valign="bottom">
+	#{line}#
+	<td>
+	<a href="#[url]#"><img src="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;url=#[url]#" /></a><br /><a href="#[url]#">#[name]#</a>
+	</td>
+	#{/line}#
+	</tr>
+	#{/results}#
+	</table>
 #(/type)#
+
 <p class="info">
 YaCy is a GPL'ed project with the target of implementing a P2P-based global search engine.<br />
 Architecture (C) by Michael Peter Christen, <img src="/env/grafics/mcemailh.gif" alt="Mail-Adresse von Michael Peter Christen" />
 </p>
 #(display)#
-#%env/templates/simplefooter.template%#
-::
-#%env/templates/footer.template%#
+	#%env/templates/simplefooter.template%#
+	::
+	#%env/templates/footer.template%#
 #(/display)#
 
 </body>

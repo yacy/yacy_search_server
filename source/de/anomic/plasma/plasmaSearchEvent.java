@@ -198,7 +198,6 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 plasmaSearchResult result = orderFinal(rcLocal);
                 if (result != null) {
                     result.globalContributions = globalContributions;
-                    result.localContributions = (rcLocal == null) ? 0 : rcLocal.size();
 
                     // flush results in a separate thread
                     this.start(); // start to flush results
@@ -212,7 +211,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 Map searchContainerMap = localSearchContainers(null);
                 indexContainer rcLocal = (searchContainerMap == null) ? wordIndex.emptyContainer(null) : localSearchJoin(searchContainerMap.values());
                 plasmaSearchResult result = orderFinal(rcLocal);
-                result.localContributions = rcLocal.size();
+                result.globalContributions = 0;
 
                 // return search result
                 log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
@@ -378,9 +377,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : (System.currentTimeMillis() + postorderTime);
         profileLocal.startTimer();
         plasmaSearchResult acc = new plasmaSearchResult(query, ranking);
-        //if (searchResult == null) return acc; // strange case where searchResult is not proper: acc is then empty
-        //if (searchResult.size() == 0) return acc; // case that we have nothing to do
-
+        
         indexRWIEntryNew entry;
         indexURLEntry page;
         Long preranking;
@@ -432,6 +429,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_FILTER);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_FILTER, acc.sizeOrdered());
         
+        acc.localContributions = (rcLocal == null) ? 0 : rcLocal.size();
+        acc.filteredResults = preorder.filteredCount();
         return acc;
     }
     

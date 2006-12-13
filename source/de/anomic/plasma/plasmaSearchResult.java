@@ -67,6 +67,7 @@ public final class plasmaSearchResult {
     private plasmaSearchRankingProfile ranking;
     public  int globalContributions;
     public  int localContributions;
+    public  int filteredResults;
     
     public plasmaSearchResult(plasmaSearchQuery query, plasmaSearchRankingProfile ranking) {
         this.pageAcc = new TreeMap();
@@ -76,6 +77,7 @@ public final class plasmaSearchResult {
         this.ranking = ranking;
         this.globalContributions = 0;
         this.localContributions = 0;
+        this.filteredResults = 0;
     }
     
     public plasmaSearchResult cloneSmart() {

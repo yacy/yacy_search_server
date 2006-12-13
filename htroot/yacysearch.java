@@ -281,28 +281,23 @@ public class yacysearch {
             // process result of search
             prop.put("type_resultbottomline", 0);
             if (filtered.size() > 0) {
-                prop.put("type_excluded", 1);
-                prop.put("type_excluded_stopwords", filtered.toString());
+                prop.put("excluded", 1);
+                prop.put("excluded_stopwords", filtered.toString());
             } else {
-                prop.put("type_excluded", 0);
+                prop.put("excluded", 0);
             }
 
             if (prop == null || prop.size() == 0) {
                 if (post.get("search", "").length() < 3) {
-                    prop.put("type_num-results", 2); // no results - at least 3 chars
+                    prop.put("num-results", 2); // no results - at least 3 chars
                 } else {
-                    prop.put("type_num-results", 1); // no results
+                    prop.put("num-results", 1); // no results
                 }
             } else {
-                final int linkcount = Integer.parseInt(prop.get("type_linkcount", "0"));
-                final int orderedcount = Integer.parseInt(prop.get("type_orderedcount", "0"));
-                final int totalcount = Integer.parseInt(prop.get("type_totalcount", "0"));
-                if (totalcount > 10) {
-                    final Object[] references = (Object[]) prop.get( "type_references", new String[0]);
-                    prop.put("type_num-results", 4);
-                    prop.put("type_num-results_linkcount", linkcount);
-                    prop.put("type_num-results_orderedcount", orderedcount);
-                    prop.put("type_num-results_totalcount", totalcount);
+                final int totalcount = Integer.parseInt(prop.get("num-results_totalcount", "0"));
+                if (totalcount >= 10) {
+                    final Object[] references = (Object[]) prop.get( "references", new String[0]);
+                    prop.put("num-results", 4);
                     int hintcount = references.length;
                     if (hintcount > 0) {
 
@@ -346,12 +341,9 @@ public class yacysearch {
                     }
                 } else {
                     if (totalcount == 0) {
-                        prop.put("type_num-results", 3); // long
+                        prop.put("num-results", 3); // long
                     } else {
-                        prop.put("type_num-results", 4);
-                        prop.put("type_num-results_linkcount", linkcount);
-                        prop.put("type_num-results_orderedcount", orderedcount);
-                        prop.put("type_num-results_totalcount", totalcount);
+                        prop.put("num-results", 4);
                     }
                 }
             }

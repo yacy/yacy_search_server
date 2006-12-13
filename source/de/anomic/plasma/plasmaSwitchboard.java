@@ -2079,13 +2079,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // result is a List of urlEntry elements: prepare answer
             if (acc == null) {
-                prop.put("type_totalcount", "0");
-                prop.put("type_orderedcount", "0");
-                prop.put("type_linkcount", "0");
+                prop.put("num-results_totalcount", 0);
+                prop.put("num-results_filteredcount", 0);
+                prop.put("num-results_orderedcount", 0);
+                prop.put("num-results_linkcount", 0);
+                prop.put("references", 0);
+                prop.put("type_results", 0);
             } else {
-                prop.put("type_totalcount", acc.globalContributions + acc.localContributions);
-                prop.put("type_orderedcount", Integer.toString(acc.sizeOrdered()));
-                prop.put("type_globalresults", acc.globalContributions);
+                prop.put("num-results_totalcount", acc.globalContributions + acc.localContributions);
+                prop.put("num-results_filteredcount", acc.filteredResults);
+                prop.put("num-results_orderedcount", Integer.toString(acc.sizeOrdered()));
+                prop.put("num-results_globalresults", acc.globalContributions);
                 int i = 0;
                 int p;
                 indexURLEntry urlentry;
@@ -2199,16 +2203,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     for (int ii = 0; ii < ws.length; ii++) System.out.print(ws[ii] + ", ");
                     System.out.println(" all words = " + ref.getElementCount() + ", total count = " + ref.getTotalCount());
                      */
-                prop.put("type_references", ws);
-                prop.put("type_linkcount", Integer.toString(i));
+                prop.put("references", ws);
+                prop.put("num-results_linkcount", Integer.toString(i));
                 prop.put("type_results", Integer.toString(i));
             }
             
             // log
             log.logInfo("EXIT WORD SEARCH: " + query.queryWords + " - " +
-            prop.get("type_totalcount", "0") + " links found, " +
-            prop.get("type_orderedcount", "0") + " links ordered, " +
-            prop.get("type_linkcount", "?") + " links selected, " +
+            prop.get("num-results_totalcount", "0") + " links found, " +
+            prop.get("num-results_filteredcount", "0") + " links filtered, " +
+            prop.get("num-results_orderedcount", "0") + " links ordered, " +
+            prop.get("num-results_linkcount", "?") + " links selected, " +
             ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             return prop;
         } catch (IOException e) {

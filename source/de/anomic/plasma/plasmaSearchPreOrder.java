@@ -65,6 +65,7 @@ public final class plasmaSearchPreOrder {
     private TreeMap pageAcc; // key = order hash; value = plasmaLURL.entry
     private plasmaSearchQuery query;
     private plasmaSearchRankingProfile ranking;
+    private int filteredCount;
     
     public plasmaSearchPreOrder() {
         this.entryMin = null;
@@ -109,6 +110,11 @@ public final class plasmaSearchPreOrder {
             }
             pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax), query.words("")), 16) + iEntry.urlHash(), iEntry);
         }
+        this.filteredCount = pageAcc.size();
+    }
+    
+    public int filteredCount() {
+        return this.filteredCount;
     }
     
     public void remove(boolean rootDomExt, boolean doubleDom) {
