@@ -37,7 +37,7 @@ For a detailed description of the various MIME-types take a look at <a href="htt
     <td class="small">&nbsp;</td>
   </tr>
   <tr class="TableCellDark">
-    <td colspan="#[parser.colspan]#" class="small" ><input type="submit" name="parserSettings" value="submit">&nbsp;Changes take effect immediately</td>
+    <td colspan="#[parser.colspan]#" class="small" ><input type="submit" name="parserSettings" value="Submit">&nbsp;Changes take effect immediately</td>
   </tr>
 </table>
 </fieldset>

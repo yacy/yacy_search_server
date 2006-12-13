@@ -44,7 +44,7 @@
            you will not be able to access the server pages anymore.</td>
   </tr>
   <tr valign="top">
-    <td colspan="3"><input type="submit" name="serveraccount" value="submit"></td>
+    <td colspan="3"><input type="submit" name="serveraccount" value="Submit"></td>
   </tr>
 </table>
 </fieldset>

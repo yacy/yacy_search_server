@@ -29,7 +29,7 @@ but only if there had been changes to the seed-list.
     <td><i>The password</i></td>
   </tr>
   <tr>
-    <td colspan="3"><input type="submit" name="seedFtpSettings" value="submit"></td>
+    <td colspan="3"><input type="submit" name="seedFtpSettings" value="Submit"></td>
   </tr>
 </table>
 </form>

@@ -25,7 +25,7 @@
     <td>Specifies if the proxy should send the X-Forwarded-For http header.</td>
   </tr> 
   <tr valign="top">
-    <td colspan="3"><input type="submit" name="httpNetworking" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
+    <td colspan="3"><input type="submit" name="httpNetworking" value="Submit">&nbsp;<i>Changes will take effect immediately.</i></td>
   </tr>  
 </table>
 </fieldset>

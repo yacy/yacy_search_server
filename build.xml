@@ -594,7 +594,6 @@
     <fileset dir="${src}" includes="**/*.class" />
     <fileset dir="${build}" includes="**/*.class" />
     <fileset dir="${htroot}" includes="**/*.class" />
-	<fileset dir="${release}" includes="*.rpm" />
   </delete>
 </target>
 

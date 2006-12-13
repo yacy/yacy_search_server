@@ -9,7 +9,7 @@
     <td><i>Here you can specify the path within the filesystem where the seed-list file should be stored.</i></td>
   </tr>  
   <tr>
-    <td colspan="3"><input type="submit" name="seedFileSettings" value="submit"></td>
+    <td colspan="3"><input type="submit" name="seedFileSettings" value="Submit"></td>
   </tr>  
 </table>
 </form>

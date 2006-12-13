@@ -19,7 +19,7 @@
     <td><i>The recipient email-address.<br> e.g.:</i>&nbsp;<code>root@localhost</code></td>
   </tr>
   <tr valign="top">
-    <td colspan="3"><input type="submit" name="msgForwarding" value="submit">&nbsp;<i>Changes will take effect immediately.</i></td>
+    <td colspan="3"><input type="submit" name="msgForwarding" value="Submit">&nbsp;<i>Changes will take effect immediately.</i></td>
   </tr>    
   
 </table>

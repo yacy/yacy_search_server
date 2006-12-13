@@ -363,19 +363,7 @@ public class SettingsAck_p {
             prop.put("info_filter", filter);
             return prop;
         }
-        
-        if (post.containsKey("dispop")) {
-            env.setConfig("browserPopUpTrigger", "false");
-            prop.put("info", 9);//popup disabled
-            return prop;
-        }
-        
-        if (post.containsKey("enpop")) {
-            env.setConfig("browserPopUpTrigger", "true");
-            prop.put("info", 10);//popup enabled
-            return prop;
-        }
-        
+
         if (post.containsKey("pmode")) {
             env.setConfig("onlineMode", "2");
             prop.put("info", 11);//permanent online mode

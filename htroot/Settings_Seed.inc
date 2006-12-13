@@ -27,7 +27,7 @@ but only if there have been changes to the seed-list.
            http://www.&lt;my-host&gt;.net/yacy/seed.txt'</i></td>
   </tr>  
   <tr>
-    <td colspan="3"><input type="submit" name="seedSettings" value="submit"></td>
+    <td colspan="3"><input type="submit" name="seedSettings" value="Submit"></td>
   </tr>  
 </table>
 </form>

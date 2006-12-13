@@ -96,8 +96,26 @@ public class Status {
                         ((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);                      
                 } else if (post.containsKey("ResetTraffic")) {
                     httpdByteCountInputStream.resetCount();
-                    httpdByteCountOutputStream.resetCount();               
+                    httpdByteCountOutputStream.resetCount();
+                //enables or disables the browser popup on Yacy-start
+                } else if (post.containsKey("popup")) {
+                String trigger_enabled = (String) post.get("popup");
+                if (trigger_enabled.equals("false")) {
+                    env.setConfig("browserPopUpTrigger", "false");
+                } else if (trigger_enabled.equals("true")){
+                    env.setConfig("browserPopUpTrigger", "true");
                 }
+                }
+                
+                /*
+                } else if (post.containsKey("popup")) {
+                    env.setConfig("browserPopUpTrigger", "false");
+                    prop.put("info", 9); //popup disabled
+                } else if (post.containsKey("enpop")) { 
+                    env.setConfig("browserPopUpTrigger", "true");
+                    prop.put("info", 10); //popup enabled
+                } */
+                
                 prop.put("LOCATION","");
             }
             return prop;

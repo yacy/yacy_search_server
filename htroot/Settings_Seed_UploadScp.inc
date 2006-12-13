@@ -30,7 +30,7 @@
     <td><i>The password</i></td>
   </tr>
   <tr>
-    <td colspan="3"><input type="submit" name="seedScpSettings" value="submit"></td>
+    <td colspan="3"><input type="submit" name="seedScpSettings" value="Submit"></td>
   </tr>
 </table>
 </form>

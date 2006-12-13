@@ -58,7 +58,7 @@
   
   <!-- submit button -->
   <tr valign="top">
-    <td colspan="4"><input type="submit" name="proxysettings" value="submit">&nbsp;  <em>Changes will take effect immediately.</em></td>
+    <td colspan="4"><input type="submit" name="proxysettings" value="Submit">&nbsp;  <em>Changes will take effect immediately.</em></td>
   </tr>
 </table>
 </fieldset>

@@ -11,7 +11,7 @@
     <td>Protection</td>
     <td>
       #(protection)#
-      <strong>Your settings are _not_ protected!</strong> Please go to the <a href="Settings_p.html?page=admin">settings</a> page <strong>immediately</strong> and set an administration password.
+      <strong>Your settings are _not_ protected!</strong> Please go to the <a href="ConfigBasic.html">settings</a> page <strong>immediately</strong> and set an administration password.
       ::
       Your settings are protected by a password.
       #(/protection)#
@@ -35,14 +35,22 @@
   </tr>
   <tr class="TableCellDark">
     <td>Auto-popup on start-up</td>
-    <td>
       #(popup)#
-      Disabled. To enable this again please use the <a href="Settings_p.html?page=SystemBehaviour">Settings</a> page.
+      <td>
+      Disabled
+      </td>
+      <td>
+      <a href="Status.html?popup=true">[Enable]</a>
+      </td>
       ::
-      Enabled. To disable this please use the <a href="Settings_p.html?page=SystemBehaviour">Settings</a> page.
+      <td>
+      Enabled
+      </td>
+      <td>
+      <a href="Status.html?popup=false">[Disable]</a>
+      </td>
       #(/popup)#
     </td>
-    <td></td>
   </tr>
   <tr class="TableCellLight">
     <td>Memory Usage</td>
@@ -121,7 +129,10 @@
   </tr>
   <tr class="TableCellLight"><td>Seed server</td><td>
     #(seedServer)#
-      Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the <a href="Settings_p.html#seed">Settings page</a>.
+      Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server.
+      </td>
+      <td>
+      <a href="Settings_p.html#seed">[Configure]</a>.
       ::
       Enabled: Updating periodically to server #[seedServer]#.
       Last upload: #[lastUpload]# ago.
@@ -129,5 +140,5 @@
       Enabled: Updating periodically to file #[seedFile]#.
       Last upload: #[lastUpload]# ago.
     #(/seedServer)#
-  </td><td></td></tr>
+  </td></tr>
 </table>
