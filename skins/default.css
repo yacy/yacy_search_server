@@ -159,6 +159,11 @@ div.ProgressBarFill {
   color:#999999;
 }
 
+.snippetLoaded strong {
+  background:#4070a0;
+  color:white;
+}
+
 .snippetError {
   color:red;
 }
