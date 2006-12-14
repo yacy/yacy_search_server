@@ -43,8 +43,10 @@
 
 package de.anomic.yacy;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.logging.serverLog;
@@ -249,7 +251,7 @@ public class yacyDHTAction implements yacyPeerAction {
         if (d > 0) {
             return d; // case where the word is 'before' the peer
         } else {
-            return 1 + d; // wrap-around case
+            return ((double) 1) + d; // wrap-around case
         }
     }
     
@@ -258,49 +260,37 @@ public class yacyDHTAction implements yacyPeerAction {
         // the maximum distance between two hashes is 1, the minimum -1
         // this can be used like "from - to"
         // the result is positive if from > to
-        if ((from == null) || (to == null) || 
-            (from.length() == 0) || (to.length() == 0) ||
-            (from.length() != to.length())) return (double) 0.0;
-        return hashDistance(from.charAt(0), to.charAt(0)) + hashDistance(from.substring(1), to.substring(1)) / maxAtomarDistance;
+        assert (from != null);
+        assert (to != null);
+        assert (from.length() == 12);
+        assert (to.length() == 12);
+        return ((double) (kelondroBase64Order.enhancedCoder.cardinal(from.getBytes()) - kelondroBase64Order.enhancedCoder.cardinal(to.getBytes()))) / ((double) Long.MAX_VALUE);
     }
     
-    private static final double maxAtomarDistance = (double) (1+ ((byte) 'z') - ((byte) '-'));
-    
-    private static double hashDistance(char from, char to) {
-        // the distance is a little bit fuzzy, since not all characters are used in a hash.
-        if (from < to)
-            return -hashDistance(to, from);
-        else
-            return ((double) (((byte) from) - ((byte) to))) / maxAtomarDistance;
-    }
-    
-    public synchronized yacySeed[] getDHTTargets(serverLog log, int primaryPeerCount, int reservePeerCount, String firstKey, String lastKey, double maxDist) {
+    public synchronized ArrayList /* of yacySeed */ getDHTTargets(serverLog log, int primaryPeerCount, int reservePeerCount, String firstKey, String lastKey, double maxDist) {
         // find a list of DHT-peers
-        yacySeed[] seeds = new yacySeed[primaryPeerCount + reservePeerCount];
-        int hc0 = 0;
+        assert
+            !(kelondroBase64Order.enhancedCoder.cardinal(firstKey.getBytes()) < kelondroBase64Order.enhancedCoder.cardinal(yacyCore.seedDB.mySeed.hash.getBytes()) &&
+              kelondroBase64Order.enhancedCoder.cardinal(lastKey.getBytes()) > kelondroBase64Order.enhancedCoder.cardinal(yacyCore.seedDB.mySeed.hash.getBytes()));
+        ArrayList seeds = new ArrayList();
+        yacySeed seed;
         double ownDistance = Math.min(yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, firstKey), yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, lastKey));
         double maxDistance = Math.min(ownDistance, maxDist);
 
         double avdist;
         Enumeration e = this.getAcceptRemoteIndexSeeds(lastKey);
-        while ((e.hasMoreElements()) && (hc0 < seeds.length)) {
-            seeds[hc0] = (yacySeed) e.nextElement();
-            if (seeds[hc0] != null) {
-                avdist = Math.max(yacyDHTAction.dhtDistance(seeds[hc0].hash, firstKey), yacyDHTAction.dhtDistance(seeds[hc0].hash, lastKey));
+        while ((e.hasMoreElements()) && (seeds.size() < (primaryPeerCount + reservePeerCount))) {
+            seed = (yacySeed) e.nextElement();
+            if (seeds != null) {
+                avdist = Math.max(yacyDHTAction.dhtDistance(seed.hash, firstKey), yacyDHTAction.dhtDistance(seed.hash, lastKey));
                 if (avdist < maxDistance) {
-                    if (log != null) log.logInfo("Selected " + ((hc0 < primaryPeerCount) ? "primary" : "reserve") + " DHT target peer " + seeds[hc0].getName() + ":" + seeds[hc0].hash + ", distance = " + avdist);
-                    hc0++;
+                    if (log != null) log.logInfo("Selected " + ((seeds.size() < primaryPeerCount) ? "primary" : "reserve") + " DHT target peer " + seed.getName() + ":" + seed.hash + ", distance = " + avdist);
+                    seeds.add(seed);
                 }
             }
         }
         e = null; // finish enumeration
         
-        if (hc0 == seeds.length) {
-            return seeds;
-        } else {
-            yacySeed[] s = new yacySeed[hc0];
-            System.arraycopy(seeds, 0, s, 0, hc0);
-            return s;
-        }
+        return seeds;
     }
 }

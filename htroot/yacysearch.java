@@ -179,7 +179,7 @@ public class yacysearch {
         if (cds.equals("app")) contentdom = plasmaSearchQuery.CONTENTDOM_APP;
         
         // patch until better search profiles are available
-        if ((contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) && (count <= 10)) count = 50;
+        if ((contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) && (count <= 10)) count = 30;
         
         serverObjects prop = new serverObjects();
         if (post.get("cat", "href").equals("href")) {
@@ -294,7 +294,7 @@ public class yacysearch {
                     prop.put("num-results", 1); // no results
                 }
             } else {
-                final int totalcount = Integer.parseInt(prop.get("num-results_totalcount", "0"));
+                final int totalcount = prop.getInt("num-results_totalcount", 0);
                 if (totalcount >= 10) {
                     final Object[] references = (Object[]) prop.get( "references", new String[0]);
                     prop.put("num-results", 4);
@@ -363,7 +363,8 @@ public class yacysearch {
                 }
             }
 
-            prop.put("type", (thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : 1);
+            prop.put("type", (thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : ((thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 2 : 1));
+            if (prop.getInt("type", 0) == 1) prop.put("type_mediatype", cds);
             prop.put("cat", "href");
             prop.put("depth", "0");
 

@@ -10,14 +10,26 @@ function AllTextSnippets() {
 	}
 }
 
-function AllMediaSnippets() {
+function AllMediaSnippets(mediatype) {
     var query = document.getElementsByName("former")[0].value;
     
 	var span = document.getElementsByTagName("span");
 	for(var x=0;x<span.length;x++) {
 		if (span[x].className == 'snippetLoading') {
 				var url = document.getElementById("url" + span[x].id);
-				requestMediaSnippet(url,query);
+				requestMediaSnippet(url,query,mediatype);
+		}
+	}
+}
+
+function AllImageSnippets() {
+    var query = document.getElementsByName("former")[0].value;
+    
+	var span = document.getElementsByTagName("span");
+	for(var x=0;x<span.length;x++) {
+		if (span[x].className == 'snippetLoading') {
+				var url = document.getElementById("url" + span[x].id);
+				requestImageSnippet(url,query);
 		}
 	}
 }
@@ -29,10 +41,17 @@ function requestTextSnippet(url, query){
 	request.send(null);
 }
 
-function requestMediaSnippet(url, query){
+function requestMediaSnippet(url, query, mediatype){
 	var request=createRequestObject();
-	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=audio&search=' + escape(query),true);
+	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=' + escape(mediatype) + '&search=' + escape(query),true);
 	request.onreadystatechange = function () {handleMediaState(request)};
+	request.send(null);
+}
+
+function requestImageSnippet(url, query){
+	var request=createRequestObject();
+	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=image&search=' + escape(query),true);
+	request.onreadystatechange = function () {handleImageState(request)};
 	request.send(null);
 }
 
@@ -110,14 +129,11 @@ function handleMediaState(req) {
 			linkanchor.appendChild(document.createTextNode(href));
 			
 			var col1 = document.createElement("td");
-			var width1 = document.createAttribute("width");
-			width1.nodeValue = 200;
-			col1.setAttributeNode(width1);
+			col1.setAttribute("width", "200");
 			col1.appendChild(nameanchor);
+			
 			var col2 = document.createElement("td");
-			var width2 = document.createAttribute("width");
-			width2.nodeValue = 500;
-			col2.setAttributeNode(width2);
+			col2.setAttribute("width", "500");
 			col2.appendChild(linkanchor);
 			
 			var row = document.createElement("tr");
@@ -134,6 +150,66 @@ function handleMediaState(req) {
 		span.appendChild(document.createTextNode(""));
 	}
 }
+
+function handleImageState(req) {
+    if(req.readyState != 4){
+		return;
+	}
+	
+	var response = req.responseXML;
+	var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
+	var links = response.getElementsByTagName("links")[0].firstChild.data;
+	var span = document.getElementById(urlHash)
+	removeAllChildren(span);
+	
+	if (links > 0) {
+		span.className = "snippetLoaded";
+		for (i = 0; i < links; i++) {
+			var type = response.getElementsByTagName("type")[i].firstChild.data;
+			var href = response.getElementsByTagName("href")[i].firstChild.data;
+			var name = response.getElementsByTagName("name")[i].firstChild.data;
+			var attr = response.getElementsByTagName("attr")[i].firstChild.data;
+
+            // <a href="#[url]#"><img src="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;url=#[url]#" /></a><br /><a href="#[url]#">#[name]#</a>
+			var img = document.createElement("img");
+			img.setAttribute("src", "/ViewImage.png?maxwidth=96&maxheight=96&url=" + href);
+			img.setAttribute("alt", name);
+			
+			var imganchor = document.createElement("a");
+			imganchor.setAttribute("href", href);
+			imganchor.appendChild(img);
+			
+			var nameanchor = document.createElement("a");
+			nameanchor.setAttribute("href", href);
+			nameanchor.appendChild(document.createTextNode(name));
+			
+			var col1 = document.createElement("td");
+			col1.setAttribute("width", "100");
+			col1.appendChild(imganchor);
+			
+			var row1 = document.createElement("tr");
+			row1.setAttribute("class", "TableCellLight");
+			row1.appendChild(col1);
+			
+			var col2 = document.createElement("td");
+			col2.setAttribute("width", "100");
+			col2.appendChild(nameanchor);
+			
+			var row2 = document.createElement("tr");
+			row2.setAttribute("class", "TableCellDark");
+			row2.appendChild(col2);
+
+			var table = document.createElement("table");
+			table.appendChild(row1);
+			table.appendChild(row2);
+			span.appendChild(table);
+		}
+	} else {
+		span.className = "snippetError";
+		span.appendChild(document.createTextNode(""));
+	}
+}
+
 
 function addHover() {
   if (document.all&&document.getElementById) {
