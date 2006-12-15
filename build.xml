@@ -194,7 +194,7 @@
     
     <!-- libs needed for the yacy thread/object-pools -->
     <pathelement location="${lib}/commons-collections.jar" />
-    <pathelement location="${lib}/commons-pool-1.2.jar" />    
+    <pathelement location="${lib}/commons-pool.jar" />    
   </path>
     
   <!-- compiling yacy.java -->   
@@ -237,7 +237,7 @@
 	    
 	    <!-- libs needed for the yacy thread/object-pools -->
 	    <pathelement location="${lib}/commons-collections.jar" />
-	    <pathelement location="${lib}/commons-pool-1.2.jar" />  
+	    <pathelement location="${lib}/commons-pool.jar" />  
 	  	
 	  	<!-- userspecific libs -->
 		<pathelement location="${htdocsWWW}/lib/*.jar" />

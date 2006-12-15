@@ -13,7 +13,7 @@
 	<classPath>..\..\htroot\yacy</classPath>
 	<classPath>..\..\yacy.jar</classPath>
 	<classPath>..\..\lib\commons-collections.jar</classPath>
-	<classPath>..\..\lib\commons-pool-1.2.jar</classPath>
+	<classPath>..\..\lib\commons-pool.jar</classPath>
 	<classPath>..\..\libx\poi-3.0-alpha2-20060616.jar</classPath>
 	<classPath>..\..\libx\poi-scratchpad-3.0-20060616.jar</classPath>
 	<classPath>..\..\libx\axis-ant.jar</classPath>

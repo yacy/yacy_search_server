@@ -40,7 +40,7 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-// compile: javac -classpath lib/commons-collections.jar:lib/commons-pool-1.2.jar -sourcepath source source/de/anomic/plasma/plasmaParser.java
+// compile: javac -classpath lib/commons-collections.jar:lib/commons-pool.jar -sourcepath source source/de/anomic/plasma/plasmaParser.java
 
 package de.anomic.plasma;
 
