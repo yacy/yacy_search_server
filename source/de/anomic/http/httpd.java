@@ -767,8 +767,15 @@ public final class httpd implements serverHandler {
                 baos.write(' ');
                 pos++;
             } else if (s.charAt(pos) == '%') {
-                baos.write(Integer.parseInt(s.substring(pos + 1, pos + 3), 16));
-                pos += 3;
+            	// start change by [FB]: added UTF-escapes
+            	if (s.charAt(pos + 1) == 'u') {				// UTF-16 escape
+            		pos += 6;
+            		baos.write(Integer.parseInt(s.substring(pos + 2, pos + 6), 16));
+            	} else {									// normal escape
+            		pos += 3;
+                	baos.write(Integer.parseInt(s.substring(pos + 1, pos + 3), 16));
+            	}
+            	// end change by [FB]
             } else {
                 baos.write(s.charAt(pos++));
             }
