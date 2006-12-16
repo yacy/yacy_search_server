@@ -43,16 +43,17 @@
 package de.anomic.http;
 
 import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -756,12 +757,13 @@ public final class httpd implements serverHandler {
         return argc;
     }
     
+    // 16.12.2006 by [FB]: added UTF-character decoding
     private static String parseArg(String s) {
         // this parses a given value-string from a http property
         // we replace all "+" by spaces
-        // and resolve %-escapes with two-digit hex attributes
+        // and resolve %-escapes with two- / four-digit hex attributes
         int pos = 0;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(s.length());
+        CharArrayWriter baos = new CharArrayWriter(s.length());
         while (pos < s.length()) {
             if (s.charAt(pos) == '+') {
                 baos.write(' ');
@@ -780,13 +782,7 @@ public final class httpd implements serverHandler {
                 baos.write(s.charAt(pos++));
             }
         }
-        String result;
-        try {
-            result = new String(baos.toByteArray(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return null;
-        }
-        return result;
+        return baos.toString();
     }
     
     
