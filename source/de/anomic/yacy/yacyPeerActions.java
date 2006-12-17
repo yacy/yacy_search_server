@@ -193,7 +193,7 @@ public class yacyPeerActions {
                     url = new URL(seedListFileURL);
                     header = httpc.whead(url, url.getHost(), this.bootstrapLoadTimeout, null, null, this.sb.remoteProxyConfig,reqHeader);
                     if ((header == null) || (header.lastModified() == null)) {
-                        yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available");
+                        yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available");
                     } else if ((header.age() > 86400000) && (ssc > 0)) {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
@@ -214,10 +214,12 @@ public class yacyPeerActions {
                         yacyCore.log.logInfo("BOOTSTRAP: " + lc + " seeds from seed-list URL " + seedListFileURL + ", AGE=" + (header.age() / 3600000) + "h");
                     }
                     
+                } catch (IOException e) {
+                    // this is when wget fails, commonly because of timeout
+                    yacyCore.log.logWarning("BOOTSTRAP: failed to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage());
                 } catch (Exception e) {
                     // this is when wget fails; may be because of missing internet connection
-                    // we do nothing here and go silently over it
-                    yacyCore.log.logSevere("BOOTSTRAP: failed to load seeds from seed-list URL " + seedListFileURL);
+                    yacyCore.log.logSevere("BOOTSTRAP: failed to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage());
                 }
             }
         }

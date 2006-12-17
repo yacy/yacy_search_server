@@ -411,22 +411,31 @@ public final class serverCore extends serverAbstractThread implements serverThre
         return isNotLocal(url.getHost());
     }
     
-    public static boolean isNotLocal(String ip) {
-        // generate ip address if ip is given by host
-        assert (ip != null);
+    /**
+     * Checks if a given address (hostname or IP) is *not* a local address
+     *
+     * @param address Address to check
+     * @return boolean, true if address is public, false if address is private 
+     */
+    public static boolean isNotLocal(String address) {
+
+        assert (address != null);
         
         // check local ip addresses
-        if ((ip.equals("localhost")) ||
-            (ip.startsWith("127")) ||
-            (ip.startsWith("192.168")) ||
-            (ip.startsWith("10."))
+        if ((address.equals("localhost")) ||
+            (address.startsWith("127")) ||
+            (address.startsWith("192.168")) ||
+            (address.startsWith("10.")) ||
+            (address.startsWith("169.254")) ||
+            //172.16.0.0–172.31.255.255 (I think this is faster than a regex)
+            (address.startsWith("172.16")) || (address.startsWith("172.17")) || (address.startsWith("172.18")) || (address.startsWith("172.19")) || (address.startsWith("172.20")) || (address.startsWith("172.21")) || (address.startsWith("172.22")) || (address.startsWith("172.23")) || (address.startsWith("172.24")) || (address.startsWith("172.25")) || (address.startsWith("172.26")) || (address.startsWith("172.27")) || (address.startsWith("172.28")) || (address.startsWith("172.29")) || (address.startsWith("172.30")) || (address.startsWith("172.31"))
            ) return false;
         
-        // make a dns resolve
-        final InetAddress clientAddress = httpc.dnsResolve(ip);
+        // make a dns resolve if a hostname is given and check again
+        final InetAddress clientAddress = httpc.dnsResolve(address);
         if (clientAddress != null) {
             if ((clientAddress.isAnyLocalAddress()) || (clientAddress.isLoopbackAddress())) return false;
-            if (ip.charAt(0) > '9') ip = clientAddress.getHostAddress();
+            if (address.charAt(0) > '9') address = clientAddress.getHostAddress();
         }
         
         // finally check if there are other local IP adresses that are not in the standard IP range
@@ -434,7 +443,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             if (localAddresses[i].equals(clientAddress)) return false;
         }
         
-        // the address must be a gloabl IP address
+        // the address must be a global address
         return true;
     }
     
@@ -526,7 +535,8 @@ public final class serverCore extends serverAbstractThread implements serverThre
     }
     
     public void freemem() {
-        // do nothing; FIXME: can we something here to flush memory?
+        // FIXME: can we something here to flush memory? Idea: Reduce the size of some of our various caches.
+    	System.gc();
     }
     
     // class body
