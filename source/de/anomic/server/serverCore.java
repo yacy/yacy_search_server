@@ -422,13 +422,22 @@ public final class serverCore extends serverAbstractThread implements serverThre
         assert (address != null);
         
         // check local ip addresses
-        if ((address.equals("localhost")) ||
-            (address.startsWith("127")) ||
-            (address.startsWith("192.168")) ||
-            (address.startsWith("10.")) ||
-            (address.startsWith("169.254")) ||
-            //172.16.0.0–172.31.255.255 (I think this is faster than a regex)
-            (address.startsWith("172.16")) || (address.startsWith("172.17")) || (address.startsWith("172.18")) || (address.startsWith("172.19")) || (address.startsWith("172.20")) || (address.startsWith("172.21")) || (address.startsWith("172.22")) || (address.startsWith("172.23")) || (address.startsWith("172.24")) || (address.startsWith("172.25")) || (address.startsWith("172.26")) || (address.startsWith("172.27")) || (address.startsWith("172.28")) || (address.startsWith("172.29")) || (address.startsWith("172.30")) || (address.startsWith("172.31"))
+        if (address.equals("localhost")   ||
+            address.startsWith("127")     ||
+            address.startsWith("192.168") ||
+            address.startsWith("10.")     ||
+            address.startsWith("169.254") ||
+            // 172.16.0.0–172.31.255.255 (I think this is faster than a regex)
+            (address.startsWith("172.") && ( 
+             address.startsWith("172.16.") || address.startsWith("172.17.") ||
+             address.startsWith("172.18.") || address.startsWith("172.19.") ||
+             address.startsWith("172.20.") || address.startsWith("172.21.") ||
+             address.startsWith("172.22.") || address.startsWith("172.23.") ||
+             address.startsWith("172.24.") || address.startsWith("172.25.") ||
+             address.startsWith("172.26.") || address.startsWith("172.27.") ||
+             address.startsWith("172.28.") || address.startsWith("172.29.") ||
+             address.startsWith("172.30.") || address.startsWith("172.31.")
+            ))
            ) return false;
         
         // make a dns resolve if a hostname is given and check again
