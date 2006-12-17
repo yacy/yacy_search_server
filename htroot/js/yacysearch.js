@@ -188,7 +188,7 @@ function handleImageState(req) {
 			col1.appendChild(imganchor);
 			
 			var row1 = document.createElement("tr");
-			row1.setAttribute("class", "TableCellLight");
+			//row1.setAttribute("class", "TableCellLight");
 			row1.appendChild(col1);
 			
 			var col2 = document.createElement("td");
@@ -200,9 +200,11 @@ function handleImageState(req) {
 			row2.appendChild(col2);
 
 			var table = document.createElement("table");
+			table.setAttribute("class", "imgtable");
 			table.appendChild(row1);
 			table.appendChild(row2);
 			span.appendChild(table);
+			//span.appendChild(imganchor);
 		}
 	} else {
 		span.className = "snippetError";

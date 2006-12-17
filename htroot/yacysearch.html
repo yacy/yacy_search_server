@@ -165,6 +165,7 @@ document.searchform.Enter.value = "search again - catch up more links";
 	
 	<!-- linklist end -->
 	::<!-- type 2: image serch: presents image thumbnails -->
+	<table border="0"><tr><td><!-- table to prevent flow behind last snippet image -->
 	<!-- linklist begin -->
 	#{results}#
 	<!-- link begin -->
@@ -175,8 +176,8 @@ document.searchform.Enter.value = "search again - catch up more links";
 	AllImageSnippets();
 	addHover();
 	</script> 
-	
 	<!-- linklist end -->
+	</td></tr></table>
 	::<!-- type 3: image thumbnail list for one single url -->
 	<table border="0" cellspacing="16" cellpadding="0">
 	#{results}#

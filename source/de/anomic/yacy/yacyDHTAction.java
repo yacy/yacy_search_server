@@ -262,8 +262,8 @@ public class yacyDHTAction implements yacyPeerAction {
         // the result is positive if from > to
         assert (from != null);
         assert (to != null);
-        assert (from.length() == 12);
-        assert (to.length() == 12);
+        assert (from.length() == 12) : "from.length = " + from.length() + ", from = " + from;
+        assert (to.length() == 12) : "to.length = " + to.length() + ", to = " + to;
         return ((double) (kelondroBase64Order.enhancedCoder.cardinal(from.getBytes()) - kelondroBase64Order.enhancedCoder.cardinal(to.getBytes()))) / ((double) Long.MAX_VALUE);
     }
     

@@ -454,3 +454,11 @@ div.CacheAdminInfo {
 .help {
   font-size:90%;
 }
+
+.imgtable {
+  margin: 1px;
+  padding: 1px;
+  width: 100px;
+  border: 0px solid #aaaaaa;
+  float: left;
+}
