@@ -214,9 +214,12 @@ public final class yacy {
             File f = new File(homePath); if (!(f.exists())) f.mkdirs();
             f = new File(homePath, "DATA/"); if (!(f.exists())) f.mkdirs();
 			if (!(f.exists())) { 
-			System.err.println("Error creating DATA-directory in " + homePath.toString() + " . Please check your write-permission for this folder. YaCy will now terminate."); 
-			System.exit(-1); 
+				System.err.println("Error creating DATA-directory in " + homePath.toString() + " . Please check your write-permission for this folder. YaCy will now terminate."); 
+				System.exit(-1); 
 			}
+			
+			f = new File(homePath, "DATA/yacy.running");
+			if (!f.exists()) f.createNewFile(); f.deleteOnExit();
             
             // setting up logging
             f = new File(homePath, "DATA/LOG/"); if (!(f.exists())) f.mkdirs();
