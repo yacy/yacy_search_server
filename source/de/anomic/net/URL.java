@@ -109,13 +109,9 @@ public class URL {
         if (relPath == null) throw new MalformedURLException("relPath is null");
         int p = relPath.indexOf(':');
         String relprotocol = (p < 0) ? null : relPath.substring(0, p).toLowerCase();
-        if (relprotocol != null) {
-            if ("http.https.ftp.mailto".indexOf(relprotocol) >= 0) {
-                parseURLString(relPath);
-            } else {
-                throw new MalformedURLException("unknown protocol: " + relprotocol);
-            }
-        } else {
+        if (relprotocol != null && "http.https.ftp.mailto".indexOf(relprotocol) >= 0) {
+            parseURLString(relPath);
+        } else if (relprotocol == null || relprotocol.equals("javascript")) {
             this.protocol = baseURL.protocol;
             this.host = baseURL.host;
             this.port = baseURL.port;
@@ -149,6 +145,8 @@ public class URL {
             identRef();
             identQuest();
             escape();
+        } else {
+            throw new MalformedURLException("unknown protocol: " + relprotocol);
         }
     }
     
@@ -525,7 +523,9 @@ public class URL {
           new String[]{"http://www.anomic.de/home", "news:de.test"},
           new String[]{"http://www.anomic.de/home", "ftp://ftp.anomic.de/src"},
           new String[]{null, "ftp://ftp.delegate.org/"},
-          new String[]{"http://www.anomic.de/home", "ftp://ftp.delegate.org/"}
+          new String[]{"http://www.anomic.de/home", "ftp://ftp.delegate.org/"},
+          new String[]{"http://www.anomic.de","mailto:yacy@weltherrschaft.org"},
+          new String[]{"http://www.anomic.de","javascipt:temp"}
         };
         String environment, url;
         de.anomic.net.URL aURL = null;
