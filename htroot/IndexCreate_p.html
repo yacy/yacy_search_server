@@ -16,7 +16,7 @@
     You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".
     </p>
     
-    <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
+    <form action="WatchCrawler_p.html" method="post" enctype="multipart/form-data">
       <table border="0" cellpadding="5" cellspacing="1">
         <tr class="TableHeader">
           <td><strong>Attribut</strong></td>
@@ -242,51 +242,15 @@
       </table>
     </form>
     
-    
-    <p>
-      #(error)#<!-- 0 -->
-      ::<!-- 1 -->
-      Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.
-      ::<!-- 2 -->
-      Error: #[errmsg]#
-      ::<!-- 3 -->
-      Application not yet initialized. Sorry. Please wait some seconds and repeat the request.
-      ::<!-- 4 -->
-      <strong>ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</strong> Please try again with different filter.
-      ::<!-- 5 -->
-      Crawling of "#[crawlingURL]#" failed. Reason: #[reasonString]#<br>
-      ::<!-- 6 -->
-      Error with URL input "#[crawlingStart]#": #[error]#
-      ::<!-- 7 -->
-      Error with file input "#[crawlingStart]#": #[error]#
-      #(/error)#
-    </p>
     <p>
       #(info)#
-      ::
-      Set new prefetch depth to "#[newproxyPrefetchDepth]#"
-      ::
-      Crawling of "#[crawlingURL]#" started.
-      You can monitor the crawling progress either by watching the URL queues
-      (<a href="/IndexCreateWWWLocalQueue_p.html">local queue</a>,
-      <a href="/IndexCreateWWWGlobalQueue_p.html">global queue</a>,
-      <a href="/IndexCreateLoaderQueue_p.html">loader queue</a>,
-      <a href="/IndexCreateLoaderQueue_p.html">indexing queue</a>)
-      or see the fill/process count of all queues on the
-      <a href="/PerformanceQueues_p.html">performance page</a>.
-      <strong>Please wait some seconds, because the request is enqueued and delayed until the proxy/HTTP-server is idle for a certain time.</strong>
-      The indexing results are presented on the
-      <a href="IndexMonitor.html">Index Monitor</a>-page.
-      <strong>It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.</strong>
-      If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.<br />
-      ::
-      Removed #[numEntries]# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty.
       ::
       Crawling paused successfully.
       ::
       Continue crawling.
     #(/info)#
     </p>
+    
     #(refreshbutton)#
     ::
     <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
@@ -305,50 +269,6 @@
       </fieldset>
     </form>
     
-    <p id="crawlingProfiles"><strong>Crawl Profile List:</strong></p>
-    <table border="0" cellpadding="2" cellspacing="1">
-      <colgroup>
-        <col width="120" />
-        <col />
-        <col width="16" />
-        <col width="60" />
-        <col width="10" span="2" />
-        <col />
-        <col width="10" span="5" />
-      </colgroup>
-      <tr class="TableHeader">
-        <td><strong>Crawl Thread</strong></td>
-        <td><strong>Start URL</strong></td>
-        <td><strong>Depth</strong></td>
-        <td><strong>Filter</strong></td>
-        <td><strong>MaxAge</strong></td>
-        <td><strong>Auto Filter Depth</strong></td>
-        <td><strong>Auto Filter Content</strong></td>
-        <td><strong>Max Page Per Domain</strong></td>
-        <td><strong>Accept '?' URLs</strong></td>
-        <td><strong>Fill Proxy Cache</strong></td>
-        <td><strong>Local Indexing</strong></td>
-        <td><strong>Remote Indexing</strong></td>
-        <td></td>
-      </tr>
-    #{crawlProfiles}#
-      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-        <td>#[name]#</td>
-        <td><a  href="#[startURL]#">#[startURL]#</a></td>
-        <td>#[depth]#</td>
-        <td>#[filter]#</td>
-        <td>#[crawlingIfOlder]#</td>
-        <td>#[crawlingDomFilterDepth]#</td>
-        <td>#[crawlingDomFilterContent]#</td>
-        <td>#[crawlingDomMaxPages]#</td>
-        <td>#(withQuery)#no::yes#(/withQuery)#</td>
-        <td>#(storeCache)#no::yes#(/storeCache)#</td>
-        <td>#(localIndexing)#no::yes#(/localIndexing)#</td>
-        <td>#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
-        <td>#(deleteButton)#::<form action="IndexCreate_p.html" method="get" enctype="multipart/form-data"><input type="hidden" name="handle" value="#[handle]#" /><input type="submit" name="deleteprofile" value="Delete" /></form>#(/deleteButton)#</td>
-      </tr>
-    #{/crawlProfiles}#
-    </table>
     <p id="crawlingStarts"><strong>Recently started remote crawls in progress:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">

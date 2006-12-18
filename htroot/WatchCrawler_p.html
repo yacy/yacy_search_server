@@ -49,7 +49,7 @@
     
     <td width="10">&nbsp;</td>
     
-    <td valign="top"	><table border="0" cellpadding="2" cellspacing="1">
+    <td valign="top"><table border="0" cellpadding="2" cellspacing="1">
       <tbody>
         <tr class="TableHeader">
           <th>Indicator</th>
@@ -66,11 +66,84 @@
           <td align="left"><span id="wordcacheSpan">&nbsp;</span></td>
         </tr>
       </tbody>
-    </table></td>
+    </table><br />
+    
+    <p>
+      #(info)#<!-- 0 -->
+      ::<!-- 1 -->
+      Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.
+      ::<!-- 2 -->
+      Error: #[errmsg]#
+      ::<!-- 3 -->
+      Application not yet initialized. Sorry. Please wait some seconds and repeat the request.
+      ::<!-- 4 -->
+      <strong>ERROR: Crawl filter "#[newcrawlingfilter]#" does not match with crawl root "#[crawlingStart]#".</strong> Please try again with different filter.
+      ::<!-- 5 -->
+      Crawling of "#[crawlingURL]#" failed. Reason: #[reasonString]#<br>
+      ::<!-- 6 -->
+      Error with URL input "#[crawlingStart]#": #[error]#
+      ::<!-- 7 -->
+      Error with file input "#[crawlingStart]#": #[error]#
+      ::<!-- 8 -->
+      Crawling of "#[crawlingURL]#" started.
+      <strong>Please wait some seconds, it may take some seconds until the first result appears there.</strong>
+      If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.<br />
+    #(/info)#
+    </p>
+    
+    </td>
     
     </tr></table></p>
     
-    <p><table border="0" cellpadding="2" cellspacing="1" id="queueTable">
+    <!-- crawl profile list -->
+    <p id="crawlingProfiles"><strong>Crawl Profiles:</strong><br />
+    <table border="0" cellpadding="2" cellspacing="1">
+      <colgroup>
+        <col width="120" />
+        <col />
+        <col width="16" />
+        <col width="60" />
+        <col width="10" span="2" />
+        <col />
+        <col width="10" span="5" />
+      </colgroup>
+      <tr class="TableHeader">
+        <td><strong>Crawl Thread</strong></td>
+        <td><strong>Start URL</strong></td>
+        <td><strong>Depth</strong></td>
+        <td><strong>Filter</strong></td>
+        <td><strong>MaxAge</strong></td>
+        <td><strong>Auto Filter Depth</strong></td>
+        <td><strong>Auto Filter Content</strong></td>
+        <td><strong>Max Page Per Domain</strong></td>
+        <td><strong>Accept '?' URLs</strong></td>
+        <td><strong>Fill Proxy Cache</strong></td>
+        <td><strong>Local Indexing</strong></td>
+        <td><strong>Remote Indexing</strong></td>
+        <td></td>
+      </tr>
+    #{crawlProfiles}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[name]#</td>
+        <td><a  href="#[startURL]#">#[startURL]#</a></td>
+        <td>#[depth]#</td>
+        <td>#[filter]#</td>
+        <td>#[crawlingIfOlder]#</td>
+        <td>#[crawlingDomFilterDepth]#</td>
+        <td>#[crawlingDomFilterContent]#</td>
+        <td>#[crawlingDomMaxPages]#</td>
+        <td>#(withQuery)#no::yes#(/withQuery)#</td>
+        <td>#(storeCache)#no::yes#(/storeCache)#</td>
+        <td>#(localIndexing)#no::yes#(/localIndexing)#</td>
+        <td>#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
+        <td>#(deleteButton)#::<form action="WatchCrawler_p.html" method="get" enctype="multipart/form-data"><input type="hidden" name="handle" value="#[handle]#" /><input type="submit" name="deleteprofile" value="Delete" /></form>#(/deleteButton)#</td>
+      </tr>
+    #{/crawlProfiles}#
+    </table></p>
+    
+    <!-- crawl queues -->
+    <p><p id="crawlingQueues"><strong>Crawl Queue:</strong><br />
+    <table border="0" cellpadding="2" cellspacing="1" id="queueTable">
       <tbody>
         <tr class="TableHeader">
           <th>Queue</th>
