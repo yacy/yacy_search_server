@@ -458,7 +458,7 @@ public final class yacyClient {
                     ), "UTF-8"
                 );
             } catch (IOException e) {
-                yacyCore.log.logFine("SEARCH failed FROM " + targetPeer.hash + ":" + targetPeer.getName() + " (" + e.getMessage() + "), score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes));
+                yacyCore.log.logFine("SEARCH failed FROM " + targetPeer.hash + ":" + targetPeer.getName() + " (" + e.getMessage() + "), score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes.substring(0, 12)));
                 yacyCore.peerActions.peerDeparture(targetPeer);
                 return null;
             }

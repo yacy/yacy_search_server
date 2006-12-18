@@ -662,7 +662,7 @@ stacker.MaxIdleThreads = 10
 stacker.MinIdleThreads = 5
 
 # maximum size of indexing queue
-indexer.slots = 100
+indexer.slots = 30
 
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.

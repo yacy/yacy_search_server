@@ -168,7 +168,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     // load slots
     public static int crawlSlots            = 10;
-    public static int indexingSlots         = 100;
+    public static int indexingSlots         = 30;
     public static int stackCrawlSlots       = 1000000;
     
     public static int maxCRLDump            = 500000;
@@ -472,7 +472,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.sbQueue = new plasmaSwitchboardQueue(this.cacheManager, this.wordIndex.loadedURL, new File(this.plasmaPath, "switchboardQueue1.stack"), this.profiles);
         
         // setting the indexing queue slots
-        indexingSlots = (int) getConfigLong("indexer.slots", 100);
+        indexingSlots = (int) getConfigLong("indexer.slots", 30);
         
         // create in process list
         this.indexingTasksInProcess = new HashMap();

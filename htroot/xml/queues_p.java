@@ -105,13 +105,9 @@ public class queues_p {
                 if ((switchboard.sbQueue.size() > 0)) {
                     entryList.addAll(switchboard.sbQueue.list(0));
                 }
-                int size=10;
-                if (post!= null) size = post.getInt("num", 10);
-                
-                if(size>entryList.size()){
-                    size=entryList.size();
-                }
-                
+                int size = (post == null) ? entryList.size() : post.getInt("num", entryList.size());
+                if (size > entryList.size()) size = entryList.size();
+
                 for (i = 0; i < size; i++) {
                     boolean inProcess = i < inProcessCount;
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
@@ -140,13 +136,9 @@ public class queues_p {
             prop.put("list-loader", 0);
         } else {
             ThreadGroup loaderThreads = switchboard.cacheLoader.threadStatus();            
-            int threadCount  = loaderThreads.activeCount();
-            Thread[] threadList = new Thread[threadCount*2];
-            threadCount = loaderThreads.enumerate(threadList);
-            int size=10;
-            if(threadCount<size){
-                size=threadCount;
-            }
+            Thread[] threadList = new Thread[loaderThreads.activeCount()*2];
+            int size = loaderThreads.enumerate(threadList);
+            
             int i, count = 0;
             for (i = 0; i < size; i++)  {
                 CrawlWorker theWorker = (CrawlWorker)threadList[i];

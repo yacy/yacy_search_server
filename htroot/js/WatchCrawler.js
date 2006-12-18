@@ -64,10 +64,13 @@ function handleStatus(){
 	statusTag=getFirstChild(statusResponse, "status")
 	
 	ppm=getValue(getFirstChild(statusTag, "ppm"))
-	var ppmSpan = document.getElementById("ppm");
+	
+	var ppmNum = document.getElementById("ppmNum");
+	removeAllChildren(ppmNum);
+	ppmNum.appendChild(document.createTextNode(ppm));
+	
+	var ppmSpan = document.getElementById("ppmSpan");
 	removeAllChildren(ppmSpan);
-	ppmSpan.appendChild(document.createTextNode(ppm));
-	ppmSpan.appendChild(document.createElement("br"));
 	for(i=0;i<ppm;i++){
 		img=document.createElement("img");
 		img.setAttribute("src", BAR_IMG1);
@@ -77,15 +80,14 @@ function handleStatus(){
 	var wordCache=getValue(getFirstChild(statusTag, "wordCacheWSize"));
 	var wordCacheMax=getValue(getFirstChild(statusTag, "wordCacheMaxCount"));
 
-	var percent=Math.round(wordCache/wordCacheMax*100);
-
+	wordCacheNum=document.getElementById("wordcacheNum");
+	removeAllChildren(wordCacheNum);
+	wordCacheNum.appendChild(document.createTextNode(wordCache+"/"+wordCacheMax));
 	
-	wordCacheSpan=document.getElementById("wordcache");
-
+	wordCacheSpan=document.getElementById("wordcacheSpan");
 	removeAllChildren(wordCacheSpan);
-	wordCacheSpan.appendChild(document.createTextNode(wordCache+"/"+wordCacheMax));
-	wordCacheSpan.appendChild(document.createElement("br"));
 	var img;
+	var percent=Math.round(wordCache/wordCacheMax*100);
 	for(i=0;i<percent*WORDCACHEBAR_LENGTH;i++){
 		img=document.createElement("img");
 		img.setAttribute("src", BAR_IMG2);
@@ -105,15 +107,19 @@ function handleQueues(){
 	var queuesResponse = queuesRPC.responseXML;
 	xml=getFirstChild(queuesResponse);
 	if(queuesResponse != null){
+		clearTable(document.getElementById("queueTable"), 1);
+	
 		indexingqueue=getFirstChild(xml, "indexingqueue");
-		createIndexingTable(indexingqueue, "indexingTable");
+		updateTable(indexingqueue, "indexing");
+		
 		indexingqueue_size=getValue(getFirstChild(indexingqueue, "size"));
 		indexingqueue_max=getValue(getFirstChild(indexingqueue, "max"));
 		document.getElementById("indexingqueuesize").firstChild.nodeValue=indexingqueue_size;
 		document.getElementById("indexingqueuemax").firstChild.nodeValue=indexingqueue_max;
 		
 		loaderqueue=getFirstChild(xml, "loaderqueue");
-		createIndexingTable(loaderqueue, "loaderTable");
+		updateTable(loaderqueue, "loader");
+		
 		loaderqueue_size=getValue(getFirstChild(loaderqueue, "size"));
 		loaderqueue_max=getValue(getFirstChild(loaderqueue, "max"));
 		document.getElementById("loaderqueuesize").firstChild.nodeValue=loaderqueue_size;
@@ -122,20 +128,20 @@ function handleQueues(){
 		localcrawlerqueue=getFirstChild(xml, "localcrawlerqueue");
 		localcrawlerqueue_size=getValue(getFirstChild(localcrawlerqueue, "size"));
 		document.getElementById("localcrawlerqueuesize").firstChild.nodeValue=localcrawlerqueue_size;
-		createIndexingTable(localcrawlerqueue, "localCrawlerTable");
+		updateTable(localcrawlerqueue, "local crawler");
 		
 		remotecrawlerqueue=getFirstChild(xml, "remotecrawlerqueue");
-		createIndexingTable(remotecrawlerqueue, "remoteCrawlerTable");
+		updateTable(remotecrawlerqueue, "remoteCrawlerTable");
+		
 		remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
 		document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
-		createRemoteCrawlerTable(remotecrawlerqueue);
+		updateTable(remotecrawlerqueue, "remote crawler");
 	}
 }
 
-function createIndexingTable(indexingqueue, tablename){
-	indexingTable=document.getElementById(tablename);
+function updateTable(indexingqueue, tablename){
+	indexingTable=document.getElementById("queueTable");
 	entries=indexingqueue.getElementsByTagName("entry");
-    clearTable(indexingTable, 1);
         
     dark=false;
     for(i=0;i<entries.length;i++){
@@ -154,7 +160,7 @@ function createIndexingTable(indexingqueue, tablename){
 			deletebutton=createLinkCol("IndexCreateIndexingQueue_p.html?deleteEntry="+hash, DELETE_STRING);
 		else
 			deletebutton=createCol("");
-		row=createIndexingRow(initiator, depth, modified, anchor, url, size, deletebutton);
+		row=createIndexingRow(tablename, initiator, depth, modified, anchor, url, size, deletebutton);
 		
 		//create row
 		if(inProcess){
@@ -167,16 +173,12 @@ function createIndexingTable(indexingqueue, tablename){
         getFirstChild(indexingTable, "tbody").appendChild(row);
         dark=!dark;
     }
-    while(i++ <= 10) {
-    		row=createIndexingRow("", "", "", "", "", "", createCol(""));
-		if(dark) {row.setAttribute("class", "TableCellDark");} else {row.setAttribute("class", "TableCellLight");}
-        getFirstChild(indexingTable, "tbody").appendChild(row);
-        dark=!dark;
-    }
 }
-function createIndexingRow(initiator, depth, modified, anchor, url, size, deletebutton){
+
+function createIndexingRow(queue, initiator, depth, modified, anchor, url, size, deletebutton){
     row=document.createElement("tr");
     row.setAttribute("height", 10);
+    row.appendChild(createCol(queue));
 	row.appendChild(createCol(initiator));
 	row.appendChild(createCol(depth));
 	row.appendChild(createCol(modified));

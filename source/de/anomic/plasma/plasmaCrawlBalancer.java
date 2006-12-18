@@ -65,7 +65,7 @@ public class plasmaCrawlBalancer {
     }
 
     public void close() {
-        try { flushAll(); } catch (IOException e) {}
+        try { flushSome(domainStacks.size()); } catch (IOException e) {}
         try { stack.close(); } catch (IOException e) {}
         stack = null;
     }
@@ -111,8 +111,8 @@ public class plasmaCrawlBalancer {
         }
     }
     
-    private void flushAll() throws IOException {
-        while (domainStacks.size() > 0) flushOnce();
+    private void flushSome(int count) throws IOException {
+        while ((domainStacks.size() > 0) && (count-- > 0)) flushOnce();
     }
     
     public void add(String domain, byte[] hash) throws IOException {
@@ -150,7 +150,7 @@ public class plasmaCrawlBalancer {
     }
     
     public byte[] top(int dist) throws IOException {
-        flushAll();
+        flushSome(1 + dist - stack.size()); // flush only that much as we need to display
         synchronized (domainStacks) {
             return stack.top(dist).getColBytes(0);
         }
