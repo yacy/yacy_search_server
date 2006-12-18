@@ -49,7 +49,7 @@ public class URL {
         int p = url.indexOf(':');
         if (p < 0) throw new MalformedURLException("protocol is not given in '" + url + "'");
         this.protocol = url.substring(0, p).toLowerCase().trim();
-
+        if (url.length() < p + 4) throw new MalformedURLException("URL not parseable: '" + url + "'");
         if (url.substring(p + 1, p + 3).equals("//")) {
             // identify host, userInfo and file for http and ftp protocol
             int q = url.indexOf('/', p + 3);
