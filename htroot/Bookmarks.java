@@ -151,7 +151,7 @@ public class Bookmarks {
                         plasmaParserDocument document = null;
                         if (urlentry != null) {
                             indexURLEntry.Components comp = urlentry.comp();
-                            document = switchboard.snippetCache.retrieveDocument(comp.url(), true, 5000);
+                            document = switchboard.snippetCache.retrieveDocument(comp.url(), true, 5000, true);
                             prop.put("mode_edit", 0); // create mode
                             prop.put("mode_url", comp.url().toNormalform());
                             prop.put("mode_title", comp.descr());

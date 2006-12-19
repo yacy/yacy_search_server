@@ -430,7 +430,8 @@ crawlingDepth=2
 crawlingIfOlder=525600
 crawlingDomFilterDepth=-1
 crawlingDomMaxPages=-1
-localIndexing=true
+indexText=true
+indexMedia=true
 
 # Filter for crawlinig; may be used to restrict a crawl to a specific domain
 # URLs are only indexed and further crawled if they match this filter

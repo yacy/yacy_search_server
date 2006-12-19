@@ -256,7 +256,7 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                plasmaHTCache.Entry entry = loadResourceFromWeb(url, timeout, true);
+                plasmaHTCache.Entry entry = loadResourceFromWeb(url, timeout, true, true);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -341,7 +341,7 @@ public class plasmaSnippetCache {
      * @param fetchOnline specifies if the resource should be loaded from web if it'as not available in the cache
      * @return the parsed document as {@link plasmaParserDocument}
      */
-    public plasmaParserDocument retrieveDocument(URL url, boolean fetchOnline, int timeout) {
+    public plasmaParserDocument retrieveDocument(URL url, boolean fetchOnline, int timeout, boolean forText) {
 
         // load resource
         long resContentLength = 0;
@@ -357,7 +357,7 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                plasmaHTCache.Entry entry = loadResourceFromWeb(url, timeout, true);
+                plasmaHTCache.Entry entry = loadResourceFromWeb(url, timeout, true, forText);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -593,7 +593,7 @@ public class plasmaSnippetCache {
             return new ArrayList();
         }
 
-        plasmaParserDocument document = retrieveDocument(url, fetchOnline, timeout);
+        plasmaParserDocument document = retrieveDocument(url, fetchOnline, timeout, false);
         ArrayList a = new ArrayList();
         if (document != null) {
             a.addAll(computeMediaSnippets(document, queryhashes, "audio"));
@@ -783,7 +783,7 @@ public class plasmaSnippetCache {
      * <tr><td>[1]</td><td>the content-length as {@link Integer}</td></tr>
      * </table>
      */
-    public Object[] getResource(URL url, boolean fetchOnline, int socketTimeout) {
+    public Object[] getResource(URL url, boolean fetchOnline, int socketTimeout, boolean forText) {
         // load the url as resource from the web
         try {
             long contentLength = -1;
@@ -796,7 +796,7 @@ public class plasmaSnippetCache {
                 // if the content is not available in cache try to download it from web
                 
                 // try to download the resource using a crawler
-                plasmaHTCache.Entry entry = loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true);
+                plasmaHTCache.Entry entry = loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText);
                 
                 // read resource body (if it is there)
                 byte[] resourceArray = entry.cacheArray();
@@ -821,7 +821,8 @@ public class plasmaSnippetCache {
     public plasmaHTCache.Entry loadResourceFromWeb(
             URL url, 
             int socketTimeout,
-            boolean keepInMemory
+            boolean keepInMemory,
+            boolean forText
     ) throws plasmaCrawlerException {
         
         plasmaHTCache.Entry result = this.sb.cacheLoader.loadSync(
@@ -830,7 +831,7 @@ public class plasmaSnippetCache {
                 null,                        // referer
                 yacyCore.seedDB.mySeed.hash, // initiator
                 0,                           // depth
-                sb.defaultSnippetProfile,    // crawl profile
+                (forText) ? sb.defaultTextSnippetProfile : sb.defaultMediaSnippetProfile, // crawl profile
                 socketTimeout,
                 keepInMemory
         );

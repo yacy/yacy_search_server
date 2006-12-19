@@ -145,6 +145,7 @@ function updateTable(indexingqueue, tablename){
         
     dark=false;
     for(i=0;i<entries.length;i++){
+		profile=getValue(getFirstChild(entries[i], "profile"));
 		initiator=getValue(getFirstChild(entries[i], "initiator"));
 		depth=getValue(getFirstChild(entries[i], "depth"));
 		modified=getValue(getFirstChild(entries[i], "modified"));
@@ -160,7 +161,7 @@ function updateTable(indexingqueue, tablename){
 			deletebutton=createLinkCol("IndexCreateIndexingQueue_p.html?deleteEntry="+hash, DELETE_STRING);
 		else
 			deletebutton=createCol("");
-		row=createIndexingRow(tablename, initiator, depth, modified, anchor, url, size, deletebutton);
+		row=createIndexingRow(tablename, profile, initiator, depth, modified, anchor, url, size, deletebutton);
 		
 		//create row
 		if(inProcess){
@@ -175,10 +176,11 @@ function updateTable(indexingqueue, tablename){
     }
 }
 
-function createIndexingRow(queue, initiator, depth, modified, anchor, url, size, deletebutton){
+function createIndexingRow(queue, profile, initiator, depth, modified, anchor, url, size, deletebutton){
     row=document.createElement("tr");
     row.setAttribute("height", 10);
     row.appendChild(createCol(queue));
+    row.appendChild(createCol(profile));
 	row.appendChild(createCol(initiator));
 	row.appendChild(createCol(depth));
 	row.appendChild(createCol(modified));

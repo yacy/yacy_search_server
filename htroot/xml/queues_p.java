@@ -115,6 +115,7 @@ public class queues_p {
                     totalSize += entrySize;
                     if ((pcentry != null)&&(pcentry.url() != null)) {
                         initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
+                        prop.put("list-indexing_"+i+"_profile", pcentry.profile().name());
                         prop.putNoHTML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())));
                         prop.put("list-indexing_"+i+"_depth", pcentry.depth());
                         prop.put("list-indexing_"+i+"_modified", pcentry.getModificationDate());
@@ -144,7 +145,7 @@ public class queues_p {
                 CrawlWorker theWorker = (CrawlWorker)threadList[i];
                 plasmaCrawlLoaderMessage theMsg = theWorker.theMsg;
                 if (theMsg == null) continue;
-                
+                prop.put("list-loader_"+count+"_profile", theMsg.profile.name());
                 initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
                 prop.putNoHTML("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("list-loader_"+count+"_depth", theMsg.depth );
@@ -183,6 +184,7 @@ public class queues_p {
             urle = crawlerList[i];
             if ((urle != null) && (urle.url() != null)) {
                 initiator = yacyCore.seedDB.getConnected(urle.initiator());
+                prop.put(tableName + "_" + showNum + "_profile", urle.profileHandle());
                 prop.put(tableName + "_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put(tableName + "_" + showNum + "_depth", urle.depth());
                 prop.put(tableName + "_" + showNum + "_modified", daydate(urle.loaddate()));

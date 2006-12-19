@@ -53,12 +53,14 @@ public class urlRedirectord implements serverHandler {
                             // domMaxPages, if negative: no count restriction
                             -1,
                             // crawlDynamic
-                            false, 
+                            false,
+                            // indexText
+                            true,
+                            // indexMedia
+                            true,
                             // storeHTCache
                             false,
                             // storeTxCache
-                            true, 
-                            //localIndexing
                             true, 
                             // remoteIndexing
                             false, 

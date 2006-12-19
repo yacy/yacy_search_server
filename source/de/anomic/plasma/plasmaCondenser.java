@@ -114,97 +114,113 @@ public final class plasmaCondenser {
     //public int RESULT_NUMB_TEXT_BYTES = -1;
     public int RESULT_NUMB_WORDS = -1;
     public int RESULT_DIFF_WORDS = -1;
-    public int RESULT_SIMI_WORDS = -1;
     public int RESULT_NUMB_SENTENCES = -1;
     public int RESULT_DIFF_SENTENCES = -1;
-    public int RESULT_SIMI_SENTENCES = -1;
     public kelondroBitfield RESULT_FLAGS = new kelondroBitfield(4);
     
-    public plasmaCondenser(plasmaParserDocument document, boolean addMedia) throws UnsupportedEncodingException {
+    public plasmaCondenser(plasmaParserDocument document, boolean indexText, boolean indexMedia) throws UnsupportedEncodingException {
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the approriate media flag
-        this(document.getText(), document.getCharset());
+        this.wordminsize = 3;
+        this.wordcut = 2;
+        this.words = new TreeMap();
+        this.sentences = new HashMap();
         
-        kelondroBitfield wflags = (kelondroBitfield) RESULT_FLAGS.clone(); // the template for the word flags, only from position 0..19
-        // construct flag set for document
-        if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
-        if (document.getAudiolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasaudio, true);
-        if (document.getVideolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasvideo, true);
-        if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
+        System.out.println("DEBUG: condensing " + document.getMainLongTitle() + ", indexText=" + Boolean.toString(indexText) + ", indexMedia=" + Boolean.toString(indexMedia));
         
-        // the phrase counter:
-        // phrase   0 are words taken from the URL
-        // phrase   1 is the MainLongTitle
-        // phrase   2 is the MainShortTitle
-        // phrase   3 is the Document Abstract
-        // phrase   4 is the Document Author
-        // phrase   5 are the tags specified in document
-        // phrase  10 and above are the section headlines/titles (88 possible)
-        // phrase  98 is taken from the embedded anchor/hyperlinks description
-        // phrase  99 is taken from the media Link url and anchor description
-        // phrase 100 and above are lines from the text
-      
-        insertTextToWords(document.getMainLongTitle(),  1, indexRWIEntryNew.flag_app_descr, wflags);
-        insertTextToWords(document.getMainShortTitle(), 2, indexRWIEntryNew.flag_app_descr, wflags);
-        insertTextToWords(document.getAbstract(),       3, indexRWIEntryNew.flag_app_descr, wflags);
-        // missing: author!
-        // missing: tags!
-        String[] titles = document.getSectionTitles();
-        for (int i = 0; i < titles.length; i++) {
-            insertTextToWords(titles[i], i + 10, indexRWIEntryNew.flag_app_emphasized, wflags);
-        }
-        
-        // anchors
-        Iterator i = document.getAnchors().entrySet().iterator();
         Map.Entry entry;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            insertTextToWords((String) entry.getKey(), 98, indexRWIEntryNew.flag_app_url, wflags);
-            insertTextToWords((String) entry.getValue(), 98, indexRWIEntryNew.flag_app_url, wflags);
+        if (indexText) {
+            createCondensement(document.getText(), document.getCharset());
+
+            kelondroBitfield wflags = (kelondroBitfield) RESULT_FLAGS.clone(); // the template for the word flags, only from position 0..19
+            // construct flag set for document
+            if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
+            if (document.getAudiolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasaudio, true);
+            if (document.getVideolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasvideo, true);
+            if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
+        
+            // the phrase counter:
+            // phrase   0 are words taken from the URL
+            // phrase   1 is the MainLongTitle
+            // phrase   2 is the MainShortTitle
+            // phrase   3 is the Document Abstract
+            // phrase   4 is the Document Author
+            // phrase   5 are the tags specified in document
+            // phrase  10 and above are the section headlines/titles (88 possible)
+            // phrase  98 is taken from the embedded anchor/hyperlinks description
+            // phrase  99 is taken from the media Link url and anchor description
+            // phrase 100 and above are lines from the text
+      
+            insertTextToWords(document.getMainLongTitle(),  1, indexRWIEntryNew.flag_app_descr, wflags);
+            insertTextToWords(document.getMainShortTitle(), 2, indexRWIEntryNew.flag_app_descr, wflags);
+            insertTextToWords(document.getAbstract(),       3, indexRWIEntryNew.flag_app_descr, wflags);
+            // missing: author!
+            // missing: tags!
+            String[] titles = document.getSectionTitles();
+            for (int i = 0; i < titles.length; i++) {
+                insertTextToWords(titles[i], i + 10, indexRWIEntryNew.flag_app_emphasized, wflags);
+            }
+        
+            // anchors
+            Iterator i = document.getAnchors().entrySet().iterator();
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                insertTextToWords((String) entry.getKey(), 98, indexRWIEntryNew.flag_app_url, wflags);
+                insertTextToWords((String) entry.getValue(), 98, indexRWIEntryNew.flag_app_url, wflags);
+            }
+        } else {
+            this.RESULT_NUMB_WORDS = 0;
+            this.RESULT_DIFF_WORDS = 0;
+            this.RESULT_NUMB_SENTENCES = 0;
+            this.RESULT_DIFF_SENTENCES = 0;
         }
         
-        // audio
-        i = document.getAudiolinks().entrySet().iterator();
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            insertTextToWords((String) entry.getKey(), 99, flag_cat_hasaudio, wflags);
-            insertTextToWords((String) entry.getValue(), 99, flag_cat_hasaudio, wflags);
-        }
+        if (indexMedia) {
+            kelondroBitfield wflags = (kelondroBitfield) RESULT_FLAGS.clone(); // the template for the word flags, only from position 0..19
+            
+            // audio
+            Iterator i = document.getAudiolinks().entrySet().iterator();
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasaudio, wflags);
+                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasaudio, wflags);
+            }
 
-        // video
-        i = document.getVideolinks().entrySet().iterator();
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            insertTextToWords((String) entry.getKey(), 99, flag_cat_hasvideo, wflags);
-            insertTextToWords((String) entry.getValue(), 99, flag_cat_hasvideo, wflags);
-        }
+            // video
+            i = document.getVideolinks().entrySet().iterator();
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasvideo, wflags);
+                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasvideo, wflags);
+            }
 
-        // applications
-        i = document.getApplinks().entrySet().iterator();
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            insertTextToWords((String) entry.getKey(), 99, flag_cat_hasapp, wflags);
-            insertTextToWords((String) entry.getValue(), 99, flag_cat_hasapp, wflags);
-        }
+            // applications
+            i = document.getApplinks().entrySet().iterator();
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasapp, wflags);
+                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasapp, wflags);
+            }
 
-        // images
-        i = document.getImages().iterator();
-        htmlFilterImageEntry ientry;
-        while (i.hasNext()) {
-            ientry = (htmlFilterImageEntry) i.next();
-            insertTextToWords((String) ientry.url().toNormalform(), 99, flag_cat_hasimage, wflags);
-            insertTextToWords((String) ientry.alt(), 99, flag_cat_hasimage, wflags);
-        }
+            // images
+            i = document.getImages().iterator();
+            htmlFilterImageEntry ientry;
+            while (i.hasNext()) {
+                ientry = (htmlFilterImageEntry) i.next();
+                insertTextToWords((String) ientry.url().toNormalform(), 99, flag_cat_hasimage, wflags);
+                insertTextToWords((String) ientry.alt(), 99, flag_cat_hasimage, wflags);
+            }
         
-        // finally check all words for missing flag entry
-        i = words.entrySet().iterator();
-        wordStatProp wprop;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            wprop = (wordStatProp) entry.getValue();
-            if (wprop.flags == null) {
-                wprop.flags = (kelondroBitfield) wflags.clone();
-                words.put(entry.getKey(), wprop);
+            // finally check all words for missing flag entry
+            i = words.entrySet().iterator();
+            wordStatProp wprop;
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                wprop = (wordStatProp) entry.getValue();
+                if (wprop.flags == null) {
+                    wprop.flags = (kelondroBitfield) wflags.clone();
+                    words.put(entry.getKey(), wprop);
+                }
             }
         }
     }
@@ -229,6 +245,8 @@ public final class plasmaCondenser {
             wprop.flags.set(flagpos, true);
             words.put(word, wprop);
             pip++;
+            this.RESULT_NUMB_WORDS++;
+            this.RESULT_DIFF_WORDS++;
         }
     }
 
@@ -280,6 +298,10 @@ public final class plasmaCondenser {
     public Map words() {
         // returns the words as word/wordStatProp relation map
         return words;
+    }
+    
+    public Map sentences() {
+        return sentences;
     }
     
     public static class wordStatProp {
@@ -534,14 +556,12 @@ public final class plasmaCondenser {
         //this.RESULT_NUMB_TEXT_BYTES = wordenum.count();
         this.RESULT_NUMB_WORDS = allwordcounter;
         this.RESULT_DIFF_WORDS = wordHandleCount;
-        this.RESULT_SIMI_WORDS = words.size();
         this.RESULT_NUMB_SENTENCES = allsentencecounter;
         this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
-        this.RESULT_SIMI_SENTENCES = sentences.size();
     }
 
     public void print() {
-        String[] s = sentences();
+        String[] s = sentenceReconstruction();
 
         // printout a reconstruction of the text
         for (int i = 0; i < s.length; i++) {
@@ -549,7 +569,7 @@ public final class plasmaCondenser {
         }
     }
 
-    public String[] sentences() {
+    private String[] sentenceReconstruction() {
         // we reconstruct the word hashtable
         // and order the entries by the number of the sentence
         // this structure is only needed to reconstruct the text
@@ -613,49 +633,6 @@ public final class plasmaCondenser {
         return orderedSentences;
     }
 
-    /*
-    public void writeMapToFile(File out) throws IOException {
-        Map.Entry entry;
-        String k;
-        String word;
-        Iterator it;
-        wordStatProp wsp;
-
-        Object[] orderedSentences = makeOrderedSentences();
-
-        // we reconstruct the word hashtable
-        // and sort the entries by the number of occurrences
-        // this structure is needed to print out a sorted list of words
-        TreeMap sortedWords = new TreeMap(); //kelondroNaturalOrder.naturalOrder
-        it = words.entrySet().iterator(); // enumerates the keys in ascending order
-        while (it.hasNext()) {
-            entry = (Map.Entry) it.next();
-            word = (String) entry.getKey();
-            wsp = (wordStatProp) entry.getValue();
-            sortedWords.put(intString(wsp.count, numlength) + intString(wsp.posInText, numlength), word);
-        }
-
-        // start writing of words and sentences
-        FileWriter writer = new FileWriter(out);
-        writer.write("\r\n");
-        it = sortedWords.entrySet().iterator(); // enumerates the keys in descending order
-        while (it.hasNext()) {
-            entry = (Map.Entry) it.next();
-            k = (String) entry.getKey();            
-            writer.write("#W " + k.substring(numlength) + " " + k.substring(0, numlength) + " " + ((String) entry.getValue()) + "\r\n");
-        }
-        for (int i = 0; i < orderedSentences.length; i++) {
-            if (orderedSentences[i] != null) {
-                writer.write("#S " + intString(i, numlength) + " ");
-                for (int j = 0; j < ((String[]) orderedSentences[i]).length; j++) {
-                    writer.write(((String[]) orderedSentences[i])[j] + " ");
-                }
-                writer.write("\r\n");
-            }
-        }
-        writer.close();
-    }
-*/
     public final static boolean invisible(char c) {
         // TODO: Bugfix for UTF-8: does this work for non ISO-8859-1 chars?
         if ((c < ' ') || (c > 'z')) return true;

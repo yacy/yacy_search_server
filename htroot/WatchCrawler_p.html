@@ -118,7 +118,8 @@
         <td><strong>Max Page Per Domain</strong></td>
         <td><strong>Accept '?' URLs</strong></td>
         <td><strong>Fill Proxy Cache</strong></td>
-        <td><strong>Local Indexing</strong></td>
+        <td><strong>Local Text Indexing</strong></td>
+        <td><strong>Local Media Indexing</strong></td>
         <td><strong>Remote Indexing</strong></td>
         <td></td>
       </tr>
@@ -134,7 +135,8 @@
         <td>#[crawlingDomMaxPages]#</td>
         <td>#(withQuery)#no::yes#(/withQuery)#</td>
         <td>#(storeCache)#no::yes#(/storeCache)#</td>
-        <td>#(localIndexing)#no::yes#(/localIndexing)#</td>
+        <td>#(indexText)#no::yes#(/indexText)#</td>
+        <td>#(indexMedia)#no::yes#(/indexMedia)#</td>
         <td>#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
         <td>#(deleteButton)#::<form action="WatchCrawler_p.html" method="get" enctype="multipart/form-data"><input type="hidden" name="handle" value="#[handle]#" /><input type="submit" name="deleteprofile" value="Delete" /></form>#(/deleteButton)#</td>
       </tr>
@@ -147,6 +149,7 @@
       <tbody>
         <tr class="TableHeader">
           <th>Queue</th>
+          <th>Profile</th>
           <th>Initiator</th>
           <th>Depth</th>
           <th>Modified Date</th>

@@ -74,7 +74,7 @@ public class ViewImage {
         int timeout = post.getInt("timeout", 5000);
         
         // getting the image as stream
-        Object[] resource = sb.snippetCache.getResource(url, true, timeout);
+        Object[] resource = sb.snippetCache.getResource(url, true, timeout, false);
         if (resource == null) return null;
         InputStream imgStream = (InputStream) resource[0];
         if (imgStream == null) return null;

@@ -186,14 +186,18 @@ public class plasmaCrawlProfile {
                            int generalDepth, int specificDepth,
                            int recrawlIfOlder /*minutes*/, int domFilterDepth,  int domMaxPages,
                            boolean crawlingQ,
+                           boolean indexText, boolean indexMedia,
                            boolean storeHTCache, boolean storeTXCache,
-                           boolean localIndexing, boolean remoteIndexing,
+                           boolean remoteIndexing,
                            boolean xsstopw, boolean xdstopw, boolean xpstopw) {
         
         entry ne = new entry(name, startURL, generalFilter, specificFilter,
                              generalDepth, specificDepth,
                              recrawlIfOlder, domFilterDepth, domMaxPages,
-                             crawlingQ, storeHTCache, storeTXCache, localIndexing, remoteIndexing,
+                             crawlingQ,
+                             indexText, indexMedia,
+                             storeHTCache, storeTXCache,
+                             remoteIndexing,
                              xsstopw, xdstopw, xpstopw);
         try {
             profileTable.set(ne.handle(), ne.map());
@@ -254,8 +258,9 @@ public class plasmaCrawlProfile {
                      int generalDepth, int specificDepth,
                      int recrawlIfOlder /*minutes*/, int domFilterDepth, int domMaxPages,
                      boolean crawlingQ,
+                     boolean indexText, boolean indexMedia,
                      boolean storeHTCache, boolean storeTXCache,
-                     boolean localIndexing, boolean remoteIndexing,
+                     boolean remoteIndexing,
                      boolean xsstopw, boolean xdstopw, boolean xpstopw) {
             String handle = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, crawlProfileHandleLength);
             mem = new HashMap();
@@ -270,9 +275,10 @@ public class plasmaCrawlProfile {
             mem.put("domFilterDepth", Integer.toString(domFilterDepth));
             mem.put("domMaxPages", Integer.toString(domMaxPages));
             mem.put("crawlingQ", (crawlingQ) ? "true" : "false"); // crawling of urls with '?'
+            mem.put("indexText", (indexText) ? "true" : "false");
+            mem.put("indexMedia", (indexMedia) ? "true" : "false");
             mem.put("storeHTCache", (storeHTCache) ? "true" : "false");
             mem.put("storeTXCache", (storeTXCache) ? "true" : "false");
-            mem.put("localIndexing", (localIndexing) ? "true" : "false");
             mem.put("remoteIndexing", (remoteIndexing) ? "true" : "false");
             mem.put("xsstopw", (xsstopw) ? "true" : "false"); // exclude static stop-words
             mem.put("xdstopw", (xdstopw) ? "true" : "false"); // exclude dynamic stop-word
@@ -376,16 +382,20 @@ public class plasmaCrawlProfile {
             String r = (String) mem.get("crawlingQ");
             if (r == null) return false; else return (r.equals("true"));
         }
+        public boolean indexText() {
+            String r = (String) mem.get("indexText");
+            if (r == null) return false; else return (r.equals("true"));
+        }
+        public boolean indexMedia() {
+            String r = (String) mem.get("indexMedia");
+            if (r == null) return false; else return (r.equals("true"));
+        }
         public boolean storeHTCache() {
             String r = (String) mem.get("storeHTCache");
             if (r == null) return false; else return (r.equals("true"));
         }
         public boolean storeTXCache() {
             String r = (String) mem.get("storeTXCache");
-            if (r == null) return false; else return (r.equals("true"));
-        }
-        public boolean localIndexing() {
-            String r = (String) mem.get("localIndexing");
             if (r == null) return false; else return (r.equals("true"));
         }
         public boolean remoteIndexing() {

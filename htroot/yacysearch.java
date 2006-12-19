@@ -222,7 +222,7 @@ public class yacysearch {
                 if (urlentry != null) {
                     indexURLEntry.Components comp = urlentry.comp();
                     plasmaParserDocument document;
-                    document = sb.snippetCache.retrieveDocument(comp.url(), true, 5000);
+                    document = sb.snippetCache.retrieveDocument(comp.url(), true, 5000, true);
                     if (document != null) {
                         // create a news message
                         HashMap map = new HashMap();

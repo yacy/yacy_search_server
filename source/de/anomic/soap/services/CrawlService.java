@@ -72,7 +72,7 @@ public class CrawlService extends AbstractService {
      * Function to crawl a single link with depth <code>0</code>
      */
     public Document crawlSingleUrl(String crawlingURL) throws AxisFault {
-        return this.crawling(crawlingURL, "CRAWLING-ROOT", new Integer(0), ".*", Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null, Boolean.TRUE);
+        return this.crawling(crawlingURL, "CRAWLING-ROOT", new Integer(0), ".*", Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null, Boolean.TRUE);
     }
     
     public Document crawling(
@@ -80,7 +80,8 @@ public class CrawlService extends AbstractService {
             String crawljobTitel,
             Integer crawlingDepth,
             String crawlingFilter,
-            Boolean localIndexing,
+            Boolean indexText,
+            Boolean indexMedia,
             Boolean crawlingQ,
             Boolean storeHTCache,
             Boolean crawlOrder,
@@ -100,8 +101,10 @@ public class CrawlService extends AbstractService {
                 args.put("crawlingFilter",crawlingFilter); 
             if (crawlingDepth != null && crawlingDepth.intValue() > 0) 
                 args.put("crawlingDepth",crawlingDepth.toString());   
-            if (localIndexing != null) 
-                args.put("localIndexinglingQ",localIndexing.booleanValue()?"on":"off");               
+            if (indexText != null) 
+                args.put("indexText",indexText.booleanValue()?"on":"off");               
+            if (indexMedia != null) 
+                args.put("indexMedia",indexMedia.booleanValue()?"on":"off");               
             if (crawlingQ != null) 
                 args.put("crawlingQ",crawlingQ.booleanValue()?"on":"off");              
             if (storeHTCache != null) 

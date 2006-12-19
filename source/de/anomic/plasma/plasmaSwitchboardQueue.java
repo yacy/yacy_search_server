@@ -365,7 +365,7 @@ public class plasmaSwitchboardQueue {
             }
 
             // check profile
-            if (!profile().localIndexing()) {
+            if ((!profile().indexText()) && (!profile().indexMedia())) {
                 return "Indexing_Not_Allowed";
             }
 
@@ -420,7 +420,7 @@ public class plasmaSwitchboardQueue {
             }
 
             // check profile
-            if (!profile().localIndexing()) { return "Indexing_Not_Allowed"; }
+            if ((!profile().indexText()) && (!profile().indexMedia())) { return "Indexing_Not_Allowed"; }
 
             final String nURL = normalizedURLString();
             // -CGI access in request

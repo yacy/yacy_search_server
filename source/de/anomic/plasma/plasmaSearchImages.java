@@ -61,7 +61,7 @@ public final class plasmaSearchImages {
         long start = System.currentTimeMillis();
         this.images = new TreeSet();
         if (maxTime > 10) {
-            Object[] resource = sc.getResource(url, true, (int) maxTime);
+            Object[] resource = sc.getResource(url, true, (int) maxTime, false);
             InputStream res = (InputStream) resource[0];
             Long resLength = (Long) resource[1];
             if (res != null) {

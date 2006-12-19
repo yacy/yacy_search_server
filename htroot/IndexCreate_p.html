@@ -106,7 +106,8 @@
         </tr>
         <tr valign="top" class="TableCellDark">
           <td>Do Local Indexing:</td>
-          <td><input type="checkbox" name="localIndexing" #(localIndexingChecked)#::checked="checked"#(/localIndexingChecked)# /></td>
+          <td>index text:<input type="checkbox" name="indexText" #(indexingTextChecked)#::checked="checked"#(/indexingTextChecked)# />&nbsp;&nbsp;&nbsp;
+              index media:<input type="checkbox" name="indexMedia" #(indexingMediaChecked)#::checked="checked"#(/indexingMediaChecked)# /></td>
           <td>
             This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
             <a href="CacheAdmin_p.html">Proxy Cache</a> without indexing.

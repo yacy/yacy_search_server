@@ -141,7 +141,8 @@ public class IndexCreate_p {
         prop.put("crawlingDomMaxPages", (crawlingDomMaxPages == -1) ? 10000 : crawlingDomMaxPages);
         prop.put("crawlingQChecked", env.getConfig("crawlingQ", "").equals("true") ? 1 : 0);
         prop.put("storeHTCacheChecked", env.getConfig("storeHTCache", "").equals("true") ? 1 : 0);
-        prop.put("localIndexingChecked", env.getConfig("localIndexing", "").equals("true") ? 1 : 0);
+        prop.put("indexingTextChecked", env.getConfig("indexText", "").equals("true") ? 1 : 0);
+        prop.put("indexingMediaChecked", env.getConfig("indexMedia", "").equals("true") ? 1 : 0);
         prop.put("crawlOrderChecked", env.getConfig("crawlOrder", "").equals("true") ? 1 : 0);
         long busySleep = Integer.parseInt(env.getConfig("62_remotetriggeredcrawl_busysleep", "100"));
         if (busySleep < 100) {

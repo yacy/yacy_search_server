@@ -4,6 +4,7 @@
   <max>#[indexingMax]#</max>
 #{list-indexing}#
   <entry>
+    <profile>#[profile]#</profile>
     <initiator>#[initiator]#</initiator>
     <depth>#[depth]#</depth>
     <modified>#[modified]#</modified>
@@ -20,6 +21,7 @@
   <max>#[loaderMax]#</max>
 #{list-loader}#
   <entry>
+    <profile>#[profile]#</profile>
     <initiator>#[initiator]#</initiator>
     <depth>#[depth]#</depth>
     <url>#[url]#</url>
@@ -30,6 +32,7 @@
   <size>#[localCrawlSize]#</size>
 #{list-local}#
   <entry>
+    <profile>#[profile]#</profile>
     <initiator>#[initiator]#</initiator>
     <depth>#[depth]#</depth>
     <modified>#[modified]#</modified>
@@ -44,6 +47,7 @@
   <size>#[remoteCrawlSize]#</size>
 #{list-remote}#
   <entry>
+    <profile>#[profile]#</profile>
 	<initiator>#[initiator]#</initiator>
     <depth>#[depth]#</depth>
     <modified>#[modified]#</modified>

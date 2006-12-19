@@ -66,7 +66,7 @@ public class QuickCrawlLink_p {
     
     /**
      * Example Javascript to call this servlet:
-     * <code>javascript:w = window.open('http://user:pwd@localhost:8080/QuickCrawlLink_p.html?localIndexing=on&crawlingQ=on&xdstopw=on&title=' + escape(document.title) + '&url=' + location.href,'_blank','height=150,width=500,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no'); w.focus();</code>
+     * <code>javascript:w = window.open('http://user:pwd@localhost:8080/QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&xdstopw=on&title=' + escape(document.title) + '&url=' + location.href,'_blank','height=150,width=500,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no'); w.focus();</code>
      * @param header
      * @param post
      * @param env
@@ -114,8 +114,9 @@ public class QuickCrawlLink_p {
         String crawlingFilter  = post.get("crawlingFilter", ".*");
         int CrawlingDepth      = Integer.parseInt(post.get("crawlingDepth", "0"));        
         boolean crawlDynamic   = post.get("crawlingQ", "").equals("on");
+        boolean indexText      = post.get("indexText", "on").equals("on");
+        boolean indexMedia      = post.get("indexMedia", "on").equals("on");
         boolean storeHTCache   = post.get("storeHTCache", "").equals("on");
-        boolean localIndexing  = post.get("localIndexing", "").equals("on");
         boolean remoteIndexing = post.get("crawlOrder", "").equals("on");
         boolean xsstopw        = post.get("xsstopw", "").equals("on");
         boolean xdstopw        = post.get("xdstopw", "").equals("on");
@@ -166,13 +167,14 @@ public class QuickCrawlLink_p {
                         60 * 24 * 30, // recrawlIfOlder (minutes); here: one month
                         -1, // domFilterDepth, if negative: no auto-filter
                         -1, // domMaxPages, if negative: no count restriction
-                        crawlDynamic, 
+                        crawlDynamic,
+                        indexText,
+                        indexMedia,
                         storeHTCache,
-                        true, 
-                        localIndexing, 
-                        remoteIndexing, 
-                        xsstopw, 
-                        xdstopw, 
+                        true,
+                        remoteIndexing,
+                        xsstopw,
+                        xdstopw,
                         xpstopw
                 );
             } catch (Exception e) {

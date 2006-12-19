@@ -221,7 +221,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaCrawlProfile          profiles;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
     public  plasmaCrawlProfile.entry    defaultRemoteProfile;
-    public  plasmaCrawlProfile.entry    defaultSnippetProfile;
+    public  plasmaCrawlProfile.entry    defaultTextSnippetProfile;
+    public  plasmaCrawlProfile.entry    defaultMediaSnippetProfile;
     public  boolean                     rankingOn;
     public  plasmaRankingDistribution   rankingOwnDistribution;
     public  plasmaRankingDistribution   rankingOtherDistribution;
@@ -777,7 +778,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private void initProfiles() {
         this.defaultProxyProfile = null;
         this.defaultRemoteProfile = null;
-        this.defaultSnippetProfile = null;
+        this.defaultTextSnippetProfile = null;
+        this.defaultMediaSnippetProfile = null;
         Iterator i = this.profiles.profiles(true);
         plasmaCrawlProfile.entry profile;
         String name;
@@ -786,24 +788,30 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             name = profile.name();
             if (name.equals("proxy")) this.defaultProxyProfile = profile;
             if (name.equals("remote")) this.defaultRemoteProfile = profile;
-            if (name.equals("snippet")) this.defaultSnippetProfile = profile;
+            if (name.equals("snippetText")) this.defaultTextSnippetProfile = profile;
+            if (name.equals("snippetMedia")) this.defaultMediaSnippetProfile = profile;
         }
         if (this.defaultProxyProfile == null) {
             // generate new default entry for proxy crawling
             this.defaultProxyProfile = this.profiles.newEntry("proxy", "", ".*", ".*",
                     Integer.parseInt(getConfig("proxyPrefetchDepth", "0")),
                     Integer.parseInt(getConfig("proxyPrefetchDepth", "0")),
-                    60 * 24, -1, -1, false, true, true, true, getConfigBool("proxyCrawlOrder", false), true, true, true);
+                    60 * 24, -1, -1, false, true, true, true, true, getConfigBool("proxyCrawlOrder", false), true, true, true);
         }
         if (this.defaultRemoteProfile == null) {
             // generate new default entry for remote crawling
             defaultRemoteProfile = this.profiles.newEntry("remote", "", ".*", ".*", 0, 0,
-                    -1, -1, -1, true, false, true, true, false, true, true, false);
+                    -1, -1, -1, true, true, true, false, true, false, true, true, false);
         }
-        if (this.defaultSnippetProfile == null) {
+        if (this.defaultTextSnippetProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultSnippetProfile = this.profiles.newEntry("snippet", "", ".*", ".*", 0, 0,
-                    60 * 24 * 30, -1, -1, true, true, true, true, false, true, true, false);
+            defaultTextSnippetProfile = this.profiles.newEntry("snippetText", "", ".*", ".*", 0, 0,
+                    60 * 24 * 30, -1, -1, true, true, true, true, true, false, true, true, false);
+        }
+        if (this.defaultMediaSnippetProfile == null) {
+            // generate new default entry for snippet fetch and optional crawling
+            defaultMediaSnippetProfile = this.profiles.newEntry("snippetMedia", "", ".*", ".*", 0, 0,
+                    60 * 24 * 30, -1, -1, true, false, true, true, true, false, true, true, false);
         }
     }
 
@@ -830,7 +838,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 entry = (plasmaCrawlProfile.entry) iter.next();
                 if (!((entry.name().equals("proxy"))  ||
                       (entry.name().equals("remote")) ||
-                      (entry.name().equals("snippet")))) {
+                      (entry.name().equals("snippetText")) ||
+                      (entry.name().equals("snippetMedia")))) {
                     iter.remove();
                     hasDoneSomething = true;
                 }
@@ -1575,7 +1584,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 
                 checkInterruption();
                 log.logFine("Condensing for '" + entry.normalizedURLString() + "'");
-                plasmaCondenser condenser = new plasmaCondenser(document, true);
+                plasmaCondenser condenser = new plasmaCondenser(document, entry.profile().indexText(), entry.profile().indexMedia());
                 
                 // generate citation reference
                 Integer[] ioLinks = generateCitationReference(entry.urlHash(), docDate, document, condenser); // [outlinksSame, outlinksOther]
@@ -1632,7 +1641,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                     (processCase == PROCESSCASE_5_LOCAL_CRAWLING) || 
                                     (processCase == PROCESSCASE_6_GLOBAL_CRAWLING)
                             ) && 
-                            (entry.profile().localIndexing())
+                            ((entry.profile().indexText()) || (entry.profile().indexMedia()))
                     ) {
                         String urlHash = newEntry.hash();
                         
@@ -1673,7 +1682,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             HashMap urlCache = new HashMap(1);
                             urlCache.put(newEntry.hash(),newEntry);
                             
-                            ArrayList tmpContainers = new ArrayList(condenser.RESULT_SIMI_WORDS);
+                            ArrayList tmpContainers = new ArrayList(condenser.words().size());
                             
                             String language = plasmaURL.language(entry.url());                            
                             char doctype = plasmaURL.docType(document.getMimeType());
@@ -1695,8 +1704,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                             urlLength, urlComps,
                                             wordStat.count,
                                             document.getMainLongTitle().length(),
-                                            condenser.RESULT_SIMI_WORDS,
-                                            condenser.RESULT_SIMI_SENTENCES,
+                                            condenser.words().size(),
+                                            condenser.sentences().size(),
                                             wordStat.posInText,
                                             wordStat.posInPhrase,
                                             wordStat.numOfPhrase,
@@ -1715,7 +1724,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 tmpContainers.add(wordIdxContainer);
                             }
                             //System.out.println("DEBUG: plasmaSearch.addPageIndex: added " + condenser.getWords().size() + " words, flushed " + c + " entries");
-                            words = condenser.RESULT_SIMI_WORDS;
+                            words = condenser.words().size();
                             
                             // transfering the index to the storage peer
                             indexContainer[] indexData = (indexContainer[]) tmpContainers.toArray(new indexContainer[tmpContainers.size()]);
@@ -1875,7 +1884,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         kelondroBase64Order.enhancedCoder.encodeLongSmart(0, 2) +       // count of links to other documents
         kelondroBase64Order.enhancedCoder.encodeLongSmart(document.getTextLength(), 3) +   // length of plain text in bytes
         kelondroBase64Order.enhancedCoder.encodeLongSmart(condenser.RESULT_NUMB_WORDS, 3) + // count of all appearing words
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(condenser.RESULT_SIMI_WORDS, 3) + // count of all unique words
+        kelondroBase64Order.enhancedCoder.encodeLongSmart(condenser.words().size(), 3) + // count of all unique words
         kelondroBase64Order.enhancedCoder.encodeLongSmart(0, 1); // Flags (update, popularity, attention, vote)
         
         //crl.append(head); crl.append ('|'); crl.append(cpl); crl.append((char) 13); crl.append((char) 10);
@@ -2249,7 +2258,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         InputStream resourceContent = null;
         try {
             // get the resource content
-            Object[] resource = snippetCache.getResource(comp.url(), fetchOnline, 10000);
+            Object[] resource = snippetCache.getResource(comp.url(), fetchOnline, 10000, true);
             resourceContent = (InputStream) resource[0];
             Long resourceContentLength = (Long) resource[1];
             
@@ -2259,7 +2268,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // get the word set
             Set words = null;
             try {
-                words = new plasmaCondenser(document, true).words().keySet();
+                words = new plasmaCondenser(document, true, true).words().keySet();
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }

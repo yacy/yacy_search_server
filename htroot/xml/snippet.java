@@ -26,6 +26,7 @@ public class snippet {
         // getting url
         String urlString = post.get("url", "");
         URL url = new URL(urlString);
+        prop.put("urlHash",plasmaURL.urlHash(url));
         
         // if 'remove' is set to true, then RWI references to URLs that do not have the snippet are removed
         boolean remove = post.get("remove", "false").equals("true");
@@ -33,11 +34,15 @@ public class snippet {
         // boolean line_end_with_punctuation
         boolean pre = post.get("pre", "false").equals("true");
         
+        // type of media
+        String media = post.get("media", "text");
+        
         String querystring = post.get("search", "").trim();
         if ((querystring.length() > 2) && (querystring.charAt(0) == '"') && (querystring.charAt(querystring.length() - 1) == '"')) {
             querystring = querystring.substring(1, querystring.length() - 1).trim();
         }        
         final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
+        Set queryHashes = plasmaCondenser.words2hashes(query);
         
         // filter out stopwords
         final TreeSet filtered = kelondroMSetTools.joinConstructive(query, plasmaSwitchboard.stopwords);
@@ -46,36 +51,39 @@ public class snippet {
         }        
         
         // find snippet
-        Set queryHashes = plasmaCondenser.words2hashes(query);        
-        plasmaSnippetCache.TextSnippet snippet = switchboard.snippetCache.retrieveTextSnippet(url, queryHashes, true, pre, 260, 10000);
-        prop.put("status",snippet.getSource());
-        if (snippet.getSource() < 11) {
-            //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
-            prop.put("text", (snippet.exists()) ? "<![CDATA["+snippet.getLineMarked(queryHashes)+"]]>" : "unknown"); 
-        } else {
-            String error = snippet.getError();
-            if ((remove) && (error.equals("no matching snippet found"))) {
-                serverLog.logInfo("snippet-fetch", "no snippet found, remove words '" + querystring + "' for url = " + url.toNormalform());
-                switchboard.wordIndex.removeReferences(query, plasmaURL.urlHash(url));
+        if (media.equals("text")) {
+            // attach text snippet
+            plasmaSnippetCache.TextSnippet snippet = switchboard.snippetCache.retrieveTextSnippet(url, queryHashes, true, pre, 260, 10000);
+            prop.put("status",snippet.getSource());
+            if (snippet.getSource() < 11) {
+                //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
+                prop.put("text", (snippet.exists()) ? "<![CDATA["+snippet.getLineMarked(queryHashes)+"]]>" : "unknown");
+            } else {
+                String error = snippet.getError();
+                if ((remove) && (error.equals("no matching snippet found"))) {
+                    serverLog.logInfo("snippet-fetch", "no snippet found, remove words '" + querystring + "' for url = " + url.toNormalform());
+                    switchboard.wordIndex.removeReferences(query, plasmaURL.urlHash(url));
+                }
+                prop.put("text", error);
             }
-            prop.put("text", error);
+            prop.put("link", 0);
+            prop.put("links", 0);
+        } else {
+            // attach media information
+            ArrayList mediaSnippets = switchboard.snippetCache.retrieveMediaSnippets(url, queryHashes, true, 1000);
+            plasmaSnippetCache.MediaSnippet ms;
+            for (int i = 0; i < mediaSnippets.size(); i++) {
+                ms = (plasmaSnippetCache.MediaSnippet) mediaSnippets.get(i);
+                prop.put("link_" + i + "_type", ms.type);
+                prop.put("link_" + i + "_href", ms.href);
+                prop.put("link_" + i + "_name", ms.name);
+                prop.put("link_" + i + "_attr", ms.attr);
+            }
+            System.out.println("DEBUG: " + mediaSnippets.size() + " ENTRIES IN MEDIA SNIPPET LINKS for url " + urlString);
+            prop.put("text", "");
+            prop.put("link", mediaSnippets.size());
+            prop.put("links", mediaSnippets.size());
         }
-        prop.put("urlHash",plasmaURL.urlHash(url));
-        
-
-        // attach link information
-        ArrayList mediaSnippets = switchboard.snippetCache.retrieveMediaSnippets(url, queryHashes, true, 1000);
-        plasmaSnippetCache.MediaSnippet ms;
-        for (int i = 0; i < mediaSnippets.size(); i++) {
-            ms = (plasmaSnippetCache.MediaSnippet) mediaSnippets.get(i);
-            prop.put("link_" + i + "_type", ms.type);
-            prop.put("link_" + i + "_href", ms.href);
-            prop.put("link_" + i + "_name", ms.name);
-            prop.put("link_" + i + "_attr", ms.attr);
-        }
-        System.out.println("DEBUG: " + mediaSnippets.size() + " ENTRIES IN MEDIA SNIPPET LINKS for url " + urlString);
-        prop.put("link", mediaSnippets.size());
-        prop.put("links", mediaSnippets.size());
         
         
         // return rewrite properties

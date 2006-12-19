@@ -171,7 +171,7 @@ public class ViewFile {
             if (resource == null) {
                 plasmaHTCache.Entry entry = null;
                 try {
-                    entry = sb.snippetCache.loadResourceFromWeb(url, 5000, false);
+                    entry = sb.snippetCache.loadResourceFromWeb(url, 5000, false, true);
                 } catch (plasmaCrawlerException e) {
                     prop.put("error", 4);
                     prop.put("error_errorText", e.getMessage());

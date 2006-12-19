@@ -102,10 +102,10 @@ public class WatchCrawler_p {
                     boolean crawlingQ = post.get("crawlingQ", "off").equals("on");
                     env.setConfig("crawlingQ", (crawlingQ) ? "true" : "false");
                     
-                    boolean indexText = post.get("indexText", "on").equals("on");
+                    boolean indexText = post.get("indexText", "off").equals("on");
                     env.setConfig("indexText", (indexText) ? "true" : "false");
                     
-                    boolean indexMedia = post.get("indexMedia", "on").equals("on");
+                    boolean indexMedia = post.get("indexMedia", "off").equals("on");
                     env.setConfig("indexMedia", (indexMedia) ? "true" : "false");
                     
                     boolean storeHTCache = post.get("storeHTCache", "off").equals("on");
@@ -181,7 +181,8 @@ public class WatchCrawler_p {
                                 if (crawlOrder) {
                                     Map m = new HashMap(pe.map()); // must be cloned
                                     m.remove("specificDepth");
-                                    m.remove("localIndexing");
+                                    m.remove("indexText");
+                                    m.remove("indexMedia");
                                     m.remove("remoteIndexing");
                                     m.remove("xsstopw");
                                     m.remove("xpstopw");
@@ -328,7 +329,8 @@ public class WatchCrawler_p {
             prop.put("crawlProfiles_"+count+"_remoteIndexing", ((profile.remoteIndexing()) ? 1 : 0));
             prop.put("crawlProfiles_"+count+"_deleteButton", (((profile.name().equals("remote")) ||
                                                                (profile.name().equals("proxy")) ||
-                                                               (profile.name().equals("snippet"))) ? 0 : 1));
+                                                               (profile.name().equals("snippetText")) ||
+                                                               (profile.name().equals("snippetMedia")) ? 0 : 1)));
             prop.put("crawlProfiles_"+count+"_deleteButton_handle", profile.handle());
             
             dark = !dark;
