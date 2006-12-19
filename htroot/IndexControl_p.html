@@ -76,7 +76,7 @@
         </colgroup>
         <tr valign="top" class="TableCellDark">
           <td>Index&nbsp;Distribution:</td>
-          <td><input type="checkbox" name="indexDistribute" #[indexDistributeChecked]# /></td>
+          <td><input type="checkbox" name="indexDistribute" #(indexDistributeChecked)#::checked="checked" #(/indexDistributionChecked)#/></td>
           <td></td>
           <td>This enables automated, DHT-ruled Index Transmission to other peers.
           </td>
@@ -84,12 +84,12 @@
         <tr valign="top" class="TableCellDark">
           <td></td>
           <td>&nbsp;&nbsp;</td>
-          <td><input type="checkbox" name="indexDistributeWhileCrawling" #[indexDistributeWhileCrawling]# /></td>
+          <td><input type="checkbox" name="indexDistributeWhileCrawling" #(indexDistributeWhileCrawling)#::checked="checked" #(/indexDistributeWhileCrawling)#/></td>
           <td>If checked, DHT-Transmission is enabled even during crawling.</td>
         </tr>
         <tr valign="top" class="TableCellDark">
           <td>Index Receive:</td>
-          <td><input type="checkbox" name="indexReceive" #[indexReceiveChecked]# /></td>
+          <td><input type="checkbox" name="indexReceive" #(indexReceiveChecked)#::checked="checked" #(/indexReceiveChecked)#::/></td>
           <td></td>
           <td>Accept remote Index Transmissions. This works only if you are a senior peer.
           The DHT-rules do not work without this function.</td>
@@ -97,7 +97,7 @@
         <tr valign="top" class="TableCellDark">
           <td></td>
           <td>&nbsp;&nbsp;</td>
-          <td><input type="checkbox" name="indexReceiveBlockBlacklist" #[indexReceiveBlockBlacklistChecked]# /></td>
+          <td><input type="checkbox" name="indexReceiveBlockBlacklist" #(indexReceiveBlockBlacklistChecked)#::checked="checked" #(/indexReceiveBlockBlacklistChecked)#/></td>
           <td>If checked, your peer silently ignores transmitted URLs that match your blacklist</td>
         </tr>
         <tr valign="top" class="TableCellDark">
@@ -130,7 +130,7 @@
     <form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
     #{urlList}# #(urlExists)#
     <input type="checkbox" name="urlhx.#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" /><span class="tt">#[urlhxValue]#&nbsp;&lt;unresolved URL Hash&gt;</span><br />
-    ::<input type="checkbox" name="urlhx.#[urlhxCount]#" #(urlhxChecked)#::checked #(/urlhxChecked)#value="#[urlhxValue]#" align="top" />
+    ::<input type="checkbox" name="urlhx.#[urlhxCount]#" #(urlhxChecked)#::checked="checked" #(/urlhxChecked)#value="#[urlhxValue]#" align="top" />
     <a href="/IndexControl_p.html?keystring=#[keyString]#&amp;keyhash=#[keyHash]#&amp;urlhash=#[urlhxValue]#&amp;urlstringsearch=&amp;urlstring=#[urlString]#" class="tt">#[urlhxValue]#</a><span class="tt">&nbsp;#[urlString]#, pos=#[pos]#</span><br />
     #(/urlExists)# #{/urlList}#
     <input type="hidden" name="keystring" value="#[keyString]#" />

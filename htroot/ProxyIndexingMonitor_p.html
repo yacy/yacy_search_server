@@ -25,8 +25,8 @@
         </tr>
       
         <tr valign="top" class="TableCellLight">
-          <td>Prefetch Depth</td>
-          <td><input name="proxyPrefetchDepth" type="text" size="2" maxlength="2" value="#[proxyPrefetchDepth]#" /></td>
+          <td><label for="prxy_prefetch">Prefetch Depth</label></td>
+          <td><input name="proxyPrefetchDepth" id="prxy_prefetch" type="text" size="2" maxlength="2" value="#[proxyPrefetchDepth]#" /></td>
           <td>
             A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all
             embedded URLs, but since embedded image links are loaded by the browser
@@ -34,13 +34,13 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td>Store to Cache</td>
-          <td><input type="checkbox" name="proxyStoreHTCache" #(proxyStoreHTCacheChecked)#::checked="checked"#(/proxyStoreHTCacheChecked)# /></td>
+          <td><label for="prxy_storeHTCache">Store to Cache</label></td>
+          <td><input type="checkbox" id="prxy_storeHTCache" name="proxyStoreHTCache"#(proxyStoreHTCacheChecked)#:: checked="checked"#(/proxyStoreHTCacheChecked)# /></td>
           <td>It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.</td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td>Do Remote Indexing</td>
-          <td><input type="checkbox" name="proxyCrawlOrder" #(proxyCrawlOrder)#::checked="checked"#(/proxyCrawlOrder)# /></td>
+          <td><label for="prxy_crawl_order">Do Remote Indexing</label></td>
+          <td><input type="checkbox" id="prxy_crawl_order" name="proxyCrawlOrder"#(proxyCrawlOrder)#:: checked="checked"#(/proxyCrawlOrder)# /></td>
           <td>
             If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
             If you need your crawling results locally, you should switch this off.
@@ -54,13 +54,13 @@
         </tr>
       
         <tr valign="top" class="TableCellLight">
-          <td>Path</td>
-          <td><input name="proxyCache" type="text" size="20" maxlength="300" value="#[proxyCache]#" /></td>
+          <td><label for="prxy_path">Path</label></td>
+          <td><input name="proxyCache" type="text" id="prxy_path" size="20" maxlength="300" value="#[proxyCache]#" /></td>
           <td>The path where the pages are stored (max. length 300)</td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td>Size</td>
-          <td><input name="proxyCacheSize" type="text" size="8" maxlength="24" value="#[proxyCacheSize]#" /></td>
+          <td><label for="HTCache_size">Size</label></td>
+          <td><input name="proxyCacheSize" type="text" id="HTCache_size" size="8" maxlength="24" value="#[proxyCacheSize]#" /></td>
           <td>The size in MB of the cache.</td>
         </tr>
       

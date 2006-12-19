@@ -56,9 +56,9 @@ import de.anomic.server.serverSwitch;
 public class IndexShare_p {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	// return variable that accumulates replacements
+    	// return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
+		serverObjects prop = new serverObjects();
 
         if ((post == null) || (env == null)) {
             prop.put("linkfreq", switchboard.getConfig("defaultLinkReceiveFrequency","30"));
@@ -80,8 +80,9 @@ public class IndexShare_p {
         // insert constants
         prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
         prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
-	// return rewrite properties
-	return prop;
+        
+        // return rewrite properties
+        return prop;
     }
 
 }

@@ -19,11 +19,11 @@
         <tr valign="top" bgcolor="#CCDDCC">
         <td>Index:&nbsp;</td>
         <td>
-        <input type="checkbox" name="distribute" value="" align="top" #[distributecheck]# />distribute&nbsp;<br />
-        <input type="checkbox" name="receive" value="" align="top" #[receivecheck]# />receive
+        <input type="checkbox" name="distribute" value="" align="top" #(distributecheck)#::checked="checked" #(/distributecheck)#/>distribute&nbsp;<br />
+        <input type="checkbox" name="receive" value="" align="top" #(receivecheck)#::checked="checked" #(/receivecheck)#/>receive
         </td>
         <td>
-        &nbsp;&nbsp;&nbsp;receive&nbsp;grant&nbsp;default:&nbsp;<br>
+        &nbsp;&nbsp;&nbsp;receive grant default: <br />
         &nbsp;&nbsp;&nbsp;for each remote peer&nbsp;
         </td>
         <td>
