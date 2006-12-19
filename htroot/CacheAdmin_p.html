@@ -8,15 +8,107 @@
  #%env/templates/header.template%#
    <h2>Local Cache</h2>
    <p>The current cache size is #[cachesize]# KB. The maximum cache size is #[cachemax]# KB.</p>
-   <p><a href="CacheAdmin_p.html?action=info&amp;path=" title="Cache Root" class="tt">cache/</a>#[path]#</p>
+   <p><a
+     href="CacheAdmin_p.html?action=info&amp;path=/" title="Cache Root" class="tt">cache/</a>#{paths}#<a
+     href="CacheAdmin_p.html?action=info&amp;path=#[path]#/#[name]#" class="tt">#[name]#/</a>#{/paths}#
+   </p>
+   
    #(info)#
    <a href="#[url]#" class="tt">#[url]#</a>
    <div class="CacheAdminInfo">
      #[info]#
-   </div>
-   ::
+     <strong>HTTP Header</strong><!-- TO-DO: CSS/XHTMLize begin -->
+     #(header)#<span class="info">- no header in header cache -</span>::<table border="0" cellspacing="0" cellpadding="0">#{line}#
+       <tr valign="top">
+         <td class="tt">#[property]#</td>
+         <td class="tt"> = </td>
+         <td class="tt">#[value]#</td>
+       </tr>#{/line}#
+     </table>#(/header)#
+     
+     #(type)#
+     
+     <strong>TITLE:</strong><br />
+     #[title]#<br />
+     <br />
+     
+     <strong>SECTION HEADLINES:</strong><br />
+     <ul>#{headlines}#
+       <li>#[headline]#</li>#{/headlines}#
+     </ul>
+     <br />
+     
+     <strong>HREF:</strong><br />
+     <table border="0" cellspacing="0" cellpadding="0">#{links}#
+       <tr valign="top">
+         <td><span class="small">#[name]#</span></td>
+         <td class="tt">#[link]#</td>
+       </tr>#{/links}#
+     </table>
+     
+     <strong>IMAGE:</strong><br />
+     <table border="0" cellspacing="0" cellpadding="0">#{images}#
+       <tr valign="top">
+         <td><span class="small">#[name]#</span></td>
+         <td class="tt">#[link]#</td>
+       </tr>#{/images}#
+     </table>
+     
+     <strong>AUDIO:</strong><br />
+     <table border="0" cellspacing="0" cellpadding="0">#{audio}#
+       <tr valign="top">
+         <td><span class="small">#[name]#</span></td>
+         <td class="tt">#[link]#</td>
+       </tr>#{/audio}#
+     </table>
+     
+     <strong>VIDEO:</strong><br />
+     <table border="0" cellspacing="0" cellpadding="0">#{video}#
+       <tr valign="top">
+         <td><span class="small">#[name]#</span></td>
+         <td class="tt">#[link]#</td>
+       </tr>#{/video}#
+     </table>
+     
+     <strong>APPS:</strong><br />
+     <table border="0" cellspacing="0" cellpadding="0">#{apps}#
+       <tr valign="top">
+         <td><span class="small">#[name]#</span></td>
+         <td class="tt">#[link]#</td>
+       </tr>#{/apps}#
+     </table>
+     
+     <strong>EMAIL:</strong><br />
+     <table border="0" cellspacing="0" cellpadding="0">#{email}#
+       <tr valign="top">
+         <td><span class="small">#[name]#</span></td>
+         <td class="tt">#[link]#</td>
+       </tr>#{/email}#
+     </table>
+     
+     <strong>TEXT:</strong><br />
+     <span class="small">
+       #[text]#
+     </span>
+     
+     <strong>LINES:</strong><br />
+     <span class="small">#{lines}#
+       <span style="display: block;">#[line]#</span>#{/lines}#
+     </span>
+     ::<span class="error">- This file is not cached -</span>
+     ::<img src="CacheResource_p.html?path=#[src]#" alt="Cached image from #[src]#" />#(/type)#
+     <!-- TO-DO: CSS/XHTMLize end -->
+   </div>::
    <div class="CacheAdminTree">
-     #[tree]#
+     <p>
+       #(empty)#::[empty]#(/empty)#
+       #{treeFolders}#
+       <img src="/env/grafics/folderIconSmall.gif" align="top" alt="Folder" />
+       <a href="CacheAdmin_p.html?action=info&amp;path=#[path]#/#[name]#" class="tt"><nobr>#[name]#</nobr></a>#{/treeFolders}#
+       #{treeFiles}#
+       <img src="/env/grafics/fileIconSmall.gif" align="top" alt="File" />
+       <a href="CacheAdmin_p.html?action=info&amp;path=#[path]#/#[name]#" class="tt"><nobr>#[name]#</nobr></a>#{/treeFiles}#
+     </p>
    </div>
    #(/info)#
    #%env/templates/footer.template%#
