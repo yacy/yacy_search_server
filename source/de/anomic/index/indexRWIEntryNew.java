@@ -160,8 +160,8 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         this.entry.setCol(col_lastModified, mddlm);
         this.entry.setCol(col_freshUntil, 0);
         this.entry.setCol(col_wordsInTitle, 20); // guessed
-        this.entry.setCol(col_wordsInText, oldEntry.wordcount());
-        this.entry.setCol(col_phrasesInText, oldEntry.phrasecount());
+        this.entry.setCol(col_wordsInText, oldEntry.wordsintext());
+        this.entry.setCol(col_phrasesInText, oldEntry.phrasesintext());
         this.entry.setCol(col_doctype, new byte[]{(byte) oldEntry.doctype()});
         this.entry.setCol(col_language, (oldEntry.getLanguage() == null) ? "en" : oldEntry.getLanguage(), null);
         this.entry.setCol(col_llocal, 0);
@@ -231,6 +231,10 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
     public long lastModified() {
         return plasmaWordIndex.reverseMicroDateDays((int) this.entry.getColLong(col_lastModified));
     }
+    
+    public long freshUntil() {
+        return plasmaWordIndex.reverseMicroDateDays((int) this.entry.getColLong(col_freshUntil));
+    }
 
     public int hitcount() {
         return (int) this.entry.getColLong(col_hitcount);
@@ -248,11 +252,11 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         return (int) this.entry.getColLong(col_posofphrase);
     }
 
-    public int wordcount() {
+    public int wordsintext() {
         return (int) this.entry.getColLong(col_wordsInText);
     }
 
-    public int phrasecount() {
+    public int phrasesintext() {
         return (int) this.entry.getColLong(col_phrasesInText);
     }
 
@@ -264,6 +268,26 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         return (char) this.entry.getColByte(col_doctype);
     }
 
+    public int wordsintitle() {
+        return (int) this.entry.getColLong(col_wordsInTitle);
+    }
+    
+    public int llocal() {
+        return (int) this.entry.getColLong(col_llocal);
+    }
+    
+    public int lother() {
+        return (int) this.entry.getColLong(col_lother);
+    }
+    
+    public int urllength() {
+        return (int) this.entry.getColLong(col_urlLength);
+    }
+    
+    public int urlcomps() {
+        return (int) this.entry.getColLong(col_urlComps);
+    }
+    
     public kelondroBitfield flags() {
         return new kelondroBitfield(this.entry.getColBytes(col_flags));
     }
@@ -278,7 +302,7 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         ie1.entry.setCol(col_posintext, Math.min(ie1.posintext(), ie2.posintext()));
         ie1.entry.setCol(col_posinphrase, (ie1.posofphrase() == ie2.posofphrase()) ? ie1.posofphrase() : 0 /*unknown*/);
         ie1.entry.setCol(col_posofphrase, Math.min(ie1.posofphrase(), ie2.posofphrase()));
-        ie1.entry.setCol(col_wordsInText, (ie1.wordcount() + ie2.wordcount()) / 2);
+        ie1.entry.setCol(col_wordsInText, (ie1.wordsintext() + ie2.wordsintext()) / 2);
         return ie1;
     }
     
@@ -292,24 +316,30 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
     
     public static final void min(indexRWIEntryNew t, indexRWIEntry other) {
         if (t.hitcount() > other.hitcount()) t.entry.setCol(col_hitcount, other.hitcount());
-        if (t.wordcount() > other.wordcount()) t.entry.setCol(col_wordsInText, other.wordcount());
-        if (t.phrasecount() > other.phrasecount()) t.entry.setCol(col_phrasesInText, other.phrasecount());
+        if (t.wordsintext() > other.wordsintext()) t.entry.setCol(col_wordsInText, other.wordsintext());
+        if (t.phrasesintext() > other.phrasesintext()) t.entry.setCol(col_phrasesInText, other.phrasesintext());
         if (t.posintext() > other.posintext()) t.entry.setCol(col_posintext, other.posintext());
         if (t.posinphrase() > other.posinphrase()) t.entry.setCol(col_posinphrase, other.posinphrase());
         if (t.posofphrase() > other.posofphrase()) t.entry.setCol(col_posofphrase, other.posofphrase());
         if (t.worddistance() > other.worddistance()) t.entry.setCol(col_worddistance, other.worddistance());
         if (t.lastModified() > other.lastModified()) t.entry.setCol(col_lastModified, other.lastModified());
+        if (t.urllength() > other.urllength()) t.entry.setCol(col_urlLength, other.urllength());
+        if (t.urlcomps() > other.urlcomps()) t.entry.setCol(col_urlComps, other.urlcomps());
+        if (t.wordsintitle() > other.wordsintitle() ) t.entry.setCol(col_wordsInTitle, other.wordsintitle());
     }
     
     public static final void max(indexRWIEntryNew t, indexRWIEntry other) {
         if (t.hitcount() < other.hitcount()) t.entry.setCol(col_hitcount, other.hitcount());
-        if (t.wordcount() < other.wordcount()) t.entry.setCol(col_wordsInText, other.wordcount());
-        if (t.phrasecount() < other.phrasecount()) t.entry.setCol(col_phrasesInText, other.phrasecount());
+        if (t.wordsintext() < other.wordsintext()) t.entry.setCol(col_wordsInText, other.wordsintext());
+        if (t.phrasesintext() < other.phrasesintext()) t.entry.setCol(col_phrasesInText, other.phrasesintext());
         if (t.posintext() < other.posintext()) t.entry.setCol(col_posintext, other.posintext());
         if (t.posinphrase() < other.posinphrase()) t.entry.setCol(col_posinphrase, other.posinphrase());
         if (t.posofphrase() < other.posofphrase()) t.entry.setCol(col_posofphrase, other.posofphrase());
         if (t.worddistance() < other.worddistance()) t.entry.setCol(col_worddistance, other.worddistance());
         if (t.lastModified() < other.lastModified()) t.entry.setCol(col_lastModified, other.lastModified());
+        if (t.urllength() < other.urllength()) t.entry.setCol(col_urlLength, other.urllength());
+        if (t.urlcomps() < other.urlcomps()) t.entry.setCol(col_urlComps, other.urlcomps());
+        if (t.wordsintitle() < other.wordsintitle() ) t.entry.setCol(col_wordsInTitle, other.wordsintitle());
     }
     
     
@@ -330,13 +360,17 @@ public class indexRWIEntryNew  implements Cloneable, indexRWIEntry {
         //System.out.println("min   = " + min.toPropertyForm(true));
         //System.out.println("max   = " + max.toPropertyForm(true));
         t.entry.setCol(col_hitcount     , (t.hitcount()     == 0) ? 0 : 1 + 255 * (t.hitcount()     - min.hitcount()    ) / (1 + max.hitcount()     - min.hitcount()));
-        t.entry.setCol(col_wordsInText  , (t.wordcount()    == 0) ? 0 : 1 + 255 * (t.wordcount()    - min.wordcount()   ) / (1 + max.wordcount()    - min.wordcount()));
-        t.entry.setCol(col_phrasesInText, (t.phrasecount()  == 0) ? 0 : 1 + 255 * (t.phrasecount()  - min.phrasecount() ) / (1 + max.phrasecount()  - min.phrasecount()));
+        t.entry.setCol(col_wordsInText  , (t.wordsintext()    == 0) ? 0 : 1 + 255 * (t.wordsintext()    - min.wordsintext()   ) / (1 + max.wordsintext()    - min.wordsintext()));
+        t.entry.setCol(col_phrasesInText, (t.phrasesintext()  == 0) ? 0 : 1 + 255 * (t.phrasesintext()  - min.phrasesintext() ) / (1 + max.phrasesintext()  - min.phrasesintext()));
         t.entry.setCol(col_posintext    , (t.posintext()    == 0) ? 0 : 1 + 255 * (t.posintext()    - min.posintext()   ) / (1 + max.posintext()    - min.posintext()));
         t.entry.setCol(col_posinphrase  , (t.posinphrase()  == 0) ? 0 : 1 + 255 * (t.posinphrase()  - min.posinphrase() ) / (1 + max.posinphrase()  - min.posinphrase()));
         t.entry.setCol(col_posofphrase  , (t.posofphrase()  == 0) ? 0 : 1 + 255 * (t.posofphrase()  - min.posofphrase() ) / (1 + max.posofphrase()  - min.posofphrase()));
         t.entry.setCol(col_worddistance , (t.worddistance() == 0) ? 0 : 1 + 255 * (t.worddistance() - min.worddistance()) / (1 + max.worddistance() - min.worddistance())); // FIXME: hier gibts ein division by zero, was nur sein kann wenn die Normalisierung nicht geklappt hat.
         t.entry.setCol(col_lastModified , (t.lastModified() == 0) ? 0 : 1 + 255 * (t.lastModified() - min.lastModified()) / (1 + max.lastModified() - min.lastModified()));
+        t.entry.setCol(col_urlLength    , (t.urllength()    == 0) ? 0 : 1 + 255 * (t.urllength()    - min.urllength()   ) / (1 + max.urllength()    - min.urllength()));
+        t.entry.setCol(col_urlComps     , (t.urlcomps()     == 0) ? 0 : 1 + 255 * (t.urlcomps()     - min.urlcomps()    ) / (1 + max.urlcomps()     - min.urlcomps()));
+        t.entry.setCol(col_wordsInTitle , (t.wordsintitle() == 0) ? 0 : 1 + 255 * (t.wordsintitle() - min.wordsintitle()) / (1 + max.wordsintitle() - min.wordsintitle()));
+        
         //System.out.println("out   = " + t.toPropertyForm(true));
     }
     

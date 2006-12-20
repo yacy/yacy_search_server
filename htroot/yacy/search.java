@@ -70,6 +70,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacySeed;
+import de.anomic.tools.crypt;
 
 public final class search {
 
@@ -95,6 +96,8 @@ public final class search {
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "text");
         final String  filter = post.get("filter", ".*");
+        String  profile = post.get("profile", ""); // remote profile hand-over
+        if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
         final boolean includesnippet = post.get("includesnippet", "false").equals("true");
         final kelondroBitfield constraint = new kelondroBitfield(4, post.get("constraint", "______"));
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
@@ -140,7 +143,7 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + squery.anonymizedQueryHashes() + " - " + squery.wantedResults + " links");
 
             // prepare a search profile
-            plasmaSearchRankingProfile rankingProfile = new plasmaSearchRankingProfile(new String[]{plasmaSearchRankingProfile.ORDER_YBR, plasmaSearchRankingProfile.ORDER_DATE, plasmaSearchRankingProfile.ORDER_QUALITY});
+            plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(contentdom) : new plasmaSearchRankingProfile("", profile);
             plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
             plasmaSearchTimingProfile remoteTiming = null;
 
@@ -167,7 +170,7 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + squery.anonymizedQueryHashes() + " - " + squery.wantedResults + " links");
 
             // prepare a search profile
-            plasmaSearchRankingProfile rankingProfile = new plasmaSearchRankingProfile(new String[]{plasmaSearchRankingProfile.ORDER_YBR, plasmaSearchRankingProfile.ORDER_DATE, plasmaSearchRankingProfile.ORDER_QUALITY});
+            plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(contentdom) : new plasmaSearchRankingProfile("", profile);
             plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
             plasmaSearchTimingProfile remoteTiming = null;
 

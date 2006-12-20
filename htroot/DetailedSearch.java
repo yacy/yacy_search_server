@@ -84,7 +84,7 @@ public class DetailedSearch {
             prop.put("results", "");
             prop.put("urlmaskoptions", 0);
             prop.put("urlmaskoptions_urlmaskfilter", ".*");
-            String defaultRankingProfile = new plasmaSearchRankingProfile().toExternalString();
+            String defaultRankingProfile = new plasmaSearchRankingProfile("text").toExternalString();
             prop.putAll(new plasmaSearchRankingProfile("", defaultRankingProfile).toExternalMap("local"));
             return prop;
         }

@@ -43,11 +43,16 @@ public interface indexRWIEntry {
     public int posintext();
     public int posinphrase();
     public int posofphrase();
-    public int wordcount();
-    public int phrasecount();
+    public int wordsintext();
+    public int phrasesintext();
     public String getLanguage();
     public char getType();
     public kelondroBitfield flags();
+    public int wordsintitle();
+    public int llocal();
+    public int lother();
+    public int urllength();
+    public int urlcomps();
     
     public void combineDistance(indexRWIEntry oe);
     public int worddistance();

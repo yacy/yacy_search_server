@@ -170,122 +170,105 @@ public class yacysearch {
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
         
         // find search domain
-        int contentdom = plasmaSearchQuery.CONTENTDOM_TEXT;
-        String cds = post.get("contentdom", "text");
-        if (cds.equals("text")) contentdom = plasmaSearchQuery.CONTENTDOM_TEXT;
-        if (cds.equals("audio")) contentdom = plasmaSearchQuery.CONTENTDOM_AUDIO;
-        if (cds.equals("video")) contentdom = plasmaSearchQuery.CONTENTDOM_VIDEO;
-        if (cds.equals("image")) contentdom = plasmaSearchQuery.CONTENTDOM_IMAGE;
-        if (cds.equals("app")) contentdom = plasmaSearchQuery.CONTENTDOM_APP;
+        int contentdomCode = plasmaSearchQuery.CONTENTDOM_TEXT;
+        String contentdomString = post.get("contentdom", "text");
+        if (contentdomString.equals("text")) contentdomCode = plasmaSearchQuery.CONTENTDOM_TEXT;
+        if (contentdomString.equals("audio")) contentdomCode = plasmaSearchQuery.CONTENTDOM_AUDIO;
+        if (contentdomString.equals("video")) contentdomCode = plasmaSearchQuery.CONTENTDOM_VIDEO;
+        if (contentdomString.equals("image")) contentdomCode = plasmaSearchQuery.CONTENTDOM_IMAGE;
+        if (contentdomString.equals("app")) contentdomCode = plasmaSearchQuery.CONTENTDOM_APP;
         
         // patch until better search profiles are available
-        if ((contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) && (count <= 10)) count = 30;
+        if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (count <= 10)) count = 30;
         
         serverObjects prop = new serverObjects();
         if (post.get("cat", "href").equals("href")) {
 
-            final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
-            // filter out stopwords
-            final TreeSet filtered = kelondroMSetTools.joinConstructive(query,
-                    plasmaSwitchboard.stopwords);
-            if (filtered.size() > 0) {
-                kelondroMSetTools.excludeDestructive(query, plasmaSwitchboard.stopwords);
-            }
+        final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
+        // filter out stopwords
+        final TreeSet filtered = kelondroMSetTools.joinConstructive(query, plasmaSwitchboard.stopwords);
+        if (filtered.size() > 0) {
+            kelondroMSetTools.excludeDestructive(query, plasmaSwitchboard.stopwords);
+        }
 
-            // if a minus-button was hit, remove a special reference first
-            if (post.containsKey("deleteref")) {
-                if (!sb.verifyAuthentication(header, true)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
-                    return prop;
-                }
+        // if a minus-button was hit, remove a special reference first
+        if (post.containsKey("deleteref")) {
+            if (!sb.verifyAuthentication(header, true)) {
+                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                return prop;
+            }
                 
-                // delete the index entry locally
-                final String delHash = post.get("deleteref", ""); // urlhash
-                sb.wordIndex.removeReferences(query, delHash);
-                
-                // make new news message with negative voting
-                HashMap map = new HashMap();
-                map.put("urlhash", delHash);
-                map.put("vote", "negative");
-                map.put("refid", "");
-                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
+            // delete the index entry locally
+            final String delHash = post.get("deleteref", ""); // urlhash
+            sb.wordIndex.removeReferences(query, delHash);
+
+            // make new news message with negative voting
+            HashMap map = new HashMap();
+            map.put("urlhash", delHash);
+            map.put("vote", "negative");
+            map.put("refid", "");
+            yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
+        }
+
+        // if aplus-button was hit, create new voting message
+        if (post.containsKey("recommendref")) {
+            if (!sb.verifyAuthentication(header, true)) {
+                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                return prop;
             }
-
-            // if aplus-button was hit, create new voting message
-            if (post.containsKey("recommendref")) {
-                if (!sb.verifyAuthentication(header, true)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
-                    return prop;
-                }
-                final String recommendHash = post.get("recommendref", ""); // urlhash
-                indexURLEntry urlentry = sb.wordIndex.loadedURL.load(recommendHash, null);
-                if (urlentry != null) {
-                    indexURLEntry.Components comp = urlentry.comp();
-                    plasmaParserDocument document;
-                    document = sb.snippetCache.retrieveDocument(comp.url(), true, 5000, true);
-                    if (document != null) {
-                        // create a news message
-                        HashMap map = new HashMap();
-                        map.put("url", comp.url().toNormalform().replace(',', '|'));
-                        map.put("title", comp.descr().replace(',', ' '));
-                        map.put("description", ((document == null) ? comp.descr() : document.getMainLongTitle()).replace(',', ' '));
-                        map.put("tags",  ((document == null) ? "" : document.getKeywords(' ')));
-                        yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippadd", map));
-                        document.close();
-                    }
+            final String recommendHash = post.get("recommendref", ""); // urlhash
+            indexURLEntry urlentry = sb.wordIndex.loadedURL.load(recommendHash, null);
+            if (urlentry != null) {
+                indexURLEntry.Components comp = urlentry.comp();
+                plasmaParserDocument document;
+                document = sb.snippetCache.retrieveDocument(comp.url(), true, 5000, true);
+                if (document != null) {
+                    // create a news message
+                    HashMap map = new HashMap();
+                    map.put("url", comp.url().toNormalform().replace(',', '|'));
+                    map.put("title", comp.descr().replace(',', ' '));
+                    map.put("description", ((document == null) ? comp.descr() : document.getMainLongTitle()).replace(',', ' '));
+                    map.put("tags",  ((document == null) ? "" : document.getKeywords(' ')));
+                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippadd", map));
+                    document.close();
                 }
             }
+        }
 
-            // prepare search order
-            final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed != null) && (yacyCore.seedDB.mySeed.getAddress() != null));
-
-            String order1 = plasmaSearchRankingProfile.ORDER_DATE;
-            String order2 = plasmaSearchRankingProfile.ORDER_YBR;
-            String order3 = plasmaSearchRankingProfile.ORDER_QUALITY;
-            if (order.startsWith("YBR")) order1 = plasmaSearchRankingProfile.ORDER_YBR;
-            if (order.startsWith("Date")) order1 = plasmaSearchRankingProfile.ORDER_DATE;
-            if (order.startsWith("Quality")) order1 = plasmaSearchRankingProfile.ORDER_QUALITY;
-            if (order.indexOf("-YBR-") > 0) order2 = plasmaSearchRankingProfile.ORDER_YBR;
-            if (order.indexOf("-Date-") > 0) order2 = plasmaSearchRankingProfile.ORDER_DATE;
-            if (order.indexOf("-Quality-") > 0) order2 = plasmaSearchRankingProfile.ORDER_QUALITY;
-            if (order.endsWith("YBR")) order3 = plasmaSearchRankingProfile.ORDER_YBR;
-            if (order.endsWith("Date")) order3 = plasmaSearchRankingProfile.ORDER_DATE;
-            if (order.endsWith("Quality")) order3 = plasmaSearchRankingProfile.ORDER_QUALITY;
-            
-            // do the search
-            plasmaSearchQuery thisSearch = new plasmaSearchQuery(
+        // prepare search properties
+        final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed != null) && (yacyCore.seedDB.mySeed.getAddress() != null));
+        final boolean samesearch = env.getConfig("last-search", "").equals(querystring + contentdomString);
+        final boolean globalsearch = (global) && (yacyonline) && (!samesearch);
+        
+        // do the search
+        plasmaSearchQuery thisSearch = new plasmaSearchQuery(
                     query,
                     maxDistance,
                     prefermask,
-                    contentdom,
+                    contentdomCode,
                     count,
                     searchtime,
                     urlmask,
-                    ((global) && (yacyonline) && (!(env.getConfig(
-                            "last-search", "").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT
-                            : plasmaSearchQuery.SEARCHDOM_LOCAL, "", 20, constraint);
-            plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile( new String[] { order1, order2, order3 });
-            plasmaSearchTimingProfile localTiming = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-            plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-            prop = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true);
+                    (globalsearch) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
+                    "",
+                    20,
+                    constraint);
+        plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile(contentdomString);
+        plasmaSearchTimingProfile localTiming = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
+        plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
+        prop = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true);
 
-            /*
-             * final serverObjects prop = sb.searchFromLocal(query, order1,
-             * order2, count, ((global) && (yacyonline) &&
-             * (!(env.getConfig("last-search","").equals(querystring)))),
-             * searchtime, urlmask);
-             */
-            // remember the last search expression
-            env.setConfig("last-search", querystring);
+        // remember the last search expression
+        env.setConfig("last-search", querystring + contentdomString);
 
-            // process result of search
-            prop.put("type_resultbottomline", 0);
-            if (filtered.size() > 0) {
-                prop.put("excluded", 1);
-                prop.put("excluded_stopwords", filtered.toString());
-            } else {
-                prop.put("excluded", 0);
-            }
+        // process result of search
+        prop.put("type_resultbottomline", 0);
+        if (filtered.size() > 0) {
+            prop.put("excluded", 1);
+            prop.put("excluded_stopwords", filtered.toString());
+        } else {
+            prop.put("excluded", 0);
+        }
 
             if (prop == null || prop.size() == 0) {
                 if (post.get("search", "").length() < 3) {
@@ -364,7 +347,7 @@ public class yacysearch {
             }
 
             prop.put("type", (thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : ((thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 2 : 1));
-            if (prop.getInt("type", 0) == 1) prop.put("type_mediatype", cds);
+            if (prop.getInt("type", 0) == 1) prop.put("type_mediatype", contentdomString);
             prop.put("cat", "href");
             prop.put("depth", "0");
 
@@ -418,12 +401,12 @@ public class yacysearch {
         prop.put("display", display);
         prop.put("indexof", (indexof) ? "on" : "off");
         prop.put("constraint", constraint.exportB64());
-        prop.put("contentdom", cds);
-        prop.put("contentdomCheckText", (contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 1 : 0);
-        prop.put("contentdomCheckAudio", (contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 1 : 0);
-        prop.put("contentdomCheckVideo", (contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);
-        prop.put("contentdomCheckImage", (contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
-        prop.put("contentdomCheckApp", (contentdom == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
+        prop.put("contentdom", contentdomString);
+        prop.put("contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? 1 : 0);
+        prop.put("contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 1 : 0);
+        prop.put("contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);
+        prop.put("contentdomCheckImage", (contentdomCode == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
+        prop.put("contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
 
         // return rewrite properties
         return prop;

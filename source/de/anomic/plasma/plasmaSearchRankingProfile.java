@@ -47,111 +47,189 @@ import java.util.Map;
 import java.util.Set;
 
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIEntryNew;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
+import de.anomic.kelondro.kelondroBitfield;
 
 public class plasmaSearchRankingProfile {
 
-    // old parameters for ordering
-    public static final String ORDER_QUALITY = "Quality";
-    public static final String ORDER_DATE    = "Date";
-    public static final String ORDER_YBR     = "YBR";
-    
     // pre-sort attributes
-    public static final String ENTROPY = "entropy";
-    public static final String DATE = "date";
-    public static final String YBR = "ybr";
-    public static final String POSINTEXT = "posintext";
-    public static final String WORDDISTANCE = "worddistance";
-    public static final String HITCOUNT = "hitcount";
-    public static final String DOMLENGTH = "domlength";
+    public static final String DOMLENGTH     = "domlength";
+    public static final String YBR           = "ybr";
+    public static final String DATE          = "date";
+    public static final String WORDSINTITLE  = "wordsintitle";
+    public static final String WORDSINTEXT   = "wordsintext";
+    public static final String PHRASESINTEXT = "phrasesintext";
+    public static final String LLOCAL        = "llocal";
+    public static final String LOTHER        = "lother";
+    public static final String URLLENGTH     = "urllength";
+    public static final String URLCOMPS      = "urlcomps";
+    public static final String HITCOUNT      = "hitcount";
+    public static final String POSINTEXT     = "posintext";
+    public static final String POSOFPHRASE   = "posofphrase";
+    public static final String WORDDISTANCE  = "worddistance";
+    public static final String APPURL        = "appurl";
+    public static final String APPDESCR      = "appdescr";
+    public static final String APPAUTHOR     = "appauthor";
+    public static final String APPTAGS       = "apptags";
+    public static final String APPREF        = "appref";
+    public static final String APPEMPH       = "appemph";
+    public static final String CATINDEXOF    = "catindexof";
+    public static final String CATHASIMAGE   = "cathasimage";
+    public static final String CATHASAUDIO   = "cathasaudio";
+    public static final String CATHASVIDEO   = "cathasvideo";
+    public static final String CATHASAPP     = "cathasapp";
     
-    // post-sort attributes
-    public static final String URLLENGTH = "urllength";
-    public static final String URLCOMPS = "urlcomps";
-    public static final String DESCRLENGTH = "descrlength";
-    public static final String DESCRCOMPS = "descrcomps";
-
     // post-sort predicates
-    public static final String QUERYINURL = "queryinurl";
-    public static final String QUERYINDESCR = "queryindescr";
-    public static final String URLCOMPINTOPLIST = "urlcompintoplist";
+    public static final String QUERYINURL         = "queryinurl";
+    public static final String QUERYINDESCR       = "queryindescr";
+    public static final String URLCOMPINTOPLIST   = "urlcompintoplist";
     public static final String DESCRCOMPINTOPLIST = "descrcompintoplist";
     public static final String PREFER = "prefer";
+
+    private int
+        coeff_domlength, coeff_ybr, coeff_date, coeff_wordsintitle, coeff_wordsintext, coeff_phrasesintext,
+        coeff_llocal, coeff_lother, coeff_urllength, coeff_urlcomps, coeff_hitcount, 
+        coeff_posintext, coeff_posofphrase, coeff_worddistance,
+        coeff_appurl, coeff_appdescr, coeff_appauthor, coeff_apptags, coeff_appref, coeff_appemph,
+        coeff_catindexof, coeff_cathasimage, coeff_cathasaudio, coeff_cathasvideo, coeff_cathasapp,
+        coeff_queryinurl, coeff_queryindescr, coeff_urlcompintoplist, coeff_descrcompintoplist, coeff_prefer;
     
-    public String[] order;
-    private HashMap coeff;
-    
-    public plasmaSearchRankingProfile() {
-        // set some default-values
-        this.order = null;
-        this.coeff = new HashMap();
-        coeff.put(ENTROPY, new Integer(0));
-        coeff.put(DATE, new Integer(4));
-        coeff.put(YBR, new Integer(8));
-        coeff.put(POSINTEXT, new Integer(7));
-        coeff.put(WORDDISTANCE, new Integer(6));
-        coeff.put(HITCOUNT, new Integer(5));
-        coeff.put(DOMLENGTH, new Integer(8));
-        coeff.put(URLLENGTH, new Integer(15));
-        coeff.put(URLCOMPS, new Integer(15));
-        coeff.put(DESCRLENGTH, new Integer(4));
-        coeff.put(DESCRCOMPS, new Integer(4));
-        coeff.put(QUERYINURL, new Integer(13));
-        coeff.put(QUERYINDESCR, new Integer(8));
-        coeff.put(URLCOMPINTOPLIST, new Integer(3));
-        coeff.put(DESCRCOMPINTOPLIST, new Integer(2));
-        coeff.put(PREFER, new Integer(15));
+    public plasmaSearchRankingProfile(String mediatype) {
+        // set default-values
+        if (mediatype == null) mediatype = "text";
+        coeff_domlength          = 8;
+        coeff_ybr                = 8;
+        coeff_date               = 4;
+        coeff_wordsintitle       = 4;
+        coeff_wordsintext        = 1;
+        coeff_phrasesintext      = 1;
+        coeff_llocal             = 2;
+        coeff_lother             = 3;
+        coeff_urllength          = 14;
+        coeff_urlcomps           = 14;
+        coeff_hitcount           = 5;
+        coeff_posintext          = 7;
+        coeff_posofphrase        = 6;
+        coeff_worddistance       = 15;
+        coeff_appurl             = 14;
+        coeff_appdescr           = 13;
+        coeff_appauthor          = 13;
+        coeff_apptags            = 8;
+        coeff_appref             = 9;
+        coeff_appemph            = 11;
+        coeff_queryinurl         = 12;
+        coeff_queryindescr       = 8;
+        coeff_urlcompintoplist   = 3;
+        coeff_descrcompintoplist = 2;
+        coeff_prefer             = 15;
+        coeff_catindexof         = (mediatype.equals("text")) ? 0 : 10;
+        coeff_cathasimage        = (mediatype.equals("image")) ? 15 : 0;
+        coeff_cathasaudio        = (mediatype.equals("audio")) ? 15 : 0;
+        coeff_cathasvideo        = (mediatype.equals("video")) ? 15 : 0;
+        coeff_cathasapp          = (mediatype.equals("app")) ? 15 : 0;
     }
     
     public plasmaSearchRankingProfile(String prefix, String profile) {
-        this(); // set defaults
-        //parse external form
-        String[] elts = profile.substring(1, profile.length() - 1).split(",");
-        int p;
-        int s = prefix.length();
-        String e;
-        for (int i = 0; i < elts.length; i++) {
-            e = elts[i].trim();
-            if ((s == 0) || (e.startsWith(prefix))) {
-                coeff.put(e.substring(s, (p = e.indexOf("="))), new Integer(Integer.parseInt(e.substring(p + 1))));
+        this("text"); // set defaults
+        if ((profile != null) && (profile.length() > 0)) {
+            //parse external form
+            HashMap coeff = new HashMap();
+            String[] elts = ((profile.startsWith("{") && (profile.endsWith("}"))) ? profile.substring(1, profile.length() - 1) : profile).split(",");
+            int p;
+            int s = (prefix == null) ? 0 : prefix.length();
+            String e;
+            for (int i = 0; i < elts.length; i++) {
+                e = elts[i].trim();
+                if ((s == 0) || (e.startsWith(prefix))) {
+                    coeff.put(e.substring(s, (p = e.indexOf("="))), new Integer(Integer.parseInt(e.substring(p + 1))));
+                }
             }
+            coeff_domlength          = parseMap(coeff, DOMLENGTH, coeff_domlength);
+            coeff_ybr                = parseMap(coeff, YBR, coeff_ybr);
+            coeff_date               = parseMap(coeff, DATE, coeff_date);
+            coeff_wordsintitle       = parseMap(coeff, WORDSINTITLE, coeff_wordsintitle);
+            coeff_wordsintext        = parseMap(coeff, WORDSINTEXT, coeff_wordsintext);
+            coeff_phrasesintext      = parseMap(coeff, PHRASESINTEXT, coeff_phrasesintext);
+            coeff_llocal             = parseMap(coeff, LLOCAL, coeff_llocal);
+            coeff_lother             = parseMap(coeff, LOTHER, coeff_lother);
+            coeff_urllength          = parseMap(coeff, URLLENGTH, coeff_urllength);
+            coeff_urlcomps           = parseMap(coeff, URLCOMPS, coeff_urlcomps);
+            coeff_hitcount           = parseMap(coeff, HITCOUNT, coeff_hitcount);
+            coeff_posintext          = parseMap(coeff, POSINTEXT, coeff_posintext);
+            coeff_posofphrase        = parseMap(coeff, POSOFPHRASE, coeff_posofphrase);
+            coeff_worddistance       = parseMap(coeff, WORDDISTANCE, coeff_worddistance);
+            coeff_appurl             = parseMap(coeff, APPURL, coeff_appurl);
+            coeff_appdescr           = parseMap(coeff, APPDESCR, coeff_appdescr);
+            coeff_appauthor          = parseMap(coeff, APPAUTHOR, coeff_appauthor);
+            coeff_apptags            = parseMap(coeff, APPTAGS, coeff_apptags);
+            coeff_appref             = parseMap(coeff, APPREF, coeff_appref);
+            coeff_appemph            = parseMap(coeff, APPEMPH, coeff_appemph);
+            coeff_catindexof         = parseMap(coeff, APPEMPH, coeff_catindexof);
+            coeff_cathasimage        = parseMap(coeff, APPEMPH, coeff_cathasimage);
+            coeff_cathasaudio        = parseMap(coeff, APPEMPH, coeff_cathasaudio);
+            coeff_cathasvideo        = parseMap(coeff, APPEMPH, coeff_cathasvideo);
+            coeff_cathasapp          = parseMap(coeff, APPEMPH, coeff_cathasapp);
+            coeff_queryinurl         = parseMap(coeff, QUERYINURL, coeff_queryinurl);
+            coeff_queryindescr       = parseMap(coeff, QUERYINDESCR, coeff_queryindescr);
+            coeff_urlcompintoplist   = parseMap(coeff, URLCOMPINTOPLIST, coeff_urlcompintoplist);
+            coeff_descrcompintoplist = parseMap(coeff, DESCRCOMPINTOPLIST, coeff_descrcompintoplist);
+            coeff_prefer             = parseMap(coeff, PREFER, coeff_prefer);
         }
     }
     
-    public plasmaSearchRankingProfile(String[] order) {
-        this(); // set defaults
-        this.order = order;
-        // overwrite defaults with order attributes
-        for (int i = 0; i < 3; i++) {
-            if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_QUALITY))   coeff.put(ENTROPY, new Integer((3 * (3 - i))));
-            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_DATE)) coeff.put(DATE, new Integer((3 * (3 - i))));
-            else if (this.order[i].equals(plasmaSearchRankingProfile.ORDER_YBR))  coeff.put(YBR, new Integer((3 * (3 - i))));
+    private static int parseMap(HashMap coeff, String attr, int dflt) {
+        if (coeff.containsKey(attr)) try {
+            return Integer.parseInt((String) coeff.get(attr));
+        } catch (NumberFormatException e) {
+            return dflt;
+        } else {
+            return dflt;
         }
-    }
-    
-    public String orderString() {
-        if (order == null) return "YBR-Date-Quality";
-        return order[0] + "-" + order[1] + "-" + order[2];
     }
 
     public String toExternalString() {
-        return coeff.toString();
+        return toExternalMap("").toString();
     }
     
     public Map toExternalMap(String prefix) {
-        Iterator i = this.coeff.entrySet().iterator();
-        Map.Entry entry;
         Map ext = new HashMap();
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            ext.put(prefix + (String) entry.getKey(), entry.getValue());
-        }
+        ext.put(prefix + DOMLENGTH, Integer.toString(coeff_domlength));
+        ext.put(prefix + YBR, Integer.toString(coeff_ybr));
+        ext.put(prefix + DATE, Integer.toString(coeff_date));
+        ext.put(prefix + WORDSINTITLE, Integer.toString(coeff_wordsintitle));
+        ext.put(prefix + WORDSINTEXT, Integer.toString(coeff_wordsintext));
+        ext.put(prefix + PHRASESINTEXT, Integer.toString(coeff_phrasesintext));
+        ext.put(prefix + LLOCAL, Integer.toString(coeff_llocal));
+        ext.put(prefix + LOTHER, Integer.toString(coeff_lother));
+        ext.put(prefix + URLLENGTH, Integer.toString(coeff_urllength));
+        ext.put(prefix + URLCOMPS, Integer.toString(coeff_urlcomps));
+        ext.put(prefix + HITCOUNT, Integer.toString(coeff_hitcount));
+        ext.put(prefix + POSINTEXT, Integer.toString(coeff_posintext));
+        ext.put(prefix + POSOFPHRASE, Integer.toString(coeff_posofphrase));
+        ext.put(prefix + WORDDISTANCE, Integer.toString(coeff_worddistance));
+        ext.put(prefix + APPURL, Integer.toString(coeff_appurl));
+        ext.put(prefix + APPDESCR, Integer.toString(coeff_appdescr));
+        ext.put(prefix + APPAUTHOR, Integer.toString(coeff_appauthor));
+        ext.put(prefix + APPTAGS, Integer.toString(coeff_apptags));
+        ext.put(prefix + APPREF, Integer.toString(coeff_appref));
+        ext.put(prefix + APPEMPH, Integer.toString(coeff_appemph));
+        ext.put(prefix + CATINDEXOF, Integer.toString(coeff_catindexof));
+        ext.put(prefix + CATHASIMAGE, Integer.toString(coeff_cathasimage));
+        ext.put(prefix + CATHASAUDIO, Integer.toString(coeff_cathasaudio));
+        ext.put(prefix + CATHASVIDEO, Integer.toString(coeff_cathasvideo));
+        ext.put(prefix + CATHASAPP, Integer.toString(coeff_cathasapp));
+        ext.put(prefix + QUERYINURL, Integer.toString(coeff_queryinurl));
+        ext.put(prefix + QUERYINDESCR, Integer.toString(coeff_queryindescr));
+        ext.put(prefix + URLCOMPINTOPLIST, Integer.toString(coeff_urlcompintoplist));
+        ext.put(prefix + DESCRCOMPINTOPLIST, Integer.toString(coeff_descrcompintoplist));
+        ext.put(prefix + PREFER, Integer.toString(coeff_prefer));
         return ext;
     }
     
     public String toExternalURLGet(String prefix) {
-        Iterator i = this.coeff.entrySet().iterator();
+        Iterator i = toExternalMap("").entrySet().iterator();
         Map.Entry entry;
         StringBuffer ext = new StringBuffer();
         while (i.hasNext()) {
@@ -168,15 +246,37 @@ public class plasmaSearchRankingProfile {
     public long preRanking(indexRWIEntry normalizedEntry, String searchedWord) {
         // the normalizedEntry must be a normalized indexEntry
         long ranking = 0;
-        ranking += normalizedEntry.quality() << ((Integer) coeff.get(ENTROPY)).intValue();
-        ranking += normalizedEntry.virtualAge() << ((Integer) coeff.get(DATE)).intValue();
-        ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.urlHash()) << ((Integer) coeff.get(YBR)).intValue();
-        ranking += (normalizedEntry.posintext() == 0) ? 0 : (256 - normalizedEntry.posintext()) << ((Integer) coeff.get(POSINTEXT)).intValue();
-        ranking += (normalizedEntry.worddistance() == 0) ? 0 : (256 - normalizedEntry.worddistance()) << ((Integer) coeff.get(WORDDISTANCE)).intValue();
-        ranking += (normalizedEntry.hitcount() == 0) ? 0 : normalizedEntry.hitcount() << ((Integer) coeff.get(HITCOUNT)).intValue();
-        ranking += (256 - plasmaURL.domLengthNormalized(normalizedEntry.urlHash())) << ((Integer) coeff.get(DOMLENGTH)).intValue();
-        ranking += (plasmaURL.probablyRootURL(normalizedEntry.urlHash())) ? 16 << ((Integer) coeff.get(URLLENGTH)).intValue() : 0;
-        ranking += (plasmaURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord) != null) ? 256 << ((Integer) coeff.get(QUERYINURL)).intValue() : 0;
+        ranking += (256 - plasmaURL.domLengthNormalized(normalizedEntry.urlHash())) << coeff_domlength;
+        ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.urlHash()) << coeff_ybr;
+        ranking += normalizedEntry.virtualAge() << coeff_date;
+        ranking += normalizedEntry.wordsintitle() << coeff_wordsintitle;
+        ranking += normalizedEntry.wordsintext() << coeff_wordsintext;
+        ranking += normalizedEntry.phrasesintext() << coeff_phrasesintext;
+        ranking += normalizedEntry.llocal() << coeff_llocal;
+        ranking += normalizedEntry.lother() << coeff_lother;
+        ranking += (normalizedEntry.urllength() == 0) ? 0 : (256 - normalizedEntry.urllength()) << coeff_urllength;
+        ranking += (normalizedEntry.urlcomps() == 0) ? 0 : (256 - normalizedEntry.urlcomps()) << coeff_urlcomps;
+        ranking += (normalizedEntry.hitcount() == 0) ? 0 : normalizedEntry.hitcount() << coeff_hitcount;
+        ranking += (normalizedEntry.posintext() == 0) ? 0 : (256 - normalizedEntry.posintext()) << coeff_posintext;
+        ranking += (normalizedEntry.posofphrase() == 0) ? 0 : (256 - normalizedEntry.hitcount()) << coeff_posofphrase;
+        ranking += (normalizedEntry.worddistance() == 0) ? 0 : (256 - normalizedEntry.worddistance()) << coeff_worddistance;
+
+        kelondroBitfield flags = normalizedEntry.flags();
+        ranking += (flags.get(indexRWIEntryNew.flag_app_url)) ? 256 << coeff_appurl : 0;
+        ranking += (flags.get(indexRWIEntryNew.flag_app_descr)) ? 256 << coeff_appdescr : 0;
+        ranking += (flags.get(indexRWIEntryNew.flag_app_author)) ? 256 << coeff_appauthor : 0;
+        ranking += (flags.get(indexRWIEntryNew.flag_app_tags)) ? 256 << coeff_apptags : 0;
+        ranking += (flags.get(indexRWIEntryNew.flag_app_reference)) ? 256 << coeff_appref : 0;
+        ranking += (flags.get(indexRWIEntryNew.flag_app_emphasized)) ? 256 << coeff_appemph : 0;
+        ranking += (flags.get(plasmaCondenser.flag_cat_indexof)) ? 256 << coeff_catindexof : 0;
+        ranking += (flags.get(plasmaCondenser.flag_cat_hasimage)) ? 256 << coeff_cathasimage : 0;
+        ranking += (flags.get(plasmaCondenser.flag_cat_hasaudio)) ? 256 << coeff_cathasaudio : 0;
+        ranking += (flags.get(plasmaCondenser.flag_cat_hasvideo)) ? 256 << coeff_cathasvideo : 0;
+        ranking += (flags.get(plasmaCondenser.flag_cat_hasapp)) ? 256 << coeff_cathasapp : 0;
+        
+        ranking += (plasmaURL.probablyRootURL(normalizedEntry.urlHash())) ? 16 << coeff_urllength : 0;
+        ranking += (plasmaURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord) != null) ? 256 << coeff_queryinurl : 0;
+
         /*
         if (indexURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord))
             System.out.println("DEBUG - hash " + normalizedEntry.urlHash() + " contains word " + searchedWord + ", weighted " + ((Integer) coeff.get(QUERYINURL)).intValue() + ", ranking = " + ranking);
@@ -199,15 +299,15 @@ public class plasmaSearchRankingProfile {
 
         // prefer hit with 'prefer' pattern
         indexURLEntry.Components comp = page.comp();
-        if (comp.url().toNormalform().matches(query.prefer)) ranking += 256 << ((Integer) coeff.get(PREFER)).intValue();
-        if (comp.descr().matches(query.prefer)) ranking += 256 << ((Integer) coeff.get(PREFER)).intValue();
+        if (comp.url().toNormalform().matches(query.prefer)) ranking += 256 << coeff_prefer;
+        if (comp.descr().matches(query.prefer)) ranking += 256 << coeff_prefer;
         
         // apply 'common-sense' heuristic using references
         for (int j = 0; j < urlcomps.length; j++) {
-            if (topwords.contains(urlcomps[j])) ranking += 256 << ((Integer) coeff.get(URLCOMPINTOPLIST)).intValue();
+            if (topwords.contains(urlcomps[j])) ranking += 256 << coeff_urlcompintoplist;
         }
         for (int j = 0; j < descrcomps.length; j++) {
-            if (topwords.contains(descrcomps[j])) ranking += 256 << ((Integer) coeff.get(DESCRCOMPINTOPLIST)).intValue();
+            if (topwords.contains(descrcomps[j])) ranking += 256 << coeff_descrcompintoplist;
         }
 
         // apply query-in-result matching
@@ -217,17 +317,9 @@ public class plasmaSearchRankingProfile {
         String queryhash;
         while (shi.hasNext()) {
             queryhash = (String) shi.next();
-            if (urlcomph.contains(queryhash)) ranking += 256 << ((Integer) coeff.get(QUERYINURL)).intValue();
-            if (descrcomph.contains(queryhash)) ranking += 256 << ((Integer) coeff.get(QUERYINDESCR)).intValue();
+            if (urlcomph.contains(queryhash)) ranking += 256 << coeff_queryinurl;
+            if (descrcomph.contains(queryhash)) ranking += 256 << coeff_queryindescr;
         }
-
-        // prefer short urls
-        ranking += (256 - comp.url().toNormalform().length()) << ((Integer) coeff.get(URLLENGTH)).intValue();
-        ranking += (8 * Math.max(0, 32 - urlcomps.length)) << ((Integer) coeff.get(URLCOMPS)).intValue();
-
-        // prefer long descriptions
-        ranking += (256 * comp.url().toNormalform().length() / 80) << ((Integer) coeff.get(DESCRLENGTH)).intValue();
-        ranking += (256 * (12 - Math.abs(12 - Math.min(12, descrcomps.length))) / 12) << ((Integer) coeff.get(DESCRCOMPS)).intValue();
 
         return ranking;
     }

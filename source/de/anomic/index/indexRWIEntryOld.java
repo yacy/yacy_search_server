@@ -189,11 +189,11 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         return (int) this.entry.getColLong(col_posofphrase);
     }
 
-    public int wordcount() {
+    public int wordsintext() {
         return (int) this.entry.getColLong(col_wordcount);
     }
 
-    public int phrasecount() {
+    public int phrasesintext() {
         return (int) this.entry.getColLong(col_phrasecount);
     }
 
@@ -215,7 +215,7 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         ie1.entry.setCol(col_posintext, Math.min(ie1.posintext(), ie2.posintext()));
         ie1.entry.setCol(col_posinphrase, (ie1.posofphrase() == ie2.posofphrase()) ? ie1.posofphrase() : 0 /*unknown*/);
         ie1.entry.setCol(col_posofphrase, Math.min(ie1.posofphrase(), ie2.posofphrase()));
-        ie1.entry.setCol(col_wordcount, (ie1.wordcount() + ie2.wordcount()) / 2);
+        ie1.entry.setCol(col_wordcount, (ie1.wordsintext() + ie2.wordsintext()) / 2);
         return ie1;
     }
     
@@ -229,8 +229,8 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
     
     public static final void min(indexRWIEntryOld t, indexRWIEntry other) {
         if (t.hitcount() > other.hitcount()) t.entry.setCol(col_hitcount, other.hitcount());
-        if (t.wordcount() > other.wordcount()) t.entry.setCol(col_wordcount, other.wordcount());
-        if (t.phrasecount() > other.phrasecount()) t.entry.setCol(col_phrasecount, other.phrasecount());
+        if (t.wordsintext() > other.wordsintext()) t.entry.setCol(col_wordcount, other.wordsintext());
+        if (t.phrasesintext() > other.phrasesintext()) t.entry.setCol(col_phrasecount, other.phrasesintext());
         if (t.posintext() > other.posintext()) t.entry.setCol(col_posintext, other.posintext());
         if (t.posinphrase() > other.posinphrase()) t.entry.setCol(col_posinphrase, other.posinphrase());
         if (t.posofphrase() > other.posofphrase()) t.entry.setCol(col_posofphrase, other.posofphrase());
@@ -241,8 +241,8 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
     
     public static final void max(indexRWIEntryOld t, indexRWIEntry other) {
         if (t.hitcount() < other.hitcount()) t.entry.setCol(col_hitcount, other.hitcount());
-        if (t.wordcount() < other.wordcount()) t.entry.setCol(col_wordcount, other.wordcount());
-        if (t.phrasecount() < other.phrasecount()) t.entry.setCol(col_phrasecount, other.phrasecount());
+        if (t.wordsintext() < other.wordsintext()) t.entry.setCol(col_wordcount, other.wordsintext());
+        if (t.phrasesintext() < other.phrasesintext()) t.entry.setCol(col_phrasecount, other.phrasesintext());
         if (t.posintext() < other.posintext()) t.entry.setCol(col_posintext, other.posintext());
         if (t.posinphrase() < other.posinphrase()) t.entry.setCol(col_posinphrase, other.posinphrase());
         if (t.posofphrase() < other.posofphrase()) t.entry.setCol(col_posofphrase, other.posofphrase());
@@ -269,8 +269,8 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
         //System.out.println("min   = " + min.toPropertyForm(true));
         //System.out.println("max   = " + max.toPropertyForm(true));
         t.entry.setCol(col_hitcount     , (t.hitcount()     == 0) ? 0 : 1 + 255 * (t.hitcount()     - min.hitcount()    ) / (1 + max.hitcount()     - min.hitcount()));
-        t.entry.setCol(col_wordcount    , (t.wordcount()    == 0) ? 0 : 1 + 255 * (t.wordcount()    - min.wordcount()   ) / (1 + max.wordcount()    - min.wordcount()));
-        t.entry.setCol(col_phrasecount  , (t.phrasecount()  == 0) ? 0 : 1 + 255 * (t.phrasecount()  - min.phrasecount() ) / (1 + max.phrasecount()  - min.phrasecount()));
+        t.entry.setCol(col_wordcount    , (t.wordsintext()    == 0) ? 0 : 1 + 255 * (t.wordsintext()    - min.wordsintext()   ) / (1 + max.wordsintext()    - min.wordsintext()));
+        t.entry.setCol(col_phrasecount  , (t.phrasesintext()  == 0) ? 0 : 1 + 255 * (t.phrasesintext()  - min.phrasesintext() ) / (1 + max.phrasesintext()  - min.phrasesintext()));
         t.entry.setCol(col_posintext    , (t.posintext()    == 0) ? 0 : 1 + 255 * (t.posintext()    - min.posintext()   ) / (1 + max.posintext()    - min.posintext()));
         t.entry.setCol(col_posinphrase  , (t.posinphrase()  == 0) ? 0 : 1 + 255 * (t.posinphrase()  - min.posinphrase() ) / (1 + max.posinphrase()  - min.posinphrase()));
         t.entry.setCol(col_posofphrase  , (t.posofphrase()  == 0) ? 0 : 1 + 255 * (t.posofphrase()  - min.posofphrase() ) / (1 + max.posofphrase()  - min.posofphrase()));
@@ -307,6 +307,26 @@ public class indexRWIEntryOld implements Cloneable, indexRWIEntry {
             if (this.quality() < other.quality()) return true;
         }
         return false;
+    }
+
+    public int llocal() {
+        return 0;
+    }
+
+    public int lother() {
+        return 0;
+    }
+
+    public int urlcomps() {
+        return 0;
+    }
+
+    public int urllength() {
+        return 0;
+    }
+
+    public int wordsintitle() {
+        return 0;
     }
 
 }

@@ -2160,8 +2160,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             // suppress line: there is no match in that resource
                         } else {*/
                             prop.put("type_results_" + i + "_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", urlstring) == null) ? 1 : 0);
-                            prop.put("type_results_" + i + "_recommend_deletelink", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
-                            prop.put("type_results_" + i + "_recommend_recommendlink", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + ranking.orderString() + "&resource=local&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
+                            prop.put("type_results_" + i + "_recommend_deletelink", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
+                            prop.put("type_results_" + i + "_recommend_recommendlink", "/yacysearch.html?search=" + formerSearch + "&Enter=Search&count=" + query.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
                             prop.put("type_results_" + i + "_description", comp.descr());
                             prop.put("type_results_" + i + "_url", urlstring);
                             prop.put("type_results_" + i + "_urlhash", urlhash);

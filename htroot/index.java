@@ -34,7 +34,6 @@ import java.util.HashMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
-import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -106,12 +105,6 @@ public class index {
         prop.put("searchoptions_count-50", (count == 50) ? 1 : 0);
         prop.put("searchoptions_count-100", (count == 100) ? 1 : 0);
         prop.put("searchoptions_count-1000", (count == 1000) ? 1 : 0);
-        prop.put("searchoptions_order-ybr-date-quality", plasmaSearchPreOrder.canUseYBR() ? 1 : 0);
-        prop.put("searchoptions_order-ybr-quality-date", 0);
-        prop.put("searchoptions_order-date-ybr-quality", 0);
-        prop.put("searchoptions_order-quality-ybr-date", 0);
-        prop.put("searchoptions_order-date-quality-ybr", plasmaSearchPreOrder.canUseYBR() ? 0 : 1);
-        prop.put("searchoptions_order-quality-date-ybr", 0);
         prop.put("searchoptions_resource-global", ((global) ? 1 : 0));
         prop.put("searchoptions_resource-local", ((global) ? 0 : 1));
         prop.put("searchoptions_time-1", (time == 1) ? 1 : 0);

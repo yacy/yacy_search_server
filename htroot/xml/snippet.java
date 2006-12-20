@@ -70,7 +70,7 @@ public class snippet {
             prop.put("links", 0);
         } else {
             // attach media information
-            ArrayList mediaSnippets = switchboard.snippetCache.retrieveMediaSnippets(url, queryHashes, true, 1000);
+            ArrayList mediaSnippets = switchboard.snippetCache.retrieveMediaSnippets(url, queryHashes, media, true, 1000);
             plasmaSnippetCache.MediaSnippet ms;
             for (int i = 0; i < mediaSnippets.size(); i++) {
                 ms = (plasmaSnippetCache.MediaSnippet) mediaSnippets.get(i);
@@ -79,7 +79,7 @@ public class snippet {
                 prop.put("link_" + i + "_name", ms.name);
                 prop.put("link_" + i + "_attr", ms.attr);
             }
-            System.out.println("DEBUG: " + mediaSnippets.size() + " ENTRIES IN MEDIA SNIPPET LINKS for url " + urlString);
+            //System.out.println("DEBUG: " + mediaSnippets.size() + " ENTRIES IN MEDIA SNIPPET LINKS for url " + urlString);
             prop.put("text", "");
             prop.put("link", mediaSnippets.size());
             prop.put("links", mediaSnippets.size());

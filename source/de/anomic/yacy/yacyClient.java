@@ -432,9 +432,9 @@ public final class yacyClient {
             obj.put("filter", filter);
             obj.put("ttl", "0");
             obj.put("duetime", Long.toString(duetime));
-            obj.put("profile", timingProfile.targetToString()); // new duetimes splitted by specific search tasks
+            obj.put("timing", crypt.simpleEncode(timingProfile.targetToString())); // new duetimes splitted by specific search tasks
             obj.put("maxdist", maxDistance);
-            obj.put("rankingProfile", rankingProfile.toExternalString());
+            obj.put("profile", crypt.simpleEncode(rankingProfile.toExternalString()));
             obj.put("constraint", constraint.exportB64());
             obj.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
             if (abstractCache != null) obj.put("abstracts", "auto");

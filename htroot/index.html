@@ -29,7 +29,6 @@
         <input type="radio"  name="contentdom" value="app" #(contentdomCheckApp)#::checked="checked"#(/contentdomCheckApp)# />Applications&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       #(searchoptions)#
         <input type="hidden" name="count" value="10" />
-        <input type="hidden" name="order" value="Date-YBR-Quality" />
         <input type="hidden" name="resource" value="global" />
         <input type="hidden" name="time" value="6" />
         <input type="hidden" name="urlmaskfilter" value=".*" />
@@ -49,19 +48,6 @@
               <option #(count-50)#::selected="selected"#(/count-50)#>50</option>
               <option #(count-100)#::selected="selected"#(/count-100)#>100</option>
               <option #(count-1000)#::selected="selected"#(/count-1000)#>1000</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>order by:</td>
-          <td>
-            <select name="order">
-              <option value="YBR-Date-Quality" #(order-ybr-date-quality)#::selected="selected"#(/order-ybr-date-quality)#>YBR-Date-Quality</option>
-              <option value="YBR-Quality-Date" #(order-ybr-quality-date)#::selected="selected"#(/order-ybr-quality-date)#>YBR-Quality-Date</option>
-              <option value="Date-YBR-Quality" #(order-date-ybr-quality)#::selected="selected"#(/order-date-ybr-quality)#>Date-YBR-Quality</option>
-              <option value="Quality-YBR-Date" #(order-quality-ybr-date)#::selected="selected"#(/order-quality-ybr-date)#>Quality-YBR-Date</option>
-              <option value="Date-Quality-YBR" #(order-date-quality-ybr)#::selected="selected"#(/order-date-quality-ybr)#>Date-Quality-YBR</option>
-              <option value="Quality-Date-YBR" #(order-quality-date-ybr)#::selected="selected"#(/order-quality-date-ybr)#>Quality-Date-YBR</option>
             </select>
           </td>
         </tr>

@@ -61,7 +61,6 @@ import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaURL;
-import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.net.URL;
 import de.anomic.plasma.cache.IResourceInfo;
@@ -587,19 +586,20 @@ public class plasmaSnippetCache {
         }
     }
     
-    public ArrayList retrieveMediaSnippets(URL url, Set queryhashes, boolean fetchOnline, int timeout) {
+    public ArrayList retrieveMediaSnippets(URL url, Set queryhashes, String mediatype, boolean fetchOnline, int timeout) {
         if (queryhashes.size() == 0) {
             serverLog.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList();
         }
-
+        if (mediatype == null) mediatype = "";
+        
         plasmaParserDocument document = retrieveDocument(url, fetchOnline, timeout, false);
         ArrayList a = new ArrayList();
         if (document != null) {
-            a.addAll(computeMediaSnippets(document, queryhashes, "audio"));
-            a.addAll(computeMediaSnippets(document, queryhashes, "video"));
-            a.addAll(computeMediaSnippets(document, queryhashes, "app"));
-            a.addAll(computeImageSnippets(document, queryhashes));
+            if ((mediatype.length() == 0) || (mediatype.equals("audio"))) a.addAll(computeMediaSnippets(document, queryhashes, "audio"));
+            if ((mediatype.length() == 0) || (mediatype.equals("video"))) a.addAll(computeMediaSnippets(document, queryhashes, "video"));
+            if ((mediatype.length() == 0) || (mediatype.equals("app"  ))) a.addAll(computeMediaSnippets(document, queryhashes, "app"));
+            if ((mediatype.length() == 0) || (mediatype.equals("image"))) a.addAll(computeImageSnippets(document, queryhashes));
         }
         return a;
     }
@@ -838,7 +838,7 @@ public class plasmaSnippetCache {
         
         return result;
     }
-    
+    /*
     public void fetch(plasmaSearchResult acc, Set queryhashes, String urlmask, int fetchcount, long maxTime) {
         // fetch snippets
         int i = 0;
@@ -879,5 +879,5 @@ public class plasmaSnippetCache {
                 log.logFine("snippetFetcher: got URL " + url + ", the snippet is '" + snippet.line + "', source=" + snippet.source);
         }
     }
-    
+    */
 }
