@@ -126,7 +126,7 @@ public final class plasmaCondenser {
         this.words = new TreeMap();
         this.sentences = new HashMap();
         
-        System.out.println("DEBUG: condensing " + document.getMainLongTitle() + ", indexText=" + Boolean.toString(indexText) + ", indexMedia=" + Boolean.toString(indexMedia));
+        //System.out.println("DEBUG: condensing " + document.getMainLongTitle() + ", indexText=" + Boolean.toString(indexText) + ", indexMedia=" + Boolean.toString(indexMedia));
         
         Map.Entry entry;
         if (indexText) {

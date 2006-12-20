@@ -89,7 +89,6 @@ public class ViewImage {
             try { imgStream.close(); } catch (Exception e) {/* ignore this */}
         }
         
-        
         // create image 
         MediaTracker mediaTracker = new MediaTracker(new Container()); 
         Image original = Toolkit.getDefaultToolkit().createImage(imgb);
@@ -99,28 +98,35 @@ public class ViewImage {
         boolean auth = ((String) header.get("CLIENTIP", "")).equals("localhost") || sb.verifyAuthentication(header, false); // handle access rights
         if ((auth) && ((width == 0) || (height == 0)) && (maxwidth == 0) && (maxheight == 0)) return original;
 
+        // find original size
+        int h = original.getHeight(null);
+        int w = original.getWidth(null);
+        
+        //System.out.println("DEBUG: get access to image " + url.toNormalform() + " is " + ((auth) ? "authorized" : "NOT authorized"));
+        
         // in case of not-authorized access shrink the image to prevent copyright problems
         // so that images are not larger than thumbnails
         if (!auth) {
-            maxwidth = 64;
-            maxheight = 64;
+            maxwidth = (int) Math.min(64.0, w * 0.6);
+            maxheight = (int) Math.min(64.0, h * 0.6);
         }
         
         // calculate width & height from maxwidth & maxheight
         if ((maxwidth != 0) || (maxheight != 0)) {
-            int h = original.getHeight(null);
-            int w = original.getWidth(null);
-            double hs = (w <= maxwidth) ? 1.0 : ((double) w) / ((double) maxwidth);
-            double vs = (h <= maxheight) ? 1.0 : ((double) h) / ((double) maxheight);
-            double scale = Math.max(hs, vs);
-            if ((scale > 1.0) && (!auth)) scale = 0.6; // this is for copyright purpose
-            if (scale > 1.0) {
-                width = (int) (((double) w) / scale);
-                height = (int) (((double) h) / scale);
+            double hs = (w <= maxwidth) ? 1.0 : ((double) maxwidth) / ((double) w);
+            double vs = (h <= maxheight) ? 1.0 : ((double) maxheight) / ((double) h);
+            double scale = Math.min(hs, vs);
+            if (!auth) scale = Math.min(scale, 0.6); // this is for copyright purpose
+            if (scale < 1.0) {
+                width = (int) (((double) w) * scale);
+                height = (int) (((double) h) * scale);
             } else {
                 width = w;
                 height = h;
             }
+        } else {
+            width = w;
+            height = h;
         }
         
         // check for minimum values
