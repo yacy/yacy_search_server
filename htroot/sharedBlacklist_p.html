@@ -1,84 +1,83 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': Shared Blacklist</title>
-#%env/templates/metas.template%#
-<script>
-<!--
-function selectall(){
-	for(i = 1; i<= document.getElementsByName("num")[0].value; i++){
-		document.getElementsByName("item" + i)[0].checked = true;
-	}
-}
-function deselectall(){
-	for(i = 1; i<= document.getElementsByName("num")[0].value; i++){
-		document.getElementsByName("item" + i)[0].checked = false;
-	}
-}
--->
-</script>
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-<h2>Add Items to Blacklist</h2>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Shared Blacklist</title>
+    #%env/templates/metas.template%#
+    <script>
+    <!--
+    function selectall(){
+        for(i = 1; i<= document.getElementsByName("num")[0].value; i++){
+    	    document.getElementsByName("item" + i)[0].checked = true;
+        }
+    }
+    function deselectall(){
+        for(i = 1; i<= document.getElementsByName("num")[0].value; i++){
+            document.getElementsByName("item" + i)[0].checked = false;
+        }
+    }
+    -->
+    </script>
+  </head>
+  <body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+    #%env/templates/header.template%#
+    <br />
+    <br />
+    <h2>Add Items to Blacklist</h2>
+    <p class="info">#(status)#
+      <!-- [0] -->
+::
+      <!-- [1] -->
+	  Unable to store the items into the blacklist file:<br />
+	  <font color="red">#[error]#</font>
+::
+      <!-- [2] -->
+	  File Error! Wrong Path?
+::
+      <!-- [3] -->
+	  YaCy-Peer &quot;<span class="settingsValue">#[name]#</span>&quot; not found.
+::
+      <!-- [4] -->
+	  URL &quot;<span class="settingsValue">#[address]#</span>&quot; not found or empty list.
+::
+      <!-- [5] -->
+	  Wrong Invocation! Please invoke with sharedBlacklist.html?name=PeerName
+	  #(/status)#
+    </p>
 
-<p class="info">
-#(status)#<!-- [0] -->
-::<!-- [1] -->
-	Unable to store the items into the blacklist file:<br>
-	<font color="red">#[error]#</font>
-::<!-- [2] -->
-	File Error! Wrong Path?
-::<!-- [3] -->
-	YaCy-Peer &quot;<span class="settingsValue">#[name]#</span>&quot; not found.
-::<!-- [4] -->
-	URL &quot;<span class="settingsValue">#[address]#</span>&quot; not found or empty list.
-::<!-- [5] -->
-	Wrong Invocation! Please invoke with sharedBlacklist.html?name=PeerName
-#(/status)#
-</p>
-
-<form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data">
-<input type="hidden" name="num" value="#[num]#">
-<input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#">
-<p>
-#(page)#<!-- [0] -->
-<table>
-<tr>
-	<td><b>Blacklist source:</b></td>
-	<td><span class="settingsValue">#[source]#</span></td>
-</tr>
-<tr>
-	<td><b>Blacklist target:</b></td>
-	<td><span class="settingsValue">#[target]#</span></td>
-</tr>
-</table>
-<p />
-<table border="0" cellspacing="1" cellpadding="3" >
-	<tr class="TableHeader">
-		<th class="small" width="100%" align="left">Blacklist item</th>
-		<th class="small">&nbsp;</th>
-	</tr>
-	#{urllist}#
-	<tr class="TableCell#(dark)#Light::Dark#(/dark)#"  class="small">
-		<td>#[url]#</td>
-		<td><input type="checkbox" name="item#[count]#" value="#[url]#"></td>
-	</tr>
-	#{/urllist}#
-	<tr class="small" style="background-color: #eeeeee">
-		<td colspan="2">
-			<input type="button" onclick="selectall()" value="select all">
-			<input type="button" onclick="deselectall()" value="deselect all">
-			<input type="submit" value="add" name="add">
-		</td>
-	</tr>
-</table>
-::<!-- [1] -->
-#(/page)#
-</p>
-</form>
-
-#%env/templates/footer.template%#
-</body>
+    <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+      #(page)#<!-- [0] -->
+      <table>
+        <tr>
+          <td><b>Blacklist source:</b></td>
+          <td><span class="settingsValue">#[source]#</span></td>
+        </tr>
+        <tr>
+          <td><b>Blacklist target:</b></td>
+          <td><span class="settingsValue">#[target]#</span></td>
+        </tr>
+      </table>
+      <table border="0" cellspacing="1" cellpadding="3" >
+        <tr class="TableHeader">
+		  <th class="small" width="100%" align="left">Blacklist item</th>
+		  <th class="small">&nbsp;</th>
+        </tr>#{urllist}#
+        <tr class="TableCell#(dark)#Light::Dark#(/dark)#"  class="small">
+          <td>#[url]#</td>
+          <td><input type="checkbox" name="item#[count]#" value="#[url]#" /></td>
+        </tr>#{/urllist}#
+        <tr class="small" style="background-color: #eeeeee">
+          <td colspan="2">
+            <input type="button" onclick="selectall()" value="select all" />
+            <input type="button" onclick="deselectall()" value="deselect all" />
+            <input type="submit" value="add" name="add" />
+          </td>
+        </tr>
+      </table>
+      ::<!-- [1] -->
+      #(/page)#
+    </form>
+    #%env/templates/footer.template%#
+  </body>
 </html>
