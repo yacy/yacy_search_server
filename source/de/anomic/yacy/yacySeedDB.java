@@ -526,6 +526,7 @@ public final class yacySeedDB {
             boolean lookupPotential
     ) {
         
+        if (peerIP == null) return null;
         yacySeed seed = null;        
         
         // local peer?

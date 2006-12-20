@@ -280,21 +280,30 @@ public class yacyPeerActions {
         if (seed == null) {
             yacyCore.log.logSevere("connect: WRONG seed (NULL)");
             return false;
-        } else if ((error = seed.isProper()) != null) {
+        }
+        if ((error = seed.isProper()) != null) {
             yacyCore.log.logSevere("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
             return false;
-        } else if ((seedDB.mySeed != null) && (seed.hash.equals(seedDB.mySeed.hash))) {
+        }
+        if ((seedDB.mySeed != null) && (seed.hash.equals(seedDB.mySeed.hash))) {
             yacyCore.log.logInfo("connect: SELF reference " + seed.getAddress());
             return false;
-        } else {
-            String peerType = seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
+        }
+        String peerType = seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
+        
+        if ((peerType.equals(yacySeed.PEERTYPE_VIRGIN)) || (peerType.equals(yacySeed.PEERTYPE_JUNIOR))) {
             // reject unqualified seeds
-            if ((peerType.equals(yacySeed.PEERTYPE_VIRGIN)) || (peerType.equals(yacySeed.PEERTYPE_JUNIOR))) {
-                yacyCore.log.logFine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
-                return false;
-            }
+            yacyCore.log.logFine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
+            return false;
+        }
 
-            // we may store that seed, but still have different cases
+        yacySeed doubleSeed = seedDB.lookupByIP(seed.getInetAddress(), true, false, false);
+        if ((doubleSeed != null) && (doubleSeed.getPort() == seed.getPort()) && (!(doubleSeed.hash.equals(seed.hash)))) {
+            // a user frauds with his peer different peer hashes
+            yacyCore.log.logFine("connect: rejecting FRAUD (double hashes " + doubleSeed.hash + "/" + seed.hash + " on same port " + seed.getPort() + ") peer " + seed.getName());
+            return false;
+        }
+            
             if (seed.get(yacySeed.LASTSEEN, "").length() < 14) {
                 // hack for peers that do not have a LastSeen date
                 seed.put(yacySeed.LASTSEEN, "20040101000000");
@@ -405,7 +414,6 @@ public class yacyPeerActions {
                     return true;
                 }
             }
-        }
     }
 
     private final void disconnectPeer(yacySeed seed) {

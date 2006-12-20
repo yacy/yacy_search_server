@@ -63,6 +63,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -344,7 +346,8 @@ public class yacySeed {
     }
 
     public final String getAddress() {
-        String ip   = (String) this.dna.get(yacySeed.IP);
+        // returns an ip:port string
+        String ip = (String) this.dna.get(yacySeed.IP);
         if (ip == null) { return null; }
         if (ip.length() < 8) { return null; } // 10.0.0.0
         // if (ip.equals(yacyCore.seedDB.mySeed.dna.get(yacySeed.IP))) ip = "127.0.0.1";
@@ -357,6 +360,33 @@ public class yacySeed {
         return ip + ":" + port;
     }
 
+    public final InetAddress getInetAddress() {
+        // returns the ip address
+        String ip = (String) this.dna.get(yacySeed.IP);
+        if (ip == null) return null;
+        if (ip.length() < 8) return null;
+        String[] ips = ip.split("\\.");
+        if (ips.length != 4) return null;
+        byte[] ipb = new byte[4];
+        ipb[0] = (byte) Integer.parseInt(ips[0]);
+        ipb[1] = (byte) Integer.parseInt(ips[1]);
+        ipb[2] = (byte) Integer.parseInt(ips[2]);
+        ipb[3] = (byte) Integer.parseInt(ips[3]);
+        try {
+            return InetAddress.getByAddress(ipb);
+        } catch (UnknownHostException e) {
+            return null;
+        }
+    }
+    
+    public final int getPort() {
+        final String port = (String) this.dna.get(yacySeed.PORT);
+        if (port == null) return -1;
+        if (port.length() < 2) return -1;
+
+        return Integer.parseInt(port);
+    }
+    
     public final long getUTCDiff() {
         String utc = (String) this.dna.get(yacySeed.UTC);
         if (utc == null) { utc = "+0130"; }
