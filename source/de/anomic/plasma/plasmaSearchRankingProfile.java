@@ -80,7 +80,7 @@ public class plasmaSearchRankingProfile {
     public static final String CATHASAUDIO   = "cathasaudio";
     public static final String CATHASVIDEO   = "cathasvideo";
     public static final String CATHASAPP     = "cathasapp";
-    
+
     // post-sort predicates
     public static final String QUERYINURL         = "queryinurl";
     public static final String QUERYINDESCR       = "queryindescr";
@@ -287,16 +287,19 @@ public class plasmaSearchRankingProfile {
     }
     
     public long postRanking(
-                    long preranking,
+                    long ranking,
                     plasmaSearchQuery query,
                     Set topwords,
                     String[] urlcomps,
                     String[] descrcomps,
                     indexURLEntry page) {
 
-        // apply pre-calculated order attributes
-        long ranking = preranking;
-
+        // for media search: prefer pages with many links
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ranking += page.limage() << coeff_cathasimage;
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ranking += page.limage() << coeff_cathasaudio;
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ranking += page.limage() << coeff_cathasvideo;
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) ranking += page.limage() << coeff_cathasapp;
+        
         // prefer hit with 'prefer' pattern
         indexURLEntry.Components comp = page.comp();
         if (comp.url().toNormalform().matches(query.prefer)) ranking += 256 << coeff_prefer;
