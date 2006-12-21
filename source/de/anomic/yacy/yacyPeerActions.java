@@ -273,147 +273,148 @@ public class yacyPeerActions {
 	return supsee;
     }
 
-    final synchronized private boolean connectPeer(yacySeed seed, boolean direct) {
+    private synchronized boolean connectPeer(yacySeed seed, boolean direct) {
         // store a remote peer's seed
         // returns true if the peer is new and previously unknown
-        String error;
         if (seed == null) {
             yacyCore.log.logSevere("connect: WRONG seed (NULL)");
             return false;
         }
-        if ((error = seed.isProper()) != null) {
+        final String error = seed.isProper();
+        if (error != null) {
             yacyCore.log.logSevere("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
             return false;
         }
-        if ((seedDB.mySeed != null) && (seed.hash.equals(seedDB.mySeed.hash))) {
+        if ((this.seedDB.mySeed != null) && (seed.hash.equals(this.seedDB.mySeed.hash))) {
             yacyCore.log.logInfo("connect: SELF reference " + seed.getAddress());
             return false;
         }
-        String peerType = seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
-        
+        final String peerType = seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
+
         if ((peerType.equals(yacySeed.PEERTYPE_VIRGIN)) || (peerType.equals(yacySeed.PEERTYPE_JUNIOR))) {
             // reject unqualified seeds
             yacyCore.log.logFine("connect: rejecting NOT QUALIFIED " + peerType + " seed " + seed.getName());
             return false;
         }
 
-        yacySeed doubleSeed = seedDB.lookupByIP(seed.getInetAddress(), true, false, false);
+        final yacySeed doubleSeed = this.seedDB.lookupByIP(seed.getInetAddress(), true, false, false);
         if ((doubleSeed != null) && (doubleSeed.getPort() == seed.getPort()) && (!(doubleSeed.hash.equals(seed.hash)))) {
             // a user frauds with his peer different peer hashes
             yacyCore.log.logFine("connect: rejecting FRAUD (double hashes " + doubleSeed.hash + "/" + seed.hash + " on same port " + seed.getPort() + ") peer " + seed.getName());
             return false;
         }
-            
-            if (seed.get(yacySeed.LASTSEEN, "").length() < 14) {
-                // hack for peers that do not have a LastSeen date
-                seed.put(yacySeed.LASTSEEN, "20040101000000");
-            }
 
-            // connection time
-            long nowUTC0Time = System.currentTimeMillis(); // is better to have this value in a variable for debugging
-            long ctimeUTC0 = seed.getLastSeenTime();
-            // maybe correct it slightly
-            /*
-             * if (ctime > yacyCore.universalTime()) { ctime = ((2 * ctime) +
-             * yacyCore.universalTime()) / 3; seed.put(yacySeed.LASTSEEN,
-             * yacyCore.shortFormatter.format(new Date(ctime))); }
-             */
+        if (seed.get(yacySeed.LASTSEEN, "").length() != 14) {
+            // hack for peers that do not have a LastSeen date
+            seed.put(yacySeed.LASTSEEN, "20040101000000");
+            yacyCore.log.logFine("connect: reset wrong date (" + seed.getName() + "/" + seed.hash + ")");
+        }
 
-            if (Math.abs(nowUTC0Time - ctimeUTC0) > 60 * 60 * 24 * 1000) {
-                // the new connection is out-of-age, we reject the connection
-                yacyCore.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + serverDate.intervalToString(Math.abs(nowUTC0Time - ctimeUTC0)));
-                return false;
+        // connection time
+        final long nowUTC0Time = System.currentTimeMillis(); // is better to have this value in a variable for debugging
+        final long ctimeUTC0 = seed.getLastSeenTime();
+        // maybe correct it slightly
+        /*
+         * if (ctime > yacyCore.universalTime()) { ctime = ((2 * ctime) +
+         * yacyCore.universalTime()) / 3; seed.put(yacySeed.LASTSEEN,
+         * yacyCore.shortFormatter.format(new Date(ctime))); }
+         */
+
+        if (Math.abs(nowUTC0Time - ctimeUTC0) > 60 * 60 * 24 * 1000) {
+            // the new connection is out-of-age, we reject the connection
+            yacyCore.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + serverDate.intervalToString(Math.abs(nowUTC0Time - ctimeUTC0)));
+            return false;
+        }
+
+        // disconnection time
+        long dtimeUTC0;
+        final yacySeed disconnectedSeed = seedDB.getDisconnected(seed.hash);
+        if (disconnectedSeed == null) {
+            dtimeUTC0 = 0; // never disconnected: virtually disconnected maximum time ago
+        } else {
+            try {
+                dtimeUTC0 = yacyCore.parseUniversalDate(disconnectedSeed.get("disconnected", "20040101000000")).getTime() - seed.getUTCDiff();
+            } catch (java.text.ParseException e) {
+                dtimeUTC0 = 0;
             }
-            
-            // disconnection time
-            long dtimeUTC0;
-            yacySeed disconnectedSeed = seedDB.getDisconnected(seed.hash);
-            if (disconnectedSeed == null) {
-                dtimeUTC0 = 0; // never disconnected: virtually disconnected maximum time ago
-            } else {
-                try {
-                    dtimeUTC0 = yacyCore.parseUniversalDate(disconnectedSeed.get("disconnected", "20040101000000")).getTime() - seed.getUTCDiff();
-                } catch (java.text.ParseException e) {
-                    dtimeUTC0 = 0;
+        }
+
+        if (direct) {
+            // remember the moment
+            // Date applies the local UTC offset, which is wrong
+            // we correct that by subtracting the local offset and adding
+            // the remote offset.
+            seed.setLastSeenTime();
+            seed.setFlagDirectConnect(true);
+        } else {
+            // set connection flag
+            if (Math.abs(nowUTC0Time - ctimeUTC0) > 120000) seed.setFlagDirectConnect(false); // 2 minutes
+        }
+
+        // update latest version number
+        if (seed.getVersion() > yacyCore.latestVersion) yacyCore.latestVersion = seed.getVersion();
+
+        // prepare to update
+        if (disconnectedSeed != null) {
+            // if the indirect connect aims to announce a peer that we know
+            // has been disconnected then we compare the dates:
+            // if the new peer has a LastSeen date, and that date is before
+            // the disconnection date, then we ignore the new peer
+            if (!direct) {
+                if (ctimeUTC0 < dtimeUTC0) {
+                    // the disconnection was later, we reject the connection
+                    yacyCore.log.logFine("connect: rejecting disconnected peer '" + seed.getName() + "' from " + seed.getAddress());
+                    return false;
                 }
             }
-            
-            if (direct) {
-                // remember the moment
-                // Date applies the local UTC offset, which is wrong
-                // we correct that by subtracting the local offset and adding
-                // the remote offset.
-                seed.setLastSeenTime();
-                seed.setFlagDirectConnect(true);
-            } else {
-                // set connection flag
-                if (Math.abs(nowUTC0Time - ctimeUTC0) > 120000) seed.setFlagDirectConnect(false); // 2 minutes
-            }
 
-            // update latest version number
-            if (seed.getVersion() > yacyCore.latestVersion) yacyCore.latestVersion = seed.getVersion();
-
-            // prepare to update
-            if (disconnectedSeed != null) {
-                // if the indirect connect aims to announce a peer that we know
-                // has been disconnected then we compare the dates:
-                // if the new peer has a LastSeen date, and that date is before
-                // the disconnection date, then we ignore the new peer
-                if (!(direct)) {
-                    if (ctimeUTC0 < dtimeUTC0) {
-                        // the disconnection was later, we reject the connection
-                        yacyCore.log.logFine("connect: rejecting disconnected peer '" + seed.getName() + "' from " + seed.getAddress());
+            // this is a return of a lost peer
+            yacyCore.log.logFine("connect: returned KNOWN " + peerType + " peer '" + seed.getName() + "' from " + seed.getAddress());
+            this.seedDB.addConnected(seed);
+            return true;
+        } else {
+            final yacySeed connectedSeed = this.seedDB.getConnected(seed.hash);
+            if (connectedSeed != null) {
+                // the seed is known: this is an update
+                try {
+                    // if the old LastSeen date is later then the other
+                    // info, then we reject the info
+                    if ((ctimeUTC0 < (yacyCore.parseUniversalDate(connectedSeed.get(yacySeed.LASTSEEN, "20040101000000")).getTime() - connectedSeed.getUTCDiff() + serverDate.UTCDiff())) && (!direct)) {
+                        yacyCore.log.logFine("connect: rejecting old info about peer '" + seed.getName() + "'");
                         return false;
                     }
-                }
 
-                // this is a return of a lost peer
-                yacyCore.log.logFine("connect: returned KNOWN " + peerType + " peer '" + seed.getName() + "' from " + seed.getAddress());
+                    if (connectedSeed.getName() != seed.getName()) {
+                        // TODO: update seed name lookup cache
+                    }
+                } catch (ParseException e) {
+                    yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getAddress() + ". Cause: " + e.getMessage());
+                    return false;
+                } catch (NumberFormatException e) {
+                    yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getAddress() + ". Cause: " + e.getMessage());
+                    return false;
+                }
+                yacyCore.log.logFine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getAddress());
                 seedDB.addConnected(seed);
                 return true;
             } else {
-                yacySeed connectedSeed = seedDB.getConnected(seed.hash);
-                if (connectedSeed != null) {
-                    // the seed is known: this is an update
-                    try {
-                        // if the old LastSeen date is later then the other
-                        // info, then we reject the info
-                        if ((ctimeUTC0 < (yacyCore.parseUniversalDate(connectedSeed.get(yacySeed.LASTSEEN, "20040101000000")).getTime() - connectedSeed.getUTCDiff() + serverDate.UTCDiff())) && (!(direct))) {
-                            yacyCore.log.logFine("connect: rejecting old info about peer '" + seed.getName() + "'");
-                            return false;
-                        }
-
-                        if (connectedSeed.getName() != seed.getName()) {
-                            // TODO: update seed name lookup cache
-                        }
-                    } catch (ParseException e) {
-                        yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getAddress() + ". Cause: " + e.getMessage());
-                        return false;
-                    } catch (NumberFormatException e) {
-                        yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getAddress() + ". Cause: " + e.getMessage());
-                        return false;
-                    }
-                    yacyCore.log.logFine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getAddress());
-                    seedDB.addConnected(seed);
-                    return true;
+                // the seed is new
+                if (seed.get(yacySeed.IP, "127.0.0.1").equals(this.seedDB.mySeed.get(yacySeed.IP, "127.0.0.1"))) {
+                    // seed from the same IP as the calling client: can be
+                    // the case if there runs another one over a NAT
+                    yacyCore.log.logFine("connect: saved NEW seed (myself IP) " + seed.getAddress());
                 } else {
-                    // the seed is new
-                    if (seed.get(yacySeed.IP, "127.0.0.1").equals(seedDB.mySeed.get(yacySeed.IP, "127.0.0.1"))) {
-                        // seed from the same IP as the calling client: can be
-                        // the case if there runs another one over a NAT
-                        yacyCore.log.logFine("connect: saved NEW seed (myself IP) " + seed.getAddress());
-                    } else {
-                        // completely new seed
-                        yacyCore.log.logFine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getAddress());
-                    }
-                    if (peerType.equals(yacySeed.PEERTYPE_SENIOR))
-                        seniorConnects++; // update statistics
-                    if (peerType.equals(yacySeed.PEERTYPE_PRINCIPAL))
-                        principalConnects++; // update statistics
-                    seedDB.addConnected(seed);
-                    return true;
+                    // completely new seed
+                    yacyCore.log.logFine("connect: saved NEW " + peerType + " peer '" + seed.getName() + "' from " + seed.getAddress());
                 }
+                if (peerType.equals(yacySeed.PEERTYPE_SENIOR))
+                    this.seniorConnects++; // update statistics
+                if (peerType.equals(yacySeed.PEERTYPE_PRINCIPAL))
+                    this.principalConnects++; // update statistics
+                this.seedDB.addConnected(seed);
+                return true;
             }
+        }
     }
 
     private final void disconnectPeer(yacySeed seed) {
