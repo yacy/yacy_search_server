@@ -71,6 +71,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsRecord;
 
@@ -253,7 +254,7 @@ public class yacysearch {
                     "",
                     20,
                     constraint);
-        plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile(contentdomString);
+        plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile(contentdomString) : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
         plasmaSearchTimingProfile localTiming = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         prop = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true);

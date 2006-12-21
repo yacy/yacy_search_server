@@ -852,3 +852,10 @@ soap.serviceDeploymentList =
 # all   - everybody has write right
 # user  - the admin and every user registered in the user db has write right
 WikiAccess = admin
+
+# Search Profiles
+# we will support different search profiles
+# this is currently only a single default profile
+# If this profile setting is empty, a hard-coded profile from plasmaSearchRanking is used
+rankingProfile =
+

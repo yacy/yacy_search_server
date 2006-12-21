@@ -21,6 +21,12 @@
         }
         document.write(n);
       }
+      function checkerline(descr, tag, dflt) {
+        document.write("<dt>" + descr + "</dt>");
+        document.write("<dd>");
+        checkers(tag, dflt);
+        document.write("</dd>");
+      }
       /* ]]> */
     </script>
     <h2>Detailed&nbsp;Search</h2>
@@ -45,70 +51,46 @@
         </dl>
       </fieldset>
       <fieldset>
-        <legend>Local Pre-Ranking</legend>
+        <legend>Pre-Ranking</legend>
         <dl>
-          <dt>Date</dt>
-          <dd>
-            <script type="text/javascript">checkers("localdate", #[localdate]#)</script>
-          </dd>
-          <dt>YBR</dt>
-          <dd>
-            <script type="text/javascript">checkers("localybr", #[localybr]#)</script>
-          </dd>
-          <dt>Position in Text</dt>
-          <dd>
-            <script type="text/javascript">checkers("localposintext", #[localposintext]#)</script>
-          </dd>
-          <dt>Word Distance</dt>
-          <dd>
-            <script type="text/javascript">checkers("localworddistance", #[localworddistance]#)</script>
-          </dd>
-          <dt>Word Hit Count</dt>
-          <dd>
-            <script type="text/javascript">checkers("localhitcount", #[localhitcount]#)</script>
-          </dd>
-          <dt>Domain Length</dt>
-          <dd>
-            <script type="text/javascript">checkers("localdomlength", #[localdomlength]#)</script>
-          </dd>
+          <script type="text/javascript">checkerline("Domain Length",                 "localdomlength",     #[localdomlength]#)</script>
+          <script type="text/javascript">checkerline("YaCy Block Rank",               "localybr",           #[localybr]#)</script>
+          <script type="text/javascript">checkerline("Date",                          "localdate",          #[localdate]#)</script>
+          <script type="text/javascript">checkerline("Words In Title",                "localwordsintitle",  #[localwordsintitle]#)</script>
+          <script type="text/javascript">checkerline("Words In Text",                 "localwordsintext",   #[localwordsintext]#)</script>
+          <script type="text/javascript">checkerline("Phrases In Text",               "localphrasesintext", #[localphrasesintext]#)</script>
+          <script type="text/javascript">checkerline("Links To Local Domain",         "localllocal",        #[localllocal]#)</script>
+          <script type="text/javascript">checkerline("Links To Other Domain",         "locallother",        #[locallother]#)</script>
+          <script type="text/javascript">checkerline("URL Length",                    "localurllength",     #[localurllength]#)</script>
+          <script type="text/javascript">checkerline("URL Components",                "localurlcomps",      #[localurlcomps]#)</script>
+          <script type="text/javascript">checkerline("Hit Count",                     "localhitcount",      #[localhitcount]#)</script>
+          <script type="text/javascript">checkerline("Position In Text",              "localposintext",     #[localposintext]#)</script>
+          <script type="text/javascript">checkerline("Position Of Phrase",            "localposofphrase",   #[localposofphrase]#)</script>
+          <script type="text/javascript">checkerline("Word Distance",                 "localworddistance",  #[localworddistance]#)</script>
+          <script type="text/javascript">checkerline("Appearance in URL",             "localappurl",        #[localappurl]#)</script>
+          <script type="text/javascript">checkerline("Appearance in Description",     "localappdescr",      #[localappdescr]#)</script>
+          <script type="text/javascript">checkerline("Appearance in Author",          "localappauthor",     #[localappauthor]#)</script>
+          <script type="text/javascript">checkerline("Appearance in Tags",            "localapptags",       #[localapptags]#)</script>
+          <script type="text/javascript">checkerline("Appearance in Reference",       "localappref",        #[localappref]#)</script>
+          <script type="text/javascript">checkerline("Appearance in Emphasized Text", "localappemph",       #[localappemph]#)</script>
+          <script type="text/javascript">checkerline("Category Index Page",           "localcatindexof",    #[localcatindexof]#)</script>
+          <script type="text/javascript">checkerline("Category Image Appearance",     "localcathasimage",   #[localcathasimage]#)</script>
+          <script type="text/javascript">checkerline("Category Audio Appearance",     "localcathasaudio",   #[localcathasaudio]#)</script>
+          <script type="text/javascript">checkerline("Category Video Appearance",     "localcathasvideo",   #[localcathasvideo]#)</script>
+          <script type="text/javascript">checkerline("Category App. Appearance",      "localcathasapp",     #[localcathasapp]#)</script>
         </dl>
       </fieldset>
       <fieldset>
-        <legend>Local Post-Ranking</legend>
+        <legend>Post-Ranking</legend>
         <dl>
-          <dt>URL Length</dt>
-          <dd>
-            <script type="text/javascript">checkers("localurllength", #[localurllength]#)</script>
-          </dd>
-          <dt>URL Components</dt>
-          <dd>
-            <script type="text/javascript">checkers("localurlcomps", #[localurlcomps]#)</script>
-          </dd>
-          <dt>Description Length</dt>
-          <dd>
-            <script type="text/javascript">checkers("localdescrlength", #[localdescrlength]#)</script>
-          </dd>
-          <dt>Description Components</dt>
-          <dd>
-            <script type="text/javascript">checkers("localdescrcomps", #[localdescrcomps]#)</script>
-          </dd>
-          <dt>Query appears in URL</dt>
-          <dd>
-            <script type="text/javascript">checkers("localqueryinurl", #[localqueryinurl]#)</script>
-          </dd>
-          <dt>Query appears in Description</dt>
-          <dd>
-            <script type="text/javascript">checkers("localqueryindescr", #[localqueryindescr]#)</script>
-          </dd>
-          <dt>URL Component appears in Toplist</dt>
-          <dd>
-            <script type="text/javascript">checkers("localurlcompintoplist", #[localurlcompintoplist]#)</script>
-          </dd>
-          <dt>Description Component appears in Toplist</dt>
-          <dd>
-            <script type="text/javascript">checkers("localdescrcompintoplist", #[localdescrcompintoplist]#)</script>
-          </dd>
+          <script type="text/javascript">checkerline("URL Component Appears In Toplist",     "localurlcompintoplist",   #[localurlcompintoplist]#)</script>
+          <script type="text/javascript">checkerline("Description Comp. Appears In Toplist", "localdescrcompintoplist", #[localdescrcompintoplist]#)</script>
+          <script type="text/javascript">checkerline("Application Of Prefer Pattern",        "localprefer",             #[localprefer]#)</script>
         </dl>
+      </fieldset>
+      <fieldset>
+        <input type="submit" name="EnterRanking" value="Set as Default Ranking" />
+        <input type="submit" name="ResetRanking" value="Re-Set to Built-In Ranking" />
       </fieldset>
     </form>
     #(type)#
@@ -145,6 +127,7 @@
     #{/results}#
     #(/type)#
     <!-- linklist end -->
+
   #%env/templates/footer.template%#
   </body>
 </html>

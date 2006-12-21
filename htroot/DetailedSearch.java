@@ -59,38 +59,59 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.tools.crypt;
 
 public class DetailedSearch {
 
+    private static serverObjects defaultValues() {
+        final serverObjects prop = new serverObjects();
+        prop.put("search", "");
+        prop.put("num-results", 0);
+        prop.put("excluded", 0);
+        prop.put("combine", 0);
+        prop.put("resultbottomline", 0);
+        prop.put("localCount", 10);
+        prop.put("localWDist", 999);
+        //prop.put("globalChecked", "checked");
+        prop.put("globalChecked", "");
+        prop.put("postsortChecked", "checked=\"checked\"");
+        prop.put("localTime", 6);
+        prop.put("results", "");
+        prop.put("urlmaskoptions", 0);
+        prop.put("urlmaskoptions_urlmaskfilter", ".*");
+        return prop;
+    }
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
         // case if no values are requested
         if (post == null || env == null) {
             // we create empty entries for template strings
-            final serverObjects prop = new serverObjects();
-            prop.put("promoteSearchPageGreeting", env.getConfig("promoteSearchPageGreeting", ""));
-            prop.put("search", "");
-            prop.put("num-results", 0);
-            prop.put("excluded", 0);
-            prop.put("combine", 0);
-            prop.put("resultbottomline", 0);
-            prop.put("localCount", 10);
-            prop.put("localWDist", 999);
-            //prop.put("globalChecked", "checked");
-            prop.put("globalChecked", "");
-            prop.put("postsortChecked", "checked=\"checked\"");
-            prop.put("localTime", 6);
-            prop.put("results", "");
-            prop.put("urlmaskoptions", 0);
-            prop.put("urlmaskoptions_urlmaskfilter", ".*");
-            String defaultRankingProfile = new plasmaSearchRankingProfile("text").toExternalString();
-            prop.putAll(new plasmaSearchRankingProfile("", defaultRankingProfile).toExternalMap("local"));
+            final serverObjects prop = defaultValues();
+            plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile("text") : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
+            prop.putAll(ranking.toExternalMap("local"));
             return prop;
         }
-
-        boolean global = (post == null) ? false : post.get("global", "").equals("on");
-        boolean postsort = (post == null) ? false : post.get("postsort", "").equals("on");
+        
+        if (post.containsKey("EnterRanking")) {
+            plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile("local", post.toString());
+            sb.setConfig("rankingProfile", crypt.simpleEncode(ranking.toExternalString()));
+            final serverObjects prop = defaultValues();
+            prop.putAll(ranking.toExternalMap("local"));
+            return prop;
+        }
+        
+        if (post.containsKey("ResetRanking")) {
+            sb.setConfig("rankingProfile", "");
+            plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile("text");
+            final serverObjects prop = defaultValues();
+            prop.putAll(ranking.toExternalMap("local"));
+            return prop;
+        }
+        
+        boolean global = post.get("global", "").equals("on");
+        boolean postsort = post.get("postsort", "").equals("on");
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
