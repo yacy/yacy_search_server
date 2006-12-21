@@ -17,7 +17,7 @@
     
     <p><table border="0" cellpadding="0" cellspacing="0"><tr>
 
-    <td valign="top"><table border="0" cellpadding="2" cellspacing="1">
+    <td valign="top" rowspan="2"><table border="0" cellpadding="2" cellspacing="1">
       <tbody>
         <tr class="TableHeader">
           <th>Queue</th>
@@ -47,7 +47,26 @@
       </tbody>
     </table></td>
     
-    <td width="10">&nbsp;</td>
+    <td width="6">&nbsp;</td>
+    
+    <td valign="top"><table border="0" cellpadding="2" cellspacing="1">
+      <tbody>
+        <tr class="TableHeader">
+          <th>Database</th>
+          <th>Entries</th>
+        </tr>
+        <tr class="TableCellLight">
+          <td align="left">Pages (URLs)</td>
+          <td align="right"><span id="urldbsize">&nbsp;&nbsp;&nbsp;</span></td>
+        </tr>
+        <tr class="TableCellLight">
+          <td align="left">RWIs (Words)</td>
+          <td align="right"><span id="rwidbsize">&nbsp;&nbsp;&nbsp;</span></td>
+        </tr>
+      </tbody>
+    </table></td>
+    
+    <td width="6">&nbsp;</td>
     
     <td valign="top"><table border="0" cellpadding="2" cellspacing="1">
       <tbody>
@@ -56,19 +75,22 @@
           <th colspan="2">Level</th>
         </tr>
         <tr class="TableCellLight">
-          <td align="left">PPM</td>
+          <td align="left">PPM (Pages Per Minute)</td>
           <td align="left"><span id="ppmNum">&nbsp;&nbsp;&nbsp;</span></td>
           <td align="left"><span id="ppmSpan">&nbsp;&nbsp;&nbsp;</span></td>
         </tr>
         <tr class="TableCellLight">
-          <td align="left">Word Caches</td>
+          <td align="left">RWI RAM (Word Cache)</td>
           <td align="left"><span id="wordcacheNum">&nbsp;</span></td>
           <td align="left"><span id="wordcacheSpan">&nbsp;</span></td>
         </tr>
       </tbody>
-    </table><br />
+    </table><td>
+    </tr><tr>
     
-    <p>
+    <td width="6">&nbsp;</td>
+    
+    <td colspan="3"><p>
       #(info)#<!-- 0 -->
       ::<!-- 1 -->
       Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.
@@ -89,9 +111,7 @@
       <strong>Please wait some seconds, it may take some seconds until the first result appears there.</strong>
       If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.<br />
     #(/info)#
-    </p>
-    
-    </td>
+    </p></td>
     
     </tr></table></p>
     

@@ -1,4 +1,8 @@
 <xml version="1.0">
+<dbsize>
+  <urlpublictext>#[urlpublictextSize]#</urlpublictext>
+  <rwipublictext>#[rwipublictextSize]#</rwipublictext>
+</dbsize>
 <indexingqueue>
   <size>#[indexingSize]#</size>
   <max>#[indexingMax]#</max>

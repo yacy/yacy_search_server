@@ -83,8 +83,10 @@ public class queues_p {
         yacySeed initiator;
         
         //indexing queue
-        prop.put("indexingSize", Integer.toString(switchboard.getThread("80_indexing").getJobCount()+switchboard.indexingTasksInProcess.size()));
-        prop.put("indexingMax", Integer.toString(plasmaSwitchboard.indexingSlots));
+        prop.put("indexingSize", switchboard.getThread("80_indexing").getJobCount()+switchboard.indexingTasksInProcess.size());
+        prop.put("indexingMax", plasmaSwitchboard.indexingSlots);
+        prop.put("urlpublictextSize", switchboard.wordIndex.loadedURL.size());
+        prop.put("rwipublictextSize", switchboard.wordIndex.size());
         if ((switchboard.sbQueue.size() == 0) && (switchboard.indexingTasksInProcess.size() == 0)) {
             prop.put("list", 0); //is empty
         } else {

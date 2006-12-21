@@ -117,6 +117,12 @@ function handleQueues(){
 		document.getElementById("indexingqueuesize").firstChild.nodeValue=indexingqueue_size;
 		document.getElementById("indexingqueuemax").firstChild.nodeValue=indexingqueue_max;
 		
+		dbsize=getFirstChild(xml, "dbsize");
+		urlpublictextSize=getValue(getFirstChild(dbsize, "urlpublictext"));
+		rwipublictextSize=getValue(getFirstChild(dbsize, "rwipublictext"));
+		document.getElementById("urldbsize").firstChild.nodeValue=urlpublictextSize;
+		document.getElementById("rwidbsize").firstChild.nodeValue=rwipublictextSize;
+		
 		loaderqueue=getFirstChild(xml, "loaderqueue");
 		updateTable(loaderqueue, "loader");
 		
