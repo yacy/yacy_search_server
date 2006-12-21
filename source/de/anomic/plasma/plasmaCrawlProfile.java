@@ -384,11 +384,11 @@ public class plasmaCrawlProfile {
         }
         public boolean indexText() {
             String r = (String) mem.get("indexText");
-            if (r == null) return false; else return (r.equals("true"));
+            if (r == null) return true; else return (r.equals("true"));
         }
         public boolean indexMedia() {
             String r = (String) mem.get("indexMedia");
-            if (r == null) return false; else return (r.equals("true"));
+            if (r == null) return true; else return (r.equals("true"));
         }
         public boolean storeHTCache() {
             String r = (String) mem.get("storeHTCache");
