@@ -39,9 +39,9 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexCollectionRI;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
-import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRAMRI;
 import de.anomic.index.indexRI;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -82,7 +82,8 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public int minMem() {
-        return dhtOutCache.minMem() + dhtInCache.minMem() + collections.minMem();
+        // return dhtOutCache.minMem() + dhtInCache.minMem() + collections.minMem();
+        return collections.minMem();
     }
     
     public int maxURLinDHTOutCache() {
@@ -566,26 +567,26 @@ public final class plasmaWordIndex implements indexRI {
         }
 
         public void pause() {
-            synchronized(this) {
-                if(pause == false)  {
+            synchronized (this) {
+                if (!pause) {
                     pause = true;
-                    serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread paused");                
+                    serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread paused");
                 }
             }
         }
 
         public void endPause() {
-            synchronized(this) {
-                if (pause == true) {
+            synchronized (this) {
+                if (pause) {
                     pause = false;
                     this.notifyAll();
                     serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread resumed");
                 }
             }
         }
-        
+
         public void waiter() {
-            synchronized(this) {
+            synchronized (this) {
                 if (this.pause) {
                     try {
                         this.wait();
@@ -597,18 +598,17 @@ public final class plasmaWordIndex implements indexRI {
             }
         }
     }
-    
+/*
     public static void main(String[] args) {
         // System.out.println(kelondroMSetTools.fastStringComparator(true).compare("RwGeoUdyDQ0Y", "rwGeoUdyDQ0Y"));
         // System.out.println(new Date(reverseMicroDateDays(microDateDays(System.currentTimeMillis()))));
-        /*
+
         File indexdb = new File("D:\\dev\\proxy\\DATA\\INDEX");
         plasmaWordIndex index = new plasmaWordIndex(indexdb, true, 555, 1000, new serverLog("TESTAPP"));
         Iterator containerIter = index.wordContainers("5A8yhZMh_Kmv", plasmaWordIndex.RL_WORDFILES, true);
         while (containerIter.hasNext()) {
             System.out.println("File: " + (indexContainer) containerIter.next());
         }
-        */
     }
-
+*/
 }
