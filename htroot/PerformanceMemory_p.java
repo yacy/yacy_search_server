@@ -340,7 +340,7 @@ public class PerformanceMemory_p {
         prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "slflush" + db, slt[8] + ":" + slt[9]);
         prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ochunkmax" + db, ost[0]);
         prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "omisscmax" + db, ost[1]);
-        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ochunkcur" + db, ost[2] + "<br>" + ost[3]);
+        prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ochunkcur" + db, ost[2] + "<br />" + ost[3]);
         prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ohittmiss" + db, ost[7] + ":" + ost[8]);
         prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "ouniqdoub" + db, ost[9] + ":" + ost[10]);
         prop.put(wdb + ((wdb.length() > 0) ? ("_") : ("")) + "oflush" + db, ost[11] + ":" + ost[12]);
