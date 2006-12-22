@@ -403,10 +403,10 @@ public class IndexControl_p {
         // insert constants
         prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
         prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
-        prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? "checked" : "");
-        prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? "checked" : "");
-        prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? "checked" : "");
-        prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "checked" : "");
+        prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? 1 : 0);
+        prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? 1 : 0);
+        prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? 1 : 0);
+        prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 1 : 0);
         prop.put("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed.getPeerTags(), ",", false));
         // return rewrite properties
         return prop;
