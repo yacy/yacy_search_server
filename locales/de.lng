@@ -548,7 +548,7 @@ Filter</strong>==Maske</strong>
 MaxAge</strong>==Max. Alter</strong>
 Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
 Auto Filter Content</strong>==Auto Inhalts Filter</strong>
-Max Page Per Domain</strong>==MAx. Seiten pro Domain</strong>
+Max Page Per Domain</strong>==Max. Seiten pro Domain</strong>
 Accept \'?\' URLs</strong>==URLs mit "?" akzeptieren</strong>
 Fill Proxy Cache==F&uuml;lle Proxy Cache
 Local Indexing</strong>==Lokales Indexieren</strong>
@@ -1234,7 +1234,7 @@ This is the account that restricts access to the proxy function.==Dies sind die 
 You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet.==Sie wollen den Proxy vermutlich nicht im Internet zur Verf&uuml;gung stellen, deshalb sollten Sie den IP-Adressraum so einstellen, dass er auf Ihr lokales Intranet zutrifft.
 The default setting should be right in most cases.==Die Standardwerte sollten in den meisten F&auml;llen richtig sein.
 If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.==Wenn Sie wollen k&ouml;nnen Sie auch Proxyaccounts erstellen, sodass sich jeder Proxynutzer zuerst anmelden muss, aber das ist eher un&uuml;blich.
-IP-Number filter:==IP-Adressen Filter:
+IP-Number filter==IP-Adressen Filter
 Use <a==Nutze <a
 #-----------------------------
 
@@ -1246,6 +1246,11 @@ With this you can specify if YaCy can be used as transparent proxy.==Hiermit k&o
 Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule:==Hinweis: Unter Linux k&ouml;nnen Sie Ihre Firewall darauf einstellen alle HTTP-Verbindungen transparent an YaCy weiterzuleiten indem Sie diese iptables-Regel verwenden:
 With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Hiermit k&ouml;nnen Sie festlegen ob YaCy die HTTP connection keep-alive Funktionalit&auml;t unterst&uuml;tzen soll.
 Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
+Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule==Tipp: Unter Linux können Sie Ihre Firewall so konfigurieren, dass der gesamte HTTP-Traffic mithilfe dieser iptables-Regen über YaCy geleitet wird.
+Specifies if the proxy should send the X-Forwarded-For http header.==Gibt an, ob der Proxy den X-forwarded-For HTTP-Header setzen soll.
+Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via</a>==Gibt an, ob der Proxy den <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via-HTTP-Header</a>
+http header according to RFC 2616 Sect 14.45.==gemäß RFC 2616 Sect 14.45 senden soll.
+Submit==Speichern
 #-----------------------------
 
 #File: Settings_Proxy.inc
@@ -1272,17 +1277,17 @@ Port Forwarding==Port Weiterleitung
 You can use a remote server running a ssh demon to forward your server/proxy port.==Sie k&ouml;nnen einen Remote Server mit einem ssh demon nutzen, um Ihrem Server/Proxy Port weiterzuleiten.
 This is useful if you want to tunnel throug a NAT/router.==Dies ist n&uuml;tzlich, wenn Sie durch einen NAT/Router tunneln wollen.
 Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.==Alternativ k&ouml;nnen Sie einfach einen virtuellen Server in Ihrem NAT/Router einstellen, um Verbindungen von Au&szlig;erhalb zu erm&ouml;glichen.
-Enable&nbsp;port&nbsp;forwarding:==Aktiviere Port Weiterleitung:
+Enable port forwarding:==Aktiviere Port Weiterleitung:
 Enabling disabling port forwarding via secure channel.==Aktivieren/Deaktivieren von Port Weiterleitung &uuml;ber sicheren Kanal.
-Forwarding&nbsp;via&nbsp;proxy:==Weiterleitung &uuml;ber Proxy:
+Forwarding via proxy:==Weiterleitung &uuml;ber Proxy:
 Function not available at the moment.==Funktion im Moment nicht verf&uuml;gbar.
 You need to install libx to use this feature==Sie m&uuml;ssen die libx installieren, um diese Funktionen benutzen zu k&ouml;nnen
-Forwarding&nbsp;port:==Weiterleitender Port
+Forwarding port:==Weiterleitender Port
 The port on the remote server that should be forwarded via the secure channel to the local host.==Der Port des Remote Servers der mittels sicherem Kanal auf den lokalen Host weitergeleitet werden soll.
-Forwarding&nbsp;host:==Weiterleitender Host
-Forwarding&nbsp;host&nbsp;port:==Weiterleitender Host Port
-Forwarding&nbsp;host&nbsp;user:==Weiterleitender Host Nutzer
-Forwarding&nbsp;host&nbsp;password:==Weiterleitender Host Passwort
+Forwarding host:==Weiterleitender Host
+Forwarding host port:==Weiterleitender Host Port
+Forwarding host user:==Weiterleitender Host Nutzer
+Forwarding host password:==Weiterleitender Host Passwort
 Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
 #-----------------------------
 
@@ -1349,7 +1354,7 @@ The password==Das Passwort
 #---------------------------
 Store into filesystem:==Ablegen im Dateisystem:
 You must configure this if you want to store the seed-list file onto the file system.==Sie m&uuml;ssen diese Einstellungen vornehmen, wenn Sie die Seed-Liste im Dateisystem ablegen wollen.
-File&nbsp;Location:==Speicherort:
+File Location:==Speicherort:
 Here you can specify the path within the filesystem where the seed-list file should be stored.==Hier k&ouml;nnen Sie den Pfad im Dateisystem festlegen, in dem die Seed-Liste abgelegt werden soll.
 #-----------------------------
 
@@ -1381,7 +1386,7 @@ Generic Crawler Settings==Allgemeine Crawler Einstellungen
 Connection timeout in ms==Verbindungs-Timeout in ms
 means unlimited==schaltet die Begrenzung ab
 Crawler Settings==Crawler Einstellungen
-Maximum&nbsp;Filesize==Maximale&nbsp;Dateigröße
+Maximum Filesize==Maximale Dateigröße
 Maximum allowed file size in bytes that should be downloaded==Maximale Größe der herunterzuladenden Datei in Byte
 Larger files will be skipped==Größere Dateien werden übersprungen
 Please note that if the crawler uses content compression, this limit is used to check the compressed content size==Beachten Sie, dass beim Herunterladen der Dateien mittels "Content-Compression" die komprimierte Dateigröße maßgeblich ist
@@ -1717,7 +1722,8 @@ Entries==Eintr&auml;ge
 Pages \(URLs\)==Seiten (URLs)
 RWIs \(Words\)==RWIs (W&ouml;rter)
 Indicator==Indikator
-Level==StufePPM \(Pages Per Minute\)==PPM (Seiten pro Minute)
+Level==Stufe
+PPM \(Pages Per Minute\)==PPM (Seiten pro Minute)
 RWI RAM \(Word Cache\)==RWI RAM (W&ouml;rter Zwischenspeicher)
 Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.==Fehler im Profil Management. Bitte stoppen Sie YaCy, l&ouml;schen Sie die Datei DATA/PLASMADB/crawlProfiles0.db und starten Sie YaCy neu. 
 Error:==Fehler:
@@ -1740,7 +1746,7 @@ Filter</strong>==Maske</strong>
 MaxAge</strong>==Max. Alter</strong>
 Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
 Auto Filter Content</strong>==Auto Inhalts Filter</strong>
-Max Page Per Domain</strong>==MAx. Seiten pro Domain</strong>
+Max Page Per Domain</strong>==Max. Seiten pro Domain</strong>
 Accept \'?\' URLs</strong>==URLs mit "?" akzeptieren</strong>
 Fill Proxy Cache==F&uuml;lle Proxy Cache
 Local Text Indexing==Lokal Test Indexieren
@@ -1755,7 +1761,7 @@ Depth==Tiefe
 Modified Date==zuletzt bearbeitet-Datum
 Anchor Name==Linkbezeichnung
 #URL==URL
-         
+Delete==Löschen
 #-----------------------------
 
 #File: Wiki.html
