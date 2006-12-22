@@ -5,6 +5,10 @@
 // Frankfurt, Germany, 2004
 // last major change: 29.04.2004
 //
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -175,27 +179,22 @@ public final class serverCodings {
         }
         return map;
     }
-    
-    public static String map2string(Map m, String separator, boolean braces) {
-        StringBuffer buf = new StringBuffer();
-        if (braces) buf.append("{");
-        Iterator i = m.entrySet().iterator();
-        boolean hasNext = i.hasNext();
-        while (hasNext) {
-            Entry e = (Entry) (i.next());
-            Object key = e.getKey();
-            Object value = e.getValue();
-            buf.append(key.toString());
-            buf.append('=');
-            buf.append(value.toString());
 
-            hasNext = i.hasNext();
-            if (hasNext) buf.append(separator);
+    public static String map2string(Map m, String separator, boolean braces) {
+        final StringBuffer buf = new StringBuffer(512);
+        if (braces) { buf.append("{"); }
+        final Iterator i = m.entrySet().iterator();
+        while (i.hasNext()) {
+            final Entry e = (Entry) (i.next());
+            buf.append(e.getKey()).append('=');
+            if (e.getValue() != null) { buf.append(e.getValue()); }
+            buf.append(separator);
         }
-        if (braces) buf.append("}");
+        if (buf.length() > 1) { buf.setLength(buf.length() - 1); } // remove last separator
+        if (braces) { buf.append("}"); }
         return buf.toString();
     }
-    
+
     public static Set string2set(String string, String separator) {
         // this can be used to parse a Map.toString() into a Map again
         if (string == null) return null;
