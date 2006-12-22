@@ -9,11 +9,11 @@
     function ParserCheckboxes(reference)
     {
       var mode = reference.name.substring(0,reference.name.indexOf("."));
-      for(i=0; i<document.parsersettings.elements.length; i++)
+      for(i=0; i<document.getElementById("parsersettings").elements.length; i++)
       {
-        if(document.parsersettings.elements[i].type=="checkbox" && document.parsersettings.elements[i].name.indexOf(mode) >= 0)
+        if(document.getElementById("parsersettings").elements[i].type=="checkbox" && document.getElementById("parsersettings").elements[i].name.indexOf(mode) >= 0)
         {
-          document.parsersettings.elements[i].checked=reference.checked;
+          document.getElementById("parsersettings").elements[i].checked=reference.checked;
         }
       }
     }

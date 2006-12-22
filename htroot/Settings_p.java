@@ -299,7 +299,7 @@ public final class Settings_p {
             prop.put("parser_" + parserIdx + "_name", parserInfo.parserName);
             prop.put("parser_" + parserIdx + "_version", parserInfo.parserVersionNr);
             prop.put("parser_" + parserIdx + "_usage", Integer.toString(parserInfo.usageCount));
-            prop.put("parser_" + parserIdx + "_colspan",Integer.toString(configArray.length+1));
+            prop.put("parser_" + parserIdx + "_colspan",Integer.toString(configArray.length));
             
             int mimeIdx = 0;
             Enumeration mimeTypeIter = parserInfo.supportedMimeTypes.keys();
@@ -329,7 +329,7 @@ public final class Settings_p {
         }
         prop.put("parserMode",configArray.length);
         prop.put("parser", parserIdx);
-        prop.put("parser.colspan", Integer.toString(configArray.length+3));
+        prop.put("parser.colspan", Integer.toString(configArray.length+2));
         
         // Crawler settings
         prop.put("crawler.clientTimeout",sb.getConfig("crawler.clientTimeout", "10000"));

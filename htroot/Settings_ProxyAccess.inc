@@ -56,7 +56,7 @@
     </td>
   </tr>
   <tr valign="top">
-    <td colspan="2"><input type="submit" name="proxyaccount" value="Submit"></td>
+    <td colspan="2"><input type="submit" name="proxyaccount" value="Submit" /></td>
   </tr>
 </table>
 </fieldset>

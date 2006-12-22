@@ -50,7 +50,6 @@
       <a href="Status.html?popup=false">[Disable]</a>
       </td>
       #(/popup)#
-    </td>
   </tr>
   <tr class="TableCellLight">
     <td>Memory Usage</td>

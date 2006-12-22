@@ -570,7 +570,7 @@ public class SettingsAck_p {
          */
         if (post.containsKey("parserSettings")) {
             post.remove("parserSettings");
-                        
+            
             Set parserModes = plasmaParser.getParserConfigList().keySet();
             HashMap newConfigList = new HashMap();     
             Iterator parserModeIter = parserModes.iterator();
