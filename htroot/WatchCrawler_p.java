@@ -319,7 +319,7 @@ public class WatchCrawler_p {
             prop.put("crawlProfiles_"+count+"_depth", profile.generalDepth());
             prop.put("crawlProfiles_"+count+"_filter", profile.generalFilter());
             prop.put("crawlProfiles_"+count+"_crawlingIfOlder", (profile.recrawlIfOlder() == Long.MAX_VALUE) ? "no re-crawl" : ""+profile.recrawlIfOlder());
-            prop.put("crawlProfiles_"+count+"_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : ""+profile.domFilterDepth());
+            prop.put("crawlProfiles_"+count+"_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
             prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", profile.domNames(true, domlistlength));
             prop.put("crawlProfiles_"+count+"_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : ""+profile.domMaxPages());
             prop.put("crawlProfiles_"+count+"_withQuery", ((profile.crawlingQ()) ? 1 : 0));

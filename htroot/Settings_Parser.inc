@@ -22,8 +22,9 @@
     <td class="small">#[mimetype]#</td>
     <td class="small">&nbsp;</td>
     <td class="small" width="100%"></td>
-  </tr>#{/mime}##{/parser}#
-  <tr class="TableCellDark">#{parserMode}#  
+  </tr>#{/mime}#
+  #{/parser}#
+  <tr class="TableCellDark">#{parserMode}#
     <td class="small" align="center">
       <input type="checkbox" name="#[name]#.allParserEnabled" align="top" onclick="javascript: ParserCheckboxes(this);" #(allParserEnabled)#::checked="checked" #(/allParserEnabled)#/>#{/parserMode}#
     </td>
