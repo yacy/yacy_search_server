@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -82,10 +82,9 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public int minMem() {
-        // return dhtOutCache.minMem() + dhtInCache.minMem() + collections.minMem();
-        return collections.minMem();
+        return dhtOutCache.minMem() + dhtInCache.minMem() + collections.minMem();
     }
-    
+
     public int maxURLinDHTOutCache() {
         return dhtOutCache.maxURLinCache();
     }
