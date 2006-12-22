@@ -1757,7 +1757,6 @@ Crawl Queue:==Crawler Puffer:
 Queue==Puffer
 #Profile==Profile
 Initiator==Auftraggeber
-Depth==Tiefe
 Modified Date==zuletzt bearbeitet-Datum
 Anchor Name==Linkbezeichnung
 #URL==URL
