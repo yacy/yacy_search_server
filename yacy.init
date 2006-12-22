@@ -495,7 +495,7 @@ xpstopw=true
 70_cachemanager_busysleep=0
 70_cachemanager_memprereq=1048576
 80_indexing_idlesleep=2000
-80_indexing_busysleep=100
+80_indexing_busysleep=200
 80_indexing_memprereq=2097152
 82_crawlstack_idlesleep=5000
 82_crawlstack_busysleep=0
@@ -572,10 +572,10 @@ ramCacheProfiles_time=      500
 # not for first startup of YaCy
 
 # -Xmx<size> set maximum Java heap size
-javastart_Xmx=Xmx64m
+javastart_Xmx=Xmx96m
 
 # -Xms<size> set initial Java heap size
-javastart_Xms=Xms10m
+javastart_Xms=Xms96m
 
 # performance properties for the word index cache
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the
@@ -587,7 +587,7 @@ javastart_Xms=Xms10m
 # may last for the word flush
 wordCacheMaxCount = 20000
 wordCacheInitCount = 30000
-wordFlushIdleDivisor = 420;
+wordFlushIdleDivisor = 500;
 wordFlushBusyDivisor = 5000;
 
 # Specifies if yacy can be used as transparent http proxy.

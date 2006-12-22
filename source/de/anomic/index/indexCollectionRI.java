@@ -83,6 +83,12 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
+    public int minMem() {
+        // calculate a minimum amount of memory that is necessary to use the index
+        // during runtime (after the object was initialized)
+        return collectionIndex.minMem();
+    }
+
     public synchronized Iterator wordContainers(String startWordHash, boolean rot) {
         return new wordContainersIterator(startWordHash, rot);
     }

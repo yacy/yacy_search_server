@@ -228,6 +228,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
                 (newColumn != rowdef.primaryKey)) {
             resolveMarkedRemoved();
             rowdef.setOrdering(newOrder, newColumn);
+            assert (removeMarker.size() == 0);
             this.sortBound = 0;
         }
     }

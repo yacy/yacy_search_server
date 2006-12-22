@@ -62,13 +62,6 @@ public final class indexRAMRI implements indexRI {
     private kelondroRow payloadrow;
     private kelondroRow bufferStructureBasis;
     
-    // calculated constants
-    private static String maxKey;
-    static {
-        maxKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += 'z';
-        //minKey = ""; for (int i = 0; i < yacySeedDB.commonHashLength; i++) maxKey += '-';
-    }
-    
     public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceLimitInit, String dumpname, serverLog log) {
 
         // creates a new index cache
@@ -98,6 +91,9 @@ public final class indexRAMRI implements indexRI {
         }
     }
 
+    public int minMem() {
+        return 1024*1024;
+    }
     
     public synchronized long getUpdateTime(String wordHash) {
         indexContainer entries = getContainer(wordHash, null, -1);

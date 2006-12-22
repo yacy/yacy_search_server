@@ -62,6 +62,10 @@ public class indexCachedRI implements indexRI {
         return payloadrow;
     }
 
+    public int minMem() {
+        return 1024 * 1024;
+    }
+    
     public void setWordFlushDivisor(int idleDivisor, int busyDivisor) {
        this.idleDivisor = idleDivisor;
        this.busyDivisor = busyDivisor;

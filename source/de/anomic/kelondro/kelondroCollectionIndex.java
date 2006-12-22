@@ -251,6 +251,19 @@ public class kelondroCollectionIndex {
         return index.size();
     }
     
+    public int minMem() {
+        // calculate a minimum amount of memory that is necessary to use the collection
+        // during runtime (after the index was initialized)
+        
+        // caclculate an upper limit (not the correct size) of the maximum number of indexes for a wordHash
+        // this is computed by the size of the biggest used collection
+        int m = 1;
+        for (int i = 0; i < arrays.size(); i++) m = m * this.loadfactor;
+
+        // this must be multiplied with the payload size
+        // and doubled for necessary memory transformation during sort operation
+        return 2 * m * this.payloadrow.objectsize;
+    }
     
     public synchronized void put(byte[] key, kelondroRowCollection collection) throws IOException, kelondroOutOfLimitsException {
         // this replaces an old collection by a new one

@@ -444,6 +444,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int wordInCacheMaxCount = (int) getConfigLong("indexDistribution.dhtReceiptLimit", 1000);
         wordIndex.setInMaxWordCount(wordInCacheMaxCount);
         
+        // set a minimum amount of memory for the indexer thread
+        setConfig("80_indexing_memprereq", Math.max(getConfigLong("80_indexing_memprereq", 0), wordIndex.minMem()));
+        
         // start a cache manager
         log.logConfig("Starting HT Cache Manager");
         
@@ -1184,6 +1187,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (yacyCore.newsPool.automaticProcess() > 0) hasDoneSomething = true;
             } catch (IOException e) {}
 
+            // set new memory limit for indexer thread
+            setConfig("80_indexing_memprereq", Math.max(getConfigLong("80_indexing_memprereq", 0), wordIndex.minMem()));
+            
             return hasDoneSomething;
         } catch (InterruptedException e) {
             this.log.logInfo("cleanupJob: Shutdown detected");

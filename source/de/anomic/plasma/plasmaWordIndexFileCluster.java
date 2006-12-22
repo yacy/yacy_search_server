@@ -279,4 +279,8 @@ public class plasmaWordIndexFileCluster implements indexRI {
         throw new UnsupportedOperationException();
     }
 
+    public int minMem() {
+        return 1024*1024;
+    }
+
 }

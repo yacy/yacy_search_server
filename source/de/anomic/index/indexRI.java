@@ -34,6 +34,7 @@ import java.util.Set;
 public interface indexRI {
     
     public int size();
+    public int minMem();
     
     public Iterator wordContainers(String startWordHash, boolean rot); // method to replace wordHashes
         

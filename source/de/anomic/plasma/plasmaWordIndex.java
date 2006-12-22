@@ -81,6 +81,10 @@ public final class plasmaWordIndex implements indexRI {
         this.idleDivisor = 420;
     }
 
+    public int minMem() {
+        return dhtOutCache.minMem() + dhtInCache.minMem() + collections.minMem();
+    }
+    
     public int maxURLinDHTOutCache() {
         return dhtOutCache.maxURLinCache();
     }
