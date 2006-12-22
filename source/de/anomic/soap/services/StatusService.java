@@ -50,6 +50,7 @@ import org.w3c.dom.Document;
 
 import de.anomic.server.serverObjects;
 import de.anomic.soap.AbstractService;
+import de.anomic.yacy.yacyCore;
 
 public class StatusService extends AbstractService {
     
@@ -200,4 +201,14 @@ public class StatusService extends AbstractService {
         // sending back the result to the client
         return this.convertContentToXML(result);        
     }       
+    
+    
+    public String getPeerHash() throws AxisFault {
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);        	
+    	
+        // return the peer hash
+    	return yacyCore.seedDB.mySeed.getHexHash();
+    }
+    
 }
