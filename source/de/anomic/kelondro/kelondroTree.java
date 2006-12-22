@@ -733,7 +733,9 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	    }
  	}
         // move node to recycling queue
-	deleteNode(node.handle());
+        synchronized (this) {
+            deleteNode(node.handle());
+        }
     }
 
     protected Node firstNode() throws IOException {
