@@ -272,21 +272,18 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         }
 
         public Object next() {
-            if (t.hasNext()) {
-                if ((tt == null) || (!(tt.hasNext()))) {
-                    try {
-                        tt = ((kelondroIndex) t.next()).rows(true, false, null);
-                    } catch (IOException e) {
-                        return null;
-                    }
-                }
-                if (tt.hasNext()) {
-                    return tt.next();
-                } else {
+            if ((tt == null) || (!(tt.hasNext()))) {
+                try {
+                    tt = ((kelondroIndex) t.next()).rows(true, false, null);
+                } catch (IOException e) {
                     return null;
                 }
             }
-            return null;
+            if (tt.hasNext()) {
+                return tt.next();
+            } else {
+                return this.next(); // t is empty, try next table
+            }
         }
 
         public void remove() {
