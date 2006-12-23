@@ -100,15 +100,17 @@
      <!-- TO-DO: CSS/XHTMLize end -->
    </div>::
    <div class="CacheAdminTree">
-     <p>
-       #(empty)#::[empty]#(/empty)#
-       #{treeFolders}#
-       <img src="/env/grafics/folderIconSmall.gif" align="top" alt="Folder" />
-       <a href="CacheAdmin_p.html?action=info&amp;path=#[path]#/#[name]#" class="tt"><nobr>#[name]#</nobr></a>#{/treeFolders}#
-       #{treeFiles}#
-       <img src="/env/grafics/fileIconSmall.gif" align="top" alt="File" />
-       <a href="CacheAdmin_p.html?action=info&amp;path=#[path]#/#[name]#" class="tt"><nobr>#[name]#</nobr></a>#{/treeFiles}#
-     </p>
+     #(empty)#::<p>[empty]</p>#(/empty)#
+     <ul class="tagList">#{treeFolders}#
+       <li>
+         <img src="/env/grafics/folderIconSmall.gif" alt="Folder" />
+         <a href="CacheAdmin_p.html?action=info&amp;path=#[path]#/#[name]#" class="tt">#[name]#</a>
+       </li>#{/treeFolders}#
+       <li>#{treeFiles}#
+         <img src="/env/grafics/fileIconSmall.gif" alt="File" />
+         <a href="CacheAdmin_p.html?action=info&amp;path=#[path]#/#[name]#" class="tt">#[name]#</a>
+       </li>#{/treeFiles}#
+     </ul>
    </div>
    #(/info)#
    #%env/templates/footer.template%#

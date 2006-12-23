@@ -427,7 +427,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             address.startsWith("192.168") ||
             address.startsWith("10.")     ||
             address.startsWith("169.254") ||
-            // 172.16.0.0–172.31.255.255 (I think this is faster than a regex)
+            // 172.16.0.0-172.31.255.255 (I think this is faster than a regex)
             (address.startsWith("172.") && ( 
              address.startsWith("172.16.") || address.startsWith("172.17.") ||
              address.startsWith("172.18.") || address.startsWith("172.19.") ||

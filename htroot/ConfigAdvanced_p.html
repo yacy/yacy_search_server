@@ -6,7 +6,7 @@
     <script type="text/javascript">
       <!--
       function element_clicked(element){
-        document.getElementById("key").value=element.id;
+        document.getElementById("key").value=element.id.substring(1);
         document.getElementById("value").value=element.value;
       }
       -->
@@ -28,7 +28,7 @@
   </p>
   <select name="options" size="25" style="width: 600px">
     #{options}#
-    <option id="#[key]#" value="#[value]#" onclick="element_clicked(this)">#[key]#: #[value]#</option>
+    <option id="k#[key]#" value="#[value]#" onclick="element_clicked(this)">#[key]#: #[value]#</option>
     #{/options}#
   </select><br />
   <form action="Config_p.html" method="post">
