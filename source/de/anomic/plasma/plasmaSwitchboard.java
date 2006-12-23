@@ -1188,7 +1188,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } catch (IOException e) {}
 
             // set new memory limit for indexer thread
-            setConfig("80_indexing_memprereq", Math.max(getConfigLong("80_indexing_memprereq", 0), wordIndex.minMem()));
+            long memprereq = Math.max(getConfigLong("80_indexing_memprereq", 0), wordIndex.minMem());
+            setConfig("80_indexing_memprereq", memprereq);
+            setThreadPerformance("80_indexing",
+                    getConfigLong("80_indexing_idlesleep", 0),
+                    getConfigLong("80_indexing_busysleep", 0),
+                    memprereq);
             
             return hasDoneSomething;
         } catch (InterruptedException e) {
