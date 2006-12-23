@@ -571,7 +571,7 @@ public final class yacyClient {
             } catch (NumberFormatException e) {
                 searchtime = totalrequesttime;
             }
-            yacyCore.log.logFine("SEARCH " + results + " URLS FROM " + targetPeer.hash + ":" + targetPeer.getName() + ", score=" + targetPeer.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes.substring(0, 12)) + ", duetime=" + duetime + ", searchtime=" + searchtime + ", netdelay=" + (totalrequesttime - searchtime) + ", references=" + result.get("references"));
+            yacyCore.log.logFine("SEARCH " + results + " URLS FROM " + targetPeer.hash + ":" + targetPeer.getName() + ", score=" + targetPeer.selectscore + ", DHTdist=" + ((wordhashes.length() < 12) ? "void" : Double.toString(yacyDHTAction.dhtDistance(targetPeer.hash, wordhashes.substring(0, 12)))) + ", duetime=" + duetime + ", searchtime=" + searchtime + ", netdelay=" + (totalrequesttime - searchtime) + ", references=" + result.get("references"));
             return urls;
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.search error: '" + targetPeer.get(yacySeed.NAME, "anonymous") + "' failed - " + e);

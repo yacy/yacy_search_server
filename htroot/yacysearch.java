@@ -89,7 +89,8 @@ public class yacysearch {
 
         // case if no values are requested
         final String referer = (String) header.get("Referer");
-        if (post == null || env == null) {
+        String querystring = (post == null) ? "" : post.get("search", "").trim();
+        if ((post == null) || (env == null) || (querystring.length() == 0)) {
 
             // save referrer
             // System.out.println("HEADER=" + header.toString());
@@ -138,7 +139,6 @@ public class yacysearch {
 
         // collect search attributes
         int maxDistance = Integer.MAX_VALUE;
-        String querystring = post.get("search", "").trim();
         if ((querystring.length() > 2) && (querystring.charAt(0) == '"') && (querystring.charAt(querystring.length() - 1) == '"')) {
             querystring = querystring.substring(1, querystring.length() - 1).trim();
             maxDistance = 1;
