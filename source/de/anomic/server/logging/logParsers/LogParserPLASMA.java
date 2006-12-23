@@ -62,7 +62,7 @@ public class LogParserPLASMA implements LogParser{
     private static Pattern i9 = Pattern.compile("RankingDistribution - transmitted file [\\w-:.\\\\]* to [\\w.]*:\\d* successfully in (\\d)* seconds");
     private static Pattern i10 = Pattern.compile("RankingDistribution - error transmitting file");
     private static Pattern i11 = Pattern.compile("Peer [\\w-_]*:[\\w-_]{12} is busy\\. Waiting \\d* ms\\.");
-    //private static Pattern i12 = Pattern.compile("\\*Indexed \\d* words in URL [\\w:.&?/%-~$§@=]* \\[[\\w-_]{12}\\]");
+    //private static Pattern i12 = Pattern.compile("\\*Indexed \\d* words in URL [\\w:.&?/%-~$\u00A7@=]* \\[[\\w-_]{12}\\]");
     private static Pattern i13 = Pattern.compile("WROTE HEADER for |LOCALCRAWL\\[\\d*, \\d*, \\d*, \\d*\\]|REJECTED WRONG STATUS TYPE");
     //RegExp for LogLevel W
     private static Pattern w1 = Pattern.compile("found not enough \\(\\d*\\) peers for distribution");
@@ -74,7 +74,7 @@ public class LogParserPLASMA implements LogParser{
     private Matcher m;
     //RegExp for advancedParser
     //private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-=]* \\[[\\w-_]{12}\\]\\n\\tDescription: ([\\w- ]*)\\n\\tMimeType: ([\\w-_/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)\\n\\tStackingTime: (\\d*) ms \\| ParsingTime: (\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
-    private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-~$§@=]* \\[[\\w-_]{12}\\][\\r\\n]*\\tDescription: ([\\w-\\.,:!?='\"|/+@() ]*)[\\r\\n]*\\tMimeType: ([\\w-_~/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)[\\r\\n]*\\tStackingTime:[ ]*(\\d*) ms \\| ParsingTime:[ ]*(\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
+    private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-~$\u00A7@=]* \\[[\\w-_]{12}\\][\\r\\n]*\\tDescription: ([\\w-\\.,:!?='\"|/+@() ]*)[\\r\\n]*\\tMimeType: ([\\w-_~/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)[\\r\\n]*\\tStackingTime:[ ]*(\\d*) ms \\| ParsingTime:[ ]*(\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
 
     private int urlSum=0;
     private int urlReqSum=0;
