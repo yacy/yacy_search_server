@@ -84,6 +84,40 @@ globalheader();
 </ul>
 -->
 
+<br><p>v0.50_20061222_3124
+<ul>
+<li>Added Media Search</li>
+  <ul>
+  <li>Added search pages for Images, Audio, Video, and Application search.</li>
+  <li>Added media links presentation during snippet fetch; the Image Search presents search results as image thumbnails.</li>
+  <li>Better recognition of search hits for text snippet generation.</li>
+  <li>Media search results are indexed again after remote search results are collected; only media links are used to update the index.</li>
+  </ul>
+<li>Better Result Ranking</li>
+  <ul>
+  <li>New ranking parameters and appearance attributes are now considered.</li>
+  <li>Faster ranking; more references can be ranked and sorted within given search time.</li>
+  <li>Ranking Parameters can be handed over to remote peers and are applied there.</li>
+  <li>Adopted Detailed Search to new ranking parameters.</li>
+  <li>Coefficients from detailed search can be set as default ranking for search page; this replaces the old ranking alternatives.</li>
+  </ul>
+<li>Better Crawl Monitoring</li>
+  <ul>
+  <li>After a crawl start was initialized, the Crawler Monitor is showed.</li>
+  <li>The Crawl Monitor now shows all queue elements in one table.</li>
+  <li>Monitoring of index size.</li>
+  <li>The Crawl Profiles are showed; crawls can be interrupted within the profile table.</li>
+  <li>A crawl may now distinguish between text indexing and media link indexing.</li>
+  </ul>
+<li>Migration to new Database Structure</li>
+  <ul>
+  <li>The new Collection Database is now the only database structure that can be used; Assortments are switched off.</li>
+  <li>Added functions to migrate Assortment databases and WORDS databases to Collection database.</li>
+  <li>Removed all methods to write Assortment data structures.</li>
+  <li>Migrated DHT position computation to base64-decoded values; this changes the DHT structure slightly and closes the gaps in the old DHT structure.</li>
+  </ul>
+</ul>
+
 <br><p>v0.49_20061202_3040
 <ul>
 <li>Enhanced search service</li>

@@ -87,7 +87,7 @@ public class yacySearch extends Thread {
                       plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile,
                       kelondroBitfield constraint) {
         super("yacySearch_" + targetPeer.getName());
-        System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.length() == 0) ? "(primary)" : "(secondary)"));
+        //System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.length() == 0) ? "(primary)" : "(secondary)"));
         this.wordhashes = wordhashes;
         this.urlhashes = urlhashes;
         this.prefer = prefer;

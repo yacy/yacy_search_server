@@ -556,6 +556,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.outgoingCookies = new HashMap();
         this.incomingCookies = new HashMap();
         
+        // init messages: clean up message symbol
+        File notifierSource = new File(getRootPath(), getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
+        File notifierDest = new File(getConfig("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+        try {
+            serverFileUtils.copy(notifierSource, notifierDest);
+        } catch (IOException e) {
+        }
+        
         // clean up profiles
         this.log.logConfig("Cleaning Profiles");
         try { cleanProfiles(); } catch (InterruptedException e) { /* Ignore this here */ }
