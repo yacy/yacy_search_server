@@ -66,6 +66,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class Blacklist_p {
+	private final static String DISABLED         = "disabled_";
     private final static String BLACKLIST        = "blackLists_";
     private final static String BLACKLIST_SHARED = "BlackLists.Shared";
 
@@ -291,8 +292,8 @@ public class Blacklist_p {
         
 
         // Read the blacklist items from file
-        int entryCount = 0;
         if (blacklistToUse != null) {
+            int entryCount = 0;
             final ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
             
             // sort them
@@ -306,77 +307,76 @@ public class Blacklist_p {
                 if (nextEntry.length() == 0) continue;
                 if (nextEntry.startsWith("#")) continue;
     
-                prop.put("Itemlist_" + entryCount + "_item", nextEntry);
+                prop.put(DISABLED + "Itemlist_" + entryCount + "_item", de.anomic.data.wikiCode.replaceHTMLonly(nextEntry));
                 entryCount++;
             }
-        } 
-        prop.put("Itemlist", entryCount);            
+        	prop.put(DISABLED + "Itemlist", entryCount);            
 
 
-        // List known hosts for BlackList retrieval
-        if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) { // no nullpointer error
-            int peerCount = 0;
-            try {
-                TreeMap hostList = new TreeMap();
-                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
-                while (e.hasMoreElements()) {
-                    yacySeed seed = (yacySeed) e.nextElement();
-                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
-                }
-
-                String peername;
-                while ((peername = (String) hostList.firstKey()) != null) {
-                    final String Hash = (String) hostList.get(peername);
-                    prop.put("otherHosts_" + peerCount + "_hash", Hash);
-                    prop.put("otherHosts_" + peerCount + "_name", peername);
-                    hostList.remove(peername);
-                    peerCount++;
-                }
-            } catch (Exception e) {/* */}
-            prop.put("otherHosts", peerCount);
+	        // List known hosts for BlackList retrieval
+	        if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) { // no nullpointer error
+	            int peerCount = 0;
+	            try {
+	                TreeMap hostList = new TreeMap();
+	                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+	                while (e.hasMoreElements()) {
+	                    yacySeed seed = (yacySeed) e.nextElement();
+	                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
+	                }
+	
+	                String peername;
+	                while ((peername = (String) hostList.firstKey()) != null) {
+	                    final String Hash = (String) hostList.get(peername);
+	                    prop.put(DISABLED + "otherHosts_" + peerCount + "_hash", Hash);
+	                    prop.put(DISABLED + "otherHosts_" + peerCount + "_name", peername);
+	                    hostList.remove(peername);
+	                    peerCount++;
+	                }
+	            } catch (Exception e) {/* */}
+	            prop.put(DISABLED + "otherHosts", peerCount);
+	        }
         }
-    
         
         // List BlackLists
         int blacklistCount = 0;
         if (dirlist != null) {
             for (int i = 0; i <= dirlist.length - 1; i++) {
-                prop.put(BLACKLIST + blacklistCount + "_name", dirlist[i]);
-                prop.put(BLACKLIST + blacklistCount + "_selected", 0);
+                prop.put(DISABLED + BLACKLIST + blacklistCount + "_name", de.anomic.data.wikiCode.replaceHTMLonly(dirlist[i]));
+                prop.put(DISABLED + BLACKLIST + blacklistCount + "_selected", 0);
 
                 if (dirlist[i].equals(blacklistToUse)) { //current List
-                    prop.put(BLACKLIST + blacklistCount + "_selected", 1);
+                    prop.put(DISABLED + BLACKLIST + blacklistCount + "_selected", 1);
 
                     for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                        prop.put("currentActiveFor_" + blTypes + "_blTypeName",supportedBlacklistTypes[blTypes]);
-                        prop.put("currentActiveFor_" + blTypes + "_checked",
+                        prop.put(DISABLED + "currentActiveFor_" + blTypes + "_blTypeName",supportedBlacklistTypes[blTypes]);
+                        prop.put(DISABLED + "currentActiveFor_" + blTypes + "_checked",
                                 listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i])?0:1);
                     }
-                    prop.put("currentActiveFor",supportedBlacklistTypes.length);
+                    prop.put(DISABLED + "currentActiveFor",supportedBlacklistTypes.length);
 
                 }
                 
                 if (listManager.ListInListslist(BLACKLIST_SHARED, dirlist[i])) {
-                    prop.put(BLACKLIST + blacklistCount + "_shared", 1);
+                    prop.put(DISABLED + BLACKLIST + blacklistCount + "_shared", 1);
                 } else {
-                    prop.put(BLACKLIST + blacklistCount + "_shared", 0);
+                    prop.put(DISABLED + BLACKLIST + blacklistCount + "_shared", 0);
                 }
 
                 int activeCount = 0;
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                     if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i])) {
-                        prop.put(BLACKLIST + blacklistCount + "_active_" + activeCount + "_blTypeName",supportedBlacklistTypes[blTypes]);
+                        prop.put(DISABLED + BLACKLIST + blacklistCount + "_active_" + activeCount + "_blTypeName",supportedBlacklistTypes[blTypes]);
                         activeCount++;
                     }                
                 }          
-                prop.put(BLACKLIST + blacklistCount + "_active",activeCount);
+                prop.put(DISABLED + BLACKLIST + blacklistCount + "_active",activeCount);
                 blacklistCount++;
             }
         }
-        prop.put("blackLists", blacklistCount);
+        prop.put(DISABLED + "blackLists", blacklistCount);
         
-        prop.put("currentBlacklist", (blacklistToUse==null)?"":blacklistToUse);
-        prop.put("disabled", (blacklistToUse==null)?1:0);
+        prop.put(DISABLED + "currentBlacklist", (blacklistToUse==null)?"":blacklistToUse);
+        prop.put("disabled", (blacklistToUse == null) ? 1 : 0);
         return prop;
     }
 

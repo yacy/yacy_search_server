@@ -17,7 +17,7 @@
    <a href="#[url]#" class="tt">#[url]#</a>
    <div class="CacheAdminInfo">
      #[info]#
-     <strong>HTTP Header</strong><!-- TO-DO: CSS/XHTMLize begin -->
+     <p><strong>HTTP Header</strong></p><!-- TO-DO: CSS/XHTMLize begin -->
      #(header)#<span class="info">- no header in header cache -</span>::<table border="0" cellspacing="0" cellpadding="0">#{line}#
        <tr valign="top">
          <td class="tt">#[property]#</td>
@@ -28,70 +28,70 @@
      
      #(type)#
      
-     <strong>TITLE:</strong><br />
-     #[title]#<br />
-     <br />
+     <p>
+       <strong>TITLE:</strong> #[title]#
+     </p>
      
-     <strong>SECTION HEADLINES:</strong><br />
+     <p><strong>SECTION HEADLINES:</strong></p>
      <ul>#{headlines}#
        <li>#[headline]#</li>#{/headlines}#
      </ul>
      <br />
      
-     <strong>HREF:</strong><br />
+     #(use.links)#::<p><strong>HREF:</strong></p>
      <table border="0" cellspacing="0" cellpadding="0">#{links}#
        <tr valign="top">
          <td><span class="small">#[name]#</span></td>
          <td class="tt">#[link]#</td>
        </tr>#{/links}#
-     </table>
+     </table>#(/use.links)#
      
-     <strong>IMAGE:</strong><br />
+     #(use.images)#::<p><strong>IMAGE:</strong></p>
      <table border="0" cellspacing="0" cellpadding="0">#{images}#
        <tr valign="top">
          <td><span class="small">#[name]#</span></td>
          <td class="tt">#[link]#</td>
        </tr>#{/images}#
-     </table>
+     </table>#(/use.images)#
      
-     <strong>AUDIO:</strong><br />
+     #(use.audio)#::<p><strong>AUDIO:</strong></p>
      <table border="0" cellspacing="0" cellpadding="0">#{audio}#
        <tr valign="top">
          <td><span class="small">#[name]#</span></td>
          <td class="tt">#[link]#</td>
        </tr>#{/audio}#
-     </table>
+     </table>#(/use.audio)#
      
-     <strong>VIDEO:</strong><br />
+     #(use.video)#::<p><strong>VIDEO:</strong></p>
      <table border="0" cellspacing="0" cellpadding="0">#{video}#
        <tr valign="top">
          <td><span class="small">#[name]#</span></td>
          <td class="tt">#[link]#</td>
        </tr>#{/video}#
-     </table>
+     </table>#(/use.video)#
      
-     <strong>APPS:</strong><br />
+     #(use.apps)#::<p><strong>APPS:</strong></p>
      <table border="0" cellspacing="0" cellpadding="0">#{apps}#
        <tr valign="top">
          <td><span class="small">#[name]#</span></td>
          <td class="tt">#[link]#</td>
        </tr>#{/apps}#
-     </table>
+     </table>#(/use.apps)#
      
-     <strong>EMAIL:</strong><br />
+     #(use.email)#::<p><strong>EMAIL:</strong></p>
      <table border="0" cellspacing="0" cellpadding="0">#{email}#
        <tr valign="top">
          <td><span class="small">#[name]#</span></td>
          <td class="tt">#[link]#</td>
        </tr>#{/email}#
-     </table>
+     </table>#(/use.email)#
      
-     <strong>TEXT:</strong><br />
+     <p><strong>TEXT:</strong></p>
      <span class="small">
        #[text]#
      </span>
      
-     <strong>LINES:</strong><br />
+     <p><strong>LINES:</strong></p>
      <span class="small">#{lines}#
        <span style="display: block;">#[line]#</span>#{/lines}#
      </span>

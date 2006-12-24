@@ -148,7 +148,8 @@ public class CacheAdmin_p {
                     String[] t = document.getSectionTitles();
                     prop.put("info_type_headlines", t.length);
                     for (i = 0; i < t.length; i++)
-                    	prop.put("info_type_headlines_" + i + "_headline", t[i].replaceAll("\n", "").trim());
+                    	prop.put("info_type_headlines_" + i + "_headline",
+                    			de.anomic.data.wikiCode.replaceHTMLonly(t[i].replaceAll("\n", "").trim()));
                     
                     formatAnchor(prop, document.getHyperlinks(), "links");
                     formatImageAnchor(prop, document.getImages());
@@ -157,13 +158,15 @@ public class CacheAdmin_p {
                     formatAnchor(prop, document.getApplinks(), "apps");
                     formatAnchor(prop, document.getEmaillinks(), "email");
                     
-                    prop.put("info_type_text", new String(scraper.getText()));
+                    prop.put("info_type_text",
+                    		de.anomic.data.wikiCode.replaceHTMLonly(new String(scraper.getText())));
                     
                     i = 0;
                     final Iterator sentences = document.getSentences(false);
                     if (sentences != null)
                     	while (sentences.hasNext()) {
-                    		prop.put("info_type_lines_" + i + "_line", sentences.next().toString().replaceAll("\n", "").trim());
+                    		prop.put("info_type_lines_" + i + "_line",
+                    				de.anomic.data.wikiCode.replaceHTMLonly(sentences.next().toString().replaceAll("\n", "").trim()));
 	                        i++;
 	                    }
                     prop.put("info_type_lines", i);
@@ -257,29 +260,34 @@ public class CacheAdmin_p {
         final Iterator iter = anchor.entrySet().iterator();
         String descr;
         Map.Entry entry;
-        prop.put("info_type_" + extension, anchor.size());
+        prop.put("info_type_use." + extension + "_" + extension, anchor.size());
         int i = 0;
         while (iter.hasNext()) {
             entry = (Map.Entry) iter.next();
             descr = ((String) entry.getValue()).trim();
             if (descr.length() == 0) { descr = "-"; }
-            prop.put("info_type_" + extension + "_" + i + "_name", descr.replaceAll("\n", "").trim());
-            prop.put("info_type_" + extension + "_" + i + "_link", entry.getKey());
+            prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_name",
+            		de.anomic.data.wikiCode.replaceHTMLonly(descr.replaceAll("\n", "").trim()));
+            prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_link",
+            		de.anomic.data.wikiCode.replaceHTMLonly(entry.getKey().toString()));
             i++;
         }
+        prop.put("info_type_use." + extension, (i == 0) ? 0 : 1);
     }
 
     private static void formatImageAnchor(serverObjects prop, TreeSet anchor) {
         final Iterator iter = anchor.iterator();
         htmlFilterImageEntry ie;
-        prop.put("info_type_images", anchor.size());
+        prop.put("info_type_use.images_images", anchor.size());
         int i = 0;
         while (iter.hasNext()) {
             ie = (htmlFilterImageEntry) iter.next();
-            prop.put("info_type_images_" + i + "_name", ie.alt().replaceAll("\n", "").trim());
-            prop.put("info_type_images_" + i + "_link", ie.url().toNormalform());
+            prop.put("info_type_use.images_images_" + i + "_name", ie.alt().replaceAll("\n", "").trim());
+            prop.put("info_type_use.images_images_" + i + "_link",
+            		de.anomic.data.wikiCode.replaceHTMLonly(ie.url().toNormalform()));
             i++;
         }
+        prop.put("info_type_use.images", (i == 0) ? 0 : 1);
     }
 
     private static void linkPathString(serverObjects prop, String path, boolean dir) {
