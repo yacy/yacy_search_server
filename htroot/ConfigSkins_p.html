@@ -11,63 +11,41 @@
     <p>
       You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.
     </p>
-    <table border="0" cellpadding="5" cellspacing="1">
-      <tr>
-        <td valign="top" class="TableHeader" colspan="2">
-          &nbsp;
-        </td>
-      </tr>
-      <tr>
-        <td valign="top" class="TableCellDark">
-          Current skin: 
-        </td>
-        <td  valign="top" class="TableCellLight">
-          #[currentskin]#
-        </td>
-      </tr>
-      <tr>
-        <td valign="top" class="TableCellDark">
-          Available Skins:
-        </td>
-        <td valign="top" class="TableCellLight">
-          <form action="ConfigSkins_p.html">
-            <fieldset>
-              <select size="10" name="skin">
-                #{skinlist}#
-                <option value="#[file]#">#[name]#</option>
-                #{/skinlist}#
-              </select>
-            </fieldset>
-            <fieldset>
-              <input type="submit" name="use_button" value="Use" />
-              <input type="submit" name="delete" value="Delete" />
-            </fieldset>
-          </form>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top" class="TableCellDark">
-          Install new skin from URL:
-        </td>
-        <td valign="top" class="TableCellLight">
-          <form action="ConfigSkins_p.html">
-            <fieldset>
-              <input type="text" name="url" size="30" /><br />
-              <input type="checkbox" name="use_skin" value="on" checked="checked" />Use this skin<br /><br />
-              <input type="submit" value="install" />
-            </fieldset>
-          </form>
-          <p>
-            <strong>#(status)#
-            ::
-            Unable to get URL: #[url]#
-            ::
-            Error saving the skin.
-            #(/status)#</strong>
-          </p>
-        </td>
-      </tr>
-    </table>
+    
+    <form action="ConfigSkins_p.html">
+      <fieldset>
+        <dl class="pairs">
+          <dt><label for="cur_skin">Current skin</label>:</dt>
+          <dd id="cur_skin">#[currentskin]#&nbsp;</dd>
+          
+          <dt><label for="skins">Available Skins</label>:</dt>
+          <dd>
+            <select id="skins" size="10" name="skin">#{skinlist}#
+              <option value="#[file]#">#[name]#</option>#{/skinlist}#
+            </select>
+          </dd>
+        </dl>
+        <input type="submit" name="use_button" value="Use" />
+        <input type="submit" name="delete" value="Delete" />
+      </fieldset>
+    </form>
+    
+    <form action="ConfigSkins_p.html">
+      <fieldset>
+        <dl>
+          <dt><label for="url">Install new skin from URL</label>:</dt>
+          <dd><input type="text" name="url" id="url" size="30" /></dd>
+          
+          <dt><label for="use_url">Use this skin</label></dt>
+          <dd><input type="checkbox" name="use_skin" id="use_url" value="on" checked="checked" /></dd>
+        </dl>
+        <input type="submit" value="install" />
+      </fieldset>
+    </form>
+    #(status)#
+    ::<p><strong>Unable to get URL: #[url]#</strong></p>
+    ::<p><strong>Error saving the skin.</strong></p>
+    #(/status)#
     #%env/templates/footer.template%#
   </body>
 </html>
