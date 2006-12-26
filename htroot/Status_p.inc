@@ -36,16 +36,12 @@
   <tr class="TableCellDark">
     <td>Auto-popup on start-up</td>
       #(popup)#
-      <td>
-      Disabled
-      </td>
+      <td>Disabled</td>
       <td>
       <a href="Status.html?popup=true">[Enable]</a>
       </td>
       ::
-      <td>
-      Enabled
-      </td>
+      <td>Enabled</td>
       <td>
       <a href="Status.html?popup=false">[Disable]</a>
       </td>

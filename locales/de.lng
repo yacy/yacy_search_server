@@ -189,18 +189,17 @@ You can also use your peer without opening it, but this is not recomended.==Sie 
 #File: ConfigLanguage_p.html
 #---------------------------
 Language selection==Sprachauswahl
-Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
-Current language:==Aktuelle Sprache
+Current language</label>==Aktuelle Sprache</label>
 default\(english\)==Deutsch
-Languagefile Author\(s\) \(chronological\)\:==Autor(en) der Sprachdatei (chronologisch):
-Send additions to maintainer:==Schicken Sie Erg&auml;nzungen bitte an:
-Available Languages:==Verf&uuml;gbare Sprachen:
-Install new language from URL:==Neue Sprachdatei herunterladen:
+Author\(s\) \(chronological\)</label>==Autor(en) (chronologisch)</label>
+Send additions to maintainer</em>==Schicken Sie Erg&auml;nzungen bitte an</em>
+Available Languages</label>==Verf&uuml;gbare Sprachen</label>
+Install new language from URL==Neue Sprachdatei herunterladen
 Use this language==Diese Sprachdatei sofort benutzen
-"Use"==Benutzen
-"Delete"==L&ouml;schen
-"Install"==Installieren
+"Use"=="Benutzen"
+"Delete"=="L&ouml;schen"
+"Install"=="Installieren"
 Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
 Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
 #-----------------------------
@@ -228,11 +227,11 @@ here.==im Profil benutzen.
 #---------------------------
 Skin Selection==Skinauswahl
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie k&ouml;nnen hier das Aussehen von YaCy mit Skins &auml;ndern. W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
-Current skin:==Aktueller Skin:
-Available Skins:==Verf&uuml;gbare Skins:
+Current skin==Aktueller Skin
+Available Skins==Verf&uuml;gbare Skins
 "Use"=="Benutzen"
 "Delete"=="L&ouml;schen"
-Install new skin from URL:==Installiere einen neuen Skin von folgender URL:
+Install new skin from URL==Installiere einen neuen Skin von folgender URL
 Use this skin==Benutze diesen Skin
 "install"=="Installieren"
 Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
@@ -258,20 +257,24 @@ Waiting for new request nr.==Warte auf neue Anfrage Nr.
 #---------------------------
 Incoming Cookies Monitor==&Uuml;berwachung eingehender Cookies
 Cookie Monitor: Incoming Cookies==Cookie &Uuml;berwachung: Eingehende Cookies
-This is a list of cookies that browsers using the YaCy proxy sent to webservers:==Dies ist eine Liste aller Cookies, die die Browser, die den YaCy-Proxy benutzen, an Webserver versandt haben:
-Showing==Angezeigt werden
-entries from a total of==Eintr&auml;ge von insgesamt
-Cookies==Cookies
+This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Dies ist eine Liste aller Cookies, die ein Webserver an Clients des YaCy Proxys geschickt hat:
+Showing \#\[num\]\# entries from a total of \#\[total\]\# Cookies.==Angezeigt werden #[num]# Eintr&auml;ge von insgesamt #[total]# Cookies.
+Sending Host==Sendender Host
+Date</td>==Datum</td>
+Receiving Client==Erhaltender Client
+#Cookie==Cookie
 #-----------------------------
 
 #File: CookieMonitorOutgoing_p.html
 #---------------------------
 Outgoing Cookies Monitor==&Uuml;berwachung ausgehender Cookies
 Cookie Monitor: Outgoing Cookies==Cookie &Uuml;berwachung: Ausgehende Cookies
-This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Dies ist eine Auflistung aller Cookies, die Ihr Browser an einen Webserver geschickt hat:
-Showing==Angezeigt werden
-entries from a total of==Eintr&auml;ge von insgesamt
-Cookies==Cookies
+This is a list of cookies that browsers using the YaCy proxy sent to webservers:==Dies ist eine Auflistung aller Cookies, die Browser, die den YaCy Proxy benutzen, an einen Webserver geschickt haben:
+Showing \#\[num\]\# entries from a total of \#\[total\]\# Cookies.==Angezeigt werden #[num]# Eintr&auml;ge von insgesamt #[total]# Cookies.
+Receiving Host==Erhaltender Host
+Date</td>==Datum</td>
+Sending Client==Sendender Client
+#Cookie==Cookie
 #-----------------------------
 
 #File: Help.html
@@ -356,17 +359,10 @@ YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
 #Text==Text
 Images==Bilder
 #Audio==Audio
-V#ideo==Video
+#Video==Video
 Applications==Anwendungen
 more options...==mehr Optionen...
 Max. number of results:==Max. Anzahl Ergebnisse:
-order by:==sortieren nach:
-YBR-Date-Quality==YBR-Datum-Qualit&auml;t
-YBR-Quality-Date==YBR-Qualit&auml;t-Datum
-Date-YBR-Quality==Datum-YBR-Qualit&auml;t
-Quality-YBR-Date==Qualit&auml;t-YBR-Datum
-Date-Quality-YBR==Datum-Qualit&auml;t-YBR
-Quality-Date-YBR==Qualit&auml;t-Datum-YBR
 Resource:==Quelle:
 global==global
 local==lokal
@@ -515,44 +511,14 @@ Accept remote crawling requests and perform crawl at maximum of==Akzeptiere Remo
 Pages Per Minute \(minimum is 1, low system load usually at PPM &ge; 30\)==Seiten pro Minute (Minimum ist 1, langsame Systeme sollten normalerweise unter 30 Seiten pro Minute laden)
 Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Akzeptiere keine Remote-Crawling Anfragen (bitte aktivieren Sie dies nur, wenn Sie nicht eine Seite pro Minute crawlen k&ouml;nnen; siehe Option oben)
 "set"=="Speichern"
-Error:==Fehler:
-Application not yet initialized. Sorry. Please wait some seconds and repeat the request.==Nicht richtig initialisiert. Sorry. Bitte warten Sie einige Sekunden und wiederholen Sie die Anfrage.
-Crawling of "\#\[crawlingURL\]\#" failed. Reason:==Crawling von "#[crawlingURL]#" fehlgeschlagen. Grund:
-Error with file input==Fehler mit der eingegebenen Datei
-Set new prefetch depth to==Neue Crawl Tiefe gesetzt auf
-Crawling of "\#\[crawlingURL\]\#" started.==Crawling von "#[crawlingURL]#" gestartet.
-You can monitor the crawling progress either by watching the URL queues==Sie k&ouml;nnen den Crawling Prozess auch sehen, indem Sie auf einer der folgenden URLs nachsehen:
-local queue</a>==lokale Warteschlange</a>
-global queue</a>==globale Warteschlange</a>
-loader queue</a>==Lade-Warteschlange</a>
-indexing queue</a>==Indexier-Warteschlange</a>
-or see the fill/process count of all queues on the==Oder sehen Sie sich den F&uuml;ll-Prozess von allen Warteschlangen auf der
->performance page</a>.==>Performance-Seite</a> an.
-Please wait some seconds, because the request is enqueued and delayed until the proxy/HTTP-server is idle for a certain time.==Bitte warten Sie einige Sekunden, da die Anfrage verz&ouml;gert wird, bis der Proxy/Http-Server f&uuml;r einige Zeit unt&auml;tig ist.  
-The indexing results are presented on the==Die Resultate des Indexierens werden auf der
-Index Monitor</a>-page.==Index Monitor</a>-Seite angezeigt.
-It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.==Es dauert in der Regel mind. 30 Sekunden bis das Sie dort die ersten Ergebnisse sehen k&ouml;nnen. Bitte beachten Sie, dass das Crawling jedesmal, wenn Sie den Proxy oder den Web-Sever benutzen, pausiert wird, um maximale Verf&uuml;gbarkeit zu garantieren.
-If you crawl any un-wanted pages, you can delete them==Wenn Sie Seiten crawlen, die Sie nicht crawlen wollen, k&ouml;nnen Sie diese
-here</a>.==hier</a> l&ouml;schen.
-Removed \#\[numEntries\]\# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty==#[numEntries]# Eintr&auml;ge wurden aus der Crawl Warteschlange entfernt. Diese Warteschlange wird sich erneut f&uuml;llen, wenn noch Eintr&auml;ge in der Lade- und Indexier Warteschlange stehen.
 Crawling paused successfully.==Crawling wurde erfolgreich unterbrochen (Pause).
 Continue crawling.==Crawling wird fortgesetzt.
 "refresh"=="Aktualisieren"
 "continue crawling"=="Crawling fortsetzen"
 "pause crawling"=="Crawling pausieren"
-Crawl Profile List:==Crawl Profil Liste:
-Crawl Thread==Crawl Art
 Start URL==Start URL
 Depth</strong>==Tiefe</strong>
-Filter</strong>==Maske</strong>
-MaxAge</strong>==Max. Alter</strong>
-Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
-Auto Filter Content</strong>==Auto Inhalts Filter</strong>
-Max Page Per Domain</strong>==Max. Seiten pro Domain</strong>
 Accept \'?\' URLs</strong>==URLs mit "?" akzeptieren</strong>
-Fill Proxy Cache==F&uuml;lle Proxy Cache
-Local Indexing</strong>==Lokales Indexieren</strong>
-Remote Indexing</strong>==Indexieren auf anderen Peers</strong>
 Recently started remote crawls in progress:==Gerade gestartetes Indexieren auf anderen Peers in Bearbeitung:
 Start Time==Startzeit
 Peer Name==Peer Name
@@ -564,13 +530,7 @@ No remote crawl peers availible.==Kein Peer zum Remote-Crawl erreichbar.
 peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.
 Idle Peers==Unt&auml;tige Peers
 Busy Peers==Besch&auml;tigte Peers
-\#\(withQuery\)\#no::yes\#\(/withQuery\)\#==#(withQuery)#nein::ja#(/withQuery)#
-\#\(storeCache\)\#no::yes\#\(/storeCache\)\#==#(storeCache)#nein::ja#(/storeCache)#
-\#\(localIndexing\)\#no::yes\#\(/localIndexing\)\#==#(localIndexing)#nein::ja#(/localIndexing)#
-\#\(remoteIndexing\)\#no::yes\#\(/remoteIndexing\)\#==#(remoteIndexing)#nein::ja#(/remoteIndexing)#
-\#\(crawlingQ\)\#no::yes\#\(/crawlingQ\)\#==#(crawlingQ)#nein::ja#(/crawlingQ)#
-\#\{available\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)&nbsp;&nbsp; \#\{/available\}\#==#{available}##[name]# (#[due]# Sekunden lang)&nbsp;&nbsp; #{/available}#
-\#\{busy\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)&nbsp;&nbsp;\#\{/busy\}\#==#{busy}##[name]# (#[due]# Sekunden lang)&nbsp;&nbsp;#{/busy}#
+\#no::yes\#==#nein::ja#
 #-----------------------------
 
 #File: IndexCreateIndexingQueue_p.html
@@ -1150,7 +1110,7 @@ Please note that this setting only take effect for a prefetch depth greater than
 Proxy generally==Proxy Allgemein
 Path==Verzeichnis
 The path where the pages are stored \(max. length 300\)==Verzeichnis in dem der Cache sein soll (max. 300 Zeichen)
-Size</td>==Gr&ouml;sse</td>
+Size</label>==Gr&ouml;sse</label>
 The size in MB of the cache.==Die Gr&ouml;sse des Cache in MB.
 "Set proxy profile"=="Proxy Profil speichern"
 The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DATA/PLASMADB/crawlProfiles0.db fehlt entweder oder ist defekt.
@@ -1224,16 +1184,17 @@ defining host name and port==einen Hostnamen und Port angeben
 defining interface name and port==einen Interface-namen und Port angeben
 <em>e.g. #eth0:8080</em>==<em>z.B. #eth0:8080</em>
 Hint: Dont forget to change your firewall configuration after you have changed the port.==Hinweis: Denken Sie daran Ihre Firewalleinstellungen zu &auml;ndern nachdem Sie den Port ge&auml;ndert haben.
-Proxy and http-Server Administration Port:==Proxy und HTTP-Server Administrations Port:
+Proxy and http-Server Administration Port==Proxy und HTTP-Server Administrations Port
 Changes will take effect in 5-10 seconds==Die &Auml;nderungen werden in 5-10 Sekunden wirksam
 Server Access Restrictions==Server Zugangsbeschr&auml;nkungen
 You can restrict the access to this proxy/server using a two-stage security barrier:==Sie k&ouml;nnen den Zugang zu diesem Proxy/Server mit einer 2-stufigen Sicherheitsbarriere einschr&auml;nken:
 define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==geben Sie einen <em>Netzwerkadressraum</em> mithilfe einer Liste zugelassener Client-IP-Adressen oder mit Platzhaltern an
 define an <em>user account</em> with an user:password - pair==geben Sie einen <em>Nutzeraccount</em> mit einem nutzer:passwort-Paar an
 This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gew&auml;hrt wird.
-You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet.==Sie wollen den Proxy vermutlich nicht im Internet zur Verf&uuml;gung stellen, deshalb sollten Sie den IP-Adressraum so einstellen, dass er auf Ihr lokales Intranet zutrifft.
-The default setting should be right in most cases.==Die Standardwerte sollten in den meisten F&auml;llen richtig sein.
-If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.==Wenn Sie wollen k&ouml;nnen Sie auch Proxyaccounts erstellen, sodass sich jeder Proxynutzer zuerst anmelden muss, aber das ist eher un&uuml;blich.
+You probably don't want to share the proxy to the internet, so you should set the==Sie wollen den Proxy vermutlich nicht im Internet zur Verf&uuml;gung stellen, deshalb sollten Sie
+IP-Number Access Domain to a pattern that corresponds to you local intranet.==den IP-Adressraum so einstellen, dass er auf Ihr lokales Intranet zutrifft.
+The default setting should be right in most cases. If you want, you can also set a proxy account==Die Standardwerte sollten in den meisten F&auml;llen richtig sein. Wenn Sie wollen k&ouml;nnen Sie auch Proxyaccounts erstellen
+so that every proxy user must authenticate first, but this is rather unusual.==, sodass sich jeder Proxynutzer zuerst anmelden muss, aber das ist eher un&uuml;blich.
 IP-Number filter==IP-Adressen Filter
 Use <a==Nutze <a
 #-----------------------------
@@ -1377,6 +1338,9 @@ Content Parser Settings==Inhalt Parser Einstellungen
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen k&ouml;nnen Sie das Parsen zus&auml;tzlicher Dateitypen basierend auf ihren MIME-Typen erm&ouml;glichen.
 For a detailed description of the various MIME-types take a look at==F&uuml;r eine detailierte Beschreibung der verschiedenen MIME-Typen k&ouml;nnen Sie einen Blick auf
 http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
+Parser&nbsp;Usage==Parser Benutzung
+Enable all parsers==aktiviere alle Parser
+"Submit"=="Speichern"
 Changes take effect immediately==&Auml;nderungen sind sofort wirksam
 #-----------------------------
 
@@ -1541,12 +1505,6 @@ You are in <em>permanent</em> mode.==Sie sind im <em>permanenten</em> Modus.
 Last Refresh:==Letzte Aktualisierung:
 Click here to==Klicken Sie
 log in</a> as administrator and see full status.==hier</a>, um sich als Administrator einzuloggen und den vollst&auml;ndigen Status zu sehen.
-Disable==Abschalten
-Disabled==Abgeschaltet
-Enable==Anschalten
-Enabled==Angeschaltet
-
-
 #-----------------------------
 
 #File: Status_p.inc
@@ -1569,9 +1527,10 @@ Used for YaCy -> YaCy communication:==Benutzt zur YaCy -> YaCy Kommunikation:
 Yes==Ja
 No==Nein
 Auto-popup on start-up==Auto-Popup beim Starten
-Disabled. To enable this again please use the==Deaktiviert. Um diese Funktion wieder zu aktivieren, benutzen Sie bitte die
-Settings</a> page.==Einstellungen-Seite</a>.
-Enabled. To disable this please use the==Aktiviert. Um diese Funktion zu deaktivieren, benutzen Sie bitte die
+Disabled</td>==Deaktiviert</td>
+Enable\]==Aktivieren]
+Enabled</td>==Aktiviert</td>
+Disable\]==Deaktivieren]
 Memory Usage==Speicherverbrauch
 free:==Frei:
 total:==Total:
@@ -1591,8 +1550,7 @@ Remote triggered Crawl==eingehende Remote-Crawls
 Global Crawl Trigger==ausgehende Remote-Crawls
 #Pre-Queueing==
  local== lokal
-Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server. You can configure your account details on the==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver. Die Zugangsdaten f&uuml;r den FTP-Account k&ouml;nnen Sie in den
-Settings page</a>.==Einstellungen</a> konfigurieren.
+Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server.==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver.
 Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
 Enabled: Updating periodically to file==Aktiv: Periodisches Update in Datei
 Last upload:==Letzter Upload:
@@ -1712,7 +1670,7 @@ seconds==Sekunden
 Queue==Puffer
 Size==Größe
 #Max==Max
-Indexing==Indexieren
+Indexing</td>==Indexieren</td>
 Loader==Lader
 Local Crawler==Lokaler Crawler
 unlimited==uneingeschr&auml;nkt
@@ -1755,8 +1713,9 @@ Remote Indexing==Remote Indexieren
 \#no::yes\#==#nein::ja#
 Crawl Queue:==Crawler Puffer:
 Queue==Puffer
-#Profile==Profile
+Profile==Profil
 Initiator==Auftraggeber
+Depth</th>==Tiefe</th>
 Modified Date==zuletzt bearbeitet-Datum
 Anchor Name==Linkbezeichnung
 #URL==URL
@@ -1840,7 +1799,7 @@ more options==Mehr Optionen
 #Text==Text
 Images==Bilder
 #Audio==Audio
-V#ideo==Video
+#Video==Video
 Applications==Anwendungen
 The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
 No Results.==Keine Ergebnisse.
@@ -2002,7 +1961,7 @@ Welcome! You are identified and authorized as==Willkommen! Sie sind identifizier
 
 #File: www/welcome.html
 #---------------------------
-YACY: Default Page for Individual Peer Content==YACY: Standardseite f&uuml;r eigene Peer-Inhalte
+YaCy: Default Page for Individual Peer Content==YACY: Standardseite f&uuml;r eigene Peer-Inhalte
 Individual&nbsp;Web&nbsp;Page==eigene Webseite
 Welcome to your own web page<br />in the <strong>YaCy Network==Willkommen auf Ihrer eigenen Webseite<br />im <strong>YaCy-Netzwerk
 THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE F&Uuml;R IHREN EIGENEN WEB SERVER!
