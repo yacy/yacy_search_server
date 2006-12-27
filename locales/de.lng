@@ -277,6 +277,57 @@ Sending Client==Sendender Client
 #Cookie==Cookie
 #-----------------------------
 
+#File: DetailedSearch.html
+#---------------------------
+Search Page==Suchseite
+Detailed&nbsp;Search==Detaillierte Suche
+"Search"=="Suche"
+Query Attributes==Such Attribute
+#Global:==Global
+Post-Sort:
+Max. number of results:==Max. Anzahl Ergebnisse:
+Max. search time \(seconds\):==Max. Suchzeit (in Sekunden):
+Max. word distance:==Max. Wort Distanz:
+Pre-Ranking==Vor-Ranking
+"Domain Length"=="Domain L&auml;nge"
+#"YaCy Block Rank"=="YaCY Block Rank"
+"Date"=="Datum"
+"Words In Title"=="W&ouml;rter im Titel"
+"Words In Text"=="W&ouml;rter im Text"
+"Phrases In Text"=="Phrasen im Text"
+"Links To Local Domain"=="Links zu lokaler Domain"
+"Links To Other Domain"=="Links zu anderer Domain" 
+"URL Length"=="URL L&auml;nge"
+"URL Components"=="URL Komponenten"
+"Hit Count"=="Treffer Anzahl"
+"Position In Text"=="Position im Text"
+"Position Of Phrase"=="Position der Phrase"
+"Word Distance"=="Wort Distanz"
+"Appearance in URL"=="Taucht in URL auf"
+"Appearance in Description"=="Vorkommen in Beschreibung"
+"Appearance in Author"=="Vorkommen im Autor"
+"Appearance in Tags"=="Vorkommen in Tags"
+"Appearance in Reference"=="Vorkommen in Referenz"
+"Appearance in Emphasized Text"=="Vork. in hervorgehobenem Text"
+"Category Index Page"=="Kategorie Index Seite"
+"Category Image Appearance"=="Vorkommen in Bilder Kategorie" 
+"Category Audio Appearance"=="Vorkommen in Audio Kategorie"
+"Category Video Appearance"=="Vorkommen in Video Kategorie"
+"Category App. Appearance"=="Vorkommen in Anwendungen Kategorie"
+Post-Ranking==Nach-Ranking
+"URL Component Appears In Toplist"=="URL Komponente kommt in Topliste vor"
+"Description Comp. Appears In Toplist"=="Beschreibung kommt in Topliste vor"
+"Application Of Prefer Pattern"=="Anwendung der bervorzugten Form"
+"Set as Default Ranking"=="Speicher als standard Ranking"
+"Re-Set to Built-In Ranking"=="Stelle auf urspr&uuml;ngliche Werte zur&uuml;ck"
+The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
+results from <strong>\#\[orderedcount\]\#</strong> ordered links of a total number of <strong>\#\[totalcount\]\#</strong> known.==Ergebnisse von <strong>#[orderedcount]#</strong> angeforderten Links von insgesamt <strong>#[totalcount]#</strong> bekannten Links.
+Topwords</strong> \(to refine search\):==Topw&ouml;rter</strong> (um Suche zu verfeinern):
+#"delete"=="l&ouml;schen"
+#Info==Info
+
+#-----------------------------
+
 #File: Help.html
 #---------------------------
 YaCy: Help==YaCy: Hilfeseiten
@@ -1096,7 +1147,7 @@ and automatically excluded from indexing.==und automatisch von der Indexierung a
 Proxy pre-fetch setting:==Proxy Indexier Einstellung:
 this is an automated html page loading procedure that takes actual proxy-requested==Dies ist eine automatische Web Seiten Lade Funktion, die aktuell besuchte
 URLs as crawling start points for crawling.==URLs als Startpunkt zum Indexieren benutzt.
-Prefetch Depth==Indizier Tiefe
+Prefetch Depth==Indexier Tiefe
 A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==Bei einer Tiefe von 0 wird nur die besuchte Seite indexiert; eine Tiefe von 1 bedeutet, dass alle Seiten
 embedded URLs, but since embedded image links are loaded by the browser==die auf dieser Seite verlinkt sind, geladen und indexiert werden; Da Links auf Bilder sowieso schon vom Browser geladen werden,
 this means that only embedded href-anchors are prefetched additionally.==trifft dies nur auf eingebettet HREF-Anker zu.
@@ -1106,7 +1157,7 @@ Do Remote Indexing==Remote Indexierung
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler andere Peers anfragen und als remote Indexierer f&uuml;r Ihren Crawl nutzen.
 If you need your crawling results locally, you should switch this off.==Sollten Sie Ihre Crawling Ergebnisse lokal ben&ouml;tigen, dann deaktivieren Sie diese Funktion.
 Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl starten oder empfangen.
-Please note that this setting only take effect for a prefetch depth greater than 0.==Bitte ber&uuml;cksichtigen Sie, dass diese Einstellung nur wirkt, wenn Ihre Indizier Tiefe gr&ouml;sser als 0 ist.
+Please note that this setting only take effect for a prefetch depth greater than 0.==Bitte ber&uuml;cksichtigen Sie, dass diese Einstellung nur wirkt, wenn Ihre Indexier Tiefe gr&ouml;sser als 0 ist.
 Proxy generally==Proxy Allgemein
 Path==Verzeichnis
 The path where the pages are stored \(max. length 300\)==Verzeichnis in dem der Cache sein soll (max. 300 Zeichen)
@@ -1115,7 +1166,7 @@ The size in MB of the cache.==Die Gr&ouml;sse des Cache in MB.
 "Set proxy profile"=="Proxy Profil speichern"
 The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DATA/PLASMADB/crawlProfiles0.db fehlt entweder oder ist defekt.
 Please delete that file and restart.==Bitte l&ouml;schen Sie diese Datei und starten Sie YaCy neu.
-Pre-fetch is now set to depth==Proxy Indizierung erfolgt nun bis zu einer Tiefe von
+Pre-fetch is now set to depth==Proxy Indexierung erfolgt nun bis zu einer Tiefe von
 Caching is now \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Proxy Speichern im Cache ist nun #(caching)#aus::an#(/caching)#.
 Cachepath is now set to \'\#\[return\]\#\'.</strong> Please move the old data in the new directory.==Der Cache ist nun im Verzeichnis '#[return]#'.</strong> Bitte verschieben Sie Ihre alten Daten in das neue Verzeichnis.
 Cachesize is now set to \#\[return\]\#MB.==Die Cache Gr&ouml;sse ist nun auf #[return]#MB gesetzt.
@@ -1666,7 +1717,7 @@ Comment==Kommentar
 #File: WatchCrawler_p.html
 #---------------------------
 Next update in==Nächste Aktualisierung in
-seconds==Sekunden
+seconds.==Sekunden.
 Queue==Puffer
 Size==Größe
 #Max==Max
@@ -1695,7 +1746,7 @@ Error with URL input==Fehler mit URL Eingabe
 Error with file input==Fehler mit Datei Eingabe
 started.==gestartet.
 Please wait some seconds, it may take some seconds until the first result appears there.==Bitte warten Sie ein wenig, es dauert einige Sekunden, bis die ersten Ergebnisse hier zu sehen sind. 
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Ihr Crawl Seiten indexiert, die Sie nicht indexiert haben wollen, k&ouml;nnen Sie diese <a href="IndexCreateWWWLocalQueue_p.html">hier</a> l&oul;schen.
+If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Ihr Crawl Seiten indexiert, die Sie nicht indexiert haben wollen, k&ouml;nnen Sie diese <a href="IndexCreateWWWLocalQueue_p.html">hier</a> l&ouml;schen.
 Crawl Profiles:==Crawl Profile:
 Crawl Thread==Crawl Art
 #Start URL==Start URL
@@ -1713,7 +1764,7 @@ Remote Indexing==Remote Indexieren
 \#no::yes\#==#nein::ja#
 Crawl Queue:==Crawler Puffer:
 Queue==Puffer
-Profile==Profil
+Profile</th>==Profil</th>
 Initiator==Auftraggeber
 Depth</th>==Tiefe</th>
 Modified Date==zuletzt bearbeitet-Datum
@@ -1810,8 +1861,8 @@ Other possible reasons for no result:==Andere m&ouml;gliche Gr&uuml;nde daf&uuml
 The search time was too short. Search again with same query to catch up 'late peers'==Die Zeit zum suchen war zu kurz. Suchen Sie erneut mit erh&ouml;hter max. Suchdauer nach dem gleichen Begriff, um so auch Ergebnisse von langsameren Peers zu erhalten.
 There is currently no support for german umlaute. Please use ae/oe/ue instead==Zur Zeit gibt es keine Unterst&uuml;tzung der deutschen Umlaute. Bitte benutzen Sie stattdessen ae/oe/ue.
 Words of length &lt; 3 are not indexed. Please omit such words==W&ouml;rter mit weniger als 3 Buchstaben werden nicht indexiert. Bitte vermeiden Sie eine Suche nach solchen W&ouml;rtern.
-YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indiziert nur den Singular eines Wortes. Bitte suchen Sie daher auch nur nach dem Singular.
-Only complete words are indexed, not parts of words==Nur komplette W&ouml;rter sind indiziert, keine Teile eines Wortes.
+YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indexiert nur den Singular eines Wortes. Bitte suchen Sie daher auch nur nach dem Singular.
+Only complete words are indexed, not parts of words==Nur komplette W&ouml;rter sind indexiert, keine Teile eines Wortes.
 Don't use stopwords as search words==Benutzen Sie bitte keine Stopwords in der Suche.
 During this test phase the reaction time of remote peers is unknown.==W&auml;hrend dieser Testphase ist die Reaktionszeit von anderen Peers unbekannt.
 Please repeat your search to see if there are late-responses from remote peers==Bitte wiederholen Sie Ihre Suche, um zu sehen ob es Antworten von sp&auml;t reagierenden Peers gibt
@@ -1957,6 +2008,44 @@ YaCy: Public Files==YaCy: &Ouml;ffentliche Dateien
 Public&nbsp;File&nbsp;Directory==&Ouml;ffentliches Datei Verzeichnis
 value="\#\[peername\]\#'s Console"==value="#[peername]#s Konsole"
 Welcome! You are identified and authorized as==Willkommen! Sie sind identifiziert und authorisiert als
+"Log-Out Administrator"=="Administrator ausloggen"
+\(enter&nbsp;empty&nbsp;account\)==(betrete leeren Account)
+"Log-Out 'upload'"=="Upload ausloggen"
+"Log-Out 'download'"=="Download ausloggen"
+#Service==Service
+New Directory:==Neues Verzeichnis:
+"Create"=="Erstellen"
+File Upload:==Datei Hochladen:
+Resource==Quelle
+Description==Beschreibung
+Indexing==Indexieren
+"Transfer"=="&Uuml;bertragen"
+You are granted to view directory listings and do downloads in this directory.==Es ist Ihnen erlaubt das Verzeichnis zu sehen und Dateien herunterzuladen. 
+If you want to upload, please log in as user 'upload'==Wenn Sie etwas hochladen wollen, loggen Sie sich bitte als Benutzer "Upload" ein.
+No service available.==Kein Service verf&uuml;gbar.						
+#Account==Account
+#upload:==upload:
+"Set Password"=="Passwort speichern"
+#download:==download:
+"Log-In as Administrator"=="Als Administrator einloggen"
+"Log-In as user 'upload'"=="Als Upload einloggen"
+"Log-In as user 'download'"=="Als Download einloggen"
+#Info==Info
+Admin and download accounts are necessary to grant their services to clients;==Amdin und download Accounts sind notwendig, um den Service zu garantieren;
+no password is required for the download-account unless you set one.==f&uuml;r den download-Account ist kein Passwort notwendig, ausser Sie setzen eins. 
+Files uploaded and indexed here have a special index entry \'yacyshare\';==Dateien die hochgeladen und indexiert wurden, haben einen speziellen Indexeintrag "yacyshare";
+if you want to find files that are indexed in any share zone, add the word \'yacyshare\' to the search words.==wenn Sie Dateien finden wollen, die so indexiert wurden, geben Sie zus&auml;tzlich das Wort "yacyshare" zu Ihrem Suchwort ein.
+Uploaders are not granted to delete files or directories. If you want to do this, log-in as admin.==Uploaders d&uuml;rfen keine Dateien oder Verzeichnisse l&ouml;schen. Wenn Sie dies tun wollen, m&uuml;ssen Sie sich als Administrator einloggen.Download is granted even if no download account has been defined.==Herunterladen ist erlaubt, ausser ein extra Download Account wurde erstellt.
+If you are an administrator and you wish to block non-authorized downloades, please log in as user 'admin' and set a download password.==Wenn Sie ein Administrator sind und nicht authorisiertes herunterladen blockieren wollen, loggen Sie sich bitte als Admin ein und setzen ein download Passwort. 						
+You must log-in to upload or download.==Sie m&uuml;ssen sich einloggen, um hoch- oder runterzuladen.
+Directory</i>==Verzeichnis</i>
+"delete"=="l&ouml;schen"
+EMPTY==LEER
+To inspect this directory you need either an admin, upload or download account. Please log in.==Um dieses Verzeichnis anzuzeigen, m&uuml;ssen Sie entweder Administrator, Upload oder Download sein. Bitte loggen Sie sich ein. 
+Access of this page with the URLs:==Zugang zu dieser Seite &uuml;ber diese URLs:
+or <a==oder <a
+from within the YaCy network.==aus dem YaCy Netzwerk.
+
 #-----------------------------
 
 #File: www/welcome.html
