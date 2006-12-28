@@ -178,14 +178,8 @@ public class DetailedSearch {
         if (prop == null || prop.size() == 0) {
             prop.put("num-results", 0);
         } else {
-            final int linkcount = Integer.parseInt(prop.get("type_linkcount", "0"));
-            final int orderedcount = Integer.parseInt(prop.get("type_orderedcount", "0"));
-            final int totalcount = Integer.parseInt(prop.get("type_totalcount", "0"));
             final Object[] references = (Object[]) prop.get("type_references", new String[0]);
-            prop.put("type_num-results", 1);
-            prop.put("type_num-results_linkcount", linkcount);
-            prop.put("type_num-results_orderedcount", orderedcount);
-            prop.put("type_num-results_totalcount", totalcount);
+            prop.put("num-results", 1);
             int hintcount = references.length;
             if (hintcount > 0) {
                 if (hintcount > 16) { hintcount = 16; }

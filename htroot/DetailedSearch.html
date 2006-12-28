@@ -30,6 +30,10 @@
       /* ]]> */
     </script>
     <h2>Detailed&nbsp;Search</h2>
+    #(num-results)#
+	::
+	<p><strong>#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links from <strong>#[filteredcount]#</strong> filtered links of a total number of <strong>#[totalcount]#</strong> known.</p>
+    #(/num-results)#
     <form class="dsearch" action="DetailedSearch.html" method="get" enctype="multipart/form-data">
       <fieldset>
         <input type="text" name="search" id="search" value="#[search]#" size="50" maxlength="250" />
@@ -98,10 +102,6 @@
     ::
     <p><strong>The following words are stop-words and had been excluded from the search: #[stopwords]#.</strong></p>
     #(/excluded)#
-    #(num-results)#
-    ::
-    <strong>#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links of a total number of <strong>#[totalcount]#</strong> known.
-    #(/num-results)#
     #(combine)#
     ::
     <p><strong>Topwords</strong> (to refine search):
