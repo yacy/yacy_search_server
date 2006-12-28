@@ -14,7 +14,7 @@
 #File: ConfigLanguage_p.html
 #---------------------------
 # Only part 1.
-# Contributors are in chronological ordern, not how much they did absolutely.
+# Contributors are in chronological order, not how much they did absolutely.
 # Thank you for your help!
 <!-- lang -->default\(english\)==Deutsch
 <!-- author -->==Roland Ramthun, Oliver Wunder, Jan Sandbrink
@@ -174,7 +174,7 @@ just <==Einfach <
 start an uncensored search==eine unzensierte Suche beginnen
 start your own crawl</a> and contribute to the global index, or create your own private web index==einen eigenen Crawl starten</a> und zum globalen Index beitragen, oder einen eigenen privaten Webindex aufbauen
 set a personal peer profile</a> \(optional settings\)==ein eigenes Peer-Profil angeben</a> (freiwillige Angabe)
-monitor at the network page</a> what the other peers are doing==auf der Netzwerkseite beobachten</a> was andere Peers gerade machen
+monitor at the network page</a> what the other peers are doing==auf der Netzwerkseite beobachten</a>, was andere Peers gerade machen
 Your Peer name is a default name; please set another peer name.==Ihr Peer-Name ist ein Standardname; bitte nutzen Sie einen anderen.
 If this does not work, the name is probably taken by someone else.==Falls das nicht funktioniert wird der Name wahrscheinlich bereits von jemand anderem verwendet.
 Please try to choose another one.==Bitte versuchen Sie einen anderen.
@@ -492,7 +492,7 @@ Start Crawling Job:==Starte Crawling Aufgabe:
 You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Sie k&ouml;nnen hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. "Crawling" bedeutet, dass YaCy die angegebene Webseite runterl&auml;dt, alle Links extrahiert und dann den Inhalt hinter diesen Links runterl&auml;dt. Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
 #Attribut==Attribut
 Value==Wert
-Description==Beschreibung
+Description</strong>==Beschreibung</strong>
 Crawling Depth:==Crawling-Tiefe:
 This defines how often the Crawler will follow links embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links in Webseiten folgen wird.
 A minimum of 1 is recommended and means that the page you enter under \"Starting Point\" will be added to the index, but no linked content is indexed. 2-4 is good for normal indexing.==Ein Minimum von 1 wird empfohlen und bedeutet, dass die Seite, die Sie unter "Startpunkt" angegeben haben, dem Index zugef&uuml;gt wird, verlinkter Inhalt allerdings nicht. 2-4 ist gut f&uuml;r normales Indexieren.
@@ -586,11 +586,11 @@ Busy Peers==Besch&auml;tigte Peers
 
 #File: IndexCreateIndexingQueue_p.html
 #---------------------------
-Index Creation/Indexing Queue==Index Erzeugung/Indexier Warteschlange
-Index Creation: Indexing Queue==Index Erzeugung: Indexier Warteschlange
-The indexing queue is empty==Die Indexier Warteschlange ist leer.
-"clear indexing queue"=="Warteschlange l&ouml;schen"
-There are <strong>\#\[num\]\#</strong> entries in the indexing queue. Showing <strong>\#\[show\]\#</strong> entries with a total size of <strong>\#\[totalSize\]\#</strong>.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in der Indexier Warteschlange. <strong>#[show]#</strong> Eintr&auml;ge mit einer Gr&ouml;sse von <strong>#[totalSize]#</strong> werden angezeigt.
+Index Creation/Indexing Queue==Index Erzeugung/Indexier-Puffer
+Index Creation: Indexing Queue==Index Erzeugung: Indexier-Puffer
+The indexing queue is empty==Der Indexier-Puffer ist leer.
+"clear indexing queue"=="Puffer l&ouml;schen"
+There are <strong>\#\[num\]\#</strong> entries in the indexing queue. Showing <strong>\#\[show\]\#</strong> entries with a total size of <strong>\#\[totalSize\]\#</strong>.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in dem Indexier-Puffer. <strong>#[show]#</strong> Eintr&auml;ge mit einer Gr&ouml;sse von <strong>#[totalSize]#</strong> werden angezeigt.
 Show last==Zeige die letzten
 </a> entries.==</a> Eintr&auml;ge.
 Initiator==Initiator
@@ -604,17 +604,17 @@ Rejected URL List:</strong>&nbsp;There are \#\[num\]\# entries in the rejected-u
 Showing latest \#\[num\]\# entries.==Es werden die letzten #[num]# Eintr&auml;ge gezeigt.
 "show more"=="Mehr zeigen"
 "clear list"=="Liste l&ouml;schen"
-There are \#\[num\]\# entries in the rejected-queue:==Es befinden sich #[num]# Eintr&auml;ge in der ausgeschlossenen Warteschlange:
+There are \#\[num\]\# entries in the rejected-queue:==Es befinden sich #[num]# Eintr&auml;ge in dem ausgeschlossenen Puffer:
 Executor==Ausf&uuml;hrender
 Fail-Reason==Fehler Grund
 #-----------------------------
 
 #File: IndexCreateLoaderQueue_p.html
 #---------------------------
-Index Creation / Loader Queue==Index Erzeugung / Lade Warteschlange
-Index Creation: Loader Queue==Index Erzeugung: Lade Warteschlange
-The loader set is empty==Die Lade Warteschlange ist leer.
-There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Eintr&auml;ge in der Lade Warteschlange:
+Index Creation / Loader Queue==Index Erzeugung / Lade-Puffer
+Index Creation: Loader Queue==Index Erzeugung: Lade-Puffer
+The loader set is empty==Der Lade-Puffer ist leer.
+There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Eintr&auml;ge in dem Lade-Puffer:
 Initiator==Initiator
 Depth==Tiefe
 #URL==URL
@@ -622,12 +622,12 @@ Depth==Tiefe
 
 #File: IndexCreateWWWGlobalQueue_p.html
 #---------------------------
-Index Creation: WWW Global Crawl Queue==Index Erzeugung: Globale WWW Warteschlange
-This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Diese Warteschlange enth&auml;lt URLs, die an andere Peers gesendet werden sollen, um einen Remote Crawl durchzuf&uuml;hren.
+Index Creation: WWW Global Crawl Queue==Index Erzeugung: Globaler WWW-Puffer
+This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Dieser Puffer enth&auml;lt URLs, die an andere Peers gesendet werden sollen, um einen Remote Crawl durchzuf&uuml;hren.
 If there is no peer for remote crawling available, the links are crawled locally.==Wenn kein Peer zum Remote Crawl vorhanden ist, werden die Links lokal gecrawlt.
-The global crawler queue is empty==Die globale Crawler Warteschlange ist leer.
-"clear global crawl queue"=="L&ouml;sche globale Crawler Warteschlange"
-There are <strong>\#\[num\]\#</strong> entries in the global crawler queue. Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in der globalen Crawler Warteschlange. Gezeigt werden die <strong>#[show-num]#</strong> neusten Eintr&auml;ge.
+The global crawler queue is empty==Der globale Crawler-Puffer ist leer.
+"clear global crawl queue"=="L&ouml;sche globalen Crawler-Puffer"
+There are <strong>\#\[num\]\#</strong> entries in the global crawler queue. Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in dem globalen Crawler-Puffer. Gezeigt werden die <strong>#[show-num]#</strong> neusten Eintr&auml;ge.
 Show last==Zeige die letzten
 </a> entries.==</a> Eintr&auml;ge.
 Initiator==Initiator
@@ -640,12 +640,12 @@ Anchor Name==Anker Name
 
 #File: IndexCreateWWWLocalQueue_p.html
 #---------------------------
-YaCy '\#\[clientname\]\#': Index Creation / WWW Local Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Lokale WWW Warteschlange
-Index Creation: WWW Local Crawl Queue==Index Erzeugung: Lokale WWW Warteschlange
-This queue stores the urls that shall be crawled localy by this peer.==Diese Warteschlange enth&auml;lt URLs, die von diesem Peer lokal gecrawlt werden sollen.
+YaCy '\#\[clientname\]\#': Index Creation / WWW Local Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Lokaler WWW-Puffer
+Index Creation: WWW Local Crawl Queue==Index Erzeugung: Lokaler WWW-Puffer
+This queue stores the urls that shall be crawled localy by this peer.==Dieser Puffer enth&auml;lt URLs, die von diesem Peer lokal gecrawlt werden sollen.
 It may also contain urls that are computed by the proxy-prefetch.==Sie enth&auml;lt auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
-The local crawler queue is empty==Die lokale Crawler Warteschlange ist leer.
-There are <strong>\#\[num\]\#</strong> entries in the local crawler queue. Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in der lokalen Crawler Warteschlange. Gezeigt werden die <strong>#[show-num]#</strong> neusten Eintr&auml;ge.
+The local crawler queue is empty==Der lokale Crawler-Puffer ist leer.
+There are <strong>\#\[num\]\#</strong> entries in the local crawler queue. Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in dem lokalen Crawler-Pufferl. Gezeigt werden die <strong>#[show-num]#</strong> neusten Eintr&auml;ge.
 Show last==Zeige die letzten
 </a> entries.==</a> Eintr&auml;ge.
 Initiator==Initiator
@@ -711,10 +711,10 @@ you have to rename it first.==m&uuml;ssen Sie sie zuerst umbenennen.
 >Notes:==>Anmerkung:
 Please note that the imported words are useless if the destination peer doesn't know==Bitte bedenken Sie, dass die importierten W&ouml;rter nutzlos sind, wenn der Ziel-Peer nicht wei&szlig;,
 the URLs the imported words belongs to.==zu welchen URLs sie geh&ouml;ren.
-Crawling Queue Import:==Crawler-Warteschlangen-Import:
+Crawling Queue Import:==Crawler-Puffer-Import:
 Contains data about the crawljob an URL belongs to==Enth&auml;lt Daten &uuml;ber den Crawljob zu dem eine URL geh&ouml;rt
-The crawling queue==Die Crawler-Warteschlange
-Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zur Crawler-Warteschlange geh&ouml;ren
+The crawling queue==Der Crawler-Puffer
+Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zum Crawler-Puffer geh&ouml;ren
 #-----------------------------
 
 #File: IndexMonitor.html
@@ -962,7 +962,7 @@ Attributes==Attribute
 
 #File: PerformanceQueues_p.html
 #---------------------------
-Performance Settings of Queues and Processes==Performanceeinstellungen f&uuml;r Warteschlangen und Prozesse
+Performance Settings of Queues and Processes==Performanceeinstellungen f&uuml;r Puffer und Prozesse
 Scheduled tasks overview and waiting time settings:==&Uuml;bersicht geplanter Aufgaben und Wartezeiteinstellungen:
 Queue Size==Warteschl.-<br />l&auml;nge
 >Total==>gesamte
@@ -1184,15 +1184,15 @@ YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientnam
 Quick Crawl Link==Schnell Crawl Link
 Quickly adding Bookmarks:==Schnell Crawl Lesezeichen:
 Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
-If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, w&auml;hrend Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zur YaCy Crawler Warteschlange hinzugef&uuml;gt, um indexiert zu werden.
+If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Wenn Sie, w&auml;hrend Sie surfen, auf dieses Lesezeichen klicken, wird die gerade betrachtete Seite zum YaCy Crawler-Puffer hinzugef&uuml;gt, um indexiert zu werden.
 Crawl with YaCy==Mit YaCy crawlen
 Title:==Titel:
 Link:==link:
 Status:==Status:
-URL successfully added to Crawler Queue==Die Url wurde erfolgreich zur Crawler Warteschlange hinzugef&uuml;gt.
+URL successfully added to Crawler Queue==Die Url wurde erfolgreich zum Crawler-Puffer hinzugef&uuml;gt.
 Malformed URL==Fehler in der URL
 Unable to create new crawling profile for URL:==Es ist nicht m&ouml;glich f&uuml;r diese URL ein Crawling Profil zu erstellen:
-Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zur Crawler Warteschlange hinzuzuf&uuml;gen:
+Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zum Crawler-Puffer hinzuzuf&uuml;gen:
 #-----------------------------
 
 #File: Settings_p.html
@@ -1202,7 +1202,6 @@ YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Einstellungen
 If you want to restore all settings to the default values,==Wenn Sie alle Einstellungen auf die urspr&uuml;nglichen Werte zur&uuml;cksetzen wollen,
 but <strong>forgot your administration password</strong>, you must stop the proxy,==aber Ihr <strong>Administatorpasswort vergessen haben</strong>, m&uuml;ssen Sie YaCy stoppen,
 delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/httpProxy.conf' im YaCy Hauptordner l&ouml;schen und YaCy neu starten.
-Administration Account Settings==Administrations Konto Einstellungen
 Server Access Settings==Server Zugangs-Einstellungen
 Proxy Access Settings==Proxy Zugangs-Einstellungen
 Content Parser Settings==Inhalt Parser Einstellungen
@@ -1210,7 +1209,6 @@ Crawler Settings==Crawler Einstellungen
 HTTP Networking==HTTP Netzwerk
 #Remote Proxy \(optional\)==Remote Proxy (optional)
 Port Forwarding \(optional\)==Port Weiterleitung (optional)
-System Behaviour Settings==System Einstellungen
 Seed Upload Settings==Seed Upload Einstellungen
 Message Forwarding \(optional\)==Nachrichten Weiterleitung (optional)
 
@@ -1222,7 +1220,6 @@ Message Forwarding \(optional\)==Nachrichten Weiterleitung (optional)
 Proxy Access Settings==Proxyzugangs Einstellungen
 These settings configure the access method to your own http proxy and server.==Diese Einstellungen beeinflussen den Zugriff auf Ihren HTTP-Proxy und -Server.
 All traffic is routed throug one single port, for both proxy and server.==Alle Verbindungen werden durch einen einzigen Port hergestellt, f&uuml;r beides (Proxy und Server).
-
 Server/Proxy Port Configuration==Server/Proxy Port Konfiguration
 The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Peers oder HTTP-Clients warten soll.
 You have four possibilities to specify the address:==Sie haben vier M&ouml;glichkeiten die Adresse anzugeben:
@@ -1325,8 +1322,7 @@ you don't need to set anything here, please leave it blank.==brauchen Sie hier n
 ATTENTION: Your current IP is recognized as "#\[clientIP\]#".==ACHTUNG: Ihre aktuelle IP wird als "#[clientIP]#" erkannt.
 If the value you enter here does not match with this IP,==Wenn der Wert, den Sie hier eingegeben haben, nicht mit dieser IP &uuml;bereinstimmt,
 you will not be able to access the server pages anymore.==wird es nicht m&ouml;glich sein auf die Serverseiten zuzugreifen.
-
-value="submit"==value="speichern"
+value="Submit"==value="speichern"
 
 #-----------------------------
 
@@ -1339,7 +1335,7 @@ General Settings:==Allgemeine Einstellungen:
 If you enable one of the available uploading methods, you will become a principal peer.==Wenn Sie eine der verf&uuml;gbaren Uploadmethoden aktivieren, werden Sie ein Principal-Peer.
 Your peer will then upload the seed-bootstrap information periodically,==Ihr Peer wird dann die Seed-Bootstrap Informationen periodisch hochladen,
 but only if there have been changes to the seed-list.==jedoch nur wenn &Auml;nderungen an der Seed-Liste vorgenommen wurden.
-Upload Method:==Uploadmethode:
+Upload Method==Uploadmethode
 Retry Uploading==Upload versuchen
 Here you can specify which upload method should be used.==Hier k&ouml;nnen Sie ausw&auml;hlen welche Uploadmethode verwendet werden soll.
 Select 'none' to deactivate uploading.==Verwenden Sie 'none' um den Upload zu deaktivieren.
@@ -1414,9 +1410,8 @@ Changes will take effect immediately==Änderungen sind sofort aktiv
 YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': Einstellung Verarbeitung
 Settings Receipt:==Einstellungen angenommen:
 No information has been submitted==Es wurden keine Informationen &uuml;bertragen.
-Nothing changed==Nichts wurde ver&auml;ndert.
 Error with submitted information.==Es gab einen Fehler bei der &Uuml;bertragung der Informationen.
-Nothing changed.==Nichts wurde ver&auml;ndert.
+Nothing changed.</p>==Nichts wurde ver&auml;ndert.</p>
 The user name must be given.==Der User Name muss angegeben werden
 Your request cannot be processed.<br />Nothing changed.==Ihre Anfrage konnte nicht bearbeitet werden.<br />Nichts wurde ver&auml;ndert.
 The password redundancy check failed. You have probably misstyped your password.==Die Passwort&uuml;berpr&uuml;fung schlug fehl. Sie haben sich wahrscheinlich vertippt.
@@ -1424,14 +1419,13 @@ Shutting down.</strong><br />Application will terminate after working off all cr
 Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
 Your new administration account name is \#\[user\]\#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das Passwort wurde akzeptiert.<br />Wenn Sie zur&uuml;ck zu den Einstellungen gehen wollen, m&uuml;ssen Sie sich neu einloggen.
 Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden ge&auml;ndert.
-Your proxy account check has been disabled, since you did not supply a password.==
+Your proxy account check has been disabled, since you did not supply a password.==Ihr Proxy Account Test wurde deaktiviert, weil sie kein Passwort eingegeben haben.
 The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
 The proxy port is:==Der Proxy Port ist:
-if you changed the Port or Port Forwarding Settings, you need to restart YaCy.==Wenn Sie den Port oder die Post Weiterleitungs ge&auml;ndert haben, m&uuml;ssen Sie YaCy neu starten.
+Port rebinding will be done in a few seconds.==Die Port Neubindung wird in wenigen Sekunden abgeschlossen sein.
+You can reach your YaCy server under the new location==Sie k&ouml;nnen Ihren YaCy Server unter folgender neuer Adresse erreichen: 
 Your proxy access setting has been changed.==Ihre Proxy Zugangs Einstellung wurden ge&auml;ndert.
-Your new proxy account name is \#\[user\]\#. The password has been accepted.==Ihr neuer Proxy Account Name ist #[user]#. Ihr Passwort wurde akzeptiert.
-If you open any public web page through the proxy, you must log-in then.==
-Your server access filter is now set to #[filter]#
+Your server access filter is now set to==Ihr Proxy Zugangs Filter ist nun gesetzt auf
 Auto pop-up of the Status page is now <strong>disabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>deaktiviert.</strong>
 Auto pop-up of the Status page is now <strong>enabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>aktiviert.</strong>
 You are now permanently <strong>online</strong>.==Sie sind nun im <strong>permanenten Online Modus</strong>.
@@ -1592,19 +1586,19 @@ Connections Incoming==Eingehende Verbindungen
 Active:==Aktiv:
 Idle:==Wartend:
 #Max:Max:
-Indexing Queue==Indexier Warteschlange
-Loader Queue==Lade Warteschlange
+Indexing Queue==Indexier Puffer
+Loader Queue==Lade Puffer
 paused==angehalten
-Crawler Queues==Crawler Warteschlangen
+Crawler Queues==Crawler Puffer
 Local Crawl==Lokales Crawlen
 Remote triggered Crawl==eingehende Remote-Crawls
 Global Crawl Trigger==ausgehende Remote-Crawls
-#Pre-Queueing==
+Pre-Queueing==Vor-Pufferung
  local== lokal
 Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server.==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver.
-Enabled: Updating periodically to server==Aktiv: Periodisches Update auf
-Enabled: Updating periodically to file==Aktiv: Periodisches Update in Datei
-Last upload:==Letzter Upload:
+Enabled: Updating periodically to server==Aktiv: Periodische Aktualisierung auf
+Enabled: Updating periodically to file==Aktiv: Periodische Aktualisierung in Datei
+Last upload:==Letztesmal hochgeladen:
 #-----------------------------
 
 #File: Steering.html
@@ -1650,8 +1644,8 @@ First Name:==Vorname:
 Last Name:==Nachname:
 Address:==Adresse:
 Rights==Rechte
-Timelimit:==Zeitlimit:
-Time used:==verbrauchte Zeit:
+Timelimit</label>==Zeitlimit</label>
+Time used==verbrauchte Zeit
 Save User==Benutzer speichern
 User created:==Benutzer erstellt:
 User changed:==Benutzer ge&auml;ndert:
@@ -1698,7 +1692,8 @@ reversed order==in umgekehrter Reihenfolge
 Remote Peer Profile==Remote Peer Profil
 Remote Peer Profile:==Remote Peer Profil:
 Wrong access of this page==Falscher Zugriff auf diese Seite
-The requested peer is not known or a potential peer, what means the peer's profile can't be fetched, because he is behind a firewall.==Der gew&uuml;nschte Peer ist nicht bekannt oder ein potenzieller Peer, das bedeutet, das Profil kann nicht geladen werden, da der Peer hinter einer Firewall ist.
+The requested peer is unknown or a potential peer.==Der gew&uuml;nschte Peer ist nicht bekannt oder ein potenzieller Peer.
+The profile can't be fetched.==Das Profil kann nicht geladen werden.
 The peer==Der Peer
 is not online.==ist nicht online.
 This is==Dies ist
@@ -1980,9 +1975,9 @@ Index Control Menu==Index Verwalten Men&uuml;
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
 Index Creation Menu==Index-erzeugen Men&uuml;
-Control Queues==Kontrolle der Warteschlangen
-WWW Crawl Queues==WWW Crawl Warteschlangen
-Media Crawl Queues==Medien Crawl Warteschlangen
+Control Queues==Kontrolle der Puffer
+WWW Crawl Queues==WWW Crawl-Puffer
+Media Crawl Queues==Medien Crawl-Puffer
 #Crawl Start==Crawl Start
 >Indexing==>Indexieren
 >Loader==>Lader
@@ -1997,7 +1992,7 @@ Media Crawl Queues==Medien Crawl Warteschlangen
 #File: env/templates/submenuPerformance.template
 #---------------------------
 Performance Menu==Performance Men&uuml;
-Queues Performance Settings==Warteschlangen Performance Einstellungen
+Queues Performance Settings==Puffer Performance Einstellungen
 Memory Settings for Database Caches==Speicher Einstellungen des Datenbank Caches
 Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequenz
 #-----------------------------
