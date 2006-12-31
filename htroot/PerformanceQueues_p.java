@@ -256,6 +256,10 @@ public class PerformanceQueues_p {
             switchboard.setConfig("stacker.MinIdleThreads",minIdle);
         }        
         
+        if ((post != null) && (post.containsKey("PrioritySubmit"))) {
+        	switchboard.setConfig("javastart_priority",post.get("YaCyPriority","0"));
+        }
+        
         if ((post != null) && (post.containsKey("proxyControlSubmit"))) {
             int onlineCautionDelay = post.getInt("onlineCautionDelay", 30000);
             switchboard.setConfig("onlineCautionDelay", Integer.toString(onlineCautionDelay));
@@ -308,7 +312,15 @@ public class PerformanceQueues_p {
         prop.put("pool_2_minIdle",stackerPoolConfig.minIdle);  
         prop.put("pool_2_numActive",switchboard.sbStackCrawlThread.getNumActiveWorker());
         prop.put("pool_2_numIdle",switchboard.sbStackCrawlThread.getNumIdleWorker());
-        prop.put("pool",3);        
+        prop.put("pool",3);
+        
+        long curr_prio = switchboard.getConfigLong("javastart_priority",0);
+        prop.put("priority_realtime",(curr_prio==-20)?1:0);
+        prop.put("priority_high",(curr_prio==-15)?1:0);
+        prop.put("priority_above",(curr_prio==-10)?1:0);
+        prop.put("priority_normal",(curr_prio==0)?1:0);
+        prop.put("priority_below",(curr_prio==10)?1:0);
+        prop.put("priority_low",(curr_prio==20)?1:0);
         
         // return rewrite values for templates
         return prop;

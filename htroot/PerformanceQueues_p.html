@@ -206,6 +206,27 @@
   </form>
   
   <p>
+    <strong>YaCy Priority Settings:</strong>
+  </p>
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
+    <fieldset>
+      <dl>
+        <dt>YaCy Process Priority:</dt>
+        <dd><select name="YaCyPriority">
+          <option value="-20"#(priority_realtime)#:: selected="selected"#(/priority_realtime)#>Realtime</option>
+          <option value="-15"#(priority_high)#:: selected="selected"#(/priority_high)#>High</option>
+          <option value="-10"#(priority_above)#:: selected="selected"#(/priority_above)#>Above normal</option>
+          <option value="0"#(priority_normal)#:: selected="selected"#(/priority_normal)#>Normal</option>
+          <option value="10"#(priority_below)#:: selected="selected"#(/priority_below)#>Below normal</option>
+          <option value="20"#(priority_low)#:: selected="selected"#(/priority_low)#>Idle</option>
+        </select></dd>
+        <dt><input type="submit" name="PrioritySubmit" value="Set new Priority" /></dt>
+        <dd>Changes take effect after <strong>restart</strong> of YaCy</dd>
+      </dl>
+    </fieldset>
+  </form>
+  
+  <p>
     <strong>Proxy Performance Settings:</strong>
   </p>
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">

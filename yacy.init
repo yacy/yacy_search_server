@@ -568,7 +568,7 @@ ramCacheProfiles     =     8192
 ramCacheProfiles_time=      500
 
 # default memory settings for startup of yacy
-# is only valid in unix/shell environments and
+# is valid in unix/shell and windows environments but
 # not for first startup of YaCy
 
 # -Xmx<size> set maximum Java heap size
@@ -576,6 +576,13 @@ javastart_Xmx=Xmx96m
 
 # -Xms<size> set initial Java heap size
 javastart_Xms=Xms96m
+
+# priority of the yacy-process
+# is valid in unix/shell and windows environments but
+# not for first startup of YaCy
+# UNIX: corresponds to the nice-level
+# WIN: -20=realtime;-15=high;-10=above;0=normal;10=below;20=low
+javastart_priority=0
 
 # performance properties for the word index cache
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the
