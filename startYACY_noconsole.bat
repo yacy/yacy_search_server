@@ -12,6 +12,7 @@ REM Please change the "javastart" settings in the web-interface "Basic Configura
 set jmx=
 set jms=
 set javacmd=-Xmx64m -Xms10m
+set priolvl=0
 set priority=/NORMAL
 if exist DATA\SETTINGS\httpProxy.conf GoTo :GETSTARTOPTS
 
