@@ -55,7 +55,7 @@ public class plasmaDHTFlush extends Thread {
         private long transferedBytes = 0;
         private int transferedContainerCount = 0;
         private String status = "Running";
-        private String oldStartingPointHash = "------------", startPointHash = "------------";
+        private String oldStartingPointHash = "AAAAAAAAAAAA", startPointHash = "AAAAAAAAAAAA";
         private int initialWordsDBSize = 0;
         private int chunkSize = 500;   
         private final long startingTime = System.currentTimeMillis();
