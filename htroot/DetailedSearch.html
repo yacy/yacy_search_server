@@ -6,30 +6,7 @@
   </head>
   <body id="DetailedSearch" onload="document.getElementById('search').focus()">
     #%env/templates/header.template%#
-    <script type="text/javascript">
-      /* <![CDATA[ */
-      function checker(name, z1, z2) {
-        if (z1 == z2) {
-          document.write("<input type=\"radio\" name=\"" + name + "\" value=\"" + z2 + "\" checked=\"checked\" />");
-        } else {
-          document.write("<input type=\"radio\" name=\"" + name + "\" value=\"" + z2 + "\">");
-        }
-      }
-      function checkers(name, n) {
-        for (i = 0; i < 16; i++) {
-          checker(name, n, i);
-        }
-        document.write(n);
-      }
-      function checkerline(descr, tag, dflt) {
-        document.write("<dt>" + descr + "</dt>");
-        document.write("<dd>");
-        checkers(tag, dflt);
-        document.write("</dd>");
-      }
-      /* ]]> */
-    </script>
-    <h2>Detailed&nbsp;Search</h2>
+    <h2>Detailed Search</h2>
     #(num-results)#
 	::
 	<p><strong>#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links from <strong>#[filteredcount]#</strong> filtered links of a total number of <strong>#[totalcount]#</strong> known.</p>
@@ -56,40 +33,30 @@
       </fieldset>
       <fieldset>
         <legend>Pre-Ranking</legend>
-        <dl>
-          <script type="text/javascript">checkerline("Domain Length",                 "localdomlength",     #[localdomlength]#)</script>
-          <script type="text/javascript">checkerline("YaCy Block Rank",               "localybr",           #[localybr]#)</script>
-          <script type="text/javascript">checkerline("Date",                          "localdate",          #[localdate]#)</script>
-          <script type="text/javascript">checkerline("Words In Title",                "localwordsintitle",  #[localwordsintitle]#)</script>
-          <script type="text/javascript">checkerline("Words In Text",                 "localwordsintext",   #[localwordsintext]#)</script>
-          <script type="text/javascript">checkerline("Phrases In Text",               "localphrasesintext", #[localphrasesintext]#)</script>
-          <script type="text/javascript">checkerline("Links To Local Domain",         "localllocal",        #[localllocal]#)</script>
-          <script type="text/javascript">checkerline("Links To Other Domain",         "locallother",        #[locallother]#)</script>
-          <script type="text/javascript">checkerline("URL Length",                    "localurllength",     #[localurllength]#)</script>
-          <script type="text/javascript">checkerline("URL Components",                "localurlcomps",      #[localurlcomps]#)</script>
-          <script type="text/javascript">checkerline("Hit Count",                     "localhitcount",      #[localhitcount]#)</script>
-          <script type="text/javascript">checkerline("Position In Text",              "localposintext",     #[localposintext]#)</script>
-          <script type="text/javascript">checkerline("Position Of Phrase",            "localposofphrase",   #[localposofphrase]#)</script>
-          <script type="text/javascript">checkerline("Word Distance",                 "localworddistance",  #[localworddistance]#)</script>
-          <script type="text/javascript">checkerline("Appearance in URL",             "localappurl",        #[localappurl]#)</script>
-          <script type="text/javascript">checkerline("Appearance in Description",     "localappdescr",      #[localappdescr]#)</script>
-          <script type="text/javascript">checkerline("Appearance in Author",          "localappauthor",     #[localappauthor]#)</script>
-          <script type="text/javascript">checkerline("Appearance in Tags",            "localapptags",       #[localapptags]#)</script>
-          <script type="text/javascript">checkerline("Appearance in Reference",       "localappref",        #[localappref]#)</script>
-          <script type="text/javascript">checkerline("Appearance in Emphasized Text", "localappemph",       #[localappemph]#)</script>
-          <script type="text/javascript">checkerline("Category Index Page",           "localcatindexof",    #[localcatindexof]#)</script>
-          <script type="text/javascript">checkerline("Category Image Appearance",     "localcathasimage",   #[localcathasimage]#)</script>
-          <script type="text/javascript">checkerline("Category Audio Appearance",     "localcathasaudio",   #[localcathasaudio]#)</script>
-          <script type="text/javascript">checkerline("Category Video Appearance",     "localcathasvideo",   #[localcathasvideo]#)</script>
-          <script type="text/javascript">checkerline("Category App. Appearance",      "localcathasapp",     #[localcathasapp]#)</script>
+        <dl>#{attrPre}#
+        
+          <dt><label for="#[nameorg]#">#[name]#</label>:</dt>
+          <dd id="#[nameorg]#">#{select}#
+          
+            <input type="radio" name="#[nameorg]#" value="#[value]#"#(checked)#:: checked="checked"#(/checked)# />#{/select}#
+            
+            #[value]#
+          </dd>#{/attrPre}#
+          
         </dl>
       </fieldset>
       <fieldset>
         <legend>Post-Ranking</legend>
-        <dl>
-          <script type="text/javascript">checkerline("URL Component Appears In Toplist",     "localurlcompintoplist",   #[localurlcompintoplist]#)</script>
-          <script type="text/javascript">checkerline("Description Comp. Appears In Toplist", "localdescrcompintoplist", #[localdescrcompintoplist]#)</script>
-          <script type="text/javascript">checkerline("Application Of Prefer Pattern",        "localprefer",             #[localprefer]#)</script>
+        <dl>#{attrPost}#
+        
+          <dt><label for="#[nameorg]#">#[name]#</label></dt>
+          <dd id="#[nameorg]#">#{select}#
+          
+            <input type="radio" name="#[nameorg]#" value="#[value]#"#(checked)#:: checked="checked"#(/checked)# />#{/select}#
+            
+            #[value]#
+          </dd>#{/attrPost}#
+          
         </dl>
       </fieldset>
       <fieldset>

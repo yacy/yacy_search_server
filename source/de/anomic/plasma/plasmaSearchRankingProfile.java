@@ -191,6 +191,12 @@ public class plasmaSearchRankingProfile {
     }
     
     public Map toExternalMap(String prefix) {
+    	Map ext = preToExternalMap(prefix);
+    	ext.putAll(postToExternalMap(prefix));
+    	return ext;
+    }
+    
+    public Map preToExternalMap(String prefix) {
         Map ext = new HashMap();
         ext.put(prefix + DOMLENGTH, Integer.toString(coeff_domlength));
         ext.put(prefix + YBR, Integer.toString(coeff_ybr));
@@ -217,6 +223,11 @@ public class plasmaSearchRankingProfile {
         ext.put(prefix + CATHASAUDIO, Integer.toString(coeff_cathasaudio));
         ext.put(prefix + CATHASVIDEO, Integer.toString(coeff_cathasvideo));
         ext.put(prefix + CATHASAPP, Integer.toString(coeff_cathasapp));
+        return ext;
+    }
+    
+    public Map postToExternalMap(String prefix) {
+    	Map ext = new HashMap();
         ext.put(prefix + URLCOMPINTOPLIST, Integer.toString(coeff_urlcompintoplist));
         ext.put(prefix + DESCRCOMPINTOPLIST, Integer.toString(coeff_descrcompintoplist));
         ext.put(prefix + PREFER, Integer.toString(coeff_prefer));
