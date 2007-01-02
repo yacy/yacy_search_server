@@ -119,12 +119,12 @@ public class DetailedSearch {
         return prop;
     }
     
-    private static void putRanking(serverObjects prop, plasmaSearchRankingProfile rankingProfile, String prefix) {
+    private static void putRanking(final serverObjects prop, final plasmaSearchRankingProfile rankingProfile, final String prefix) {
     	putRanking(prop, rankingProfile.preToExternalMap(prefix), prefix, "Pre");
     	putRanking(prop, rankingProfile.postToExternalMap(prefix), prefix, "Post");
     }
     
-    private static void putRanking(serverObjects prop, Map ranking, String prefix, String attrExtension) {
+    private static void putRanking(final serverObjects prop, final Map ranking, final String prefix, final String attrExtension) {
     	prop.put("attr" + attrExtension, ranking.size());
     	Iterator it = ranking.keySet().iterator();
     	String key;

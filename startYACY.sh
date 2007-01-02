@@ -67,11 +67,25 @@ done
 java_args=""
 if [ -f DATA/SETTINGS/httpProxy.conf ]
 then
-	for i in `grep javastart DATA/SETTINGS/httpProxy.conf`;do 
-		i="${i#javastart_*=}";
-		JAVA_ARGS="-$i $JAVA_ARGS";
+	# startup memory
+	for i in Xmx Xms; do
+		j=`grep javastart_$i DATA/SETTINGS/httpProxy.conf`;
+		j="${j#javastart_$i=}";
+		if [ -n $j ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
 	done
+	
+	# Priority
+	j=`grep javastart_priority DATA/SETTINGS/httpProxy.conf`;
+	j="${j#javastart_priority=}"
+	if [ -n $j ]; then JAVA="nice -n $j $JAVA"; fi;
+	
+#	for i in `grep javastart DATA/SETTINGS/httpProxy.conf`;do
+#		i="${i#javastart_*=}";
+#		JAVA_ARGS="-$i $JAVA_ARGS";
+#	done
 fi
+echo "JAVA_ARGS: $JAVA_ARGS"
+echo "JAVA: $JAVA"
 
 # generating the proper classpath
 CLASSPATH=""
