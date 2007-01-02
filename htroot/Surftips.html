@@ -12,7 +12,7 @@
 	}
 	</script>
   </head>
-  <body>
+  <body id="Surftips">
     #(display)#
     #%env/templates/simpleheader.template%#
     ::
@@ -43,9 +43,10 @@
      </div>
     <!-- link end -->
     #{/results}#
-    <br />
+    <p class="aftersurftips">
     ...provided by YaCy peers using public bookmarks, link votes and crawl start points<br />
     <a href="/Surftips.html?surftips=0">Hide surftips</a>
+    </p>
 	#(/surftips)#
     
     #(display)#

@@ -2,14 +2,17 @@
 
 body {
   background-color:#F8F8FF;
+  color:black;
 }
 
 a:link {
   color:#00008B;
+  background-color:transparent;
 }
 
 a:link:hover {
   color:#0000FF;
+  background-color:transparent;
 }
 
 
@@ -209,7 +212,13 @@ body#ViewLog pre {
 
 fieldset {
   background-color:#ddeeee;
+  color:black;
   border:1px solid #aaa;
+}
+
+input, select, textarea {
+  color: black;
+  background-color: white;
 }
 
 legend {

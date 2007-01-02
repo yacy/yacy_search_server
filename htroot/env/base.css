@@ -238,6 +238,19 @@ div.searchresults {
   margin-bottom:1em;
 }
 
+body#Surftips div.searchresults {
+  float:left;
+  width:35em;
+  height:6em;
+  margin-left:1em;
+  margin-bottom:0;
+  overflow:hidden;
+}
+
+p.aftersurftips {
+  clear:both;
+}
+
 /* Bookmarks */
 
 div.Tags {
@@ -331,6 +344,7 @@ form dt, dl.pairs dt {
 
 form dd {
   margin:0 0 0.5em 0.25em;
+  float:left;
 }
 
 dl.pairs dd {
@@ -355,23 +369,23 @@ body#ViewLog pre {
 }
 
 body#ViewLog pre.logSevere {
-	color:red;
+  color:red;
 }
 
 body#ViewLog pre.logWarning {
-	color:orange
+  color:orange
 }
 
 body#ViewLog pre.logSystem {
-	color:black;
+  color:black;
 }
 
 body#ViewLog pre.logInfo {
-	color:black;
+  color:black;
 }
 
 body#ViewLog pre.logDebug {
-	color:black;
+  color:black;
 }
 
 body#QuickCrawlLink p, body#QuickCrawlLink h4 {
