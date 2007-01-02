@@ -92,7 +92,17 @@
     if the .svn directory exists we try to determine the real
     svn revision number of the working base now
 -->	
-<target name="determineRevisionNr" if="svnEntriesFileExists">
+
+<target name="buildSvnRevNr">
+  <delete file="lib/svnRevNr.jar" />
+  <jar destfile="lib/svnRevNr.jar" basedir="${lib}/svnRevNr">
+    <manifest>
+      <attribute name="Main-Class" value="svnRevNrParser"/>
+    </manifest>	  	
+  </jar>	
+</target>
+
+<target name="determineRevisionNr" if="svnEntriesFileExists" depends="buildSvnRevNr">
 	<!-- define a custom ant task to read the revision number from file -->
 	<taskdef resource="svnRevNrParser.properties" classpath="${lib}/svnRevNr.jar"/>
 	
