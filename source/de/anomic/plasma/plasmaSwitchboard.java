@@ -368,7 +368,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
 
         // read memory amount
-        int  ramLURL         = (int) getConfigLong("ramCacheLURL", 1024);
+        int  ramLURL         = (int) getConfigLong("ramCacheLURL", 1024) / 1024;
         long ramLURL_time    = getConfigLong("ramCacheLURL_time", 1000);
         ramLURL = Math.max((int)  (serverMemory.available() / 2), ramLURL);
         setConfig("ramCacheLURL", ramLURL);
@@ -380,7 +380,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         long ramEURL_time    = getConfigLong("ramCacheEURL_time", 1000);
         ramEURL = Math.max((int)  (serverMemory.available() / 20 / 1024), ramEURL);
         setConfig("ramCacheEURL", ramEURL * 1024);
-        int  ramRWI          = (int) getConfigLong("ramCacheRWI",  1024);
+        int  ramRWI          = (int) getConfigLong("ramCacheRWI",  1024) / 1024;
         long ramRWI_time     = getConfigLong("ramCacheRWI_time", 1000);
         ramRWI = Math.max((int)  (serverMemory.available() / 4), ramRWI);
         setConfig("ramCacheRWI", ramRWI);
