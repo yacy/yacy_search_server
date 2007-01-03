@@ -102,7 +102,8 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static Hashtable bfHost = new Hashtable(); // for brute-force prevention
     
     // class variables
-    private String extendedPort;                      // the listening port
+    private String extendedPort;                      // the port, which is visible from outside (in most cases bind-port)
+	private String bindPort;						// if set, yacy will bind to this port, but set extendedPort in the seed
     public boolean forceRestart = false;     // specifies if the server should try to do a restart
     
     public static boolean portForwardingEnabled = false;
@@ -224,10 +225,11 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
         // read some config values
         this.extendedPort = this.switchboard.getConfig("port", "8080").trim();
+        this.bindPort = this.switchboard.getConfig("bindPort", "").trim();
         
         // Open a new server-socket channel
         try {
-            this.initPort(this.extendedPort);
+            this.initPort(this.extendedPort, this.bindPort);
         } catch (Exception e) {
             String errorMsg = "FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number";
             this.log.logSevere(errorMsg);
@@ -278,16 +280,22 @@ public final class serverCore extends serverAbstractThread implements serverThre
         this.theSessionPool = new SessionPool(new SessionFactory(this.theSessionThreadGroup),this.sessionPoolConfig);        
     }
     
-    public void initPort(String thePort) throws IOException {
-        this.log.logInfo("Trying to bind server to port " + thePort);
+    public void initPort(String seedPort, String bindPort) throws IOException {
         
         // Binds the ServerSocket to a specific address 
         InetSocketAddress bindAddress = null;
         this.socket = new ServerSocket();
-        this.socket.bind(bindAddress = generateSocketAddress(thePort));
+		if(bindPort == null || bindPort.equals("")){
+			this.log.logInfo("Trying to bind server to port " + seedPort);
+	        this.socket.bind(bindAddress = generateSocketAddress(seedPort));
+		}else{ //bindPort set, use another port to bind than the port reachable from outside
+			this.log.logInfo("Trying to bind server to port " + bindPort+ " with "+ seedPort + "as seedPort.");
+	        this.socket.bind(bindAddress = generateSocketAddress(bindPort));
+		}
         
         // updating the port information
-        yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(bindAddress.getPort()));    
+        //yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(bindAddress.getPort()));    
+        yacyCore.seedDB.mySeed.put(yacySeed.PORT, seedPort);    
     }
     
     public static int getPortNr(String extendedPortString) {
