@@ -48,7 +48,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.TreeMap;
 
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiCode;
@@ -57,10 +59,13 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class Messages_p {
 
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private static final String PEERSKNOWN = "peersKnown_";
 
     public static String dateString(Date date) {
         return SimpleFormatter.format(date);
@@ -69,6 +74,34 @@ public class Messages_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
+        
+
+        // List known hosts for message sending (from Blacklist_p.java)
+        if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
+            prop.put("peersKnown", 1);
+            int peerCount = 0;
+            try {
+                TreeMap hostList = new TreeMap();
+                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+                while (e.hasMoreElements()) {
+                    yacySeed seed = (yacySeed) e.nextElement();
+                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
+                }
+
+                String peername;
+                while ((peername = (String) hostList.firstKey()) != null) {
+                    final String Hash = (String) hostList.get(peername);
+                    prop.put(PEERSKNOWN + "peers_" + peerCount + "_hash", Hash);
+                    prop.put(PEERSKNOWN + "peers_" + peerCount + "_name", peername);
+                    hostList.remove(peername);
+                    peerCount++;
+                }
+            } catch (Exception e) {/* */}
+            prop.put(PEERSKNOWN + "peers", peerCount);
+        } else {
+            prop.put("peersKnown", 0);
+        }
+        
         prop.put("mode", 0);
         prop.put("mode_error", 0);
         wikiCode wikiTransformer = new wikiCode(switchboard);
