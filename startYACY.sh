@@ -77,15 +77,17 @@ then
 	# Priority
 	j=`grep javastart_priority DATA/SETTINGS/httpProxy.conf`;
 	j="${j#javastart_priority=}"
-	if [ -n $j ]; then JAVA="nice -n $j $JAVA"; fi;
+	if [ ! -z "$j" ];then
+		if [ -n $j ]; then JAVA="nice -n $j $JAVA"; fi;
+	fi
 	
 #	for i in `grep javastart DATA/SETTINGS/httpProxy.conf`;do
 #		i="${i#javastart_*=}";
 #		JAVA_ARGS="-$i $JAVA_ARGS";
 #	done
 fi
-echo "JAVA_ARGS: $JAVA_ARGS"
-echo "JAVA: $JAVA"
+#echo "JAVA_ARGS: $JAVA_ARGS"
+#echo "JAVA: $JAVA"
 
 # generating the proper classpath
 CLASSPATH=""
