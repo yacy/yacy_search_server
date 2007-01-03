@@ -390,6 +390,13 @@ public class yacysearch {
             prop.put("cat", "href");
             prop.put("depth", depth);
         }
+        
+        // if user is not authenticated, he may not vote for URLs
+        if (!authenticated) {
+            int linkcount = Integer.parseInt(prop.get("num-results_linkcount", "0"));
+            for (int i=0; i<linkcount; i++)
+                prop.put("type_results_" + i + "_recommend", 0);
+        }
 
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("former", post.get("search", ""));

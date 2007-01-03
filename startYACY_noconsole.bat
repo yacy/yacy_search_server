@@ -38,9 +38,6 @@ if defined jms set javacmd=-%jms% %javacmd%
 if defined priolvl (
 	if %priolvl% == 20 set priority=/LOW
 	if %priolvl% == 10 set priority=/BELOWNORMAL
-	if %priolvl% == -10 set priority=/ABOVENORMAL
-	if %priolvl% == -15 set priority=/HIGH
-	if %priolvl% == -20 set priority=/REALTIME
 )
 
 GoTo :STARTJAVA

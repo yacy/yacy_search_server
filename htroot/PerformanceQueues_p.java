@@ -315,9 +315,6 @@ public class PerformanceQueues_p {
         prop.put("pool",3);
         
         long curr_prio = switchboard.getConfigLong("javastart_priority",0);
-        prop.put("priority_realtime",(curr_prio==-20)?1:0);
-        prop.put("priority_high",(curr_prio==-15)?1:0);
-        prop.put("priority_above",(curr_prio==-10)?1:0);
         prop.put("priority_normal",(curr_prio==0)?1:0);
         prop.put("priority_below",(curr_prio==10)?1:0);
         prop.put("priority_low",(curr_prio==20)?1:0);
