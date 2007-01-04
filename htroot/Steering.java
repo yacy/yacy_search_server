@@ -46,20 +46,24 @@
 // javac -classpath .:../Classes SettingsAck_p.java
 // if the shell's current path is HTROOT
 
+import java.io.File;
+import java.io.IOException;
+
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 
 public class Steering {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
         if (post == null || ss == null) { return new serverObjects(); }
-        
-        plasmaSwitchboard sb = (plasmaSwitchboard) ss;
-        serverObjects prop = new serverObjects();
-        prop.put("info", 0);//no information submitted
-        if (prop == null) { return prop; }
+
+        final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        final serverObjects prop = new serverObjects();
+        prop.put("info", 0); //no information submitted
+        if (prop == null) { return null; }
 
         // handle access rights
         if (!sb.verifyAuthentication(header, false)) {
@@ -68,15 +72,23 @@ public class Steering {
         }
 
         if (post.containsKey("shutdown")) {
-            ss.setConfig("restart", "false");
             sb.terminate(3000);
             prop.put("info", 3);
             return prop;
         }
 
         if (post.containsKey("restart")) {
-            ss.setConfig("restart", "true");
-            sb.terminate();
+            // yacy.restart erstellen (wird im startscript ausgewertet)
+            final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
+            if (!yacyRestart.exists()) {
+                try {
+                    yacyRestart.createNewFile();
+                } catch (IOException e) {
+                    serverLog.logConfig("SHUTDOWN", "ERROR: no restart !");
+                    e.printStackTrace();
+                }
+            }
+            sb.terminate(5000);
             prop.put("info", 4);
             return prop;
         }

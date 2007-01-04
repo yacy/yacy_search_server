@@ -192,10 +192,10 @@ public final class yacy {
     */
     private static void startup(String homePath, long startupMemFree, long startupMemTotal) {
         long startup = System.currentTimeMillis();
-        String restart = "false";
+
         int oldRev=0;
         int newRev=0;
-        
+
         try {
             // start up
             System.out.println(copyright);
@@ -268,9 +268,6 @@ public final class yacy {
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
             sb.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
-
-            // set default = no restart
-            sb.setConfig("restart", "false");
 
             // if we are running an SVN version, we try to detect the used svn revision now ...
             final Properties buildProp = new Properties();
@@ -450,8 +447,6 @@ public final class yacy {
                     } catch (Exception e) {
                         serverLog.logSevere("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
                     }
-                    restart = sb.getConfig("restart", "false");
-                    
                     // shut down
                     serverLog.logConfig("SHUTDOWN", "caught termination signal");
                     server.terminate(false);
@@ -478,31 +473,7 @@ public final class yacy {
         } catch (Exception ee) {
             serverLog.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         }
-
-        // restart YaCy
-        if (restart.equals("true")) {
-            serverLog.logConfig("SHUTDOWN", "RESTART...");
-            long count = 0;
-            if (Thread.activeCount() > 1) {
-                serverLog.logConfig("SHUTDOWN", "Wait maximally 5 minutes for " + (Thread.activeCount() - 1) + " running threads to restart YaCy");
-                while (Thread.activeCount() > 1 && count <= 60) { // wait 5 minutes                 
-                    count++;
-                    try { Thread.sleep(5000); } catch (InterruptedException e) {}
-                }
-            }
-            if (count < 60) {
-                System.gc();
-                try { Thread.sleep(5000); } catch (InterruptedException e) {}
-                startupMemFree  = Runtime.getRuntime().freeMemory();  // the amount of free memory in the Java Virtual Machine
-                startupMemTotal = Runtime.getRuntime().totalMemory(); // the total amount of memory in the Java virtual machine; may vary over time
-                startup(homePath, startupMemFree, startupMemTotal);
-            } else {
-                serverLog.logConfig("SHUTDOWN", "RESTART BREAK, more than 5 minutes waited to try a restart, goodbye. (this is the last line)");
-//              serverLog.logConfig("SHUTDOWN", "RESTART BREAK, getAllStackTraces()\n" + Thread.getAllStackTraces()); // needs java 1.5
-            }
-        } else {
-            serverLog.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
-        }
+        serverLog.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
         try {
             System.exit(0);
         } catch (Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)

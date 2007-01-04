@@ -22,33 +22,38 @@ Echo Generated classpath:%CLASSPATH%
 Echo JRE Parameters:%javacmd%
 Echo Priority:%priority%
 
-	Echo ****************** YaCy Web Crawler/Indexer ^& Search Engine *******************
-	Echo **** (C) by Michael Peter Christen, usage granted under the GPL Version 2  ****
-	Echo **** USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/yacy ****
-	Echo **  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy^<xx^>.log)                **
-	Echo **  STOP         YaCy: execute stopYACY.bat and wait some seconds            **
-	Echo **  GET HELP for YaCy: see www.yacy-websearch.net/wiki and www.yacy-forum.de **
-	Echo *******************************************************************************
-	Echo  ^>^> YaCy started as daemon process. Administration at http://localhost:%port% ^<^<
-    
-start "YaCy" %priority% java %javacmd% -classpath %CLASSPATH% yacy
+Echo ****************** YaCy Web Crawler/Indexer ^& Search Engine *******************
+Echo **** (C) by Michael Peter Christen, usage granted under the GPL Version 2  ****
+Echo **** USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/yacy ****
+Echo **  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy^<xx^>.log)                **
+Echo **  STOP         YaCy: execute stopYACY.bat and wait some seconds            **
+Echo **  GET HELP for YaCy: see www.yacy-websearch.net/wiki and www.yacy-forum.de **
+Echo *******************************************************************************
+Echo  ^>^> YaCy started as daemon process. Administration at http://localhost:%port% ^<^<
 
-GoTo :END
+start "YaCy" %priority% /B /WAIT java %javacmd% -classpath %CLASSPATH% yacy
+
+if not exist DATA\yacy.restart GoTo :END
+:WAIT
+echo Please wait...
+if exist DATA\yacy.running GoTo :WAIT
+del DATA\yacy.restart
+GoTo :STARTJAVA
 
 Rem This target is used to read java runtime parameters out of the yacy config file
 :GETSTARTOPTS
 for /F "tokens=1,2 delims==" %%i in (DATA\SETTINGS\httpProxy.conf) do (
-	if "%%i"=="javastart_Xmx" set jmx=%%j
-	if "%%i"=="javastart_Xms" set jms=%%j
-	if "%%i"=="port" set port=%%j
-	if "%%i"=="javastart_priority" set priolvl=%%j
+    if "%%i"=="javastart_Xmx" set jmx=%%j
+    if "%%i"=="javastart_Xms" set jms=%%j
+    if "%%i"=="port" set port=%%j
+    if "%%i"=="javastart_priority" set priolvl=%%j
 )
 if defined jmx set javacmd=-%jmx%
 if defined jms set javacmd=-%jms% %javacmd%
 if not defined port set port=8080
 if defined priolvl (
-	if %priolvl% == 20 set priority=/LOW
-	if %priolvl% == 10 set priority=/BELOWNORMAL
+    if %priolvl% == 20 set priority=/LOW
+    if %priolvl% == 10 set priority=/BELOWNORMAL
 )
 
 GoTo :STARTJAVA
