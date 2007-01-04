@@ -289,36 +289,39 @@ Max. number of results:==Max. Anzahl Ergebnisse:
 Max. search time \(seconds\):==Max. Suchzeit (in Sekunden):
 Max. word distance:==Max. Wort Distanz:
 Pre-Ranking==Vor-Ranking
-"Domain Length"=="Domain L&auml;nge"
+
+#auskommentierte Übersetzung, vielleicht später wieder einsetzbar - daburna 04.01.07
+
+#"Domain Length"=="Domain L&auml;nge"
 #"YaCy Block Rank"=="YaCY Block Rank"
-"Date"=="Datum"
-"Words In Title"=="W&ouml;rter im Titel"
-"Words In Text"=="W&ouml;rter im Text"
-"Phrases In Text"=="Phrasen im Text"
-"Links To Local Domain"=="Links zu lokaler Domain"
-"Links To Other Domain"=="Links zu anderer Domain" 
-"URL Length"=="URL L&auml;nge"
-"URL Components"=="URL Komponenten"
-"Hit Count"=="Treffer Anzahl"
-"Position In Text"=="Position im Text"
-"Position Of Phrase"=="Position der Phrase"
-"Word Distance"=="Wort Distanz"
-"Appearance in URL"=="Taucht in URL auf"
-"Appearance in Description"=="Vorkommen in Beschreibung"
-"Appearance in Author"=="Vorkommen im Autor"
-"Appearance in Tags"=="Vorkommen in Tags"
-"Appearance in Reference"=="Vorkommen in Referenz"
-"Appearance in Emphasized Text"=="Vork. in hervorgehobenem Text"
-"Category Index Page"=="Kategorie Index Seite"
-"Category Image Appearance"=="Vorkommen in Bilder Kategorie" 
-"Category Audio Appearance"=="Vorkommen in Audio Kategorie"
-"Category Video Appearance"=="Vorkommen in Video Kategorie"
-"Category App. Appearance"=="Vorkommen in Anwendungen Kategorie"
+#"Date"=="Datum"
+#"Words In Title"=="W&ouml;rter im Titel"
+#"Words In Text"=="W&ouml;rter im Text"
+#"Phrases In Text"=="Phrasen im Text"
+#"Links To Local Domain"=="Links zu lokaler Domain"
+#"Links To Other Domain"=="Links zu anderer Domain" 
+#"URL Length"=="URL L&auml;nge"
+#"URL Components"=="URL Komponenten"
+#"Hit Count"=="Treffer Anzahl"
+#"Position In Text"=="Position im Text"
+#"Position Of Phrase"=="Position der Phrase"
+#"Word Distance"=="Wort Distanz"
+#"Appearance in URL"=="Taucht in URL auf"
+#"Appearance in Description"=="Vorkommen in Beschreibung"
+#"Appearance in Author"=="Vorkommen im Autor"
+#"Appearance in Tags"=="Vorkommen in Tags"
+#"Appearance in Reference"=="Vorkommen in Referenz"
+#"Appearance in Emphasized Text"=="Vork. in hervorgehobenem Text"
+#"Category Index Page"=="Kategorie Index Seite"
+#"Category Image Appearance"=="Vorkommen in Bilder Kategorie" 
+#"Category Audio Appearance"=="Vorkommen in Audio Kategorie"
+#"Category Video Appearance"=="Vorkommen in Video Kategorie"
+#"Category App. Appearance"=="Vorkommen in Anwendungen Kategorie"
 Post-Ranking==Nach-Ranking
-"URL Component Appears In Toplist"=="URL Komponente kommt in Topliste vor"
-"Description Comp. Appears In Toplist"=="Beschreibung kommt in Topliste vor"
-"Application Of Prefer Pattern"=="Anwendung der bervorzugten Form"
-"Set as Default Ranking"=="Speicher als standard Ranking"
+#"URL Component Appears In Toplist"=="URL Komponente kommt in Topliste vor"
+#"Description Comp. Appears In Toplist"=="Beschreibung kommt in Topliste vor"
+#"Application Of Prefer Pattern"=="Anwendung der bervorzugten Form"
+"Set as Default Ranking"=="Speicher als Standard Ranking"
 "Re-Set to Built-In Ranking"=="Stelle auf urspr&uuml;ngliche Werte zur&uuml;ck"
 The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
 results from <strong>\#\[orderedcount\]\#</strong> ordered links of a total number of <strong>\#\[totalcount\]\#</strong> known.==Ergebnisse von <strong>#[orderedcount]#</strong> angeforderten Links von insgesamt <strong>#[totalcount]#</strong> bekannten Links.
@@ -846,11 +849,32 @@ Date:==Datum:
 Subject:==Betreff:
 reply==antworten
 >delete==>l&ouml;schen
+Compose Message==Nachrichtenerstellung
+Send message to peer==Sende eine Nachricht an Peer
+"Compose"=="Erstellen"
 #-----------------------------
 
 #File: MessageSend_p.html
 #---------------------------
 Send message==Nachricht versenden
+You cannot send a message to==Sie k&ouml;nnen keine Nachricht schicken an
+The peer does not respond. It was now removed from the peer-list.==Der Peer antwortet nicht. Er ist nicht mehr in der Peer-Liste vorhanden. 
+The peer <b>==Der Peer <b>
+is alive and responded:==ist online und antwortet:
+You are allowed to send me a message==Es ist Ihnen erlaubt, mir eine Nachricht zu senden
+kb and an==KB und einen
+attachment &le;==Anhang  &le;
+Your Message==Ihre Nachricht
+Subject:==Betreff:
+Text:==Inhalt:
+You can use==Sie k&ouml;nnen hier
+Wiki Code</a> here.==Wiki Code </a> benutzen.
+"Enter"=="Los"
+The peer is alive but cannot respond. Sorry.==Der Peer ist nicht online und kann nicht antworten. Entschuldigung.
+Your message has been sent. The target peer responded:==Ihre Nachricht wurde erfolgreich versandt. Der Ziel-Peer antwortet:
+The target peer is alive but did not receive your message. Sorry.==Der Ziel-Peer ist online, hat aber Ihre Nachricht nicht erhalten. Entschuldigung.
+Here is a copy of your message, so you can copy it to save it for further attempts:==Hier ist eine Kopie Ihrer Nachricht. Sie k&ouml;nnen diese kopieren, speichern und es sp&auml;ter nochmal versuchen: 
+You cannot call this page directly. Instead, use a link on the <a href="Network.html">Network</a> page.==Sie k&ouml;nnen diese Seite nicht direkt aufrufen. Benutzen Sie stattdessen einen Link auf der <a href="Network.html">Netzwerk</a> Seite.
 #-----------------------------
 
 #File: Network.html
