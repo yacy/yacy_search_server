@@ -532,8 +532,8 @@ public final class plasmaCrawlLURL {
                             if (blacklistedUrls % 100 == 0) {
                                 serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
                             }
-                            lastUrl = comp.url().toNormalform();
                         }
+                        lastUrl = comp.url().toNormalform();
                         lastHash = entry.hash();
                     }
                 }
