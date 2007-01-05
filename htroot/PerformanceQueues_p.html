@@ -205,14 +205,11 @@
     </table>
   </form>
   
-  <p>
-    <strong>YaCy Priority Settings:</strong>
-  </p>
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
-    <fieldset>
+    <fieldset><legend>YaCy Priority Settings</legend>
       <dl>
-        <dt>YaCy Process Priority:</dt>
-        <dd><select name="YaCyPriority">
+        <dt><label for="priority">YaCy Process Priority</label>:</dt>
+        <dd><select id="priority" name="YaCyPriority">
           <option value="0"#(priority_normal)#:: selected="selected"#(/priority_normal)#>Normal</option>
           <option value="10"#(priority_below)#:: selected="selected"#(/priority_below)#>Below normal</option>
           <option value="20"#(priority_low)#:: selected="selected"#(/priority_low)#>Idle</option>
@@ -224,25 +221,22 @@
   </form>
   
   <p>
-    <strong>Proxy Performance Settings:</strong>
+    <strong></strong>
   </p>
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
-    <table border="0" cellpadding="5" cellspacing="1">
-      <tr valign="top" class="TableCellDark">
-        <td>Online Caution Delay (milliseconds):</td>
-        <td><input name="onlineCautionDelay" type="text" size="20" maxlength="100" value="#[onlineCautionDelay]#" /></td>
-        <td>
+    <fieldset><legend>Proxy Performance Settings</legend>
+      <p>
         This is the time that the crawler idles when the proxy is accessed. The delay is extended by this time
         each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.
         (current delta is #[onlineCautionDelayCurrent]# milliseconds since last proxy access.)
-        </td>
-      </tr>
-      <tr valign="top" class="TableCellLight">
-        <td colspan="3">
-        <input type="submit" name="proxyControlSubmit" value="Enter New Parameters" />
-        Changes take effect immediately</td>
-      </tr>
-    </table>
+      </p>
+      <dl>
+        <dt><label for="onlineCautionDelay">Online Caution Delay (milliseconds)</label>:</dt>
+        <dd><input id="onlineCautionDelay" name="onlineCautionDelay" type="text" size="20" maxlength="100" value="#[onlineCautionDelay]#" /></dd>
+        <dt><input type="submit" name="proxyControlSubmit" value="Enter New Parameters" /></dt>
+        <dd>Changes take effect immediately</dd>
+      </dl>
+    </fieldset>
   </form>
   
   #%env/templates/footer.template%#

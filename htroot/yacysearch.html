@@ -10,7 +10,7 @@
 	<script type="text/javascript" src="/js/yacysearch.js"></script>
    
 </head>
-<body id="yacysearch" onload="document.getElementById('search').focus()">
+<body id="yacysearch" onload="document.getElementById('SearchInput').focus()">
 
 #(display)#
 	#%env/templates/simpleheader.template%#
@@ -18,42 +18,52 @@
 	#%env/templates/header.template%#
 #(/display)#
 
-<form class="search small" name="searchform" action="yacysearch.html" method="get">
-	<p class="yacylogo"><a href="http://yacy.net/yacy/" class="yacylogo"><img src="/env/grafics/yacy.png" alt="yacy" /></a></p>
-	<h2>#[promoteSearchPageGreeting]#</h2>
-	<fieldset class="maininput">
-		<table width="100%" border="0" cellspacing="0" cellpadding="0">
-			<tr><td width="80%">
-			<input name="search" type="text" size="50" maxlength="80" value="#[former]#" onClick='document.searchform.Enter.value = "Search"' />
-			<input type="submit" name="Enter" value="Search" />
-			</td><td width="20%">
-			<a href="index.html?display=#[display]#&searchoptions=1&count=#[count]#&order=#[order]#&resource=#[resource]#&time=#[time]#&urlmaskfilter=#[urlmaskfilter]#&prefermaskfilter=#[prefermaskfilter]#&cat=#[cat]#&type=#[type]#&constraint=#[constraint]#&contentdom=#[contentdom]#&former=#[former]#">more options<a>
-			</td></tr>
-			<tr><td width="100%" colspan="2">
-			<input type="radio"  name="contentdom" value="text" #(contentdomCheckText)#::checked="checked"#(/contentdomCheckText)# />Text&nbsp;&nbsp;
-			<input type="radio"  name="contentdom" value="image" #(contentdomCheckImage)#::checked="checked"#(/contentdomCheckImage)# />Images&nbsp;&nbsp;
-			<input type="radio"  name="contentdom" value="audio" #(contentdomCheckAudio)#::checked="checked"#(/contentdomCheckAudio)# />Audio&nbsp;&nbsp;
-			<input type="radio"  name="contentdom" value="video" #(contentdomCheckVideo)#::checked="checked"#(/contentdomCheckVideo)# />Video&nbsp;&nbsp;
-			<input type="radio"  name="contentdom" value="app" #(contentdomCheckApp)#::checked="checked"#(/contentdomCheckApp)# />Applications
-			</td></tr>
-		</table>
-		<input type="hidden" name="former" value="#[former]#" />
-		<input type="hidden" name="count" value="#[count]#" />
-		<input type="hidden" name="order" value="#[order]#" />
-		<input type="hidden" name="resource" value="#[resource]#" />
-		<input type="hidden" name="time" value="#[time]#" />
-		<input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
-		<input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
-		<input type="hidden" name="depth" value="#[depth]#" />
-		<input type="hidden" name="cat" value="#[cat]#" />
-		<input type="hidden" name="type" value="#[type]#" />
-		<input type="hidden" name="display" value="#[display]#" />
-		<input type="hidden" name="constraint" value="#[constraint]#" />
-	</fieldset>
-</form>
+    <form class="search small" action="yacysearch.html" method="get" accept-charset="ascii">
+      <p class="yacylogo"><a href="http://yacy.net/yacy/" class="yacylogo"><img src="/env/grafics/yacy.png" alt="yacy" /></a></p>
+      <h2>#[promoteSearchPageGreeting]#</h2>
+      <fieldset class="maininput">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td>
+              <input id="SearchInput" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Search').value = 'Search'" />
+              <input id="Search" type="submit" name="Enter" value="Search" />
+            </td>
+            <td>
+              <a href="index.html?display=#[display]#&amp;searchoptions=1&amp;count=#[count]#&amp;order=#[order]#&amp;resource=#[resource]#&amp;time=#[time]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;type=#[type]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <input type="radio" id="text" name="contentdom" value="text"#(contentdomCheckText)#:: checked="checked"#(/contentdomCheckText)# />
+              <label for="text">Text</label>&nbsp;&nbsp;
+              <input type="radio" id="images" name="contentdom" value="image"#(contentdomCheckImage)#:: checked="checked"#(/contentdomCheckImage)# />
+              <label for="images">Images</label>&nbsp;&nbsp;
+              <input type="radio" id="audio" name="contentdom" value="audio"#(contentdomCheckAudio)#:: checked="checked"#(/contentdomCheckAudio)# />
+              <label for="audio">Audio</label>&nbsp;&nbsp;
+              <input type="radio" id="video" name="contentdom" value="video"#(contentdomCheckVideo)#:: checked="checked"#(/contentdomCheckVideo)# />
+              <label for="video">Video</label>&nbsp;&nbsp;
+              <input type="radio" id="appl" name="contentdom" value="app"#(contentdomCheckApp)#:: checked="checked"#(/contentdomCheckApp)# />
+              <label for="appl">Applications</label>
+            </td>
+          </tr>
+        </table>
+        <input type="hidden" name="former" value="#[former]#" />
+        <input type="hidden" name="count" value="#[count]#" />
+        <input type="hidden" name="order" value="#[order]#" />
+        <input type="hidden" name="resource" value="#[resource]#" />
+        <input type="hidden" name="time" value="#[time]#" />
+        <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
+        <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
+        <input type="hidden" name="depth" value="#[depth]#" />
+        <input type="hidden" name="cat" value="#[cat]#" />
+        <input type="hidden" name="type" value="#[type]#" />
+        <input type="hidden" name="display" value="#[display]#" />
+        <input type="hidden" name="constraint" value="#[constraint]#" />
+      </fieldset>
+    </form>
   
 <script type="text/javascript">
-document.searchform.Enter.value = "search again - catch up more links";
+document.getElementById("Search").value = "search again - catch up more links";
 </script>
 
 <!-- show information about search key handling -->

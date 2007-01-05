@@ -62,10 +62,10 @@
       <fieldset>
         <legend>Memory Settings</legend>
         <dl>
-          <dt>Maximum used memory</dt>
-          <dd><input name="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /> MByte</dd>
-          <dt>Minimal used memory</dt>
-          <dd><input name="Xms" type="text" size="4" maxlength="4" value="#[Xms]#" /> MByte</dd>
+          <dt><label for="Xmx">Maximum used memory</label></dt>
+          <dd><input name="Xmx" id="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /> MByte</dd>
+          <dt><label for="Xms">Minimal used memory</label></dt>
+          <dd><input name="Xms" id="Xms" type="text" size="4" maxlength="4" value="#[Xms]#" /> MByte</dd>
           <dt><input type="submit" name="setStartup" value="Set" /></dt>
           <dd>Changes take effect after <strong>restart</strong> of YaCy</dd>
         </dl>
@@ -77,7 +77,7 @@
       <table border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
           <td rowspan="2">Database<br />&nbsp;</td>
-          <td rowspan="2">DB&nbsp;Size<br />&nbsp;</td>
+          <td rowspan="2">DB Size<br />&nbsp;</td>
           <td colspan="4">Node Cache</td>
           <td colspan="5">Object Cache</td>
           <td colspan="4">Memory Occupation (KBytes)</td>
