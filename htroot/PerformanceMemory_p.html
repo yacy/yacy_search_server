@@ -9,66 +9,69 @@
     #%env/templates/submenuPerformance.template%#
     <h2>Performance Settings for Memory</h2>
     <p><strong>Memory Usage:</strong></p>
+    
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>&nbsp;<br />Type</td>
+        <td>After Startup<br />&nbsp;</td>
+        <td>After Initializations<br />before GC</td>
+        <td>After Initializations<br />after GC</td>
+        <td>Now<br />#(gc)#before <a href="PerformanceMemory_p.html?gc=">GC</a>::after GC#(/gc)#</td>
+        <td>Description<br />&nbsp;</td>
+      </tr>
+      <tr class="TableCellDark">
+        <td class="TableHeader" align="left">Max</td>
+        <td align="center" colspan="4">#[memoryMax]# MByte</td>
+        <td align="left">maximum memory that the JVM will attempt to use</td>
+      </tr>
+      <tr class="TableCellDark">
+        <td class="TableHeader" align="left">Available</td>
+        <td align="right">#[memoryAvailAfterStartup]# MByte</td>
+        <td align="right">#[memoryAvailAfterInitBGC]# MByte</td>
+        <td align="right">#[memoryAvailAfterInitAGC]# MByte</td>
+        <td align="right">#[memoryAvailNow]# MByte</td>
+        <td align="left">total available memory including free for the JVM within maximum</td>
+      </tr>
+      <tr class="TableCellDark">
+        <td class="TableHeader" align="left">Total</td>
+        <td align="right">#[memoryTotalAfterStartup]# KByte</td>
+        <td align="right">#[memoryTotalAfterInitBGC]# KByte</td>
+        <td align="right">#[memoryTotalAfterInitAGC]# KByte</td>
+        <td align="right">#[memoryTotalNow]# MByte</td>
+        <td align="left">total memory taken from the OS</td>
+      </tr>
+      <tr class="TableCellDark">
+        <td class="TableHeader" align="left">Free</td>
+        <td align="right">#[memoryFreeAfterStartup]# KByte</td>
+        <td align="right">#[memoryFreeAfterInitBGC]# KByte</td>
+        <td align="right">#[memoryFreeAfterInitAGC]# KByte</td>
+        <td align="right">#[memoryFreeNow]# MByte</td>
+        <td align="left">free memory in the JVM within total amount</td>
+      </tr>
+      <tr class="TableCellDark">
+        <td class="TableHeader" align="left">Used</td>
+        <td align="right">#[memoryUsedAfterStartup]# KByte</td>
+        <td align="right">#[memoryUsedAfterInitBGC]# KByte</td>
+        <td align="right">#[memoryUsedAfterInitAGC]# KByte</td>
+        <td align="right">#[memoryUsedNow]# MByte</td>
+        <td align="left">used memory in the JVM within total amount</td>
+      </tr>
+    </table>
+    
     <form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
-      <table border="0" cellpadding="2" cellspacing="1">
-        <tr class="TableHeader" valign="bottom">
-          <td>&nbsp;<br />Type</td>
-          <td>After Startup<br />&nbsp;</td>
-          <td>After Initializations<br />before GC</td>
-          <td>After Initializations<br />after GC</td>
-          <td>Now<br />#(gc)#before <a href="PerformanceMemory_p.html?gc=">GC</a>::after GC#(/gc)#</td>
-          <td>Next<br />Startup</td>
-          <td>Description<br />&nbsp;</td>
-        </tr>
-        <tr class="TableCellDark">
-          <td class="TableHeader" align="left">Max</td>
-          <td align="center" colspan="4">#[memoryMax]# MByte</td>
-          <td align="right"><input name="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /><br />MByte</td>
-          <td align="left">maximum memory that the JVM will attempt to use</td>
-        </tr>
-        <tr class="TableCellDark">
-          <td class="TableHeader" align="left">Available</td>
-          <td align="right">#[memoryAvailAfterStartup]# MByte</td>
-          <td align="right">#[memoryAvailAfterInitBGC]# MByte</td>
-          <td align="right">#[memoryAvailAfterInitAGC]# MByte</td>
-          <td align="right">#[memoryAvailNow]# MByte</td>
-          <td align="right">&nbsp;<br />&nbsp;</td>
-          <td align="left">total available memory including free for the JVM within maximum</td>
-        </tr>
-        <tr class="TableCellDark">
-          <td class="TableHeader" align="left">Total</td>
-          <td align="right">#[memoryTotalAfterStartup]# KByte</td>
-          <td align="right">#[memoryTotalAfterInitBGC]# KByte</td>
-          <td align="right">#[memoryTotalAfterInitAGC]# KByte</td>
-          <td align="right">#[memoryTotalNow]# MByte</td>
-          <td align="right"><input name="Xms" type="text" size="4" maxlength="4" value="#[Xms]#" /><br />MByte</td>
-          <td align="left">total memory taken from the OS</td>
-        </tr>
-        <tr class="TableCellDark">
-          <td class="TableHeader" align="left">Free</td>
-          <td align="right">#[memoryFreeAfterStartup]# KByte</td>
-          <td align="right">#[memoryFreeAfterInitBGC]# KByte</td>
-          <td align="right">#[memoryFreeAfterInitAGC]# KByte</td>
-          <td align="right">#[memoryFreeNow]# MByte</td>
-          <td align="right">&nbsp;<br />&nbsp;</td>
-          <td align="left">free memory in the JVM within total amount</td>
-        </tr>
-        <tr class="TableCellDark">
-          <td class="TableHeader" align="left">Used</td>
-          <td align="right">#[memoryUsedAfterStartup]# KByte</td>
-          <td align="right">#[memoryUsedAfterInitBGC]# KByte</td>
-          <td align="right">#[memoryUsedAfterInitAGC]# KByte</td>
-          <td align="right">#[memoryUsedNow]# MByte</td>
-          <td align="right">&nbsp;<br />&nbsp;</td>
-          <td align="left">used memory in the JVM within total amount</td>
-        </tr>
-        <tr class="TableCellLight">
-          <td align="right" colspan="5">Re-Configuration of Startup Paramenters: </td>
-          <td align="right"><input type="submit" name="setStartup" value="Set" /></td>
-          <td align="left">Changes take effect after <strong>re-start</strong> of YaCy</td>
-        </tr>
-      </table>
+      <fieldset>
+        <legend>Memory Settings</legend>
+        <dl>
+          <dt>Maximum used memory</dt>
+          <dd><input name="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /> MByte</dd>
+          <dt>Minimal used memory</dt>
+          <dd><input name="Xms" type="text" size="4" maxlength="4" value="#[Xms]#" /> MByte</dd>
+          <dt><input type="submit" name="setStartup" value="Set" /></dt>
+          <dd>Changes take effect after <strong>restart</strong> of YaCy</dd>
+        </dl>
+      </fieldset>
     </form>
+    
     <p><strong>RAM Cache for Database Files:</strong></p>
     <form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
       <table border="0" cellpadding="2" cellspacing="1">

@@ -638,7 +638,7 @@
       <pathelement location="${build}"/>
       <pathelement location="${htroot}"/>
       <pathelement location="${lib}/commons-collections.jar" />
-      <pathelement location="${lib}/commons-pool-1.2.jar" />        
+      <pathelement location="${lib}/commons-pool.jar" />        
       <pathelement location="${libx}" />                 
       <fileset dir="${libx}" includes="**/*.jar" />
     </classpath>
@@ -658,7 +658,7 @@
       <pathelement location="${build}"/>
       <pathelement location="${htroot}"/>
       <pathelement location="${lib}/commons-collections.jar" />
-      <pathelement location="${lib}/commons-pool-1.2.jar" />        
+      <pathelement location="${lib}/commons-pool.jar" />        
       <pathelement location="${libx}" />                 
       <fileset dir="${libx}" includes="**/*.jar" />
     </classpath>
@@ -673,7 +673,7 @@
       <pathelement location="${build}"/>
       <pathelement location="${htroot}"/>
       <pathelement location="${lib}/commons-collections.jar" />
-      <pathelement location="${lib}/commons-pool-1.2.jar" />        
+      <pathelement location="${lib}/commons-pool.jar" />        
       <pathelement location="${libx}" />                 
       <fileset dir="${libx}" includes="**/*.jar" />
     </classpath>
@@ -692,7 +692,7 @@
       <pathelement location="${build}"/>
       <pathelement location="${htroot}"/>
       <pathelement location="${lib}/commons-collections.jar" />
-      <pathelement location="${lib}/commons-pool-1.2.jar" />        
+      <pathelement location="${lib}/commons-pool.jar" />        
       <pathelement location="${libx}" />                 
       <fileset dir="${libx}" includes="**/*.jar" />
     </classpath>
