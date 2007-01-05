@@ -94,9 +94,9 @@
 -->	
 
 <target name="buildSvnRevNr">
-  <delete file="lib/svnRevNr.jar" />
+  <delete file="${lib}/svnRevNr.jar" />
   <javac srcdir="${lib}/svnRevNr" />
-  <jar destfile="lib/svnRevNr.jar" basedir="${lib}/svnRevNr">
+  <jar destfile="${lib}/svnRevNr.jar" basedir="${lib}/svnRevNr">
     <manifest>
       <attribute name="Main-Class" value="svnRevNrParser"/>
     </manifest>	  	
