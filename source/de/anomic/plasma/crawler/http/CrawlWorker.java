@@ -411,7 +411,8 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 retryCrawling = true;
             } else if ((errorMsg != null) && (
             		(errorMsg.indexOf("Corrupt GZIP trailer") >= 0) ||
-            		(errorMsg.indexOf("Not in GZIP format") >= 0)
+            		(errorMsg.indexOf("Not in GZIP format") >= 0) ||
+            		(errorMsg.indexOf("Unexpected end of ZLIB") >= 0)
             )) {
                 this.log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + this.url.toString() +
                 "'. Retrying request without using gzip content encoding.");
