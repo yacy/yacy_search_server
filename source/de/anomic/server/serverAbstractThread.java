@@ -248,7 +248,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 logSystem("thread '" + this.getName() + "' deployed, " + ((this.busyPause < 0) ? "starting job." : "starting loop."));
         }
         long timestamp;
-        long memstamp0, memstamp1;
+        long memstamp0, memstamp1, memnow;
         boolean isBusy;
         //Runtime rt = Runtime.getRuntime();
                 
@@ -271,7 +271,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 timestamp = System.currentTimeMillis();
                 ratz(this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
-            } else if (serverMemory.available() > memprereq) try {
+            } else if ((memnow = serverMemory.available()) > memprereq) try {
                 // do job
                 timestamp = System.currentTimeMillis();
                 memstamp0 = serverMemory.used();
@@ -304,6 +304,8 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 this.jobExceptionHandler(e);
                 busyCycles++;
             } else {
+                log.logFine("Thread '" + this.getName() + "' runs short memory cycle. Free mem: " +
+                        (memnow / 1024) + " KB, needed: " + (memprereq / 1024) + " KB");
                 // omit job, not enough memory
                 // process scheduled pause
                 timestamp = System.currentTimeMillis();

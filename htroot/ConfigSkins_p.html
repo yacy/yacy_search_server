@@ -14,19 +14,21 @@
     
     <form action="ConfigSkins_p.html">
       <fieldset>
-        <dl class="pairs">
+        <dl>
           <dt><label for="cur_skin">Current skin</label>:</dt>
           <dd id="cur_skin">#[currentskin]#&nbsp;</dd>
           
           <dt><label for="skins">Available Skins</label>:</dt>
           <dd>
-            <select id="skins" size="10" name="skin">#{skinlist}#
+            <select id="skins" name="skin">#{skinlist}#
               <option value="#[file]#">#[name]#</option>#{/skinlist}#
             </select>
           </dd>
+          <dd>
+            <input type="submit" name="use_button" value="Use" />
+            <input type="submit" name="delete" value="Delete" />
+          </dd>
         </dl>
-        <input type="submit" name="use_button" value="Use" />
-        <input type="submit" name="delete" value="Delete" />
       </fieldset>
     </form>
     
@@ -38,8 +40,8 @@
           
           <dt><label for="use_url">Use this skin</label></dt>
           <dd><input type="checkbox" name="use_skin" id="use_url" value="on" checked="checked" /></dd>
+          <dd><input type="submit" value="install" /></dd>
         </dl>
-        <input type="submit" value="install" />
       </fieldset>
     </form>
     #(status)#

@@ -13,7 +13,7 @@
     </p>
     <form action="ConfigLanguage_p.html">
       <fieldset>
-        <dl class="pairs">
+        <dl>
           <dt><label for="cur_lang">Current language</label>:</dt>
           <dd id="cur_lang"><!-- lang -->default(english)&nbsp;</dd>
           
@@ -29,9 +29,11 @@
               <option value="#[file]#">#[name]#</option>#{/langlist}#
             </select>
           </dd>
+          <dd>
+            <input type="submit" name="use_button" value="Use" />
+            <input type="submit" name="delete" value="Delete" />
+          </dd>
         </dl>
-        <input type="submit" name="use_button" value="Use" />
-        <input type="submit" name="delete" value="Delete" />
       </fieldset>
     </form>
     
@@ -47,8 +49,8 @@
           <dd>
             <input type="checkbox" name="use_lang" id="use_lang" value="on" checked="checked" />
           </dd>
+          <dd><input type="submit" value="Install" /></dd>
         </dl>
-        <input type="submit" value="Install" />
       </fieldset>
     </form>
     #(status)#

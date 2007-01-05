@@ -49,8 +49,8 @@ import java.text.DecimalFormat;
 
 public class serverMemory {
 
-    public static boolean vm15 = System.getProperty("java.vm.version").startsWith("1.5");
-    public static final long max = (vm15) ? Runtime.getRuntime().maxMemory() : computedMaxMemory(); // patch for maxMemory bug in Java 1.4.2
+    public static boolean vm14 = System.getProperty("java.vm.version").startsWith("1.4");
+    public static final long max = (vm14) ? computedMaxMemory() : Runtime.getRuntime().maxMemory() ; // patch for maxMemory bug in Java 1.4.2
     private static final Runtime runtime = Runtime.getRuntime();
     
     public static long free() {
