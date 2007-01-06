@@ -79,28 +79,26 @@ public class ViewFile {
     public static final int VIEW_MODE_AS_PARSED_SENTENCES = 3;
     public static final int VIEW_MODE_AS_IFRAME = 4;
     public static final int VIEW_MODE_AS_LINKLIST = 5;
-
-    public static final String[] highlightingColors = new String[] {
-        "255,255,100",
-        "255,155,155",
-        "0,255,0",
-        "0,255,255",
-        "204,153,0",
-        "204,153,255"
-    };
+    
+    private static final String HIGHLIGHT_CSS = "searchHighlight";
+    private static final int MAX_HIGHLIGHTS = 6;
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = (plasmaSwitchboard)env;     
 
-        if (post != null && post.containsKey("words")) try {
-            prop.put("error_words",URLEncoder.encode((String) post.get("words"), "UTF-8"));
-        } catch (UnsupportedEncodingException e1) {
-            // ignore this. this should not occure
+        if (post != null && post.containsKey("words"))
+            prop.put("error_words", wikiCode.replaceHTMLonly((String)post.get("words")));
+        else {
+            prop.put("error", 1);
+            prop.put("viewmode", 0);    
+            return prop;
         }
 
         String viewMode = post.get("viewMode","sentences");
+        prop.put("error_vMode-" + viewMode, 1);
+        
         URL url = null;
         String descr = "";
         int wordCount = 0;
@@ -203,7 +201,7 @@ public class ViewFile {
                     /* ignore this */
                 }
 
-                // if the metadata where not cached try to load it from web
+                // if the metadata was not cached try to load it from web
                 if (resInfo == null) {
                     String protocol = url.getProtocol();
                     if (!((protocol.equals("http") || protocol.equals("https")))) {
@@ -265,16 +263,17 @@ public class ViewFile {
                     }
             }
 
-            content = content.replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-                    .replaceAll("\"", "&quot;").replaceAll("\n", "<br>")
-                    .replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
+            content = wikiCode.replaceHTMLonly(
+                    content.replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;"));
 
             prop.put("error", 0);
             prop.put("viewMode", VIEW_MODE_AS_PLAIN_TEXT);
             prop.put("viewMode_plainText", content);
+            
         } else if (viewMode.equals("iframe")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME);
-            prop.put("viewMode_url", url.toNormalform());
+            prop.put("viewMode_url", wikiCode.replaceHTMLonly(url.toNormalform()));
+            
         } else if (viewMode.equals("parsed") || viewMode.equals("sentences") || viewMode.equals("links")) {
             // parsing the resource content
             plasmaParserDocument document = null;
@@ -301,37 +300,41 @@ public class ViewFile {
             }
 
             resMime = document.getMimeType();
+            String[] wordArray = wordArray(post.get("words", null));
 
             if (viewMode.equals("parsed")) {
                 String content = new String(document.getTextBytes());
                 content = wikiCode.replaceHTML(content); // added by Marc Nause
-                content = content.replaceAll("\n", "<br>").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
+                content = content.replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
 
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_TEXT);
-                prop.put("viewMode_parsedText", content);
+                prop.put("viewMode_parsedText", markup(wordArray, content));
+                
             } else if (viewMode.equals("sentences")) {
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_SENTENCES);
                 final Iterator sentences = document.getSentences(pre);
 
                 boolean dark = true;
                 int i = 0;
+                String sentence;
                 if (sentences != null) {
-                    String[] wordArray = wordArray(post.get("words", null));
                     
                     // Search word highlighting
                     while (sentences.hasNext()) {
-                        prop.put("viewMode_sentences_" + i + "_nr", Integer.toString(i + 1));
-                        prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, (String) sentences.next()));
-                        prop.put("viewMode_sentences_" + i + "_dark", ((dark) ? 1 : 0));
-                        dark = !dark;
-                        i++;
+                        sentence = (String)sentences.next();
+                        if (sentence.trim().length() > 0) {
+                            prop.put("viewMode_sentences_" + i + "_nr", Integer.toString(i + 1));
+                            prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, (String) sentences.next()));
+                            prop.put("viewMode_sentences_" + i + "_dark", ((dark) ? 1 : 0));
+                            dark = !dark;
+                            i++;
+                        }
                     }
                 }
                 prop.put("viewMode_sentences", i);
 
             } else if (viewMode.equals("links")) {
                 prop.put("viewMode", VIEW_MODE_AS_LINKLIST);
-                String[] wordArray = wordArray(post.get("words", null));
                 boolean dark = true;
                 int i = 0;
                 i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0));
@@ -359,13 +362,13 @@ public class ViewFile {
             if (document != null) document.close();
         }
         prop.put("error", 0);
-        prop.put("error_url", url.toNormalform());
+        prop.put("error_url", wikiCode.replaceHTMLonly(url.toNormalform()));
         prop.put("error_hash", urlHash);
         prop.put("error_wordCount", Integer.toString(wordCount));
         prop.put("error_desc", descr);
         prop.put("error_size", size);
-        prop.put("error_mimeType", resMime);
-
+        prop.put("error_mimeTypeAvailable", (resMime == null) ? 0 : 1);
+        prop.put("error_mimeTypeAvailable_mimeType", resMime);
         return prop;
     }
 
@@ -381,14 +384,14 @@ public class ViewFile {
     
     private static final String markup(String[] wordArray, String message) {
         message = wikiCode.replaceHTML(message);
-        if (wordArray != null) for (int j = 0; j < wordArray.length; j++) {
-            String currentWord = wordArray[j].trim();
-            message = message.replaceAll(currentWord,
-                            "<b style=\"color: black; background-color: rgb("
-                          + highlightingColors[j % 6]
-                          + ");\">" + currentWord
-                          + "</b>");
-         }
+        if (wordArray != null)
+            for (int j = 0; j < wordArray.length; j++) {
+                String currentWord = wordArray[j].trim();
+                message = message.replaceAll(currentWord,
+                                "<span class=\"" + HIGHLIGHT_CSS + ((j % MAX_HIGHLIGHTS) + 1) + "\">" +
+                                currentWord + 
+                                "</span>");
+            }
         return message;
     }
     

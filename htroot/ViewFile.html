@@ -1,103 +1,90 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy '#[clientname]#': View URL Content</title>
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-<h2>View URL Content</h2>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': View URL Content</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body>
+    #%env/templates/header.template%#
+    <h2>View URL Content</h2>
 
-<p><font color="red">
-#(error)#
-<table border="0" cellpadding="2" cellspacing="1">
-<tr class="TableHeader">
-	<td>URL</td>
-	<td><a href="#[url]#">#[url]#</a></td>
-</tr>
-<tr class="TableCellDark">
-	<td>Hash</td>
-	<td><tt>#[hash]#</tt></td>
-</tr>
-<tr class="TableCellLight">
-	<td>Word Count</td>
-	<td><tt>#[wordCount]#</tt></td>
-</tr>
-<tr class="TableCellDark">
-	<td>Description</td>
-	<td><tt>#[desc]#</tt></td>
-</tr>
-<tr class="TableCellLight">
-	<td>Size</td>
-	<td><tt>#[size]#</tt></td>
-</tr>
-<tr class="TableCellDark">
-	<td>MimeType</td>
-	<td><tt>#[mimeType]#</tt></td>
-</tr>
-<tr class="TableCellLight">
-	<td>View as:</td>
-	<td>
-		<a href="?urlHash=#[hash]#&viewMode=iframe&words=#[words]#">Original</a> |   
-		<a href="?urlHash=#[hash]#&viewMode=plain&words=#[words]#">Plain Text</a> |
-		<a href="?urlHash=#[hash]#&viewMode=parsed&words=#[words]#">Parsed Text</a> |
-		<a href="?urlHash=#[hash]#&viewMode=sentences&words=#[words]#">Parsed Sentences</a> |
-		<a href="?urlHash=#[hash]#&viewMode=links&words=#[words]#">Link List</a>
-	</td>
-</tr>
-</table>
+    #(error)#
+    <form method="get" action="ViewFile.html" accept-charset="ascii">
+      <fieldset><legend>View URL Content</legend>
+        <dl>
+          <dt>URL:</dt>        <dd><a href="#[url]#">#[url]#</a></dd>
+          <dt>Hash:</dt>       <dd>#[hash]#</dd>
+          <dt>Word Count:</dt> <dd>#[wordCount]#</dd>
+          <dt>Description:</dt><dd>#[desc]#</dd>
+          <dt>Size:</dt>       <dd>#[size]#</dd>#(mimeTypeAvailable)#::
+          <dt>MimeType:</dt>   <dd>#[mimeType]#</dd>#(/mimeTypeAvailable)#
+          <dt><label for="viewMode">View as</label>:</dt>
+          <dd>
+            <select id="viewMode" name="viewMode">
+              <option value="iframe"#(vMode-iframe)#:: selected="selected"#(/vMode-iframe)#>Original</option>
+              <option value="plain"#(vMode-plain)#:: selected="selected"#(/vMode-plain)#>Plain Text</option>
+              <option value="parsed"#(vMode-parsed)#:: selected="selected"#(/vMode-parsed)#>Parsed Text</option>
+              <option value="sentences"#(vMode-sentences)#:: selected="selected"#(/vMode-sentences)#>Parsed Sentences</option>
+              <option value="links"#(vMode-links)#:: selected="selected"#(/vMode-links)#>Link List</option>
+            </select>
+            <input type="submit" name="show" value="Show" />
+          </dd>
+        </dl>
+        <input type="hidden" name="words" value="#[words]#" />
+        <input type="hidden" name="urlHash" value="#[hash]#" />
+      </fieldset>
+    </form>
 :: <!-- 1 -->
-No URL hash submitted.
+<span class="error">No URL hash submitted.</span>
 :: <!-- 2 -->
-Unable to find URL Entry in DB
+<span class="error">Unable to find URL Entry in DB</span>
 :: <!-- 3 -->
-Invalid URL
+<span class="error">Invalid URL</span>
 :: <!-- 4 -->
-Unable to download resource content.<br> 
+<p class="error">Unable to download resource content.</p>
 <tt>#[errorText]#</tt>
 :: <!-- 5 -->
-Unable to parse resource content.<br>
+<p class="error">Unable to parse resource content.</p>
 <tt>#[errorText]#</tt>
 :: <!-- 6 -->
-Unsupported protocol.
+<span class="error">Unsupported protocol.</span>
 #(/error)#
-</font>
-</p>
+
 <p>
 #(viewMode)#
 :: <!-- 1 -->
-	<h3>Plain Resource Content</h3><br>
-	<tt>#[plainText]#</tt>
+	<fieldset><legend>Plain Resource Content</legend>
+	  <p class="tt">
+	    #[plainText]#
+	  </p>
+	</fieldset>
 :: <!-- 2 -->
-	<h3>Parsed Resource Content</h3><br>
-	<tt>#[parsedText]#</tt>
+	<fieldset><legend>Parsed Resource Content</legend>
+	  <p class="tt">
+	    #[parsedText]#
+	  </p>
+	</fieldset>
 :: <!-- 3 -->
-	<h3>Parsed Resource Sentences</h3><br>
-	<table border="0" cellpadding="2" cellspacing="1">
-		#{sentences}#
-			<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#" title="#[sessionName]#">
-				<td>#[nr]#</td>
-				<td><tt>#[text]#</tt></td>
-			</tr>
-		#{/sentences}#
-	</table>	
+	<fieldset><legend>Parsed Resource Sentences</legend>
+	  <ol>#{sentences}#
+		<li class="tt">#[text]#</li>#{/sentences}#
+	  </ol>
+	</fieldset>
 :: <!-- 4 -->
-	<h3>Original Resource Content</h3><br>
-	<iframe src="#[url]#" width="800" height="400">
-	</iframe>
+	<fieldset><legend>Original Resource Content</legend>
+	  <iframe src="#[url]#" width="800" height="400" />
+	</fieldset>
 :: <!-- 5 -->
 	<h3>Link List</h3><br>
 	<table border="0" cellpadding="2" cellspacing="1">
 		#{links}#
-			<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-				<td>#[nr]#</td>
-				<td><tt>#[type]#</tt></td>
-				<td><tt>#[text]#</tt></td>
-				<td><tt>#[link]#</tt></td>
-				<td><tt>#[attr]#</tt></td>
-			</tr>
-		#{/links}#
+		<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+			<td>#[nr]#</td>
+			<td class="tt">#[type]#</tt></td>
+			<td class="tt">#[text]#</tt></td>
+			<td class="tt">#[link]#</tt></td>
+			<td class="tt">#[attr]#</tt></td>
+		</tr>#{/links}#
 	</table>	
 #(/viewMode)#
 </p>

@@ -4,14 +4,14 @@
     <title>YaCy '#[clientname]#': Search Page</title>
     #%env/templates/metas.template%#
   </head>
-  <body id="DetailedSearch" onload="document.getElementById('search').focus()">
+  <body id="DetailedSearch"#(jumpToCursor)#:: onload="document.getElementById('search').focus()"#(/jumpToCursor)#>
     #%env/templates/header.template%#
     <h2>Detailed Search</h2>
     #(num-results)#
 	::
 	<p><strong>#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links from <strong>#[filteredcount]#</strong> filtered links of a total number of <strong>#[totalcount]#</strong> known.</p>
     #(/num-results)#
-    <form class="dsearch" action="DetailedSearch.html" method="get" enctype="multipart/form-data">
+    <form class="dsearch" action="DetailedSearch.html#Results" method="get" enctype="multipart/form-data">
       <fieldset>
         <input type="text" name="search" id="search" value="#[search]#" size="50" maxlength="250" />
         <input type="submit" name="Enter" value="Search" />
@@ -20,9 +20,9 @@
         <legend>Query Attributes</legend>
         <dl>
           <dt><label for="global">Global:</label></dt>
-          <dd><input type="checkbox" name="global" id="global" #[globalChecked]# /></dd>
+          <dd><input type="checkbox" name="global" id="global"#(globalChecked)#:: checked="checked"#(/globalChecked)# /></dd>
           <dt><label for="postsort">Post-Sort:</label></dt>
-          <dd><input type="checkbox" name="postsort" id="postsort" #[postsortChecked]# /></dd>
+          <dd><input type="checkbox" name="postsort" id="postsort"#(postsortChecked)#:: checked="checked"#(/postsortChecked)# /></dd>
           <dt><label for="localCount">Max. number of results:</label></dt>
           <dd><input type="text" name="localCount" id="localCount" value="#[localCount]#" size="4" maxlength="5" /></dd>
           <dt><label for="localTime">Max. search time (seconds):</label></dt>
@@ -64,6 +64,8 @@
         <input type="submit" name="ResetRanking" value="Re-Set to Built-In Ranking" />
       </fieldset>
     </form>
+    
+    <a name="Results"></a>
     #(type)#
     #(excluded)#
     ::
@@ -81,9 +83,11 @@
      #{results}#
     <!-- link begin -->
     <div class="searchresults">
+      #(authorized)#::
       <div class="urlactions">
         <a href="#[delete]#" title="delete" class="deletelink" ><img src="/env/grafics/empty.gif" title="delete" alt="delete" class="deleteIcon" /></a>
       </div>
+      #(/authorized)#
       <h4 class="linktitle"><a href="#[url]#">#[description]#</a></h4>
       #(snippet)#::<p class="snippet"><em>#[text]#</em></p>#(/snippet)#
       <p class="url"><a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a></p>

@@ -110,12 +110,13 @@ public class DetailedSearch {
         prop.put("localCount", 10);
         prop.put("localWDist", 999);
         //prop.put("globalChecked", "checked");
-        prop.put("globalChecked", "");
-        prop.put("postsortChecked", "checked=\"checked\"");
+        prop.put("globalChecked", 0);
+        prop.put("postsortChecked", 1);
         prop.put("localTime", 6);
         prop.put("results", "");
         prop.put("urlmaskoptions", 0);
         prop.put("urlmaskoptions_urlmaskfilter", ".*");
+        prop.put("jumpToCursor", 1);
         return prop;
     }
     
@@ -200,7 +201,8 @@ public class DetailedSearch {
         if (filtered.size() > 0) {
             kelondroMSetTools.excludeDestructive(query, plasmaSwitchboard.stopwords);
         }
-
+        
+        boolean authenticated = sb.adminAuthenticated(header) >= 2;
         // if a minus-button was hit, remove a special reference first
         if (post.containsKey("deleteref")) {
             if (!sb.verifyAuthentication(header, true)) {
@@ -235,6 +237,7 @@ public class DetailedSearch {
         plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         final serverObjects prop = sb.searchFromLocal(thisSearch, localRanking, localTiming, remoteTiming, postsort);
 
+        putRanking(prop, localRanking, "local");
         // remember the last search expression
         env.setConfig("last-search", querystring);
         // process result of search
@@ -276,13 +279,19 @@ public class DetailedSearch {
         } else {
             prop.put("urlmaskoptions", 1);
         }
+        
+        // if user is not authenticated, he may not vote for URLs
+        int linkcount = Integer.parseInt(prop.get("num-results_linkcount", "0"));
+        for (int i=0; i<linkcount; i++)
+            prop.put("type_results_" + i + "_authorized", (authenticated) ? 1 : 0);
 
+        prop.put("jumpToCursor", (linkcount > 0) ? 0 : 1);
         prop.put("urlmaskoptions_urlmaskfilter", urlmask);
         prop.put("type", "0");
         prop.put("localCount", count);
         prop.put("localWDist", wdist);
-        prop.put("globalChecked", (global) ? "checked=\"checked\"" : "");
-        prop.put("postsortChecked", (postsort) ? "checked=\"checked\"" : "");
+        prop.put("globalChecked", (global) ? 1 : 0);
+        prop.put("postsortChecked", (postsort) ? 1 : 0);
         prop.put("localTime", searchtime/1000);
         prop.put("search", post.get("search", ""));
         prop.putAll(localRanking.toExternalMap("local"));

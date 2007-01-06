@@ -66,6 +66,12 @@ a.bookmarkAction	{ color: #999999; }
 .searchresults .url a	{ color: #008000; }
 .snippetLoading		{ color: #999999; }
 .snippetError		{ color: red; }
+.searchHighlight1	{ font-weight: bold; color: #FFFF64; }
+.searchHighlight2	{ font-weight: bold; color: #FF9B9B; }
+.searchHighlight3	{ font-weight: bold; color: #0F0; }
+.searchHighlight4	{ font-weight: bold; color: #0FF; }
+.searchHighlight5	{ font-weight: bold; color: #C90; }
+.searchHighlight6	{ font-weight: bold; color: #C9F; }
 
 /* other */
 .settingsValue		{ color: #556699; }
