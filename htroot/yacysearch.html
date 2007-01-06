@@ -10,7 +10,7 @@
 	<script type="text/javascript" src="/js/yacysearch.js"></script>
    
 </head>
-<body id="yacysearch" onload="document.getElementById('SearchInput').focus()">
+<body id="yacysearch" onload="document.getElementById('search').focus()">
 
 #(display)#
 	#%env/templates/simpleheader.template%#
@@ -18,15 +18,15 @@
 	#%env/templates/header.template%#
 #(/display)#
 
-    <form class="search small" action="yacysearch.html" method="get" accept-charset="ascii">
+    <form class="search small" action="yacysearch.html" method="get">
       <p class="yacylogo"><a href="http://yacy.net/yacy/" class="yacylogo"><img src="/env/grafics/yacy.png" alt="yacy" /></a></p>
       <h2>#[promoteSearchPageGreeting]#</h2>
       <fieldset class="maininput">
         <table width="100%" border="0" cellspacing="0" cellpadding="0">
           <tr>
             <td>
-              <input id="SearchInput" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Search').value = 'Search'" />
-              <input id="Search" type="submit" name="Enter" value="Search" />
+              <input id="search" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
+              <input id="Enter" type="submit" name="Enter" value="Search" />
             </td>
             <td>
               <a href="index.html?display=#[display]#&amp;searchoptions=1&amp;count=#[count]#&amp;order=#[order]#&amp;resource=#[resource]#&amp;time=#[time]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;type=#[type]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
@@ -63,7 +63,7 @@
     </form>
   
 <script type="text/javascript">
-document.getElementById("Search").value = "search again - catch up more links";
+document.getElementById("Enter").value = "search again - catch up more links";
 </script>
 
 <!-- show information about search key handling -->
@@ -116,6 +116,7 @@ document.getElementById("Search").value = "search again - catch up more links";
 	#{results}#
 	<!-- link begin -->
 	     <div class="searchresults">
+	       #(authorized)#::
 	       <div class="urlactions">
 	         <a href="/Bookmarks.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" class="bookmarkIcon" /></a>
 	         #(recommend)#
@@ -126,6 +127,7 @@ document.getElementById("Search").value = "search again - catch up more links";
 	         <a href="#[deletelink]#" title="delete" class="deletelink" ><img src="/env/grafics/empty.gif" title="delete" alt="delete" class="deleteIcon" /></a>
 	         #(/recommend)#
 	       </div>
+	       #(/authorized)#
 	       <h4 class="linktitle"><a href="#[url]#">#[description]#</a></h4>
 	       <p class="snippet"><span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span></p>
 	       <p class="url"><a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a></p>

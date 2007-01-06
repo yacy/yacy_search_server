@@ -62,6 +62,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import de.anomic.data.userDB;
+import de.anomic.data.wikiCode;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
@@ -84,6 +85,9 @@ import de.anomic.yacy.yacySeed;
  * a proxy servlet or a file server servlet 
  */
 public final class httpd implements serverHandler {
+    
+    public static final int ERRORCASE_MESSAGE = 4;
+    public static final int ERRORCASE_FILE = 5;
     
     /**
      * A hashset containing extensions that indicate content that should not be transported
@@ -781,9 +785,37 @@ public final class httpd implements serverHandler {
                 baos.write(s.charAt(pos++));
             }
         }
-        return baos.toString();
+        return decodeHtmlEntities(baos.toString());
     }
     
+    // 06.01.2007: decode HTML entities by [FB]
+    public static String decodeHtmlEntities(String s) {
+        // replace all entities defined in wikiCode.characters and htmlentities
+        for (int i=1; i<wikiCode.characters.length; i+=2) {
+            s = s.replaceAll(wikiCode.characters[i], wikiCode.characters[i - 1]);
+        }
+        for (int i=1; i<wikiCode.htmlentities.length; i+=2) {
+            s = s.replaceAll(wikiCode.htmlentities[i], wikiCode.htmlentities[i - 1]);
+        }
+        
+        // replace all other 
+        CharArrayWriter b = new CharArrayWriter(s.length());
+        int end;
+        for (int i=0; i<s.length(); i++) {
+            if (s.charAt(i) == '&' && (end = s.indexOf(';', i + 1)) > i) {
+                if (s.charAt(i + 1) == '#') {                           // &#1234; symbols
+                    b.write(Integer.parseInt(s.substring(i + 2, end)));
+                    i += end - i;
+                } else {                                                // 'named' smybols
+                    serverLog.logFine("HTTPD", "discovered yet unimplemented HTML entity '" + s.substring(i, end + 1) + "'");
+                    b.write(s.charAt(i));
+                }
+            } else {
+                b.write(s.charAt(i));
+            }
+        }
+        return b.toString();
+    }
     
     public static HashMap parseMultipart(httpHeader header, serverObjects args, InputStream in, int length) throws IOException {
         // this is a quick hack using a previously coded parseMultipart based on a buffer
@@ -1103,10 +1135,10 @@ public final class httpd implements serverHandler {
             tp.put("requestURL",       urlString);
             
             switch (errorcase) {
-                case 4:
+                case ERRORCASE_MESSAGE:
                     tp.put("errorMessageType_detailedErrorMsg",(detailedErrorMsgText==null)?"":detailedErrorMsgText.replaceAll("\n","<br>"));
                     break;
-                case 5:
+                case ERRORCASE_FILE:
                     tp.put("errorMessageType_file",(detailedErrorMsgFile==null)?"":detailedErrorMsgFile);
                     if ((detailedErrorMsgValues != null)&&(detailedErrorMsgValues.size()>0)) {
                         // rewriting the value-names and add the proper name prefix:

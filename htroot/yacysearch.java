@@ -52,8 +52,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import de.anomic.data.wikiCode;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpd;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -390,16 +392,14 @@ public class yacysearch {
             prop.put("cat", "href");
             prop.put("depth", depth);
         }
-        
+
         // if user is not authenticated, he may not vote for URLs
-        if (!authenticated) {
-            int linkcount = Integer.parseInt(prop.get("num-results_linkcount", "0"));
-            for (int i=0; i<linkcount; i++)
-                prop.put("type_results_" + i + "_recommend", 0);
-        }
+        int linkcount = Integer.parseInt(prop.get("num-results_linkcount", "0"));
+        for (int i=0; i<linkcount; i++)
+            prop.put("type_results_" + i + "_authorized", (authenticated) ? 1 : 0);
 
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("former", post.get("search", ""));
+        prop.put("former", wikiCode.replaceHTMLonly(post.get("search", "")));
         prop.put("count", count);
         prop.put("order", order);
         prop.put("resource", (global) ? "global" : "local");
