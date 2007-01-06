@@ -980,8 +980,8 @@ Category==Kategorie
 Received==Empfangen
 Distributed==Verteilt
 Attributes==Attribute
-"\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Gew&auml;hlte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Gew&auml;hlte&nbsp;News&nbsp;l&ouml;schen::Verbreitung&nbsp;gew&auml;hlter&nbsp;News&nbsp;abbrechen::Gew&auml;hlte&nbsp;News&nbsp;l&ouml;schen#(/page)#
-"\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"==#(page)#::Alle&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Alle&nbsp;News&nbsp;l&ouml;schen::Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;abbrechen::Alle&nbsp;News&nbsp;l&ouml;schen#(/page)#
+"\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"=="#(page)#::Gew&auml;hlte&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Gew&auml;hlte&nbsp;News&nbsp;l&ouml;schen::Verbreitung&nbsp;gew&auml;hlter&nbsp;News&nbsp;abbrechen::Gew&auml;hlte&nbsp;News&nbsp;l&ouml;schen#(/page)#"
+"\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"=="#(page)#::Alle&nbsp;News&nbsp;als&nbsp;gelesen&nbsp;markieren::Alle&nbsp;News&nbsp;l&ouml;schen::Verbreitung&nbsp;von&nbsp;allen&nbsp;News&nbsp;abbrechen::Alle&nbsp;News&nbsp;l&ouml;schen#(/page)#"
 #-----------------------------
 
 #File: PerformanceQueues_p.html
