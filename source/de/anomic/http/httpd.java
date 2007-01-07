@@ -777,6 +777,19 @@ public final class httpd implements serverHandler {
             		baos.write(Integer.parseInt(s.substring(pos + 2, pos + 6), 16));
             		pos += 6;
             	} else {									// normal escape
+                    // currently one escape is treated as one char, which only works if
+                    // formulars accept-charset=ascii are used. This is wrong if
+                    // formulars are set to accept-charset=UTF-8, then many escaped bytes
+                    // are sent, but they belong together to one char
+                    
+                    // TODO: UTF-8 escapes: i.e. "%C3%A4" should be 'ä', but is now "Ã¤"
+                    // - parse out subsequent escapes
+                    // - check which of these 'belong together', see http://de.wikipedia.org/wiki/UTF-8
+                    // - write the UTF-8 escapes together as one char
+                    
+                    // XXX: implement an own UTF-8 converter as described above or
+                    // revert this method to use bytes and let Java do the UTF-8-parsing?
+                    // i.e. new String(result[], "UTF-8");
                 	baos.write(Integer.parseInt(s.substring(pos + 1, pos + 3), 16));
             		pos += 3;
             	}
