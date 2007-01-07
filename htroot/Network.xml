@@ -16,6 +16,11 @@
     <receivedWords>#[rI]#</receivedWords>
     <sendURLs>#[sU]#</sendURLs>
     <receivedURLs>#[rU]#</receivedURLs>
+    <type>#(type)#junior::senior::principal#(/type)#</type> 
+    <direct>#(type_direct)#direct::passive#(/type_direct)#</direct> 
+    <acceptcrawl>#(acceptcrawl)#no::yes#(/acceptcrawl)#</acceptcrawl> 
+    <dhtreceive>#(dhtreceive)#no::yes#(/dhtreceive)#</dhtreceive> 
+    <rankingreceive>#(rankingreceive)#no::yes#(/rankingreceive)#</rankingreceive>
     #(complete)#
     ::
     <age>#[age]#</age>
