@@ -200,9 +200,9 @@ public class yacyCore {
         log.logConfig("DHT Cache memory = " + memDHT + " KB");
         seedDB = new yacySeedDB(
                 sb,
-                new File(yacyDBPath, "seed.new.db"),
-                new File(yacyDBPath, "seed.old.db"),
-                new File(yacyDBPath, "seed.pot.db"),
+                new File(yacyDBPath, "seed0.new.db"),
+                new File(yacyDBPath, "seed0.old.db"),
+                new File(yacyDBPath, "seed0.pot.db"),
                 memDHT, memDHT_time);
 
         // create or init news database

@@ -83,7 +83,7 @@ public class blogBoard {
     public blogBoard(File actpath, int bufferkb, long preloadTime) {
     		new File(actpath.getParent()).mkdir();
         if (datbase == null) {
-            datbase = new kelondroMap(kelondroDyn.open(actpath, bufferkb / 2 * 0x40, preloadTime, keyLength, recordSize, '_'));
+            datbase = new kelondroMap(kelondroDyn.open(actpath, bufferkb / 2 * 0x40, preloadTime, keyLength, recordSize, '_', true));
         }
     }
     

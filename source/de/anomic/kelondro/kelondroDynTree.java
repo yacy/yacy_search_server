@@ -79,7 +79,7 @@ public class kelondroDynTree {
         this.cache = new Hashtable();
         //this.cycleCache = Long.MIN_VALUE;
         this.cycleBuffer = Long.MIN_VALUE;
-        this.table = new kelondroDyn(file, buffersize, preloadTime, keylength, nodesize, fillChar);
+        this.table = new kelondroDyn(file, buffersize, preloadTime, keylength, nodesize, fillChar, true);
         this.treeRAHandles = new Hashtable();
     }
     

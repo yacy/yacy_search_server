@@ -174,7 +174,7 @@ public final class plasmaHTCache {
         // open the response header database
         File dbfile = new File(this.cachePath, "responseHeader.db");
         try {
-            this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, preloadTime, yacySeedDB.commonHashLength, 150, '#'));
+            this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, preloadTime, yacySeedDB.commonHashLength, 150, '#', true));
         } catch (IOException e) {
             this.log.logSevere("the request header database could not be opened: " + e.getMessage());
             System.exit(0);

@@ -1320,7 +1320,7 @@ public final class yacy {
             String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
                 File dbFile = new File(yacyDBPath,dbFileNames[i]);
-                kelondroMap db = new kelondroMap(new kelondroDyn(dbFile, (1024 * 0x400) / 3, 3000, yacySeedDB.commonHashLength, 480, '#'), yacySeedDB.sortFields, yacySeedDB.accFields);
+                kelondroMap db = new kelondroMap(new kelondroDyn(dbFile, (1024 * 0x400) / 3, 3000, yacySeedDB.commonHashLength, 480, '#', true), yacySeedDB.sortFields, yacySeedDB.accFields);
                 
                 kelondroMap.mapIterator it;
                 it = db.maps(true, false);

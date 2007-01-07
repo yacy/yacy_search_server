@@ -70,7 +70,7 @@ public class messageBoard {
     public messageBoard(File path, int bufferkb, long preloadTime) {
         new File(path.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMap(kelondroDyn.open(path, bufferkb * 0x400, preloadTime, categoryLength + dateFormat.length() + 2, recordSize, '_'));
+            database = new kelondroMap(kelondroDyn.open(path, bufferkb * 0x400, preloadTime, categoryLength + dateFormat.length() + 2, recordSize, '_', true));
         }
         sn = 0;
     }
