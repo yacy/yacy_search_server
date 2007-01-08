@@ -21,6 +21,7 @@
     <acceptcrawl>#(acceptcrawl)#no::yes#(/acceptcrawl)#</acceptcrawl> 
     <dhtreceive>#(dhtreceive)#no::yes#(/dhtreceive)#</dhtreceive> 
     <rankingreceive>#(rankingreceive)#no::yes#(/rankingreceive)#</rankingreceive>
+    <location>#[location]#</location>
     #(complete)#
     ::
     <age>#[age]#</age>
