@@ -293,6 +293,13 @@ public final class plasmaWordIndex implements indexRI {
         return wordCount;
     }
 
+    public boolean hasContainer(String wordHash) {
+        if (dhtOutCache.hasContainer(wordHash)) return true;
+        if (dhtInCache.hasContainer(wordHash)) return true;
+        if (collections.hasContainer(wordHash)) return true;
+        return false;
+    }
+    
     public indexContainer getContainer(String wordHash, Set urlselection, long maxTime) {
 
         // get from cache

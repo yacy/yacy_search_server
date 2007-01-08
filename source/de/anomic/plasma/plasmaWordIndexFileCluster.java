@@ -224,6 +224,10 @@ public class plasmaWordIndexFileCluster implements indexRI {
         return plasmaWordIndexFile.wordHash2path(databaseRoot, wordHash).exists();
     }
     
+    public synchronized boolean hasContainer(String wordHash) {
+        return getContainer(wordHash, new TreeSet(), -1) != null;
+    }
+    
     public synchronized indexContainer getContainer(String wordHash, Set urlselection, long maxTime) {
         long start = System.currentTimeMillis();
         if ((maxTime < 0) || (maxTime > 60000)) maxTime=60000; // maximum is one minute

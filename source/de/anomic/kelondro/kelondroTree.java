@@ -168,6 +168,10 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         else n.commit(CP_HIGH);
     }
 
+    public boolean has(byte[] key) throws IOException {
+        throw new UnsupportedOperationException("has should not be used with kelondroTree.");
+    }
+    
     // Returns the value to which this map maps the specified key.
     public kelondroRow.Entry get(byte[] key) throws IOException {
         kelondroRow.Entry result;

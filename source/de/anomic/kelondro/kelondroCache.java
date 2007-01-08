@@ -278,6 +278,10 @@ public class kelondroCache implements kelondroIndex {
         index.close();
     }
 
+    public boolean has(byte[] key) throws IOException {
+        return (get(key) != null);
+    }
+    
     public synchronized Entry get(byte[] key) throws IOException {
         // first look into the miss cache
         if (readMissCache != null) {

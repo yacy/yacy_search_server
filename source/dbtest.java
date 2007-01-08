@@ -492,6 +492,10 @@ final class dbTable implements kelondroIndex {
         return this.rowdef;
     }
     
+    public boolean has(byte[] key) throws IOException {
+        return (get(key) != null);
+    }
+    
     public kelondroRow.Entry get(byte[] key) throws IOException {
         try {
             String sqlQuery = new String

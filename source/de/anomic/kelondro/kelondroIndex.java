@@ -59,6 +59,7 @@ public interface kelondroIndex {
     public int size() throws IOException;
     public kelondroProfile profile();
     public kelondroRow row() throws IOException;
+    public boolean has(byte[] key) throws IOException; // use this only if there is no get in case that has returns true
     public kelondroRow.Entry get(byte[] key) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException;

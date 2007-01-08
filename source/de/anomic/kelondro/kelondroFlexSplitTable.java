@@ -169,6 +169,16 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         return this.rowdef;
     }
     
+    public boolean has(byte[] key) throws IOException {
+        Iterator i = tables.values().iterator();
+        kelondroIndex table;
+        while (i.hasNext()) {
+            table = (kelondroIndex) i.next();
+            if (table.has(key)) return true;
+        }
+        return false;
+    }
+    
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
         Object[] keeper = keeperOf(key);
         if (keeper == null) return null;

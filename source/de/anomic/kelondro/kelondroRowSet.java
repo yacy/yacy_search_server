@@ -24,6 +24,7 @@
 
 package de.anomic.kelondro;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
@@ -61,6 +62,10 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         super(rowdef, exportedCollectionRowinstance);
         this.removeMarker = new TreeMap();
         this.profile = new kelondroProfile();
+    }
+    
+    public boolean has(byte[] key) throws IOException {
+        return (get(key) != null);
     }
     
     public kelondroRow.Entry get(byte[] key) {

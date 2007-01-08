@@ -105,6 +105,10 @@ public class kelondroSplittedTree implements kelondroIndex {
         return (int) order.partition(key, ff);
     }
     
+    public boolean has(byte[] key) throws IOException {
+        throw new UnsupportedOperationException("has should not be used with kelondroSplittedTree.");
+    }
+    
     public kelondroRow.Entry get(byte[] key) throws IOException {
         return ktfs[partition(key)].get(key);
     }

@@ -420,6 +420,10 @@ public class kelondroCollectionIndex {
         return (int) indexrow.getColLong(idx_col_chunkcount);
     }
     
+    public synchronized boolean has(byte[] key) throws IOException {
+        return index.has(key);
+    }
+    
     public synchronized kelondroRowSet get(byte[] key) throws IOException {
         // find an entry, if one exists
         kelondroRow.Entry indexrow = index.get(key);

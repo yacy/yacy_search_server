@@ -118,7 +118,15 @@ public class indexCollectionRI implements indexRI {
         }
 
     }
-     
+
+    public synchronized boolean hasContainer(String wordHash) {
+        try {
+            return collectionIndex.has(wordHash.getBytes());
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    
     public synchronized indexContainer getContainer(String wordHash, Set urlselection, long maxtime) {
         try {
             kelondroRowSet collection = collectionIndex.get(wordHash.getBytes());

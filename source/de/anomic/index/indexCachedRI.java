@@ -143,6 +143,13 @@ public class indexCachedRI implements indexRI {
         busyCacheFlush = false;
     }
     
+    public boolean hasContainer(String wordHash) {
+        if (riExtern.hasContainer(wordHash)) return true;
+        if (riIntern.hasContainer(wordHash)) return true;
+        if (backend.hasContainer(wordHash)) return true;
+        return false;
+    }
+    
     public indexContainer getContainer(String wordHash, Set urlselection, long maxTime) {
         // get from cache
         indexContainer container = riExtern.getContainer(wordHash, urlselection, maxTime);

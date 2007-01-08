@@ -360,7 +360,7 @@ public final class plasmaCrawlLURL {
 
     public synchronized boolean exists(String urlHash) {
         try {
-            return (urlIndexFile.get(urlHash.getBytes()) != null);
+            return urlIndexFile.has(urlHash.getBytes());
         } catch (IOException e) {
             return false;
         }
