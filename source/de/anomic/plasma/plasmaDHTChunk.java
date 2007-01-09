@@ -6,6 +6,10 @@
 // Frankfurt, Germany, 2006
 // created: 18.02.2006
 //
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -192,32 +196,33 @@ public class plasmaDHTChunk {
     }
 
     private int selectTransferContainersResource(String hash, boolean ram, int maxcount, int maxtime) throws InterruptedException {
+        if (maxcount > 500) { maxcount = 500; } // flooding & OOM reduce
         // the hash is a start hash from where the indexes are picked
-        ArrayList tmpContainers = new ArrayList(maxcount);
+        final ArrayList tmpContainers = new ArrayList(maxcount);
         try {
-            Iterator indexContainerIterator = wordIndex.indexContainerSet(hash, ram, true, maxcount).iterator();
+            final Iterator indexContainerIterator = wordIndex.indexContainerSet(hash, ram, true, maxcount).iterator();
             indexContainer container;
             Iterator urlIter;
             indexRWIEntryNew iEntry;
             indexURLEntry lurl;
             int refcount = 0;
             int wholesize;
-            
+
             urlCache = new HashMap();
-            double maximumDistance = ((double) peerRedundancy * 2) / ((double) yacyCore.seedDB.sizeConnected());
-            long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+            final double maximumDistance = ((double) peerRedundancy * 2) / ((double) yacyCore.seedDB.sizeConnected());
+            final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
             while (
-                    (maxcount > refcount) && 
-                    (indexContainerIterator.hasNext()) && 
-                    ((container = (indexContainer) indexContainerIterator.next()) != null) && 
-                    (container.size() > 0) && 
-                    ((tmpContainers.size() == 0) || 
+                    (maxcount > refcount) &&
+                    (indexContainerIterator.hasNext()) &&
+                    ((container = (indexContainer) indexContainerIterator.next()) != null) &&
+                    (container.size() > 0) &&
+                    ((tmpContainers.size() == 0) ||
                      (yacyDHTAction.dhtDistance(container.getWordHash(), ((indexContainer) tmpContainers.get(0)).getWordHash()) < maximumDistance)) &&
                     (System.currentTimeMillis() < timeout)
             ) {
                 // check for interruption
                 if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
-                
+
                 // make an on-the-fly entity and insert values
                 int notBoundCounter = 0;
                 try {
@@ -225,6 +230,9 @@ public class plasmaDHTChunk {
                     urlIter = container.entries();
                     // iterate over indexes to fetch url entries and store them in the urlCache
                     while ((urlIter.hasNext()) && (maxcount > refcount) && (System.currentTimeMillis() < timeout)) {
+                        // CPU & IO reduce
+                        try { Thread.sleep(50); } catch (InterruptedException e) { }
+
                         iEntry = (indexRWIEntryNew) urlIter.next();
                         if ((iEntry == null) || (iEntry.urlHash() == null)) {
                             urlIter.remove();
@@ -267,7 +275,6 @@ public class plasmaDHTChunk {
             }
 
             this.status = chunkStatus_FILLED;
-            
             return refcount;
         } catch (kelondroException e) {
             log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
@@ -277,8 +284,7 @@ public class plasmaDHTChunk {
             return 0;
         }
     }
-    
-    
+
     public synchronized String deleteTransferIndexes() {
         Iterator urlIter;
         indexRWIEntry iEntry;
