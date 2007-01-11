@@ -162,13 +162,17 @@ public final class yacy {
         return combined2prettyVersion(ver, "");
     }
     public static String combined2prettyVersion(String ver, String computerName) {
-        final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{3})(\\d{4}|\\d{5})\\z").matcher(ver); 
+        final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{1,3})(\\d{0,5})\\z").matcher(ver); 
 
         if (!matcher.find()) { 
             serverLog.logWarning("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");   
             return "dev/00000";
-        } 
-        return (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1)) + "/" + matcher.group(2);
+        }
+        
+        String mainversion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
+		String revision = matcher.group(2);
+		for(int i=revision.length();i<5;++i) revision += "0";
+		return mainversion+"/"+revision;
     }
        
     /**
