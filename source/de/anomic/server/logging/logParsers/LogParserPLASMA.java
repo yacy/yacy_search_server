@@ -45,10 +45,15 @@
 package de.anomic.server.logging.logParsers;
 
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LogParserPLASMA implements LogParser{
+    
+    private final double parserVersion = 0.1;
+    private final String parserType = "PLASMA";
+
     //RegExp for LogLevel I
     private static Pattern i1 = Pattern.compile("Received (\\d*) URLs from peer [\\w-_]{12}:[\\w-_]*/[\\w.-]* in (\\d*) ms, Blocked (\\d*) URLs");
     private static Pattern i2 = Pattern.compile("Received (\\d*) Entries (\\d*) Words \\[[\\w-_]{12} .. [\\w-_]{12}\\]/[\\w.-]* from [\\w-_]{12}:[\\w-_]*/[\\w.-]*, processed in (\\d*) milliseconds, requesting (\\d*)/(\\d*) URLs, blocked (\\d*) RWIs");
@@ -62,7 +67,7 @@ public class LogParserPLASMA implements LogParser{
     private static Pattern i9 = Pattern.compile("RankingDistribution - transmitted file [\\w-:.\\\\]* to [\\w.]*:\\d* successfully in (\\d)* seconds");
     private static Pattern i10 = Pattern.compile("RankingDistribution - error transmitting file");
     private static Pattern i11 = Pattern.compile("Peer [\\w-_]*:[\\w-_]{12} is busy\\. Waiting \\d* ms\\.");
-    //private static Pattern i12 = Pattern.compile("\\*Indexed \\d* words in URL [\\w:.&?/%-~$\u00A7@=]* \\[[\\w-_]{12}\\]");
+    //private static Pattern i12 = Pattern.compile("\\*Indexed \\d* words in URL [\\w:.&/%-~$\u00A7@=]* \\[[\\w-_]{12}\\]");
     private static Pattern i13 = Pattern.compile("WROTE HEADER for |LOCALCRAWL\\[\\d*, \\d*, \\d*, \\d*\\]|REJECTED WRONG STATUS TYPE");
     //RegExp for LogLevel W
     private static Pattern w1 = Pattern.compile("found not enough \\(\\d*\\) peers for distribution");
@@ -74,7 +79,7 @@ public class LogParserPLASMA implements LogParser{
     private Matcher m;
     //RegExp for advancedParser
     //private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-=]* \\[[\\w-_]{12}\\]\\n\\tDescription: ([\\w- ]*)\\n\\tMimeType: ([\\w-_/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)\\n\\tStackingTime: (\\d*) ms \\| ParsingTime: (\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
-    private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-~$\u00A7@=]* \\[[\\w-_]{12}\\][\\r\\n]*\\tDescription: ([\\w-\\.,:!?='\"|/+@() ]*)[\\r\\n]*\\tMimeType: ([\\w-_~/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)[\\r\\n]*\\tStackingTime:[ ]*(\\d*) ms \\| ParsingTime:[ ]*(\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
+    private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&/%-~$\u00A7@=]* \\[[\\w-_]{12}\\][\\r\\n]*\\tDescription: ([\\w-\\.,:!='\"|/+@() ]*)[\\r\\n]*\\tMimeType: ([\\w-_~/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)[\\r\\n]*\\tStackingTime:[ ]*(\\d*) ms \\| ParsingTime:[ ]*(\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
 
     private int urlSum=0;
     private int urlReqSum=0;
@@ -114,7 +119,6 @@ public class LogParserPLASMA implements LogParser{
     private int indexedParsingTime = 0;
     private int indexedIndexingTime = 0;
     private int indexedStorageTime = 0;
-    private final String parserType = "PLASMA";
     
     public int parse(String logLevel, String logLine) {
         if (logLevel.equals("INFO")){
@@ -266,6 +270,58 @@ public class LogParserPLASMA implements LogParser{
         return -1;
     }
 
+    public Hashtable getResults() {
+        Hashtable results = new Hashtable();
+        results.put("version", Double.valueOf(parserVersion));
+        results.put("urlSum", Integer.valueOf(urlSum));
+        results.put("urlReqSum", Integer.valueOf(urlReqSum));
+        results.put("blockedURLSum", Integer.valueOf(blockedURLSum));
+        results.put("wordsSum", Integer.valueOf(wordsSum));
+        results.put("rwiSum", Integer.valueOf(rwiSum));
+        results.put("blockedRWISum", Integer.valueOf(blockedRWISum));
+        results.put("urlTimeSum", Long.valueOf(urlTimeSum));
+        results.put("rwiTimeSum", Long.valueOf(rwiTimeSum));
+        results.put("DHTSendTraffic", Long.valueOf(DHTSendTraffic));
+        results.put("DHTSendURLs", Integer.valueOf(DHTSendURLs));
+        results.put("RWIRejectCount", Integer.valueOf(RWIRejectCount));
+        results.put("RWIRejectPeerNames", RWIRejectPeerNames);
+        results.put("RWIRejectPeerHashs", RWIRejectPeerHashs);
+        results.put("DHTPeerNames", DHTPeerNames);
+        results.put("DHTPeerHashs", DHTPeerHashs);
+        results.put("DHTSelectionTargetCount", Integer.valueOf(DHTSelectionTargetCount));
+        results.put("DHTSelectionWordsCount", Integer.valueOf(DHTSelectionWordsCount));
+        results.put("DHTSelectionWordsTimeCount", Integer.valueOf(DHTSelectionWordsTimeCount));
+        results.put("minDHTDist", Double.valueOf(minDHTDist));
+        results.put("maxDHTDist", Double.valueOf(maxDHTDist));
+        results.put("avgDHTDist", Double.valueOf(avgDHTDist));
+        results.put("busyPeerCount", Integer.valueOf(busyPeerCount));
+        results.put("notEnoughDHTPeers", Integer.valueOf(notEnoughDHTPeers));
+        results.put("failedIndexDistributionCount", Integer.valueOf(failedIndexDistributionCount));
+        results.put("leftChildTwiceCount", Integer.valueOf(leftChildTwiceCount));
+        results.put("rightChildTwiceCount", Integer.valueOf(rightChildTwiceCount));
+        results.put("rankingDistributionCount", Integer.valueOf(rankingDistributionCount));
+        results.put("rankingDistributionTime", Integer.valueOf(rankingDistributionTime));
+        results.put("rankingDistributionFailCount", Integer.valueOf(rankingDistributionFailCount));
+        results.put("malformedURLCount", Integer.valueOf(malformedURLCount));
+        results.put("indexedSites", Integer.valueOf(indexedSites));
+        results.put("indexedWordSum", Integer.valueOf(indexedWordSum));
+        results.put("indexedSiteSizeSum", Integer.valueOf(indexedSiteSizeSum));
+        results.put("indexedAnchorsCount", Integer.valueOf(indexedAnchorsCount));
+        results.put("indexedStackingTime", Integer.valueOf(indexedStackingTime));
+        results.put("indexedParsingTime", Integer.valueOf(indexedParsingTime));
+        results.put("indexedIndexingTime", Integer.valueOf(indexedIndexingTime));
+        results.put("indexedStorageTime", Integer.valueOf(indexedStorageTime));
+        return null;
+    }
+    
+    public String getParserType() {
+        return parserType;
+    }
+
+    public double getParserVersion() {
+        return parserVersion;
+    }
+
     public void printResults() {
         if(rankingDistributionCount == 0) rankingDistributionCount = 1;
         if(DHTSelectionWordsTimeCount == 0) DHTSelectionWordsTimeCount = 1;
@@ -302,10 +358,6 @@ public class LogParserPLASMA implements LogParser{
             System.out.println("ERRORS: tried " + rightChildTwiceCount + " times to create rightchild node twice in db");
         if (malformedURLCount != 0)
             System.out.println("ERRORS: " + malformedURLCount + " MalformedURLExceptions accord.");
-    }
-
-    public String getParserType() {
-        return parserType;
     }
 
 }

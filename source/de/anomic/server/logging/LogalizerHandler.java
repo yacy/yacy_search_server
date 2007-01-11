@@ -49,6 +49,8 @@ import java.io.FilenameFilter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
@@ -58,8 +60,8 @@ import de.anomic.server.logging.logParsers.LogParser;
 
 public class LogalizerHandler extends Handler {
 
-    public static boolean enabled;
-    public static boolean debug;
+    public static boolean enabled=false;
+    public static boolean debug=false;
     private String logParserPackage;
     private HashMap parsers;
     
@@ -93,6 +95,7 @@ public class LogalizerHandler extends Handler {
                         LogParser theLogParser = (LogParser) theParser;
                         //System.out.println(bla.getName() + " is a logParser");
                         parsers.put(theLogParser.getParserType(), theParser);
+                        
                         if (debug) System.out.println("Added " + theLogParser.getClass().getName() + " as " + theLogParser.getParserType() + " Parser.");
                     }
                     else {
@@ -140,6 +143,14 @@ public class LogalizerHandler extends Handler {
         }
     }
     
+    public Set getParserNames() {
+        return parsers.keySet();
+    }
+    
+    public Hashtable getParserResults(LogParser parsername) {
+        return parsername.getResults();
+    }
+    
     public void close() throws SecurityException {
         // TODO Auto-generated method stub
 
@@ -155,6 +166,4 @@ public class LogalizerHandler extends Handler {
             return name.matches(".*.class");
         }
     };
-
-
 }

@@ -44,6 +44,8 @@
 
 package de.anomic.server.logging.logParsers;
 
+import java.util.Hashtable;
+
 /**
  * This is the logParser-Interface which all yacy Logalizer-Parser must
  * implement.
@@ -75,4 +77,6 @@ public interface LogParser {
      * <b>PLASMA</b> or <b>YACY</b>
      */
     public String getParserType();
+    public Hashtable getResults();
+    public double getParserVersion();
 }
