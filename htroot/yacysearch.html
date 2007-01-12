@@ -21,19 +21,12 @@
     <form class="search small" action="yacysearch.html" method="get">
       <p class="yacylogo"><a href="http://yacy.net/yacy/" class="yacylogo"><img src="/env/grafics/yacy.png" alt="yacy" /></a></p>
       <h2>#[promoteSearchPageGreeting]#</h2>
-      <fieldset class="maininput">
-        <table width="100%" border="0" cellspacing="0" cellpadding="0">
-          <tr>
-            <td>
+      <div>
+      <fieldset class="yacys">
               <input id="search" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
-              <input id="Enter" type="submit" name="Enter" value="Search" />
-            </td>
-            <td>
+              <input id="Enter" type="submit" name="Enter" value="Search" /> &nbsp;
               <a href="index.html?display=#[display]#&amp;searchoptions=1&amp;count=#[count]#&amp;order=#[order]#&amp;resource=#[resource]#&amp;time=#[time]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;type=#[type]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2">
+          <div class="yacysearch">
               <input type="radio" id="text" name="contentdom" value="text"#(contentdomCheckText)#:: checked="checked"#(/contentdomCheckText)# />
               <label for="text">Text</label>&nbsp;&nbsp;
               <input type="radio" id="images" name="contentdom" value="image"#(contentdomCheckImage)#:: checked="checked"#(/contentdomCheckImage)# />
@@ -44,9 +37,7 @@
               <label for="video">Video</label>&nbsp;&nbsp;
               <input type="radio" id="appl" name="contentdom" value="app"#(contentdomCheckApp)#:: checked="checked"#(/contentdomCheckApp)# />
               <label for="appl">Applications</label>
-            </td>
-          </tr>
-        </table>
+           </div>
         <input type="hidden" name="former" value="#[former]#" />
         <input type="hidden" name="count" value="#[count]#" />
         <input type="hidden" name="order" value="#[order]#" />
@@ -60,6 +51,7 @@
         <input type="hidden" name="display" value="#[display]#" />
         <input type="hidden" name="constraint" value="#[constraint]#" />
       </fieldset>
+      </div>
     </form>
   
 <script type="text/javascript">
@@ -129,7 +121,7 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	       </div>
 	       #(/authorized)#
 	       <h4 class="linktitle"><a href="#[url]#">#[description]#</a></h4>
-	       <p class="snippet"><span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span></p>
+	       <p class="snippet"><span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="h#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span></p>
 	       <p class="url"><a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a></p>
 	       <p class="urlinfo">#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#">Info</a> | <a href="yacysearch.html?cat=image&amp;url=#[url]#&amp;search=#[former]#">Pictures</a></p>
 	     </div>
@@ -142,27 +134,28 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	</script> 
 	
 	<!-- linklist end -->
-	<p>
 	#(resultbottomline)#
 	::
-	The global search resulted in #[globalresults]# link contributions from other YaCy peers.
+	<p>The global search resulted in #[globalresults]# link contributions from other YaCy peers.</p>
 	::
-	You can enrich the search results by using the 'global' option: This will search also other YaCy peers
+	<p>You can enrich the search results by using the 'global' option: This will search also other YaCy peers</p>
 	::
-	You cannot get global search results because you are not connected to another YaCy peer.
-	To connect you must first use the proxy.
-	See here for an <a href="http://www.anomic.de/AnomicHTTPProxy/Installation.html#wininst">installation guide</a>.
-	Alternatively, you can run the proxy in permanent online mode, which also grants global search.
-	To do this, press this button:</p>
-	<form action="SettingsAck_p.html" method="get">
-	<input type="submit" name="pmode" value="go online">
-	</form>
 	<p>
-	::
-	You can enrich the search results by using the 'global' option; you must also switch to online mode
-	(by using the proxy) to contribute to the global index.
-	#(/resultbottomline)#
+	  You cannot get global search results because you are not connected to another YaCy peer.
+	  To connect you must first use the proxy.
+	  See here for an <a href="http://www.anomic.de/AnomicHTTPProxy/Installation.html#wininst">installation guide</a>.
+	  Alternatively, you can run the proxy in permanent online mode, which also grants global search.
+	  To do this, press this button:
 	</p>
+	<form action="SettingsAck_p.html" method="get">
+	  <input type="submit" name="pmode" value="go online">
+	</form>
+	::
+	<p>
+	  You can enrich the search results by using the 'global' option; you must also switch to online mode
+	  (by using the proxy) to contribute to the global index.
+	</p>
+	#(/resultbottomline)#
 	::<!-- type 1: media search -->
 	<!-- linklist begin -->
 	#{results}#

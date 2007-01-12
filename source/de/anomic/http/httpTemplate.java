@@ -466,9 +466,9 @@ public final class httpTemplate {
                             }
                         }catch(IOException e){
                             //file not found?                    
-                            serverLog.logSevere("FILEHANDLER","Include Error with file: "+filename);
+                            serverLog.logSevere("FILEHANDLER","Include Error with file: " + new String(filename, "UTF-8"));
                         } finally {
-                            if (br!=null) try{br.close(); br=null;}catch(Exception e){}
+                            if (br != null) try { br.close(); br=null; } catch (Exception e) {}
                         }
                         PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
                         structure.append("<fileinclude file=\"".getBytes("UTF-8")).append(filename).append(">\n".getBytes("UTF-8"));

@@ -40,6 +40,8 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class index {
 
@@ -91,6 +93,11 @@ public class index {
         if (cds.equals("image")) contentdom = plasmaSearchQuery.CONTENTDOM_IMAGE;
         if (cds.equals("app")) contentdom = plasmaSearchQuery.CONTENTDOM_APP;
         
+        try {
+            prop.put("links", groupDigits(Long.parseLong(yacyCore.seedDB.mySeed.get(yacySeed.LCOUNT, "0"))));
+        } catch (NumberFormatException e) { prop.put("links", "0"); }
+        prop.put("total-links", groupDigits(yacyCore.seedDB.countActiveURL()));
+        
         // we create empty entries for template strings
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
@@ -133,5 +140,11 @@ public class index {
 
         return prop;
     }
-
+    
+    private static String groupDigits(long Number) {
+        final String s = Long.toString(Number);
+        String t = "";
+        for (int i = 0; i < s.length(); i++) t = s.charAt(s.length() - i - 1) + (((i % 3) == 0) ? "." : "") + t;
+        return t.substring(0, t.length() - 1);
+    }
 }

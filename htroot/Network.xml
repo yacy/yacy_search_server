@@ -18,9 +18,9 @@
     <receivedURLs>#[rU]#</receivedURLs>
     <type>#(type)#junior::senior::principal#(/type)#</type> 
     <direct>#(type_direct)#direct::passive#(/type_direct)#</direct> 
-    <acceptcrawl>#(acceptcrawl)#0::1#(/acceptcrawl)#</acceptcrawl> 
-    <dhtreceive>#(dhtreceive)#0::1#(/dhtreceive)#</dhtreceive> 
-    <rankingreceive>#(rankingreceive)#0::1#(/rankingreceive)#</rankingreceive>
+    <acceptcrawl>#[acceptcrawl]#</acceptcrawl> 
+    <dhtreceive>#[dhtreceive]#</dhtreceive> 
+    <rankingreceive>#[rankingreceive]#</rankingreceive>
     <location>#[location]#</location>
     #(complete)#
     ::
@@ -62,8 +62,8 @@
         <uptime>#[my-uptime]#</uptime>
         <links>#[my-links]#</links>
         <words>#[my-words]#</words> 
-        <acceptcrawl>#(my-acceptcrawl)#0::1#(/my-acceptcrawl)#</acceptcrawl>
-        <acceptindex>#(my-dhtreceive)#0::1#(/my-dhtreceive)#</acceptindex>
+        <acceptcrawl>#[my-acceptcrawl]#</acceptcrawl>
+        <acceptindex>#[my-dhtreceive]#</acceptindex>
         <sentwords>#[my-sI]#</sentwords>
         <senturls>#[my-sU]#</senturls>
         <receivedwords>#[my-rI]#</receivedwords>

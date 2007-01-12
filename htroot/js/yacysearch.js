@@ -4,7 +4,7 @@ function AllTextSnippets() {
 	var span = document.getElementsByTagName("span");
 	for(var x=0;x<span.length;x++) {
 		if (span[x].className == 'snippetLoading') {
-				var url = document.getElementById("url" + span[x].id);
+				var url = document.getElementById("url" + span[x].id.substring(1));
 				requestTextSnippet(url,query);
 		}
 	}
@@ -66,7 +66,7 @@ function handleTextState(req) {
 	var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
 	var status = response.getElementsByTagName("status")[0].firstChild.data;
 	
-	var span = document.getElementById(urlHash)
+	var span = document.getElementById("h" + urlHash)
 	removeAllChildren(span);
 	//span.removeChild(span.firstChild);
 	

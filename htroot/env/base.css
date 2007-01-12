@@ -164,6 +164,19 @@ form.search table {
   text-align:left;
 }
 
+fieldset.yacysearch {
+  text-align:left;
+  padding-top:10px;
+  display:block;
+}
+
+div.yacysearch {
+  margin-top: .8em;
+  display:block;
+  position:relative;
+  /*left:-60px;*/
+}
+
 h2.yacy { /* The heading in index.html */
   margin:10px auto;
   text-align:center;
