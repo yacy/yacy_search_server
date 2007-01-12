@@ -38,7 +38,6 @@ if not exist DATA\yacy.restart GoTo :END
 echo Please wait...
 if exist DATA\yacy.running GoTo :WAIT
 del DATA\yacy.restart
-GoTo :STARTJAVA
 
 Rem This target is used to read java runtime parameters out of the yacy config file
 :GETSTARTOPTS
