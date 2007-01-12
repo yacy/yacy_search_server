@@ -429,6 +429,7 @@ show all==alle zeigen
 Prefer mask:==Vorzugsmaske:
 Constraints:==Einschr&auml;nkungen:
 only index pages==Nur Index Seiten
+This peer holds \#\[links\]\# URLs of \#\[total-links\]\# in the known network.==Dieser Peer speichert #[links]# von #[total-links]# der dem Netzwerk bekannten URLs.
 #-----------------------------
 
 #File: IndexCleaner_p.html
@@ -842,16 +843,19 @@ Configuration</a>==Einstellungen</a>
 >From==>Von
 >To==>An
 >Subject==>Betreff
->Action==>Aktion
+Action==Aktion
 From:==Von:
 To:==An:
 Date:==Datum:
 Subject:==Betreff:
+>view==>anzeigen
 reply==antworten
 >delete==>l&ouml;schen
 Compose Message==Nachrichtenerstellung
 Send message to peer==Sende eine Nachricht an Peer
 "Compose"=="Erstellen"
+Message:==Nachricht:
+inbox==Posteingang
 #-----------------------------
 
 #File: MessageSend_p.html
@@ -1522,7 +1526,7 @@ Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite b
 #---------------------------
 System-, Index- and Peer-Status==System-, Index- und Peer-Status
 Welcome to YaCy!==Willkommen bei YaCy!
-"Restart"=="Neustarten"
+"Restart \(only Windows\)"=="Neustarten (nur f&uuml;r Windows)"
 "Shutdown"=="Herunterfahren"
 Public System Properties==Allgemeine Systemangaben
 System version==Systemversion
@@ -1994,6 +1998,7 @@ Index Control Menu==Index Verwalten Men&uuml;
 #Index Administration==Index Administration
 #Index Import==Index Import
 #Index Transfer==Index Transfer
+Index Cleaner==Index Aufr&auml;umer
 #-----------------------------
 
 #File: env/templates/submenuIndexCreate.template
