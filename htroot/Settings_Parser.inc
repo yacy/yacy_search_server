@@ -13,8 +13,8 @@
   </tr>#{parser}#
   <tr class="TableCellDark">
     <td colspan="#[colspan]#">#[name]# V#[version]#</td>
-    <td>#[usage]#</td>
     <td>&nbsp;</td>
+    <td>#[usage]#</td>
   </tr>#{mime}#
   <tr class="TableCellLight">#{parserMode}#
     <td class="small" align="center"><input type="checkbox" name="#[optionName]#" #(status)#::checked="checked" #(/status)#/></td>#{/parserMode}#
@@ -26,6 +26,7 @@
     <td class="small" align="center">
       <input type="checkbox" name="#[name]#.allParserEnabled" onclick="javascript: ParserCheckboxes(this);" #(allParserEnabled)#::checked="checked" #(/allParserEnabled)#/>
     </td>#{/parserMode}#
+	 <td>&nbsp;</td>    
     <td colspan="2" class="small">Enable all parsers</td>
   </tr>
   <tr class="TableCellDark">

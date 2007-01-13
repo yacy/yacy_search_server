@@ -280,7 +280,7 @@ Sending Client==Sendender Client
 #File: DetailedSearch.html
 #---------------------------
 Search Page==Suchseite
-Detailed&nbsp;Search==Detaillierte Suche
+Detailed Search</h2>==Detaillierte Suche</h2>
 "Search"=="Suche"
 Query Attributes==Such Attribute
 #Global:==Global
@@ -429,7 +429,7 @@ show all==alle zeigen
 Prefer mask:==Vorzugsmaske:
 Constraints:==Einschr&auml;nkungen:
 only index pages==Nur Index Seiten
-This peer holds \#\[links\]\# URLs of \#\[total-links\]\# in the known network.==Dieser Peer speichert #[links]# von #[total-links]# der dem Netzwerk bekannten URLs.
+This peer holds \#\[links\]\# URLs of \#\[total-links\]\# in the known network.==Dieser Peer speichert #[links]# von #[total-links]#, der dem Netzwerk bekannten URLs.
 #-----------------------------
 
 #File: IndexCleaner_p.html
@@ -529,7 +529,7 @@ Page-Count:==Seitenanzahl:
 You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.==Sie k&ouml;nnen die maximale Anzahl an Seiten, die von einer einzelnen Domain gefunden und indexiert werden, mit dieser Option begrenzen.
 You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==Sie k&ouml;nnen diese Option auch mit dem 'Auto-Dom-Filter' kombinieren, so dass das Limit f&uuml;r alle Domains mit der
 the given depth. Domains outside the given depth are then sorted-out anyway.==angegebenen Tiefe gilt. Domains ausserhalb der angegebenen Tiefe werden einfach aussortiert.
-Accept URLs with '\?' / dynamic URLs:==Akzeptiere URLs mit '?' / dynamische URLs:
+Accept URLs with \'?\' / dynamic URLs:==Akzeptiere URLs mit '?' / dynamische URLs:
 A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Ein Fragezeichen ist normalerweise ein Hinweis auf eine dynamische Seite. URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden. Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
 is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
 Store to Proxy Cache:==Speichern im Proxy-Cache:
@@ -1278,32 +1278,39 @@ Use <a==Nutze <a
 #File: Settings_Http.inc
 #---------------------------
 HTTP Networking==HTTP Netzwerk
-Transparent&nbsp;Proxy:==Transparenter Proxy:
+Transparent Proxy==Transparenter Proxy
 With this you can specify if YaCy can be used as transparent proxy.==Hiermit k&ouml;nnen Sie festlegen ob YaCy als transparenter Proxy genutzt werden kann.
-Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule:==Hinweis: Unter Linux k&ouml;nnen Sie Ihre Firewall darauf einstellen alle HTTP-Verbindungen transparent an YaCy weiterzuleiten indem Sie diese iptables-Regel verwenden:
+Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule==Hinweis: Unter Linux k&ouml;nnen Sie Ihre Firewall darauf einstellen, alle HTTP-Verbindungen transparent an YaCy weiterzuleiten indem Sie diese iptables-Regel verwenden.
+Connection Keep-Alive==Verbindung halten
 With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Hiermit k&ouml;nnen Sie festlegen ob YaCy die HTTP connection keep-alive Funktionalit&auml;t unterst&uuml;tzen soll.
-Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
-Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule==Tipp: Unter Linux können Sie Ihre Firewall so konfigurieren, dass der gesamte HTTP-Traffic mithilfe dieser iptables-Regen über YaCy geleitet wird.
-Specifies if the proxy should send the X-Forwarded-For http header.==Gibt an, ob der Proxy den X-forwarded-For HTTP-Header setzen soll.
+Send "Via" Header==Sende "Via" Header
 Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via</a>==Gibt an, ob der Proxy den <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via-HTTP-Header</a>
 http header according to RFC 2616 Sect 14.45.==gemäß RFC 2616 Sect 14.45 senden soll.
-Submit==Speichern
+Send "X-Forwarded-For" Header== Sende "X-Forward-For" Header
+Specifies if the proxy should send the X-Forwarded-For http header.==Gibt an, ob der Proxy den X-forwarded-For HTTP-Header setzen soll.
+"Submit"=="Speichern"
+Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
 #-----------------------------
 
 #File: Settings_Proxy.inc
 #---------------------------
 YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCy kann einen anderen Proxy nutzen um sich zum Internet zu verbinden. Sie k&ouml;nnen die Adresse f&uuml;r den Remote Proxy hier eingeben.
-Use remote proxy:==Nutze Remote Proxy:
+Use remote proxy</label>==Nutze Remote Proxy</label>
 Enables the usage of the remote proxy by yacy==Aktiviert die Nutzung des Remote Proxies durch YaCy
-Use remote proxy for yacy <-> yacy communication==Nutze Remote Proxy f&uuml;r YaCy <-> YaCy Kommunikation
+Use remote proxy for yacy &lt;-&gt; yacy communication==Nutze Remote Proxy f&uuml;r YaCy &lt;-&gt; YaCy Kommunikation
 Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==Gibt an, ob der Remote Proxy f&uuml;r Kommunikation zwischen diesem und anderen YaCy-Peers genutzt werden soll.
 <em>Hint:</em> Enabling this option could cause this peer to remain in junior status.==<em>Hinweis:</em> Dies k&ouml;nnte dazu f&uuml;hren, dass dieser Peer im Junior-Status verbleibt.
-Use remote proxy for https==Nutze Remote Proxy f&uuml;r HTTPS
+Use remote proxy for HTTPS==Nutze Remote Proxy f&uuml;r HTTPS
 Specifies if YaCy should forward ssl connections to the remote proxy.==Gibt an, ob YaCy SSL-Verbindungen zum Remote Proxy weiterleiten soll.
+Remote proxy host==Remote Proxy Host
 The ip address or domain name of the remote proxy==Die IP-Adresse oder der Domainname des Remote Proxy
+Remote proxy port==Remote Proxy Port
 the port of the remote proxy==Der Port des Remote Proxy
-no-proxy adresses:==proxylose Adressen:
+Remote proxy user==Remote Proxy Benutzer
+Remote proxy password==Remote Proxy Passwort
+No-proxy adresses==Proxylose Adressen
 IP addresses for which the remote proxy should not be used==IP-Adressen f&uuml;r die der Remote Proxy nicht genutzt werden soll
+"Submit"=="Speichern"
 Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
 #-----------------------------
 
@@ -1314,17 +1321,25 @@ Port Forwarding==Port Weiterleitung
 You can use a remote server running a ssh demon to forward your server/proxy port.==Sie k&ouml;nnen einen Remote Server mit einem ssh demon nutzen, um Ihrem Server/Proxy Port weiterzuleiten.
 This is useful if you want to tunnel throug a NAT/router.==Dies ist n&uuml;tzlich, wenn Sie durch einen NAT/Router tunneln wollen.
 Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.==Alternativ k&ouml;nnen Sie einfach einen virtuellen Server in Ihrem NAT/Router einstellen, um Verbindungen von Au&szlig;erhalb zu erm&ouml;glichen.
-Enable port forwarding:==Aktiviere Port Weiterleitung:
-Enabling disabling port forwarding via secure channel.==Aktivieren/Deaktivieren von Port Weiterleitung &uuml;ber sicheren Kanal.
-Forwarding via proxy:==Weiterleitung &uuml;ber Proxy:
+Enable port forwarding==Aktiviere Port Weiterleitung
+Enabling / disabling port forwarding==Aktivieren / Deaktivieren von Port Weiterleitung
+Forwarding method==Weiterleitungsmethode
+Select the port forwarding method to use.==W&auml;hle eine Port Weiterleitungsmethode zur Benutzung.
+Special settings for port forwarding using secure channel==Spezielle Einstellungen f&uuml;r Port Weiterleitung &uuml;ber einen sicheren Kanal
+Forwarding via proxy==Weiterleitung &uuml;ber Proxy
 Function not available at the moment.==Funktion im Moment nicht verf&uuml;gbar.
 You need to install libx to use this feature==Sie m&uuml;ssen die libx installieren, um diese Funktionen benutzen zu k&ouml;nnen
-Forwarding port:==Weiterleitender Port
-The port on the remote server that should be forwarded via the secure channel to the local host.==Der Port des Remote Servers der mittels sicherem Kanal auf den lokalen Host weitergeleitet werden soll.
-Forwarding host:==Weiterleitender Host
-Forwarding host port:==Weiterleitender Host Port
-Forwarding host user:==Weiterleitender Host Nutzer
-Forwarding host password:==Weiterleitender Host Passwort
+Forwarding port==Weiterleitender Port
+The tcp/ip port on the remote server that should be forwarded via the secure channel to the local host.==Der TCP/IP Port des Remote Servers der mittels sicherem Kanal auf den lokalen Host weitergeleitet werden soll.
+Forwarding host</label>==Weiterleitender Host</label>
+IP address or name of the remote server.==Die IP Adresse oder Name des Remote Servers.
+Forwarding host port==Weiterleitender Host Port
+SSH port of the remote server.==SSH Port des Remote Servers.
+Forwarding host user==Weiterleitender Host Nutzer
+Username to login on the remote server.==Benutzername zum einloggen auf dem Remote Server.
+Forwarding host password==Weiterleitender Host Passwort
+Password to login on the remote server.==Passwort zum einloggen auf dem remote Server.
+"Submit"=="Speichern"
 Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
 #-----------------------------
 
@@ -1370,7 +1385,16 @@ Select 'none' to deactivate uploading.==Verwenden Sie 'none' um den Upload zu de
 The URL that can be used to retrieve the uploaded seed file, like==Die URL die genutzt werden kann um die hochgeladene Seed-Liste zu erhalten, wie
 #-----------------------------
 
-#File: yacy/seedUpload/yacySeedUploadFtp.html
+#File: Settings_Seed_UploadFile.inc
+#---------------------------
+Store into filesystem:==Ablegen im Dateisystem:
+You must configure this if you want to store the seed-list file onto the file system.==Sie m&uuml;ssen diese Einstellungen vornehmen, wenn Sie die Seed-Liste im Dateisystem ablegen wollen.
+File Location==Speicherort
+Here you can specify the path within the filesystem where the seed-list file should be stored.==Hier k&ouml;nnen Sie den Pfad im Dateisystem festlegen, in dem die Seed-Liste abgelegt werden soll.
+"Submit"=="Speichern"
+#-----------------------------
+
+#File: Settings_Seed_UploadFtp.inc
 #---------------------------
 Uploading via FTP:==Upload per FTP:
 This is the account for a FTP server where you can host a seed-list file.==Dies ist der Account f&uuml;r einen FTP-Server, auf dem Sie eine Seed-Liste bereitstellen k&ouml;nnen.
@@ -1378,32 +1402,46 @@ If you set this, you will become a principal peer.==Wenn Sie das tun, werden Sie
 Your peer will then upload the seed-bootstrap information periodically,==Ihr Peer wird dann die Seed-Bootstrap Informationen periodisch hochladen,
 but only if there had been changes to the seed-list.==jedoch nur wenn &Auml;nderungen an der Seed-Liste existieren.
 The host where you have a FTP account, like==Der Host zu Ihrem FTP-Account, wie
-Path:==Pfad:
+Path</label>==Pfad</label>
 The remote path on the FTP server, like==Der Remote-Pfad auf dem FTP-Server, wie
 Missing sub-directories are NOT created automatically.==Fehlende Unterverzeichnisse werden NICHT automatisch erstellt.
+Username==Benutzername
 Your log-in at the FTP server==Ihr Log-in auf dem FTP-Server
-Password:==Passwort:
+Password==Passwort
 The password==Das Passwort
+"Submit"=="Speichern"
 #-----------------------------
 
-#File: yacy/seedUpload/yacySeedUploadFile.html
+#File: Settings_Seed_UploadScp.inc
 #---------------------------
-Store into filesystem:==Ablegen im Dateisystem:
-You must configure this if you want to store the seed-list file onto the file system.==Sie m&uuml;ssen diese Einstellungen vornehmen, wenn Sie die Seed-Liste im Dateisystem ablegen wollen.
-File Location:==Speicherort:
-Here you can specify the path within the filesystem where the seed-list file should be stored.==Hier k&ouml;nnen Sie den Pfad im Dateisystem festlegen, in dem die Seed-Liste abgelegt werden soll.
+
+Uploading via SCP:==Uplaod per SCP:
+This is the account for a server where you are able to login via ssh.==Dies ist der Account f&uuml;r einen Server, auf dem Sie sich per SSH anmelden m&uuml;ssen.
+#Server==Server
+The host where you have an account, like 'my.host.net'==Der Host auf dem Sie einen Account haben, wie z.B. 'mein.host.net' 
+#Server&nbsp;Port==Server&nbsp;Port
+The sshd port of the host, like '22'==Der SSHD Port vom Host z.B. '22'
+Path</label>==Pfad</label>
+The remote path on the server, like '~/yacy/seed.txt'. Missing sub-directories are NOT created automatically.==Der Remote Pfad auf dem Server z.B. '~/yacy/seed.txt'. Fehlende Unterverzeichnise werden NICHT automatisch erstellt.
+Username==Benutzername
+Your log-in at the server==Ihr Log-In auf dem Server
+Password</label>==Passwort</label>
+The password==Das Passwort
+"Submit"=="Speichern"
 #-----------------------------
 
 #File: Settings_MessageForwarding.inc
 #---------------------------
 Message Forwarding==Nachrichten Weiterleitung
 With this settings you can activate or deactivate forwarding of yacy-messages via email.==Mit diesen Einstellungen k&ouml;nnen Sie die Weiterleitung von YaCy-Nachrichten per E-Mail aktivieren oder deaktivieren.
-Enable message forwarding:==Aktiviere Nachrichten Weiterleitung:
+Enable message forwarding==Aktiviere Nachrichten Weiterleitung
 Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
-Forwarding Command:==Weiterleitungskommando:
-The command-line program that should be used to forward the message.<br />e.g.:==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />z.B.:
-Forwarding To:==Weiterleiten An:
-The recipient email-address.<br /> e.g.:==Die E-Mail Adresse des Empf&auml;ngers.<br />z.B.:
+Forwarding Command==Weiterleitungskommando
+The command-line program that should be used to forward the message.<br />==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />
+Forwarding To==Weiterleiten An
+The recipient email-address.<br />==Die E-Mail Adresse des Empf&auml;ngers.<br />
+e.g.:==z.B.:
+"Submit"=="Speichern"
 Changes will take effect immediately.==&Auml;nderungen sind sofort wirksam.
 #-----------------------------
 
@@ -1941,7 +1979,7 @@ Communication / Publication==Kommunikation / Publikation
 Peer Control==Peer-Verwaltung
 The Project==Das Projekt
 Search Page==Suchseite
-Detailed Search==Detailsuche
+Detailed Search==Detaillierte Suche
 >Surftips==>Surftipps
 >Bookmarks==>Lesezeichen
 >Help==>Hilfe
