@@ -324,7 +324,7 @@ public class ViewFile {
                         sentence = (String)sentences.next();
                         if (sentence.trim().length() > 0) {
                             prop.put("viewMode_sentences_" + i + "_nr", Integer.toString(i + 1));
-                            prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, (String) sentences.next()));
+                            prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, sentence));
                             prop.put("viewMode_sentences_" + i + "_dark", ((dark) ? 1 : 0));
                             dark = !dark;
                             i++;
