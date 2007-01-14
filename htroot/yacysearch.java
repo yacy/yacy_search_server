@@ -337,7 +337,7 @@ public class yacysearch {
             if (yacyonline) {
                 if (global) {
                     prop.put("type_resultbottomline", 1);
-                    prop.put("type_resultbottomline_globalresults", prop.get("type_globalresults", "0"));
+                    prop.put("type_resultbottomline_globalresults", prop.get("num-results_globalresults", "0"));
                 } else {
                     prop.put("type_resultbottomline", 2);
                 }
