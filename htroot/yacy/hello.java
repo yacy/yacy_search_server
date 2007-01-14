@@ -107,14 +107,20 @@ public final class hello {
 
         // if the previous attempt (using the reported ip address) was not successful, try the ip where 
         // the request came from
-        if ((urls < 0) && (serverCore.portForwardingEnabled || serverCore.useStaticIP) && (serverCore.isNotLocal(clientip))) {
-            // we are only allowed to connect to the client IP address if it's not our own address
+        if (urls < 0) {
+        	boolean isNotLocal = true;
+        	
+        	// we are only allowed to connect to the client IP address if it's not our own address
+        	if(serverCore.portForwardingEnabled || serverCore.useStaticIP)
+        		isNotLocal = serverCore.isNotLocal(clientip);
             
-            serverCore.checkInterruption();
+        	if(isNotLocal) {
+        		serverCore.checkInterruption();
                 
-            prop.put(yacySeed.YOURIP, clientip);
-            remoteSeed.put(yacySeed.IP, clientip);
-            urls = yacyClient.queryUrlCount(remoteSeed);
+                prop.put(yacySeed.YOURIP, clientip);
+                remoteSeed.put(yacySeed.IP, clientip);
+                urls = yacyClient.queryUrlCount(remoteSeed);
+        	}
         }
 
 //      System.out.println("YACYHELLO: YOUR IP=" + clientip);
