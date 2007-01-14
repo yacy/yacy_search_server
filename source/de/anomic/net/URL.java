@@ -197,7 +197,7 @@ public class URL {
      */
     private void escape() {
         if (path != null && path.indexOf('%') == -1) escapePath();
-        // if (quest != null && quest.indexOf('%') == -1) escapeQuest();
+        if (quest != null && quest.indexOf('%') == -1) escapeQuest();
         if (ref != null && ref.indexOf('%') == -1) escapeRef();
     }
     
