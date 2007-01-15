@@ -350,7 +350,7 @@ form dt, dl.pairs dt {
   float:left;
   clear:left;
   width:17em;
-  margin:0 2px;
+  margin:0 2px 0.5em 2px;
   padding:0.2em 0.5em;
   text-align:right;
 }

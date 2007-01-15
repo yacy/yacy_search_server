@@ -143,6 +143,10 @@ public class Status {
             prop.put("protection", 1); // protected
         }
 
+        // if running on Windows, enable restart button
+        // (remove from servlet when Linux start-script is capable, too) 
+        prop.put("restartEnabled", (System.getProperty("os.name").toLowerCase().startsWith("win")) ? 1 : 0);
+
         // version information
         prop.put("versionpp", yacy.combined2prettyVersion(env.getConfig("version","0.1")));
         double thisVersion = Double.parseDouble(env.getConfig("version","0.1"));
