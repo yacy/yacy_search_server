@@ -1,7 +1,0 @@
-<div class="SubMenu">
-  <h3>Search Statistics Menu</h3>
-  <ul class="SubMenu">
-    <li><a href="/SearchStatisticsLocal_p.html" class="MenuItemLink lock">Local&nbsp;Searches</a></li>
-    <li><a href="/SearchStatisticsRemote_p.html" class="MenuItemLink lock">Remote&nbsp;Searches</a></li>
-  </ul>
-</div>

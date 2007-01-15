@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Search Statistics</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="SearchStatistics">
+    #%env/templates/header.template%#
+	<div class="SubMenu">
+    <h3>Cookie Menu</h3>
+    <ul class="SubMenu">
+      <li><a href="/SearchStatistics_p.html?page=1" class="MenuItemLink lock">Local&nbsp;Searches</a></li>
+      <li><a href="/SearchStatistics_p.html?page=3" class="MenuItemLink lock">Remote&nbsp;Searches</a></li>
+    </ul>
+    </div>
+    #(page)#
+    <h2>Search Statistics</h2>
+    You can monitor search attempts at your own peer.
+    Local statistics apply for search attempts at your own search portal,
+    and remote statistics show search requests form other peer. Not all remote peers ask your peer during a global search,
+    therefore your cannot have a global view over all search requests within the complete YaCy network.
+    ::
+    <h2>Search Statistics: Local Searches</h2>
+    <p>This is a list of searches that had been requested from this' peer search interface</p>
+    <p>Showing #[num]# entries from a total of #[total]# Requests.</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td>Requesting Host</td>
+        <td>Date</td>
+        <td>Expected Results</td>
+        <td>Returned Results</td>
+        <td>Expected Time</td>
+        <td>Used Time</td>
+        <td>Search Words</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[date]#</td>
+        <td>#[querycount]#</td>
+        <td>#[resultcount]#</td>
+        <td>#[querytime]#</td>
+        <td>#[resulttime]#</td>
+        <td>#[querywords]#</td>
+      </tr>
+      #{/list}#
+    </table>
+    ::
+    ::
+    <h2>Search Statistics: Remote Searches</h2>
+    <p>This is a list of searches that had been requested from remote peer search interface</p>
+    <p>Showing #[num]# entries from a total of #[total]# Requests.</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td>Requesting Host</td>
+        <td>Date</td>
+        <td>Expected Results</td>
+        <td>Returned Results</td>
+        <td>Expected Time</td>
+        <td>Used Time</td>
+        <td>Search Words</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[date]#</td>
+        <td>#[querycount]#</td>
+        <td>#[resultcount]#</td>
+        <td>#[querytime]#</td>
+        <td>#[resulttime]#</td>
+        <td>#[queryhashes]#</td>
+      </tr>
+      #{/list}#
+    </table>
+    #(/page)#
+    #%env/templates/footer.template%#
+  </body>
+</html>
