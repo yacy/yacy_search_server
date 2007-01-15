@@ -4,6 +4,7 @@
     <title>YaCy '#[clientname]#': Search Page</title>
     #%env/templates/metas.template%#
     <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?search=#[former]#" />
+	<link rel="search" type="application/opensearchdescription+xml" title="YaCy Search on '#[clientname]#'" href="opensearchdescription.xml" /> 
   </head>
   <body id="index" onload="document.getElementById('search').focus()">
     #(display)#

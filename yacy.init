@@ -816,6 +816,11 @@ searchProcessRemoteCount_f = 100
 searchProcessRemoteTime_s = 5
 searchProcessRemoteCount_s = 10
 
+# timeouts for snippet fetching in ms
+# timeout_text is for text-snippets, timeout_media for media, e.g. images
+timeout_text = 10000
+timeout_media = 15000
+
 # path to ranking directory containing ranking reference files
 rankingPath = DATA/RANKING
 

@@ -23,6 +23,12 @@ public class snippet {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         
+        //get the timeout for snippet-fetching
+        int mediasnippet_timeout = 15000;
+        int textsnippet_timeout = 10000;
+        mediasnippet_timeout = Integer.parseInt((env.getConfig("timeout_text", "15000")));
+        textsnippet_timeout = Integer.parseInt((env.getConfig("timeout_media", "10000")));
+        	
         // getting url
         String urlString = post.get("url", "");
         URL url = new URL(urlString);
@@ -53,7 +59,7 @@ public class snippet {
         // find snippet
         if (media.equals("text")) {
             // attach text snippet
-            plasmaSnippetCache.TextSnippet snippet = switchboard.snippetCache.retrieveTextSnippet(url, queryHashes, true, pre, 260, 10000);
+            plasmaSnippetCache.TextSnippet snippet = switchboard.snippetCache.retrieveTextSnippet(url, queryHashes, true, pre, 260, textsnippet_timeout);
             prop.put("status",snippet.getSource());
             if (snippet.getSource() < 11) {
                 //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
@@ -70,7 +76,7 @@ public class snippet {
             prop.put("links", 0);
         } else {
             // attach media information
-            ArrayList mediaSnippets = switchboard.snippetCache.retrieveMediaSnippets(url, queryHashes, media, true, 1000);
+            ArrayList mediaSnippets = switchboard.snippetCache.retrieveMediaSnippets(url, queryHashes, media, true, mediasnippet_timeout);
             plasmaSnippetCache.MediaSnippet ms;
             for (int i = 0; i < mediaSnippets.size(); i++) {
                 ms = (plasmaSnippetCache.MediaSnippet) mediaSnippets.get(i);
