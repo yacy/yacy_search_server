@@ -47,33 +47,38 @@
 
 package de.anomic.ymage;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
+
+import javax.imageio.ImageIO;
+
 import de.anomic.server.serverMemory;
 
-public class ymageMatrix implements Cloneable {
-    
-    // colors regarding RGB Color Model
-    public static final long ADDITIVE_RED   = 0xFF0000;
-    public static final long ADDITIVE_GREEN = 0x00FF00;
-    public static final long ADDITIVE_BLUE  = 0x0000FF;
-    public static final long ADDITIVE_BLACK = 0xFFFFFF;
+public class ymageMatrix /*implements Cloneable*/ {
     
     // colors regarding CMY Color Model
     public static final long SUBTRACTIVE_CYAN    = 0xFF0000;
     public static final long SUBTRACTIVE_MAGENTA = 0x00FF00;
     public static final long SUBTRACTIVE_YELLOW  = 0x0000FF;
-    public static final long SUBTRACTIVE_WHITE   = 0xFFFFFF;
+    public static final long SUBTRACTIVE_BLACK   = 0xFFFFFF;
+    public static final long SUBTRACTIVE_WHITE   = 0x000000;
+    public static final long SUBTRACTIVE_RED     = 0x007F7F;
+    public static final long SUBTRACTIVE_GREEN   = 0x7F007F;
+    public static final long SUBTRACTIVE_BLUE    = 0x7F7F00;
     
     public static final byte MODE_REPLACE = 0;
-    public static final byte MODE_ADD = 1;
     public static final byte MODE_SUB = 2;
 
     
-    protected int  width, height;
-    private byte[] grid; // one-dimensional arrays are much faster than two-dimensional
-    private int    defaultColR, defaultColG, defaultColB;
-    private byte   defaultMode;
-    private boolean grabComplementary = false;
-    
+    protected int            width, height;
+    private   BufferedImage  image;
+    private   WritableRaster grid;
+    private   int[]          defaultCol;
+    private   byte           defaultMode;
+
+    /*
     public ymageMatrix(ymageMatrix matrix) throws RuntimeException {
         if (!(serverMemory.available(1024 * 1024 + 3 * width * height, true))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
         // clones the matrix
@@ -83,10 +88,10 @@ public class ymageMatrix implements Cloneable {
         this.defaultColG = matrix.defaultColG;
         this.defaultColB = matrix.defaultColB;
         this.defaultMode = matrix.defaultMode;
-        this.grabComplementary = matrix.grabComplementary;
-        this.grid = new byte[3 * width * height];
+        this.grid = (WritableRaster) matrix.grid.
         System.arraycopy(matrix.grid, 0, this.grid, 0, matrix.grid.length);
     }
+    */
     
     public ymageMatrix(int width, int height, String backgroundColor) {
         this(width, height, colNum(backgroundColor));
@@ -96,21 +101,30 @@ public class ymageMatrix implements Cloneable {
         if (!(serverMemory.available(1024 * 1024 + 3 * width * height, true))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
         this.width = width;
         this.height = height;
-        this.defaultColR = 0xFF;
-        this.defaultColG = 0xFF;
-        this.defaultColB = 0xFF;
+        this.defaultCol = new int[]{0xFF, 0xFF, 0xFF};
         this.defaultMode = MODE_REPLACE;
-        grid = new byte[3 * width * height];
+        
+        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D gr = image.createGraphics();
+        gr.setBackground(Color.white);
+        //gr.clearRect(0, 0, width, height);
+        
+        grid = image.getRaster();
         
         // fill grid with background color
-        byte bgR = (byte) (backgroundColor >> 16);
-        byte bgG = (byte) ((backgroundColor >> 8) & 0xff);
-        byte bgB = (byte) (backgroundColor & 0xff);
-        for (int n = 3 * width * height - 3; n >= 0; n = n - 3) {
-            grid[n    ] = bgR;
-            grid[n + 1] = bgG;
-            grid[n + 2] = bgB;
+        byte bgR = (byte) (0xFF - (backgroundColor >> 16));
+        byte bgG = (byte) (0xFF - ((backgroundColor >> 8) & 0xff));
+        byte bgB = (byte) (0xFF - (backgroundColor & 0xff));
+        int[] c = new int[]{bgR, bgG, bgB};
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                grid.setPixel(i, j, c);
+            }
         }
+    }
+    
+    public BufferedImage getImage() {
+        return this.image;
     }
     
     private static long colNum(String col) {
@@ -119,17 +133,10 @@ public class ymageMatrix implements Cloneable {
     }
     
     /*
-    private static String colStr(long c) {
-        String s = Long.toHexString(c);
-        while (s.length() < 6) s = "0" + s;
-        return s;
-    }
-    */ 
-    
     public Object clone() {
         return new ymageMatrix(this);
     }
-    
+    */
     public int getWidth() {
         return width;
     }
@@ -139,9 +146,9 @@ public class ymageMatrix implements Cloneable {
     }
     
     public void setColor(long c) {
-        defaultColR = (int) (c >> 16);
-        defaultColG = (int) ((c >> 8) & 0xff);
-        defaultColB = (int) (c & 0xff);
+        defaultCol[0] = (int) (c >> 16);
+        defaultCol[1] = (int) ((c >> 8) & 0xff);
+        defaultCol[2] = (int) (c & 0xff);
     }
     
     public void setColor(String s) {
@@ -155,28 +162,18 @@ public class ymageMatrix implements Cloneable {
     public void plot(int x, int y) {
         if ((x < 0) || (x >= width)) return;
         if ((y < 0) || (y >= height)) return;
-        int n = 3 * (x + y * width);
+        //int n = 3 * (x + y * width);
         if (this.defaultMode == MODE_REPLACE) {
-            grid[n    ] = (byte) defaultColR;
-            grid[n + 1] = (byte) defaultColG;
-            grid[n + 2] = (byte) defaultColB;
-        } else if (this.defaultMode == MODE_ADD) {
-            int r = (0xff & grid[n    ]) + defaultColR; if (r > 0xff) r = 0xff;
-            int g = (0xff & grid[n + 1]) + defaultColG; if (g > 0xff) g = 0xff;
-            int b = (0xff & grid[n + 2]) + defaultColB; if (b > 0xff) b = 0xff;
-            grid[n    ] = (byte) r;
-            grid[n + 1] = (byte) g;
-            grid[n + 2] = (byte) b;
+            grid.setPixel(x, y, defaultCol);
         } else if (this.defaultMode == MODE_SUB) {
-            int r = (0xff & grid[n    ]) - defaultColR; if (r < 0) r = 0;
-            int g = (0xff & grid[n + 1]) - defaultColG; if (g < 0) g = 0;
-            int b = (0xff & grid[n + 2]) - defaultColB; if (b < 0) b = 0;
-            grid[n    ] = (byte) r;
-            grid[n + 1] = (byte) g;
-            grid[n + 2] = (byte) b;
+            int[] c = new int[3];
+            c = grid.getPixel(x, y, c);
+            int r = (0xff & c[0]) - defaultCol[0]; if (r < 0) r = 0;
+            int g = (0xff & c[1]) - defaultCol[1]; if (g < 0) g = 0;
+            int b = (0xff & c[2]) - defaultCol[2]; if (b < 0) b = 0;
+            grid.setPixel(x, y, new int[]{r, g, b});
         }
     }
-    
     
     public void line(int Ax, int Ay, int Bx, int By) {
         // Bresenham's line drawing algorithm
@@ -218,24 +215,95 @@ public class ymageMatrix implements Cloneable {
         }
     }
     
-    public void getColorMode(boolean grabComplementary) {
-        this.grabComplementary = grabComplementary;
-    }
-    
     public int[] getColor(int x, int y) {
-        int n = 3 * (x + y * width);
-        if (grabComplementary) {
-            int r = 0xff & grid[n    ];
-            int g = 0xff & grid[n + 1];
-            int b = 0xff & grid[n + 2];
-            return new int[]{(0x1fe - g - b) / 2, (0x1fe - r - b) / 2, (0x1fe - r - g) / 2};
-        } else {
-            int r = 0xff & grid[n    ];
-            int g = 0xff & grid[n + 1];
-            int b = 0xff & grid[n + 2];
-            return new int[]{r, g, b};
-        }
+        int[] c = new int[3];
+        return grid.getPixel(x, y, c);
     }
 
-            
+    public void dot(int x, int y, int radius, boolean filled) {
+        if (filled) {
+            for (int r = radius; r >= 0; r--) ymageToolCircle.circle(this, x, y, r);
+        } else {
+            ymageToolCircle.circle(this, x, y, radius);
+        }
+    }
+    
+    public void arc(int x, int y, int innerRadius, int outerRadius, int fromArc, int toArc) {
+        for (int r = innerRadius; r <= outerRadius; r++) ymageToolCircle.circle(this, x, y, r, fromArc, toArc);
+    }
+
+    public void arcLine(int cx, int cy, int innerRadius, int outerRadius, int angle) {
+        int xi = cx + (int) (innerRadius * Math.cos(Math.PI * angle / 180));
+        int yi = cy - (int) (innerRadius * Math.sin(Math.PI * angle / 180));
+        int xo = cx + (int) (outerRadius * Math.cos(Math.PI * angle / 180));
+        int yo = cy - (int) (outerRadius * Math.sin(Math.PI * angle / 180));
+        line(xi, yi, xo, yo);
+    }
+    
+    public void arcDot(int cx, int cy, int arcRadius, int angle, int dotRadius) {
+        int x = cx + (int) (arcRadius * Math.cos(Math.PI * angle / 180));
+        int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
+        dot(x, y, dotRadius, true);
+    }
+    
+    public void arcArc(int cx, int cy, int arcRadius, int angle, int innerRadius, int outerRadius, int fromArc, int toArc) {
+        int x = cx + (int) (arcRadius * Math.cos(Math.PI * angle / 180));
+        int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
+        arc(x, y, innerRadius, outerRadius, fromArc, toArc);
+    }
+    
+    public static void demoPaint(ymageMatrix m) {
+        m.setMode(MODE_SUB);
+        m.setColor(SUBTRACTIVE_CYAN);
+        m.line(0,  10, 100,  10); ymageToolPrint.print(m, 0,   5, 0, "Cyan", true);
+        m.line(50, 0,   50, 300);
+        m.setColor(SUBTRACTIVE_MAGENTA);
+        m.line(0,  30, 100,  30); ymageToolPrint.print(m, 0,  25, 0, "Magenta", true);
+        m.line(55, 0,   55, 300);
+        m.setColor(SUBTRACTIVE_YELLOW);
+        m.line(0,  50, 100,  50); ymageToolPrint.print(m, 0,  45, 0, "Yellow", true);
+        m.line(60, 0,   60, 300);
+        m.setColor(SUBTRACTIVE_BLACK);
+        m.line(0,  70, 100,  70); ymageToolPrint.print(m, 0,  65, 0, "Black", true);
+        m.line(65, 0,   65, 300);
+        m.setColor(SUBTRACTIVE_RED);
+        m.line(0,  90, 100,  90); ymageToolPrint.print(m, 0,  85, 0, "Red", true);
+        m.line(70, 0,   70, 300);
+        m.setColor(SUBTRACTIVE_GREEN);
+        m.line(0, 110, 100, 110); ymageToolPrint.print(m, 0, 105, 0, "Green", true);
+        m.line(75, 0,   75, 300);
+        m.setColor(SUBTRACTIVE_BLUE);
+        m.line(0, 130, 100, 130); ymageToolPrint.print(m, 0, 125, 0, "Blue", true);
+        m.line(80, 0,   80, 300);
+    }
+    
+    public static void main(String[] args) {
+        // go into headless awt mode
+        System.setProperty("java.awt.headless", "true");
+        
+        ymageMatrix m = new ymageMatrix(200, 300, SUBTRACTIVE_WHITE);
+        demoPaint(m);
+        try {
+            ImageIO.write(m.getImage(), "png", new java.io.File(args[0]));
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+        
+        // open file automatically, works only on Mac OS X
+        /*
+        Process p = null;
+        try {
+            p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open \"" + args[0] + "\""});
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            p.waitFor();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        */
+    }
+    
+    
 }

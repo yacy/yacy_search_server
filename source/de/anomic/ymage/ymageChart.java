@@ -41,7 +41,7 @@
 
 package de.anomic.ymage;
 
-public class ymageChart extends ymageMatrixPainter {
+public class ymageChart extends ymageMatrix {
     
     public static final int DIMENSION_RIGHT  = 0;
     public static final int DIMENSION_TOP    = 1;
@@ -67,7 +67,7 @@ public class ymageChart extends ymageMatrixPainter {
         this.topborder = topborder;
         this.bottomborder = bottomborder;
         if (name != null) {
-            print(width / 2 - name.length() * 3, 6, 0, name, true);
+            ymageToolPrint.print(this, width / 2 - name.length() * 3, 6, 0, name, true);
         }
     }
     
@@ -111,12 +111,12 @@ public class ymageChart extends ymageMatrixPainter {
             }
             setColor(colorNaming);
             line(x, y - 3, x, y + 3);
-            print(x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), true);
+            ymageToolPrint.print(this, x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), true);
             x += pixelperscale;
             s += scale;
         }
         setColor(colorNaming);
-        print(width - rightborder, (top) ? y - 9 : y + 15, 0, name, false);
+        ymageToolPrint.print(this, width - rightborder, (top) ? y - 9 : y + 15, 0, name, false);
         line(leftborder - 4, y, width - rightborder + 4, y);
     }
     
@@ -135,12 +135,12 @@ public class ymageChart extends ymageMatrixPainter {
             line(x - 3, y, x + 3, y);
             s1 = Integer.toString(s);
             if (s1.length() > s1max) s1max = s1.length();
-            print((left) ? leftborder - 4 : width - rightborder + 4, y, 0, s1, (!left));
+            ymageToolPrint.print(this, (left) ? leftborder - 4 : width - rightborder + 4, y, 0, s1, (!left));
             y -= pixelperscale;
             s += scale;
         }
         setColor(colorNaming);
-        print((left) ? x - s1max * 6 - 6 : x + s1max * 6 + 9, topborder, 90, name, false);
+        ymageToolPrint.print(this, (left) ? x - s1max * 6 - 6 : x + s1max * 6 + 9, topborder, 90, name, false);
         line(x, topborder - 4, x, height - bottomborder + 4);
     }
    

@@ -48,17 +48,16 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaGrafics;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.ymage.ymageMatrixPainter;
-import de.anomic.ymage.ymagePainter;
+import de.anomic.ymage.ymageMatrix;
 
 // draw a picture of the yacy network
 
 public class SearchEventPicture {
     
-    public static ymagePainter respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
 
-        ymagePainter yp = plasmaGrafics.getSearchEventPicture();
-        if (yp == null) return new ymageMatrixPainter(1, 1, "000000"); // empty image
+        ymageMatrix yp = plasmaGrafics.getSearchEventPicture();
+        if (yp == null) return new ymageMatrix(1, 1, "000000"); // empty image
         
         return yp;
     }

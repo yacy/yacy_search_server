@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
 
+import javax.imageio.ImageIO;
+
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexSplitTable;
@@ -26,7 +28,6 @@ import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverMemory;
 import de.anomic.ymage.ymageChart;
-import de.anomic.ymage.ymagePNGEncoderAWT;
 
 public class dbtest {
 
@@ -673,7 +674,7 @@ final class memprofiler extends Thread {
             try {Thread.sleep(100);} catch (InterruptedException e) {}
         }
         try {
-            ymagePNGEncoderAWT.toPNG(memChart, true, outputFile);
+            ImageIO.write(memChart.getImage(), "png", outputFile);
         } catch (IOException e) {}
     }
     

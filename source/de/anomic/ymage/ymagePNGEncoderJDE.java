@@ -463,7 +463,7 @@ public class ymagePNGEncoderJDE extends Object
                 scanPos = 0;
                 startPos = 1;
                 int[] pixel;
-                matrix.getColorMode(true);
+                //matrix.getColorMode(true);
                 for (int i=0; i<width*nRows; i++)
                 {
                     if (i % width == 0)

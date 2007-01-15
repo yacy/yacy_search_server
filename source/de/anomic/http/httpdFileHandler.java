@@ -115,9 +115,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 import de.anomic.server.logging.serverLog;
-import de.anomic.ymage.ymageMatrixPainter;
-import de.anomic.ymage.ymagePNGEncoderAWT;
-import de.anomic.ymage.ymagePainter;
+import de.anomic.ymage.ymageMatrix;
 
 public final class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
     
@@ -514,8 +512,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     // error with image generation; send file-not-found
                     httpd.sendRespondError(this.connectionProperties,out,3,404,"File not Found",null,null);
                 } else {
-                    if (img instanceof ymagePainter) {
-                        ymagePainter yp = (ymagePainter) img;
+                    if (img instanceof ymageMatrix) {
+                        ymageMatrix yp = (ymageMatrix) img;
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
@@ -527,9 +525,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         // ymagePNGEncoderJDE((ymageMatrixPainter) yp,
                         // ymagePNGEncoderJDE.FILTER_NONE, 0);
                         // byte[] result = jde.pngEncode();
-                        ImageIO.write(ymagePNGEncoderAWT.toImage(
-                                        (ymageMatrixPainter) yp, true),
-                                        targetExt, baos);
+                        ImageIO.write(yp.getImage(), targetExt, baos);
                         byte[] result = baos.toByteArray();
                         baos.close();
                         baos = null;

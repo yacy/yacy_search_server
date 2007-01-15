@@ -48,13 +48,13 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaGrafics;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.ymage.ymagePainter;
+import de.anomic.ymage.ymageMatrix;
 
 // draw a picture of the yacy network
 
 public class NetworkPicture {
     
-    public static ymagePainter respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
 
         int width = 640;
         int height = 480;
