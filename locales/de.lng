@@ -2100,6 +2100,7 @@ Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequen
 
 #File: env/templates/submenuSearchStatistics.template
 #---------------------------
+Search Statistics Menu==Such Statistik Men&uuml;
 Local&nbsp;Searches==Lokale Suche
 Remote&nbsp;Searches==Remote Suche
 
