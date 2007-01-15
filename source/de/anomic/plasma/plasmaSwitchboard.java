@@ -119,6 +119,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.data.blogBoard;
@@ -239,6 +240,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  dbImportManager             dbImportManager;
     public  plasmaDHTFlush              transferIdxThread = null;
     private plasmaDHTChunk              dhtTransferChunk = null;
+    public  TreeMap                     localSearches, remoteSearches;
+    public  HashMap                     localSearchTracker, remoteSearchTracker;
     
     /*
      * Remote Proxy configuration
@@ -555,6 +558,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("Starting Cookie Monitor");
         this.outgoingCookies = new HashMap();
         this.incomingCookies = new HashMap();
+        
+        // init search history trackers
+        this.localSearchTracker = new HashMap(); // String:TreeSet - IP:set of Long(accessTime)
+        this.remoteSearchTracker = new HashMap();
+        this.localSearches = new TreeMap(); // Long:HashMap - Long(accessTime):properties
+        this.remoteSearches = new TreeMap();
         
         // init messages: clean up message symbol
         File notifierSource = new File(getRootPath(), getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
@@ -2074,7 +2083,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                          plasmaSearchRankingProfile ranking,
                                          plasmaSearchTimingProfile  localTiming,
                                          plasmaSearchTimingProfile  remoteTiming,
-                                         boolean postsort) {
+                                         boolean postsort,
+                                         String client) {
         
         // tell all threads to do nothing for a specific time
         intermissionAllThreads(2 * query.maximumTime);
@@ -2243,6 +2253,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             prop.get("num-results_orderedcount", "0") + " links ordered, " +
             prop.get("num-results_linkcount", "?") + " links selected, " +
             ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+            
+            
+            // prepare search statistics
+            Long trackerHandle = new Long(System.currentTimeMillis());
+            HashMap searchProfile = theSearch.resultProfile();
+            searchProfile.put("host", client);
+            this.localSearches.put(trackerHandle, searchProfile);
+            TreeSet handles = (TreeSet) this.localSearchTracker.get(client);
+            if (handles == null) handles = new TreeSet();
+            handles.add(trackerHandle);
+            this.localSearchTracker.put(client, handles);
+            
             return prop;
         } catch (IOException e) {
             return null;

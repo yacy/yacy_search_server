@@ -47,9 +47,11 @@
 // javac -classpath .:../../Classes search.java
 // if the shell's current path is htroot/yacy
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBitfield;
@@ -136,6 +138,7 @@ public final class search {
         int joincount = 0;
         plasmaSearchResult acc = null;
         plasmaSearchQuery squery = null;
+        plasmaSearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
             squery = new plasmaSearchQuery(abstractSet, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, plasmaSearchQuery.catchall_constraint);
@@ -147,7 +150,7 @@ public final class search {
             plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
             plasmaSearchTimingProfile remoteTiming = null;
 
-            plasmaSearchEvent theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.wordIndex.loadedURL, sb.snippetCache);
+            theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.wordIndex.loadedURL, sb.snippetCache);
             Map containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
             if (containers != null) {
                 Iterator ci = containers.entrySet().iterator();
@@ -174,7 +177,7 @@ public final class search {
             plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
             plasmaSearchTimingProfile remoteTiming = null;
 
-            plasmaSearchEvent theSearch = new plasmaSearchEvent(squery,
+            theSearch = new plasmaSearchEvent(squery,
                     rankingProfile, localTiming, remoteTiming, true,
                     yacyCore.log, sb.wordIndex, sb.wordIndex.loadedURL,
                     sb.snippetCache);
@@ -241,6 +244,17 @@ public final class search {
             }
         }
         prop.put("indexabstract", indexabstract.toString());
+        
+        // prepare search statistics
+        Long trackerHandle = new Long(System.currentTimeMillis());
+        HashMap searchProfile = theSearch.resultProfile();
+        String client = (String) header.get("CLIENTIP");
+        searchProfile.put("host", client);
+        sb.remoteSearches.put(trackerHandle, searchProfile);
+        TreeSet handles = (TreeSet) sb.remoteSearchTracker.get(client);
+        if (handles == null) handles = new TreeSet();
+        handles.add(trackerHandle);
+        sb.remoteSearchTracker.put(client, handles);
         
         // prepare result
         if ((joincount == 0) || (acc == null)) {

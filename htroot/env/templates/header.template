@@ -10,6 +10,7 @@
       <li><a href="/Surftips.html?display=1" class="MenuItemLink">Surftips</a></li>
       <li><a href="/Bookmarks.html" class="MenuItemLink">Bookmarks</a></li>
       <li><a href="/Help.html" class="MenuItemLink">Help</a></li>
+      <li><a href="/SearchStatisticsLocal_p.html" class="MenuItemLink lock">Search Statistics</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupCrawlerControl">

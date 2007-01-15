@@ -235,7 +235,7 @@ public class DetailedSearch {
         plasmaSearchRankingProfile localRanking = new plasmaSearchRankingProfile("local", post.toString());
         plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-        final serverObjects prop = sb.searchFromLocal(thisSearch, localRanking, localTiming, remoteTiming, postsort);
+        final serverObjects prop = sb.searchFromLocal(thisSearch, localRanking, localTiming, remoteTiming, postsort, (String) header.get("CLIENTIP"));
 
         putRanking(prop, localRanking, "local");
         // remember the last search expression

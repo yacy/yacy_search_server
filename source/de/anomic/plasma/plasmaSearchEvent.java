@@ -76,6 +76,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private plasmaSearchTimingProfile profileLocal, profileGlobal;
     private boolean postsort;
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
+    private long searchtime;
+    private int searchcount;
     
     public plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaSearchRankingProfile ranking,
@@ -100,6 +102,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.postsort = postsort;
         this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
+        this.searchtime = -1;
+        this.searchcount = -1;
     }
     
     public plasmaSearchQuery getQuery() {
@@ -117,20 +121,29 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         return secondarySearchThreads;
     }
     
+    public HashMap resultProfile() {
+        // generate statistics about search: query, time, etc
+        HashMap r = new HashMap();
+        r.put("queryhashes", query.queryHashes);
+        r.put("querywords", query.queryWords);
+        r.put("querycount", new Integer(query.wantedResults));
+        r.put("querytime", new Long(query.maximumTime));
+        r.put("resultcount", new Integer(this.searchcount));
+        r.put("resulttime", new Long(this.searchtime));
+        return r;
+    }
+    
     public plasmaSearchResult search() {
         // combine all threads
         
         // we synchronize with flushThreads to allow only one local search at a time,
         // so all search tasks are queued
         synchronized (flushThreads) {
-
+            long start = System.currentTimeMillis();
             if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
                 int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
                 if (fetchpeers > 50) fetchpeers = 50;
                 if (fetchpeers < 30) fetchpeers = 30;
-
-                // remember time
-                long start = System.currentTimeMillis();
 
                 // do a global search
                 // the result of the fetch is then in the rcGlobal
@@ -206,6 +219,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 // return search result
                 log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
                 lastEvent = this;
+                this.searchtime = System.currentTimeMillis() - start;
+                this.searchcount = result.filteredResults;
                 return result;
             } else {
                 Map searchContainerMap = localSearchContainers(null);
@@ -216,6 +231,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 // return search result
                 log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
                 lastEvent = this;
+                this.searchtime = System.currentTimeMillis() - start;
+                this.searchcount = result.filteredResults;
                 return result;
             }
         }

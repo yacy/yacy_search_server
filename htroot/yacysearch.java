@@ -55,7 +55,6 @@ import java.util.TreeSet;
 import de.anomic.data.wikiCode;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpd;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -259,7 +258,7 @@ public class yacysearch {
         plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile(contentdomString) : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
         plasmaSearchTimingProfile localTiming = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-        prop = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true);
+        prop = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
 
         // remember the last search expression
         env.setConfig("last-search", querystring + contentdomString);
