@@ -1223,6 +1223,38 @@ Unable to create new crawling profile for URL:==Es ist nicht m&ouml;glich f&uuml
 Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zum Crawler-Puffer hinzuzuf&uuml;gen:
 #-----------------------------
 
+#File: SearchStatisticsLocal_p.html
+#---------------------------
+Local Search Statistics==Lokale Such Statistik
+Search Statistics: Local Searches==Such Statistik: Lokale Suche
+This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgef&uuml;hrt wurden. 
+Showing \#\[num\]\# entries from a total of \#\[total\]\# Requests.==Es werden #[num]# Eintr&auml;ge von insgesamt #[total]# Anfragen angezeigt.
+Requesting Host==Anfragender Host
+Date==Datum
+Expected Results==Erwartete Ergebnisse
+Returned Results==Gefundene Ergebnisse
+Expected Time==Erwartete Zeit
+Used Time==Gebrauchte Zeit
+Search Words==Such Wort
+
+#---------------------------
+
+#File: SearchStatisticsRemote_p.html
+#---------------------------
+Remote Search Statistics==Remote Such Statistik   
+Search Statistics: Remote Searches==Such Statistik: Remote Suche
+This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
+Showing \#\[num\]\# entries from a total of \#\[total\]\# Requests.==Es werden #[num]# Eintr&auml;ge von insgesamt #[total]# Anfragen angezeigt.
+Requesting Host==Anfragender Host
+Date==Datum
+Expected Results==Erwartete Ergebnisse
+Returned Results==Gefundene Ergebnisse
+Expected Time==Erwartete Zeit
+Used Time==Gebrauchte Zeit
+Search Words==Such Wort
+
+#---------------------------
+
 #File: Settings_p.html
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Einstellungen
@@ -1375,12 +1407,13 @@ Seed Upload Settings==Seed Upload Einstellungen
 With these settings you can configure if you have an account on a public accessible==Mit diesen Einstellungen k&ouml;nnen Sie bestimmen ob Sie einen Account auf einem &ouml;ffentlich zug&auml;nglichen
 server where you can host a seed-list file.==Server haben, wo Sie eine Seed-Liste bereitstellen k&ouml;nnen.
 General Settings:==Allgemeine Einstellungen:
-If you enable one of the available uploading methods, you will become a principal peer.==Wenn Sie eine der verf&uuml;gbaren Uploadmethoden aktivieren, werden Sie ein Principal-Peer.
+If you enable one of the available uploading methods, you will become a principal peer.==Wenn Sie eine der verf&uuml;gbaren Upload-Methoden aktivieren, werden Sie ein Principal-Peer.
 Your peer will then upload the seed-bootstrap information periodically,==Ihr Peer wird dann die Seed-Bootstrap Informationen periodisch hochladen,
 but only if there have been changes to the seed-list.==jedoch nur wenn &Auml;nderungen an der Seed-Liste vorgenommen wurden.
-Upload Method==Uploadmethode
+Upload Method==Upload-Methode
+"Submit"=="Speichern"
 Retry Uploading==Upload versuchen
-Here you can specify which upload method should be used.==Hier k&ouml;nnen Sie ausw&auml;hlen welche Uploadmethode verwendet werden soll.
+Here you can specify which upload method should be used.==Hier k&ouml;nnen Sie ausw&auml;hlen welche Upload-Methode verwendet werden soll.
 Select 'none' to deactivate uploading.==Verwenden Sie 'none' um den Upload zu deaktivieren.
 The URL that can be used to retrieve the uploaded seed file, like==Die URL die genutzt werden kann um die hochgeladene Seed-Liste zu erhalten, wie
 #-----------------------------
@@ -1983,6 +2016,7 @@ Detailed Search==Detaillierte Suche
 >Surftips==>Surftipps
 >Bookmarks==>Lesezeichen
 >Help==>Hilfe
+Search Statistics==Such Statistik
 Index Create==Index erzeugen
 Index Control==Index verwalten
 #Index Monitor==Index Monitor
@@ -2063,6 +2097,13 @@ Queues Performance Settings==Puffer Performance Einstellungen
 Memory Settings for Database Caches==Speicher Einstellungen des Datenbank Caches
 Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequenz
 #-----------------------------
+
+#File: env/templates/submenuSearchStatistics.template
+#---------------------------
+Local&nbsp;Searches==Lokale Suche
+Remote&nbsp;Searches==Remote Suche
+
+#---------------------------
 
 #File: htdocsdefault/dir.html
 #---------------------------
