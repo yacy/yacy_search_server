@@ -200,11 +200,11 @@ public final class plasmaSearchQuery {
             if (blueList.contains(word)) it.remove();
         }
     }
-    
-    public String anonymizedQueryHashes() {
+
+    public static String anonymizedQueryHashes(Set hashes) {
         // create a more anonymized representation of euqery hashes for logging
-        StringBuffer sb = new StringBuffer(queryHashes.size() * 14 + 2);
-        Iterator i = queryHashes.iterator();
+        StringBuffer sb = new StringBuffer(hashes.size() * 14 + 2);
+        Iterator i = hashes.iterator();
         sb.append("[");
         String hash;
         if (i.hasNext()) {
@@ -218,5 +218,5 @@ public final class plasmaSearchQuery {
         sb.append("]");
         return new String(sb);
     }
-
+    
 }

@@ -143,7 +143,7 @@ public final class search {
             // this is _not_ a normal search, only a request for index abstracts
             squery = new plasmaSearchQuery(abstractSet, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, plasmaSearchQuery.catchall_constraint);
             squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
-            yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + squery.anonymizedQueryHashes() + " - " + squery.wantedResults + " links");
+            yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + squery.wantedResults + " links");
 
             // prepare a search profile
             plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(contentdom) : new plasmaSearchRankingProfile("", profile);
@@ -170,7 +170,7 @@ public final class search {
             // retrieve index containers from search request
             squery = new plasmaSearchQuery(keyhashes, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, constraint);
             squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
-            yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + squery.anonymizedQueryHashes() + " - " + squery.wantedResults + " links");
+            yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + squery.wantedResults + " links");
 
             // prepare a search profile
             plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(contentdom) : new plasmaSearchRankingProfile("", profile);
@@ -305,7 +305,7 @@ public final class search {
         prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
         
         // log
-        yacyCore.log.logInfo("EXIT HASH SEARCH: " + squery.anonymizedQueryHashes() + " - " + joincount + " links found, " + prop.get("linkcount", "?") + " links selected, " + ((System.currentTimeMillis() - timestamp1) / 1000) + " seconds");
+        yacyCore.log.logInfo("EXIT HASH SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + joincount + " links found, " + prop.get("linkcount", "?") + " links selected, " + ((System.currentTimeMillis() - timestamp1) / 1000) + " seconds");
  
         prop.put("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
 

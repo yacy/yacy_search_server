@@ -60,7 +60,7 @@ public class SearchStatisticsRemote_p {
          prop.put("list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
          prop.put("list_" + entCount + "_host", (String) searchProfile.get("host"));
          prop.put("list_" + entCount + "_date", (new Date(trackerHandle.longValue())).toString());
-         prop.put("list_" + entCount + "_queryhashes", plasmaSearchQuery.hashSet2hashString((Set) searchProfile.get("queryhashes")));
+         prop.put("list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes((Set) searchProfile.get("queryhashes")));
          prop.put("list_" + entCount + "_querycount", ((Integer) searchProfile.get("querycount")).toString());
          prop.put("list_" + entCount + "_querytime", ((Long) searchProfile.get("querytime")).toString());
          prop.put("list_" + entCount + "_resultcount", ((Integer) searchProfile.get("resultcount")).toString());
@@ -71,7 +71,7 @@ public class SearchStatisticsRemote_p {
      }
      prop.put("list", entCount);
      prop.put("num", entCount);
-     prop.put("total", switchboard.localSearches.size());
+     prop.put("total", switchboard.remoteSearches.size());
      // return rewrite properties
      return prop;
  }
