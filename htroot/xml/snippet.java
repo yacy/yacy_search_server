@@ -63,7 +63,7 @@ public class snippet {
             prop.put("status",snippet.getSource());
             if (snippet.getSource() < 11) {
                 //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
-                prop.put("text", (snippet.exists()) ? "<![CDATA["+snippet.getLineMarked(queryHashes)+"]]>" : "unknown");
+                prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
             } else {
                 String error = snippet.getError();
                 if ((remove) && (error.equals("no matching snippet found"))) {

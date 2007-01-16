@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <snippet>
-	<text>#[text]#</text>
+	<text><![CDATA[#[text]#]]></text>
 	<status>#[status]#</status>
 	<urlHash>#[urlHash]#</urlHash>
 	<links>#[links]#</links>
