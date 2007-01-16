@@ -775,8 +775,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                     }
                                 }else
                                     tp = new servletProperties();
-                                tp.put("header", header_s);
-                                tp.put("page", content_s);
+                                tp.putASIS("header", header_s);
+                                tp.putASIS("page", content_s);
                                 fis=new BufferedInputStream(new FileInputStream(pageFile));
                                 
                             }
