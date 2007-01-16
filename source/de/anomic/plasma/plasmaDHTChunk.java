@@ -77,7 +77,7 @@ public class plasmaDHTChunk {
     private serverLog log;
     
     private int status = chunkStatus_UNDEFINED;
-    private String startPointHash;
+    private String startPointHash = "AAAAAAAAAAAA";
     private indexContainer[] indexContainers = null;
     private HashMap urlCache; // String (url-hash) / plasmaCrawlLURL.Entry
     private int idxCount;
