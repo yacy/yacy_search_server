@@ -81,7 +81,7 @@ a.bookmarkAction	{ color: #999999; }
 .success		{ color: green; }
 .Message		{ background-color: #eeeeee; }
 .example		{ background-color: #D3D3D3; }
-
+.hides:hover .hoverShow { background-color: #111; border-color: #333; }
 
 /* Log */
 body#ViewLog pre	{ color: #777; background-color: #333; }

@@ -50,6 +50,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
@@ -145,6 +146,18 @@ public class LogalizerHandler extends Handler {
     
     public Set getParserNames() {
         return parsers.keySet();
+    }
+    
+    public LogParser getParser(int number) {
+        Object o;
+        Iterator it = parsers.keySet().iterator();
+        int i = 0;
+        while (it.hasNext()) {
+            o = it.next();
+            if (i++ == number)
+                return (LogParser)parsers.get(o);
+        }
+        return null;
     }
     
     public Hashtable getParserResults(LogParser parsername) {

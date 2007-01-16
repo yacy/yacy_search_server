@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Log Statistics</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ViewProfile">
+    #%env/templates/header.template%#
+    <h2>Log statistics<!--of the last #[parsedLines]# lines--></h2>
+    
+    <form method="get" action="LogStatistics_p.html">
+      #(results)#::
+      <fieldset><legend>DHT</legend>
+        <fieldset>
+          <legend>URLs</legend>
+          <dl style="margin-top: .3em;">
+            <dt>URLs Received:</dt><dd>#[urlSum]#</dd>
+            <dt>URLs Requested:</dt><dd>#[urlReqSum]#</dd>
+            <dt>URLs Blocked:</dt><dd>#[blockedURLSum]#</dd>
+            <dt>Total time:</dt><dd>#[urlTimeSum]# #[urlTimeSumUnit]#</dd>
+            <dt>URLs Sent:</dt><dd>#[DHTSendURLs]#</dd>
+          </dl>
+        </fieldset>
+        
+        <fieldset>
+          <legend>RWIs / Words</legend>
+          <dl style="margin-top: .3em;">
+            <dt>Words received:</dt><dd>#[wordsSum]#</dd>
+            <dt>RWIs reveived:</dt><dd>#[rwiSum]#</dd>
+            <dt>RWIs blocked:</dt><dd>#[blockedRWISum]#</dd>
+            <dt>Total time:</dt><dd>#[rwiTimeSum]# #[rwiTimeSumUnit]#</dd>
+            <dt>RWIs selected:</dt><dd>#[DHTSelectionWordsCount]#</dd>
+            <dt>Selection time:</dt><dd>#[DHTSelectionWordsTimeCount]#</dd>
+          </dl>
+        </fieldset>
+        
+        <fieldset>
+          <legend>Chunks / Protocol</legend>
+          <dl style="margin-top: .3em;">
+            <dt>Sent traffic:</dt><dd>#[DHTSendTraffic]# #[DHTSendTrafficUnit]#</dd>
+            <dt>Total peers selected:</dt><dd>#[DHTSelectionTargetCount]#</dd>
+            <dt>DHT Distance: Min/Average/Max:</dt><dd>#[minDHTDist]# / #[avgDHTDist]# / #[maxDHTDist]#</dd>
+            <dt>Not enough peers found for distribution:</dt><dd>#[notEnoughDHTPeers]#</dd>
+            <dt>Peers busy:</dt><dd>#[busyPeerCount]#</dd>
+            <dt>Distribution failed:</dt><dd>#[failedIndexDistributionCount]#</dd>
+            <dt>Rejected index receives:</dt><dd>#[RWIRejectCount]#</dd>
+            <dt>Rejected index receives from:</dt>
+            <dd class="hides">
+              #[DHTRejectPeers]# peers#(useDHTRejectPeers)#::
+              <div class="hoverShow">
+                <ul class="tagList">#{DHTRejectPeers}# 
+                  <li>( <span class="tt">#[hash]#</span> ) #[name]#</li>#{/DHTRejectPeers}# 
+                </ul>
+              </div>#(/useDHTRejectPeers)#
+            </dd>
+            <dt>Sent indexes:</dt>
+            <dd class="hides">
+              #[DHTPeers]# peers#(useDHTPeers)#::
+              <div class="hoverShow">
+                <ul class="tagList">#{DHTPeers}# 
+                  <li>( <span class="tt">#[hash]#</span> ) #[name]#</li>#{/DHTPeers}# 
+                </ul>
+              </div>#(/useDHTPeers)#
+            </dd>
+          </dl>
+        </fieldset>
+      </fieldset>
+      
+      <fieldset><legend>Ranking Distribution</legend>
+        <dl>
+          <dt>Submitted ranking files:</dt><dd>#[rankingDistributionCount]#</dd>
+          <dt>Total time submitting ranking files:</dt><dd>#[rankingDistributionTime]#</dd>
+          <dt>Failed ranking distributions:</dt><dd>#[rankingDistributionFailCount]#</dd>
+        </dl>
+      </fieldset>
+      
+      <fieldset><legend>Indexing</legend>
+        <dl>
+          <dt>Indexed sites:</dt><dd>#[indexedSites]#</dd>
+          <dt>Size of indexed sites:</dt><dd>#[indexedSiteSizeSum]# #[indexedSiteSizeSumUnit]#</dd>
+          <dt>Indexed words:</dt><dd>#[indexedWords]#</dd>
+          <dt>Indexed anchors:</dt><dd>#[indexedAnchors]#</dd>
+          <dt>Total stacking time:</dt><dd>#[indexedStackingTime]# #[indexedStackingTimeUnit]#</dd>
+          <dt>Total parsing time:</dt><dd>#[indexedParsingTime]# #[indexedParsingTimeUnit]#</dd>
+          <dt>Total indexing time:</dt><dd>#[indexedIndexingTime]# #[indexedIndexingTimeUnit]#</dd>
+          <dt>Total storage time:</dt><dd>#[indexedStorageTime]# #[indexedStorageTimeUnit]#</dd>
+        </dl>
+      </fieldset>
+      
+      <fieldset><legend>Errors</legend>
+        <dl>
+          <dt><span class="tt">Tried to create left child node twice</span></dt><dd>#[leftChildTwiceCount]#</dd>
+          <dt><span class="tt">Tried to create right child node twice</span></dt><dd>#[rightChildTwiceCount]#</dd>
+          <dt><span class="tt">Malformed URL Exception</span></dt><dd>#[malformedURLCount]#</dd>
+        </dl>
+      </fieldset>
+      #(/results)#
+    </form>
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

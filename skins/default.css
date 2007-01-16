@@ -208,6 +208,7 @@ div.ProgressBarFill {
   background-color:#D3D3D3;
 }
 
+.hides:hover .hoverShow { background-color: #F8F8FF; }
 
 /* Log */
 

@@ -489,3 +489,18 @@ div.CacheAdminInfo {
   border: 0px solid #aaaaaa;
   float: left;
 }
+
+.hides .hoverShow {
+  display: none;
+}
+
+.hides:hover .hoverShow {
+  display: block;
+  position: absolute;
+  border: 3px double;
+  margin: 0 0 0 2em;
+  padding: .3em;
+  height: 20em;
+  overflow: auto;
+  width: 30em;
+}
