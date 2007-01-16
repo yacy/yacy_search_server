@@ -2208,7 +2208,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             // adding snippet if available
                             if ((snippet != null) && (snippet.exists())) {
                                 prop.put("type_results_" + i + "_snippet", 1);
-                                prop.put("type_results_" + i + "_snippet_text", snippet.getLineMarked(query.queryHashes));
+                                prop.putASIS("type_results_" + i + "_snippet_text", snippet.getLineMarked(query.queryHashes));//FIXME: the ASIS should not be needed, if there is no html in .java
                             } else {
                                 prop.put("type_results_" + i + "_snippet", 0);
                                 prop.put("type_results_" + i + "_snippet_text", "");

@@ -63,7 +63,7 @@ public class snippet {
             prop.put("status",snippet.getSource());
             if (snippet.getSource() < 11) {
                 //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
-                prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
+                prop.putASIS("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown"); //FIXME: the ASIS should not be needed, but we have still htmlcode in .java files
             } else {
                 String error = snippet.getError();
                 if ((remove) && (error.equals("no matching snippet found"))) {
