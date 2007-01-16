@@ -97,7 +97,14 @@ public class PerformanceQueues_p {
             
             // set values to templates
             prop.put("table_" + c + "_threadname", threadName);
-            prop.put("table_" + c + "_shortdescr", (thread.getMonitorURL() == null) ? thread.getShortDescription() : "<a href=\"" + thread.getMonitorURL() + "\">" + thread.getShortDescription() + "</a>");
+
+			prop.put("table_" + c + "_hasurl_shortdescr", thread.getShortDescription());
+			if(thread.getMonitorURL() == null) {
+				prop.put("table_"+c+"_hasurl", 0);
+			}else{
+				prop.put("table_"+c+"_hasurl", 1);
+				prop.put("table_" + c + "_hasurl_url", thread.getMonitorURL());
+			}
             prop.put("table_" + c + "_longdescr", thread.getLongDescription());
             queuesize = thread.getJobCount();
             prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(queuesize));
