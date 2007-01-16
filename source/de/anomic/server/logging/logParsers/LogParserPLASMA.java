@@ -51,6 +51,124 @@ import java.util.regex.Pattern;
 
 public class LogParserPLASMA implements LogParser{
     
+    /** the version of the LogParser */
+    public static final String PARSER_VERSION           = "version";
+    
+    /** the amount of URLs received during DHT */
+    public static final String URLS_RECEIVED            = "urlSum";
+    
+    /** the amount of URLs requested during DHT */
+    public static final String URLS_REQUESTED           = "urlReqSum";
+    
+    /** the amount of URLs blocked during DHT because they match the peer's blacklist */
+    public static final String URLS_BLOCKED             = "blockedURLSum";
+    
+    /** the amount of words received during DHT */
+    public static final String WORDS_RECEIVED           = "wordsSum";
+    
+    /** the amount of RWIs received during DHT */
+    public static final String RWIS_RECEIVED            = "rwiSum";
+    
+    /** the amount of RWIs blocked during DHT because their entries match the peer's blacklist */
+    public static final String RWIS_BLOCKED             = "blockedRWISum";
+    
+    /** total time receiving RWIs during DHT in milli seconds */
+    public static final String RWIS_RECEIVED_TIME       = "rwiTimeSum";
+    
+    /** total time receiving URLs during DHT in milli seconds */
+    public static final String URLS_RECEIVED_TIME       = "urlTimeSum";
+    
+    /** the traffic sent during DHT in bytes */
+    public static final String DHT_TRAFFIC_SENT         = "DHTSendTraffic";
+    
+    /** the amount of URLs requested by other peers and sent by this one */
+    public static final String DHT_URLS_SENT            = "DHTSendURLs";
+    
+    /** the amount of rejected DHT transfers from other peers (i.e. because this peer was busy) */
+    public static final String DHT_REJECTED             = "RWIRejectCount";
+    
+    /** the amount of different peer-names from whose DHT transfers were rejected */
+    public static final String DHT_REJECTED_PEERS_NAME  = "DHTRejectPeerNames";
+    
+    /** the amount of different peer-hashes from whose DHT transfers were rejected */
+    public static final String DHT_REJECTED_PEERS_HASH  = "DHTRejectPeerHashs";
+    
+    /** the amount of different peer-names this peer sent DHT chunks to */
+    public static final String DHT_SENT_PEERS_NAME      = "DHTPeerNames";
+    
+    /** the amount of different peer-hashes this peer sent DHT chunks to */
+    public static final String DHT_SENT_PEERS_HASH      = "DHTPeerHashs";
+    
+    /** total amount of selected peers for index distribution */
+    public static final String DHT_SELECTED             = "DHTSelectionTargetCount";
+    
+    /** total amount of words selected for index distribution */
+    public static final String DHT_WORDS_SELECTED       = "DHTSelectionWordsCount";
+    
+    /** total time selecting words for index distribution */
+    public static final String DHT_WORDS_SELECTED_TIME  = "DHTSelectionWordsTimeCount";
+    
+    /** the minimal DHT distance during peer-selection for index distribution */
+    public static final String DHT_DISTANCE_MIN         = "minDHTDist";
+    
+    /** the maximal DHT distance during peer-selection for index distribution */
+    public static final String DHT_DISTANCE_MAX         = "maxDHTDist";
+    
+    /** the average DHT distance during peer-selection for index distribution */
+    public static final String DHT_DISTANCE_AVERAGE     = "avgDHTDist";
+    
+    /** how many times remote peers were too busy to accept the index transfer */
+    public static final String PEERS_BUSY               = "busyPeerCount";
+    
+    /** how many times not enough peers for index distribution were found */
+    public static final String PEERS_TOO_LESS           = "notEnoughDHTPeers";
+    
+    /** how many times the index distribution failed (i.e. due to time-out or other reasons) */
+    public static final String DHT_SENT_FAILED          = "failedIndexDistributionCount";
+    
+    /** how many times the error "<code>tried to create left child-node twice</code>" occured */
+    public static final String ERROR_CHILD_TWICE_LEFT   = "leftChildTwiceCount";
+    
+    /** how many times the error "<code>tried to create right child-node twice</code>" occured */
+    public static final String ERROR_CHILD_TWICE_RIGHT  = "rightChildTwiceCount";
+    
+    /** how many ranking distributions were executed successfully */
+    public static final String RANKING_DIST             = "rankingDistributionCount";
+    
+    /** total time the ranking distributions took */
+    public static final String RANKING_DIST_TIME        = "rankingDistributionTime";
+    
+    /** how many ranking distributions failed */
+    public static final String RANKING_DIST_FAILED      = "rankingDistributionFailCount";
+    
+    /** how many times the error "<code>Malformed URL</code>" occured */
+    public static final String ERROR_MALFORMED_URL      = "malformedURLCount";
+    
+    /** the amount of indexed sites */
+    public static final String INDEXED_SITES            = "indexedSites";
+    
+    /** total amount of indexed words */
+    public static final String INDEXED_WORDS            = "indexedWords";
+    
+    /** total size of all indexed sites */
+    public static final String INDEXED_SITES_SIZE       = "indexedSiteSizeSum";
+    
+    /** total amount of indexed anchors */
+    public static final String INDEXED_ANCHORS          = "indexedAnchors";
+    
+    /** total time needed for stacking the site of an indexing */
+    public static final String INDEXED_STACK_TIME       = "indexedStackingTime";
+    
+    /** total time needed for parsing during indexing */
+    public static final String INDEXED_PARSE_TIME       = "indexedParsingTime";
+    
+    /** total time needed for the actual indexing during indexing */
+    public static final String INDEXED_INDEX_TIME       = "indexedIndexingTime";
+    
+    /** total time needed for storing the results of an indexing */
+    public static final String INDEXED_STORE_TIME       = "indexedStorageTime";
+    
+    
     private final double parserVersion = 0.1;
     private final String parserType = "PLASMA";
 
@@ -272,45 +390,45 @@ public class LogParserPLASMA implements LogParser{
 
     public Hashtable getResults() {
         Hashtable results = new Hashtable();
-        results.put("version", new Double(parserVersion));
-        results.put("urlSum", new Integer(urlSum));
-        results.put("urlReqSum", new Integer(urlReqSum));
-        results.put("blockedURLSum", new Integer(blockedURLSum));
-        results.put("wordsSum", new Integer(wordsSum));
-        results.put("rwiSum", new Integer(rwiSum));
-        results.put("blockedRWISum", new Integer(blockedRWISum));
-        results.put("urlTimeSum", new Long(urlTimeSum));
-        results.put("rwiTimeSum", new Long(rwiTimeSum));
-        results.put("DHTSendTraffic", new Long(DHTSendTraffic));
-        results.put("DHTSendURLs", new Integer(DHTSendURLs));
-        results.put("RWIRejectCount", new Integer(RWIRejectCount));
-        results.put("RWIRejectPeerNames", RWIRejectPeerNames);
-        results.put("RWIRejectPeerHashs", RWIRejectPeerHashs);
-        results.put("DHTPeerNames", DHTPeerNames);
-        results.put("DHTPeerHashs", DHTPeerHashs);
-        results.put("DHTSelectionTargetCount", new Integer(DHTSelectionTargetCount));
-        results.put("DHTSelectionWordsCount", new Integer(DHTSelectionWordsCount));
-        results.put("DHTSelectionWordsTimeCount", new Integer(DHTSelectionWordsTimeCount));
-        results.put("minDHTDist", new Double(minDHTDist));
-        results.put("maxDHTDist", new Double(maxDHTDist));
-        results.put("avgDHTDist", new Double(avgDHTDist));
-        results.put("busyPeerCount", new Integer(busyPeerCount));
-        results.put("notEnoughDHTPeers", new Integer(notEnoughDHTPeers));
-        results.put("failedIndexDistributionCount", new Integer(failedIndexDistributionCount));
-        results.put("leftChildTwiceCount", new Integer(leftChildTwiceCount));
-        results.put("rightChildTwiceCount", new Integer(rightChildTwiceCount));
-        results.put("rankingDistributionCount", new Integer(rankingDistributionCount));
-        results.put("rankingDistributionTime", new Integer(rankingDistributionTime));
-        results.put("rankingDistributionFailCount", new Integer(rankingDistributionFailCount));
-        results.put("malformedURLCount", new Integer(malformedURLCount));
-        results.put("indexedSites", new Integer(indexedSites));
-        results.put("indexedWordSum", new Integer(indexedWordSum));
-        results.put("indexedSiteSizeSum", new Integer(indexedSiteSizeSum));
-        results.put("indexedAnchorsCount", new Integer(indexedAnchorsCount));
-        results.put("indexedStackingTime", new Integer(indexedStackingTime));
-        results.put("indexedParsingTime", new Integer(indexedParsingTime));
-        results.put("indexedIndexingTime", new Integer(indexedIndexingTime));
-        results.put("indexedStorageTime", new Integer(indexedStorageTime));
+        results.put(PARSER_VERSION          , new Double(parserVersion));
+        results.put(URLS_RECEIVED           , new Integer(urlSum));
+        results.put(URLS_REQUESTED          , new Integer(urlReqSum));
+        results.put(URLS_BLOCKED            , new Integer(blockedURLSum));
+        results.put(WORDS_RECEIVED          , new Integer(wordsSum));
+        results.put(RWIS_RECEIVED           , new Integer(rwiSum));
+        results.put(RWIS_BLOCKED            , new Integer(blockedRWISum));
+        results.put(URLS_RECEIVED_TIME      , new Long(urlTimeSum));
+        results.put(RWIS_RECEIVED_TIME      , new Long(rwiTimeSum));
+        results.put(DHT_TRAFFIC_SENT        , new Long(DHTSendTraffic));
+        results.put(DHT_URLS_SENT           , new Integer(DHTSendURLs));
+        results.put(DHT_REJECTED            , new Integer(RWIRejectCount));
+        results.put(DHT_REJECTED_PEERS_NAME , RWIRejectPeerNames);
+        results.put(DHT_REJECTED_PEERS_HASH , RWIRejectPeerHashs);
+        results.put(DHT_SENT_PEERS_NAME     , DHTPeerNames);
+        results.put(DHT_SENT_PEERS_HASH     , DHTPeerHashs);
+        results.put(DHT_SELECTED            , new Integer(DHTSelectionTargetCount));
+        results.put(DHT_WORDS_SELECTED      , new Integer(DHTSelectionWordsCount));
+        results.put(DHT_WORDS_SELECTED_TIME , new Integer(DHTSelectionWordsTimeCount));
+        results.put(DHT_DISTANCE_MIN        , new Double(minDHTDist));
+        results.put(DHT_DISTANCE_MAX        , new Double(maxDHTDist));
+        results.put(DHT_DISTANCE_AVERAGE    , new Double(avgDHTDist));
+        results.put(PEERS_BUSY              , new Integer(busyPeerCount));
+        results.put(PEERS_TOO_LESS          , new Integer(notEnoughDHTPeers));
+        results.put(DHT_SENT_FAILED         , new Integer(failedIndexDistributionCount));
+        results.put(ERROR_CHILD_TWICE_LEFT  , new Integer(leftChildTwiceCount));
+        results.put(ERROR_CHILD_TWICE_RIGHT , new Integer(rightChildTwiceCount));
+        results.put(RANKING_DIST            , new Integer(rankingDistributionCount));
+        results.put(RANKING_DIST_TIME       , new Integer(rankingDistributionTime));
+        results.put(RANKING_DIST_FAILED     , new Integer(rankingDistributionFailCount));
+        results.put(ERROR_MALFORMED_URL     , new Integer(malformedURLCount));
+        results.put(INDEXED_SITES           , new Integer(indexedSites));
+        results.put(INDEXED_WORDS           , new Integer(indexedWordSum));
+        results.put(INDEXED_SITES_SIZE      , new Integer(indexedSiteSizeSum));
+        results.put(INDEXED_ANCHORS         , new Integer(indexedAnchorsCount));
+        results.put(INDEXED_STACK_TIME      , new Integer(indexedStackingTime));
+        results.put(INDEXED_PARSE_TIME      , new Integer(indexedParsingTime));
+        results.put(INDEXED_INDEX_TIME      , new Integer(indexedIndexingTime));
+        results.put(INDEXED_STORE_TIME      , new Integer(indexedStorageTime));
         return results;
     }
     
