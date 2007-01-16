@@ -194,7 +194,7 @@ public class Blog {
 				}
 	            prop.put("mode_subject", wikiCode.replaceHTML(post.get("subject","")));
 	            prop.put("mode_date", dateString(new Date()));
-	            prop.put("mode_page", wikiTransformer.transform(post.get("content", "")));
+	            prop.putASIS("mode_page", wikiTransformer.transform(post.get("content", "")));
 	            prop.put("mode_page-code", post.get("content", "").replaceAll("<","&lt;").replaceAll(">","&gt;"));
 			}
 			else prop.put("mode",3); //access denied (no rights)

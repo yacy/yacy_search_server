@@ -156,7 +156,7 @@ public class Wiki {
             prop.put("mode_pagename", pagename);
             prop.put("mode_author", author);
             prop.put("mode_date", dateString(new Date()));
-            prop.put("mode_page", wikiTransformer.transform(post.get("content", "")));
+            prop.putASIS("mode_page", wikiTransformer.transform(post.get("content", "")));
             prop.put("mode_page-code", post.get("content", "").replaceAll("<","&lt;").replaceAll(">","&gt;"));
         }
         //end contrib of [MN]
@@ -193,7 +193,7 @@ public class Wiki {
             prop.put("mode_pagename", pagename);
             prop.put("mode_author", page.author());
             prop.put("mode_date", dateString(page.date()));
-            prop.put("mode_page", wikiTransformer.transform(page.page()));
+            prop.putASIS("mode_page", wikiTransformer.transform(page.page()));
 
             prop.put("controls", 0);
             prop.put("controls_pagename", pagename);
