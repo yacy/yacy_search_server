@@ -89,7 +89,7 @@ public class ViewFile {
         plasmaSwitchboard sb = (plasmaSwitchboard)env;     
 
         if (post != null && post.containsKey("words"))
-            prop.put("error_words", wikiCode.replaceHTMLonly((String)post.get("words")));
+            prop.put("error_words", wikiCode.replaceXMLEntities((String)post.get("words")));
         else {
             prop.put("error", 1);
             prop.put("viewmode", 0);    
@@ -263,7 +263,7 @@ public class ViewFile {
                     }
             }
 
-            content = wikiCode.replaceHTMLonly(
+            content = wikiCode.replaceXMLEntities(
                     content.replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;"));
 
             prop.put("error", 0);
@@ -272,7 +272,7 @@ public class ViewFile {
             
         } else if (viewMode.equals("iframe")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME);
-            prop.put("viewMode_url", wikiCode.replaceHTMLonly(url.toNormalform()));
+            prop.put("viewMode_url", wikiCode.replaceXMLEntities(url.toNormalform()));
             
         } else if (viewMode.equals("parsed") || viewMode.equals("sentences") || viewMode.equals("links")) {
             // parsing the resource content
@@ -362,7 +362,7 @@ public class ViewFile {
             if (document != null) document.close();
         }
         prop.put("error", 0);
-        prop.put("error_url", wikiCode.replaceHTMLonly(url.toNormalform()));
+        prop.put("error_url", wikiCode.replaceXMLEntities(url.toNormalform()));
         prop.put("error_hash", urlHash);
         prop.put("error_wordCount", Integer.toString(wordCount));
         prop.put("error_desc", descr);

@@ -118,10 +118,10 @@ public final class crawlReceipt {
         
         if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
             // no yacy connection / unknown peers
-            prop.put("delay", "3600");
+            prop.putASIS("delay", "3600");
         } else if (propStr == null) {
             // error with url / wrong key
-            prop.put("delay", "3600");
+            prop.putASIS("delay", "3600");
         } else if (result.equals("fill")) {
             // generating a new loaded URL entry
             indexURLEntry entry = switchboard.wordIndex.loadedURL.newEntry(propStr);
@@ -152,7 +152,7 @@ public final class crawlReceipt {
             }
             }            
             // ready for more
-            prop.put("delay", "10");
+            prop.putASIS("delay", "10");
         } else {
             try {
                 plasmaCrawlNURL.Entry en = switchboard.noticeURL.getEntry(receivedUrlhash);
@@ -163,7 +163,7 @@ public final class crawlReceipt {
             } catch (IOException e) {
 
             }
-            prop.put("delay", "100"); // what shall we do with that???
+            prop.putASIS("delay", "100"); // what shall we do with that???
         }
 	
 	// return rewrite properties

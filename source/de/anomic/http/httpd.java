@@ -804,11 +804,11 @@ public final class httpd implements serverHandler {
     // 06.01.2007: decode HTML entities by [FB]
     public static String decodeHtmlEntities(String s) {
         // replace all entities defined in wikiCode.characters and htmlentities
-        for (int i=1; i<wikiCode.characters.length; i+=2) {
-            s = s.replaceAll(wikiCode.characters[i], wikiCode.characters[i - 1]);
-        }
         for (int i=1; i<wikiCode.htmlentities.length; i+=2) {
             s = s.replaceAll(wikiCode.htmlentities[i], wikiCode.htmlentities[i - 1]);
+        }
+        for (int i=1; i<wikiCode.xmlentities.length; i+=2) {
+            s = s.replaceAll(wikiCode.xmlentities[i], wikiCode.xmlentities[i - 1]);
         }
         
         // replace all other 

@@ -181,7 +181,7 @@ public class IndexMonitor {
                     prop.put("table_indexed_" + cnt + "_moddate", daydate(urle.moddate()));
                     prop.put("table_indexed_" + cnt + "_wordcount", urle.wordCount());
                     prop.put("table_indexed_" + cnt + "_urldescr", comp.descr());
-                    prop.put("table_indexed_" + cnt + "_url", (cachepath == null) ? "-not-cached-" : "<a href=\"CacheAdmin_p.html?action=info&amp;path=" + cachepath + "\" class=\"small\" title=\"" + de.anomic.data.wikiCode.replaceHTMLonly(urlstr) + "\">" + de.anomic.data.wikiCode.replaceHTMLonly(urltxt) + "</a>");
+                    prop.put("table_indexed_" + cnt + "_url", (cachepath == null) ? "-not-cached-" : "<a href=\"CacheAdmin_p.html?action=info&amp;path=" + cachepath + "\" class=\"small\" title=\"" + de.anomic.data.wikiCode.replaceXMLEntities(urlstr) + "\">" + de.anomic.data.wikiCode.replaceXMLEntities(urltxt) + "</a>");
                     dark = !dark;
                     cnt++;
                 } catch (Exception e) {

@@ -200,8 +200,8 @@ public final class crawlOrder {
                         
                         stackresult = stack(switchboard, (String) urlv.get(i), (String) refv.get(i), iam, youare);
                         response = (String) stackresult[0];
-                        prop.put("list_" + i + "_job", (String) stackresult[0] + "," + (String) stackresult[1]);
-                        prop.put("list_" + i + "_lurl", (String) stackresult[2]);
+                        prop.putASIS("list_" + i + "_job", (String) stackresult[0] + "," + (String) stackresult[1]);
+                        prop.putASIS("list_" + i + "_lurl", (String) stackresult[2]);
                         prop.put("list_" + i + "_count", i);
                     }
                     prop.put("list", count);
@@ -218,13 +218,13 @@ public final class crawlOrder {
             delay = "600";
         }
 
-        prop.put("response", response);
-        prop.put("reason", reason);
-        prop.put("delay", delay);
+        prop.putASIS("response", response);
+        prop.putASIS("reason", reason);
+        prop.putASIS("delay", delay);
         prop.put("depth", acceptDepth);
-        prop.put("lurl", lurl);
-        prop.put("forward", "");
-        prop.put("key", key);
+        prop.putASIS("lurl", lurl);
+        prop.putASIS("forward", "");
+        prop.putASIS("key", key);
         
         // return rewrite properties
         return prop;

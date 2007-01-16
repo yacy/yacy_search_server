@@ -57,12 +57,12 @@ public class get {
             if(bookmarksDB.dateToiso8601(new Date(bookmark.getTimeStamp())) == date &&
                     tag==null || bookmark.getTags().contains(tag) &&
                     isAdmin || bookmark.getPublic()){
-                prop.putNoHTML("posts_"+count+"_url", bookmark.getUrl());
-                prop.putNoHTML("posts_"+count+"_title", bookmark.getTitle());
-                prop.putNoHTML("posts_"+count+"_description", bookmark.getDescription());
-                prop.putNoHTML("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
-                prop.putNoHTML("posts_"+count+"_time", date);
-                prop.putNoHTML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
+                prop.putSafeXML("posts_"+count+"_url", bookmark.getUrl());
+                prop.putSafeXML("posts_"+count+"_title", bookmark.getTitle());
+                prop.putSafeXML("posts_"+count+"_description", bookmark.getDescription());
+                prop.putSafeXML("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
+                prop.putSafeXML("posts_"+count+"_time", date);
+                prop.putSafeXML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
                 count++;
             }
         }

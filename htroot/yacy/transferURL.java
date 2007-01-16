@@ -153,8 +153,8 @@ public final class transferURL {
             result = "error_not_granted";
         }
 
-        prop.put("double", doublevalues);
-        prop.put("result", result);
+        prop.putASIS("double", doublevalues);
+        prop.putASIS("result", result);
         return prop;
     }
 }

@@ -84,7 +84,7 @@ public final class list {
 
             prop.put("list",out);
         } else {
-            prop.put("list","");
+            prop.putASIS("list","");
         }
 
         return prop;

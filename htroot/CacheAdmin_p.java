@@ -149,7 +149,7 @@ public class CacheAdmin_p {
                     prop.put("info_type_headlines", t.length);
                     for (i = 0; i < t.length; i++)
                     	prop.put("info_type_headlines_" + i + "_headline",
-                    			de.anomic.data.wikiCode.replaceHTMLonly(t[i].replaceAll("\n", "").trim()));
+                    			de.anomic.data.wikiCode.replaceXMLEntities(t[i].replaceAll("\n", "").trim()));
                     
                     formatAnchor(prop, document.getHyperlinks(), "links");
                     formatImageAnchor(prop, document.getImages());
@@ -159,14 +159,14 @@ public class CacheAdmin_p {
                     formatAnchor(prop, document.getEmaillinks(), "email");
                     
                     prop.put("info_type_text",
-                    		de.anomic.data.wikiCode.replaceHTMLonly(new String(scraper.getText())));
+                    		de.anomic.data.wikiCode.replaceXMLEntities(new String(scraper.getText())));
                     
                     i = 0;
                     final Iterator sentences = document.getSentences(false);
                     if (sentences != null)
                     	while (sentences.hasNext()) {
                     		prop.put("info_type_lines_" + i + "_line",
-                    				de.anomic.data.wikiCode.replaceHTMLonly(sentences.next().toString().replaceAll("\n", "").trim()));
+                    				de.anomic.data.wikiCode.replaceXMLEntities(sentences.next().toString().replaceAll("\n", "").trim()));
 	                        i++;
 	                    }
                     prop.put("info_type_lines", i);
@@ -267,9 +267,9 @@ public class CacheAdmin_p {
             descr = ((String) entry.getValue()).trim();
             if (descr.length() == 0) { descr = "-"; }
             prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_name",
-            		de.anomic.data.wikiCode.replaceHTMLonly(descr.replaceAll("\n", "").trim()));
+            		de.anomic.data.wikiCode.replaceXMLEntities(descr.replaceAll("\n", "").trim()));
             prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_link",
-            		de.anomic.data.wikiCode.replaceHTMLonly(entry.getKey().toString()));
+            		de.anomic.data.wikiCode.replaceXMLEntities(entry.getKey().toString()));
             i++;
         }
         prop.put("info_type_use." + extension, (i == 0) ? 0 : 1);
@@ -284,7 +284,7 @@ public class CacheAdmin_p {
             ie = (htmlFilterImageEntry) iter.next();
             prop.put("info_type_use.images_images_" + i + "_name", ie.alt().replaceAll("\n", "").trim());
             prop.put("info_type_use.images_images_" + i + "_link",
-            		de.anomic.data.wikiCode.replaceHTMLonly(ie.url().toNormalform()));
+            		de.anomic.data.wikiCode.replaceXMLEntities(ie.url().toNormalform()));
             i++;
         }
         prop.put("info_type_use.images", (i == 0) ? 0 : 1);

@@ -100,7 +100,7 @@ public final class hello {
             serverCore.checkInterruption();
             
             // try first the reportedip, since this may be a connect from a port-forwarding host
-            prop.put(yacySeed.YOURIP, reportedip);
+            prop.putASIS(yacySeed.YOURIP, reportedip);
             remoteSeed.put(yacySeed.IP, reportedip);
             urls = yacyClient.queryUrlCount(remoteSeed);
         }
@@ -117,7 +117,7 @@ public final class hello {
         	if(isNotLocal) {
         		serverCore.checkInterruption();
                 
-                prop.put(yacySeed.YOURIP, clientip);
+                prop.putASIS(yacySeed.YOURIP, clientip);
                 remoteSeed.put(yacySeed.IP, clientip);
                 urls = yacyClient.queryUrlCount(remoteSeed);
         	}
@@ -128,18 +128,18 @@ public final class hello {
         // assign status
         if (urls >= 0) {
             if (remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) == null) {
-                prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
+                prop.putASIS(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
                 remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
             } else if (remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL).equals(yacySeed.PEERTYPE_PRINCIPAL)) {
-                prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_PRINCIPAL);
+                prop.putASIS(yacySeed.YOURTYPE, yacySeed.PEERTYPE_PRINCIPAL);
             } else {
-                prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
+                prop.putASIS(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
                 remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
             }
             // connect the seed
             yacyCore.peerActions.peerArrival(remoteSeed, true);
         } else {
-            prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
+            prop.putASIS(yacySeed.YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
             remoteSeed.put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - remoteSeed.getUTCDiff())) );
             yacyCore.peerActions.juniorConnects++; // update statistics
             remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
@@ -186,8 +186,8 @@ public final class hello {
             seeds.append("seed0=").append(yacyCore.seedDB.mySeed.genSeedStr(key)).append(serverCore.crlfString);
         }
 
-        prop.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
-        prop.put("seedlist", seeds.toString());
+        prop.putASIS(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
+        prop.putASIS("seedlist", seeds.toString());
         // return rewrite properties
         return prop;
     }

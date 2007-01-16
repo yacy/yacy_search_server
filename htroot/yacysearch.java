@@ -398,7 +398,7 @@ public class yacysearch {
             prop.put("type_results_" + i + "_authorized", (authenticated) ? 1 : 0);
 
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("former", wikiCode.replaceHTMLonly(post.get("search", "")));
+        prop.put("former", wikiCode.replaceXMLEntities(post.get("search", "")));
         prop.put("count", count);
         prop.put("order", order);
         prop.put("resource", (global) ? "global" : "local");

@@ -62,8 +62,8 @@ public class config_p {
         int count=0;
         while(keys.hasNext()){
             key = (String) keys.next();
-            prop.put("options_"+count+"_key", wikiCode.replaceHTMLonly(key));
-            prop.put("options_"+count+"_value", wikiCode.replaceHTMLonly(env.getConfig(key, "ERROR")));
+            prop.put("options_"+count+"_key", wikiCode.replaceXMLEntities(key));
+            prop.put("options_"+count+"_value", wikiCode.replaceXMLEntities(env.getConfig(key, "ERROR")));
             count++;        
         }
         prop.put("options", count);

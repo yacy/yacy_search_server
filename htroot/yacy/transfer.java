@@ -72,12 +72,12 @@ public final class transfer {
         //long   filesize  = Long.parseLong((String) post.get("filesize", "")); // the size of the file
 
         prop.put("process", 0);
-        prop.put("response", "denied"); // reject is default and is overwritten if ok
-        prop.put("process_access", "");
-        prop.put("process_address", "");
-        prop.put("process_protocol", "");
-        prop.put("process_path", "");
-        prop.put("process_maxsize", "0");
+        prop.putASIS("response", "denied"); // reject is default and is overwritten if ok
+        prop.putASIS("process_access", "");
+        prop.putASIS("process_address", "");
+        prop.putASIS("process_protocol", "");
+        prop.putASIS("process_path", "");
+        prop.putASIS("process_maxsize", "0");
 
         if (!sb.rankingOn) { return prop; }
 
@@ -99,12 +99,12 @@ public final class transfer {
                 //System.out.println("yacy/transfer:post=" + post.toString());
                 //String cansendprotocol = (String) post.get("can-send-protocol", "http");
                 String access = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw("" + System.currentTimeMillis()));
-                prop.put("response", "ok");
-                prop.put("process_access", access);
-                prop.put("process_address", yacyCore.seedDB.mySeed.getAddress());
-                prop.put("process_protocol", "http");
-                prop.put("process_path", "");  // currently empty; the store process will find a path
-                prop.put("process_maxsize", "-1"); // if response is too big we return the size of the file
+                prop.putASIS("response", "ok");
+                prop.putASIS("process_access", access);
+                prop.putASIS("process_address", yacyCore.seedDB.mySeed.getAddress());
+                prop.putASIS("process_protocol", "http");
+                prop.putASIS("process_path", "");  // currently empty; the store process will find a path
+                prop.putASIS("process_maxsize", "-1"); // if response is too big we return the size of the file
                 sb.rankingPermissions.put(serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access)), filename);
                 sb.getLog().logFine("RankingTransmission: granted peer " + otherpeerName + " to send CR file " + filename);
             }
@@ -120,10 +120,10 @@ public final class transfer {
                 //java.util.HashMap perm = sb.rankingPermissions;
                 //System.out.println("PERMISSIONDEBUG: accesscode=" + accesscode + ", permissions=" + perm.toString());
                 String grantedFile = (String) sb.rankingPermissions.get(accesscode);
-                prop.put("process_tt", "");
+                prop.putASIS("process_tt", "");
                 if ((grantedFile == null) || (!(grantedFile.equals(filename)))) {
                     // fraud-access of this interface
-                    prop.put("response", "denied");
+                    prop.putASIS("response", "denied");
                     sb.getLog().logFine("RankingTransmission: denied " + otherpeerName + " to send CR file " + filename + ": wrong access code");
                 } else {
                     sb.rankingPermissions.remove(accesscode); // not needed any more
@@ -135,19 +135,19 @@ public final class transfer {
                             serverFileUtils.write(filebytes, file);
                             String md5t = serverCodings.encodeMD5Hex(file);
                             if (md5t.equals(md5)) {
-                                prop.put("response", "ok");
+                                prop.putASIS("response", "ok");
                                 sb.getLog().logFine("RankingTransmission: received from peer " + otherpeerName + " CR file " + filename);
                             } else {
-                                prop.put("response", "transfer failure");
+                                prop.putASIS("response", "transfer failure");
                                 sb.getLog().logFine("RankingTransmission: transfer failure from peer " + otherpeerName + " for CR file " + filename);
                             }
                         }else{
                             //exploit?
-                            prop.put("response", "io error");
+                            prop.putASIS("response", "io error");
                             return prop;
                         }
                     } catch (IOException e) {
-                        prop.put("response", "io error");
+                        prop.putASIS("response", "io error");
                     }
                 }
             }

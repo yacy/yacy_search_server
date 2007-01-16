@@ -85,8 +85,8 @@ public final class profile {
             key=(String)it.next();
             value=profile.getProperty(key, "").replaceAll("\r","").replaceAll("\n","\\\\n");
             if( !(key.equals("")) && !(value.equals("")) ){
-                prop.put("list_"+count+"_key", key);
-                prop.put("list_"+count+"_value", value);
+                prop.putASIS("list_"+count+"_key", key);
+                prop.putASIS("list_"+count+"_value", value);
                 count++;
             }
         }

@@ -164,7 +164,7 @@ public final class search {
                 }
             }
             
-            prop.put("indexcount", "");
+            prop.putASIS("indexcount", "");
             prop.put("joincount", 0);
         } else {
             // retrieve index containers from search request
@@ -185,8 +185,8 @@ public final class search {
 
             // set statistic details of search result and find best result index set
             if (containers == null) {
-                prop.put("indexcount", "");
-                prop.put("joincount", "0");
+                prop.putASIS("indexcount", "");
+                prop.putASIS("joincount", "0");
             } else {
                 Iterator ci = containers.entrySet().iterator();
                 StringBuffer indexcount = new StringBuffer();
@@ -213,7 +213,7 @@ public final class search {
                         indexabstract.append("indexabstract." + wordhash + "=").append(plasmaURL.compressIndex(container, null,1000).toString()).append(serverCore.crlfString);
                     }
                 }
-                prop.put("indexcount", new String(indexcount));
+                prop.putASIS("indexcount", new String(indexcount));
 
                 // join and order the result
                 indexContainer localResults = theSearch.localSearchJoin(containers.values());
@@ -223,14 +223,14 @@ public final class search {
                     acc = null;
                 } else {
                     joincount = localResults.size();
-                    prop.put("joincount", Integer.toString(joincount));
+                    prop.putASIS("joincount", Integer.toString(joincount));
                     acc = theSearch.orderFinal(localResults);
                 }
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search
                 if ((maxcounthash == null) || (urls.length() != 0) || (keyhashes.size() == 1) || (abstracts.length() == 0)) {
-                    prop.put("indexabstract", "");
+                    prop.putASIS("indexabstract", "");
                 } else if (abstracts.equals("auto")) {
                     indexabstract.append("indexabstract." + maxcounthash + "=").append(plasmaURL.compressIndex(((indexContainer) containers.get(maxcounthash)),localResults, 1000).toString()).append(serverCore.crlfString);
                     if ((neardhthash != null)
@@ -243,7 +243,7 @@ public final class search {
                 }
             }
         }
-        prop.put("indexabstract", indexabstract.toString());
+        prop.putASIS("indexabstract", indexabstract.toString());
         
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
@@ -260,9 +260,9 @@ public final class search {
         if ((joincount == 0) || (acc == null)) {
             
             // no results
-            prop.put("links", "");
-            prop.put("linkcount", "0");
-            prop.put("references", "");
+            prop.putASIS("links", "");
+            prop.putASIS("linkcount", "0");
+            prop.putASIS("references", "");
 
         } else {
             // result is a List of urlEntry elements
@@ -288,26 +288,26 @@ public final class search {
                     i++;
                 }
             }
-            prop.put("links", new String(links));
-            prop.put("linkcount", Integer.toString(i));
+            prop.putASIS("links", new String(links));
+            prop.putASIS("linkcount", Integer.toString(i));
 
             // prepare reference hints
             Object[] ws = acc.getReferences(16);
             StringBuffer refstr = new StringBuffer();
             for (int j = 0; j < ws.length; j++)
                 refstr.append(",").append((String) ws[j]);
-            prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
+            prop.putASIS("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
         }
         
         // add information about forward peers
-        prop.put("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
-        prop.put("fwsrc", ""); // peers that helped to construct this result
-        prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
+        prop.putASIS("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
+        prop.putASIS("fwsrc", ""); // peers that helped to construct this result
+        prop.putASIS("fwrec", ""); // peers that would have helped to construct this result (recommendations)
         
         // log
         yacyCore.log.logInfo("EXIT HASH SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + joincount + " links found, " + prop.get("linkcount", "?") + " links selected, " + ((System.currentTimeMillis() - timestamp1) / 1000) + " seconds");
  
-        prop.put("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
+        prop.putASIS("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
 
         final int links = Integer.parseInt(prop.get("linkcount","0"));
         yacyCore.seedDB.mySeed.incSI(links);

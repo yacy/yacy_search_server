@@ -87,8 +87,8 @@ public final class message {
         int messagesize = 10240;
         int attachmentsize = 0;
 
-        prop.put("messagesize", "0");
-        prop.put("attachmentsize", "0");
+        prop.putASIS("messagesize", "0");
+        prop.putASIS("attachmentsize", "0");
 
 //      System.out.println("DEBUG yacy/message: message post values = " + post.toString());
 
@@ -97,17 +97,17 @@ public final class message {
         if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
             // this request has a wrong target
 //          System.out.println("DEBUG yacy/message: authenticate failed");
-            prop.put("response", "-1"); // request rejected
+            prop.putASIS("response", "-1"); // request rejected
             return prop;
         }
 
-        prop.put("messagesize", Integer.toString(messagesize));
-        prop.put("attachmentsize", Integer.toString(attachmentsize));
+        prop.putASIS("messagesize", Integer.toString(messagesize));
+        prop.putASIS("attachmentsize", Integer.toString(attachmentsize));
 
         if (process.equals("permission")) {
             // permission: respond with acceptable message and attachment size
 //          String iam = (String) post.get("iam", "");    // seed hash of requester
-            prop.put("response", "Welcome to my peer!");
+            prop.putASIS("response", "Welcome to my peer!");
             // that's it!
         }
 
@@ -115,7 +115,7 @@ public final class message {
             // post: post message to message board
             String otherSeedString = post.get("myseed", "");
             if (otherSeedString.length() == 0) {
-                prop.put("response", "-1"); // request rejected
+                prop.putASIS("response", "-1"); // request rejected
                 return prop;
             }
             //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
@@ -127,11 +127,11 @@ public final class message {
             message = message.trim();
             
             if (subject.length() == 0 && message.length() == 0) {
-                prop.put("response", "-1"); // don't accept empty messages
+                prop.putASIS("response", "-1"); // don't accept empty messages
                 return prop;
             }
             
-            prop.put("response", "Thank you!");
+            prop.putASIS("response", "Thank you!");
 
             // save message
             messageBoard.entry msgEntry = null;

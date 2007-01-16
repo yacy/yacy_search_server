@@ -242,7 +242,7 @@ public class Bookmarks {
     while(count<max_count && it.hasNext()){
         bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
         if(bookmark!=null){
-            prop.put("bookmarks_"+count+"_link", de.anomic.data.wikiCode.replaceHTMLonly(bookmark.getUrl()));
+            prop.put("bookmarks_"+count+"_link", de.anomic.data.wikiCode.replaceXMLEntities(bookmark.getUrl()));
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
             prop.put("bookmarks_"+count+"_description", bookmark.getDescription());
             prop.put("bookmarks_"+count+"_public", (bookmark.getPublic()? 1:0));

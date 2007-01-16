@@ -128,8 +128,8 @@ public class wikiCode {
       */
       //[MN]
     public static String replaceHTML(String text) {
+        text = replace(text, xmlentities);
         text = replace(text, htmlentities);
-        text = replace(text, characters);
         return text;
     }
 
@@ -139,8 +139,8 @@ public class wikiCode {
       * @return the string with all special characters encoded
       */
       //[MN]
-    public static String replaceCharacters(String text) {
-        text = replace(text, characters);
+    public static String replaceHTMLEntities(String text) {
+        text = replace(text, htmlentities);
         return text;
     }
 
@@ -149,8 +149,8 @@ public class wikiCode {
       * @return the string without any HTML-tags that can be used for XSS
       */
       //[MN]
-    public static String replaceHTMLonly(String text) {
-        text = replace(text, htmlentities);
+    public static String replaceXMLEntities(String text) {
+        text = replace(text, xmlentities);
         return text;
     }
 
@@ -175,7 +175,7 @@ public class wikiCode {
     //This array contains codes (see http://mindprod.com/jgloss/unicode.html for details) 
     //that will be replaced. To add new codes or patterns, just put them at the end
     //of the list. Codes or patterns in this list can not be escaped with [= or <pre>
-    public static String[] htmlentities={
+    public static String[] xmlentities={
         // Ampersands _have_ to be replaced first. If they were replaced later,
         // other replaced characters containing ampersands would get messed up.
         "\u0026","&amp;",      //ampersand
@@ -187,7 +187,7 @@ public class wikiCode {
     //This array contains codes (see http://mindprod.com/jgloss/unicode.html for details) and
     //patterns that will be replaced. To add new codes or patterns, just put them at the end
     //of the list. Codes or patterns in this list can not be escaped with [= or <pre>
-    public static String[] characters={
+    public static String[] htmlentities={
         "\u005E","&#094;",  // Caret
 
         "\u0060","&#096;",  // Accent Grave `
@@ -1046,12 +1046,12 @@ public class wikiCode {
     public String transformLine(String result, plasmaSwitchboard switchboard) {
         //If HTML has not bee replaced yet (can happen if method gets called in recursion), replace now!
         if (!replacedHTML || preformattedSpan){
-            result = replaceHTMLonly(result);
+            result = replaceXMLEntities(result);
             replacedHTML = true;
         }
         //If special characters have not bee replaced yet, replace now!
         if (!replacedCharacters || preformattedSpan){
-            result = replaceCharacters(result);
+            result = replaceHTMLEntities(result);
             replacedCharacters = true;
         }
 
