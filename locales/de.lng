@@ -1223,9 +1223,16 @@ Unable to create new crawling profile for URL:==Es ist nicht m&ouml;glich f&uuml
 Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zum Crawler-Puffer hinzuzuf&uuml;gen:
 #-----------------------------
 
-#File: SearchStatisticsLocal_p.html
+#File: SearchStatistics_p.html
 #---------------------------
-Local Search Statistics==Lokale Such Statistik
+Search Statistics Menu==Such Statistik Men&uuml;
+Local&nbsp;Searches==Lokale Suche
+Remote&nbsp;Searches==Remote Suche
+Search Statistics</h2>==Such Statistik</h2>
+You can monitor search attempts at your own peer.==Sie k&ouml;nnen hier die Suchanfragen an Ihren Peer einsehen.
+Local statistics apply for search attempts at your own search portal,==Die lokale Statistik zeigt Suchanfragen, die von Ihrem eigenen Such Portal gestartet wurden.
+and remote statistics show search requests form other peer. Not all remote peers ask your peer during a global search,==Die Remote Statistik zeigt Suchanfragen von anderen Peers an. Nicht alle Peers fragen w&auml;hrend einer Suche Ihren Peer an, 
+therefore your cannot have a global view over all search requests within the complete YaCy network.==deswegen k&ouml;nnen Sie keine Gesamt&uuml;bersicht f&uuml;r das komplette YaCy Netzwerk haben.
 Search Statistics: Local Searches==Such Statistik: Lokale Suche
 This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgef&uuml;hrt wurden. 
 Showing \#\[num\]\# entries from a total of \#\[total\]\# Requests.==Es werden #[num]# Eintr&auml;ge von insgesamt #[total]# Anfragen angezeigt.
@@ -1236,22 +1243,8 @@ Returned Results==Gefundene Ergebnisse
 Expected Time==Erwartete Zeit
 Used Time==Gebrauchte Zeit
 Search Words==Such Wort
-
-#---------------------------
-
-#File: SearchStatisticsRemote_p.html
-#---------------------------
-Remote Search Statistics==Remote Such Statistik   
 Search Statistics: Remote Searches==Such Statistik: Remote Suche
 This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
-Showing \#\[num\]\# entries from a total of \#\[total\]\# Requests.==Es werden #[num]# Eintr&auml;ge von insgesamt #[total]# Anfragen angezeigt.
-Requesting Host==Anfragender Host
-Date==Datum
-Expected Results==Erwartete Ergebnisse
-Returned Results==Gefundene Ergebnisse
-Expected Time==Erwartete Zeit
-Used Time==Gebrauchte Zeit
-Search Words==Such Wort
 
 #---------------------------
 
@@ -1762,12 +1755,13 @@ View URL Content==Zeige URL Inhalte
 Word Count==Anzahl W&ouml;rter
 Description==Beschreibung
 Size==Gr&ouml;sse
-View as:==Zeige als:
+View as==Zeige als
 #Original==Original
 Plain Text==Quelltext
 Parsed Text==Geparsten Text
 Parsed Sentences==Geparste S&auml;tze
 Link List==Linkliste
+"Show"=="Anzeigen"
 No URL hash submitted.==Es wurde kein URL Hash &uuml;vertragen.
 Unable to find URL Entry in DB==Es war nicht m&ouml;glich den URL Eintrag in der DB zu finden.
 Invalid URL==Ung&uuml;ltige URL
@@ -1812,7 +1806,7 @@ Comment==Kommentar
 #---------------------------
 Next update in==Nächste Aktualisierung in
 seconds.==Sekunden.
-Queue==Puffer
+Queue</th>==Puffer</th>
 Size==Größe
 #Max==Max
 Indexing</td>==Indexieren</td>
@@ -2097,14 +2091,6 @@ Queues Performance Settings==Puffer Performance Einstellungen
 Memory Settings for Database Caches==Speicher Einstellungen des Datenbank Caches
 Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequenz
 #-----------------------------
-
-#File: env/templates/submenuSearchStatistics.template
-#---------------------------
-Search Statistics Menu==Such Statistik Men&uuml;
-Local&nbsp;Searches==Lokale Suche
-Remote&nbsp;Searches==Remote Suche
-
-#---------------------------
 
 #File: htdocsdefault/dir.html
 #---------------------------
