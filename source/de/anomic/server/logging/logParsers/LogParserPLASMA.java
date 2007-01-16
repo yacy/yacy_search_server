@@ -173,31 +173,35 @@ public class LogParserPLASMA implements LogParser{
     private final String parserType = "PLASMA";
 
     //RegExp for LogLevel I
-    private static Pattern i1 = Pattern.compile("Received (\\d*) URLs from peer [\\w-_]{12}:[\\w-_]*/[\\w.-]* in (\\d*) ms, Blocked (\\d*) URLs");
-    private static Pattern i2 = Pattern.compile("Received (\\d*) Entries (\\d*) Words \\[[\\w-_]{12} .. [\\w-_]{12}\\]/[\\w.-]* from [\\w-_]{12}:[\\w-_]*/[\\w.-]*, processed in (\\d*) milliseconds, requesting (\\d*)/(\\d*) URLs, blocked (\\d*) RWIs");
-    private static Pattern i2_2 = Pattern.compile("Received (\\d*) Entries (\\d*) Words \\[[\\w-_]{12} .. [\\w-_]{12}\\]/[\\w.-]* from [\\w-_]{12}:[\\w-_]*, processed in (\\d*) milliseconds, requesting (\\d*)/(\\d*) URLs, blocked (\\d*) RWIs");
-    private static Pattern i3 = Pattern.compile("Index transfer of (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] to peer ([\\w-_]*):([\\w-_]{12}) in (\\d*) seconds successful \\((\\d*) words/s, (\\d*) Bytes\\)");
-    private static Pattern i4 = Pattern.compile("Index transfer of (\\d*) entries (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] and (\\d*) URLs to peer ([\\w-_]*):([\\w-_]{12}) in (\\d*) seconds successful \\((\\d*) words/s, (\\d*) Bytes\\)");
-    private static Pattern i5 = Pattern.compile("Selected \\w* DHT target peer ([\\w-_]*):([\\w-_]{12}), distance = ([\\w.-]*)");
-    private static Pattern i6 = Pattern.compile("Rejecting RWIs from peer ([\\w-_]{12}):([\\w-_]*)/([\\w.]*) ([\\w. ]*)");
-    private static Pattern i7 = Pattern.compile("DHT distribution: transfer to peer [\\w-]* finished.");
-    private static Pattern i8 = Pattern.compile("Index selection of (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] in (\\d*) seconds");
-    private static Pattern i9 = Pattern.compile("RankingDistribution - transmitted file [\\w-:.\\\\]* to [\\w.]*:\\d* successfully in (\\d)* seconds");
-    private static Pattern i10 = Pattern.compile("RankingDistribution - error transmitting file");
-    private static Pattern i11 = Pattern.compile("Peer [\\w-_]*:[\\w-_]{12} is busy\\. Waiting \\d* ms\\.");
+    private static final Pattern i1 = Pattern.compile("Received (\\d*) URLs from peer [\\w-_]{12}:[\\w-_]*/[\\w.-]* in (\\d*) ms, Blocked (\\d*) URLs");
+    private static final Pattern i2 = Pattern.compile("Received (\\d*) Entries (\\d*) Words \\[[\\w-_]{12} .. [\\w-_]{12}\\]/[\\w.-]* from [\\w-_]{12}:[\\w-_]*/[\\w.-]*, processed in (\\d*) milliseconds, requesting (\\d*)/(\\d*) URLs, blocked (\\d*) RWIs");
+    private static final Pattern i2_2 = Pattern.compile("Received (\\d*) Entries (\\d*) Words \\[[\\w-_]{12} .. [\\w-_]{12}\\]/[\\w.-]* from [\\w-_]{12}:[\\w-_]*, processed in (\\d*) milliseconds, requesting (\\d*)/(\\d*) URLs, blocked (\\d*) RWIs");
+    private static final Pattern i3 = Pattern.compile("Index transfer of (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] to peer ([\\w-_]*):([\\w-_]{12}) in (\\d*) seconds successful \\((\\d*) words/s, (\\d*) Bytes\\)");
+    private static final Pattern i4 = Pattern.compile("Index transfer of (\\d*) entries (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] and (\\d*) URLs to peer ([\\w-_]*):([\\w-_]{12}) in (\\d*) seconds successful \\((\\d*) words/s, (\\d*) Bytes\\)");
+    private static final Pattern i5 = Pattern.compile("Selected \\w* DHT target peer ([\\w-_]*):([\\w-_]{12}), distance = ([\\w.-]*)");
+    private static final Pattern i6 = Pattern.compile("Rejecting RWIs from peer ([\\w-_]{12}):([\\w-_]*)/([\\w.]*) ([\\w. ]*)");
+    private static final Pattern i7 = Pattern.compile("DHT distribution: transfer to peer [\\w-]* finished.");
+    private static final Pattern i8 = Pattern.compile("Index selection of (\\d*) words \\[[\\w-_]{12} .. [\\w-_]{12}\\] in (\\d*) seconds");
+    private static final Pattern i9 = Pattern.compile("RankingDistribution - transmitted file [\\w-:.\\\\]* to [\\w.]*:\\d* successfully in (\\d)* seconds");
+    private static final Pattern i10 = Pattern.compile("RankingDistribution - error transmitting file");
+    private static final Pattern i11 = Pattern.compile("Peer [\\w-_]*:[\\w-_]{12} is busy\\. Waiting \\d* ms\\.");
     //private static Pattern i12 = Pattern.compile("\\*Indexed \\d* words in URL [\\w:.&/%-~$\u00A7@=]* \\[[\\w-_]{12}\\]");
-    private static Pattern i13 = Pattern.compile("WROTE HEADER for |LOCALCRAWL\\[\\d*, \\d*, \\d*, \\d*\\]|REJECTED WRONG STATUS TYPE");
+    private static final Pattern i13 = Pattern.compile("WROTE HEADER for |LOCALCRAWL\\[\\d*, \\d*, \\d*, \\d*\\]|REJECTED WRONG STATUS TYPE");
     //RegExp for LogLevel W
-    private static Pattern w1 = Pattern.compile("found not enough \\(\\d*\\) peers for distribution");
-    private static Pattern w2 = Pattern.compile("Transfer to peer ([\\w-_]*):([\\w-_]{12}) failed:'(\\w*)'");
+    private static final Pattern w1 = Pattern.compile("found not enough \\(\\d*\\) peers for distribution");
+    private static final Pattern w2 = Pattern.compile("Transfer to peer ([\\w-_]*):([\\w-_]{12}) failed:'(\\w*)'");
     //RegExp for LogLevel E
-    private static Pattern e1 = Pattern.compile("INTERNAL ERROR AT plasmaCrawlLURL:store:de.anomic.kelondro.kelondroException: tried to create (\\w*) node twice in db");
-    private static Pattern e2 = Pattern.compile("INTERNAL ERROR [\\w./: ]* java.net.MalformedURLException");
+    private static final Pattern e1 = Pattern.compile("INTERNAL ERROR AT plasmaCrawlLURL:store:de.anomic.kelondro.kelondroException: tried to create (\\w*) node twice in db");
+    private static final Pattern e2 = Pattern.compile("INTERNAL ERROR [\\w./: ]* java.net.MalformedURLException");
 
     private Matcher m;
     //RegExp for advancedParser
     //private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-=]* \\[[\\w-_]{12}\\]\\n\\tDescription: ([\\w- ]*)\\n\\tMimeType: ([\\w-_/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)\\n\\tStackingTime: (\\d*) ms \\| ParsingTime: (\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
-    private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&/%-~$\u00A7@=]* \\[[\\w-_]{12}\\][\\r\\n]*\\tDescription: ([\\w-\\.,:!='\"|/+@() ]*)[\\r\\n]*\\tMimeType: ([\\w-_~/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)[\\r\\n]*\\tStackingTime:[ ]*(\\d*) ms \\| ParsingTime:[ ]*(\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
+    private static Pattern adv1 = Pattern.compile(
+            "\\*Indexed (\\d+) words in URL [\\w:.&/%-~;$\u00A7@=]* \\[[\\w_-]{12}\\]\\r?\\n?" + 
+            "\\tDescription: +([\\w-\\.,:!='\"|/+@\\(\\) \\t]*)\\r?\\n?" +
+            "\\tMimeType: ([\\w_~/-]*) \\| Charset: ([\\w-]*) \\| Size: (\\d+) bytes \\| Anchors: (\\d+)\\r?\\n?" +
+            "\\tStackingTime:[ ]*(\\d+) ms \\| ParsingTime:[ ]*(\\d+) ms \\| IndexingTime: (\\d+) ms \\| StorageTime: (\\d+) ms");
 
     private int urlSum=0;
     private int urlReqSum=0;
@@ -349,12 +353,12 @@ public class LogParserPLASMA implements LogParser{
             if (m.find ()) {
                 indexedSites++;
                 indexedWordSum += Integer.parseInt(m.group(1));
-                indexedSiteSizeSum += Integer.parseInt(m.group(4));
-                indexedAnchorsCount += Integer.parseInt(m.group(5));
-                indexedStackingTime += Integer.parseInt(m.group(6));
-                indexedParsingTime += Integer.parseInt(m.group(7));
-                indexedIndexingTime += Integer.parseInt(m.group(8));
-                indexedStorageTime += Integer.parseInt(m.group(9));
+                indexedSiteSizeSum += Integer.parseInt(m.group(5));
+                indexedAnchorsCount += Integer.parseInt(m.group(6));
+                indexedStackingTime += Integer.parseInt(m.group(7));
+                indexedParsingTime += Integer.parseInt(m.group(8));
+                indexedIndexingTime += Integer.parseInt(m.group(9));
+                indexedStorageTime += Integer.parseInt(m.group(10));
             }
 
         } else if (logLevel.equals("WARNING")){
