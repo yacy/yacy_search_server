@@ -1,8 +1,8 @@
 # Wenn man diese Liste benutzen moechte, muss diese zuerst in "yacy.badwords"
 # umbenannt werden!
 #
-# Alles was hier gelistet ist, wird dann bei den "Topwoerter" die nach einer
-# Suche angezeigt werden gefiltert.
+# Alles was hier gelistet ist, wird dann bei den "Topwoerter", die nach einer
+# Suche angezeigt werden, gefiltert.
 #
 # AEnderungen werden aber erst nach einen Neustart aktiv.
 #

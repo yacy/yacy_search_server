@@ -416,18 +416,18 @@ Images==Bilder
 #Video==Video
 Applications==Anwendungen
 more options...==mehr Optionen...
-Max. number of results:==Max. Anzahl Ergebnisse:
-Resource:==Quelle:
+Max. number of results==Max. Anzahl Ergebnisse
+Resource==Quelle
 global==global
 local==lokal
 Max. search time==Max. Suchdauer
 \(seconds\)==(Sekunden)
-URL mask:==URL-Filter:
+URL mask==URL-Filter
 restrict on==beschr&auml;nken auf
 show all==alle zeigen
 #überarbeiten!!!
-Prefer mask:==Vorzugsmaske:
-Constraints:==Einschr&auml;nkungen:
+Prefer mask==Vorzugsmaske
+Constraints==Einschr&auml;nkungen
 only index pages==Nur Index Seiten
 This peer holds \#\[links\]\# URLs of \#\[total-links\]\# in the known network.==Dieser Peer speichert #[links]# von #[total-links]#, der dem Netzwerk bekannten URLs.
 #-----------------------------
@@ -1590,7 +1590,7 @@ Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite b
 #---------------------------
 System-, Index- and Peer-Status==System-, Index- und Peer-Status
 Welcome to YaCy!==Willkommen bei YaCy!
-"Restart \(only Windows\)"=="Neustarten (nur f&uuml;r Windows)"
+"Restart"=="Neustarten"
 "Shutdown"=="Herunterfahren"
 Public System Properties==Allgemeine Systemangaben
 System version==Systemversion
@@ -1789,8 +1789,7 @@ The requested peer is unknown or a potential peer.==Der gew&uuml;nschte Peer ist
 The profile can't be fetched.==Das Profil kann nicht geladen werden.
 The peer==Der Peer
 is not online.==ist nicht online.
-This is==Dies ist
-'s Profile:==s Profil
+This is the Profile of==Dies ist das Profil von
 Name==Name
 Nick Name==Nick Name
 Homepage==Homepage
@@ -2136,6 +2135,40 @@ Access of this page with the URLs:==Zugang zu dieser Seite &uuml;ber diese URLs:
 or <a==oder <a
 from within the YaCy network.==aus dem YaCy Netzwerk.
 
+#-----------------------------
+
+#File: proxymsg/authfail.inc
+#-----------------------------
+Your Username/Password is wrong.==Benutzername/Passwort waren falsch.
+Username</label>==Benutzername</label>
+Password</label>==Passwort</label>
+"login"=="anmelden"
+#-----------------------------
+
+#File: proxymsg/error.html
+#-----------------------------
+YaCy: Proxy Message==YaCy: Proxy Nachricht
+YaCy - Distributed Web Indexing - Administration==YaCy - Verteiltes Internet-Indexieren - Administration 
+Problems with request:==Probleme mit Anfrage:
+unspecified error==unspezifizierter Fehler
+not-yet-assigned error==noch nicht vergebener Fehler
+You don't have an active internet connection. Please go online.==Sie haben keine aktive Internetverbindung. Bitte gehen Sie online.
+Could not load resource. The file is not available.==Datei konnte nicht geladen werden. Die Datei ist nicht vorhanden.
+Exception occured==Dieser Fehler trat auf 
+Generated \#\[date\]\# by==Erstellt am #[date]# von
+#-----------------------------
+
+#File: proxymsg/proxylimits.inc
+#-----------------------------
+Your Account is disabled for surfing.==Ihr Account ist deaktivert zum surfen.
+Your Timelimit \(\#\[timelimit\]\# Minutes per Day\) is reached.==Ihr Zeitlimit (#[timelimit]# Minuten am Tag) wurde erreicht. 
+#-----------------------------
+
+#File: proxymsg/unknownHost.inc
+#-----------------------------
+The server==Der Server
+could not be found.==wurde nicht gefunden.
+Did you mean:==Meinten Sie vielleicht:
 #-----------------------------
 
 #File: www/welcome.html
