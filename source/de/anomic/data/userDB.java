@@ -5,7 +5,7 @@
 //(C) 2005, 2006 by Martin Thelian
 //                  Alexander Schier
 //
-//last change: $LastChangedDate$ by $LastChangedBy$
+//last change: $LastChangedDate$ by $LastChangedBy: $
 //Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
@@ -77,7 +77,7 @@ public final class userDB {
         this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
         userTableFile.getParentFile().mkdirs();
-        this.userTable = new kelondroMap(kelondroDyn.open(userTableFile, bufferkb * 1024, preloadTime, 128, 256, '_', true));
+        this.userTable = new kelondroMap(kelondroDyn.open(userTableFile, bufferkb * 1024, preloadTime, 128, 256, '_', true, false));
     }
     
     public int dbCacheNodeChunkSize() {
@@ -95,7 +95,7 @@ public final class userDB {
         } catch (IOException e) {}
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
         userTableFile.getParentFile().mkdirs();
-        userTable = new kelondroMap(kelondroDyn.open(userTableFile, this.bufferkb, preloadTime, 256, 512, '_', true));
+        userTable = new kelondroMap(kelondroDyn.open(userTableFile, this.bufferkb, preloadTime, 256, 512, '_', true, false));
     }
     
     public void close() {

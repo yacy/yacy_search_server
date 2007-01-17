@@ -82,7 +82,7 @@ public class kelondroMapTable {
         File tablefile = new File(tablesPath, "table." + tablename + ".mdb");
         kelondroDyn dyn;
         if (!(tablefile.exists())) tablefile.getParentFile().mkdirs();
-        dyn = new kelondroDyn(tablefile, buffersize, preloadTime, keysize, nodesize, fillChar, true);
+        dyn = new kelondroDyn(tablefile, buffersize, preloadTime, keysize, nodesize, fillChar, true, false);
         kelondroMap map = new kelondroMap(dyn, sortfields, accfields);
         mTables.put(tablename, map);
     }

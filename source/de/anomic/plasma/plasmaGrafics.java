@@ -60,7 +60,23 @@ public class plasmaGrafics {
     private static int shortestName = 10;
     private static int longestName = 12;
 
-    private static ymageMatrix networkPicture = null;
+    private static final String COL_DHTCIRCLE = "400030"; /*"008020"*/
+    private static final long   COL_HEADLINE   = ymageMatrix.SUBTRACTIVE_BLACK;
+    private static final String COL_BACKGROUND = "080808"; /*"FFFFE0"*/
+    private static final String COL_ACTIVE_DOT     = "181808";
+    private static final String COL_ACTIVE_LINE    = "604040";
+    private static final String COL_ACTIVE_TEXT    = "b080b0";
+    private static final String COL_PASSIVE_DOT    = "101010";
+    private static final String COL_PASSIVE_LINE   = "404040";
+    private static final String COL_PASSIVE_TEXT   = "a0a0a0";
+    private static final String COL_POTENTIAL_DOT  = "041010";
+    private static final String COL_POTENTIAL_LINE = "104040";
+    private static final String COL_POTENTIAL_TEXT = "80b0b0";
+    private static final String COL_WE_DOT         = "206060";
+    private static final String COL_WE_LINE        = "b0f0f0";
+    private static final String COL_WE_TEXT        = "f0f0f0";
+    
+    private static ymageMatrix  networkPicture = null;
     private static long         networkPictureDate = 0;
 
     public static ymageMatrix getSearchEventPicture() {
@@ -134,11 +150,11 @@ public class plasmaGrafics {
 
         if (yacyCore.seedDB == null) return; // no other peers known
 
-        networkPicture = new ymageMatrix(width, height, "101010" /*"FFFFE0"*/);
+        networkPicture = new ymageMatrix(width, height, COL_BACKGROUND);
         networkPicture.setMode(ymageMatrix.MODE_SUB);
 
         // draw network circle
-        networkPicture.setColor("A02080" /*"008020"*/);
+        networkPicture.setColor(COL_DHTCIRCLE);
         networkPicture.arc(width / 2, height / 2, innerradius - 20, innerradius + 20, 0, 360);
 
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
@@ -154,7 +170,7 @@ public class plasmaGrafics {
         while (e.hasMoreElements() && count < maxCount) {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, "404000", "E8C0E8", "B0FFB0", corona);
+                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_ACTIVE_DOT, COL_ACTIVE_LINE, COL_ACTIVE_TEXT, corona);
                 count++;
             }
         }
@@ -168,7 +184,7 @@ public class plasmaGrafics {
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
                 if (lastseen > passiveLimit) break; // we have enough, this list is sorted so we don't miss anything
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, "101010", "401000", "802000", corona);
+                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_PASSIVE_DOT, COL_PASSIVE_LINE, COL_PASSIVE_TEXT, corona);
                 count++;
             }
         }
@@ -182,17 +198,17 @@ public class plasmaGrafics {
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
                 if (lastseen > potentialLimit) break; // we have enough, this list is sorted so we don't miss anything
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, "202040", "5050A0", "A0A0FF", corona);
+                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_POTENTIAL_DOT, COL_POTENTIAL_LINE, COL_POTENTIAL_TEXT, corona);
                 count++;
             }
         }
         totalCount += count;
 
         // draw my own peer
-        drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, yacyCore.seedDB.mySeed, "008080", "AAAAAA", "FFFFFF", corona);
+        drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, yacyCore.seedDB.mySeed, COL_WE_DOT, COL_WE_LINE, COL_WE_TEXT, corona);
 
         // draw description
-        networkPicture.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
+        networkPicture.setColor(COL_HEADLINE);
         networkPicture.setMode(ymageMatrix.MODE_SUB);
         ymageToolPrint.print(networkPicture, 2, 8, 0, "THE YACY NETWORK", true);
         ymageToolPrint.print(networkPicture, 2, 16, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", true);

@@ -72,11 +72,11 @@ public class wikiBoard {
     public wikiBoard(File actpath, File bkppath, int bufferkb, long preloadTime) {
     		new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
-            datbase = new kelondroMap(kelondroDyn.open(actpath, bufferkb / 2 * 0x400, preloadTime, keyLength, recordSize, '_', true));
+            datbase = new kelondroMap(kelondroDyn.open(actpath, bufferkb / 2 * 0x400, preloadTime, keyLength, recordSize, '_', true, false));
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
-            bkpbase = new kelondroMap(kelondroDyn.open(bkppath, bufferkb / 2 * 0x400, preloadTime, keyLength + dateFormat.length(), recordSize, '_', true));
+            bkpbase = new kelondroMap(kelondroDyn.open(bkppath, bufferkb / 2 * 0x400, preloadTime, keyLength + dateFormat.length(), recordSize, '_', true, false));
         }
     }
 
