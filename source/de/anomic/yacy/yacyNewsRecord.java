@@ -88,6 +88,7 @@ public class yacyNewsRecord {
         this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt((String) attributes.get("dis")) : 0;
         this.originator = (attributes.containsKey("ori")) ? (String) attributes.get("ori") : "";
         removeStandards();
+        
     }
 
     public yacyNewsRecord(String category, Map attributes) {
@@ -99,6 +100,7 @@ public class yacyNewsRecord {
         this.distributed = 0;
         this.originator = yacyCore.seedDB.mySeed.hash;
         removeStandards();
+        truncAttrLengthToMax();
     }
 
     protected yacyNewsRecord(String id, String category, Date received, int distributed, Map attributes) {
@@ -109,6 +111,7 @@ public class yacyNewsRecord {
         this.distributed = distributed;
         this.originator = id.substring(yacyCore.universalDateShortPattern.length());
         removeStandards();
+        truncAttrLengthToMax();
     }
 
     private void removeStandards() {
@@ -118,7 +121,14 @@ public class yacyNewsRecord {
         attributes.remove("rec");
         attributes.remove("dis");
     }
-
+    
+    private void truncAttrLengthToMax() {
+        String s = this.attributes.toString();
+        if (s.length() <= attributesMaxLength) return;
+        this.attributes = serverCodings.string2map(
+                s.substring(0, s.lastIndexOf(',', attributesMaxLength)), ",");
+    }
+    
     public String toString() {
         // this creates the string that shall be distributed
         // attention: this has no additional encoding
