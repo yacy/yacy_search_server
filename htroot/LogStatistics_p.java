@@ -54,7 +54,6 @@ import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.LogalizerHandler;
-import de.anomic.server.logging.logParsers.LogParser;
 import de.anomic.server.logging.logParsers.LogParserPLASMA;
 
 public class LogStatistics_p {
@@ -146,7 +145,7 @@ public class LogStatistics_p {
                 prop.put(RESULTS + "avgExists", 0);
             } else {
                 prop.put(RESULTS + "avgExists", 1);
-                prop.put(RESULTS + "avgExists_avgParserRunsPerMinute", ((Integer)r.get(LogParserPLASMA.TOTAL_PARSER_RUNS)).floatValue() / l); 
+                prop.put(RESULTS + "avgExists_avgParserRunsPerMinute", (int) (((Integer) r.get(LogParserPLASMA.TOTAL_PARSER_RUNS)).floatValue() / l)); 
             }
             
             Object[] names = ((HashSet)r.get(LogParserPLASMA.DHT_REJECTED_PEERS_NAME)).toArray();
