@@ -258,12 +258,12 @@ public class Blog {
 	        			if(!xml) {
 	        				prop.put("mode_entries_"+count+"_subject", wikiCode.replaceHTML(new String(entry.subject(),"UTF-8")));
 		        			prop.put("mode_entries_"+count+"_author", wikiCode.replaceHTML(new String(entry.author(),"UTF-8")));
-		        			prop.put("mode_entries_"+count+"_page", wikiTransformer.transform(entry.page()));
+		        			prop.putASIS("mode_entries_"+count+"_page", wikiTransformer.transform(entry.page()));
 	        			}
 	        			else {
 	        				prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
 		        			prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
-		        			prop.put("mode_entries_"+count+"_page", entry.page());
+		        			prop.putASIS("mode_entries_"+count+"_page", entry.page());
 		        			prop.put("mode_entries_"+count+"_timestamp", entry.timestamp());
 	        			}
 	        			prop.put("mode_entries_"+count+"_date", dateString(entry.date()));
@@ -301,7 +301,7 @@ public class Blog {
 					prop.put("mode_entries_0_author", wikiCode.replaceHTML(new String(page.author())));
 				}
 	        	prop.put("mode_entries_0_date", dateString(page.date()));
-	        	prop.put("mode_entries_0_page", wikiTransformer.transform(page.page()));
+	        	prop.putASIS("mode_entries_0_page", wikiTransformer.transform(page.page()));
 	        	if(hasRights) {
     				prop.put("mode_entries_0_admin", 1);
     				prop.put("mode_entries_0_admin_pageid",page.key());
