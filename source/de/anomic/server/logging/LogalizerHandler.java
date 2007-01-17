@@ -89,8 +89,9 @@ public class LogalizerHandler extends Handler {
             for (int i=0; i<parserDirFiles.length; i++) {
                 String tmp = parserDirFiles[i].substring(0,parserDirFiles[i].indexOf(".class"));
                 Class tempClass = Class.forName(logParserPackage+"."+tmp);
-                if (tempClass.isInterface() && debug) System.out.println(tempClass.getName() + " is an Interface");
-                else {
+                if (tempClass.isInterface()) {
+                    if (debug) System.out.println(tempClass.getName() + " is an Interface");
+                } else {
                     Object theParser = tempClass.newInstance();
                     if (theParser instanceof LogParser) {
                         LogParser theLogParser = (LogParser) theParser;

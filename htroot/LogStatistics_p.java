@@ -82,6 +82,7 @@ public class LogStatistics_p {
         } else {
             prop.put("results", 1);
             String[] t;
+            float l;
             prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_AVERAGE, r.get(LogParserPLASMA.DHT_DISTANCE_AVERAGE));
             prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MAX, r.get(LogParserPLASMA.DHT_DISTANCE_MAX));
             prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MIN, r.get(LogParserPLASMA.DHT_DISTANCE_MIN));
@@ -93,7 +94,7 @@ public class LogStatistics_p {
             prop.put(RESULTS + LogParserPLASMA.DHT_TRAFFIC_SENT + "Unit", t[1]);
             prop.put(RESULTS + LogParserPLASMA.DHT_URLS_SENT, r.get(LogParserPLASMA.DHT_URLS_SENT));
             prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED, r.get(LogParserPLASMA.DHT_WORDS_SELECTED));
-            t = transformTime(((Integer)r.get(LogParserPLASMA.DHT_WORDS_SELECTED_TIME)).longValue());
+            t = transformTime(((Integer)r.get(LogParserPLASMA.DHT_WORDS_SELECTED_TIME)).longValue() * 1000L);
             prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED_TIME, t[0]);
             prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED_TIME + "Unit", t[1]);
             prop.put(RESULTS + LogParserPLASMA.ERROR_CHILD_TWICE_LEFT, r.get(LogParserPLASMA.ERROR_CHILD_TWICE_LEFT));
@@ -136,6 +137,17 @@ public class LogStatistics_p {
             prop.put(RESULTS + LogParserPLASMA.URLS_RECEIVED_TIME + "Unit", t[1]);
             prop.put(RESULTS + LogParserPLASMA.URLS_REQUESTED, r.get(LogParserPLASMA.URLS_REQUESTED));
             prop.put(RESULTS + LogParserPLASMA.WORDS_RECEIVED, r.get(LogParserPLASMA.WORDS_RECEIVED));
+            l = ((Long)r.get(LogParserPLASMA.TOTAL_PARSER_TIME)).floatValue();
+            t = transformTime((long)l);
+            prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_TIME, t[0]);
+            prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_TIME + "Unit", t[1]);
+            prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_RUNS, r.get(LogParserPLASMA.TOTAL_PARSER_RUNS));
+            if ((l /= 1000) == 0) {
+                prop.put(RESULTS + "avgExists", 0);
+            } else {
+                prop.put(RESULTS + "avgExists", 1);
+                prop.put(RESULTS + "avgExists_avgParserRunsPerMinute", ((Integer)r.get(LogParserPLASMA.TOTAL_PARSER_RUNS)).floatValue() / l); 
+            }
             
             Object[] names = ((HashSet)r.get(LogParserPLASMA.DHT_REJECTED_PEERS_NAME)).toArray();
             Object[] hashes = ((HashSet)r.get(LogParserPLASMA.DHT_REJECTED_PEERS_HASH)).toArray();
@@ -172,10 +184,10 @@ public class LogStatistics_p {
     private static final String[] units = new String[] { "Bytes", "KiloBytes", "MegaBytes", "GigaBytes" };
     
     private static String[] transformTime(long timems) {
-        if (timems > 1000) timems /= 1000; else return new String[] { Long.toString(timems), MILLISECONDS };
-        if (timems > 60) timems /= 60; else return new String[] { Long.toString(timems), SECONDS };
-        if (timems > 60) timems /= 60; else return new String[] { Long.toString(timems), MINUTES };
-        if (timems > 24) timems /= 24; else return new String[] { Long.toString(timems), HOURS };
+        if (timems > 10000) timems /= 1000; else return new String[] { Long.toString(timems), MILLISECONDS };
+        if (timems > 180) timems /= 60; else return new String[] { Long.toString(timems), SECONDS };
+        if (timems > 600) timems /= 60; else return new String[] { Long.toString(timems), MINUTES };
+        if (timems > 240) timems /= 24; else return new String[] { Long.toString(timems), HOURS };
         return new String[] { Long.toString(timems), DAYS };
     }
     
@@ -186,10 +198,3 @@ public class LogStatistics_p {
         return new String[] { Long.toString(mem), units[i] };
     }
 }
-
-
-
-
-
-
-

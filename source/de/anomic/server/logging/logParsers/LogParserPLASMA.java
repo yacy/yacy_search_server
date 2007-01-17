@@ -168,8 +168,11 @@ public class LogParserPLASMA implements LogParser{
     /** total time needed for storing the results of an indexing - <strong>Integer</strong> */
     public static final String INDEXED_STORE_TIME       = "indexedStorageTime";
     
-    public static final String TOTAL_PARSER_TIME       = "totalParserTime";
-    public static final String TOTAL_PARSER_RUNS       = "totalParserRuns";
+    /** accumulated time needed to parse the log entries up to now */
+    public static final String TOTAL_PARSER_TIME        = "totalParserTime";
+    
+    /** times the parser was called, respectively amount of independant log-lines */
+    public static final String TOTAL_PARSER_RUNS        = "totalParserRuns";
     
     
     private final double parserVersion = 0.1;

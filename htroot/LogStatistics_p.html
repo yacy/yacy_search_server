@@ -6,10 +6,12 @@
   </head>
   <body id="ViewProfile">
     #%env/templates/header.template%#
-    <h2>Log statistics<!--of the last #[parsedLines]# lines--></h2>
+    <h2>Log statistics</h2>
+    
+    #(results)#::
+    <p>Needed #[totalParserTime]# #[totalParserTimeUnit]# to parse #[totalParserRuns]# Entries#(avgExists)#:: (#[avgParserRunsPerMinute]#/sec)#(/avgExists)#</p>
     
     <form method="get" action="LogStatistics_p.html">
-      #(results)#::
       <fieldset><legend>DHT</legend>
         <fieldset>
           <legend>URLs</legend>
@@ -94,8 +96,8 @@
           <dt><span class="tt">Malformed URL Exception</span></dt><dd>#[malformedURLCount]#</dd>
         </dl>
       </fieldset>
-      #(/results)#
     </form>
+    #(/results)#
     
     #%env/templates/footer.template%#
   </body>
