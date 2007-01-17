@@ -42,9 +42,9 @@
        
       <table>
         <tr>
-          <td>Max. number of results:</td>
+          <td><label for="count">Max. number of results</label>:</td>
           <td>
-            <select name="count">
+            <select id="count" name="count">
               <option #(count-10)#::selected="selected"#(/count-10)#>10</option>
               <option #(count-50)#::selected="selected"#(/count-50)#>50</option>
               <option #(count-100)#::selected="selected"#(/count-100)#>100</option>
@@ -53,18 +53,18 @@
           </td>
         </tr>
         <tr>
-          <td>Resource:</td>
+          <td><label for="resource">Resource</label>:</td>
           <td>
-            <select name="resource">
+            <select id="resource" name="resource">
               <option value="global" #(resource-global)#::selected="selected"#(/resource-global)#>global</option>
               <option value="local" #(resource-local)#::selected="selected"#(/resource-local)#>local</option>
             </select>
           </td>
         </tr>
         <tr>
-          <td>Max. search time (seconds):</td>
+          <td><label for="time">Max. search time (seconds)</label>:</td>
             <td>
-              <select name="time">
+              <select id="time" name="time">
                 <option #(time-1)#::selected="selected"#(/time-1)#>1</option>
                 <option #(time-3)#::selected="selected"#(/time-3)#>3</option>
                 <option #(time-6)#::selected="selected"#(/time-6)#>6</option>
@@ -75,9 +75,9 @@
             </td>
           </tr>
           <tr>
-          <td>URL mask:</td>
+          <td><label for="urlmaskfilter">URL mask</label>:</td>
           <td>#(urlmaskoptions)#
-            <input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#" />
+            <input id="urlmaskfilter" name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#" />
             ::
             <input type="radio" name="urlmask" value="yes" checked /> restrict on <input name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#" />
             <input type="radio" name="urlmask" value="no" /> show all
@@ -86,11 +86,11 @@
         </tr>
         <tr>
           <td>
-            Prefer mask:
+            <label for="prefermaskfilter">Prefer mask</label>:
           </td>
           <td>
             #(prefermaskoptions)#
-            <input name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#" />
+            <input id="prefermaskfilter" name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#" />
             ::
             <input type="radio" name="prefermask" value="yes" checked="checked" /> restrict on <input name="prefermaskfilter" type="text" size="12" maxlength="80" value="#[prefermaskfilter]#" />
             <input type="radio" name="prefermask" value="no" /> show all

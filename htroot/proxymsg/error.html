@@ -1,87 +1,35 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-<title>YaCy: Proxy Message</title>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<meta name="Content-Language" content="English, Englisch">
-<meta name="keywords" content="yacy proxy message">
-<meta name="description" content="YaCy proxy message">
-<meta name="copyright" content="Michael Christen">
-
-<base href="http://#[host]#:#[port]#/">
-<link rel="stylesheet" media="all" href="/env/style.css">
-
-<!-- (C), Architecture and Realisation: Michael Peter Christen; Contact: mc <at> anomic.de -->
-
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-<table border="0" cellspacing="0" cellpadding="0" width="100%">
-<tr><td>
-  <table class="Heading" border="0" cellspacing="0" cellpadding="0" width="100%">
-  <tr height="36">
-    <td width="240">
-	<a href="http://www.yacy.net">
-	<img width="52" height="33" border="0" src="/env/grafics/yacy.gif" align="top" alt="YaCy-Logo">
-	</a>
-    </td>
-    <td width="50%" align="center">
-		<div class="Headline">#[peerName]#: Proxy message</div>
-    </td>
-    <td width="240" align="right">
-    </td>
-  </tr>
-  </table>
-</td></tr>
-</table>
-<br><br>
-
-<table align="center" style="margin-left: auto; margin-right: auto; margin-top: 5em;">
-<tr>
-	<td>
-		<p>
-			<h2>Problems with request: <font color="#556699">#[requestMethod]# #[requestURL]#</font></h2>
-			<br>
-			<br>
-			<tt>#[httpStatus]#</tt>
-			<p>				
-				#(errorMessageType)#<!-- 0 -->
-					<b>unspecified error</b>
-					::<!-- 1 -->
-					<b>not-yet-assigned error</b>
-					::<!-- 2 -->
-					<b>You don't have an active internet connection. Please go online.</b>
-					::<!-- 3 -->
-					<b>Could not load resource. The file is not available.</b>
-					::<!-- 4 -->
-					<b>#[detailedErrorMsg]#</b>
-					::<!-- 5 -->
-					#%[file]%#
-				#(/errorMessageType)#				
-			</p>
-		</p>
-	</td>
-</tr>
-#(printStackTrace)#
-<!--
-<tr><td><hr></td></tr>
-<tr>
-	<td>No stacktrace available</td>
-</tr>
--->	
-::
-<tr><td><hr></td></tr>
-<tr>
-	<td>
-		<font color="red"><code>#[stacktrace]#</code></font>
-	</td>
-</tr>
-#(/printStackTrace)#
-<tr><td><hr></td></tr>
-<tr>
-	<td>Generated #[date]# by #[peerName]#.yacy
-	</td>
-</tr>	
-</table>
-
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy: Proxy Message</title>
+  	#%env/templates/metas.template%#
+  </head>
+  <body id="error">
+    <div class="head">
+      <h1 class="head">YaCy - Distributed Web Indexing - Administration</h1>
+    </div>
+    <div class="content">
+      <h2>Problems with request: <span class="settingsValue">#[requestMethod]# #[requestURL]#</span></h2>
+      <p class="tt">#[httpStatus]#</p>
+      #(errorMessageType)#
+      <!-- 0 --><p><strong>unspecified error</strong></p>
+      ::<!-- 1 --><p><strong>not-yet-assigned error</strong></p>
+      ::<!-- 2 --><p><strong>You don't have an active internet connection. Please go online.</strong></p>
+      ::<!-- 3 --><p><strong>Could not load resource. The file is not available.</strong></p>
+      ::<!-- 4 --><p><strong>#[detailedErrorMsg]#</strong></p>
+      ::<!-- 5 -->
+      #%[file]%#
+      #(/errorMessageType)#
+      	
+      #(printStackTrace)#::
+      <hr />
+      <p class="tt error"><em>Exception occured</em>: <strong>#[exception]#</strong></p>
+      <pre class="tt error"><em>TRACE</em>:
+#[stacktrace]#</pre>
+      #(/printStackTrace)#
+      
+      <hr />
+      <p>Generated #[date]# by #[peerName]#.yacy</p>
+    </div>
+  </body>
 </html>

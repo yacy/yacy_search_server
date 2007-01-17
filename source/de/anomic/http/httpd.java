@@ -1149,16 +1149,16 @@ public final class httpd implements serverHandler {
             
             switch (errorcase) {
                 case ERRORCASE_MESSAGE:
-                    tp.put("errorMessageType_detailedErrorMsg",(detailedErrorMsgText==null)?"":detailedErrorMsgText.replaceAll("\n","<br>"));
+                    tp.putASIS("errorMessageType_detailedErrorMsg", (detailedErrorMsgText == null) ? "" : detailedErrorMsgText.replaceAll("\n", "<br />"));
                     break;
                 case ERRORCASE_FILE:
-                    tp.put("errorMessageType_file",(detailedErrorMsgFile==null)?"":detailedErrorMsgFile);
-                    if ((detailedErrorMsgValues != null)&&(detailedErrorMsgValues.size()>0)) {
+                    tp.put("errorMessageType_file", (detailedErrorMsgFile == null) ? "" : detailedErrorMsgFile);
+                    if ((detailedErrorMsgValues != null) && (detailedErrorMsgValues.size() > 0)) {
                         // rewriting the value-names and add the proper name prefix:
                         Iterator nameIter = detailedErrorMsgValues.keySet().iterator();
                         while (nameIter.hasNext()) {
                             String name = (String) nameIter.next();
-                            tp.put("errorMessageType_" + name,detailedErrorMsgValues.get(name));
+                            tp.put("errorMessageType_" + name, detailedErrorMsgValues.get(name));
                         }                        
                     }                    
                     break;
@@ -1169,24 +1169,18 @@ public final class httpd implements serverHandler {
             // building the stacktrace            
             if (stackTrace != null) {  
                 tp.put("printStackTrace",1);
-                
                 serverByteBuffer errorMsg = new serverByteBuffer(100);
-                errorMsg.append("<i>Exception occurred:</i>&nbsp;<b>".getBytes("UTF-8"))
-                        .append(stackTrace.toString().getBytes("UTF-8"))
-                        .append("</b>\r\n\r\n".getBytes("UTF-8"))
-                        .append("</i>TRACE:</i>\r\n".getBytes("UTF-8"));
                 stackTrace.printStackTrace(new PrintStream(errorMsg));
-                errorMsg.append("\r\n".getBytes("UTF-8"));
-                
-                tp.put("printStackTrace_stacktrace",(new String(errorMsg.getBytes(),"UTF-8")).replaceAll("\n","<br>"));
+                tp.put("printStackTrace_exception", stackTrace.toString());
+                tp.put("printStackTrace_stacktrace", new String(errorMsg.getBytes(),"UTF-8"));
             } else {
-                tp.put("printStackTrace",0);
+                tp.put("printStackTrace", 0);
             }
             
             // Generated Tue, 23 Aug 2005 11:19:14 GMT by brain.wg (squid/2.5.STABLE3)
             // adding some system information
             String systemDate = httpc.dateString(httpc.nowDate());
-            tp.put("date",systemDate);
+            tp.put("date", systemDate);
             
             // rewrite the file
             File htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
