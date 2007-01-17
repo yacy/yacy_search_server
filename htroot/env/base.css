@@ -405,6 +405,10 @@ body#QuickCrawlLink p, body#QuickCrawlLink h4 {
   padding:0 5%;
 }
 
+body#Wiki form fieldset p.help{
+	clear:both;
+}
+
 form.PeerControl fieldset { /* on Status.html */
 	text-align:right;
 }
