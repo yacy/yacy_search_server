@@ -82,14 +82,14 @@ public class LogalizerHandler extends Handler {
             File parserDir = new File(new URI(packageURI));
             //System.out.println(parserDir.toString());
             String [] parserDirFiles = parserDir.list(parserNameFilter);
-            if(parserDirFiles == null && enabled) {
+            if(parserDirFiles == null && debug) {
                 System.out.println("Can't find any parsers in "+parserDir.getAbsolutePath());
             }
             //System.out.println(parserDirFiles.length);
             for (int i=0; i<parserDirFiles.length; i++) {
                 String tmp = parserDirFiles[i].substring(0,parserDirFiles[i].indexOf(".class"));
                 Class tempClass = Class.forName(logParserPackage+"."+tmp);
-                if (tempClass.isInterface() && enabled) System.out.println(tempClass.getName() + " is an Interface");
+                if (tempClass.isInterface() && debug) System.out.println(tempClass.getName() + " is an Interface");
                 else {
                     Object theParser = tempClass.newInstance();
                     if (theParser instanceof LogParser) {

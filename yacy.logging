@@ -26,7 +26,8 @@ STACKCRAWL-POOL.level = INFO
 # List of global handlers
 handlers = java.util.logging.FileHandler,\
            de.anomic.server.logging.GuiHandler,\
-           de.anomic.server.logging.ConsoleOutErrHandler
+           de.anomic.server.logging.ConsoleOutErrHandler,\
+           de.anomic.server.logging.LogalizerHandler
 
 # Properties for the FileHandler
 java.util.logging.FileHandler.limit = 1048576
@@ -55,3 +56,7 @@ de.anomic.http.httpdProxyHandler.logging.FileHandler.limit = 1048576
 de.anomic.http.httpdProxyHandler.logging.FileHandler.count = 20
 de.anomic.http.httpdProxyHandler.logging.FileHandler.pattern = DATA/LOG/proxyAccess%u%g.log
 
+# Properties for the LogalizerHandler
+de.anomic.server.logging.LogalizerHandler.enabled = false
+de.anomic.server.logging.LogalizerHandler.debug = false
+de.anomic.server.logging.LogalizerHandler.parserPackage = de.anomic.server.logging.logParsers
