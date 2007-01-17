@@ -168,6 +168,9 @@ public class LogParserPLASMA implements LogParser{
     /** total time needed for storing the results of an indexing - <strong>Integer</strong> */
     public static final String INDEXED_STORE_TIME       = "indexedStorageTime";
     
+    public static final String TOTAL_PARSER_TIME       = "totalParserTime";
+    public static final String TOTAL_PARSER_RUNS       = "totalParserRuns";
+    
     
     private final double parserVersion = 0.1;
     private final String parserType = "PLASMA";
@@ -241,8 +244,11 @@ public class LogParserPLASMA implements LogParser{
     private int indexedParsingTime = 0;
     private int indexedIndexingTime = 0;
     private int indexedStorageTime = 0;
+    private long totalParserTime = 0;
+    private int totalParserRuns = 0;
     
     public int parse(String logLevel, String logLine) {
+        long start = System.currentTimeMillis();
         if (logLevel.equals("INFO")){
             m = i1.matcher (logLine);
             
@@ -389,6 +395,8 @@ public class LogParserPLASMA implements LogParser{
                 return 0;
             }
         }
+        totalParserTime += (System.currentTimeMillis() - start);
+        totalParserRuns++;
         return -1;
     }
 
@@ -433,6 +441,8 @@ public class LogParserPLASMA implements LogParser{
         results.put(INDEXED_PARSE_TIME      , new Integer(indexedParsingTime));
         results.put(INDEXED_INDEX_TIME      , new Integer(indexedIndexingTime));
         results.put(INDEXED_STORE_TIME      , new Integer(indexedStorageTime));
+        results.put(TOTAL_PARSER_TIME      , new Long(totalParserTime));
+        results.put(TOTAL_PARSER_RUNS      , new Integer(totalParserRuns));
         return results;
     }
     
