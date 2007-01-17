@@ -115,8 +115,14 @@ public final class transferURL {
                 
                 // check if entry is well-formed
                 indexURLEntry.Components comp = lEntry.comp();
-                if ((comp.url() == null) || (lEntry.freshdate().getTime() <= freshdate)) {
+                if (comp.url() == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
+                    continue;
+                }
+                
+                // check whether entry is too old
+                if (lEntry.freshdate().getTime() <= freshdate) {
+                    yacyCore.log.logFine("transerURL: received too old URL from peer " + otherPeerName + ": " + lEntry.freshdate());
                     continue;
                 }
                 
