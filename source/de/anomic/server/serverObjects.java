@@ -106,7 +106,7 @@ public class serverObjects extends Hashtable implements Cloneable {
 
     // byte[] variant
     public byte[] put(String key, byte[] value) {
-	return (byte[]) this.put((Object) key, (Object) value);
+	return (byte[]) this.put((Object) key, (Object) value); //TODO: use wikiCode.replaceXMLEntities?!
     }
     
     // string variant
@@ -114,6 +114,9 @@ public class serverObjects extends Hashtable implements Cloneable {
         //return putASIS(key, value);
         return (String)putSafeXML(key, value); //XSS Safe!
     }
+	public byte[] putASIS(String key, byte[] value) {
+		return (byte[]) this.put((Object) key, (Object) value);
+	}
     public String putASIS(Object key, String value) {
         return (String) this.put(key, (Object) value);
         }

@@ -164,19 +164,22 @@ public class ViewProfile {
             String key = ((String) entry.getKey());
             String value = new String();
 
-            // only comments get "wikified"
             // this prevents broken links ending in <br>
-            if (key.equals("comment")) {
-                value = wikiTransformer.transform(((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"));
-            } else { // else only HTML tags get transformed to regular text   
-                value = wikiCode.replaceHTML(((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"));
-            }
+			value=((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n");
 
             //all known Keys which should be set as they are
             if (knownKeys.contains(key)) {
             	if (value.length() > 0) {
             		prop.put("success_" + key, 1);
-            		prop.put("success_" + key + "_value", value);
+					// only comments get "wikified"
+					if(key.equals("comment")){
+						prop.putASIS(
+							"success_" + key + "_value",
+							wikiTransformer.transform(((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"))
+						);
+					}else{
+	            		prop.put("success_" + key + "_value", value); //put replaces HTML Chars by entities.
+					}
             	}
             	//special handling, hide flower if no icq uin is set
             } else if (key.equals("homepage")) {
