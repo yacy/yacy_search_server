@@ -417,7 +417,9 @@ public class bookmarksDB {
         }
     }
     public Bookmark createBookmark(String url){
-        return new Bookmark(url);
+        if (url == null || url.length() == 0) return null;
+        Bookmark bk = new Bookmark(url);
+        return (bk.getUrlHash() == null || bk.getMap() == null) ? null : bk;
     }
     public Iterator tagIterator(boolean up){
         try {
@@ -686,7 +688,7 @@ public class bookmarksDB {
             }else{
                 list=new ArrayList();
             }
-            if(!list.contains(urlHash) && !urlHash.equals("")){
+            if(!list.contains(urlHash) && urlHash != null && !urlHash.equals("")){
                 list.add(urlHash);
             }
             this.mem.put(URL_HASHES, listManager.arraylist2string(list));
