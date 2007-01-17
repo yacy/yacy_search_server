@@ -174,7 +174,6 @@ public class CacheAdmin_p {
                 }
             } catch (Exception e) {
             	prop.put("info_type", NotCached);
-                e.printStackTrace();
             }
         } else {
             prop.put("info", TypeDIR);

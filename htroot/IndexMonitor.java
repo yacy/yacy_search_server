@@ -47,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
@@ -181,7 +182,14 @@ public class IndexMonitor {
                     prop.put("table_indexed_" + cnt + "_moddate", daydate(urle.moddate()));
                     prop.put("table_indexed_" + cnt + "_wordcount", urle.wordCount());
                     prop.put("table_indexed_" + cnt + "_urldescr", comp.descr());
-                    prop.put("table_indexed_" + cnt + "_url", (cachepath == null) ? "-not-cached-" : "<a href=\"CacheAdmin_p.html?action=info&amp;path=" + cachepath + "\" class=\"small\" title=\"" + de.anomic.data.wikiCode.replaceXMLEntities(urlstr) + "\">" + de.anomic.data.wikiCode.replaceXMLEntities(urltxt) + "</a>");
+                    if (cachepath == null) {
+                        prop.put("table_indexed_" + cnt + "_available", 0);
+                    } else {
+                        prop.put("table_indexed_" + cnt + "_available", 1);
+                        prop.put("table_indexed_" + cnt + "_available_cachepath", cachepath);
+                        prop.put("table_indexed_" + cnt + "_available_urltitle", wikiCode.replaceXMLEntities(urlstr));
+                        prop.put("table_indexed_" + cnt + "_available_url", wikiCode.replaceXMLEntities(urltxt));
+                    }
                     dark = !dark;
                     cnt++;
                 } catch (Exception e) {

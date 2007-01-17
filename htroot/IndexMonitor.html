@@ -125,7 +125,13 @@
         <td>#[moddate]#</td>
         <td>#[wordcount]#</td>
         <td>#[urldescr]#</td>
-        <td>#[url]#</td>
+        <td>
+          #(available)#
+            <span class="tt">-not cached-</span>
+          ::
+            <a href="CacheAdmin_p.html?action=info&amp;path=#[cachepath]#" class="small" title="#[urltitle]#">#[url]#</a>
+          #(/available)#
+        </td>
       </tr>
       #{/indexed}#
     </table>
