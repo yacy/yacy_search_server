@@ -139,8 +139,15 @@ public class Surftips {
                 }
                 prop.put("surftips_results_" + i + "_authorized", (authenticated) ? 1 : 0);
                 prop.put("surftips_results_" + i + "_authorized_recommend", (voted) ? 0 : 1);
-                prop.put("surftips_results_" + i + "_authorized_recommend_negativeVoteLink", "/Surftips.html?voteNegative=" + urlhash + "&amp;refid=" + refid + "&amp,display=" + display + ((showScore) ? "&amp;score=" : "")); // for negaive votes, we don't send around the bad url again, the hash is enough
-                prop.put("surftips_results_" + i + "_authorized_recommend_positiveVoteLink", "/Surftips.html?votePositive=" + urlhash + "&amp;refid=" + refid + "&amp;url=" + crypt.simpleEncode(url,null,'b') + "&amp;title=" + crypt.simpleEncode(title,null,'b') + "&amp;description=" + crypt.simpleEncode(description,null,'b') + "&amp;display=" + display + ((showScore) ? "&amp;score=" : ""));
+
+				prop.put("surftips_results_" + i + "_authorized_recommend_urlhash", urlhash);
+				prop.put("surftips_results_" + i + "_authorized_recommend_refid", refid);
+				prop.putASIS("surftips_results_" + i + "_authorized_recommend_url", crypt.simpleEncode(url, null, 'b'));
+				prop.putASIS("surftips_results_" + i + "_authorized_recommend_title", crypt.simpleEncode(title, null, 'b'));
+				prop.putASIS("surftips_results_" + i + "_authorized_recommend_description", crypt.simpleEncode(description, null, 'b'));
+				prop.put("surftips_results_" + i + "_authorized_recommend_display", display);
+				prop.put("surftips_results_" + i + "_authorized_recommend_showScore", (showScore ? 1 : 0));
+
                 prop.put("surftips_results_" + i + "_authorized_urlhash", urlhash);
                 prop.put("surftips_results_" + i + "_url", de.anomic.data.wikiCode.replaceXMLEntities(url));
                 prop.put("surftips_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
