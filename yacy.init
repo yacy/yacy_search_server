@@ -878,3 +878,6 @@ WikiAccess = admin
 # If this profile setting is empty, a hard-coded profile from plasmaSearchRanking is used
 rankingProfile =
 
+#optional extern thumbnail program.
+#the program must accept the invocation PROGRAM http://url /path/to/filename
+thumbnailProgram = 
