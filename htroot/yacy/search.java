@@ -126,12 +126,7 @@ public final class search {
         // prepare search
         final Set keyhashes = plasmaSearchQuery.hashes2Set(query);
         final long timestamp = System.currentTimeMillis();
-        
-        
         serverObjects prop = new serverObjects();
-
-        long timestamp1 = System.currentTimeMillis();
-        
         
         // prepare an abstract result
         StringBuffer indexabstract = new StringBuffer();
@@ -248,6 +243,8 @@ public final class search {
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
         HashMap searchProfile = theSearch.resultProfile();
+        searchProfile.put("resulttime", new Long(System.currentTimeMillis() - timestamp));
+        searchProfile.put("resultcount", new Integer(joincount));
         String client = (String) header.get("CLIENTIP");
         searchProfile.put("host", client);
         sb.remoteSearches.put(trackerHandle, searchProfile);
@@ -305,7 +302,7 @@ public final class search {
         prop.putASIS("fwrec", ""); // peers that would have helped to construct this result (recommendations)
         
         // log
-        yacyCore.log.logInfo("EXIT HASH SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + joincount + " links found, " + prop.get("linkcount", "?") + " links selected, " + ((System.currentTimeMillis() - timestamp1) / 1000) + " seconds");
+        yacyCore.log.logInfo("EXIT HASH SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + joincount + " links found, " + prop.get("linkcount", "?") + " links selected, " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
  
         prop.putASIS("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
 

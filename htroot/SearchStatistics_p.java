@@ -1,4 +1,4 @@
-// SearchStatisticsLocal_p.java
+// SearchStatistics_p.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 14.01.2007 on http://www.anomic.de
 //
@@ -73,7 +73,7 @@ public class SearchStatistics_p {
             if (page <= 2) {
                 prop.put("page_list_" + entCount + "_querywords", new String(a));
             } else {
-                prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.hashSet2hashString((Set) searchProfile.get("queryhashes")));
+                prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes((Set) searchProfile.get("queryhashes")));
             }
             prop.put("page_list_" + entCount + "_querycount", ((Integer) searchProfile.get("querycount")).toString());
             prop.put("page_list_" + entCount + "_querytime", ((Long) searchProfile.get("querytime")).toString());

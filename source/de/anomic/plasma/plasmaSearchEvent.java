@@ -140,6 +140,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // so all search tasks are queued
         synchronized (flushThreads) {
             long start = System.currentTimeMillis();
+            plasmaSearchResult result;
             if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
                 int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
                 if (fetchpeers > 50) fetchpeers = 50;
@@ -208,33 +209,30 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
 
                 // combine the result and order
-                plasmaSearchResult result = orderFinal(rcLocal);
+                result = orderFinal(rcLocal);
                 if (result != null) {
                     result.globalContributions = globalContributions;
 
                     // flush results in a separate thread
                     this.start(); // start to flush results
                 }
-                
-                // return search result
-                log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
-                lastEvent = this;
-                this.searchtime = System.currentTimeMillis() - start;
-                this.searchcount = result.filteredResults;
-                return result;
             } else {
                 Map searchContainerMap = localSearchContainers(null);
                 indexContainer rcLocal = (searchContainerMap == null) ? wordIndex.emptyContainer(null) : localSearchJoin(searchContainerMap.values());
-                plasmaSearchResult result = orderFinal(rcLocal);
+                result = orderFinal(rcLocal);
                 result.globalContributions = 0;
-
-                // return search result
-                log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
-                lastEvent = this;
-                this.searchtime = System.currentTimeMillis() - start;
-                this.searchcount = result.filteredResults;
-                return result;
             }
+
+            // log the event
+            log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
+            
+            // prepare values for statistics
+            lastEvent = this;
+            this.searchtime = System.currentTimeMillis() - start;
+            this.searchcount = result.filteredResults;
+            
+            // return search result
+            return result;
         }
     }
 
