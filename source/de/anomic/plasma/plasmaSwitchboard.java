@@ -2080,7 +2080,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (date == null) return ""; else return DateFormatter.format(date);
     }
     
-    public serverObjects searchFromLocal(plasmaSearchQuery query,
+    public searchResults searchFromLocal(plasmaSearchQuery query,
                                          plasmaSearchRankingProfile ranking,
                                          plasmaSearchTimingProfile  localTiming,
                                          plasmaSearchTimingProfile  remoteTiming,
@@ -2090,7 +2090,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // tell all threads to do nothing for a specific time
         intermissionAllThreads(2 * query.maximumTime);
         
-        serverObjects prop = new serverObjects();
         searchResults results=new searchResults();
         results.setRanking(ranking);
         results.setQuery(query);
@@ -2126,12 +2125,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 results.setFilteredcount(0);
                 results.setOrderedcount(0);
                 results.setLinkcount(0);
-                prop.put("num-results_totalcount", results.getTotalcount());
-                prop.put("num-results_filteredcount", results.getFilteredcount());
-                prop.put("num-results_orderedcount", results.getOrderedcount());
-                prop.put("num-results_linkcount", results.getLinkcount());
-                prop.put("references", 0);
-                prop.put("type_results", 0);
             } else {
                 results.setTotalcount(acc.globalContributions + acc.localContributions);
                 results.setFilteredcount(acc.filteredResults);
@@ -2139,10 +2132,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 results.setGlobalresults(acc.globalContributions);
                 results.setRanking(ranking);
                 
-                prop.put("num-results_totalcount", results.getTotalcount());
-                prop.put("num-results_filteredcount", results.getFilteredcount());
-                prop.put("num-results_orderedcount", Integer.toString(results.getOrderedcount())); //why toString?
-                prop.put("num-results_globalresults", results.getGlobalresults());
                 int i = 0;
                 int p;
                 indexURLEntry urlentry;
@@ -2192,7 +2181,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                          */
                     //addScoreForked(ref, gs, descr.split(" "));
                     //addScoreForked(ref, gs, urlstring.split("/"));
-                    URL wordURL;
                     searchResults.searchResult result=results.createSearchResult();
                     result.setUrl(urlstring);
                     result.setUrlname(urlname);
@@ -2209,33 +2197,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if ((snippet != null) && (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH)) {
                             // suppress line: there is no match in that resource
                         } else {*/
-                            
-
-                            prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", result.getUrl()) == null) ? 1 : 0);
-                            prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + results.getFormerSearch() + "&amp;Enter=Search&amp;count=" + results.getQuery().wantedResults + "&amp;order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&amp;resource=local&amp;time=3&amp;deleteref=" + result.getUrlhash() + "&amp;urlmaskfilter=.*");
-                            prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + results.getFormerSearch() + "&amp;Enter=Search&amp;count=" + results.getQuery().wantedResults + "&amp;order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&amp;resource=local&amp;time=3&amp;recommendref=" + result.getUrlhash() + "&amp;urlmaskfilter=.*");
-                            prop.put("type_results_" + i + "_authorized_urlhash", result.getUrlhash());
-                            prop.put("type_results_" + i + "_description", result.getUrlentry().comp().descr());
-                            prop.put("type_results_" + i + "_url", result.getUrl());
-                            prop.put("type_results_" + i + "_urlhash", result.getUrlhash());
-                            prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(result.getUrlhash()));
-                            prop.put("type_results_" + i + "_urlname", nxTools.shortenURLString(result.getUrlname(), 120));
-                            prop.put("type_results_" + i + "_date", dateString(result.getUrlentry().moddate()));
-                            prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(result.getUrlentry().hash()));
-                            prop.put("type_results_" + i + "_size", Long.toString(result.getUrlentry().size()));
-                            prop.put("type_results_" + i + "_words", URLEncoder.encode(results.getQuery().queryWords.toString(),"UTF-8"));
-                            prop.put("type_results_" + i + "_former", results.getFormerSearch());
-                            prop.put("type_results_" + i + "_rankingprops", result.getUrlentry().word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(result.getUrlhash()) +
-                                    ((plasmaURL.probablyRootURL(result.getUrlhash())) ? ", probablyRootURL" : "") + 
-                                    (((wordURL = plasmaURL.probablyWordURL(urlhash, query.words(""))) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
-                            // adding snippet if available
-                            if (result.hasSnippet()) {
-                                prop.put("type_results_" + i + "_snippet", 1);
-                                prop.putASIS("type_results_" + i + "_snippet_text", result.getSnippet().getLineMarked(query.queryHashes));//FIXME: the ASIS should not be needed, if there is no html in .java
-                            } else {
-                                prop.put("type_results_" + i + "_snippet", 0);
-                                prop.put("type_results_" + i + "_snippet_text", "");
-                            }
                             i++;
                             results.appendResult(result);
                         //}
@@ -2258,6 +2219,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                  **/
                 //Object[] ws = ref.getScores(16, false, 2, Integer.MAX_VALUE);
                 Object[] ws = acc.getReferences(16);
+                results.setReferences(ws);
                 log.logFine("SEARCH TIME AFTER XREF PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
                 
                     /*
@@ -2265,18 +2227,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     for (int ii = 0; ii < ws.length; ii++) System.out.print(ws[ii] + ", ");
                     System.out.println(" all words = " + ref.getElementCount() + ", total count = " + ref.getTotalCount());
                      */
-                prop.put("references", ws);
-                prop.put("num-results_linkcount", Integer.toString(i));
-                prop.put("type_results", Integer.toString(i));
             }
             
             // log
             log.logInfo("EXIT WORD SEARCH: " + query.queryWords + " - " +
-            prop.get("num-results_totalcount", "0") + " links found, " +
-            prop.get("num-results_filteredcount", "0") + " links filtered, " +
-            prop.get("num-results_orderedcount", "0") + " links ordered, " +
-            prop.get("num-results_linkcount", "?") + " links selected, " +
-            ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+                    results.getTotalcount() + " links found, " +
+                    results.getFilteredcount() + " links filtered, " +
+                    results.getOrderedcount() + " links ordered, " +
+                    results.getLinkcount() + " links selected, " +
+                    ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             
             
             // prepare search statistics
@@ -2289,7 +2248,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             handles.add(trackerHandle);
             this.localSearchTracker.put(client, handles);
             
-            return prop;
+            return results;
         } catch (IOException e) {
             return null;
         }

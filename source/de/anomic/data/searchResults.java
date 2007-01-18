@@ -40,6 +40,7 @@ public class searchResults {
     private String formerSearch="";
     private plasmaSearchQuery query=null;
     private ArrayList results=null;
+    private Object[] references=null;
     
     public searchResults(){
         this.results=new ArrayList();
@@ -52,7 +53,18 @@ public class searchResults {
         this.linkcount=linkcount;
     }
     public void appendResult(searchResult result){
+        if (results==null)
+            results=new ArrayList();
         results.add(result);
+    }
+    public int numResults(){
+        if(results==null) return 0;
+        return results.size();
+    }
+    public searchResult getResult(int index){
+        if(results==null || results.size()-1<index)
+            return null;
+        return (searchResult)results.get(index);
     }
     public void setTotalcount(int totalcount) {
         this.totalcount = totalcount;
@@ -104,6 +116,12 @@ public class searchResults {
     }
     public plasmaSearchQuery getQuery() {
         return query;
+    }
+    public void setReferences(Object[] references) {
+        this.references = references;
+    }
+    public Object[] getReferences() {
+        return references;
     }
     public class searchResult{
         private String url="";

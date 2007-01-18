@@ -47,12 +47,16 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import de.anomic.data.searchResults;
 import de.anomic.data.wikiCode;
+import de.anomic.data.searchResults.searchResult;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
@@ -68,13 +72,17 @@ import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
+import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacySeed;
 
 public class yacysearch {
 
@@ -258,7 +266,59 @@ public class yacysearch {
         plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile(contentdomString) : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
         plasmaSearchTimingProfile localTiming = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-        prop = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
+        
+        searchResults results = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
+        //prop=sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
+        prop=new serverObjects();
+        //prop.put("references", 0);
+        URL wordURL=null;
+        prop.put("num-results_totalcount", results.getTotalcount());
+        prop.put("num-results_filteredcount", results.getFilteredcount());
+        prop.put("num-results_orderedcount", results.getOrderedcount());
+        prop.put("num-results_linkcount", results.getLinkcount());
+        prop.put("type_results", 0);
+        if(results.numResults()!=0){
+            //we've got results
+            prop.put("num-results_totalcount", results.getTotalcount());
+            prop.put("num-results_filteredcount", results.getFilteredcount());
+            prop.put("num-results_orderedcount", Integer.toString(results.getOrderedcount())); //why toString?
+            prop.put("num-results_globalresults", results.getGlobalresults());
+            for(int i=0;i<results.numResults();i++){
+                searchResults.searchResult result=results.getResult(i);
+                try {
+                    prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", result.getUrl()) == null) ? 1 : 0);
+                } catch (IOException e) {}
+                prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + results.getFormerSearch() + "&amp;Enter=Search&amp;count=" + results.getQuery().wantedResults + "&amp;order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&amp;resource=local&amp;time=3&amp;deleteref=" + result.getUrlhash() + "&amp;urlmaskfilter=.*");
+                prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + results.getFormerSearch() + "&amp;Enter=Search&amp;count=" + results.getQuery().wantedResults + "&amp;order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&amp;resource=local&amp;time=3&amp;recommendref=" + result.getUrlhash() + "&amp;urlmaskfilter=.*");
+                prop.put("type_results_" + i + "_authorized_urlhash", result.getUrlhash());
+                prop.put("type_results_" + i + "_description", result.getUrlentry().comp().descr());
+                prop.put("type_results_" + i + "_url", result.getUrl());
+                prop.put("type_results_" + i + "_urlhash", result.getUrlhash());
+                prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(result.getUrlhash()));
+                prop.put("type_results_" + i + "_urlname", nxTools.shortenURLString(result.getUrlname(), 120));
+                prop.put("type_results_" + i + "_date", plasmaSwitchboard.dateString(result.getUrlentry().moddate()));
+                prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(result.getUrlentry().hash()));
+                prop.put("type_results_" + i + "_size", Long.toString(result.getUrlentry().size()));
+                try {
+                    prop.put("type_results_" + i + "_words", URLEncoder.encode(results.getQuery().queryWords.toString(),"UTF-8"));
+                } catch (UnsupportedEncodingException e) {}
+                prop.put("type_results_" + i + "_former", results.getFormerSearch());
+                prop.put("type_results_" + i + "_rankingprops", result.getUrlentry().word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(result.getUrlhash()) +
+                        ((plasmaURL.probablyRootURL(result.getUrlhash())) ? ", probablyRootURL" : "") + 
+                        (((wordURL = plasmaURL.probablyWordURL(result.getUrlhash(), results.getQuery().words(""))) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
+                // adding snippet if available
+                if (result.hasSnippet()) {
+                    prop.put("type_results_" + i + "_snippet", 1);
+                    prop.putASIS("type_results_" + i + "_snippet_text", result.getSnippet().getLineMarked(results.getQuery().queryHashes));//FIXME: the ASIS should not be needed, if there is no html in .java
+                } else {
+                    prop.put("type_results_" + i + "_snippet", 0);
+                    prop.put("type_results_" + i + "_snippet_text", "");
+                }
+                prop.put("type_results", results.numResults());
+                prop.put("references", results.getReferences());
+                prop.put("num-results_linkcount", Integer.toString(results.numResults()));
+            }
+        }
 
         // remember the last search expression
         env.setConfig("last-search", querystring + contentdomString);
