@@ -126,6 +126,7 @@ import de.anomic.data.blogBoard;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.messageBoard;
+import de.anomic.data.searchResults;
 import de.anomic.data.userDB;
 import de.anomic.data.wikiBoard;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -2090,10 +2091,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         intermissionAllThreads(2 * query.maximumTime);
         
         serverObjects prop = new serverObjects();
+        searchResults results=new searchResults();
+        results.setRanking(ranking);
+        results.setQuery(query);
+        results.setFormerSearch("");
         try {
             // filter out words that appear in bluelist
             //log.logInfo("E");
             query.filterOut(blueList);
+            results.setQuery(query);
             
             // log
             log.logInfo("INIT WORD SEARCH: " + query.queryWords + ":" + query.queryHashes + " - " + query.wantedResults + " links, " + (query.maximumTime / 1000) + " seconds");
@@ -2116,26 +2122,35 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // result is a List of urlEntry elements: prepare answer
             if (acc == null) {
-                prop.put("num-results_totalcount", 0);
-                prop.put("num-results_filteredcount", 0);
-                prop.put("num-results_orderedcount", 0);
-                prop.put("num-results_linkcount", 0);
+                results.setTotalcount(0);
+                results.setFilteredcount(0);
+                results.setOrderedcount(0);
+                results.setLinkcount(0);
+                prop.put("num-results_totalcount", results.getTotalcount());
+                prop.put("num-results_filteredcount", results.getFilteredcount());
+                prop.put("num-results_orderedcount", results.getOrderedcount());
+                prop.put("num-results_linkcount", results.getLinkcount());
                 prop.put("references", 0);
                 prop.put("type_results", 0);
             } else {
-                prop.put("num-results_totalcount", acc.globalContributions + acc.localContributions);
-                prop.put("num-results_filteredcount", acc.filteredResults);
-                prop.put("num-results_orderedcount", Integer.toString(acc.sizeOrdered()));
-                prop.put("num-results_globalresults", acc.globalContributions);
+                results.setTotalcount(acc.globalContributions + acc.localContributions);
+                results.setFilteredcount(acc.filteredResults);
+                results.setOrderedcount(acc.sizeOrdered());
+                results.setGlobalresults(acc.globalContributions);
+                results.setRanking(ranking);
+                
+                prop.put("num-results_totalcount", results.getTotalcount());
+                prop.put("num-results_filteredcount", results.getFilteredcount());
+                prop.put("num-results_orderedcount", Integer.toString(results.getOrderedcount())); //why toString?
+                prop.put("num-results_globalresults", results.getGlobalresults());
                 int i = 0;
                 int p;
                 indexURLEntry urlentry;
                 String urlstring, urlname, filename, urlhash;
                 String host, hash, address;
                 yacySeed seed;
-                plasmaSnippetCache.TextSnippet snippet;
                 boolean includeSnippets = false;
-                String formerSearch = query.words(" ");
+                results.setFormerSearch(query.words(" "));
                 long targetTime = timestamp + query.maximumTime;
                 if (targetTime < System.currentTimeMillis()) targetTime = System.currentTimeMillis() + 1000;
                 while ((acc.hasMoreElements()) && (i < query.wantedResults) && (System.currentTimeMillis() < targetTime)) {
@@ -2178,42 +2193,51 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     //addScoreForked(ref, gs, descr.split(" "));
                     //addScoreForked(ref, gs, urlstring.split("/"));
                     URL wordURL;
-                    if (urlstring.matches(query.urlMask)) { //.* is default
+                    searchResults.searchResult result=results.createSearchResult();
+                    result.setUrl(urlstring);
+                    result.setUrlname(urlname);
+                    result.setUrlentry(urlentry);
+                    if (urlstring.matches(results.getQuery().urlMask)) { //.* is default
                         if (includeSnippets) {
-                            snippet = snippetCache.retrieveTextSnippet(comp.url(), query.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
+                            result.setSnippet(snippetCache.retrieveTextSnippet(comp.url(), results.getQuery().queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000));
+                            //snippet = snippetCache.retrieveTextSnippet(comp.url(), query.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
                         } else {
-                            snippet = null;
+                            //snippet = null;
+                            result.setSnippet(null);
                         }
                         /*
                         if ((snippet != null) && (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH)) {
                             // suppress line: there is no match in that resource
                         } else {*/
-                            prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", urlstring) == null) ? 1 : 0);
-                            prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + formerSearch + "&amp;Enter=Search&amp;count=" + query.wantedResults + "&amp;order=" + crypt.simpleEncode(ranking.toExternalString()) + "&amp;resource=local&amp;time=3&amp;deleteref=" + urlhash + "&amp;urlmaskfilter=.*");
-                            prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + formerSearch + "&amp;Enter=Search&amp;count=" + query.wantedResults + "&amp;order=" + crypt.simpleEncode(ranking.toExternalString()) + "&amp;resource=local&amp;time=3&amp;recommendref=" + urlhash + "&amp;urlmaskfilter=.*");
-                            prop.put("type_results_" + i + "_authorized_urlhash", urlhash);
-                            prop.put("type_results_" + i + "_description", comp.descr());
-                            prop.put("type_results_" + i + "_url", urlstring);
-                            prop.put("type_results_" + i + "_urlhash", urlhash);
-                            prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(urlhash));
-                            prop.put("type_results_" + i + "_urlname", nxTools.shortenURLString(urlname, 120));
-                            prop.put("type_results_" + i + "_date", dateString(urlentry.moddate()));
-                            prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(urlentry.hash()));
-                            prop.put("type_results_" + i + "_size", Long.toString(urlentry.size()));
-                            prop.put("type_results_" + i + "_words", URLEncoder.encode(query.queryWords.toString(),"UTF-8"));
-                            prop.put("type_results_" + i + "_former", formerSearch);
-                            prop.put("type_results_" + i + "_rankingprops", urlentry.word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(urlhash) +
-                                    ((plasmaURL.probablyRootURL(urlhash)) ? ", probablyRootURL" : "") + 
+                            
+
+                            prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", result.getUrl()) == null) ? 1 : 0);
+                            prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + results.getFormerSearch() + "&amp;Enter=Search&amp;count=" + results.getQuery().wantedResults + "&amp;order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&amp;resource=local&amp;time=3&amp;deleteref=" + result.getUrlhash() + "&amp;urlmaskfilter=.*");
+                            prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + results.getFormerSearch() + "&amp;Enter=Search&amp;count=" + results.getQuery().wantedResults + "&amp;order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&amp;resource=local&amp;time=3&amp;recommendref=" + result.getUrlhash() + "&amp;urlmaskfilter=.*");
+                            prop.put("type_results_" + i + "_authorized_urlhash", result.getUrlhash());
+                            prop.put("type_results_" + i + "_description", result.getUrlentry().comp().descr());
+                            prop.put("type_results_" + i + "_url", result.getUrl());
+                            prop.put("type_results_" + i + "_urlhash", result.getUrlhash());
+                            prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(result.getUrlhash()));
+                            prop.put("type_results_" + i + "_urlname", nxTools.shortenURLString(result.getUrlname(), 120));
+                            prop.put("type_results_" + i + "_date", dateString(result.getUrlentry().moddate()));
+                            prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(result.getUrlentry().hash()));
+                            prop.put("type_results_" + i + "_size", Long.toString(result.getUrlentry().size()));
+                            prop.put("type_results_" + i + "_words", URLEncoder.encode(results.getQuery().queryWords.toString(),"UTF-8"));
+                            prop.put("type_results_" + i + "_former", results.getFormerSearch());
+                            prop.put("type_results_" + i + "_rankingprops", result.getUrlentry().word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(result.getUrlhash()) +
+                                    ((plasmaURL.probablyRootURL(result.getUrlhash())) ? ", probablyRootURL" : "") + 
                                     (((wordURL = plasmaURL.probablyWordURL(urlhash, query.words(""))) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
                             // adding snippet if available
-                            if ((snippet != null) && (snippet.exists())) {
+                            if (result.hasSnippet()) {
                                 prop.put("type_results_" + i + "_snippet", 1);
-                                prop.putASIS("type_results_" + i + "_snippet_text", snippet.getLineMarked(query.queryHashes));//FIXME: the ASIS should not be needed, if there is no html in .java
+                                prop.putASIS("type_results_" + i + "_snippet_text", result.getSnippet().getLineMarked(query.queryHashes));//FIXME: the ASIS should not be needed, if there is no html in .java
                             } else {
                                 prop.put("type_results_" + i + "_snippet", 0);
                                 prop.put("type_results_" + i + "_snippet_text", "");
                             }
                             i++;
+                            results.appendResult(result);
                         //}
                     }
                 }

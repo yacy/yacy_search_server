@@ -5,6 +5,8 @@ version 0.50
 	* UPDATED: Result Ranking
 	* UPDATED: Crawl Monitor
 	* CHANGED: Migrated to the new Database Structure
+	* ADDED: XSS protection for all pages as default.
+	* ADDED: searchResults structure.
 
 version 0.49
 	* CHANGED: New Database Structure for Index and URL Storage
