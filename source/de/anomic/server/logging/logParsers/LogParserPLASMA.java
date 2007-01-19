@@ -168,7 +168,7 @@ public class LogParserPLASMA implements LogParser{
     /** total time needed for storing the results of an indexing - <strong>Integer</strong> */
     public static final String INDEXED_STORE_TIME       = "indexedStorageTime";
     
-    /** accumulated time needed to parse the log entries up to now (in ns)*/
+    /** accumulated time needed to parse the log entries up to now (in ms)*/
     public static final String TOTAL_PARSER_TIME        = "totalParserTime";
     
     /** times the parser was called, respectively amount of independant log-lines */
@@ -251,7 +251,7 @@ public class LogParserPLASMA implements LogParser{
     private int totalParserRuns = 0;
     
     public int parse(String logLevel, String logLine) {
-        long start = System.nanoTime();
+        long start = System.currentTimeMillis();
         if (logLevel.equals("INFO")){
             m = i1.matcher (logLine);
             
@@ -260,7 +260,7 @@ public class LogParserPLASMA implements LogParser{
                 urlSum += Integer.parseInt(m.group(1));
                 urlTimeSum += Integer.parseInt(m.group(2));
                 blockedURLSum += Integer.parseInt(m.group(3));
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -272,7 +272,7 @@ public class LogParserPLASMA implements LogParser{
                 rwiTimeSum += Integer.parseInt(m.group(3));
                 urlReqSum += Integer.parseInt(m.group(4));
                 blockedRWISum += Integer.parseInt(m.group(6));
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -284,7 +284,7 @@ public class LogParserPLASMA implements LogParser{
                 rwiTimeSum += Integer.parseInt(m.group(3));
                 urlReqSum += Integer.parseInt(m.group(4));
                 blockedRWISum += Integer.parseInt(m.group(6));
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -294,7 +294,7 @@ public class LogParserPLASMA implements LogParser{
                 DHTSendTraffic += Integer.parseInt(m.group(6));
                 DHTPeerNames.add(m.group(2));
                 DHTPeerHashs.add(m.group(3));
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -305,7 +305,7 @@ public class LogParserPLASMA implements LogParser{
                 DHTSendURLs += Integer.parseInt(m.group(3));
                 DHTPeerNames.add(m.group(4));
                 DHTPeerHashs.add(m.group(5));
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -316,7 +316,7 @@ public class LogParserPLASMA implements LogParser{
                 maxDHTDist = Math.max(maxDHTDist, Double.parseDouble(m.group(3)));
                 avgDHTDist += Double.parseDouble(m.group(3));
                 DHTSelectionTargetCount++;
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -326,14 +326,14 @@ public class LogParserPLASMA implements LogParser{
                 RWIRejectPeerNames.add(m.group(2));
                 RWIRejectPeerHashs.add(m.group(1));
                 RWIRejectCount++;
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
             m = i7.matcher (logLine);
             
             if (m.find ()) {
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -342,7 +342,7 @@ public class LogParserPLASMA implements LogParser{
             if (m.find ()) {
                 DHTSelectionWordsCount += Double.parseDouble(m.group(1));
                 DHTSelectionWordsTimeCount += Double.parseDouble(m.group(2));
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -351,7 +351,7 @@ public class LogParserPLASMA implements LogParser{
             if (m.find ()) {
                 rankingDistributionCount++;
                 rankingDistributionTime += Integer.parseInt(m.group(1));
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -359,7 +359,7 @@ public class LogParserPLASMA implements LogParser{
             
             if (m.find ()) {
                 rankingDistributionFailCount++;
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -367,7 +367,7 @@ public class LogParserPLASMA implements LogParser{
             
             if (m.find ()) {
                 busyPeerCount++;
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -379,7 +379,7 @@ public class LogParserPLASMA implements LogParser{
             m = i13.matcher (logLine);
             
             if (m.find ()) {
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -394,7 +394,7 @@ public class LogParserPLASMA implements LogParser{
                 indexedParsingTime += Integer.parseInt(m.group(8));
                 indexedIndexingTime += Integer.parseInt(m.group(9));
                 indexedStorageTime += Integer.parseInt(m.group(10));
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -404,7 +404,7 @@ public class LogParserPLASMA implements LogParser{
             
             if (m.find ()) {
                 notEnoughDHTPeers++;
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -412,7 +412,7 @@ public class LogParserPLASMA implements LogParser{
             
             if (m.find ()) {
                 failedIndexDistributionCount++;
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -422,7 +422,7 @@ public class LogParserPLASMA implements LogParser{
             if (m.find ()) {
                 if (m.group(1).equals("leftchild")) leftChildTwiceCount++;
                 else if (m.group(1).equals("rightchild")) rightChildTwiceCount++;
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
@@ -430,12 +430,12 @@ public class LogParserPLASMA implements LogParser{
             
             if (m.find ()) {
                 malformedURLCount++;
-                totalParserTime += (System.nanoTime() - start);
+                totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
             }
         }
-        totalParserTime += (System.nanoTime() - start);
+        totalParserTime += (System.currentTimeMillis() - start);
         totalParserRuns++;
         return -1;
     }
