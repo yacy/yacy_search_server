@@ -58,7 +58,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.net.URL;
 import de.anomic.server.serverCodings;
 
-public final class plasmaSearchResult {
+public final class plasmaSearchPostOrder {
     
     private TreeMap pageAcc;            // key = order hash; value = plasmaLURL.entry
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
@@ -69,7 +69,7 @@ public final class plasmaSearchResult {
     public  int localContributions;
     public  int filteredResults;
     
-    public plasmaSearchResult(plasmaSearchQuery query, plasmaSearchRankingProfile ranking) {
+    public plasmaSearchPostOrder(plasmaSearchQuery query, plasmaSearchRankingProfile ranking) {
         this.pageAcc = new TreeMap();
         this.ref = new kelondroMScoreCluster();
         this.results = new ArrayList();
@@ -80,9 +80,9 @@ public final class plasmaSearchResult {
         this.filteredResults = 0;
     }
     
-    public plasmaSearchResult cloneSmart() {
+    public plasmaSearchPostOrder cloneSmart() {
         // clones only the top structure
-        plasmaSearchResult theClone = new plasmaSearchResult(this.query, this.ranking);
+        plasmaSearchPostOrder theClone = new plasmaSearchPostOrder(this.query, this.ranking);
         theClone.pageAcc = (TreeMap) this.pageAcc.clone();
         theClone.ref = this.ref;
         theClone.results = this.results;
@@ -107,7 +107,7 @@ public final class plasmaSearchResult {
         return (indexURLEntry) pageAcc.remove(top);
     }
     
-    protected void addResult(indexURLEntry page, Long preranking) {
+    protected void addPage(indexURLEntry page, Long preranking) {
         
         // take out relevant information for reference computation
         indexURLEntry.Components comp = page.comp();
@@ -123,7 +123,7 @@ public final class plasmaSearchResult {
         addScoreFiltered(descrcomps);
     }
     
-    protected void sortResults(boolean postsort) {
+    protected void sortPages(boolean postsort) {
         // finally sort the results
         
         // create a commonSense - set that represents a set of words that is

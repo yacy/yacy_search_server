@@ -1,6 +1,6 @@
-//plasmaSearchResults.java - a container for searchresults.
-//----------------------------------------------------------
-//part of YaCy
+// plasmaSearchResults.java - a container for search results
+// ---------------------------------------------------------
+// part of YaCy
 //
 // (C) 2007 by Alexander Schier
 //
@@ -21,16 +21,12 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.data;
+package de.anomic.plasma;
 import java.util.ArrayList;
-import java.util.Date;
 
 import de.anomic.index.indexURLEntry;
-import de.anomic.plasma.plasmaSearchQuery;
-import de.anomic.plasma.plasmaSearchRankingProfile;
-import de.anomic.plasma.plasmaSnippetCache;
 
-public class searchResults {
+public class plasmaSearchResults {
     private int totalcount=0;
     private int filteredcount=0;
     private int orderedcount=0;
@@ -42,10 +38,10 @@ public class searchResults {
     private ArrayList results=null;
     private Object[] references=null;
     
-    public searchResults(){
+    public plasmaSearchResults(){
         this.results=new ArrayList();
     }
-    public searchResults(int totalcount, int filteredcount, int orderedcount, int linkcount){
+    public plasmaSearchResults(int totalcount, int filteredcount, int orderedcount, int linkcount){
         this.results=new ArrayList();
         this.totalcount=totalcount;
         this.filteredcount=filteredcount;

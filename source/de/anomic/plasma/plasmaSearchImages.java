@@ -99,7 +99,7 @@ public final class plasmaSearchImages {
         }
     }
     
-    public plasmaSearchImages(plasmaSnippetCache sc, long maxTime, plasmaSearchResult sres, int depth) {
+    public plasmaSearchImages(plasmaSnippetCache sc, long maxTime, plasmaSearchPostOrder sres, int depth) {
         long start = System.currentTimeMillis();
         this.images = new TreeSet();
         indexURLEntry urlentry;

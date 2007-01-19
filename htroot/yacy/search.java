@@ -62,7 +62,7 @@ import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
-import de.anomic.plasma.plasmaSearchResult;
+import de.anomic.plasma.plasmaSearchPostOrder;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -131,7 +131,7 @@ public final class search {
         // prepare an abstract result
         StringBuffer indexabstract = new StringBuffer();
         int joincount = 0;
-        plasmaSearchResult acc = null;
+        plasmaSearchPostOrder acc = null;
         plasmaSearchQuery squery = null;
         plasmaSearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {

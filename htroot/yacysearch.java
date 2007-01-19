@@ -54,9 +54,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import de.anomic.data.searchResults;
 import de.anomic.data.wikiCode;
-import de.anomic.data.searchResults.searchResult;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
@@ -73,6 +71,7 @@ import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.plasmaSearchResults;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -267,7 +266,7 @@ public class yacysearch {
         plasmaSearchTimingProfile localTiming = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         
-        searchResults results = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
+        plasmaSearchResults results = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
         //prop=sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
         prop=new serverObjects();
         //prop.put("references", 0);
@@ -284,7 +283,7 @@ public class yacysearch {
             prop.put("num-results_orderedcount", Integer.toString(results.getOrderedcount())); //why toString?
             prop.put("num-results_globalresults", results.getGlobalresults());
             for(int i=0;i<results.numResults();i++){
-                searchResults.searchResult result=results.getResult(i);
+                plasmaSearchResults.searchResult result=results.getResult(i);
                 try {
                     prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", result.getUrl()) == null) ? 1 : 0);
                 } catch (IOException e) {}

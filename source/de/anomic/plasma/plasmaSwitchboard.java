@@ -110,7 +110,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -126,7 +125,6 @@ import de.anomic.data.blogBoard;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.messageBoard;
-import de.anomic.data.searchResults;
 import de.anomic.data.userDB;
 import de.anomic.data.wikiBoard;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -160,7 +158,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
-import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -2080,7 +2077,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (date == null) return ""; else return DateFormatter.format(date);
     }
     
-    public searchResults searchFromLocal(plasmaSearchQuery query,
+    public plasmaSearchResults searchFromLocal(plasmaSearchQuery query,
                                          plasmaSearchRankingProfile ranking,
                                          plasmaSearchTimingProfile  localTiming,
                                          plasmaSearchTimingProfile  remoteTiming,
@@ -2090,7 +2087,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // tell all threads to do nothing for a specific time
         intermissionAllThreads(2 * query.maximumTime);
         
-        searchResults results=new searchResults();
+        plasmaSearchResults results=new plasmaSearchResults();
         results.setRanking(ranking);
         results.setQuery(query);
         results.setFormerSearch("");
@@ -2113,7 +2110,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // create a new search event
             plasmaSearchEvent theSearch = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, postsort, log, wordIndex, wordIndex.loadedURL, snippetCache);
-            plasmaSearchResult acc = theSearch.search();
+            plasmaSearchPostOrder acc = theSearch.search();
             
             // fetch snippets
             //if (query.domType != plasmaSearchQuery.SEARCHDOM_GLOBALDHT) snippetCache.fetch(acc.cloneSmart(), query.queryHashes, query.urlMask, 10, 1000);
@@ -2181,7 +2178,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                          */
                     //addScoreForked(ref, gs, descr.split(" "));
                     //addScoreForked(ref, gs, urlstring.split("/"));
-                    searchResults.searchResult result=results.createSearchResult();
+                    plasmaSearchResults.searchResult result=results.createSearchResult();
                     result.setUrl(urlstring);
                     result.setUrlname(urlname);
                     result.setUrlentry(urlentry);

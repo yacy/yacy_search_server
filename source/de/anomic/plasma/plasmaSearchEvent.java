@@ -133,14 +133,14 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         return r;
     }
     
-    public plasmaSearchResult search() {
+    public plasmaSearchPostOrder search() {
         // combine all threads
         
         // we synchronize with flushThreads to allow only one local search at a time,
         // so all search tasks are queued
         synchronized (flushThreads) {
             long start = System.currentTimeMillis();
-            plasmaSearchResult result;
+            plasmaSearchPostOrder result;
             if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
                 int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
                 if (fetchpeers > 50) fetchpeers = 50;
@@ -364,7 +364,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         return rcLocal;
     }
     
-    public plasmaSearchResult orderFinal(indexContainer rcLocal) {
+    public plasmaSearchPostOrder orderFinal(indexContainer rcLocal) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
@@ -391,7 +391,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         System.out.println("DEBUG: postorder-final (urlfetch) maxtime = " + postorderTime);
         long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : (System.currentTimeMillis() + postorderTime);
         profileLocal.startTimer();
-        plasmaSearchResult acc = new plasmaSearchResult(query, ranking);
+        plasmaSearchPostOrder acc = new plasmaSearchPostOrder(query, ranking);
         
         indexRWIEntryNew entry;
         indexURLEntry page;
@@ -417,12 +417,12 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                         Iterator wi = query.queryHashes.iterator();
                         while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
                     } else if (query.contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) {
-                        if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (page.laudio() > 0)) acc.addResult(page, preranking);
-                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (page.lvideo() > 0)) acc.addResult(page, preranking);
-                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (page.limage() > 0)) acc.addResult(page, preranking);
-                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP) && (page.lapp() > 0)) acc.addResult(page, preranking);
+                        if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (page.laudio() > 0)) acc.addPage(page, preranking);
+                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (page.lvideo() > 0)) acc.addPage(page, preranking);
+                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (page.limage() > 0)) acc.addPage(page, preranking);
+                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP) && (page.lapp() > 0)) acc.addPage(page, preranking);
                     } else {
-                        acc.addResult(page, preranking);
+                        acc.addPage(page, preranking);
                     }
                 }
             }
@@ -434,7 +434,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
         // start postsorting
         profileLocal.startTimer();
-        acc.sortResults(postsort);
+        acc.sortPages(postsort);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_POSTSORT, acc.sizeOrdered());
         
