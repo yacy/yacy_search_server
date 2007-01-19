@@ -9,8 +9,10 @@
 	<div class="SubMenu">
     <h3>Seach Statistics Menu</h3>
     <ul class="SubMenu">
-      <li><a href="/SearchStatistics_p.html?page=1" class="MenuItemLink lock">Local&nbsp;Searches</a></li>
-      <li><a href="/SearchStatistics_p.html?page=3" class="MenuItemLink lock">Remote&nbsp;Searches</a></li>
+      <li><a href="/SearchStatistics_p.html?page=1" class="MenuItemLink lock">Local&nbsp;Search&nbsp;Log</a></li>
+      <li><a href="/SearchStatistics_p.html?page=2" class="MenuItemLink lock">Local&nbsp;Search&nbsp;Host&nbsp;Tracker</a></li>
+      <li><a href="/SearchStatistics_p.html?page=3" class="MenuItemLink lock">Remote&nbsp;Search&nbsp;Log</a></li>
+      <li><a href="/SearchStatistics_p.html?page=4" class="MenuItemLink lock">Remote&nbsp;Search&nbsp;Host&nbsp;Tracker</a></li>
     </ul>
     </div>
     #(page)#
@@ -27,6 +29,7 @@
       <tr class="TableHeader">
         <td>Requesting Host</td>
         <td>Date</td>
+        <td>Offset</td>
         <td>Expected Results</td>
         <td>Returned Results</td>
         <td>Expected Time</td>
@@ -37,6 +40,7 @@
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
         <td>#[host]#</td>
         <td>#[date]#</td>
+        <td>#[offset]#</td>
         <td>#[querycount]#</td>
         <td>#[resultcount]#</td>
         <td>#[querytime]#</td>
@@ -46,6 +50,23 @@
       #{/list}#
     </table>
     ::
+    <h2>Search Statistics: Local Searche Tracker</h2>
+    <p>This is a list of searches that had been requested from this' peer search interface</p>
+    <p>Showing #[num]# entries from a total of #[total]# Requests.</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td>Requesting Host</td>
+        <td>Count</td>
+        <td>Access Dates</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[count]#</td>
+        <td>#[dates]#</td>
+      </tr>
+      #{/list}#
+    </table>
     ::
     <h2>Search Statistics: Remote Searches</h2>
     <p>This is a list of searches that had been requested from remote peer search interface</p>
@@ -53,6 +74,7 @@
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
         <td>Requesting Host</td>
+        <td>Peer Name</td>
         <td>Date</td>
         <td>Expected Results</td>
         <td>Returned Results</td>
@@ -63,12 +85,31 @@
       #{list}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
         <td>#[host]#</td>
+        <td>#[peername]#</td>
         <td>#[date]#</td>
         <td>#[querycount]#</td>
         <td>#[resultcount]#</td>
         <td>#[querytime]#</td>
         <td>#[resulttime]#</td>
         <td>#[queryhashes]#</td>
+      </tr>
+      #{/list}#
+    </table>
+    ::
+    <h2>Search Statistics: Remote Searche Tracker</h2>
+    <p>This is a list of searches that had been requested from remote peer search interface</p>
+    <p>Showing #[num]# entries from a total of #[total]# Requests.</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td>Requesting Host</td>
+        <td>Count</td>
+        <td>Access Dates</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[count]#</td>
+        <td>#[dates]#</td>
       </tr>
       #{/list}#
     </table>

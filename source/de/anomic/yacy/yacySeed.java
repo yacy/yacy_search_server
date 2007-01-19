@@ -64,7 +64,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -362,21 +361,7 @@ public class yacySeed {
 
     public final InetAddress getInetAddress() {
         // returns the ip address
-        String ip = (String) this.dna.get(yacySeed.IP);
-        if (ip == null) return null;
-        if (ip.length() < 8) return null;
-        String[] ips = ip.split("\\.");
-        if (ips.length != 4) return null;
-        byte[] ipb = new byte[4];
-        ipb[0] = (byte) Integer.parseInt(ips[0]);
-        ipb[1] = (byte) Integer.parseInt(ips[1]);
-        ipb[2] = (byte) Integer.parseInt(ips[2]);
-        ipb[3] = (byte) Integer.parseInt(ips[3]);
-        try {
-            return InetAddress.getByAddress(ipb);
-        } catch (UnknownHostException e) {
-            return null;
-        }
+        return natLib.getInetAddress((String) this.dna.get(yacySeed.IP));
     }
     
     public final int getPort() {

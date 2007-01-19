@@ -2239,6 +2239,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             Long trackerHandle = new Long(System.currentTimeMillis());
             HashMap searchProfile = theSearch.resultProfile();
             searchProfile.put("host", client);
+            searchProfile.put("offset", new Integer(0));
+            searchProfile.put("results", results);
             this.localSearches.put(trackerHandle, searchProfile);
             TreeSet handles = (TreeSet) this.localSearchTracker.get(client);
             if (handles == null) handles = new TreeSet();

@@ -56,6 +56,7 @@ import java.util.TreeSet;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.index.indexContainer;
+import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaCondenser;
@@ -247,6 +248,8 @@ public final class search {
         searchProfile.put("resultcount", new Integer(joincount));
         String client = (String) header.get("CLIENTIP");
         searchProfile.put("host", client);
+        yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
+        searchProfile.put("peername", (remotepeer == null) ? "unknown" : remotepeer.getName());
         sb.remoteSearches.put(trackerHandle, searchProfile);
         TreeSet handles = (TreeSet) sb.remoteSearchTracker.get(client);
         if (handles == null) handles = new TreeSet();

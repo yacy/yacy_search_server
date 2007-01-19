@@ -45,6 +45,7 @@
 package de.anomic.net;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import de.anomic.http.httpc;
@@ -142,6 +143,23 @@ public class natLib {
         if (ip == null) return false;
         if (ip.indexOf(":") >= 0) return false; // ipv6...
         return (isNotLocal(ip)) && (isIP(ip));
+    }
+    
+    public static final InetAddress getInetAddress(String ip) {
+        if (ip == null) return null;
+        if (ip.length() < 8) return null;
+        String[] ips = ip.split("\\.");
+        if (ips.length != 4) return null;
+        byte[] ipb = new byte[4];
+        ipb[0] = (byte) Integer.parseInt(ips[0]);
+        ipb[1] = (byte) Integer.parseInt(ips[1]);
+        ipb[2] = (byte) Integer.parseInt(ips[2]);
+        ipb[3] = (byte) Integer.parseInt(ips[3]);
+        try {
+            return InetAddress.getByAddress(ipb);
+        } catch (UnknownHostException e) {
+            return null;
+        }
     }
 
     private static int retrieveOptions() {

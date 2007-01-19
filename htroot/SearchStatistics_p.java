@@ -29,12 +29,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
 
 public class SearchStatistics_p {
  
@@ -50,42 +52,72 @@ public class SearchStatistics_p {
         int maxCount = 100;
         int entCount = 0;
         boolean dark = true;
-        Iterator i = (page <= 2) ? switchboard.localSearches.entrySet().iterator() : switchboard.remoteSearches.entrySet().iterator() ;
         Map.Entry entry;
-        Long trackerHandle;
-        HashMap searchProfile;
-        StringBuffer a = null;
-        while ((entCount < maxCount) && (i.hasNext())) {
-            entry = (Map.Entry) i.next();
-            trackerHandle = (Long) entry.getKey();
-            searchProfile = (HashMap) entry.getValue();
+        if ((page == 1) || (page == 3)) {
+            Iterator i = (page == 1) ? switchboard.localSearches.entrySet().iterator() : switchboard.remoteSearches.entrySet().iterator();
+            Long trackerHandle;
+            HashMap searchProfile;
+            StringBuffer a = null;
+            while ((entCount < maxCount) && (i.hasNext())) {
+                entry = (Map.Entry) i.next();
+                trackerHandle = (Long) entry.getKey();
+                searchProfile = (HashMap) entry.getValue();
          
-            if (page <= 2) {
-                Iterator wi = ((Set) searchProfile.get("querywords")).iterator();
-                a = new StringBuffer();
-                while (wi.hasNext()) a.append((String) wi.next()).append(' ');
-            }
+                if (page == 1) {
+                    Iterator wi = ((Set) searchProfile.get("querywords")).iterator();
+                    a = new StringBuffer();
+                    while (wi.hasNext()) a.append((String) wi.next()).append(' ');
+                }
             
-            // put values in template
-            prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
-            prop.put("page_list_" + entCount + "_host", (String) searchProfile.get("host"));
-            prop.put("page_list_" + entCount + "_date", (new Date(trackerHandle.longValue())).toString());
-            if (page <= 2) {
-                prop.put("page_list_" + entCount + "_querywords", new String(a));
-            } else {
-                prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes((Set) searchProfile.get("queryhashes")));
-            }
-            prop.put("page_list_" + entCount + "_querycount", ((Integer) searchProfile.get("querycount")).toString());
-            prop.put("page_list_" + entCount + "_querytime", ((Long) searchProfile.get("querytime")).toString());
-            prop.put("page_list_" + entCount + "_resultcount", ((Integer) searchProfile.get("resultcount")).toString());
-            prop.put("page_list_" + entCount + "_resulttime", ((Long) searchProfile.get("resulttime")).toString());
+                // put values in template
+                prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
+                prop.put("page_list_" + entCount + "_host", (String) searchProfile.get("host"));
+                prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(trackerHandle.longValue())));
+                if (page == 1) {
+                    // local search
+                    prop.put("page_list_" + entCount + "_offset", ((Integer) searchProfile.get("offset")).toString());
+                    prop.put("page_list_" + entCount + "_querywords", new String(a));
+                } else {
+                    // remote search
+                    prop.put("page_list_" + entCount + "_peername", (String) searchProfile.get("peername"));
+                    prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes((Set) searchProfile.get("queryhashes")));
+                }
+                prop.put("page_list_" + entCount + "_querycount", ((Integer) searchProfile.get("querycount")).toString());
+                prop.put("page_list_" + entCount + "_querytime", ((Long) searchProfile.get("querytime")).toString());
+                prop.put("page_list_" + entCount + "_resultcount", ((Integer) searchProfile.get("resultcount")).toString());
+                prop.put("page_list_" + entCount + "_resulttime", ((Long) searchProfile.get("resulttime")).toString());
 
-            // next
-            entCount++;
+                // next
+                entCount++;
+            }
+            prop.put("page_list", entCount);
+            prop.put("page_num", entCount);
+            prop.put("page_total", (page == 1) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
         }
-        prop.put("page_list", entCount);
-        prop.put("page_num", entCount);
-        prop.put("page_total", (page <= 2) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
+        if ((page == 2) || (page == 4)) {
+            Iterator i = (page == 2) ? switchboard.localSearchTracker.entrySet().iterator() : switchboard.remoteSearchTracker.entrySet().iterator();
+            String host, handlestring;
+            TreeSet handles;
+            while ((entCount < maxCount) && (i.hasNext())) {
+                entry = (Map.Entry) i.next();
+                host = (String) entry.getKey();
+                handles = (TreeSet) entry.getValue();
+                handlestring = "";
+                Iterator ii = handles.iterator();
+                while (ii.hasNext()) {
+                    handlestring += yacyCore.universalDateShortString(new Date(((Long) ii.next()).longValue())) + " ";
+                }
+                prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
+                prop.put("page_list_" + entCount + "_host", host);
+                prop.put("page_list_" + entCount + "_count", new Integer(handles.size()).toString());
+                prop.put("page_list_" + entCount + "_dates", handlestring);
+                // next
+                entCount++;
+            }
+            prop.put("page_list", entCount);
+            prop.put("page_num", entCount);
+            prop.put("page_total", (page == 2) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
+        }
         // return rewrite properties
         return prop;
     }
