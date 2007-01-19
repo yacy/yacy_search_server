@@ -9,7 +9,7 @@
     <h2>Log statistics</h2>
     
     #(results)#::
-    <p>Needed #[totalParserTime]# #[totalParserTimeUnit]# to parse #[totalParserRuns]# Entries#(avgExists)#:: (#[avgParserRunsPerMinute]#/sec)#(/avgExists)#</p>
+    <p>Needed #[totalParserTime]# #[totalParserTimeUnit]# to parse #[totalParserRuns]# Entries#(avgExists)#:: (#[avgParserRunsPerSecond]# / sec)#(/avgExists)#</p>
     
     <form method="get" action="LogStatistics_p.html">
       <fieldset><legend>DHT</legend>
@@ -32,7 +32,7 @@
             <dt>RWIs blocked:</dt><dd>#[blockedRWISum]#</dd>
             <dt>Total time:</dt><dd>#[rwiTimeSum]# #[rwiTimeSumUnit]#</dd>
             <dt>RWIs selected:</dt><dd>#[DHTSelectionWordsCount]#</dd>
-            <dt>Selection time:</dt><dd>#[DHTSelectionWordsTimeCount]#</dd>
+            <dt>Selection time:</dt><dd>#[DHTSelectionWordsTimeCount]# #[DHTSelectionWordsTimeCountUnit]#</dd>
           </dl>
         </fieldset>
         

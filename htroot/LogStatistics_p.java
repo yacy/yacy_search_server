@@ -81,39 +81,39 @@ public class LogStatistics_p {
         } else {
             prop.put("results", 1);
             String[] t;
-            float l;
+            double l;
             prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_AVERAGE, r.get(LogParserPLASMA.DHT_DISTANCE_AVERAGE));
             prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MAX, r.get(LogParserPLASMA.DHT_DISTANCE_MAX));
             prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MIN, r.get(LogParserPLASMA.DHT_DISTANCE_MIN));
             prop.put(RESULTS + LogParserPLASMA.DHT_REJECTED, r.get(LogParserPLASMA.DHT_REJECTED));
             prop.put(RESULTS + LogParserPLASMA.DHT_SELECTED, r.get(LogParserPLASMA.DHT_SELECTED));
             prop.put(RESULTS + LogParserPLASMA.DHT_SENT_FAILED, r.get(LogParserPLASMA.DHT_SENT_FAILED));
-            t = transformMem(((Long)r.get(LogParserPLASMA.DHT_TRAFFIC_SENT)).longValue());
+            t = transformMem(((Long)r.get(LogParserPLASMA.DHT_TRAFFIC_SENT)).longValue() * 1000000);
             prop.put(RESULTS + LogParserPLASMA.DHT_TRAFFIC_SENT, t[0]);
             prop.put(RESULTS + LogParserPLASMA.DHT_TRAFFIC_SENT + "Unit", t[1]);
             prop.put(RESULTS + LogParserPLASMA.DHT_URLS_SENT, r.get(LogParserPLASMA.DHT_URLS_SENT));
             prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED, r.get(LogParserPLASMA.DHT_WORDS_SELECTED));
-            t = transformTime(((Integer)r.get(LogParserPLASMA.DHT_WORDS_SELECTED_TIME)).longValue() * 1000L);
+            t = transformTime(((Integer)r.get(LogParserPLASMA.DHT_WORDS_SELECTED_TIME)).longValue() * 1000000000);
             prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED_TIME, t[0]);
             prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED_TIME + "Unit", t[1]);
             prop.put(RESULTS + LogParserPLASMA.ERROR_CHILD_TWICE_LEFT, r.get(LogParserPLASMA.ERROR_CHILD_TWICE_LEFT));
             prop.put(RESULTS + LogParserPLASMA.ERROR_CHILD_TWICE_RIGHT, r.get(LogParserPLASMA.ERROR_CHILD_TWICE_RIGHT));
             prop.put(RESULTS + LogParserPLASMA.ERROR_MALFORMED_URL, r.get(LogParserPLASMA.ERROR_MALFORMED_URL));
             prop.put(RESULTS + LogParserPLASMA.INDEXED_ANCHORS, r.get(LogParserPLASMA.INDEXED_ANCHORS));
-            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_INDEX_TIME)).longValue());
+            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_INDEX_TIME)).longValue() * 1000000);
             prop.put(RESULTS + LogParserPLASMA.INDEXED_INDEX_TIME, t[0]);
             prop.put(RESULTS + LogParserPLASMA.INDEXED_INDEX_TIME + "Unit", t[1]);
-            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_PARSE_TIME)).longValue());
+            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_PARSE_TIME)).longValue() * 1000000);
             prop.put(RESULTS + LogParserPLASMA.INDEXED_PARSE_TIME, t[0]);
             prop.put(RESULTS + LogParserPLASMA.INDEXED_PARSE_TIME + "Unit", t[1]);
             prop.put(RESULTS + LogParserPLASMA.INDEXED_SITES, r.get(LogParserPLASMA.INDEXED_SITES));
             t = transformMem(((Integer)r.get(LogParserPLASMA.INDEXED_SITES_SIZE)).longValue());
             prop.put(RESULTS + LogParserPLASMA.INDEXED_SITES_SIZE, t[0]);
             prop.put(RESULTS + LogParserPLASMA.INDEXED_SITES_SIZE + "Unit", t[1]);
-            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_STACK_TIME)).longValue());
+            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_STACK_TIME)).longValue() * 1000000);
             prop.put(RESULTS + LogParserPLASMA.INDEXED_STACK_TIME, t[0]);
             prop.put(RESULTS + LogParserPLASMA.INDEXED_STACK_TIME + "Unit", t[1]);
-            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_STORE_TIME)).longValue());
+            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_STORE_TIME)).longValue() * 1000000);
             prop.put(RESULTS + LogParserPLASMA.INDEXED_STORE_TIME, t[0]);
             prop.put(RESULTS + LogParserPLASMA.INDEXED_STORE_TIME + "Unit", t[1]);
             prop.put(RESULTS + LogParserPLASMA.INDEXED_WORDS, r.get(LogParserPLASMA.INDEXED_WORDS));
@@ -121,31 +121,33 @@ public class LogStatistics_p {
             prop.put(RESULTS + LogParserPLASMA.PEERS_TOO_LESS, r.get(LogParserPLASMA.PEERS_TOO_LESS));
             prop.put(RESULTS + LogParserPLASMA.RANKING_DIST, r.get(LogParserPLASMA.RANKING_DIST));
             prop.put(RESULTS + LogParserPLASMA.RANKING_DIST_FAILED, r.get(LogParserPLASMA.RANKING_DIST_FAILED));
-            t = transformTime(((Integer)r.get(LogParserPLASMA.RANKING_DIST_TIME)).longValue());
+            t = transformTime(((Integer)r.get(LogParserPLASMA.RANKING_DIST_TIME)).longValue() * 1000000);
             prop.put(RESULTS + LogParserPLASMA.RANKING_DIST_TIME, t[0]);
             prop.put(RESULTS + LogParserPLASMA.RANKING_DIST_TIME + "Unit", t[1]);
             prop.put(RESULTS + LogParserPLASMA.RWIS_BLOCKED, r.get(LogParserPLASMA.RWIS_BLOCKED));
             prop.put(RESULTS + LogParserPLASMA.RWIS_RECEIVED, r.get(LogParserPLASMA.RWIS_RECEIVED));
-            t = transformTime(((Long)r.get(LogParserPLASMA.RWIS_RECEIVED_TIME)).longValue());
+            t = transformTime(((Long)r.get(LogParserPLASMA.RWIS_RECEIVED_TIME)).longValue() * 1000000);
             prop.put(RESULTS + LogParserPLASMA.RWIS_RECEIVED_TIME, t[0]);
             prop.put(RESULTS + LogParserPLASMA.RWIS_RECEIVED_TIME + "Unit", t[1]);
             prop.put(RESULTS + LogParserPLASMA.URLS_BLOCKED, r.get(LogParserPLASMA.URLS_BLOCKED));
             prop.put(RESULTS + LogParserPLASMA.URLS_RECEIVED, r.get(LogParserPLASMA.URLS_RECEIVED));
-            t = transformTime(((Long)r.get(LogParserPLASMA.URLS_RECEIVED_TIME)).longValue());
+            t = transformTime(((Long)r.get(LogParserPLASMA.URLS_RECEIVED_TIME)).longValue() * 1000000);
             prop.put(RESULTS + LogParserPLASMA.URLS_RECEIVED_TIME, t[0]);
             prop.put(RESULTS + LogParserPLASMA.URLS_RECEIVED_TIME + "Unit", t[1]);
             prop.put(RESULTS + LogParserPLASMA.URLS_REQUESTED, r.get(LogParserPLASMA.URLS_REQUESTED));
             prop.put(RESULTS + LogParserPLASMA.WORDS_RECEIVED, r.get(LogParserPLASMA.WORDS_RECEIVED));
-            l = ((Long)r.get(LogParserPLASMA.TOTAL_PARSER_TIME)).floatValue();
-            t = transformTime((long)l);
+            t = transformTime((long)(l = ((Long)r.get(LogParserPLASMA.TOTAL_PARSER_TIME)).longValue()));
             prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_TIME, t[0]);
             prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_TIME + "Unit", t[1]);
             prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_RUNS, r.get(LogParserPLASMA.TOTAL_PARSER_RUNS));
-            if ((l /= 1000) == 0) {
+            if ((l /= 1000000000D) == 0) {
                 prop.put(RESULTS + "avgExists", 0);
             } else {
                 prop.put(RESULTS + "avgExists", 1);
-                prop.put(RESULTS + "avgExists_avgParserRunsPerMinute", (int) (((Integer) r.get(LogParserPLASMA.TOTAL_PARSER_RUNS)).floatValue() / l)); 
+                prop.put(RESULTS + "avgExists_avgParserRunsPerSecond",
+                        String.format("%.2f", new Object[] {
+                                new Double(((Integer)r.get(LogParserPLASMA.TOTAL_PARSER_RUNS)).doubleValue() / l)
+                        } )); 
             }
             
             Object[] names = ((HashSet)r.get(LogParserPLASMA.DHT_REJECTED_PEERS_NAME)).toArray();
@@ -174,6 +176,8 @@ public class LogStatistics_p {
         }
     }
     
+    private static final String NANOSECONDS = "ns";
+    private static final String MICROSECONDS = "\u00B5s";
     private static final String MILLISECONDS = "ms";
     private static final String SECONDS = "sec";
     private static final String MINUTES = "min";
@@ -183,6 +187,8 @@ public class LogStatistics_p {
     private static final String[] units = new String[] { "Bytes", "KiloBytes", "MegaBytes", "GigaBytes" };
     
     private static String[] transformTime(long timems) {
+        if (timems > 10000) timems /= 1000; else return new String[] { Long.toString(timems), NANOSECONDS };
+        if (timems > 10000) timems /= 1000; else return new String[] { Long.toString(timems), MICROSECONDS };
         if (timems > 10000) timems /= 1000; else return new String[] { Long.toString(timems), MILLISECONDS };
         if (timems > 180) timems /= 60; else return new String[] { Long.toString(timems), SECONDS };
         if (timems > 600) timems /= 60; else return new String[] { Long.toString(timems), MINUTES };

@@ -1085,7 +1085,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             ) {
                 // generate new chunk
                 int minChunkSize = (int) getConfigLong("indexDistribution.minChunkSize", 30);
-                dhtTransferChunk = new plasmaDHTChunk(this.log, wordIndex, minChunkSize, dhtTransferIndexCount, 15000);
+                dhtTransferChunk = new plasmaDHTChunk(this.log, wordIndex, minChunkSize, dhtTransferIndexCount, 5000);
                 doneSomething = true;
             }
 

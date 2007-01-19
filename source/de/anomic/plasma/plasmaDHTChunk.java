@@ -196,7 +196,7 @@ public class plasmaDHTChunk {
     }
 
     private int selectTransferContainersResource(String hash, boolean ram, int maxcount, int maxtime) throws InterruptedException {
-        if (maxcount > 500) { maxcount = 500; } // flooding & OOM reduce
+        // if (maxcount > 500) { maxcount = 500; } // flooding & OOM reduce
         // the hash is a start hash from where the indexes are picked
         final ArrayList tmpContainers = new ArrayList(maxcount);
         try {
@@ -231,7 +231,7 @@ public class plasmaDHTChunk {
                     // iterate over indexes to fetch url entries and store them in the urlCache
                     while ((urlIter.hasNext()) && (maxcount > refcount) && (System.currentTimeMillis() < timeout)) {
                         // CPU & IO reduce
-                        try { Thread.sleep(50); } catch (InterruptedException e) { }
+                        // try { Thread.sleep(50); } catch (InterruptedException e) { }
 
                         iEntry = (indexRWIEntryNew) urlIter.next();
                         if ((iEntry == null) || (iEntry.urlHash() == null)) {
