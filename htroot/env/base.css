@@ -1,8 +1,37 @@
-/* Layout and general style */
+/* base.css - Layout and general style */
+/* 
+	$LastChangedDate:  $
+	$LastChangedRevision:  $
+	$LastChangedBy:  $
+*/
 
-body, table, textarea {
-  font-size: 12px;
-}
+/*
+# use section names to jump
+
+############ Sections: ########################
+## "global elements"								##
+# all html elements without ".class" or "#id"
+###############################################
+## "global classes"									##
+# i.e. ".strong"; ".left"; ".error"; 
+###############################################
+## "privat classes"									##
+# all htnml-elements with a specific class 
+# i.e. "div.content"; "span.left"; 
+# and
+# "div.content span a."; "form.search fieldset legend";
+# sorted by the last html-element
+###############################################
+## "site specific"									##
+# all site specific elements
+# i.e. "body#search form"; "body#stats table td.strong";
+###############################################
+## "other"												##
+# all "other" elements
+# i.e. "#left"; "#myID.div";
+*/
+
+/* --------------- global elements -------------------------- */
 
 * {
   font-family:Helvetica, Arial, sans-serif;
@@ -13,8 +42,8 @@ body {
   padding:0;
 }
 
-img {
-  border:0;
+body, table, textarea {
+  font-size: 12px;
 }
 
 h1, h2, h3, h4 {
@@ -24,6 +53,7 @@ h1, h2, h3, h4 {
 h1 {
   font-size:2em;
 }
+
 h2 {
   font-size:1.6em;
   clear:left; /* The heading after the submenu has to be left again */
@@ -32,6 +62,7 @@ h2 {
 h3 {
   font-size:1.3em;
 }
+
 h4 {
   font-size:1.1em;
 }
@@ -48,101 +79,166 @@ a:hover {
   text-decoration:underline;
 }
 
-*.tt {
-  font-family:Courier,Terminal,sans-serif;
+img {
+  border:0;
 }
 
 td {
   padding:1px 2px;
 }
 
-/* Head */
-
-div.head h1 {
-  padding:4px;
-  background:url(/env/grafics/yacy.gif) 10px center no-repeat;
-  font-weight: bold;
-  font-size: 1.6em;
-  text-align: center;
-  margin:0;
+form dd {
+  margin:0 0 0.5em 0.25em;
+  float:left;
 }
 
-/* Menu*/
-
-ul#menu {
-  padding:0;
-  margin:0;
-  margin-left:1px;
-  position:absolute;
-  top:3em;
-  left:0;
-  width:11em;
-  overflow:hidden;
+fieldset {
+  margin:10px 5px;
+  padding:10px;
 }
 
-ul.menu, ul.SubMenu {
-  padding:0;
-  margin:0;
+legend {
+  font-size:1.2em;
+  padding:0.2em;
+  text-align:center;
 }
 
-ul.menu li, ul.SubMenu li {
-  list-style:none;
-  margin:0;
-  margin-top:1px;
-  padding:0;
+
+
+/* --------------- global classes --------------------- */
+
+*.tt {
+  font-family:Courier,Terminal,sans-serif;
 }
 
-li.menugroup {
-  margin-left:5px;
-  margin-bottom:10px;
-  list-style:none;
-}
-li.menugroup h3, div.SubMenugroup h3, div.SubMenu h3 {
-  font-size:1em;
+.error {
   font-weight:bold;
+}
+
+.help {
+  font-size:90%;
+}
+
+.snippetLoaded {
+  font-style:italic;
+}
+
+.snippetError {
+  font-style:italic;
+}
+
+.settingsValue {
+  font-weight:bold;
+}
+
+.Headline {
+  font-weight: bold;
+  font-size: 160%;
+  text-align: center;
+  height: 36px;
+  width:100%;
+}
+
+.Heading {
+  height: 36px;
+}
+
+.Post {
+  padding:10px;
+  margin-bottom:10px;
+}
+
+.PostSubject {
+  padding:5px;
   margin:0;
+}
+
+.PostBody {
+  margin:10px;
+}
+
+.PostInfo {
   padding:1px 10px;
 }
 
-div.SubMenu h3 {
-  margin-bottom:1px;
+.WikiTOCBox {
+  padding: 8px;
 }
 
-div.SubMenugroup, ul.SubMenu li {
+.imgtable {
+  margin: 1px;
+  padding: 1px;
+  width: 100px;
+  border: 0px solid #aaaaaa;
+  float: left;
+}
+
+.hides .hoverShow {
+  display: none;
+}
+
+.hides:hover .hoverShow {
+  display: block;
+  position: absolute;
+  border: 3px double;
+  margin: 0 0 0 2em;
+  padding: .3em;
+  height: 20em;
+  overflow: auto;
+  width: 30em;
+}
+
+/* ---------------- private classes ---------------------*/
+
+/*----------
+<div>
+*/
+
+div.Tags {
+  float:right;
+  width:12em;
+  text-align:right;
+  padding-left: 5px;
+}
+
+div.ProgressBarCaption {
+	float:left;
+	width:70px;
+}
+div.ProgressBar {
+	float:left;
+	width:150px;
+	height:10px;
+}
+div.ProgressBarFill {
+	margin:0px;
+	height:100%; /*not valid value for Netscape 8*/
+}
+
+div.CacheAdminInfo {
+  margin-top:1em;
+}
+
+div.bookmarkList, div.Tags {
+  margin-top:1em;
+}
+
+div.bookmark {
+  margin-top:1em;
+  margin-right:13em;
+  padding-bottom:1em;
+}
+
+div.searchresults {
+  padding-top:1em;
+  margin-bottom:1em;
+}
+
+div.SubMenugroup{
   float:left;
   margin-right:1px;
   margin-top:0;
 }
-
-a.MenuItemLink, ul.SubMenu em {
-  display:block;
-  text-decoration:none;
-  margin-top:1px;
-  margin-bottom:1px;
-  padding:1px 10px 1px 15px;
-  font-size:0.9em;
-}
-
-ul#menu a.MenuItemLink {
-  width:80%;
-  padding:1px 5% 1px 15%;
-}
-
-ul.SubMenu a.MenuItemLink, ul.SubMenu em {
-  margin-top:0;
-}
-
-a:hover.MenuItemLink {
-  text-decoration:none;
-}
-
-a.MenuItemLink.lock, ul.SubMenu em.lock {
-  background-image:url(/env/grafics/lock.gif);
-  background-position:2px center;
-  background-repeat:no-repeat;
-}
-
-/* Content */
 
 div.content {
   position:absolute;
@@ -152,24 +248,6 @@ div.content {
   margin:0;
 }
 
-/* Searchpages */
-
-form.search {
-  text-align:center;
-  margin:0;
-}
-
-form.search table {
-  margin:0 auto;
-  text-align:left;
-}
-
-fieldset.yacysearch {
-  text-align:left;
-  padding-top:10px;
-  display:block;
-}
-
 div.yacysearch {
   margin-top: .8em;
   display:block;
@@ -177,17 +255,30 @@ div.yacysearch {
   /*left:-60px;*/
 }
 
-h2.yacy { /* The heading in index.html */
-  margin:10px auto;
-  text-align:center;
-  padding-top:130px;
-  width:256px;
-  min-width:256px;
-  background:url(/env/grafics/kaskelix.png) top center no-repeat;
+div.urlactions {
+  float:left;
 }
 
-form.search.small {
-  text-align:left;
+/*----------
+<p>
+*/
+
+p.aftersurftips {
+  clear:both;
+}
+
+p.info {
+  margin-top:5em;
+  padding-top:5px;
+  text-align:center;
+}
+
+div.bookmark p {
+  margin:1px;
+}
+
+div.searchresults p{
+  margin:2px 2px 2px 22px;
 }
 
 form.search.small p.yacylogo { /* The logo in yacysearch.html */
@@ -198,13 +289,96 @@ form.search.small p.yacylogo { /* The logo in yacysearch.html */
   width:70px;
 }
 
+/*----------
+<h1>, <h2>, <h3>, <h4>, <h5>
+*/
+
+div.head h1 {
+  padding:4px;
+  background:url(/env/grafics/yacy.gif) 10px center no-repeat;
+  font-weight: bold;
+  font-size: 1.6em;
+  text-align: center;
+  margin:0;
+}
+
+
+h2.yacy { /* The heading in index.html */
+  margin:10px auto;
+  text-align:center;
+  padding-top:130px;
+  width:256px;
+  min-width:256px; /*min-width does not exist in IE 5.5, 6 and Safari */
+  background:url(/env/grafics/kaskelix.png) top center no-repeat;
+}
+
 form.search.small h2 {
   clear:none;
   margin-left:85px;
 }
 
-div.urlactions {
-  float:left;
+li.menugroup h3{
+	font-size: 1em; font-weight: bold; 
+	margin: 0; padding: 1px 10px; 
+}
+
+div.SubMenugroup h3{
+  font-size:1em;
+  font-weight:bold;
+  margin:0;
+  padding:1px 10px;
+}
+div.SubMenu h3 {
+  font-size:1em;
+  font-weight:bold;
+  margin:0;
+  margin-bottom:1px;
+  padding:1px 10px;
+}
+div.searchresults h4 {
+  margin:2px 2px 2px 22px;
+}
+
+h4.bookmarkTitle {
+  margin:0;
+}
+
+/*----------
+<a>
+*/
+
+a.bookmarkTags {
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+a.bookmarkTitle {
+  font-size:17px;
+  font-weight:bold;
+}
+
+a.BookmarkLink {
+  background:url(/env/grafics/addlink.png) left center no-repeat;
+  padding-left:15px;
+}
+
+a.MenuItemLink{
+  display:block;
+  text-decoration:none;
+  margin-top:1px;
+  margin-bottom:1px;
+  padding:1px 10px 1px 15px;
+  font-size:0.9em;
+}
+
+a.MenuItemLink.lock{
+  background-image:url(/env/grafics/lock.gif);
+  background-position:2px center;
+  background-repeat:no-repeat;
+}
+
+a:hover.MenuItemLink {
+  text-decoration:none;
 }
 
 div.urlactions a {
@@ -215,11 +389,6 @@ div.urlactions > a {
   width: 11px;
   height: 11px;
   margin: 1px 1px 1px 7px;
-}
-
-img.bookmarkIcon, img.deleteIcon, img.recommendIcon {
-  height: 11px;
-  width: 11px;
 }
 
 a.bookmarklink:hover, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
@@ -234,44 +403,34 @@ a.deletelink:hover, div.searchresults:hover a.deletelink, div.searchresults.hove
   background:url(/env/grafics/minus.gif) center center no-repeat;
 }
 
-div.searchresults p, div.searchresults h4 {
-  margin:2px 2px 2px 22px;
+ul.SubMenu a.MenuItemLink{
+  margin-top:0;
 }
 
-.snippetLoaded {
-  font-style:italic;
+/*----------
+<em>
+*/
+
+ul.SubMenu em {
+  margin-top:0;
 }
 
-.snippetError {
-  font-style:italic;
+ul.SubMenu em.lock {
+  background-image:url(/env/grafics/lock.gif);
+  background-position:2px center;
+  background-repeat:no-repeat;
 }
 
-div.searchresults {
-  padding-top:1em;
-  margin-bottom:1em;
+ul.SubMenu em {
+  display:block;
+  text-decoration:none;
+  margin-top:1px;
+  margin-bottom:1px;
+  padding:1px 10px 1px 15px;
+  font-size:0.9em;
 }
 
-body#Surftips div.searchresults {
-  float:left;
-  width:35em;
-  height:6em;
-  margin-left:1em;
-  margin-bottom:0;
-  overflow:hidden;
-}
-
-p.aftersurftips {
-  clear:both;
-}
-
-/* Bookmarks */
-
-div.Tags {
-  float:right;
-  width:12em;
-  text-align:right;
-  padding-left: 5px;
-}
+/*	<ul>, <li>	*/
 
 ul.tagList {
   list-style:none;
@@ -279,71 +438,39 @@ ul.tagList {
   margin-left:0;
 }
 
-div.bookmarkList, div.Tags {
-  margin-top:1em;
-}
 
-div.bookmark {
-  margin-top:1em;
-  margin-right:13em;
-  padding-bottom:1em;
-}
 
-div.bookmark p {
-  margin:1px;
-}
-
-a.bookmarkTags {
-  font-weight:bold;
-  white-space:nowrap;
-}
-
-h4.bookmarkTitle {
+ul.menu, ul.SubMenu {
+  padding:0;
   margin:0;
 }
 
-a.bookmarkTitle {
-  font-size:17px;
-  font-weight:bold;
+ul.menu li, ul.SubMenu li {
+  list-style:none;
+  margin:0;
+  margin-top:1px;
+  padding:0;
 }
 
-a.BookmarkLink {
-  background:url(/env/grafics/addlink.png) left center no-repeat;
-  padding-left:15px;
+ul.SubMenu li {
+  float:left;
+  margin-right:1px;
+  margin-top:0;
 }
 
-/* Blog and Wiki */
-
-.Post {
-  padding:10px;
+li.menugroup {
+  margin-left:5px;
   margin-bottom:10px;
-}
-.PostSubject {
-  padding:5px;
-  margin:0;
-}
-.PostBody {
-  margin:10px;
-}
-.PostInfo {
-  padding:1px 10px;
+  list-style:none;
 }
 
-.WikiTOCBox {
-  padding: 8px;
-}
+/*----------
+<dl>, <dd>, <dt>
+*/
 
-/* Forms and key-value pairs with dl */
-
-fieldset {
-  margin:10px 5px;
-  padding:10px;
-}
-
-legend {
-  font-size:1.2em;
-  padding:0.2em;
-  text-align:center;
+dl.pairs dd {
+  padding:0.2em 0.5em;
+  margin:2px 0 2px 18.3em;
 }
 
 form dt, dl.pairs dt {
@@ -355,18 +482,80 @@ form dt, dl.pairs dt {
   text-align:right;
 }
 
-form dd {
-  margin:0 0 0.5em 0.25em;
+/*----------
+<form>
+*/
+form.search {
+  text-align:center;
+  margin:0;
+}
+form.search.small {
+  text-align:left;
+}
+
+/*----------
+<table>, <tr>, <th>, <td>
+*/
+
+table.networkTable{
+  font-size:90%;
+}
+table.StatusTable {
+	border-width:0px;
+	border-spacing:1px;
+}
+
+form.search table {
+  margin:0 auto;
+  text-align:left;
+}
+
+/*----------
+<fieldset>
+*/
+
+fieldset.yacysearch {
+  text-align:left;
+  padding-top:10px;
+  display:block;
+}
+
+form.PeerControl fieldset { /* on Status.html */
+	text-align:right;
+}
+/*----------
+<img>
+*/
+
+img.bookmarkIcon, img.deleteIcon, img.recommendIcon {
+  height: 11px;
+  width: 11px;
+}
+
+/* site specific ------------------------------------*/
+
+body#Blacklist fieldset.editList {
   float:left;
+  margin-top:0;
 }
-
-dl.pairs dd {
-  padding:0.2em 0.5em;
-  margin:2px 0 2px 18.3em;
+body#PerformanceQueues table, body#PerformanceQueues table input, body#PerformanceMemory table, body#PerformanceMemory table input {
+  font-size:90%;
 }
-
-/* for pages: */
-
+body#help dt {
+  margin-top:0.2em;
+  font-weight:bold;
+}
+body#Settings ul.settingsMenu li {
+  list-style-image:url(/env/grafics/down.gif);
+}
+body#Surftips div.searchresults {
+  float:left;
+  width:35em;
+  height:6em;
+  margin-left:1em;
+  margin-bottom:0;
+  overflow:hidden;
+}
 body#ViewLog div.log {
   height:600px;
   overflow:scroll;  
@@ -409,102 +598,19 @@ body#Wiki form fieldset p.help{
 	clear:both;
 }
 
-form.PeerControl fieldset { /* on Status.html */
-	text-align:right;
-}
 
-body#Settings ul.settingsMenu li {
-  list-style-image:url(/env/grafics/down.gif);
+/* other ------------------------------------*/
+ul#menu {
+  padding:0;
+  margin:0;
+  margin-left:1px;
+  position:absolute;
+  top:3em;
+  left:0;
+  width:11em;
+  overflow:hidden;
 }
-
-body#help dt {
-  margin-top:0.2em;
-  font-weight:bold;
-}
-
-table.networkTable, body#PerformanceQueues table, body#PerformanceQueues table input, body#PerformanceMemory table, body#PerformanceMemory table input {
-  font-size:90%;
-}
-
-table.StatusTable {
-	border-width:0px;
-	border-spacing:1px;
-}
-
-body#Blacklist fieldset.editList {
-  float:left;
-  margin-top:0;
-}
-
-/* other */
-
-div.ProgressBarCaption {
-	float:left;
-	width:70px;
-}
-div.ProgressBar {
-	float:left;
-	width:150px;
-	height:10px;
-}
-div.ProgressBarFill {
-	margin:0px;
-	height:100%;
-}
-
-p.info {
-  margin-top:5em;
-  padding-top:5px;
-  text-align:center;
-}
-
-.settingsValue {
-  font-weight:bold;
-}
-
-.Headline {
-  font-weight: bold;
-  font-size: 160%;
-  text-align: center;
-  height: 36px;
-  width:100%;
-}
-
-.Heading {
-  height: 36px;
-}
-
-div.CacheAdminInfo {
-  margin-top:1em;
-}
-
-.error {
-  font-weight:bold;
-}
-
-.help {
-  font-size:90%;
-}
-
-.imgtable {
-  margin: 1px;
-  padding: 1px;
-  width: 100px;
-  border: 0px solid #aaaaaa;
-  float: left;
-}
-
-.hides .hoverShow {
-  display: none;
-}
-
-.hides:hover .hoverShow {
-  display: block;
-  position: absolute;
-  border: 3px double;
-  margin: 0 0 0 2em;
-  padding: .3em;
-  height: 20em;
-  overflow: auto;
-  width: 30em;
+ul#menu a.MenuItemLink {
+  width:80%;
+  padding:1px 5% 1px 15%;
 }
