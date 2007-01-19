@@ -737,6 +737,7 @@ public class bookmarksDB {
         public static final String BOOKMARK_TAGS="bookmarkTags";
         public static final String BOOKMARK_PUBLIC="bookmarkPublic";
         public static final String BOOKMARK_TIMESTAMP="bookmarkTimestamp";
+        public static final String BOOKMARK_OWNER="bookmarkOwner";
         private String urlHash;
         private Map mem;
         private HashSet tags;
@@ -815,6 +816,16 @@ public class bookmarksDB {
                 return (String) this.mem.get(BOOKMARK_TITLE);
             }
             return (String) this.mem.get(BOOKMARK_URL);
+        }
+        public String getOwner(){
+            if(this.mem.containsKey(BOOKMARK_OWNER)){
+                return (String) this.mem.get(BOOKMARK_OWNER);
+            }else{
+                return null; //null means admin
+            }
+        }
+        public void setOwner(String owner){
+                this.mem.put(BOOKMARK_OWNER, owner);
         }
         public boolean getPublic(){
             if(this.mem.containsKey(BOOKMARK_PUBLIC)){

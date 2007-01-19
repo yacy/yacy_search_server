@@ -53,6 +53,7 @@ import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
+import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;

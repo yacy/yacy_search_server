@@ -79,6 +79,8 @@ public class User_p {
         prop.put("page_downloadRight", 0);
         prop.put("page_uploadRight", 0);
         prop.put("page_adminRight", 0);
+        prop.put("page_wikiAdminRight", 0);
+        prop.put("page_bookmarkRight", 0);
         
         prop.put("page_users", 0);
 
@@ -99,19 +101,20 @@ public class User_p {
 		        // link: "If you want to manage more Users, return to the user page." (parameter "user" is empty)
                 if (entry != null) {
     			    //TODO: set username read-only in html
-    				prop.put("page_current_user", post.get("user"));
-    	            prop.put("page_username", post.get("user"));
-    		        prop.put("page_firstname", entry.getFirstName());
-    			    prop.put("page_lastname", entry.getLastName());
-    	            prop.put("page_address", entry.getAddress());
-    		        prop.put("page_timelimit", entry.getTimeLimit());
-    			    prop.put("page_timeused", entry.getTimeUsed());
+                    prop.put("page_current_user", post.get("user"));
+    	                prop.put("page_username", post.get("user"));
+    	                prop.put("page_firstname", entry.getFirstName());
+    	                prop.put("page_lastname", entry.getLastName());
+    	                prop.put("page_address", entry.getAddress());
+    	                prop.put("page_timelimit", entry.getTimeLimit());
+    	                prop.put("page_timeused", entry.getTimeUsed());
                     prop.put("page_proxyRight", (entry.hasProxyRight()?1:0));
                     prop.put("page_uploadRight", (entry.hasUploadRight()?1:0));
                     prop.put("page_downloadRight", (entry.hasDownloadRight()?1:0));
                     prop.put("page_adminRight", (entry.hasAdminRight()?1:0));
                     prop.put("page_blogRight", (entry.hasBlogRight()?1:0));
                     prop.put("page_wikiAdminRight", (entry.hasWikiAdminRight()?1:0));
+                    prop.put("page_bookmarkRight", (entry.hasBookmarkRight()?1:0));
                 }
 			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
 				sb.userDB.removeEntry((String)post.get("user"));
@@ -140,22 +143,24 @@ public class User_p {
             String adminRight=( post.containsKey("adminRight")&&((String)post.get("adminRight")).equals("on") ? "true" : "false");
             String blogRight=( post.containsKey("blogRight")&&((String)post.get("blogRight")).equals("on") ? "true" : "false");
             String wikiAdminRight=( post.containsKey("wikiAdminRight")&&((String)post.get("wikiAdminRight")).equals("on") ? "true" : "false");
+            String bookmarkRight=( post.containsKey("bookmarkRight")&&((String)post.get("bookmarkRight")).equals("on") ? "true" : "false");
             HashMap mem=new HashMap();
             if( post.get("current_user").equals("newuser")){ //new user
                 
 				if(!pw.equals("")){ //change only if set
 	                mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
 				}
-		        mem.put(userDB.Entry.USER_FIRSTNAME, firstName);
-			    mem.put(userDB.Entry.USER_LASTNAME, lastName);
+				mem.put(userDB.Entry.USER_FIRSTNAME, firstName);
+				mem.put(userDB.Entry.USER_LASTNAME, lastName);
 				mem.put(userDB.Entry.USER_ADDRESS, address);
 				mem.put(userDB.Entry.TIME_LIMIT, timeLimit);
-	            mem.put(userDB.Entry.TIME_USED, timeUsed);
-                mem.put(userDB.Entry.PROXY_RIGHT, proxyRight);
-                mem.put(userDB.Entry.UPLOAD_RIGHT, uploadRight);
-                mem.put(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
-                mem.put(userDB.Entry.BLOG_RIGHT, blogRight);
-                mem.put(userDB.Entry.WIKIADMIN_RIGHT, wikiAdminRight);
+				mem.put(userDB.Entry.TIME_USED, timeUsed);
+				mem.put(userDB.Entry.PROXY_RIGHT, proxyRight);
+				mem.put(userDB.Entry.UPLOAD_RIGHT, uploadRight);
+				mem.put(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
+				mem.put(userDB.Entry.BLOG_RIGHT, blogRight);
+				mem.put(userDB.Entry.WIKIADMIN_RIGHT, wikiAdminRight);
+				mem.put(userDB.Entry.BOOKMARK_RIGHT, bookmarkRight);
 
                 try{
                     entry=sb.userDB.createEntry(username, mem);
@@ -175,17 +180,18 @@ public class User_p {
 						if(! pw.equals("")){
 			                entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(username+":"+pw));
 						}
-			            entry.setProperty(userDB.Entry.USER_FIRSTNAME, firstName);
-				        entry.setProperty(userDB.Entry.USER_LASTNAME, lastName);
-					    entry.setProperty(userDB.Entry.USER_ADDRESS, address);
+						entry.setProperty(userDB.Entry.USER_FIRSTNAME, firstName);
+						entry.setProperty(userDB.Entry.USER_LASTNAME, lastName);
+						entry.setProperty(userDB.Entry.USER_ADDRESS, address);
 						entry.setProperty(userDB.Entry.TIME_LIMIT, timeLimit);
-	                    entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
-                        entry.setProperty(userDB.Entry.PROXY_RIGHT, proxyRight);
-                        entry.setProperty(userDB.Entry.UPLOAD_RIGHT, uploadRight);
-                        entry.setProperty(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
-                        entry.setProperty(userDB.Entry.ADMIN_RIGHT, adminRight);
-                        entry.setProperty(userDB.Entry.BLOG_RIGHT, blogRight);
-                        entry.setProperty(userDB.Entry.WIKIADMIN_RIGHT, wikiAdminRight);
+						entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
+						entry.setProperty(userDB.Entry.PROXY_RIGHT, proxyRight);
+						entry.setProperty(userDB.Entry.UPLOAD_RIGHT, uploadRight);
+						entry.setProperty(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
+						entry.setProperty(userDB.Entry.ADMIN_RIGHT, adminRight);
+						entry.setProperty(userDB.Entry.BLOG_RIGHT, blogRight);
+						entry.setProperty(userDB.Entry.WIKIADMIN_RIGHT, wikiAdminRight);
+						entry.setProperty(userDB.Entry.BOOKMARK_RIGHT, bookmarkRight);
 		            }catch (IOException e){
 					}
                 }else{

@@ -140,7 +140,8 @@ public final class userDB {
             return null;
         }
     }    
-	/*
+
+    /*
 	 * use a ProxyAuth String to authenticate a user
 	 * @param auth a base64 Encoded String, which contains "username:pw".
 	 */
@@ -168,23 +169,29 @@ public final class userDB {
 		}
 		return null;
 	}
+    public Entry getUser(String auth, String ip, String cookies){
+        Entry entry=null;
+        if(auth != null)
+            entry=proxyAuth(auth);
+        if(entry == null)
+            entry=cookieAuth(cookies);
+        if(entry == null)
+            entry=cookieAuth(cookies);
+        return entry;
+    }
     /*
      * determinate, if a user has Adminrights from a authorisation http-headerfield
      * it tests both userDB and oldstyle adminpw.
      * @param auth the http-headerline for authorisation
      */
     public boolean hasAdminRight(String auth, String ip, String cookies){
-        Entry entry=null;
-        if(auth != null)
-            entry=proxyAuth(auth);
-        if(entry != null && entry.hasAdminRight())
+        Entry entry=getUser(auth, ip, cookies);
+        if(entry != null)
             return true;
-        entry=cookieAuth(cookies);
-        if(entry != null && entry.hasAdminRight())
+        else if(cookieAdminAuth(cookies))
             return true;
-        if(cookieAdminAuth(cookies))
-            return true;
-        return false;
+        else
+            return false;
     }
 
 	/*
@@ -319,6 +326,7 @@ public final class userDB {
         public static final String PROXY_RIGHT = "proxyRight";
         public static final String BLOG_RIGHT = "blogRight";
         public static final String WIKIADMIN_RIGHT = "wikiAdminRight";
+        public static final String BOOKMARK_RIGHT = "bookmarkRight";
         
         public static final int PROXY_ALLOK = 0; //can Surf
         public static final int PROXY_ERROR = 1; //unknown error
@@ -517,6 +525,9 @@ public final class userDB {
         }
         public boolean hasWikiAdminRight() {
             return (this.mem.containsKey(WIKIADMIN_RIGHT)?((String)this.mem.get(WIKIADMIN_RIGHT)).equals("true"):false);
+        }
+        public boolean hasBookmarkRight() {
+            return (this.mem.containsKey(BOOKMARK_RIGHT)?((String)this.mem.get(BOOKMARK_RIGHT)).equals("true"):false);
         }
         public boolean isLoggedOut(){
         	   return (this.mem.containsKey(LOGGED_OUT)?((String)this.mem.get(LOGGED_OUT)).equals("true"):false);
