@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<jsmoothproject>
+	<JVMSearchPath>registry</JVMSearchPath>
+	<JVMSearchPath>javahome</JVMSearchPath>
+	<JVMSearchPath>jrepath</JVMSearchPath>
+	<JVMSearchPath>jdkpath</JVMSearchPath>
+	<JVMSearchPath>exepath</JVMSearchPath>
+	<JVMSearchPath>jview</JVMSearchPath>
+	<arguments></arguments>
+	
+	<classPath>..\..\lib\activation.jar</classPath>
+	<classPath>..\..\lib\axis.jar</classPath>
+	<classPath>..\..\lib\commons-codec-1.3.jar</classPath>
+	<classPath>..\..\lib\commons-discovery.jar</classPath>
+	<classPath>..\..\lib\commons-httpclient-3.0.1.jar</classPath>
+	<classPath>..\..\lib\commons-logging.jar</classPath>
+	<classPath>..\..\lib\gnumail.jar</classPath>
+	<classPath>..\..\lib\inetlib.jar</classPath>
+	<classPath>..\..\lib\jaxrpc.jar</classPath>
+	<classPath>..\..\lib\jdic.jar</classPath>
+	<classPath>..\..\lib\jdom.jar</classPath>
+	<classPath>..\..\lib\saaj.jar</classPath>
+	<classPath>..\..\lib\wsdl4j.jar</classPath>
+	<classPath>..\..\lib\xerces.jar</classPath>
+	<classPath>..\..\lib\yacySoapClient.jar</classPath>
+	<classPath>..\..\lib\windows\jdic_stub.jar</classPath>
+	<embeddedJar>false</embeddedJar>
+	<executableName>../../yacyAdmin.exe</executableName>
+	<iconLocation>../../ressources/yacyIcon.png</iconLocation>
+	<initialMemoryHeap>-1</initialMemoryHeap>
+	<jarLocation>../../yacyAdmin.jar</jarLocation>
+	<mainClassName>YacyAdmin</mainClassName>
+	<maximumMemoryHeap>-1</maximumMemoryHeap>
+	<maximumVersion></maximumVersion>
+	<minimumVersion>1.5</minimumVersion>
+	<skeletonName>Windowed Wrapper</skeletonName>
+	<skeletonProperties>
+		<key>Message</key>
+		<value>Java has not been found on your computer. Do you want to download it?</value>
+	</skeletonProperties>
+	<skeletonProperties>
+		<key>URL</key>
+		<value>http://www.java.com</value>
+	</skeletonProperties>
+	<skeletonProperties>
+		<key>SingleProcess</key>
+		<value>1</value>
+	</skeletonProperties>
+	<skeletonProperties>
+		<key>Debug</key>
+		<value>0</value>
+	</skeletonProperties>
+</jsmoothproject>
