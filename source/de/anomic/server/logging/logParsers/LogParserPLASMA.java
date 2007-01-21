@@ -255,7 +255,7 @@ public class LogParserPLASMA implements LogParser{
         if (logLevel.equals("INFO")){
             m = i1.matcher (logLine);
             
-            if (m.find ()) {
+            if (m.find () && m.groupCount() >= 3) {
                 //System.out.println(m.group(1) + " " + m.group(2) + " " + m.group(3));
                 urlSum += Integer.parseInt(m.group(1));
                 urlTimeSum += Integer.parseInt(m.group(2));
@@ -266,7 +266,7 @@ public class LogParserPLASMA implements LogParser{
             }
             m = i2.matcher (logLine);
             
-            if (m.find ()) {
+            if (m.find () && m.groupCount() >= 6) {
                 rwiSum += Integer.parseInt(m.group(1));
                 wordsSum += Integer.parseInt(m.group(2));
                 rwiTimeSum += Integer.parseInt(m.group(3));
@@ -278,7 +278,7 @@ public class LogParserPLASMA implements LogParser{
             }
             m = i2_2.matcher (logLine);
             
-            if (m.find ()) {
+            if (m.find () && m.groupCount() >= 6) {
                 rwiSum += Integer.parseInt(m.group(1));
                 wordsSum += Integer.parseInt(m.group(2));
                 rwiTimeSum += Integer.parseInt(m.group(3));
@@ -290,7 +290,7 @@ public class LogParserPLASMA implements LogParser{
             }
             m = i3.matcher (logLine);
             
-            if (m.find ()) {
+            if (m.find () && m.groupCount() >= 6) {
                 DHTSendTraffic += Integer.parseInt(m.group(6));
                 DHTPeerNames.add(m.group(2));
                 DHTPeerHashs.add(m.group(3));
@@ -300,7 +300,7 @@ public class LogParserPLASMA implements LogParser{
             }
             m = i4.matcher (logLine);
             
-            if (m.find ()) {
+            if (m.find () && m.groupCount() >= 8) {
                 DHTSendTraffic += Integer.parseInt(m.group(8));
                 DHTSendURLs += Integer.parseInt(m.group(3));
                 DHTPeerNames.add(m.group(4));
@@ -311,7 +311,7 @@ public class LogParserPLASMA implements LogParser{
             }
             m = i5.matcher (logLine);
             
-            if (m.find ()) {
+            if (m.find () && m.groupCount() >= 3) {
                 minDHTDist = Math.min(minDHTDist, Double.parseDouble(m.group(3)));
                 maxDHTDist = Math.max(maxDHTDist, Double.parseDouble(m.group(3)));
                 avgDHTDist += Double.parseDouble(m.group(3));
@@ -322,7 +322,7 @@ public class LogParserPLASMA implements LogParser{
             }
             m = i6.matcher (logLine);
             
-            if (m.find ()) {
+            if (m.find () && m.groupCount() >= 2) {
                 RWIRejectPeerNames.add(m.group(2));
                 RWIRejectPeerHashs.add(m.group(1));
                 RWIRejectCount++;
@@ -339,7 +339,7 @@ public class LogParserPLASMA implements LogParser{
             }
             m = i8.matcher (logLine);
             
-            if (m.find ()) {
+            if (m.find () && m.groupCount() >= 2) {
                 DHTSelectionWordsCount += Double.parseDouble(m.group(1));
                 DHTSelectionWordsTimeCount += Double.parseDouble(m.group(2));
                 totalParserTime += (System.currentTimeMillis() - start);
@@ -348,7 +348,7 @@ public class LogParserPLASMA implements LogParser{
             }
             m = i9.matcher (logLine);
             
-            if (m.find ()) {
+            if (m.find () && m.groupCount() >= 1) {
                 rankingDistributionCount++;
                 rankingDistributionTime += Integer.parseInt(m.group(1));
                 totalParserTime += (System.currentTimeMillis() - start);
@@ -385,7 +385,7 @@ public class LogParserPLASMA implements LogParser{
             }
             m = adv1.matcher (logLine);
             
-            if (m.find ()) {
+            if (m.find() && m.groupCount() >= 10) {
                 indexedSites++;
                 indexedWordSum += Integer.parseInt(m.group(1));
                 indexedSiteSizeSum += Integer.parseInt(m.group(5));
@@ -419,7 +419,7 @@ public class LogParserPLASMA implements LogParser{
         } else if (logLevel.equals("SEVERE")){
             m = e1.matcher (logLine);
             
-            if (m.find ()) {
+            if (m.find () && m.groupCount() >= 1) {
                 if (m.group(1).equals("leftchild")) leftChildTwiceCount++;
                 else if (m.group(1).equals("rightchild")) rightChildTwiceCount++;
                 totalParserTime += (System.currentTimeMillis() - start);
