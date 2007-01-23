@@ -581,7 +581,7 @@ Start URL==Start URL
 Intention/Description==Absicht/Beschreibung
 Recently started remote crawls, finished:==Gerade gestartete Remote-Crawls anderer Peers, beendete:
 Remote Crawling Peers:==Remote-Crawl Peers:
-No remote crawl peers availible.==Kein Peer zum Remote-Crawl erreichbar.
+No remote crawl peers available.==Kein Peer zum Remote-Crawl erreichbar.
 peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.
 Idle Peers==Unt&auml;tige Peers
 Busy Peers==Besch&auml;tigte Peers
@@ -822,7 +822,7 @@ Use this language==Diese Sprachdatei sofort benutzen
 "Install"==Installieren
 Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
 Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
-#-----------------------------
+#---------------------------
 
 #File: Lab.html
 #---------------------------
@@ -834,7 +834,57 @@ You may try out these things but please do not care about bugs.==Sie k&ouml;nnen
 The <a==Das <a
 Advanced <a==erweiterte <a
 Configuration</a>==Einstellungen</a>
-#-----------------------------
+#---------------------------
+
+#File: LogStatistics_p.html
+#---------------------------
+Log Statistics==Log Statistik
+Needed \#\[totalParserTime\]\# \#\[totalParserTimeUnit\]\# to parse \#\[totalParserRuns\]\# Entries\#\(avgExists\)\#:: \(\#\[avgParserRunsPerMinute\]\#/sec\)==#[totalParserTime]# #[totalParserTimeUnit]# gebraucht, um #[totalParserRuns]# Eintr&auml;ge zu durchsuchen#(avgExists)#:: (#[avgParserRunsPerMinute]#/Sek).
+#DHT==DHT
+#URLs==URLs
+URLs Received:==Empfangene URLs:
+URLs Requested:==Angeforderte URLs:
+URLs Blocked:==Blockierte URLs:
+Total time:==Gesamte Zeit:
+URLs Sent:==Versandte URLs:
+RWIs / Words==RWIs / W&ouml;rter
+Words received:==Empfangene W&ouml;rter:
+RWIs reveived:==Empfangene RWIs:
+RWIs blocked:==Blockierte RWIs:
+RWIs selected:==Ausgew&auml;hlte RWIs:
+Selection time:==Auswahlzeit:
+Chunks / Protocol==Chunks / Protokoll
+Sent traffic:==Ausgehender Traffic:
+Total peers selected:==Insgesamt gew&auml;hlte Peers:
+DHT Distance: Min/Average/Max:==DHT Distanz: Min/Durschnitt/Max:
+Not enough peers found for distribution:==Nicht genug Peers gefunden zur Verteilung:
+Peers busy:==Besch&auml;ftigte Peers:
+Distribution failed:==Fehlgeschlagene Verteilung: 
+Rejected index receives:==Abgelehnte Index Empf&auml;nge:
+Rejected index receives from:==Abgelehnte Index Empf&auml;nge von:
+Sent indexes:==Versandte Indexe:
+Ranking Distribution==Ranking Verteilung
+Submitted ranking files:==Verschickte Ranking Dateien:
+Total time submitting ranking files:==Insgesamte Versandzeit der Ranking Dateien: 
+Failed ranking distributions:==Fehlgeschlagene Ranking Verteilung:
+Indexing</legend>==Indexierung</legend>
+Indexed sites:==Indexierte Seiten:
+Size of indexed sites:==Gr&ouml;sse der indexierten Seiten:
+Indexed words:==Indexierte W&ouml;rter:
+Indexed anchors:==Indexierte Verweise:
+Total stacking time:==Insgesamte Sammelzeit:
+Total parsing time:==Insgesamte Parsing Zeit:
+Total indexing time:==Insgesamte Indexierungs Zeit:
+Total storage time:==Insgesamte Speicher Zeit:
+Errors==Fehler
+
+Tried to create left child node twice
+Tried to create right child node twice
+
+#hat jemand ne passende Übersetzung dafür? 
+
+Malformed URL Exception==Missgeformte URL
+#---------------------------
 
 #File: Messages_p.html
 #---------------------------
@@ -1226,24 +1276,31 @@ Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zum Crawl
 #File: SearchStatistics_p.html
 #---------------------------
 Search Statistics Menu==Such Statistik Men&uuml;
-Local&nbsp;Searches==Lokale Suche
-Remote&nbsp;Searches==Remote Suche
+Local&nbsp;Search&nbsp;Log==Lokale Suche Log
+Local&nbsp;Search&nbsp;Host&nbsp;Tracker==Lokale Suche Host Tracker
+Remote&nbsp;Search&nbsp;Log==Remote Suche Log
+Remote&nbsp;Search&nbsp;Host&nbsp;Tracker==Remote Suche Host Tracker
 Search Statistics</h2>==Such Statistik</h2>
 You can monitor search attempts at your own peer.==Sie k&ouml;nnen hier die Suchanfragen an Ihren Peer einsehen.
 Local statistics apply for search attempts at your own search portal,==Die lokale Statistik zeigt Suchanfragen, die von Ihrem eigenen Such Portal gestartet wurden.
 and remote statistics show search requests form other peer. Not all remote peers ask your peer during a global search,==Die Remote Statistik zeigt Suchanfragen von anderen Peers an. Nicht alle Peers fragen w&auml;hrend einer Suche Ihren Peer an, 
 therefore your cannot have a global view over all search requests within the complete YaCy network.==deswegen k&ouml;nnen Sie keine Gesamt&uuml;bersicht f&uuml;r das komplette YaCy Netzwerk haben.
 Search Statistics: Local Searches==Such Statistik: Lokale Suche
+Search Statistics: Local Searche Tracker==Such Statistik: Lokale Suche Tracker
 This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgef&uuml;hrt wurden. 
 Showing \#\[num\]\# entries from a total of \#\[total\]\# Requests.==Es werden #[num]# Eintr&auml;ge von insgesamt #[total]# Anfragen angezeigt.
 Requesting Host==Anfragender Host
-Date==Datum
+Date</td>==Datum</td>
+Offset==Versatz
 Expected Results==Erwartete Ergebnisse
 Returned Results==Gefundene Ergebnisse
 Expected Time==Erwartete Zeit
 Used Time==Gebrauchte Zeit
 Search Words==Such Wort
+Count==Anzahl
+Access Dates==Zugriffsdaten
 Search Statistics: Remote Searches==Such Statistik: Remote Suche
+Search Statistics: Remote Searche Tracker==Such Statistik: Remote Suche Tracker
 This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
 
 #---------------------------
@@ -1823,7 +1880,8 @@ PPM \(Pages Per Minute\)==PPM (Seiten pro Minute)
 RWI RAM \(Word Cache\)==RWI RAM (W&ouml;rter Zwischenspeicher)
 Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.==Fehler im Profil Management. Bitte stoppen Sie YaCy, l&ouml;schen Sie die Datei DATA/PLASMADB/crawlProfiles0.db und starten Sie YaCy neu. 
 Error:==Fehler:
-Application not yet initialized. Sorry. Please wait some seconds and repeat the request.==Anwendung noch nicht initialisiert. Bitte warten Sie noch ein paar Sekunden und versuchen es dann erneut. 
+Application not yet initialized. Sorry. Please wait some seconds and repeat==Anwendung noch nicht initialisiert. Bitte warten Sie noch ein paar Sekunden und versuchen 
+the request.==es dann erneut.
 ERROR: Crawl filter==FEHLER: Crawl Maske
 does not match with crawl root==stimmt nicht &uuml;berein mit dem Crawlstart
 Please try again with different filter.==Bitte probieren Sie es erneut mit einer anderen Maske.
