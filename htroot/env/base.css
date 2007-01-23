@@ -1,8 +1,8 @@
 /* base.css - Layout and general style */
 /* 
-	$LastChangedDate:  $
+	$LastChangedDate:  23.01.2007 $
 	$LastChangedRevision:  $
-	$LastChangedBy:  $
+	$LastChangedBy:  netbude $
 */
 
 /*
@@ -213,10 +213,6 @@ div.ProgressBar {
 div.ProgressBarFill {
 	margin:0px;
 	height:100%; /*not valid value for Netscape 8*/
-}
-
-div.CacheAdminInfo {
-  margin-top:1em;
 }
 
 div.bookmarkList, div.Tags {
@@ -571,23 +567,23 @@ body#ViewLog pre {
 }
 
 body#ViewLog pre.logSevere {
-  color:red;
+  color:#ff0000;
 }
 
 body#ViewLog pre.logWarning {
-  color:orange
+  color:#FF9C60;
 }
 
 body#ViewLog pre.logSystem {
-  color:black;
+  color:#000000;
 }
 
 body#ViewLog pre.logInfo {
-  color:black;
+  color:#000000;
 }
 
 body#ViewLog pre.logDebug {
-  color:black;
+  color:#000000;
 }
 
 body#QuickCrawlLink p, body#QuickCrawlLink h4 {
@@ -597,6 +593,14 @@ body#QuickCrawlLink p, body#QuickCrawlLink h4 {
 body#Wiki form fieldset p.help{
 	clear:both;
 }
+/* WatchCrawler_p.html */
+body#watchCrawler table.watchCrawler {float:left; margin: 0px 5px 5px 0px;}
+body#watchCrawler p.watchCrawler {clear:both;}
+body#watchCrawler p#crawlingQueues{clear:both; margin: 20px 0px 0px 0px;}
+
+/* CacheAdmin_p.html */
+div.CacheAdminInfo {margin-top:1em;}
+div.CacheAdminTree{}
 
 
 /* other ------------------------------------*/
