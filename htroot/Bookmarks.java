@@ -115,16 +115,12 @@ public class Bookmarks {
             if(bookmark != null){
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
+                if(user!=null) bookmark.setOwner(user.getUserName());
+                
                 if(((String) post.get("public")).equals("public")){
                     bookmark.setPublic(true);
                     
-                    // create a news message
-                    HashMap map = new HashMap();
-                    map.put("url", url.replace(',', '|'));
-                    map.put("title", title.replace(',', ' '));
-                    map.put("description", description.replace(',', ' '));
-                    map.put("tags", tagsString.replace(',', ' '));
-                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord("bkmrkadd", map));
+                    publishNews(url, title, description, tagsString);
                 }else{
                     bookmark.setPublic(false);
                 }
@@ -283,6 +279,16 @@ public class Bookmarks {
     }
     prop.put("bookmarks", count);
     return prop;
+    }
+
+    private static void publishNews(String url, String title, String description, String tagsString) {
+        // create a news message
+        HashMap map = new HashMap();
+        map.put("url", url.replace(',', '|'));
+        map.put("title", title.replace(',', ' '));
+        map.put("description", description.replace(',', ' '));
+        map.put("tags", tagsString.replace(',', ' '));
+        yacyCore.newsPool.publishMyNews(new yacyNewsRecord("bkmrkadd", map));
     }
 
 }
