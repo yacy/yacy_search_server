@@ -208,7 +208,7 @@ public class StatusService extends AbstractService {
         extractMessageContext(AUTHENTICATION_NEEDED);        	
     	
         // return the peer hash
-    	return yacyCore.seedDB.mySeed.getHexHash();
+    	return yacyCore.seedDB.mySeed.hash;
     }
     
 }
