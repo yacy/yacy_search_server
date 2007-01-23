@@ -72,7 +72,8 @@ public class Bookmarks {
     int max_count=10;
     String tagName="";
     int start=0;
-    boolean isAdmin=switchboard.verifyAuthentication(header, true);
+    userDB.Entry user=switchboard.userDB.getUser(header);
+    boolean isAdmin=(switchboard.verifyAuthentication(header, true) || user!= null && user.hasBookmarkRight());
     
     //defaultvalues
     prop.put("mode", 0);

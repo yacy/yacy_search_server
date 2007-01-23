@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
+import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
@@ -169,7 +170,10 @@ public final class userDB {
 		}
 		return null;
 	}
-    public Entry getUser(String auth, String ip, String cookies){
+        public Entry getUser(httpHeader header){
+            return getUser((String) header.get(httpHeader.AUTHORIZATION), (String)header.get("CLIENTIP"), header.getHeaderCookies());
+        }
+        public Entry getUser(String auth, String ip, String cookies){
         Entry entry=null;
         if(auth != null)
             entry=proxyAuth(auth);
@@ -187,9 +191,9 @@ public final class userDB {
     public boolean hasAdminRight(String auth, String ip, String cookies){
         Entry entry=getUser(auth, ip, cookies);
         if(entry != null)
-            return true;
+            return entry.hasAdminRight();
         else if(cookieAdminAuth(cookies))
-            return true;
+            return entry.hasAdminRight();
         else
             return false;
     }
