@@ -117,7 +117,7 @@ public class yacysearch {
 
             // we create empty entries for template strings
             final serverObjects prop = new serverObjects();
-            prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
+            prop.putASIS("promoteSearchPageGreeting", promoteSearchPageGreeting);
             prop.put("former", "");
             prop.put("count", 10);
             prop.put("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
@@ -458,7 +458,7 @@ public class yacysearch {
         for (int i=0; i<linkcount; i++)
             prop.put("type_results_" + i + "_authorized", (authenticated) ? 1 : 0);
 
-        prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
+        prop.putASIS("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("former", wikiCode.replaceXMLEntities(post.get("search", "")));
         prop.put("count", count);
         prop.put("order", order);

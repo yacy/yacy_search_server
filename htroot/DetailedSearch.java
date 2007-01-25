@@ -365,7 +365,7 @@ public class DetailedSearch {
         prop.put("num-results_ranking", localRanking.toExternalURLGet("local").toString());
 
         // return rewrite properties
-        prop.put("promoteSearchPageGreeting", env.getConfig("promoteSearchPageGreeting", ""));
+        prop.putASIS("promoteSearchPageGreeting", env.getConfig("promoteSearchPageGreeting", ""));
 
         // adding some additional properties needed for the rss feed
         String hostName = (String) header.get("Host","localhost");
