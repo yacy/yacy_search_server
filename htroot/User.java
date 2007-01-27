@@ -59,7 +59,7 @@ import de.anomic.server.servletProperties;
 
 public class User{
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static servletProperties respond(httpHeader header, serverObjects post, serverSwitch env) {
         servletProperties prop = new servletProperties();
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         userDB.Entry entry=null;
@@ -74,7 +74,7 @@ public class User{
         	prop.put("logged-in_identified-by", 1);
         //try via cookie
         }else{
-            entry=sb.userDB.cookieAuth(userDB.getLoginToken(header.getHeaderCookies()));
+            entry=sb.userDB.cookieAuth(header.getHeaderCookies());
             prop.put("logged-in_identified-by", 2);
             //try via ip
             if(entry == null){

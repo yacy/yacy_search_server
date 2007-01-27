@@ -617,10 +617,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             requestHeader.put("PATH", path);
                             // in case that there are no args given, args = null or empty hashmap
                             Object tmp = invokeServlet(targetClass, requestHeader, args); 
-                            if(tmp instanceof serverObjects){
-                                tp=new servletProperties((serverObjects)tmp);
-                            }else{
+                            if(tmp instanceof servletProperties){
                                 tp=(servletProperties)tmp;
+                            }else{
+                                tp=new servletProperties((serverObjects)tmp);
                             }
                             // if no args given , then tp will be an empty Hashtable object (not null)
                             if (tp == null) tp = new servletProperties();
