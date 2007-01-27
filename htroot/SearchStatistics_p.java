@@ -32,11 +32,13 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
+import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public class SearchStatistics_p {
  
@@ -109,6 +111,10 @@ public class SearchStatistics_p {
                 }
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.put("page_list_" + entCount + "_host", host);
+                if (page == 4) {
+                    yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
+                    prop.put("page_list_" + entCount + "_peername", remotepeer);
+                }
                 prop.put("page_list_" + entCount + "_count", new Integer(handles.size()).toString());
                 prop.put("page_list_" + entCount + "_dates", handlestring);
                 // next
