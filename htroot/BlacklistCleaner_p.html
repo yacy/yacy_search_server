@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Blacklist Manager</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="BlacklistCleaner">
+    #%env/templates/header.template%#
+    #%env/templates/submenuBlacklist.template%#
+    
+    <h2>Blacklist Cleaner</h2>
+    <p>Remove illegal blacklist-entries</p>
+    
+    <form action="BlacklistCleaner_p.html" method="post" enctype="multipart/form-data">#(disabled)#
+      <fieldset class="selectList"><legend>Check list</legend>
+        <div style="display:inline;">
+          <select name="listNames" size="1">
+            #{blacklists}#
+            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+            #{/blacklists}#
+          </select>
+          <input type="submit" name="list" value="Check" />
+        </div>::#(/disabled)#
+      </fieldset>
+    
+      #(results)#
+      ::<!-- 1: Show results -->
+      <fieldset><legend>#[entries]# Illegal Entries for #[blEngine]#</legend>
+        #(modified)#
+        ::<p>Deleted #[delCount]# entries</p>
+        ::<p>Altered #[alterCount] entries!</p>
+        #(/modified)#
+        
+        #(disabled)#
+        <dl>
+          #{entries}# 
+          <dt>
+            <label for="select#[entry]#" class="error">#(error)#Two wildcards in host-part::Either subdomain <u>or</u> wildcard::Path is invalid Regex#(/error)#</label>
+            <input type="checkbox" name="select#[entry]#" id="select#[entry]#" checked="checked" />
+          </dt>
+          <dd><input type="text" name="entry#[entry]#" value="#[entry]#" size="50" /></dd>
+          #{/entries}# 
+          <dt><input type="submit" name="delete" value="Delete Selected" /></dt>
+          <!--<dd><input type="submit" name="alter" value="Change Selected" /></dd>-->
+        </dl>::#(/disabled)#
+      </fieldset>
+      ::<!-- 2: Error -->
+      <span class="error">No Blacklist selected</span>
+      #(/results)#
+    </form>
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>
