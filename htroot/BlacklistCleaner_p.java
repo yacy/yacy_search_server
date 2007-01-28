@@ -73,6 +73,8 @@ public class BlacklistCleaner_p {
     private static final int ERR_TWO_WILDCARDS_IN_HOST = 0;
     private static final int ERR_SUBDOMAIN_XOR_WILDCARD = 1;
     private static final int ERR_PATH_REGEX = 2;
+    private static final int ERR_WILDCARD_BEGIN_OR_END = 3;
+    private static final int ERR_HOST_WRONG_CHARS = 4;
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
@@ -123,7 +125,7 @@ public class BlacklistCleaner_p {
                 String s;
                 while (it.hasNext()) {
                     s = (String)it.next();
-                    prop.put(RESULTS + DISABLED + ENTRIES + i + "_error", ((Integer)ies.get(s)).intValue());
+                    prop.put(RESULTS + DISABLED + ENTRIES + i + "_error", ((Integer)ies.get(s)).longValue());
                     prop.putSafeXML(RESULTS + DISABLED + ENTRIES + i + "_entry", s);
                     i++;
                 }
@@ -177,18 +179,29 @@ public class BlacklistCleaner_p {
                 }
                 
                 int i = host.indexOf("*");
+                
+                // check whether host begins illegally
+                if (!host.matches("([A-Za-z0-9_-]+|\\*)(\\.([A-Za-z0-9_-]+|\\*))*")) {
+                    if (i == 0 && host.length() > 1 && host.charAt(1) != '.') {
+                        r.put(s, new Integer(ERR_SUBDOMAIN_XOR_WILDCARD));
+                        continue;
+                    } else {
+                        r.put(s, new Integer(ERR_HOST_WRONG_CHARS));
+                        continue;
+                    }
+                }
+                
                 // in host-part only full sub-domains may be wildcards
                 if (host.length() > 0 && i > -1) {
-                    if (host.length() > i + 1)
-                        if (host.charAt(i + 1) != '.') {
-                            r.put(s, Integer.valueOf(ERR_SUBDOMAIN_XOR_WILDCARD));
-                            continue;
-                        }
-                    if (i > 0)
-                        if (host.charAt(i - 1) != '.') {
-                            r.put(s, Integer.valueOf(ERR_SUBDOMAIN_XOR_WILDCARD));
-                            continue;
-                        }
+                    if (!(i == 0 || i == host.length() - 1)) {
+                        r.put(s, new Integer(ERR_WILDCARD_BEGIN_OR_END));
+                        continue;
+                    }
+                    
+                    if (i == host.length() - 1 && host.length() > 1 && host.charAt(i - 1) != '.') {
+                        r.put(s, new Integer(ERR_SUBDOMAIN_XOR_WILDCARD));
+                        continue;
+                    }
                 }
                 
                 // check for double-occurences of "*" in host
