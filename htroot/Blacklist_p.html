@@ -6,6 +6,8 @@
   </head>
   <body id="Blacklist">
     #%env/templates/header.template%#
+    #%env/templates/submenuBlacklist.template%#
+    
     <h2>Blacklist</h2>
     <p>Used Blacklist engine: <span class="settingsValue">#[blacklistEngine]#</span></p>
     <p>
@@ -28,8 +30,8 @@
           <input type="submit" name="selectList" value="select" />
         </div>::#(/disabled)#
         <div style="display:inline;">
-          New list:
-          <input type="text" name="newListName" />
+          <label for="newListName">New list</label>:
+          <input type="text" id="newListName" name="newListName" />
           <input type="submit" name="createNewList" value="create" />
         </div>
       </form>
