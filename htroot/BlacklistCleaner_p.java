@@ -206,7 +206,7 @@ public class BlacklistCleaner_p {
                 
                 // check for double-occurences of "*" in host
                 if (host.indexOf("*", i + 1) > -1) {
-                    r.put(s, Integer.valueOf(ERR_TWO_WILDCARDS_IN_HOST));
+                    r.put(s, new Integer(ERR_TWO_WILDCARDS_IN_HOST));
                     continue;
                 }
                 
@@ -214,7 +214,7 @@ public class BlacklistCleaner_p {
                 try {
                     Pattern.compile(path);
                 } catch (PatternSyntaxException e) {
-                    r.put(s, Integer.valueOf(ERR_PATH_REGEX));
+                    r.put(s, new Integer(ERR_PATH_REGEX));
                     continue;
                 }
             }
