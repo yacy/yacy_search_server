@@ -244,7 +244,7 @@ public class BookmarkService extends AbstractService {
         if (url == null || url.length()==0) throw new IllegalArgumentException("The url must not be null or empty");
         
         // create new bookmark object
-        bookmarksDB.Bookmark bookmark = getBookmarkDB().createBookmark(url);
+        bookmarksDB.Bookmark bookmark = getBookmarkDB().createBookmark(url, "admin"); //FIXME: "admin" can be user.getUserName() for users with bookmarkrights 
         
         // set bookmark properties
         if(bookmark != null){

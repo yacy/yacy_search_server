@@ -91,6 +91,9 @@ public class bookmarksDB {
     public static String tagHash(String tagName){
         return plasmaCondenser.word2hash(tagName.toLowerCase());
     }
+    public static String tagHash(String tagName, String user){
+        return plasmaCondenser.word2hash(user+":"+tagName.toLowerCase());
+    }
     public static String dateToiso8601(Date date){
     	return new SimpleDateFormat("yyyy-MM-dd").format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z";
     }
@@ -407,6 +410,9 @@ public class bookmarksDB {
                 saveTag(tag);
             }
         }
+        return removeFromBookmarkCache(urlHash);
+    }
+    private boolean removeFromBookmarkCache(String urlHash) {
         try {
             if(bookmarkCache.containsKey(urlHash))
                 bookmarkCache.remove(urlHash);
@@ -416,9 +422,10 @@ public class bookmarksDB {
         	return false;
         }
     }
-    public Bookmark createBookmark(String url){
+    public Bookmark createBookmark(String url, String user){
         if (url == null || url.length() == 0) return null;
         Bookmark bk = new Bookmark(url);
+        bk.setOwner(user);
         return (bk.getUrlHash() == null || bk.getMap() == null) ? null : bk;
     }
     public Iterator tagIterator(boolean up){

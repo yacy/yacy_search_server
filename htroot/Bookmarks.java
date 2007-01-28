@@ -74,6 +74,15 @@ public class Bookmarks {
     int start=0;
     userDB.Entry user=switchboard.userDB.getUser(header);
     boolean isAdmin=(switchboard.verifyAuthentication(header, true) || user!= null && user.hasBookmarkRight());
+    String username="";
+    if(user != null)
+        username=user.getUserName();
+    else if(isAdmin)
+        username="admin";
+    
+    //redirect to userpage
+    if(username!="" &&(post == null || !post.containsKey("user")))
+        prop.put("LOCATION", "/Bookmarks.html?user="+username);
     
     //defaultvalues
     prop.put("mode", 0);
@@ -111,7 +120,7 @@ public class Bookmarks {
             }
             HashSet tags=listManager.string2hashset(tagsString);
         
-            bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url);
+            bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url, username);
             if(bookmark != null){
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
                 bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
