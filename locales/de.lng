@@ -54,7 +54,21 @@ file:==Datei:
 was removed from blacklist==wurde aus Blacklist entfernt
 was added to the blacklist==wurde zur Blacklist hinzugef&uuml;gt
 Activate this list for==Diese Liste ist g&uuml;ltig f&uuml;r
-#-----------------------------
+#---------------------------
+
+#File: BlacklistCleaner_p.html
+#---------------------------
+Blacklist Cleaner==Blacklist aufr&auml;men
+Remove illegal blacklist-entries==Entferne ung&uuml;ltige Eintr&auml;ge aus der Blacklist
+Check list==Liste testen
+"Check"=="Teste"
+Illegal Entries for==Ung&uuml;ltiger Eintr&auml;ge f&uuml;r
+Deleted \#\[delCount\]\# entries==#[delCount]# Eintr&auml;ge gel&ouml;scht
+Altered \#\[alterCount\]\# entries!==#[alterCount]# Eintr&auml;ge ge&auml;ndert
+Two wildcards in host-part::Either subdomain <u>or</u> wildcard::Path is invalid Regex::Wildcard not on begin or end::Host contains illegal chars==Zwei Wildcards im Host-Teil::Entweder Subdomain <u>oder</u> Wildcard::Pfad ist ung&uuml;ltige Regex::Wildcard nicht am Beginn oder Ende::Host enth&auml;lt ung&uuml;ltige Zeichen
+"Delete Selected"=="Markierte l&ouml;schen"
+No Blacklist selected==Es wurde keine Blacklist ausgew&auml;hlt
+#---------------------------
 
 #File: Blog.html
 #---------------------------
@@ -217,6 +231,7 @@ You do not need to provide any personal data here, but if you want to distribute
 #Jabber==Jabber
 #Yahoo!==Yahoo!
 #MSN==MSN
+#Skype==Skype
 Comment==Kommentar
 "Save"==Speichern
 You can use==Sie können
@@ -877,12 +892,8 @@ Total parsing time:==Insgesamte Parsing Zeit:
 Total indexing time:==Insgesamte Indexierungs Zeit:
 Total storage time:==Insgesamte Speicher Zeit:
 Errors==Fehler
-
-Tried to create left child node twice
-Tried to create right child node twice
-
-#hat jemand ne passende Übersetzung dafür? 
-
+Tried to create left child node twice==Doppelte Erzeugung des linken Tochterknoten wurde versucht
+Tried to create right child node twice==Doppelte Erzeugung des rechten Tochterknoten wurde versucht
 Malformed URL Exception==Missgeformte URL
 #---------------------------
 
@@ -1231,6 +1242,10 @@ embedded URLs, but since embedded image links are loaded by the browser==die auf
 this means that only embedded href-anchors are prefetched additionally.==trifft dies nur auf eingebettet HREF-Anker zu.
 Store to Cache==Speicher im Cache
 It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.==Es wird empfohlen diese Option immer zu aktivieren. Einzige Ausnahme: Sie haben einen zweiten Proxy als Cache laufen und YaCy soll im "Proxy-zu-Proxy"-Modus laufen.
+Do Local Text-Indexing==Lokales Text-Indexieren
+If this is on, all pages \(except private content\) that passes the proxy is indexed.==Wenn dieses aktiviert ist, werden alle Seiten (ausser private), die den Proxy passieren, indexiert. 
+Do Local Media-Indexing==Lokales Medien-Indexieren
+This is the same as for Local Text-Indexing, but switches only the indexing of media content on.==Dies ist fast das Gleiche wie beim lokalen Text-Indexieren, nur, dass medialer Inhalt indexiert wird.
 Do Remote Indexing==Remote Indexierung
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler andere Peers anfragen und als remote Indexierer f&uuml;r Ihren Crawl nutzen.
 If you need your crawling results locally, you should switch this off.==Sollten Sie Ihre Crawling Ergebnisse lokal ben&ouml;tigen, dann deaktivieren Sie diese Funktion.
@@ -1246,10 +1261,12 @@ The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DAT
 Please delete that file and restart.==Bitte l&ouml;schen Sie diese Datei und starten Sie YaCy neu.
 Pre-fetch is now set to depth==Proxy Indexierung erfolgt nun bis zu einer Tiefe von
 Caching is now \#\(caching\)\#off\:\:on\#\(/caching\)\#.==Proxy Speichern im Cache ist nun #(caching)#aus::an#(/caching)#.
+Local Text Indexing is now \#\(indexingLocalText\)\#off::on==Lokales Text Indexieren ist nun #(indexingLocalText)#aus::an
+Local Media Indexing is now \#\(indexingLocalMedia\)\#off::on==Lokales Medien Indexieren ist nun #(indexingLocalMedia)#aus::an
+Remote Indexing is now \#\(indexingRemote\)\#off::on==Remote-Indexieren ist nun #(indexingRemote)#aus::an
 Cachepath is now set to \'\#\[return\]\#\'.</strong> Please move the old data in the new directory.==Der Cache ist nun im Verzeichnis '#[return]#'.</strong> Bitte verschieben Sie Ihre alten Daten in das neue Verzeichnis.
 Cachesize is now set to \#\[return\]\#MB.==Die Cache Gr&ouml;sse ist nun auf #[return]#MB gesetzt.
 Changes will take effect after restart only.==&Auml;nderungen werden erst nach einem Neustart von YaCy wirksam.
-Remote Indexing is now \#\(crawlOrder\)\#off::on==Remote-Indexieren ist nun #(crawlOrder)#aus::an
 An error has occurred:==Es trat ein Fehler auf:
 You can see a snapshot of recently indexed pages==Sie k&ouml;nnen sich Voransichten von frisch indexierten Seiten
 on the==auf der
@@ -1847,14 +1864,15 @@ The profile can't be fetched.==Das Profil kann nicht geladen werden.
 The peer==Der Peer
 is not online.==ist nicht online.
 This is the Profile of==Dies ist das Profil von
-Name==Name
-Nick Name==Nick Name
-Homepage==Homepage
-eMail==eMail
-ICQ==ICQ
-Jabber==Jabber
-Yahoo!==Yahoo!
-MSN==MSN
+#Name==Name
+#Nick Name==Nick Name
+#Homepage==Homepage
+#eMail==eMail
+#ICQ==ICQ
+#Jabber==Jabber
+#Yahoo!==Yahoo!
+#MSN==MSN
+#Skype==Skype
 Comment==Kommentar
 #-----------------------------
 
@@ -2096,6 +2114,13 @@ Newsletters==Newsletter
 Download YaCy==YaCy herunterladen
 #YaCy Wiki==YaCy Wiki
 >Contact==>Kontakt
+#-----------------------------
+
+#File: env/templates/submenuBlacklist.template
+#---------------------------
+Blacklist Menu==Blacklist Men&uuml;
+Manage Blacklists==Blacklist verwalten
+Blacklist Cleaner==Blacklist aufr&auml;men
 #-----------------------------
 
 #File: env/templates/submenuConfig.template
