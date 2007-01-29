@@ -26,13 +26,11 @@ package de.anomic.kelondro;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 public class kelondroCachedObjectMap {
-    private kelondroMap db;
+    private kelondroMapObjects db;
     private HashMap cache;
-    public kelondroCachedObjectMap(kelondroMap db){
+    public kelondroCachedObjectMap(kelondroMapObjects db){
         this.db=db;
         cache=new HashMap();
     }

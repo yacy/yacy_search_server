@@ -78,16 +78,16 @@ import de.anomic.kelondro.kelondroCachedObject;
 import de.anomic.kelondro.kelondroCachedObjectMap;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.net.URL;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
 public class bookmarksDB {
-    kelondroMap tagsTable;
+    kelondroMapObjects tagsTable;
     //kelondroMap bookmarksTable;
     kelondroCachedObjectMap bookmarksTable;
-    kelondroMap datesTable;
+    kelondroMapObjects datesTable;
     HashMap tagCache;
     HashMap bookmarkCache;
     
@@ -135,17 +135,17 @@ public class bookmarksDB {
         bookmarkCache=new HashMap();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
-        this.bookmarksTable = new kelondroCachedObjectMap(new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false)));
+        this.bookmarksTable = new kelondroCachedObjectMap(new kelondroMapObjects(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false), 500));
 
         // tags
         tagsFile.getParentFile().mkdirs();
         boolean tagsFileExisted = tagsFile.exists();
-        this.tagsTable = new kelondroMap(kelondroDyn.open(tagsFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
+        this.tagsTable = new kelondroMapObjects(kelondroDyn.open(tagsFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false), 500);
         if (!tagsFileExisted) rebuildTags();
 
         // dates
         boolean datesExisted = datesFile.exists();
-        this.datesTable = new kelondroMap(kelondroDyn.open(datesFile, bufferkb * 1024, preloadTime, 20, 256, '_', true, false));
+        this.datesTable = new kelondroMapObjects(kelondroDyn.open(datesFile, bufferkb * 1024, preloadTime, 20, 256, '_', true, false), 500);
         if (!datesExisted) rebuildDates();
         
     }
@@ -195,13 +195,11 @@ public class bookmarksDB {
     public Tag loadTag(String hash){
         Map map;
         Tag ret=null;
-        try {
-            map = tagsTable.get(hash);
-            if(map!=null){
-                ret=new Tag(hash, map);
-                tagCache.put(hash, ret);
-            }
-        } catch (IOException e) {}
+        map = tagsTable.getMap(hash);
+        if(map!=null){
+            ret=new Tag(hash, map);
+            tagCache.put(hash, ret);
+        }
         
         return ret;
     }
@@ -284,14 +282,9 @@ public class bookmarksDB {
     }
     public bookmarksDate getDate(String date){
         Map map;
-        try {
-            map=datesTable.get(date);
-            if(map==null) return new bookmarksDate(date);
-            return new bookmarksDate(date, map);
-        } catch (IOException e) {
-            return null;
-        }
-        
+        map=datesTable.getMap(date);
+        if(map==null) return new bookmarksDate(date);
+        return new bookmarksDate(date, map);
     }
     public boolean renameTag(String oldName, String newName){
     	String tagHash=tagHash(oldName);

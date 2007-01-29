@@ -58,7 +58,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.server.serverCodings;
 
 public final class userDB {
@@ -66,7 +66,7 @@ public final class userDB {
     public static final int USERNAME_MAX_LENGTH = 128;
     public static final int USERNAME_MIN_LENGTH = 4;
     
-    kelondroMap userTable;
+    kelondroMapObjects userTable;
     private final File userTableFile;
     private final int bufferkb;
     private long preloadTime;
@@ -78,7 +78,7 @@ public final class userDB {
         this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
         userTableFile.getParentFile().mkdirs();
-        this.userTable = new kelondroMap(kelondroDyn.open(userTableFile, bufferkb * 1024, preloadTime, 128, 256, '_', true, false));
+        this.userTable = new kelondroMapObjects(kelondroDyn.open(userTableFile, bufferkb * 1024, preloadTime, 128, 256, '_', true, false), 10);
     }
     
     public int dbCacheNodeChunkSize() {
@@ -96,7 +96,7 @@ public final class userDB {
         } catch (IOException e) {}
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
         userTableFile.getParentFile().mkdirs();
-        userTable = new kelondroMap(kelondroDyn.open(userTableFile, this.bufferkb, preloadTime, 256, 512, '_', true, false));
+        userTable = new kelondroMapObjects(kelondroDyn.open(userTableFile, this.bufferkb, preloadTime, 256, 512, '_', true, false), 10);
     }
     
     public void close() {
@@ -119,13 +119,9 @@ public final class userDB {
         if(userName.length()>128){
             userName=userName.substring(0, 127);
         }
-        try {
-            Map record = userTable.get(userName);
-            if (record == null) return null;
-            return new Entry(userName, record);
-        } catch (IOException e) {
-            return null;
-        }
+        Map record = userTable.getMap(userName);
+        if (record == null) return null;
+        return new Entry(userName, record);
     }    
     
     public Entry createEntry(String userName, HashMap userProps) throws IllegalArgumentException{

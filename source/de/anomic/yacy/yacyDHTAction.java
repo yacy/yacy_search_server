@@ -145,6 +145,7 @@ public class yacyDHTAction implements yacyPeerAction {
                     if (s.getFlagAcceptRemoteIndex()) return s;
                 }
             } catch (kelondroException e) {
+                System.out.println("DEBUG acceptRemoteIndexSeedEnum:" + e.getMessage());
                 yacyCore.log.logSevere("database inconsistency (" + e.getMessage() + "), re-set of db.");
                 seedDB.resetActiveTable();
                 return null;

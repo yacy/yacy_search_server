@@ -79,7 +79,7 @@ import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
@@ -1324,9 +1324,9 @@ public final class yacy {
             String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
                 File dbFile = new File(yacyDBPath,dbFileNames[i]);
-                kelondroMap db = new kelondroMap(new kelondroDyn(dbFile, (1024 * 0x400) / 3, 3000, yacySeedDB.commonHashLength, 480, '#', true, false), yacySeedDB.sortFields, yacySeedDB.accFields);
+                kelondroMapObjects db = new kelondroMapObjects(new kelondroDyn(dbFile, (1024 * 0x400) / 3, 3000, yacySeedDB.commonHashLength, 480, '#', true, false), 500, yacySeedDB.sortFields, yacySeedDB.accFields);
                 
-                kelondroMap.mapIterator it;
+                kelondroMapObjects.mapIterator it;
                 it = db.maps(true, false);
                 while (it.hasNext()) {
                     Map dna = (Map) it.next();

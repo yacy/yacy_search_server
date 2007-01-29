@@ -57,13 +57,13 @@ import java.util.Map;
 
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroMapObjects;
 
 public class plasmaCrawlRobotsTxt {
     
     public static final String ROBOTS_DB_PATH_SEPARATOR = ";";    
     
-    kelondroMap robotsTable;
+    kelondroMapObjects robotsTable;
     private final File robotsTableFile;
     private int bufferkb;
     private long preloadTime;
@@ -73,7 +73,7 @@ public class plasmaCrawlRobotsTxt {
         this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMap(kelondroDyn.open(robotsTableFile, bufferkb * 1024, preloadTime, 256, 512, '_', true, false));
+        robotsTable = new kelondroMapObjects(kelondroDyn.open(robotsTableFile, bufferkb * 1024, preloadTime, 256, 512, '_', true, false), 100);
     }
     
     public int cacheNodeChunkSize() {
@@ -99,7 +99,7 @@ public class plasmaCrawlRobotsTxt {
         } catch (IOException e) {}
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMap(kelondroDyn.open(robotsTableFile, this.bufferkb, preloadTime, 256, 512, '_', true, false));
+        robotsTable = new kelondroMapObjects(kelondroDyn.open(robotsTableFile, this.bufferkb, preloadTime, 256, 512, '_', true, false), 100);
     }
     
     public void close() {
@@ -124,14 +124,12 @@ public class plasmaCrawlRobotsTxt {
     
     public Entry getEntry(String hostName) {
         try {
-            Map record = robotsTable.get(hostName);
+            Map record = robotsTable.getMap(hostName);
             if (record == null) return null;
             return new Entry(hostName, record);
-        } catch (IOException e) {
-            return null;
         } catch (kelondroException e) {
-        		resetDatabase();
-        		return null;
+        	resetDatabase();
+        	return null;
         }
     }    
     

@@ -78,7 +78,7 @@ import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.net.URL;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.ResourceInfoFactory;
@@ -97,7 +97,7 @@ public final class plasmaHTCache {
     private static final int stackLimit = 150; // if we exceed that limit, we do not check idle
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
 
-    kelondroMap responseHeaderDB = null;
+    kelondroMapObjects responseHeaderDB = null;
     private final LinkedList cacheStack;
     private final Map cacheAge; // a <date+hash, cache-path> - relation
     public long curCacheSize;
@@ -174,7 +174,7 @@ public final class plasmaHTCache {
         // open the response header database
         File dbfile = new File(this.cachePath, "responseHeader.db");
         try {
-            this.responseHeaderDB = new kelondroMap(new kelondroDyn(dbfile, bufferkb * 0x400, preloadTime, yacySeedDB.commonHashLength, 150, '#', true, false));
+            this.responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, bufferkb * 0x400, preloadTime, yacySeedDB.commonHashLength, 150, '#', true, false), 500);
         } catch (IOException e) {
             this.log.logSevere("the request header database could not be opened: " + e.getMessage());
             System.exit(0);
@@ -512,7 +512,7 @@ public final class plasmaHTCache {
         String urlHash = plasmaURL.urlHash(url.toNormalform());
         
         // loading data from database
-        Map hdb = this.responseHeaderDB.get(urlHash);
+        Map hdb = this.responseHeaderDB.getMap(urlHash);
         if (hdb == null) return null;
         
         // generate the cached object
@@ -752,11 +752,7 @@ public final class plasmaHTCache {
             if (url != null) return url;
             // try responseHeaderDB
             Map hdb;
-            try {
-               hdb = this.responseHeaderDB.get(urlHash);
-            } catch (IOException e) {
-               hdb = null;
-            }
+            hdb = this.responseHeaderDB.getMap(urlHash);
             if (hdb != null) {
                 Object origRequestLine = hdb.get(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
                 if ((origRequestLine != null)&&(origRequestLine instanceof String)) {

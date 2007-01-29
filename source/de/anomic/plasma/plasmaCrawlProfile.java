@@ -51,12 +51,12 @@ import java.util.Map;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.server.serverCodings;
 
 public class plasmaCrawlProfile {
     
-    private kelondroMap profileTable;
+    private kelondroMapObjects profileTable;
     private HashMap domsCache;
     private File profileTableFile;
     private int bufferkb;
@@ -70,7 +70,7 @@ public class plasmaCrawlProfile {
         this.preloadTime = preloadTime;
         profileTableFile.getParentFile().mkdirs();
         kelondroDyn dyn = kelondroDyn.open(profileTableFile, bufferkb * 1024, preloadTime, crawlProfileHandleLength, 2000, '#', true, false);
-        profileTable = new kelondroMap(dyn);
+        profileTable = new kelondroMapObjects(dyn, 500);
         domsCache = new HashMap();
     }
     
@@ -96,7 +96,7 @@ public class plasmaCrawlProfile {
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
         kelondroDyn dyn = kelondroDyn.open(profileTableFile, bufferkb * 1024, preloadTime, crawlProfileHandleLength, 2000, '#', true, false);
-        profileTable = new kelondroMap(dyn);
+        profileTable = new kelondroMapObjects(dyn, 500);
     }
     
     public void close() {
@@ -222,13 +222,9 @@ public class plasmaCrawlProfile {
     }
     
     public entry getEntry(String handle) {
-        try {
-            Map m = profileTable.get(handle);
-            if (m == null) return null;
-            return new entry(m);
-        } catch (IOException e) {
-            return null;
-        }
+        Map m = profileTable.getMap(handle);
+        if (m == null) return null;
+        return new entry(m);
     }
     
     public class DomProfile {

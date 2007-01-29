@@ -67,7 +67,7 @@ import org.xml.sax.SAXException;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
-import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroMapObjects;
 
 public class blogBoard {
     
@@ -78,12 +78,12 @@ public class blogBoard {
     private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
 
-    private kelondroMap datbase = null;
+    private kelondroMapObjects datbase = null;
     
     public blogBoard(File actpath, int bufferkb, long preloadTime) {
     		new File(actpath.getParent()).mkdir();
         if (datbase == null) {
-            datbase = new kelondroMap(kelondroDyn.open(actpath, bufferkb / 2 * 0x40, preloadTime, keyLength, recordSize, '_', true, false));
+            datbase = new kelondroMapObjects(kelondroDyn.open(actpath, bufferkb / 2 * 0x40, preloadTime, keyLength, recordSize, '_', true, false), 500);
         }
     }
     
@@ -238,16 +238,12 @@ public class blogBoard {
 	return read(key, datbase);
     }
 
-    private entry read(String key, kelondroMap base) {
-    	try {
-            key = normalize(key);
-            if (key.length() > keyLength) key = key.substring(0, keyLength);
-            Map record = base.get(key);
-            if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new GregorianCalendar(GMTTimeZone).getTime(), "".getBytes());
-            return new entry(key, record);
-    	} catch (IOException e) {
-    		return null;
-    	}
+    private entry read(String key, kelondroMapObjects base) {
+    	key = normalize(key);
+        if (key.length() > keyLength) key = key.substring(0, keyLength);
+        Map record = base.getMap(key);
+        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new GregorianCalendar(GMTTimeZone).getTime(), "".getBytes());
+        return new entry(key, record);
     }
     
     public boolean importXML(String input) {

@@ -53,7 +53,7 @@ import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
-import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroMapObjects;
 
 public class messageBoard {
     
@@ -64,13 +64,13 @@ public class messageBoard {
     private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
 
-    private kelondroMap database = null;
+    private kelondroMapObjects database = null;
     private int sn = 0;
 
     public messageBoard(File path, int bufferkb, long preloadTime) {
         new File(path.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMap(kelondroDyn.open(path, bufferkb * 0x400, preloadTime, categoryLength + dateFormat.length() + 2, recordSize, '_', true, false));
+            database = new kelondroMapObjects(kelondroDyn.open(path, bufferkb * 0x400, preloadTime, categoryLength + dateFormat.length() + 2, recordSize, '_', true, false), 500);
         }
         sn = 0;
     }
@@ -216,39 +216,25 @@ public class messageBoard {
     }
 
     public String write(entry message) {
-	// writes a message and returns key
-	try {
-	    database.set(message.key, message.record);
-	    return message.key;
-	} catch (IOException e) {
-	    return null;
-	}
+        // writes a message and returns key
+        try {
+            database.set(message.key, message.record);
+            return message.key;
+        } catch (IOException e) {
+            return null;
+        }
     }
     
     public entry read(String key) {
-	try {
-	    Map record = database.get(key);
+        Map record = database.getMap(key);
 	    return new entry(key, record);
-	} catch (IOException e) {
-	    return null;
-	}
     }
-
-    /*
-    public boolean has(String key) {
-	try {
-	    return database.has(key);
-	} catch (IOException e) {
-            return false;
-	}
-    }
-    */
     
     public void remove(String key) {
-	try {
-	    database.remove(key);
-	} catch (IOException e) {
-	}
+        try {
+            database.remove(key);
+        } catch (IOException e) {
+        }
     }
     
     public Iterator keys(String category, boolean up) throws IOException {

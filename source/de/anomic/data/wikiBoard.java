@@ -53,7 +53,7 @@ import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
-import de.anomic.kelondro.kelondroMap;
+import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroRecords;
 
 public class wikiBoard {
@@ -65,18 +65,18 @@ public class wikiBoard {
     private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
 
-    private kelondroMap datbase = null;
-    private kelondroMap bkpbase = null;
+    private kelondroMapObjects datbase = null;
+    private kelondroMapObjects bkpbase = null;
     private static HashMap authors = new HashMap();
     
     public wikiBoard(File actpath, File bkppath, int bufferkb, long preloadTime) {
     		new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
-            datbase = new kelondroMap(kelondroDyn.open(actpath, bufferkb / 2 * 0x400, preloadTime, keyLength, recordSize, '_', true, false));
+            datbase = new kelondroMapObjects(kelondroDyn.open(actpath, bufferkb / 2 * 0x400, preloadTime, keyLength, recordSize, '_', true, false), 500);
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
-            bkpbase = new kelondroMap(kelondroDyn.open(bkppath, bufferkb / 2 * 0x400, preloadTime, keyLength + dateFormat.length(), recordSize, '_', true, false));
+            bkpbase = new kelondroMapObjects(kelondroDyn.open(bkppath, bufferkb / 2 * 0x400, preloadTime, keyLength + dateFormat.length(), recordSize, '_', true, false), 500);
         }
     }
 
@@ -305,11 +305,11 @@ public class wikiBoard {
 	return read(key, datbase);
     }
 
-    private entry read(String key, kelondroMap base) {
+    private entry read(String key, kelondroMapObjects base) {
 	try {
-            key = normalize(key);
-            if (key.length() > keyLength) key = key.substring(0, keyLength);
-	    Map record = base.get(key);
+        key = normalize(key);
+        if (key.length() > keyLength) key = key.substring(0, keyLength);
+	    Map record = base.getMap(key);
 	    if (record == null) return newEntry(key, "anonymous", "127.0.0.1", "New Page", "".getBytes());
         return new entry(key, record);
 	} catch (IOException e) {
