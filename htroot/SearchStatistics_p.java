@@ -60,6 +60,7 @@ public class SearchStatistics_p {
             Long trackerHandle;
             HashMap searchProfile;
             StringBuffer a = null;
+            int m = Math.min(maxCount, (page == 1) ? switchboard.localSearches.size(): switchboard.remoteSearches.size()) - 1;
             while ((entCount < maxCount) && (i.hasNext())) {
                 entry = (Map.Entry) i.next();
                 trackerHandle = (Long) entry.getKey();
@@ -72,22 +73,22 @@ public class SearchStatistics_p {
                 }
             
                 // put values in template
-                prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
-                prop.put("page_list_" + entCount + "_host", (String) searchProfile.get("host"));
-                prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(trackerHandle.longValue())));
+                prop.put("page_list_" + (m - entCount) + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
+                prop.put("page_list_" + (m - entCount) + "_host", (String) searchProfile.get("host"));
+                prop.put("page_list_" + (m - entCount) + "_date", yacyCore.universalDateShortString(new Date(trackerHandle.longValue())));
                 if (page == 1) {
                     // local search
-                    prop.put("page_list_" + entCount + "_offset", ((Integer) searchProfile.get("offset")).toString());
-                    prop.put("page_list_" + entCount + "_querywords", new String(a));
+                    prop.put("page_list_" + (m - entCount) + "_offset", ((Integer) searchProfile.get("offset")).toString());
+                    prop.put("page_list_" + (m - entCount) + "_querywords", new String(a));
                 } else {
                     // remote search
-                    prop.put("page_list_" + entCount + "_peername", (String) searchProfile.get("peername"));
-                    prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes((Set) searchProfile.get("queryhashes")));
+                    prop.put("page_list_" + (m - entCount) + "_peername", (String) searchProfile.get("peername"));
+                    prop.put("page_list_" + (m - entCount) + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes((Set) searchProfile.get("queryhashes")));
                 }
-                prop.put("page_list_" + entCount + "_querycount", ((Integer) searchProfile.get("querycount")).toString());
-                prop.put("page_list_" + entCount + "_querytime", ((Long) searchProfile.get("querytime")).toString());
-                prop.put("page_list_" + entCount + "_resultcount", ((Integer) searchProfile.get("resultcount")).toString());
-                prop.put("page_list_" + entCount + "_resulttime", ((Long) searchProfile.get("resulttime")).toString());
+                prop.put("page_list_" + (m - entCount) + "_querycount", ((Integer) searchProfile.get("querycount")).toString());
+                prop.put("page_list_" + (m - entCount) + "_querytime", ((Long) searchProfile.get("querytime")).toString());
+                prop.put("page_list_" + (m - entCount) + "_resultcount", ((Integer) searchProfile.get("resultcount")).toString());
+                prop.put("page_list_" + (m - entCount) + "_resulttime", ((Long) searchProfile.get("resulttime")).toString());
 
                 // next
                 entCount++;
@@ -113,7 +114,7 @@ public class SearchStatistics_p {
                 prop.put("page_list_" + entCount + "_host", host);
                 if (page == 4) {
                     yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
-                    prop.put("page_list_" + entCount + "_peername", remotepeer);
+                    prop.put("page_list_" + entCount + "_peername", remotepeer.getName());
                 }
                 prop.put("page_list_" + entCount + "_count", new Integer(handles.size()).toString());
                 prop.put("page_list_" + entCount + "_dates", handlestring);

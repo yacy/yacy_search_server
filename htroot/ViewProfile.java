@@ -149,6 +149,7 @@ public class ViewProfile {
         knownKeys.add("jabber");
         knownKeys.add("yahoo");
         knownKeys.add("msn");
+        knownKeys.add("skype");
         knownKeys.add("comment");
 
         //empty values

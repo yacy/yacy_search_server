@@ -85,6 +85,7 @@ public class ConfigProfile_p {
             profile.setProperty("jabber", (String)post.get("jabber"));
             profile.setProperty("yahoo", (String)post.get("yahoo"));
             profile.setProperty("msn", (String)post.get("msn"));
+            profile.setProperty("skype", (String)post.get("skype"));
 
             profile.setProperty("comment", (String)post.get("comment"));
 
@@ -98,6 +99,7 @@ public class ConfigProfile_p {
             prop.put("jabber", profile.getProperty("jabber", ""));
             prop.put("yahoo", profile.getProperty("yahoo", ""));
             prop.put("msn", profile.getProperty("msn", ""));
+            prop.put("skype", profile.getProperty("skype", ""));
 
             prop.put("comment", profile.getProperty("comment", ""));
 
@@ -128,6 +130,7 @@ public class ConfigProfile_p {
             prop.put("jabber", profile.getProperty("jabber", ""));
             prop.put("yahoo", profile.getProperty("yahoo", ""));
             prop.put("msn", profile.getProperty("msn", ""));
+            prop.put("skype", profile.getProperty("skype", ""));
 
             prop.put("comment", profile.getProperty("comment", ""));
         }

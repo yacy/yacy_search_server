@@ -56,16 +56,16 @@ public class NetworkPicture {
     
     public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
 
-        int width = 640;
-        int height = 480;
+        int width = 768;
+        int height = 576;
         int passiveLimit = 300;
         int potentialLimit = 300;
         int maxCount = 1000;
         boolean corona = true;
         
         if (post != null) {
-            width = post.getInt("width", 640);
-            height = post.getInt("height", 420);
+            width = post.getInt("width", 768);
+            height = post.getInt("height", 576);
             passiveLimit = post.getInt("pal", 300);
             potentialLimit = post.getInt("pol", 300);
             maxCount = post.getInt("max", 1000);
