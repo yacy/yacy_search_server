@@ -426,7 +426,9 @@ defaultLinkReceiveFrequency=30
 # of 2 would result in hundreds of prefetched URLs for each single proxy fill.
 proxyPrefetchDepth=0
 proxyStoreHTCache=true
-proxyCrawlOrder=false
+proxyIndexingRemote=false
+proxyIndexingLocalText=true
+proxyIndexingLocalMedia=true
 
 # From the 'IndexCreate' menu point you can also define a crawling start point.
 # The crawling works the same way as the prefetch, but it is possible to

@@ -39,8 +39,22 @@
           <td>It is almost always recommended to set this on. The only exception is that you have another caching proxy running as secondary proxy and YaCy is configured to used that proxy in proxy-proxy - mode.</td>
         </tr>
         <tr valign="top" class="TableCellLight">
+          <td><label for="prxy_index_text">Do Local Text-Indexing</label></td>
+          <td><input type="checkbox" id="prxy_index_text" name="proxyIndexingLocalText"#(proxyIndexingLocalText)#:: checked="checked"#(/proxyIndexingLocalText)# /></td>
+          <td>
+            If this is on, all pages (except private content) that passes the proxy is indexed. 
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td><label for="prxy_index_media">Do Local Media-Indexing</label></td>
+          <td><input type="checkbox" id="prxy_index_media" name="proxyIndexingLocalMedia"#(proxyIndexingLocalMedia)#:: checked="checked"#(/proxyIndexingLocalMedia)# /></td>
+          <td>
+            This is the same as for Local Text-Indexing, but switches only the indexing of media content on.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
           <td><label for="prxy_crawl_order">Do Remote Indexing</label></td>
-          <td><input type="checkbox" id="prxy_crawl_order" name="proxyCrawlOrder"#(proxyCrawlOrder)#:: checked="checked"#(/proxyCrawlOrder)# /></td>
+          <td><input type="checkbox" id="prxy_crawl_order" name="proxyIndexingRemote"#(proxyIndexingRemote)#:: checked="checked"#(/proxyIndexingRemote)# /></td>
           <td>
             If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
             If you need your crawling results locally, you should switch this off.
@@ -82,7 +96,9 @@
     <!-- info 2 -->
     <p><strong>Pre-fetch is now set to depth-#[message]#.</strong></p>
     <p><strong>Caching is now #(caching)#off::on#(/caching)#.</strong></p>
-    <p><strong>Remote Indexing is now #(crawlOrder)#off::on#(/crawlOrder)#.</strong></p>
+    <p><strong>Local Text Indexing is now #(indexingLocalText)#off::on#(/indexingLocalText)#.</strong></p>
+    <p><strong>Local Media Indexing is now #(indexingLocalMedia)#off::on#(/indexingLocalMedia)#.</strong></p>
+    <p><strong>Remote Indexing is now #(indexingRemote)#off::on#(/indexingRemote)#.</strong></p>
     #(path)#::<p><strong>Cachepath is now set to '#[return]#'.</strong> Please move the old data in the new directory.</p>#(/path)#
     #(size)#::<p><strong>Cachesize is now set to #[return]#MB.</strong></p>#(/size)#
     #(restart)#::<p style="color:red;"><strong>Changes will take effect after restart only.</strong></p>#(/restart)#

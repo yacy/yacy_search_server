@@ -814,7 +814,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             this.defaultProxyProfile = this.profiles.newEntry("proxy", "", ".*", ".*",
                     Integer.parseInt(getConfig("proxyPrefetchDepth", "0")),
                     Integer.parseInt(getConfig("proxyPrefetchDepth", "0")),
-                    60 * 24, -1, -1, false, true, true, true, true, getConfigBool("proxyCrawlOrder", false), true, true, true);
+                    60 * 24, -1, -1, false,
+                    getConfigBool("proxyIndexingLocalText", true),
+                    getConfigBool("proxyIndexingLocalMedia", true),
+                    true, true,
+                    getConfigBool("proxyIndexingRemote", false), true, true, true);
         }
         if (this.defaultRemoteProfile == null) {
             // generate new default entry for remote crawling

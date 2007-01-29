@@ -958,7 +958,7 @@ public final class plasmaParser {
                 int i = 0;
                 if (sentences != null) while (sentences.hasNext()) {
                         System.out.print("line " + i + ": ");
-                        System.out.println((String) sentences.next());
+                        System.out.println(((StringBuffer) sentences.next()).toString());
                         i++;
                 }
                 

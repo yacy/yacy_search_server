@@ -320,7 +320,7 @@ public class ViewFile {
                     
                     // Search word highlighting
                     while (sentences.hasNext()) {
-                        sentence = (String)sentences.next();
+                        sentence = ((StringBuffer) sentences.next()).toString();
                         if (sentence.trim().length() > 0) {
                             prop.put("viewMode_sentences_" + i + "_nr", Integer.toString(i + 1));
                             prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, sentence));

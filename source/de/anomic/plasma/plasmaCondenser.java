@@ -236,7 +236,7 @@ public final class plasmaCondenser {
         }
         int pip = 0;
         while (wordenum.hasMoreElements()) {
-            word = ((String) wordenum.nextElement()).toLowerCase();
+            word = (new String((StringBuffer) wordenum.nextElement())).toLowerCase();
             wprop = (wordStatProp) words.get(word);
             if (wprop == null) wprop = new wordStatProp(0, pip, phrase);
             if (wprop.flags == null) wprop.flags = (kelondroBitfield) flagstemplate.clone();
@@ -387,7 +387,7 @@ public final class plasmaCondenser {
         // read source
         sievedWordsEnum wordenum = new sievedWordsEnum(is, charset, wordminsize);
         while (wordenum.hasMoreElements()) {
-            word = ((String) wordenum.nextElement()).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
+            word = (new String((StringBuffer) wordenum.nextElement())).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             //System.out.println("PARSED-WORD " + word);
             
             // distinguish punctuation and words
@@ -665,10 +665,10 @@ public final class plasmaCondenser {
         }
         
         private Object nextElement0() {
-            String s;
+            StringBuffer s;
             char c;
             loop: while (e.hasMoreElements()) {
-                s = (String) e.nextElement();
+                s = (StringBuffer) e.nextElement();
                 if ((s.length() == 1) && (htmlFilterContentScraper.punctuation(s.charAt(0)))) return s;
                 if ((s.length() < ml) && (!(s.equals("of")))) continue loop;
                 for (int i = 0; i < s.length(); i++) {
@@ -697,14 +697,14 @@ public final class plasmaCondenser {
     }
 
     private static class unsievedWordsEnum implements Enumeration {
-        
+        // returns an enumeration of StringBuffer Objects
         Object buffer = null;
         sentencesFromInputStreamEnum e;
-        String s;
+        StringBuffer s;
 
         public unsievedWordsEnum(InputStream is, String charset) throws UnsupportedEncodingException {
             e = new sentencesFromInputStreamEnum(is, charset);
-            s = "";
+            s = new StringBuffer();
             buffer = nextElement0();
         }
 
@@ -712,15 +712,15 @@ public final class plasmaCondenser {
             e.pre(x);
         }
         
-        private Object nextElement0() {
-            String r;
+        private StringBuffer nextElement0() {
+            StringBuffer r;
             StringBuffer sb;
             char c;
             while (s.length() == 0) {
                 if (e.hasNext()) {
-                    r = (String) e.next();
+                    r = (StringBuffer) e.next();
                     if (r == null) return null;
-                    r = r.trim();
+                    r = trim(r);
                     sb = new StringBuffer(r.length() * 2);
                     for (int i = 0; i < r.length(); i++) {
                         c = r.charAt(i);
@@ -728,7 +728,7 @@ public final class plasmaCondenser {
                         else if (htmlFilterContentScraper.punctuation(c)) sb = sb.append(' ').append(c).append(' ');
                         else sb = sb.append(c);
                     }
-                    s = sb.toString().trim(); 
+                    s = trim(sb); 
                     //System.out.println("PARSING-LINE '" + r + "'->'" + s + "'");
                 } else {
                     return null;
@@ -737,11 +737,11 @@ public final class plasmaCondenser {
             int p = s.indexOf(" ");
             if (p < 0) {
                 r = s;
-                s = "";
+                s = new StringBuffer();
                 return r;
             }
-            r = s.substring(0, p);
-            s = s.substring(p + 1).trim();
+            r = trim(new StringBuffer(s.substring(0, p)));
+            s = trim(s.delete(0, p + 1));
             return r;
         }
 
@@ -757,6 +757,14 @@ public final class plasmaCondenser {
 
     }
     
+    public static StringBuffer trim(StringBuffer sb) {
+        synchronized (sb) {
+            while ((sb.length() > 0) && (sb.charAt(0) <= ' ')) sb = sb.deleteCharAt(0);
+            while ((sb.length() > 0) && (sb.charAt(sb.length() - 1) <= ' ')) sb = sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb;
+    }
+    
     public static sentencesFromInputStreamEnum sentencesFromInputStream(InputStream is, String charset) {
         try {
             return new sentencesFromInputStreamEnum(is, charset);
@@ -767,9 +775,9 @@ public final class plasmaCondenser {
     
     public static class sentencesFromInputStreamEnum implements Iterator {
         // read sentences from a given input stream
-        // this enumerates String objects
+        // this enumerates StringBuffer objects
         
-        Object buffer = null;
+        StringBuffer buffer = null;
         BufferedReader raf;
         int counter = 0;
         boolean pre = false;
@@ -785,9 +793,9 @@ public final class plasmaCondenser {
             this.pre = x;
         }
         
-        private Object nextElement0() {
+        private StringBuffer nextElement0() {
             try {
-                String s = readSentence(raf, pre);
+                StringBuffer s = readSentence(raf, pre);
                 //System.out.println(" SENTENCE='" + s + "'"); // DEBUG 
                 if (s == null) {
                     raf.close();
@@ -811,8 +819,8 @@ public final class plasmaCondenser {
             if (buffer == null) {
                 return null;
             } else {
-                counter = counter + ((String) buffer).length() + 1;
-                Object r = buffer;
+                counter = counter + buffer.length() + 1;
+                StringBuffer r = buffer;
                 buffer = nextElement0();
                 return r;
             }
@@ -827,7 +835,7 @@ public final class plasmaCondenser {
         }
     }
 
-    static String readSentence(Reader reader, boolean pre) throws IOException {
+    static StringBuffer readSentence(Reader reader, boolean pre) throws IOException {
         StringBuffer s = new StringBuffer();
         int nextChar;
         char c;
@@ -854,8 +862,7 @@ public final class plasmaCondenser {
         }
         // remove all double-spaces
         int p; while ((p = s.indexOf("  ")) >= 0) s.deleteCharAt(p);
-        return new String(s);
-        
+        return s;
     }
 
     public static Map getWords(byte[] text, String charset) throws UnsupportedEncodingException {

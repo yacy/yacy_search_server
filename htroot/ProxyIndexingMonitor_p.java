@@ -86,8 +86,12 @@ public class ProxyIndexingMonitor_p {
                 env.setConfig("proxyPrefetchDepth", Integer.toString(newProxyPrefetchDepth));
                 boolean proxyStoreHTCache = post.containsKey("proxyStoreHTCache");
                 env.setConfig("proxyStoreHTCache", (proxyStoreHTCache) ? "true" : "false");
-                boolean proxyCrawlOrder = post.containsKey("proxyCrawlOrder");
-                env.setConfig("proxyCrawlOrder", proxyCrawlOrder ? "true" : "false");
+                boolean proxyIndexingRemote = post.containsKey("proxyIndexingRemote");
+                env.setConfig("proxyIndexingRemote", proxyIndexingRemote ? "true" : "false");
+                boolean proxyIndexingLocalText = post.containsKey("proxyIndexingLocalText");
+                env.setConfig("proxyIndexingLocalText", proxyIndexingLocalText ? "true" : "false");
+                boolean proxyIndexingLocalMedia = post.containsKey("proxyIndexingLocalMedia");
+                env.setConfig("proxyIndexingLocalMedia", proxyIndexingLocalMedia ? "true" : "false");
                 
                 // added proxyCache, proxyCacheSize - Borg-0300
                 // proxyCache - check and create the directory
@@ -115,12 +119,16 @@ public class ProxyIndexingMonitor_p {
                     try {
                         sb.defaultProxyProfile.changeEntry("generalDepth", Integer.toString(newProxyPrefetchDepth));
                         sb.defaultProxyProfile.changeEntry("storeHTCache", (proxyStoreHTCache) ? "true": "false");
-                        sb.defaultProxyProfile.changeEntry("remoteIndexing",proxyCrawlOrder ? "true":"false");
+                        sb.defaultProxyProfile.changeEntry("remoteIndexing",proxyIndexingRemote ? "true":"false");
+                        sb.defaultProxyProfile.changeEntry("indexText",proxyIndexingLocalText ? "true":"false");
+                        sb.defaultProxyProfile.changeEntry("indexMedia",proxyIndexingLocalMedia ? "true":"false");
                         
                         prop.put("info", 2);//new proxyPrefetchdepth
                         prop.put("info_message", newProxyPrefetchDepth);
                         prop.put("info_caching", (proxyStoreHTCache) ? 1 : 0);
-                        prop.put("info_crawlOrder", (proxyCrawlOrder) ? 1 : 0);
+                        prop.put("info_indexingLocalText", (proxyIndexingLocalText) ? 1 : 0);
+                        prop.put("info_indexingLocalMedia", (proxyIndexingLocalMedia) ? 1 : 0);
+                        prop.put("info_indexingRemote", (proxyIndexingRemote) ? 1 : 0);
 
                         // proxyCache - only display on change
                         if (oldProxyCachePath.equals(newProxyCachePath)) {
@@ -159,7 +167,9 @@ public class ProxyIndexingMonitor_p {
 
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("proxyStoreHTCacheChecked", env.getConfig("proxyStoreHTCache", "").equals("true") ? 1 : 0);
-        prop.put("proxyCrawlOrder", env.getConfig("proxyCrawlOrder", "").equals("true") ? 1 : 0);
+        prop.put("proxyIndexingRemote", env.getConfig("proxyIndexingRemote", "").equals("true") ? 1 : 0);
+        prop.put("proxyIndexingLocalText", env.getConfig("proxyIndexingLocalText", "").equals("true") ? 1 : 0);
+        prop.put("proxyIndexingLocalMedia", env.getConfig("proxyIndexingLocalMedia", "").equals("true") ? 1 : 0);
         prop.put("proxyCache", env.getConfig("proxyCache", "DATA/HTCACHE"));
         prop.put("proxyCacheSize", env.getConfig("proxyCacheSize", "64"));
         // return rewrite properties

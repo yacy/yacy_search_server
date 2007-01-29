@@ -465,15 +465,15 @@ public class plasmaSnippetCache {
             Iterator j;
             HashMap hs;
             String hash;
-            String sentence;
+            StringBuffer sentence;
             TreeMap os = new TreeMap();
             int uniqCounter = 9999;
             int score;
             while (sentences.hasNext()) {
-                sentence = (String) sentences.next();
+                sentence = (StringBuffer) sentences.next();
                 //System.out.println("Snippet-Sentence :" + sentence); // DEBUG
                 if (sentence.length() > minLength) {
-                    hs = hashSentence(sentence);
+                    hs = hashSentence(sentence.toString());
                     j = queryhashes.iterator();
                     score = 0;
                     while (j.hasNext()) {
@@ -492,8 +492,8 @@ public class plasmaSnippetCache {
             String result;
             Set remaininghashes;
             while (os.size() > 0) {
-                sentence = (String) os.remove((Integer) os.lastKey()); // sentence with the biggest score
-                result = computeTextSnippet(sentence, queryhashes, minLength, maxLength);
+                sentence = (StringBuffer) os.remove((Integer) os.lastKey()); // sentence with the biggest score
+                result = computeTextSnippet(sentence.toString(), queryhashes, minLength, maxLength);
                 if ((result != null) && (result.length() > 0)) {
                     remaininghashes = removeAppearanceHashes(result, queryhashes);
                     if (remaininghashes.size() == 0) {
@@ -688,10 +688,10 @@ public class plasmaSnippetCache {
         HashMap map = new HashMap();
         Enumeration words = plasmaCondenser.wordTokenizer(sentence, "UTF-8", 0);
         int pos = 0;
-        String word;
+        StringBuffer word;
         while (words.hasMoreElements()) {
-            word = (String) words.nextElement();
-            map.put(plasmaCondenser.word2hash(word), new Integer(pos));
+            word = (StringBuffer) words.nextElement();
+            map.put(plasmaCondenser.word2hash(new String(word)), new Integer(pos));
             pos += word.length() + 1;
         }
         return map;
