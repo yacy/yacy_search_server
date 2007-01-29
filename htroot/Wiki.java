@@ -151,12 +151,11 @@ public class Wiki {
         //contributed by [MN]
         else if (post.containsKey("preview")) {
             // preview the page
-            wikiCode wikiTransformer=new wikiCode(switchboard);
             prop.put("mode", 2);//preview
             prop.put("mode_pagename", pagename);
             prop.put("mode_author", author);
             prop.put("mode_date", dateString(new Date()));
-            prop.putASIS("mode_page", wikiTransformer.transform(post.get("content", "")));
+            prop.putWiki("mode_page", post.get("content", ""));
             prop.put("mode_page-code", post.get("content", "").replaceAll("<","&lt;").replaceAll(">","&gt;"));
         }
         //end contrib of [MN]
@@ -187,13 +186,12 @@ public class Wiki {
         }
 
         else {
-            wikiCode wikiTransformer=new wikiCode(switchboard);
             // show page
             prop.put("mode", 0); //viewing
             prop.put("mode_pagename", pagename);
             prop.put("mode_author", page.author());
             prop.put("mode_date", dateString(page.date()));
-            prop.putASIS("mode_page", wikiTransformer.transform(page.page()));
+            prop.putWiki("mode_page", page.page());
 
             prop.put("controls", 0);
             prop.put("controls_pagename", pagename);
