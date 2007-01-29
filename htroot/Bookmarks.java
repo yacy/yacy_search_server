@@ -81,7 +81,7 @@ public class Bookmarks {
         username="admin";
     
     //redirect to userpage
-    if(username!="" &&(post == null || !post.containsKey("user")))
+    if(username!="" &&(post == null || !post.containsKey("user") && !post.containsKey("mode")))
         prop.put("LOCATION", "/Bookmarks.html?user="+username);
     
     //defaultvalues

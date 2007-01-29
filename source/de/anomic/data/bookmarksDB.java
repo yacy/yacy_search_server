@@ -74,6 +74,8 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.kelondro.kelondroCachedObject;
+import de.anomic.kelondro.kelondroCachedObjectMap;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMap;
@@ -83,7 +85,8 @@ import de.anomic.server.logging.serverLog;
 
 public class bookmarksDB {
     kelondroMap tagsTable;
-    kelondroMap bookmarksTable;
+    //kelondroMap bookmarksTable;
+    kelondroCachedObjectMap bookmarksTable;
     kelondroMap datesTable;
     HashMap tagCache;
     HashMap bookmarkCache;
@@ -131,7 +134,8 @@ public class bookmarksDB {
         tagCache=new HashMap();
         bookmarkCache=new HashMap();
         bookmarksFile.getParentFile().mkdirs();
-        this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
+        //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
+        this.bookmarksTable = new kelondroCachedObjectMap(new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false)));
 
         // tags
         tagsFile.getParentFile().mkdirs();
@@ -148,7 +152,7 @@ public class bookmarksDB {
     
     public void close(){
         try {
-            flushBookmarkCache();
+            //flushBookmarkCache();
             bookmarksTable.close();
         } catch (IOException e) {}
         try {
@@ -163,9 +167,7 @@ public class bookmarksDB {
         return bookmarksSize(false);
     }
     public int bookmarksSize(boolean flushed){
-        if(flushed)
-            flushBookmarkCache();
-        return bookmarksTable.size();
+        return bookmarksTable.size(flushed);
     }
     public int tagSize(boolean flushed){
         if(flushed)
@@ -176,23 +178,18 @@ public class bookmarksDB {
         return tagSize(false);
     }
     public void saveBookmark(Bookmark bookmark){
-        bookmarkCache.put(bookmark.getUrlHash(), bookmark);
+        bookmarksTable.set(bookmark.getUrlHash(), bookmark);
     }
-    /**
-     * Store a Bookmark in the Bookmarkstable
-     * @param bookmark the bookmark to store/update in the bookmarksTable
-     */
-    public void storeBookmark(Bookmark bookmark){
-        try {
-            bookmarksDB.this.bookmarksTable.set(bookmark.getUrlHash(), bookmark.getMap());
-        } catch (IOException e) {}
-    }
+
     public void flushBookmarkCache(){
-        Iterator it=bookmarkCache.keySet().iterator();
+        /*Iterator it=bookmarkCache.keySet().iterator();
         while(it.hasNext()){
             storeBookmark((Bookmark) bookmarkCache.get(it.next()));
         }
-        bookmarkCache=new HashMap();
+        bookmarkCache=new HashMap();*/
+        try {
+            bookmarksTable.flushCache();
+        } catch (IOException e) {}
     }
 
     public Tag loadTag(String hash){
@@ -340,16 +337,18 @@ public class bookmarksDB {
  
     }
     public Bookmark getBookmark(String urlHash){
-        Map map;
-        if(bookmarkCache.containsKey(urlHash))
-            return (Bookmark) bookmarkCache.get(urlHash);
+        Object obj;
         try {
-            map = bookmarksTable.get(urlHash);
-            if(map==null) return null;
-            return new Bookmark(urlHash, map);
+            obj = bookmarksTable.get(urlHash);
+            if(obj instanceof Bookmark){
+                return (Bookmark)obj;
+            }else{
+                return new Bookmark(urlHash, (Map)obj);
+            }
         } catch (IOException e) {
             return null;
         }
+        
     }
     public Iterator getBookmarksIterator(boolean priv){
         TreeSet set=new TreeSet(new bookmarkComparator(true));
@@ -410,23 +409,14 @@ public class bookmarksDB {
                 saveTag(tag);
             }
         }
-        return removeFromBookmarkCache(urlHash);
+        return bookmarksTable.remove(urlHash);
     }
-    private boolean removeFromBookmarkCache(String urlHash) {
-        try {
-            if(bookmarkCache.containsKey(urlHash))
-                bookmarkCache.remove(urlHash);
-            bookmarksTable.remove(urlHash);
-            return true;
-        } catch (IOException e) {
-        	return false;
-        }
-    }
+
     public Bookmark createBookmark(String url, String user){
         if (url == null || url.length() == 0) return null;
         Bookmark bk = new Bookmark(url);
         bk.setOwner(user);
-        return (bk.getUrlHash() == null || bk.getMap() == null) ? null : bk;
+        return (bk.getUrlHash() == null || bk.toMap() == null) ? null : bk;
     }
     public Iterator tagIterator(boolean up){
         try {
@@ -490,6 +480,7 @@ public class bookmarksDB {
     		
     		importCount++;
     	}
+
     	flushBookmarkCache();
     	flushTagCache();
     	
@@ -737,7 +728,7 @@ public class bookmarksDB {
      * Subclass, which stores the bookmark
      *
      */
-    public class Bookmark{
+    public class Bookmark extends kelondroCachedObject{
         public static final String BOOKMARK_URL="bookmarkUrl";
         public static final String BOOKMARK_TITLE="bookmarkTitle";
         public static final String BOOKMARK_DESCRIPTION="bookmarkDesc";
@@ -746,31 +737,34 @@ public class bookmarksDB {
         public static final String BOOKMARK_TIMESTAMP="bookmarkTimestamp";
         public static final String BOOKMARK_OWNER="bookmarkOwner";
         private String urlHash;
-        private Map mem;
         private HashSet tags;
         private long timestamp;
         public Bookmark(String urlHash, Map map){
+            super(urlHash, map);
             this.urlHash=urlHash;
-            this.mem=map;
-            tags=listManager.string2hashset((String) map.get(BOOKMARK_TAGS));
+            if(this.map.containsKey(BOOKMARK_TAGS))
+                tags=listManager.string2hashset((String) this.map.get(BOOKMARK_TAGS));
+            else
+                tags=new HashSet();
             loadTimestamp();
         }
         public Bookmark(String url){
+            super();
             if(!url.toLowerCase().startsWith("http://")){
                 url="http://"+url;
             }
             this.urlHash=plasmaURL.urlHash(url);
-            mem=new HashMap();
-            mem.put(BOOKMARK_URL, url);
+            this.key=this.urlHash;
+            map.put(BOOKMARK_URL, url);
             this.timestamp=System.currentTimeMillis();
             tags=new HashSet();
             Bookmark oldBm=getBookmark(this.urlHash);
-            if(oldBm!=null && oldBm.mem.containsKey(BOOKMARK_TIMESTAMP)){
-                mem.put(BOOKMARK_TIMESTAMP, oldBm.mem.get(BOOKMARK_TIMESTAMP)); //preserve timestamp on edit
+            if(oldBm!=null && oldBm.map.containsKey(BOOKMARK_TIMESTAMP)){
+                map.put(BOOKMARK_TIMESTAMP, oldBm.map.get(BOOKMARK_TIMESTAMP)); //preserve timestamp on edit
             }else{
-                mem.put(BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
+                map.put(BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
             }  
-            bookmarksDate bmDate=getDate((String) mem.get(BOOKMARK_TIMESTAMP));
+            bookmarksDate bmDate=getDate((String) map.get(BOOKMARK_TIMESTAMP));
             bmDate.add(this.urlHash);
             bmDate.setDatesTable();
             
@@ -778,33 +772,33 @@ public class bookmarksDB {
         }
         public Bookmark(String urlHash, URL url){
             this.urlHash=urlHash;
-            mem=new HashMap();
-            mem.put(BOOKMARK_URL, url.toString());
+            map=new HashMap();
+            map.put(BOOKMARK_URL, url.toString());
             tags=new HashSet();
             timestamp=System.currentTimeMillis();
         }
         public Bookmark(String urlHash, String url){
             this.urlHash=urlHash;
-            mem=new HashMap();
-            mem.put(BOOKMARK_URL, url);
+            map=new HashMap();
+            map.put(BOOKMARK_URL, url);
             tags=new HashSet();
             timestamp=System.currentTimeMillis();
         }
        
-        public Map getMap(){
-            mem.put(BOOKMARK_TAGS, listManager.hashset2string(tags));
-            mem.put(BOOKMARK_TIMESTAMP, String.valueOf(this.timestamp));
-            return mem;
+        public Map toMap(){
+            map.put(BOOKMARK_TAGS, listManager.hashset2string(tags));
+            map.put(BOOKMARK_TIMESTAMP, String.valueOf(this.timestamp));
+            return map;
         }
         private void loadTimestamp(){
-            if(this.mem.containsKey(BOOKMARK_TIMESTAMP))
-                this.timestamp=Long.parseLong((String)mem.get(BOOKMARK_TIMESTAMP));
+            if(this.map.containsKey(BOOKMARK_TIMESTAMP))
+                this.timestamp=Long.parseLong((String)map.get(BOOKMARK_TIMESTAMP));
         }
         public String getUrlHash(){
             return urlHash;
         }
         public String getUrl(){
-            return (String) this.mem.get(BOOKMARK_URL);
+            return (String) this.map.get(BOOKMARK_URL);
         }
         public HashSet getTags(){
             return tags;
@@ -813,43 +807,43 @@ public class bookmarksDB {
             return listManager.hashset2string(getTags());
         }
         public String getDescription(){
-            if(this.mem.containsKey(BOOKMARK_DESCRIPTION)){
-                return (String) this.mem.get(BOOKMARK_DESCRIPTION);
+            if(this.map.containsKey(BOOKMARK_DESCRIPTION)){
+                return (String) this.map.get(BOOKMARK_DESCRIPTION);
             }
             return "";
         }
         public String getTitle(){
-            if(this.mem.containsKey(BOOKMARK_TITLE)){
-                return (String) this.mem.get(BOOKMARK_TITLE);
+            if(this.map.containsKey(BOOKMARK_TITLE)){
+                return (String) this.map.get(BOOKMARK_TITLE);
             }
-            return (String) this.mem.get(BOOKMARK_URL);
+            return (String) this.map.get(BOOKMARK_URL);
         }
         public String getOwner(){
-            if(this.mem.containsKey(BOOKMARK_OWNER)){
-                return (String) this.mem.get(BOOKMARK_OWNER);
+            if(this.map.containsKey(BOOKMARK_OWNER)){
+                return (String) this.map.get(BOOKMARK_OWNER);
             }else{
                 return null; //null means admin
             }
         }
         public void setOwner(String owner){
-                this.mem.put(BOOKMARK_OWNER, owner);
+                this.map.put(BOOKMARK_OWNER, owner);
         }
         public boolean getPublic(){
-            if(this.mem.containsKey(BOOKMARK_PUBLIC)){
-                return ((String) this.mem.get(BOOKMARK_PUBLIC)).equals("public");
+            if(this.map.containsKey(BOOKMARK_PUBLIC)){
+                return ((String) this.map.get(BOOKMARK_PUBLIC)).equals("public");
             }else{
                 return false;
             }
         }
         public void setPublic(boolean isPublic){
         	if(isPublic){
-        		this.mem.put(BOOKMARK_PUBLIC, "public");
+        		this.map.put(BOOKMARK_PUBLIC, "public");
         	}else{
-        		this.mem.put(BOOKMARK_PUBLIC, "private");
+        		this.map.put(BOOKMARK_PUBLIC, "private");
         	}
         }
         public void setProperty(String name, String value){
-            mem.put(name, value);
+            map.put(name, value);
             //setBookmarksTable();
         }
         public void addTag(String tag){
@@ -926,10 +920,10 @@ public class bookmarksDB {
         }
     }
     public class bookmarkIterator implements Iterator{
-        kelondroDyn.dynKeyIterator bookmarkIter;
+        Iterator bookmarkIter;
         bookmarksDB.Bookmark nextEntry;
         public bookmarkIterator(boolean up) throws IOException {
-            flushBookmarkCache(); //XXX: this will cost performance
+            //flushBookmarkCache(); //XXX: this will cost performance
             this.bookmarkIter = bookmarksDB.this.bookmarksTable.keys(up, false);
             this.nextEntry = null;
         }
