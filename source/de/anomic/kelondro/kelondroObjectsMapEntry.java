@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class kelondroObjectsMapEntry implements kelondroObjectsEntry {
 
-    private Map entry;
+    protected Map entry;
     
     public kelondroObjectsMapEntry() {
         this.entry = new HashMap();

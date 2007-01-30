@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.data.wikiBoard;
-import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
