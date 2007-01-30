@@ -145,6 +145,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.net.URL;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.plasma.urlPattern.defaultURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverCodings;
@@ -264,11 +265,574 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     //private Object  crawlingPausedSync = new Object();
     //private boolean crawlingIsPaused = false;    
     
-    public static final String CRAWLJOB_LOCAL_CRAWL = "50_localcrawl";
-    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL = "62_remotetriggeredcrawl";
-    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER = "61_globalcrawltrigger";
     private static final int   CRAWLJOB_SYNC = 0;
     private static final int   CRAWLJOB_STATUS = 1;
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Thread settings
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    // 20_dhtdistribution
+    /**
+     * <p><code>public static final String <strong>INDEX_DIST</strong> = "20_dhtdistribution"</code></p>
+     * <p>Name of the DHT distribution thread, which selects index chunks and transfers them to other peers
+     * according to the global DHT rules</p>
+     */
+    public static final String INDEX_DIST                   = "20_dhtdistribution";
+    public static final String INDEX_DIST_METHOD_START      = "dhtTransferJob";
+    public static final String INDEX_DIST_METHOD_JOBCOUNT   = null;
+    public static final String INDEX_DIST_METHOD_FREEMEM    = null;
+    public static final String INDEX_DIST_MEMPREREQ         = "20_dhtdistribution_memprereq";
+    public static final String INDEX_DIST_IDLESLEEP         = "20_dhtdistribution_idlesleep";
+    public static final String INDEX_DIST_BUSYSLEEP         = "20_dhtdistribution_busysleep";
+    
+    // 30_peerping
+    /**
+     * <p><code>public static final String <strong>PEER_PING</strong> = "30_peerping"</code></p>
+     * <p>Name of the Peer Ping thread which publishes the own peer and retrieves information about other peers
+     * connected to the YaCy-network</p>
+     */
+    public static final String PEER_PING                    = "30_peerping";
+    public static final String PEER_PING_METHOD_START       = "peerPing";
+    public static final String PEER_PING_METHOD_JOBCOUNT    = null;
+    public static final String PEER_PING_METHOD_FREEMEM     = null;
+    
+    // 40_peerseedcycle
+    /**
+     * <p><code>public static final String <strong>SEED_UPLOAD</strong> = "40_peerseedcycle"</code></p>
+     * <p>Name of the seed upload thread, providing the so-called seed-lists needed during bootstrapping</p>
+     */
+    public static final String SEED_UPLOAD                  = "40_peerseedcycle";
+    public static final String SEED_UPLOAD_METHOD_START     = "publishSeedList";
+    public static final String SEED_UPLOAD_METHOD_JOBCOUNT  = null;
+    public static final String SEED_UPLOAD_METHOD_FREEMEM   = null;
+    
+    // 50_localcrawl
+    /**
+     * <p><code>public static final String <strong>CRAWLJOB_LOCAL_CRAWL</strong> = "50_localcrawl"</code></p>
+     * <p>Name of the local crawler thread, popping one entry off the Local Crawl Queue, and passing it to the
+     * proxy cache enqueue thread to download and further process it</p>
+     * 
+     * @see plasmaSwitchboard#PROXY_CACHE_ENQUEUE
+     */
+    public static final String CRAWLJOB_LOCAL_CRAWL                             = "50_localcrawl";
+    public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_START                = "coreCrawlJob";
+    public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT             = "coreCrawlJobSize";
+    public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM              = null;
+    
+    // 61_globalcawltrigger
+    /**
+     * <p><code>public static final String <strong>CRAWLJOB_GLOBAL_CRAWL_TRIGGER</strong> = "61_globalcrawltrigger"</code></p>
+     * <p>Name of the global crawl trigger thread, popping one entry off it's queue and sending it to a non-busy peer to
+     * crawl it</p>
+     * 
+     * @see plasmaSwitchboard#CRAWLJOB_REMOTE_TRIGGERED_CRAWL
+     */
+    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER                    = "61_globalcrawltrigger";
+    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_START       = "limitCrawlTriggerJob";
+    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_JOBCOUNT    = "limitCrawlTriggerJobSize";
+    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_FREEMEM     = null;
+    
+    // 62_remotetriggeredcrawl
+    /**
+     * <p><code>public static final String <strong>CRAWLJOB_REMOTE_TRIGGERED_CRAWL</strong> = "62_remotetriggeredcrawl"</code></p>
+     * <p>Name of the remote triggered crawl thread, responsible for processing a remote crawl received from another peer</p>
+     */
+    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL                  = "62_remotetriggeredcrawl";
+    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START     = "remoteTriggeredCrawlJob";
+    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT  = "remoteTriggeredCrawlJobSize";
+    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM   = null;
+    
+    // 70_cachemanager
+    /**
+     * <p><code>public static final String <strong>PROXY_CACHE_ENQUEUE</strong> = "70_cachemanager"</code></p>
+     * <p>Name of the proxy cache enqueue thread which fetches a given website and saves the site itself as well as it's
+     * HTTP-headers in the HTCACHE</p>
+     * 
+     * @see plasmaSwitchboard#PROXY_CACHE_PATH
+     */
+    public static final String PROXY_CACHE_ENQUEUE                  = "70_cachemanager";
+    public static final String PROXY_CACHE_ENQUEUE_METHOD_START     = "htEntryStoreJob";
+    public static final String PROXY_CACHE_ENQUEUE_METHOD_JOBCOUNT  = "htEntrySize";
+    public static final String PROXY_CACHE_ENQUEUE_METHOD_FREEMEM   = null;
+    
+    // 80_indexing
+    /**
+     * <p><code>public static final String <strong>INDEXER</strong> = "80_indexing"</code></p>
+     * <p>Name of the indexer thread, performing the actual indexing of a website</p>
+     */
+    public static final String INDEXER                      = "80_indexing";
+    public static final String INDEXER_CLUSTER              = "80_indexing_cluster";
+    public static final String INDEXER_MEMPREREQ            = "80_indexing_memprereq";
+    public static final String INDEXER_IDLESLEEP            = "80_indexing_idlesleep";
+    public static final String INDEXER_BUSYSLEEP            = "80_indexing_busysleep";
+    public static final String INDEXER_METHOD_START         = "deQueue";
+    public static final String INDEXER_METHOD_JOBCOUNT      = "queueSize";
+    public static final String INDEXER_METHOD_FREEMEM       = "deQueueFreeMem";
+    public static final String INDEXER_SLOTS                = "indexer.slots";
+    
+    // 82_crawlstack
+    /**
+     * <p><code>public static final String <strong>CRAWLSTACK</strong> = "82_crawlstack"</code></p>
+     * <p>Name of the crawl stacker thread, performing several checks on new URLs to crawl, i.e. double-check</p>
+     */
+    public static final String CRAWLSTACK                   = "82_crawlstack";
+    public static final String CRAWLSTACK_METHOD_START      = "job";
+    public static final String CRAWLSTACK_METHOD_JOBCOUNT   = "size";
+    public static final String CRAWLSTACK_METHOD_FREEMEM    = null;
+    
+    // 90_cleanup
+    /**
+     * <p><code>public static final String <strong>CLEANUP</strong> = "90_cleanup"</code></p>
+     * <p>The cleanup thread which is responsible for pendant cleanup-jobs, news/ranking distribution, etc.</p> 
+     */
+    public static final String CLEANUP                      = "90_cleanup";
+    public static final String CLEANUP_METHOD_START         = "cleanupJob";
+    public static final String CLEANUP_METHOD_JOBCOUNT      = "cleanupJobSize";
+    public static final String CLEANUP_METHOD_FREEMEM       = null;
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // RAM Cache settings
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /**
+     * <p><code>public static final String <strong>RAM_CACHE_LURL</strong> = "ramCacheLURL"</code></p>
+     * <p>Name of the setting how much memory in bytes should be assigned to the Loaded URLs DB for caching purposes</p>
+     */
+    public static final String RAM_CACHE_LURL           = "ramCacheLURL";
+    public static final String RAM_CACHE_LURL_TIME      = "ramCacheLURL_time";
+    /**
+     * <p><code>public static final String <strong>RAM_CACHE_NURL</strong> = "ramCacheNURL"</code></p>
+     * <p>Name of the setting how much memory in bytes should be assigned to the Noticed URLs DB for caching purposes</p>
+     */
+    public static final String RAM_CACHE_NURL           = "ramCacheNURL";
+    public static final String RAM_CACHE_NURL_TIME      = "ramCacheNURL_time";
+    /**
+     * <p><code>public static final String <strong>RAM_CACHE_EURL</strong> = "ramCacheEURL"</code></p>
+     * <p>Name of the setting how much memory in bytes should be assigned to the Erroneous URLs DB for caching purposes</p>
+     */
+    public static final String RAM_CACHE_EURL           = "ramCacheEURL";
+    public static final String RAM_CACHE_EURL_TIME      = "ramCacheEURL_time";
+    /**
+     * <p><code>public static final String <strong>RAM_CACHE_RWI</strong> = "ramCacheRWI"</code></p>
+     * <p>Name of the setting how much memory in bytes should be assigned to the RWIs DB for caching purposes</p>
+     */
+    public static final String RAM_CACHE_RWI            = "ramCacheRWI";
+    public static final String RAM_CACHE_RWI_TIME       = "ramCacheRWI_time";
+    /**
+     * <p><code>public static final String <strong>RAM_CACHE_HTTP</strong> = "ramCacheHTTP"</code></p>
+     * <p>Name of the setting how much memory in bytes should be assigned to the HTTP Headers DB for caching purposes</p>
+     */
+    public static final String RAM_CACHE_HTTP           = "ramCacheHTTP";
+    public static final String RAM_CACHE_HTTP_TIME      = "ramCacheHTTP_time";
+    /**
+     * <p><code>public static final String <strong>RAM_CACHE_MESSAGE</strong> = "ramCacheMessage"</code></p>
+     * <p>Name of the setting how much memory in bytes should be assigned to the Message DB for caching purposes</p>
+     */
+    public static final String RAM_CACHE_MESSAGE        = "ramCacheMessage";
+    public static final String RAM_CACHE_MESSAGE_TIME   = "ramCacheMessage_time";
+    /**
+     * <p><code>public static final String <strong>RAM_CACHE_ROBOTS</strong> = "ramCacheRobots"</code></p>
+     * <p>Name of the setting how much memory in bytes should be assigned to the robots.txts DB for caching purposes</p>
+     */
+    public static final String RAM_CACHE_ROBOTS         = "ramCacheRobots";
+    public static final String RAM_CACHE_ROBOTS_TIME    = "ramCacheRobots_time";
+    /**
+     * <p><code>public static final String <strong>RAM_CACHE_PROFILES</strong> = "ramCacheProfiles"</code></p>
+     * <p>Name of the setting how much memory in bytes should be assigned to the Crawl Profiles DB for caching purposes</p>
+     */
+    public static final String RAM_CACHE_PROFILES       = "ramCacheProfiles";
+    public static final String RAM_CACHE_PROFILES_TIME  = "ramCacheProfiles_time";
+    /**
+     * <p><code>public static final String <strong>RAM_CACHE_PRE_NURL</strong> = "ramCachePreNURL"</code></p>
+     * <p>Name of the setting how much memory in bytes should be assigned to the Pre-Noticed URLs DB for caching purposes</p>
+     */
+    public static final String RAM_CACHE_PRE_NURL       = "ramCachePreNURL";
+    public static final String RAM_CACHE_PRE_NURL_TIME  = "ramCachePreNURL_time";
+    /**
+     * <p><code>public static final String <strong>RAM_CACHE_WIKI</strong> = "ramCacheWiki"</code></p>
+     * <p>Name of the setting how much memory in bytes should be assigned to the Wiki DB for caching purposes</p>
+     */
+    public static final String RAM_CACHE_WIKI           = "ramCacheWiki";
+    public static final String RAM_CACHE_WIKI_TIME      = "ramCacheWiki_time";
+    /**
+     * <p><code>public static final String <strong>RAM_CACHE_BLOG</strong> = "ramCacheBlog"</code></p>
+     * <p>Name of the setting how much memory in bytes should be assigned to the Blog DB for caching purposes</p>
+     */
+    public static final String RAM_CACHE_BLOG           = "ramCacheBlog";
+    public static final String RAM_CACHE_BLOG_TIME      = "ramCacheBlog_time";
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // DHT settings
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /**
+     * <p><code>public static final String <strong>INDEX_DIST_DHT_RECEIPT_LIMIT</strong> = "indexDistribution.dhtReceiptLimit"</code></p>
+     * <p>Name of the setting how many words the DHT-In cache may contain maximal before new DHT receipts
+     * will be rejected</p>
+     */
+    public static final String INDEX_DIST_DHT_RECEIPT_LIMIT     = "indexDistribution.dhtReceiptLimit";
+    /**
+     * <p><code>public static final String <strong>INDEX_DIST_CHUNK_SIZE_START</strong> = "indexDistribution.startChunkSize"</code></p>
+     * <p>Name of the setting specifying how many words the very first chunk will contain when the DHT-thread starts</p>
+     */
+    public static final String INDEX_DIST_CHUNK_SIZE_START      = "indexDistribution.startChunkSize";
+    /**
+     * <p><code>public static final String <strong>INDEX_DIST_CHUNK_SIZE_MIN</strong> = "indexDistribution.minChunkSize"</code></p>
+     * <p>Name of the setting specifying how many words the smallest chunk may contain</p>
+     */
+    public static final String INDEX_DIST_CHUNK_SIZE_MIN        = "indexDistribution.minChunkSize";
+    /**
+     * <p><code>public static final String <strong>INDEX_DIST_CHUNK_SIZE_MAX</strong> = "indexDistribution.maxChunkSize"</code></p>
+     * <p>Name of the setting specifying how many words the hugest chunk may contain</p>
+     */
+    public static final String INDEX_DIST_CHUNK_SIZE_MAX        = "indexDistribution.maxChunkSize";
+    public static final String INDEX_DIST_CHUNK_FAILS_MAX       = "indexDistribution.maxChunkFails";
+    /**
+     * <p><code>public static final String <strong>INDEX_DIST_TIMEOUT</strong> = "indexDistribution.timeout"</code></p>
+     * <p>Name of the setting how long the timeout for an Index Distribution shall be in milliseconds</p>
+     */
+    public static final String INDEX_DIST_TIMEOUT               = "indexDistribution.timeout";
+    /**
+     * <p><code>public static final String <strong>INDEX_DIST_GZIP_BODY</strong> = "indexDistribution.gzipBody"</code></p>
+     * <p>Name of the setting whether DHT chunks shall be transferred gzip-encodedly</p>
+     */
+    public static final String INDEX_DIST_GZIP_BODY             = "indexDistribution.gzipBody";
+    /**
+     * <p><code>public static final String <strong>INDEX_DIST_ALLOW</strong> = "allowDistributeIndex"</code></p>
+     * <p>Name of the setting whether Index Distribution shall be allowed (and the DHT-thread therefore started) or not</p>
+     * 
+     * @see plasmaSwitchboard#INDEX_DIST_ALLOW_WHILE_CRAWLING
+     */
+    public static final String INDEX_DIST_ALLOW                 = "allowDistributeIndex";
+    /**
+     * <p><code>public static final String <strong>INDEX_DIST_ALLOW_WHILE_CRAWLING</strong> = "allowDistributeIndexWhileCrawling"</code></p>
+     * <p>Name of the setting whether Index Distribution shall be allowed while crawling is in progress, i.e.
+     * the Local Crawler Queue is filled.</p>
+     * <p>This setting only has effect if {@link #INDEX_DIST_ALLOW} is enabled</p>
+     * 
+     * @see plasmaSwitchboard#INDEX_DIST_ALLOW
+     */
+    public static final String INDEX_DIST_ALLOW_WHILE_CRAWLING  = "allowDistributeIndexWhileCrawling";
+    public static final String INDEX_TRANSFER_TIMEOUT           = "indexTransfer.timeout";
+    public static final String INDEX_TRANSFER_GZIP_BODY         = "indexTransfer.gzipBody";
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Ranking settings
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    public static final String RANKING_DIST_ON                  = "CRDistOn";
+    public static final String RANKING_DIST_0_PATH              = "CRDist0Path";
+    public static final String RANKING_DIST_0_METHOD            = "CRDist0Method";
+    public static final String RANKING_DIST_0_PERCENT           = "CRDist0Percent";
+    public static final String RANKING_DIST_0_TARGET            = "CRDist0Target";
+    public static final String RANKING_DIST_1_PATH              = "CRDist1Path";
+    public static final String RANKING_DIST_1_METHOD            = "CRDist1Method";
+    public static final String RANKING_DIST_1_PERCENT           = "CRDist1Percent";
+    public static final String RANKING_DIST_1_TARGET            = "CRDist1Target";
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Parser settings
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    public static final String PARSER_MIMETYPES_REALTIME        = "parseableRealtimeMimeTypes";
+    public static final String PARSER_MIMETYPES_PROXY           = "parseableMimeTypes.PROXY";
+    public static final String PARSER_MIMETYPES_CRAWLER         = "parseableMimeTypes.CRAWLER";
+    public static final String PARSER_MIMETYPES_ICAP            = "parseableMimeTypes.ICAP";
+    public static final String PARSER_MIMETYPES_URLREDIRECTOR   = "parseableMimeTypes.URLREDIRECTOR";
+    public static final String PARSER_MEDIA_EXT                 = "mediaExt";
+    public static final String PARSER_MEDIA_EXT_PARSEABLE       = "parseableExt";
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Proxy settings
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /**
+     * <p><code>public static final String <strong>PROXY_ONLINE_CAUTION_DELAY</strong> = "onlineCautionDelay"</code></p>
+     * <p>Name of the setting how long indexing should pause after the last time the proxy was used in milliseconds</p> 
+     */
+    public static final String PROXY_ONLINE_CAUTION_DELAY       = "onlineCautionDelay";
+    /**
+     * <p><code>public static final String <strong>PROXY_PREFETCH_DEPTH</strong> = "proxyPrefetchDepth"</code></p>
+     * <p>Name of the setting how deep URLs fetched by proxy usage shall be followed</p>
+     */
+    public static final String PROXY_PREFETCH_DEPTH             = "proxyPrefetchDepth";
+    public static final String PROXY_CRAWL_ORDER                = "proxyCrawlOrder";
+    
+    public static final String PROXY_CACHE_SIZE                 = "proxyCacheSize";
+    /**
+     * <p><code>public static final String <strong>PROXY_CACHE_LAYOUT</strong> = "proxyCacheLayout"</code></p>
+     * <p>Name of the setting which file-/folder-layout the proxy cache shall use. Possible values are {@link #PROXY_CACHE_LAYOUT_TREE}
+     * and {@link #PROXY_CACHE_LAYOUT_HASH}</p>
+     * 
+     * @see plasmaSwitchboard#PROXY_CACHE_LAYOUT_TREE
+     * @see plasmaSwitchboard#PROXY_CACHE_LAYOUT_HASH
+     */
+    public static final String PROXY_CACHE_LAYOUT               = "proxyCacheLayout";
+    /**
+     * <p><code>public static final String <strong>PROXY_CACHE_LAYOUT_TREE</strong> = "tree"</code></p>
+     * <p>Setting the file-/folder-structure for {@link #PROXY_CACHE_LAYOUT}. Websites are stored in a folder-layout
+     * according to the layout, the URL purported. The first folder is either <code>http</code> or <code>https</code>
+     * depending on the protocol used to fetch the website, descending follows the hostname and the sub-folders on the
+     * website up to the actual file itself.</p>  
+     * <p>When using <code>tree</code>, be aware that
+     * the possibility of inconsistencies between folders and files with the same name may occur which prevent proper
+     * storage of the fetched site. Below is an example how files are stored:</p>
+     * <pre>
+     * /html/
+     * /html/www.example.com/
+     * /html/www.example.com/index/
+     * /html/www.example.com/index/en/
+     * /html/www.example.com/index/en/index.html</pre>
+     */
+    public static final String PROXY_CACHE_LAYOUT_TREE          = "tree";
+    /**
+     * <p><code>public static final String <strong>PROXY_CACHE_LAYOUT_HASH</strong> = "hash"</code></p>
+     * <p>Setting the file-/folder-structure for {@link #PROXY_CACHE_LAYOUT}. Websites are stored using the MD5-sum of
+     * their respective URLs. This method prevents collisions on some websites caused by using the {@link #PROXY_CACHE_LAYOUT_TREE}
+     * layout.</p>
+     * <p>Similarly to {@link #PROXY_CACHE_LAYOUT_TREE}, the top-folders name is given by the protocol used to fetch the site,
+     * followed by either <code>www</code> or &ndash; if the hostname does not start with "www" &ndash; <code>other</code>.
+     * Afterwards the next folder has the rest of the hostname as name, followed by a folder <code>hash</code> which contains
+     * a folder consisting of the first two letters of the hash. Another folder named after the 3rd and 4th letters of the
+     * hash follows which finally contains the file named after the full 18-characters long hash.
+     * Below is an example how files are stored:</p>
+     * <pre>
+     * /html/
+     * /html/www/
+     * /html/www/example.com/
+     * /html/www/example.com/hash/
+     * /html/www/example.com/hash/0d/
+     * /html/www/example.com/hash/0d/f8/
+     * /html/www/example.com/hash/0d/f8/0df83a8444f48317d8</pre>
+     */
+    public static final String PROXY_CACHE_LAYOUT_HASH          = "hash";
+    public static final String PROXY_CACHE_MIGRATION            = "proxyCacheMigration";
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Miscellaneous settings
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    public static final String CRAWL_PROFILE_PROXY              = "proxy";
+    public static final String CRAWL_PROFILE_REMOTE             = "remote";
+    public static final String CRAWL_PROFILE_SNIPPET_TEXT       = "snippetText";
+    public static final String CRAWL_PROFILE_SNIPPET_MEDIA      = "snippetMedia";
+    
+    /**
+     * <p><code>public static final String <strong>CRAWLER_THREADS_ACTIVE_MAX</strong> = "crawler.MaxActiveThreads"</code></p>
+     * <p>Name of the setting how many active crawler-threads may maximal be running on the same time</p>
+     */
+    public static final String CRAWLER_THREADS_ACTIVE_MAX       = "crawler.MaxActiveThreads";
+    
+    /**
+     * <p><code>public static final String <strong>ADMIN_ACCOUNT_B64MD5</strong> = "adminAccountBase64MD5"</code></p>
+     * <p>Name of the setting holding the authentification hash for the static <code>admin</code>-account. It is calculated
+     * by first encoding <code>username:password</code> as Base64 and hashing it using {@link serverCodings#encodeMD5Hex(String)}.</p>
+     */
+    public static final String ADMIN_ACCOUNT_B64MD5             = "adminAccountBase64MD5";
+    public static final String OWN_SEED_FILE                    = "yacyOwnSeedFile";
+    /**
+     * <p><code>public static final String <strong>STORAGE_PEER_HASH</strong> = "storagePeerHash"</code></p>
+     * <p>Name of the setting holding the Peer-Hash where indexes shall be transferred after indexing a webpage. If this setting
+     * is empty, the Storage Peer function is disabled</p>
+     */
+    public static final String STORAGE_PEER_HASH                = "storagePeerHash";
+    public static final String YACY_MODE_DEBUG                  = "yacyDebugMode";
+    
+    public static final String WORDCACHE_INIT_COUNT             = "wordCacheInitCount";
+    /**
+     * <p><code>public static final String <strong>WORDCACHE_MAX_COUNT</strong> = "wordCacheMaxCount"</code></p>
+     * <p>Name of the setting how many words the word-cache (or DHT-Out cache) shall contain maximal. Indexing pages if the
+     * cache has reached this limit will slow down the indexing process by flushing some of it's entries</p>
+     */
+    public static final String WORDCACHE_MAX_COUNT              = "wordCacheMaxCount";
+    
+    public static final String HTTPC_NAME_CACHE_CACHING_PATTERNS_NO = "httpc.nameCacheNoCachingPatterns";
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Lists
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /**
+     * <p><code>public static final String <strong>BLACKLIST_CLASS</strong> = "Blacklist.class"</code></p>
+     * <p>Name of the setting which Blacklist backend shall be used. Due to different requirements of users, the
+     * {@link plasmaURLPattern}-interface has been created to support blacklist engines different from YaCy's default</p>
+     * <p>Attention is required when the backend is changed, because different engines may have different syntaxes</p>
+     */
+    public static final String BLACKLIST_CLASS          = "BlackLists.class";
+    /**
+     * <p><code>public static final String <strong>BLACKLIST_CLASS_DEFAULT</strong> = "de.anomic.plasma.urlPattern.defaultURLPattern"</code></p>
+     * <p>Package and name of YaCy's {@link defaultURLPattern default} blacklist implementation</p>
+     * 
+     * @see defaultURLPattern for a detailed overview about the syntax of the default implementation
+     */
+    public static final String BLACKLIST_CLASS_DEFAULT  = "de.anomic.plasma.urlPattern.defaultURLPattern";
+    
+    public static final String LIST_BLUE                = "plasmaBlueList";
+    public static final String LIST_BLUE_DEFAULT        = null;
+    public static final String LIST_BADWORDS_DEFAULT    = "yacy.badwords";
+    public static final String LIST_STOPWORDS_DEFAULT   = "yacy.stopwords";
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // DB Paths
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /**
+     * <p><code>public static final String <strong>DBPATH</strong> = "dbPath"</code></p>
+     * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
+     * databases containing queues are stored</p>
+     */
+    public static final String DBPATH                   = "dbPath";
+    public static final String DBPATH_DEFAULT           = "DATA/PLASMADB";
+    /**
+     * <p><code>public static final String <strong>HTCACHE_PATH</strong> = "proxyCache"</code></p>
+     * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
+     * downloaded webpages and their respective ressources and HTTP-headers are stored. It is the location containing
+     * the proxy-cache</p>
+     * 
+     * @see plasmaSwitchboard#PROXY_CACHE_LAYOUT for details on the file-layout in this path
+     */
+    public static final String HTCACHE_PATH             = "proxyCache";
+    public static final String HTCACHE_PATH_DEFAULT     = "DATA/HTCACHE";
+    /**
+     * <p><code>public static final String <strong>HTDOCS_PATH</strong> = "htDocsPath"</code></p>
+     * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
+     * user-ressources (i.e. for the fileshare or the contents displayed on <code>www.peername.yacy</code>) lie.
+     * The translated templates of the webinterface will also be put in here</p>
+     */
+    public static final String HTDOCS_PATH              = "htDocsPath";
+    public static final String HTDOCS_PATH_DEFAULT      = "DATA/HTDOCS";
+    /**
+     * <p><code>public static final String <strong>HTROOT_PATH</strong> = "htRootPath"</code></p>
+     * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
+     * original servlets, their stylesheets, scripts, etc. lie. It is also home of the XML-interface to YaCy</p> 
+     */
+    public static final String HTROOT_PATH              = "htRootPath";
+    public static final String HTROOT_PATH_DEFAULT      = "htroot";
+    /**
+     * <p><code>public static final String <strong>INDEX_PATH</strong> = "indexPath"</code></p>
+     * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where the
+     * whole database of known RWIs and URLs as well as dumps of the DHT-In and DHT-Out caches are stored</p>
+     */
+    public static final String INDEX_PATH               = "indexPath";
+    public static final String INDEX_PATH_DEFAULT       = "DATA/INDEX";
+    /**
+     * <p><code>public static final String <strong>LISTS_PATH</strong> = "listsPath"</code></p>
+     * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
+     * user-lists like blacklists, etc. are stored</p>
+     */
+    public static final String LISTS_PATH               = "listsPath";
+    public static final String LISTS_PATH_DEFAULT       = "DATA/LISTS";
+    /**
+     * <p><code>public static final String <strong>RANKING_PATH</strong> = "rankingPath"</code></p>
+     * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
+     * ranking files are stored, self-generated as well as received ranking files</p>
+     * 
+     * @see plasmaSwitchboard#RANKING_DIST_0_PATH
+     * @see plasmaSwitchboard#RANKING_DIST_1_PATH
+     */
+    public static final String RANKING_PATH             = "rankingPath";
+    public static final String RANKING_PATH_DEFAULT     = "DATA/RANKING";
+    /**
+     * <p><code>public static final String <strong>WORK_PATH</strong> = "wordPath"</code></p>
+     * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
+     * DBs containing "work" of the user are saved. Such include bookmarks, messages, wiki, blog</p>
+     * 
+     * @see plasmaSwitchboard#DBFILE_BLOG
+     * @see plasmaSwitchboard#DBFILE_BOOKMARKS
+     * @see plasmaSwitchboard#DBFILE_BOOKMARKS_DATES
+     * @see plasmaSwitchboard#DBFILE_BOOKMARKS_TAGS
+     * @see plasmaSwitchboard#DBFILE_MESSAGE
+     * @see plasmaSwitchboard#DBFILE_WIKI
+     * @see plasmaSwitchboard#DBFILE_WIKI_BKP
+     */
+    public static final String WORK_PATH                = "workPath";
+    public static final String WORK_PATH_DEFAULT        = "DATA/WORK";
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // DB files
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /**
+     * <p><code>public static final String <strong>DBFILE_MESSAGE</strong> = "message.db"</code></p>
+     * <p>Name of the file containing the database holding the user's peer-messages</p>
+     * 
+     * @see plasmaSwitchboard#WORK_PATH for the folder, this file lies in
+     */
+    public static final String DBFILE_MESSAGE           = "message.db";
+    /**
+     * <p><code>public static final String <strong>DBFILE_WIKI</strong> = "wiki.db"</code></p>
+     * <p>Name of the file containing the database holding the whole wiki of this peer</p>
+     * 
+     * @see plasmaSwitchboard#WORK_PATH for the folder, this file lies in
+     * @see plasmaSwitchboard#DBFILE_WIKI_BKP for the file previous versions of wiki-pages lie in
+     */
+    public static final String DBFILE_WIKI              = "wiki.db";
+    /**
+     * <p><code>public static final String <strong>DBFILE_WIKI_BKP</strong> = "wiki-bkp.db"</code></p>
+     * <p>Name of the file containing the database holding all versions but the latest of the wiki-pages of this peer</p>
+     * 
+     * @see plasmaSwitchboard#WORK_PATH for the folder this file lies in
+     * @see plasmaSwitchboard#DBFILE_WIKI for the file the latest version of wiki-pages lie in
+     */
+    public static final String DBFILE_WIKI_BKP          = "wiki-bkp.db";
+    /**
+     * <p><code>public static final String <strong>DBFILE_BLOG</strong> = "blog.db"</code></p>
+     * <p>Name of the file containing the database holding all blog-entries available on this peer</p>
+     * 
+     * @see plasmaSwitchboard#WORK_PATH for the folder this file lies in
+     */
+    public static final String DBFILE_BLOG              = "blog.db";
+    /**
+     * <p><code>public static final String <strong>DBFILE_BOOKMARKS</strong> = "bookmarks.db"</code></p>
+     * <p>Name of the file containing the database holding all bookmarks available on this peer</p>
+     * 
+     * @see plasmaSwitchboard#WORK_PATH for the folder this file lies in
+     * @see bookmarksDB for more detailed overview about the bookmarks structure
+     */
+    public static final String DBFILE_BOOKMARKS         = "bookmarks.db";
+    /**
+     * <p><code>public static final String <strong>DBFILE_BOOKMARKS_TAGS</strong> = "bookmarkTags.db"</code></p>
+     * <p>Name of the file containing the database holding all tag-&gt;bookmark relations</p>
+     * 
+     * @see plasmaSwitchboard#WORK_PATH for the folder this file lies in
+     * @see bookmarksDB for more detailed overview about the bookmarks structure
+     */
+    public static final String DBFILE_BOOKMARKS_TAGS    = "bookmarkTags.db";
+    /**
+     * <p><code>public static final String <strong>DBFILE_BOOKMARKS_DATES</strong> = "bookmarkDates.db"</code></p>
+     * <p>Name of the file containing the database holding all date-&gt;bookmark relations</p>
+     * 
+     * @see plasmaSwitchboard#WORK_PATH for the folder this file lies in
+     * @see bookmarksDB for more detailed overview about the bookmarks structure
+     */
+    public static final String DBFILE_BOOKMARKS_DATES   = "bookmarkDates.db";
+    /**
+     * <p><code>public static final String <strong>DBFILE_OWN_SEED</strong> = "mySeed.txt"</code></p>
+     * <p>Name of the file containing the database holding this peer's seed</p>
+     */
+    public static final String DBFILE_OWN_SEED          = "mySeed.txt";
+    /**
+     * <p><code>public static final String <strong>DBFILE_CRAWL_PROFILES</strong> = "crawlProfiles0.db"</code>
+     * <p>Name of the file containing the database holding all recent crawl profiles</p>
+     * 
+     * @see plasmaSwitchboard#DBPATH for the folder this file lies in
+     */
+    public static final String DBFILE_CRAWL_PROFILES    = "crawlProfiles0.db";
+    /**
+     * <p><code>public static final String <strong>DBFILE_CRAWL_ROBOTS</strong> = "crawlRobotsTxt.db"</code></p>
+     * <p>Name of the file containing the database holding all <code>robots.txt</code>-entries of the lately crawled domains</p>
+     * 
+     * @see plasmaSwitchboard#DBPATH for the folder this file lies in
+     */
+    public static final String DBFILE_CRAWL_ROBOTS      = "crawlRobotsTxt.db";
+    /**
+     * <p><code>public static final String <strong>DBFILE_USER</strong> = "DATA/SETTINGS/user.db"</code></p>
+     * <p>Path to the user-DB, beginning from the YaCy-installation's top-folder. It holds all rights the created
+     * users have as well as all other needed data about them</p>
+     */
+    public static final String DBFILE_USER              = "DATA/SETTINGS/user.db";
+    
     
     private Hashtable crawlJobsStatus = new Hashtable(); 
     
@@ -281,18 +845,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         setLog(new serverLog("PLASMA"));
         
         // load values from configs
-        this.plasmaPath   = new File(rootPath, getConfig("dbPath", "DATA/PLASMADB"));
+        this.plasmaPath   = new File(rootPath, getConfig(DBPATH, DBPATH_DEFAULT));
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
-        this.indexPath = new File(rootPath, getConfig("indexPath", "DATA/INDEX"));
+        this.indexPath = new File(rootPath, getConfig(INDEX_PATH, INDEX_PATH_DEFAULT));
         this.log.logConfig("Index Path: " + this.indexPath.toString());
-        this.listsPath      = new File(rootPath, getConfig("listsPath", "DATA/LISTS"));
+        this.listsPath      = new File(rootPath, getConfig(LISTS_PATH, LISTS_PATH_DEFAULT));
         this.log.logConfig("Lists Path:     " + this.listsPath.toString());
-        this.htDocsPath   = new File(rootPath, getConfig("htDocsPath", "DATA/HTDOCS"));
+        this.htDocsPath   = new File(rootPath, getConfig(HTDOCS_PATH, HTDOCS_PATH_DEFAULT));
         this.log.logConfig("HTDOCS Path:    " + this.htDocsPath.toString());
-        this.rankingPath   = new File(rootPath, getConfig("rankingPath", "DATA/RANKING"));
+        this.rankingPath   = new File(rootPath, getConfig(RANKING_PATH, RANKING_PATH_DEFAULT));
         this.log.logConfig("Ranking Path:    " + this.rankingPath.toString());
         this.rankingPermissions = new HashMap(); // mapping of permission - to filename.
-        this.workPath   = new File(rootPath, getConfig("workPath", "DATA/WORK"));
+        this.workPath   = new File(rootPath, getConfig(WORK_PATH, WORK_PATH_DEFAULT));
         this.log.logConfig("Work Path:    " + this.workPath.toString());
         
         /* ============================================================================
@@ -312,7 +876,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // load coloured lists
         if (blueList == null) {
             // read only once upon first instantiation of this class
-            String f = getConfig("plasmaBlueList", null);
+            String f = getConfig(LIST_BLUE, LIST_BLUE_DEFAULT);
             File plasmaBlueListFile = new File(f);
             if (f != null) blueList = kelondroMSetTools.loadList(plasmaBlueListFile, kelondroNaturalOrder.naturalOrder); else blueList= new TreeSet();
             this.log.logConfig("loaded blue-list from file " + plasmaBlueListFile.getName() + ", " +
@@ -321,8 +885,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // load the black-list / inspired by [AS]
-        File ulrBlackListFile = new File(getRootPath(), getConfig("listsPath", "DATA/LISTS"));
-        String blacklistClassName = getConfig("BlackLists.class", "de.anomic.plasma.urlPattern.defaultURLPattern");
+        File ulrBlackListFile = new File(getRootPath(), getConfig(LISTS_PATH, LISTS_PATH_DEFAULT));
+        String blacklistClassName = getConfig(BLACKLIST_CLASS, BLACKLIST_CLASS_DEFAULT);
         
         this.log.logConfig("Starting blacklist engine ...");
         try {
@@ -346,7 +910,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         // load badwords (to filter the topwords)
         if (badwords == null) {
-            File badwordsFile = new File(rootPath, "yacy.badwords");
+            File badwordsFile = new File(rootPath, LIST_BADWORDS_DEFAULT);
             badwords = kelondroMSetTools.loadList(badwordsFile, kelondroNaturalOrder.naturalOrder);
             this.log.logConfig("loaded badwords from file " + badwordsFile.getName() +
                                ", " + badwords.size() + " entries, " +
@@ -355,7 +919,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         // load stopwords
         if (stopwords == null) {
-            File stopwordsFile = new File(rootPath, "yacy.stopwords");
+            File stopwordsFile = new File(rootPath, LIST_STOPWORDS_DEFAULT);
             stopwords = kelondroMSetTools.loadList(stopwordsFile, kelondroNaturalOrder.naturalOrder);
             this.log.logConfig("loaded stopwords from file " + stopwordsFile.getName() + ", " +
             stopwords.size() + " entries, " +
@@ -369,38 +933,38 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
 
         // read memory amount
-        int  ramLURL         = (int) getConfigLong("ramCacheLURL", 1024) / 1024;
-        long ramLURL_time    = getConfigLong("ramCacheLURL_time", 1000);
+        int  ramLURL         = (int) getConfigLong(RAM_CACHE_LURL, 1024) / 1024;
+        long ramLURL_time    = getConfigLong(RAM_CACHE_LURL_TIME, 1000);
         ramLURL = Math.max((int)  (serverMemory.available() / 2), ramLURL);
         setConfig("ramCacheLURL", ramLURL);
-        int  ramNURL         = (int) getConfigLong("ramCacheNURL", 1024) / 1024;
-        long ramNURL_time    = getConfigLong("ramCacheNURL_time", 1000);
+        int  ramNURL         = (int) getConfigLong(RAM_CACHE_NURL, 1024) / 1024;
+        long ramNURL_time    = getConfigLong(RAM_CACHE_NURL_TIME, 1000);
         ramNURL = Math.max((int)  (serverMemory.available() / 10 / 1024), ramNURL);
         setConfig("ramCacheNURL", ramNURL * 1024);
-        int  ramEURL         = (int) getConfigLong("ramCacheEURL", 1024) / 1024;
-        long ramEURL_time    = getConfigLong("ramCacheEURL_time", 1000);
+        int  ramEURL         = (int) getConfigLong(RAM_CACHE_EURL, 1024) / 1024;
+        long ramEURL_time    = getConfigLong(RAM_CACHE_EURL_TIME, 1000);
         ramEURL = Math.max((int)  (serverMemory.available() / 20 / 1024), ramEURL);
         setConfig("ramCacheEURL", ramEURL * 1024);
-        int  ramRWI          = (int) getConfigLong("ramCacheRWI",  1024) / 1024;
-        long ramRWI_time     = getConfigLong("ramCacheRWI_time", 1000);
+        int  ramRWI          = (int) getConfigLong(RAM_CACHE_RWI, 1024) / 1024;
+        long ramRWI_time     = getConfigLong(RAM_CACHE_RWI_TIME, 1000);
         ramRWI = Math.max((int)  (serverMemory.available() / 4), ramRWI);
         setConfig("ramCacheRWI", ramRWI);
-        int  ramHTTP         = (int) getConfigLong("ramCacheHTTP", 1024) / 1024;
-        long ramHTTP_time    = getConfigLong("ramCacheHTTP_time", 1000);
-        int  ramMessage      = (int) getConfigLong("ramCacheMessage", 1024) / 1024;
-        long ramMessage_time = getConfigLong("ramCacheMessage_time", 1000);
-        int  ramRobots       = (int) getConfigLong("ramCacheRobots",1024) / 1024;
-        long ramRobots_time  = getConfigLong("ramCacheRobots_time",1000);
-        int  ramProfiles     = (int) getConfigLong("ramCacheProfiles",1024) / 1024;
-        long ramProfiles_time= getConfigLong("ramCacheProfiles_time", 1000);
-        int  ramPreNURL      = (int) getConfigLong("ramCachePreNURL", 1024) / 1024;
-        long ramPreNURL_time = getConfigLong("ramCachePreNURL_time", 1000);
+        int  ramHTTP         = (int) getConfigLong(RAM_CACHE_HTTP, 1024) / 1024;
+        long ramHTTP_time    = getConfigLong(RAM_CACHE_HTTP_TIME, 1000);
+        int  ramMessage      = (int) getConfigLong(RAM_CACHE_MESSAGE, 1024) / 1024;
+        long ramMessage_time = getConfigLong(RAM_CACHE_MESSAGE_TIME, 1000);
+        int  ramRobots       = (int) getConfigLong(RAM_CACHE_ROBOTS, 1024) / 1024;
+        long ramRobots_time  = getConfigLong(RAM_CACHE_ROBOTS_TIME, 1000);
+        int  ramProfiles     = (int) getConfigLong(RAM_CACHE_PROFILES, 1024) / 1024;
+        long ramProfiles_time= getConfigLong(RAM_CACHE_PROFILES_TIME, 1000);
+        int  ramPreNURL      = (int) getConfigLong(RAM_CACHE_PRE_NURL, 1024) / 1024;
+        long ramPreNURL_time = getConfigLong(RAM_CACHE_PRE_NURL_TIME, 1000);
         ramPreNURL = Math.max((int)  (serverMemory.available() / 10 / 1024), ramPreNURL);
         setConfig("ramCachePreNURL", ramPreNURL * 1024);
-        int  ramWiki         = (int) getConfigLong("ramCacheWiki", 1024) / 1024;
-        long ramWiki_time    = getConfigLong("ramCacheWiki_time", 1000);
-        int  ramBlog         = (int) getConfigLong("ramCacheBlog", 1024) / 1024;
-        long ramBlog_time    = getConfigLong("ramCacheBlog_time", 1000);
+        int  ramWiki         = (int) getConfigLong(RAM_CACHE_WIKI, 1024) / 1024;
+        long ramWiki_time    = getConfigLong(RAM_CACHE_WIKI_TIME, 1000);
+        int  ramBlog         = (int) getConfigLong(RAM_CACHE_BLOG, 1024) / 1024;
+        long ramBlog_time    = getConfigLong(RAM_CACHE_BLOG_TIME, 1000);
         this.log.logConfig("LURL     Cache memory = " + ppRamString(ramLURL)     + ", preloadTime = " + ramLURL_time);
         this.log.logConfig("NURL     Cache memory = " + ppRamString(ramNURL)     + ", preloadTime = " + ramNURL_time);
         this.log.logConfig("EURL     Cache memory = " + ppRamString(ramEURL)     + ", preloadTime = " + ramEURL_time);
@@ -415,7 +979,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // make crawl profiles database and default profiles
         this.log.logConfig("Initializing Crawl Profiles");
-        File profilesFile = new File(this.plasmaPath, "crawlProfiles0.db");
+        File profilesFile = new File(this.plasmaPath, DBFILE_CRAWL_PROFILES);
         this.profiles = new plasmaCrawlProfile(profilesFile, ramProfiles, ramProfiles_time);
         initProfiles();
         log.logConfig("Loaded profiles from file " + profilesFile.getName() +
@@ -424,7 +988,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // loading the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
-        File robotsDBFile = new File(this.plasmaPath, "crawlRobotsTxt.db");
+        File robotsDBFile = new File(this.plasmaPath, DBFILE_CRAWL_ROBOTS);
         robots = new plasmaCrawlRobotsTxt(robotsDBFile, ramRobots, ramRobots_time);
         this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() +
         ", " + robots.size() + " entries" +
@@ -437,22 +1001,22 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         errorURL = new plasmaCrawlEURL(plasmaPath, ramEURL, -1);
 
         // set a high maximum cache size to current size; this is adopted later automatically
-        int wordCacheMaxCount = Math.max((int) getConfigLong("wordCacheInitCount", 30000),
-                                         (int) getConfigLong("wordCacheMaxCount", 20000));
-        setConfig("wordCacheMaxCount", Integer.toString(wordCacheMaxCount));
+        int wordCacheMaxCount = Math.max((int) getConfigLong(WORDCACHE_INIT_COUNT, 30000),
+                                         (int) getConfigLong(WORDCACHE_MAX_COUNT, 20000));
+        setConfig(WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
         wordIndex.setMaxWordCount(wordCacheMaxCount); 
 
-        int wordInCacheMaxCount = (int) getConfigLong("indexDistribution.dhtReceiptLimit", 1000);
+        int wordInCacheMaxCount = (int) getConfigLong(INDEX_DIST_DHT_RECEIPT_LIMIT, 1000);
         wordIndex.setInMaxWordCount(wordInCacheMaxCount);
         
         // set a minimum amount of memory for the indexer thread
-        setConfig("80_indexing_memprereq", Math.max(getConfigLong("80_indexing_memprereq", 0), wordIndex.minMem()));
+        setConfig(INDEXER_MEMPREREQ, Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem()));
         
         // start a cache manager
         log.logConfig("Starting HT Cache Manager");
         
         // create the cache directory
-        String cache = getConfig("proxyCache", "DATA/HTCACHE");
+        String cache = getConfig(HTCACHE_PATH, HTCACHE_PATH_DEFAULT);
         cache = cache.replace('\\', '/');
         if (cache.endsWith("/")) { cache = cache.substring(0, cache.length() - 1); }
         if (new File(cache).isAbsolute()) {
@@ -461,9 +1025,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             htCachePath = new File(rootPath, cache);
         }
         this.log.logInfo("HTCACHE Path = " + htCachePath.getAbsolutePath());
-        long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig("proxyCacheSize", "2")); // this is megabyte
-        String cacheLayout = getConfig("proxyCacheLayout", "tree");
-        boolean cacheMigration = getConfigBool("proxyCacheMigration", true);
+        long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig(PROXY_CACHE_SIZE, "2")); // this is megabyte
+        String cacheLayout = getConfig(PROXY_CACHE_LAYOUT, PROXY_CACHE_LAYOUT_TREE);
+        boolean cacheMigration = getConfigBool(PROXY_CACHE_MIGRATION, true);
         this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP, ramHTTP_time, cacheLayout, cacheMigration);
         
         // make parser
@@ -477,7 +1041,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.sbQueue = new plasmaSwitchboardQueue(this.cacheManager, this.wordIndex.loadedURL, new File(this.plasmaPath, "switchboardQueue1.stack"), this.profiles);
         
         // setting the indexing queue slots
-        indexingSlots = (int) getConfigLong("indexer.slots", 30);
+        indexingSlots = (int) getConfigLong(INDEXER_SLOTS, 30);
         
         // create in process list
         this.indexingTasksInProcess = new HashMap();
@@ -499,20 +1063,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         // define an extension-blacklist
         log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
-        plasmaParser.initMediaExt(plasmaParser.extString2extList(getConfig("mediaExt","")));
-        plasmaParser.initSupportedRealtimeFileExt(plasmaParser.extString2extList(getConfig("parseableExt","")));
+        plasmaParser.initMediaExt(plasmaParser.extString2extList(getConfig(PARSER_MEDIA_EXT,"")));
+        plasmaParser.initSupportedRealtimeFileExt(plasmaParser.extString2extList(getConfig(PARSER_MEDIA_EXT_PARSEABLE,"")));
         
         // define a realtime parsable mimetype list
         log.logConfig("Parser: Initializing Mime Types");
-        plasmaParser.initRealtimeParsableMimeTypes(getConfig("parseableRealtimeMimeTypes","application/xhtml+xml,text/html,text/plain"));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_PROXY,getConfig("parseableMimeTypes.PROXY",null));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER,getConfig("parseableMimeTypes.CRAWLER",null));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_ICAP,getConfig("parseableMimeTypes.ICAP",null));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_URLREDIRECTOR,getConfig("parseableMimeTypes.URLREDIRECTOR",null));
+        plasmaParser.initRealtimeParsableMimeTypes(getConfig(PARSER_MIMETYPES_REALTIME,"application/xhtml+xml,text/html,text/plain"));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_PROXY,getConfig(PARSER_MIMETYPES_PROXY,null));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER,getConfig(PARSER_MIMETYPES_CRAWLER,null));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_ICAP,getConfig(PARSER_MIMETYPES_ICAP,null));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_URLREDIRECTOR,getConfig(PARSER_MIMETYPES_URLREDIRECTOR,null));
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
-        crawlSlots = Integer.parseInt(getConfig("crawler.MaxActiveThreads", "10"));
+        crawlSlots = Integer.parseInt(getConfig(CRAWLER_THREADS_ACTIVE_MAX, "10"));
         plasmaCrawlLoader.switchboard = this;
         this.cacheLoader = new plasmaCrawlLoader(this.cacheManager, this.log);
                 
@@ -543,7 +1107,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // Init User DB
         this.log.logConfig("Loading User DB");
-        File userDbFile = new File(getRootPath(), "DATA/SETTINGS/user.db");
+        File userDbFile = new File(getRootPath(), DBFILE_USER);
         this.userDB = new userDB(userDbFile, 512, 500);
         this.log.logConfig("Loaded User DB from file " + userDbFile.getName() +
         ", " + this.userDB.size() + " entries" +
@@ -564,8 +1128,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.remoteSearches = new TreeMap();
         
         // init messages: clean up message symbol
-        File notifierSource = new File(getRootPath(), getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
-        File notifierDest = new File(getConfig("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+        File notifierSource = new File(getRootPath(), getConfig(HTROOT_PATH, HTROOT_PATH_DEFAULT) + "/env/grafics/empty.gif");
+        File notifierDest = new File(getConfig(HTDOCS_PATH, HTDOCS_PATH_DEFAULT), "notifier.gif");
         try {
             serverFileUtils.copy(notifierSource, notifierDest);
         } catch (IOException e) {
@@ -587,9 +1151,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         CRDist1Percent = 30
         CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080
          **/
-        rankingOn = getConfig("CRDistOn", "true").equals("true");
-        rankingOwnDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig("CRDist0Path", plasmaRankingDistribution.CR_OWN)), (int) getConfigLong("CRDist0Method", plasmaRankingDistribution.METHOD_ANYSENIOR), (int) getConfigLong("CRDist0Percent", 0), getConfig("CRDist0Target", ""));
-        rankingOtherDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig("CRDist1Path", plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong("CRDist1Method", plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong("CRDist1Percent", 30), getConfig("CRDist1Target", "kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080"));
+        rankingOn = getConfig(RANKING_DIST_ON, "true").equals("true");
+        rankingOwnDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig(RANKING_DIST_0_PATH, plasmaRankingDistribution.CR_OWN)), (int) getConfigLong(RANKING_DIST_0_METHOD, plasmaRankingDistribution.METHOD_ANYSENIOR), (int) getConfigLong(RANKING_DIST_0_METHOD, 0), getConfig(RANKING_DIST_0_TARGET, ""));
+        rankingOtherDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig(RANKING_DIST_1_PATH, plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong(RANKING_DIST_1_METHOD, plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong(RANKING_DIST_1_METHOD, 30), getConfig(RANKING_DIST_1_TARGET, "kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080"));
         
         // init facility DB
         /*
@@ -611,10 +1175,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * Initializing httpc
          */
         // initializing yacyDebugMode
-        httpc.yacyDebugMode = getConfig("yacyDebugMode", "false").equals("true");
+        httpc.yacyDebugMode = getConfig(YACY_MODE_DEBUG, "false").equals("true");
         
         // init nameCacheNoCachingList
-        String noCachingList = getConfig("httpc.nameCacheNoCachingPatterns","");
+        String noCachingList = getConfig(HTTPC_NAME_CACHE_CACHING_PATTERNS_NO,"");
         String[] noCachingEntries = noCachingList.split(",");
         for (int i=0; i<noCachingEntries.length; i++) {
             String entry = noCachingEntries[i].trim();
@@ -640,50 +1204,50 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // initializing dht chunk generation
         this.dhtTransferChunk = null;
-        this.dhtTransferIndexCount = (int) getConfigLong("indexDistribution.startChunkSize", 50);
+        this.dhtTransferIndexCount = (int) getConfigLong(INDEX_DIST_CHUNK_SIZE_START, 50);
         
         // deploy threads
         log.logConfig("Starting Threads");
         // System.gc(); // help for profiler
-        int indexing_cluster = Integer.parseInt(getConfig("80_indexing_cluster", "1"));
+        int indexing_cluster = Integer.parseInt(getConfig(INDEXER_CLUSTER, "1"));
         if (indexing_cluster < 1) indexing_cluster = 1;
-        deployThread("90_cleanup", "Cleanup", "simple cleaning process for monitoring information", null,
-        new serverInstantThread(this, "cleanupJob", "cleanupJobSize", null), 10000); // all 5 Minutes
-        deployThread("82_crawlstack", "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
-        new serverInstantThread(sbStackCrawlThread, "job", "size", null), 8000);
+        deployThread(CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
+        new serverInstantThread(this, CLEANUP_METHOD_START, CLEANUP_METHOD_JOBCOUNT, CLEANUP_METHOD_FREEMEM), 10000); // all 5 Minutes
+        deployThread(CRAWLSTACK, "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
+        new serverInstantThread(sbStackCrawlThread, CRAWLSTACK_METHOD_START, CRAWLSTACK_METHOD_JOBCOUNT, CRAWLSTACK_METHOD_FREEMEM), 8000);
 
-        deployThread("80_indexing", "Parsing/Indexing", "thread that performes document parsing and indexing", "/IndexCreateIndexingQueue_p.html",
-        new serverInstantThread(this, "deQueue", "queueSize", "deQueueFreeMem"), 10000);
+        deployThread(INDEXER, "Parsing/Indexing", "thread that performes document parsing and indexing", "/IndexCreateIndexingQueue_p.html",
+        new serverInstantThread(this, INDEXER_METHOD_START, INDEXER_METHOD_JOBCOUNT, INDEXER_METHOD_FREEMEM), 10000);
         for (int i = 1; i < indexing_cluster; i++) {
-            setConfig((i + 80) + "_indexing_idlesleep", getConfig("80_indexing_idlesleep", ""));
-            setConfig((i + 80) + "_indexing_busysleep", getConfig("80_indexing_busysleep", ""));
+            setConfig((i + 80) + "_indexing_idlesleep", getConfig(INDEXER_IDLESLEEP, ""));
+            setConfig((i + 80) + "_indexing_busysleep", getConfig(INDEXER_BUSYSLEEP, ""));
             deployThread((i + 80) + "_indexing", "Parsing/Indexing (cluster job)", "thread that performes document parsing and indexing", null,
-            new serverInstantThread(this, "deQueue", "queueSize", "deQueueFreeMem"), 10000 + (i * 1000),
-            Long.parseLong(getConfig("80_indexing_idlesleep" , "5000")),
-            Long.parseLong(getConfig("80_indexing_busysleep" , "0")),
-            Long.parseLong(getConfig("80_indexing_memprereq" , "1000000")));
+            new serverInstantThread(this, INDEXER_METHOD_START, INDEXER_METHOD_JOBCOUNT, INDEXER_METHOD_FREEMEM), 10000 + (i * 1000),
+            Long.parseLong(getConfig(INDEXER_IDLESLEEP , "5000")),
+            Long.parseLong(getConfig(INDEXER_BUSYSLEEP , "0")),
+            Long.parseLong(getConfig(INDEXER_MEMPREREQ , "1000000")));
         }
 
-        deployThread("70_cachemanager", "Proxy Cache Enqueue", "job takes new proxy files from RAM stack, stores them, and hands over to the Indexing Stack", null,
-        new serverInstantThread(this, "htEntryStoreJob", "htEntrySize", null), 10000);
-        deployThread("62_remotetriggeredcrawl", "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
-        new serverInstantThread(this, "remoteTriggeredCrawlJob", "remoteTriggeredCrawlJobSize", null), 30000);
-        deployThread("61_globalcrawltrigger", "Global Crawl Trigger", "thread that triggeres remote peers for crawling", "/IndexCreateWWWGlobalQueue_p.html",
-        new serverInstantThread(this, "limitCrawlTriggerJob", "limitCrawlTriggerJobSize", null), 30000); // error here?
-        deployThread("50_localcrawl", "Local Crawl", "thread that performes a single crawl step from the local crawl queue", "/IndexCreateWWWLocalQueue_p.html",
-        new serverInstantThread(this, "coreCrawlJob", "coreCrawlJobSize", null), 10000);
-        deployThread("40_peerseedcycle", "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account", null,
-        new serverInstantThread(yc, "publishSeedList", null, null), 180000);
+        deployThread(PROXY_CACHE_ENQUEUE, "Proxy Cache Enqueue", "job takes new proxy files from RAM stack, stores them, and hands over to the Indexing Stack", null,
+        new serverInstantThread(this, PROXY_CACHE_ENQUEUE_METHOD_START, PROXY_CACHE_ENQUEUE_METHOD_JOBCOUNT, PROXY_CACHE_ENQUEUE_METHOD_FREEMEM), 10000);
+        deployThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
+        new serverInstantThread(this, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
+        deployThread(CRAWLJOB_GLOBAL_CRAWL_TRIGGER, "Global Crawl Trigger", "thread that triggeres remote peers for crawling", "/IndexCreateWWWGlobalQueue_p.html",
+        new serverInstantThread(this, CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_START, CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_JOBCOUNT, CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_FREEMEM), 30000); // error here?
+        deployThread(CRAWLJOB_LOCAL_CRAWL, "Local Crawl", "thread that performes a single crawl step from the local crawl queue", "/IndexCreateWWWLocalQueue_p.html",
+        new serverInstantThread(this, CRAWLJOB_LOCAL_CRAWL_METHOD_START, CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT, CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM), 10000);
+        deployThread(SEED_UPLOAD, "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account", null,
+        new serverInstantThread(yc, SEED_UPLOAD_METHOD_START, SEED_UPLOAD_METHOD_JOBCOUNT, SEED_UPLOAD_METHOD_FREEMEM), 180000);
         serverInstantThread peerPing = null;
-        deployThread("30_peerping", "YaCy Core", "this is the p2p-control and peer-ping task", null,
-        peerPing = new serverInstantThread(yc, "peerPing", null, null), 2000);
+        deployThread(PEER_PING, "YaCy Core", "this is the p2p-control and peer-ping task", null,
+        peerPing = new serverInstantThread(yc, PEER_PING_METHOD_START, PEER_PING_METHOD_JOBCOUNT, PEER_PING_METHOD_FREEMEM), 2000);
         peerPing.setSyncObject(new Object());
         
-        deployThread("20_dhtdistribution", "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
-            new serverInstantThread(this, "dhtTransferJob", null, null), 60000,
-            Long.parseLong(getConfig("20_dhtdistribution_idlesleep" , "5000")),
-            Long.parseLong(getConfig("20_dhtdistribution_busysleep" , "0")),
-            Long.parseLong(getConfig("20_dhtdistribution_memprereq" , "1000000")));
+        deployThread(INDEX_DIST, "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
+            new serverInstantThread(this, INDEX_DIST_METHOD_START, INDEX_DIST_METHOD_JOBCOUNT, INDEX_DIST_METHOD_FREEMEM), 60000,
+            Long.parseLong(getConfig(INDEX_DIST_IDLESLEEP , "5000")),
+            Long.parseLong(getConfig(INDEX_DIST_BUSYSLEEP , "0")),
+            Long.parseLong(getConfig(INDEX_DIST_MEMPREREQ , "1000000")));
 
         // test routine for snippet fetch
         //Set query = new HashSet();
@@ -702,7 +1266,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
     public void initMessages(int ramMessage, long ramMessage_time) {
         this.log.logConfig("Starting Message Board");
-        File messageDbFile = new File(workPath, "message.db");
+        File messageDbFile = new File(workPath, DBFILE_MESSAGE);
         this.messageDB = new messageBoard(messageDbFile, ramMessage, ramMessage_time);
         this.log.logConfig("Loaded Message Board DB from file " + messageDbFile.getName() +
         ", " + this.messageDB.size() + " entries" +
@@ -712,15 +1276,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
     public void initWiki(int ramWiki, long ramWiki_time) {
         this.log.logConfig("Starting Wiki Board");
-        File wikiDbFile = new File(workPath, "wiki.db");
-        this.wikiDB = new wikiBoard(wikiDbFile, new File(workPath, "wiki-bkp.db"), ramWiki, ramWiki_time);
+        File wikiDbFile = new File(workPath, DBFILE_WIKI);
+        this.wikiDB = new wikiBoard(wikiDbFile, new File(workPath, DBFILE_WIKI_BKP), ramWiki, ramWiki_time);
         this.log.logConfig("Loaded Wiki Board DB from file " + wikiDbFile.getName() +
         ", " + this.wikiDB.size() + " entries" +
         ", " + ppRamString(wikiDbFile.length()/1024));
     }
     public void initBlog(int ramBlog, long ramBlog_time) {
         this.log.logConfig("Starting Blog");
-        File blogDbFile = new File(workPath, "blog.db");
+        File blogDbFile = new File(workPath, DBFILE_BLOG);
         this.blogDB = new blogBoard(blogDbFile, ramBlog, ramBlog_time);
         this.log.logConfig("Loaded Blog DB from file " + blogDbFile.getName() +
         ", " + this.blogDB.size() + " entries" +
@@ -728,9 +1292,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     public void initBookmarks(){
         this.log.logConfig("Loading Bookmarks DB");
-        File bookmarksFile = new File(workPath, "bookmarks.db");
-        File tagsFile = new File(workPath, "bookmarkTags.db");
-        File datesFile = new File(workPath, "bookmarkDates.db");
+        File bookmarksFile = new File(workPath, DBFILE_BOOKMARKS);
+        File tagsFile = new File(workPath, DBFILE_BOOKMARKS_TAGS);
+        File datesFile = new File(workPath, DBFILE_BOOKMARKS_DATES);
         this.bookmarksDB = new bookmarksDB(bookmarksFile, tagsFile, datesFile, 512, 500);
         this.log.logConfig("Loaded Bookmarks DB from files "+ bookmarksFile.getName()+ ", "+tagsFile.getName());
         this.log.logConfig(this.bookmarksDB.tagsSize()+" Tag, "+this.bookmarksDB.bookmarksSize()+" Bookmarks");
@@ -770,7 +1334,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     /**
      * This method changes the HTCache size.<br>
-     * @param new cache size in mb
+     * @param newCacheSize in MB
      */
     public final void setCacheSize(long newCacheSize) {
         this.cacheManager.setCacheSize(1048576 * newCacheSize);
@@ -778,7 +1342,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public boolean onlineCaution() {
         try {
-            return System.currentTimeMillis() - proxyLastAccess < Integer.parseInt(getConfig("onlineCautionDelay", "30000"));
+            return System.currentTimeMillis() - proxyLastAccess < Integer.parseInt(getConfig(PROXY_ONLINE_CAUTION_DELAY, "30000"));
         } catch (NumberFormatException e) {
             return false;
         }
@@ -804,10 +1368,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         while (i.hasNext()) {
             profile = (plasmaCrawlProfile.entry) i.next();
             name = profile.name();
-            if (name.equals("proxy")) this.defaultProxyProfile = profile;
-            if (name.equals("remote")) this.defaultRemoteProfile = profile;
-            if (name.equals("snippetText")) this.defaultTextSnippetProfile = profile;
-            if (name.equals("snippetMedia")) this.defaultMediaSnippetProfile = profile;
+            if (name.equals(CRAWL_PROFILE_PROXY)) this.defaultProxyProfile = profile;
+            if (name.equals(CRAWL_PROFILE_REMOTE)) this.defaultRemoteProfile = profile;
+            if (name.equals(CRAWL_PROFILE_SNIPPET_TEXT)) this.defaultTextSnippetProfile = profile;
+            if (name.equals(CRAWL_PROFILE_SNIPPET_MEDIA)) this.defaultMediaSnippetProfile = profile;
         }
         if (this.defaultProxyProfile == null) {
             // generate new default entry for proxy crawling
@@ -822,26 +1386,26 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         if (this.defaultRemoteProfile == null) {
             // generate new default entry for remote crawling
-            defaultRemoteProfile = this.profiles.newEntry("remote", "", ".*", ".*", 0, 0,
+            defaultRemoteProfile = this.profiles.newEntry(CRAWL_PROFILE_REMOTE, "", ".*", ".*", 0, 0,
                     -1, -1, -1, true, true, true, false, true, false, true, true, false);
         }
         if (this.defaultTextSnippetProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultTextSnippetProfile = this.profiles.newEntry("snippetText", "", ".*", ".*", 0, 0,
+            defaultTextSnippetProfile = this.profiles.newEntry(CRAWL_PROFILE_SNIPPET_TEXT, "", ".*", ".*", 0, 0,
                     60 * 24 * 30, -1, -1, true, true, true, true, true, false, true, true, false);
         }
         if (this.defaultMediaSnippetProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultMediaSnippetProfile = this.profiles.newEntry("snippetMedia", "", ".*", ".*", 0, 0,
+            defaultMediaSnippetProfile = this.profiles.newEntry(CRAWL_PROFILE_SNIPPET_MEDIA, "", ".*", ".*", 0, 0,
                     60 * 24 * 30, -1, -1, true, false, true, true, true, false, true, true, false);
         }
     }
 
     private void resetProfiles() {
-        final File pdb = new File(plasmaPath, "crawlProfiles0.db");
+        final File pdb = new File(plasmaPath, DBFILE_CRAWL_PROFILES);
         if (pdb.exists()) pdb.delete();
-        int ramProfiles = (int) getConfigLong("ramCacheProfiles", 1024) / 1024;
-        long ramProfiles_time = getConfigLong("ramCacheProfiles_time", 1000);
+        int ramProfiles = (int) getConfigLong(RAM_CACHE_PROFILES, 1024) / 1024;
+        long ramProfiles_time = getConfigLong(RAM_CACHE_PROFILES_TIME, 1000);
         profiles = new plasmaCrawlProfile(pdb, ramProfiles, ramProfiles_time);
         initProfiles();
     }
@@ -858,10 +1422,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 
                 // getting next profile
                 entry = (plasmaCrawlProfile.entry) iter.next();
-                if (!((entry.name().equals("proxy"))  ||
-                      (entry.name().equals("remote")) ||
-                      (entry.name().equals("snippetText")) ||
-                      (entry.name().equals("snippetMedia")))) {
+                if (!((entry.name().equals(CRAWL_PROFILE_PROXY))  ||
+                      (entry.name().equals(CRAWL_PROFILE_REMOTE)) ||
+                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_TEXT)) ||
+                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_MEDIA)))) {
                     iter.remove();
                     hasDoneSomething = true;
                 }
@@ -1049,8 +1613,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // flush some entries from the RAM cache
         wordIndex.flushCacheSome(false);
         // adopt maximum cache size to current size to prevent that further OutOfMemoryErrors occur
-        int newMaxCount = Math.max(2000, Math.min((int) getConfigLong("wordCacheMaxCount", 20000), wordIndex.dhtOutCacheSize()));
-        setConfig("wordCacheMaxCount", Integer.toString(newMaxCount));
+        int newMaxCount = Math.max(2000, Math.min((int) getConfigLong(WORDCACHE_MAX_COUNT, 20000), wordIndex.dhtOutCacheSize()));
+        setConfig(WORDCACHE_MAX_COUNT, Integer.toString(newMaxCount));
         wordIndex.setMaxWordCount(newMaxCount); 
     }
     
@@ -1088,7 +1652,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     )
             ) {
                 // generate new chunk
-                int minChunkSize = (int) getConfigLong("indexDistribution.minChunkSize", 30);
+                int minChunkSize = (int) getConfigLong(INDEX_DIST_CHUNK_SIZE_MIN, 30);
                 dhtTransferChunk = new plasmaDHTChunk(this.log, wordIndex, minChunkSize, dhtTransferIndexCount, 5000);
                 doneSomething = true;
             }
@@ -1208,10 +1772,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
             // set new memory limit for indexer thread
             long memprereq = Math.max(getConfigLong("80_indexing_memprereq", 0), wordIndex.minMem());
-            setConfig("80_indexing_memprereq", memprereq);
-            setThreadPerformance("80_indexing",
-                    getConfigLong("80_indexing_idlesleep", 0),
-                    getConfigLong("80_indexing_busysleep", 0),
+            setConfig(INDEXER_MEMPREREQ, memprereq);
+            setThreadPerformance(INDEXER,
+                    getConfigLong(INDEXER_IDLESLEEP, 0),
+                    getConfigLong(INDEXER_BUSYSLEEP, 0),
                     memprereq);
             
             return hasDoneSomething;
@@ -1226,7 +1790,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * @return a new File instance
      */
     public File getOwnSeedFile() {
-        return new File(getRootPath(), getConfig("yacyOwnSeedFile", "mySeed.txt"));
+        return new File(getRootPath(), getConfig(OWN_SEED_FILE, DBFILE_OWN_SEED));
     }
     
     /**
@@ -1685,9 +2249,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         yacySeed seed;
                                                 
                         if (
-                                ((storagePeerHash = getConfig("storagePeerHash",null))== null) ||
+                                ((storagePeerHash = getConfig(STORAGE_PEER_HASH, null)) == null) ||
                                 (storagePeerHash.trim().length() == 0) ||
-                                ((seed = yacyCore.seedDB.getConnected(storagePeerHash))==null)
+                                ((seed = yacyCore.seedDB.getConnected(storagePeerHash)) == null)
                         ){
                             
                             /* ========================================================================
@@ -1792,8 +2356,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         storageEndTime = System.currentTimeMillis();
                         
                         //increment number of indexed urls
-                		long indexedurls = getConfigLong("indexedc",0) + 1;
-                		setConfig("indexedc",indexedurls);
+                		long indexedurls = getConfigLong("indexedc", 0) + 1;
+                		setConfig("indexedc", indexedurls);
                         
                         if (log.isInfo()) {
                             // TODO: UTF-8 docDescription seems not to be displayed correctly because
@@ -2337,7 +2901,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if(authorization==null) return 1;
         //if (authorization.length() < 6) return 1; // no authentication information given
         //authorization = authorization.trim().substring(6);
-        String adminAccountBase64MD5 = getConfig("adminAccountBase64MD5", "");
+        String adminAccountBase64MD5 = getConfig(ADMIN_ACCOUNT_B64MD5, "");
         if (adminAccountBase64MD5.length() == 0) return 2; // no passwrd stored
         if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
         return 0;
@@ -2364,8 +2928,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public void startTransferWholeIndex(yacySeed seed, boolean delete) {
         if (transferIdxThread == null) {
             this.transferIdxThread = new plasmaDHTFlush(this.log, this.wordIndex, seed, delete,
-                                                        "true".equalsIgnoreCase(getConfig("indexTransfer.gzipBody","false")),
-                                                        (int) getConfigLong("indexTransfer.timeout",60000));
+                                                        "true".equalsIgnoreCase(getConfig(INDEX_TRANSFER_GZIP_BODY, "false")),
+                                                        (int) getConfigLong(INDEX_TRANSFER_TIMEOUT, 60000));
             this.transferIdxThread.start();
         }
     }    
@@ -2398,7 +2962,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (yacyCore.seedDB.mySeed.isVirgin()) {
             return "no DHT distribution: status is virgin";
         }
-        if (getConfig("allowDistributeIndex","false").equalsIgnoreCase("false")) {
+        if (getConfig(INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false")) {
             return "no DHT distribution: not enabled";
         }
         if (wordIndex.loadedURL.size() < 10) {
@@ -2407,7 +2971,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (wordIndex.size() < 100) {
             return "no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size();
         }
-        if ((getConfig("allowDistributeIndexWhileCrawling","false").equalsIgnoreCase("false")) &&
+        if ((getConfig(INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) &&
             ((noticeURL.stackSize() > 0) /*|| (sbQueue.size() > 3)*/)) {
             return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + noticeURL.stackSize() + ", sbQueue.size() = " + sbQueue.size();
         }
@@ -2444,8 +3008,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } else {
                 if (dhtTransferChunk.indexCount() >= dhtTransferIndexCount) dhtTransferIndexCount++;
             }
-            int minChunkSize = (int) getConfigLong("indexDistribution.minChunkSize", 30);
-            int maxChunkSize = (int) getConfigLong("indexDistribution.maxChunkSize", 3000);
+            int minChunkSize = (int) getConfigLong(INDEX_DIST_CHUNK_SIZE_MIN, 30);
+            int maxChunkSize = (int) getConfigLong(INDEX_DIST_CHUNK_SIZE_MAX, 3000);
             if (dhtTransferIndexCount < minChunkSize) dhtTransferIndexCount = minChunkSize;
             if (dhtTransferIndexCount > maxChunkSize) dhtTransferIndexCount = maxChunkSize;
             
@@ -2453,7 +3017,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return true;
         } else {
             dhtTransferChunk.incTransferFailedCounter();
-            int maxChunkFails = (int) getConfigLong("indexDistribution.maxChunkFails", 1);
+            int maxChunkFails = (int) getConfigLong(INDEX_DIST_CHUNK_FAILS_MAX, 1);
             if (dhtTransferChunk.getTransferFailedCounter() >= maxChunkFails) {
                 System.out.println("DEBUG: " + dhtTransferChunk.getTransferFailedCounter() + " of " + maxChunkFails + " sendings failed for this chunk, aborting!");
                 dhtTransferChunk.setStatus(plasmaDHTChunk.chunkStatus_FAILED);
@@ -2482,8 +3046,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             int hc1 = 0;
 
             // getting distribution configuration values
-            boolean gzipBody = getConfig("indexDistribution.gzipBody","false").equalsIgnoreCase("true");
-            int timeout = (int)getConfigLong("indexDistribution.timeout",60000);
+            boolean gzipBody = getConfig(INDEX_DIST_GZIP_BODY, "false").equalsIgnoreCase("true");
+            int timeout = (int)getConfigLong(INDEX_DIST_TIMEOUT, 60000);
             int retries = 0;
 
             // starting up multiple DHT transfer threads   
