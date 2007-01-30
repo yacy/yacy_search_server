@@ -171,7 +171,7 @@ public class Messages_p {
             } catch (UnsupportedEncodingException e) {
                 // can not happen, because UTF-8 must be supported by every JVM
             }
-            prop.put("mode_message", wikiTransformer.transform(theMessage));
+            prop.putWiki("mode_message", theMessage);
             prop.put("mode_hash", message.authorHash());
             prop.put("mode_key", key);
         }
