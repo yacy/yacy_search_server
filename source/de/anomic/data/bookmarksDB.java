@@ -135,7 +135,7 @@ public class bookmarksDB {
         bookmarkCache=new HashMap();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
-        this.bookmarksTable = new kelondroMapObjects(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false), 500);
+        this.bookmarksTable = new kelondroObjects(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false), 1000);
 
         // tags
         tagsFile.getParentFile().mkdirs();
