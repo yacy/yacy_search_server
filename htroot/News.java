@@ -141,7 +141,7 @@ public class News {
                     prop.put("table_list_" + i + "_cat", record.category());
                     prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : yacyCore.universalDateShortString(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());
-                    prop.put("table_list_" + i + "_att", wikiCode.replaceHTML(record.attributes().toString()) );
+                    prop.put("table_list_" + i + "_att", record.attributes().toString() );
                 } catch (IOException e) {e.printStackTrace();}
                 prop.put("table_list", maxCount);
             }
