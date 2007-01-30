@@ -766,7 +766,7 @@ public class bookmarksDB {
             timestamp=System.currentTimeMillis();
         }
        
-        public Map toMap(){
+        private Map toMap(){
             entry.put(BOOKMARK_TAGS, listManager.hashset2string(tags));
             entry.put(BOOKMARK_TIMESTAMP, String.valueOf(this.timestamp));
             return entry;
@@ -856,6 +856,7 @@ public class bookmarksDB {
                     saveTag(tag);
                 }
             }
+            toMap();
         }
 
         public long getTimeStamp(){
