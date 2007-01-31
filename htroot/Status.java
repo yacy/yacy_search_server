@@ -206,6 +206,7 @@ public class Status {
             prop.put("peerStatistics", 1);
             prop.put("peerStatistics_uptime", serverDate.intervalToString(uptime));
             prop.put("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed.get(yacySeed.ISPEED, "unknown"));
+            prop.put("peerStatistics_queriesperminute", yacyCore.seedDB.mySeed.get(yacySeed.RSPEED, "unknown"));
             prop.put("peerStatistics_links", yacyCore.seedDB.mySeed.get(yacySeed.LCOUNT, "unknown"));
             prop.put("peerStatistics_words", yacyCore.seedDB.mySeed.get(yacySeed.ICOUNT, "unknown"));
             prop.put("peerStatistics_juniorConnects", yacyCore.peerActions.juniorConnects);

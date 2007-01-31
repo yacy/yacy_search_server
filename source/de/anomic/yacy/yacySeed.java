@@ -135,6 +135,7 @@ public class yacySeed {
     public static final String PEERTAGS  = "Tags";
 
     public static final String ISPEED    = "ISpeed";
+    public static final String RSPEED    = "RSpeed";
     public static final String UPTIME    = "Uptime";
     public static final String LCOUNT    = "LCount";
     public static final String NCOUNT    = "NCount";
@@ -178,6 +179,7 @@ public class yacySeed {
         this.dna.put(yacySeed.UTC, "+0000");
         // later during operation -
         this.dna.put(yacySeed.ISPEED, yacySeed.ZERO);  // the speed of indexing (pages/minute) of the peer
+        this.dna.put(yacySeed.RSPEED, yacySeed.ZERO);  // the speed of retrieval (queries/minute) of the peer
         this.dna.put(yacySeed.UPTIME, yacySeed.ZERO);  // the number of minutes that the peer is up in minutes/day (moving average MA30)
         this.dna.put(yacySeed.LCOUNT, yacySeed.ZERO);  // the number of links that the peer has stored (LURL's)
         this.dna.put(yacySeed.NCOUNT, yacySeed.ZERO);  // the number of links that the peer has noticed, but not loaded (NURL's)
@@ -426,6 +428,14 @@ public class yacySeed {
     public int getPPM() {
         try {
             return Integer.parseInt(get(yacySeed.ISPEED, yacySeed.ZERO));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    public int getQPM() {
+        try {
+            return Integer.parseInt(get(yacySeed.RSPEED, yacySeed.ZERO));
         } catch (NumberFormatException e) {
             return 0;
         }

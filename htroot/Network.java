@@ -7,7 +7,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedBy: $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ public class Network {
 
 //          final boolean complete = ((post == null) ? false : post.get("links", "false").equals("true"));
             final long otherppm = yacyCore.seedDB.countActivePPM();
-            long myppm = 0;
+            long myppm = 0, myqpm = 0;
 
             // create own peer info
             yacySeed seed = yacyCore.seedDB.mySeed;
@@ -131,6 +131,7 @@ public class Network {
 
 
                 myppm = seed.getPPM();
+                myqpm = seed.getQPM();
                 prop.put("table_my-version", seed.get(yacySeed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(yacySeed.UTC, "-"));
                 prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, ""))));
@@ -141,7 +142,9 @@ public class Network {
                 prop.put("table_my-rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
                 prop.put("table_my-rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
                 prop.put("table_my-ppm", myppm);
+                prop.put("table_my-qpm", myqpm);
                 prop.put("table_my-totalppm", sb.getConfig("totalPPM","0"));
+                prop.put("table_my-totalqpm", sb.getConfig("totalQPM","0"));
                 prop.put("table_my-seeds", seed.get(yacySeed.SCOUNT, "-"));
                 prop.put("table_my-connects", groupDigits(seed.get(yacySeed.CCOUNT, "0")));
             }
@@ -283,7 +286,7 @@ public class Network {
                     Map wikiMap;
                     Map blogMap;
                     String userAgent, location;
-                    int PPM;
+                    int PPM, QPM;
                     long myValue=0, nextValue=0, prevValue=0, nextPPM=0, myPPM=0;
                     while (e.hasMoreElements() && conCount < maxCount) {
                         seed = (yacySeed) e.nextElement();
@@ -339,6 +342,11 @@ public class Network {
                                 PPM = Integer.parseInt(seed.get(yacySeed.ISPEED, "-"));
                             } catch (NumberFormatException ee) {
                                 PPM = 0;
+                            }
+                            try {
+                                QPM = Integer.parseInt(seed.get(yacySeed.RSPEED, "-"));
+                            } catch (NumberFormatException ee) {
+                                QPM = 0;
                             }
                             if (((startURL = (String) isCrawling.get(seed.hash)) != null) && (PPM >= 10)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 1);
@@ -435,6 +443,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_ppm", PPM);
+                            prop.put(STR_TABLE_LIST + conCount + "_qpm", QPM);
                             conCount++;
                         } // seed != null
                     } // while

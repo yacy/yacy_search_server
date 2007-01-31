@@ -241,6 +241,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private plasmaDHTChunk              dhtTransferChunk = null;
     public  TreeMap                     localSearches, remoteSearches;
     public  HashMap                     localSearchTracker, remoteSearchTracker;
+    public  long                        indexedPages = 0;
+    public  double                      requestedQueries = 0d;
     
     /*
      * Remote Proxy configuration
@@ -2356,8 +2358,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         storageEndTime = System.currentTimeMillis();
                         
                         //increment number of indexed urls
-                		long indexedurls = getConfigLong("indexedc", 0) + 1;
-                		setConfig("indexedc", indexedurls);
+                		indexedPages++;
                         
                         if (log.isInfo()) {
                             // TODO: UTF-8 docDescription seems not to be displayed correctly because

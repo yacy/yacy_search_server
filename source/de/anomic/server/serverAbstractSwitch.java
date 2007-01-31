@@ -154,6 +154,10 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         setConfig(key, Long.toString(value));
     }
 
+    public void setConfig(String key, double value) {
+        setConfig(key, Double.toString(value));
+    }
+
     public void setConfig(String key, String value) {
         // perform action before setting new value
         Iterator bevore = switchActions.entrySet().iterator();
@@ -217,6 +221,14 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     public long getConfigLong(String key, long dflt) {
         try {
             return Long.parseLong(getConfig(key, Long.toString(dflt)));
+        } catch (NumberFormatException e) {
+            return dflt;
+        }
+    }
+    
+    public double getConfigDouble(String key, double dflt) {
+        try {
+            return Double.parseDouble(getConfig(key, Double.toString(dflt)));
         } catch (NumberFormatException e) {
             return dflt;
         }

@@ -88,7 +88,7 @@ public final class yacySeedDB {
     public static final int commonHashLength = 12;
 
     public static final String[] sortFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.UPTIME, yacySeed.VERSION, yacySeed.LASTSEEN};
-    public static final String[]  accFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.ISPEED};
+    public static final String[]  accFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.ISPEED, yacySeed.RSPEED};
     
     // class objects
     protected File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
@@ -340,6 +340,7 @@ public final class yacySeedDB {
     public long countActiveURL() { return seedActiveDB.getAcc(yacySeed.LCOUNT); }
     public long countActiveRWI() { return seedActiveDB.getAcc(yacySeed.ICOUNT); }
     public long countActivePPM() { return seedActiveDB.getAcc(yacySeed.ISPEED); }
+    public long countActiveQPM() { return seedActiveDB.getAcc(yacySeed.RSPEED); }
     public long countPassiveURL() { return seedPassiveDB.getAcc(yacySeed.LCOUNT); }
     public long countPassiveRWI() { return seedPassiveDB.getAcc(yacySeed.ICOUNT); }
     public long countPotentialURL() { return seedPotentialDB.getAcc(yacySeed.LCOUNT); }
