@@ -308,7 +308,7 @@ public final class yacy {
             sb.setConfig("vString", combined2prettyVersion(Double.toString(version)));
             sb.setConfig("vdate", vDATE);
             sb.setConfig("applicationRoot", homePath);
-            sb.setConfig("startupTime", Long.toString(startup));
+            sb.startupTime = startup;
             serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + vDATE);
             yacyCore.latestVersion = version;
 

@@ -241,8 +241,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private plasmaDHTChunk              dhtTransferChunk = null;
     public  TreeMap                     localSearches, remoteSearches;
     public  HashMap                     localSearchTracker, remoteSearchTracker;
+    public  long                        startupTime = 0;
+    public  long                        lastseedcheckuptime = -1;
     public  long                        indexedPages = 0;
+    public  long                        lastindexedPages = 0;
     public  double                      requestedQueries = 0d;
+    public  double                      lastrequestedQueries = 0d;
     
     /*
      * Remote Proxy configuration
