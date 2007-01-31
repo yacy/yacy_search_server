@@ -119,6 +119,7 @@ public final class httpd implements serverHandler {
     private InetAddress userAddress;     // the address of the client
     private boolean allowProxy;
     private boolean allowServer;
+    private boolean allowYaCyHop;
     
     // for authentication
     private boolean use_proxyAccounts = false;
@@ -166,6 +167,7 @@ public final class httpd implements serverHandler {
         this.userAddress = null;
         this.allowProxy = false;
         this.allowServer = false;
+        this.allowYaCyHop = false;
         this.proxyAccounts_init = false;
         this.serverAccountBase64MD5 = null;
         this.clientIP = null;
@@ -192,9 +194,10 @@ public final class httpd implements serverHandler {
         
         this.allowProxy = (proxyClient.equals("*")) ? true : match(this.clientIP, proxyClient);
         this.allowServer = (serverClient.equals("*")) ? true : match(this.clientIP, serverClient);
+        this.allowYaCyHop = switchboard.getConfigBool("YaCyHop", false);
         
         // check if we want to allow this socket to connect us
-        if (!(this.allowProxy || this.allowServer)) {
+        if (!(this.allowProxy || this.allowServer || this.allowYaCyHop)) {
             String errorMsg = "CONNECTION FROM " + this.clientIP + " FORBIDDEN";
             this.log.logWarning(errorMsg);
             throw new IOException(errorMsg);
@@ -449,11 +452,9 @@ public final class httpd implements serverHandler {
                 }
             } else {
                 // pass to proxy
-                if (this.allowProxy) {
-                    if (this.handleProxyAuthentication(header)) {
-                        if (proxyHandler != null) proxyHandler = new httpdProxyHandler(switchboard); 
-                        proxyHandler.doGet(this.prop, header, this.session.out);
-                    }
+                if (((this.allowYaCyHop) && (this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) ||
+                    ((this.allowProxy) && (this.handleProxyAuthentication(header)))) {
+                    proxyHandler.doGet(this.prop, header, this.session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     this.session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
@@ -524,11 +525,9 @@ public final class httpd implements serverHandler {
                 }
             } else {
                 // pass to proxy
-                if (allowProxy) {
-                    if (handleProxyAuthentication(header)) {
-                        if (proxyHandler != null) proxyHandler = new httpdProxyHandler(switchboard); 
-                        proxyHandler.doHead(prop, header, this.session.out);
-                    }
+                if (((this.allowYaCyHop) && (this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) ||
+                    ((this.allowProxy) && (this.handleProxyAuthentication(header)))) {
+                    proxyHandler.doHead(prop, header, this.session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write((httpVersion + " 403 refused (IP not granted)" +
@@ -608,11 +607,9 @@ public final class httpd implements serverHandler {
                 }
             } else {
                 // pass to proxy
-                if (allowProxy) {
-                    if (handleProxyAuthentication(header)) {
-                        if (proxyHandler != null) proxyHandler = new httpdProxyHandler(switchboard); 
-                        proxyHandler.doPost(prop, header, this.session.out, this.session.in);
-                    }
+                if (((this.allowYaCyHop) && (this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) ||
+                    ((this.allowProxy) && (this.handleProxyAuthentication(header)))) {
+                    proxyHandler.doPost(prop, header, this.session.out, this.session.in);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
@@ -677,11 +674,9 @@ public final class httpd implements serverHandler {
         }
         
         // pass to proxy
-        if (allowProxy) {
-            if (handleProxyAuthentication(header)) {
-                if (proxyHandler != null) proxyHandler = new httpdProxyHandler(switchboard); 
-                proxyHandler.doConnect(prop, header, this.session.in, this.session.out);
-            } 
+        if (((this.allowYaCyHop) && (this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) ||
+            ((this.allowProxy) && (this.handleProxyAuthentication(header)))) {
+            proxyHandler.doConnect(prop, header, this.session.in, this.session.out);
         } else {
             // not authorized through firewall blocking (ip does not match filter)
             session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());

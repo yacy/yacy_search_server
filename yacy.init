@@ -144,14 +144,6 @@ fileHost = localpeer
 # specify the path to the MIME matching file table
 mimeConfig = httpd.mime
 
-# UNUSED:
-# specify the path to message resource file
-messConfig = httpd.messages
-
-# proxy use. This server can also act as an caching proxy.
-# to enable that function, set proxy=true
-proxy=true
-
 # a path to the file cache, used for the internal proxy and as crawl buffer
 # This will be used if the server is addressed as a proxy
 proxyCache = DATA/HTCACHE
@@ -178,7 +170,6 @@ proxyCacheLayout = hash
 # the migration flag shows, if the different layout shall be migrated from one to another
 proxyCacheMigration = true
 
-
 # the following mime-types are the whitelist for indexing
 #
 # parseableRealtimeMimeTypes: specifies mime-types that can be indexed on the fly
@@ -189,7 +180,6 @@ parseableMimeTypes.CRAWLER=
 parseableMimeTypes.PROXY=
 parseableMimeTypes.ICAP=
 parseableMimeTypes.URLREDIRECTOR=
-
 
 # media extension string
 # a comma-separated list of extensions that denote media file formats
@@ -275,19 +265,20 @@ proxyBlueList=yacy.blue
 #proxyClient=192.168.0.4
 proxyClient=localhost,127.0.0.1,192.168.*,10.*
 
+# YaCyHop: allow public usage of proxy for yacy-protocol
+# this enables usage of the internal http proxy for everyone,
+# if the file path starts with /yacy/
+# This is used to enable anonymization of yacy protocol requests
+# Instead of asking a remote peer directly, a peer in between is asked
+# to prevent that the asked peer knows which peer asks.
+YaCyHop=true
+
 # serverClient: client-ip's that may connect to the web server,
 # thus are allowed to use the search service
 # if you set this to another value, search requst from others
 # are blocked, but you will also be blocked from using others
 # search services.
 serverClient=*
-
-### proxyAccount: a user:password - pair for proxy authentification
-### leave empty for no authenication
-### example:
-##proxyAccount=jim:knopf
-##proxyAccount=
-##proxyAccountBase64MD5=
 
 # use_proxyAccounts: set to true to restrict proxy-access to some identified users.
 #use User_p.html to create some Users.

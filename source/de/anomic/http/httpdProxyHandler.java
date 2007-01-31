@@ -122,14 +122,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
     private static boolean redirectorEnabled=false;
     private static PrintWriter redirectorWriter;
     private static BufferedReader redirectorReader;
-//    public static boolean remoteProxyUse = false;
-//    public static String remoteProxyHost = "";
-//    public static int remoteProxyPort = -1;
-//    public static String remoteProxyNoProxy = "";
-//    public static String[] remoteProxyNoProxyPatterns = null;
-
-//    private static final HashSet remoteProxyAllowProxySet = new HashSet();
-//    private static final HashSet remoteProxyDisallowProxySet = new HashSet();    
 
     private static htmlFilterTransformer transformer = null;
     public static final String proxyUserAgent = "yacy (" + httpc.systemOST +") yacy.net";

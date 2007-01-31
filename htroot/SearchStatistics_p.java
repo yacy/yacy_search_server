@@ -114,7 +114,7 @@ public class SearchStatistics_p {
                 prop.put("page_list_" + entCount + "_host", host);
                 if (page == 4) {
                     yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
-                    prop.put("page_list_" + entCount + "_peername", remotepeer.getName());
+                    prop.put("page_list_" + entCount + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
                 prop.put("page_list_" + entCount + "_count", new Integer(handles.size()).toString());
                 prop.put("page_list_" + entCount + "_dates", handlestring);
