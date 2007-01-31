@@ -46,7 +46,6 @@
 import java.io.IOException;
 import java.util.Enumeration;
 
-import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;

@@ -283,14 +283,14 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public void initPort(String seedPort, String bindPort) throws IOException {
         
         // Binds the ServerSocket to a specific address 
-        InetSocketAddress bindAddress = null;
+        //InetSocketAddress bindAddress = null;
         this.socket = new ServerSocket();
 		if(bindPort == null || bindPort.equals("")){
 			this.log.logInfo("Trying to bind server to port " + seedPort);
-	        this.socket.bind(bindAddress = generateSocketAddress(seedPort));
+	        this.socket.bind(/*bindAddress = */generateSocketAddress(seedPort));
 		}else{ //bindPort set, use another port to bind than the port reachable from outside
 			this.log.logInfo("Trying to bind server to port " + bindPort+ " with "+ seedPort + "as seedPort.");
-	        this.socket.bind(bindAddress = generateSocketAddress(bindPort));
+	        this.socket.bind(/*bindAddress = */generateSocketAddress(bindPort));
 		}
         
         // updating the port information

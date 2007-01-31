@@ -104,7 +104,7 @@ public class Messages_p {
         
         prop.put("mode", 0);
         prop.put("mode_error", 0);
-        wikiCode wikiTransformer = new wikiCode(switchboard);
+        //wikiCode wikiTransformer = new wikiCode(switchboard);
 
         String action = ((post == null) ? "list" : post.get("action", "list"));
         messageBoard.entry message;

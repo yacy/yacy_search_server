@@ -47,14 +47,13 @@
 // if the shell's current path is HTROOT
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class WikiHelp {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        //final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         return prop;
     }
