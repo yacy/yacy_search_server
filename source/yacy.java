@@ -736,6 +736,7 @@ public final class yacy {
         // run with "java -classpath classes yacy -minimizeUrlDB"
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         File indexRoot = new File(new File(homePath), "DATA/INDEX");
+        File indexRoot2 = new File(new File(homePath), "DATA/INDEX2");
         serverLog log = new serverLog("URL-CLEANUP");
         try {
             log.logInfo("STARTING URL CLEANUP");
@@ -746,18 +747,18 @@ public final class yacy {
             plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexRoot, cache, 10000);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot, cache, 10000);
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot2, cache, 10000);
             
             Runtime rt = Runtime.getRuntime();
             int cacheMem = (int)(serverMemory.max-rt.totalMemory());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             plasmaWordIndex wordIndex = new plasmaWordIndex(indexRoot, cacheMem, cacheMem, 10000, log);
-            Iterator indexContainerIterator = wordIndex.wordContainers("------------", false, false);
+            Iterator indexContainerIterator = wordIndex.wordContainers("AAAAAAAAAAAA", false, false);
             
             long urlCounter = 0, wordCounter = 0;
             long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
-            String wordChunkStartHash = "------------", wordChunkEndHash;
+            String wordChunkStartHash = "AAAAAAAAAAAA", wordChunkEndHash;
             
             while (indexContainerIterator.hasNext()) {
                 indexContainer wordIdxContainer = null;
@@ -1285,6 +1286,7 @@ public final class yacy {
                         log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
                     }
                 }
+                bos.flush();
                 bos.close();
             } else {
                 log.logInfo("Writing Hashlist to TXT-file: " + targetName + ".txt");
@@ -1299,6 +1301,7 @@ public final class yacy {
                         log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
                     }
                 }
+                bos.flush();
                 bos.close();
             }
             log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + container.getWordHash());
