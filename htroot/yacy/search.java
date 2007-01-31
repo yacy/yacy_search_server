@@ -238,6 +238,7 @@ public final class search {
                     //yacyCore.log.logFine("DEBUG HASH SEARCH: " + indexabstract);
                 }
             }
+            sb.requestedQueries = sb.requestedQueries + 1d / 30d; // increase query counter TODO: put number of remote peers into protocol
         }
         prop.putASIS("indexabstract", indexabstract.toString());
         
