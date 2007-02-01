@@ -8,6 +8,7 @@
     <fullname>#[fullname]#</fullname>
     <version>#[version]#</version>
     <ppm>#[ppm]#</ppm>
+	<qph>#[qph]#</qph>
     <uptime>#[uptime]#</uptime>
     <links>#[links]#</links>
     <words>#[words]#</words>
@@ -69,6 +70,7 @@
         <receivedwords>#[my-rI]#</receivedwords>
         <receivedurls>#[my-rU]#</receivedurls>
         <ppm>#[my-ppm]#</ppm>
+		<qph>#[qph]#</qph>
         <seeds>#[my-seeds]#</seeds>
         <connects>#[my-connects]#</connects>
   </your>
