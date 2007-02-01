@@ -112,7 +112,7 @@ public class yacyPeerActions {
         long uptime = (System.currentTimeMillis() - sb.startupTime) / 1000;
 		long uptimediff = uptime - sb.lastseedcheckuptime;
 		long indexedcdiff = sb.indexedPages - sb.lastindexedPages;
-        double requestcdiff = sb.requestedQueries - sb.lastrequestedQueries;
+        //double requestcdiff = sb.requestedQueries - sb.lastrequestedQueries;
         if (uptimediff > 300 || sb.lastseedcheckuptime == -1 ) {
 			sb.lastseedcheckuptime = uptime;
 			sb.lastindexedPages = sb.indexedPages;
@@ -120,10 +120,10 @@ public class yacyPeerActions {
 		}
         
         //the speed of indexing (pages/minute) of the peer
+        sb.totalPPM = (int) (sb.indexedPages * 60 / Math.max(uptime, 1));
         seedDB.mySeed.put(yacySeed.ISPEED, Long.toString(Math.round(Math.max((float) indexedcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f))));
-        sb.setConfig("totalPPM", sb.indexedPages * 60 / Math.max(uptime, 1));
-        seedDB.mySeed.put(yacySeed.RSPEED, Long.toString(Math.round(Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f))));
-        sb.setConfig("totalQPM", sb.requestedQueries * 60d / Math.max((double) uptime, 1d));
+        sb.totalQPM = sb.requestedQueries * 60d / Math.max((double) uptime, 1d);
+        seedDB.mySeed.put(yacySeed.RSPEED, Double.toString(sb.totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
         
         seedDB.mySeed.put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
         seedDB.mySeed.put(yacySeed.LCOUNT, Integer.toString(sb.wordIndex.loadedURL.size())); // the number of links that the peer has stored (LURL's)

@@ -37,6 +37,7 @@
         <td><strong>Info</strong><br />&nbsp;</td>
         <td><strong>Release/<br />SVN</strong><br />&nbsp;</td>
         <td><strong>PPM</strong><br />&nbsp;</td>
+        <td><strong>QPH</strong><br />&nbsp;</td>
         <td><strong>Last<br />Seen</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LastSeen&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LastSeen&amp;order=down">&gt;</a></td>
         <td><strong>UTC</strong><br />Offset<br />&nbsp;</td>
         <td><strong>Location</strong><br /><br />&nbsp;</td>
@@ -73,6 +74,7 @@
         <td>#(type)##(direct)#<img src="/env/grafics/JuniorPassive.gif" title="Type: Junior | Contact: passive" alt="Junior passive" />::<img src="/env/grafics/JuniorDirect.gif" title="Type: Junior | Contact: direct" alt="Junior direct" /></img>::<img src="/env/grafics/JuniorOffline.gif" title="Type: Junior | Contact: offline" alt="Junior offline" />#(/direct)#::#(direct)#<img src="/env/grafics/SeniorPassive.gif" title="Type: Senior | Contact: passive" alt="senior passive" />::<img src="/env/grafics/SeniorDirect.gif" title="Type: Senior | Contact: direct" alt="Senior direct" />::<img src="/env/grafics/SeniorOffline.gif" title="Type: Senior | Contact: offline" alt="Senior offline" />#(/direct)#::<a href="#[url]#">#(direct)#<img src="/env/grafics/PrincipalPassive.gif" title="Type: Principal | Contact: passive | Seed download: possible" alt="Principal passive" />::<img src="/env/grafics/PrincipalDirect.gif"  title="Type: Principal | Contact: direct | Seed download: possible" alt="Principal active" />::<img src="/env/grafics/PrincipalOffline.gif"  title="Type: Principal | Contact: offline | Seed download: ?" alt="Principal offline" />#(/direct)#</a>#(/type)##(acceptcrawl)#<img src="/env/grafics/CrawlNo.gif" title="Accept Crawl: no" alt="no crawl" />::<img src="/env/grafics/CrawlYes.gif" title="Accept Crawl: yes" alt="crawl possible" />::<img src="/env/grafics/CrawlYesOffline.gif" title="Accept Crawl: yes" alt="crawl possible" />#(/acceptcrawl)##(dhtreceive)#<img src="/env/grafics/DHTReceiveNo.gif" title="DHT Receive: no; #[peertags]#" alt="no DHT receive" />::<img src="/env/grafics/DHTReceiveYes.gif" title="DHT Receive: yes" alt="DHT receive enabled" />::<img src="/env/grafics/DHTReceiveYesOffline.gif" title="DHT Receive: yes" alt="DHT receive enabled" />#(/dhtreceive)##(rankingreceive)#<img src="/env/grafics/RankingReceiveNo.gif" title="Ranking Receive: no" alt="no ranking receive" />::<img src="/env/grafics/RankingReceiveYes.gif" title="Ranking Receive: yes" alt="Ranking receive enabled" />::<img  src="/env/grafics/RankingCollects.gif" title="Ranking Receive: collection" alt="ranking collects" />#(/rankingreceive)#</td>
         <td align="right">#[version]#</td>
         <td align="right">#[ppm]#</td>
+        <td align="right">#[qph]#</td>
         <td align="right">#[lastSeen]#</td>
         <td align="right">#[utc]#</td>
         <td align="right">#[location]#</td>
@@ -143,7 +145,11 @@
       </tr>
     </table>
     <p>
-    YaCy Cluster Indexing Speed: #[gppm]# Pages Per Minute (Accumulated PPM over Active Peers).
+    YaCy Cluster
+    <ul>
+    <li>Indexing Speed: #[gppm]# Pages Per Minute (PPM)</li>
+    <li>Query Frequency: #[gqph]# Queries Per Hour (QPH)</li>
+    </ul>
     </p>
     <p>Your Peer:</p>
     <table border="0" cellpadding="2" cellspacing="1">
@@ -160,7 +166,9 @@
         <td>Received<br />Words</td>
         <td>Received<br />URLs</td>
         <td>PPM</td>
+        <td>QPH</td>
         <td>total PPM</td>
+        <td>total QPH</td>
         <td>#Seeds</td>
         <td>#Connects<br />per hour</td>
       </tr>
@@ -177,7 +185,9 @@
         <td align="right">#[my-rI]#</td>
         <td align="right">#[my-rU]#</td>
         <td align="right">#[my-ppm]#</td>
+        <td align="right">#[my-qph]#</td>
         <td align="right">#[my-totalppm]#</td>
+        <td align="right">#[my-totalqph]#</td>
         <td align="right">#[my-seeds]#</td>
         <td align="right">#[my-connects]#</td>
       </tr>

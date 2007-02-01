@@ -433,11 +433,11 @@ public class yacySeed {
         }
     }
 
-    public int getQPM() {
+    public double getQPM() {
         try {
-            return Integer.parseInt(get(yacySeed.RSPEED, yacySeed.ZERO));
+            return Double.parseDouble(get(yacySeed.RSPEED, yacySeed.ZERO));
         } catch (NumberFormatException e) {
-            return 0;
+            return 0d;
         }
     }
 

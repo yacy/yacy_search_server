@@ -54,6 +54,7 @@ import java.util.Map;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
@@ -69,7 +70,8 @@ public class Network {
 
     private static final String STR_TABLE_LIST = "table_list_";
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch switchboard) {
+        plasmaSwitchboard sb = (plasmaSwitchboard) switchboard;
         final long start = System.currentTimeMillis();
         
         // return variable that accumulates replacements
@@ -93,7 +95,9 @@ public class Network {
 
 //          final boolean complete = ((post == null) ? false : post.get("links", "false").equals("true"));
             final long otherppm = yacyCore.seedDB.countActivePPM();
-            long myppm = 0, myqpm = 0;
+            final long otherqpm = yacyCore.seedDB.countActiveQPM();
+            long myppm = 0;
+            double myqph = 0d;
 
             // create own peer info
             yacySeed seed = yacyCore.seedDB.mySeed;
@@ -131,7 +135,7 @@ public class Network {
 
 
                 myppm = seed.getPPM();
-                myqpm = seed.getQPM();
+                myqph = 60d * seed.getQPM();
                 prop.put("table_my-version", seed.get(yacySeed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(yacySeed.UTC, "-"));
                 prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, ""))));
@@ -142,9 +146,9 @@ public class Network {
                 prop.put("table_my-rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
                 prop.put("table_my-rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
                 prop.put("table_my-ppm", myppm);
-                prop.put("table_my-qpm", myqpm);
-                prop.put("table_my-totalppm", sb.getConfig("totalPPM","0"));
-                prop.put("table_my-totalqpm", sb.getConfig("totalQPM","0"));
+                prop.put("table_my-qph", Double.toString(Math.round(10d * myqph) / 10d));
+                prop.put("table_my-totalppm", sb.totalPPM);
+                prop.put("table_my-totalqph", Double.toString(Math.round(600d * sb.totalQPM) / 10d));
                 prop.put("table_my-seeds", seed.get(yacySeed.SCOUNT, "-"));
                 prop.put("table_my-connects", groupDigits(seed.get(yacySeed.CCOUNT, "0")));
             }
@@ -165,6 +169,7 @@ public class Network {
             prop.put("table_all-words", groupDigits(accActWords + accPassWords + accPotWords));
 
             prop.put("table_gppm", otherppm + ((iAmActive) ? myppm : 0));
+            prop.put("table_gqph", Double.toString(Math.round(600d * otherqpm + 10d * ((iAmActive) ? myqph : 0d)) / 10d));
 
 //          String comment = "";
             prop.put("table_comment", 0);
@@ -286,7 +291,8 @@ public class Network {
                     Map wikiMap;
                     Map blogMap;
                     String userAgent, location;
-                    int PPM, QPM;
+                    int PPM;
+                    double QPM;
                     long myValue=0, nextValue=0, prevValue=0, nextPPM=0, myPPM=0;
                     while (e.hasMoreElements() && conCount < maxCount) {
                         seed = (yacySeed) e.nextElement();
@@ -338,16 +344,8 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_subject", (String) blogMap.get("subject"));
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_address", seed.getAddress());
                             }
-                            try {
-                                PPM = Integer.parseInt(seed.get(yacySeed.ISPEED, "-"));
-                            } catch (NumberFormatException ee) {
-                                PPM = 0;
-                            }
-                            try {
-                                QPM = Integer.parseInt(seed.get(yacySeed.RSPEED, "-"));
-                            } catch (NumberFormatException ee) {
-                                QPM = 0;
-                            }
+                            PPM = seed.getPPM();
+                            QPM = seed.getQPM();
                             if (((startURL = (String) isCrawling.get(seed.hash)) != null) && (PPM >= 10)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_isCrawling_page", startURL);
@@ -443,7 +441,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_ppm", PPM);
-                            prop.put(STR_TABLE_LIST + conCount + "_qpm", QPM);
+                            prop.put(STR_TABLE_LIST + conCount + "_qph", Math.round(60d * QPM));
                             conCount++;
                         } // seed != null
                     } // while

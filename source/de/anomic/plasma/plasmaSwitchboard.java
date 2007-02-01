@@ -247,6 +247,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  long                        lastindexedPages = 0;
     public  double                      requestedQueries = 0d;
     public  double                      lastrequestedQueries = 0d;
+    public  int                         totalPPM = 0;
+    public  double                      totalQPM = 0d;
     
     /*
      * Remote Proxy configuration
