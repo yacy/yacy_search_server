@@ -64,18 +64,18 @@ public class kelondroMapTable {
     public void declareMaps(
             String tablename, int keysize, int nodesize, int cacheslots,
             char fillChar) throws IOException {
-        declareMaps(tablename, keysize, nodesize, cacheslots, null, null, fillChar);
+        declareMaps(tablename, keysize, nodesize, cacheslots, null, null, null, fillChar);
     }
     
     public void declareMaps(
             String tablename, int keysize, int nodesize, int cacheslots,
-            String[] sortfields, String[] accfields, char fillChar) throws IOException {
-        declareMaps(tablename, keysize, nodesize, cacheslots, sortfields, accfields, fillChar, 0x800, 0);
+            String[] sortfields, String[] longaccfields, String[] doubleaccfields, char fillChar) throws IOException {
+        declareMaps(tablename, keysize, nodesize, cacheslots, sortfields, longaccfields, doubleaccfields, fillChar, 0x800, 0);
     }
     
     public void declareMaps(
             String tablename, int keysize, int nodesize, int cacheslots,
-            String[] sortfields, String[] accfields, char fillChar,
+            String[] sortfields, String[] longaccfields, String[] doubleaccfields, char fillChar,
             long buffersize /*bytes*/, long preloadTime) throws IOException {
         if (mTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareMap: table '" + tablename + "' declared twice.");
         if (tTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareMap: table '" + tablename + "' declared already in other context.");
@@ -83,7 +83,7 @@ public class kelondroMapTable {
         kelondroDyn dyn;
         if (!(tablefile.exists())) tablefile.getParentFile().mkdirs();
         dyn = new kelondroDyn(tablefile, buffersize, preloadTime, keysize, nodesize, fillChar, true, false);
-        kelondroMapObjects map = new kelondroMapObjects(dyn, cacheslots, sortfields, accfields);
+        kelondroMapObjects map = new kelondroMapObjects(dyn, cacheslots, sortfields, longaccfields, doubleaccfields);
         mTables.put(tablename, map);
     }
     
@@ -160,10 +160,16 @@ public class kelondroMapTable {
         throw new RuntimeException("kelondroTables.delete: table '" + tablename + "' does not exist.");
     }
     
-    public synchronized long accumulator(String tablename, String field) {
+    public synchronized long longAccumulator(String tablename, String field) {
         kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.accumulator: map table '" + tablename + "' does not exist.");
-        return table.getAcc(field);
+        return table.getLongAcc(field);
+    }
+    
+    public synchronized double doubleAccumulator(String tablename, String field) {
+        kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
+        if (table == null) throw new RuntimeException("kelondroTables.accumulator: map table '" + tablename + "' does not exist.");
+        return table.getDoubleAcc(field);
     }
     
     public synchronized int size(String tablename) {

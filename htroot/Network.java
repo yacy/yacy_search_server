@@ -95,7 +95,7 @@ public class Network {
 
 //          final boolean complete = ((post == null) ? false : post.get("links", "false").equals("true"));
             final long otherppm = yacyCore.seedDB.countActivePPM();
-            final long otherqpm = yacyCore.seedDB.countActiveQPM();
+            final double otherqpm = yacyCore.seedDB.countActiveQPM();
             long myppm = 0;
             double myqph = 0d;
 

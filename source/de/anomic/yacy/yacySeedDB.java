@@ -87,8 +87,9 @@ public final class yacySeedDB {
      */
     public static final int commonHashLength = 12;
 
-    public static final String[] sortFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.UPTIME, yacySeed.VERSION, yacySeed.LASTSEEN};
-    public static final String[]  accFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.ISPEED, yacySeed.RSPEED};
+    public static final String[]      sortFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.UPTIME, yacySeed.VERSION, yacySeed.LASTSEEN};
+    public static final String[]   longaccFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.ISPEED};
+    public static final String[] doubleaccFields = new String[] {yacySeed.RSPEED};
     
     // class objects
     protected File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
@@ -206,11 +207,11 @@ public final class yacySeedDB {
     private synchronized kelondroMapObjects openSeedTable(File seedDBFile) {
         new File(seedDBFile.getParent()).mkdirs();
         try {
-            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, accFields);
+            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields);
         } catch (Exception e) {
             seedDBFile.delete();
             // try again
-            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, accFields);
+            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields);
         }
     }
     
@@ -337,14 +338,14 @@ public final class yacySeedDB {
         */
     }
     
-    public long countActiveURL() { return seedActiveDB.getAcc(yacySeed.LCOUNT); }
-    public long countActiveRWI() { return seedActiveDB.getAcc(yacySeed.ICOUNT); }
-    public long countActivePPM() { return seedActiveDB.getAcc(yacySeed.ISPEED); }
-    public long countActiveQPM() { return seedActiveDB.getAcc(yacySeed.RSPEED); }
-    public long countPassiveURL() { return seedPassiveDB.getAcc(yacySeed.LCOUNT); }
-    public long countPassiveRWI() { return seedPassiveDB.getAcc(yacySeed.ICOUNT); }
-    public long countPotentialURL() { return seedPotentialDB.getAcc(yacySeed.LCOUNT); }
-    public long countPotentialRWI() { return seedPotentialDB.getAcc(yacySeed.ICOUNT); }
+    public long countActiveURL() { return seedActiveDB.getLongAcc(yacySeed.LCOUNT); }
+    public long countActiveRWI() { return seedActiveDB.getLongAcc(yacySeed.ICOUNT); }
+    public long countActivePPM() { return seedActiveDB.getLongAcc(yacySeed.ISPEED); }
+    public double countActiveQPM() { return seedActiveDB.getDoubleAcc(yacySeed.RSPEED); }
+    public long countPassiveURL() { return seedPassiveDB.getLongAcc(yacySeed.LCOUNT); }
+    public long countPassiveRWI() { return seedPassiveDB.getLongAcc(yacySeed.ICOUNT); }
+    public long countPotentialURL() { return seedPotentialDB.getLongAcc(yacySeed.LCOUNT); }
+    public long countPotentialRWI() { return seedPotentialDB.getLongAcc(yacySeed.ICOUNT); }
 
     public synchronized void addConnected(yacySeed seed) {
         if ((seed == null) || (seed.isProper() != null)) return;
