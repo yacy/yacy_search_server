@@ -66,6 +66,7 @@ public class yacySearch extends Thread {
 
     final private String wordhashes, urlhashes;
     final private boolean global;
+    final private int partitions;
     final private plasmaCrawlLURL urlManager;
     final private plasmaWordIndex wordIndex;
     final private indexContainer containerCache;
@@ -81,7 +82,7 @@ public class yacySearch extends Thread {
     final private kelondroBitfield constraint;
     
     public yacySearch(String wordhashes, String urlhashes, String prefer, String filter, int maxDistance, 
-                      boolean global, yacySeed targetPeer, plasmaCrawlLURL urlManager, plasmaWordIndex wordIndex,
+                      boolean global, int partitions, yacySeed targetPeer, plasmaCrawlLURL urlManager, plasmaWordIndex wordIndex,
                       indexContainer containerCache, Map abstractCache,
                       plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
                       plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile,
@@ -93,6 +94,7 @@ public class yacySearch extends Thread {
         this.prefer = prefer;
         this.filter = filter;
         this.global = global;
+        this.partitions = partitions;
         this.urlManager = urlManager;
         this.wordIndex = wordIndex;
         this.containerCache = containerCache;
@@ -108,7 +110,10 @@ public class yacySearch extends Thread {
     }
 
     public void run() {
-        this.urls = yacyClient.search(wordhashes, urlhashes, prefer, filter, maxDistance, global, targetPeer, urlManager, wordIndex, containerCache, abstractCache, blacklist, snippetCache, timingProfile, rankingProfile, constraint);
+        this.urls = yacyClient.search(
+                    wordhashes, urlhashes, prefer, filter, maxDistance, global, partitions,
+                    targetPeer, urlManager, wordIndex, containerCache, abstractCache,
+                    blacklist, snippetCache, timingProfile, rankingProfile, constraint);
         if (urls != null) {
             StringBuffer urllist = new StringBuffer(this.urls.length * 13);
             for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
@@ -218,7 +223,7 @@ public class yacySearch extends Thread {
         if (targets == 0) return null;
         yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {
-            searchThreads[i]= new yacySearch(wordhashes, urlhashes, prefer, filter, maxDist, true, targetPeers[i],
+            searchThreads[i]= new yacySearch(wordhashes, urlhashes, prefer, filter, maxDist, true, targets, targetPeers[i],
                     urlManager, wordIndex, containerCache, abstractCache, blacklist, snippetCache, timingProfile, rankingProfile, constraint);
             searchThreads[i].start();
             //try {Thread.sleep(20);} catch (InterruptedException e) {}
@@ -239,7 +244,7 @@ public class yacySearch extends Thread {
         //Set wordhashes = plasmaSearch.words2hashes(querywords);
         final yacySeed targetPeer = yacyCore.seedDB.getConnected(targethash);
         if (targetPeer == null) return null;
-        yacySearch searchThread = new yacySearch(wordhashes, urlhashes, "", "", 9999, true, targetPeer,
+        yacySearch searchThread = new yacySearch(wordhashes, urlhashes, "", "", 9999, true, 0, targetPeer,
                                              urlManager, wordIndex, containerCache, new TreeMap(), blacklist, snippetCache, timingProfile, rankingProfile, constraint);
         searchThread.start();
         return searchThread;

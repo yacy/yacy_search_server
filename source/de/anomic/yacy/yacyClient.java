@@ -373,6 +373,7 @@ public final class yacyClient {
             String filter,
             int maxDistance,
             boolean global, 
+            int partitions,
             yacySeed targetPeer,
             plasmaCrawlLURL urlManager, 
             plasmaWordIndex wordIndex,
@@ -388,16 +389,17 @@ public final class yacyClient {
         // this mainly converts the words into word hashes
 
         // INPUT:
-        // iam     : complete seed of the requesting peer
-        // youare  : seed hash of the target peer, used for testing network stability
-        // key     : transmission key for response
-        // search  : a list of search words
-        // hsearch : a string of word hashes
-        // fwdep   : forward depth. if "0" then peer may NOT ask another peer for more results
-        // fwden   : forward deny, a list of seed hashes. They may NOT be target of forward hopping
-        // count   : maximum number of wanted results
-        // global  : if "true", then result may consist of answers from other peers
-        // duetime : maximum time that a peer should spent to create a result
+        // iam        : complete seed of the requesting peer
+        // youare     : seed hash of the target peer, used for testing network stability
+        // key        : transmission key for response
+        // search     : a list of search words
+        // hsearch    : a string of word hashes
+        // fwdep      : forward depth. if "0" then peer may NOT ask another peer for more results
+        // fwden      : forward deny, a list of seed hashes. They may NOT be target of forward hopping
+        // count      : maximum number of wanted results
+        // global     : if "true", then result may consist of answers from other peers
+        // partitions : number of remote peers that are asked (for evaluation of QPM)
+        // duetime    : maximum time that a peer should spent to create a result
 
         // request result
         final String key = crypt.randomSalt();
@@ -426,6 +428,7 @@ public final class yacyClient {
             obj.put("key", key);
             obj.put("count", timingProfile.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT));
             obj.put("resource", ((global) ? "global" : "local"));
+            obj.put("partitions", partitions);
             obj.put("query", wordhashes);
             obj.put("urls", urlhashes);
             obj.put("prefer", prefer);

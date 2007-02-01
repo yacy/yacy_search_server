@@ -99,6 +99,7 @@ public final class search {
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "text");
         final String  filter = post.get("filter", ".*");
+        final int     partitions = post.getInt("partitions", 30);
         String  profile = post.get("profile", ""); // remote profile hand-over
         if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
         final boolean includesnippet = post.get("includesnippet", "false").equals("true");
@@ -238,7 +239,7 @@ public final class search {
                     //yacyCore.log.logFine("DEBUG HASH SEARCH: " + indexabstract);
                 }
             }
-            sb.requestedQueries = sb.requestedQueries + 1d / 30d; // increase query counter TODO: put number of remote peers into protocol
+            if (partitions > 0) sb.requestedQueries = sb.requestedQueries + 1d / (double) partitions; // increase query counter
         }
         prop.putASIS("indexabstract", indexabstract.toString());
         
