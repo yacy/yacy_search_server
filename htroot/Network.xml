@@ -70,7 +70,7 @@
         <receivedwords>#[my-rI]#</receivedwords>
         <receivedurls>#[my-rU]#</receivedurls>
         <ppm>#[my-ppm]#</ppm>
-		<qph>#[qph]#</qph>
+		<qph>#[my-qph]#</qph>
         <seeds>#[my-seeds]#</seeds>
         <connects>#[my-connects]#</connects>
   </your>
