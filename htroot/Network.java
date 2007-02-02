@@ -431,7 +431,7 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.length() == 0)) ? "no tags given" : ("tags = " + peertags));
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_version", yacy.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));
-                            prop.put(STR_TABLE_LIST + conCount + "_lastSeen", lastseen);
+                            prop.put(STR_TABLE_LIST + conCount + "_lastSeen", seed.getLastSeenString() + " " + lastseen);
                             prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
                             prop.put(STR_TABLE_LIST + conCount + "_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
                             prop.put(STR_TABLE_LIST + conCount + "_links", groupDigits(seed.get(yacySeed.LCOUNT, "0")));

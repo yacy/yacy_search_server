@@ -28,6 +28,8 @@
 package de.anomic.kelondro;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -40,10 +42,10 @@ public class kelondroMapObjects extends kelondroObjects {
     private int elementCount;
     
     public kelondroMapObjects(kelondroDyn dyn, int cachesize) {
-        this(dyn, cachesize, null, null, null);
+        this(dyn, cachesize, null, null, null, null, null);
     }
     
-    public kelondroMapObjects(kelondroDyn dyn, int cachesize, String[] sortfields, String[] longaccfields, String[] doubleaccfields) {
+    public kelondroMapObjects(kelondroDyn dyn, int cachesize, String[] sortfields, String[] longaccfields, String[] doubleaccfields, Method externalInitializer, Object externalHandler) {
         super(dyn, cachesize);
         
         // create fast ordering clusters and acc fields
@@ -81,34 +83,51 @@ public class kelondroMapObjects extends kelondroObjects {
         // fill cluster and accumulator with values
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) try {
             kelondroDyn.dynKeyIterator it = dyn.dynKeys(true, false);
-            String key, value;
+            String mapname;
+            Object cell;
             long valuel;
             double valued;
             Map map;
             while (it.hasNext()) {
-                key = (String) it.next();
-                map = getMap(key);
+                mapname = (String) it.next();
+                map = getMap(mapname);
                 if (map == null) break;
                 
                 if (sortfields != null) for (int i = 0; i < sortfields.length; i++) {
-                    value = (String) map.get(sortfields[i]);
-                    if (value != null) cluster[i].setScore(key, kelondroMScoreCluster.string2score(value));
+                    cell = map.get(sortfields[i]);
+                    if (cell != null) cluster[i].setScore(mapname, kelondroMScoreCluster.object2score(cell));
                 }
 
                 if (longaccfields != null) for (int i = 0; i < longaccfields.length; i++) {
-                    value = (String) map.get(longaccfields[i]);
-                    if (value != null) try {
-                        valuel = Long.parseLong(value);
+                    cell = map.get(longaccfields[i]);
+                    valuel = 0;
+                    if (cell != null) try {
+                        if (cell instanceof Long)   valuel = ((Long) cell).longValue();
+                        if (cell instanceof String) valuel = Long.parseLong((String) cell);
                         longaccumulator[i] = new Long(longaccumulator[i].longValue() + valuel);
                     } catch (NumberFormatException e) {}
                 }
                 
                 if (doubleaccfields != null) for (int i = 0; i < doubleaccfields.length; i++) {
-                    value = (String) map.get(doubleaccfields[i]);
-                    if (value != null) try {
-                        valued = Double.parseDouble(value);
+                    cell = map.get(doubleaccfields[i]);
+                    valued = 0d;
+                    if (cell != null) try {
+                        if (cell instanceof Double) valued = ((Double) cell).doubleValue();
+                        if (cell instanceof String) valued = Double.parseDouble((String) cell);
                         doubleaccumulator[i] = new Double(doubleaccumulator[i].doubleValue() + valued);
                     } catch (NumberFormatException e) {}
+                }
+                
+                if ((externalHandler != null) && (externalInitializer != null)) {
+                    try {
+                        externalInitializer.invoke(externalHandler, new Object[]{mapname, map});
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
                 }
                 elementCount++;
             }
@@ -185,13 +204,13 @@ public class kelondroMapObjects extends kelondroObjects {
     }
 
     private void updateSortCluster(final String key, final Map map) {
-        String value;
+        Object cell;
         kelondroMScoreCluster cluster;
         for (int i = 0; i < sortfields.length; i++) {
-            value = (String) map.get(sortfields[i]);
-            if (value != null) {
+            cell = map.get(sortfields[i]);
+            if (cell != null) {
                 cluster = (kelondroMScoreCluster) sortClusterMap.get(sortfields[i]);
-                cluster.setScore(key, kelondroMScoreCluster.string2score(value));
+                cluster.setScore(key, kelondroMScoreCluster.object2score(cell));
                 sortClusterMap.put(sortfields[i], cluster);
             }
         }

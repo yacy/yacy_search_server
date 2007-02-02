@@ -73,7 +73,20 @@ public final class kelondroMScoreCluster {
         } catch (ParseException e) {}
     }
     
-    public static int string2score(String s) {
+    public static int object2score(Object o) {
+        if (o instanceof Integer) return ((Integer) o).intValue();
+        if (o instanceof Long) {
+            long l = ((Long) o).longValue();
+            if (l < (long) Integer.MAX_VALUE) return (int) l;
+            o = ((Long) o).toString();
+        }
+        if (o instanceof Double) {
+            double d = 1000d * ((Double) o).doubleValue();
+            return (int) Math.round(d);
+        }
+        String s = "";
+        if (o instanceof String) s = (String) o;
+        
         // this can be used to calculate a score from a string
         if ((s == null) || (s.length() == 0) || (s.charAt(0) == '-')) return 0;
         try {
@@ -410,9 +423,9 @@ public final class kelondroMScoreCluster {
     public static void main(String[] args) {
         
         String t = "ZZZZZZZZZZ";
-        System.out.println("score of " + t + ": " + string2score(t));
+        System.out.println("score of " + t + ": " + object2score(t));
         if (args.length > 0) {
-            System.out.println("score of " + args[0] + ": " + string2score(args[0]));
+            System.out.println("score of " + args[0] + ": " + object2score(args[0]));
             System.exit(0);
         }
         

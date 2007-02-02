@@ -49,6 +49,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.SoftReference;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -206,12 +207,29 @@ public final class yacySeedDB {
     
     private synchronized kelondroMapObjects openSeedTable(File seedDBFile) {
         new File(seedDBFile.getParent()).mkdirs();
+        Class[] args;
         try {
-            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields);
+            args = new Class[]{"".getClass(), Class.forName("java.util.Map")};
+        } catch (ClassNotFoundException e2){
+            e2.printStackTrace();
+            args = null;
+        }
+        Method initializeHandlerMethod;
+        try {
+            initializeHandlerMethod = this.getClass().getMethod("initializeHandler", args);
+        } catch (SecurityException e1) {
+            e1.printStackTrace();
+            initializeHandlerMethod = null;
+        } catch (NoSuchMethodException e1) {
+            e1.printStackTrace();
+            initializeHandlerMethod = null;
+        }
+        try {
+            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (Exception e) {
             seedDBFile.delete();
             // try again
-            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields);
+            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         }
     }
     
@@ -243,6 +261,11 @@ public final class yacySeedDB {
         }
     }
 
+    public void initializeHandler(String mapname, Map map) {
+        // this is used to set up a lastSeen lookup table
+        
+    }
+    
     public Enumeration seedsSortedConnected(boolean up, String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
         return new seedEnum(up, field, seedActiveDB);

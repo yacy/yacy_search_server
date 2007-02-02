@@ -399,6 +399,10 @@ public class yacySeed {
             return System.currentTimeMillis();
         }
     }
+    
+    public final String getLastSeenString() {
+        return get(yacySeed.LASTSEEN, "20040101000000");
+    }
 
     public final int getAge() {
         // returns the age as number of days

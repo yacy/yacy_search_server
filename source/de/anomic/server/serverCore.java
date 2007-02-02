@@ -95,6 +95,9 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static final byte lf = 10;
     public static final byte[] crlf = {cr, lf};
     public static final String crlfString = new String(crlf);
+    public static final Class[] stringType = {"".getClass()}; //  set up some reflection
+    //Class[] exceptionType = {Class.forName("java.lang.Throwable")};
+    
     
     // static variables
     public static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
@@ -1138,9 +1141,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	
         private void listen() {
             try {
-                // set up some reflection
-                Class[] stringType    = {"".getClass()};
-                //Class[] exceptionType = {Class.forName("java.lang.Throwable")};
                 
                 Object result;
 //                // send greeting
