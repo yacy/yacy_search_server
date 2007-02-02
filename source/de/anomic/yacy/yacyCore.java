@@ -6,7 +6,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedBy: $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -346,7 +346,7 @@ public class yacyCore {
         // if we cannot reach ourself, we call a forced publishMySeed and return false
         final int urlc = yacyClient.queryUrlCount(seedDB.mySeed);
         if (urlc >= 0) {
-            seedDB.mySeed.put(yacySeed.LASTSEEN, universalDateShortString(new Date()));
+            seedDB.mySeed.setLastSeenUTC();
             return true;
         }
         log.logInfo("re-connect own seed");

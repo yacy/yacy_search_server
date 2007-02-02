@@ -262,14 +262,14 @@ public class yacySeed {
         return (String) o;
     }
 
-    public final void setIP()                    { put(yacySeed.IP, ""); }
-    public final void setIP(final String ip)     { put(yacySeed.IP, ip); }
-    public final void setPort(final String port) { put(yacySeed.PORT, port); }
-    public final void setJunior()                { put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR); }
-    public final void setSenior()                { put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); }
-    public final void setPrincipal()             { put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL); }
-    public final void setLastSeen()              { put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - getUTCDiff()))); }
-
+    public final void setIP()                    { dna.put(yacySeed.IP, ""); }
+    public final void setIP(final String ip)     { dna.put(yacySeed.IP, ip); }
+    public final void setPort(final String port) { dna.put(yacySeed.PORT, port); }
+    public final void setJunior()                { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR); }
+    public final void setSenior()                { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); }
+    public final void setPrincipal()             { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL); }
+    
+    
     public final void put(String key, String value) {
         synchronized (this.dna) {
             this.dna.put(key, value);
@@ -291,25 +291,25 @@ public class yacySeed {
     public final void incSI(int count) {
         String v = (String) this.dna.get(yacySeed.INDEX_OUT);
         if (v == null) { v = yacySeed.ZERO; }
-        put(yacySeed.INDEX_OUT, Integer.toString(Integer.parseInt(v) + count));
+        dna.put(yacySeed.INDEX_OUT, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public final void incRI(int count) {
         String v = (String) this.dna.get(yacySeed.INDEX_IN);
         if (v == null) { v = yacySeed.ZERO; }
-        put(yacySeed.INDEX_IN, Integer.toString(Integer.parseInt(v) + count));
+        dna.put(yacySeed.INDEX_IN, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public final void incSU(int count) {
         String v = (String) this.dna.get(yacySeed.URL_OUT);
         if (v == null) { v = yacySeed.ZERO; }
-        put(yacySeed.URL_OUT, Integer.toString(Integer.parseInt(v) + count));
+        dna.put(yacySeed.URL_OUT, Integer.toString(Integer.parseInt(v) + count));
     }
 
     public final void incRU(int count) {
         String v = (String) this.dna.get(yacySeed.URL_IN);
         if (v == null) { v = yacySeed.ZERO; }
-        put(yacySeed.URL_IN, Integer.toString(Integer.parseInt(v) + count));
+        dna.put(yacySeed.URL_IN, Integer.toString(Integer.parseInt(v) + count));
     }
 
     // 12 * 6 bit = 72 bit = 18 characters hex-hash
@@ -379,15 +379,24 @@ public class yacySeed {
         }
     }
 
-    public final long getLastSeenTime() {
+    public final void setLastSeenUTC() {
+        // we put the current time into the lastseen field
+        // because java thinks it must apply the UTC offset to the current time,
+        // to create a string that looks like our current time, it adds the local UTC offset to the
+        // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
+        dna.put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date(System.currentTimeMillis() - serverDate.UTCDiff())) );
+    }
+    
+    public final long getLastSeenUTC() {
         try {
             final long t = yacyCore.parseUniversalDate(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
-            // the problem here is: getTime applies a time shift according to local time zone:
-            // it substracts the local UTF offset, but it should subtract the remote UTC offset
-            // so we correct it by first adding the local UTF offset and then subtracting the remote
-            // the time zone was originally the seeds time zone
-            // we correct this here
-            return t - getUTCDiff() + serverDate.UTCDiff();
+            // getTime creates a UTC time number. But in this case java thinks, that the given
+            // time string is a local time, which has a local UTC offset applied.
+            // Therefore java subtracts the local UTC offset, to get a UTC number.
+            // But the given time string is already in UTC time, so the subtraction
+            // of the local UTC offset is wrong. We correct this here by adding the local UTC
+            // offset again.
+            return t + serverDate.UTCDiff();
         } catch (java.text.ParseException e) {
             return System.currentTimeMillis();
         } catch (java.lang.NumberFormatException e) {
@@ -411,13 +420,8 @@ public class yacySeed {
         }
     }
 
-    public final void setLastSeenTime() {
-        // if we set a last seen time, then we need to respect the seeds UTC offset
-        put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date(System.currentTimeMillis() - serverDate.UTCDiff() + getUTCDiff())));
-    }
-
     public void setPeerTags(Set keys) {
-        put(PEERTAGS, serverCodings.set2string(keys, "|", false));
+        dna.put(PEERTAGS, serverCodings.set2string(keys, "|", false));
     }
 
     public Set getPeerTags() {
@@ -458,7 +462,7 @@ public class yacySeed {
         if (flags.length() != 4) { flags = yacySeed.FLAGSZERO; }
         final bitfield f = new bitfield(flags.getBytes());
         f.set(flag, value);
-        put(yacySeed.FLAGS, new String(f.getBytes()));
+        dna.put(yacySeed.FLAGS, new String(f.getBytes()));
     }
 
     public final void setFlagDirectConnect(final boolean value) { setFlag(0, value); }

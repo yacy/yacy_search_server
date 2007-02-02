@@ -391,7 +391,7 @@ public class Network {
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_type_url", seed.get("seedURL", "http://nowhere/"));
 
-                            final long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenTime()) / 1000 / 60);
+                            final long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                             if (page == 2 || lastseen > 1440) { // Passive Peers should be passive, also Peers without contact greater than an day
                                 // principal/senior/junior: red/red=offline
                                 prop.put(STR_TABLE_LIST + conCount + "_type_direct", 2);

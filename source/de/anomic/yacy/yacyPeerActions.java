@@ -48,7 +48,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -137,7 +136,7 @@ public class yacyPeerActions {
             seedDB.mySeed.put("seedURL", sb.getConfig("seedURL", ""));
         }
         seedDB.mySeed.setFlagDirectConnect(true);
-        seedDB.mySeed.put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date()));
+        seedDB.mySeed.setLastSeenUTC();
         seedDB.mySeed.put(yacySeed.UTC, serverDate.UTCDiffString());
         seedDB.mySeed.setFlagAcceptRemoteCrawl(sb.getConfig("crawlResponse", "").equals("true"));
         seedDB.mySeed.setFlagAcceptRemoteIndex(sb.getConfig("allowReceiveIndex", "").equals("true"));
@@ -298,20 +297,20 @@ public class yacyPeerActions {
 
         if (seed.get(yacySeed.LASTSEEN, "").length() != 14) {
             // hack for peers that do not have a LastSeen date
-            seed.put(yacySeed.LASTSEEN, "20040101000000");
+            seed.setLastSeenUTC();
             yacyCore.log.logFine("connect: reset wrong date (" + seed.getName() + "/" + seed.hash + ")");
         }
 
         // connection time
         final long nowUTC0Time = System.currentTimeMillis(); // is better to have this value in a variable for debugging
-        final long ctimeUTC0 = seed.getLastSeenTime();
-        // maybe correct it slightly
-        /*
-         * if (ctime > yacyCore.universalTime()) { ctime = ((2 * ctime) +
-         * yacyCore.universalTime()) / 3; seed.put(yacySeed.LASTSEEN,
-         * yacyCore.shortFormatter.format(new Date(ctime))); }
-         */
+        long ctimeUTC0 = seed.getLastSeenUTC();
 
+        if (ctimeUTC0 > nowUTC0Time) {
+            // the peer is future-dated, correct it
+            seed.setLastSeenUTC();
+            ctimeUTC0 = nowUTC0Time;
+            assert (seed.getLastSeenUTC() - ctimeUTC0 < 100);
+        }
         if (Math.abs(nowUTC0Time - ctimeUTC0) > 60 * 60 * 24 * 1000) {
             // the new connection is out-of-age, we reject the connection
             yacyCore.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + serverDate.intervalToString(Math.abs(nowUTC0Time - ctimeUTC0)));
@@ -336,7 +335,7 @@ public class yacyPeerActions {
             // Date applies the local UTC offset, which is wrong
             // we correct that by subtracting the local offset and adding
             // the remote offset.
-            seed.setLastSeenTime();
+            seed.setLastSeenUTC();
             seed.setFlagDirectConnect(true);
         } else {
             // set connection flag
@@ -371,7 +370,7 @@ public class yacyPeerActions {
                 try {
                     // if the old LastSeen date is later then the other
                     // info, then we reject the info
-                    if ((ctimeUTC0 < (yacyCore.parseUniversalDate(connectedSeed.get(yacySeed.LASTSEEN, "20040101000000")).getTime() - connectedSeed.getUTCDiff() + serverDate.UTCDiff())) && (!direct)) {
+                    if ((ctimeUTC0 < (connectedSeed.getLastSeenUTC())) && (!direct)) {
                         yacyCore.log.logFine("connect: rejecting old info about peer '" + seed.getName() + "'");
                         return false;
                     }
@@ -379,9 +378,6 @@ public class yacyPeerActions {
                     if (connectedSeed.getName() != seed.getName()) {
                         // TODO: update seed name lookup cache
                     }
-                } catch (ParseException e) {
-                    yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getAddress() + ". Cause: " + e.getMessage());
-                    return false;
                 } catch (NumberFormatException e) {
                     yacyCore.log.logFine("connect: rejecting wrong peer '" + seed.getName() + "' from " + seed.getAddress() + ". Cause: " + e.getMessage());
                     return false;

@@ -316,7 +316,7 @@ public final class yacySeedDB {
             while ((s.hasMoreElements()) && (searchcount-- > 0)) {
                 ys = (yacySeed) s.nextElement();
                 if ((ys != null) && (ys.get(yacySeed.LASTSEEN, "").length() > 10)) try {
-                    absage = Math.abs(System.currentTimeMillis() - ys.getLastSeenTime());
+                    absage = Math.abs(System.currentTimeMillis() - ys.getLastSeenUTC());
                     seedScore.addScore(ys.hash, (int) absage);
                 } catch (Exception e) {}
             }

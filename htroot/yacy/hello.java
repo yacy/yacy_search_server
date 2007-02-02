@@ -50,7 +50,6 @@ import java.util.Date;
 
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -124,7 +123,9 @@ public final class hello {
         }
 
 //      System.out.println("YACYHELLO: YOUR IP=" + clientip);
-
+        // set lastseen value (we have seen that peer, it contacted us!)
+        remoteSeed.setLastSeenUTC();
+        
         // assign status
         if (urls >= 0) {
             if (remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) == null) {
@@ -140,7 +141,6 @@ public final class hello {
             yacyCore.peerActions.peerArrival(remoteSeed, true);
         } else {
             prop.putASIS(yacySeed.YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
-            remoteSeed.put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date(System.currentTimeMillis() + serverDate.UTCDiff() - remoteSeed.getUTCDiff())) );
             yacyCore.peerActions.juniorConnects++; // update statistics
             remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
             yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip);
