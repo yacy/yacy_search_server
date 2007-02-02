@@ -144,15 +144,10 @@ public class yacySeed {
     public static final String CCOUNT    = "CCount"; // Connection Count
     public static final String CRWCNT    = "CRWCnt"; // Citation Rank (Own) - Count
     public static final String CRTCNT    = "CRTCnt"; // Citation Rank (Other) - Count
-
     public static final String IP        = "IP";
     public static final String PORT      = "Port";
-    public static final String YOURIP    = "yourip";
-    public static final String MYTIME    = "mytime";
-    public static final String SEED      = "seed";
-    public static final String EQUAL     = "=";
     public static final String ZERO      = "0";
-
+    
     // class variables
     public String hash;
     private final Map dna;

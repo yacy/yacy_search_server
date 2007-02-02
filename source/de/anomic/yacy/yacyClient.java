@@ -124,9 +124,9 @@ public final class yacyClient {
                 obj.put("pattern", "");
                 obj.put("count", "20");
                 obj.put("key", key);
-                obj.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
+                obj.put("mytime", yacyCore.universalDateShortString(new Date()));
                 obj.put("myUTC", System.currentTimeMillis());
-                obj.put(yacySeed.SEED, yacyCore.seedDB.mySeed.genSeedStr(key));
+                obj.put("seed", yacyCore.seedDB.mySeed.genSeedStr(key));
             
             // sending request
             result = nxTools.table(
@@ -173,7 +173,7 @@ public final class yacyClient {
         if (serverCore.portForwardingEnabled || serverCore.useStaticIP) {
             yacyCore.seedDB.mySeed.put(yacySeed.IP, serverCore.publicIP());
         } else {
-            yacyCore.seedDB.mySeed.put(yacySeed.IP, (String) result.get(yacySeed.YOURIP));
+            yacyCore.seedDB.mySeed.put(yacySeed.IP, (String) result.get("yourip"));
         }
 
         /* If we have port forwarding enabled but the other peer uses a too old yacy version
@@ -237,7 +237,7 @@ public final class yacyClient {
         int i = 0;
         int count = 0;
         String seedStr;
-        while ((seedStr = (String) result.get(yacySeed.SEED + i++)) != null) {
+        while ((seedStr = (String) result.get("seed" + i++)) != null) {
             // integrate new seed into own database
             // the first seed, "seed0" is the seed of the responding peer
             if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, key, true), (i == 1))) count++;
@@ -439,7 +439,7 @@ public final class yacyClient {
             obj.put("maxdist", maxDistance);
             obj.put("profile", crypt.simpleEncode(rankingProfile.toExternalString()));
             obj.put("constraint", constraint.exportB64());
-            obj.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
+            obj.put("mytime", yacyCore.universalDateShortString(new Date()));
             if (abstractCache != null) obj.put("abstracts", "auto");
             
             //yacyCore.log.logDebug("yacyClient.search url=" + url);
@@ -600,7 +600,7 @@ public final class yacyClient {
             post.put("process", "permission");
             post.put("iam", yacyCore.seedDB.mySeed.hash);
             post.put("youare", targetHash);
-            post.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
+            post.put("mytime", yacyCore.universalDateShortString(new Date()));
             
         // get target address    
         String address = targetAddress(targetHash);
@@ -642,7 +642,7 @@ public final class yacyClient {
             post.put("myseed", yacyCore.seedDB.mySeed.genSeedStr(key));
             post.put("youare", targetHash);
             post.put("subject", subject);
-            post.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
+            post.put("mytime", yacyCore.universalDateShortString(new Date()));
             try {
                 post.put("message", new String(message, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
@@ -813,7 +813,7 @@ public final class yacyClient {
         post.put("process", "crawl");
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetSeed.hash);
-        post.put(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
+        post.put("mytime", yacyCore.universalDateShortString(new Date()));
         if (url.length == 1) {
             post.put("url", crypt.simpleEncode(url[0].toString()));
             post.put("referrer", crypt.simpleEncode((referrer[0] == null) ? "" : referrer[0].toString()));

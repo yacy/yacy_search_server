@@ -94,7 +94,6 @@ public final class kelondroMScoreCluster {
             if (s.length() == shortDateFormatString.length()) {
                 // try a date
                 l = ((shortFormatter.parse(s).getTime() - date2000) / minutemillis);
-                if (l > (60 + ((System.currentTimeMillis() - date2000) / minutemillis))) l = 0; // future date, more than one hour
                 if (l < 0) l = 0;
             } else {
                 // try a number

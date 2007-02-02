@@ -71,7 +71,7 @@ public final class hello {
 //      final String pattern  = (String) post.get("pattern", "");  //        
 //      final String mytime   = (String) post.get(MYTIME, ""); //
         final String key      = post.get("key", "");      // transmission key for response
-        final String seed     = post.get(yacySeed.SEED, "");
+        final String seed     = post.get("seed", "");
         final String countStr = post.get("count", "0");
         int  i;
         int  count = 0;
@@ -100,7 +100,7 @@ public final class hello {
             serverCore.checkInterruption();
             
             // try first the reportedip, since this may be a connect from a port-forwarding host
-            prop.putASIS(yacySeed.YOURIP, reportedip);
+            prop.putASIS("yourip", reportedip);
             remoteSeed.put(yacySeed.IP, reportedip);
             urls = yacyClient.queryUrlCount(remoteSeed);
         }
@@ -117,7 +117,7 @@ public final class hello {
         	if(isNotLocal) {
         		serverCore.checkInterruption();
                 
-                prop.putASIS(yacySeed.YOURIP, clientip);
+                prop.putASIS("yourip", clientip);
                 remoteSeed.put(yacySeed.IP, clientip);
                 urls = yacyClient.queryUrlCount(remoteSeed);
         	}
@@ -176,7 +176,7 @@ public final class hello {
                 seeds.ensureCapacity((ySeeds.length + 1) * 768);
                 for (i = 0; i < ySeeds.length; i++) {
                     if ((ySeeds[i] != null) && (ySeeds[i].isProper() == null)) {
-                        seeds.append(yacySeed.SEED).append(count).append(yacySeed.EQUAL).append(ySeeds[i].genSeedStr(key)).append(serverCore.crlfString);
+                        seeds.append("seed").append(count).append('=').append(ySeeds[i].genSeedStr(key)).append(serverCore.crlfString);
                         count++;
                     }
                 }
@@ -186,7 +186,7 @@ public final class hello {
             seeds.append("seed0=").append(yacyCore.seedDB.mySeed.genSeedStr(key)).append(serverCore.crlfString);
         }
 
-        prop.putASIS(yacySeed.MYTIME, yacyCore.universalDateShortString(new Date()));
+        prop.putASIS("mytime", yacyCore.universalDateShortString(new Date()));
         prop.putASIS("seedlist", seeds.toString());
         // return rewrite properties
         return prop;
