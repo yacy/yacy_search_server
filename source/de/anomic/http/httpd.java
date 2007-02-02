@@ -50,9 +50,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -747,7 +751,7 @@ public final class httpd implements serverHandler {
             sep = argsString.indexOf("&");
             if ((eqp <= 0) || (sep <= 0)) break;
             // resulting equations are inserted into the property args with leading '&'
-            args.put(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
+            args.putASIS(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
             argsString = argsString.substring(sep + 1);
             argc++;
         }
@@ -755,45 +759,72 @@ public final class httpd implements serverHandler {
         return argc;
     }
     
-    // 16.12.2006 by [FB]: added UTF-character decoding
+    /**
+     * <p>This method basically does the same as {@link URLDecoder#decode(String, String) URLDecoder.decode(s, "UTF-8")}
+     * would do with the exception of more lazyness in regard to current browser implementations as they do not
+     * always comply with the standards.</p>
+     * <p>The following replacements are performed on the input-<code>String</code>:</p>
+     * <ul>
+     * <li>'<code>+</code>'-characters are replaced by space
+     * <li>(supbsequent (in the case of encoded unicode-chars)) '<code>%HH</code>'-entities are replaced by their
+     * respective <code>char</code>-representation</li>
+     * <li>'<code>%uHHHH</code>'-entities (sent by IE although rejected by the W3C) are replaced by their respective
+     * <code>char</code>-representation</li>
+     * <li><strong>TODO</strong>: <code>chars</code> already encoded in UTF-8 are url-encoded and re-decoded due to internal restrictions,
+     * which slows down this method unnecessarily</li>
+     * </ul>
+     * 
+     * @param s the URL-encoded <code>String</code> to decode, note that the encoding used to URL-encode the original
+     * <code>String</code> has to be UTF-8 (i.e. the "<code>accept-charset</code>"-property of HTML
+     * <code>&lt;form&gt;</code>-elements)
+     * @return the "normal" Java-<code>String</code> (UTF-8) represented by the input or <code>null</code>
+     * if the passed argument <code>encoding</code> is not supported
+     */
     private static String parseArg(String s) {
-        // this parses a given value-string from a http property
-        // we replace all "+" by spaces
-        // and resolve %-escapes with two- / four-digit hex attributes
         int pos = 0;
-        CharArrayWriter baos = new CharArrayWriter(s.length());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(s.length());
+        
         while (pos < s.length()) {
             if (s.charAt(pos) == '+') {
                 baos.write(' ');
                 pos++;
             } else if (s.charAt(pos) == '%') {
-            	// start change by [FB]: added UTF-escapes
-            	if (s.charAt(pos + 1) == 'u') {				// UTF-16 escape
-            		baos.write(Integer.parseInt(s.substring(pos + 2, pos + 6), 16));
-            		pos += 6;
-            	} else {									// normal escape
-                    // currently one escape is treated as one char, which only works if
-                    // formulars accept-charset=ascii are used. This is wrong if
-                    // formulars are set to accept-charset=UTF-8, then many escaped bytes
-                    // are sent, but they belong together to one char
-                    
-                    // TODO: UTF-8 escapes: i.e. "%C3%A4" should be 'ä', but is now "Ã¤"
-                    // - parse out subsequent escapes
-                    // - check which of these 'belong together', see http://de.wikipedia.org/wiki/UTF-8
-                    // - write the UTF-8 escapes together as one char
-                    
-                    // XXX: implement an own UTF-8 converter as described above or
-                    // revert this method to use bytes and let Java do the UTF-8-parsing?
-                    // i.e. new String(result[], "UTF-8");
-                	baos.write(Integer.parseInt(s.substring(pos + 1, pos + 3), 16));
-            		pos += 3;
-            	}
-            	// end change by [FB]
+                try {
+                    if (s.length() >= pos + 6 && (s.charAt(pos + 1) == 'u' || s.charAt(pos + 1) == 'U')) {
+                        // non-standard encoding of IE for unicode-chars
+                        int bh = Integer.parseInt(s.substring(pos + 2, pos + 4), 16);
+                        int bl = Integer.parseInt(s.substring(pos + 4, pos + 6), 16);
+                        // TODO: needs conversion from UTF-16 to UTF-8
+                        baos.write(bh);
+                        baos.write(bl);
+                        pos += 6;
+                    } else if (s.length() >= pos + 3) {
+                        baos.write(Integer.parseInt(s.substring(pos + 1, pos + 3), 16));
+                        pos += 3;
+                    } else {
+                        baos.write(s.charAt(pos++));
+                    }
+                } catch (NumberFormatException e) {
+                    baos.write(s.charAt(pos++));
+                }
+            } else if (s.charAt(pos) > 127) {
+                // Unicode chars sent by client, see http://www.w3.org/International/O-URL-code.html
+                try {
+                    // don't write anything but url-encode the unicode char
+                    s = s.substring(0, pos) + URLEncoder.encode(s.substring(pos, pos + 1), "UTF-8") + s.substring(pos + 1); 
+                } catch (UnsupportedEncodingException e) { return null; }
             } else {
                 baos.write(s.charAt(pos++));
             }
         }
-        return decodeHtmlEntities(baos.toString());
+        
+        try {
+            return new String(baos.toByteArray(), "UTF-8");
+        } catch (UnsupportedEncodingException e) { return null; }
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(Charset.availableCharsets().toString().replaceAll(" ", "\n"));
     }
     
     // 06.01.2007: decode HTML entities by [FB]

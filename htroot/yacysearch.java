@@ -98,6 +98,7 @@ public class yacysearch {
         // case if no values are requested
         final String referer = (String) header.get("Referer");
         String querystring = (post == null) ? "" : post.get("search", "").trim();
+        
         if ((post == null) || (env == null) || (querystring.length() == 0)) {
 
             // save referrer
@@ -147,6 +148,7 @@ public class yacysearch {
 
         // collect search attributes
         int maxDistance = Integer.MAX_VALUE;
+        
         if ((querystring.length() > 2) && (querystring.charAt(0) == '"') && (querystring.charAt(querystring.length() - 1) == '"')) {
             querystring = querystring.substring(1, querystring.length() - 1).trim();
             maxDistance = 1;
@@ -459,7 +461,7 @@ public class yacysearch {
             prop.put("type_results_" + i + "_authorized", (authenticated) ? 1 : 0);
 
         prop.putASIS("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("former", wikiCode.replaceXMLEntities(post.get("search", "")));
+        prop.put("former", post.get("search", ""));
         prop.put("count", count);
         prop.put("order", order);
         prop.put("resource", (global) ? "global" : "local");
