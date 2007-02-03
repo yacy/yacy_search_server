@@ -143,7 +143,7 @@ public class Wiki {
             try {
                 prop.put("mode", 1); //edit
                 prop.put("mode_author", author);
-                prop.put("mode_page-code", new String(page.page(), "UTF-8").replaceAll("<","&lt;").replaceAll(">","&gt;"));
+                prop.put("mode_page-code", new String(page.page(), "UTF-8"));
                 prop.put("mode_pagename", pagename);
             } catch (UnsupportedEncodingException e) {}
         }
@@ -186,6 +186,7 @@ public class Wiki {
         }
         
         else if (post.containsKey("diff")) {
+            // Diff
             prop.put("mode", 4);
             prop.put("mode_page", pagename);
             prop.put("mode_error_page", pagename);
@@ -232,14 +233,20 @@ public class Wiki {
                 }
                 
                 if (nentry == null) nentry = entry;
-                if (post.get("diff", "").length() > 0 && oentry != null && nentry != null) {
+                if (post.containsKey("compare") && oentry != null && nentry != null) {
                     // TODO: split into paragraphs and compare them with the same diff-algo
                     Diff diff = new Diff(
                             new String(oentry.page(), "UTF-8"),
-                            new String(nentry.page(), "UTF-8"), 5);
-                    prop.putASIS("mode_diff", Diff.toHTML(new Diff[] { diff }));
-                } else {
-                    prop.put("mode_diff", "");
+                            new String(nentry.page(), "UTF-8"), 3);
+                    prop.putASIS("mode_versioning_diff", Diff.toHTML(new Diff[] { diff }));
+                    prop.put("mode_versioning", 1);
+                } else if (post.containsKey("viewold") && oentry != null) {
+                    prop.put("mode_versioning", 2);
+                    prop.put("mode_versioning_pagename", pagename);
+                    prop.put("mode_versioning_author", oentry.author());
+                    prop.put("mode_versioning_date", dateString(oentry.date()));
+                    prop.putWiki("mode_versioning_page", oentry.page());
+                    prop.put("mode_versioning_page-code", new String(oentry.page(), "UTF-8"));
                 }
             } catch (IOException e) {
                 prop.put("mode_error", 1); //IO Error reading Wiki
