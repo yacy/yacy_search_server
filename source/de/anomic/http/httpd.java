@@ -823,10 +823,6 @@ public final class httpd implements serverHandler {
         } catch (UnsupportedEncodingException e) { return null; }
     }
     
-    public static void main(String[] args) {
-        System.out.println(Charset.availableCharsets().toString().replaceAll(" ", "\n"));
-    }
-    
     // 06.01.2007: decode HTML entities by [FB]
     public static String decodeHtmlEntities(String s) {
         // replace all entities defined in wikiCode.characters and htmlentities
@@ -968,12 +964,12 @@ public final class httpd implements serverHandler {
             java.lang.System.arraycopy(buffer, pos, line, 0, q - pos);
             // in the 'line' variable we have now either a normal value or an uploadef file
             if (filename == null) {
-                args.put(new String(name, "UTF-8"), new String(line, "UTF-8"));
+                args.putASIS(new String(name, "UTF-8"), new String(line, "UTF-8"));
             } else {
                 // we store the file in a hashtable.
                 // we use the same key to address the file in the hashtable as we
                 // use to address the filename in the properties, but without leading '&'
-                args.put(new String(name, "UTF-8"), new String(filename, "UTF-8"));
+                args.putASIS(new String(name, "UTF-8"), new String(filename, "UTF-8"));
                 files.put(new String(name, "UTF-8"), line);
             }
             argc++;
