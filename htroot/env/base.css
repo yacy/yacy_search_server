@@ -157,6 +157,10 @@ legend {
   margin:10px;
 }
 
+.PostBody h2 { margin: .4em 0 0; }
+.PostBody h3 { margin: .3em 0 0; }
+.PostBody h4 { margin: .2em 0 0; }
+
 .PostInfo {
   padding:1px 10px;
 }
