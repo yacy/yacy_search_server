@@ -19,7 +19,12 @@
          last edited by #[author]# | change date #[date]# | <a href="Wiki.html?page=#[pagename]#&amp;edit=Edit">Edit</a> #(access)#(only granted to admin)::#(/access)#
       </p>
     </div>
-    <p class="Navigation"><a href="Wiki.html">Start Page</a> - <a href="Wiki.html?index=Index">Index</a> - #(access)#<a href="Wiki.html?access=all">Grant Write Access to Everybody</a>::<a href="Wiki.html?access=admin">Grant Write Access to Admin only</a>#(/access)#</p>
+    <p class="Navigation">
+      <a href="Wiki.html">Start Page</a> -
+      <a href="Wiki.html?index=Index">Index</a> -
+      <a href="Wiki.html?page=#[pagename]#&amp;diff=">Versions</a> -
+      #(access)#<a href="Wiki.html?access=all">Grant Write Access to Everybody</a>::<a href="Wiki.html?access=admin">Grant Write Access to Admin only</a>#(/access)#
+    </p>
     ::
     <!-- 1: edit -->
     <form action="Wiki.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
@@ -105,6 +110,39 @@
     #(error)#::<p class="error">IO Error reading wiki database: #[message]#</p>#(/error)#
     <p class="Navigation">
       <a href="Wiki.html">Start Page</a>
+    </p>
+    ::
+    <!-- 4: Diff -->
+    #(error)#<!-- no error -->
+    <form method="get" action="Wiki.html">
+      <fieldset><legend>Select versions of page '#[page]#</legend>
+        <input type="hidden" name="page" value="#[page]#" />
+        <dl>
+          <dt><label for="old">Compare version from</label>:</dt>
+          <dd>
+            <select id="old" name="old">#{versions}# 
+              <option value="#[date]#"#(oldselected)#:: selected="selected"#(/oldselected)#>#[fdate]#</option>#{/versions}# 
+            </select>
+          </dd>
+          <dt><label for="new">with version from</label>:</dt>
+          <dd>
+            <select id="new" name="new">
+              <optgroup label="current"><option value="#[curdate]#"#(curselected)#:: selected="selected"#(/curselected)#>#[curfdate]#</option></optgroup>#{versions}# 
+              <option value="#[date]#"#(newselected)#:: selected="selected"#(/newselected)#>#[fdate]#</option>#{/versions}# 
+            </select>
+          </dd>
+          <dt><input type="submit" name="diff" value="Compare" /></dt>
+        </dl>
+      </fieldset>
+    </form>
+    ::<!-- IO error -->
+    <p class="error">IO Error reading wiki database: #[message]#</p>
+    ::<!-- no entries available for #[name]# -->
+    #(/error)#
+    #[diff]#
+    <p class="Navigation">
+      <a href="Wiki.html">Start Page</a> -
+      <a href="Wiki.html?page=#[page]#">Return to #[page]#</a>
     </p>
     #(/mode)#
 

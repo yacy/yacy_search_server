@@ -45,14 +45,19 @@ a.extern		{ color: #635; }
 .bookmark		{ border-bottom: 1px #000 dashed; }
 .Tags			{ border-left: 2px solid black; }
 
-a.bookmarkTitle		{ color: #4070a0; }
+a.bookmarkTitle			{ color: #4070a0; }
 a:hover.bookmarkTitle	{ color: #4070a0; }
-a.bookmarkTags		{ color: #007050; }
+a.bookmarkTags			{ color: #007050; }
 a:hover.bookmarkTags	{ color: #4070a0; }
-a.bookmarkAction	{ color: #999999; }
+a.bookmarkAction		{ color: #999999; }
 
 .Navigation a		{ color: #555; }
 .Navigation a:hover	{ color: #777; }
+
+.diff 				{ background-color: #171717; }
+.diff .unchanged 	{ color: #666; }
+.diff .added 		{ color: #0A0; background-color: #053005; }
+.diff .deleted 		{ color: #B00; background-color: #390505; }
 
 /* in Status.html */
 .ProgressBar		{ border: 1px solid #777; }

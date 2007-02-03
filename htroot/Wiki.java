@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import de.anomic.data.Diff;
 import de.anomic.data.wikiBoard;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -155,7 +156,7 @@ public class Wiki {
             prop.put("mode_author", author);
             prop.put("mode_date", dateString(new Date()));
             prop.putWiki("mode_page", post.get("content", ""));
-            prop.put("mode_page-code", post.get("content", "").replaceAll("<","&lt;").replaceAll(">","&gt;"));
+            prop.put("mode_page-code", post.get("content", ""));
         }
         //end contrib of [MN]
 
@@ -182,6 +183,68 @@ public class Wiki {
                 prop.put("mode_error_message", e.getMessage());
             }
             prop.put("mode_pagename", pagename);
+        }
+        
+        else if (post.containsKey("diff")) {
+            prop.put("mode", 4);
+            prop.put("mode_page", pagename);
+            prop.put("mode_error_page", pagename);
+            
+            try {
+                Iterator it = switchboard.wikiDB.keysBkp(true);
+                wikiBoard.entry entry;
+                wikiBoard.entry oentry = null;
+                wikiBoard.entry nentry = null;
+                int count = 0;
+                boolean oldselected = false, newselected = false;
+                while (it.hasNext()) {
+                    entry = switchboard.wikiDB.readBkp((String)it.next());
+                    prop.put("mode_error_versions_" + count + "_date", wikiBoard.dateString(entry.date()));
+                    prop.put("mode_error_versions_" + count + "_fdate", dateString(entry.date()));
+                    if (wikiBoard.dateString(entry.date()).equals(post.get("old", null))) {
+                        prop.put("mode_error_versions_" + count + "_oldselected", 1);
+                        oentry = entry;
+                        oldselected = true;
+                    } else if (wikiBoard.dateString(entry.date()).equals(post.get("new", null))) {
+                        prop.put("mode_error_versions_" + count + "_newselected", 1);
+                        nentry = entry;
+                        newselected = true;
+                    }
+                    count++;
+                }
+                count--;    // don't show current version
+                
+                if (!oldselected)   // select latest old entry
+                    prop.put("mode_error_versions_" + (count - 1) + "_oldselected", 1);
+                if (!newselected)   // select latest new entry (== current)
+                    prop.put("mode_error_curselected", 1);
+                
+                if (count == 0) {
+                    prop.put("mode_error", 2); // no entries found
+                } else {
+                    prop.put("mode_error_versions", count);
+                }
+                
+                entry = switchboard.wikiDB.read(pagename);
+                if (entry != null) {
+                    prop.put("mode_error_curdate", wikiBoard.dateString(entry.date()));
+                    prop.put("mode_error_curfdate", dateString(entry.date()));
+                }
+                
+                if (nentry == null) nentry = entry;
+                if (post.get("diff", "").length() > 0 && oentry != null && nentry != null) {
+                    // TODO: split into paragraphs and compare them with the same diff-algo
+                    Diff diff = new Diff(
+                            new String(oentry.page(), "UTF-8"),
+                            new String(nentry.page(), "UTF-8"), 5);
+                    prop.putASIS("mode_diff", Diff.toHTML(new Diff[] { diff }));
+                } else {
+                    prop.put("mode_diff", "");
+                }
+            } catch (IOException e) {
+                prop.put("mode_error", 1); //IO Error reading Wiki
+                prop.put("mode_error_message", e.getMessage());
+            }
         }
 
         else {

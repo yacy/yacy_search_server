@@ -144,6 +144,10 @@ a.bookmarkAction {
   border-left: 2px solid black;
 }
 
+.diff 				{ background-color: #171717; }
+.diff .unchanged 	{ color: #666; }
+.diff .added 		{ color: #0A0; background-color: #053005; }
+.diff .deleted 		{ color: #B00; background-color: #390505; }
 
 /* in Status.html */
 

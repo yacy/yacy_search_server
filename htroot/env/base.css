@@ -34,7 +34,7 @@
 /* --------------- global elements -------------------------- */
 
 * {
-  font-family:Helvetica, Arial, sans-serif;
+  font-family:/*Helvetica, Arial, */sans-serif;
 }
 
 body {
@@ -164,6 +164,17 @@ legend {
 .WikiTOCBox {
   padding: 8px;
 }
+
+.diff {
+  margin: 10px 5px;
+  border: 1px dashed #722;
+  padding: .5em;
+  font-family: monospace;
+}
+
+.diff .unchanged { font-family: monospace; }
+.diff .added { font-family: monospace; }
+.diff .deleted { font-family: monospace; text-decoration: line-through; }
 
 .imgtable {
   margin: 1px;

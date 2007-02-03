@@ -143,7 +143,7 @@ public class Diff {
                         if (!matrix[yy + i][xx + i]) break;
                     if (i <= minLength && yy + i < matrix.length && xx + i < matrix[yy].length) {
                         // vorzeitig abgebrochen => zuwenige chars in Diagonale => weitersuchen
-                        break;
+                        continue;
                     } else {
                         return new int[] { rx, ry, i };
                     }
@@ -169,6 +169,13 @@ public class Diff {
      * @return all parts this diff consists of in correct order
      */
     public Part[] getParts() { return (Part[])this.parts.toArray(new Part[this.parts.size()]); }
+    
+    public String toString() {
+        StringBuffer sb = new StringBuffer(this.parts.size() * 20);
+        for (int j=0; j<this.parts.size(); j++)
+            sb.append(((Part)this.parts.get(j)).toString()).append("\n");
+        return sb.toString();
+    }
     
     /**
      * This class represents a part of the diff, meaning one operation
@@ -219,5 +226,26 @@ public class Diff {
             return ((this.action == UNCHANGED) ? " " :
                     (this.action == ADDED) ? "+" : "-") + " " + getString();
         }
+    }
+    
+    public static String toHTML(Diff[] diffs) {
+        StringBuffer sb = new StringBuffer(diffs.length * 60);
+        Diff.Part[] ps;
+        for (int i=0; i<diffs.length; i++) {
+            sb.append("<p class=\"diff\">\n");
+            ps = diffs[i].getParts();
+            for (int j=0; j<ps.length; j++) {
+                sb.append("<span\nclass=\"");
+                switch (ps[j].getAction()) {
+                case Diff.Part.UNCHANGED: sb.append("unchanged"); break;
+                case Diff.Part.ADDED: sb.append("added"); break;
+                case Diff.Part.DELETED: sb.append("deleted"); break;
+                }
+                sb.append("\">").append(wikiCode.replaceXMLEntities(ps[j].getString()).replaceAll("\n", "<br />"));
+                sb.append("</span>");
+            }
+            sb.append("</p>");
+        }
+        return sb.toString();
     }
 }

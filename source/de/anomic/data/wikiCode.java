@@ -171,6 +171,32 @@ public class wikiCode {
         }
         return text;
     }
+    
+    public static String deReplaceHTML(String text) {
+        text = deReplaceHTMLEntities(text);
+        text = deReplaceXMLEntities(text);
+        return text;
+    }
+    
+    public static String deReplaceHTMLEntities(String text) {
+        return deReplace(text, htmlentities);
+    }
+    
+    public static String deReplaceXMLEntities(String text) {
+        return deReplace(text, xmlentities);
+    }
+    
+    public static String deReplace(String text, String[] entities) {
+        if (text == null) return null;
+        for (int i=entities.length-1; i>0; i-=2) {
+            int p = 0;
+            while ((p = text.indexOf(entities[i])) >= 0) {
+                text = text.substring(0, p) + entities[i - 1] + text.substring(p + entities[i].length());
+                p += entities[i - 1].length();
+            }
+        }
+        return text;
+    }
 
     //This array contains codes (see http://mindprod.com/jgloss/unicode.html for details) 
     //that will be replaced. To add new codes or patterns, just put them at the end
