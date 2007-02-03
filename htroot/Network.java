@@ -146,9 +146,9 @@ public class Network {
                 prop.put("table_my-rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
                 prop.put("table_my-rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
                 prop.put("table_my-ppm", myppm);
-                prop.put("table_my-qph", Double.toString(Math.round(10d * myqph) / 10d));
+                prop.put("table_my-qph", Double.toString(Math.round(100d * myqph) / 100d));
                 prop.put("table_my-totalppm", sb.totalPPM);
-                prop.put("table_my-totalqph", Double.toString(Math.round(600d * sb.totalQPM) / 10d));
+                prop.put("table_my-totalqph", Double.toString(Math.round(6000d * sb.totalQPM) / 100d));
                 prop.put("table_my-seeds", seed.get(yacySeed.SCOUNT, "-"));
                 prop.put("table_my-connects", groupDigits(seed.get(yacySeed.CCOUNT, "0")));
             }
@@ -169,7 +169,7 @@ public class Network {
             prop.put("table_all-words", groupDigits(accActWords + accPassWords + accPotWords));
 
             prop.put("table_gppm", otherppm + ((iAmActive) ? myppm : 0));
-            prop.put("table_gqph", Double.toString(Math.round(600d * otherqpm + 10d * ((iAmActive) ? myqph : 0d)) / 10d));
+            prop.put("table_gqph", Double.toString(Math.round(6000d * otherqpm + 100d * ((iAmActive) ? myqph : 0d)) / 100d));
 
 //          String comment = "";
             prop.put("table_comment", 0);
@@ -441,7 +441,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_ppm", PPM);
-                            prop.put(STR_TABLE_LIST + conCount + "_qph", Math.round(60d * QPM));
+                            prop.put(STR_TABLE_LIST + conCount + "_qph", Double.toString(Math.round(6000d * QPM) / 100d));
                             conCount++;
                         } // seed != null
                     } // while
