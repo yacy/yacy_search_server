@@ -88,7 +88,7 @@ public class ViewFile {
         plasmaSwitchboard sb = (plasmaSwitchboard)env;     
 
         if (post != null && post.containsKey("words"))
-            prop.put("error_words", wikiCode.replaceXMLEntities((String)post.get("words")));
+            prop.put("error_words", (String)post.get("words"));
         else {
             prop.put("error", 1);
             prop.put("viewmode", 0);    
@@ -262,8 +262,7 @@ public class ViewFile {
                     }
             }
 
-            content = wikiCode.replaceXMLEntities(
-                    content.replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;"));
+            content = content.replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
 
             prop.put("error", 0);
             prop.put("viewMode", VIEW_MODE_AS_PLAIN_TEXT);
@@ -271,7 +270,7 @@ public class ViewFile {
             
         } else if (viewMode.equals("iframe")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME);
-            prop.put("viewMode_url", wikiCode.replaceXMLEntities(url.toNormalform()));
+            prop.put("viewMode_url", url.toNormalform());
             
         } else if (viewMode.equals("parsed") || viewMode.equals("sentences") || viewMode.equals("links")) {
             // parsing the resource content
@@ -303,11 +302,11 @@ public class ViewFile {
 
             if (viewMode.equals("parsed")) {
                 String content = new String(document.getTextBytes());
-                content = wikiCode.replaceHTML(content); // added by Marc Nause
+                // content = wikiCode.replaceHTML(content); // added by Marc Nause
                 content = content.replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
 
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_TEXT);
-                prop.put("viewMode_parsedText", markup(wordArray, content));
+                prop.putASIS("viewMode_parsedText", markup(wordArray, content));
                 
             } else if (viewMode.equals("sentences")) {
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_SENTENCES);
@@ -323,7 +322,7 @@ public class ViewFile {
                         sentence = ((StringBuffer) sentences.next()).toString();
                         if (sentence.trim().length() > 0) {
                             prop.put("viewMode_sentences_" + i + "_nr", Integer.toString(i + 1));
-                            prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, sentence));
+                            prop.putASIS("viewMode_sentences_" + i + "_text", markup(wordArray, sentence));
                             prop.put("viewMode_sentences_" + i + "_dark", ((dark) ? 1 : 0));
                             dark = !dark;
                             i++;
@@ -349,9 +348,13 @@ public class ViewFile {
                     prop.put("viewMode_links_" + i + "_nr", i);
                     prop.put("viewMode_links_" + i + "_dark", ((dark) ? 1 : 0));
                     prop.put("viewMode_links_" + i + "_type", "image");
-                    prop.put("viewMode_links_" + i + "_text", markup(wordArray, entry.alt()));
-                    prop.put("viewMode_links_" + i + "_link", "<a href=\"" + (String) entry.url().toNormalform() + "\">" + markup(wordArray, (String) entry.url().toNormalform()) + "</a>");
-                    prop.put("viewMode_links_" + i + "_attr", entry.width() + "&nbsp;x&nbsp;" + entry.height());
+                    prop.putASIS("viewMode_links_" + i + "_text", markup(wordArray, entry.alt()));
+                    prop.put("viewMode_links_" + i + "_url", (String) entry.url().toNormalform());
+                    prop.putASIS("viewMode_links_" + i + "_link", markup(wordArray, (String) entry.url().toNormalform()));
+                    if (entry.width() > 0 && entry.height() > 0)
+                        prop.putASIS("viewMode_links_" + i + "_attr", entry.width() + "x" + entry.height() + " Pixel");
+                    else
+                        prop.put("viewMode_links_" + i + "_attr", "unknown");
                     dark = !dark;
                     i++;
                 }
@@ -361,7 +364,7 @@ public class ViewFile {
             if (document != null) document.close();
         }
         prop.put("error", 0);
-        prop.put("error_url", wikiCode.replaceXMLEntities(url.toNormalform()));
+        prop.put("error_url", url.toNormalform());
         prop.put("error_hash", urlHash);
         prop.put("error_wordCount", Integer.toString(wordCount));
         prop.put("error_desc", descr);
@@ -382,10 +385,11 @@ public class ViewFile {
     }
     
     private static final String markup(String[] wordArray, String message) {
-        message = wikiCode.replaceHTML(message);
+        message = wikiCode.replaceXMLEntities(message);
         if (wordArray != null)
             for (int j = 0; j < wordArray.length; j++) {
                 String currentWord = wordArray[j].trim();
+                // TODO: replace upper-/lowercase words as well
                 message = message.replaceAll(currentWord,
                                 "<span class=\"" + HIGHLIGHT_CSS + ((j % MAX_HIGHLIGHTS) + 1) + "\">" +
                                 currentWord + 
@@ -403,8 +407,8 @@ public class ViewFile {
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
             prop.put("viewMode_links_" + c + "_type", name);
-            prop.put("viewMode_links_" + c + "_text", markup(wordArray, (String) entry.getValue()));
-            prop.put("viewMode_links_" + c + "_link", "<a href=\"" + (String) entry.getKey() + "\">" + markup(wordArray, (String) entry.getKey()) + "</a>");
+            prop.putASIS("viewMode_links_" + c + "_text", markup(wordArray, (String) entry.getValue()));
+            prop.putASIS("viewMode_links_" + c + "_link", markup(wordArray, (String) entry.getKey()));
             prop.put("viewMode_links_" + c + "_attr", "");
             dark = !dark;
             c++;
