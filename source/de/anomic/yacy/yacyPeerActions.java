@@ -49,7 +49,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -323,11 +322,7 @@ public class yacyPeerActions {
         if (disconnectedSeed == null) {
             dtimeUTC0 = 0; // never disconnected: virtually disconnected maximum time ago
         } else {
-            try {
-                dtimeUTC0 = yacyCore.parseUniversalDate(disconnectedSeed.get("disconnected", "20040101000000")).getTime() - seed.getUTCDiff();
-            } catch (java.text.ParseException e) {
-                dtimeUTC0 = 0;
-            }
+            dtimeUTC0 = Long.parseLong(disconnectedSeed.get("dct", "0"));
         }
 
         if (direct) {
@@ -410,7 +405,7 @@ public class yacyPeerActions {
 	    yacyCore.log.logFine("connect: no contact to a " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN) + " peer '" + seed.getName() + "' at " + seed.getAddress());
         synchronized (seedDB) {
 	        if (!seedDB.hasDisconnected(seed.hash)) { disconnects++; }
-            seed.put("disconnected", yacyCore.universalDateShortString(new Date()));
+            seed.put("dct", Long.toString(System.currentTimeMillis()));
 	        seedDB.addDisconnected(seed); // update info
         }
     }
