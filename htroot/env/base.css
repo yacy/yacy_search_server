@@ -107,7 +107,7 @@ legend {
 
 /* --------------- global classes --------------------- */
 
-*.tt {
+tt, *.tt {
   font-family:Courier,Terminal,sans-serif;
 }
 
