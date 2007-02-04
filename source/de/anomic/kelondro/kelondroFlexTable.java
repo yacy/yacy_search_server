@@ -240,7 +240,14 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         }
 
         public Object next() {
-            kelondroRow.Entry idxEntry = (kelondroRow.Entry) indexIterator.next();
+            kelondroRow.Entry idxEntry = null;
+            while ((indexIterator.hasNext()) && (idxEntry == null)) {
+                idxEntry = (kelondroRow.Entry) indexIterator.next();
+            }
+            if (idxEntry == null) {
+                serverLog.logSevere("kelondroFlexTable.rowIterator: " + tablename, "indexIterator returned null");
+                return null;
+            }
             int idx = (int) idxEntry.getColLong(1);
             try {
                 return get(idx);

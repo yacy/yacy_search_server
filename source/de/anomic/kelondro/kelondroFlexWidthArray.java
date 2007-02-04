@@ -36,9 +36,11 @@ public class kelondroFlexWidthArray implements kelondroArray {
 
     protected kelondroFixedWidthArray[] col;
     protected kelondroRow rowdef;
+    protected String tablename;
     
     public kelondroFlexWidthArray(File path, String tablename, kelondroRow rowdef) throws IOException {
         this.rowdef = rowdef;
+        this.tablename = tablename;
         
         // initialize columns
         col = new kelondroFixedWidthArray[rowdef.columns()];
