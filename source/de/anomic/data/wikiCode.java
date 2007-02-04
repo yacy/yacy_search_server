@@ -1061,6 +1061,8 @@ public class wikiCode {
                 }
             }
         }
+        //recursion if the pattern can still be found in the line
+        if(input.indexOf(pat) >= 0) {input = pairReplace(input, pat, repl1, repl2);}
         return input;
     }
 
