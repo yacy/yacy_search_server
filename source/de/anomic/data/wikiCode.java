@@ -346,8 +346,7 @@ public class wikiCode {
         "\u00FC","&uuml;",
         "\u00FD","&yacute;",
         "\u00FE","&thorn;",
-        "\u00FF","&yuml;",
-        "(C)","&copy;"
+        "\u00FF","&yuml;"
     };
 
     /** This method processes tables in the wiki code.
