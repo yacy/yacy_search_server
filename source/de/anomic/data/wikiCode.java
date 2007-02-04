@@ -979,7 +979,7 @@ public class wikiCode {
                     level3++;
                     String temp = element.substring(1);
                     element=level1+"."+level2+"."+level3+" "+temp;
-                    directory = directory + "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                    directory = directory + "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br />\n";
                 }
                 else if (element.startsWith("2")){
                     if(level==1){
@@ -992,7 +992,7 @@ public class wikiCode {
                     level2++;
                     String temp = element.substring(1);
                     element=level1+"."+level2+" "+temp;
-                    directory = directory + "&nbsp;&nbsp;<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                    directory = directory + "&nbsp;&nbsp;<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br />\n";
                 }
                 else if (element.startsWith("1")) {
                     if (level>1) {
@@ -1003,7 +1003,7 @@ public class wikiCode {
                     level1++;
                     String temp = element.substring(1);
                     element=level1+". "+temp;
-                    directory = directory + "<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br>\n";
+                    directory = directory + "<a href=\"#"+temp.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","")+anchorext+"\" class=\"WikiTOC\">"+element+"</a><br />\n";
                 }
                 anchorext="";
             }
@@ -1098,8 +1098,8 @@ public class wikiCode {
             result = processTable(result, switchboard);
 
             // format lines
-            if (result.startsWith(" ")) result = "<tt>" + result + "</tt>";
-            if (result.startsWith("----")) result = "<hr>";
+            if (result.startsWith(" ")) result = "<tt>" + result.substring(1) + "</tt>";
+            if (result.startsWith("----")) result = "<hr />";
 
             // citings contributed by [MN]
             if(result.startsWith(":")){
@@ -1134,6 +1134,6 @@ public class wikiCode {
         if (!preformatted) replacedHTML = false;
         replacedCharacters = false;
         if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)||(table)||(cellprocessing)) return result;
-        return result + "<br>";
+        return result + "<br />";
     }
 }
