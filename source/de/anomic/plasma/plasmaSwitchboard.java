@@ -131,6 +131,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
+import de.anomic.http.httpd;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryNew;
@@ -148,7 +149,6 @@ import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.urlPattern.defaultURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
@@ -632,12 +632,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      */
     public static final String CRAWLER_THREADS_ACTIVE_MAX       = "crawler.MaxActiveThreads";
     
-    /**
-     * <p><code>public static final String <strong>ADMIN_ACCOUNT_B64MD5</strong> = "adminAccountBase64MD5"</code></p>
-     * <p>Name of the setting holding the authentification hash for the static <code>admin</code>-account. It is calculated
-     * by first encoding <code>username:password</code> as Base64 and hashing it using {@link serverCodings#encodeMD5Hex(String)}.</p>
-     */
-    public static final String ADMIN_ACCOUNT_B64MD5             = "adminAccountBase64MD5";
     public static final String OWN_SEED_FILE                    = "yacyOwnSeedFile";
     /**
      * <p><code>public static final String <strong>STORAGE_PEER_HASH</strong> = "storagePeerHash"</code></p>
@@ -2888,7 +2882,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
     public int adminAuthenticated(httpHeader header) {
         
-        String adminAccountBase64MD5 = getConfig("adminAccountBase64MD5", "");
+        String adminAccountBase64MD5 = getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
         String authorization = ((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
         
         // security check against too long authorization strings
@@ -2901,17 +2895,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (userDB.hasAdminRight((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"), ((String) header.get("CLIENTIP", "")), header.getHeaderCookies())) return 4; //return, because 4=max
 
         // authorization with admin keyword in configuration
-        return staticAdminAuthenticated(authorization);
-    }
-    
-    public int staticAdminAuthenticated(String authorization){
-        if(authorization==null) return 1;
-        //if (authorization.length() < 6) return 1; // no authentication information given
-        //authorization = authorization.trim().substring(6);
-        String adminAccountBase64MD5 = getConfig(ADMIN_ACCOUNT_B64MD5, "");
-        if (adminAccountBase64MD5.length() == 0) return 2; // no passwrd stored
-        if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
-        return 0;
+        return httpd.staticAdminAuthenticated(authorization, this);
     }
     
     public boolean verifyAuthentication(httpHeader header, boolean strict) {

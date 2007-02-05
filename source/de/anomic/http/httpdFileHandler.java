@@ -137,12 +137,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     
     private MessageDigest md5Digest = null;
     
-    /**
-     * Template Cache
-     * @param switchboard
-     */
-    private static final HashMap templateCache;
-    
+
+    private static final HashMap templateCache;    
     private static final HashMap templateMethodCache;
     
     public static boolean useTemplateCache = false;
@@ -319,7 +315,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
             // check permission/granted access
             String authorization = (String) requestHeader.get(httpHeader.AUTHORIZATION);
-            String adminAccountBase64MD5 = switchboard.getConfig("adminAccountBase64MD5", "");
+            String adminAccountBase64MD5 = switchboard.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
             
             int pos = path.lastIndexOf(".");
             
@@ -330,7 +326,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     //Authentication successful. remove brute-force flag
                     serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
                 //static
-                }else if(authorization != null && sb.staticAdminAuthenticated(authorization.trim().substring(6))==4){
+                }else if(authorization != null && httpd.staticAdminAuthenticated(authorization.trim().substring(6), switchboard)==4){
                     //Authentication successful. remove brute-force flag
                     serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
                 //no auth

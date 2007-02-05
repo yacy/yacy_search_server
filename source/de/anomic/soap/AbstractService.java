@@ -67,6 +67,7 @@ import org.w3c.dom.Element;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpTemplate;
+import de.anomic.http.httpd;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -235,7 +236,7 @@ public abstract class AbstractService {
             // the base64 encoded and md5 hashed authentication string 
             String authString = authElement.getValue();
             
-            String adminAccountBase64MD5 = this.switchboard.getConfig("adminAccountBase64MD5","");
+            String adminAccountBase64MD5 = this.switchboard.getConfig(httpd.ADMIN_ACCOUNT_B64MD5,"");
             if (authString.length() == 0) {
                 throw new AxisFault("log-in required");
             } else if (!(adminAccountBase64MD5.equals(authString))) {

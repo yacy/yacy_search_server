@@ -15,6 +15,8 @@ import org.apache.axis.MessageContext;
 import org.apache.axis.client.Stub;
 import org.apache.axis.transport.http.HTTPConstants;
 
+import de.anomic.http.httpd;
+
 public abstract class AbstractServiceTest extends TestCase {
 	protected static final String SOAP_HEADER_NAMESPACE = "http://http.anomic.de/header";
 	protected static final String SOAP_HEADER_AUTHORIZATION = "Authorization";
@@ -47,7 +49,7 @@ public abstract class AbstractServiceTest extends TestCase {
 			fileInput.close();  
 			
 			// getting admin account auth string
-			authString = peerProperties.getProperty("adminAccountBase64MD5");
+			authString = peerProperties.getProperty(httpd.ADMIN_ACCOUNT_B64MD5);
 			if (authString == null) throw new Exception("Unable to find authentication information.");
 			
 			peerPort = peerProperties.getProperty("port");

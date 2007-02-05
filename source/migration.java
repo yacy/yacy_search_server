@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.data.listManager;
+import de.anomic.http.httpd;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
@@ -187,7 +188,7 @@ public class migration {
             sb.setConfig("serverAccount", "");
         }
         if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
-            sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(acc)));
+            sb.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, de.anomic.server.serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(acc)));
             sb.setConfig("adminAccount", "");
         }
     
@@ -201,7 +202,7 @@ public class migration {
             sb.setConfig("serverAccountBase64", "");
         }
         if ((acc = sb.getConfig("adminAccountBase64", "")).length() > 0) {
-            sb.setConfig("adminAccountBase64MD5", de.anomic.server.serverCodings.encodeMD5Hex(acc));
+            sb.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, de.anomic.server.serverCodings.encodeMD5Hex(acc));
             sb.setConfig("adminAccountBase64", "");
         }
         if ((acc = sb.getConfig("uploadAccountBase64", "")).length() > 0) {

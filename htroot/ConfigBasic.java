@@ -53,6 +53,7 @@ import java.util.regex.Pattern;
 
 import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -142,7 +143,7 @@ public class ConfigBasic {
         // admin password
         if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
             // check passed. set account:
-            env.setConfig("adminAccountBase64MD5", serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
+            env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("adminAccount", "");
             // authenticate immediately
             //prop.put("AUTHENTICATE", "admin log-in"); 
@@ -191,7 +192,7 @@ public class ConfigBasic {
         }
         
         // check if values are proper
-        boolean properPW = (env.getConfig("adminAccount", "").length() == 0) && (env.getConfig("adminAccountBase64MD5", "").length() > 0);
+        boolean properPW = (env.getConfig("adminAccount", "").length() == 0) && (env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
         boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
         boolean properPort = (yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal());
         

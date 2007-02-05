@@ -56,7 +56,6 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -67,6 +66,7 @@ import java.util.StringTokenizer;
 
 import de.anomic.data.userDB;
 import de.anomic.data.wikiCode;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
@@ -89,6 +89,13 @@ import de.anomic.yacy.yacySeed;
  * a proxy servlet or a file server servlet 
  */
 public final class httpd implements serverHandler {
+    
+    /**
+     * <p><code>public static final String <strong>ADMIN_ACCOUNT_B64MD5</strong> = "adminAccountBase64MD5"</code></p>
+     * <p>Name of the setting holding the authentification hash for the static <code>admin</code>-account. It is calculated
+     * by first encoding <code>username:password</code> as Base64 and hashing it using {@link serverCodings#encodeMD5Hex(String)}.</p>
+     */
+    public static final String ADMIN_ACCOUNT_B64MD5 = "adminAccountBase64MD5";
     
     public static final int ERRORCASE_MESSAGE = 4;
     public static final int ERRORCASE_FILE = 5;
@@ -287,6 +294,16 @@ public final class httpd implements serverHandler {
         return persistent;
     }
     
+    public static int staticAdminAuthenticated(String authorization, serverSwitch sw){
+        if(authorization==null) return 1;
+        //if (authorization.length() < 6) return 1; // no authentication information given
+        //authorization = authorization.trim().substring(6);
+        String adminAccountBase64MD5 = sw.getConfig(ADMIN_ACCOUNT_B64MD5, "");
+        if (adminAccountBase64MD5.length() == 0) return 2; // no passwrd stored
+        if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
+        return 0;
+    }
+    
     private boolean handleServerAuthentication(httpHeader header) throws IOException {
         // getting the http version that is used by the client
         String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");        
@@ -319,6 +336,24 @@ public final class httpd implements serverHandler {
         return true;
     }
     
+    private boolean handleYaCyHopAuthentication(httpHeader header) throws IOException {
+        // proxy hops must identify with 3 criteria:
+        
+        // the access path must be into the yacy protocol path; it must start with 'yacy'
+        if (!(this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) return false;
+
+        // the accessing client must identify with user:password, where
+        // user = addressed peer name
+        // pw = addressed peer hash (b64-hash)
+        String auth = (String) header.get(httpHeader.PROXY_AUTHORIZATION,"xxxxxx");
+        String test = kelondroBase64Order.standardCoder.encodeString(yacyCore.seedDB.mySeed.getName() + ":" + yacyCore.seedDB.mySeed.hash);
+        if (!test.equals(auth.trim().substring(6))) return false;
+        
+        // the accessing client must use a yacy user-agent
+        
+        return true;
+    }
+
     private boolean handleProxyAuthentication(httpHeader header) throws IOException {
         // getting the http version that is used by the client
         String httpVersion = this.prop.getProperty("HTTP", "HTTP/0.9");            
@@ -456,8 +491,8 @@ public final class httpd implements serverHandler {
                 }
             } else {
                 // pass to proxy
-                if (((this.allowYaCyHop) && (this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) ||
-                    ((this.allowProxy) && (this.handleProxyAuthentication(header)))) {
+                if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
+                    ((this.allowProxy) && (handleProxyAuthentication(header)))) {
                     proxyHandler.doGet(this.prop, header, this.session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
@@ -529,8 +564,8 @@ public final class httpd implements serverHandler {
                 }
             } else {
                 // pass to proxy
-                if (((this.allowYaCyHop) && (this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) ||
-                    ((this.allowProxy) && (this.handleProxyAuthentication(header)))) {
+                if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
+                    ((this.allowProxy) && (handleProxyAuthentication(header)))) {
                     proxyHandler.doHead(prop, header, this.session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
@@ -611,8 +646,8 @@ public final class httpd implements serverHandler {
                 }
             } else {
                 // pass to proxy
-                if (((this.allowYaCyHop) && (this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) ||
-                    ((this.allowProxy) && (this.handleProxyAuthentication(header)))) {
+                if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
+                    ((this.allowProxy) && (handleProxyAuthentication(header)))) {
                     proxyHandler.doPost(prop, header, this.session.out, this.session.in);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
@@ -678,7 +713,7 @@ public final class httpd implements serverHandler {
         }
         
         // pass to proxy
-        if (((this.allowYaCyHop) && (this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) ||
+        if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
             ((this.allowProxy) && (this.handleProxyAuthentication(header)))) {
             proxyHandler.doConnect(prop, header, this.session.in, this.session.out);
         } else {

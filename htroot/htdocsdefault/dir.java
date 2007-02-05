@@ -58,6 +58,7 @@ import java.util.Iterator;
 
 import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpd;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -113,7 +114,7 @@ public class dir {
         prop.put("port", serverCore.getPortNr(env.getConfig("port","8080")));
 
         // generate upload/download authorizations
-        final String adminAccountBase64MD5    = switchboard.getConfig("adminAccountBase64MD5", "");
+        final String adminAccountBase64MD5    = switchboard.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
         final String uploadAccountBase64MD5   = switchboard.getConfig("uploadAccountBase64MD5", "");
         final String downloadAccountBase64MD5 = switchboard.getConfig("downloadAccountBase64MD5", "");
 

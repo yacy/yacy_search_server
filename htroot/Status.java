@@ -50,6 +50,7 @@ import java.text.DecimalFormat;
 import java.util.Date;
 
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpd;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -137,7 +138,7 @@ public class Status {
         }
 
         // password protection
-        if (env.getConfig("adminAccountBase64MD5", "").length() == 0) {
+        if (env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
             prop.put("protection", 0); // not protected
         } else {
             prop.put("protection", 1); // protected
