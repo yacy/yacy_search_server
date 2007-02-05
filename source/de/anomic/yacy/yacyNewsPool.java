@@ -304,8 +304,19 @@ public class yacyNewsPool {
     private boolean moveOff(yacyNewsQueue fromqueue, yacyNewsQueue toqueue, String id) throws IOException {
         // called if a published news shall be removed
         yacyNewsRecord record = fromqueue.remove(id);
-        if (record == null) return false;
+        if (record == null) {
+            System.out.println("DEBUG: record == null");
+            return false;
+        }
         if (toqueue != null) toqueue.push(record);
+        else if ((incomingNews.get(id) == null) && (processedNews.get(id) == null) && (outgoingNews.get(id) == null) && (publishedNews.get(id) == null)){
+            newsDB.remove(id);
+            System.out.println("DEBUG: News-ID " + id + " deleted");
+        }
+        if (incomingNews.get(id) != null) System.out.println("DEBUG: News-ID " + id + " in incomingNews");
+        if (processedNews.get(id) != null) System.out.println("DEBUG: News-ID " + id + " in processedNews");
+        if (outgoingNews.get(id) != null) System.out.println("DEBUG: News-ID " + id + " in outgoingNews");
+        if (publishedNews.get(id) != null) System.out.println("DEBUG: News-ID " + id + " in publishedNews");
         return true;
     }
     
