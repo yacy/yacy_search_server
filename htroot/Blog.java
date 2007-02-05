@@ -55,7 +55,6 @@ import java.util.Iterator;
 
 import de.anomic.data.blogBoard;
 import de.anomic.data.userDB;
-import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -171,9 +170,9 @@ public class Blog {
 			if(hasRights) {
 				try {
 			        prop.put("mode", 1); //edit
-			        prop.put("mode_author", wikiCode.replaceHTML(new String(page.author(),"UTF-8")));
+			        prop.put("mode_author", new String(page.author(),"UTF-8"));
 			        prop.put("mode_pageid", page.key());
-			        prop.put("mode_subject", wikiCode.replaceHTML(new String(page.subject(), "UTF-8")));
+			        prop.put("mode_subject", new String(page.subject(), "UTF-8"));
 			        prop.put("mode_page-code", new String(page.page(), "UTF-8").replaceAll("<","&lt;").replaceAll(">","&gt;"));
 			    } catch (UnsupportedEncodingException e) {}
 			}
@@ -184,17 +183,16 @@ public class Blog {
 		else if(post.containsKey("preview")) {
 			//preview the page
 			if(hasRights) {
-				wikiCode wikiTransformer=new wikiCode(switchboard);
 	            prop.put("mode", 2);//preview
 	            prop.put("mode_pageid", pagename);
 	            try {
-					prop.put("mode_author", wikiCode.replaceHTML(new String(author, "UTF-8")));
+					prop.put("mode_author", new String(author, "UTF-8"));
 				} catch (UnsupportedEncodingException e) {
-					prop.put("mode_author", wikiCode.replaceHTML(new String(author)));
+					prop.put("mode_author", new String(author));
 				}
-	            prop.put("mode_subject", wikiCode.replaceHTML(post.get("subject","")));
+	            prop.put("mode_subject", post.get("subject",""));
 	            prop.put("mode_date", dateString(new Date()));
-	            prop.putASIS("mode_page", wikiTransformer.transform(post.get("content", "")));
+	            prop.putWiki("mode_page", post.get("content", ""));
 	            prop.put("mode_page-code", post.get("content", "").replaceAll("<","&lt;").replaceAll(">","&gt;"));
 			}
 			else prop.put("mode",3); //access denied (no rights)
@@ -204,14 +202,14 @@ public class Blog {
 				prop.put("mode",4);
 				prop.put("mode_pageid",pagename);
 				try {
-					prop.put("mode_author",wikiCode.replaceHTML(new String(page.author(), "UTF-8")));
+					prop.put("mode_author",new String(page.author(), "UTF-8"));
 				} catch (UnsupportedEncodingException e) {
-					prop.put("mode_author",wikiCode.replaceHTML(new String(page.author())));
+					prop.put("mode_author",new String(page.author()));
 				}
 				try {
-					prop.put("mode_subject",wikiCode.replaceHTML(new String(page.subject(),"UTF-8")));
+					prop.put("mode_subject",new String(page.subject(),"UTF-8"));
 				} catch (UnsupportedEncodingException e) {
-					prop.put("mode_subject",wikiCode.replaceHTML(new String(page.subject())));
+					prop.put("mode_subject",new String(page.subject()));
 				}
 			}
 			else prop.put("mode",3); //access denied (no rights)
@@ -230,7 +228,6 @@ public class Blog {
 			}
 		}
 		else {
-	        wikiCode wikiTransformer=new wikiCode(switchboard);
 		    // show blog-entry/entries
 	        prop.put("mode", 0); //viewing
 	        if(pagename.equals("blog_default")) {
@@ -256,9 +253,9 @@ public class Blog {
 	        			entry = switchboard.blogDB.read(pageid);
 	        			prop.put("mode_entries_"+count+"_pageid",entry.key());
 	        			if(!xml) {
-	        				prop.put("mode_entries_"+count+"_subject", wikiCode.replaceHTML(new String(entry.subject(),"UTF-8")));
-		        			prop.put("mode_entries_"+count+"_author", wikiCode.replaceHTML(new String(entry.author(),"UTF-8")));
-		        			prop.putASIS("mode_entries_"+count+"_page", wikiTransformer.transform(entry.page()));
+	        				prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
+		        			prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
+		        			prop.putWiki("mode_entries_"+count+"_page", entry.page());
 	        			}
 	        			else {
 	        				prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
@@ -291,17 +288,17 @@ public class Blog {
 	        	prop.put("mode_entries",1);
 	        	prop.put("mode_entries_0_pageid", page.key());
 	        	try {
-					prop.put("mode_entries_0_subject", wikiCode.replaceHTML(new String(page.subject(),"UTF-8")));
+					prop.put("mode_entries_0_subject", new String(page.subject(),"UTF-8"));
 				} catch (UnsupportedEncodingException e) {
-					prop.put("mode_entries_0_subject", wikiCode.replaceHTML(new String(page.subject())));
+					prop.put("mode_entries_0_subject", new String(page.subject()));
 				}
 	        	try {
-					prop.put("mode_entries_0_author", wikiCode.replaceHTML(new String(page.author(),"UTF-8")));
+					prop.put("mode_entries_0_author", new String(page.author(),"UTF-8"));
 				} catch (UnsupportedEncodingException e) {
-					prop.put("mode_entries_0_author", wikiCode.replaceHTML(new String(page.author())));
+					prop.put("mode_entries_0_author", new String(page.author()));
 				}
 	        	prop.put("mode_entries_0_date", dateString(page.date()));
-	        	prop.putASIS("mode_entries_0_page", wikiTransformer.transform(page.page()));
+	        	prop.putWiki("mode_entries_0_page", page.page());
 	        	if(hasRights) {
     				prop.put("mode_entries_0_admin", 1);
     				prop.put("mode_entries_0_admin_pageid",page.key());
