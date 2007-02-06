@@ -174,7 +174,7 @@ public class Diff {
         StringBuffer sb = new StringBuffer(this.parts.size() * 20);
         for (int j=0; j<this.parts.size(); j++)
             sb.append(((Part)this.parts.get(j)).toString()).append("\n");
-        return sb.toString();
+        return new String(sb);
     }
     
     /**
@@ -246,6 +246,6 @@ public class Diff {
             }
             sb.append("</p>");
         }
-        return sb.toString();
+        return new String(sb);
     }
 }

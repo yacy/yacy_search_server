@@ -202,9 +202,9 @@ public class kelondroAttrSeq {
             sb.append((char) 13); sb.append((char) 10);
         }
         if (out.toString().endsWith(".gz")) {
-            serverFileUtils.writeAndGZip(sb.toString().getBytes(), out);
+            serverFileUtils.writeAndGZip((new String(sb)).getBytes(), out);
         } else {
-            serverFileUtils.write(sb.toString().getBytes(), out);
+            serverFileUtils.write((new String(sb)).getBytes(), out);
         }
     }
     
@@ -352,7 +352,7 @@ public class kelondroAttrSeq {
                     sb.append(",<"); sb.append(seq_names[i]); sb.append('-'); sb.append(Integer.toString(seq_len[i])); sb.append('>');
                 }
             }
-            return sb.toString();
+            return new String(sb);
         }
     }
     
@@ -444,7 +444,7 @@ public class kelondroAttrSeq {
                 }
                 */
             }
-            return sb.toString();
+            return new String(sb);
         }
     }
     

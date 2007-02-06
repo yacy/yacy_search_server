@@ -558,7 +558,7 @@ public final class userDB {
                 str.append(this.mem.toString());
             } 
             
-            return str.toString();
+            return new String(str);
         }    
         
     }

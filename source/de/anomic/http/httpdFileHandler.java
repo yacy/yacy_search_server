@@ -753,7 +753,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 //tp is from the servlet, fis is the content-only from the servlet
                                 //this resolvs templates in both header and content
                                 o = new serverByteBuffer();
-                                fis=new ByteArrayInputStream(content.toString().getBytes());
+                                fis=new ByteArrayInputStream((new String(content)).getBytes());
                                 httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
                                 content_s=o.toString();
                                 o = new serverByteBuffer();
@@ -947,7 +947,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 if (!conProp.containsKey(httpHeader.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     // sending back an error message to the client 
                     // if we have not already send an http header
-                    httpd.sendRespondError(conProp,out, 4, httpStatusCode, httpStatusText, errorMessage.toString(),errorExc);
+                    httpd.sendRespondError(conProp,out, 4, httpStatusCode, httpStatusText, new String(errorMessage),errorExc);
                 } else {
                     // otherwise we close the connection
                     this.forceConnectionClose();
@@ -955,7 +955,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 
                 // if it is an unexpected error we log it 
                 if (httpStatusCode == 500) {
-                    this.theLogger.logWarning(errorMessage.toString(),e);
+                    this.theLogger.logWarning(new String(errorMessage),e);
                 }
                 
             } catch (Exception ee) {

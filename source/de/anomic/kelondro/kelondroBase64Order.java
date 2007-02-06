@@ -138,7 +138,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
             StringBuffer s = new StringBuffer(length);
             s.setLength(length);
             while (length > 0) s.setCharAt(--length, alpha[63]);
-            return s.toString();
+            return new String(s);
         }
         return encodeLong(c, length);
     }
@@ -150,7 +150,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
             s.setCharAt(--length, alpha[(byte) (c & 0x3F)]);
             c >>= 6;
         }
-        return s.toString();
+        return new String(s);
     }
 
     public final void encodeLong(long c, byte[] b, int offset, int length) {
@@ -208,7 +208,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         if (in.length % 3 != 0) out = out.append((in.length % 3 == 2) ? encodeLong((((0XffL & (long) in[pos]) << 8) + (0XffL & (long) in[pos + 1])) << 8, 4).substring(0, 3) : encodeLong((((0XffL & (long) in[pos])) << 8) << 8, 4).substring(0, 2));
         if (rfc1113compliant) while (out.length() % 4 > 0) out.append("=");
         // return result
-        return out.toString();
+        return new String(out);
     }
 
     public final String decodeString(String in) {

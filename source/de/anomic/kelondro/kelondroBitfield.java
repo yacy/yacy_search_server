@@ -101,7 +101,7 @@ public class kelondroBitfield implements Cloneable {
     public String toString() {
         StringBuffer sb = new StringBuffer(length());
         for (int i = length() - 1; i >= 0; i--) sb.append((this.get(i)) ? '1' : '0');
-        return sb.toString();
+        return new String(sb);
     }
     
     public boolean equals(kelondroBitfield x) {

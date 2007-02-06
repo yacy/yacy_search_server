@@ -129,7 +129,7 @@ public final class httpRemoteProxyConfig {
         .append(this.remoteProxyNoProxy);
         
         
-        return toStrBuf.toString();
+        return new String(toStrBuf);
     }
     
     public static httpRemoteProxyConfig init(

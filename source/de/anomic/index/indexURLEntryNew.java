@@ -363,7 +363,7 @@ public class indexURLEntryNew implements indexURLEntry {
         core.append(",snippet=").append(crypt.simpleEncode(snippet));
         core.append("}");
 
-        return core.toString();
+        return new String(core);
         //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
     }
 
@@ -379,7 +379,7 @@ public class indexURLEntryNew implements indexURLEntry {
         core.insert(0, "{");
         core.append("}");
 
-        return core.toString();
+        return new String(core);
         //return "{" + core + "}";
     }
 

@@ -241,7 +241,7 @@ public final class search {
             }
             if (partitions > 0) sb.requestedQueries = sb.requestedQueries + 1d / (double) partitions; // increase query counter
         }
-        prop.putASIS("indexabstract", indexabstract.toString());
+        prop.putASIS("indexabstract", new String(indexabstract));
         
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
@@ -298,7 +298,7 @@ public final class search {
             StringBuffer refstr = new StringBuffer();
             for (int j = 0; j < ws.length; j++)
                 refstr.append(",").append((String) ws[j]);
-            prop.putASIS("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
+            prop.putASIS("references", (refstr.length() > 0) ? refstr.substring(1) : new String(refstr));
         }
         
         // add information about forward peers

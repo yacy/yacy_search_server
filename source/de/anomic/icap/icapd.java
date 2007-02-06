@@ -229,7 +229,7 @@ public class icapd implements serverHandler {
                 // icapResHeader.put(icapHeader.CONNECTION, "close");    
                 
                 StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",404,null);            
-                out.write(headerStringBuffer.toString().getBytes());
+                out.write((new String(headerStringBuffer)).getBytes());
                 out.flush();    
             }
             
@@ -307,7 +307,7 @@ public class icapd implements serverHandler {
                 // resHeader.put(icapHeader.CONNECTION, "close");    
                 
                 StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",204,null);            
-                out.write(headerStringBuffer.toString().getBytes());
+                out.write((new String(headerStringBuffer)).getBytes());
                 out.flush();
             } else {
                 icapResHeader.put(icapHeader.ENCAPSULATED,reqHeader.get(icapHeader.ENCAPSULATED));
@@ -315,7 +315,7 @@ public class icapd implements serverHandler {
                 // icapResHeader.put(icapHeader.CONNECTION, "close");    
                 
                 StringBuffer headerStringBuffer = icapResHeader.toHeaderString("ICAP/1.0",503,null);            
-                out.write(headerStringBuffer.toString().getBytes());
+                out.write((new String(headerStringBuffer)).getBytes());
                 out.flush();                
             }
             

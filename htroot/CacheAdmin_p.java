@@ -166,7 +166,7 @@ public class CacheAdmin_p {
                     if (sentences != null)
                     	while (sentences.hasNext()) {
                     		prop.put("info_type_lines_" + i + "_line",
-                    				de.anomic.data.wikiCode.replaceXMLEntities(((StringBuffer) sentences.next()).toString().replaceAll("\n", "").trim()));
+                    				de.anomic.data.wikiCode.replaceXMLEntities((new String((StringBuffer) sentences.next())).replaceAll("\n", "").trim()));
 	                        i++;
 	                    }
                     prop.put("info_type_lines", i);

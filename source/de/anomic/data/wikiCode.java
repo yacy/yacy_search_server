@@ -111,7 +111,7 @@ public class wikiCode {
                     out.append(transformLine(line, switchboard)).append(
                             serverCore.crlfString);
                 }
-                return directory()+out.toString();
+                return directory() + new String(out);
             } catch (UnsupportedEncodingException e1) {
                 // can not happen
                 return null;

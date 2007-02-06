@@ -1546,7 +1546,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             this.userAgentStr.append(browserUserAgent);
         }
         
-        return this.userAgentStr.toString();
+        return new String(this.userAgentStr);
     }
     
     private void setViaHeader(httpHeader header, String httpVer) {
@@ -1564,7 +1564,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         .append("(YaCy ").append(switchboard.getConfig("vString", "0.0")).append(")");
         
         // storing header back
-        header.put(httpHeader.VIA, viaValue.toString());                 
+        header.put(httpHeader.VIA, new String(viaValue));                 
     }
     
     /**
@@ -1652,7 +1652,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         this.logMessage.append(mime);        
         
         // sending the logging message to the logger
-        this.proxyLog.logFine(this.logMessage.toString());
+        this.proxyLog.logFine(new String(this.logMessage));
     }
     
 }

@@ -215,7 +215,7 @@ public final class transferRWI {
             }
         }
 
-        prop.putASIS("unknownURL", unknownURLs.toString());
+        prop.putASIS("unknownURL", new String(unknownURLs));
         prop.putASIS("result", result);
         prop.putASIS("pause", Integer.toString(pause));
 

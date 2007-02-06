@@ -161,7 +161,7 @@ public class listManager {
             .append(list[i])
             .append(serverCore.crlfString);
         }
-        return writeList(listFile, out.toString()); //(File, String)
+        return writeList(listFile, new String(out)); //(File, String)
     }
 
     public static String getListString(String filename, boolean withcomments) {        
@@ -192,7 +192,7 @@ public class listManager {
             if (br!=null) try { br.close(); } catch (Exception e) {}
         }
 
-        return temp.toString();
+        return new String(temp);
     }
 
     // get a Directory Listing as a String Array
@@ -308,7 +308,7 @@ public class listManager {
                 }
             }
         }
-        return ret.toString();
+        return new String(ret);
     }
     public static HashSet string2hashset(String string){
         HashSet ret=new HashSet();

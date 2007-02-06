@@ -1801,7 +1801,7 @@ do upload
             toStringBuffer.append((this.status == null) ? "Status: Unknown" : "Status: " + this.status)
             .append(" | Headers: ")
             .append((this.responseHeader == null) ? "none" : this.responseHeader.toString());
-            return toStringBuffer.toString();
+            return new String(toStringBuffer);
         }
 
         /**

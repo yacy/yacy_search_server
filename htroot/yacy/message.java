@@ -211,7 +211,7 @@ public final class message {
 
             Process process=Runtime.getRuntime().exec(sendMail);
             PrintWriter email = new PrintWriter(process.getOutputStream());
-            email.print(emailTxt.toString());
+            email.print(new String(emailTxt));
             email.close();                        
         } catch (Exception e) {
             yacyCore.log.logWarning("message: message forwarding via email failed. ",e);
