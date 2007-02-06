@@ -312,6 +312,14 @@ public class yacySeed {
         dna.put(yacySeed.URL_IN, Integer.toString(Integer.parseInt(v) + count));
     }
 
+    // 12 * 6 bit = 72 bit = 24 characters octal-hash
+    // octal hashes are used for cache-dumps that are DHT-ready
+    // cause: the natural order of octal hashes are the same as the b64-order of b64Hashes
+    // a hexhash cannot be used in such cases, and b64Hashes are not appropriate for file names
+    public static String b64Hash2octalHash(String b64Hash) {
+        return serverCodings.encodeOctal(kelondroBase64Order.enhancedCoder.decode(b64Hash));
+    }
+
     // 12 * 6 bit = 72 bit = 18 characters hex-hash
     public static String b64Hash2hexHash(String b64Hash) {
         // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.

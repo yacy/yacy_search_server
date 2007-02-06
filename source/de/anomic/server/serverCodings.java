@@ -67,47 +67,59 @@ public final class serverCodings {
         return s;
     }
     
+    public static String encodeOctal(byte[] in) {
+        if (in == null) return "";
+        StringBuffer result = new StringBuffer(in.length * 8 / 3);
+        for (int i = 0; i < in.length; i++) {
+            if ((0Xff & (int) in[i]) < 8) result.append('0');
+            result.append(Integer.toOctalString(0Xff & (int) in[i]));
+        }
+        return new String(result);
+    }
+    
     public static String encodeHex(byte[] in) {
-	if (in == null) return "";
-	String result = "";
-	for (int i = 0; i < in.length; i++)
-	    result = result + (((0Xff & (int) in[i]) < 16) ? "0" : "") + Integer.toHexString(0Xff & (int) in[i]);
-	return result;
+        if (in == null) return "";
+        StringBuffer result = new StringBuffer(in.length * 2);
+        for (int i = 0; i < in.length; i++) {
+            if ((0Xff & (int) in[i]) < 16) result.append('0');
+            result.append(Integer.toHexString(0Xff & (int) in[i]));
+        }
+        return new String(result);
     }
 
     public static byte[] decodeHex(String hex) {
-	byte[] result = new byte[hex.length() / 2];
-	for (int i = 0; i < result.length; i++) {
-	    result[i] = (byte) (16 * Integer.parseInt(hex.charAt(i * 2) + "", 16) + Integer.parseInt(hex.charAt(i * 2 + 1) + "", 16));
-	}
-	return result;
+        byte[] result = new byte[hex.length() / 2];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = (byte) (16 * Integer.parseInt(hex.charAt(i * 2) + "", 16) + Integer.parseInt(hex.charAt(i * 2 + 1) + "", 16));
+        }
+        return result;
     }
     
     public static String encodeMD5Hex(String key) {
-	// generate a hex representation from the md5 of a string
-	return encodeHex(encodeMD5Raw(key));
+        // generate a hex representation from the md5 of a string
+        return encodeHex(encodeMD5Raw(key));
     }
 
     public static String encodeMD5Hex(File file) {
-	// generate a hex representation from the md5 of a file
-	return encodeHex(encodeMD5Raw(file));
+        // generate a hex representation from the md5 of a file
+        return encodeHex(encodeMD5Raw(file));
     }
 
     public static String encodeMD5Hex(byte[] b) {
-	// generate a hex representation from the md5 of a byte-array
-	return encodeHex(encodeMD5Raw(b));
+        // generate a hex representation from the md5 of a byte-array
+        return encodeHex(encodeMD5Raw(b));
     }
 
     public static byte[] encodeMD5Raw(String key) {
-	try {
-	    MessageDigest digest = MessageDigest.getInstance("MD5");
-	    digest.reset();
-	    digest.update(key.getBytes());
-	    return digest.digest();
-	} catch (java.security.NoSuchAlgorithmException e) {
-	    System.out.println("Internal Error at md5:" + e.getMessage());
-	}
-	return null;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            digest.reset();
+            digest.update(key.getBytes());
+            return digest.digest();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            System.out.println("Internal Error at md5:" + e.getMessage());
+        }
+        return null;
     }
 
     public static byte[] encodeMD5Raw(File file) {
@@ -181,7 +193,7 @@ public final class serverCodings {
     }
 
     public static String map2string(Map m, String separator, boolean braces) {
-        final StringBuffer buf = new StringBuffer(512);
+        final StringBuffer buf = new StringBuffer(20 * m.size());
         if (braces) { buf.append("{"); }
         final Iterator i = m.entrySet().iterator();
         while (i.hasNext()) {
@@ -192,7 +204,7 @@ public final class serverCodings {
         }
         if (buf.length() > 1) { buf.setLength(buf.length() - 1); } // remove last separator
         if (braces) { buf.append("}"); }
-        return buf.toString();
+        return new String(buf);
     }
 
     public static Set string2set(String string, String separator) {
@@ -220,7 +232,7 @@ public final class serverCodings {
             if (hasNext) buf.append(separator);
         }
         if (braces) buf.append("}");
-        return buf.toString();
+        return new String(buf);
     }
     
     public static void main(String[] s) {
