@@ -611,8 +611,7 @@ public final class yacySeedDB {
             while (e.hasMoreElements()) {
                 try {
                     seed = (yacySeed) e.nextElement();
-                    if (seed != null) {
-                        addressStr = seed.getAddress();
+                    if ((seed != null) && ((addressStr = seed.getAddress()) != null)) {
                         if ((pos = addressStr.indexOf(":"))!= -1) {
                             addressStr = addressStr.substring(0,pos);
                         }
