@@ -56,7 +56,7 @@ public class svnRevNrParser extends org.apache.tools.ant.Task{
             if (dataStr.startsWith("<?xml")) {
                 pattern = Pattern.compile("<entry[^>]*(?:name=\"\"[^>]*revision=\"(\\d*)\"|revision=\"(\\d*)\"[^>]*name=\"\")[^>]*/>"); 
             } else {                
-                pattern = Pattern.compile("\\s\\sdir\\s*(\\d*)\\s*svn(\\+ssh)?://");
+                pattern = Pattern.compile("\\s\\sdir\\s*(\\d*)\\s*(svn(\\+ssh)?|http(s?))://");
             }
 
             Matcher matcher = pattern.matcher(dataStr);
