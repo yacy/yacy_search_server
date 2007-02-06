@@ -350,8 +350,7 @@ public final class httpd implements serverHandler {
         if (!test.equals(auth.trim().substring(6))) return false;
         
         // the accessing client must use a yacy user-agent
-        
-        return true;
+        return (((String) header.get(httpHeader.USER_AGENT,"")).startsWith("yacy"));
     }
 
     private boolean handleProxyAuthentication(httpHeader header) throws IOException {
