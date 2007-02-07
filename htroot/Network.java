@@ -7,7 +7,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy: $
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,6 +51,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -294,9 +296,19 @@ public class Network {
                     int PPM;
                     double QPM;
                     long myValue=0, nextValue=0, prevValue=0, nextPPM=0, myPPM=0;
+                    Pattern peerSearchPattern = null;
+                    if(post.containsKey("search")) {
+                        peerSearchPattern = Pattern.compile(post.get("match", ""));
+                    }
                     while (e.hasMoreElements() && conCount < maxCount) {
                         seed = (yacySeed) e.nextElement();
                         if (seed != null) {
+                            if(post.containsKey("search")) {
+                                Matcher m = peerSearchPattern.matcher (seed.getName());
+                                if (!m.find ()) {
+                                    continue;
+                                }
+                            }
                             prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
@@ -452,7 +464,7 @@ public class Network {
                     prop.put("table_total", ((page == 1) && (iAmActive)) ? (size + 1) : size );
                     prop.put("table_complete", ((complete)? 1 : 0) );
                     
-                    if( (!post.containsKey("order") && !post.containsKey("sort")) && page==1){
+                    if( (!post.containsKey("order") && !post.containsKey("sort") && !post.containsKey("search")) && page==1){
                         int percent=(int)((float)(myValue-prevValue)/(float)(nextValue-prevValue)*100);
                         long indexdiff=nextValue-myValue;
                         long ppmdiff=myPPM-nextPPM;
@@ -476,6 +488,7 @@ public class Network {
             }
             prop.put("page", page);
             prop.put("table_page", page);
+            prop.put("table_searchpattern", post.get("match", ""));
             switch (page) {
                 case 1 : prop.put("table_peertype", "senior/principal"); break;
                 case 2 : prop.put("table_peertype", "senior/principal"); break;
