@@ -377,7 +377,7 @@ public class kelondroCollectionIndex {
                 arrayEntry.setCol(1, collection.exportCollection());
 
                 // overwrite entry in this array
-                array.set(oldrownumber, arrayEntry);
+                array.overwrite(oldrownumber, arrayEntry);
 
                 // update the index entry
                 indexrow.setCol(idx_col_chunkcount, collection.size());

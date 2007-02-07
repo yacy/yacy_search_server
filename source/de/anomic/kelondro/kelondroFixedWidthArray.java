@@ -85,7 +85,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         }
     }
     
-    public synchronized kelondroRow.Entry set(int index, kelondroRow.Entry rowentry) throws IOException {
+    public synchronized kelondroRow.Entry replace(int index, kelondroRow.Entry rowentry) throws IOException {
 
         // make room for element
         Node n;
@@ -100,8 +100,23 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         // write the row
         byte[] before = n.setValueRow((rowentry == null) ? null : rowentry.bytes());
         n.commit(CP_NONE);
-
+        
         return row().newEntry(before);
+    }
+    
+    public synchronized void overwrite(int index, kelondroRow.Entry rowentry) throws IOException {
+        // this writes a row without reading the row from the file system first
+        
+        // make room for element
+        Node n;
+        while (super.USAGE.allCount() <= index) {
+            n = newNode();
+            n.commit(CP_NONE);
+        }
+
+        // create a node at position index with rowentry
+        n = newNode(new Handle(index), (rowentry == null) ? null : rowentry.bytes(), 0);
+        n.commit(CP_NONE);
     }
     
     public synchronized kelondroRow.Entry get(int index) throws IOException {
@@ -162,7 +177,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
             System.out.println("erster Test");
             f.delete();
             kelondroFixedWidthArray k = new kelondroFixedWidthArray(f, rowdef, 6);
-            k.set(3, k.row().newEntry(new byte[][]{
+            k.overwrite(3, k.row().newEntry(new byte[][]{
                 "test123".getBytes(), "abcd".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{
                 "test456".getBytes(), "efgh".getBytes()}));

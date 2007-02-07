@@ -583,6 +583,10 @@ public class kelondroRecords {
         return new Node();
     }
     
+    protected final Node newNode(Handle handle, byte[] bulkchunk, int offset) {
+        return new Node(handle, bulkchunk, offset, true);
+    }
+    
     protected final Node getNode(Handle handle) throws IOException {
         return getNode(handle, null, 0);
     }
@@ -649,7 +653,7 @@ public class kelondroRecords {
             for (int i = tailchunksize - 1; i >= 0; i--) this.tailChunk[i] = 0;
         }
     
-        protected Node(Handle handle, byte[] bulkchunk, int offset) {
+        protected Node(Handle handle, byte[] bulkchunk, int offset, boolean setChanged) {
             // this initializer is used to create nodes from bulk-read byte arrays
             this.handle = handle;
             assert (bulkchunk.length >= offset + headchunksize) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", headchunksize = " + headchunksize;
@@ -657,8 +661,18 @@ public class kelondroRecords {
             // create empty chunks
             this.headChunk = new byte[headchunksize];
             this.tailChunk = new byte[tailchunksize];
-            System.arraycopy(bulkchunk, offset, this.headChunk, 0, headchunksize);
-            System.arraycopy(bulkchunk, offset + headchunksize, this.tailChunk, 0, tailchunksize);
+            
+            // write content to chunks
+            if (bulkchunk != null) {
+                System.arraycopy(bulkchunk, offset, this.headChunk, 0, headchunksize);
+                System.arraycopy(bulkchunk, offset + headchunksize, this.tailChunk, 0, tailchunksize);
+            }
+            
+            // mark chunks as changed
+            // if the head/tail chunks come from a file system read, setChanged should be false
+            // if the chunks come from a overwrite attempt, it should be true
+            this.headChanged = setChanged;
+            this.tailChanged = setChanged;
         }
         
         protected Node(Handle handle, Node parentNode, int referenceInParent) throws IOException {
@@ -1246,7 +1260,7 @@ public class kelondroRecords {
             }
                 
             // read node from bulk
-            Node n = new Node(new Handle(pos.index), bulk, (pos.index - bulkstart) * recordsize);
+            Node n = new Node(new Handle(pos.index), bulk, (pos.index - bulkstart) * recordsize, false);
             pos.index++;
             while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
             return n;

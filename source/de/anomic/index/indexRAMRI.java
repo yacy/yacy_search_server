@@ -139,7 +139,7 @@ public final class indexRAMRI implements indexRI {
                             row.setCol(1, occ);
                             row.setCol(2, time);
                             row.setCol(3, iEntry.toKelondroEntry().bytes());
-                            dumpArray.set((int) urlcount++, row);
+                            dumpArray.overwrite((int) urlcount++, row);
                         }
                     }
                     wordcount++;

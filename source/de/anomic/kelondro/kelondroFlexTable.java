@@ -193,7 +193,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             index.puti(row.getColBytes(0), super.add(row));
             return null;
         }
-        return super.set(i, row);
+        return super.replace(i, row);
     }
     
     public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {

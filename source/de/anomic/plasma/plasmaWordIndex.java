@@ -6,7 +6,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedBy: $
 //
 // LICENSE
 //
@@ -190,8 +190,9 @@ public final class plasmaWordIndex implements indexRI {
     private void flushCacheSome(indexRAMRI ram, boolean busy) {
         int flushCount = (busy) ? ram.size() / busyDivisor : ram.size() / idleDivisor;
         if (flushCount > 100) flushCount = 100;
-        if (flushCount < 1) flushCount = Math.min(1, ram.size());
-        flushCache(ram, flushCount);
+        if (flushCount >= 1) {
+            flushCache(ram, flushCount);
+        }
         while (ram.maxURLinCache() >= 2040) flushCache(ram, 1);
     }
     

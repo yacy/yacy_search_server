@@ -208,13 +208,13 @@ public class kelondroHashtable {
         }
         
         // make space
-        while (rowNumber >= hashArray.size()) hashArray.set(hashArray.size(), dummyRow);
+        while (rowNumber >= hashArray.size()) hashArray.overwrite(hashArray.size(), dummyRow);
         
         // write row
         kelondroRow.Entry newhkrow = hashArray.row().newEntry();
         newhkrow.setCol(0, hash.key());
         newhkrow.setCol(1, rowentry.bytes());
-        hashArray.set(rowNumber, newhkrow);
+        hashArray.overwrite(rowNumber, newhkrow);
         return hashArray.row().newEntry(oldhkrow.getColBytes(1));
     }
     
