@@ -116,7 +116,8 @@ public final class indexRAMRI implements indexRI {
             long updateTime;
             indexRWIEntry iEntry;
             kelondroRow.Entry row = dumpArray.row().newEntry();
-      
+            byte[] occ, time;
+            
             // write wCache
             synchronized (cache) {
                 Iterator i = cache.entrySet().iterator();
@@ -130,11 +131,13 @@ public final class indexRAMRI implements indexRI {
                     // put entries on stack
                     if (container != null) {
                         Iterator ci = container.entries();
+                        occ = kelondroNaturalOrder.encodeLong(container.size(), 4);
+                        time = kelondroNaturalOrder.encodeLong(updateTime, 8);
                         while (ci.hasNext()) {
                             iEntry = (indexRWIEntry) ci.next();
                             row.setCol(0, wordHash.getBytes());
-                            row.setCol(1, kelondroNaturalOrder.encodeLong(container.size(), 4));
-                            row.setCol(2, kelondroNaturalOrder.encodeLong(updateTime, 8));
+                            row.setCol(1, occ);
+                            row.setCol(2, time);
                             row.setCol(3, iEntry.toKelondroEntry().bytes());
                             dumpArray.set((int) urlcount++, row);
                         }
