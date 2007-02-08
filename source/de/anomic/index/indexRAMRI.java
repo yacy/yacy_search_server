@@ -36,12 +36,16 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBufferedRA;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFixedWidthArray;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverMemory;
 import de.anomic.yacy.yacySeedDB;
 
 public final class indexRAMRI implements indexRI {
@@ -106,64 +110,92 @@ public final class indexRAMRI implements indexRI {
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (indexDumpFile.exists()) indexDumpFile.delete();
         kelondroFixedWidthArray dumpArray = null;
+        kelondroBufferedRA writeBuffer = null;
+        if (serverMemory.available() > 50 * bufferStructureBasis.objectsize() * cache.size()) {
+            writeBuffer = new kelondroBufferedRA();
+            dumpArray = new kelondroFixedWidthArray(writeBuffer, bufferStructureBasis, 0);
+            log.logInfo("started dump of ram cache: " + cache.size() + " words; memory-enhanced write");
+        } else {
             dumpArray = new kelondroFixedWidthArray(indexDumpFile, bufferStructureBasis, 0);
-            long startTime = System.currentTimeMillis();
-            long messageTime = System.currentTimeMillis() + 5000;
-            long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
-            Map.Entry entry;
-            String wordHash;
-            indexContainer container;
-            long updateTime;
-            indexRWIEntry iEntry;
-            kelondroRow.Entry row = dumpArray.row().newEntry();
-            byte[] occ, time;
-            
-            // write wCache
-            synchronized (cache) {
-                Iterator i = cache.entrySet().iterator();
-                while (i.hasNext()) {
-                    // get entries
-                    entry = (Map.Entry) i.next();
-                    wordHash = (String) entry.getKey();
-                    updateTime = getUpdateTime(wordHash);
-                    container = (indexContainer) entry.getValue();
+            log.logInfo("started dump of ram cache: " + cache.size() + " words; low-memory write");
+        }
+        long startTime = System.currentTimeMillis();
+        long messageTime = System.currentTimeMillis() + 5000;
+        long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
+        Map.Entry entry;
+        String wordHash;
+        indexContainer container;
+        long updateTime;
+        indexRWIEntry iEntry;
+        kelondroRow.Entry row = dumpArray.row().newEntry();
+        byte[] occ, time;
 
-                    // put entries on stack
-                    if (container != null) {
-                        Iterator ci = container.entries();
-                        occ = kelondroNaturalOrder.encodeLong(container.size(), 4);
-                        time = kelondroNaturalOrder.encodeLong(updateTime, 8);
-                        while (ci.hasNext()) {
-                            iEntry = (indexRWIEntry) ci.next();
-                            row.setCol(0, wordHash.getBytes());
-                            row.setCol(1, occ);
-                            row.setCol(2, time);
-                            row.setCol(3, iEntry.toKelondroEntry().bytes());
-                            dumpArray.overwrite((int) urlcount++, row);
-                        }
-                    }
-                    wordcount++;
-                    i.remove(); // free some mem
+        // write wCache
+        synchronized (cache) {
+            Iterator i = cache.entrySet().iterator();
+            while (i.hasNext()) {
+                // get entries
+                entry = (Map.Entry) i.next();
+                wordHash = (String) entry.getKey();
+                updateTime = getUpdateTime(wordHash);
+                container = (indexContainer) entry.getValue();
 
-                    // write a log
-                    if (System.currentTimeMillis() > messageTime) {
-                        // System.gc(); // for better statistic
-                        wordsPerSecond = wordcount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                        log.logInfo("dumping status: " + wordcount + " words done, " + (cache.size() / (wordsPerSecond + 1)) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
-                        messageTime = System.currentTimeMillis() + 5000;
+                // put entries on stack
+                if (container != null) {
+                    Iterator ci = container.entries();
+                    occ = kelondroNaturalOrder.encodeLong(container.size(), 4);
+                    time = kelondroNaturalOrder.encodeLong(updateTime, 8);
+                    while (ci.hasNext()) {
+                        iEntry = (indexRWIEntry) ci.next();
+                        row.setCol(0, wordHash.getBytes());
+                        row.setCol(1, occ);
+                        row.setCol(2, time);
+                        row.setCol(3, iEntry.toKelondroEntry().bytes());
+                        dumpArray.overwrite((int) urlcount++, row);
                     }
                 }
+                wordcount++;
+                i.remove(); // free some mem
+
+                // write a log
+                if (System.currentTimeMillis() > messageTime) {
+                    // System.gc(); // for better statistic
+                    wordsPerSecond = wordcount * 1000
+                            / (1 + System.currentTimeMillis() - startTime);
+                    log.logInfo("dump status: " + wordcount
+                            + " words done, "
+                            + (cache.size() / (wordsPerSecond + 1))
+                            + " seconds remaining, free mem = "
+                            + (Runtime.getRuntime().freeMemory() / 1024 / 1024)
+                            + "MB");
+                    messageTime = System.currentTimeMillis() + 5000;
+                }
             }
-            dumpArray.close();
-            dumpArray = null;
-            log.logConfig("dumped " + urlcount + " word/URL relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+        }
+        if (writeBuffer != null) {
+            serverByteBuffer bb = writeBuffer.getBuffer();
+            //System.out.println("*** byteBuffer size = " + bb.length());
+            serverFileUtils.write(bb.getBytes(), indexDumpFile);
+            writeBuffer.close();
+        }
+        dumpArray.close();
+        dumpArray = null;
+        log.logInfo("finished dump of ram cache: " + urlcount + " word/URL relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
     }
 
     private long restore() throws IOException {
         File indexDumpFile = new File(databaseRoot, indexArrayFileName);
         if (!(indexDumpFile.exists())) return 0;
-        kelondroFixedWidthArray dumpArray = new kelondroFixedWidthArray(indexDumpFile, bufferStructureBasis, 0);
-        log.logConfig("restore array dump of index cache '" + indexArrayFileName + "', " + dumpArray.size() + " word/URL relations");
+        kelondroFixedWidthArray dumpArray;
+        kelondroBufferedRA readBuffer = null;
+        if (false /*serverMemory.available() > indexDumpFile.length() * 2*/) {
+            readBuffer = new kelondroBufferedRA(new serverByteBuffer(serverFileUtils.read(indexDumpFile)));
+            dumpArray = new kelondroFixedWidthArray(readBuffer, bufferStructureBasis, 0);
+            log.logInfo("started restore of ram cache '" + indexArrayFileName + "', " + dumpArray.size() + " word/URL relations; memory-enhanced read");
+        } else {
+            dumpArray = new kelondroFixedWidthArray(indexDumpFile, bufferStructureBasis, 0);
+            log.logInfo("started restore of ram cache '" + indexArrayFileName + "', " + dumpArray.size() + " word/URL relations; low-memory read");
+        }
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;
         long urlCount = 0, urlsPerSecond = 0;
@@ -196,12 +228,12 @@ public final class indexRAMRI implements indexRI {
                     }
                 }
             }
-
+            if (readBuffer != null) readBuffer.close();
             dumpArray.close();
-            log.logConfig("restored " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+            log.logConfig("finished restor " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
         } catch (kelondroException e) {
             // restore failed
-            log.logSevere("restore of indexCache array dump failed: " + e.getMessage(), e);
+            log.logSevere("failed restore of indexCache array dump: " + e.getMessage(), e);
         } finally {
             if (dumpArray != null) try {dumpArray.close();}catch(Exception e){}
         }

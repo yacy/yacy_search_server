@@ -165,6 +165,28 @@ public final class serverByteBuffer extends OutputStream {
         length += le;
     }
     
+    // overwrite does not increase the 'length' write position pointer!
+    
+    public void overwrite(int pos, int b) {
+        overwrite(pos, (byte) (b & 0xff));
+    }
+    
+    public void overwrite(int pos, byte b) {
+        if (offset + pos + 1 > buffer.length) grow();
+        buffer[offset + pos] = b;
+        if (pos >= length) length = pos + 1;
+    }
+    
+    public void overwrite(int pos, byte[] bb) {
+        overwrite(pos, bb, 0, bb.length);
+    }
+    
+    public void overwrite(int pos, byte[] bb, int of, int le) {
+        while (offset + pos + le > buffer.length) grow();
+        System.arraycopy(bb, of, buffer, offset + pos, le);
+        if (pos + le > length) length = pos + le;
+    }
+    
     public serverByteBuffer append(byte b) {
         write(b);
         return this;

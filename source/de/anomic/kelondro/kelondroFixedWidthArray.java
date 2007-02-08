@@ -69,6 +69,18 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         }
     }
     
+    public kelondroFixedWidthArray(kelondroRA ra, kelondroRow rowdef, int intprops) throws IOException {
+        // this creates a new array
+        super(ra, 0, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, false);
+        for (int i = 0; i < intprops; i++) {
+            setHandle(i, new Handle(0));
+        }
+        // store column description
+        for (int i = 0; i < rowdef.columns(); i++) {
+            try {super.setText(i, rowdef.column(i).toString().getBytes());} catch (IOException e) {}
+        }
+    }
+    
     public static kelondroFixedWidthArray open(File file, kelondroRow rowdef, int intprops) {
         try {
             return new kelondroFixedWidthArray(file, rowdef, intprops);
@@ -107,16 +119,10 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     public synchronized void overwrite(int index, kelondroRow.Entry rowentry) throws IOException {
         // this writes a row without reading the row from the file system first
         
-        // make room for element
-        Node n;
-        while (super.USAGE.allCount() <= index) {
-            n = newNode();
-            n.commit(CP_NONE);
-        }
-
         // create a node at position index with rowentry
-        n = newNode(new Handle(index), (rowentry == null) ? null : rowentry.bytes(), 0);
-        n.commit(CP_NONE);
+        Handle h = new Handle(index);
+        h.adoptAllCount(); // adopt counting
+        newNode(h, (rowentry == null) ? null : rowentry.bytes(), 0).commit(CP_NONE);
     }
     
     public synchronized kelondroRow.Entry get(int index) throws IOException {
@@ -186,7 +192,6 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
             k = new kelondroFixedWidthArray(f, rowdef, 6);
             System.out.println(k.get(2).toString());
             System.out.println(k.get(3).toString());
-            System.out.println(k.get(4).toString());
             k.close();
 
             System.out.println("zweiter Test");

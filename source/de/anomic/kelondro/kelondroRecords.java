@@ -258,6 +258,8 @@ public class kelondroRecords {
                            short ohbytec, short ohhandlec,
                            kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
                            boolean exitOnFail) {
+        // this always creates a new file
+        this.fileExisted = false;
         this.filename = null;
         try {
             initNewFile(ra, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, buffersize / 10);
@@ -265,6 +267,7 @@ public class kelondroRecords {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail) System.exit(-1);
         }
+        assignRowdef(rowdef);
         writeOrderType();
         initCache(buffersize / 10 * 9, preloadTime);
     }
@@ -388,6 +391,7 @@ public class kelondroRecords {
     }
 
     public kelondroRecords(kelondroRA ra, long buffersize, long preloadTime) throws IOException{
+        this.fileExisted = false;
         this.filename = null;
         initExistingFile(ra, buffersize / 10);
         readOrderType();
@@ -656,7 +660,7 @@ public class kelondroRecords {
         protected Node(Handle handle, byte[] bulkchunk, int offset, boolean setChanged) {
             // this initializer is used to create nodes from bulk-read byte arrays
             this.handle = handle;
-            assert (bulkchunk.length >= offset + headchunksize) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", headchunksize = " + headchunksize;
+            assert ((bulkchunk == null) || (bulkchunk.length >= offset + headchunksize)) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", headchunksize = " + headchunksize;
             
             // create empty chunks
             this.headChunk = new byte[headchunksize];
@@ -1400,6 +1404,7 @@ public class kelondroRecords {
                     index = USAGE.allCount();
                     USAGE.USEDC++;
                     entryFile.writeInt(POS_USEDC, USAGE.USEDC);
+                    entryFile.commit();
                 } else {
                     // re-use record from free-list
                     USAGE.USEDC++;
@@ -1439,6 +1444,36 @@ public class kelondroRecords {
             this.index = i;
         }
 
+        protected void adoptAllCount() throws IOException {
+            // in case that the handle index was created outside this class,
+            // this method ensures that the USAGE counters are consistent with the
+            // new handle index
+            if (USAGE.allCount() <= this.index) synchronized (USAGE) {
+                // records that are in between are marked as deleted
+                boolean wf = false;
+                while (USAGE.allCount() < this.index) {
+                    Handle h = new Handle(USAGE.allCount());
+                    USAGE.FREEC++;
+                    entryFile.writeInt(seekpos(h), USAGE.FREEH.index);
+                    USAGE.FREEH = h;
+                    wf = true;
+                }
+                assert (USAGE.allCount() >= this.index);
+                
+                // adopt USAGE.USEDC
+                if (USAGE.allCount() == this.index) {
+                    USAGE.USEDC++;
+                    wf = true;
+                }
+                
+                // commit changes
+                if (wf) {
+                    USAGE.write();
+                    entryFile.commit();
+                }
+            }
+        }
+        
         public boolean isNUL() {
             return index == NUL;
         }
