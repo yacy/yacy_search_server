@@ -252,7 +252,8 @@ public final class search {
         searchProfile.put("host", client);
         yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
         searchProfile.put("peername", (remotepeer == null) ? "unknown" : remotepeer.getName());
-        sb.remoteSearches.put(trackerHandle, searchProfile);
+        searchProfile.put("time", trackerHandle);
+        sb.remoteSearches.add(searchProfile);
         TreeSet handles = (TreeSet) sb.remoteSearchTracker.get(client);
         if (handles == null) handles = new TreeSet();
         handles.add(trackerHandle);

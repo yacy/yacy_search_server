@@ -118,7 +118,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.data.blogBoard;
@@ -239,7 +238,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  dbImportManager             dbImportManager;
     public  plasmaDHTFlush              transferIdxThread = null;
     private plasmaDHTChunk              dhtTransferChunk = null;
-    public  TreeMap                     localSearches, remoteSearches;
+    public  ArrayList                   localSearches, remoteSearches;
     public  HashMap                     localSearchTracker, remoteSearchTracker;
     public  long                        startupTime = 0;
     public  long                        lastseedcheckuptime = -1;
@@ -1126,8 +1125,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // init search history trackers
         this.localSearchTracker = new HashMap(); // String:TreeSet - IP:set of Long(accessTime)
         this.remoteSearchTracker = new HashMap();
-        this.localSearches = new TreeMap(); // Long:HashMap - Long(accessTime):properties
-        this.remoteSearches = new TreeMap();
+        this.localSearches = new ArrayList(); // contains search result properties as HashMaps
+        this.remoteSearches = new ArrayList();
         
         // init messages: clean up message symbol
         File notifierSource = new File(getRootPath(), getConfig(HTROOT_PATH, HTROOT_PATH_DEFAULT) + "/env/grafics/empty.gif");
@@ -2807,10 +2806,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // prepare search statistics
             Long trackerHandle = new Long(System.currentTimeMillis());
             HashMap searchProfile = theSearch.resultProfile();
+            searchProfile.put("time", trackerHandle);
             searchProfile.put("host", client);
             searchProfile.put("offset", new Integer(0));
             searchProfile.put("results", results);
-            this.localSearches.put(trackerHandle, searchProfile);
+            this.localSearches.add(searchProfile);
             TreeSet handles = (TreeSet) this.localSearchTracker.get(client);
             if (handles == null) handles = new TreeSet();
             handles.add(trackerHandle);
