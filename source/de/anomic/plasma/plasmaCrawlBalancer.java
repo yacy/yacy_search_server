@@ -155,12 +155,12 @@ public class plasmaCrawlBalancer {
                 if (lastAccess != null) {
                     // this is not the first access of the same domain
                     long la = lastAccess.longValue();
-                    if (System.currentTimeMillis() - la > minimumDelta) {
+                    if (System.currentTimeMillis() - la < minimumDelta) {
                         // force a busy waiting here
                         // in best case, this should never happen if the balancer works propertly
                         // this is only to protect against the worst case, where the crawler could
                         // behave in a DoS-manner
-                        long sleeptime = System.currentTimeMillis() - la - minimumDelta;
+                        long sleeptime = minimumDelta - (System.currentTimeMillis() - la);
                         if (sleeptime > 0) try {this.wait(sleeptime);} catch (InterruptedException e) {}
                     }
                 }
