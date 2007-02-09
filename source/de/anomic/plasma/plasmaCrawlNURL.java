@@ -76,6 +76,7 @@ public class plasmaCrawlNURL {
     public static final int STACK_TYPE_MOVIE    = 12; // put on movie stack
     public static final int STACK_TYPE_MUSIC    = 13; // put on music stack
 
+    private static final long minimumDelta = 500; // the minimum time difference between access of the same domain
     /**
      * column length definition for the {@link plasmaURL#urlIndexFile} DB
      */
@@ -432,7 +433,7 @@ public class plasmaCrawlNURL {
     private Entry pop(plasmaCrawlBalancer balancer) throws IOException {
         // this is a filo - pop
         if (balancer.size() > 0) {
-            String hash = new String(balancer.get());
+            String hash = balancer.get(minimumDelta);
             if (hash == null) throw new IOException("hash is null");
             Entry e = new Entry(hash);
             stackIndex.remove(e.hash);

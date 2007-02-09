@@ -58,10 +58,12 @@ public class plasmaCrawlBalancer {
 
     private kelondroStack stack;
     private HashMap domainStacks;
+    private HashMap domainAccess;
     
     public plasmaCrawlBalancer(File stackFile) {
         stack = kelondroStack.open(stackFile, new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 0));
         domainStacks = new HashMap();
+        domainAccess = new HashMap();
     }
 
     public void close() {
@@ -135,17 +137,36 @@ public class plasmaCrawlBalancer {
         }
     }
     
-    public byte[] get() throws IOException {
+    public String get(long minimumDelta) throws IOException {
         // returns an url-hash from the stack
         synchronized (domainStacks) {
+            String entry = null;
             if (stack.size() > 0) {
-                return stack.pop().getColBytes(0);
+                entry = new String(stack.pop().getColBytes(0));
             } else if (domainStacks.size() > 0) {
                 flushOnce();
-                return stack.pop().getColBytes(0);
-            } else {
-                return null;
+                entry = new String(stack.pop().getColBytes(0));
             }
+            if ((minimumDelta > 0) && (entry != null)) {
+                // check if the time after retrieval of last hash from same
+                // domain is not shorter than the minimumDelta
+                String domhash = entry.substring(6);
+                Long lastAccess = (Long) domainAccess.get(domhash);
+                if (lastAccess != null) {
+                    // this is not the first access of the same domain
+                    long la = lastAccess.longValue();
+                    if (System.currentTimeMillis() - la > minimumDelta) {
+                        // force a busy waiting here
+                        // in best case, this should never happen if the balancer works propertly
+                        // this is only to protect against the worst case, where the crawler could
+                        // behave in a DoS-manner
+                        long sleeptime = System.currentTimeMillis() - la - minimumDelta;
+                        if (sleeptime > 0) try {this.wait(sleeptime);} catch (InterruptedException e) {}
+                    }
+                }
+                domainAccess.put(domhash, new Long(System.currentTimeMillis()));
+            }
+            return entry;
         }
     }
     
