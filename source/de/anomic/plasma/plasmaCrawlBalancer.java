@@ -138,36 +138,44 @@ public class plasmaCrawlBalancer {
     }
     
     public String get(long minimumDelta) throws IOException {
-        // returns an url-hash from the stack
+        // returns an url-hash from the stack and ensures minimum delta times
         synchronized (domainStacks) {
+            if ((stack.size() == 0) && (domainStacks.size() > 0)) flushOnce();
+            if (stack.size() == 0) return null;
+            
             String entry = null;
-            if (stack.size() > 0) {
+            String topentry = new String(stack.top().getColBytes(0));
+
+            // check if the time after retrieval of last hash from same
+            // domain is not shorter than the minimumDelta
+            long delta = lastAccessDelta(topentry);
+            if (delta > minimumDelta) {
+                // the entry from top is fine
                 entry = new String(stack.pop().getColBytes(0));
-            } else if (domainStacks.size() > 0) {
-                flushOnce();
-                entry = new String(stack.pop().getColBytes(0));
+            } else {
+                // try entry from bottom
+                entry = new String(stack.pot().getColBytes(0));
+                delta = lastAccessDelta(entry);
             }
-            if ((minimumDelta > 0) && (entry != null)) {
-                // check if the time after retrieval of last hash from same
-                // domain is not shorter than the minimumDelta
-                String domhash = entry.substring(6);
-                Long lastAccess = (Long) domainAccess.get(domhash);
-                if (lastAccess != null) {
-                    // this is not the first access of the same domain
-                    long la = lastAccess.longValue();
-                    if (System.currentTimeMillis() - la < minimumDelta) {
-                        // force a busy waiting here
-                        // in best case, this should never happen if the balancer works propertly
-                        // this is only to protect against the worst case, where the crawler could
-                        // behave in a DoS-manner
-                        long sleeptime = minimumDelta - (System.currentTimeMillis() - la);
-                        if (sleeptime > 0) try {this.wait(sleeptime);} catch (InterruptedException e) {}
-                    }
-                }
-                domainAccess.put(domhash, new Long(System.currentTimeMillis()));
+            
+            if (delta < minimumDelta) {
+                // force a busy waiting here
+                // in best case, this should never happen if the balancer works propertly
+                // this is only to protect against the worst case, where the crawler could
+                // behave in a DoS-manner
+                long sleeptime = minimumDelta - delta;
+                try {this.wait(sleeptime);} catch (InterruptedException e) {}
             }
+            domainAccess.put(entry.substring(6), new Long(System.currentTimeMillis()));
             return entry;
         }
+    }
+    
+    private long lastAccessDelta(String urlhash) {
+        assert urlhash != null;
+        Long lastAccess = (Long) domainAccess.get(urlhash.substring(6));
+        if (lastAccess == null) return Long.MAX_VALUE; // never accessed
+        return System.currentTimeMillis() - lastAccess.longValue();
     }
     
     public byte[] top(int dist) throws IOException {
