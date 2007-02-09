@@ -124,19 +124,21 @@ public final class httpd implements serverHandler {
     private static String virtualHost = null;
     
     public static boolean keepAliveSupport = false;
+    private static HashMap YaCyHopAccessRequester = new HashMap();
+    private static HashMap YaCyHopAccessTargets = new HashMap();
     
     // class objects
     private serverCore.Session session;  // holds the session object of the calling class
     private InetAddress userAddress;     // the address of the client
-    private boolean allowProxy;
-    private boolean allowServer;
-    private boolean allowYaCyHop;
     
     // for authentication
     private boolean use_proxyAccounts = false;
 	private boolean proxyAccounts_init = false; // is use_proxyAccounts set?
     private String serverAccountBase64MD5;
     private String clientIP;
+    private boolean allowProxy;
+    private boolean allowServer;
+    private boolean allowYaCyHop;
     
     // the connection properties
     private final Properties prop = new Properties();
@@ -337,7 +339,21 @@ public final class httpd implements serverHandler {
     }
     
     private boolean handleYaCyHopAuthentication(httpHeader header) throws IOException {
-        // proxy hops must identify with 3 criteria:
+        // check if the user has allowed that his/her peer is used for hops
+        if (!this.allowYaCyHop) return false;
+        
+        // proxy hops must identify with 4 criteria:
+        
+        // the accessed port must not be port 80
+        String host = this.prop.getProperty(httpHeader.CONNECTION_PROP_HOST);
+        if (host == null) return false;
+        int pos;
+        if ((pos = host.indexOf(":")) < 0) {
+            // default port 80
+            return false; // not allowed
+        } else {
+            if (Integer.parseInt(host.substring(pos + 1)) == 80) return false;
+        }
         
         // the access path must be into the yacy protocol path; it must start with 'yacy'
         if (!(this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) return false;
@@ -350,9 +366,30 @@ public final class httpd implements serverHandler {
         if (!test.equals(auth.trim().substring(6))) return false;
         
         // the accessing client must use a yacy user-agent
-        return (((String) header.get(httpHeader.USER_AGENT,"")).startsWith("yacy"));
+        if (!(((String) header.get(httpHeader.USER_AGENT,"")).startsWith("yacy"))) return false;
+        
+        // furthermore, YaCy hops must not exceed a specific access frequency
+        
+        // check access requester frequency: protection against DoS against this peer
+        String requester = this.prop.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP);
+        if (requester == null) return false;
+        if (lastAccessDelta(YaCyHopAccessRequester, requester) < 10000) return false;
+        YaCyHopAccessRequester.put(requester, new Long(System.currentTimeMillis()));
+        
+        // check access target frequecy: protection against DoS from a single peer by several different requesters
+        if (lastAccessDelta(YaCyHopAccessTargets, host) < 3000) return false;
+        YaCyHopAccessTargets.put(host, new Long(System.currentTimeMillis()));
+        
+        // passed all tests
+        return true;
     }
 
+    private static long lastAccessDelta(HashMap accessTable, String domain) {
+        Long lastAccess = (Long) accessTable.get(domain);
+        if (lastAccess == null) return Long.MAX_VALUE; // never accessed
+        return System.currentTimeMillis() - lastAccess.longValue();
+    }
+    
     private boolean handleProxyAuthentication(httpHeader header) throws IOException {
         // getting the http version that is used by the client
         String httpVersion = this.prop.getProperty("HTTP", "HTTP/0.9");            
