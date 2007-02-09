@@ -128,6 +128,7 @@ public class Wiki {
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
             yacyCore.newsPool.publishMyNews(new yacyNewsRecord("wiki_upd", map));
+            prop.put("LOCATION", "/Wiki.html?page=" + pagename);
         }
 
         wikiBoard.entry page = switchboard.wikiDB.read(pagename);
