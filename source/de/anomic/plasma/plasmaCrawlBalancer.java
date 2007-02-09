@@ -164,7 +164,7 @@ public class plasmaCrawlBalancer {
                 // this is only to protect against the worst case, where the crawler could
                 // behave in a DoS-manner
                 long sleeptime = minimumDelta - delta;
-                try {this.wait(sleeptime);} catch (InterruptedException e) {}
+                try {synchronized(this) { this.wait(sleeptime); }} catch (InterruptedException e) {}
             }
             domainAccess.put(entry.substring(6), new Long(System.currentTimeMillis()));
             return entry;
