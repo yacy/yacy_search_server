@@ -179,7 +179,7 @@ public class CrawlURLFetch_p {
             this.running = true;
             this.paused = false;
             long start;
-            while (!isInterrupted() && this.delay > 0) {
+            do {
                 try {
                     start = System.currentTimeMillis();
                     totalFetchedURLs += addURLs();
@@ -189,7 +189,7 @@ public class CrawlURLFetch_p {
                     this.wait(this.delay);
                     this.paused = false;
                 } catch (InterruptedException e) { break; }
-            }
+            } while (!isInterrupted() && this.delay > 0);
             this.running = false;
         }
         
@@ -228,7 +228,6 @@ public class CrawlURLFetch_p {
                 
                 httpc.response res = con.GET(this.url.getPath(), header);
                 lastServerResponse = res.statusCode + " (" + res.statusText + ")";
-                System.err.println("LAST RESPONSE: " + lastServerResponse);
                 if (res.status.startsWith("2")) {
                     byte[] cbs = res.writeContent();
                     String encoding = res.responseHeader.getCharacterEncoding();
