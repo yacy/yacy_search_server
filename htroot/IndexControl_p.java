@@ -78,7 +78,7 @@ public class IndexControl_p {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         
         serverObjects prop = new serverObjects();
-
+        
         if (post == null || env == null) {
             prop.put("keystring", "");
             prop.put("keyhash", "");
@@ -93,9 +93,10 @@ public class IndexControl_p {
             prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? 1 : 0);
             prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 1 : 0);
             prop.put("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed.getPeerTags(), ",", false));
+            listHosts(prop, "");
             return prop; // be save
         }
-
+        
         // default values
         String keystring = ((String) post.get("keystring", "")).trim();
         String keyhash = ((String) post.get("keyhash", "")).trim();
@@ -381,12 +382,27 @@ public class IndexControl_p {
                 prop.put("result", "No Entries for URL hash " + urlhash);
             }
         }
+        
+        listHosts(prop, keyhash);
 
+        // insert constants
+        prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
+        prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
+        prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? 1 : 0);
+        prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? 1 : 0);
+        prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? 1 : 0);
+        prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 1 : 0);
+        prop.put("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed.getPeerTags(), ",", false));
+        // return rewrite properties
+        return prop;
+    }
+    
+    private static void listHosts(serverObjects prop, String startHash) {
         // list known hosts
         yacySeed seed;
         int hc = 0;
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
-            Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(keyhash);
+            Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(startHash);
             while (e.hasMoreElements()) {
                 seed = (yacySeed) e.nextElement();
                 if (seed != null) {
@@ -399,17 +415,6 @@ public class IndexControl_p {
         } else {
             prop.put("hosts", "0");
         }
-
-        // insert constants
-        prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
-        prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
-        prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? 1 : 0);
-        prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? 1 : 0);
-        prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? 1 : 0);
-        prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 1 : 0);
-        prop.put("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed.getPeerTags(), ",", false));
-        // return rewrite properties
-        return prop;
     }
 
     public static serverObjects genUrlProfile(plasmaSwitchboard switchboard, indexURLEntry entry, String urlhash) {
