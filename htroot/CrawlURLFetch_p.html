@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Local Cache Management</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="CrawlURLFetch_p">
+    #%env/templates/header.template%#
+    <h2>URL-Fetcher</h2>
+    <p><!-- desc --></p>
+    <form method="post" action="CrawlURLFetch_p.html" enctype="multipart/form-data">
+      <p>
+        All newly added URLs will be crawled using the <span class="tt">Proxy</span> Crawl Profile.
+      </p>
+      <fieldset><legend>Fetch new URLs to crawl</legend>
+        <dl>
+          <dt><label for="url">Fetch from URL</label>:</dt>
+          <dd>
+            <input type="radio" name="source" value="url" id="url" checked="checked" />
+            <input type="text" id="host" name="host" size="60" value="#[host]#" />
+            #(hostError)#::<span class="error">Malformed URL</span>#(/hostError)#
+          </dd>
+          #(peersKnown)#::
+          <dt><label for="peer">Fetch from Peer</label>:</dt>
+          <dd>
+            <input type="radio" name="source" value="peer" id="peer" disabled="disabled" />
+            <select name="peerhash" disabled="disabled">#{peers}# 
+              <option value="#[hash]#">#[name]#</option>#{/peers}# 
+            </select>
+            #(peerError)#::<span class="error">
+          </dd>#(/peersKnown)#
+          <dt><label for="type">List-type</label>:</dt>
+          <dd>
+            <select name="type" id="type">
+              <option value="text">Text</option>
+              <option value="xml" disabled="disabled">XML</option>
+            </select>
+          </dd>
+          <dt><label for="regularly">Run regularly</label>:</dt>
+          <dd>
+            <input type="checkbox" name="regularly" id="regularly" disabled="disabled" />,
+            <label for="frequency">every</label>
+            <input type="text" name="frequency" id="frequency" text-align="left" size="5" disabled="disabled" />
+            <select name="freq_type" disabled="disabled">
+              <option value="weeks">Weeks</option>
+              <option value="days" selected="selected">Days</option>
+              <option value="hours">Hours</option>
+            </select>
+          </dd>
+          <dt><input type="submit" name="start" value="Fetch URLs" /></dt>
+        </dl>
+      </fieldset>
+      #(runs)#::
+      <fieldset><legend>Thread to fetch URLs is #(status)#running::stopped::paused#(/status)#</legend>
+        <dl>
+          <dt>Total runs:</dt><dd>#[totalRuns]#</dd>
+          <dt>Last run duration:</dt><dd>#[lastRun]#</dd>
+          <dt>Last server response:</dt><dd>#[lastServerResponse]#</dd>
+          <dt>Total fetched URLs:</dt><dd>#[totalFetchedURLs]#</dd>
+          <dt>Total failed URLs:</dt><dd>#[totalFailedURLs]#</dd>
+          <dt>Last fetched URLs:</dt><dd>#[lastFetchedURLs]#</dd>
+          <dt><input type="submit" name="stop" value="Stop Thread" /></dt>
+        </dl>
+      </fieldset>
+      #(/runs)#
+    </form>
+    #%env/templates/footer.template%#
+  </body>
+</html>
