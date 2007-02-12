@@ -958,6 +958,7 @@ Manually contacting Peer==Kontaktiere Peer manuell
 no remote \#\[peertype\]\# peer for this list known==Kein remote Peer #[peertype]# bekannt oder online.
 Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Gezeigt werden #[num]# Eintr&auml;ge von insgesamt #[total]# Peers.
 send&nbsp;<strong>M</strong>essage/<br />show&nbsp;<strong>P</strong>rofile/<br />edit&nbsp;<strong>W</strong>iki==Sende Nachricht (<strong>m</strong>)/<br />Zeige Profil (<strong>p</strong>)/<br />&Auml;ndere Wiki (<strong>w</strong>)
+Search for a peername \(RegExp allowed\):==Suche nach Peernamen (RegExp erlaubt):
 Name==Name
 Address==Adresse
 Hash==Hash
@@ -989,8 +990,9 @@ Active \(connected Senior and Principal\)==Aktiv (verbundene Senior und Principa
 Passive \(disconnected Senior and Principal\)==Passiv (nicht verbundene Senior und Principal)
 Potential \(Junior\)==Potenziell (Junior)
 Network Total==Netzwerk insgesamt
-YaCy Cluster Indexing Speed:==YaCy Cluster Index Geschwindigkeit:
-Pages Per Minute \(Accumulated PPM over Active Peers\).==Seiten pro Minute (PPM von Aktiven Peers)
+#YaCy Cluster==YaCy Cluster
+Indexing Speed: \#\[gppm\]\# Pages Per Minute \(PPM\)==Indexier Geschwindikeit: #[gppm]# Seiten pro Minute (PPM)
+Query Frequency: \#\[gqph\]\# Queries Per Hour \(QPH\)==Suchfrequenz: #[gqph]# Suchanfragen pro Minute (QPH) 
 Your Peer:==Ihr Peer:
 Version==Version
 Own/Other==Eigene/Andere
@@ -1687,7 +1689,7 @@ This peer's name==Name dieses Peers
 This peer's statistics==Statistik dieses Peers
 Unknown==unbekannt
 Uptime==Online seit
-Connects \(==Verbindungen (
+Connects:==Verbindungen:
 "connected Juniors"=="verbundene Juniors"
 "connected Seniors"=="verbundene Seniors"
 "connected Principals"=="verbundene Principals"
@@ -1902,7 +1904,8 @@ Application not yet initialized. Sorry. Please wait some seconds and repeat==Anw
 the request.==es dann erneut.
 ERROR: Crawl filter==FEHLER: Crawl Maske
 does not match with crawl root==stimmt nicht &uuml;berein mit dem Crawlstart
-Please try again with different filter.==Bitte probieren Sie es erneut mit einer anderen Maske.
+Please try again with different==Bitte probieren Sie es erneut mit einer anderen
+filter.==Maske.
 Crawling of==Crawling von
 failed. Reason:==schlug fehl. Grund:
 Error with URL input==Fehler mit URL Eingabe
@@ -1943,10 +1946,12 @@ last edited by==zuletzt bearbeitet von
 change date==&Auml;nderungsdatum
 Edit</a>==Bearbeiten</a>
 only granted to admin==nur als Admin erlaubt
-Grant Write Access to Everybody==Erlaube allen Benutzern das Wiki zu bearbeiten 
-Grant Write Access to Admin only==Erlaube nur dem Admin das Wiki zu bearbeiten
+Grant Write Access to==Erlaube es folgenden Benutzern das Wiki zu bearbeiten 
+"all"=="Allen"
+"admin"=="Administrator"
 Start Page==Startseite
 #Index==Index
+Versions==Versionen
 Author:==Autor:
 #Text:==Text:
 You can use==Sie k&ouml;nnen hier
@@ -1961,6 +1966,13 @@ Subject==Titel
 Change Date==&Auml;nderungsdatum
 Last Author==Letzter Autor
 IO Error reading wiki database:==I0 Fehler beim Lesen der Wiki Datenbank:
+Select versions of page==W&auml;hle Versionen der Seite
+Compare version from==Vergleiche Version vom
+"Show"=="Anzeigen"
+with version from==mit Version vom
+"current"=="aktuelle"
+"Compare"=="Vergleichen"
+Return to==Kehre zur&uuml;ck zu
 Changes will be published as announcement on YaCyNews==&Auml;nderungen werden &uuml;ber den YaCy News Service bekannt gegeben.
 #-----------------------------
 
