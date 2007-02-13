@@ -74,6 +74,7 @@ public class CrawlURLFetch_p {
                     }
                 }
                 
+                if (fetcher != null) fetcher.interrupt();
                 fetcher = null;
                 if (post.get("source", "").equals("peer") &&
                         post.get("peerhash", "").equals("random")) {
@@ -92,6 +93,12 @@ public class CrawlURLFetch_p {
                         } catch (MalformedURLException e) {
                             prop.put("host", post.get("host", ""));
                             prop.put("hostError", ERR_HOST_MALFORMED_URL);
+                        }
+                    } else if (post.get("source", "").equals("savedURL")) {
+                        try {
+                            url = new URL(post.get("saved", ""));
+                        } catch (MalformedURLException e) {
+                            /* should never appear, except for invalid input, see above */
                         }
                     } else if (post.get("source", "").equals("peer")) {
                         yacySeed ys = null;
@@ -128,8 +135,9 @@ public class CrawlURLFetch_p {
                     prop.put("threadError", ERR_THREAD_STOP);
                 }
             }
-            else if (post.containsKey("restart") || post.containsKey("resume")) {
+            else if (post.containsKey("restart")) {
                 if (fetcher != null) {
+                    fetcher.interrupt();
                     if (fetcher.url == null) {
                         fetcher = new URLFetcher(
                                 env,
@@ -151,8 +159,9 @@ public class CrawlURLFetch_p {
         
         if (fetcher != null) {
             prop.put("runs", 1);
-            prop.put("runs_status", (fetcher.isAlive()) ? STAT_THREAD_ALIVE :
-                (fetcher.paused) ? STAT_THREAD_PAUSED : STAT_THREAD_STOPPED);
+            prop.put("runs_status",
+                    ((fetcher.paused && fetcher.isAlive()) ? STAT_THREAD_PAUSED :
+                    (fetcher.isAlive()) ? STAT_THREAD_ALIVE : STAT_THREAD_STOPPED));
             prop.put("runs_totalRuns",          URLFetcher.totalRuns);
             prop.put("runs_totalFetchedURLs",   URLFetcher.totalFetchedURLs);
             prop.put("runs_totalFailedURLs",    URLFetcher.totalFailed);
@@ -180,7 +189,7 @@ public class CrawlURLFetch_p {
         if (savedURLs.size() == 0) return 0;
         prop.put("saved", 1);
         for (int i=0; i<savedURLs.size(); i++)
-            prop.put("saved_urls_" + i + "url", savedURLs.get(i));
+            prop.put("saved_urls_" + i + "_url", savedURLs.get(i));
         prop.put("saved_urls", savedURLs.size());
         return savedURLs.size();
     }
@@ -218,7 +227,7 @@ public class CrawlURLFetch_p {
         if (count != null && count.matches("\\d+")) r = Long.parseLong(count);
         if (r < 1) return -1;
         
-        r *= 3600;
+        r *= 3600000;
         if (type.equals("weeks"))       return r * 24 * 7;
         else if (type.equals("days"))   return r * 24;
         else if (type.equals("hours"))  return r;
@@ -285,22 +294,24 @@ public class CrawlURLFetch_p {
                     url = getDLURL();
                     if (url == null) {
                         serverLog.logSevere(this.getName(), "canceled because no valid URL for the URL-list could be determinded");
-                        break;
+                        return;
                     }
                     totalFetchedURLs += stackURLs(getURLs(url));
                     lastRun = System.currentTimeMillis() - start;
                     totalRuns++;
-                    if (this.delay < 0) {
-                        break;
-                    } else if (this.delay == 0) {
-                        this.paused = true;
-                        while (this.paused) this.wait();
-                    } else {
-                        this.paused = true;
-                        this.wait(this.delay);
+                    if (this.delay < 0 || isInterrupted()) {
+                        return;
+                    } else synchronized (this) {
+                        if (this.delay == 0) {
+                            this.paused = true;
+                            while (this.paused) this.wait();
+                        } else {
+                            this.paused = true;
+                            this.wait(this.delay);
+                        }
                     }
                     this.paused = false;
-                } catch (InterruptedException e) { break; }
+                } catch (InterruptedException e) { return; }
             }
         }
         
@@ -327,7 +338,7 @@ public class CrawlURLFetch_p {
             this.lastFailed = 0;
             if (urls == null) return 0;
             String reason;
-            for (int i=0; i<urls.length; i++) {
+            for (int i=0; i<urls.length && !isInterrupted(); i++) {
                 serverLog.logFinest(this.getName(), "stacking " + urls[i]);
                 reason = this.sb.sbStackCrawlThread.stackCrawl(
                         urls[i],
@@ -339,6 +350,7 @@ public class CrawlURLFetch_p {
                         this.profile);
                 if (reason != null)  {
                     this.lastFailed++;
+                    totalFailed++;
                     this.failed.put(urls[i], reason);
                     try {
                         plasmaCrawlEURL.Entry ee = this.sb.errorURL.newEntry(
@@ -346,7 +358,7 @@ public class CrawlURLFetch_p {
                                 null,
                                 yacyCore.seedDB.mySeed.hash,
                                 yacyCore.seedDB.mySeed.hash,
-                                null,
+                                "",
                                 reason,
                                 new kelondroBitfield());
                         ee.store();

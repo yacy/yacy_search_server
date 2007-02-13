@@ -12,18 +12,22 @@
         <p>
           The newly added URLs will be crawled without any filter restricions except of the <em>static</em> stop-words.
           The Re-Crawl option isn't used and the sites won't be stored in the Proxy Cache. Text and media types will be indexed.
-          Since these URLs are explicitely requested from another peer, they won't be distributed for remote indexing.
+          Since these URLs will be requested explicitely from another peer, they won't be distributed for remote indexing.
         </p>
         <dl>
           <dt><label for="url">Fetch from URL</label>:</dt>
           <dd>
             <input type="radio" name="source" value="url" id="url" checked="checked" />
             <input type="text" id="host" name="host" size="60" value="#[host]#" />
-            #(saved)#::<br />
-            Or select previously entered URL: <select name="savedURL">#{urls}#
-              <option>#[url]#</option>
-            </select>#(/saved)#
             #(hostError)#::&nbsp;<span class="error">Malformed URL</span>#(/hostError)#
+            #(saved)#::
+          </dd>
+          <dt><label for="savedURL">Or select previously entered URL</label>:</dt>
+          <dd>
+            <input type="radio" name="source" id="savedURL" value="saved" />
+            <select name="saved">#{urls}#
+              <option>#[url]#</option>#{/urls}# 
+            </select>#(/saved)#
           </dd>
           
           #(peersKnown)#::
@@ -56,36 +60,39 @@
           <dt><input type="submit" name="start" value="Fetch URLs" /></dt>
         </dl>
       </fieldset>
-      
-      #(threadError)#::
-      <span class="error">Error on stopping thread, it isn't alive anymore</span>::
-      <span class="error">Error on restarting thread, it isn't alive anymore</span>#(/threadError)#
-      
-      #(runs)#::
+    </form>
+    
+    #(threadError)#::
+    <span class="error">Error on stopping thread, it isn't alive anymore</span>::
+    <span class="error">Error on restarting thread, it isn't alive anymore</span>#(/threadError)#
+    
+    #(runs)#::
+    <form method="post" action="CrawlURLFetch_p.html" enctype="multipart/form-data">
       <fieldset><legend>Thread to fetch URLs is #(status)#running::stopped::paused#(/status)#</legend>
         <dl>
           <dt>Total runs:</dt><dd>#[totalRuns]#</dd>
-          <dt>Last run duration:</dt><dd>#[lastRun]#</dd>
-          <dt>Last server response:</dt><dd>#[lastServerResponse]#</dd>
           <dt>Total fetched URLs:</dt><dd>#[totalFetchedURLs]#</dd>
           <dt>Total failed URLs:</dt><dd>#[totalFailedURLs]#</dd>
+          <dt>Last run duration:</dt><dd>#[lastRun]# ms</dd>
+          <dt>Last server response:</dt><dd>#[lastServerResponse]#</dd>
           <dt>Last fetched URLs:</dt><dd>#[lastFetchedURLs]#</dd>
           <dt>Failed URLs:</dt>
           <dd>
             #[error]#
             <ul>#{error}# 
-              <li><span class="error">#[reason]#</span>: #[url]#</li>#{/error}#
+              <li><span class="error">#[reason]#</span>: <a href="#[url]#">#[url]#</a></li>#{/error}#
             </ul> 
           </dd>
           <dt>#(status)#
             <input type="submit" name="stop" value="Stop Thread" />::
             <input type="submit" name="restart" value="Restart Thread" />::
-            <input type="submit" name="resume" value="Resume Thread" />#(/status)#
+            <input type="submit" name="stop" value="Stop Thread" />
+            <input type="submit" name="restart" value="Restart Thread" />#(/status)#
           </dt>
         </dl>
       </fieldset>
-      #(/runs)#
     </form>
+    #(/runs)#
     #%env/templates/footer.template%#
   </body>
 </html>
