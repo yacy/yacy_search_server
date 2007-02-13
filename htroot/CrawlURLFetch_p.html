@@ -7,49 +7,60 @@
   <body id="CrawlURLFetch_p">
     #%env/templates/header.template%#
     <h2>URL-Fetcher</h2>
-    <p><!-- desc --></p>
     <form method="post" action="CrawlURLFetch_p.html" enctype="multipart/form-data">
-      <p>
-        All newly added URLs will be crawled using the <span class="tt">Proxy</span> Crawl Profile.
-      </p>
       <fieldset><legend>Fetch new URLs to crawl</legend>
+        <p>
+          The newly added URLs will be crawled without any filter restricions except of the <em>static</em> stop-words.
+          The Re-Crawl option isn't used and the sites won't be stored in the Proxy Cache. Text and media types will be indexed.
+          Since these URLs are explicitely requested from another peer, they won't be distributed for remote indexing.
+        </p>
         <dl>
           <dt><label for="url">Fetch from URL</label>:</dt>
           <dd>
             <input type="radio" name="source" value="url" id="url" checked="checked" />
             <input type="text" id="host" name="host" size="60" value="#[host]#" />
-            #(hostError)#::<span class="error">Malformed URL</span>#(/hostError)#
+            #(saved)#::<br />
+            Or select previously entered URL: <select name="savedURL">#{urls}#
+              <option>#[url]#</option>
+            </select>#(/saved)#
+            #(hostError)#::&nbsp;<span class="error">Malformed URL</span>#(/hostError)#
           </dd>
+          
           #(peersKnown)#::
           <dt><label for="peer">Fetch from Peer</label>:</dt>
           <dd>
             <input type="radio" name="source" value="peer" id="peer" disabled="disabled" />
-            <select name="peerhash" disabled="disabled">#{peers}# 
+            <select name="peerhash" disabled="disabled">
+              <option value="random" selected="selected">Choose a random peer</option>#{peers}# 
               <option value="#[hash]#">#[name]#</option>#{/peers}# 
             </select>
-            #(peerError)#::<span class="error">
+            #(peerError)#::
+            &nbsp;<span class="error">Error fetching URL-list from <span class="tt">#[hash]#:#[name]#</span></span>::
+            &nbsp;<span class="error">Peer with hash <span class="tt">#[hash]#</span> doesn't seem to be online anymore</span>#(/peerError)#
           </dd>#(/peersKnown)#
-          <dt><label for="type">List-type</label>:</dt>
+          
+          <dt>Frequency:</dt>
           <dd>
-            <select name="type" id="type">
-              <option value="text">Text</option>
-              <option value="xml" disabled="disabled">XML</option>
-            </select>
-          </dd>
-          <dt><label for="regularly">Run regularly</label>:</dt>
-          <dd>
-            <input type="checkbox" name="regularly" id="regularly" disabled="disabled" />,
+            <input type="radio" name="reg" value="once" id="once" checked="checked" /> <label for="once">Fetch only once</label><br />
+            <input type="radio" name="reg" value="self_det" id="self_det" disabled="disabled"/> <label for="self_det">Fetch when queue is empty</label><br />
+            <input type="radio" name="reg" value="delay" id="delay" /> <label for="delay">Fetch in a specified delay</label>:
             <label for="frequency">every</label>
-            <input type="text" name="frequency" id="frequency" text-align="left" size="5" disabled="disabled" />
-            <select name="freq_type" disabled="disabled">
+            &nbsp;<input type="text" name="frequency" id="frequency" text-align="left" size="2" style="text-align: right;" maxlength="2"/>
+            <select name="freq_type">
               <option value="weeks">Weeks</option>
               <option value="days" selected="selected">Days</option>
               <option value="hours">Hours</option>
             </select>
+            #(freqError)#::&nbsp;<span class="error">Invalid period, fetching only once</span>#(/freqError)#
           </dd>
           <dt><input type="submit" name="start" value="Fetch URLs" /></dt>
         </dl>
       </fieldset>
+      
+      #(threadError)#::
+      <span class="error">Error on stopping thread, it isn't alive anymore</span>::
+      <span class="error">Error on restarting thread, it isn't alive anymore</span>#(/threadError)#
+      
       #(runs)#::
       <fieldset><legend>Thread to fetch URLs is #(status)#running::stopped::paused#(/status)#</legend>
         <dl>
@@ -59,7 +70,18 @@
           <dt>Total fetched URLs:</dt><dd>#[totalFetchedURLs]#</dd>
           <dt>Total failed URLs:</dt><dd>#[totalFailedURLs]#</dd>
           <dt>Last fetched URLs:</dt><dd>#[lastFetchedURLs]#</dd>
-          <dt><input type="submit" name="stop" value="Stop Thread" /></dt>
+          <dt>Failed URLs:</dt>
+          <dd>
+            #[error]#
+            <ul>#{error}# 
+              <li><span class="error">#[reason]#</span>: #[url]#</li>#{/error}#
+            </ul> 
+          </dd>
+          <dt>#(status)#
+            <input type="submit" name="stop" value="Stop Thread" />::
+            <input type="submit" name="restart" value="Restart Thread" />::
+            <input type="submit" name="resume" value="Resume Thread" />#(/status)#
+          </dt>
         </dl>
       </fieldset>
       #(/runs)#
