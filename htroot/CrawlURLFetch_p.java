@@ -16,13 +16,13 @@ import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverSwitch;
-import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyVersion;
 
 public class CrawlURLFetch_p {
     
@@ -36,8 +36,6 @@ public class CrawlURLFetch_p {
     private static final long STAT_THREAD_ALIVE = 0;
     private static final long STAT_THREAD_STOPPED = 1;
     private static final long STAT_THREAD_PAUSED = 2;
-    
-    public static final float MIN_PEER_VERSION_LIST_SERVLET = 0.504033F;
     
     private static URLFetcher fetcher = null;
     private static plasmaCrawlProfile.entry profile = null;
@@ -212,7 +210,7 @@ public class CrawlURLFetch_p {
             prop.put("peersKnown", 1);
             try {
                 TreeMap hostList = new TreeMap();
-                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, MIN_PEER_VERSION_LIST_SERVLET);
+                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, yacyVersion.YACY_PROVIDES_CRAWLS_VIA_LIST_HTML);
                 while (e.hasMoreElements()) {
                     yacySeed seed = (yacySeed) e.nextElement();
                     if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
@@ -340,7 +338,7 @@ public class CrawlURLFetch_p {
             
             // choose random seed
             yacySeed ys = null;
-            Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, MIN_PEER_VERSION_LIST_SERVLET);
+            Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, yacyVersion.YACY_PROVIDES_CRAWLS_VIA_LIST_HTML);
             int num = new Random().nextInt(yacyCore.seedDB.sizeConnected()) + 1;
             Object o;
             for (int i=0; i<num && e.hasMoreElements(); i++) {
@@ -416,7 +414,7 @@ public class CrawlURLFetch_p {
                     String encoding = res.responseHeader.getCharacterEncoding();
                     
                     if (encoding == null) encoding = "US-ASCII";
-                    r = parseText(wikiCode.deReplaceHTMLEntities(new String(cbs, encoding)));
+                    r = parseText(new String(cbs, encoding));
                 }
                 httpc.returnInstance(con);
             } catch (IOException e) {  }

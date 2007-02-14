@@ -48,4 +48,5 @@ public final class yacyVersion {
     public static final float YACY_SUPPORTS_GZIP_POST_REQUESTS = (float) 0.40300772;
     public static final float YACY_ACCEPTS_RANKING_TRANSMISSION = (float) 0.414;
     public static final float YACY_HANDLES_COLLECTION_INDEX = (float) 0.486;
+    public static final float YACY_PROVIDES_CRAWLS_VIA_LIST_HTML = (float) 0.50403367;
 }
