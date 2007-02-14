@@ -37,6 +37,8 @@ public class CrawlURLFetch_p {
     private static final long STAT_THREAD_STOPPED = 1;
     private static final long STAT_THREAD_PAUSED = 2;
     
+    public static final float MIN_PEER_VERSION_LIST_SERVLET = 0.504033F;
+    
     private static URLFetcher fetcher = null;
     private static plasmaCrawlProfile.entry profile = null;
     private static ArrayList savedURLs = new ArrayList();
@@ -74,6 +76,12 @@ public class CrawlURLFetch_p {
                     }
                 }
                 
+                int count = 50;
+                if (post.get("amount", "").matches("\\d+")) {
+                    count = Integer.parseInt(post.get("amount", ""));
+                    if (count > 999) count = 999;
+                }
+                
                 if (fetcher != null) fetcher.interrupt();
                 fetcher = null;
                 if (post.get("source", "").equals("peer") &&
@@ -81,6 +89,7 @@ public class CrawlURLFetch_p {
                     fetcher = new URLFetcher(
                             env,
                             profile,
+                            count,
                             frequency);
                 } else {
                     URL url = null;
@@ -103,9 +112,9 @@ public class CrawlURLFetch_p {
                     } else if (post.get("source", "").equals("peer")) {
                         yacySeed ys = null;
                         try {
-                            ys = yacyCore.seedDB.getConnected(post.get("peerhash", ""));
+                            ys = yacyCore.seedDB.get(post.get("peerhash", ""));
                             if (ys != null) {
-                                url = new URL("http://" + ys.getAddress() + "/yacy/urllist.html");
+                                url = new URL("http://" + ys.getAddress() + URLFetcher.LIST_SERVLET);
                             } else {
                                 prop.put("peerError", ERR_PEER_OFFLINE);
                                 prop.put("peerError_hash", post.get("peerhash", ""));
@@ -122,6 +131,7 @@ public class CrawlURLFetch_p {
                                 env,
                                 profile,
                                 url,
+                                count,
                                 frequency);
                     }
                 }
@@ -142,12 +152,14 @@ public class CrawlURLFetch_p {
                         fetcher = new URLFetcher(
                                 env,
                                 profile,
+                                fetcher.count,
                                 fetcher.delay);
                     } else {
                         fetcher = new URLFetcher(
                                 env,
                                 profile,
                                 fetcher.url,
+                                fetcher.count,
                                 fetcher.delay);
                     }
                     fetcher.start();
@@ -200,7 +212,7 @@ public class CrawlURLFetch_p {
             prop.put("peersKnown", 1);
             try {
                 TreeMap hostList = new TreeMap();
-                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, MIN_PEER_VERSION_LIST_SERVLET);
                 while (e.hasMoreElements()) {
                     yacySeed seed = (yacySeed) e.nextElement();
                     if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
@@ -209,6 +221,7 @@ public class CrawlURLFetch_p {
                 String peername;
                 while ((peername = (String) hostList.firstKey()) != null) {
                     final String Hash = (String) hostList.get(peername);
+                    if (Hash.equals(yacyCore.seedDB.mySeed.hash)) continue;
                     prop.put("peersKnown_peers_" + peerCount + "_hash", Hash);
                     prop.put("peersKnown_peers_" + peerCount + "_name", peername);
                     hostList.remove(peername);
@@ -239,6 +252,8 @@ public class CrawlURLFetch_p {
         public static final long DELAY_ONCE = -1;
         public static final long DELAY_SELF_DET = 0;
         
+        private static final String LIST_SERVLET = "/yacy/list.html?list=queueUrls";
+        
         public static int totalRuns = 0;
         public static int totalFetchedURLs = 0;
         public static int totalFailed = 0;
@@ -251,6 +266,7 @@ public class CrawlURLFetch_p {
         public int        lastFailed = 0;
         
         public final URL url;
+        public final int count;
         public final long delay;
         public final plasmaSwitchboard sb;
         public final plasmaCrawlProfile.entry profile;
@@ -261,12 +277,14 @@ public class CrawlURLFetch_p {
                 serverSwitch env,
                 plasmaCrawlProfile.entry profile,
                 URL url,
+                int count,
                 long delayMs) {
             if (env == null || profile == null || url == null)
                 throw new NullPointerException("env, profile or url must not be null");
             this.sb = (plasmaSwitchboard)env;
             this.profile = profile;
             this.url = url;
+            this.count = count;
             this.delay = delayMs;
             this.setName("URLFetcher");
         }
@@ -274,12 +292,14 @@ public class CrawlURLFetch_p {
         public URLFetcher(
                 serverSwitch env,
                 plasmaCrawlProfile.entry profile,
+                int count,
                 long delayMs) {
             if (env == null || profile == null)
                 throw new NullPointerException("env or profile must not be null");
             this.sb = (plasmaSwitchboard)env;
             this.profile = profile;
             this.url = null;
+            this.count = count;
             this.delay = delayMs;
             this.setName("URLFetcher");
         }
@@ -297,7 +317,7 @@ public class CrawlURLFetch_p {
                         return;
                     }
                     totalFetchedURLs += stackURLs(getURLs(url));
-                    lastRun = System.currentTimeMillis() - start;
+                    this.lastRun = System.currentTimeMillis() - start;
                     totalRuns++;
                     if (this.delay < 0 || isInterrupted()) {
                         return;
@@ -320,7 +340,7 @@ public class CrawlURLFetch_p {
             
             // choose random seed
             yacySeed ys = null;
-            Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, 0F);
+            Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, MIN_PEER_VERSION_LIST_SERVLET);
             int num = new Random().nextInt(yacyCore.seedDB.sizeConnected()) + 1;
             Object o;
             for (int i=0; i<num && e.hasMoreElements(); i++) {
@@ -330,16 +350,18 @@ public class CrawlURLFetch_p {
             if (ys == null) return null;
             
             try {
-                return new URL("http://" + ys.getAddress() + "/yacy/urllist.html");
+                return new URL("http://" + ys.getAddress() + LIST_SERVLET + "&count=" + this.count);
             } catch (MalformedURLException ee) { return null; }
         }
         
         private int stackURLs(String[] urls) throws InterruptedException {
             this.lastFailed = 0;
+            this.lastFetchedURLs = 0;
             if (urls == null) return 0;
             String reason;
             for (int i=0; i<urls.length && !isInterrupted(); i++) {
-                serverLog.logFinest(this.getName(), "stacking " + urls[i]);
+                if (urls[i].trim().length() == 0) continue;
+                serverLog.logFine(this.getName(), "stacking " + urls[i]);
                 reason = this.sb.sbStackCrawlThread.stackCrawl(
                         urls[i],
                         null,
@@ -348,7 +370,9 @@ public class CrawlURLFetch_p {
                         new Date(),
                         this.profile.generalDepth(),
                         this.profile);
-                if (reason != null)  {
+                if (reason == null) {
+                    this.lastFetchedURLs++;
+                } else {
                     this.lastFailed++;
                     totalFailed++;
                     this.failed.put(urls[i], reason);
@@ -366,7 +390,7 @@ public class CrawlURLFetch_p {
                     } catch (MalformedURLException e) {  }
                 }
             }
-            return urls.length - this.lastFailed;
+            return this.lastFetchedURLs;
         }
         
         private String[] getURLs(URL url) {
@@ -384,7 +408,7 @@ public class CrawlURLFetch_p {
                 header.put(httpHeader.ACCEPT_ENCODING, "US-ASCII");
                 header.put(httpHeader.HOST, url.getHost());
                 
-                httpc.response res = con.GET(url.getPath(), header);
+                httpc.response res = con.GET(url.getPath() + "?" + url.getQuery(), header);
                 serverLog.logFine(this.getName(), "downloaded URL-list from " + url + " (" + res.statusCode + ")");
                 this.lastServerResponse = res.statusCode + " (" + res.statusText + ")";
                 if (res.status.startsWith("2")) {

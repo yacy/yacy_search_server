@@ -49,18 +49,24 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
+import java.io.IOException;
 
 import de.anomic.data.listManager;
+import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaCrawlNURL;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 
 public final class list {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
-        if (post == null || ss == null ) { return null; }
-
+        if (post == null || ss == null)
+            throw new NullPointerException("post: " + post + ", sb: " + ss);
+        
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         
@@ -83,11 +89,27 @@ public final class list {
             } // if filenamesarray.length > 0
 
             prop.put("list",out);
+        } else if (col.length() == 0 && post.get("list", "").equals("queueUrls")) {
+            // list urls from remote crawler queue for other peers
+            int count = 50;
+            if (post.get("count", "").length() > 0 && post.get("count", "").matches("\\d+"))
+                count = Integer.parseInt(post.get("count", ""));
+            
+            final StringBuffer sb = new StringBuffer();
+            plasmaCrawlNURL.Entry entry;
+            for (int i=0; i<count && count - i<((plasmaSwitchboard)ss).noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT); i++) {
+                try {
+                    entry = ((plasmaSwitchboard)ss).noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+                    sb.append(wikiCode.deReplaceHTMLEntities(entry.url().toNormalform())).append("\n");
+                } catch (IOException e) {
+                    serverLog.logSevere("/yacy/list.html", "CANNOT FETCH ENTRY " + i + "/" + count + ": " + e.getMessage());
+                }
+            }
+            prop.put("list", sb);
         } else {
             prop.putASIS("list","");
         }
 
         return prop;
     }
-
 }

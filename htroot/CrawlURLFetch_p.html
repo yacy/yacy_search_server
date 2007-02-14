@@ -33,11 +33,13 @@
           #(peersKnown)#::
           <dt><label for="peer">Fetch from Peer</label>:</dt>
           <dd>
-            <input type="radio" name="source" value="peer" id="peer" disabled="disabled" />
-            <select name="peerhash" disabled="disabled">
+            <input type="radio" name="source" value="peer" id="peer" />
+            <select name="peerhash">
               <option value="random" selected="selected">Choose a random peer</option>#{peers}# 
               <option value="#[hash]#">#[name]#</option>#{/peers}# 
             </select>
+            &nbsp;<label for="amount">Amount of URLs to request</label>:
+            <input type="text" name="amount" id="amount" value="50" maxlength="3" size="3" />
             #(peerError)#::
             &nbsp;<span class="error">Error fetching URL-list from <span class="tt">#[hash]#:#[name]#</span></span>::
             &nbsp;<span class="error">Peer with hash <span class="tt">#[hash]#</span> doesn't seem to be online anymore</span>#(/peerError)#
@@ -49,7 +51,7 @@
             <input type="radio" name="reg" value="self_det" id="self_det" disabled="disabled"/> <label for="self_det">Fetch when queue is empty</label><br />
             <input type="radio" name="reg" value="delay" id="delay" /> <label for="delay">Fetch in a specified delay</label>:
             <label for="frequency">every</label>
-            &nbsp;<input type="text" name="frequency" id="frequency" text-align="left" size="2" style="text-align: right;" maxlength="2"/>
+            &nbsp;<input type="text" name="frequency" id="frequency" size="2" style="text-align: right;" maxlength="2"/>
             <select name="freq_type">
               <option value="weeks">Weeks</option>
               <option value="days" selected="selected">Days</option>
@@ -80,7 +82,7 @@
           <dd>
             #[error]#
             <ul>#{error}# 
-              <li><span class="error">#[reason]#</span>: <a href="#[url]#">#[url]#</a></li>#{/error}#
+              <li><span class="error">#[reason]#</span>: <a href="#[url]#">#[url]#</a></li>#{/error}# 
             </ul> 
           </dd>
           <dt>#(status)#
