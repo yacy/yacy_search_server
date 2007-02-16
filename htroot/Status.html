@@ -13,8 +13,14 @@
     
     <form action="Steering.html" method="get" class="PeerControl">
       <fieldset>#(restartEnabled)#::
-        <input type="submit" name="restart" value="Restart" />#(/restartEnabled)#
-        <input type="submit" name="shutdown" value="Shutdown" />
+        <button type="submit" name="restart" value="Restart">
+          <img src="/env/grafics/lock.gif" alt="Only the administrator may restart this peer" />
+          Restart
+        </button>#(/restartEnabled)#
+        <button type="submit" name="shutdown" value="Shutdown">
+          <img src="/env/grafics/lock.gif" alt="Only the administrator may shutdown this peer" />
+          Shutdown
+        </button>
       </fieldset>
     </form>
     

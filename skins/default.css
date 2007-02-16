@@ -228,7 +228,7 @@ fieldset {
   border:1px solid #aaa;
 }
 
-input, select, textarea {
+input, select, textarea, button {
   color: black;
   background-color: white;
 }

@@ -1,21 +1,21 @@
 /* Skin */
-body			{ color: #777; background-color: #000; }
+body				{ color: #777; background-color: #000; }
 
 a:link, a:visited	{ color: #888; }
-a:hover			{ color: #999; }
+a:hover				{ color: #999; }
 
 
 /* Menu */
 .menugroup h3,
 .SubMenugroup h3,
-.SubMenu h3		{ background-color: #222; color: #777; }
+.SubMenu h3				{ background-color: #222; color: #777; }
 
 a.MenuItemLink,
-ul.SubMenu em		{ background-color: #444; color: #888; }
+ul.SubMenu em			{ background-color: #444; color: #888; }
 a:hover.MenuItemLink	{ color:#AAA; }
 
 /* Head */
-div.head h1		{ background-color: #333; color: #AAA; }
+div.head h1			{ background-color: #333; color: #AAA; }
 
 /* Tables */
 .TableHeader		{ color: #777; background-color: #333; }
@@ -27,8 +27,8 @@ div.head h1		{ background-color: #333; color: #AAA; }
 
 /* Blog and Wiki*/
 .Post			{ background-color: #222; }
-.PostSubject		{ background-color: #555; }
-.PostSubject a		{ color: #666; }
+.PostSubject	{ background-color: #555; }
+.PostSubject a	{ color: #666; }
 .PostInfo		{ background-color:#333; }
 .PostInfo a		{ color: #666; }
 .PostBody		{ color: #666; }
@@ -38,7 +38,7 @@ div.head h1		{ background-color: #333; color: #AAA; }
 
 a.unknown		{ color: #666; }
 a.known			{ color: #600; }
-a.known:hover		{ color: #722; }
+a.known:hover	{ color: #722; }
 a.extern		{ color: #635; }
 
 /* in Bookmarks */
@@ -64,7 +64,7 @@ a.bookmarkAction		{ color: #999999; }
 .ProgressBarFill	{ background-color: #944; }
 
 /* Copyright info */
-.info			{ border-top: 1px solid gray; }
+.info				{ border-top: 1px solid gray; }
 
 /* Searchresults */
 .searchresults		{ border-top: 1px #000 dashed; }
@@ -80,12 +80,12 @@ a.bookmarkAction		{ color: #999999; }
 
 /* other */
 .settingsValue		{ color: #556699; }
-.Headline		{ background-color: #4070a0; color: white; }
-.Heading		{ background-color: #4070a0; }
+.Headline			{ background-color: #4070a0; color: white; }
+.Heading			{ background-color: #4070a0; }
 .error, .warning	{ color: red; }
-.success		{ color: green; }
-.Message		{ background-color: #eeeeee; }
-.example		{ background-color: #D3D3D3; }
+.success			{ color: green; }
+.Message			{ background-color: #eeeeee; }
+.example			{ background-color: #D3D3D3; }
 .hides:hover .hoverShow { background-color: #111; border-color: #333; }
 
 /* Log */
@@ -96,4 +96,4 @@ fieldset		{ color: #777; background-color: #222; border: 1px solid #555; }
 legend			{ color: #777; background-color: #2A2A2A; }
 form dt, dl.pairs dt	{ background-color: #2A2A2A; }
 form dd, dl.pairs dd	{ background-color: #222; }
-input, select, textarea	{ color: #777; background-color: #000; }
+input, select, textarea, button	{ color: #777; background-color: #000; }

@@ -134,6 +134,6 @@
       ::
       Enabled: Updating periodically to file #[seedFile]#.
       Last upload: #[lastUpload]# ago.
-    #(/seedServer)#
-  </td><td>&nbsp;</td></tr>
+    #(/seedServer)#</td>
+  </tr>
 </table>
