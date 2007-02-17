@@ -93,7 +93,7 @@ fi
 CLASSPATH=""
 for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done	
 for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
-CLASSPATH="classes:.:$CLASSPATH"
+CLASSPATH="classes:.:htroot:$CLASSPATH"
 
 
 cmdline="";

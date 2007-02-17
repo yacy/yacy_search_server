@@ -258,27 +258,28 @@ public class plasmaCrawlProfile {
                      boolean storeHTCache, boolean storeTXCache,
                      boolean remoteIndexing,
                      boolean xsstopw, boolean xdstopw, boolean xpstopw) {
+            if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
             String handle = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, crawlProfileHandleLength);
             mem = new HashMap();
-            mem.put("handle", handle);
-            mem.put("name", name);
-            mem.put("startURL", startURL);
-            mem.put("generalFilter", generalFilter);
-            mem.put("specificFilter", specificFilter);
-            mem.put("generalDepth", Integer.toString(generalDepth));
-            mem.put("specificDepth", Integer.toString(specificDepth));
-            mem.put("recrawlIfOlder", Integer.toString(recrawlIfOlder));
-            mem.put("domFilterDepth", Integer.toString(domFilterDepth));
-            mem.put("domMaxPages", Integer.toString(domMaxPages));
-            mem.put("crawlingQ", (crawlingQ) ? "true" : "false"); // crawling of urls with '?'
-            mem.put("indexText", (indexText) ? "true" : "false");
-            mem.put("indexMedia", (indexMedia) ? "true" : "false");
-            mem.put("storeHTCache", (storeHTCache) ? "true" : "false");
-            mem.put("storeTXCache", (storeTXCache) ? "true" : "false");
-            mem.put("remoteIndexing", (remoteIndexing) ? "true" : "false");
-            mem.put("xsstopw", (xsstopw) ? "true" : "false"); // exclude static stop-words
-            mem.put("xdstopw", (xdstopw) ? "true" : "false"); // exclude dynamic stop-word
-            mem.put("xpstopw", (xpstopw) ? "true" : "false"); // exclude parent stop-words
+            mem.put("handle",           handle);
+            mem.put("name",             name);
+            mem.put("startURL",         (startURL == null) ? "" : startURL);
+            mem.put("generalFilter",    (generalFilter == null) ? ".*" : generalFilter);
+            mem.put("specificFilter",   (specificFilter == null) ? ".*" : specificFilter);
+            mem.put("generalDepth",     Integer.toString(generalDepth));
+            mem.put("specificDepth",    Integer.toString(specificDepth));
+            mem.put("recrawlIfOlder",   Integer.toString(recrawlIfOlder));
+            mem.put("domFilterDepth",   Integer.toString(domFilterDepth));
+            mem.put("domMaxPages",      Integer.toString(domMaxPages));
+            mem.put("crawlingQ",        (crawlingQ) ? "true" : "false"); // crawling of urls with '?'
+            mem.put("indexText",        (indexText) ? "true" : "false");
+            mem.put("indexMedia",       (indexMedia) ? "true" : "false");
+            mem.put("storeHTCache",     (storeHTCache) ? "true" : "false");
+            mem.put("storeTXCache",     (storeTXCache) ? "true" : "false");
+            mem.put("remoteIndexing",   (remoteIndexing) ? "true" : "false");
+            mem.put("xsstopw",          (xsstopw) ? "true" : "false"); // exclude static stop-words
+            mem.put("xdstopw",          (xdstopw) ? "true" : "false"); // exclude dynamic stop-word
+            mem.put("xpstopw",          (xpstopw) ? "true" : "false"); // exclude parent stop-words
 
             doms = new HashMap();
         }

@@ -48,18 +48,21 @@
 // javac -classpath .:../../classes list.java
 // if the shell's current path is HTROOT
 
-import java.io.File;
-import java.io.IOException;
+// contains contributions by [FB] to support listing URLs for URL Fetcher
 
+import java.io.File;
+
+import de.anomic.data.URLFetcherStack;
 import de.anomic.data.listManager;
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlNURL;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.net.URL;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 
 public final class list {
 
@@ -72,6 +75,7 @@ public final class list {
         
         final String col = post.get("col", "");
         final File listsPath = new File(ss.getRootPath(),ss.getConfig("listsPath", "DATA/LISTS"));
+        final String otherPeerName = yacyCore.seedDB.get(post.get("iam", null)).get(yacySeed.NAME, "unknown");
 
         if (col.equals("black")) {
             final StringBuffer out = new StringBuffer();
@@ -89,27 +93,39 @@ public final class list {
             } // if filenamesarray.length > 0
 
             prop.put("list",out);
-        } else if (col.length() == 0 && post.get("list", "").equals("queueUrls")) {
-            // list urls from remote crawler queue for other peers
-            int count = 50;
-            if (post.get("count", "").length() > 0 && post.get("count", "").matches("\\d+"))
-                count = Integer.parseInt(post.get("count", ""));
-            
-            final StringBuffer sb = new StringBuffer();
-            plasmaCrawlNURL.Entry entry;
-            for (int i=0; i<count && count - i<((plasmaSwitchboard)ss).noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT); i++) {
-                try {
-                    entry = ((plasmaSwitchboard)ss).noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT);
-                    sb.append(wikiCode.deReplaceHTMLEntities(entry.url().toNormalform())).append("\n");
-                } catch (IOException e) {
-                    serverLog.logSevere("/yacy/list.html", "CANNOT FETCH ENTRY " + i + "/" + count + ": " + e.getMessage());
+        }
+        // start contrib by [FB]
+        else if (col.length() == 0 && post.get("list", "").equals("queueUrls")) {
+            final URLFetcherStack db = CrawlURLFetchStack_p.getURLFetcherStack(ss);
+            final String display = post.get("display", "list");
+            if (display.equals("list")) {
+                // list urls from remote crawler queue for other peers
+                final int count = Math.min(post.getInt("count", 50), CrawlURLFetchStack_p.maxURLsPerFetch);
+                if (count > 0 && db.size() > 0) {
+                    final StringBuffer sb = new StringBuffer();
+                    
+                    URL url;
+                    int cnt = 0;
+                    for (int i=0; i<count; i++) {
+                        if ((url = db.pop()) == null) continue;
+                        sb.append(wikiCode.deReplaceHTMLEntities(url.toNormalform())).append("\n");
+                        cnt++;
+                    }
+                    prop.put("list", sb);
+                    CrawlURLFetchStack_p.fetchMap.put(otherPeerName, new Integer(cnt));
+                    serverLog.logInfo("URLFETCHER", "sent " + cnt + " URLs to peer " + otherPeerName);
+                } else {
+                    prop.put("list", "");
+                    serverLog.logInfo("URLFETCHER", "couldn't satisfy URL request of " + otherPeerName + ": stack is empty");
                 }
+            } else if (display.equals("count")) {
+                prop.put("list", db.size());
             }
-            prop.put("list", sb);
+        // end contrib by [FB]
         } else {
             prop.putASIS("list","");
         }
-
+        
         return prop;
     }
 }

@@ -1,4 +1,43 @@
 // CrawlURLFetch_p.java
+// -------------------------------------
+// part of YACY
+//
+// (C) 2007 by Franz Brausse
+//
+// last change: $LastChangedDate: $ by $LastChangedBy: $
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+// Using this software in any meaning (reading, learning, copying, compiling,
+// running) means that you agree that the Author(s) is (are) not responsible
+// for cost, loss of data or any harm that may be caused directly or indirectly
+// by usage of this softare or this documentation. The usage of this software
+// is on your own risk. The installation and usage (starting/running) of this
+// software may allow other people or application to access your computer and
+// any attached devices and is highly dependent on the configuration of the
+// software which must be done by the user of the software; the author(s) is
+// (are) also not responsible for proper configuration and usage of the
+// software, even if provoked by documentation provided together with
+// the software.
+//
+// Any changes to this file according to the GPL as documented in the file
+// gpl.txt aside this file in the shipment you received can be done to the
+// lines that follows this copyright notice here, but changes must not be
+// done inside the copyright notive above. A re-distribution must contain
+// the intact and unchanged copyright notice.
+// Contributions and changes to the program code must be marked as such.
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -17,6 +56,7 @@ import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverSwitch;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
@@ -41,16 +81,11 @@ public class CrawlURLFetch_p {
     private static plasmaCrawlProfile.entry profile = null;
     private static ArrayList savedURLs = new ArrayList();
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        serverObjects prop = new serverObjects();
-        prop.put("host", "");
-        listURLs(prop);                     // List previously saved URLs for easy selection
-        listPeers(prop);                    // List known hosts
-        
+    public static plasmaCrawlProfile.entry getCrawlProfile(serverSwitch env) {
         if (profile == null) {
             profile = ((plasmaSwitchboard)env).profiles.newEntry(
                     "URLFetcher",           // Name
-                    null,                   // URL
+                    "",                     // URL
                     ".*", ".*",             // General / specific filter
                     0, 0,                   // General / specific depth
                     -1, -1, -1,             // Recrawl / Dom-filter depth / Dom-max-pages
@@ -60,6 +95,20 @@ public class CrawlURLFetch_p {
                     false,                  // Remote indexing
                     true, false, false);    // Exclude static / dynamic / parent stopwords
         }
+        return profile;
+    }
+    
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        serverObjects prop = new serverObjects();
+        prop.put("host", "");
+        
+        // List previously saved URLs for easy selection
+        listURLs(prop);
+        
+        // List known hosts
+        listPeers(prop,
+                post != null && post.containsKey("checkPeerURLCount"),
+                ((plasmaSwitchboard)env).remoteProxyConfig);
         
         if (post != null) {
             if (post.containsKey("start")) {
@@ -82,59 +131,65 @@ public class CrawlURLFetch_p {
                 
                 if (fetcher != null) fetcher.interrupt();
                 fetcher = null;
-                if (post.get("source", "").equals("peer") &&
-                        post.get("peerhash", "").equals("random")) {
-                    fetcher = new URLFetcher(
-                            env,
-                            profile,
-                            count,
-                            frequency);
-                } else {
-                    URL url = null;
-                    if (post.get("source", "").equals("url")) {
-                        try {
-                            url = new URL(post.get("host", null));
-                            if (!savedURLs.contains(url.toNormalform()))
-                                savedURLs.add(url.toNormalform());
-                            prop.put("host", post.get("host", url.toString()));
-                        } catch (MalformedURLException e) {
-                            prop.put("host", post.get("host", ""));
-                            prop.put("hostError", ERR_HOST_MALFORMED_URL);
-                        }
-                    } else if (post.get("source", "").equals("savedURL")) {
-                        try {
-                            url = new URL(post.get("saved", ""));
-                        } catch (MalformedURLException e) {
-                            /* should never appear, except for invalid input, see above */
-                        }
-                    } else if (post.get("source", "").equals("peer")) {
-                        yacySeed ys = null;
-                        try {
-                            ys = yacyCore.seedDB.get(post.get("peerhash", ""));
+                try {
+                    if (post.get("source", "").equals("peer") &&
+                            post.get("peerhash", "").equals("random")) {
+                        fetcher = new URLFetcher(
+                                env,
+                                getCrawlProfile(env),
+                                count,
+                                frequency);
+                    } else {
+                        URL url = null;
+                        if (post.get("source", "").equals("url")) {
+                            try {
+                                url = new URL(post.get("host", null));
+                                if (!savedURLs.contains(url.toNormalform()))
+                                    savedURLs.add(url.toNormalform());
+                                prop.put("host", post.get("host", url.toString()));
+                            } catch (MalformedURLException e) {
+                                prop.put("host", post.get("host", ""));
+                                prop.put("hostError", ERR_HOST_MALFORMED_URL);
+                            }
+                        } else if (post.get("source", "").equals("savedURL")) {
+                            try {
+                                url = new URL(post.get("saved", ""));
+                            } catch (MalformedURLException e) {
+                                /* should never appear, except for invalid input, see above */
+                            }
+                        } else if (post.get("source", "").equals("peer")) {
+                            yacySeed ys = null;
+                            ys = yacyCore.seedDB.get(post.get("peerhash", null));
                             if (ys != null) {
-                                url = new URL("http://" + ys.getAddress() + URLFetcher.LIST_SERVLET);
+                                if ((url = URLFetcher.getListServletURL(
+                                        ys.getAddress(),
+                                        URLFetcher.MODE_LIST,
+                                        count,
+                                        yacyCore.seedDB.mySeed.hash)) == null) {
+                                    prop.put("peerError", ERR_PEER_GENERAL_CONN);
+                                    prop.put("peerError_hash", post.get("peerhash", ""));
+                                    prop.put("peerError_name", ys.getName());
+                                }
                             } else {
                                 prop.put("peerError", ERR_PEER_OFFLINE);
                                 prop.put("peerError_hash", post.get("peerhash", ""));
                             }
-                        } catch (MalformedURLException e) {
-                            prop.put("peerError", ERR_PEER_GENERAL_CONN);
-                            prop.put("peerError_hash", post.get("peerhash", ""));
-                            prop.put("peerError_name", ys.getName());
+                        }
+                        
+                        if (url != null) {
+                            fetcher = new URLFetcher(
+                                    env,
+                                    getCrawlProfile(env),
+                                    url,
+                                    count,
+                                    frequency);
                         }
                     }
-                    
-                    if (url != null) {
-                        fetcher = new URLFetcher(
-                                env,
-                                profile,
-                                url,
-                                count,
-                                frequency);
-                    }
+                    if (fetcher != null)
+                        fetcher.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                if (fetcher != null)
-                    fetcher.start();
             }
             else if (post.containsKey("stop")) {
                 if (fetcher != null) {
@@ -145,22 +200,26 @@ public class CrawlURLFetch_p {
             }
             else if (post.containsKey("restart")) {
                 if (fetcher != null) {
-                    fetcher.interrupt();
-                    if (fetcher.url == null) {
-                        fetcher = new URLFetcher(
-                                env,
-                                profile,
-                                fetcher.count,
-                                fetcher.delay);
-                    } else {
-                        fetcher = new URLFetcher(
-                                env,
-                                profile,
-                                fetcher.url,
-                                fetcher.count,
-                                fetcher.delay);
+                    try {
+                        fetcher.interrupt();
+                        if (fetcher.url == null) {
+                            fetcher = new URLFetcher(
+                                    env,
+                                    getCrawlProfile(env),
+                                    fetcher.count,
+                                    fetcher.delay);
+                        } else {
+                            fetcher = new URLFetcher(
+                                    env,
+                                    getCrawlProfile(env),
+                                    fetcher.url,
+                                    fetcher.count,
+                                    fetcher.delay);
+                        }
+                        fetcher.start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                    fetcher.start();
                 } else {
                     prop.put("threadError", ERR_THREAD_RESUME);
                 }
@@ -204,7 +263,7 @@ public class CrawlURLFetch_p {
         return savedURLs.size();
     }
     
-    private static int listPeers(serverObjects prop) {
+    private static int listPeers(serverObjects prop, boolean checkURLCount, httpRemoteProxyConfig theRemoteProxyConfig) {
         int peerCount = 0;
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
             prop.put("peersKnown", 1);
@@ -213,14 +272,15 @@ public class CrawlURLFetch_p {
                 final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, yacyVersion.YACY_PROVIDES_CRAWLS_VIA_LIST_HTML);
                 while (e.hasMoreElements()) {
                     yacySeed seed = (yacySeed) e.nextElement();
-                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
+                    if (seed != null && (!checkURLCount || getURLs2Fetch(seed, theRemoteProxyConfig) > 0))
+                        hostList.put(seed.get(yacySeed.NAME, "nameless"), seed.hash);
                 }
-
+                
                 String peername;
                 while ((peername = (String) hostList.firstKey()) != null) {
-                    final String Hash = (String) hostList.get(peername);
-                    if (Hash.equals(yacyCore.seedDB.mySeed.hash)) continue;
-                    prop.put("peersKnown_peers_" + peerCount + "_hash", Hash);
+                    final String hash = (String) hostList.get(peername);
+                    if (hash.equals(yacyCore.seedDB.mySeed.hash)) continue;
+                    prop.put("peersKnown_peers_" + peerCount + "_hash", hash);
                     prop.put("peersKnown_peers_" + peerCount + "_name", peername);
                     hostList.remove(peername);
                     peerCount++;
@@ -233,15 +293,37 @@ public class CrawlURLFetch_p {
         return peerCount;
     }
     
+    private static int getURLs2Fetch(yacySeed seed, httpRemoteProxyConfig theRemoteProxyConfig) {
+        try {
+            String answer = new String(httpc.wget(
+                    URLFetcher.getListServletURL(seed.getAddress(), URLFetcher.MODE_COUNT, 0, null),
+                    seed.getIP(),
+                    5000,
+                    null, null,
+                    theRemoteProxyConfig));
+            if (answer.matches("\\d+"))
+                return Integer.parseInt(answer);
+            else {
+                System.err.println("RETRIEVED INVALID ANSWER FROM " + seed.getName() + ": '" + answer + "'");
+                return -1;
+            }
+        } catch (MalformedURLException e) {
+            /* should not happen */
+            return -3;
+        } catch (IOException e) {
+            return -2;
+        }
+    }
+    
     private static long getDate(String count, String type) {
         long r = 0;
         if (count != null && count.matches("\\d+")) r = Long.parseLong(count);
         if (r < 1) return -1;
         
-        r *= 3600000;
-        if (type.equals("weeks"))       return r * 24 * 7;
-        else if (type.equals("days"))   return r * 24;
-        else if (type.equals("hours"))  return r;
+        r *= 60000;
+        if (type.equals("days"))            return r * 60 * 24;
+        else if (type.equals("hours"))      return r * 60;
+        else if (type.equals("minutes"))    return r;
         else return -1;
     }
     
@@ -250,7 +332,8 @@ public class CrawlURLFetch_p {
         public static final long DELAY_ONCE = -1;
         public static final long DELAY_SELF_DET = 0;
         
-        private static final String LIST_SERVLET = "/yacy/list.html?list=queueUrls";
+        public static final int MODE_LIST = 0;
+        public static final int MODE_COUNT = 1;
         
         public static int totalRuns = 0;
         public static int totalFetchedURLs = 0;
@@ -271,12 +354,35 @@ public class CrawlURLFetch_p {
         
         public boolean paused = false;
         
+        public static URL getListServletURL(String host, int mode, int count, String peerHash) {
+            String r = "http://" + host + "/yacy/list.html?list=queueUrls&display=";
+            
+            switch (mode) {
+            case MODE_LIST: r += "list"; break;
+            case MODE_COUNT: r += "count"; break;
+            }
+            
+            if (count > 0) r += "&count=" + count;
+            
+            if (peerHash != null && peerHash.length() > 0) {
+                r += "&iam=" + peerHash;
+            } else if (mode == MODE_LIST) {
+                r += "&iam=" + yacyCore.seedDB.mySeed.hash;
+            }
+            
+            try {
+                return new URL(r);
+            } catch (MalformedURLException e) {
+                return null;
+            }
+        }
+        
         public URLFetcher(
                 serverSwitch env,
                 plasmaCrawlProfile.entry profile,
                 URL url,
                 int count,
-                long delayMs) {
+                long delayMs) throws IOException {
             if (env == null || profile == null || url == null)
                 throw new NullPointerException("env, profile or url must not be null");
             this.sb = (plasmaSwitchboard)env;
@@ -291,7 +397,7 @@ public class CrawlURLFetch_p {
                 serverSwitch env,
                 plasmaCrawlProfile.entry profile,
                 int count,
-                long delayMs) {
+                long delayMs) throws IOException {
             if (env == null || profile == null)
                 throw new NullPointerException("env or profile must not be null");
             this.sb = (plasmaSwitchboard)env;
@@ -317,6 +423,7 @@ public class CrawlURLFetch_p {
                     totalFetchedURLs += stackURLs(getURLs(url));
                     this.lastRun = System.currentTimeMillis() - start;
                     totalRuns++;
+                    serverLog.logInfo(this.getName(), "Loaded " + this.lastFetchedURLs + " URLs from " + url + " in " + this.lastRun + " ms into stackcrawler.");
                     if (this.delay < 0 || isInterrupted()) {
                         return;
                     } else synchronized (this) {
@@ -347,9 +454,7 @@ public class CrawlURLFetch_p {
             }
             if (ys == null) return null;
             
-            try {
-                return new URL("http://" + ys.getAddress() + LIST_SERVLET + "&count=" + this.count);
-            } catch (MalformedURLException ee) { return null; }
+            return getListServletURL(ys.getAddress(), MODE_LIST, this.count, yacyCore.seedDB.mySeed.hash);
         }
         
         private int stackURLs(String[] urls) throws InterruptedException {
@@ -359,7 +464,6 @@ public class CrawlURLFetch_p {
             String reason;
             for (int i=0; i<urls.length && !isInterrupted(); i++) {
                 if (urls[i].trim().length() == 0) continue;
-                serverLog.logFine(this.getName(), "stacking " + urls[i]);
                 reason = this.sb.sbStackCrawlThread.stackCrawl(
                         urls[i],
                         null,
@@ -369,8 +473,10 @@ public class CrawlURLFetch_p {
                         this.profile.generalDepth(),
                         this.profile);
                 if (reason == null) {
+                    serverLog.logFine(this.getName(), "stacked " + urls[i]);
                     this.lastFetchedURLs++;
                 } else {
+                    serverLog.logFine(this.getName(), "error on stacking " + urls[i] + ": " + reason);
                     this.lastFailed++;
                     totalFailed++;
                     this.failed.put(urls[i], reason);

@@ -1,11 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': Local Cache Management</title>
+    <title>YaCy '#[clientname]#': URL Fetcher Management</title>
     #%env/templates/metas.template%#
   </head>
   <body id="CrawlURLFetch_p">
     #%env/templates/header.template%#
+    #%env/templates/submenuCrawlURLFetch.template%#
     <h2>URL-Fetcher</h2>
     <form method="post" action="CrawlURLFetch_p.html" enctype="multipart/form-data">
       <fieldset><legend>Fetch new URLs to crawl</legend>
@@ -38,6 +39,7 @@
               <option value="random" selected="selected">Choose a random peer</option>#{peers}# 
               <option value="#[hash]#">#[name]#</option>#{/peers}# 
             </select>
+            <input type="submit" name="checkPeerURLCount" value="Check URL count" />
             &nbsp;<label for="amount">Amount of URLs to request</label>:
             <input type="text" name="amount" id="amount" value="50" maxlength="3" size="3" />
             #(peerError)#::
@@ -53,9 +55,9 @@
             <label for="frequency">every</label>
             &nbsp;<input type="text" name="frequency" id="frequency" size="2" style="text-align: right;" maxlength="2"/>
             <select name="freq_type">
-              <option value="weeks">Weeks</option>
-              <option value="days" selected="selected">Days</option>
-              <option value="hours">Hours</option>
+              <option value="days">Days</option>
+              <option value="hours" selected="selected">Hours</option>
+              <option value="minutes">Minutes</option>
             </select>
             #(freqError)#::&nbsp;<span class="error">Invalid period, fetching only once</span>#(/freqError)#
           </dd>
