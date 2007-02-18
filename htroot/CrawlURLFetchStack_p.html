@@ -38,25 +38,21 @@
           <dd>
             <input type="text" name="shiftloc" id="shiftloc" value="#[locurlsVal]#" size="5" maxlength="5" style="text-align: right;" />
             of <span class="tt">#[locurls]#</span> URLs
-            <input type="submit" name="shiftlcq" value="Shift" />
-            #(shiftloc)#::
-            <span class="success">Shifted #[value]# URLs from Local Crawler Queue to URL Fetcher Stack</span>::
-            <span class="error">Shifting URLs from Local Crawler Queue to URL Fetcher Stack was unsuccessful: #[error]#</span>#(/shiftloc)#
+            <input type="submit" name="shiftlcq" value="Shift" />#(shiftloc)#::
+            <span class="success">Shifted #[value]# URLs from Local Crawler Queue to URL Fetcher Stack (not bound: #[failed]#)</span>#(/shiftloc)#
           </dd>
           <dt><label for="shiftrem">Shift URLs from Remote Crawler</label>:</dt>
           <dd>
             <input type="text" name="shiftrem" id="shiftrem" value="#[remurlsVal]#" size="5" maxlength="5" style="text-align: right;" />
             of <span class="tt">#[remurls]#</span> URLs
-            <input type="submit" name="shiftrcq" value="Shift" />
-            #(shiftrem)#::
-            <span class="success">Shifted #[value]# URLs from Remote Crawler Queue to URL Fetcher Stack</span>::
-            <span class="error">Shifting URLs from Remote Crawler Queue to URL Fetcher Stack was unsuccessful: #[error]#</span>#(/shiftrem)#
+            <input type="submit" name="shiftrcq" value="Shift" />#(shiftrem)#::
+            <span class="success">Shifted #[value]# URLs from Remote Crawler Queue to URL Fetcher Stack (not bound: #[failed]#)</span>#(/shiftrem)#
           </dd>
           <dt><label for="upload">Upload URL-List</label>:</dt>
           <dd>
             <input type="file" name="upload" id="upload" /> #(uploadError)#::&nbsp;<span class="error">No file entered for upload</span>#(/uploadError)#<br />
             <input type="radio" name="uploadType" id="plain" value="plain" checked="checked" /> <label for="plain">Plain text, line-seperated</label><br />
-            <input type="radio" name="uploadType" id="html" value="html" disabled="disabled" /> <label for="html">HTML file, links will be added</label><br />
+            <input type="radio" name="uploadType" id="html" value="html" /> <label for="html">HTML file, links will be added</label><br />
             <input type="submit" name="subupload" value="Upload File" />
             #(upload)#::
             <span class="success">Added #[added]# and rejected #[failed]# URLs from uploaded file successfully</span>::

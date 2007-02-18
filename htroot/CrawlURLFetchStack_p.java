@@ -94,26 +94,18 @@ public class CrawlURLFetchStack_p {
                 }
             }
             else if (post.containsKey("shiftlcq")) {
-                int count = Math.min(post.getInt("shiftloc", 0), sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
-                try {
-                    shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_CORE, getURLFetcherStack(env), count);
-                    prop.put("shiftloc", 1);
-                    prop.put("shiftloc_value", count);
-                } catch (IOException e) {
-                    prop.put("shiftloc", 2);
-                    prop.put("shiftloc_error", e.getMessage());
-                }
+                final int count = Math.min(post.getInt("shiftloc", 0), sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
+                final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_CORE, getURLFetcherStack(env), count);
+                prop.put("shiftloc", 1);
+                prop.put("shiftloc_value", count - failed);
+                prop.put("shiftloc_failed", failed);
             }
             else if (post.containsKey("shiftrcq")) {
-                int count = post.getInt("shiftrem", 0);
-                try {
-                    shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_LIMIT, getURLFetcherStack(env), count);
-                    prop.put("shiftrem", 1);
-                    prop.put("shiftrem_value", count);
-                } catch (IOException e) {
-                    prop.put("shiftrem", 2);
-                    prop.put("shiftrem_error", e.getMessage());
-                }
+                final int count = post.getInt("shiftrem", 0);
+                final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_LIMIT, getURLFetcherStack(env), count);
+                prop.put("shiftrem", 1);
+                prop.put("shiftrem_value", count - failed);
+                prop.put("shiftrem_failed", failed);
             }
             else if (post.containsKey("subupload")) {
                 if (post.get("upload", "").length() == 0) {
@@ -190,12 +182,14 @@ public class CrawlURLFetchStack_p {
         return count;
     }
     
-    private static void shiftFromNotice(plasmaCrawlNURL nurl, int fromStackType, URLFetcherStack stack, int count) throws IOException {
+    private static int shiftFromNotice(plasmaCrawlNURL nurl, int fromStackType, URLFetcherStack stack, int count) {
         plasmaCrawlNURL.Entry entry;
-        for (int i=0; i<count; i++) {
+        int failed = 0;
+        for (int i=0; i<count; i++) try {
             entry = nurl.pop(fromStackType);
             stack.push(entry.url());
-        }
+        } catch (IOException e) { failed++; }
+        return failed;
     }
     
     private static int addURLs(serverObjects post, int amount, URLFetcherStack stack) {
