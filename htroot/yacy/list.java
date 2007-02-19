@@ -51,6 +51,7 @@
 // contains contributions by [FB] to support listing URLs for URL Fetcher
 
 import java.io.File;
+import java.net.InetAddress;
 
 import de.anomic.data.URLFetcherStack;
 import de.anomic.data.listManager;
@@ -75,8 +76,14 @@ public final class list {
         
         final String col = post.get("col", "");
         final File listsPath = new File(ss.getRootPath(),ss.getConfig("listsPath", "DATA/LISTS"));
-        final String otherPeerName = yacyCore.seedDB.get(post.get("iam", null)).get(yacySeed.NAME, "unknown");
-
+        
+        String otherPeerName = null;
+        if (post.containsKey("iam")) {
+            yacySeed bla = yacyCore.seedDB.get(post.get("iam", ""));
+            if (bla != null) otherPeerName = bla.getName();
+        }
+        if (otherPeerName == null) otherPeerName = (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        
         if (col.equals("black")) {
             final StringBuffer out = new StringBuffer();
 
@@ -101,6 +108,7 @@ public final class list {
             if (display.equals("list")) {
                 // list urls from remote crawler queue for other peers
                 final int count = Math.min(post.getInt("count", 50), CrawlURLFetchStack_p.maxURLsPerFetch);
+                
                 if (count > 0 && db.size() > 0) {
                     final StringBuffer sb = new StringBuffer();
                     
@@ -112,11 +120,15 @@ public final class list {
                         cnt++;
                     }
                     prop.put("list", sb);
-                    CrawlURLFetchStack_p.fetchMap.put(otherPeerName, new Integer(cnt));
-                    serverLog.logInfo("URLFETCHER", "sent " + cnt + " URLs to peer " + otherPeerName);
+                    CrawlURLFetchStack_p.fetchMap.put(
+                            otherPeerName,
+                            new Integer(((CrawlURLFetchStack_p.fetchMap.get(otherPeerName) == null)
+                                    ? 0
+                                    : ((Integer)CrawlURLFetchStack_p.fetchMap.get(otherPeerName)).intValue()) + cnt));
+                    serverLog.logInfo("URLFETCHER", "sent " + cnt + " URLs to " + otherPeerName);
                 } else {
                     prop.put("list", "");
-                    serverLog.logInfo("URLFETCHER", "couldn't satisfy URL request of " + otherPeerName + ": stack is empty");
+                    serverLog.logInfo("URLFETCHER", "couldn't satisfy URL request from " + otherPeerName + ": stack is empty");
                 }
             } else if (display.equals("count")) {
                 prop.put("list", db.size());

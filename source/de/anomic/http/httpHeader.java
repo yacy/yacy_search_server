@@ -237,6 +237,8 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String CONNECTION_PROP_PREV_REQUESTLINE = "PREVREQUESTLINE";
     public static final String CONNECTION_PROP_REQUEST_START = "REQUEST_START";
     public static final String CONNECTION_PROP_REQUEST_END = "REQUEST_END";
+    public static final String CONNECTION_PROP_INPUTSTREAM = "INPUTSTREAM";
+    public static final String CONNECTION_PROP_OUTPUTSTREAM = "OUTPUTSTREAM";
     
     /* PROPERTIES: Client -> Proxy */
     public static final String CONNECTION_PROP_CLIENT_REQUEST_HEADER = "CLIENT_REQUEST_HEADER";

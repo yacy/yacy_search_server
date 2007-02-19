@@ -87,6 +87,11 @@
               <li><span class="error">#[reason]#</span>: <a href="#[url]#">#[url]#</a></li>#{/error}# 
             </ul> 
           </dd>
+          <dt><label for="newDelay">Re-set delay</label>:</dt>
+          <dd>
+            <input type="text" name="newDelay" id="newDelay" maxlength="2" size="6" value="#[curDelay]#" style="text-align: right;" /> minutes
+            <input type="submit" name="resetDelay" value="Set new delay" />
+          </dd>
           <dt>#(status)#
             <input type="submit" name="stop" value="Stop Thread" />::
             <input type="submit" name="restart" value="Restart Thread" />::

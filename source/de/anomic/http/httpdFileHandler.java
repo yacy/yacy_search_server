@@ -491,8 +491,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 // call an image-servlet to produce an on-the-fly - generated image
                 Object img = null;
                 try {
-                    requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
-                    requestHeader.put("PATH", path);
+                    requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty("CLIENTIP"));
+                    requestHeader.put(httpHeader.CONNECTION_PROP_PATH, path);
                     // in case that there are no args given, args = null or empty hashmap
                     img = invokeServlet(targetClass, requestHeader, args);
                 } catch (InvocationTargetException e) {
@@ -568,10 +568,10 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 }
             } else if ((targetClass != null) && (path.endsWith(".stream"))) {
                 // call rewrite-class
-                requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
-                requestHeader.put("PATH", path);
-                requestHeader.put("INPUTSTREAM", body);
-                requestHeader.put("OUTPUTSTREAM", out);
+                requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty("CLIENTIP"));
+                requestHeader.put(httpHeader.CONNECTION_PROP_PATH, path);
+                requestHeader.put(httpHeader.CONNECTION_PROP_INPUTSTREAM, body);
+                requestHeader.put(httpHeader.CONNECTION_PROP_OUTPUTSTREAM, out);
              
                 httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null);                
                 
@@ -609,8 +609,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     } else {
                         // CGI-class: call the class to create a property for rewriting
                         try {
-                            requestHeader.put("CLIENTIP", conProp.getProperty("CLIENTIP"));
-                            requestHeader.put("PATH", path);
+                            requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty("CLIENTIP"));
+                            requestHeader.put(httpHeader.CONNECTION_PROP_PATH, path);
                             // in case that there are no args given, args = null or empty hashmap
                             Object tmp = invokeServlet(targetClass, requestHeader, args); 
                             if(tmp instanceof servletProperties){
@@ -621,7 +621,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                             // if no args given , then tp will be an empty Hashtable object (not null)
                             if (tp == null) tp = new servletProperties();
                             // check if the servlets requests authentification
-                            if (tp.containsKey("AUTHENTICATE")) {
+                            if (tp.containsKey(servletProperties.ACTION_AUTHENTICATE)) {
                                 // handle brute-force protection
                                 if (authorization != null) {
                                     String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
@@ -634,11 +634,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 }
                                 // send authentication request to browser
                                 httpHeader headers = getDefaultHeaders(path);
-                                headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"" + tp.get("AUTHENTICATE", "") + "\"");
+                                headers.put(httpHeader.WWW_AUTHENTICATE,"Basic realm=\"" + tp.get(servletProperties.ACTION_AUTHENTICATE, "") + "\"");
                                 httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
                                 return;
-                            } else if (tp.containsKey("LOCATION")) {
-                                String location = tp.get("LOCATION","");
+                            } else if (tp.containsKey(servletProperties.ACTION_LOCATION)) {
+                                String location = tp.get(servletProperties.ACTION_LOCATION, "");
                                 if (location.length() == 0) location = path;
                                 
                                 httpHeader headers = getDefaultHeaders(path);
@@ -648,9 +648,9 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 return;
                             }
                             // add the application version, the uptime and the client name to every rewrite table
-                            tp.put("version", switchboard.getConfig("version", ""));
-                            tp.put("uptime", ((System.currentTimeMillis() - Long.parseLong(switchboard.getConfig("startupTime","0"))) / 1000) / 60); // uptime in minutes
-                            tp.put("clientname", switchboard.getConfig("peerName", "anomic"));
+                            tp.put(servletProperties.PEER_STAT_VERSION, switchboard.getConfig("version", ""));
+                            tp.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() - Long.parseLong(switchboard.getConfig("startupTime","0"))) / 1000) / 60); // uptime in minutes
+                            tp.put(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (InvocationTargetException e) {
                             if (e.getCause() instanceof InterruptedException) {

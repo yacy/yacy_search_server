@@ -26,6 +26,13 @@ import de.anomic.http.httpHeader;
 public class servletProperties extends serverObjects {
 
     private static final long serialVersionUID = 1L;
+    
+    public static final String ACTION_AUTHENTICATE = "AUTHENTICATE";
+    public static final String ACTION_LOCATION = "LOCATION";
+    
+    public static final String PEER_STAT_VERSION = "version";
+    public static final String PEER_STAT_UPTIME = "uptime";
+    public static final String PEER_STAT_CLIENTNAME = "clientname";
 
     private String prefix="";
     

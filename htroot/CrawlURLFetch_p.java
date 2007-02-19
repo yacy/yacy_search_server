@@ -224,6 +224,15 @@ public class CrawlURLFetch_p {
                     prop.put("threadError", ERR_THREAD_RESUME);
                 }
             }
+            else if (post.containsKey("resetDelay")) {
+                final long frequency = getDate(post.get("newDelay", ""), "minutes");
+                if (frequency == -1) {
+                    prop.put("freqError", ERR_DATE);
+                } else {
+                    fetcher.delay = frequency;
+                }
+            }
+            prop.put("LOCATION", "/CrawlURLFetch_p.html");
         }
         
         if (fetcher != null) {
@@ -238,6 +247,7 @@ public class CrawlURLFetch_p {
             prop.put("runs_lastFetchedURLs",    fetcher.lastFetchedURLs);
             prop.put("runs_lastServerResponse", (fetcher.lastServerResponse == null)
                     ? "" : fetcher.lastServerResponse);
+            prop.put("runs_curDelay", (int)(fetcher.delay / 60000));
             
             Iterator it = fetcher.failed.keySet().iterator();
             int i = 0;
@@ -265,28 +275,34 @@ public class CrawlURLFetch_p {
     
     private static int listPeers(serverObjects prop, boolean checkURLCount, httpRemoteProxyConfig theRemoteProxyConfig) {
         int peerCount = 0;
+        TreeMap hostList = new TreeMap();
+        String peername;
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
-            prop.put("peersKnown", 1);
-            try {
-                TreeMap hostList = new TreeMap();
-                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, yacyVersion.YACY_PROVIDES_CRAWLS_VIA_LIST_HTML);
-                while (e.hasMoreElements()) {
-                    yacySeed seed = (yacySeed) e.nextElement();
-                    if (seed != null && (!checkURLCount || getURLs2Fetch(seed, theRemoteProxyConfig) > 0))
-                        hostList.put(seed.get(yacySeed.NAME, "nameless"), seed.hash);
+            final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, yacyVersion.YACY_PROVIDES_CRAWLS_VIA_LIST_HTML);
+            int dbsize;
+            while (e.hasMoreElements()) {
+                yacySeed seed = (yacySeed) e.nextElement();
+                if (seed != null && !seed.hash.equals(yacyCore.seedDB.mySeed.hash)) {
+                    peername = seed.get(yacySeed.NAME, "nameless");
+                    if (checkURLCount && (dbsize = getURLs2Fetch(seed, theRemoteProxyConfig)) > 0) {
+                        hostList.put(peername + " (" + dbsize + ")", seed.hash);
+                    } else {
+                        hostList.put(peername, seed.hash);
+                    }
                 }
-                
-                String peername;
-                while ((peername = (String) hostList.firstKey()) != null) {
-                    final String hash = (String) hostList.get(peername);
-                    if (hash.equals(yacyCore.seedDB.mySeed.hash)) continue;
-                    prop.put("peersKnown_peers_" + peerCount + "_hash", hash);
-                    prop.put("peersKnown_peers_" + peerCount + "_name", peername);
-                    hostList.remove(peername);
-                    peerCount++;
-                }
-            } catch (Exception e) { /* no comment :P */ }
+            }
+        }
+        
+        if (hostList.size() > 0) {
+            while (!hostList.isEmpty() && (peername = (String) hostList.firstKey()) != null) {
+                final String hash = (String) hostList.get(peername);
+                prop.put("peersKnown_peers_" + peerCount + "_hash", hash);
+                prop.put("peersKnown_peers_" + peerCount + "_name", peername);
+                hostList.remove(peername);
+                peerCount++;
+            }
             prop.put("peersKnown_peers", peerCount);
+            prop.put("peersKnown", 1);
         } else {
             prop.put("peersKnown", 0);
         }
@@ -304,7 +320,7 @@ public class CrawlURLFetch_p {
             if (answer.matches("\\d+"))
                 return Integer.parseInt(answer);
             else {
-                System.err.println("RETRIEVED INVALID ANSWER FROM " + seed.getName() + ": '" + answer + "'");
+                serverLog.logFine("URLFETCHER", "Retrieved invalid answer from " + seed.getName() + ": '" + answer + "'");
                 return -1;
             }
         } catch (MalformedURLException e) {
@@ -348,7 +364,7 @@ public class CrawlURLFetch_p {
         
         public final URL url;
         public final int count;
-        public final long delay;
+        public long delay;
         public final plasmaSwitchboard sb;
         public final plasmaCrawlProfile.entry profile;
         

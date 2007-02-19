@@ -39,8 +39,13 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -73,74 +78,133 @@ public class CrawlURLFetchStack_p {
         return stack;
     }
     
+    public static final String STREAM_CMD_ADDURLS_      = "ADD URLS: ";
+    public static final String STREAM_CMD_END           = "END";
+    public static final String STREAM_RESP_OK_ADDURLS_  = "FAILED URLS: ";
+    public static final String STREAM_RESP_OK           = "OK";
+    public static final String STREAM_RESP_FAILED       = "FAILED";
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = (plasmaSwitchboard)env;
         
-        if (post != null) {
-            if (post.containsKey("addurls")) {
-                prop.put("addedUrls", 1);
-                prop.put("addedUrls_added", addURLs(post, post.getInt("addurls", -1), getURLFetcherStack(env)));
-            }
-            else if (post.containsKey("setMaxSize")) {
-                final int count = post.getInt("maxSize", maxURLsPerFetch);
-                if (count > 0) {
-                    maxURLsPerFetch = count;
-                    prop.put("set", 1);
-                    prop.put("set_value", maxURLsPerFetch);
-                } else {
-                    prop.put("set", 2);
-                    prop.put("set_value", count);
-                }
-            }
-            else if (post.containsKey("shiftlcq")) {
-                final int count = Math.min(post.getInt("shiftloc", 0), sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
-                final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_CORE, getURLFetcherStack(env), count);
-                prop.put("shiftloc", 1);
-                prop.put("shiftloc_value", count - failed);
-                prop.put("shiftloc_failed", failed);
-            }
-            else if (post.containsKey("shiftrcq")) {
-                final int count = post.getInt("shiftrem", 0);
-                final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_LIMIT, getURLFetcherStack(env), count);
-                prop.put("shiftrem", 1);
-                prop.put("shiftrem_value", count - failed);
-                prop.put("shiftrem_failed", failed);
-            }
-            else if (post.containsKey("subupload")) {
-                if (post.get("upload", "").length() == 0) {
-                    prop.put("uploadError", 1);
-                } else {
-                    final File file = new File(post.get("upload", ""));
-                    final String content = new String((byte[])post.get("upload$file"));
-                    
-                    final String type = post.get("uploadType", "");
-                    if (type.equals("plain")) {
-                        prop.put("upload_added", addURLs(content.split("\n"), getURLFetcherStack(env)));
-                        prop.put("upload_failed", 0);
-                        prop.put("upload", 1);
-                    } else if (type.equals("html")) {
+        if (((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".stream")) {
+            /* =================================================================
+             * .stream request
+             * ================================================================= */
+            InputStream in = (InputStream)header.get(httpHeader.CONNECTION_PROP_INPUTSTREAM);
+            OutputStream out = (OutputStream)header.get(httpHeader.CONNECTION_PROP_OUTPUTSTREAM);
+            BufferedReader inrb = new BufferedReader(new InputStreamReader(in));
+            PrintWriter outw = new PrintWriter(out);
+            
+            String line;
+            int addurls = 0, cururl = 0;
+            boolean[] status = new boolean[0];
+            URLFetcherStack stack = getURLFetcherStack(env);
+            try {
+                while ((line = inrb.readLine()) != null) {
+                    // commands
+                    if (line.startsWith(STREAM_CMD_ADDURLS_)) {
                         try {
-                            final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL(file));
-                            final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
-                            serverFileUtils.write(content, writer);
-                            writer.close();
-                            
-                            final Iterator it = ((HashMap)scraper.getAnchors()).keySet().iterator();
-                            int added = 0, failed = 0;
-                            String url;
-                            while (it.hasNext()) try {
-                                url = (String)it.next();
-                                getURLFetcherStack(env).push(new URL(url));
-                                added++;
-                            } catch (MalformedURLException e) { failed++; }
+                            addurls = Integer.parseInt(line.substring(STREAM_CMD_ADDURLS_.length()));
+                            status = new boolean[addurls];
+                            cururl = 0;
+                            outw.println(STREAM_RESP_OK);
+                        } catch (NumberFormatException e) {
+                            outw.println(STREAM_RESP_FAILED);
+                        }
+                    } else if (line.equals(STREAM_CMD_END)) {
+                        break;
+                    } else {
+                        if (cururl < addurls)       // add url
+                            status[cururl++] = addURL(line, stack);
+                        
+                        if (cururl > 0 && cururl == addurls ) {
+                            // done with parsing the passed URL count, now some status output: i.e. 'FAILED URLS: 5 of 8'
+                            outw.print(STREAM_RESP_OK_ADDURLS_);
+                            StringBuffer stat = new StringBuffer();
+                            for (int i=0; i<status.length; i++)
+                                if (!status[i]) stat.append(i).append(", ");
+                            outw.print(stat.substring(0, stat.length() - 2));
+                            outw.print(" of ");
+                            outw.println(status.length);
+                            cururl = 0;
+                            addurls = 0;
+                        }
+                    }
+                }
+            } catch (IOException e) { e.printStackTrace(); }
+            outw.flush();
+            return null;
+        } else {
+            /* =================================================================
+             * 'normal' request
+             * ================================================================= */
+            if (post != null) {
+                if (post.containsKey("addurls")) {
+                    prop.put("addedUrls", 1);
+                    prop.put("addedUrls_added", addURLs(post, post.getInt("addurls", -1), getURLFetcherStack(env)));
+                }
+                else if (post.containsKey("setMaxSize")) {
+                    final int count = post.getInt("maxSize", maxURLsPerFetch);
+                    if (count > 0) {
+                        maxURLsPerFetch = count;
+                        prop.put("set", 1);
+                        prop.put("set_value", maxURLsPerFetch);
+                    } else {
+                        prop.put("set", 2);
+                        prop.put("set_value", count);
+                    }
+                }
+                else if (post.containsKey("shiftlcq")) {
+                    final int count = Math.min(post.getInt("shiftloc", 0), sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
+                    final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_CORE, getURLFetcherStack(env), count);
+                    prop.put("shiftloc", 1);
+                    prop.put("shiftloc_value", count - failed);
+                    prop.put("shiftloc_failed", failed);
+                }
+                else if (post.containsKey("shiftrcq")) {
+                    final int count = post.getInt("shiftrem", 0);
+                    final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_LIMIT, getURLFetcherStack(env), count);
+                    prop.put("shiftrem", 1);
+                    prop.put("shiftrem_value", count - failed);
+                    prop.put("shiftrem_failed", failed);
+                }
+                else if (post.containsKey("subupload")) {
+                    if (post.get("upload", "").length() == 0) {
+                        prop.put("uploadError", 1);
+                    } else {
+                        final File file = new File(post.get("upload", ""));
+                        final String content = new String((byte[])post.get("upload$file"));
+                        
+                        final String type = post.get("uploadType", "");
+                        if (type.equals("plain")) {
+                            prop.put("upload_added", addURLs(content.split("\n"), getURLFetcherStack(env)));
+                            prop.put("upload_failed", 0);
                             prop.put("upload", 1);
-                            prop.put("upload_added", added);
-                            prop.put("upload_failed", failed);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            prop.put("upload", 2);
-                            prop.put("upload_error", e.getMessage());
+                        } else if (type.equals("html")) {
+                            try {
+                                final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL(file));
+                                final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
+                                serverFileUtils.write(content, writer);
+                                writer.close();
+                                
+                                final Iterator it = ((HashMap)scraper.getAnchors()).keySet().iterator();
+                                int added = 0, failed = 0;
+                                String url;
+                                while (it.hasNext()) try {
+                                    url = (String)it.next();
+                                    getURLFetcherStack(env).push(new URL(url));
+                                    added++;
+                                } catch (MalformedURLException e) { failed++; }
+                                prop.put("upload", 1);
+                                prop.put("upload_added", added);
+                                prop.put("upload_failed", failed);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                prop.put("upload", 2);
+                                prop.put("upload_error", e.getMessage());
+                            }
                         }
                     }
                 }
@@ -156,7 +220,6 @@ public class CrawlURLFetchStack_p {
         prop.put("remurls", sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT));
         prop.put("locurlsVal", Math.min(sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE), 500));
         prop.put("remurlsVal", Math.min(sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT), 500));
-        
         return prop;
     }
     
@@ -174,12 +237,17 @@ public class CrawlURLFetchStack_p {
     
     private static int addURLs(String[] urls, URLFetcherStack stack) {
         int count = -1;
-        for (int i=0; i<urls.length; i++) try {
-            if (urls[i].length() == 0) continue;
-            stack.push(new URL(urls[i]));
-            count++;
-        } catch (MalformedURLException e) { /* ignore this */ }
+        for (int i=0; i<urls.length; i++)
+            if (addURL(urls[i], stack)) count++;
         return count;
+    }
+    
+    private static boolean addURL(String url, URLFetcherStack stack) {
+        try {
+            if (url == null || url.length() == 0) return false;
+            stack.push(new URL(url));
+            return true;
+        } catch (MalformedURLException e) { return false; }
     }
     
     private static int shiftFromNotice(plasmaCrawlNURL nurl, int fromStackType, URLFetcherStack stack, int count) {
@@ -196,7 +264,7 @@ public class CrawlURLFetchStack_p {
         int count = 0;
         String url;
         for (int i=0; i<amount; i++) {
-            url = post.get("url" + count++, null);
+            url = post.get("url" + i, null);
             if (url == null || url.length() == 0) continue;
             try {
                 stack.push(new URL(url));
