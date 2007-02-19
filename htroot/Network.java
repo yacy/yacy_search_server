@@ -298,7 +298,7 @@ public class Network {
                     long myValue=0, nextValue=0, prevValue=0, nextPPM=0, myPPM=0;
                     Pattern peerSearchPattern = null;
                     if(post.containsKey("search")) {
-                        peerSearchPattern = Pattern.compile(post.get("match", ""));
+                        peerSearchPattern = Pattern.compile(post.get("match", ""), Pattern.CASE_INSENSITIVE);
                     }
                     while (e.hasMoreElements() && conCount < maxCount) {
                         seed = (yacySeed) e.nextElement();
