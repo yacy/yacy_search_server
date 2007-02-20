@@ -1026,42 +1026,42 @@ public class wikiCode {
         int p0 = 0;
         int p1 = 0;
         int l = pat.length();
-        if ((p0 = input.indexOf(pat)) >= 0) {
-            p1 = input.indexOf(pat, p0 + l);
-            if (p1 >= 0) {
-                //extra treatment for headlines
-                if((pat.equals("===="))||(pat.equals("==="))||(pat.equals("=="))){
-                    //add anchor and create headline
-                    direlem = input.substring(p0 + l, p1);
-                    //counting double headlines
-                    int doubles = 0;
-                    for(int i=0;i<headlines;i++){
-                        if(dirElements.get(i).toString().substring(1).equals(direlem)){
-                            doubles++;
-                        }
+        //replace pattern if a pair of the pattern can be found in the line
+        if( ((p0 = input.indexOf(pat)) >= 0) && ((p1 = input.indexOf(pat, p0 + l)) >= 0) ) {
+            //extra treatment for headlines
+            if((pat.equals("===="))||(pat.equals("==="))||(pat.equals("=="))){
+                //add anchor and create headline
+                direlem = input.substring(p0 + l, p1);
+                //counting double headlines
+                int doubles = 0;
+                for(int i=0;i<headlines;i++){
+                    if(dirElements.get(i).toString().substring(1).equals(direlem)){
+                        doubles++;
                     }
-                    String anchor = direlem.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]",""); //replace blanks with underscores and delete everything thats not a regular character, a number or _
-                    //if there are doubles, add underscore and number of doubles plus one
-                    if(doubles>0){
-                        anchor = anchor + "_" + (doubles+1);
-                    }
-                    input = input.substring(0, p0) + "<a name=\""+anchor+"\"></a>" + repl1 +
-                    direlem + repl2 + input.substring(p1 + l);
-                    //add headlines to list of headlines (so TOC can be created)
-                    if(pat.equals("===="))     dirElements.add("3"+direlem);
-                    else if(pat.equals("===")) dirElements.add("2"+direlem);
-                    else if(pat.equals("=="))  dirElements.add("1"+direlem);
-                    headlines++;
                 }
-                else{
-                    input = input.substring(0, p0) +  repl1 +
-                    (direlem = input.substring(p0 + l, p1)) + repl2 +
-                    input.substring(p1 + l);
+                String anchor = direlem.replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]",""); //replace blanks with underscores and delete everything thats not a regular character, a number or _
+                //if there are doubles, add underscore and number of doubles plus one
+                if(doubles>0){
+                    anchor = anchor + "_" + (doubles+1);
                 }
+                input = input.substring(0, p0) + "<a name=\""+anchor+"\"></a>" + repl1 +
+                direlem + repl2 + input.substring(p1 + l);
+                //add headlines to list of headlines (so TOC can be created)
+                if(pat.equals("===="))     dirElements.add("3"+direlem);
+                else if(pat.equals("===")) dirElements.add("2"+direlem);
+                else if(pat.equals("=="))  dirElements.add("1"+direlem);
+                headlines++;
+            }
+            else{
+                input = input.substring(0, p0) +  repl1 +
+                (direlem = input.substring(p0 + l, p1)) + repl2 +
+                input.substring(p1 + l);
             }
         }
-        //recursion if the pattern can still be found in the line
-        if(input.indexOf(pat) >= 0) {input = pairReplace(input, pat, repl1, repl2);}
+        //recursion if a pair of the pattern can still be found in the line
+        if( ((p0 = input.indexOf(pat)) >= 0) && (input.indexOf(pat,p0 + l) >= 0) ){
+            input = pairReplace(input, pat, repl1, repl2);
+        }
         return input;
     }
 
