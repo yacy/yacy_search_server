@@ -102,9 +102,9 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         
         // create a node at position index with rowentry
         Handle h = new Handle(index);
-        newNode(h, (rowentry == null) ? null : rowentry.bytes(), 0, true).commit(CP_NONE);
+        newNode(h, (rowentry == null) ? null : rowentry.bytes(), 0).commit(CP_NONE);
         // attention! this newNode call wants that the OH bytes are passed within the bulkchunk
-        // field. Here, only the rowentry.bytes() rare payload is passed. This is valid, because
+        // field. Here, only the rowentry.bytes() raw payload is passed. This is valid, because
         // the OHbytes and OHhandles are zero.
     }
     

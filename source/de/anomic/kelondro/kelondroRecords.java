@@ -256,7 +256,7 @@ public class kelondroRecords {
             }
         }
         
-        private synchronized int allocate(byte[] chunk) throws IOException {
+        private synchronized int allocatePayload(byte[] chunk) throws IOException {
             // reserves a new record and returns index of record
             // the return value is not a seek position
             // the seek position can be retrieved using the seekpos() function
@@ -309,12 +309,12 @@ public class kelondroRecords {
             }
         }
         
-        private synchronized void allocate(int index, byte[] chunk, int offset, boolean write) throws IOException {
+        private synchronized void allocateRecord(int index, byte[] bulkchunk, int offset) throws IOException {
             // in case that the handle index was created outside this class,
             // this method ensures that the USAGE counters are consistent with the
             // new handle index
-            if (chunk == null) {
-                chunk = new byte[ROW.objectsize()];
+            if (bulkchunk == null) {
+                bulkchunk = new byte[recordsize];
                 offset = 0;
             }
             //assert (chunk.length == ROW.objectsize()) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize();
@@ -326,10 +326,9 @@ public class kelondroRecords {
                     // that the field is not occupied than looking at the FREEC counter
                     assert (USAGE.FREEC == 0) : "FREEC = " + USAGE.FREEC;
                     // simply overwrite the cell
-                    if (write) entryFile.write(seekpos(index) + overhead, chunk, offset, ROW.objectsize());
+                    entryFile.write(seekpos(index), bulkchunk, offset, recordsize);
                     // no changes of counter necessary
                 } else {
-                    assert write == true;
                     // write beyond the end of the file
                     // records that are in between are marked as deleted
                     Handle h;
@@ -346,7 +345,7 @@ public class kelondroRecords {
                 
                     // adopt USAGE.USEDC
                     if (USAGE.allCount() == index) {
-                        entryFile.write(seekpos(index) + overhead, chunk, offset, ROW.objectsize()); // write chunk and occupy space
+                        entryFile.write(seekpos(index), bulkchunk, offset, recordsize); // write chunk and occupy space
                         USAGE.USEDC++;
                         USAGE.writeused(false);
                         entryFile.commit();
@@ -755,12 +754,13 @@ public class kelondroRecords {
     }
     
     protected synchronized final Node newNode(byte[] row) throws IOException {
+        // the row must be the raw row data only
         return new Node(row);
     }
     
-    protected synchronized final Node newNode(Handle handle, byte[] bulkchunk, int offset, boolean write) throws IOException {
+    protected synchronized final Node newNode(Handle handle, byte[] bulkchunk, int offset) throws IOException {
         // bulkchunk must include the OH bytes and handles!
-        return new Node(handle, bulkchunk, offset, write);
+        return new Node(handle, bulkchunk, offset);
     }
     
     protected synchronized final Node getNode(Handle handle, boolean fillTail) throws IOException {
@@ -817,7 +817,7 @@ public class kelondroRecords {
         protected Node(byte[] rowinstance) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
             assert ((rowinstance == null) || (rowinstance.length == ROW.objectsize)) : "bulkchunk.length = " + rowinstance.length + ", ROW.width(0) = " + ROW.width(0);
-            this.handle = new Handle(USAGE.allocate(rowinstance));
+            this.handle = new Handle(USAGE.allocatePayload(rowinstance));
             
             // create empty chunks
             this.headChunk = new byte[headchunksize];
@@ -838,12 +838,9 @@ public class kelondroRecords {
             // if the chunks come from a overwrite attempt, it should be true
             this.headChanged = false; // we wrote the head already during allocate
             this.tailChanged = false; // we write the tail already during allocate
-            
-            // update cache
-            update2Cache(CP_LOW);
         }
         
-        protected Node(Handle handle, byte[] bulkchunk, int offset, boolean write) throws IOException {
+        protected Node(Handle handle, byte[] bulkchunk, int offset) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
             // if write is true, then the chunk in bulkchunk is written to the file
             // othervise it is considered equal to what is stored in the file
@@ -851,15 +848,11 @@ public class kelondroRecords {
             this.handle = handle;
             boolean changed;
             if (handle.index >= USAGE.allCount()) {
-                assert write == true : "handle.index = " + handle.index + ", USAGE.allCount() = " + USAGE.allCount();
-                USAGE.allocate(handle.index, bulkchunk, offset + overhead, write);
-                if ((bulkchunk != null) && (overhead != 0)) {
-                    // write also the OH bytes and handles
-                    entryFile.write(seekpos(this.handle), this.headChunk, 0, overhead);
-                }
-                changed = false; // this is independent from write; we have already wrote the record, so it is considered as unchanged
+                // this causes only a write action if we create a node beyond the end of the file
+                USAGE.allocateRecord(handle.index, bulkchunk, offset);
+                changed = false; // we have already wrote the record, so it is considered as unchanged
             } else {
-                changed = write;
+                changed = true;
             }
             assert ((bulkchunk == null) || (bulkchunk.length - offset >= recordsize)) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", recordsize = " + recordsize;
             
@@ -874,8 +867,6 @@ public class kelondroRecords {
             }
             
             // mark chunks as changed
-            // if the head/tail chunks come from a file system read, setChanged should be false
-            // if the chunks come from a overwrite attempt, it should be true
             this.headChanged = changed;
             this.tailChanged = changed;
         }
@@ -1070,6 +1061,8 @@ public class kelondroRecords {
                 throw new kelondroException(filename, "no values to save (header missing)");
             }
 
+            boolean doCommit = this.headChanged || this.tailChanged;
+            
             // save head
             if (this.headChanged) {
                 //System.out.println("WRITEH(" + filename + ", " + seekpos(this.handle) + ", " + this.headChunk.length + ")");
@@ -1085,7 +1078,7 @@ public class kelondroRecords {
                 this.tailChanged = false;
             }
             
-            entryFile.commit();
+            if (doCommit) entryFile.commit();
         }
 
         public synchronized void collapse() {
@@ -1462,7 +1455,7 @@ public class kelondroRecords {
             }
                 
             // read node from bulk
-            Node n = new Node(new Handle(pos.index), bulk, (pos.index - bulkstart) * recordsize, true);
+            Node n = new Node(new Handle(pos.index), bulk, (pos.index - bulkstart) * recordsize);
             pos.index++;
             while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
             return n;
