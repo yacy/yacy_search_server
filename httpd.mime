@@ -77,6 +77,7 @@ rtf     = application/rtf
 sh      = text/plain
 shtml   = text/html
 stream  = audio/x-qt-stream
+svg		= image/svg+xml
 swf     = application/x-shockwave-flash
 sxw     = application/OOo-writer 
 sxc     = application/OOo-calc 
