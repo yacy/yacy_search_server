@@ -1891,6 +1891,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 return true;
             } catch (IOException e) {
                 log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage());
+                noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
             }
         }
         return true;
@@ -1975,6 +1976,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return true;
         } catch (IOException e) {
             log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage());
+            noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
             return true; // if we return a false here we will block everything
         }
     }
@@ -2040,6 +2042,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return true;
         } catch (IOException e) {
             log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage());
+            noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_REMOTE);
             return true;
         }
     }
