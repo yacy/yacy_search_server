@@ -107,7 +107,9 @@ public class plasmaCrawlBalancer {
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
                 list = (ArrayList) entry.getValue();
-                stack.push(stack.row().newEntry(new byte[][]{(byte[]) list.remove(0)}));
+                if (list.size() != 0) {
+                    stack.push(stack.row().newEntry(new byte[][]{(byte[]) list.remove(0)}));
+                }
                 if (list.size() == 0) i.remove();
             }
         }
@@ -144,11 +146,13 @@ public class plasmaCrawlBalancer {
             if (stack.size() == 0) return null;
             
             String entry = null;
-            String topentry = new String(stack.top().getColBytes(0));
+            kelondroRow.Entry topentry = stack.top();
+            if (topentry == null) return null;
+            String top = new String(topentry.getColBytes(0));
 
             // check if the time after retrieval of last hash from same
             // domain is not shorter than the minimumDelta
-            long delta = lastAccessDelta(topentry);
+            long delta = lastAccessDelta(top);
             if (delta > minimumDelta) {
                 // the entry from top is fine
                 entry = new String(stack.pop().getColBytes(0));
@@ -188,7 +192,7 @@ public class plasmaCrawlBalancer {
     public void clear() throws IOException {
         synchronized (domainStacks) {
             domainStacks.clear();
-            stack.clear();
+            stack = kelondroStack.reset(stack);
         }
     }
     

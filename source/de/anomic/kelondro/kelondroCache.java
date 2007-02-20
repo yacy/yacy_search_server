@@ -269,13 +269,13 @@ public class kelondroCache implements kelondroIndex {
     }
     
     public synchronized void close() throws IOException {
-        readHitCache = null;
-        readMissCache = null;
         flushUnique();
         flushDoubles();
+        index.close();
+        readHitCache = null;
+        readMissCache = null;
         writeBufferUnique = null;
         writeBufferDoubles = null;
-        index.close();
     }
 
     public boolean has(byte[] key) throws IOException {

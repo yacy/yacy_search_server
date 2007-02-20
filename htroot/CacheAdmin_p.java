@@ -115,7 +115,7 @@ public class CacheAdmin_p {
             urlstr = url.toNormalform();
             prop.put("info_url", urlstr);
 
-            info.ensureCapacity(40000);
+            info.ensureCapacity(10000);
             try {
                 final IResourceInfo resInfo = switchboard.cacheManager.loadResourceInfo(url);
                 formatHeader(prop, resInfo.getMap());

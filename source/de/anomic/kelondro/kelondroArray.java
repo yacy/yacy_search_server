@@ -32,8 +32,7 @@ public interface kelondroArray {
     
     public kelondroRow row();
     
-    public kelondroRow.Entry replace(int index, kelondroRow.Entry rowentry) throws IOException;
-    public void overwrite(int index, kelondroRow.Entry rowentry) throws IOException;
+    public void set(int index, kelondroRow.Entry rowentry) throws IOException;
 
     public kelondroRow.Entry get(int index) throws IOException;
 

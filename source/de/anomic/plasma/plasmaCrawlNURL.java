@@ -411,9 +411,9 @@ public class plasmaCrawlNURL {
                 case STACK_TYPE_LIMIT:    limitStack.clear(); break;
                 case STACK_TYPE_OVERHANG: overhangStack.clear(); break;
                 case STACK_TYPE_REMOTE:   remoteStack.clear(); break;
-                case STACK_TYPE_IMAGE:    imageStack.clear(); break;
-                case STACK_TYPE_MOVIE:    movieStack.clear(); break;
-                case STACK_TYPE_MUSIC:    musicStack.clear(); break;
+                case STACK_TYPE_IMAGE:    imageStack = kelondroStack.reset(imageStack); break;
+                case STACK_TYPE_MOVIE:    movieStack = kelondroStack.reset(movieStack); break;
+                case STACK_TYPE_MUSIC:    musicStack = kelondroStack.reset(musicStack); break;
                 default: return;
             }
         } catch (IOException e) {}

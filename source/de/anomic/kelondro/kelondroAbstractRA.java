@@ -196,37 +196,6 @@ abstract class kelondroAbstractRA implements kelondroRA {
             bb[bbsize++] = (byte) c;
         }
     }
-/*
-    public void writeMap(final Map map, final String comment) throws IOException {
-        this.seek(0);
-        writeLine("# " + comment);
-        final Iterator iter = map.entrySet().iterator();
-        Map.Entry entry;
-        while (iter.hasNext()) {
-            entry = (Map.Entry) iter.next();
-            write(((String) entry.getKey()).getBytes());
-            write((byte) '=');
-            writeLine((String) entry.getValue());
-        }
-        writeLine("# EOF");
-    }
-
-    public Map readMap() throws IOException {
-        this.seek(0);
-        final TreeMap map = new TreeMap();
-        String line;
-        int pos;
-        while ((line = readLine()) != null) { // very slow readLine????
-            line = line.trim();
-            if (line.equals("# EOF")) return map;
-            if ((line.length() == 0) || (line.charAt(0) == '#')) continue;
-            pos = line.indexOf("=");
-            if (pos < 0) continue;
-            map.put(line.substring(0, pos), line.substring(pos + 1));
-        }
-        return map;
-    }
-*/
 
     public void writeMap(final Map map, final String comment) throws IOException {
         this.seek(0);

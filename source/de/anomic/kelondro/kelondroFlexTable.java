@@ -110,7 +110,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     public boolean has(byte[] key) throws IOException {
         // it is not recommended to implement or use a has predicate unless
         // it can be ensured that it causes no IO
-        assert (RAMIndex == true);
+        assert (RAMIndex == true) : "RAM index warning in file " + super.tablename;
         return index.geti(key) >= 0;
     }
     
@@ -193,7 +193,9 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             index.puti(row.getColBytes(0), super.add(row));
             return null;
         }
-        return super.replace(i, row);
+        kelondroRow.Entry oldentry = super.get(i);
+        super.set(i, row);
+        return oldentry;
     }
     
     public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {

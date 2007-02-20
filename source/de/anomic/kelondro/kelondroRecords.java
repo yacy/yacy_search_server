@@ -77,6 +77,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.anomic.server.serverMemory;
@@ -85,69 +86,70 @@ import de.anomic.server.logging.serverLog;
 public class kelondroRecords {
 
     // constants
-    private static final int NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
-    private static final long memBlock = 500000; // do not fill cache further if the amount of available memory is less that this
-    public final static boolean useWriteBuffer = false;
+    protected final static int     NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
+    private   final static long    memBlock = 500000;       // do not fill cache further if the amount of available memory is less that this
+    public    final static boolean useWriteBuffer = false;  // currently only used during development/testing
     
     // memory calculation
-    private static final int element_in_cache = 4; // for kelondroCollectionObjectMap: 4; for HashMap: 52
+    private   static final int element_in_cache = 4; // for kelondroCollectionObjectMap: 4; for HashMap: 52
     
     // caching flags
-    public static final int CP_NONE   = -1; // cache priority none; entry shall not be cached
-    public static final int CP_LOW    =  0; // cache priority low; entry may be cached
-    public static final int CP_MEDIUM =  1; // cache priority medium; entry shall be cached
-    public static final int CP_HIGH   =  2; // cache priority high; entry must be cached
+    public    static final int CP_NONE   = -1; // cache priority none; entry shall not be cached
+    public    static final int CP_LOW    =  0; // cache priority low; entry may be cached
+    public    static final int CP_MEDIUM =  1; // cache priority medium; entry shall be cached
+    public    static final int CP_HIGH   =  2; // cache priority high; entry must be cached
     
     // static seek pointers
-    public    static int  LEN_DESCR      = 60;
-    protected static long POS_MAGIC      = 0;                     // 1 byte, byte: file type magic
-    protected static long POS_BUSY       = POS_MAGIC      + 1;    // 1 byte, byte: marker for synchronization
-    protected static long POS_PORT       = POS_BUSY       + 1;    // 2 bytes, short: hint for remote db access
-    protected static long POS_DESCR      = POS_PORT       + 2;    // 60 bytes, string: any description string
-    protected static long POS_COLUMNS    = POS_DESCR      + LEN_DESCR; // 2 bytes, short: number of columns in one entry
-    protected static long POS_OHBYTEC    = POS_COLUMNS    + 2;    // 2 bytes, number of extra bytes on each Node
-    protected static long POS_OHHANDLEC  = POS_OHBYTEC    + 2;    // 2 bytes, number of Handles on each Node
-    protected static long POS_USEDC      = POS_OHHANDLEC  + 2;    // 4 bytes, int: used counter
-    protected static long POS_FREEC      = POS_USEDC      + 4;    // 4 bytes, int: free counter
-    protected static long POS_FREEH      = POS_FREEC      + 4;    // 4 bytes, int: free pointer (to free chain start)
-    protected static long POS_MD5PW      = POS_FREEH      + 4;    // 16 bytes, string (encrypted password to this file)
-    protected static long POS_ENCRYPTION = POS_MD5PW      + 16;   // 16 bytes, string (method description)
-    protected static long POS_OFFSET     = POS_ENCRYPTION + 16;   // 8 bytes, long (seek position of first record)
-    protected static long POS_INTPROPC   = POS_OFFSET     + 8;    // 4 bytes, int: number of INTPROP elements
-    protected static long POS_TXTPROPC   = POS_INTPROPC   + 4;    // 4 bytes, int: number of TXTPROP elements
-    protected static long POS_TXTPROPW   = POS_TXTPROPC   + 4;    // 4 bytes, int: width of TXTPROP elements
-    protected static long POS_COLWIDTHS  = POS_TXTPROPW   + 4;    // array of 4 bytes, int[]: sizes of columns
+    private   static int  LEN_DESCR      = 60;
+    private   static long POS_MAGIC      = 0;                     // 1 byte, byte: file type magic
+    private   static long POS_BUSY       = POS_MAGIC      + 1;    // 1 byte, byte: marker for synchronization
+    private   static long POS_PORT       = POS_BUSY       + 1;    // 2 bytes, short: hint for remote db access
+    private   static long POS_DESCR      = POS_PORT       + 2;    // 60 bytes, string: any description string
+    private   static long POS_COLUMNS    = POS_DESCR      + LEN_DESCR; // 2 bytes, short: number of columns in one entry
+    private   static long POS_OHBYTEC    = POS_COLUMNS    + 2;    // 2 bytes, number of extra bytes on each Node
+    private   static long POS_OHHANDLEC  = POS_OHBYTEC    + 2;    // 2 bytes, number of Handles on each Node
+    private   static long POS_USEDC      = POS_OHHANDLEC  + 2;    // 4 bytes, int: used counter
+    private   static long POS_FREEC      = POS_USEDC      + 4;    // 4 bytes, int: free counter
+    private   static long POS_FREEH      = POS_FREEC      + 4;    // 4 bytes, int: free pointer (to free chain start)
+    private   static long POS_MD5PW      = POS_FREEH      + 4;    // 16 bytes, string (encrypted password to this file)
+    private   static long POS_ENCRYPTION = POS_MD5PW      + 16;   // 16 bytes, string (method description)
+    private   static long POS_OFFSET     = POS_ENCRYPTION + 16;   // 8 bytes, long (seek position of first record)
+    private   static long POS_INTPROPC   = POS_OFFSET     + 8;    // 4 bytes, int: number of INTPROP elements
+    private   static long POS_TXTPROPC   = POS_INTPROPC   + 4;    // 4 bytes, int: number of TXTPROP elements
+    private   static long POS_TXTPROPW   = POS_TXTPROPC   + 4;    // 4 bytes, int: width of TXTPROP elements
+    private   static long POS_COLWIDTHS  = POS_TXTPROPW   + 4;    // array of 4 bytes, int[]: sizes of columns
     // after this configuration field comes:
     // POS_HANDLES: INTPROPC * 4 bytes  : INTPROPC Integer properties, randomly accessible
     // POS_TXTPROPS: TXTPROPC * TXTPROPW : an array of TXTPROPC byte arrays of width TXTPROPW that can hold any string
     // POS_NODES : (USEDC + FREEC) * (overhead + sum(all: COLWIDTHS)) : Node Objects
 
     // values that are only present at run-time
-    protected String     filename;     // the database's file name
-    protected kelondroIOChunks entryFile;    // the database file
-    protected int        overhead;     // OHBYTEC + 4 * OHHANDLEC = size of additional control bytes
-    protected int        headchunksize;// overheadsize + key element column size
-    protected int        tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
-    protected int        recordsize;   // (overhead + sum(all: COLWIDTHS)) = the overall size of a record
+    protected String           filename;     // the database's file name
+    private   kelondroIOChunks entryFile;    // the database file
+    private   int              overhead;     // OHBYTEC + 4 * OHHANDLEC = size of additional control bytes
+    private   int              headchunksize;// overheadsize + key element column size
+    private   int              tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
+    private   int              recordsize;   // (overhead + sum(all: COLWIDTHS)) = the overall size of a record
+    private   byte[]           spaceChunk;   // a chunk of data that is used to reserve space within the file
     
     // dynamic run-time seek pointers
-    protected long POS_HANDLES = 0; // starts after end of POS_COLWIDHS which is POS_COLWIDTHS + COLWIDTHS.length * 4
-    protected long POS_TXTPROPS = 0; // starts after end of POS_HANDLES which is POS_HANDLES + HANDLES.length * 4
-    protected long POS_NODES  = 0; // starts after end of POS_TXTPROPS which is POS_TXTPROPS + TXTPROPS.length * TXTPROPW
+    private   long POS_HANDLES  = 0; // starts after end of POS_COLWIDHS which is POS_COLWIDTHS + COLWIDTHS.length * 4
+    private   long POS_TXTPROPS = 0; // starts after end of POS_HANDLES which is POS_HANDLES + HANDLES.length * 4
+    private   long POS_NODES    = 0; // starts after end of POS_TXTPROPS which is POS_TXTPROPS + TXTPROPS.length * TXTPROPW
 
     // dynamic variables that are back-ups of stored values in file; read/defined on instantiation
-    protected usageControl      USAGE;       // counter for used and re-use records and pointer to free-list
-    protected short             OHBYTEC;     // number of extra bytes in each node
-    protected short             OHHANDLEC;   // number of handles in each node
-    protected kelondroRow       ROW;         // array with widths of columns
-    protected Handle            HANDLES[];   // array with handles
-    protected byte[]            TXTPROPS[];  // array with text properties
-    protected int               TXTPROPW;    // size of a single TXTPROPS element
+    private   usageControl      USAGE;       // counter for used and re-use records and pointer to free-list
+    private   short             OHBYTEC;     // number of extra bytes in each node
+    private   short             OHHANDLEC;   // number of handles in each node
+    private   kelondroRow       ROW;         // array with widths of columns
+    private   Handle            HANDLES[];   // array with handles
+    private   byte[]            TXTPROPS[];  // array with text properties
+    private   int               TXTPROPW;    // size of a single TXTPROPS element
 
     // caching buffer
-    protected kelondroIntBytesMap   cacheHeaders; // the cache; holds overhead values and key element
-    protected int                   cacheSize;    // number of cache records
-    protected int readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
+    private   kelondroIntBytesMap   cacheHeaders; // the cache; holds overhead values and key element
+    private   int                   cacheSize;    // number of cache records
+    private   int readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     
     // optional logger
     protected Logger theLogger = Logger.getLogger("KELONDRO"); // default logger
@@ -158,40 +160,211 @@ public class kelondroRecords {
     // Random. This is used to shift flush-times of write-buffers to differrent time
     private static Random random = new Random(System.currentTimeMillis());
 
+    // check for debug mode
+    private static boolean debugmode = false;
+    static {
+        assert debugmode = true;
+    }
+    
     protected final class usageControl {
-        protected int    USEDC; // counter of used elements
-        protected int    FREEC; // counter of free elements in list of free Nodes
-        protected Handle FREEH; // pointer to first element in list of free Nodes, empty = NUL
+        private int    USEDC; // counter of used elements
+        private int    FREEC; // counter of free elements in list of free Nodes
+        private Handle FREEH; // pointer to first element in list of free Nodes, empty = NUL
 
-        public usageControl() throws IOException {
-            read();
+        public usageControl(boolean init) throws IOException {
+            if (init) {
+                this.USEDC = 0;
+                this.FREEC = 0;
+                this.FREEH = new Handle(NUL);
+            } else {
+                readfree();
+                readused();
+                try {
+                    int rest = (int) ((entryFile.length() - POS_NODES) % recordsize);// == 0 : "rest = " + ((entryFile.length()  - POS_NODES) % ((long) recordsize)) + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
+                    int calculated_used = (int) ((entryFile.length() - POS_NODES) / recordsize);
+                    if ((rest != 0) || (calculated_used != this.USEDC + this.FREEC)) {
+                        theLogger.log(Level.WARNING, "USEDC inconsistency at startup: calculated_used = " + calculated_used + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename);
+                        this.USEDC = calculated_used - this.FREEC;
+                        writeused(true);
+                    }
+                } catch (IOException e) {
+                    assert false;
+                }
+            }
         }
         
-        public usageControl(int usedc, int freec, Handle freeh) {
-            this.USEDC = usedc;
-            this.FREEC = freec;
-            this.FREEH = freeh; 
-        }
-        
-        public void write() throws IOException {
-            synchronized (entryFile) {
+        private synchronized void writeused(boolean finalwrite) throws IOException {
+            // we write only at close time, not in between. othervise, the read/write head
+            // needs to run up and own all the way between the beginning and the end of the
+            // file for each record. We check consistency beteen file size and
+            if (finalwrite) synchronized (entryFile) {
                 entryFile.writeInt(POS_USEDC, USEDC);
-                entryFile.writeInt(POS_FREEC, FREEC);
-                entryFile.writeInt(POS_FREEH, FREEH.index);
                 entryFile.commit();
             }
         }
         
-        public void read() throws IOException {
+        private synchronized void writefree() throws IOException {
+            synchronized (entryFile) {
+                entryFile.writeInt(POS_FREEC, FREEC);
+                entryFile.writeInt(POS_FREEH, FREEH.index);
+                entryFile.commit();
+                checkConsistency();
+            }
+        }
+        
+        private synchronized void readused() throws IOException {
             synchronized (entryFile) {
                 this.USEDC = entryFile.readInt(POS_USEDC);
+            }
+        }
+        
+        private synchronized void readfree() throws IOException {
+            synchronized (entryFile) {
                 this.FREEC = entryFile.readInt(POS_FREEC);
                 this.FREEH = new Handle(entryFile.readInt(POS_FREEH));
             }
         }
         
-        public int allCount() {
+        private synchronized int allCount() {
+            checkConsistency();
             return this.USEDC + this.FREEC;
+        }
+        
+        private synchronized int used() {
+            checkConsistency();
+            return this.USEDC;
+        }
+        
+        private synchronized void dispose(Handle h) throws IOException {
+            // delete element with handle h
+            // this element is then connected to the deleted-chain and can be
+            // re-used change counter
+            assert (h.index >= 0);
+            assert (h.index != NUL);
+            assert (h.index < USEDC + FREEC) : "USEDC = " + USEDC + ", FREEC = " + FREEC + ", h.index = " + h.index;
+            long sp = seekpos(h);
+            assert (sp <= entryFile.length() + ROW.objectsize) : h.index + "/" + sp + " exceeds file size " + entryFile.length();
+            synchronized (USAGE) {
+                USEDC--;
+                FREEC++;
+                // change pointer
+                entryFile.writeInt(sp, FREEH.index); // extend free-list
+                // write new FREEH Handle link
+                FREEH = h;
+                writefree();
+                writeused(false);
+            }
+        }
+        
+        private synchronized int allocate(byte[] chunk) throws IOException {
+            // reserves a new record and returns index of record
+            // the return value is not a seek position
+            // the seek position can be retrieved using the seekpos() function
+            if (chunk == null) {
+                chunk = spaceChunk;
+            }
+            assert (chunk.length == ROW.objectsize()) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize();
+            synchronized (USAGE) {
+                if (USAGE.FREEC == 0) {
+                    // generate new entry
+                    int index = USAGE.allCount();
+                    entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize()); // occupy space, othervise the USAGE computaton does not work
+                    USAGE.USEDC++;
+                    writeused(false);
+                    return index;
+                } else {
+                    // re-use record from free-list
+                    USAGE.USEDC++;
+                    USAGE.FREEC--;
+                    // take link
+                    int index;
+                    if (USAGE.FREEH.index == NUL) {
+                        serverLog.logSevere("kelondroRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
+                        // try to heal..
+                        USAGE.USEDC = USAGE.allCount() + 1;
+                        USAGE.FREEC = 0;
+                        index = USAGE.USEDC - 1;
+                    } else {
+                        index = USAGE.FREEH.index;
+                        //System.out.println("*DEBUG* ALLOCATED DELETED INDEX " + index);
+                        // check for valid seek position
+                        long seekp = seekpos(USAGE.FREEH);
+                        if (seekp > entryFile.length()) {
+                            // this is a severe inconsistency. try to heal..
+                            serverLog.logSevere("kelondroRecords/" + filename, "new Handle: lost " + USAGE.FREEC + " marked nodes; seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
+                            index = USAGE.allCount(); // a place at the end of the file
+                            USAGE.USEDC += USAGE.FREEC; // to avoid that non-empty records at the end are overwritten
+                            USAGE.FREEC = 0; // discard all possible empty nodes
+                            USAGE.FREEH.index = NUL;
+                        } else {
+                            // read link to next element of FREEH chain
+                            USAGE.FREEH.index = entryFile.readInt(seekp);
+                        }
+                    }
+                    USAGE.writeused(false);
+                    USAGE.writefree();
+                    entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize()); // overwrite space
+                    return index;
+                }
+            }
+        }
+        
+        private synchronized void allocate(int index, byte[] chunk, int offset, boolean write) throws IOException {
+            // in case that the handle index was created outside this class,
+            // this method ensures that the USAGE counters are consistent with the
+            // new handle index
+            if (chunk == null) {
+                chunk = new byte[ROW.objectsize()];
+                offset = 0;
+            }
+            //assert (chunk.length == ROW.objectsize()) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize();
+            synchronized (USAGE) {
+                if (index < USAGE.allCount()) {
+                    // write within the file
+                    // this can be critical, if we simply overwrite fields that are marked
+                    // as deleted. This case should be avoided. There is no other way to check
+                    // that the field is not occupied than looking at the FREEC counter
+                    assert (USAGE.FREEC == 0) : "FREEC = " + USAGE.FREEC;
+                    // simply overwrite the cell
+                    if (write) entryFile.write(seekpos(index) + overhead, chunk, offset, ROW.objectsize());
+                    // no changes of counter necessary
+                } else {
+                    assert write == true;
+                    // write beyond the end of the file
+                    // records that are in between are marked as deleted
+                    Handle h;
+                    while (index > USAGE.allCount()) {
+                        h = new Handle(USAGE.allCount());
+                        USAGE.FREEC++;
+                        entryFile.write(seekpos(h), spaceChunk); // occupy space, othervise the USAGE computaton does not work
+                        entryFile.writeInt(seekpos(h), USAGE.FREEH.index);
+                        USAGE.FREEH = h;
+                        USAGE.writefree();
+                        entryFile.commit();
+                    }
+                    assert (index <= USAGE.allCount());
+                
+                    // adopt USAGE.USEDC
+                    if (USAGE.allCount() == index) {
+                        entryFile.write(seekpos(index) + overhead, chunk, offset, ROW.objectsize()); // write chunk and occupy space
+                        USAGE.USEDC++;
+                        USAGE.writeused(false);
+                        entryFile.commit();
+                    }
+                }
+            }
+        }
+        
+        
+        private synchronized void checkConsistency() {
+            if (debugmode) try { // in debug mode
+                long efl = entryFile.length();
+                assert ((efl - POS_NODES) % ((long) recordsize)) == 0 : "rest = " + ((entryFile.length()  - POS_NODES) % ((long) recordsize)) + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
+                long calculated_used = (efl - POS_NODES) / ((long) recordsize);
+                assert calculated_used == this.USEDC + this.FREEC : "calculated_used = " + calculated_used + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
+            } catch (IOException e) {
+                assert false;
+            }
         }
     }
 
@@ -201,10 +374,10 @@ public class kelondroRecords {
             kelondroRA ra = new kelondroFileRA(file.getCanonicalPath());
             kelondroIOChunks entryFile = new kelondroRAIOChunks(ra, ra.name());
 
-            int USEDC = entryFile.readInt(POS_USEDC);
+            int used = entryFile.readInt(POS_USEDC); // works only if consistency with file size is given
             entryFile.close();
             ra.close();
-            return USEDC;
+            return used;
         } catch (FileNotFoundException e) {
             return 0;
         } catch (IOException e) {
@@ -251,7 +424,6 @@ public class kelondroRecords {
             writeOrderType();            
         }
         initCache(buffersize / 10 * 9, preloadTime);
-        
     }
 
     public kelondroRecords(kelondroRA ra, long buffersize /* bytes */, long preloadTime,
@@ -290,14 +462,16 @@ public class kelondroRecords {
         this.recordsize = this.overhead + ROW.objectsize();
         this.headchunksize = overhead + ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
+        this.spaceChunk = fillSpaceChunk(recordsize);
 
         // store dynamic run-time seek pointers
         POS_HANDLES = POS_COLWIDTHS + ROW.columns() * 4;
         POS_TXTPROPS = POS_HANDLES + FHandles * 4;
         POS_NODES = POS_TXTPROPS + txtProps * txtPropWidth;
+        //System.out.println("*** DEBUG: POS_NODES = " + POS_NODES + " for " + filename);
 
         // store dynamic back-up variables
-        USAGE     = new usageControl(0, 0, new Handle(NUL));
+        USAGE     = new usageControl(true);
         OHBYTEC   = ohbytec;
         OHHANDLEC = ohhandlec;
         HANDLES   = new Handle[FHandles];
@@ -314,8 +488,8 @@ public class kelondroRecords {
         entryFile.writeShort(POS_COLUMNS, this.ROW.columns());
         entryFile.writeShort(POS_OHBYTEC, OHBYTEC);
         entryFile.writeShort(POS_OHHANDLEC, OHHANDLEC);
-        entryFile.writeInt(POS_USEDC, this.USAGE.USEDC);
-        entryFile.writeInt(POS_FREEC, this.USAGE.FREEC);
+        entryFile.writeInt(POS_USEDC, 0);
+        entryFile.writeInt(POS_FREEC, 0);
         entryFile.writeInt(POS_FREEH, this.USAGE.FREEH.index);
         entryFile.write(POS_MD5PW, "PASSWORDPASSWORD".getBytes());
         entryFile.write(POS_ENCRYPTION, "ENCRYPTION!#$%&?".getBytes());
@@ -341,6 +515,12 @@ public class kelondroRecords {
         this.entryFile.commit();
     }
 
+    private static final byte[] fillSpaceChunk(int size) {
+        byte[] chunk = new byte[size];
+        while (--size >= 0) chunk[size] = (byte) 0xff;
+        return chunk;
+    }
+    
     public void setDescription(byte[] description) throws IOException {
         if (description.length > LEN_DESCR)
             entryFile.write(POS_DESCR, description, 0, LEN_DESCR);
@@ -378,17 +558,6 @@ public class kelondroRecords {
         else
             this.theLogger.fine("KELONDRO DEBUG " + this.filename + ": " + message);
     }
-    
-    public void clear() throws IOException {
-        // Removes all mappings from this map
-        // throw new UnsupportedOperationException("clear not supported");
-        synchronized (USAGE) {
-            this.USAGE.USEDC = 0;
-            this.USAGE.FREEC = 0;
-            this.USAGE.FREEH = new Handle(NUL);
-        }
-        this.USAGE.write();
-    }
 
     public kelondroRecords(kelondroRA ra, long buffersize, long preloadTime) throws IOException{
         this.fileExisted = false;
@@ -408,8 +577,7 @@ public class kelondroRecords {
 
         // read dynamic variables that are back-ups of stored values in file;
         // read/defined on instantiation
-        this.USAGE = new usageControl();
-
+        
         this.OHBYTEC = entryFile.readShort(POS_OHBYTEC);
         this.OHHANDLEC = entryFile.readShort(POS_OHHANDLEC);
 
@@ -424,6 +592,7 @@ public class kelondroRecords {
         POS_HANDLES = POS_COLWIDTHS + COLDEFS.length * 4;
         POS_TXTPROPS = POS_HANDLES + HANDLES.length * 4;
         POS_NODES = POS_TXTPROPS + TXTPROPS.length * TXTPROPW;
+        //System.out.println("*** DEBUG: POS_NODES = " + POS_NODES + " for " + filename);
 
         // read configuration arrays
         for (int i = 0; i < COLDEFS.length; i++) {
@@ -440,10 +609,13 @@ public class kelondroRecords {
         
         // assign remaining values that are only present at run-time
         this.overhead = OHBYTEC + 4 * OHHANDLEC;
-        this.recordsize = this.overhead;
         this.recordsize = this.overhead + ROW.objectsize();
         this.headchunksize = this.overhead + this.ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
+        this.spaceChunk = fillSpaceChunk(recordsize);
+        
+        // init USAGE, must be done at the end because it needs the recordsize value
+        this.USAGE = new usageControl(false);
     }
     
     private void writeOrderType() {
@@ -583,31 +755,29 @@ public class kelondroRecords {
         return bulk;
     }
     
-    protected final Node newNode() throws IOException {
-        return new Node();
+    protected synchronized final Node newNode(byte[] row) throws IOException {
+        return new Node(row);
     }
     
-    protected final Node newNode(Handle handle, byte[] bulkchunk, int offset) {
-        return new Node(handle, bulkchunk, offset, true);
+    protected synchronized final Node newNode(Handle handle, byte[] bulkchunk, int offset, boolean write) throws IOException {
+        return new Node(handle, bulkchunk, offset, write);
     }
     
-    protected final Node getNode(Handle handle) throws IOException {
-        return getNode(handle, null, 0);
+    protected synchronized final Node getNode(Handle handle, boolean fillTail) throws IOException {
+        return getNode(handle, null, 0, fillTail);
     }
     
-    protected final Node getNode(Handle handle, Node parentNode, int referenceInParent) throws IOException {
-        return new Node(handle, parentNode, referenceInParent);
+    protected synchronized final Node getNode(Handle handle, Node parentNode, int referenceInParent, boolean fillTail) throws IOException {
+        return new Node(handle, parentNode, referenceInParent, fillTail);
     }
     
-    protected final void deleteNode(Handle handle) throws IOException {
-        if (cacheSize == 0) {
-            dispose(handle);
-        } else {
-            synchronized (cacheHeaders) {
-                cacheHeaders.removeb(handle.index);
-                cacheDelete++;
-                dispose(handle);
-            }
+    protected synchronized final void deleteNode(Handle handle) throws IOException {
+        if ((cacheHeaders == null) || (cacheSize == 0)) {
+            USAGE.dispose(handle);
+        } else synchronized (cacheHeaders) {
+            cacheHeaders.removeb(handle.index);
+            cacheDelete++;
+            USAGE.dispose(handle);
         }
     }
 
@@ -641,26 +811,53 @@ public class kelondroRecords {
         protected Handle handle = null; // index of the entry, by default NUL means undefined
         protected byte[] headChunk = null; // contains ohBytes, ohHandles and the key value
         protected byte[] tailChunk = null; // contains all values except the key value
-        protected boolean headChanged = true;
-        protected boolean tailChanged = true;
-        
-        protected Node() throws IOException {
-            // create a new empty node and reserve empty space in file for it
-            // use this method only if you want to extend the file with new entries
-            // without the need to have content in it.
-            this.handle = new Handle();
+        protected boolean headChanged = false;
+        protected boolean tailChanged = false;
 
+        protected Node(byte[] rowinstance) throws IOException {
+            // this initializer is used to create nodes from bulk-read byte arrays
+            assert ((rowinstance == null) || (rowinstance.length == ROW.objectsize)) : "bulkchunk.length = " + rowinstance.length + ", ROW.width(0) = " + ROW.width(0);
+            this.handle = new Handle(USAGE.allocate(rowinstance));
+            
             // create empty chunks
             this.headChunk = new byte[headchunksize];
             this.tailChunk = new byte[tailchunksize];
-            for (int i = headchunksize - 1; i >= 0; i--) this.headChunk[i] = 0;
-            for (int i = tailchunksize - 1; i >= 0; i--) this.tailChunk[i] = 0;
+            
+            // write content to chunks
+            if (rowinstance == null) {
+                for (int i = headchunksize - 1; i >= 0; i--) this.headChunk[i] = (byte) 0xff;
+                for (int i = tailchunksize - 1; i >= 0; i--) this.tailChunk[i] = (byte) 0xff;
+            } else {
+                for (int i = overhead - 1; i >= 0; i--) this.headChunk[i] = (byte) 0xff;
+                System.arraycopy(rowinstance, 0, this.headChunk, overhead, ROW.width(0));
+                System.arraycopy(rowinstance, ROW.width(0), this.tailChunk, 0, tailchunksize);
+            }
+            
+            // mark chunks as changed
+            // if the head/tail chunks come from a file system read, setChanged should be false
+            // if the chunks come from a overwrite attempt, it should be true
+            this.headChanged = false; // we wrote the head already during allocate
+            this.tailChanged = false; // we write the tail already during allocate
+            
+            // update cache
+            update2Cache(CP_LOW);
         }
-    
-        protected Node(Handle handle, byte[] bulkchunk, int offset, boolean setChanged) {
+        
+        protected Node(Handle handle, byte[] bulkchunk, int offset, boolean write) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
+            // if write is true, then the chunk in bulkchunk is written to the file
+            // othervise it is considered equal to what is stored in the file
+            // (that is ensured during pre-loaded enumeration)
             this.handle = handle;
-            assert ((bulkchunk == null) || (bulkchunk.length >= offset + headchunksize)) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", headchunksize = " + headchunksize;
+            boolean changed;
+            if (handle.index >= USAGE.allCount()) {
+                assert write == true : "handle.index = " + handle.index + ", USAGE.allCount() = " + USAGE.allCount();
+                USAGE.allocate(handle.index, bulkchunk, offset, write);
+                changed = false; // this is independent from write
+            } else {
+                changed = write;
+            }
+            assert ((bulkchunk == null) || (bulkchunk.length >= offset + ROW.width(0))) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", ROW.width(0) = " + ROW.width(0);
             
             // create empty chunks
             this.headChunk = new byte[headchunksize];
@@ -668,18 +865,18 @@ public class kelondroRecords {
             
             // write content to chunks
             if (bulkchunk != null) {
-                System.arraycopy(bulkchunk, offset, this.headChunk, 0, headchunksize);
-                System.arraycopy(bulkchunk, offset + headchunksize, this.tailChunk, 0, tailchunksize);
+                System.arraycopy(bulkchunk, offset, this.headChunk, overhead, ROW.width(0));
+                System.arraycopy(bulkchunk, offset + ROW.width(0), this.tailChunk, 0, tailchunksize);
             }
             
             // mark chunks as changed
             // if the head/tail chunks come from a file system read, setChanged should be false
             // if the chunks come from a overwrite attempt, it should be true
-            this.headChanged = setChanged;
-            this.tailChanged = setChanged;
+            this.headChanged = changed;
+            this.tailChanged = changed;
         }
         
-        protected Node(Handle handle, Node parentNode, int referenceInParent) throws IOException {
+        protected Node(Handle handle, Node parentNode, int referenceInParent, boolean fillTail) throws IOException {
             // this creates an entry with an pre-reserved entry position.
             // values can be written using the setValues() method,
             // but we expect that values are already there in the file.
@@ -703,18 +900,28 @@ public class kelondroRecords {
             // use given handle
             this.handle = new Handle(handle.index);
 
+            // check for memory availability when fillTail is requested
+            if ((fillTail) && (tailchunksize > 10000)) fillTail = false; // this is a fail-safe 'short version' of a memory check
+            
             // init the content
-            initContent();
-        }
-        
-        private void initContent() throws IOException {
             // create chunks; read them from file or cache
             this.tailChunk = null;
             if (cacheSize == 0) {
-                // read overhead and key
-                //System.out.println("**NO CACHE for " + this.handle.index + "**");
-                this.headChunk = new byte[headchunksize];
-                entryFile.readFully(seekpos(this.handle), this.headChunk, 0, this.headChunk.length);
+                if (fillTail) {
+                    // read complete record
+                    byte[] chunkbuffer = new byte[recordsize];
+                    entryFile.readFully(seekpos(this.handle), chunkbuffer, 0, recordsize);
+                    this.headChunk = new byte[headchunksize];
+                    this.tailChunk = new byte[tailchunksize];
+                    System.arraycopy(chunkbuffer, 0, this.headChunk, 0, headchunksize);
+                    System.arraycopy(chunkbuffer, headchunksize, this.tailChunk, 0, tailchunksize);
+                    chunkbuffer = null;
+                } else {
+                    // read overhead and key
+                    this.headChunk = new byte[headchunksize];
+                    this.tailChunk = null;
+                    entryFile.readFully(seekpos(this.handle), this.headChunk, 0, headchunksize);
+                }
             } else synchronized(cacheHeaders) {
                 byte[] cacheEntry = null;
                 int cp = CP_HIGH;
@@ -722,11 +929,22 @@ public class kelondroRecords {
                 if (cacheEntry == null) {
                     // cache miss, we read overhead and key from file
                     readMiss++;
-                    //System.out.println("**CACHE miss for " + this.handle.index + "**");
-                    this.headChunk = new byte[headchunksize];
-                    //this.tailChunk = new byte[tailchunksize];
-                    entryFile.readFully(seekpos(this.handle), this.headChunk, 0, this.headChunk.length);
-
+                    if (fillTail) {
+                        // read complete record
+                        byte[] chunkbuffer = new byte[recordsize];
+                        entryFile.readFully(seekpos(this.handle), chunkbuffer, 0, recordsize);
+                        this.headChunk = new byte[headchunksize];
+                        this.tailChunk = new byte[tailchunksize];
+                        System.arraycopy(chunkbuffer, 0, this.headChunk, 0, headchunksize);
+                        System.arraycopy(chunkbuffer, headchunksize, this.tailChunk, 0, tailchunksize);
+                        chunkbuffer = null;
+                    } else {
+                        // read overhead and key
+                        this.headChunk = new byte[headchunksize];
+                        this.tailChunk = null;
+                        entryFile.readFully(seekpos(this.handle), this.headChunk, 0, headchunksize);
+                    }
+                    
                     // calculate cache priority
                     cp = CP_HIGH;
                     if (OHHANDLEC == 3) {
@@ -739,14 +957,7 @@ public class kelondroRecords {
                     // if space left in cache, copy these value to the cache
                     update2Cache(cp);
                 } else {
-                    //System.out.print("CACHE HIT FOR INDEX " + this.handle.index + ": ");
-                    //for (int i = 0; i < cacheEntry.length; i++) System.out.print(cacheEntry[i] + ", ");
-                    //System.out.println();
-                    // cache hit, copy overhead and key from cache
                     readHit++;
-                    //System.out.println("**CACHE HIT for " + this.handle.index + "**");
-                    //this.headChunk = new byte[headchunksize];
-                    //System.arraycopy(cacheEntry, 0, this.headChunk, 0, headchunksize);
                     this.headChunk = cacheEntry;
                 }
             }
@@ -768,7 +979,7 @@ public class kelondroRecords {
         protected Handle handle() {
             // if this entry has an index, return it
             if (this.handle.index == NUL) throw new kelondroException(filename, "the entry has no index assigned");
-            return new Handle(this.handle.index);
+            return this.handle;
         }
 
         protected void setOHByte(int i, byte b) {
@@ -811,7 +1022,7 @@ public class kelondroRecords {
             // set values
             if (this.handle.index != NUL) {
                 setValue(row, 0, ROW.width(0), headChunk, overhead);
-                if (ROW.columns() > 1) setValue(row, ROW.width(0), ROW.objectsize() - ROW.width(0), tailChunk, 0);
+                if (ROW.columns() > 1) setValue(row, ROW.width(0), tailchunksize, tailChunk, 0);
             }
             this.headChanged = true;
             this.tailChanged = true;
@@ -858,7 +1069,7 @@ public class kelondroRecords {
             // save head
             if (this.headChanged) {
                 //System.out.println("WRITEH(" + filename + ", " + seekpos(this.handle) + ", " + this.headChunk.length + ")");
-                entryFile.write(seekpos(this.handle), this.headChunk);
+                entryFile.write(seekpos(this.handle), (this.headChunk == null) ? new byte[headchunksize] : this.headChunk);
                 update2Cache(cachePriority);
                 this.headChanged = false;
             }
@@ -866,7 +1077,7 @@ public class kelondroRecords {
             // save tail
             if ((this.tailChunk != null) && (this.tailChanged)) {
                 //System.out.println("WRITET(" + filename + ", " + (seekpos(this.handle) + headchunksize) + ", " + this.tailChunk.length + ")");
-                entryFile.write(seekpos(this.handle) + headchunksize, this.tailChunk);
+                entryFile.write(seekpos(this.handle) + headchunksize, (this.tailChunk == null) ? new byte[tailchunksize] : this.tailChunk);
                 this.tailChanged = false;
             }
             
@@ -933,6 +1144,7 @@ public class kelondroRecords {
             if (this.headChunk == null) return; // nothing there to cache
             if (priority == CP_NONE) return; // it is not wanted that this shall be cached
             if (cacheSize == 0) return; // we do not use the cache
+            if (cacheHeaders == null) return; // no cache
             if (cacheHeaders.size() >= cacheSize) return; // no cache update if cache is full
             
             synchronized (cacheHeaders) {
@@ -1024,8 +1236,12 @@ public class kelondroRecords {
 
     protected final long seekpos(Handle handle) {
         assert (handle.index >= 0): "handle index too low: " + handle.index;
-        //assert (handle.index < USAGE.allCount()): "handle index too high:" + handle.index;
         return POS_NODES + ((long) recordsize * handle.index);
+    }
+    
+    protected final long seekpos(int index) {
+        assert (index >= 0): "handle index too low: " + index;
+        return POS_NODES + ((long) recordsize * index);
     }
 
     // additional properties
@@ -1061,38 +1277,16 @@ public class kelondroRecords {
 
     // Returns true if this map contains no key-value mappings.
     public final boolean isEmpty() {
-        return (USAGE.USEDC == 0);
+        return (USAGE.used() == 0);
     }
 
     // Returns the number of key-value mappings in this map.
-    public final int size() {
-        return USAGE.USEDC;
+    public int size() {
+        return USAGE.used();
     }
 
     protected final int free() {
         return USAGE.FREEC;
-    }
-
-    private synchronized final void dispose(Handle h) throws IOException {
-        // delete element with handle h
-        // this element is then connected to the deleted-chain and can be
-        // re-used change counter
-        assert (h.index >= 0);
-        assert (h.index != NUL);
-        long sp = seekpos(h);
-        if (sp >= entryFile.length()) {
-            // a deletion of a node that cannot exist is wrong
-            throw new IOException("dispose: handle position " + h.index + "/" + sp + " exceeds file size " + entryFile.length());
-        }
-        synchronized (USAGE) {
-            USAGE.USEDC--;
-            USAGE.FREEC++;
-            // change pointer
-            entryFile.writeInt(sp, USAGE.FREEH.index); // extend free-list
-            // write new FREEH Handle link
-            USAGE.FREEH = h;
-            USAGE.write();
-        }
     }
     
     public final Iterator contentRows(long maxInitTime) throws kelondroException {
@@ -1247,7 +1441,7 @@ public class kelondroRecords {
                     ((key.length  > 0) && (key[0] == 0))              // a 'lost' pointer within a deleted-chain
                    ) {
                     // this is a deleted node; probably not commited with dispose
-                    if (fullyMarked) try {dispose(nn.handle);} catch (IOException e) {} // mark this now as deleted
+                    if (fullyMarked) try {USAGE.dispose(nn.handle);} catch (IOException e) {} // mark this now as deleted
                     continue;
                 }
                 return nn;
@@ -1264,7 +1458,7 @@ public class kelondroRecords {
             }
                 
             // read node from bulk
-            Node n = new Node(new Handle(pos.index), bulk, (pos.index - bulkstart) * recordsize, false);
+            Node n = new Node(new Handle(pos.index), bulk, (pos.index - bulkstart) * recordsize, true);
             pos.index++;
             while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
             return n;
@@ -1277,14 +1471,19 @@ public class kelondroRecords {
     }
     
     public void close() throws IOException {
-        if (this.entryFile != null) this.entryFile.close();
-        this.entryFile = null;
+        if (entryFile == null) {
+            theLogger.severe("File was closed before close was called. File = " + filename);
+        } else {
+            USAGE.writeused(true);
+            this.entryFile.close();
+        }
     }
 
     public void finalize() {
         try {
-            close();
+            if (entryFile != null) close();
         } catch (IOException e) { }
+        this.entryFile = null;
     }
 
     protected final static String[] line2args(String line) {
@@ -1354,7 +1553,7 @@ public class kelondroRecords {
                 System.out.print(", '" + (new String(TXTPROPS[i])).trim() + "'");
             System.out.println("}");
         }
-        System.out.println("  USEDC      : " + USAGE.USEDC);
+        System.out.println("  USEDC      : " + USAGE.used());
         System.out.println("  FREEC      : " + USAGE.FREEC);
         System.out.println("  FREEH      : " + USAGE.FREEH.toString());
         System.out.println("  NUL repres.: 0x" + Integer.toHexString(NUL));
@@ -1384,7 +1583,7 @@ public class kelondroRecords {
         System.out.println("--");
         System.out.println("NODES");
         for (int i = 0; i < USAGE.allCount(); i++)
-            System.out.println("NODE: " + new Node(new Handle(i), (Node) null, 0).toString());
+            System.out.println("NODE: " + new Node(new Handle(i), (Node) null, 0, true).toString());
     }
 
     public String toString() {
@@ -1394,84 +1593,11 @@ public class kelondroRecords {
     protected final class Handle implements Comparable {
         protected int index;
 
-        protected Handle() throws IOException {
-            // reserves a new record and returns index of record
-            // the return value is not a seek position
-            // the seek position can be retrieved using the seekpos() function
-            synchronized (USAGE) {
-                if (USAGE.FREEC == 0) {
-                    // generate new entry
-                    index = USAGE.allCount();
-                    USAGE.USEDC++;
-                    entryFile.writeInt(POS_USEDC, USAGE.USEDC);
-                    entryFile.commit();
-                } else {
-                    // re-use record from free-list
-                    USAGE.USEDC++;
-                    USAGE.FREEC--;
-                    // take link
-                    if (USAGE.FREEH.index == NUL) {
-                        serverLog.logSevere("kelondroRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
-                        // try to heal..
-                        USAGE.USEDC = USAGE.allCount() + 1;
-                        USAGE.FREEC = 0;
-                        index = USAGE.USEDC - 1;
-                    } else {
-                        index = USAGE.FREEH.index;
-                        //System.out.println("*DEBUG* ALLOCATED DELETED INDEX " + index);
-                        // check for valid seek position
-                        long seekp = seekpos(USAGE.FREEH);
-                        if (seekp > entryFile.length()) {
-                            // this is a severe inconsistency. try to heal..
-                            serverLog.logSevere("kelondroRecords/" + filename, "new Handle: lost " + USAGE.FREEC + " marked nodes; seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
-                            index = USAGE.allCount(); // a place at the end of the file
-                            USAGE.USEDC += USAGE.FREEC; // to avoid that non-empty records at the end are overwritten
-                            USAGE.FREEC = 0; // discard all possible empty nodes
-                            USAGE.FREEH.index = NUL;
-                        } else {
-                            // read link to next element of FREEH chain
-                            USAGE.FREEH.index = entryFile.readInt(seekp);
-                        }
-                    }
-                    USAGE.write();
-                }
-            }
-        }
-        
         protected Handle(int i) {
             assert (i == NUL) || (i >= 0) : "node handle index too low: " + i;
             //assert (i == NUL) || (i < USAGE.allCount()) : "node handle index too high: " + i + ", USEDC=" + USAGE.USEDC + ", FREEC=" + USAGE.FREEC;
             this.index = i;
-        }
-
-        protected void adoptAllCount() throws IOException {
-            // in case that the handle index was created outside this class,
-            // this method ensures that the USAGE counters are consistent with the
-            // new handle index
-            if (USAGE.allCount() <= this.index) synchronized (USAGE) {
-                // records that are in between are marked as deleted
-                boolean wf = false;
-                while (USAGE.allCount() < this.index) {
-                    Handle h = new Handle(USAGE.allCount());
-                    USAGE.FREEC++;
-                    entryFile.writeInt(seekpos(h), USAGE.FREEH.index);
-                    USAGE.FREEH = h;
-                    wf = true;
-                }
-                assert (USAGE.allCount() >= this.index);
-                
-                // adopt USAGE.USEDC
-                if (USAGE.allCount() == this.index) {
-                    USAGE.USEDC++;
-                    wf = true;
-                }
-                
-                // commit changes
-                if (wf) {
-                    USAGE.write();
-                    entryFile.commit();
-                }
-            }
+            //if ((USAGE != null) && (this.index != NUL)) USAGE.allocate(this.index);
         }
         
         public boolean isNUL() {

@@ -45,7 +45,6 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverMemory;
 import de.anomic.yacy.yacySeedDB;
 
 public final class indexRAMRI implements indexRI {
@@ -111,7 +110,7 @@ public final class indexRAMRI implements indexRI {
         if (indexDumpFile.exists()) indexDumpFile.delete();
         kelondroFixedWidthArray dumpArray = null;
         kelondroBufferedRA writeBuffer = null;
-        if (serverMemory.available() > 50 * bufferStructureBasis.objectsize() * cache.size()) {
+        if (false /*serverMemory.available() > 50 * bufferStructureBasis.objectsize() * cache.size()*/) {
             writeBuffer = new kelondroBufferedRA();
             dumpArray = new kelondroFixedWidthArray(writeBuffer, bufferStructureBasis, 0);
             log.logInfo("started dump of ram cache: " + cache.size() + " words; memory-enhanced write");
@@ -151,7 +150,7 @@ public final class indexRAMRI implements indexRI {
                         row.setCol(1, occ);
                         row.setCol(2, time);
                         row.setCol(3, iEntry.toKelondroEntry().bytes());
-                        dumpArray.overwrite((int) urlcount++, row);
+                        dumpArray.set((int) urlcount++, row);
                     }
                 }
                 wordcount++;

@@ -95,10 +95,10 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             // open next biggest table
             t.remove(maxf);
             date = maxf.substring(tablename.length() + 1);
-            if (buffersize >= maxram) {
+            if (buffersize >= maxram * 2) {
                 // this will cause usage of a complete RAM index
-                table = new kelondroCache(new kelondroFlexTable(path, maxf, maxram, preloadTime, rowdef), maxram / 10, true, false);
-                buffersize -= maxram;
+                table = new kelondroCache(new kelondroFlexTable(path, maxf, maxram * 2, preloadTime, rowdef), maxram / 10, true, false);
+                buffersize -= maxram * 2;
                 buffersize -= maxram / 10;
             } else {
                 // this will cause a generation of a file index

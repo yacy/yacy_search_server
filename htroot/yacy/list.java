@@ -51,7 +51,6 @@
 // contains contributions by [FB] to support listing URLs for URL Fetcher
 
 import java.io.File;
-import java.net.InetAddress;
 
 import de.anomic.data.URLFetcherStack;
 import de.anomic.data.listManager;

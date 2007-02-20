@@ -154,7 +154,13 @@ public class kelondroFlexWidthArray implements kelondroArray {
     
     public void close() throws IOException {
         synchronized (col) {
-            for (int i = 0; i < col.length; i++) if (col[i] != null) col[i].close();
+            for (int i = 0; i < col.length; i++) {
+                if (col[i] != null) {
+                    // a column can be null, this is normal
+                    col[i].close();
+                    col[i] = null;
+                }
+            }
         }
     }
     
@@ -176,30 +182,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         return col[0].size();
     }
     
-    public kelondroRow.Entry replace(int index, kelondroRow.Entry rowentry) throws IOException {
-        assert rowentry.bytes().length == this.rowdef.objectsize;
-        int c = 0;
-        kelondroRow.Entry e0, e1, p;
-        p = rowdef.newEntry();
-        int lastcol;
-        synchronized (col) {
-            while (c < rowdef.columns()) {
-                lastcol = c + col[c].row().columns() - 1;
-                e0 = col[c].row().newEntry(
-                        rowentry.bytes(),
-                        rowdef.colstart[c],
-                        rowdef.colstart[lastcol] - rowdef.colstart[c] + rowdef.width(lastcol));
-                e1 = col[c].replace(index, e0);
-                for (int i = 0; i < col[c].row().columns(); i++) {
-                    p.setCol(c + i, e1.getColBytes(i));
-                }
-                c = c + col[c].row().columns();
-            }
-        }
-        return p;
-    }
-    
-    public void overwrite(int index, kelondroRow.Entry rowentry) throws IOException {
+    public void set(int index, kelondroRow.Entry rowentry) throws IOException {
         assert rowentry.bytes().length == this.rowdef.objectsize;
         int c = 0;
         kelondroRow.Entry e0;
@@ -211,7 +194,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
                         rowentry.bytes(),
                         rowdef.colstart[c],
                         rowdef.colstart[lastcol] - rowdef.colstart[c] + rowdef.width(lastcol));
-                col[c].overwrite(index, e0);
+                col[c].set(index, e0);
                 c = c + col[c].row().columns();
             }
         }
@@ -233,7 +216,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
                         rowentry.bytes(),
                         rowdef.colstart[c],
                         rowdef.colstart[lastcol] + rowdef.width(lastcol) - rowdef.colstart[c]);
-                col[c].overwrite(index,e);
+                col[c].set(index,e);
                 c = c + col[c].row().columns();
             }
         }
@@ -265,7 +248,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
             
             // the other columns will be blanked out only
             while (r < rowdef.columns()) {
-                col[r].overwrite(index, null);
+                col[r].set(index, null);
                 r = r + col[r].row().columns();
             }
         }
@@ -274,7 +257,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
     public void print() throws IOException {
         System.out.println("PRINTOUT of table, length=" + size());
         kelondroRow.Entry row;
-        for (int i = 0; i < col[0].USAGE.allCount(); i++) {
+        for (int i = 0; i < (col[0].free() + col[0].size()); i++) {
             System.out.print("row " + i + ": ");
             row = get(i);
             System.out.println(row.toString());

@@ -171,7 +171,7 @@ public class kelondroCollectionIndex {
                     
                     // write a log
                     if (System.currentTimeMillis() - lastlog > 30000) {
-                        serverLog.logFine("STARTUP", "created " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.USAGE.allCount() - count) / count) / 60000) + " minutes remaining for this array");
+                        serverLog.logFine("STARTUP", "created " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
                         lastlog = System.currentTimeMillis();
                     }
                 }
@@ -377,7 +377,7 @@ public class kelondroCollectionIndex {
                 arrayEntry.setCol(1, collection.exportCollection());
 
                 // overwrite entry in this array
-                array.overwrite(oldrownumber, arrayEntry);
+                array.set(oldrownumber, arrayEntry);
 
                 // update the index entry
                 indexrow.setCol(idx_col_chunkcount, collection.size());

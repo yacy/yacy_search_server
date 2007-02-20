@@ -71,7 +71,7 @@ public final class kelondroStack extends kelondroRecords {
         // this creates a new stack
         super(file, 0, 0, thisOHBytes, thisOHHandles, rowdef, thisFHandles, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
         if (super.fileExisted) {
-            if ((getHandle(root) == null) && (getHandle(toor) == null)) clear();
+            //if ((getHandle(root) == null) && (getHandle(toor) == null)) clear();
         } else {
             setHandle(root, null); // define the root value
             setHandle(toor, null); // define the toor value
@@ -106,12 +106,6 @@ public final class kelondroStack extends kelondroRecords {
         // re-open a database with same settings as before
         return open(f, row);
     }
-    
-    public void clear() throws IOException {
-        super.clear();
-        setHandle(root, null); // reset the root value
-        setHandle(toor, null); // reset the toor value
-    }
 
     public class Counter implements Iterator {
         Handle nextHandle = null;
@@ -127,8 +121,8 @@ public final class kelondroStack extends kelondroRecords {
         public Object next() {
             Handle ret = nextHandle;
             try {
-                nextHandle = getNode(nextHandle, null, 0).getOHHandle(right);
-                return getNode(ret, null, 0);
+                nextHandle = getNode(nextHandle, null, 0, false).getOHHandle(right);
+                return getNode(ret, null, 0, true);
             } catch (IOException e) {
                 throw new kelondroException(filename, "IO error at Counter:next()");
             }
@@ -139,13 +133,16 @@ public final class kelondroStack extends kelondroRecords {
         }
     }
 
+    public synchronized int size() {
+        return super.size();
+    }
+    
     public synchronized void push(kelondroRow.Entry row) throws IOException {
         // check if there is already a stack
         if (getHandle(toor) == null) {
             if (getHandle(root) != null) throw new RuntimeException("push: internal organisation of root and toor");
             // create node
-            Node n = newNode();
-            n.setValueRow(row.bytes());
+            Node n = newNode(row.bytes());
             n.setOHHandle(left, null);
             n.setOHHandle(right, null);
             n.commit(CP_NONE);
@@ -155,11 +152,10 @@ public final class kelondroStack extends kelondroRecords {
             // thats it
         } else {
             // expand the list at the end
-            Node n = newNode();
-            n.setValueRow(row.bytes());
+            Node n = newNode(row.bytes());
             n.setOHHandle(left, getHandle(toor));
             n.setOHHandle(right, null);
-            Node n1 = getNode(getHandle(toor), null, 0);
+            Node n1 = getNode(getHandle(toor), null, 0, false);
             n1.setOHHandle(right, n.handle());
             n.commit(CP_NONE);
             n1.commit(CP_NONE);
@@ -249,7 +245,7 @@ public final class kelondroStack extends kelondroRecords {
             setHandle(root, r);
         } else {
             // un-link the previous record
-            Node k = getNode(l, null, 0);
+            Node k = getNode(l, null, 0, false);
             k.setOHHandle(left, k.getOHHandle(left));
             k.setOHHandle(right, r);
             k.commit(CP_NONE);
@@ -260,7 +256,7 @@ public final class kelondroStack extends kelondroRecords {
             setHandle(toor, l);
         } else {
             // un-link the following record
-            Node k = getNode(r, null, 0);
+            Node k = getNode(r, null, 0, false);
             k.setOHHandle(left, l);
             k.setOHHandle(right, k.getOHHandle(right));
             k.commit(CP_NONE);
@@ -283,8 +279,8 @@ public final class kelondroStack extends kelondroRecords {
         Handle h = getHandle(side);
         if (h == null) return null;
         if (dist >= size()) return null; // that would exceed the stack
-        while (dist-- > 0) h = getNode(h).getOHHandle(dir); // track through elements
-        return getNode(h);
+        while (dist-- > 0) h = getNode(h, false).getOHHandle(dir); // track through elements
+        if (h == null) return null; else return getNode(h, true);
     }
 
     public Iterator iterator() {

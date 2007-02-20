@@ -234,7 +234,7 @@ public final class serverLog {
         StringBuffer sb = new StringBuffer(b.length * 4);
         for (int i = 0; i < b.length; i++) {
             if (i % linewidth == 0)
-                sb.append('\n').append("# ").append(Integer.toHexString(i));
+                sb.append('\n').append("# ").append(Integer.toHexString(i)).append(": ");
             else
                 sb.append(',');
             sb.append(' ').append(Integer.toString(0xff & (int) b[i]));

@@ -479,8 +479,8 @@ xpstopw=true
 40_peerseedcycle_idlesleep=1800000
 40_peerseedcycle_busysleep=1200000
 40_peerseedcycle_memprereq=2097152
-50_localcrawl_idlesleep=10000
-50_localcrawl_busysleep=300
+50_localcrawl_idlesleep=1000
+50_localcrawl_busysleep=120
 50_localcrawl_memprereq=2097152
 50_localcrawl_isPaused=false
 61_globalcrawltrigger_idlesleep=10000
@@ -491,11 +491,11 @@ xpstopw=true
 62_remotetriggeredcrawl_busysleep=1000
 62_remotetriggeredcrawl_memprereq=4194304
 62_remotetriggeredcrawl_isPaused=false
-70_cachemanager_idlesleep=5000
+70_cachemanager_idlesleep=1000
 70_cachemanager_busysleep=0
 70_cachemanager_memprereq=1048576
 80_indexing_idlesleep=2000
-80_indexing_busysleep=200
+80_indexing_busysleep=100
 80_indexing_memprereq=2097152
 82_crawlstack_idlesleep=5000
 82_crawlstack_busysleep=0
@@ -594,8 +594,8 @@ javastart_priority=0
 # may last for the word flush
 wordCacheMaxCount = 20000
 wordCacheInitCount = 30000
-wordFlushIdleDivisor = 500;
-wordFlushBusyDivisor = 5000;
+wordFlushIdleDivisor = 400;
+wordFlushBusyDivisor = 4000;
 
 # Specifies if yacy can be used as transparent http proxy.
 # 
@@ -655,14 +655,14 @@ crawler.clientTimeout=9000
 crawler.http.acceptEncoding=gzip
 crawler.http.acceptLanguage=en-us,en;q=0.5
 crawler.http.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
-crawler.http.maxFileSize=-1
+crawler.http.maxFileSize=262144
 
 # ftp crawler specific settings
-crawler.ftp.maxFileSize=-1
+crawler.ftp.maxFileSize=262144
 
 # maximum number of crawler threads
-crawler.MaxActiveThreads = 10
-crawler.MaxIdleThreads = 7
+crawler.MaxActiveThreads = 30
+crawler.MaxIdleThreads = 5
 
 # maximum number of crawl-stacker threads
 stacker.MaxActiveThreads = 50
@@ -670,7 +670,7 @@ stacker.MaxIdleThreads = 10
 stacker.MinIdleThreads = 5
 
 # maximum size of indexing queue
-indexer.slots = 30
+indexer.slots = 60
 
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.

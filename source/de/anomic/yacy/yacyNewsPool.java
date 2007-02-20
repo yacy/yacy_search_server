@@ -139,7 +139,7 @@ public class yacyNewsPool {
         // generate a record for next peer-ping
         if (outgoingNews.size() == 0) return null;
         yacyNewsRecord record = outgoingNews.topInc();
-        if (record.distributed() >= maxDistribution) {
+        if ((record != null) && (record.distributed() >= maxDistribution)) {
             // move record to its final position. This is only for history
             publishedNews.push(outgoingNews.pop(0));
         }

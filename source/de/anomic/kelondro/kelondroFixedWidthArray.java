@@ -60,7 +60,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         super(file, 0, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
         if (!(super.fileExisted)) {
             for (int i = 0; i < intprops; i++) {
-                setHandle(i, new Handle(0));
+                setHandle(i, new Handle(NUL));
             }
             // store column description
             for (int i = 0; i < rowdef.columns(); i++) {
@@ -97,36 +97,16 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         }
     }
     
-    public synchronized kelondroRow.Entry replace(int index, kelondroRow.Entry rowentry) throws IOException {
-
-        // make room for element
-        Node n;
-        while (super.USAGE.allCount() <= index) {
-            n = newNode();
-            n.commit(CP_NONE);
-        }
-
-        // get the node at position index
-        n = getNode(new Handle(index));
-
-        // write the row
-        byte[] before = n.setValueRow((rowentry == null) ? null : rowentry.bytes());
-        n.commit(CP_NONE);
-        
-        return row().newEntry(before);
-    }
-    
-    public synchronized void overwrite(int index, kelondroRow.Entry rowentry) throws IOException {
+    public synchronized void set(int index, kelondroRow.Entry rowentry) throws IOException {
         // this writes a row without reading the row from the file system first
         
         // create a node at position index with rowentry
         Handle h = new Handle(index);
-        h.adoptAllCount(); // adopt counting
-        newNode(h, (rowentry == null) ? null : rowentry.bytes(), 0).commit(CP_NONE);
+        newNode(h, (rowentry == null) ? null : rowentry.bytes(), 0, true).commit(CP_NONE);
     }
     
     public synchronized kelondroRow.Entry get(int index) throws IOException {
-        return row().newEntry(getNode(new Handle(index)).getValueRow());
+        return row().newEntry(getNode(new Handle(index), true).getValueRow());
     }
 
     protected synchronized int seti(int index, int value) throws IOException {
@@ -141,19 +121,18 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
 
     public synchronized int add(kelondroRow.Entry rowentry) throws IOException {
 
-        Node n = newNode();
-        n.setValueRow(rowentry.bytes());
+        Node n = newNode(rowentry.bytes());
         n.commit(CP_NONE);
 
         return n.handle().hashCode();
     }
 
     public synchronized void remove(int index) throws IOException {
-        if (index >= super.USAGE.allCount()) throw new IOException("remove: index " + index + " out of bounds " + super.USAGE.allCount());
+        if (index >= (super.free() + super.size())) throw new IOException("remove: index " + index + " out of bounds " + (super.free() + super.size()));
 
         // get the node at position index
         Handle h = new Handle(index);
-        Node n = getNode(h);
+        Node n = getNode(h, false);
 
         // erase the row
         n.setValueRow(null);
@@ -166,7 +145,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     public void print() throws IOException {
         System.out.println("PRINTOUT of table, length=" + size());
         kelondroRow.Entry row;
-        for (int i = 0; i < super.USAGE.allCount(); i++) {
+        for (int i = 0; i < (super.free() + super.size()); i++) {
             System.out.print("row " + i + ": ");
             row = get(i);
             for (int j = 0; j < row.columns(); j++) System.out.print(((row.empty(j)) ? "NULL" : row.getColString(j, "UTF-8")) + ", ");
@@ -183,7 +162,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
             System.out.println("erster Test");
             f.delete();
             kelondroFixedWidthArray k = new kelondroFixedWidthArray(f, rowdef, 6);
-            k.overwrite(3, k.row().newEntry(new byte[][]{
+            k.set(3, k.row().newEntry(new byte[][]{
                 "test123".getBytes(), "abcd".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{
                 "test456".getBytes(), "efgh".getBytes()}));
