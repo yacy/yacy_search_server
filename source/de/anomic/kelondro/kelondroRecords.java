@@ -656,7 +656,7 @@ public class kelondroRecords {
         this.writeDouble = 0;
         this.cacheDelete = 0;
         this.cacheFlush = 0;
-        
+        /*
         // pre-load node cache
         if ((preloadTime > 0) && (cacheSize > 0)) {
             long stop = System.currentTimeMillis() + preloadTime;
@@ -677,6 +677,7 @@ public class kelondroRecords {
             }
             
         }
+        */
     }
 
     public File file() {
@@ -1394,6 +1395,7 @@ public class kelondroRecords {
         
         public contentNodeIterator(long maxInitTime) throws IOException, kelondroException {
             // initialize markedDeleted set of deleted Handles
+            maxInitTime = -1;// for debugging only
             markedDeleted = deletedHandles(maxInitTime);
             fullyMarked = (maxInitTime < 0);
             
