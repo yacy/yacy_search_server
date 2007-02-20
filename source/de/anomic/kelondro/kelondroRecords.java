@@ -656,7 +656,6 @@ public class kelondroRecords {
         this.writeDouble = 0;
         this.cacheDelete = 0;
         this.cacheFlush = 0;
-        /*
         // pre-load node cache
         if ((preloadTime > 0) && (cacheSize > 0)) {
             long stop = System.currentTimeMillis() + preloadTime;
@@ -677,7 +676,6 @@ public class kelondroRecords {
             }
             
         }
-        */
     }
 
     public File file() {
@@ -761,6 +759,7 @@ public class kelondroRecords {
     }
     
     protected synchronized final Node newNode(Handle handle, byte[] bulkchunk, int offset, boolean write) throws IOException {
+        // bulkchunk must include the OH bytes and handles!
         return new Node(handle, bulkchunk, offset, write);
     }
     
@@ -853,12 +852,16 @@ public class kelondroRecords {
             boolean changed;
             if (handle.index >= USAGE.allCount()) {
                 assert write == true : "handle.index = " + handle.index + ", USAGE.allCount() = " + USAGE.allCount();
-                USAGE.allocate(handle.index, bulkchunk, offset, write);
-                changed = false; // this is independent from write
+                USAGE.allocate(handle.index, bulkchunk, offset + overhead, write);
+                if ((bulkchunk != null) && (overhead != 0)) {
+                    // write also the OH bytes and handles
+                    entryFile.write(seekpos(this.handle), this.headChunk, 0, overhead);
+                }
+                changed = false; // this is independent from write; we have already wrote the record, so it is considered as unchanged
             } else {
                 changed = write;
             }
-            assert ((bulkchunk == null) || (bulkchunk.length >= offset + ROW.width(0))) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", ROW.width(0) = " + ROW.width(0);
+            assert ((bulkchunk == null) || (bulkchunk.length - offset >= recordsize)) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", recordsize = " + recordsize;
             
             // create empty chunks
             this.headChunk = new byte[headchunksize];
@@ -866,8 +869,8 @@ public class kelondroRecords {
             
             // write content to chunks
             if (bulkchunk != null) {
-                System.arraycopy(bulkchunk, offset, this.headChunk, overhead, ROW.width(0));
-                System.arraycopy(bulkchunk, offset + ROW.width(0), this.tailChunk, 0, tailchunksize);
+                System.arraycopy(bulkchunk, offset, this.headChunk, 0, headchunksize);
+                System.arraycopy(bulkchunk, offset + headchunksize, this.tailChunk, 0, tailchunksize);
             }
             
             // mark chunks as changed
@@ -1395,7 +1398,6 @@ public class kelondroRecords {
         
         public contentNodeIterator(long maxInitTime) throws IOException, kelondroException {
             // initialize markedDeleted set of deleted Handles
-            maxInitTime = -1;// for debugging only
             markedDeleted = deletedHandles(maxInitTime);
             fullyMarked = (maxInitTime < 0);
             
