@@ -10,48 +10,49 @@
       <li><a href="/Surftips.html?display=1" class="MenuItemLink">Surftips</a></li>
       <li><a href="/Bookmarks.html" class="MenuItemLink">Bookmarks</a></li>
       <li><a href="/Help.html" class="MenuItemLink">Help</a></li>
-      <li><a href="/SearchStatistics_p.html" class="MenuItemLink lock">Search Statistics</a></li>
-    </ul>
-  </li>
-  <li class="menugroup" id="menugroupCrawlerControl">
-    <h3>Crawler Control</h3>
-    <ul class="menu">
-      <li><a href="/IndexCreate_p.html" class="MenuItemLink lock">Index Create</a></li>
-      <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Index Control</a></li>
-      <li><a href="/IndexMonitor.html" class="MenuItemLink">Index Monitor</a></li>
-      <li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawler Monitor</a></li>
-      <li><a href="/Blacklist_p.html" class="MenuItemLink lock">URL Blacklist</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupCommunicationPublication">
-    <h3>Communication / Publication</h3>
+    <h3>Your Web</h3>
     <ul class="menu">
-      <li><a href="/www/" class="MenuItemLink">Home Page</a></li>
-      <li><a href="/share/" class="MenuItemLink">File Share</a></li>
-      <li><a href="/Wiki.html" class="MenuItemLink">Wiki</a></li>
-      <li><a href="/Blog.html" class="MenuItemLink">Blog</a></li>
+      <li><a href="/www/" class="MenuItemLink">Home Page Demo</a></li>
+      <li><a href="/share/" class="MenuItemLink">Your File Share</a></li>
+      <li><a href="/Wiki.html" class="MenuItemLink">YaCy Wiki</a></li>
+      <li><a href="/Blog.html" class="MenuItemLink">YaCy Blog</a></li>
       <li><a href="/Messages_p.html" class="MenuItemLink lock">Messages <img src="notifier.gif" alt="New Messages" /></a></li>
     </ul>
   </li>
+  <li class="menugroup" id="menugroupMonitoring">
+    <h3>Monitoring</h3>
+    <ul class="menu">
+      <li><a href="/Network.html" accesskey="w" class="MenuItemLink">YaCy Network</a></li>
+      <li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawler Monitor</a></li>
+      <li><a href="/IndexMonitor.html" class="MenuItemLink">Web Crawl Results</a></li>
+      <li><a href="/SearchStatistics_p.html" class="MenuItemLink lock">Search Statistics</a></li>
+      <li><a href="/ViewLog_p.html" class="MenuItemLink lock">Server Log</a></li>
+      <li><a href="/Connections_p.html" class="MenuItemLink lock">Connections</a></li>
+      <li><a href="/CacheAdmin_p.html" class="MenuItemLink lock">Web Cache</a></li>
+      <li><a href="/News.html" accesskey="n" class="MenuItemLink">News Monitor</a></li>
+      <li><a href="/CookieMonitorIncoming_p.html" class="MenuItemLink lock">Cookies in Proxy</a></li>
+    </ul>
+  </li>
+  <li class="menugroup" id="menugroupCrawlerControl">
+    <h3>Web Crawler</h3>
+    <ul class="menu">
+      <li><a href="/IndexCreate_p.html" class="MenuItemLink lock">Start Web Crawl</a></li>
+      <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Administrate Index</a></li>
+      <li><a href="/Blacklist_p.html" class="MenuItemLink lock">URL Blacklist</a></li>
+      <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Indexing with Proxy</a></li>
+    </ul>
+  </li>
   <li class="menugroup" id="menugroupPeerControl">
-    <h3>Peer Control</h3>
+    <h3>Peer Configuration</h3>
     <ul class="menu">
       <li><a href="/Status.html" accesskey="t" class="MenuItemLink">Status &amp; Shutdown</a></li>
       <li><a href="/ConfigBasic.html" class="MenuItemLink lock">Basic Configuration</a></li>
       <li><a href="/Settings_p.html" class="MenuItemLink lock">Advanced Settings</a></li>
-      <li><a href="/Network.html" accesskey="w" class="MenuItemLink">Network</a></li>
-      <li><a href="/News.html" accesskey="n" class="MenuItemLink">News System</a></li>
-      <li><a href="/ViewLog_p.html" class="MenuItemLink lock">Log</a></li>
+      <li><a href="/User_p.html" class="MenuItemLink lock">User Administration</a></li>
       <li><a href="/PerformanceQueues_p.html" class="MenuItemLink lock">Performance</a></li>
-      <li><a href="/Connections_p.html" class="MenuItemLink lock">Connections</a></li>
-    </ul>
-  </li>
-  <li class="menugroup" id="menugroupLocalProxy">
-    <h3>Local Proxy</h3>
-    <ul class="menu">
-      <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Proxy Indexing</a></li>
-      <li><a href="/CacheAdmin_p.html" class="MenuItemLink lock">Cache Monitor</a></li>
-      <li><a href="/CookieMonitorIncoming_p.html" class="MenuItemLink lock">Cookie Monitor</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupTheProjekt">
@@ -59,12 +60,11 @@
     <ul class="menu">
       <li><a href="http://www.yacy.net/yacy/" class="MenuItemLink">Project Home</a></li>
       <li><a href="http://www.yacy.net/yacy/News.html" class="MenuItemLink">Project News</a></li>
-      <li><a href="http://sourceforge.net/forum/?group_id=116142" class="MenuItemLink">English Forum</a></li>
       <li><a href="http://www.yacy-forum.de" class="MenuItemLink">Deutsches Forum</a></li>
       <li><a href="http://newsletters.yacy-forum.de" class="MenuItemLink">Newsletters</a></li>
       <li><a href="http://www.yacy.net/yacy/Download.html" class="MenuItemLink">Download YaCy</a></li>
       <li><a href="http://www.yacy-websuche.de/wiki/index.php/Hauptseite" class="MenuItemLink">YaCy Wiki</a></li>
-      <li><a href="http://www.yacy.net/yacy/Contact.html" class="MenuItemLink">Contact</a></li>
+      <li><a href="http://www.yacy.net/yacy/Contact.html" class="MenuItemLink">Contact YaCy Developer</a></li>
     </ul>
   </li>
 </ul>
