@@ -58,6 +58,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -79,6 +80,7 @@ public class CrawlURLFetchStack_p {
     }
     
     public static final String STREAM_CMD_ADDURLS_      = "ADD URLS: ";
+    public static final String STREAM_CMD_ADDURLSBLCHK_ = "ADD URLS CHECK BLACKLIST: ";
     public static final String STREAM_CMD_END           = "END";
     public static final String STREAM_RESP_OK_ADDURLS_  = "FAILED URLS: ";
     public static final String STREAM_RESP_OK           = "OK";
@@ -100,6 +102,7 @@ public class CrawlURLFetchStack_p {
             String line;
             int addurls = 0, cururl = 0;
             boolean[] status = new boolean[0];
+            boolean blchk = false;
             URLFetcherStack stack = getURLFetcherStack(env);
             try {
                 while ((line = inrb.readLine()) != null) {
@@ -109,6 +112,17 @@ public class CrawlURLFetchStack_p {
                             addurls = Integer.parseInt(line.substring(STREAM_CMD_ADDURLS_.length()));
                             status = new boolean[addurls];
                             cururl = 0;
+                            blchk = false;
+                            outw.println(STREAM_RESP_OK);
+                        } catch (NumberFormatException e) {
+                            outw.println(STREAM_RESP_FAILED);
+                        }
+                    } else if (line.startsWith(STREAM_CMD_ADDURLSBLCHK_)) {
+                        try {
+                            addurls = Integer.parseInt(line.substring(STREAM_CMD_ADDURLSBLCHK_.length()));
+                            status = new boolean[addurls];
+                            cururl = 0;
+                            blchk = true;
                             outw.println(STREAM_RESP_OK);
                         } catch (NumberFormatException e) {
                             outw.println(STREAM_RESP_FAILED);
@@ -117,7 +131,7 @@ public class CrawlURLFetchStack_p {
                         break;
                     } else {
                         if (cururl < addurls)       // add url
-                            status[cururl++] = addURL(line, stack);
+                            status[cururl++] = addURL(line, blchk, stack);
                         
                         if (cururl > 0 && cururl == addurls ) {
                             // done with parsing the passed URL count, now some status output: i.e. 'FAILED URLS: 5 of 8'
@@ -178,8 +192,9 @@ public class CrawlURLFetchStack_p {
                         final String content = new String((byte[])post.get("upload$file"));
                         
                         final String type = post.get("uploadType", "");
+                        final boolean blCheck = post.containsKey("blacklistCheck");
                         if (type.equals("plain")) {
-                            prop.put("upload_added", addURLs(content.split("\n"), getURLFetcherStack(env)));
+                            prop.put("upload_added", addURLs(content.split("\n"), blCheck, getURLFetcherStack(env)));
                             prop.put("upload_failed", 0);
                             prop.put("upload", 1);
                         } else if (type.equals("html")) {
@@ -191,10 +206,14 @@ public class CrawlURLFetchStack_p {
                                 
                                 final Iterator it = ((HashMap)scraper.getAnchors()).keySet().iterator();
                                 int added = 0, failed = 0;
-                                String url;
+                                URL url;
                                 while (it.hasNext()) try {
-                                    url = (String)it.next();
-                                    getURLFetcherStack(env).push(new URL(url));
+                                    url = new URL((String)it.next());
+                                    if (blCheck && plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, url)) {
+                                        failed++;
+                                        continue;
+                                    }
+                                    getURLFetcherStack(env).push(url);
                                     added++;
                                 } catch (MalformedURLException e) { failed++; }
                                 prop.put("upload", 1);
@@ -235,17 +254,19 @@ public class CrawlURLFetchStack_p {
         prop.put("peers", count);
     }
     
-    private static int addURLs(String[] urls, URLFetcherStack stack) {
+    private static int addURLs(String[] urls, boolean blCheck, URLFetcherStack stack) {
         int count = -1;
         for (int i=0; i<urls.length; i++)
-            if (addURL(urls[i], stack)) count++;
+            if (addURL(urls[i], blCheck, stack)) count++;
         return count;
     }
     
-    private static boolean addURL(String url, URLFetcherStack stack) {
+    private static boolean addURL(String url, boolean blCheck, URLFetcherStack stack) {
         try {
             if (url == null || url.length() == 0) return false;
-            stack.push(new URL(url));
+            URL u = new URL(url);
+            if (blCheck && plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, u)) return false;
+            stack.push(u);
             return true;
         } catch (MalformedURLException e) { return false; }
     }

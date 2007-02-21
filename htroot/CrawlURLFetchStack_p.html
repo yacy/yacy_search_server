@@ -53,6 +53,7 @@
             <input type="file" name="upload" id="upload" /> #(uploadError)#::&nbsp;<span class="error">No file entered for upload</span>#(/uploadError)#<br />
             <input type="radio" name="uploadType" id="plain" value="plain" checked="checked" /> <label for="plain">Plain text, line-seperated</label><br />
             <input type="radio" name="uploadType" id="html" value="html" /> <label for="html">HTML file, links will be added</label><br />
+            <input type="checkbox" name="blacklistCheck" id="blacklistCheck" checked="checked" /> <label for="blacklistCheck">Don't add URLs matching blacklists active for crawler</label><br />
             <input type="submit" name="subupload" value="Upload File" />
             #(upload)#::
             <span class="success">Added #[added]# and rejected #[failed]# URLs from uploaded file successfully</span>::

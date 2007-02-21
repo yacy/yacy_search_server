@@ -146,9 +146,9 @@ public class IndexCreateIndexingQueue_p {
 
                     boolean inProcess = i < inProcessCount;
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
-                    long entrySize = pcentry.size();
-                    totalSize += entrySize;
                     if ((pcentry != null)&&(pcentry.url() != null)) {
+                        long entrySize = pcentry.size();
+                        totalSize += entrySize;
                         initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                         prop.put("indexing-queue_list_"+entryCount+"_dark", (inProcess)? 2: ((dark) ? 1 : 0));
                         prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())));
