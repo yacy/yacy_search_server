@@ -22,12 +22,12 @@ public class ListToken extends AbstractToken {
 		this.listElement = "li";
 		this.recursion = true;
 		this.pattern = new Pattern[] { Pattern.compile("^[" + firstChar + "]([^\n]|\n[" + firstChar + "])*", Pattern.MULTILINE) };
-		ArrayList<String> r = new ArrayList<String>();
+		ArrayList r = new ArrayList();
 		if (this.listBlockElement != null) {
 			if (this.recursion) r.add(this.listBlockElement);
 			if (this.listElement != null) r.add(this.listElement);
 		}
-		blockElements = r.toArray(new String[r.size()]);
+		blockElements = (String[])r.toArray(new String[r.size()]);
 	}
 	
 	public ListToken(char firstChar, String listBlockElement, String listElement) {
@@ -36,12 +36,12 @@ public class ListToken extends AbstractToken {
 		this.listElement = listElement;
 		this.recursion = true;
 		this.pattern = new Pattern[] { Pattern.compile("^[" + firstChar + "]([^\n]|\n[" + firstChar + "])*", Pattern.MULTILINE) };
-		ArrayList<String> r = new ArrayList<String>();
+		ArrayList r = new ArrayList();
 		if (this.listBlockElement != null) {
 			if (this.recursion) r.add(this.listBlockElement);
 			if (this.listElement != null) r.add(this.listElement);
 		}
-		blockElements = r.toArray(new String[r.size()]);
+		blockElements = (String[])r.toArray(new String[r.size()]);
 	}
 	
 	public ListToken(char firstChar, String listBlockElement, String listElement, boolean recursion) {
@@ -50,15 +50,14 @@ public class ListToken extends AbstractToken {
 		this.listElement = listElement;
 		this.recursion = recursion;
 		this.pattern = new Pattern[] { Pattern.compile("^[" + firstChar + "]([^\n]|\n[" + firstChar + "])*", Pattern.MULTILINE) };
-		ArrayList<String> r = new ArrayList<String>();
+		ArrayList r = new ArrayList();
 		if (this.listBlockElement != null) {
 			if (this.recursion) r.add(this.listBlockElement);
 			if (this.listElement != null) r.add(this.listElement);
 		}
-		blockElements = r.toArray(new String[r.size()]);
+		blockElements = (String[])r.toArray(new String[r.size()]);
 	}
 	
-	@Override
 	protected boolean parse() {
 		StringBuffer sb = new StringBuffer(this.text.length());
 		parse(this.text.split("\n"), 0, sb);

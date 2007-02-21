@@ -21,13 +21,13 @@ public class SimpleToken extends AbstractToken {
 		this.definitionList = definitionList;
 		int i;
 		if (isBlockElements) {
-			ArrayList<String> r = new ArrayList<String>();
+			ArrayList r = new ArrayList();
 			int j;
 			for (i=0; i<definitionList.length; i++)
 				if (definitionList[i] != null)
 					for (j=0; j<definitionList[i].length; j++)
 						r.add(definitionList[i][j]);
-			this.blockElements = r.toArray(new String[r.size()]);
+			this.blockElements = (String[])r.toArray(new String[r.size()]);
 		} else {
 			this.blockElements = null;
 		}
@@ -39,11 +39,16 @@ public class SimpleToken extends AbstractToken {
 			}
 		this.pattern = new Pattern[] { Pattern.compile(String.format(
 				"([\\%s]{%d,%d})(.*?)([\\%s]{%d,%d})",
-				firstChar, i, definitionList.length,
-				lastChar, i, definitionList.length)) };
+				new Object[] {
+                        new Character(firstChar),
+                        new Integer(i),
+                        new Integer(definitionList.length),
+                        new Character(lastChar),
+                        new Integer(i),
+                        new Integer(definitionList.length)
+                } ))};
 	}
 	
-	@Override
 	public String getMarkup() {
 		if (this.content == null) {
 			if (this.text == null) {

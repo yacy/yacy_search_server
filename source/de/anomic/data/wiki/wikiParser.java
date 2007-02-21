@@ -27,7 +27,7 @@ public class wikiParser {
 	
 	private static final String[] BEs;
 	static {
-		ArrayList<String> r = new ArrayList<String>();
+		ArrayList r = new ArrayList();
 		for (int i=0, k, j; i<tokens.length; i++)
 			if (tokens[i].getBlockElementNames() != null)
 				for (j=0; j<tokens[i].getBlockElementNames().length; j++) {
@@ -39,7 +39,7 @@ public class wikiParser {
 					}
 				}
 		r.add("hr");
-		BEs = r.toArray(new String[r.size()]);
+		BEs = (String[])r.toArray(new String[r.size()]);
 	}
 	
 	public static void main(String[] args) {
@@ -175,7 +175,7 @@ public class wikiParser {
 			if (text.length() < 2) return new Text[] { new Text(text, false, true) };
 			
 			int startLen = escapeBegin.length();
-			ArrayList<Text> r = new ArrayList<Text>();
+			ArrayList r = new ArrayList();
 			boolean escaped = text.startsWith(escapeBegin);
 			if (escaped) r.add(new Text("", false, true));
 			int i, j = 0;
@@ -185,7 +185,7 @@ public class wikiParser {
 				escaped = !escaped;
 			}
 			r.add(resolve2Text(text, escaped, (escaped) ? j : (j > 0) ? j + startLen : 0, -1, escapeEnd));
-			return r.toArray(new Text[r.size()]);
+			return (Text[])r.toArray(new Text[r.size()]);
 		}
 		
 		private static Text resolve2Text(String text, boolean escaped, int from, int to, String escapeEnd) {

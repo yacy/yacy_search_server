@@ -42,7 +42,6 @@ public class LinkToken extends AbstractToken {
 		this.wikiPath = wikiPath;
 	}
 	
-	@Override
 	protected boolean parse() {
 		StringBuilder sb = new StringBuilder();
 		Matcher m;

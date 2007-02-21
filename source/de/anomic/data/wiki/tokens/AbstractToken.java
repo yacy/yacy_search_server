@@ -18,6 +18,5 @@ public abstract class AbstractToken implements Token {
 	
 	public String getText() { return this.text; }
 	
-	@Override
 	public String toString() { return getMarkup(); }
 }

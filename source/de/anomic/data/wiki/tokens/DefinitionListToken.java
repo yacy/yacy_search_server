@@ -9,7 +9,6 @@ public class DefinitionListToken extends ListToken {
 		super(';', null, null);
 	}
 	
-	@Override
 	protected StringBuffer parse(String[] t, int depth, StringBuffer sb) {
 		sb.append("<dl>\n");
 		while (super.aktline < t.length && getGrade(t[super.aktline]) >= depth) {

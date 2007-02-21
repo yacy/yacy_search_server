@@ -14,7 +14,6 @@ public class TableToken extends AbstractToken {
 	};
 	private static final String[] blockElementNames = new String[] { "table", "tr", "td" };
 	
-	@Override
 	protected boolean parse() {
 		String[] t = text.split("\n");
 		String[] tds;
@@ -46,7 +45,7 @@ public class TableToken extends AbstractToken {
 	
     // from de.anomic.data.wikiCode.java.parseTableProperties, modified by [FB]
 	private static final String[] tps = { "rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border" };
-    private static final HashMap<String,String[]> ps = new HashMap<String,String[]>();
+    private static final HashMap/* <String,String[]> */ ps = new HashMap();
     static {
     	ps.put("frame", 	new String[] { "void", "above", "below", "hsides", "lhs", "rhs", "vsides", "box", "border" });
     	ps.put("rules", 	new String[] { "none", "groups", "rows", "cols", "all" });
@@ -65,7 +64,7 @@ public class TableToken extends AbstractToken {
     private static StringBuffer parseTableProperties(final String properties){
         String[] values = properties.replaceAll("&quot;", "").split("[= ]");     //splitting the string at = and blanks
         StringBuffer sb = new StringBuffer(properties.length());
-        Iterator<String> it;
+        Iterator it;
         String key, valkey, value;
         int numberofvalues = values.length;
         main: for (int i=0; i<numberofvalues; i++) {
@@ -83,8 +82,8 @@ public class TableToken extends AbstractToken {
         		}
         		it = ps.keySet().iterator();
         		while (it.hasNext()) {
-        			key = it.next();
-        			if (valkey.equals(key) && isInArray(ps.get(key), value)) {
+        			key = (String)it.next();
+        			if (valkey.equals(key) && isInArray((String[])ps.get(key), (String)value)) {
         				addPair(valkey, value, sb);
         				continue main;
         			}
