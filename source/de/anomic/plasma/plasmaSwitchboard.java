@@ -1890,8 +1890,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 processLocalCrawling(urlEntry, profile, stats);
                 return true;
             } catch (IOException e) {
-                log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage());
-                noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
+                log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
+                if (e.getMessage().indexOf("hash is null") > 0) noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
             }
         }
         return true;
@@ -1975,8 +1975,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             return true;
         } catch (IOException e) {
-            log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage());
-            noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+            log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
+            if (e.getMessage().indexOf("hash is null") > 0) noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
             return true; // if we return a false here we will block everything
         }
     }
@@ -2041,8 +2041,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             processLocalCrawling(urlEntry, profile, stats);
             return true;
         } catch (IOException e) {
-            log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage());
-            noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_REMOTE);
+            log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
+            if (e.getMessage().indexOf("hash is null") > 0) noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_REMOTE);
             return true;
         }
     }

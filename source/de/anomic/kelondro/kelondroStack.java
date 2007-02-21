@@ -284,10 +284,37 @@ public final class kelondroStack extends kelondroRecords {
     }
 
     public Iterator iterator() {
-        // iterates the elements in an ordered way. returns Node - type Objects
+        // iterates the elements in an ordered way.
+        // returns Node - type Objects
         return new Counter();
     }
 
+    public Iterator keyIterator() {
+        // iterates byte[] - objects
+        return new keyIterator(iterator());
+    }
+    
+    public class keyIterator implements Iterator {
+
+        Iterator ni;
+        
+        public keyIterator(Iterator i) {
+            ni = i;
+        }
+        
+        public boolean hasNext() {
+            return ni.hasNext();
+        }
+        
+        public Object next() {
+            return ((kelondroRecords.Node) ni.next()).getKey();
+        }
+        
+        public void remove() {
+        }
+        
+    }
+    
     public int imp(File file, String separator) throws IOException {
         // imports a value-separated file, returns number of records that have been read
         RandomAccessFile f = null;

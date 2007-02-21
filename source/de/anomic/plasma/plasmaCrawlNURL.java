@@ -76,7 +76,9 @@ public class plasmaCrawlNURL {
     public static final int STACK_TYPE_MOVIE    = 12; // put on movie stack
     public static final int STACK_TYPE_MUSIC    = 13; // put on music stack
 
-    private static final long minimumDelta = 500; // the minimum time difference between access of the same domain
+    private static final long minimumDelta  =    500; // the minimum time difference between access of the same domain
+    private static final long maximumDomAge =  60000; // the maximum age of a domain until it is used for another crawl attempt
+    
     /**
      * column length definition for the {@link plasmaURL#urlIndexFile} DB
      */
@@ -105,7 +107,7 @@ public class plasmaCrawlNURL {
     private kelondroStack movieStack;     // links pointing to movie resources
     private kelondroStack musicStack;     // links pointing to music resources
 
-    private final HashSet stackIndex;     // to find out if a specific link is already on any stack
+    private final HashSet imageStackIndex, movieStackIndex, musicStackIndex; // to find out if a specific link is already on any stack
     private File cacheStacksPath;
     private int bufferkb;
     private long preloadTime;
@@ -141,7 +143,9 @@ public class plasmaCrawlNURL {
         musicStack = kelondroStack.open(musicStackFile, rowdef);
 
         // init stack Index
-        stackIndex = new HashSet();
+        imageStackIndex    = new HashSet();
+        movieStackIndex    = new HashSet();
+        musicStackIndex    = new HashSet();
         (initThead = new initStackIndex()).start();
     }
 
@@ -235,44 +239,20 @@ public class plasmaCrawlNURL {
         public void run() {
             Iterator i;
             try {
-                i = coreStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next(), "UTF-8"));
-            } catch (Exception e) {
-                coreStack.reset();
-            }
-            try {
-                i = limitStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next(), "UTF-8"));
-            } catch (Exception e) {
-                limitStack.reset();
-            }
-            try {
-                i = overhangStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next(), "UTF-8"));
-            } catch (Exception e) {
-                overhangStack.reset();
-            }
-            try {
-                i = remoteStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String((byte[]) i.next(), "UTF-8"));
-            } catch (Exception e) {
-                remoteStack.reset();
-            }
-            try {
                 i = imageStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
+                while (i.hasNext()) imageStackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
             } catch (Exception e) {
                 imageStack = kelondroStack.reset(imageStack);
             }
             try {
                 i = movieStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
+                while (i.hasNext()) movieStackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
             } catch (Exception e) {
                 movieStack = kelondroStack.reset(movieStack);
             }
             try {
                 i = musicStack.iterator();
-                while (i.hasNext()) stackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
+                while (i.hasNext()) musicStackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
             } catch (Exception e) {
                 musicStack = kelondroStack.reset(musicStack);
             }
@@ -315,7 +295,14 @@ public class plasmaCrawlNURL {
     }
 
     public boolean existsInStack(String urlhash) {
-        return stackIndex.contains(urlhash);
+        return
+            coreStack.has(urlhash) ||
+            limitStack.has(urlhash) ||
+            overhangStack.has(urlhash) || 
+            remoteStack.has(urlhash) ||
+            imageStackIndex.contains(urlhash) || 
+            movieStackIndex.contains(urlhash) || 
+            musicStackIndex.contains(urlhash);
     }
 
     public synchronized Entry newEntry(String initiator, URL url, Date loaddate,
@@ -340,19 +327,35 @@ public class plasmaCrawlNURL {
         );
     }
 
-    public void push(int stackType, String domain, String hash) {
+    public void push(int stackType, String urlhash) {
         try {
             switch (stackType) {
-                case STACK_TYPE_CORE:     coreStack.add(domain, hash.getBytes()); break;
-                case STACK_TYPE_LIMIT:    limitStack.add(domain, hash.getBytes()); break;
-                case STACK_TYPE_OVERHANG: overhangStack.add(domain, hash.getBytes()); break;
-                case STACK_TYPE_REMOTE:   remoteStack.add(domain, hash.getBytes()); break;
-                case STACK_TYPE_IMAGE:    imageStack.push(imageStack.row().newEntry(new byte[][] {hash.getBytes()})); break;
-                case STACK_TYPE_MOVIE:    movieStack.push(movieStack.row().newEntry(new byte[][] {hash.getBytes()})); break;
-                case STACK_TYPE_MUSIC:    musicStack.push(musicStack.row().newEntry(new byte[][] {hash.getBytes()})); break;
+                case STACK_TYPE_CORE:
+                    coreStack.add(urlhash);
+                    break;
+                case STACK_TYPE_LIMIT:
+                    limitStack.add(urlhash);
+                    break;
+                case STACK_TYPE_OVERHANG:
+                    overhangStack.add(urlhash);
+                    break;
+                case STACK_TYPE_REMOTE:
+                    remoteStack.add(urlhash);
+                    break;
+                case STACK_TYPE_IMAGE:
+                    imageStack.push(imageStack.row().newEntry(new byte[][] {urlhash.getBytes()}));
+                    imageStackIndex.add(urlhash);
+                    break;
+                case STACK_TYPE_MOVIE:
+                    movieStack.push(movieStack.row().newEntry(new byte[][] {urlhash.getBytes()}));
+                    movieStackIndex.add(urlhash);
+                    break;
+                case STACK_TYPE_MUSIC:
+                    musicStack.push(musicStack.row().newEntry(new byte[][] {urlhash.getBytes()}));
+                    musicStackIndex.add(urlhash);
+                    break;
                 default: break;
             }
-            stackIndex.add(hash);
         } catch (IOException er) {}
     }
 
@@ -370,14 +373,15 @@ public class plasmaCrawlNURL {
     }
     
     public Iterator iterator(int stackType) {
+        // returns an iterator of String objects
         switch (stackType) {
         case STACK_TYPE_CORE:     return coreStack.iterator();
         case STACK_TYPE_LIMIT:    return limitStack.iterator();
         case STACK_TYPE_OVERHANG: return overhangStack.iterator();
         case STACK_TYPE_REMOTE:   return remoteStack.iterator();
-        case STACK_TYPE_IMAGE:    return imageStack.iterator();
-        case STACK_TYPE_MOVIE:    return movieStack.iterator();
-        case STACK_TYPE_MUSIC:    return musicStack.iterator();
+        case STACK_TYPE_IMAGE:    return imageStackIndex.iterator();
+        case STACK_TYPE_MOVIE:    return movieStackIndex.iterator();
+        case STACK_TYPE_MUSIC:    return musicStackIndex.iterator();
         default: return null;
         }        
     }
@@ -398,15 +402,14 @@ public class plasmaCrawlNURL {
     public void shift(int fromStack, int toStack) {
         try {
             Entry entry = pop(fromStack);
-            push(toStack, entry.url.getHost(), entry.hash());
+            push(toStack, entry.hash());
         } catch (IOException e) {
             return;
         }
     }
 
     public void clear(int stackType) {
-        try {
-            switch (stackType) {
+        switch (stackType) {
                 case STACK_TYPE_CORE:     coreStack.clear(); break;
                 case STACK_TYPE_LIMIT:    limitStack.clear(); break;
                 case STACK_TYPE_OVERHANG: overhangStack.clear(); break;
@@ -416,14 +419,15 @@ public class plasmaCrawlNURL {
                 case STACK_TYPE_MUSIC:    musicStack = kelondroStack.reset(musicStack); break;
                 default: return;
             }
-        } catch (IOException e) {}
     }
 
     private Entry pop(kelondroStack stack) throws IOException {
         // this is a filo - pop
         if (stack.size() > 0) {
             Entry e = new Entry(new String(stack.pop().getColBytes(0)));
-            stackIndex.remove(e.hash);
+            imageStackIndex.remove(e.hash);
+            movieStackIndex.remove(e.hash);
+            musicStackIndex.remove(e.hash);
             return e;
         } else {
             throw new IOException("crawl stack is empty");
@@ -433,10 +437,12 @@ public class plasmaCrawlNURL {
     private Entry pop(plasmaCrawlBalancer balancer) throws IOException {
         // this is a filo - pop
         if (balancer.size() > 0) {
-            String hash = balancer.get(minimumDelta);
+            String hash = balancer.get(minimumDelta, maximumDomAge);
             if (hash == null) throw new IOException("hash is null");
             Entry e = new Entry(hash);
-            stackIndex.remove(e.hash);
+            imageStackIndex.remove(e.hash);
+            movieStackIndex.remove(e.hash);
+            musicStackIndex.remove(e.hash);
             return e;
         } else {
             throw new IOException("balancer stack is empty");
@@ -462,15 +468,16 @@ public class plasmaCrawlNURL {
         // this is a filo - top
         if (count > balancer.size()) count = balancer.size();
         ArrayList list = new ArrayList(count);
-            for (int i = 0; i < count; i++) {
-                try {
-                    byte[] hash = balancer.top(i);
-                    list.add(new Entry(new String(hash)));
-                } catch (IOException e) {
-                    continue;
-                }
+        for (int i = 0; i < count; i++) {
+            try {
+                String urlhash = balancer.top(i);
+                if (urlhash == null) break;
+                list.add(new Entry(urlhash));
+            } catch (IOException e) {
+                break;
             }
-            return (Entry[])list.toArray(new Entry[list.size()]);
+        }
+        return (Entry[])list.toArray(new Entry[list.size()]);
     }
 
     public synchronized Entry getEntry(String hash) throws IOException {

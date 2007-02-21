@@ -452,7 +452,6 @@ public final class plasmaCrawlStacker {
         this.sb.noticeURL.push(
                 ((global) ? plasmaCrawlNURL.STACK_TYPE_LIMIT :
                 ((local) ? plasmaCrawlNURL.STACK_TYPE_CORE : plasmaCrawlNURL.STACK_TYPE_REMOTE)) /*local/remote stack*/,
-                nexturl.getHost(),
                 ne.hash());
         return null;
     }
