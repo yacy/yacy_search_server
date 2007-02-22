@@ -34,6 +34,7 @@
 </loaderqueue>
 <localcrawlerqueue>
   <size>#[localCrawlSize]#</size>
+  <state>#[localCrawlState]#</state>
 #{list-local}#
   <entry>
     <profile>#[profile]#</profile>
@@ -49,6 +50,7 @@
 </localcrawlerqueue>
 <remotecrawlerqueue>
   <size>#[remoteCrawlSize]#</size>
+  <state>#[remoteCrawlState]#</state>
 #{list-remote}#
   <entry>
     <profile>#[profile]#</profile>

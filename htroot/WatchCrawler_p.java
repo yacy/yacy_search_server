@@ -73,6 +73,26 @@ public class WatchCrawler_p {
                 if (handle != null) switchboard.profiles.removeEntry(handle);
             }
             
+            if (post.containsKey("continue")) {
+                // continue queue
+                String queue = post.get("continue", "");
+                if (queue.equals("localcrawler")) {
+                    switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                } else if (queue.equals("remotecrawler")) {
+                    switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+                }
+            }
+
+            if (post.containsKey("pause")) {
+                // pause queue
+                String queue = post.get("pause", "");
+                if (queue.equals("localcrawler")) {
+                    switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                } else if (queue.equals("remotecrawler")) {
+                    switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+                }
+            }
+            
             if (post.containsKey("crawlingstart")) {
                 // init crawl
                 if (yacyCore.seedDB == null) {
@@ -301,7 +321,6 @@ public class WatchCrawler_p {
                     }
                 }
             }
-
         }
         
         // crawl profiles

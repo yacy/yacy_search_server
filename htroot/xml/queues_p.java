@@ -66,6 +66,9 @@ import de.anomic.yacy.yacySeed;
 
 public class queues_p {
     
+    public static final String STATE_RUNNING = "running";
+    public static final String STATE_PAUSED = "paused";
+    
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
     private static String daydate(Date date) {
         if (date == null) return "";
@@ -83,7 +86,7 @@ public class queues_p {
         yacySeed initiator;
         
         //indexing queue
-        prop.put("indexingSize", switchboard.getThread("80_indexing").getJobCount()+switchboard.indexingTasksInProcess.size());
+        prop.put("indexingSize", switchboard.getThread(plasmaSwitchboard.INDEXER).getJobCount()+switchboard.indexingTasksInProcess.size());
         prop.put("indexingMax", plasmaSwitchboard.indexingSlots);
         prop.put("urlpublictextSize", switchboard.wordIndex.loadedURL.size());
         prop.put("rwipublictextSize", switchboard.wordIndex.size());
@@ -114,9 +117,9 @@ public class queues_p {
                 for (i = 0; i < size; i++) {
                     boolean inProcess = i < inProcessCount;
                     pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
-                    long entrySize = pcentry.size();
-                    totalSize += entrySize;
                     if ((pcentry != null)&&(pcentry.url() != null)) {
+                        long entrySize = pcentry.size();
+                        totalSize += entrySize;
                         initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                         prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
                         prop.putSafeXML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())));
@@ -160,13 +163,14 @@ public class queues_p {
         }
         
         //local crawl queue
-        prop.put("localCrawlSize", Integer.toString(switchboard.getThread("50_localcrawl").getJobCount()));
+        prop.put("localCrawlSize", Integer.toString(switchboard.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
+        prop.put("localCrawlState", switchboard.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
         int stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
         addNTable(prop, "list-local", switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
         
         //global crawl queue
-        prop.put("remoteCrawlSize", Integer.toString(switchboard.getThread("61_globalcrawltrigger").getJobCount()));
-        //prop.put("remoteCrawlSize", Integer.toString(switchboard.getThread("62_remotetriggeredcrawl").getJobCount()));
+        prop.put("remoteCrawlSize", Integer.toString(switchboard.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount()));
+        prop.put("remoteCrawlState", switchboard.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER) ? STATE_PAUSED : STATE_RUNNING);
         stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
         if (stackSize == 0) {
             prop.put("list-remote", 0);

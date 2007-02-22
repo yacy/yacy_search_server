@@ -16,26 +16,39 @@
           <tr class="TableHeader"> 
             <th>Queue</th>
             <th>Size</th>
+            <th>&nbsp;</th>
             <th>Max</th>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Indexing</td>
             <td align="right"><span id="indexingqueuesize">&nbsp;&nbsp;&nbsp;</span></td>
+            <td>&nbsp;</td>
             <td align="right"><span id="indexingqueuemax">&nbsp;&nbsp;&nbsp;</span></td>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Loader</td>
             <td align="right"><span id="loaderqueuesize">&nbsp;&nbsp;&nbsp;</span></td>
+            <td>&nbsp;</td>
             <td align="right"><span id="loaderqueuemax">&nbsp;&nbsp;&nbsp;</span></td>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Local Crawler</td>
             <td align="right"><span id="localcrawlerqueuesize">&nbsp;&nbsp;&nbsp;</span></td>
+            <td>
+              <a href="" id="localcrawlerstateA">
+                <img src="" alt="" style="width:12px; height:12px;" id="localcrawlerstateIMG" />
+              </a>
+            </td>
             <td align="right">unlimited</td>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">Remote Crawler</td>
             <td align="right"><span id="remotecrawlerqueuesize">&nbsp;&nbsp;&nbsp;</span></td>
+            <td>
+              <a href="" title="" id="remotecrawlerstateA">
+                <img src="" alt="" style="width:12px; height:12px;" id="remotecrawlerstateIMG" />
+              </a>
+            </td>
             <td align="right">unlimited</td>
           </tr>
         </tbody>
@@ -68,6 +81,11 @@
             <td align="left">PPM (Pages Per Minute)</td>
             <td align="left"><span id="ppmNum">&nbsp;&nbsp;&nbsp;</span></td>
             <td align="left"><span id="ppmSpan">&nbsp;&nbsp;&nbsp;</span></td>
+          </tr>
+          <tr class="TableCellLight">
+            <td align="left">Traffic (Crawler)</td>
+            <td align="left"><span id="trafficCrawler">&nbsp;&nbsp;&nbsp;</span> MB</td>
+            <td>&nbsp;</td>
           </tr>
           <tr class="TableCellLight"> 
             <td align="left">RWI RAM (Word Cache)</td>

@@ -77,6 +77,13 @@ function handleStatus(){
 		ppmSpan.appendChild(img);
 	}
 	
+	// traffic output (no bar up to now)
+    traffic = getFirstChild(statusTag, "traffic");
+    trafficCrawler = getValue(getFirstChild(traffic, "crawler"));
+    trafCrawlerSpan = document.getElementById("trafficCrawler");
+    removeAllChildren(trafCrawlerSpan);
+	trafCrawlerSpan.appendChild(document.createTextNode(Math.round((trafficCrawler) / 1024 / 10.24) / 100));
+    
 	var wordCache=getValue(getFirstChild(statusTag, "wordCacheWSize"));
 	var wordCacheMax=getValue(getFirstChild(statusTag, "wordCacheMaxCount"));
 
@@ -133,15 +140,36 @@ function handleQueues(){
 		
 		localcrawlerqueue=getFirstChild(xml, "localcrawlerqueue");
 		localcrawlerqueue_size=getValue(getFirstChild(localcrawlerqueue, "size"));
+		localcrawlerqueue_state=getValue(getFirstChild(localcrawlerqueue, "state"));
 		document.getElementById("localcrawlerqueuesize").firstChild.nodeValue=localcrawlerqueue_size;
+		putQueueState("localcrawler", localcrawlerqueue_state);
+		
 		updateTable(localcrawlerqueue, "local crawler");
 		
 		remotecrawlerqueue=getFirstChild(xml, "remotecrawlerqueue");
 		updateTable(remotecrawlerqueue, "remoteCrawlerTable");
 		
 		remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
+		remotecrawlerqueue_state=getValue(getFirstChild(remotecrawlerqueue, "state"));
 		document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;
+		putQueueState("remotecrawler", remotecrawlerqueue_state);
 		updateTable(remotecrawlerqueue, "remote crawler");
+	}
+}
+
+function putQueueState(queue, state) {
+	a = document.getElementById(queue + "stateA");
+	img = document.getElementById(queue + "stateIMG");
+	if (state == "paused") {
+		a.href = "WatchCrawler_p.html?continue=" + queue;
+		a.title = "Continue this queue";
+		img.src = "/env/grafics/start.gif";
+		img.alt = "Continue this queue";
+	} else {
+		a.href = "WatchCrawler_p.html?pause=" + queue;
+		a.title = "Pause this queue";
+		img.src = "/env/grafics/stop.gif";
+		img.alt = "Pause this queue";
 	}
 }
 
