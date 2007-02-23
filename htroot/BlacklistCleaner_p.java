@@ -51,6 +51,7 @@
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -75,6 +76,7 @@ public class BlacklistCleaner_p {
     private static final int ERR_PATH_REGEX = 2;
     private static final int ERR_WILDCARD_BEGIN_OR_END = 3;
     private static final int ERR_HOST_WRONG_CHARS = 4;
+    private static final int ERR_DOUBLE_OCCURANCE = 5;
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
@@ -161,21 +163,31 @@ public class BlacklistCleaner_p {
     
     private static HashMap /* entry, error-code */ getIllegalEntries(String blacklistToUse, String[] supportedBlacklistTypes, plasmaURLPattern blEngine) {
         HashMap r = new HashMap();
+        HashSet ok = new HashSet();
         
         ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
         Iterator it = list.iterator();
         String s, host, path;
         
         if (blEngine instanceof defaultURLPattern) {
+            int slashPos;
             while (it.hasNext()) {
-                s = (String)it.next();
-            
-                if (s.indexOf("/") == -1) {
+                s = ((String)it.next()).trim();
+                
+                // check for double-occurance
+                if (ok.contains(s)) {
+                    r.put(s, new Integer(ERR_DOUBLE_OCCURANCE));
+                    continue;
+                } else {
+                    ok.add(s);
+                }
+                
+                if ((slashPos = s.indexOf("/")) == -1) {
                     host = s;
                     path = ".*";
                 } else {
-                    host = s.substring(0, s.indexOf("/"));
-                    path = s.substring(s.indexOf("/") + 1);
+                    host = s.substring(0, slashPos);
+                    path = s.substring(slashPos + 1);
                 }
                 
                 int i = host.indexOf("*");
@@ -231,7 +243,7 @@ public class BlacklistCleaner_p {
         String s;
         for (int i=0; i<entries.length; i++) {
             s = entries[i];
-            if (list != null) list.remove(s);
+            if (list != null) while (list.contains(s)) list.remove(s);
             
             // remove the entry from the running blacklist engine
             for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
