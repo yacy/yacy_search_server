@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.urlPattern.plasmaURLPattern.blacklistFile;
 import de.anomic.server.serverCore;
 
 // The Naming of the functions is a bit strange...
@@ -336,15 +337,16 @@ public class listManager {
         
         ArrayList blacklistFiles = new ArrayList(supportedBlacklistTypes.length);
         for (int i=0; i < supportedBlacklistTypes.length; i++) {
-            String[] blacklistFile = new String[]{
-                    supportedBlacklistTypes[i],
-                    switchboard.getConfig(supportedBlacklistTypes[i] + ".BlackLists", "")
-            };
-            blacklistFiles.add(blacklistFile);
+            blacklistFile blFile = new blacklistFile(
+                    switchboard.getConfig(supportedBlacklistTypes[i] + ".BlackLists", ""),
+                    supportedBlacklistTypes[i]);
+            blacklistFiles.add(blFile);
         }
         
-        de.anomic.plasma.plasmaSwitchboard.urlBlacklist.clear();
-        de.anomic.plasma.plasmaSwitchboard.urlBlacklist.loadList((String[][])blacklistFiles.toArray(new String[blacklistFiles.size()][]), "/");
+        plasmaSwitchboard.urlBlacklist.clear();
+        plasmaSwitchboard.urlBlacklist.loadList(
+                (blacklistFile[])blacklistFiles.toArray(new blacklistFile[blacklistFiles.size()]),
+                "/");
 
 //       switchboard.urlBlacklist.clear();
 //       if (f != "") switchboard.urlBlacklist.loadLists("black", f, "/");
