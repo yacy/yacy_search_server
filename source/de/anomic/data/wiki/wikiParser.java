@@ -56,43 +56,46 @@ import de.anomic.data.wiki.tokens.ListToken;
 import de.anomic.data.wiki.tokens.SimpleToken;
 import de.anomic.data.wiki.tokens.TableToken;
 import de.anomic.data.wiki.tokens.Token;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.yacy.yacyCore;
 
 public class wikiParser {
 	
-	public static final Token[] tokens = {
-		new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
-		new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
-		new LinkToken("localhost:8080", "Wiki.html?page="),
-		new ListToken('*', "ul"),
-		new ListToken('#', "ol"),
-		new ListToken(':', "blockquote", null),
-		new ListToken(' ', null, "tt", false),
-		new DefinitionListToken(),
-		new TableToken()
-	};
-	
-	private static final String[] BEs;
-	static {
-		ArrayList r = new ArrayList();
-		for (int i=0, k, j; i<tokens.length; i++)
-			if (tokens[i].getBlockElementNames() != null)
-				for (j=0; j<tokens[i].getBlockElementNames().length; j++) {
-					if (tokens[i].getBlockElementNames()[j] == null) continue;
-					if ((k = tokens[i].getBlockElementNames()[j].indexOf(' ')) > 1) {
-						r.add(tokens[i].getBlockElementNames()[j].substring(0, k));
-					} else {
-						r.add(tokens[i].getBlockElementNames()[j]);
-					}
-				}
-		r.add("hr");
-		BEs = (String[])r.toArray(new String[r.size()]);
-	}
+	public final Token[] tokens;
+	private final String[] BEs;
+    
+    public wikiParser(plasmaSwitchboard sb) {
+        tokens = new Token[] {
+                new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
+                new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
+                new LinkToken("localhost:8080"/*yacyCore.seedDB.mySeed.getAddress()*/, "Wiki.html?page=", sb),
+                new ListToken('*', "ul"),
+                new ListToken('#', "ol"),
+                new ListToken(':', "blockquote", null),
+                new ListToken(' ', null, "tt", false),
+                new DefinitionListToken(),
+                new TableToken()
+        };
+        ArrayList r = new ArrayList();
+        for (int i=0, k, j; i<tokens.length; i++)
+            if (tokens[i].getBlockElementNames() != null)
+                for (j=0; j<tokens[i].getBlockElementNames().length; j++) {
+                    if (tokens[i].getBlockElementNames()[j] == null) continue;
+                    if ((k = tokens[i].getBlockElementNames()[j].indexOf(' ')) > 1) {
+                        r.add(tokens[i].getBlockElementNames()[j].substring(0, k));
+                    } else {
+                        r.add(tokens[i].getBlockElementNames()[j]);
+                    }
+                }
+        r.add("hr");
+        BEs = (String[])r.toArray(new String[r.size()]);
+    }
 	
 	public static void main(String[] args) {
-		String text = "===Title===\n" +
-				"==blubb[== was ==ein '''shice'''==...och.bla\n" +
+		String text = "===T<pre>itle===\n" +
+				"==blubb== was ==ein '''shice'''==...och.bla\n" +
 				"* ein \n" +
-				"*==test==\n" +
+				"*==test=</pre>=\n" +
 				"** doppelt\n" +
 				"* ''tess*sst''\n" +
 				"*** xyz\n" +
@@ -118,29 +121,31 @@ public class wikiParser {
 				":doppel-blubb[= huch =]\n" +
 				";hier:da\n" +
 				";dort:und so\n" +
-				";;und:doppelt";
+				";;und:doppelt\n\n\n\n" +
+                "[[Image:blubb|BLA]]";
 		// text = "[=\n=]* bla";
 		String t = "[=] ein fucking [= test =]-text[=,ne?!=] joa, [=alles=]wunderbar," +
 				"[=denk ich=] mal =]";
 		long l = System.currentTimeMillis();
-		t = parse((args.length > 0) ? args[0] : text);
+		t = new wikiParser(null).parse((args.length > 0) ? args[0] : text);
         System.out.println("parsing time: " + (System.currentTimeMillis() - l) + " ms");
         System.out.println("--- --- ---");
         System.out.println(t);
 	}
 	
-	// TODO:
-	// - preParse:
-	//   - <pre>~</pre>
-	
-	public static String parse(String text) {
+	public String parse(String text) {
         Text[] tt = Text.split2Texts(text, "[=", "=]");
         for (int i=0; i<tt.length; i+=2)
         	tt[i].setText(parseUnescaped(tt[i].getText()));
-        return replaceBRs(Text.mergeTexts(tt));
+        text = Text.mergeTexts(tt);
+        
+        tt = Text.split2Texts(text, "<pre>", "</pre>");
+        for (int i=0; i<tt.length; i+=2)
+            tt[i].setText(replaceBRs(tt[i].getText()));
+        return Text.mergeTexts(tt);
 	}
 	
-	public static String parseUnescaped(String text) {
+	public String parseUnescaped(String text) {
 		Token st;
 		Matcher m;
 		StringBuffer sb;
@@ -166,7 +171,7 @@ public class wikiParser {
 		return text.replaceAll("----", "<hr />");
 	}
 	
-	private static String replaceBRs(String text) {
+	private String replaceBRs(String text) {
 		StringBuffer sb = new StringBuffer(text.length());
 		String[] tt = text.split("\n");
 		boolean replace;
@@ -175,8 +180,10 @@ public class wikiParser {
 			for (j=0; j<BEs.length; j++)
 				if (tt[i].endsWith(BEs[j] + ">")) { replace = false; break; }
 			sb.append(tt[i]);
-			if (replace && i < tt.length - 1) sb.append("<br />");
-			if (i < tt.length - 1) sb.append("\n");
+            if (i < tt.length - 1) {
+                if (replace) sb.append("<br />");
+                sb.append("\n");
+            }
 		}
 		return new String(sb);
 	}
@@ -193,7 +200,7 @@ public class wikiParser {
 			this.text = text;
 			this.escaped = escaped;
 			this.nl = newLineBefore;
-		}
+        }
 		
 		public String setTextPlain(String text) { return this.text = text; }
 		public String setText(String text) {
@@ -215,22 +222,23 @@ public class wikiParser {
 		public String toString() { return this.text; }
 		public boolean isEscaped() { return this.escaped; }
 		public boolean isNewLineBefore() { return this.nl; }
-		
+        
 		private static Text[] split2Texts(String text, String escapeBegin, String escapeEnd) {
 			if (text == null) return null;
 			if (text.length() < 2) return new Text[] { new Text(text, false, true) };
 			
 			int startLen = escapeBegin.length();
+            int endLen = escapeEnd.length();
 			ArrayList r = new ArrayList();
 			boolean escaped = text.startsWith(escapeBegin);
 			if (escaped) r.add(new Text("", false, true));
 			int i, j = 0;
 			while ((i = text.indexOf((escaped) ? escapeEnd : escapeBegin, j)) > -1) {
-				r.add(resolve2Text(text, escaped, (j > 0) ? j + startLen : 0, i, escapeEnd));
+				r.add(resolve2Text(text, escaped, (j > 0) ? j + ((escaped) ? startLen : endLen) : 0, i, escapeEnd));
 				j = i;
 				escaped = !escaped;
 			}
-			r.add(resolve2Text(text, escaped, (escaped) ? j : (j > 0) ? j + startLen : 0, -1, escapeEnd));
+			r.add(resolve2Text(text, escaped, (escaped) ? j : (j > 0) ? j + endLen : 0, -1, escapeEnd));
 			return (Text[])r.toArray(new Text[r.size()]);
 		}
 		

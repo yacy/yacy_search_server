@@ -48,7 +48,6 @@
 package de.anomic.data.wiki.tokens;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.regex.Pattern;
 
 public class TableToken extends AbstractToken {
@@ -61,7 +60,7 @@ public class TableToken extends AbstractToken {
 	};
 	private static final String[] blockElementNames = new String[] { "table", "tr", "td" };
 	
-	protected boolean parse() {
+	protected void parse() {
 		String[] t = text.split("\n");
 		String[] tds;
 		StringBuffer sb = new StringBuffer();
@@ -87,7 +86,6 @@ public class TableToken extends AbstractToken {
 		if (trOpen) sb.append("\t</tr>\n");
 		this.markup =  new String(sb.append("</table>"));
 		this.parsed = true;
-		return true;
 	}
 	
     // from de.anomic.data.wikiCode.java.parseTableProperties, modified by [FB]
@@ -105,45 +103,38 @@ public class TableToken extends AbstractToken {
       * Valid in this case means if they are a property for the table, tr or td
       * tag as stated in the HTML Pocket Reference by Jennifer Niederst (1st edition)
       * The method is important to avoid XSS attacks on the wiki via table properties.
-      * @param str A string that may contain several table properties and/or junk.
+      * @param properties A string that may contain several table properties and/or junk.
       * @return A string that only contains table properties.
       */
     private static StringBuffer parseTableProperties(final String properties){
         String[] values = properties.replaceAll("&quot;", "").split("[= ]");     //splitting the string at = and blanks
         StringBuffer sb = new StringBuffer(properties.length());
-        Iterator it;
-        String key, valkey, value;
+        String key, value;
+        String[] posVals;
         int numberofvalues = values.length;
-        main: for (int i=0; i<numberofvalues; i++) {
-        	valkey = values[i].trim();
+        for (int i=0; i<numberofvalues; i++) {
+        	key = values[i].trim();
         	if (i + 1 < numberofvalues) {
         		value = values[++i].trim();
         		if (
-        				valkey.equals("summary") ||
-        				(valkey.equals("bgcolor") && value.matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}")) ||
-        				((valkey.equals("width") || valkey.equals("height")) && value.matches("\\d+%{0,1}")) ||
-        				(isInArray(tps, valkey) && value.matches("\\d+"))
+        				(key.equals("summary")) ||
+        				(key.equals("bgcolor") && value.matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}")) ||
+        				((key.equals("width") || key.equals("height")) && value.matches("\\d+%{0,1}")) ||
+                        ((posVals = (String[])ps.get(key)) != null && isInArray(posVals, value)) ||
+        				(isInArray(tps, key) && value.matches("\\d+"))
         		) {
-                	addPair(valkey, value, sb);
+                	addPair(key, value, sb);
                 	continue;
         		}
-        		it = ps.keySet().iterator();
-        		while (it.hasNext()) {
-        			key = (String)it.next();
-        			if (valkey.equals(key) && isInArray((String[])ps.get(key), (String)value)) {
-        				addPair(valkey, value, sb);
-        				continue main;
-        			}
-        		}
         	}
-            if (valkey.equals("nowrap"))
-                sb.append(" nowrap");
+            if (key.equals("nowrap"))
+                addPair("nowrap", "nowrap", sb);
         }
         return sb;
     }
     
-    private static StringBuffer addPair(String val1, String val2, StringBuffer sb) {
-    	return sb.append(" ").append(val1).append("=\"").append(val2).append("\"");
+    private static StringBuffer addPair(String key, String value, StringBuffer sb) {
+    	return sb.append(" ").append(key).append("=\"").append(value).append("\"");
     }
     
     private static boolean isInArray(Object[] array, Object find) {

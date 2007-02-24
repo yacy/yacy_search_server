@@ -53,12 +53,12 @@ public abstract class AbstractToken implements Token {
 	protected String markup = null;
 	protected boolean parsed = false;
 	
-	protected abstract boolean parse();
+	protected abstract void parse();
 	
 	public String getMarkup() {
 		if (this.text == null)
 			throw new IllegalArgumentException();
-		if (!this.parsed && !parse()) return this.text;
+		if (!this.parsed) parse();
 		return this.markup;
 	}
 	

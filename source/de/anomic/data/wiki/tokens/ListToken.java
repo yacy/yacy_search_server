@@ -104,12 +104,11 @@ public class ListToken extends AbstractToken {
 		blockElements = (String[])r.toArray(new String[r.size()]);
 	}
 	
-	protected boolean parse() {
+	protected void parse() {
 		StringBuffer sb = new StringBuffer(this.text.length());
 		parse(this.text.split("\n"), 0, sb);
 		this.markup = new String(sb);
 		this.parsed = true;
-		return true;
 	}
 	
 	protected StringBuffer parse(String[] t, int depth, StringBuffer sb) {
