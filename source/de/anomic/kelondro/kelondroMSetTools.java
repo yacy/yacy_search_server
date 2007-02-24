@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -370,6 +371,30 @@ public class kelondroMSetTools {
                 line = line.trim();
                 if ((line.length() > 0) && (!(line.startsWith("#"))) && ((pos = line.indexOf(sep)) > 0))
                     map.put(line.substring(0, pos).trim().toLowerCase(), line.substring(pos + sep.length()).trim());
+            }
+        } catch (IOException e) {            
+        } finally {
+            if (br != null) try { br.close(); } catch (Exception e) {}
+        }
+        return map;
+    }
+    
+    public static TreeMap /* <String,ArrayList<String>> */ loadMapMultiValsPerKey(String filename, String sep) {
+        TreeMap map = new TreeMap();
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+            String line, key, value;
+            int pos;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if ((line.length() > 0) && (!(line.startsWith("#"))) && ((pos = line.indexOf(sep)) > 0)) {
+                    key = line.substring(0, pos).trim().toLowerCase();
+                    value = line.substring(pos + sep.length()).trim();
+                    if (!map.containsKey(key))
+                        map.put(key, new ArrayList());
+                    ((ArrayList)map.get(key)).add(value);
+                }
             }
         } catch (IOException e) {            
         } finally {

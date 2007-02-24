@@ -249,7 +249,8 @@ public class BlacklistCleaner_p {
             for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                 if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
                     plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],
-                            (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/")));
+                            (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/")),
+                            (s.indexOf("/") == -1) ? ".*" : s.substring(s.indexOf("/") + 1));
                 }                
             }    
         }
@@ -284,7 +285,8 @@ public class BlacklistCleaner_p {
             for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                 if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
                     plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],
-                            (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/")));
+                            (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/")),
+                            (s.indexOf("/") == -1) ? ".*" : s.substring(s.indexOf("/") + 1));
                     plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes], host, path);
                 }                
             }    

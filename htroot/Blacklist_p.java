@@ -225,7 +225,7 @@ public class Blacklist_p {
                 }                
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                     if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
-                        plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],oldEntry.substring(0, pos));
+                        plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],oldEntry.substring(0, pos), oldEntry.substring(pos + 1));
                     }                
                 }                    
                 
@@ -307,7 +307,7 @@ public class Blacklist_p {
                 if (nextEntry.length() == 0) continue;
                 if (nextEntry.startsWith("#")) continue;
     
-                prop.put(DISABLED + "Itemlist_" + entryCount + "_item", de.anomic.data.wikiCode.replaceXMLEntities(nextEntry));
+                prop.put(DISABLED + "Itemlist_" + entryCount + "_item", nextEntry);
                 entryCount++;
             }
         	prop.put(DISABLED + "Itemlist", entryCount);            
@@ -341,7 +341,7 @@ public class Blacklist_p {
         int blacklistCount = 0;
         if (dirlist != null) {
             for (int i = 0; i <= dirlist.length - 1; i++) {
-                prop.put(DISABLED + BLACKLIST + blacklistCount + "_name", de.anomic.data.wikiCode.replaceXMLEntities(dirlist[i]));
+                prop.put(DISABLED + BLACKLIST + blacklistCount + "_name", dirlist[i]);
                 prop.put(DISABLED + BLACKLIST + blacklistCount + "_selected", 0);
 
                 if (dirlist[i].equals(blacklistToUse)) { //current List

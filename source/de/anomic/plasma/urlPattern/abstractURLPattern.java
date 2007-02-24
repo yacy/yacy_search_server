@@ -45,13 +45,19 @@
 
 package de.anomic.plasma.urlPattern;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.net.URL;
@@ -67,8 +73,7 @@ public abstract class abstractURLPattern implements plasmaURLPattern {
     
     protected File blacklistRootPath = null;
     protected HashMap cachedUrlHashs = null; 
-    protected HashMap hostpaths = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
-    
+    protected HashMap /* <blacklistType,HashMap<host,ArrayList<path>>> */ hostpaths = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
     
     public abstractURLPattern(File rootPath) {
         this.setRootPath(rootPath);
@@ -98,7 +103,7 @@ public abstract class abstractURLPattern implements plasmaURLPattern {
         this.blacklistRootPath = rootPath;
     }
     
-    protected HashMap geBlacklistMap(String blacklistType) {
+    protected HashMap getBlacklistMap(String blacklistType) {
         if (blacklistType == null) throw new IllegalArgumentException();
         if (!BLACKLIST_TYPES.contains(blacklistType)) throw new IllegalArgumentException("Unknown backlist type.");        
         
@@ -124,37 +129,42 @@ public abstract class abstractURLPattern implements plasmaURLPattern {
         int size = 0;
         Iterator iter = this.hostpaths.keySet().iterator();
         while (iter.hasNext()) {
-            HashMap blacklistMap = (HashMap) this.hostpaths.get(iter.next());
-            size += blacklistMap.size();
+            Iterator blIter = ((HashMap)this.hostpaths.get(iter.next())).values().iterator();
+            while (blIter.hasNext())
+                size += ((ArrayList)blIter.next()).size();
         }
         return size;
     }
     
-    public void loadList(String[][] filenames, String sep) {        
-        for (int j = 0; j < filenames.length; j++) {
-            String[] nextFile = filenames[j];
-            String blacklistType = nextFile[0];
-            String fileName = nextFile[1];
-            this.loadList(blacklistType, fileName, sep);
+    public void loadList(blacklistFile[] blFiles, String sep) {        
+        for (int j = 0; j < blFiles.length; j++) {
+            blacklistFile blf = blFiles[j];
+            loadList(blf.getType(), blf.getFileName(), sep);
         }
     }
     
     public void loadList(String blacklistType, String filenames, String sep) {
-        
-        HashMap blacklistMap = geBlacklistMap(blacklistType);
+        HashMap blacklistMap = getBlacklistMap(blacklistType);
         String[] filenamesarray = filenames.split(",");
 
-        if( filenamesarray.length > 0) {
+        if (filenamesarray.length > 0) {
             for (int i = 0; i < filenamesarray.length; i++) {
-                blacklistMap.putAll(kelondroMSetTools.loadMap(new File(this.blacklistRootPath, filenamesarray[i]).toString(), sep));
+                blacklistMap.putAll(kelondroMSetTools.loadMapMultiValsPerKey(new File(this.blacklistRootPath, filenamesarray[i]).toString(), sep));
             }
-        }        
+        }
     }
     
-    public void remove(String blacklistType, String host) {
-        
-        HashMap blacklistMap = geBlacklistMap(blacklistType);
+    public void removeAll(String blacklistType, String host) {
+        HashMap blacklistMap = getBlacklistMap(blacklistType);
         blacklistMap.remove(host);
+    }
+    
+    public void remove(String blacklistType, String host, String path) {
+        HashMap blacklistMap = getBlacklistMap(blacklistType);
+        ArrayList hostList = (ArrayList)blacklistMap.get(host);
+        hostList.remove(path);
+        if (hostList.size() == 0)
+            blacklistMap.remove(host);
     }
 
     public void add(String blacklistType, String host, String path) {
@@ -163,8 +173,11 @@ public abstract class abstractURLPattern implements plasmaURLPattern {
         
         if (path.length() > 0 && path.charAt(0) == '/') path = path.substring(1);
         
-        HashMap blacklistMap = geBlacklistMap(blacklistType);        
-        blacklistMap.put(host.toLowerCase(), path);
+        HashMap blacklistMap = getBlacklistMap(blacklistType);
+        ArrayList hostList = (ArrayList)blacklistMap.get(host.toLowerCase());
+        if (hostList == null)
+            blacklistMap.put(host.toLowerCase(), (hostList = new ArrayList()));
+        hostList.add(path);
     }
 
     public int blacklistCacheSize() {

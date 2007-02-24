@@ -42,6 +42,7 @@
 package de.anomic.plasma.urlPattern;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -60,28 +61,44 @@ public class defaultURLPattern extends abstractURLPattern implements plasmaURLPa
         if (path == null) throw new NullPointerException();
         
         // getting the proper blacklist
-        HashMap blacklistMap = super.geBlacklistMap(blacklistType);
+        HashMap blacklistMap = super.getBlacklistMap(blacklistType);
         
         if (path.length() > 0 && path.charAt(0) == '/') path = path.substring(1);
+        ArrayList app;
+        boolean matched = false;
         String pp = ""; // path-pattern
 
         // first try to match the domain with wildcard '*'
         // [TL] While "." are found within the string
         int index = 0;
         while ((index = hostlow.indexOf('.', index + 1)) != -1) {
-            if ((pp = (String) blacklistMap.get(hostlow.substring(0, index + 1) + "*")) != null) {
-                return ((pp.equals("*")) || (path.matches(pp)));
+            if ((app = (ArrayList) blacklistMap.get(hostlow.substring(0, index + 1) + "*")) != null) {
+                for (int i=app.size()-1; !matched && i>-1; i--) {
+                    pp = (String)app.get(i);
+                    matched |= ((pp.equals("*")) || (path.matches(pp)));
+                }
+                return matched;
             }
         }
         index = hostlow.length();
         while ((index = hostlow.lastIndexOf('.', index - 1)) != -1) {
-            if ((pp = (String) blacklistMap.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
-                return ((pp.equals("*")) || (path.matches(pp)));
+            if ((app = (ArrayList) blacklistMap.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
+                for (int i=app.size()-1; !matched && i>-1; i--) {
+                    pp = (String)app.get(i);
+                    matched |= ((pp.equals("*")) || (path.matches(pp)));
+                }
+                return matched;
             }
         }
 
         // try to match without wildcard in domain
-        return (((pp = (String) blacklistMap.get(hostlow)) != null) &&
-                ((pp.equals("*")) || (path.matches(pp))));
+        if ((app = (ArrayList)blacklistMap.get(hostlow)) != null) {
+            for (int i=app.size()-1; !matched && i>-1; i--) {
+                pp = (String)app.get(i);
+                matched |= ((pp.equals("*")) || (path.matches(pp)));
+            }
+            return matched;
+        }
+        return false;
     }
 }

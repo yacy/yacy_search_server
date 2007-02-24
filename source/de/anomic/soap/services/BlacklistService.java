@@ -466,7 +466,7 @@ public class BlacklistService extends AbstractService {
         	
         	// if the current blacklist is activated for the type, remove the item from the list
             if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + BLACKLISTS,blacklistName)) {
-                plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],itemParts[0]);
+                plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],itemParts[0], itemParts[1]);
             }                
         }       	
     }
