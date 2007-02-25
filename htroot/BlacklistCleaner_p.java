@@ -49,10 +49,14 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -63,6 +67,7 @@ import de.anomic.plasma.urlPattern.defaultURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 
 public class BlacklistCleaner_p {
     
@@ -109,10 +114,10 @@ public class BlacklistCleaner_p {
             
             if (post.containsKey("delete")) {
                 prop.put(RESULTS + "modified", 1);
-                prop.put(RESULTS + "modified_delCount", removeEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select")));
+                prop.put(RESULTS + "modified_delCount", removeEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select", true)));
             } else if (post.containsKey("alter")) {
                 prop.put(RESULTS + "modified", 2);
-                prop.put(RESULTS + "modified_alterCount", alterEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select"), getByPrefix(post, "entry")));
+                prop.put(RESULTS + "modified_alterCount", alterEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select", true), getByPrefix(post, "entry", false)));
             }
             
             // list illegal entries
@@ -150,14 +155,25 @@ public class BlacklistCleaner_p {
         }
     }
     
-    private static String[] getByPrefix(serverObjects post, String prefix) {
+    private static String[] getByPrefix(serverObjects post, String prefix, boolean useKeys) {
         ArrayList r = new ArrayList();
-        Iterator it = post.keySet().iterator();
-        Object o;
-        while (it.hasNext())
-            if (((String)(o = it.next())).indexOf(prefix) == 0)
-                r.add(((String)o).substring(prefix.length()));
-        
+        Iterator it;
+        String s;
+        if (useKeys) {
+            it =  post.keySet().iterator();
+            while (it.hasNext())
+                if ((s = (String)it.next()).indexOf(prefix) == 0)
+                    r.add(s.substring(prefix.length()));
+        } else {
+            it = post.entrySet().iterator();
+            Entry entry;
+            while (it.hasNext()) {
+                entry = (Entry)it.next();
+                if (((String)entry.getKey()).indexOf(prefix) == 0)
+                    r.add(entry.getValue());
+            }
+        }
+        System.err.println("for " + prefix + "(" + useKeys + "): " + r.size());
         return (String[])r.toArray(new String[r.size()]);
     }
     
@@ -255,10 +271,46 @@ public class BlacklistCleaner_p {
             }    
         }
         if (list != null) listManager.writeList(new File(listManager.listsPath, blacklistToUse), (String[])list.toArray(new String[list.size()]));
-        
         return entries.length;
     }
     
+    private static int alterEntries(
+            String blacklistToUse,
+            String[] supportedBlacklistTypes,
+            String[] oldE,
+            String[] newE) {
+        removeEntries(blacklistToUse, supportedBlacklistTypes, oldE);
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklistToUse), true));
+            String host, path;
+            for (int i=0, pos; i<newE.length; i++) {
+                pos = newE[i].indexOf("/");
+                if (pos < 0) {
+                    host = newE[i];
+                    path = ".*";
+                } else {
+                    host = newE[i].substring(0, pos);
+                    path = newE[i].substring(pos + 1);
+                }
+                pw.println(host + "/" + path);
+                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
+                        plasmaSwitchboard.urlBlacklist.add(
+                                supportedBlacklistTypes[blTypes],
+                                host,
+                                path);
+                    }                
+                }
+            }
+            pw.close();
+        } catch (IOException e) {
+            serverLog.logSevere("BLACKLIST-CLEANER", "error on writing altered entries to blacklist", e);
+        }
+        return newE.length;
+    }
+    
+    /*
     private static int alterEntries(String blacklistToUse, String[] supportedBlacklistTypes, String[] entries, String[] newEntries) {
         // load blacklist data from file
         ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
@@ -276,7 +328,9 @@ public class BlacklistCleaner_p {
                 path = t.substring(t.indexOf("/"));
             }
             
+            System.err.println("attempting to remove '" + );
             if (list != null && list.contains(s)) {
+                System.err.println("done");
                 list.remove(s);
                 list.add(t);
             }
@@ -293,5 +347,5 @@ public class BlacklistCleaner_p {
         }
         if (list != null) listManager.writeList(new File(listManager.listsPath, blacklistToUse), (String[])list.toArray(new String[list.size()]));
         return entries.length;
-    }
+    }*/
 }

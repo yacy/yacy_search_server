@@ -46,10 +46,11 @@
             </label>
             <input type="checkbox" name="select#[entry]#" id="select#[entry]#" checked="checked" />
           </dt>
-          <dd><input type="text" name="entry#[entry]#" value="#[entry]#" size="50" /></dd>
-          #{/entries}# 
-          <dt><input type="submit" name="delete" value="Delete Selected" /></dt>
-          <!--<dd><input type="submit" name="alter" value="Change Selected" /></dd>-->
+          <dd><input type="text" name="entry#[entry]#" value="#[entry]#" size="50" /></dd>#{/entries}# 
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="submit" name="alter" value="Change Selected" /> <input type="submit" name="delete" value="Delete Selected" />
+          </dd>
         </dl>::#(/disabled)#
       </fieldset>
       ::<!-- 2: Error -->
