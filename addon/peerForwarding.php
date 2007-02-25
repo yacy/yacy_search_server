@@ -5,8 +5,8 @@
 	$page = 'error.html';
 	$peername = 'Error';
 	$seedurl = 'http://www.anomic.de/yacy/seed.txt';	// remote seed-file
-	$seedfile = 'seed.txt';								// local cache file, needs write access
-	$hostlength = 24; 									// EDIT THIS! length of the hostname + 1 (strlen(".peer.karlchenofhell.org"))
+	$seedfile = 'seed.txt';							// local cache file, needs write access
+	$hostlength = 24; 							// EDIT THIS! length of the hostname + 1 (strlen(".peer.karlchenofhell.org"))
 	
 	function get($url, $filename) {
 		if(!file_exists($filename) || (time()-filectime($filename)) > 600){
@@ -79,27 +79,27 @@
         return $r;
     }
 
+	###peername.yacypeer.dyndns.org
+	###rewrite:
+	###RewriteCond %{REQUEST_URI} /error.html
+	###RewriteRule ^/(.*) /error.html [L]
+	###RewriteRule ^/(.*) /index.php?url=$1 [L]
 	$name = $_SERVER['SERVER_NAME'];
 	$name = substr($name, 0, strlen($name) - $hostlength);
+	
+	###domain.org/peername/*
+	###rewrite:
+	###RewriteRule ^/(.*) /error.html [L]
+	###RewriteRule ^/([^\/]*)/(.*) /index.php?name=$1&url=$2 [L]
+	#$name=$_GET['name'];
 	
 	$seedfile = get($seedurl, $seedfile);
 	$peers = decodeSeedList($seedfile);
 	
 	$peer = $peers[strtolower($name)];
 	
-	#peername.yacypeer.dyndns.org
-	#rewrite:
-	#RewriteCond %{REQUEST_URI} /error.html
-	#RewriteRule ^/(.*) /error.html [L]
-	#RewriteRule ^/(.*) /index.php?url=$1 [L]
 	
-	#$name=$_SERVER['SERVER_NAME'];
-	#$name=substr($name, 0, strlen($name)-(strlen($basehost)+1)); //+1 because we filter .$basehost
-	
-	#domain.org/peername/*
-	#rewrite:
-	#RewriteRule ^/(.*) /error.html [L]
-	#RewriteRule ^/([^\/]*)/(.*) /index.php?name=$1&url=$2 [L]
+
 	
 	if (strlen($name) == 0 || $peer == null) {
 		// peer-list
@@ -143,4 +143,3 @@
 </html>
 <?
 	}
-?>
