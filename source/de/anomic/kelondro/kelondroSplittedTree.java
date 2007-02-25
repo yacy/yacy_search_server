@@ -47,8 +47,10 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 public class kelondroSplittedTree implements kelondroIndex {
 
@@ -113,6 +115,18 @@ public class kelondroSplittedTree implements kelondroIndex {
         return ktfs[partition(key)].get(key);
     }
 
+    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
+        Iterator i = rows.iterator();
+        kelondroRow.Entry row;
+        ArrayList[] parts = new ArrayList[ktfs.length];
+        for (int j = 0; j < ktfs.length; j++) parts[j] = new ArrayList();
+        while (i.hasNext()) {
+            row = (kelondroRow.Entry) i.next();
+            parts[partition(row.getColBytes(0))].add(row);
+        }
+        for (int j = 0; j < ktfs.length; j++) ktfs[j].putMultiple(parts[j], entryDate);
+    }
+    
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
         return put(row);
     }

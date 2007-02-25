@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -25,6 +26,7 @@ import de.anomic.kelondro.kelondroProfile;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroSplittedTree;
 import de.anomic.kelondro.kelondroTree;
+import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverMemory;
 import de.anomic.ymage.ymageChart;
@@ -524,6 +526,11 @@ final class dbTable implements kelondroIndex {
         }
     }
 
+    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
+        Iterator i = rows.iterator();
+        while (i.hasNext()) put ((Entry) i.next(), entryDate);
+    }
+    
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
         return put(row);
     }

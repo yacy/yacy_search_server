@@ -29,6 +29,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import de.anomic.server.logging.serverLog;
 
@@ -178,6 +181,33 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             // the deleted entries are subtracted from the 'real' tablesize, so the size may be
             // smaller than an index to a row entry
             return super.get(i);
+    }
+    
+    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
+        // put a list of entries in a ordered way.
+        // this should save R/W head positioning time
+        Iterator i = rows.iterator();
+        kelondroRow.Entry row;
+        TreeMap ordered = new TreeMap();
+        int pos;
+        byte[] key;
+        while (i.hasNext()) {
+            row = (kelondroRow.Entry) i.next();
+            key = row.getColBytes(0);
+            pos = index.geti(key);
+            if (pos < 0) {
+                index.puti(key, super.add(row));
+            } else {
+                ordered.put(new Integer(pos), row);
+            }
+        }
+        i = ordered.entrySet().iterator();
+        Map.Entry entry;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            pos = ((Integer) entry.getKey()).intValue();
+            super.set(pos, (kelondroRow.Entry) entry.getValue());
+        }
     }
 
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {

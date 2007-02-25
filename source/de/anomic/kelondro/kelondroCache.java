@@ -30,6 +30,7 @@ package de.anomic.kelondro;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.server.serverMemory;
@@ -339,6 +340,11 @@ public class kelondroCache implements kelondroIndex {
         }
     }
 
+    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
+        Iterator i = rows.iterator();
+        while (i.hasNext()) put ((Entry) i.next(), entryDate);
+    }
+    
     public synchronized Entry put(Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());

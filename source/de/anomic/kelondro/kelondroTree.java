@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -61,6 +62,7 @@ import java.util.TreeSet;
 import java.util.Vector;
 import java.util.logging.Logger;
 
+import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroTree extends kelondroRecords implements kelondroIndex {
@@ -324,6 +326,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         Handle lc = parentn.getOHHandle(child);
         if (lc == null) return false;
         return (lc.equals(childn.handle()));
+    }
+    
+    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
+        Iterator i = rows.iterator();
+        while (i.hasNext()) put ((Entry) i.next(), entryDate);
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {

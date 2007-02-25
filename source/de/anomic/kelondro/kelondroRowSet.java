@@ -27,9 +27,11 @@ package de.anomic.kelondro;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
 
+import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
@@ -98,6 +100,11 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         } else {
             this.put(row, entryDate);
         }
+    }
+    
+    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
+        Iterator i = rows.iterator();
+        while (i.hasNext()) put ((Entry) i.next(), entryDate);
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) {

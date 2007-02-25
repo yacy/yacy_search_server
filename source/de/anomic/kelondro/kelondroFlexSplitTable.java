@@ -32,6 +32,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class kelondroFlexSplitTable implements kelondroIndex {
@@ -183,6 +184,10 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         Object[] keeper = keeperOf(key);
         if (keeper == null) return null;
         return (kelondroRow.Entry) keeper[1];
+    }
+    
+    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
+        throw new UnsupportedOperationException("not yet implemented");
     }
     
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
