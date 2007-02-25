@@ -46,7 +46,10 @@
 // javac -classpath .:../classes IndexControl_p.java
 // if the shell's current path is HTROOT
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -55,6 +58,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 
+import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
@@ -383,6 +387,61 @@ public class IndexControl_p {
             }
         }
         
+        if (post.containsKey("blacklist")) {
+            String blacklist = post.get("blacklist", "");
+            if (post.containsKey("blacklisturls")) {
+                PrintWriter pw;
+                try {
+                    String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
+                    pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
+                    URL url;
+                    for (int i=0; i<urlx.length; i++) {
+                        indexURLEntry e = switchboard.wordIndex.loadedURL.load(urlx[i], null);
+                        if (e != null) {
+                            url = e.comp().url();
+                            pw.println(url.getHost() + "/" + url.getFile());
+                            for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                                if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
+                                    plasmaSwitchboard.urlBlacklist.add(
+                                            supportedBlacklistTypes[blTypes],
+                                            url.getHost(),
+                                            url.getFile());
+                                }                
+                            }
+                        }
+                    }
+                    pw.close();
+                } catch (IOException e) {
+                }
+            }
+            
+            if (post.containsKey("blacklistdomains")) {
+                PrintWriter pw;
+                try {
+                    String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
+                    pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
+                    URL url;
+                    for (int i=0; i<urlx.length; i++) {
+                        indexURLEntry e = switchboard.wordIndex.loadedURL.load(urlx[i], null);
+                        if (e != null) {
+                            url = e.comp().url();
+                            pw.println(url.getHost() + "/.*");
+                            for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                                if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
+                                    plasmaSwitchboard.urlBlacklist.add(
+                                            supportedBlacklistTypes[blTypes],
+                                            url.getHost(),
+                                            ".*");
+                                }                
+                            }
+                        }
+                    }
+                    pw.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+        
         listHosts(prop, keyhash);
 
         // insert constants
@@ -512,6 +571,7 @@ public class IndexControl_p {
                 prop.put("genUrlList_urlList", i);
                 prop.put("genUrlList_keyString", keystring);
                 prop.put("genUrlList_count", i);
+                putBlacklists(prop, listManager.getDirListing(listManager.listsPath));
             }
             index = null;
             return prop;
@@ -521,5 +581,10 @@ public class IndexControl_p {
             if (index != null) index = null;
         }
     }
-
+    
+    private static void putBlacklists(serverObjects prop, String[] lists) {
+        prop.put("genUrlList_blacklists", lists.length);
+        for (int i=0; i<lists.length; i++)
+            prop.put("genUrlList_blacklists_" + i + "_name", lists[i]);
+    }
 }
