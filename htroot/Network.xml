@@ -23,6 +23,7 @@
     <dhtreceive>#[dhtreceive]#</dhtreceive> 
     <rankingreceive>#[rankingreceive]#</rankingreceive>
     <location>#[location]#</location>
+    <seedurl>#[type_url]#</seedurl>
     #(complete)#
     ::
     <age>#[age]#</age>
