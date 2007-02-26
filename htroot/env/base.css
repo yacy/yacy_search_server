@@ -1,5 +1,5 @@
 /* base.css - Layout and general style */
-/* 
+/*
 	$LastChangedDate:  23.01.2007 $
 	$LastChangedRevision:  $
 	$LastChangedBy:  netbude $
@@ -13,11 +13,11 @@
 # all html elements without ".class" or "#id"
 ###############################################
 ## "global classes"									##
-# i.e. ".strong"; ".left"; ".error"; 
+# i.e. ".strong"; ".left"; ".error";
 ###############################################
 ## "privat classes"									##
-# all htnml-elements with a specific class 
-# i.e. "div.content"; "span.left"; 
+# all htnml-elements with a specific class
+# i.e. "div.content"; "span.left";
 # and
 # "div.content span a."; "form.search fieldset legend";
 # sorted by the last html-element
@@ -148,12 +148,7 @@ tt, *.tt {
   margin-bottom:10px;
 }
 
-.BlogCommentPost {
-  padding:10px;
-  padding-left:50px;
-  padding-right:50px;
-  margin-bottom:10px;
-}
+
 
 .PostSubject {
   padding:5px;
@@ -336,8 +331,8 @@ form.search.small h2 {
 }
 
 li.menugroup h3{
-	font-size: 1em; font-weight: bold; 
-	margin: 0; padding: 1px 10px; 
+	font-size: 1em; font-weight: bold;
+	margin: 0; padding: 1px 10px;
 }
 
 div.SubMenugroup h3{
@@ -576,14 +571,14 @@ body#Surftips div.searchresults {
 }
 body#ViewLog div.log {
   height:600px;
-  overflow:scroll;  
-}	
+  overflow:scroll;
+}
 
 body#ViewLog pre {
   width:100%; /* TODO: fix width in IE */
-  margin-top:0px; 
+  margin-top:0px;
   margin-bottom:0px;
-  font-family: Courier,monospace; 
+  font-family: Courier,monospace;
   font-weight: normal;
   font-size: small;
 }
@@ -624,6 +619,11 @@ body#watchCrawler p#crawlingQueues{clear:both; margin: 20px 0px 0px 0px;}
 div.CacheAdminInfo {margin-top:1em;}
 div.CacheAdminTree{}
 
+/* BlogComments.html */
+div.BlogCommentPost {
+margin: 0px 30px 0px 30px;
+background-color:#eeeeee;
+}
 
 /* other ------------------------------------*/
 ul#menu {
