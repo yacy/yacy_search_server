@@ -28,7 +28,9 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import de.anomic.server.serverFileUtils;
 
@@ -180,6 +182,34 @@ public class kelondroFlexWidthArray implements kelondroArray {
     
     public int size() {
         return col[0].size();
+    }
+    
+    public void setMultiple(TreeMap /*of {Integer, kelondroRow.Entry}*/ entries) throws IOException {
+        // a R/W head path-optimized option to write a set of entries
+        Iterator i;
+        Map.Entry entry;
+        kelondroRow.Entry rowentry, e0;
+        int c = 0, index, lastcol;
+        synchronized (col) {
+            // go across each file
+            while (c < rowdef.columns()) {
+                i = entries.entrySet().iterator();
+                lastcol = c + col[c].row().columns() - 1;
+                while (i.hasNext()) {
+                    entry = (Map.Entry) i.next();
+                    index = ((Integer) entry.getKey()).intValue();
+                    rowentry = (kelondroRow.Entry) entry.getValue();
+                    assert rowentry.bytes().length == this.rowdef.objectsize;
+                        
+                    e0 = col[c].row().newEntry(
+                            rowentry.bytes(),
+                            rowdef.colstart[c],
+                            rowdef.colstart[lastcol] - rowdef.colstart[c] + rowdef.width(lastcol));
+                    col[c].set(index, e0);             
+                }
+                c = c + col[c].row().columns();   
+            }
+        }
     }
     
     public void set(int index, kelondroRow.Entry rowentry) throws IOException {

@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.server.logging.serverLog;
@@ -201,13 +200,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
                 ordered.put(new Integer(pos), row);
             }
         }
-        i = ordered.entrySet().iterator();
-        Map.Entry entry;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            pos = ((Integer) entry.getKey()).intValue();
-            super.set(pos, (kelondroRow.Entry) entry.getValue());
-        }
+        super.setMultiple(ordered);
     }
 
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {

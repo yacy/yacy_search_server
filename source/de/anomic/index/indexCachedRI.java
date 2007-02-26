@@ -40,6 +40,8 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
 
 public class indexCachedRI implements indexRI {
+    
+    private static final int flushsize = 1000;
 
     private kelondroRow       payloadrow;
     private kelondroOrder     indexOrder;
@@ -76,10 +78,10 @@ public class indexCachedRI implements indexRI {
         // check for forced flush
         synchronized (this) {
             if (riExtern.size() > riExtern.getMaxWordCount()) {
-                flushCache(riExtern, riExtern.size() + 500 - riExtern.getMaxWordCount());
+                flushCache(riExtern, riExtern.size() + flushsize - riExtern.getMaxWordCount());
             }
             if (riIntern.size() > riIntern.getMaxWordCount()) {
-                flushCache(riIntern, riIntern.size() + 500 - riIntern.getMaxWordCount());
+                flushCache(riIntern, riIntern.size() + flushsize - riIntern.getMaxWordCount());
             }
         }
     }

@@ -55,6 +55,8 @@ import de.anomic.yacy.yacyDHTAction;
 
 public final class plasmaWordIndex implements indexRI {
 
+    private static final int flushsize = 2000;
+
     private final kelondroOrder      indexOrder = kelondroBase64Order.enhancedCoder;
     private final indexRAMRI         dhtOutCache, dhtInCache;
     private final indexCollectionRI  collections;          // new database structure to replace AssortmentCluster and FileCluster
@@ -135,10 +137,10 @@ public final class plasmaWordIndex implements indexRI {
         // check for forced flush
         synchronized (this) {
             if (dhtOutCache.size() > dhtOutCache.getMaxWordCount()) {
-                flushCache(dhtOutCache, dhtOutCache.size() + 500 - dhtOutCache.getMaxWordCount());
+                flushCache(dhtOutCache, dhtOutCache.size() + flushsize - dhtOutCache.getMaxWordCount());
             }
             if (dhtInCache.size() > dhtInCache.getMaxWordCount()) {
-                flushCache(dhtInCache, dhtInCache.size() + 500 - dhtInCache.getMaxWordCount());
+                flushCache(dhtInCache, dhtInCache.size() + flushsize - dhtInCache.getMaxWordCount());
             }
         }
     }
@@ -190,7 +192,7 @@ public final class plasmaWordIndex implements indexRI {
     
     private void flushCacheSome(indexRAMRI ram, boolean busy) {
         int flushCount = (busy) ? ram.size() / busyDivisor : ram.size() / idleDivisor;
-        if (flushCount > 100) flushCount = 100;
+        if (flushCount > 1000) flushCount = 1000;
         if (flushCount >= 1) {
             flushCache(ram, flushCount);
         }
@@ -199,7 +201,7 @@ public final class plasmaWordIndex implements indexRI {
     
     private void flushCache(indexRAMRI ram, int count) {
         if (count <= 0) return;
-        if (count > 1000) count = 1000;
+        if (count >= 5000) count = 5000;
         busyCacheFlush = true;
         String wordHash;
         ArrayList containerList = new ArrayList();
