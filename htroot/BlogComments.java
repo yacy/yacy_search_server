@@ -165,20 +165,17 @@ public class BlogComments {
 
 		if(post.containsKey("preview")) {
 			//preview the page
-			if(hasRights) {
-	            prop.put("mode", 1);//preview
-	            prop.put("mode_pageid", pagename);
-	            try {
-					prop.put("mode_author", new String(author, "UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					prop.put("mode_author", new String(author));
-				}
-	            prop.put("mode_subject", post.get("subject",""));
-	            prop.put("mode_date", dateString(new Date()));
-	            prop.putWiki("mode_page", post.get("content", ""));
-	            prop.put("mode_page-code", post.get("content", ""));
-			}
-			else prop.put("mode",3); //access denied (no rights)
+            prop.put("mode", 1);//preview
+            prop.put("mode_pageid", pagename);
+            try {
+                prop.put("mode_author", new String(author, "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                prop.put("mode_author", new String(author));
+            }
+            prop.put("mode_subject", post.get("subject",""));
+            prop.put("mode_date", dateString(new Date()));
+            prop.putWiki("mode_page", post.get("content", ""));
+            prop.put("mode_page-code", post.get("content", ""));
 		}
 		else {
 		    // show blog-entry/entries
