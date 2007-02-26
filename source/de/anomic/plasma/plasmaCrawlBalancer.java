@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.server.logging.serverLog;
@@ -136,8 +137,8 @@ public class plasmaCrawlBalancer {
     
     public synchronized int size() {
         int componentsize = fileStack.size() + ramStack.size() + sizeDomainStacks();
-        //assert componentsize == ramIndex.size() : "componentsize = " + componentsize + ", ramIndex.size() = " + ramIndex.size();
-        if (componentsize != ramIndex.size()) {
+        if ((kelondroRecords.debugmode) && (componentsize != ramIndex.size())) {
+            // hier ist ramIndex.size() immer grš§er. warum?
             serverLog.logWarning("PLASMA BALANCER", "size operation wrong - componentsize = " + componentsize + ", ramIndex.size() = " + ramIndex.size());
         }        
         return componentsize;
@@ -201,13 +202,13 @@ public class plasmaCrawlBalancer {
             domainList.add(urlhash);
         }
         
+        // add to index
+        ramIndex.add(urlhash);
+        
         // check size of domainStacks and flush
         if ((domainStacks.size() > 20) || (sizeDomainStacks() > 1000)) {
             flushOnceDomStacks(false);
         }
-        
-        // add to index
-        ramIndex.add(urlhash);
     }
     
     public synchronized String get(long minimumDelta, long maximumAge) throws IOException {
