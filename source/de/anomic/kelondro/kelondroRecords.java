@@ -161,7 +161,7 @@ public class kelondroRecords {
     private static Random random = new Random(System.currentTimeMillis());
 
     // check for debug mode
-    private static boolean debugmode = false;
+    public static boolean debugmode = false;
     static {
         assert debugmode = true;
     }
