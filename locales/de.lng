@@ -1509,7 +1509,7 @@ The remote path on the FTP server, like==Der Remote-Pfad auf dem FTP-Server, wie
 Missing sub-directories are NOT created automatically.==Fehlende Unterverzeichnisse werden NICHT automatisch erstellt.
 Username==Benutzername
 Your log-in at the FTP server==Ihr Log-in auf dem FTP-Server
-Password==Passwort
+Password</label>==Passwort</label>
 The password==Das Passwort
 "Submit"=="Speichern"
 #-----------------------------
