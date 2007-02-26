@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Blog</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Blog">
+    #%env/templates/header.template%#
+    BlogSize: #[blogSize]#<br />
+    BlogCommentsSize: #[blogCommentsSize]#<br />
+    #(mode)#
+    <!-- 0: viewing -->
+    <div class="Post">	
+      <h2 class="PostSubject"><a href="Blog.html?page=#[pageid]#">#[subject]#</a></h2>
+      <div class="PostBody">#[page]#</div>
+      <p class="PostInfo">
+        #[date]# | by #[author]# | <a href="BlogComments.html?page=#[pageid]#">#[comments]# Comments</a>
+      </p>
+    </div>
+    <p class="Navigation">
+      #(admin)#<a href="Blog.html?login=true">Login</a> #(/admin)#<a href="Blog.html">Blog-Home</a>
+    </p>
+    #{entries}#
+    <div class="BlogCommentPost">
+      <h2 class="PostSubject">#[subject]#</h2>
+      <div class="PostBody">#[page]#</div>
+      <p class="PostInfo">
+        #[date]# | by #[author]#
+        #(admin)#::| <a href="BlogComments.html?page=#[pageid]#&amp;comment=#[commentid]#&amp;delete=try">delete</a>#(/admin)#
+      </p>
+    </div>
+    #{/entries}#
+    <form action="BlogComments.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <dl>
+          <dt><label for="author">Author:</label></dt>
+          <dd>
+            <input name="author" id="author" type="text" size="20" maxlength="80" value="#[author]#" />
+          </dd>
+          <dt><label for="subject">Subject:</label></dt>
+          <dd>
+            <input name="subject" id="subject" type="text" size="20" maxlength="80" value="" />
+          </dd>
+          <dt><label for="content">Text:</label></dt>
+          <dd>
+            <textarea name="content" id="content" cols="80" rows="12"></textarea>
+            <p class="help">
+              You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Yacy-Wiki Code</a> here.
+            </p>
+          </dd>
+        </dl>
+        <input type="hidden" name="page" value="#[pageid]#" />
+        <input type="submit" name="submit" value="Submit" />
+        <input type="submit" name="preview" value="Preview" />
+        <input type="submit" name="view" value="Discard" />
+      </fieldset>
+    </form>
+    ::
+    <!-- 1: preview -->
+    <div class="Post">
+      <h2 class="PostSubject"><a href="Blog.html?page=#[pageid]#">#[subject]#</a></h2>
+      <div class="PostBody">#[page]#</div>
+      <p class="PostInfo">
+        #[date]# | by #[author]#
+      </p>
+    </div>
+    <p class="Navigation">
+      #(admin)#<a href="Blog.html?login=true">Login</a> - ::<a href="Blog.html?edit=true">new entry</a> - <a href="Blog.html?import=xml">import XML-File</a> - <a href="Blog.xml?xml=1">export as XML</a> - #(/admin)#<a href="Blog.html">Blog-Home</a>
+    </p>
+    <form action="BlogComments.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+        <dl>
+          <dt><label for="author">Author:</label></dt>
+          <dd>
+            <input name="author" id="author" type="text" size="20" maxlength="80" value="#[author]#" />
+          </dd>
+          <dt><label for="subject">Subject:</label></dt>
+          <dd>
+            <input name="subject" id="subject" type="text" size="20" maxlength="80" value="#[subject]#" />
+          </dd>
+          <dt><label for="content">Text:</label></dt>
+          <dd>
+            <textarea name="content" id="conten	t" cols="80" rows="12">#[page-code]#</textarea>
+            <p class="help">
+              You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Yacy-Wiki Code</a> here.
+            </p>
+          </dd>
+        </dl>
+        <input type="hidden" name="page" value="#[pageid]#" />
+        <input type="text" name="page" value="#[pageid]#" />
+        <input type="submit" name="submit" value="Submit" />
+        <input type="submit" name="preview" value="Preview" />
+        <input type="submit" name="view" value="Discard" />
+      </fieldset>
+    </form>
+    #(/mode)#
+  #%env/templates/footer.template%#
+  </body>
+</html>
