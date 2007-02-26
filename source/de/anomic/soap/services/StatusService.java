@@ -188,7 +188,7 @@ public class StatusService extends AbstractService {
     
     /**
      * Query status information about this peer
-     * @return
+     * @return the <code>status</code>-{@link Document}
      * @throws Exception
      */
     public Document getStatus() throws Exception {

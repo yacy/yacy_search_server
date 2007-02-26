@@ -87,10 +87,10 @@ public final class serverFileUtils {
     * @param count the total amount of bytes to copy
     * @return Total number of bytes copied.
     * 
-    * @see copy(InputStream source, File dest)
-    * @see copyRange(File source, OutputStream dest, int start)
-    * @see copy(File source, OutputStream dest)
-    * @see copy(File source, File dest)
+    * @see #copy(InputStream source, File dest)
+    * @see #copyRange(File source, OutputStream dest, int start)
+    * @see #copy(File source, OutputStream dest)
+    * @see #copy(File source, File dest)
     */
     public static long copy(InputStream source, OutputStream dest, long count) throws IOException {
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];                
@@ -196,10 +196,10 @@ public final class serverFileUtils {
     * @param source    InputStream
     * @param dest    File
     * @param the amount of bytes to copy
-    * @see copy(InputStream source, OutputStream dest)
-    * @see copyRange(File source, OutputStream dest, int start)
-    * @see copy(File source, OutputStream dest)
-    * @see copy(File source, File dest)
+    * @see #copy(InputStream source, OutputStream dest)
+    * @see #copyRange(File source, OutputStream dest, int start)
+    * @see #copy(File source, OutputStream dest)
+    * @see #copy(File source, File dest)
     */
     public static void copy(InputStream source, File dest, long count) throws IOException {
         FileOutputStream fos = null;
@@ -216,10 +216,10 @@ public final class serverFileUtils {
     * @param source    File
     * @param dest    OutputStream
     * @param start Number of bytes to skip from the beginning of the File
-    * @see copy(InputStream source, OutputStream dest)
-    * @see copy(InputStream source, File dest)
-    * @see copy(File source, OutputStream dest)
-    * @see copy(File source, File dest)
+    * @see #copy(InputStream source, OutputStream dest)
+    * @see #copy(InputStream source, File dest)
+    * @see #copy(File source, OutputStream dest)
+    * @see #copy(File source, File dest)
     */
     public static void copyRange(File source, OutputStream dest, int start) throws IOException {
         InputStream fis = null;
@@ -237,10 +237,10 @@ public final class serverFileUtils {
     * Copies a File to an OutputStream.
     * @param source    File
     * @param dest    OutputStream
-    * @see copy(InputStream source, OutputStream dest)
-    * @see copy(InputStream source, File dest)
-    * @see copyRange(File source, OutputStream dest, int start)
-    * @see copy(File source, File dest)
+    * @see #copy(InputStream source, OutputStream dest)
+    * @see #copy(InputStream source, File dest)
+    * @see #copyRange(File source, OutputStream dest, int start)
+    * @see #copy(File source, File dest)
     */
     public static void copy(File source, OutputStream dest) throws IOException {
         InputStream fis = null;
@@ -261,10 +261,10 @@ public final class serverFileUtils {
     * @param source    File
     * @param dest    File
     * @param count the amount of bytes to copy
-    * @see copy(InputStream source, OutputStream dest)
-    * @see copy(InputStream source, File dest)
-    * @see copyRange(File source, OutputStream dest, int start)
-    * @see copy(File source, OutputStream dest)
+    * @see #copy(InputStream source, OutputStream dest)
+    * @see #copy(InputStream source, File dest)
+    * @see #copyRange(File source, OutputStream dest, int start)
+    * @see #copy(File source, OutputStream dest)
     */
     public static void copy(File source, File dest, long count) throws IOException {
         FileInputStream fis = null;

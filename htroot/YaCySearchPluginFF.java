@@ -51,10 +51,10 @@ import de.anomic.yacy.yacyCore;
 public class YaCySearchPluginFF {
     
     /**
-     * @param header
-     * @param post
-     * @param env
-     * @return
+     * @param header the complete HTTP header of the request
+     * @param post any arguments for this servlet, the request carried with (GET as well as POST)
+     * @param env the serverSwitch object holding all runtime-data
+     * @return the rewrite-properties for the template
      */
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         

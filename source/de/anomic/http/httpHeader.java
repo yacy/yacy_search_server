@@ -830,8 +830,8 @@ public final class httpHeader extends TreeMap implements Map {
      */
     //Since properties such as cookies can be multiple, we cannot use HashMap here. We have to use Vector.
     private Vector cookies=new Vector();
+    
     /**
-     *
      * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
      */
     class Entry implements Map.Entry
@@ -847,13 +847,13 @@ public final class httpHeader extends TreeMap implements Map {
     /**
      * Sets Cookie on the client machine.
      *
-     * @param name: Cookie name
-     * @param value: Cookie value
-     * @param expires: when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
-     * @param path: Path the cookie belongs to. Default - "/". Can be <b>null</b>.
-     * @param domain: Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
-     * @param secure: If true cookie will be send only over safe connection such as https
-     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     * @param name Cookie name
+     * @param value Cookie value
+     * @param expires when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
+     * @param path Path the cookie belongs to. Default - "/". Can be <b>null</b>.
+     * @param domain Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
+     * @param secure If true cookie will be send only over safe connection such as https
+     * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
     public void setCookie(String name, String value, String expires, String path, String domain, boolean secure)
     {
@@ -876,14 +876,14 @@ public final class httpHeader extends TreeMap implements Map {
     /**
      * Sets Cookie on the client machine.
      *
-     * @param name: Cookie name
-     * @param value: Cookie value
-     * @param expires: when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
-     * @param path: Path the cookie belongs to. Default - "/". Can be <b>null</b>.
-     * @param domain: Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
+     * @param name Cookie name
+     * @param value Cookie value
+     * @param expires when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
+     * @param path Path the cookie belongs to. Default - "/". Can be <b>null</b>.
+     * @param domain Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
      *
      * Note: this cookie will be sent over each connection independend if it is safe connection or not.
-     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
     public void setCookie(String name, String value, String expires, String path, String domain)
     {
@@ -892,13 +892,13 @@ public final class httpHeader extends TreeMap implements Map {
     /**
      * Sets Cookie on the client machine.
      *
-     * @param name: Cookie name
-     * @param value: Cookie value
-     * @param expires: when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
-     * @param path: Path the cookie belongs to. Default - "/". Can be <b>null</b>.
+     * @param name Cookie name
+     * @param value Cookie value
+     * @param expires when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
+     * @param path Path the cookie belongs to. Default - "/". Can be <b>null</b>.
      *
      * Note: this cookie will be sent over each connection independend if it is safe connection or not.
-     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
     public void setCookie(String name, String value, String expires, String path)
     {
@@ -907,12 +907,12 @@ public final class httpHeader extends TreeMap implements Map {
     /**
      * Sets Cookie on the client machine.
      *
-     * @param name: Cookie name
-     * @param value: Cookie value
-     * @param expires: when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
+     * @param name Cookie name
+     * @param value Cookie value
+     * @param expires when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
      *
      * Note: this cookie will be sent over each connection independend if it is safe connection or not.
-     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
     public void setCookie(String name, String value, String expires)
     {
@@ -921,11 +921,11 @@ public final class httpHeader extends TreeMap implements Map {
     /**
      * Sets Cookie on the client machine.
      *
-     * @param name: Cookie name
-     * @param value: Cookie value
+     * @param name Cookie name
+     * @param value Cookie value
      *
      * Note: this cookie will be sent over each connection independend if it is safe connection or not. This cookie never expires
-     * Further documentation at <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
     public void setCookie(String name, String value )
     {
@@ -953,17 +953,17 @@ public final class httpHeader extends TreeMap implements Map {
     /**
      * Returns an iterator within all properties can be reached.
      * Is used mainly by httpd.
-     * @return iterator to read all request properties.
      *
-     * Example:
-     *
+     * <p>Example:</p>
+     * <pre>
      * Iterator it=serverObjects.getRequestProperties();
      * while(it.hasNext())
      * {
      *  java.util.Map.Entry e=(java.util.Map.Entry)it.next();
      *  String propertyName=e.getKey();
      *  String propertyValue=e.getValue();
-     * }
+     * }</pre>
+     * @return iterator to read all request properties.
      */
     public Iterator getCookies()
     {

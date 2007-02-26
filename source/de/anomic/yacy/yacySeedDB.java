@@ -770,7 +770,7 @@ public final class yacySeedDB {
     }
         
     /**
-     * @deprecated: Function seems to be unused
+     * @deprecated Function seems to be unused
      */
     public String copyCache(File seedFile, URL seedURL) {
     	if (seedURL == null) return "COPY - Error: URL not given";

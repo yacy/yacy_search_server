@@ -45,7 +45,6 @@
 
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -65,11 +64,10 @@ public class ScreenSaver {
     /**
      * Generates a proxy-autoconfig-file (application/x-ns-proxy-autoconfig) 
      * See: <a href="http://wp.netscape.com/eng/mozilla/2.0/relnotes/demo/proxy-live.html">Proxy Auto-Config File Format</a> 
-     * @param header
-     * @param post
-     * @param env
-     * @return
-     * @throws IOException 
+     * @param header the complete HTTP header of the request
+     * @param post any arguments for this servlet, the request carried with (GET as well as POST)
+     * @param env the serverSwitch object holding all runtime-data
+     * @return the rewrite-properties for the template
      */
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 

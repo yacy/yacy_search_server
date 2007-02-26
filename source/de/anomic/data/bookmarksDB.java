@@ -604,8 +604,7 @@ public class bookmarksDB {
             return tagHash;
         }
         /**
-         * get tag name, with all uppercase chars.
-         * @return
+         * @return the tag name, with all uppercase chars
          */
         public String getFriendlyName(){
             /*if(this.mem.containsKey(TAG_FRIENDLY_NAME)){

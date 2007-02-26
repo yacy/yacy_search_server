@@ -118,7 +118,7 @@ public abstract class AbstractService {
      * 
      * @param templateName
      * @param args
-     * @return
+     * @return the output document
      * @throws AxisFault
      */
     protected byte[] writeTemplate(String templateName, serverObjects args) throws AxisFault {
@@ -250,7 +250,8 @@ public abstract class AbstractService {
     /**
      * This method was copied from the {@link httpdFileHandler httpdFileHandler-class}
      * @param template
-     * @return
+     * @return the .class-{@link File} belonging to the given template or <code>null</code>
+     * if no fitting .class-{@link File} does exist
      */
     protected File rewriteClassFile(File template) {
         try {
@@ -270,7 +271,9 @@ public abstract class AbstractService {
     /**
      * This method was copied from the {@link httpdFileHandler httpdFileHandler-class}
      * @param classFile
-     * @return
+     * @return the <code>resond({@link httpHeader}, {@link serverObjects}, {@link serverSwitch})</code>
+     * {@link Method} of the specified class file or <code>null</code> if this file doesn't contain
+     * such a method
      */    
     protected Method rewriteMethod(File classFile) {
         Method m = null;
@@ -279,9 +282,9 @@ public abstract class AbstractService {
             //System.out.println("**DEBUG** loading class file " + classFile);
             Class c = this.provider.loadClass(classFile);
             Class[] params = new Class[] {
-            Class.forName("de.anomic.http.httpHeader"),
-            Class.forName("de.anomic.server.serverObjects"),
-            Class.forName("de.anomic.server.serverSwitch")};
+                    httpHeader.class,     // Class.forName("de.anomic.http.httpHeader"),
+                    serverObjects.class,  // Class.forName("de.anomic.server.serverObjects"),
+                    serverSwitch.class }; // Class.forName("de.anomic.server.serverSwitch")};
             m = c.getMethod("respond", params);
         } catch (ClassNotFoundException e) {
             System.out.println("INTERNAL ERROR: class " + classFile + " is missing:" + e.getMessage()); 
@@ -290,7 +293,7 @@ public abstract class AbstractService {
         }
         //System.out.println("found method: " + m.toString());
         return m;
-        }        
+    }        
     
     protected Document convertContentToXML(String contentString) throws Exception {
         return convertContentToXML(contentString.getBytes("UTF-8"));

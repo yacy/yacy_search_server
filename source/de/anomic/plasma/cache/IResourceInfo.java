@@ -59,14 +59,12 @@ import de.anomic.net.URL;
 public interface IResourceInfo {
     
     /**
-     * Return the resource information as map
-     * @return
+     * @return the resource information
      */
     public Map getMap();
     
     /**
-     * Returns the URL of this content
-     * @return
+     * @return the URL of this content
      */
     public URL getUrl();
     
@@ -95,28 +93,29 @@ public interface IResourceInfo {
     public Date getModificationDate();
     
     /**
-     * Returns the url hash of the content URL
-     * @return
+     * @return the url hash of the content URL
      */
     public String getUrlHash();
     
     /**
      * Specifies if the resource was requested with a
      * if modified since date
-     * @return
+     * @return the <code>Modified since</code>-header field or <code>null</code>
+     * if the request didn't contain this field
      */
     public Date ifModifiedSince();
     
     /**
      * Specifies if the resource was requested with 
      * client specific information (e.g. cookies for http)
-     * @return
+     * @return whether additional client specific information were passed
+     * along the reuqest for this resource
      */
     public boolean requestWithCookie();
     
     /**
      * Specifies if the request prohibits indexing
-     * @return
+     * @return whether indexing is proibited by this request
      */
     public boolean requestProhibitsIndexing();
     

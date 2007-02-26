@@ -173,7 +173,7 @@ public class BlacklistCleaner_p {
                     r.add(entry.getValue());
             }
         }
-        System.err.println("for " + prefix + "(" + useKeys + "): " + r.size());
+        
         return (String[])r.toArray(new String[r.size()]);
     }
     
@@ -309,43 +309,4 @@ public class BlacklistCleaner_p {
         }
         return newE.length;
     }
-    
-    /*
-    private static int alterEntries(String blacklistToUse, String[] supportedBlacklistTypes, String[] entries, String[] newEntries) {
-        // load blacklist data from file
-        ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
-        
-        // delete the old entry from file
-        String s, t, host, path;
-        for (int i=0; i<entries.length; i++) {
-            s = entries[i];
-            t = newEntries[i];
-            if (t.indexOf("/") == -1) {
-                host = t;
-                path = "/.*";
-            } else {
-                host = t.substring(0, t.indexOf("/"));
-                path = t.substring(t.indexOf("/"));
-            }
-            
-            System.err.println("attempting to remove '" + );
-            if (list != null && list.contains(s)) {
-                System.err.println("done");
-                list.remove(s);
-                list.add(t);
-            }
-            
-            // remove the entry from the running blacklist engine
-            for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
-                    plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],
-                            (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/")),
-                            (s.indexOf("/") == -1) ? ".*" : s.substring(s.indexOf("/") + 1));
-                    plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes], host, path);
-                }                
-            }    
-        }
-        if (list != null) listManager.writeList(new File(listManager.listsPath, blacklistToUse), (String[])list.toArray(new String[list.size()]));
-        return entries.length;
-    }*/
 }

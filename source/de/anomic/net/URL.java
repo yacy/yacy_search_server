@@ -190,7 +190,7 @@ public class URL {
     /**
      * Escapes the following parts of the url, this object already contains:
      * <ul>
-     * <li>path: see {@link: #escape(String)}</li>
+     * <li>path: see {@link #escape(String)}</li>
      * <li>ref: same as above</li>
      * <li>quest: same as above without the ampersand ("&amp;") and the equals symbol</li>
      * </ul>

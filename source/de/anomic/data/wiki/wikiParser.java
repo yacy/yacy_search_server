@@ -57,6 +57,7 @@ import de.anomic.data.wiki.tokens.SimpleToken;
 import de.anomic.data.wiki.tokens.TableToken;
 import de.anomic.data.wiki.tokens.Token;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.yacy.yacyCore;
 
 public class wikiParser {
 	
@@ -67,7 +68,7 @@ public class wikiParser {
         tokens = new Token[] {
                 new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
                 new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
-                new LinkToken("localhost:8080"/*yacyCore.seedDB.mySeed.getAddress()*/, "Wiki.html?page=", sb),
+                new LinkToken(yacyCore.seedDB.mySeed.getAddress(), "Wiki.html?page=", sb),
                 new ListToken('*', "ul"),
                 new ListToken('#', "ol"),
                 new ListToken(':', "blockquote", null),

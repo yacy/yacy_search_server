@@ -908,7 +908,7 @@ public final class httpc {
     *
     * @param path The path to the page which should be GET.
     * @param requestHeader Prefilled httpHeader.
-    * @param return Instance of response with the content.
+    * @return Instance of response with the content.
     * @throws IOException
     */
     public response GET(String path, httpHeader requestHeader) throws IOException {
@@ -929,7 +929,7 @@ public final class httpc {
     *
     * @param path The path to the page whose header should be get.
     * @param requestHeader Prefilled httpHeader.
-    * @param return Instance of response with the content.
+    * @return Instance of response with the content.
     * @throws IOException
     */
     public response HEAD(String path, httpHeader requestHeader) throws IOException {
@@ -949,7 +949,7 @@ public final class httpc {
     * @param path The path to the page which the post is sent to.
     * @param requestHeader Prefilled httpHeader.
     * @param ins InputStream with the data to be posted to the server.
-    * @param return Instance of response with the content.
+    * @return Instance of response with the content.
     * @throws IOException
     */
     public response POST(String path, httpHeader requestHeader, InputStream ins) throws IOException {
@@ -1815,12 +1815,12 @@ do upload
         }
 
         /**
-         * Returns a {@link InputStream} to read the response body. If the response was encoded using <code>Content-Encoding: gzip</code>
+         * If the response was encoded using <code>Content-Encoding: gzip</code>
          * a {@link GZIPInputStream} is returned. If the <code>Content-Length</code> header was set,
          * a {@link httpContentLengthInputStream} is returned which returns <code>-1</code> if the end of the
          * response body was reached.
          * 
-         * @return
+         * @return a {@link InputStream} to read the response body
          * @throws IOException
          */
         public InputStream getContentInputStream() throws IOException {
@@ -1836,10 +1836,10 @@ do upload
         }
         
         /**
-        * This method just output the found content into an byte-array and
+        * This method just outputs the found content into an byte-array and
         * returns it.
         *
-        * @return
+        * @return the found content
         * @throws IOException 
         */
         public byte[] writeContent() throws IOException {
@@ -1855,7 +1855,7 @@ do upload
         * additionally outputs it to procOS.
         *
         * @param procOS
-        * @return 
+        * @return the found content
         * @throws IOException
         */
         public byte[] writeContent(Object procOS, boolean returnByteArray) throws IOException {

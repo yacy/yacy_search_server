@@ -769,8 +769,9 @@ public final class plasmaParser {
     /**
      * This function is used to determine the parser class that should be used for a given
      * mimetype ...
-     * @param mimeType
-     * @return
+     * @param mimeType MIME-Type of the resource
+     * @return the {@link Parser}-class that is supposed to parse the resource of
+     * the given MIME-Type
      */
     private Parser getParser(String mimeType) {
 

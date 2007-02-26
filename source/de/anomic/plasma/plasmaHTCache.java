@@ -251,7 +251,7 @@ public final class plasmaHTCache {
 
     /**
      * This method changes the HTCache size.<br>
-     * @param new cache size in bytes
+     * @param the new cache size in bytes
      */
     public void setCacheSize(long newCacheSize) {
         this.maxCacheSize = newCacheSize;
@@ -1159,7 +1159,7 @@ public final class plasmaHTCache {
 
     /**
      * decide upon header information if a specific file should be taken from the cache or not
-     * @return
+     * @return whether the file should be taken from the cache
      */
     public boolean shallUseCacheForProxy() {
 //      System.out.println("SHALL READ CACHE: requestHeader = " + requestHeader.toString() + ", responseHeader = " + responseHeader.toString());

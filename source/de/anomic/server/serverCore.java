@@ -1018,7 +1018,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         }
     
         /**
-         * @return
+         * @return whether the {@link Thread} is currently running
          */
         public boolean isRunning() {
             return this.running;

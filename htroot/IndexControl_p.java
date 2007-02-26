@@ -389,6 +389,7 @@ public class IndexControl_p {
         
         if (post.containsKey("blacklist")) {
             String blacklist = post.get("blacklist", "");
+            Set urlHashes = new HashSet();
             if (post.containsKey("blacklisturls")) {
                 PrintWriter pw;
                 try {
@@ -396,7 +397,9 @@ public class IndexControl_p {
                     pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                     URL url;
                     for (int i=0; i<urlx.length; i++) {
+                        urlHashes.add(urlx[i]);
                         indexURLEntry e = switchboard.wordIndex.loadedURL.load(urlx[i], null);
+                        switchboard.wordIndex.loadedURL.remove(urlx[i]);
                         if (e != null) {
                             url = e.comp().url();
                             pw.println(url.getHost() + "/" + url.getFile());
@@ -422,7 +425,9 @@ public class IndexControl_p {
                     pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                     URL url;
                     for (int i=0; i<urlx.length; i++) {
+                        urlHashes.add(urlx[i]);
                         indexURLEntry e = switchboard.wordIndex.loadedURL.load(urlx[i], null);
+                        switchboard.wordIndex.loadedURL.remove(urlx[i]);
                         if (e != null) {
                             url = e.comp().url();
                             pw.println(url.getHost() + "/.*");
@@ -440,6 +445,7 @@ public class IndexControl_p {
                 } catch (IOException e) {
                 }
             }
+            switchboard.wordIndex.removeEntries(keystring, urlHashes);
         }
         
         listHosts(prop, keyhash);
