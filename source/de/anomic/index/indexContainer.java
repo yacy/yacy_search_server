@@ -1,4 +1,4 @@
-// indexRowSetContainer.java
+// indexContainer.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 04.07.2006 on http://www.anomic.de
 //

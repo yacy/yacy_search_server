@@ -27,6 +27,7 @@
 
 package de.anomic.index;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -40,14 +41,14 @@ import de.anomic.server.logging.serverLog;
 
 public class indexCachedRI implements indexRI {
 
-    private kelondroRow   payloadrow;
-    private kelondroOrder indexOrder;
-    private indexRAMRI    riExtern, riIntern;
-    private indexRI       backend;
-    public  boolean       busyCacheFlush;            // shows if a cache flush is currently performed
-    private int           idleDivisor, busyDivisor;
+    private kelondroRow       payloadrow;
+    private kelondroOrder     indexOrder;
+    private indexRAMRI        riExtern, riIntern;
+    private indexCollectionRI backend;
+    public  boolean           busyCacheFlush;            // shows if a cache flush is currently performed
+    private int               idleDivisor, busyDivisor;
     
-    public indexCachedRI(indexRAMRI riExtern, indexRAMRI riIntern, indexRI backend, kelondroOrder payloadorder, kelondroRow payloadrow, serverLog log) {
+    public indexCachedRI(indexRAMRI riExtern, indexRAMRI riIntern, indexCollectionRI backend, kelondroOrder payloadorder, kelondroRow payloadrow, serverLog log) {
         this.riExtern = riExtern;
         this.riIntern  = riIntern;
         this.backend = backend;
@@ -89,16 +90,6 @@ public class indexCachedRI implements indexRI {
         return entries.updated();
     }
     
-    public void addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean intern) {        
-        // add the entry
-        if (intern) {
-            riIntern.addEntry(wordHash, entry, updateTime, true);
-        } else {
-            riExtern.addEntry(wordHash, entry, updateTime, false);
-            flushControl();
-        }
-    }
-    
     public void addEntries(indexContainer entries, long updateTime, boolean intern) {
         // add the entry
         if (intern) {
@@ -127,18 +118,19 @@ public class indexCachedRI implements indexRI {
         if (count > 1000) count = 1000;
         busyCacheFlush = true;
         String wordHash;
-        for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
-            if (ram.size() == 0) break;
-            synchronized (this) {
+        ArrayList containerList = new ArrayList();
+        synchronized (this) {
+            for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
+                if (ram.size() == 0) break;
+                // select one word to flush
                 wordHash = ram.bestFlushWordHash();
                 
-                // flush the wordHash
+                // move one container from ram to flush list
                 indexContainer c = ram.deleteContainer(wordHash);
-                if (c != null) backend.addEntries(c, c.updated(), false);
-                
-                // pause to next loop to give other processes a chance to use IO
-                //try {this.wait(8);} catch (InterruptedException e) {}
+                if (c != null) containerList.add(c);
             }
+            // flush the containers
+            backend.addMultipleEntries(containerList);
         }
         busyCacheFlush = false;
     }

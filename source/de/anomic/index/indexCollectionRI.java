@@ -30,13 +30,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCollectionIndex;
 import de.anomic.kelondro.kelondroOutOfLimitsException;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRowCollection;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.server.logging.serverLog;
 
@@ -166,22 +166,19 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public synchronized void addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
-        indexContainer container = new indexContainer(wordHash, collectionIndex.payloadRow());
-        container.add(newEntry);
+    public synchronized void addEntries(indexContainer newEntries, long creationTime, boolean dhtCase) {
         try {
-            collectionIndex.merge(wordHash.getBytes(), (kelondroRowCollection) container);
+            collectionIndex.merge(newEntries);
         } catch (kelondroOutOfLimitsException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
-    public synchronized void addEntries(indexContainer newEntries, long creationTime, boolean dhtCase) {
-        String wordHash = newEntries.getWordHash();
+
+    public synchronized void addMultipleEntries(List /*of indexContainer*/ containerList) {
         try {
-            collectionIndex.merge(wordHash.getBytes(), (kelondroRowCollection) newEntries);
+            collectionIndex.mergeMultiple(containerList);
         } catch (kelondroOutOfLimitsException e) {
             e.printStackTrace();
         } catch (IOException e) {

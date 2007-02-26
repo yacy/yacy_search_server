@@ -56,7 +56,6 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaWordIndexFile {
@@ -145,10 +144,6 @@ public final class plasmaWordIndexFile {
         return (theIndex.get(entry.urlHash().getBytes()) != null);
     }
     
-    public void addEntry(indexRWIEntry entry) {
-        throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
-    }
-    
     public void addEntries(indexContainer container) {
         throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
     }
@@ -217,21 +212,6 @@ public final class plasmaWordIndexFile {
 
     public String toString() {
         return "DB:" + theIndex.toString();
-    }
-
-    public void merge(plasmaWordIndexFile otherEntity, long time) {
-        // this is a merge of another entity to this entity
-        // the merge is interrupted when the given time is over
-        // a time=-1 means: no timeout
-        Iterator i = otherEntity.elements(true);
-        long timeout = (time == -1) ? Long.MAX_VALUE : System.currentTimeMillis() + time;
-        try {
-        while ((i.hasNext()) && (System.currentTimeMillis() < timeout)) {
-            addEntry((indexRWIEntry) i.next());            
-        }
-        } catch (kelondroException e) {
-            serverLog.logSevere("PLASMA", "plasmaWordIndexEntity.merge: " + e.getMessage());
-        }
     }
     
 }

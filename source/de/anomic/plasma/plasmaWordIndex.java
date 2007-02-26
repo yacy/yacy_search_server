@@ -27,6 +27,7 @@
 package de.anomic.plasma;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -201,20 +202,19 @@ public final class plasmaWordIndex implements indexRI {
         if (count > 1000) count = 1000;
         busyCacheFlush = true;
         String wordHash;
-        //System.out.println("DEBUG-Started flush of " + count + " entries from RAM to DB");
-        //long start = System.currentTimeMillis();
-        for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
-            if (ram.size() == 0) break;
-            synchronized (this) {
+        ArrayList containerList = new ArrayList();
+        synchronized (this) {
+            for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
+                if (ram.size() == 0) break;
+                // select one word to flush
                 wordHash = ram.bestFlushWordHash();
                 
-                // flush the wordHash
+                // move one container from ram to flush list
                 indexContainer c = ram.deleteContainer(wordHash);
-                if (c != null) collections.addEntries(c, c.updated(), false);
-                
-                // pause to next loop to give other processes a chance to use IO
-                //try {this.wait(8);} catch (InterruptedException e) {}
+                if (c != null) containerList.add(c);
             }
+            // flush the containers
+            collections.addMultipleEntries(containerList);
         }
         //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
         busyCacheFlush = false;

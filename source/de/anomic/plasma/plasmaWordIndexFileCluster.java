@@ -50,7 +50,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexRWIEntryOld;
@@ -265,10 +264,6 @@ public class plasmaWordIndexFileCluster implements indexRI {
     }
     
     public int removeEntries(String wordHash, Set urlHashes) {
-        throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
-    }
-    
-    public void addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
         throw new UnsupportedOperationException("word files are not supported in YaCy 0.491 and above");
     }
     
