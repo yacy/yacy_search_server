@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -133,8 +134,8 @@ public class blogBoard {
         return wikiBoard.guessAuthor(ip);
     }
 
-    public entry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page) {
-	return new entry(normalize(key), subject, author, ip, date, page);
+    public entry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList comments, String commentMode) {
+	return new entry(normalize(key), subject, author, ip, date, page, comments, commentMode);
     }
 
     public class entry {
@@ -142,7 +143,7 @@ public class blogBoard {
 	String key;
         Map record;
 
-    public entry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page) {
+    public entry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList comments, String commentMode) {
 	    record = new HashMap();
 	    key = nkey;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
@@ -154,8 +155,12 @@ public class blogBoard {
 	    else record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
 	    if ((ip == null) || (ip.length() == 0)) ip = "";
 	    record.put("ip", ip);
-	    if (page == null) record.put("page", "");
-	    else record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
+        if (page == null) record.put("page", "");
+        else record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
+        if (comments == null) record.put("comments", listManager.arraylist2string(new ArrayList()));
+        else record.put("comments", listManager.arraylist2string(comments));
+        if (commentMode == null) record.put("commentMode", "1");
+        else record.put("commentMode", commentMode);
 	    
         wikiBoard.setAuthor(ip, new String(author));
         //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
@@ -164,6 +169,8 @@ public class blogBoard {
 	private entry(String key, Map record) {
 	    this.key = key;
 	    this.record = record;
+        if (this.record.get("comments")==null) this.record.put("comments", listManager.arraylist2string(new ArrayList()));
+        if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "1");
 	}
 	
 	public String key() {
@@ -200,14 +207,28 @@ public class blogBoard {
 		return c;
 	}
 	
-	public byte[] author() {
-		String m = (String) record.get("author");
-	    if (m == null) return new byte[0];
-	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m);
-	    if (b == null) return "".getBytes();
-	    return b;
-	}
-	
+    public byte[] author() {
+        String m = (String) record.get("author");
+        if (m == null) return new byte[0];
+        byte[] b = kelondroBase64Order.enhancedCoder.decode(m);
+        if (b == null) return "".getBytes();
+        return b;
+    }
+    
+    public byte[] commentsSize() {
+        ArrayList m = listManager.string2arraylist((String) record.get("comments"));
+        if (m == null) return new byte[0];
+        byte[] b = Integer.toString(m.size()).getBytes();
+        if (b == null) return "".getBytes();
+        return b;
+    }
+
+    public ArrayList comments() {
+        ArrayList m = listManager.string2arraylist((String) record.get("comments"));
+        if (m == null) return new ArrayList();
+        return m;
+    }
+
 	public String ip() {
 	    String a = (String) record.get("ip");
 	    if (a == null) return "127.0.0.1";
@@ -222,6 +243,22 @@ public class blogBoard {
 	    return b;
 	}        
 
+    public void addComment(String commentID) {
+        ArrayList comments = listManager.string2arraylist((String) record.get("comments"));
+        comments.add(commentID);
+        record.put("comments", listManager.arraylist2string(comments));
+    }
+    
+    public boolean removeComment(String commentID) {
+        ArrayList comments = listManager.string2arraylist((String) record.get("comments"));
+        boolean success = comments.remove(commentID);
+        record.put("comments", listManager.arraylist2string(comments));
+        return success;
+    }
+    
+    public int getCommentMode(){
+        return Integer.parseInt((String) record.get("commentMode"));
+    }
     }
 
     public String write(entry page) {
@@ -242,7 +279,7 @@ public class blogBoard {
     	key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
         Map record = base.getMap(key);
-        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new GregorianCalendar(GMTTimeZone).getTime(), "".getBytes());
+        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new GregorianCalendar(GMTTimeZone).getTime(), "".getBytes(), null, null);
         return new entry(key, record);
     }
     
@@ -318,7 +355,7 @@ public class blogBoard {
 				page = StrPage.getBytes();
 			}
 
-		write (newEntry(key, subject, author, ip, date, page));
+		write (newEntry(key, subject, author, ip, date, page, null, null));
     	}
     	return true;
     }

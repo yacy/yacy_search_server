@@ -49,6 +49,7 @@
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -122,6 +123,11 @@ public class Blog {
 		}
 
 		if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
+            page = switchboard.blogDB.read(pagename);
+            Iterator i = page.comments().iterator();
+            while(i.hasNext()) {
+                switchboard.blogCommentDB.delete((String) i.next());
+            }
 			switchboard.blogDB.delete(pagename);
 			pagename = "blog_default";
 		}
@@ -136,15 +142,17 @@ public class Blog {
 			}
 
 			Date date = null;
+            ArrayList comments = null;
 			
 			//set name for new entry or date for old entry
 			if(pagename.equals("blog_default"))
 				pagename = String.valueOf(System.currentTimeMillis());
 			else {
 				page = switchboard.blogDB.read(pagename);
+                comments = page.comments();
 				date = page.date();
 			}
-			
+			String commentMode = post.get("commentMode", "1");
 			String StrSubject = post.get("subject", "");
 			byte[] subject;
 			try {
@@ -153,7 +161,7 @@ public class Blog {
 				subject = StrSubject.getBytes();
 			}
          
-			switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content));
+			switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
             
 			// create a news message
              HashMap map = new HashMap();
@@ -169,7 +177,8 @@ public class Blog {
 		    //edit an entry
 			if(hasRights) {
 				try {
-			        prop.put("mode", 1); //edit
+                    prop.put("mode", 1); //edit
+                    prop.put("mode_commentMode", page.getCommentMode());
 			        prop.put("mode_author", new String(page.author(),"UTF-8"));
 			        prop.put("mode_pageid", page.key());
 			        prop.put("mode_subject", new String(page.subject(), "UTF-8"));
@@ -184,6 +193,7 @@ public class Blog {
 			//preview the page
 			if(hasRights) {
 	            prop.put("mode", 2);//preview
+                prop.put("mode_commentMode", Integer.parseInt(post.get("commentMode", "1")));
 	            prop.put("mode_pageid", pagename);
 	            try {
 					prop.put("mode_author", new String(author, "UTF-8"));
@@ -259,7 +269,7 @@ public class Blog {
 	        			}
 	        			else {
 	        				prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
-		        			prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
+                            prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
 		        			prop.putASIS("mode_entries_"+count+"_page", entry.page());
 		        			prop.put("mode_entries_"+count+"_timestamp", entry.timestamp());
 	        			}
@@ -270,6 +280,13 @@ public class Blog {
 	        				prop.put("mode_entries_"+count+"_admin_pageid",entry.key());
 	        			}
 	        			else prop.put("mode_entries_"+count+"_admin", 0);
+                        if(entry.getCommentMode() != 0) {
+                            prop.put("mode_entries_"+count+"_commentsactive", 1);
+                            prop.put("mode_entries_"+count+"_commentsactive_pageid",entry.key());
+                            prop.put("mode_entries_"+count+"_commentsactive_comments", new String(entry.commentsSize(),"UTF-8"));
+                        }
+                        else prop.put("mode_entries_"+count+"_commentsactive", 0);
+
 	        			++count;
 	        		}
 	        		prop.put("mode_entries",count);
@@ -297,6 +314,12 @@ public class Blog {
 				} catch (UnsupportedEncodingException e) {
 					prop.put("mode_entries_0_author", new String(page.author()));
 				}
+                try {
+                    prop.put("mode_entries_0_comments", new String(page.commentsSize(),"UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    prop.put("mode_entries_0_comments", new String(page.commentsSize()));
+                }
+
 	        	prop.put("mode_entries_0_date", dateString(page.date()));
 	        	prop.putWiki("mode_entries_0_page", page.page());
 	        	if(hasRights) {

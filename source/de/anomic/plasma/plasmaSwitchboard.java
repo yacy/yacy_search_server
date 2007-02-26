@@ -121,6 +121,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.data.blogBoard;
+import de.anomic.data.blogBoardComments;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.messageBoard;
@@ -216,6 +217,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  messageBoard                messageDB;
     public  wikiBoard                   wikiDB;
     public  blogBoard                   blogDB;
+    public  blogBoardComments           blogCommentDB;
     public  static plasmaCrawlRobotsTxt robots;
     public  plasmaCrawlProfile          profiles;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
@@ -785,6 +787,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      */
     public static final String DBFILE_BLOG              = "blog.db";
     /**
+     * <p><code>public static final String <strong>DBFILE_BLOGCOMMENTS</strong> = "blogComment.db"</code></p>
+     * <p>Name of the file containing the database holding all blogComment-entries available on this peer</p>
+     * 
+     * @see plasmaSwitchboard#WORK_PATH for the folder this file lies in
+     */
+    public static final String DBFILE_BLOGCOMMENTS      = "blogComment.db";
+    /**
      * <p><code>public static final String <strong>DBFILE_BOOKMARKS</strong> = "bookmarks.db"</code></p>
      * <p>Name of the file containing the database holding all bookmarks available on this peer</p>
      * 
@@ -1290,6 +1299,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("Loaded Blog DB from file " + blogDbFile.getName() +
         ", " + this.blogDB.size() + " entries" +
         ", " + ppRamString(blogDbFile.length()/1024));
+
+        File blogCommentDbFile = new File(workPath, DBFILE_BLOGCOMMENTS);
+        this.blogCommentDB = new blogBoardComments(blogCommentDbFile, ramBlog, ramBlog_time);
+        this.log.logConfig("Loaded Blog-Comment DB from file " + blogCommentDbFile.getName() +
+        ", " + this.blogCommentDB.size() + " entries" +
+        ", " + ppRamString(blogCommentDbFile.length()/1024));
     }
     public void initBookmarks(){
         this.log.logConfig("Loading Bookmarks DB");
@@ -1575,6 +1590,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         cacheLoader.close();
         wikiDB.close();
         blogDB.close();
+        blogCommentDB.close();
         userDB.close();
         bookmarksDB.close();
         messageDB.close();
@@ -3013,12 +3029,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             dhtTransferChunk.incTransferFailedCounter();
             int maxChunkFails = (int) getConfigLong(INDEX_DIST_CHUNK_FAILS_MAX, 1);
             if (dhtTransferChunk.getTransferFailedCounter() >= maxChunkFails) {
-                System.out.println("DEBUG: " + dhtTransferChunk.getTransferFailedCounter() + " of " + maxChunkFails + " sendings failed for this chunk, aborting!");
+                //System.out.println("DEBUG: " + dhtTransferChunk.getTransferFailedCounter() + " of " + maxChunkFails + " sendings failed for this chunk, aborting!");
                 dhtTransferChunk.setStatus(plasmaDHTChunk.chunkStatus_FAILED);
                 log.logFine("DHT distribution: transfer FAILED");   
             }
             else {
-                System.out.println("DEBUG: " + dhtTransferChunk.getTransferFailedCounter() + " of " + maxChunkFails + " sendings failed for this chunk, retrying!");
+                //System.out.println("DEBUG: " + dhtTransferChunk.getTransferFailedCounter() + " of " + maxChunkFails + " sendings failed for this chunk, retrying!");
                 log.logFine("DHT distribution: transfer FAILED, sending this chunk again");   
             }
             return false;
@@ -3032,7 +3048,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // find a list of DHT-peers
             ArrayList seeds = yacyCore.dhtAgent.getDHTTargets(log, peerCount, 10, dhtChunk.firstContainer().getWordHash(), dhtChunk.lastContainer().getWordHash(), 0.4);
             if (seeds.size() < peerCount) {
-                log.logWarning("found not enough (" + seeds.size() + ") peers for distribution");
+                log.logWarning("found not enough (" + seeds.size() + ") peers for distribution for dhtchunk [" + dhtChunk.firstContainer().getWordHash() + " .. " + dhtChunk.lastContainer().getWordHash() + "]");
                 return false;
             }
 

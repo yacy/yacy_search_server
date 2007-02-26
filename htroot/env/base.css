@@ -148,6 +148,13 @@ tt, *.tt {
   margin-bottom:10px;
 }
 
+.BlogCommentPost {
+  padding:10px;
+  padding-left:50px;
+  padding-right:50px;
+  margin-bottom:10px;
+}
+
 .PostSubject {
   padding:5px;
   margin:0;

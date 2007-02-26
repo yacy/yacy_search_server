@@ -13,7 +13,7 @@
       <h2 class="PostSubject"><a href="Blog.html?page=#[pageid]#">#[subject]#</a></h2>
       <div class="PostBody">#[page]#</div>
       <p class="PostInfo">
-        #[date]# | by #[author]#
+        #[date]# | by #[author]# #(commentsactive)#::| <a href="BlogComments.html?page=#[pageid]#">#[comments]# Comments</a>#(/commentsactive)#
         #(admin)#::| <a href="Blog.html?page=#[pageid]#&amp;edit=true">edit</a>
         - <a href="Blog.html?page=#[pageid]#&amp;delete=try">delete</a>#(/admin)#
       </p>
@@ -42,6 +42,13 @@
             <p class="help">
               You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Yacy-Wiki Code</a> here.
             </p>
+          </dd>
+          <dt><label for="subject">Comments:</label></dt>
+          <dd>
+            <select name="commentMode">
+              <option value="0" #(commentMode)#selected="selected"::#(/commentMode)#>deactivated</option>
+              <option value="1" #(commentMode)#::selected="selected"#(/commentMode)#>activated</option>
+            </select>
           </dd>
         </dl>
         <input type="hidden" name="page" value="#[pageid]#" />
@@ -78,6 +85,13 @@
             <p class="help">
               You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Yacy-Wiki Code</a> here.
             </p>
+          </dd>
+          <dt><label for="subject">Comments:</label></dt>
+          <dd>
+            <select name="commentMode">
+              <option value="0" #(commentMode)#selected="selected"::#(/commentMode)#>deactivated</option>
+              <option value="1" #(commentMode)#::selected="selected"#(/commentMode)#>activated</option>
+            </select>
           </dd>
         </dl>
         <input type="hidden" name="page" value="#[pageid]#" />
