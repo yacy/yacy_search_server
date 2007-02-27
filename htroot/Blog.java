@@ -43,7 +43,7 @@
 // Contributions and changes to the program code must be marked as such.
 
 // You must compile this file with
-// javac -classpath .:../Classes Blacklist_p.java
+// javac -classpath .:../classes Blog.java
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
@@ -78,28 +78,36 @@ public class Blog {
 		blogBoard.entry page = null;
 		
 		boolean hasRights = switchboard.verifyAuthentication(header, true);
+        final boolean xml = ((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
+        final String address = yacyCore.seedDB.mySeed.getAddress();
 
-        if(hasRights) prop.put("mode_admin",1);
-        else prop.put("mode_admin",0);
-
-        if (post == null) {
-            post = new serverObjects();
-            post.put("page", "blog_default");
+        if(hasRights) {
+            prop.put("mode_admin",1);
+        } else {
+            prop.put("mode_admin",0);
         }
-
+        
+        if (post == null) {
+            prop.put("peername", yacyCore.seedDB.mySeed.getName());
+            prop.put("address", address);
+            return putBlogDefault(prop, switchboard, address, 0, 20, hasRights, xml);
+        }
+        
+        final int start = post.getInt("start",0); //indicates from where entries should be shown
+        final int num   = post.getInt("num",20);  //indicates how many entries should be shown
+        
         if(!hasRights){
             userDB.Entry userentry = switchboard.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
             if(userentry != null && userentry.hasBlogRight()){
                 hasRights=true;
-            }
-            //opens login window if login link is clicked - contrib [MN]
-            else if(post.containsKey("login")){
+            } else if(post.containsKey("login")) {
+                //opens login window if login link is clicked - contrib [MN]
                 prop.put("AUTHENTICATE","admin log-in");
             }
 		}
 
 		String pagename = post.get("page", "blog_default");
-	    String ip = post.get("CLIENTIP", "127.0.0.1");
+	    final String ip = post.get("CLIENTIP", "127.0.0.1");
 	    
 		String StrAuthor = post.get("author", "");
 		
@@ -242,69 +250,9 @@ public class Blog {
 	        prop.put("mode", 0); //viewing
 	        if(pagename.equals("blog_default")) {
                 prop.put("peername", yacyCore.seedDB.mySeed.getName());
-                String address = yacyCore.seedDB.mySeed.getAddress();
                 prop.put("address", address);
 	        	//index all entries
-	        	try {
-	        		Iterator i = switchboard.blogDB.keys(false);
-	        		String pageid;
-	        		blogBoard.entry entry;
-	        		boolean xml = false;
-	        		if(post.containsKey("xml"))
-	        			xml = true;
-	        		int count = 0; //counts how many entries are shown to the user
-	        		int start = post.getInt("start",0); //indicates from where entries should be shown
-	        		int num   = post.getInt("num",20);  //indicates how many entries should be shown
-	        		if(xml) num = 0;
-	        		int nextstart = start+num;		//indicates the starting offset for next results
-	        		while(i.hasNext()) {
-	        			if(count >= num && num > 0)
-	        				break;
-	        			pageid = (String) i.next();
-	        			if(0 < start--)
-	        				continue;
-	        			entry = switchboard.blogDB.read(pageid);
-	        			prop.put("mode_entries_"+count+"_pageid",entry.key());
-                        prop.put("mode_entries_"+count+"_address", address);
-	        			if(!xml) {
-	        				prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
-		        			prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
-		        			prop.putWiki("mode_entries_"+count+"_page", entry.page());
-	        			}
-	        			else {
-	        				prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
-                            prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
-		        			prop.putASIS("mode_entries_"+count+"_page", entry.page());
-		        			prop.put("mode_entries_"+count+"_timestamp", entry.timestamp());
-	        			}
-	        			prop.put("mode_entries_"+count+"_date", dateString(entry.date()));
-	        			prop.put("mode_entries_"+count+"_ip", entry.ip());
-	        			if(hasRights) {
-	        				prop.put("mode_entries_"+count+"_admin", 1);
-	        				prop.put("mode_entries_"+count+"_admin_pageid",entry.key());
-	        			}
-	        			else prop.put("mode_entries_"+count+"_admin", 0);
-                        if(entry.getCommentMode() != 0) {
-                            prop.put("mode_entries_"+count+"_commentsactive", 1);
-                            prop.put("mode_entries_"+count+"_commentsactive_pageid",entry.key());
-                            prop.put("mode_entries_"+count+"_commentsactive_comments", new String(entry.commentsSize(),"UTF-8"));
-                            prop.put("mode_entries_"+count+"_commentsactive_address", address);
-
-                        }
-                        else prop.put("mode_entries_"+count+"_commentsactive", 0);
-
-	        			++count;
-	        		}
-	        		prop.put("mode_entries",count);
-	        		if(i.hasNext()) {
-	        			prop.put("mode_moreentries",1); //more entries are availible
-	        			prop.put("mode_moreentries_start",nextstart);
-	        			prop.put("mode_moreentries_num",num);
-	        		}
-	        		else prop.put("moreentries",0);
-	        	} catch (IOException e) {
-
-	        	}
+                putBlogDefault(prop, switchboard, address, start, num, hasRights, xml);
 	        }
 	        else {
 	        	//only show 1 entry
@@ -338,4 +286,68 @@ public class Blog {
 		// return rewrite properties
 		return prop;
 	}
+    
+    private static serverObjects putBlogDefault(
+            serverObjects prop,
+            plasmaSwitchboard switchboard,
+            String address,
+            int start,
+            int num,
+            boolean hasRights,
+            boolean xml) {
+        try {
+            Iterator i = switchboard.blogDB.keys(false);
+            String pageid;
+            blogBoard.entry entry;
+            int count = 0; //counts how many entries are shown to the user
+            if(xml) num = 0;
+            int nextstart = start+num;      //indicates the starting offset for next results
+            while(i.hasNext()) {
+                if(count >= num && num > 0)
+                    break;
+                pageid = (String) i.next();
+                if(0 < start--)
+                    continue;
+                entry = switchboard.blogDB.read(pageid);
+                prop.put("mode_entries_"+count+"_pageid",entry.key());
+                prop.put("mode_entries_"+count+"_address", address);
+                if(!xml) {
+                    prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
+                    prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
+                    prop.putWiki("mode_entries_"+count+"_page", entry.page());
+                }
+                else {
+                    prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
+                    prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
+                    prop.putASIS("mode_entries_"+count+"_page", entry.page());
+                    prop.put("mode_entries_"+count+"_timestamp", entry.timestamp());
+                }
+                prop.put("mode_entries_"+count+"_date", dateString(entry.date()));
+                prop.put("mode_entries_"+count+"_ip", entry.ip());
+                if(hasRights) {
+                    prop.put("mode_entries_"+count+"_admin", 1);
+                    prop.put("mode_entries_"+count+"_admin_pageid",entry.key());
+                }
+                else prop.put("mode_entries_"+count+"_admin", 0);
+                if(entry.getCommentMode() != 0) {
+                    prop.put("mode_entries_"+count+"_commentsactive", 1);
+                    prop.put("mode_entries_"+count+"_commentsactive_pageid",entry.key());
+                    prop.put("mode_entries_"+count+"_commentsactive_comments", new String(entry.commentsSize(),"UTF-8"));
+                    prop.put("mode_entries_"+count+"_commentsactive_address", address);
+
+                }
+                else prop.put("mode_entries_"+count+"_commentsactive", 0);
+
+                ++count;
+            }
+            prop.put("mode_entries",count);
+            if(i.hasNext()) {
+                prop.put("mode_moreentries",1); //more entries are availible
+                prop.put("mode_moreentries_start",nextstart);
+                prop.put("mode_moreentries_num",num);
+            }
+            else prop.put("moreentries",0);
+        } catch (IOException e) {  }
+        return prop;
+    }
 }

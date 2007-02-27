@@ -131,22 +131,36 @@ public class Diff {
         if (starty < endy) this.parts.add(new Part(Part.ADDED, starty, endy));
     }
     
+    /** Search for a diagonal with minimal length <code>minLength</code> line by line in a submatrix 
+     * <code>{ x, y, matrix[0].length, matrix.length}</code> of the <code>matrix</code>:<br>
+     *           <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {_1,__,__} -&gt X axis</code><br>
+     *           <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;,{__,_1,__} </code><br>
+     *           <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;,{__,__,_1} </code><br> 
+     * <ul>
+     * TODO: some optimisation ideas see the discusion <a href="http://www.yacy-forum.de/viewtopic.php?t=3557">Diff.findDiagonal(..) buggy????</a>
+     * <li>search for a better algorithm on the inet!!! :) </li> 
+     * <li>pass only the part of the matrix where the search takes place - not the whole matrix everytime</li> 
+     * <li>break the inner loop if the rest of the matrix is smaller than minLength (and no diagonal has been found yet) </li> 
+     * <li>return diagonal topologicaly closest to the {0,0} </li> 
+     * </ul>
+     * @param x the starting position of the search on the optical horizontal axis  
+     * @param y the starting position of the search on the optical vertical axis<br>
+     * @param matrix the matrix to search through
+     * @param minLength the minimal desired length of a diagonal to find
+     * @return a vector in the form <code>{ diagStartX, diagStartY, diagLength }</code> where <code> diagLength >= minLength</code>
+     */
     private static int[] findDiagonal(int x, int y, boolean[][] matrix, int minLength) {
         int rx, ry, yy, xx, i;
-        // Zeilenweise nach Diagonalen mit mindest-Laenge minLength suchen
         for (yy=y; yy<matrix.length; yy++)
             for (xx=x; xx<matrix[yy].length; xx++)
-                if (matrix[yy][xx]) {
+                if (matrix[yy][xx]) {       // reverse order! [y][x]
                     rx = xx;
                     ry = yy;
                     for (i=1; (yy + i)<matrix.length && (xx + i)<matrix[yy].length; i++)
-                        if (!matrix[yy + i][xx + i]) break;
-                    if (i <= minLength && yy + i < matrix.length && xx + i < matrix[yy].length) {
-                        // vorzeitig abgebrochen => zuwenige chars in Diagonale => weitersuchen
-                        continue;
-                    } else {
-                        return new int[] { rx, ry, i };
-                    }
+                        if (!matrix[yy + i][xx + i]) 
+                            break;
+                    if (i >= minLength)
+                        return new int[] { rx, ry, i };     // swap back the x and y axes for better readability 
                 }
         return null;
     }

@@ -1032,9 +1032,9 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             //System.out.println("**DEBUG** loading class file " + classFile);
             Class c = provider.loadClass(classFile);
             Class[] params = new Class[] {
-                    Class.forName("de.anomic.http.httpHeader"),
-                    Class.forName("de.anomic.server.serverObjects"),
-                    Class.forName("de.anomic.server.serverSwitch")};
+                    httpHeader.class,
+                    serverObjects.class,
+                    serverSwitch.class };
             m = c.getMethod("respond", params);
             
             if (useTemplateCache) {
