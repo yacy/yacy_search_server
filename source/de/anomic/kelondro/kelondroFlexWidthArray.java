@@ -268,12 +268,12 @@ public class kelondroFlexWidthArray implements kelondroArray {
         return p;
     }
 
-    public void remove(int index) throws IOException {
+    public void remove(int index, boolean marked) throws IOException {
         int r = 0;
         synchronized (col) {
             
             // remove only from the first column
-            col[0].remove(index);
+            col[0].remove(index, marked);
             r = r + col[r].row().columns();
             
             // the other columns will be blanked out only
@@ -281,6 +281,12 @@ public class kelondroFlexWidthArray implements kelondroArray {
                 col[r].set(index, null);
                 r = r + col[r].row().columns();
             }
+        }
+    }
+    
+    public synchronized void resolveMarkedRemoved() throws IOException {
+        synchronized (col) {
+            col[0].resolveMarkedRemoved();
         }
     }
     
@@ -308,14 +314,14 @@ public class kelondroFlexWidthArray implements kelondroArray {
             kelondroFlexWidthArray k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
             k.add(k.row().newEntry(new byte[][]{"a".getBytes(), "xxxx".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{"b".getBytes(), "xxxx".getBytes()}));
-            k.remove(0);
+            k.remove(0, false);
             
             k.add(k.row().newEntry(new byte[][]{"c".getBytes(), "xxxx".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{"d".getBytes(), "xxxx".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{"e".getBytes(), "xxxx".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{"f".getBytes(), "xxxx".getBytes()}));
-            k.remove(0);
-            k.remove(1);
+            k.remove(0, false);
+            k.remove(1, false);
             
             k.print();
             k.col[0].print(true);
@@ -335,10 +341,11 @@ public class kelondroFlexWidthArray implements kelondroArray {
                 k.close();
                 k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
                 for (int j = 0; j < i; j++) {
-                    k.remove(i*2 - j - 1);
+                    k.remove(i*2 - j - 1, true);
                 }
                 k.close();
             }
+            k.resolveMarkedRemoved();
             k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
             k.print();
             k.col[0].print(true);

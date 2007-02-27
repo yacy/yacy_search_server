@@ -41,8 +41,10 @@ import de.anomic.server.logging.serverLog;
 
 public class kelondroCollectionIndex {
 
+    private static final int serialNumber = 0;
+    
     protected kelondroIndex index;
-    int keylength;
+    private int keylength;
     private File          path;
     private String        filenameStub;
     private int           loadfactor;
@@ -235,6 +237,13 @@ public class kelondroCollectionIndex {
         return array;
     }
     
+    private void arrayResolveRemoved() throws IOException {
+        Iterator i = arrays.values().iterator();
+        while (i.hasNext()) {
+            ((kelondroFixedWidthArray) i.next()).resolveMarkedRemoved();
+        }
+    }
+    
     private int arrayCapacity(int arrayCounter) {
         int load = this.loadfactor;
         for (int i = 0; i < arrayCounter; i++) load = load * this.loadfactor;
@@ -269,11 +278,11 @@ public class kelondroCollectionIndex {
         return 2 * m * this.payloadrow.objectsize;
     }
     
-    private kelondroRow.Entry putnew(byte[] key, kelondroRowCollection collection) throws IOException {
+    private kelondroRow.Entry array_new(byte[] key, kelondroRowCollection collection) throws IOException {
         // the collection is new
         int newPartitionNumber = arrayIndex(collection.size());
         kelondroRow.Entry indexrow = index.row().newEntry();
-        kelondroFixedWidthArray array = getArray(newPartitionNumber, 0, this.payloadrow.objectsize());
+        kelondroFixedWidthArray array = getArray(newPartitionNumber, serialNumber, this.payloadrow.objectsize());
 
         // define row
         kelondroRow.Entry arrayEntry = array.row().newEntry();
@@ -293,14 +302,49 @@ public class kelondroCollectionIndex {
         indexrow.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
         indexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
 
-        // after calling this method there mus be a index.addUnique(indexrow);
+        // after calling this method there must be an index.addUnique(indexrow);
         return indexrow;
     }
     
-    private void putreplace(
+    private void array_remove(
+            int oldPartitionNumber, int serialNumber, int chunkSize,
+            int oldRownumber) throws IOException {
+        // we need a new slot, that means we must first delete the old entry
+        // find array file
+        kelondroFixedWidthArray array = getArray(oldPartitionNumber, serialNumber, chunkSize);
+
+        // delete old entry
+        array.remove(oldRownumber, true);
+    }
+    
+    private void array_add(
             byte[] key, kelondroRowCollection collection, kelondroRow.Entry indexrow,
-            int serialNumber, int chunkSize,
-            int partitionNumber, int rownumber) throws IOException {
+            int partitionNumber, int serialNumber, int chunkSize) throws IOException {
+
+        // write a new entry in the other array
+        kelondroFixedWidthArray array = getArray(partitionNumber, serialNumber, chunkSize);
+        
+        // define new row
+        kelondroRow.Entry arrayEntry = array.row().newEntry();
+        arrayEntry.setCol(0, key);
+        arrayEntry.setCol(1, collection.exportCollection());
+        
+        // write a new entry in this array
+        int rowNumber = array.add(arrayEntry);
+        
+        // store the new row number in the index
+        indexrow.setCol(idx_col_chunkcount, collection.size());
+        indexrow.setCol(idx_col_clusteridx, (byte) partitionNumber);
+        indexrow.setCol(idx_col_indexpos, (long) rowNumber);
+        indexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
+
+        // after calling this method there must be a index.put(indexrow);
+    }
+    
+    private void array_replace(
+            byte[] key, kelondroRowCollection collection, kelondroRow.Entry indexrow,
+            int partitionNumber, int serialNumber, int chunkSize,
+            int rowNumber) throws IOException {
         // we don't need a new slot, just write collection into the old one
 
         // find array file
@@ -312,45 +356,13 @@ public class kelondroCollectionIndex {
         arrayEntry.setCol(1, collection.exportCollection());
 
         // overwrite entry in this array
-        array.set(rownumber, arrayEntry);
+        array.set(rowNumber, arrayEntry);
 
         // update the index entry
         indexrow.setCol(idx_col_chunkcount, collection.size());
         indexrow.setCol(idx_col_clusteridx, (byte) partitionNumber);
         indexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
         
-        // after calling this method there mus be a index.put(indexrow);
-    }
-    
-    private void puttransit(
-            byte[] key, kelondroRowCollection collection, kelondroRow.Entry indexrow,
-            int serialNumber, int chunkSize,
-            int oldPartitionNumber, int oldRownumber,
-            int newPartitionNumber) throws IOException {
-        // we need a new slot, that means we must first delete the old entry
-        // find array file
-        kelondroFixedWidthArray array = getArray(oldPartitionNumber, serialNumber, chunkSize);
-
-        // delete old entry
-        array.remove(oldRownumber);
-
-        // write a new entry in the other array
-        array = getArray(newPartitionNumber, 0, this.payloadrow.objectsize());
-        
-        // define row
-        kelondroRow.Entry arrayEntry = array.row().newEntry();
-        arrayEntry.setCol(0, key);
-        arrayEntry.setCol(1, collection.exportCollection());
-        
-        // write a new entry in this array
-        int newRowNumber = array.add(arrayEntry);
-        
-        // store the new row number in the index
-        indexrow.setCol(idx_col_chunkcount, collection.size());
-        indexrow.setCol(idx_col_clusteridx, (byte) newPartitionNumber);
-        indexrow.setCol(idx_col_indexpos, (long) newRowNumber);
-        indexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
-
         // after calling this method there mus be a index.put(indexrow);
     }
     
@@ -362,7 +374,7 @@ public class kelondroCollectionIndex {
         if (indexrow == null) {
             // create new row and index entry
             if ((collection != null) && (collection.size() > 0)) {
-                indexrow = putnew(key, collection); // modifies indexrow
+                indexrow = array_new(key, collection); // modifies indexrow
                 index.addUnique(indexrow);
             }
             return;
@@ -375,12 +387,11 @@ public class kelondroCollectionIndex {
         int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
         int oldPartitionNumber = (int) indexrow.getColByte(idx_col_clusteridx); // points to array file
         assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
-        int oldSerialNumber = 0;
 
         if ((collection == null) || (collection.size() == 0)) {
             // delete the index entry and the array
-            kelondroFixedWidthArray array = getArray(oldPartitionNumber, oldSerialNumber, oldchunksize);
-            array.remove(oldrownumber);
+            kelondroFixedWidthArray array = getArray(oldPartitionNumber, serialNumber, oldchunksize);
+            array.remove(oldrownumber ,false);
             index.remove(key);
             return;
         }
@@ -389,17 +400,19 @@ public class kelondroCollectionIndex {
 
         // see if we need new space or if we can overwrite the old space
         if (oldPartitionNumber == newPartitionNumber) {
-            putreplace(
+            array_replace(
                     key, collection, indexrow,
-                    oldSerialNumber, this.payloadrow.objectsize(),
-                    oldPartitionNumber, oldrownumber); // modifies indexrow
+                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize(),
+                    oldrownumber); // modifies indexrow
         } else {
-            puttransit(
+            array_remove(
+                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize(),
+                    oldrownumber);
+            array_add(
                     key, collection, indexrow,
-                    oldSerialNumber, this.payloadrow.objectsize(),
-                    oldPartitionNumber, oldrownumber,
-                    newPartitionNumber); // modifies indexrow
+                    newPartitionNumber, serialNumber, this.payloadrow.objectsize()); // modifies indexrow
         }
+        arrayResolveRemoved(); // remove all to-be-removed marked entries
         index.put(indexrow); // write modified indexrow
     }
     
@@ -434,23 +447,68 @@ public class kelondroCollectionIndex {
         // now iterate through the container lists and execute merges
         // this is done in such a way, that there is a optimized path for the R/W head
         
-        // write new containers
-        i = newContainer.iterator();
-        Object[] record;
-        while (i.hasNext()) {
-            record = (Object[]) i.next(); // {byte[], indexContainer}
-            mergeNew((byte[]) record[0], (indexContainer) record[1]);
-        }
-        
         // merge existing containers
         i = existingContainer.iterator();
+        Object[] record;
         ArrayList indexrows = new ArrayList();
+        kelondroRowCollection collection;
         while (i.hasNext()) {
             record = (Object[]) i.next(); // {byte[], indexContainer, kelondroRow.Entry}
+            
+            // merge with the old collection
+            key = (byte[]) record[0];
+            collection = (kelondroRowCollection) record[1];
             indexrow = (kelondroRow.Entry) record[2];
-            mergeExisting((byte[]) record[0], (indexContainer) record[1], indexrow); // modifies indexrow
+
+            // read old information
+            int oldchunksize       = (int) indexrow.getColLong(idx_col_chunksize);  // needed only for migration
+            int oldchunkcount      = (int) indexrow.getColLong(idx_col_chunkcount); // the number if rows in the collection
+            int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
+            int oldPartitionNumber = (int) indexrow.getColByte(idx_col_clusteridx); // points to array file
+            assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
+            int oldSerialNumber = 0;
+
+            // load the old collection and join it
+            kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false);
+                    
+            // join with new collection
+            oldcollection.addAllUnique(collection);
+            oldcollection.shape();
+            oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
+            oldcollection.trim();
+            collection = oldcollection;
+
+            int newPartitionNumber = arrayIndex(collection.size());
+
+            // see if we need new space or if we can overwrite the old space
+            if (oldPartitionNumber == newPartitionNumber) {
+                array_replace(
+                        key, collection, indexrow,
+                        oldPartitionNumber, oldSerialNumber, this.payloadrow.objectsize(),
+                        oldrownumber); // modifies indexrow
+            } else {
+                array_remove(
+                        oldPartitionNumber, oldSerialNumber, this.payloadrow.objectsize(),
+                        oldrownumber);
+                array_add(
+                        key, collection, indexrow,
+                        newPartitionNumber, oldSerialNumber, this.payloadrow.objectsize()); // modifies indexrow
+            }
+            arrayResolveRemoved(); // remove all to-be-removed marked entries
             indexrows.add(indexrow); // indexrows are collected and written later as block
         }
+        
+        // write new containers
+        i = newContainer.iterator();
+        while (i.hasNext()) {
+            record = (Object[]) i.next(); // {byte[], indexContainer}
+            key = (byte[]) record[0];
+            collection = (indexContainer) record[1];
+            indexrow = array_new(key, collection); // modifies indexrow
+            index.addUnique(indexrow); // write modified indexrow
+        }
+        
+        // write index entries
         index.putMultiple(indexrows, new Date()); // write modified indexrows in optimized manner
     }
     
@@ -461,58 +519,50 @@ public class kelondroCollectionIndex {
         // first find an old entry, if one exists
         kelondroRow.Entry indexrow = index.get(key);
         if (indexrow == null) {
-            mergeNew(key, container);
+            indexrow = array_new(key, container); // modifies indexrow
+            index.addUnique(indexrow); // write modified indexrow
         } else {
-            mergeExisting(key, container, indexrow); // modifies indexrow
+            // merge with the old collection
+            // attention! this modifies the indexrow entry which must be written with index.put(indexrow) afterwards!
+            kelondroRowCollection collection = (kelondroRowCollection) container;
+            
+            // read old information
+            int oldchunksize       = (int) indexrow.getColLong(idx_col_chunksize);  // needed only for migration
+            int oldchunkcount      = (int) indexrow.getColLong(idx_col_chunkcount); // the number if rows in the collection
+            int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
+            int oldPartitionNumber = (int) indexrow.getColByte(idx_col_clusteridx); // points to array file
+            assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
+            int oldSerialNumber = 0;
+
+            // load the old collection and join it
+            kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false);
+                    
+            // join with new collection
+            oldcollection.addAllUnique(collection);
+            oldcollection.shape();
+            oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
+            oldcollection.trim();
+            collection = oldcollection;
+
+            int newPartitionNumber = arrayIndex(collection.size());
+
+            // see if we need new space or if we can overwrite the old space
+            if (oldPartitionNumber == newPartitionNumber) {
+                array_replace(
+                        key, collection, indexrow,
+                        oldPartitionNumber, oldSerialNumber, this.payloadrow.objectsize(),
+                        oldrownumber); // modifies indexrow
+            } else {
+                array_remove(
+                        oldPartitionNumber, oldSerialNumber, this.payloadrow.objectsize(),
+                        oldrownumber);
+                array_add(
+                        key, collection, indexrow,
+                        newPartitionNumber, oldSerialNumber, this.payloadrow.objectsize()); // modifies indexrow
+            }
+            arrayResolveRemoved(); // remove all to-be-removed marked entries
             index.put(indexrow); // write modified indexrow
         }
-    }
-    
-    private void mergeNew(byte[] key, kelondroRowCollection collection) throws IOException, kelondroOutOfLimitsException {
-        // create new row and index entry
-        
-        kelondroRow.Entry indexrow = putnew(key, collection); // modifies indexrow
-        index.addUnique(indexrow); // write modified indexrow
-    }
-    
-    private void mergeExisting(byte[] key, kelondroRowCollection collection, kelondroRow.Entry indexrow) throws IOException, kelondroOutOfLimitsException {
-        // merge with the old collection
-        // attention! this modifies the indexrow entry which must be written with index.put(indexrow) afterwards!
-        
-        // read old information
-        int oldchunksize       = (int) indexrow.getColLong(idx_col_chunksize);  // needed only for migration
-        int oldchunkcount      = (int) indexrow.getColLong(idx_col_chunkcount); // the number if rows in the collection
-        int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
-        int oldPartitionNumber = (int) indexrow.getColByte(idx_col_clusteridx); // points to array file
-        assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
-        int oldSerialNumber = 0;
-
-        // load the old collection and join it
-        kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false);
-                
-        // join with new collection
-        oldcollection.addAllUnique(collection);
-        oldcollection.shape();
-        oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
-        oldcollection.trim();
-        collection = oldcollection;
-
-        int newPartitionNumber = arrayIndex(collection.size());
-
-        // see if we need new space or if we can overwrite the old space
-        if (oldPartitionNumber == newPartitionNumber) {
-            putreplace(
-                    key, collection, indexrow,
-                    oldSerialNumber, this.payloadrow.objectsize(),
-                    oldPartitionNumber, oldrownumber); // modifies indexrow
-        } else {
-            puttransit(
-                    key, collection, indexrow,
-                    oldSerialNumber, this.payloadrow.objectsize(),
-                    oldPartitionNumber, oldrownumber,
-                    newPartitionNumber); // modifies indexrow
-        }
-        
     }
     
     public synchronized int remove(byte[] key, Set removekeys) throws IOException, kelondroOutOfLimitsException {
@@ -531,12 +581,11 @@ public class kelondroCollectionIndex {
         int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
         int oldPartitionNumber = (int) indexrow.getColByte(idx_col_clusteridx); // points to array file
         assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
-        int oldSerialNumber = 0;
 
         int removed = 0;
         assert (removekeys != null);
         // load the old collection and remove keys
-        kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false);
+        kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, serialNumber, false);
 
         // remove the keys from the set
         Iterator i = removekeys.iterator();
@@ -551,8 +600,8 @@ public class kelondroCollectionIndex {
 
         if (oldcollection.size() == 0) {
             // delete the index entry and the array
-            kelondroFixedWidthArray array = getArray(oldPartitionNumber, oldSerialNumber, oldchunksize);
-            array.remove(oldrownumber);
+            kelondroFixedWidthArray array = getArray(oldPartitionNumber, serialNumber, oldchunksize);
+            array.remove(oldrownumber, false);
             index.remove(key);
             return removed;
         }
@@ -561,17 +610,19 @@ public class kelondroCollectionIndex {
 
         // see if we need new space or if we can overwrite the old space
         if (oldPartitionNumber == newPartitionNumber) {
-            putreplace(
+            array_replace(
                     key, oldcollection, indexrow,
-                    oldSerialNumber, this.payloadrow.objectsize(),
-                    oldPartitionNumber, oldrownumber); // modifies indexrow
+                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize(),
+                    oldrownumber); // modifies indexrow
         } else {
-            puttransit(
+            array_remove(
+                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize(),
+                    oldrownumber);
+            array_add(
                     key, oldcollection, indexrow,
-                    oldSerialNumber, this.payloadrow.objectsize(),
-                    oldPartitionNumber, oldrownumber,
-                    newPartitionNumber); // modifies indexrow
+                    newPartitionNumber, serialNumber, this.payloadrow.objectsize()); // modifies indexrow
         }
+        arrayResolveRemoved(); // remove all to-be-removed marked entries
         index.put(indexrow); // write modified indexrow
         return removed;
     }
@@ -630,7 +681,7 @@ public class kelondroCollectionIndex {
         if (!(index.row().objectOrder.wellformed(arraykey))) {
             // cleanup for a bad bug that corrupted the database
             index.remove(indexkey);  // the RowCollection must be considered lost
-            array.remove(rownumber); // loose the RowCollection (we don't know how much is lost)
+            array.remove(rownumber, false); // loose the RowCollection (we don't know how much is lost)
             serverLog.logSevere("kelondroCollectionIndex." + array.filename, "lost a RowCollection because of a bad arraykey");
             return new kelondroRowSet(this.payloadrow, 0);
         }
@@ -658,7 +709,7 @@ public class kelondroCollectionIndex {
             index.put(indexrow);
             array.logFailure("INCONSISTENCY in " + arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString() + ": array has different chunkcount than index: index = " + chunkcount + ", array = " + chunkcountInArray + "; the index has been auto-fixed");
         }
-        if (remove) array.remove(rownumber); // index is removed in calling method
+        if (remove) array.remove(rownumber, false); // index is removed in calling method
         return collection;
     }
     

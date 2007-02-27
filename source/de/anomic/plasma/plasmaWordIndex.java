@@ -55,13 +55,11 @@ import de.anomic.yacy.yacyDHTAction;
 
 public final class plasmaWordIndex implements indexRI {
 
-    private static final int flushsize = 2000;
-
     private final kelondroOrder      indexOrder = kelondroBase64Order.enhancedCoder;
     private final indexRAMRI         dhtOutCache, dhtInCache;
     private final indexCollectionRI  collections;          // new database structure to replace AssortmentCluster and FileCluster
     public        boolean            busyCacheFlush;       // shows if a cache flush is currently performed
-    private       int                idleDivisor, busyDivisor;
+    private       int                flushsize;
     public  final plasmaCrawlLURL    loadedURL;
     
     public plasmaWordIndex(File indexRoot, long rwibuffer, long lurlbuffer, long preloadTime, serverLog log) {
@@ -80,8 +78,7 @@ public final class plasmaWordIndex implements indexRI {
         
         // performance settings
         busyCacheFlush = false;
-        this.busyDivisor = 5000;
-        this.idleDivisor = 420;
+        this.flushsize = 2000;
     }
 
     public int minMem() {
@@ -128,9 +125,8 @@ public final class plasmaWordIndex implements indexRI {
         dhtInCache.setMaxWordCount(maxWords);
     }
 
-    public void setWordFlushDivisor(int idleDivisor, int busyDivisor) {
-       this.idleDivisor = idleDivisor;
-       this.busyDivisor = busyDivisor;
+    public void setWordFlushSize(int flushsize) {
+       this.flushsize = flushsize;
     }
 
     public void flushControl() {
@@ -185,23 +181,19 @@ public final class plasmaWordIndex implements indexRI {
         }
     }
 
-    public void flushCacheSome(boolean busy) {
-        flushCacheSome(dhtOutCache, busy);
-        flushCacheSome(dhtInCache, busy);
+    public void flushCacheSome() {
+        flushCacheSome(dhtOutCache);
+        flushCacheSome(dhtInCache);
     }
     
-    private void flushCacheSome(indexRAMRI ram, boolean busy) {
-        int flushCount = (busy) ? ram.size() / busyDivisor : ram.size() / idleDivisor;
-        if (flushCount > 1000) flushCount = 1000;
-        if (flushCount >= 1) {
-            flushCache(ram, flushCount);
-        }
+    private void flushCacheSome(indexRAMRI ram) {
+        flushCache(ram, flushsize);
         while (ram.maxURLinCache() >= 2040) flushCache(ram, 1);
     }
     
     private void flushCache(indexRAMRI ram, int count) {
         if (count <= 0) return;
-        if (count >= 5000) count = 5000;
+        if (count > 5000) count = 5000;
         busyCacheFlush = true;
         String wordHash;
         ArrayList containerList = new ArrayList();

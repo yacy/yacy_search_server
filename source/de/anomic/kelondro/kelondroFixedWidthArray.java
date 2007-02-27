@@ -48,12 +48,16 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.TreeSet;
 
 public class kelondroFixedWidthArray extends kelondroRecords implements kelondroArray {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
     private static short thisOHHandles = 0; // and no handles
+    
+    private TreeSet markedRemoved; // a set of Integer indexes of removed records (only temporary)
     
     public kelondroFixedWidthArray(File file, kelondroRow rowdef, int intprops) throws IOException {
         // this creates a new array
@@ -67,6 +71,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
                 try {super.setText(i, rowdef.column(i).toString().getBytes());} catch (IOException e) {}
             }
         }
+        markedRemoved = new TreeSet();
     }
     
     public kelondroFixedWidthArray(kelondroRA ra, kelondroRow rowdef, int intprops) throws IOException {
@@ -79,6 +84,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         for (int i = 0; i < rowdef.columns(); i++) {
             try {super.setText(i, rowdef.column(i).toString().getBytes());} catch (IOException e) {}
         }
+        markedRemoved = new TreeSet();
     }
     
     public static kelondroFixedWidthArray open(File file, kelondroRow rowdef, int intprops) {
@@ -123,26 +129,51 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     }
 
     public synchronized int add(kelondroRow.Entry rowentry) throws IOException {
-
-        Node n = newNode(rowentry.bytes());
-        n.commit(CP_NONE);
-
-        return n.handle().hashCode();
+        // adds a new rowentry, but re-uses a previously as-deleted marked entry
+        if (markedRemoved.size() == 0) {
+            // no records there to be re-used
+            Node n = newNode(rowentry.bytes());
+            n.commit(CP_NONE);
+            return n.handle().hashCode();
+        } else {
+            // re-use a removed record
+            Integer index = (Integer) markedRemoved.first();
+            markedRemoved.remove(index);
+            set(index.intValue(), rowentry);
+            return index.intValue();
+        }
     }
+    
+    public synchronized void remove(int index, boolean marked) throws IOException {
+        assert (index < (super.free() + super.size())) : "remove: index " + index + " out of bounds " + (super.free() + super.size());
 
-    public synchronized void remove(int index) throws IOException {
-        if (index >= (super.free() + super.size())) throw new IOException("remove: index " + index + " out of bounds " + (super.free() + super.size()));
-
-        // get the node at position index
-        Handle h = new Handle(index);
-        Node n = getNode(h, false);
-
-        // erase the row
-        n.setValueRow(null);
-        n.commit(CP_NONE);
+        if (marked) {
+            // does not remove directly, but sets only a mark that a record is to be deleted
+            // this record can be re-used with add
+            markedRemoved.add(new Integer(index));
+        } else {
         
-        // mark row as deleted so it can be re-used
-        deleteNode(h);
+            // get the node at position index
+            Handle h = new Handle(index);
+            Node n = getNode(h, false);
+
+            // erase the row
+            n.setValueRow(null);
+            n.commit(CP_NONE);
+        
+            // mark row as deleted so it can be re-used
+            deleteNode(h);
+        }
+    }
+    
+    public synchronized void resolveMarkedRemoved() throws IOException {
+        Iterator i = markedRemoved.iterator();
+        Integer index;
+        while (i.hasNext()) {
+            index = (Integer) i.next();
+            remove(index.intValue(), false);
+        }
+        markedRemoved.clear();
     }
     
     public void print() throws IOException {
@@ -181,14 +212,14 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
             k = new kelondroFixedWidthArray(f, rowdef, 6);
             k.add(k.row().newEntry(new byte[][]{"a".getBytes(), "xxxx".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{"b".getBytes(), "xxxx".getBytes()}));
-            k.remove(0);
+            k.remove(0, false);
             
             k.add(k.row().newEntry(new byte[][]{"c".getBytes(), "xxxx".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{"d".getBytes(), "xxxx".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{"e".getBytes(), "xxxx".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{"f".getBytes(), "xxxx".getBytes()}));
-            k.remove(0);
-            k.remove(1);
+            k.remove(0, false);
+            k.remove(1, false);
             
             k.print();
             k.print(true);
@@ -203,9 +234,10 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
                     k.add(k.row().newEntry(new byte[][]{(Integer.toString(i) + "-" + Integer.toString(j)).getBytes(), "xxxx".getBytes()}));
                 }
                 for (int j = 0; j < i; j++) {
-                    k.remove(j);
+                    k.remove(j, true);
                 }
             }
+            k.resolveMarkedRemoved();
             k.print();
             k.print(true);
             k.close();

@@ -40,15 +40,13 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
 
 public class indexCachedRI implements indexRI {
-    
-    private static final int flushsize = 1000;
 
     private kelondroRow       payloadrow;
     private kelondroOrder     indexOrder;
     private indexRAMRI        riExtern, riIntern;
     private indexCollectionRI backend;
     public  boolean           busyCacheFlush;            // shows if a cache flush is currently performed
-    private int               idleDivisor, busyDivisor;
+    private int               flushsize;
     
     public indexCachedRI(indexRAMRI riExtern, indexRAMRI riIntern, indexCollectionRI backend, kelondroOrder payloadorder, kelondroRow payloadrow, serverLog log) {
         this.riExtern = riExtern;
@@ -57,8 +55,7 @@ public class indexCachedRI implements indexRI {
         this.indexOrder = payloadorder;
         this.payloadrow = payloadrow;
         this.busyCacheFlush = false;
-        this.busyDivisor = 5000;
-        this.idleDivisor = 420;
+        this.flushsize = 2000;
     }
 
     public kelondroRow payloadrow() {
@@ -69,9 +66,8 @@ public class indexCachedRI implements indexRI {
         return 1024 * 1024;
     }
     
-    public void setWordFlushDivisor(int idleDivisor, int busyDivisor) {
-       this.idleDivisor = idleDivisor;
-       this.busyDivisor = busyDivisor;
+    public void setWordFlushSize(int flushsize) {
+       this.flushsize = flushsize;
     }
 
     public void flushControl() {
@@ -102,22 +98,19 @@ public class indexCachedRI implements indexRI {
         }
     }
 
-    public void flushCacheSome(boolean busy) {
-        flushCacheSome(riExtern, busy);
-        flushCacheSome(riIntern, busy);
+    public void flushCacheSome() {
+        flushCacheSome(riExtern);
+        flushCacheSome(riIntern);
     }
     
-    private void flushCacheSome(indexRAMRI ram, boolean busy) {
-        int flushCount = (busy) ? ram.size() / busyDivisor : ram.size() / idleDivisor;
-        if (flushCount > 100) flushCount = 100;
-        if (flushCount < 1) flushCount = Math.min(1, ram.size());
-        flushCache(ram, flushCount);
-        while (ram.maxURLinCache() > 1024) flushCache(ram, 1);
+    private void flushCacheSome(indexRAMRI ram) {
+        flushCache(ram, flushsize);
+        while (ram.maxURLinCache() > 2048) flushCache(ram, 1);
     }
     
     private void flushCache(indexRAMRI ram, int count) {
         if (count <= 0) return;
-        if (count > 1000) count = 1000;
+        if (count > 5000) count = 5000;
         busyCacheFlush = true;
         String wordHash;
         ArrayList containerList = new ArrayList();

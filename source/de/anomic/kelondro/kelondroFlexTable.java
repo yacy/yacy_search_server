@@ -235,7 +235,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         if (i < 0) return null;
         kelondroRow.Entry r;
         r = super.get(i);
-        super.remove(i);
+        super.remove(i, false);
         return r;
     }
 
@@ -244,7 +244,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         if (i < 0) return null;
         kelondroRow.Entry r;
         r = super.get(i);
-        super.remove(i);
+        super.remove(i, false);
         return r;
     }
     

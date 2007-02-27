@@ -190,14 +190,9 @@ public class PerformanceQueues_p {
             int wordCacheInitCount = post.getInt("wordCacheInitCount", 30000);
             switchboard.setConfig("wordCacheInitCount", Integer.toString(wordCacheInitCount));
             
-            int maxWaitingWordFlush = post.getInt("maxWaitingWordFlush", 180);
-            switchboard.setConfig("maxWaitingWordFlush", Integer.toString(maxWaitingWordFlush));
-            
-            int wordFlushIdleDivisor = post.getInt("wordFlushIdleDivisor", 420);
-            switchboard.setConfig("wordFlushIdleDivisor", Integer.toString(wordFlushIdleDivisor));
-            int wordFlushBusyDivisor = post.getInt("wordFlushBusyDivisor", 5000);
-            switchboard.setConfig("wordFlushBusyDivisor", Integer.toString(wordFlushBusyDivisor));
-            switchboard.wordIndex.setWordFlushDivisor(wordFlushIdleDivisor, wordFlushBusyDivisor);
+            int flushsize = post.getInt("wordFlushSize", 2000);
+            switchboard.setConfig("wordFlushSize", Integer.toString(flushsize));
+            switchboard.wordIndex.setWordFlushSize(flushsize);
         }
         
         if ((post != null) && (post.containsKey("poolConfig"))) {
@@ -287,8 +282,7 @@ public class PerformanceQueues_p {
         prop.put("wordOutCacheMaxCount", switchboard.getConfigLong("wordCacheMaxCount", 20000));
         prop.put("wordInCacheMaxCount", switchboard.getConfigLong("indexDistribution.dhtReceiptLimit", 1000));
         prop.put("wordCacheInitCount", switchboard.getConfigLong("wordCacheInitCount", 30000));
-        prop.put("wordFlushIdleDivisor", switchboard.getConfigLong("wordFlushIdleDivisor", 420));
-        prop.put("wordFlushBusyDivisor", switchboard.getConfigLong("wordFlushBusyDivisor", 5000));
+        prop.put("wordFlushSize", switchboard.getConfigLong("wordFlushSize", 2000));
         prop.put("onlineCautionDelay", switchboard.getConfig("onlineCautionDelay", "30000"));
         prop.put("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
         

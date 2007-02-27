@@ -1628,7 +1628,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public void deQueueFreeMem() {
         // flush some entries from the RAM cache
-        wordIndex.flushCacheSome(false);
+        wordIndex.flushCacheSome();
         // adopt maximum cache size to current size to prevent that further OutOfMemoryErrors occur
         int newMaxCount = Math.max(2000, Math.min((int) getConfigLong(WORDCACHE_MAX_COUNT, 20000), wordIndex.dhtOutCacheSize()));
         setConfig(WORDCACHE_MAX_COUNT, Integer.toString(newMaxCount));
@@ -1644,8 +1644,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
 
             // flush some entries from the RAM cache
-            // (new permanent cache flushing)
-            wordIndex.flushCacheSome(sbQueue.size() != 0);
+            if (sbQueue.size() == 0) wordIndex.flushCacheSome(); // permanent flushing only if we are not busy
             wordIndex.loadedURL.flushCacheSome();
 
             boolean doneSomething = false;

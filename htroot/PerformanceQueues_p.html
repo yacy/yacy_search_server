@@ -143,20 +143,12 @@
         </td>
       </tr>
       <tr valign="top" class="TableCellDark">
-        <td>word-flush idle divisor:</td>
+        <td>word flush size:</td>
         <td colspan="2">
-          <input name="wordFlushIdleDivisor" type="text" size="20" maxlength="100" value="#[wordFlushIdleDivisor]#" />
+          <input name="wordFlushSize" type="text" size="20" maxlength="100" value="#[wordFlushSize]#" />
         </td>
-        <td rowspan="2">
-          The word flush divisor is applied when an indexing loop is executed.
-          The divisor is used to divide the number of words in the cache; the result is the number of words that are flushed.
-          The idleDivisor is used if the indexing queue is empty, the busyDivisor is used if the indexing queue contains at least one element.
-        </td>
-      </tr>
-      <tr valign="top" class="TableCellDark">
-        <td>word-flush busy divisor:</td>
-        <td colspan="2">
-          <input name="wordFlushBusyDivisor" type="text" size="20" maxlength="100" value="#[wordFlushBusyDivisor]#" />
+        <td>
+          The word flush size is applied when an indexing loop is executed, and the cache size is exceeded.
         </td>
       </tr>
       <tr valign="top" class="TableCellLight">
