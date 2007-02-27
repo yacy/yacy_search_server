@@ -35,7 +35,7 @@ No blacklist selected==Keine Blacklist gew&auml;hlt
 Select list:==Liste ausw&auml;hlen:
 not shared::shared==nicht freigegeben::freigegeben
 "select"=="w&auml;hlen"
-New list:==Neue Liste:
+New list==Neue Liste
 "create"=="anlegen"
 Settings for this list==Einstellungen dieser Liste
 Save==Speichern
@@ -58,6 +58,7 @@ Activate this list for==Diese Liste ist g&uuml;ltig f&uuml;r
 
 #File: BlacklistCleaner_p.html
 #---------------------------
+Blacklist Manager==Blacklist Verwaltung
 Blacklist Cleaner==Blacklist aufr&auml;men
 Remove illegal blacklist-entries==Entferne ung&uuml;ltige Eintr&auml;ge aus der Blacklist
 Check list==Liste testen
@@ -65,7 +66,13 @@ Check list==Liste testen
 Illegal Entries for==Ung&uuml;ltiger Eintr&auml;ge f&uuml;r
 Deleted \#\[delCount\]\# entries==#[delCount]# Eintr&auml;ge gel&ouml;scht
 Altered \#\[alterCount\]\# entries!==#[alterCount]# Eintr&auml;ge ge&auml;ndert
-Two wildcards in host-part::Either subdomain <u>or</u> wildcard::Path is invalid Regex::Wildcard not on begin or end::Host contains illegal chars==Zwei Wildcards im Host-Teil::Entweder Subdomain <u>oder</u> Wildcard::Pfad ist ung&uuml;ltige Regex::Wildcard nicht am Beginn oder Ende::Host enth&auml;lt ung&uuml;ltige Zeichen
+Two wildcards in host-part==Zwei Wildcards im Host-Teil
+Either subdomain <u>or</u> wildcard==Entweder Subdomain <u>oder</u> Wildcard
+Path is invalid Regex==Pfad ist ung&uuml;ltige Regex
+Wildcard not on begin or end==Wildcard nicht am Beginn oder Ende
+Host contains illegal chars==Host enth&auml;lt ung&uuml;ltige Zeichen
+Double==Doppelt
+"Change Selected"=="Markierte bearbeiten"
 "Delete Selected"=="Markierte l&ouml;schen"
 No Blacklist selected==Es wurde keine Blacklist ausgew&auml;hlt
 #---------------------------
@@ -79,6 +86,7 @@ show more entries==zeige weitere Eintr&auml;ge
 new entry==Neuer Eintrag
 import XML-File==XML-Datei importieren
 export as XML==als XML exportieren
+Comments</a>==Kommentare</a>
 Blog-Home==Blog-Startseite
 Author:==Autor:
 Subject:==Titel:
@@ -100,6 +108,25 @@ No, leave it.==Nein, belassen.
 Import was successful!==Import war erfolgreich!
 Import failed, maybe the supplied file was no valid blog-backup?==Import fehlgeschlagen, unter Umst&auml;nden war die angegebene Datei keine g&uuml;ltige Blog-Sicherung?
 Please select the XML-file you want to import:==Bitte w&auml;hlen Sie die XML-Datei die Sie importieren wollen:
+#-----------------------------
+
+#File: BlogComments.html
+#---------------------------
+by==von
+Comments</a>==Kommentare</a>
+Login==Einloggen
+Blog-Home==Blog-Startseite
+delete</a>==l&ouml;schen</a>
+Author:==Autor:
+Subject:==Titel:
+#Text:==Text:
+You can use==Sie k&ouml;nnen hier
+Yacy-Wiki Code==YaCy-Wiki Befehle
+here.==benutzen.
+"Submit"=="Absenden"
+"Preview"=="Vorschau"
+"Discard"=="Verwerfen"
+>Preview==>Vorschau
 #-----------------------------
 
 #File: Bookmarks.html
@@ -1666,8 +1693,10 @@ Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite b
 #---------------------------
 System-, Index- and Peer-Status==System-, Index- und Peer-Status
 Welcome to YaCy!==Willkommen bei YaCy!
-"Restart"=="Neustarten"
-"Shutdown"=="Herunterfahren"
+Restart==Neustarten
+"Only the administrator may restart this peer"=="Nur der Administrator darf den Peer neustarten"
+Shutdown==Herunterfahren
+"Only the administrator may shutdown this peer"=="Nur der Administrator darf den Peer herunterfahren"
 Public System Properties==Allgemeine Systemangaben
 System version==Systemversion
 the latest public version is==Die neueste stabile Version ist
@@ -1905,7 +1934,7 @@ the request.==es dann erneut.
 ERROR: Crawl filter==FEHLER: Crawl Maske
 does not match with crawl root==stimmt nicht &uuml;berein mit dem Crawlstart
 Please try again with different==Bitte probieren Sie es erneut mit einer anderen
-filter.==Maske.
+filter. ::==Maske. ::
 Crawling of==Crawling von
 failed. Reason:==schlug fehl. Grund:
 Error with URL input==Fehler mit URL Eingabe
@@ -2087,45 +2116,48 @@ Project Home==Projektseite
 #---------------------------
 YaCy - Distributed Web Indexing - Administration==YaCy - Verteiltes Internet-Indexieren - Administration
 Global Index==Globaler Index
-Crawler Control==Crawler Steuerung
-Local Proxy==Lokaler Proxy
-Communication / Publication==Kommunikation / Publikation
-Peer Control==Peer-Verwaltung
-The Project==Das Projekt
 Search Page==Suchseite
 Detailed Search==Detaillierte Suche
 >Surftips==>Surftipps
 >Bookmarks==>Lesezeichen
 >Help==>Hilfe
-Search Statistics==Such Statistik
-Index Create==Index erzeugen
-Index Control==Index verwalten
-#Index Monitor==Index Monitor
-#Blacklist==Blacklist
-Proxy Indexing==Proxy Indexierung
-#Cache Monitor==Cache Monitor
-#Cookie Monitor==Cookie Monitor
-#Home Page==Homepage
-File Share==Dateifreigabe
-#Wiki==Wiki
+Your Web==Dein Web
+Home Page Demo==Homepage Demo
+Your File Share==Deine Dateifreigabe
+#YaCy Wiki==YaCy Wiki
+#YaCy Blog==YaCy Blog
 >Messages==>Nachrichten
+"New Messages"=="Neue Nachrichten"
+Monitoring==Kontrolle
+YaCy Network==YaCy Netzwerk
+Crawler Monitor==Crawler Kontrolle
+Web Crawl Results==Crawl Ergebnisse
+Search Statistics==Such Statistik
+#Server Log==Server Log
+>Connections==>Verbindungen
+#Web Cache==Web Cache
+News Monitor==News Anzeige
+Cookies in Proxy==Cookies per Proxy
+#Web Crawler==Web Crawler
+Start Web Crawl==Starte Web Crawl
+Administrate Index==Indexverwaltung
+#URL Blacklist==URL Blacklist
+Indexing with Proxy==Indexierung per Proxy
+Peer Configuration==Peer Einstellungen
+#Status &amp; Shutdown==Status &amp; Shutdown
 Basic Configuration==Grund-<br />einstellungen
 Advanced Settings==erweiterte Einstellungen
-#Status==Status
->Network==>Netzwerk
-#News==News
-#Log==Log
+User Administration==Benutzer Verwaltung
 #Performance==Performance
->Connections==>Verbindungen
-#Skins==Skins
+The Project==Das Projekt
 Project Home==Projektseite
 Project News==Neuigkeiten
 English Forum==Englisches Forum
 Newsletters==Newsletter
 #Deutsches Forum==Deutsches Forum
 Download YaCy==YaCy herunterladen
-#YaCy Wiki==YaCy Wiki
->Contact==>Kontakt
+YaCy Project Wiki==YaCy Projekt Wiki
+Contact YaCy Developer==Kontakt mit YaCy Entwicklern
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
