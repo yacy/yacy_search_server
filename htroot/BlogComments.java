@@ -50,7 +50,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.data.blogBoard;
@@ -61,8 +60,6 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNewsRecord;
 
 public class BlogComments {
 
@@ -125,39 +122,36 @@ public class BlogComments {
 		if (post.containsKey("submit")) {
 			// store a new/edited blog-entry
 			byte[] content;
-			try {
-				content = post.get("content", "").getBytes("UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				content = post.get("content", "").getBytes();
-			}
+            if(!post.get("content", "").equals(""))
+            {
+                if(post.get("subject", "").equals("")) post.put("subject", "no title");
+                try {
+                    content = post.get("content", "").getBytes("UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    content = post.get("content", "").getBytes();
+                }
 
-			Date date = null;
-			
-			//set name for new entry or date for old entry
-			
-			String StrSubject = post.get("subject", "");
-			byte[] subject;
-			try {
-				subject = StrSubject.getBytes("UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				subject = StrSubject.getBytes();
-			}
-            String commentID = String.valueOf(System.currentTimeMillis());
-            entry blogEntry = switchboard.blogDB.read(pagename);
-            blogEntry.addComment(commentID);
-            switchboard.blogDB.write(blogEntry);
-			switchboard.blogCommentDB.write(switchboard.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
-            
-			// create a news message
-             HashMap map = new HashMap();
-             map.put("page", pagename);
-             map.put("subject", StrSubject.replace(',', ' '));
-             map.put("author", StrAuthor.replace(',', ' '));
-             //yacyCore.newsPool.publishMyNews(new yacyNewsRecord("blogComment_add", map));
+                Date date = null;
+                
+                //set name for new entry or date for old entry
+                
+                String StrSubject = post.get("subject", "");
+                byte[] subject;
+                try {
+                    subject = StrSubject.getBytes("UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    subject = StrSubject.getBytes();
+                }
+                String commentID = String.valueOf(System.currentTimeMillis());
+                entry blogEntry = switchboard.blogDB.read(pagename);
+                blogEntry.addComment(commentID);
+                switchboard.blogDB.write(blogEntry);
+                switchboard.blogCommentDB.write(switchboard.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
+            }
 		}
 
 		page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
-        if(post.containsKey("delete") && post.containsKey("page") &&post.containsKey("comment")) {
+        if(hasRights && post.containsKey("delete") && post.containsKey("page") && post.containsKey("comment")) {
             if(page.removeComment((String) post.get("comment"))) {
                 switchboard.blogCommentDB.delete((String) post.get("comment"));
             }
