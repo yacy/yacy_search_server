@@ -486,6 +486,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         this.put(row, entryDate);
     }
     
+    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
+        Iterator i = rows.iterator();
+        while (i.hasNext()) addUnique((kelondroRow.Entry) i.next(), entryDate);
+    }
+    
     private void assignChild(Node parentNode, Node childNode, int childType) throws IOException {
         parentNode.setOHHandle(childType, childNode.handle());
         childNode.setOHHandle(parent, parentNode.handle());

@@ -539,6 +539,11 @@ public class kelondroCache implements kelondroIndex {
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
     }
+    
+    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
+        Iterator i = rows.iterator();
+        while (i.hasNext()) addUnique((Entry) i.next(), entryDate);
+    }
 
     public synchronized Entry remove(byte[] key) throws IOException {
         

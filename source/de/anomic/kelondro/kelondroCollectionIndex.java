@@ -278,11 +278,23 @@ public class kelondroCollectionIndex {
         return 2 * m * this.payloadrow.objectsize;
     }
     
-    private kelondroRow.Entry array_new(byte[] key, kelondroRowCollection collection) throws IOException {
+    private void array_remove(
+            int oldPartitionNumber, int serialNumber, int chunkSize,
+            int oldRownumber) throws IOException {
+        // we need a new slot, that means we must first delete the old entry
+        // find array file
+        kelondroFixedWidthArray array = getArray(oldPartitionNumber, serialNumber, chunkSize);
+
+        // delete old entry
+        array.remove(oldRownumber, true);
+    }
+    
+    private kelondroRow.Entry array_new(
+            byte[] key, kelondroRowCollection collection) throws IOException {
         // the collection is new
-        int newPartitionNumber = arrayIndex(collection.size());
+        int partitionNumber = arrayIndex(collection.size());
         kelondroRow.Entry indexrow = index.row().newEntry();
-        kelondroFixedWidthArray array = getArray(newPartitionNumber, serialNumber, this.payloadrow.objectsize());
+        kelondroFixedWidthArray array = getArray(partitionNumber, serialNumber, this.payloadrow.objectsize());
 
         // define row
         kelondroRow.Entry arrayEntry = array.row().newEntry();
@@ -296,7 +308,7 @@ public class kelondroCollectionIndex {
         indexrow.setCol(idx_col_key, key);
         indexrow.setCol(idx_col_chunksize, this.payloadrow.objectsize());
         indexrow.setCol(idx_col_chunkcount, collection.size());
-        indexrow.setCol(idx_col_clusteridx, (byte) newPartitionNumber);
+        indexrow.setCol(idx_col_clusteridx, (byte) partitionNumber);
         indexrow.setCol(idx_col_flags, (byte) 0);
         indexrow.setCol(idx_col_indexpos, (long) newRowNumber);
         indexrow.setCol(idx_col_lastread, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
@@ -304,17 +316,6 @@ public class kelondroCollectionIndex {
 
         // after calling this method there must be an index.addUnique(indexrow);
         return indexrow;
-    }
-    
-    private void array_remove(
-            int oldPartitionNumber, int serialNumber, int chunkSize,
-            int oldRownumber) throws IOException {
-        // we need a new slot, that means we must first delete the old entry
-        // find array file
-        kelondroFixedWidthArray array = getArray(oldPartitionNumber, serialNumber, chunkSize);
-
-        // delete old entry
-        array.remove(oldRownumber, true);
     }
     
     private void array_add(
@@ -450,7 +451,7 @@ public class kelondroCollectionIndex {
         // merge existing containers
         i = existingContainer.iterator();
         Object[] record;
-        ArrayList indexrows = new ArrayList();
+        ArrayList indexrows_existing = new ArrayList();
         kelondroRowCollection collection;
         while (i.hasNext()) {
             record = (Object[]) i.next(); // {byte[], indexContainer, kelondroRow.Entry}
@@ -495,21 +496,23 @@ public class kelondroCollectionIndex {
                         newPartitionNumber, oldSerialNumber, this.payloadrow.objectsize()); // modifies indexrow
             }
             arrayResolveRemoved(); // remove all to-be-removed marked entries
-            indexrows.add(indexrow); // indexrows are collected and written later as block
+            indexrows_existing.add(indexrow); // indexrows are collected and written later as block
         }
         
         // write new containers
         i = newContainer.iterator();
+        ArrayList indexrows_new = new ArrayList();
         while (i.hasNext()) {
             record = (Object[]) i.next(); // {byte[], indexContainer}
             key = (byte[]) record[0];
             collection = (indexContainer) record[1];
             indexrow = array_new(key, collection); // modifies indexrow
-            index.addUnique(indexrow); // write modified indexrow
+            indexrows_new.add(indexrow); // collect new index rows
         }
         
         // write index entries
-        index.putMultiple(indexrows, new Date()); // write modified indexrows in optimized manner
+        index.putMultiple(indexrows_existing, new Date()); // write modified indexrows in optimized manner
+        index.addUniqueMultiple(indexrows_new, new Date()); // write new indexrows in optimized manner
     }
     
     public synchronized void merge(indexContainer container) throws IOException, kelondroOutOfLimitsException {

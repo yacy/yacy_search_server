@@ -1018,6 +1018,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         int wordInCacheMaxCount = (int) getConfigLong(INDEX_DIST_DHT_RECEIPT_LIMIT, 1000);
         wordIndex.setInMaxWordCount(wordInCacheMaxCount);
+        wordIndex.setWordFlushSize((int) getConfigLong("wordFlushSize", 1000));
         
         // set a minimum amount of memory for the indexer thread
         setConfig(INDEXER_MEMPREREQ, Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem()));

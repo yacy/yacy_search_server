@@ -139,6 +139,10 @@ public class kelondroSplittedTree implements kelondroIndex {
         throw new UnsupportedOperationException();
     }
     
+    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+    
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
         return ktfs[partition(row.getColBytes(0))].put(row);
     }
@@ -274,4 +278,5 @@ public class kelondroSplittedTree implements kelondroIndex {
         // a collection of different node cache status values
         return new int[]{0,0,0,0,0,0,0,0,0,0};
     }
+
 }

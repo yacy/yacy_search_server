@@ -590,7 +590,7 @@ javastart_priority=0
 # flushed to disc; this may last some minutes.
 wordCacheMaxCount = 20000
 wordCacheInitCount = 30000
-wordFlushSize = 2000;
+wordFlushSize = 1000;
 
 # Specifies if yacy can be used as transparent http proxy.
 # 

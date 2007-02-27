@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -188,7 +189,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         // a R/W head path-optimized option to write a set of entries
         Iterator i;
         Map.Entry entry;
-        kelondroRow.Entry rowentry, e0;
+        kelondroRow.Entry rowentry, e;
         int c = 0, index, lastcol;
         synchronized (col) {
             // go across each file
@@ -201,11 +202,11 @@ public class kelondroFlexWidthArray implements kelondroArray {
                     rowentry = (kelondroRow.Entry) entry.getValue();
                     assert rowentry.bytes().length == this.rowdef.objectsize;
                         
-                    e0 = col[c].row().newEntry(
+                    e = col[c].row().newEntry(
                             rowentry.bytes(),
                             rowdef.colstart[c],
                             rowdef.colstart[lastcol] - rowdef.colstart[c] + rowdef.width(lastcol));
-                    col[c].set(index, e0);             
+                    col[c].set(index, e);             
                 }
                 c = c + col[c].row().columns();   
             }
@@ -215,16 +216,16 @@ public class kelondroFlexWidthArray implements kelondroArray {
     public void set(int index, kelondroRow.Entry rowentry) throws IOException {
         assert rowentry.bytes().length == this.rowdef.objectsize;
         int c = 0;
-        kelondroRow.Entry e0;
+        kelondroRow.Entry e;
         int lastcol;
         synchronized (col) {
             while (c < rowdef.columns()) {
                 lastcol = c + col[c].row().columns() - 1;
-                e0 = col[c].row().newEntry(
+                e = col[c].row().newEntry(
                         rowentry.bytes(),
                         rowdef.colstart[c],
                         rowdef.colstart[lastcol] - rowdef.colstart[c] + rowdef.width(lastcol));
-                col[c].set(index, e0);
+                col[c].set(index, e);
                 c = c + col[c].row().columns();
             }
         }
@@ -246,13 +247,58 @@ public class kelondroFlexWidthArray implements kelondroArray {
                         rowentry.bytes(),
                         rowdef.colstart[c],
                         rowdef.colstart[lastcol] + rowdef.width(lastcol) - rowdef.colstart[c]);
-                col[c].set(index,e);
+                col[c].set(index, e);
                 c = c + col[c].row().columns();
             }
         }
         return index;
     }
 
+    protected TreeMap addMultiple(List rows) throws IOException {
+        // result is a Integer/byte[] relation
+        // of newly added rows (index, key)
+        TreeMap indexref = new TreeMap();
+        Iterator i;
+        kelondroRow.Entry rowentry;
+        // prepare storage for other columns
+        TreeMap[] colm = new TreeMap[col.length];
+        for (int j = 0; j < col.length; j++) {
+            if (col[j] == null) colm[j] = null; else colm[j] = new TreeMap();
+        }
+        i = rows.iterator();
+        while (i.hasNext()) {
+            rowentry = (kelondroRow.Entry) i.next();
+            assert rowentry.bytes().length == this.rowdef.objectsize;
+            
+            kelondroRow.Entry e;
+            int index = -1;
+            int lastcol;
+            synchronized (col) {
+                e = col[0].row().newEntry(rowentry.bytes(), 0, rowdef.width(0));
+                index = col[0].add(e);
+                int c = col[0].row().columns();
+
+                while (c < rowdef.columns()) {
+                    lastcol = c + col[c].row().columns() - 1;
+                    e = col[c].row().newEntry(
+                            rowentry.bytes(),
+                            rowdef.colstart[c],
+                            rowdef.colstart[lastcol] + rowdef.width(lastcol) - rowdef.colstart[c]);
+                    // remember write to column, but do not write directly
+                    colm[c].put(new Integer(index), e); // col[c].set(index,e);
+                    c = c + col[c].row().columns();
+                }
+            }
+            indexref.put(new Integer(index), rowentry.getColBytes(0));
+        }
+        // write the other columns
+        for (int j = 1; j < col.length; j++) {
+            if (col[j] != null) col[j].setMultiple(colm[j]);
+        }
+        // retrun references to entries with key
+        return indexref;
+    }
+    
     public kelondroRow.Entry get(int index) throws IOException {
         int r = 0;
         kelondroRow.Entry e, p;

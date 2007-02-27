@@ -49,6 +49,8 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class kelondroFixedWidthArray extends kelondroRecords implements kelondroArray {
@@ -112,6 +114,15 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         // attention! this newNode call wants that the OH bytes are passed within the bulkchunk
         // field. Here, only the rowentry.bytes() raw payload is passed. This is valid, because
         // the OHbytes and OHhandles are zero.
+    }
+    
+    public synchronized void setMultiple(TreeMap /* of Integer/kelondroRow.Entry */ rows) throws IOException {
+        Iterator i = rows.entrySet().iterator();
+        Map.Entry entry;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            set(((Integer) entry.getKey()).intValue(), (kelondroRow.Entry) entry.getValue());
+        }
     }
     
     public synchronized kelondroRow.Entry get(int index) throws IOException {

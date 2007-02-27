@@ -27,9 +27,11 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.server.logging.serverLog;
@@ -187,20 +189,25 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         // this should save R/W head positioning time
         Iterator i = rows.iterator();
         kelondroRow.Entry row;
-        TreeMap ordered = new TreeMap();
         int pos;
         byte[] key;
+        TreeMap   old_rows_ordered    = new TreeMap();
+        ArrayList new_rows_sequential = new ArrayList();
         while (i.hasNext()) {
             row = (kelondroRow.Entry) i.next();
             key = row.getColBytes(0);
             pos = index.geti(key);
             if (pos < 0) {
-                index.puti(key, super.add(row));
+                new_rows_sequential.add(row);
             } else {
-                ordered.put(new Integer(pos), row);
+                old_rows_ordered.put(new Integer(pos), row);
             }
         }
-        super.setMultiple(ordered);
+        // overwrite existing entries in index
+        super.setMultiple(old_rows_ordered);
+        
+        // write new entries to index
+        addUniqueMultiple(new_rows_sequential, entryDate);
     }
 
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
@@ -228,6 +235,20 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
         assert row.bytes().length == this.rowdef.objectsize;
         index.addi(row.getColBytes(0), super.add(row));
+    }
+    
+    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
+        // add a list of entries in a ordered way.
+        // this should save R/W head positioning time
+        TreeMap indexed_result = super.addMultiple(rows);
+        // indexed_result is a Integer/byte[] relation
+        // that is used here to store the index
+        Iterator i = indexed_result.entrySet().iterator();
+        Map.Entry entry;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            index.puti((byte[]) entry.getValue(), ((Integer) entry.getKey()).intValue());
+        }
     }
     
     public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {

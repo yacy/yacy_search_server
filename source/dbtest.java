@@ -528,7 +528,7 @@ final class dbTable implements kelondroIndex {
 
     public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
         Iterator i = rows.iterator();
-        while (i.hasNext()) put ((Entry) i.next(), entryDate);
+        while (i.hasNext()) put((Entry) i.next(), entryDate);
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
@@ -568,6 +568,10 @@ final class dbTable implements kelondroIndex {
     }
     
     public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+    
+    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
         throw new UnsupportedOperationException();
     }
     

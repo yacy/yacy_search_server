@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
@@ -102,9 +101,18 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
     }
     
+    public void addUniqueMultiple(List rows, Date entryDate) throws IOException {
+        if (removeMarker.size() == 0) {
+            super.addUniqueMultiple(rows, entryDate);
+        } else {
+            Iterator i = rows.iterator();
+            while (i.hasNext()) addUnique((kelondroRow.Entry) i.next(), entryDate);
+        }
+    }
+    
     public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
         Iterator i = rows.iterator();
-        while (i.hasNext()) put ((Entry) i.next(), entryDate);
+        while (i.hasNext()) put((kelondroRow.Entry) i.next(), entryDate);
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) {

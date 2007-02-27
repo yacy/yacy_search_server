@@ -239,6 +239,11 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         table.addUnique(row, entryDate);
     }
     
+    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
+        Iterator i = rows.iterator();
+        while (i.hasNext()) addUnique((kelondroRow.Entry) i.next(), entryDate);
+    }
+    
     public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
         Iterator i = tables.values().iterator();
         kelondroIndex table;

@@ -67,6 +67,7 @@ public interface kelondroIndex {
     public void putMultiple(List /* of kelondroRow.Entry*/ rows, Date entryDate) throws IOException; // for R/W head path optimization
     public void addUnique(kelondroRow.Entry row) throws IOException; // no double-check
     public void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException; // no double-check
+    public void addUniqueMultiple(List /* of kelondroRow.Entry*/ rows, Date entryDate) throws IOException; // no double-check
     public kelondroRow.Entry remove(byte[] key) throws IOException;
     public kelondroRow.Entry removeOne() throws IOException;
     public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException;

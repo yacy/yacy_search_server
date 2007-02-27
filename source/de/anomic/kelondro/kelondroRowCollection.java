@@ -24,8 +24,10 @@
 
 package de.anomic.kelondro;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import de.anomic.server.logging.serverLog;
@@ -216,6 +218,11 @@ public class kelondroRowCollection {
         addUnique(row);
     }
 
+    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
+        Iterator i = rows.iterator();
+        while (i.hasNext()) addUnique((kelondroRow.Entry) i.next());
+    }
+    
     public void add(byte[] a) {
         addUnique(a, 0, a.length);
     }
