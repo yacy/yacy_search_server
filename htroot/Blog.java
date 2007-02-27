@@ -241,6 +241,9 @@ public class Blog {
 		    // show blog-entry/entries
 	        prop.put("mode", 0); //viewing
 	        if(pagename.equals("blog_default")) {
+                prop.put("peername", yacyCore.seedDB.mySeed.getName());
+                String address = yacyCore.seedDB.mySeed.getAddress();
+                prop.put("address", address);
 	        	//index all entries
 	        	try {
 	        		Iterator i = switchboard.blogDB.keys(false);
@@ -262,6 +265,7 @@ public class Blog {
 	        				continue;
 	        			entry = switchboard.blogDB.read(pageid);
 	        			prop.put("mode_entries_"+count+"_pageid",entry.key());
+                        prop.put("mode_entries_"+count+"_address", address);
 	        			if(!xml) {
 	        				prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
 		        			prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
@@ -284,6 +288,8 @@ public class Blog {
                             prop.put("mode_entries_"+count+"_commentsactive", 1);
                             prop.put("mode_entries_"+count+"_commentsactive_pageid",entry.key());
                             prop.put("mode_entries_"+count+"_commentsactive_comments", new String(entry.commentsSize(),"UTF-8"));
+                            prop.put("mode_entries_"+count+"_commentsactive_address", address);
+
                         }
                         else prop.put("mode_entries_"+count+"_commentsactive", 0);
 
