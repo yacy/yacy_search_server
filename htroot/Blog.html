@@ -55,7 +55,7 @@
         <input type="hidden" name="page" value="#[pageid]#" />
         <input type="submit" name="submit" value="Submit" />
         <input type="submit" name="preview" value="Preview" />
-        <input type="submit" name="view" value="Discard" />
+        <input type="submit" name="discard" value="Discard" />
       </fieldset>
     </form>
     ::
@@ -98,7 +98,7 @@
         <input type="hidden" name="page" value="#[pageid]#" />
         <input type="submit" name="submit" value="Submit" />
         <input type="submit" name="preview" value="Preview" />
-        <input type="submit" name="view" value="Discard" />
+        <input type="submit" name="discard" value="Discard" />
       </fieldset>
     </form>
     ::
@@ -108,20 +108,17 @@
     ::
     <!-- 4: Delete Confirmation -->
     <h3>Are you sure...</h3>
-    <p>... that you want to delete <strong>#[subject]#</strong> by #[author]#?</p>
-    <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-      <fieldset>
+    <p>... that you want to delete <strong>#[subject]#</strong> by <span class="tt">#[author]#</span>?</p>
+    <fieldset><legend>Confirm deletion</legend>
+      <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
         <input type="hidden" name="delete" value="sure" />
         <input type="hidden" name="page" value="#[pageid]#" />
         <input type="submit" value="Yes, delete it." />
-      </fieldset>
-    </form>
-    <br />
-    <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-      <fieldset>
+      </form>
+      <form action="Blog.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
         <input type="submit" value="No, leave it." />
-      </fieldset>
-    </form>
+      </form>
+    </fieldset>
     ::
     <!-- 5: XML-Import -->
     <h3>XML-Import</h3>

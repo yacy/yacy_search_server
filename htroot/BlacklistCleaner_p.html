@@ -20,7 +20,12 @@
             #{/blacklists}#
           </select>
           <input type="submit" name="list" value="Check" />
-        </div>::#(/disabled)#
+        </div>::
+        <p class="error">The blacklist-cleaner only works for the following blacklist-engines up to now:</p>
+        <ul>#{engines}# 
+          <li class="tt" title="#[fullname]#">#[name]#</li>#{/engines}# 
+        </ul>::
+        #(/disabled)#
       </fieldset>
     
       #(results)#

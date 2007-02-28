@@ -83,6 +83,8 @@ public class BlacklistCleaner_p {
     private static final int ERR_HOST_WRONG_CHARS = 4;
     private static final int ERR_DOUBLE_OCCURANCE = 5;
     
+    public static final Class[] supportedBLEngines = { plasmaSwitchboard.class };
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
         
@@ -143,15 +145,28 @@ public class BlacklistCleaner_p {
     }
     
     private static void putBlacklists(serverObjects prop, String[] lists, String selected) {
-        if (lists.length > 0) {
-            prop.put("disabled", 0);
-            prop.put(DISABLED + "blacklists", lists.length);
-            for (int i=0; i<lists.length; i++) {
-                prop.put(DISABLED + BLACKLISTS + i + "_name", lists[i]);
-                prop.put(DISABLED + BLACKLISTS + i + "_selected", (lists[i].equals(selected)) ? 1 : 0);
+        boolean supported = false;
+        for (int i=0; i<supportedBLEngines.length && !supported; i++)
+            supported |= (plasmaSwitchboard.urlBlacklist.getClass() == supportedBLEngines[i]);
+        
+        if (supported) {
+            if (lists.length > 0) {
+                prop.put("disabled", 0);
+                prop.put(DISABLED + "blacklists", lists.length);
+                for (int i=0; i<lists.length; i++) {
+                    prop.put(DISABLED + BLACKLISTS + i + "_name", lists[i]);
+                    prop.put(DISABLED + BLACKLISTS + i + "_selected", (lists[i].equals(selected)) ? 1 : 0);
+                }
+            } else {
+                prop.put("disabled", 2);
             }
         } else {
             prop.put("disabled", 1);
+            for (int i=0; i<supportedBLEngines.length; i++) {
+                prop.put(DISABLED + "engines_" + i + "_name", supportedBLEngines[i].getSimpleName());
+                prop.put(DISABLED + "engines_" + i + "_fullname", supportedBLEngines[i].getName());                
+            }
+            prop.put(DISABLED + "engines", supportedBLEngines.length);
         }
     }
     
