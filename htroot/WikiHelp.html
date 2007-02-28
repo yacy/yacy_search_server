@@ -5,12 +5,14 @@
 #%env/templates/metas.template%#
  </head>
  <body>
- <br>
- <h2>Index Creation</h2>
- <br>
  <div align="center">
-  <table width="95%" border="1">
-   <caption>This table contains a short description of the tags that can be used in the Wiki and several other servlets of YaCy. For a more detailed description visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Hauptseite">YaCy Wiki</a>.</caption>
+  <h2>Wiki-Code</h2>
+  <table width="95%" border="1" cellspacing="0" cellpadding="4">
+   <caption>
+     This table contains a short description of the tags that can be used in the Wiki and several other servlets
+     of YaCy. For a more detailed description visit the
+     <a href="http://www.yacy-websuche.de/wiki/index.php/Hauptseite">YaCy Wiki</a>.
+   </caption>
    <tr valign="top">
     <th>
      Code
@@ -20,61 +22,65 @@
     </th>
    </tr>
    <tr valign="top">
-    <td>
+    <td class="tt">
      ==headline1==<br />===headline2===<br />====headline3====
     </td>
     <td>
-     This tags create headlines. If a page has three or more headlines, a directory will be created automaticly.
+     These tags create headlines. If a page has three or more headlines, a directory will be created automaticly.
     </td>
    </tr>
 
    <tr valign="top">
-    <td>
+    <td class="tt">
      ''text''<br />'''text'''<br />'''''text'''''
     </td>
     <td>
-     This tags create stressed texts. Most browsers will display the texts in italics, bold, and a combination of both.
+     These tags create stressed texts. The first pair emphasizes the text (most browsers will display it in italics),
+     the second one emphazises it more strongly (i.e. bold) and the last tags create a combination of both.
     </td>
    </tr>
 
    <tr valign="top">
-    <td>
+    <td class="tt">
      :text<br>::text
     </td>
     <td>
-     Lines will be indented. This tag is supposed to mark citations.
+     Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.
     </td>
    </tr>
 
    <tr valign="top">
-    <td>
+    <td class="tt">
      #point1<br />##point1.1<br />##point1.2<br />#point2
     </td>
     <td>
-     This tags create a numbered list.
+     These tags create a numbered list.
     </td>
    </tr>
 
    <tr valign="top">
-    <td>
+    <td class="tt">
      *something<br />**another thing<br />***and yet another<br />*something else
     </td>
     <td>
-     This tags create a unnumbered list.
+     These tags create a unnumbered list.
     </td>
    </tr>
 
    <tr valign="top">
-    <td>
-     ;word 1:definition 1<br />;word 2:definition 2<br />;;word 3:definition 3<br />;word 4:definition 4
+    <td class="tt">
+     <nobr class="tt">;word 1:definition 1</nobr><br />
+     <nobr class="tt">;word 2:definition 2</nobr><br />
+     <nobr class="tt">;;word 3:definition 3</nobr><br />
+     <nobr class="tt">;word 4:definition 4</nobr>
     </td>
     <td>
-     This tags create a definition list.
+     These tags create a definition list.
     </td>
    </tr>
 
    <tr valign="top">
-    <td>
+    <td class="tt">
      ----
     </td>
     <td>
@@ -83,8 +89,9 @@
    </tr>
 
    <tr valign="top">
-    <td>
-     [[pagename]]<br />[[pagename|description]]
+    <td class="tt">
+     <nobr class="tt">[[pagename]]</nobr><br />
+     <nobr class="tt">[[pagename|description]]</nobr>
     </td>
     <td>
      This tag creates links to other pages of the wiki.
@@ -92,7 +99,7 @@
    </tr>
 
    <tr valign="top">
-    <td>
+    <td class="tt">
      [url]<br />[url description]
     </td>
     <td>
@@ -101,8 +108,10 @@
    </tr>
 
    <tr valign="top">
-    <td>
-     [[Image:url]]<br />[[Image:url|alt text]]<br />[[Image:url|align|alt text]]
+    <td class="tt">
+     <nobr class="tt">[[Image:url]]</nobr><br />
+     <nobr class="tt">[[Image:url|alt text]]</nobr><br />
+     <nobr class="tt">[[Image:url|align|alt text]]</nobr>
     </td>
     <td>
      This tag displays an image, it can be aligned left, right or center.
@@ -110,34 +119,41 @@
    </tr>
 
    <tr valign="top">
-    <td>
-     {|<br />|-<br />||row 1, col 1||row 1, col 2<br />|-<br />||row 2, col 1||row 2, col 2<br />|}
+    <td class="tt">
+     {|<br />
+     |-<br />
+     <nobr class="tt">||row 1, col 1||row 1, col 2</nobr><br />
+     |-<br />
+     <nobr class="tt">||row 2, col 1||row 2, col 2</nobr><br />
+     |}
     </td>
     <td>
-     This tags create a table.
+     These tags create a table, whereas the first marks the beginning of the table, the second starts
+     a new line, the third and fourth each create a new cell in the line. The last displayed tag closes
+     the table.
     </td>
    </tr>
 
    <tr valign="top">
-    <td>
+    <td class="tt">
      [= text =]
     </td>
     <td>
-     The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as regular text.
+     The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as wiki-code.
     </td>
    </tr>
 
    <tr valign="top">
-    <td>
+    <td class="tt">
      &lt;pre&gt; text &lt;/pre&gt;
     </td>
     <td>
-     A text between this tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.
+     A text between these tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.
     </td>
    </tr>
 
    <tr valign="top">
-    <td>
+    <td class="tt">
      text<br />&nbsp;text<br />text
     </td>
     <td>

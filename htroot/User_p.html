@@ -2,76 +2,7 @@
  <title>#[clientname]#'s User Administration</title> 
  end of HEADER-->
     <h2>User Administration</h2>
-    #(page)#
-    <table>
-      <tr>
-        <td valign="top">
-          <form action="User_p.html">
-            <select name="user">
-              <option value="newuser">new User</option>#{users}#
-              <option>#[user]#</option>#{/users}#
-            </select><br />
-            <input type="submit" name="change_user" value="Edit User" />
-            <input type="submit" name="delete_user" value="Delete User" />
-          </form>
-        </td>
-        <td width="100%">
-          <form action="User_p.html" method="POST">
-            <!-- Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly> -->
-            <input type="hidden" name="current_user" value="#[current_user]#" />
-            Current User: #[username]#
-            <table border="1">
-              <tr>
-                <td>Username: </td>
-                <td><input type="text" name="username" value="#[username]#"></td>
-              </tr>
-              <tr>
-                <td>Password: </td>
-                <td><input type="password" name="password"></td>
-              </tr>
-              <tr>
-                <td>Password(repeat): </td>
-                <td><input type="password" name="password2"></td>
-              </tr>
-              <tr>
-                <td>First Name: </td>
-                <td><input type="text" name="firstname" value="#[firstname]#"></td>
-              </tr>
-              <tr>
-                <td>Last Name: </td>
-                <td><input type="text" name="lastname" value="#[lastname]#"></td>
-              </tr>
-              <tr>
-                <td>Address: </td>
-                <td><input type="text" name="address" value="#[address]#"></td>
-              </tr>
-              <tr>
-                <td>Rights</td>
-                <td>
-                  <input type="checkbox" id="proxy" name="proxyRight"#(proxyRight)#:: checked="checked"#(/proxyRight)# /><label for="proxy">Proxy</label><br />
-                  <input type="checkbox" id="admin" name="adminRight"#(adminRight)#:: checked="checked"#(/adminRight)# /><label for="admin">Admin</label><br />
-                  <input type="checkbox" id="share" name="uploadRight"#(uploadRight)#:: checked="checked"#(/uploadRight)# /><label for="share">Fileshare-Upload</label><br />
-                  <input type="checkbox" id="dwnld" name="downloadRight"#(downloadRight)#:: checked="checked"#(/downloadRight)# /><label for="dwnld">Fileshare-Download</label><br />
-                  <input type="checkbox" id="blog" name="blogRight"#(blogRight)#:: checked="checked"#(/blogRight)# /><label for="blog">Blog</label><br />
-                  <input type="checkbox" id="wiki" name="wikiAdminRight"#(wikiAdminRight)#:: checked="checked"#(/wikiAdminRight)# /><label for="wiki">Wiki Admin</label>
-                  <input type="checkbox" id="wiki" name="bookmarkRight"#(bookmarkRight)#:: checked="checked"#(/bookmarkRight)# /><label for="wiki">Bookmarks</label>
-                </td>
-              </tr>
-              <tr>
-                <td><label for="tlimit">Timelimit</label>:</td>
-                <td><input type="text" id="tlimit" name="timelimit" value="#[timelimit]#" /></td>
-              </tr>
-              <tr>
-                <td><label for="tused">Time used</label>:</td>
-                <td><input type="text" id="tused" name="timeused" value="#[timeused]#" /></td>
-              </tr>
-            </table>
-            <input type="submit" name="change" value="Save User" />
-          </form>
-        </td>
-      </tr>
-    </table>
-    ::
+    
     <!-- Page 1: Results -->
     #(text)#
     ::
@@ -81,11 +12,65 @@
     #(/text)#
     #(error)#
     ::
-    <p>Generic error.</p>
+    <p class="error">Generic error.</p>
     ::
-    <p>Passwords do not match.</p>
+    <p class="error">Passwords do not match.</p>
     ::
-    <p>Username too short. Username must be >= 4 Characters.</p>
+    <p class="error">Username too short. Username must be >= 4 Characters.</p>
     #(/error)#
-    <p>If you want to manage more Users, return to the <a href="User_p.html?change_user=true&amp;user=#[username]#">user</a> page.</p>
-    #(/page)#
+    
+	<form action="User_p.html">
+      <fieldset><legend>Select user</legend>
+        <dl>
+          <dt><label for="user">Select user</label>:</dt>
+          <dd>
+            <select name="user" id="user">
+              <option value="newuser">New user</option>#{users}#
+              <option>#[user]#</option>#{/users}#
+            </select>
+          </dd>
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="submit" name="change_user" value="Edit User" />
+            <input type="submit" name="delete_user" value="Delete User" />
+          </dd>
+        </dl>
+      </fieldset>
+    </form>
+    
+    <form action="User_p.html" method="post">
+      <fieldset><legend>Edit current user: #[username]#</legend>
+        <!-- Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly> -->
+        <input type="hidden" name="current_user" value="#[current_user]#" />
+        <dl>
+          <dt><label for="username">Username</label>:</dt>
+          <dd><input type="text" id="username" name="username" value="#[username]#" /></dd>
+          <dt><label for="password">Password</label>:</dt>
+          <dd><input type="password" id="password" name="password" /></dd>
+          <dt><label for="password2">Repeat password</label>:</dt>
+          <dd><input type="password" id="password2" name="password2" /></dd>
+          <dt><label for="firstname">First name</label>:</dt>
+          <dd><input type="text" id="firstname" name="firstname" value="#[firstname]#" /></dd>
+          <dt><label for="lastname">Last name</label>:</dt>
+          <dd><input type="text" id="lastname" name="lastname" value="#[lastname]#" /></dd>
+          <dt><label for="address">Address</label>:</dt>
+          <dd><input type="text" id="address" name="address" value="#[address]#" /></dd>
+          <dt>Rights:</dt>
+          <dd>
+            <input type="checkbox" id="proxy" name="proxyRight"#(proxyRight)#:: checked="checked"#(/proxyRight)# /><label for="proxy">Proxy</label><br />
+            <input type="checkbox" id="admin" name="adminRight"#(adminRight)#:: checked="checked"#(/adminRight)# /><label for="admin">Admin</label><br />
+            <input type="checkbox" id="share" name="uploadRight"#(uploadRight)#:: checked="checked"#(/uploadRight)# /><label for="share">Fileshare-Upload</label><br />
+            <input type="checkbox" id="dwnld" name="downloadRight"#(downloadRight)#:: checked="checked"#(/downloadRight)# /><label for="dwnld">Fileshare-Download</label><br />
+            <input type="checkbox" id="blog" name="blogRight"#(blogRight)#:: checked="checked"#(/blogRight)# /><label for="blog">Blog</label><br />
+            <input type="checkbox" id="wiki" name="wikiAdminRight"#(wikiAdminRight)#:: checked="checked"#(/wikiAdminRight)# /><label for="wiki">Wiki Admin</label><br />
+            <input type="checkbox" id="bkmark" name="bookmarkRight"#(bookmarkRight)#:: checked="checked"#(/bookmarkRight)# /><label for="bkmark">Bookmarks</label>
+          </dd>
+          <dt><label for="tlimit">Timelimit</label>:</dt>
+          <dd><input type="text" id="tlimit" name="timelimit" value="#[timelimit]#" /></dd>
+          <dt><label for="tused">Time used</label>:</dt>
+          <dd><input type="text" id="tused" name="timeused" value="#[timeused]#" /></dd>
+          <dt>&nbsp;</dt>
+          <dd><input type="submit" name="change" value="Save User" /></dd>
+        </dl>
+      </fieldset>
+    </form>

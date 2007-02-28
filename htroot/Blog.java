@@ -60,6 +60,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsRecord;
 
@@ -75,8 +76,8 @@ public class Blog {
     }
 	
 	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-		plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-		serverObjects prop = new serverObjects();
+		final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+		final serverObjects prop = new serverObjects();
 		blogBoard.entry page = null;
 		
 		boolean hasRights = switchboard.verifyAuthentication(header, true);
@@ -99,7 +100,7 @@ public class Blog {
         final int num   = post.getInt("num",20);  //indicates how many entries should be shown
         
         if(!hasRights){
-            userDB.Entry userentry = switchboard.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
+            final userDB.Entry userentry = switchboard.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
             if(userentry != null && userentry.hasBlogRight()){
                 hasRights=true;
             } else if(post.containsKey("login")) {
@@ -109,7 +110,7 @@ public class Blog {
 		}
 
 		String pagename = post.get("page", DEFAULT_PAGE);
-	    final String ip = post.get("CLIENTIP", "127.0.0.1");
+	    final String ip = (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 	    
 		String StrAuthor = post.get("author", "");
 		
@@ -134,7 +135,7 @@ public class Blog {
 
 		if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
             page = switchboard.blogDB.read(pagename);
-            Iterator i = page.comments().iterator();
+            final Iterator i = page.comments().iterator();
             while(i.hasNext()) {
                 switchboard.blogCommentDB.delete((String) i.next());
             }
@@ -165,8 +166,8 @@ public class Blog {
                 comments = page.comments();
 				date = page.date();
 			}
-			String commentMode = post.get("commentMode", "1");
-			String StrSubject = post.get("subject", "");
+			final String commentMode = post.get("commentMode", "1");
+			final String StrSubject = post.get("subject", "");
 			byte[] subject;
 			try {
 				subject = StrSubject.getBytes("UTF-8");
@@ -177,11 +178,11 @@ public class Blog {
 			switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
             
 			// create a news message
-             HashMap map = new HashMap();
-             map.put("page", pagename);
-             map.put("subject", StrSubject.replace(',', ' '));
-             map.put("author", StrAuthor.replace(',', ' '));
-             yacyCore.newsPool.publishMyNews(new yacyNewsRecord("blog_add", map));
+			final HashMap map = new HashMap();
+			map.put("page", pagename);
+			map.put("subject", StrSubject.replace(',', ' '));
+			map.put("author", StrAuthor.replace(',', ' '));
+			yacyCore.newsPool.publishMyNews(new yacyNewsRecord("blog_add", map));
 		}
 
 		page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
@@ -264,7 +265,7 @@ public class Blog {
 	        else {
 	        	//only show 1 entry
 	        	prop.put("mode_entries",1);
-                putBlogEntry(prop, page, address, 0, xml, hasRights);
+                putBlogEntry(prop, page, address, 0, hasRights, xml);
 	        }
 		}
 
@@ -273,28 +274,29 @@ public class Blog {
 	}
     
     private static serverObjects putBlogDefault(
-            serverObjects prop,
-            plasmaSwitchboard switchboard,
-            String address,
+            final serverObjects prop,
+            final plasmaSwitchboard switchboard,
+            final String address,
             int start,
             int num,
-            boolean hasRights,
-            boolean xml) {
+            final boolean hasRights,
+            final boolean xml) {
         try {
-            Iterator i = switchboard.blogDB.keys(false);
+            final Iterator i = switchboard.blogDB.keys(false);
             String pageid;
-            blogBoard.entry entry;
             int count = 0; //counts how many entries are shown to the user
             if(xml) num = 0;
-            int nextstart = start+num;      //indicates the starting offset for next results
-            while(i.hasNext()) {
-                if(count >= num && num > 0)
-                    break;
+            final int nextstart = start+num;      //indicates the starting offset for next results
+            while(i.hasNext() && (num == 0 || num > count)) {
                 pageid = (String) i.next();
-                if(0 < start--)
-                    continue;
-                entry = switchboard.blogDB.read(pageid);
-                putBlogEntry(prop, entry, address, count++, xml, hasRights);
+                if(0 < start--) continue;
+                putBlogEntry(
+                        prop,
+                        switchboard.blogDB.read(pageid),
+                        address,
+                        count++,
+                        hasRights,
+                        xml);
             }
             prop.put("mode_entries",count);
             
@@ -305,7 +307,7 @@ public class Blog {
             } else {
                 prop.put("moreentries",0);
             }
-        } catch (IOException e) {  }
+        } catch (IOException e) { serverLog.logSevere("BLOG", "Error reading blog-DB", e); }
         return prop;
     }
     
@@ -314,8 +316,8 @@ public class Blog {
             final blogBoard.entry entry,
             final String address,
             final int number,
-            final boolean xml,
-            final boolean hasRights) {
+            final boolean hasRights,
+            final boolean xml) {
         
         // subject
         try {
@@ -332,7 +334,9 @@ public class Blog {
         }
         
         // comments
-        if(entry.getCommentMode() != 0) {
+        if(entry.getCommentMode() == 0) {
+            prop.put("mode_entries_" + number + "_commentsactive", 0);
+        } else {
             prop.put("mode_entries_" + number + "_commentsactive", 1);
             prop.put("mode_entries_" + number + "_commentsactive_pageid", entry.key());
             prop.put("mode_entries_" + number + "_commentsactive_address", address);
@@ -341,14 +345,12 @@ public class Blog {
             } catch (UnsupportedEncodingException e) {
                 prop.put("mode_entries_" + number + "_commentsactive_comments", new String(entry.commentsSize()));
             }
-        } else {
-            prop.put("mode_entries_" + number + "_commentsactive", 0);
         }
-
+        
         prop.put("mode_entries_" + number + "_date", dateString(entry.date()));
         prop.put("mode_entries_" + number + "_pageid", entry.key());
         prop.put("mode_entries_" + number + "_address", address);
-        prop.put("mode_entries_" + number +" _ip", entry.ip());
+        prop.put("mode_entries_" + number + "_ip", entry.ip());
         
         if(xml) {
             prop.putASIS("mode_entries_" + number + "_page", entry.page());

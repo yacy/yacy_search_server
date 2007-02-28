@@ -67,23 +67,22 @@ public class User_p {
 		prop.put("SUPERTEMPLATE", "/env/page.html"); //user Supertemplates
 
         //default values
-        prop.put("page", 0);
-        prop.put("page_current_user", "newuser");
-        prop.put("page_username", "");
-        prop.put("page_firstname", "");
-        prop.put("page_lastname", "");
-        prop.put("page_address", "");
-        prop.put("page_timelimit", "");
-        prop.put("page_timeused", "");
-        prop.put("page_timerange", "");
-        prop.put("page_proxyRight", 1);
-        prop.put("page_downloadRight", 0);
-        prop.put("page_uploadRight", 0);
-        prop.put("page_adminRight", 0);
-        prop.put("page_wikiAdminRight", 0);
-        prop.put("page_bookmarkRight", 0);
+        prop.put("current_user", "newuser");
+        prop.put("username", "");
+        prop.put("firstname", "");
+        prop.put("lastname", "");
+        prop.put("address", "");
+        prop.put("timelimit", "");
+        prop.put("timeused", "");
+        prop.put("timerange", "");
+        prop.put("proxyRight", 1);
+        prop.put("downloadRight", 0);
+        prop.put("uploadRight", 0);
+        prop.put("adminRight", 0);
+        prop.put("wikiAdminRight", 0);
+        prop.put("bookmarkRight", 0);
         
-        prop.put("page_users", 0);
+        prop.put("users", 0);
 
         if(sb.userDB == null)
             return prop;
@@ -102,35 +101,34 @@ public class User_p {
 		        // link: "If you want to manage more Users, return to the user page." (parameter "user" is empty)
                 if (entry != null) {
     			    //TODO: set username read-only in html
-                    prop.put("page_current_user", post.get("user"));
-    	                prop.put("page_username", post.get("user"));
-    	                prop.put("page_firstname", entry.getFirstName());
-    	                prop.put("page_lastname", entry.getLastName());
-    	                prop.put("page_address", entry.getAddress());
-    	                prop.put("page_timelimit", entry.getTimeLimit());
-    	                prop.put("page_timeused", entry.getTimeUsed());
-                    prop.put("page_proxyRight", (entry.hasProxyRight()?1:0));
-                    prop.put("page_uploadRight", (entry.hasUploadRight()?1:0));
-                    prop.put("page_downloadRight", (entry.hasDownloadRight()?1:0));
-                    prop.put("page_adminRight", (entry.hasAdminRight()?1:0));
-                    prop.put("page_blogRight", (entry.hasBlogRight()?1:0));
-                    prop.put("page_wikiAdminRight", (entry.hasWikiAdminRight()?1:0));
-                    prop.put("page_bookmarkRight", (entry.hasBookmarkRight()?1:0));
+                    prop.put("current_user", post.get("user"));
+    	                prop.put("username", post.get("user"));
+    	                prop.put("firstname", entry.getFirstName());
+    	                prop.put("lastname", entry.getLastName());
+    	                prop.put("address", entry.getAddress());
+    	                prop.put("timelimit", entry.getTimeLimit());
+    	                prop.put("timeused", entry.getTimeUsed());
+                    prop.put("proxyRight", (entry.hasProxyRight()?1:0));
+                    prop.put("uploadRight", (entry.hasUploadRight()?1:0));
+                    prop.put("downloadRight", (entry.hasDownloadRight()?1:0));
+                    prop.put("adminRight", (entry.hasAdminRight()?1:0));
+                    prop.put("blogRight", (entry.hasBlogRight()?1:0));
+                    prop.put("wikiAdminRight", (entry.hasWikiAdminRight()?1:0));
+                    prop.put("bookmarkRight", (entry.hasBookmarkRight()?1:0));
                 }
 			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
 				sb.userDB.removeEntry((String)post.get("user"));
 			}
         } else if(post.containsKey("change")) { //New User / edit User
-            prop.put("page", 1); //results
-            prop.put("page_text", 0);
-            prop.put("page_error", 0);
+            prop.put("text", 0);
+            prop.put("error", 0);
 
             
             String username=(String)post.get("username");
             String pw=(String)post.get("password");
             String pw2=(String)post.get("password2");
             if(! pw.equals(pw2)){
-                prop.put("page_error", 2); //PW does not match
+                prop.put("error", 2); //PW does not match
                 return prop;
             }
             String firstName=(String)post.get("firstname");
@@ -166,10 +164,10 @@ public class User_p {
                 try{
                     entry=sb.userDB.createEntry(username, mem);
                     sb.userDB.addEntry(entry);
-                    prop.put("page_text_username", username);
-                    prop.put("page_text", 1);
+                    prop.put("text_username", username);
+                    prop.put("text", 1);
                 }catch(IllegalArgumentException e){
-                    prop.put("page_error", 3);
+                    prop.put("error", 3);
                 }
                 
                 
@@ -196,12 +194,12 @@ public class User_p {
 		            }catch (IOException e){
 					}
                 }else{
-					prop.put("page_error", 1);
+					prop.put("error", 1);
 				}
-				prop.put("page_text_username", username);
-				prop.put("page_text", 2);
+				prop.put("text_username", username);
+				prop.put("text", 2);
             }//edit user
-			prop.put("page_username", username);
+			prop.put("username", username);
         }
 		
 		//Generate Userlist
@@ -209,10 +207,10 @@ public class User_p {
         int numUsers=0;
         while(it.hasNext()){
             entry = (userDB.Entry)it.next();
-            prop.put("page_users_"+numUsers+"_user", entry.getUserName());
+            prop.put("users_"+numUsers+"_user", entry.getUserName());
             numUsers++;
         }
-        prop.put("page_users", numUsers);
+        prop.put("users", numUsers);
 
         // return rewrite properties
         return prop;
