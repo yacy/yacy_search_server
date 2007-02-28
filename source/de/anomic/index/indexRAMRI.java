@@ -322,6 +322,16 @@ public final class indexRAMRI implements indexRI {
         
     }
 
+    public synchronized String maxScoreWordHash() {
+        if (cache.size() == 0) return null;
+        try {
+            return (String) hashScore.getMaxObject();
+        } catch (Exception e) {
+            log.logSevere("flushFromMem: " + e.getMessage(), e);
+        }
+        return null;
+    }
+    
     public synchronized String bestFlushWordHash() {
         // select appropriate hash
         // we have 2 different methods to find a good hash:

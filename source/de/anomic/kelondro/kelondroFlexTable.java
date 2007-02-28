@@ -114,7 +114,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     public boolean has(byte[] key) throws IOException {
         // it is not recommended to implement or use a has predicate unless
         // it can be ensured that it causes no IO
-        assert (RAMIndex == true) : "RAM index warning in file " + super.tablename;
+        if ((kelondroRecords.debugmode) && (RAMIndex != true)) serverLog.logWarning("kelondroFlexTable", "RAM index warning in file " + super.tablename);
         return index.geti(key) >= 0;
     }
     

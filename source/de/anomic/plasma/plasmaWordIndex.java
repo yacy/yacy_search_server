@@ -65,8 +65,8 @@ public final class plasmaWordIndex implements indexRI {
     public plasmaWordIndex(File indexRoot, long rwibuffer, long lurlbuffer, long preloadTime, serverLog log) {
         File textindexcache = new File(indexRoot, "PUBLIC/TEXT/RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
-        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIEntryNew.urlEntryRow, 2040, "dump1.array", log);
-        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIEntryNew.urlEntryRow, 2040, "dump2.array", log);
+        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIEntryNew.urlEntryRow, 4000, "dump1.array", log);
+        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIEntryNew.urlEntryRow, 4000, "dump2.array", log);
         
         // create collections storage path
         File textindexcollections = new File(indexRoot, "PUBLIC/TEXT/RICOLLECTION");
@@ -182,29 +182,37 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public void flushCacheSome() {
-        flushCacheSome(dhtOutCache);
-        flushCacheSome(dhtInCache);
-    }
-    
-    private void flushCacheSome(indexRAMRI ram) {
-        flushCache(ram, flushsize);
-        while (ram.maxURLinCache() >= 2040) flushCache(ram, 1);
+        flushCache(dhtOutCache, flushsize);
+        flushCache(dhtInCache, flushsize);
     }
     
     private void flushCache(indexRAMRI ram, int count) {
+        if (ram.size() <= 5000) return;
         if (count <= 0) return;
         if (count > 5000) count = 5000;
         busyCacheFlush = true;
         String wordHash;
         ArrayList containerList = new ArrayList();
         synchronized (this) {
+            boolean collectMax = true;
+            indexContainer c;
+            while (collectMax) {
+                wordHash = ram.maxScoreWordHash();
+                c = ram.getContainer(wordHash, null, -1);
+                if ((c != null) && (c.size() > 4000)) {
+                    containerList.add(ram.deleteContainer(wordHash));
+                } else {
+                    collectMax = false;
+                }
+            }
+            count = count - containerList.size();
             for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
                 if (ram.size() == 0) break;
                 // select one word to flush
                 wordHash = ram.bestFlushWordHash();
                 
                 // move one container from ram to flush list
-                indexContainer c = ram.deleteContainer(wordHash);
+                c = ram.deleteContainer(wordHash);
                 if (c != null) containerList.add(c);
             }
             // flush the containers

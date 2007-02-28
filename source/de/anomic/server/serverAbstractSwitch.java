@@ -51,8 +51,6 @@ import java.util.TreeMap;
 import de.anomic.server.logging.serverLog;
 
 public abstract class serverAbstractSwitch implements serverSwitch {
-
-    private static final long delayBetweenSave = 2000;
     
     // configuration management
     private final File      configFile;
@@ -65,7 +63,6 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     private final TreeMap   switchActions;
     protected serverLog     log;
     protected int           serverJobs;
-    private long            lastTimeSaved;
     
     public serverAbstractSwitch(String rootPath, String initPath, String configPath) {
         // we initialize the switchboard with a property file,
@@ -132,9 +129,6 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
         // init busy state control
         serverJobs = 0;
-        
-        // save control
-        lastTimeSaved = System.currentTimeMillis();
     }
     
     // a logger for this switchboard
@@ -243,15 +237,12 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     }
 
     private void saveConfig() {
-        if (System.currentTimeMillis() > this.lastTimeSaved + delayBetweenSave) {
-            try {
-                synchronized (configProps) {
-                    serverFileUtils.saveMap(configFile, configProps, configComment);
-                }
-            } catch (IOException e) {
-                System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());
+        try {
+            synchronized (configProps) {
+                serverFileUtils.saveMap(configFile, configProps, configComment);
             }
-            this.lastTimeSaved = System.currentTimeMillis();
+        } catch (IOException e) {
+            System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());
         }
     }
 
