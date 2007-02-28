@@ -70,6 +70,7 @@ ps      = application/postscript
 qt      = video/quicktime
 ra      = audio/x-pn-realaudio
 ram     = audio/x-pn-realaudio
+rar		= application/x-rar
 rm		= audio/x-pn-realaudio-plugin
 rpm     = audio/x-pn-realaudio-plugin
 rss     = application/xml
