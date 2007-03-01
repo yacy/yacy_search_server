@@ -14,16 +14,14 @@
     <form action="BlacklistCleaner_p.html" method="post" enctype="multipart/form-data">#(disabled)#
       <fieldset class="selectList"><legend>Check list</legend>
         <div style="display:inline;">
-          <select name="listNames" size="1">
-            #{blacklists}#
-            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
-            #{/blacklists}#
+          <select name="listNames" size="1">#{blacklists}# 
+            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>#{/blacklists}# 
           </select>
           <input type="submit" name="list" value="Check" />
         </div>::
         <p class="error">The blacklist-cleaner only works for the following blacklist-engines up to now:</p>
         <ul>#{engines}# 
-          <li class="tt" title="#[fullname]#">#[name]#</li>#{/engines}# 
+          <li class="tt">#[name]#</li>#{/engines}# 
         </ul>::
         #(/disabled)#
       </fieldset>

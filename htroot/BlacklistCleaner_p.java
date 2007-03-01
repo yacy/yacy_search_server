@@ -1,4 +1,4 @@
-// Blacklist_p.java 
+// BlacklistCleaner_p.java 
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@anomic.de
@@ -162,10 +162,8 @@ public class BlacklistCleaner_p {
             }
         } else {
             prop.put("disabled", 1);
-            for (int i=0; i<supportedBLEngines.length; i++) {
-                prop.put(DISABLED + "engines_" + i + "_name", supportedBLEngines[i].getSimpleName());
-                prop.put(DISABLED + "engines_" + i + "_fullname", supportedBLEngines[i].getName());                
-            }
+            for (int i=0; i<supportedBLEngines.length; i++)
+                prop.put(DISABLED + "engines_" + i + "_name", supportedBLEngines[i].getName());
             prop.put(DISABLED + "engines", supportedBLEngines.length);
         }
     }

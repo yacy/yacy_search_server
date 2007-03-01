@@ -5,6 +5,7 @@
     <li><a href="/ConfigLanguage_p.html" class="MenuItemLink lock">Language</a></li>
     <li><a href="/ConfigProfile_p.html" class="MenuItemLink lock">Peer Profile</a></li>
     <li><a href="/ConfigSkins_p.html" class="MenuItemLink lock">Interface Skins</a></li>
+    <li><a href="/ConfigRobotsTxt_p.html" class ="MenuItemLink lock">Local robots.txt</a></li>
     <li><a href="/ConfigAdvanced_p.html" class="MenuItemLink lock">Advanced</a></li>
   </ul>
 </div>

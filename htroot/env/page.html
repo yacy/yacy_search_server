@@ -1,19 +1,16 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<html>
-<head>
-#[header]#
-<!--<title>YaCy '#[clientname]#': #[title]#</title>-->
-<!-- TODO: title cannot be set, yet. -->
-<!-- clientname needs to be set in page.java (this will remove the code in httpdFileHandler, 
-if we use supertemplates for everything -->
-#%env/templates/metas.template%#
-</head>
-<body marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
-#%env/templates/header.template%#
-<br><br>
-
-#[page]#
-
-#%env/templates/footer.template%#
-</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    #[header]#
+    <!--<title>YaCy '#[clientname]#': #[title]#</title>-->
+    <!-- TODO: title cannot be set, yet. -->
+    <!-- clientname needs to be set in page.java (this will remove the code in httpdFileHandler, 
+    if we use supertemplates for everything -->
+    #%env/templates/metas.template%#
+  </head>
+  <body>
+    #%env/templates/header.template%#
+    #[page]#
+    #%env/templates/footer.template%#
+  </body>
 </html>

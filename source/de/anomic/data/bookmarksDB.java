@@ -321,12 +321,14 @@ public class bookmarksDB {
     }
     public Bookmark getBookmark(String urlHash){
         try {
-            return (Bookmark) bookmarksTable.get(urlHash);
+            kelondroObjectsMapEntry map = (kelondroObjectsMapEntry)bookmarksTable.get(urlHash);
+            if (map instanceof Bookmark) return (Bookmark)map;
+            return new Bookmark(map);
         } catch (IOException e) {
             return null;
         }
-        
     }
+    
     public Iterator getBookmarksIterator(boolean priv){
         TreeSet set=new TreeSet(new bookmarkComparator(true));
         Iterator it=bookmarkIterator(true);
@@ -764,7 +766,11 @@ public class bookmarksDB {
             tags=new HashSet();
             timestamp=System.currentTimeMillis();
         }
-       
+        
+        public Bookmark(kelondroObjectsMapEntry map) {
+            this(plasmaURL.urlHash((String)map.map().get(BOOKMARK_URL)), map.map());
+        }
+        
         private Map toMap(){
             entry.put(BOOKMARK_TAGS, listManager.hashset2string(tags));
             entry.put(BOOKMARK_TIMESTAMP, String.valueOf(this.timestamp));
