@@ -60,10 +60,11 @@ Activate this list for==Diese Liste ist g&uuml;ltig f&uuml;r
 #---------------------------
 Blacklist Manager==Blacklist Verwaltung
 Blacklist Cleaner==Blacklist aufr&auml;men
-Remove illegal blacklist-entries==Entferne ung&uuml;ltige Eintr&auml;ge aus der Blacklist
+Here you can remove or edit illegal or double blacklist-entries.==Hier k&ouml;nnen Sie ung&uuml;ltige oder doppelte Eintr&auml;ge auf der Blacklist entfernen oder bearbeiten. 
 Check list==Liste testen
 "Check"=="Teste"
-Illegal Entries for==Ung&uuml;ltiger Eintr&auml;ge f&uuml;r
+The blacklist-cleaner only works for the following blacklist-engines up to now:==Der Blacklist-Cleaner arbeitet zur Zeit nur mit den folgenden Blacklist-Engines:
+Illegal Entries for==Ung&uuml;ltige Eintr&auml;ge f&uuml;r
 Deleted \#\[delCount\]\# entries==#[delCount]# Eintr&auml;ge gel&ouml;scht
 Altered \#\[alterCount\]\# entries!==#[alterCount]# Eintr&auml;ge ge&auml;ndert
 Two wildcards in host-part==Zwei Wildcards im Host-Teil
@@ -986,6 +987,7 @@ no remote \#\[peertype\]\# peer for this list known==Kein remote Peer #[peertype
 Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Gezeigt werden #[num]# Eintr&auml;ge von insgesamt #[total]# Peers.
 send&nbsp;<strong>M</strong>essage/<br />show&nbsp;<strong>P</strong>rofile/<br />edit&nbsp;<strong>W</strong>iki==Sende Nachricht (<strong>m</strong>)/<br />Zeige Profil (<strong>p</strong>)/<br />&Auml;ndere Wiki (<strong>w</strong>)
 Search for a peername \(RegExp allowed\):==Suche nach Peernamen (RegExp erlaubt):
+"Search"=="Suche"
 Name==Name
 Address==Adresse
 Hash==Hash
@@ -1829,26 +1831,37 @@ alt="Give negative vote"==alt="Link negativ bewerten"
 provided by YaCy peers using public bookmarks, link votes and crawl start points==bereitgestellt von YaCy-Peers durch öffentliche Lesezeichen, Link Bewertungen und Crawl Startpunkte
 Hide surftips==Verberge Surftipps
 "Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
+
 #File: User_p.html
 #---------------------------
-new User==neuer Benutzer
+User Administration==Benutzer Verwaltung
+Select user==Benutzer w&auml;hlen
+New user==neuer Benutzer
 Edit User==Benutzer bearbeiten
 Delete User==Benutzer l&ouml;schen
-Current User:==aktueller Benutzer:
-Password:==Passwort:
-Password\(repeat\):==Passwort(wiederholen):
-First Name:==Vorname:
-Last Name:==Nachname:
-Address:==Adresse:
+Edit current user:==aktuellen Benutzer bearbeiten:
+Username==Benutzername
+Password==Passwort
+Repeat password==Passwort wiederholen
+First name==Vorname
+Last name==Nachname
+Address==Adresse
 Rights==Rechte
-Timelimit</label>==Zeitlimit</label>
+#Proxy==Proxy
+#Admin==Admin
+Fileshare-Upload==Dateifreigabe-Upload
+Fileshare-Download==Dateifreigabe-Download
+#Blog==Blog
+#Wiki Admin==Wiki Admin
+Bookmarks==Lesezeichen
+Timelimit==Zeitlimit
 Time used==verbrauchte Zeit
 Save User==Benutzer speichern
 User created:==Benutzer erstellt:
 User changed:==Benutzer ge&auml;ndert:
+Generic error.==Genereller Fehler.
 Passwords do not match.==Passw&ouml;rter stimmen nicht &uuml;berein.
-If you want to manage more Users, return to the==Wenn Sie mehr Benutzer verwalten wollen kehren Sie zur
-user</a> page.==Benutzerseite</a> zur&uuml;ck.
+Username too short. Username must be >= 4 Characters.==Benutzername zu kurz. Benutzername mus mehr als 4 Buchstaben enthalten.
 #-----------------------------
 
 #File: ViewFile.html
