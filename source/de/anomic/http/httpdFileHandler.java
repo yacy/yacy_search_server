@@ -592,7 +592,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         path.endsWith("csv") ||
                         path.endsWith("pac") ||
                         path.endsWith("src") ||
-                        path.endsWith("/")) {
+                        path.endsWith("/") ||
+                        path.equals("/robots.txt")) {
                             
                     /*targetFile = getLocalizedFile(path);
 					if (!(targetFile.exists())) {

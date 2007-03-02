@@ -132,6 +132,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
+import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryNew;
@@ -261,6 +262,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     //    public String   remoteProxyNoProxy = "";
     //    public String[] remoteProxyNoProxyPatterns = null;
     public httpRemoteProxyConfig remoteProxyConfig = null;
+    
+    public httpdRobotsTxtConfig robotstxtConfig = null;
     
     
     /*
@@ -652,6 +655,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public static final String HTTPC_NAME_CACHE_CACHING_PATTERNS_NO = "httpc.nameCacheNoCachingPatterns";
     
+    public static final String ROBOTS_TXT                       = "httpd.robots.txt";
+    public static final String ROBOTS_TXT_DEFAULT               = httpdRobotsTxtConfig.LOCKED + " " + httpdRobotsTxtConfig.DIRS;
+    
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Lists
     //////////////////////////////////////////////////////////////////////////////////////////////
@@ -874,6 +880,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * ============================================================================ */
         this.remoteProxyConfig = httpRemoteProxyConfig.init(this);
         this.log.logConfig("Remote proxy configuration:\n" + this.remoteProxyConfig.toString());
+        
+        // set up local robots.txt
+        this.robotstxtConfig = httpdRobotsTxtConfig.init(this);
         
         // setting timestamp of last proxy access
         this.proxyLastAccess = System.currentTimeMillis() - 60000;

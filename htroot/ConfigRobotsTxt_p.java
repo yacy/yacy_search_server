@@ -48,157 +48,56 @@
 // javac -classpath .:../classes ConfigRobotsTxt_p.java
 // if the shell's current path is HTROOT
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 
 public class ConfigRobotsTxt_p {
     
     public static final Pattern entryBeginPattern = Pattern.compile("# (\\w*) \\((\\d*) entries\\)");
     
-    private static HashMap disallowMap = null;
-    
-    private static Map getDisallowMap(String htrootPath) {
-        if (disallowMap == null) {
-            final File htroot = new File(htrootPath);
-            if (!htroot.exists()) return null;
-            disallowMap = new /* <String,String[]> */ HashMap();
-            final ArrayList htrootFiles = new ArrayList();
-            final ArrayList htrootDirs = new ArrayList();
-            final String[] htroots = htroot.list();
-            File file;
-            for (int i=0, dot; i<htroots.length; i++) {
-                if (htroots[i].equals("www")) continue;
-                file = new File(htroot, htroots[i]);
-                if (file.isDirectory()) {
-                    htrootDirs.add("/" + file.getName());
-                } else if (
-                        (dot = htroots[i].lastIndexOf('.')) < 2 ||
-                        htroots[i].charAt(dot - 2) == '_' && htroots[i].charAt(dot - 1) == 'p'
-                ) {
-                    htrootFiles.add("/" + file.getName());
-                }
-            }
-            
-            disallowMap.put("all", new String[] { "/" } );
-            disallowMap.put("locked", htrootFiles.toArray(new String[htrootFiles.size()]));
-            disallowMap.put("directories", htrootDirs.toArray(new String[htrootDirs.size()]));
-            disallowMap.put("blog", new String[] {
-                    "/Blog.html",
-                    "/Blog.xml",
-                    "/BlogComments.html" } );
-            disallowMap.put("wiki", new String[] { "/Wiki.html" } );
-            disallowMap.put("bookmarks", new String[] { "/Bookmarks.html" } );
-            disallowMap.put("homepage", new String[] { "/www" } );
-            disallowMap.put("fileshare", new String[] { "/share" } );
-            disallowMap.put("surftips", new String[] { "/Surftips.html" } );
-            disallowMap.put("news", new String[] { "/News.html" } );
-            disallowMap.put("status", new String[] { "/Status.html" } );
-            disallowMap.put("network", new String[] {
-                    "/Network.html",
-                    "/Network.xml",
-                    "/Network.csv" } );
-        }
-        return disallowMap;
-    }
-    
     public static servletProperties respond(httpHeader header, serverObjects post, serverSwitch env) {
         final servletProperties prop = new servletProperties();
         
-        prop.put("address", yacyCore.seedDB.mySeed.getAddress());
-        
-        final String htroot = ((plasmaSwitchboard)env).getConfig(plasmaSwitchboard.HTROOT_PATH, plasmaSwitchboard.HTROOT_PATH_DEFAULT);
-        final File robots_txt = new File(htroot + File.separator + "robots.txt");
-        if (!robots_txt.exists()) try {
-            robots_txt.createNewFile();
-        } catch (IOException e) {
-            prop.put("error", 1);
-            prop.put("error_msg", e.getMessage());
-        }
+        httpdRobotsTxtConfig rbc = ((plasmaSwitchboard)env).robotstxtConfig;
+        prop.put("clientname", yacyCore.seedDB.mySeed.getAddress());
         
         if (post != null) {
             if (post.containsKey("save")) {
-                try {
-                    if (robots_txt.delete() && robots_txt.createNewFile()) {
-                        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(robots_txt)));
-                        printHeader(out);
-                        
-                        final Iterator it = getDisallowMap(htroot).entrySet().iterator();
-                        Map.Entry entry;
-                        while (it.hasNext()) {
-                            entry = (Map.Entry)it.next();
-                            if (post.containsKey(entry.getKey())) {
-                                out.println();
-                                printEntry(out, entry);
-                            }
-                        }
-                        out.flush();
-                        out.close();
-                    } else {
-                        prop.put("error", 2);
-                    }
-                } catch (IOException e) {
-                    serverLog.logSevere("ROBOTS.TXT", "Error writing " + robots_txt, e);
-                    prop.put("error", 1);
-                    prop.put("error_msg", e.getMessage());
-                }
+                rbc.setAllDisallowed(post.containsKey(httpdRobotsTxtConfig.ALL));
+                rbc.setBlogDisallowed(post.containsKey(httpdRobotsTxtConfig.BLOG));
+                rbc.setBookmarksDisallowed(post.containsKey(httpdRobotsTxtConfig.BOOKMARKS));
+                rbc.setDirsDisallowed(post.containsKey(httpdRobotsTxtConfig.DIRS));
+                rbc.setFileshareDisallowed(post.containsKey(httpdRobotsTxtConfig.FILESHARE));
+                rbc.setHomepageDisallowed(post.containsKey(httpdRobotsTxtConfig.HOMEPAGE));
+                rbc.setLockedDisallowed(post.containsKey(httpdRobotsTxtConfig.LOCKED));
+                rbc.setNetworkDisallowed(post.containsKey(httpdRobotsTxtConfig.NETWORK));
+                rbc.setNewsDisallowed(post.containsKey(httpdRobotsTxtConfig.NEWS));
+                rbc.setStatusDisallowed(post.containsKey(httpdRobotsTxtConfig.STATUS));
+                rbc.setSurftipsDisallowed(post.containsKey(httpdRobotsTxtConfig.SURFTIPS));
+                rbc.setWikiDisallowed(post.containsKey(httpdRobotsTxtConfig.WIKI));
+                ((plasmaSwitchboard)env).setConfig(plasmaSwitchboard.ROBOTS_TXT, rbc.toString());
             }
         }
         
-        // read htroot/robots.txt
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(robots_txt));
-            String line;
-            Matcher m;
-            while ((line = br.readLine()) != null) {
-                if ((m = entryBeginPattern.matcher(line)).matches())
-                    prop.put(m.group(1) + ".checked", 1);
-            }
-        } catch (IOException e) {
-            prop.put("error", 1);
-            prop.put("error_msg", e.getMessage());
-        }
-        
+        prop.put(httpdRobotsTxtConfig.ALL + ".checked", (rbc.isAllDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.BLOG + ".checked", (rbc.isBlogDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.BOOKMARKS + ".checked", (rbc.isBookmarksDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.DIRS + ".checked", (rbc.isDirsDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.FILESHARE + ".checked", (rbc.isFileshareDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.HOMEPAGE + ".checked", (rbc.isHomepageDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.LOCKED + ".checked", (rbc.isLockedDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.NETWORK + ".checked", (rbc.isNetworkDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.NEWS + ".checked", (rbc.isNewsDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.STATUS + ".checked", (rbc.isStatusDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.SURFTIPS + ".checked", (rbc.isSurftipsDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.WIKI + ".checked", (rbc.isWikiDisallowed()) ? 1 : 0);
         return prop;
-    }
-    
-    private static void printHeader(PrintWriter out) {
-        out.print("# robots.txt for ");
-        out.print(yacyCore.seedDB.mySeed.getName());
-        out.println(".yacy");
-        out.println();
-        out.println("User-agent: *");
-    }
-    
-    private static void printEntry(PrintWriter out, Map.Entry entry) {
-        String[] disallows = (String[])entry.getValue();
-        out.print("# ");
-        out.print(entry.getKey());
-        out.print(" (");
-        out.print(disallows.length);
-        out.println(" entries)");
-        
-        for (int i=0; i<disallows.length; i++) {
-            out.print("Disallow: ");
-            out.println(disallows[i]);
-        }
     }
 }

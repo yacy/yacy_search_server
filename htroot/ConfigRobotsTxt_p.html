@@ -9,14 +9,17 @@
     #%env/templates/submenuConfig.template%#
     <h2>Exclude Web-Spiders</h2>
     <p>
+      Here you can set robots.txt-settings for all webcrawlers that try to access your peer.
+      <span class="tt">robots.txt</span> is a volunteer agreement most search-engines (including YaCy) follow.
+      It disallows crawlers to access webpages or even entire domains.
     </p>
     #(error)#
     ::<p class="error">Unable to access the local file: <span class="error tt">#[msg]#</span></p>
     ::<p class="error">Deletion of <span class="error tt">htroot/robots.txt</span> failed</p>#(/error)#
     <form method="post" action="ConfigRobotsTxt_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
-      <input type="hidden" name="directories" value="checked" />
-      <input type="hidden" name="locked" value="checked" />
-      <fieldset><legend>Restrict access to</legend>
+      <fieldset><legend>Restrict access for</legend>
+        <input type="hidden" name="directories" value="checked" />
+        <input type="hidden" name="locked" value="checked" />
         <dl>
           <dt><label for="all"><em>Entire Peer</em></label></dt>
           <dd><input type="checkbox" id="all" name="all"#(all.checked)#:: checked="checked"#(/all.checked)# /></dd>

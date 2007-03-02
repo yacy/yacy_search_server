@@ -869,3 +869,19 @@ rankingProfile =
 #optional extern thumbnail program.
 #the program must accept the invocation PROGRAM http://url /path/to/filename
 thumbnailProgram = 
+
+# settings for the peer's local robots.txt
+# the following restrictions are possible (comma-separated):
+# - all       : entire domain is disallowed
+# - blog      : the blog-pages
+# - bookmarks : the bookmark-page
+# - dirs      : all directories in htroot (standard setting, as there is no usable information in)
+# - fileshare : all files in the peer's file share (DATA/HTDOCS/share)
+# - homepage  : all files on the peer's home page (DATA/HTDOCS/www)
+# - locked    : all servlets ending on '_p.*' (standard setting, as robots would need a password to access them anyways)
+# - news      : the news-page
+# - network   : the network-pages
+# - status    : peer's status page
+# - surftips  : the surftips-page
+# - wiki      : the wiki-page
+httpd.robots.txt = locked,dirs
