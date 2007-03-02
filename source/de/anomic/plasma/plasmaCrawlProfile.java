@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
@@ -461,21 +462,23 @@ public class plasmaCrawlProfile {
             if (domFilterDepth() == Integer.MAX_VALUE) return true;
             return doms.containsKey(domain);
         }
-        public String domNames(boolean attr, int maxlength) {
+
+        public String domName(boolean attr, int index){
             Iterator domnamesi = doms.entrySet().iterator();
-            String domnames="";
+            String domname="";
             Map.Entry ey;
             DomProfile dp;
-            while (domnamesi.hasNext()) {
+            int i = 0;
+            while ((domnamesi.hasNext()) && (i < index)) {
+                ey = (Map.Entry) domnamesi.next();
+                i++;
+            }
+            if(domnamesi.hasNext()){
                 ey = (Map.Entry) domnamesi.next();
                 dp = (DomProfile) ey.getValue();
-                domnames += ((String) ey.getKey()) + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count + " ") : " ") + "<br>";
-                if ((maxlength > 0) && (domnames.length() >= maxlength)) {
-                    domnames = domnames.substring(0, maxlength-3) + "...";
-                    break;
-                }
+                domname = ((String) ey.getKey()) + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count) : " ");
             }
-            return domnames;
+            return domname;
         }
     }
 }

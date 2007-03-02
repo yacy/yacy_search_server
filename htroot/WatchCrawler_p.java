@@ -1,29 +1,3 @@
-import java.io.File;
-import java.io.Writer;
-import java.net.MalformedURLException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
-import de.anomic.data.wikiCode;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.http.httpHeader;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.net.URL;
-import de.anomic.plasma.plasmaCrawlEURL;
-import de.anomic.plasma.plasmaCrawlProfile;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
-import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverObjects;
-import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNewsRecord;
-
 // WatchCrawler_p.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 18.12.2006 on http://www.anomic.de
@@ -50,6 +24,32 @@ import de.anomic.yacy.yacyNewsRecord;
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+import java.io.File;
+import java.io.Writer;
+import java.net.MalformedURLException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import de.anomic.data.wikiCode;
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroBitfield;
+import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.plasma.plasmaCrawlProfile;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaURL;
+import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsRecord;
 
 public class WatchCrawler_p {
 
@@ -332,14 +332,28 @@ public class WatchCrawler_p {
         while (it.hasNext()) {
             profile = (plasmaCrawlProfile.entry) it.next();
             prop.put("crawlProfiles_"+count+"_dark", ((dark) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_name", wikiCode.replaceHTML(profile.name()));
-            prop.put("crawlProfiles_"+count+"_startURL", wikiCode.replaceHTML(profile.startURL()));
-            prop.put("crawlProfiles_"+count+"_handle", wikiCode.replaceHTML(profile.handle()));
+            prop.put("crawlProfiles_"+count+"_name", profile.name());
+            prop.put("crawlProfiles_"+count+"_startURL", profile.startURL());
+            prop.put("crawlProfiles_"+count+"_handle", profile.handle());
             prop.put("crawlProfiles_"+count+"_depth", profile.generalDepth());
             prop.put("crawlProfiles_"+count+"_filter", profile.generalFilter());
             prop.put("crawlProfiles_"+count+"_crawlingIfOlder", (profile.recrawlIfOlder() == Long.MAX_VALUE) ? "no re-crawl" : ""+profile.recrawlIfOlder());
             prop.put("crawlProfiles_"+count+"_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
-            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", profile.domNames(true, domlistlength));
+
+            //start contrib [MN]
+            int i = 0;
+            String item;
+            while((i <= domlistlength) && !((item = profile.domName(true, i)).equals(""))){
+                if(i == domlistlength){
+                    item = item + " ...";
+                }
+                prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent_"+i+"_item", item);
+                i++;
+            }
+
+            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", i);
+            //end contrib [MN]
+
             prop.put("crawlProfiles_"+count+"_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : ""+profile.domMaxPages());
             prop.put("crawlProfiles_"+count+"_withQuery", ((profile.crawlingQ()) ? 1 : 0));
             prop.put("crawlProfiles_"+count+"_storeCache", ((profile.storeHTCache()) ? 1 : 0));
