@@ -32,12 +32,12 @@ public class robots {
             if (rbc.isLockedDisallowed() || rbc.isDirsDisallowed()) {
                 final ArrayList[] p = getFiles(env.getConfig(plasmaSwitchboard.HTROOT_PATH, plasmaSwitchboard.HTROOT_PATH_DEFAULT));
                 if (rbc.isLockedDisallowed()) {
-                    prop.put(httpdRobotsTxtConfig.LOCKED, p[0].size());
+                    prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.LOCKED, p[0].size());
                     for (int i=0; i<p[0].size(); i++)
                         prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.LOCKED + "_" + i + "_page", p[0].get(i));
                 }
                 if (rbc.isDirsDisallowed()) {
-                    prop.put(httpdRobotsTxtConfig.DIRS, p[1].size());
+                    prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.DIRS, p[1].size());
                     for (int i=0; i<p[1].size(); i++)
                         prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.DIRS + "_" + i + "_dir", p[1].get(i));
                 }
@@ -58,12 +58,12 @@ public class robots {
             if (htroots[i].equals("www")) continue;
             file = new File(htroot, htroots[i]);
             if (file.isDirectory()) {
-                htrootDirs.add("/" + file.getName());
+                htrootDirs.add(htroots[i]);
             } else if (
                     (dot = htroots[i].lastIndexOf('.')) < 2 ||
                     htroots[i].charAt(dot - 2) == '_' && htroots[i].charAt(dot - 1) == 'p'
             ) {
-                htrootFiles.add("/" + file.getName());
+                htrootFiles.add(htroots[i]);
             }
         }
         return new ArrayList[] { htrootFiles, htrootDirs };

@@ -4,13 +4,16 @@ User-agent: *
 
 #(all)#
 
-#{dirs}#
 # dirs
-Disallow: /#[dir]##{/dirs}#
+#{dirs}#
+Disallow: /#[dir]#
+#{/dirs}#
 
-#{locked}#
+
 # locked
-Disallow: /#[page]##{/locked}#
+#{locked}#
+Disallow: /#[page]#
+#{/locked}#
 
 #(wiki)#::
 # wiki
