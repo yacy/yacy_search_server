@@ -322,6 +322,7 @@ public class bookmarksDB {
     public Bookmark getBookmark(String urlHash){
         try {
             kelondroObjectsMapEntry map = (kelondroObjectsMapEntry)bookmarksTable.get(urlHash);
+            if (map == null) return null;
             if (map instanceof Bookmark) return (Bookmark)map;
             return new Bookmark(map);
         } catch (IOException e) {
@@ -733,7 +734,7 @@ public class bookmarksDB {
         }
         public Bookmark(String url){
             super();
-            if(!url.toLowerCase().startsWith("http://")){
+            if(!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")){
                 url="http://"+url;
             }
             this.urlHash=plasmaURL.urlHash(url);
