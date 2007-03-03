@@ -317,6 +317,25 @@ public class BookmarkService extends AbstractService {
 		this.deleteBookmarksByHash(hashs);	
 	}
 	
+	
+	public String bookmarkIsKnown(String url) throws AxisFault {
+		String urlHash = plasmaURL.urlHash(url);
+		return this.bookmarkIsKnownByHash(urlHash);
+	}
+	
+	public String bookmarkIsKnownByHash(String urlHash) throws AxisFault {
+        // extracting the message context		
+        extractMessageContext(AUTHENTICATION_NEEDED);        
+        if (urlHash == null || urlHash.length()==0) throw new IllegalArgumentException("The url-hash must not be null or empty");
+        
+        // get the bookmark object
+        bookmarksDB.Bookmark bookmark = getBookmarkDB().getBookmark(urlHash);  
+        
+        // set bookmark properties
+        if(bookmark == null) return null;        
+        return bookmark.getTagsString();
+	}	
+	
 	/**
 	 * Function to change the properties of a bookmark stored in the YaCy Bookmark DB
 	 * 

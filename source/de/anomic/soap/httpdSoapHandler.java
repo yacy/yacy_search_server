@@ -726,7 +726,8 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         if (transferEncoding != null) bodyOut = chunkedOut = new httpChunkedOutputStream(bodyOut);
         if (contentEncoding != null) bodyOut = gzipOut = new GZIPOutputStream(bodyOut);
         
-        // sending the body        
+        // sending the body     
+        soapMessage.writeTo(System.out);
         soapMessage.writeTo(bodyOut);            
         bodyOut.flush();
         
