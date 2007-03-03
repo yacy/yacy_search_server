@@ -49,9 +49,6 @@ import de.anomic.yacy.yacySeedDB;
 
 public final class indexRAMRI implements indexRI {
 
-    // environment constants
-    public  static final long wCacheMaxAge = 1000 * 60 * 30; // milliseconds; 30 minutes
-        
     // class variables
     private final File databaseRoot;
     protected final SortedMap cache; // wordhash-container
@@ -59,13 +56,14 @@ public final class indexRAMRI implements indexRI {
     private final kelondroMScoreCluster hashDate;
     private long  initTime;
     private int   cacheMaxCount;
-    public  int   cacheReferenceLimit;
+    public  int   cacheReferenceCountLimit;
+    public  long  cacheReferenceAgeLimit;
     private final serverLog log;
     private String indexArrayFileName;
     private kelondroRow payloadrow;
     private kelondroRow bufferStructureBasis;
     
-    public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceLimitInit, String dumpname, serverLog log) {
+    public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceCountLimitInit, long wCacheReferenceAgeLimitInit, String dumpname, serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
@@ -75,7 +73,8 @@ public final class indexRAMRI implements indexRI {
         this.hashDate  = new kelondroMScoreCluster();
         this.initTime = System.currentTimeMillis();
         this.cacheMaxCount = 10000;
-        this.cacheReferenceLimit = wCacheReferenceLimitInit;
+        this.cacheReferenceCountLimit = wCacheReferenceCountLimitInit;
+        this.cacheReferenceAgeLimit = wCacheReferenceAgeLimitInit;
         this.log = log;
         this.indexArrayFileName = dumpname;
         this.payloadrow = payloadrow;
@@ -341,14 +340,14 @@ public final class indexRAMRI implements indexRI {
         try {
                 String hash = null;
                 int count = hashScore.getMaxScore();
-                if ((count >= cacheReferenceLimit) &&
+                if ((count >= cacheReferenceCountLimit) &&
                     ((hash = (String) hashScore.getMaxObject()) != null)) {
                     // we MUST flush high-score entries, because a loop deletes entries in cache until this condition fails
                     // in this cache we MUST NOT check wCacheMinAge
                     return hash;
                 }
                 long oldestTime = longEmit(hashDate.getMinScore());
-                if (((System.currentTimeMillis() - oldestTime) > wCacheMaxAge) &&
+                if (((System.currentTimeMillis() - oldestTime) > cacheReferenceAgeLimit) &&
                     ((hash = (String) hashDate.getMinObject()) != null)) {
                     // flush out-dated entries
                     return hash;

@@ -27,16 +27,23 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 import de.anomic.index.indexContainer;
+import de.anomic.plasma.plasmaURL;
+import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
@@ -44,14 +51,15 @@ public class kelondroCollectionIndex {
 
     private static final int serialNumber = 0;
     
-    protected kelondroIndex index;
-    private int keylength;
+    private kelondroIndex index;
+    private int           keylength;
     private File          path;
     private String        filenameStub;
+    private File          commonsPath;
     private int           loadfactor;
     private Map           arrays; // Map of (partitionNumber"-"chunksize)/kelondroFixedWidthArray - Objects
     private kelondroRow   payloadrow; // definition of the payload (chunks inside the collections)
-    //  private int partitions;  // this is the maxmimum number of array files; yet not used
+    private int           maxPartitions;  // this is the maxmimum number of array files; yet not used
     
     private static final int idx_col_key        = 0;  // the index
     private static final int idx_col_chunksize  = 1;  // chunksize (number of bytes in a single chunk, needed for migration option)
@@ -101,14 +109,18 @@ public class kelondroCollectionIndex {
     
     public kelondroCollectionIndex(File path, String filenameStub, int keyLength, kelondroOrder indexOrder,
                                    long buffersize, long preloadTime,
-                                   int loadfactor, kelondroRow rowdef) throws IOException {
+                                   int loadfactor, int maxpartitions,
+                                   kelondroRow rowdef) throws IOException {
         // the buffersize is number of bytes that are only used if the kelondroFlexTable is backed up with a kelondroTree
         this.path = path;
         this.filenameStub = filenameStub;
         this.keylength = keyLength;
         this.payloadrow = rowdef;
         this.loadfactor = loadfactor;
-
+        this.maxPartitions = maxpartitions;
+        this.commonsPath = new File(path, filenameStub + "." + fillZ(Integer.toHexString(rowdef.objectsize).toUpperCase(), 4) + ".commons");
+        this.commonsPath.mkdirs();
+        
         boolean ramIndexGeneration = false;
         boolean fileIndexGeneration = !(new File(path, filenameStub + ".index").exists());
         if (ramIndexGeneration) index = new kelondroRowSet(indexRow(keyLength, indexOrder), 0);
@@ -591,9 +603,20 @@ public class kelondroCollectionIndex {
                 oldcollection.shape();
                 oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
                 oldcollection.trim();
+                
+                // check for size of collection:
+                // if necessary shrink the collection and dump a part of that collection
+                // to avoid that this grows too big
+                int newPartitionNumber;
+                while ((newPartitionNumber = arrayIndex(oldcollection.size())) > maxPartitions) {
+                    kelondroRowSet newcollection = shrinkCollection(key, oldcollection, arrayCapacity(maxPartitions));
+                    saveCommons(key, oldcollection);
+                    oldcollection = newcollection;
+                }
+                
+                // work on with oldcollection
                 collection = oldcollection;
-
-                int newPartitionNumber = arrayIndex(collection.size());
+                newPartitionNumber = arrayIndex(collection.size());
 
                 // see if we need new space or if we can overwrite the old space
                 if (oldPartitionNumber == newPartitionNumber) {
@@ -678,7 +701,7 @@ public class kelondroCollectionIndex {
 
             // load the old collection and join it
             kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false);
-                    
+
             // join with new collection
             oldcollection.addAllUnique(collection);
             oldcollection.shape();
@@ -686,7 +709,19 @@ public class kelondroCollectionIndex {
             oldcollection.trim();
             collection = oldcollection;
 
-            int newPartitionNumber = arrayIndex(collection.size());
+            // check for size of collection:
+            // if necessary shrink the collection and dump a part of that collection
+            // to avoid that this grows too big
+            int newPartitionNumber;
+            while ((newPartitionNumber = arrayIndex(oldcollection.size())) > maxPartitions) {
+                kelondroRowSet newcollection = shrinkCollection(key, oldcollection, arrayCapacity(maxPartitions));
+                saveCommons(key, oldcollection);
+                oldcollection = newcollection;
+            }
+            
+            // work on with oldcollection
+            collection = oldcollection;
+            newPartitionNumber = arrayIndex(collection.size());
 
             // see if we need new space or if we can overwrite the old space
             if (oldPartitionNumber == newPartitionNumber) {
@@ -705,6 +740,68 @@ public class kelondroCollectionIndex {
             arrayResolveRemoved(); // remove all to-be-removed marked entries
             index.put(indexrow); // write modified indexrow
         }
+    }
+    
+    private kelondroRowSet shrinkCollection(byte[] key, kelondroRowSet collection, int targetSize) {
+        // removes entries from collection
+        // the removed entries are stored in a 'commons' dump file
+
+        // check if the collection is already small enough
+        int oldsize = collection.size();
+        kelondroRowSet survival = new kelondroRowSet(collection.rowdef, 0);
+        if (oldsize <= targetSize) return survival;
+        
+        // delete some entries, which are bad rated
+        Iterator i = collection.rows();
+        kelondroRow.Entry entry;
+        byte[] ref;
+        while (i.hasNext()) {
+            entry = (kelondroRow.Entry) i.next();
+            ref = entry.getColBytes(0);
+            if ((ref.length == 12) && (plasmaURL.probablyRootURL(new String(ref)))) {
+                survival.addUnique(entry);
+                i.remove();
+            }
+        }
+        int firstSurvival = survival.size();
+        
+        // check if we shrinked enough
+        Random rand = new Random(System.currentTimeMillis());
+        while (survival.size() > targetSize) {
+            // now delete randomly more entries from the survival collection
+            i = survival.rows();
+            while (i.hasNext()) {
+                entry = (kelondroRow.Entry) i.next();
+                ref = entry.getColBytes(0);
+                if (rand.nextInt() % 4 != 0) {
+                    collection.addUnique(entry);
+                    i.remove();
+                }
+            }
+        }
+        
+        serverLog.logInfo("kelondroCollectionIndex", "shrinked common word " + new String(key) + "; old size = " + oldsize + ", new size = " + collection.size() + ", maximum size = " + targetSize + ", survival size = " + survival.size() + ", first survival = " + firstSurvival);
+        return survival;
+    }
+    
+    private void saveCommons(byte[] key, kelondroRowSet collection) {
+        if (key.length != 12) return;
+        collection.shape();
+        TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
+        Calendar gregorian = new GregorianCalendar(GMTTimeZone);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        String filename = serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(new String(key))) + "_" + formatter.format(gregorian.getTime()) + ".collection";
+        File storagePath = new File(commonsPath, filename.substring(0, 2)); // make a subpath
+        storagePath.mkdirs();
+        File file = new File(storagePath, filename);
+        try {
+            collection.saveCollection(file);
+            serverLog.logInfo("kelondroCollectionIndex", "dumped common word " + new String(key) + " to " + file.toString() + "; size = " + collection.size());
+        } catch (IOException e) {
+            e.printStackTrace();
+            serverLog.logWarning("kelondroCollectionIndex", "failed to dump common word " + new String(key) + " to " + file.toString() + "; size = " + collection.size());
+        }
+        
     }
     
     public synchronized int remove(byte[] key, Set removekeys) throws IOException, kelondroOutOfLimitsException {
@@ -918,7 +1015,7 @@ public class kelondroCollectionIndex {
             kelondroCollectionIndex collectionIndex  = new kelondroCollectionIndex(
                         path, filenameStub, 9 /*keyLength*/,
                         kelondroNaturalOrder.naturalOrder, buffersize, preloadTime,
-                        4 /*loadfactor*/, rowdef);
+                        4 /*loadfactor*/, 7, rowdef);
             
             // fill index with values
             kelondroRowSet collection = new kelondroRowSet(rowdef, 0);

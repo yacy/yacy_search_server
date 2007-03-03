@@ -24,12 +24,14 @@
 
 package de.anomic.kelondro;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroRowCollection {
@@ -143,8 +145,12 @@ public class kelondroRowCollection {
         entry.setCol(exp_order_type, (this.rowdef.objectOrder == null) ? "__".getBytes() :this.rowdef.objectOrder.signature().getBytes());
         entry.setCol(exp_order_col, this.rowdef.primaryKey);
         entry.setCol(exp_order_bound, this.sortBound);
-        entry.setCol(exp_collection, chunkcache);
+        entry.setCol(exp_collection, this.chunkcache);
         return entry.bytes();
+    }
+    
+    public void saveCollection(File file) throws IOException {
+        serverFileUtils.write(exportCollection(), file);
     }
 
     public kelondroRow row() {
@@ -324,6 +330,7 @@ public class kelondroRowCollection {
     }
     
     public Iterator rows() {
+        // iterates kelondroRow.Entry - type entries
         return new rowIterator();
     }
     

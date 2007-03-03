@@ -480,7 +480,7 @@ xpstopw=true
 40_peerseedcycle_busysleep=1200000
 40_peerseedcycle_memprereq=2097152
 50_localcrawl_idlesleep=1000
-50_localcrawl_busysleep=120
+50_localcrawl_busysleep=250
 50_localcrawl_memprereq=2097152
 50_localcrawl_isPaused=false
 61_globalcrawltrigger_idlesleep=10000
@@ -494,8 +494,8 @@ xpstopw=true
 70_cachemanager_idlesleep=1000
 70_cachemanager_busysleep=0
 70_cachemanager_memprereq=1048576
-80_indexing_idlesleep=2000
-80_indexing_busysleep=100
+80_indexing_idlesleep=1000
+80_indexing_busysleep=50
 80_indexing_memprereq=2097152
 82_crawlstack_idlesleep=5000
 82_crawlstack_busysleep=0
@@ -853,7 +853,7 @@ soap.serviceDeploymentList =
 
 
 # Wiki access rights
-# the built - in wiki system allowes by default only that the administration is allowed to make changes
+# the built-in wiki system allows by default only that the administrator is allowed to make changes
 # this can be changed. There are three options:
 # admin - only the admin has write right
 # all   - everybody has write right

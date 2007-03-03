@@ -44,7 +44,7 @@ public class indexCollectionRI implements indexRI {
 
     kelondroCollectionIndex collectionIndex;
     
-    public indexCollectionRI(File path, String filenameStub, long buffersize, long preloadTime, kelondroRow payloadrow) {
+    public indexCollectionRI(File path, String filenameStub, long buffersize, long preloadTime, int maxpartition, kelondroRow payloadrow) {
         try {
             collectionIndex = new kelondroCollectionIndex(
                     path,
@@ -54,6 +54,7 @@ public class indexCollectionRI implements indexRI {
                     buffersize,
                     preloadTime,
                     4 /*loadfactor*/,
+                    maxpartition,
                     payloadrow);
         } catch (IOException e) {
             serverLog.logSevere("PLASMA", "unable to open collection index at " + path.toString() + ":" + e.getMessage());

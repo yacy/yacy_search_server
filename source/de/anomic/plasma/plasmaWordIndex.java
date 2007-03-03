@@ -55,6 +55,11 @@ import de.anomic.yacy.yacyDHTAction;
 
 public final class plasmaWordIndex implements indexRI {
 
+    // environment constants
+    public  static final long wCacheMaxAge   = 1000 * 60 * 30; // milliseconds; 30 minutes
+    public  static final int  wCacheMaxChunk = 1000;           // number of references for each urlhash
+    public  static final int  maxCollectionPartition = 7; // should be 7
+    
     private final kelondroOrder      indexOrder = kelondroBase64Order.enhancedCoder;
     private final indexRAMRI         dhtOutCache, dhtInCache;
     private final indexCollectionRI  collections;          // new database structure to replace AssortmentCluster and FileCluster
@@ -65,13 +70,13 @@ public final class plasmaWordIndex implements indexRI {
     public plasmaWordIndex(File indexRoot, long rwibuffer, long lurlbuffer, long preloadTime, serverLog log) {
         File textindexcache = new File(indexRoot, "PUBLIC/TEXT/RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
-        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIEntryNew.urlEntryRow, 4000, "dump1.array", log);
-        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIEntryNew.urlEntryRow, 4000, "dump2.array", log);
+        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIEntryNew.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump1.array", log);
+        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIEntryNew.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump2.array", log);
         
         // create collections storage path
         File textindexcollections = new File(indexRoot, "PUBLIC/TEXT/RICOLLECTION");
         if (!(textindexcollections.exists())) textindexcollections.mkdirs();
-        this.collections = new indexCollectionRI(textindexcollections, "collection", rwibuffer, preloadTime, indexRWIEntryNew.urlEntryRow);
+        this.collections = new indexCollectionRI(textindexcollections, "collection", rwibuffer, preloadTime, maxCollectionPartition, indexRWIEntryNew.urlEntryRow);
 
         // create LURL-db
         loadedURL = new plasmaCrawlLURL(indexRoot, lurlbuffer, preloadTime);
@@ -129,13 +134,18 @@ public final class plasmaWordIndex implements indexRI {
        this.flushsize = flushsize;
     }
 
-    public void flushControl() {
+    public void dhtOutFlushControl() {
         // check for forced flush
         synchronized (this) {
-            if (dhtOutCache.size() > dhtOutCache.getMaxWordCount()) {
+            if ((dhtOutCache.getMaxWordCount() > wCacheMaxChunk ) || (dhtOutCache.size() > dhtOutCache.getMaxWordCount())) {
                 flushCache(dhtOutCache, dhtOutCache.size() + flushsize - dhtOutCache.getMaxWordCount());
             }
-            if (dhtInCache.size() > dhtInCache.getMaxWordCount()) {
+        }
+    }
+    public void dhtInFlushControl() {
+        // check for forced flush
+        synchronized (this) {
+            if ((dhtInCache.getMaxWordCount() > wCacheMaxChunk ) || (dhtInCache.size() > dhtInCache.getMaxWordCount())) {
                 flushCache(dhtInCache, dhtInCache.size() + flushsize - dhtInCache.getMaxWordCount());
             }
         }
@@ -160,9 +170,10 @@ public final class plasmaWordIndex implements indexRI {
         // add the entry
         if (dhtInCase) {
             dhtInCache.addEntry(wordHash, entry, updateTime, true);
+            dhtInFlushControl();
         } else {
             dhtOutCache.addEntry(wordHash, entry, updateTime, false);
-            flushControl();
+            dhtOutFlushControl();
         }
     }
     
@@ -175,9 +186,10 @@ public final class plasmaWordIndex implements indexRI {
         // add the entry
         if (dhtInCase) {
             dhtInCache.addEntries(entries, updateTime, true);
+            dhtInFlushControl();
         } else {
             dhtOutCache.addEntries(entries, updateTime, false);
-            flushControl();
+            dhtOutFlushControl();
         }
     }
 
@@ -187,7 +199,7 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     private void flushCache(indexRAMRI ram, int count) {
-        if (ram.size() <= 5000) return;
+        if (ram.size() <= count) count = ram.size();
         if (count <= 0) return;
         if (count > 5000) count = 5000;
         busyCacheFlush = true;
@@ -199,7 +211,7 @@ public final class plasmaWordIndex implements indexRI {
             while (collectMax) {
                 wordHash = ram.maxScoreWordHash();
                 c = ram.getContainer(wordHash, null, -1);
-                if ((c != null) && (c.size() > 4000)) {
+                if ((c != null) && (c.size() > wCacheMaxChunk)) {
                     containerList.add(ram.deleteContainer(wordHash));
                 } else {
                     collectMax = false;
@@ -215,9 +227,9 @@ public final class plasmaWordIndex implements indexRI {
                 c = ram.deleteContainer(wordHash);
                 if (c != null) containerList.add(c);
             }
-            // flush the containers
-            collections.addMultipleEntries(containerList);
         }
+        // flush the containers
+        collections.addMultipleEntries(containerList);
         //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
         busyCacheFlush = false;
     }
