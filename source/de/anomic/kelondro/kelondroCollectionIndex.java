@@ -45,6 +45,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroCollectionIndex {
@@ -258,6 +259,7 @@ public class kelondroCollectionIndex {
     }
     
     private int arrayCapacity(int arrayCounter) {
+        if (arrayCounter < 0) return 0;
         int load = this.loadfactor;
         for (int i = 0; i < arrayCounter; i++) load = load * this.loadfactor;
         return load;
@@ -283,12 +285,9 @@ public class kelondroCollectionIndex {
         
         // caclculate an upper limit (not the correct size) of the maximum number of indexes for a wordHash
         // this is computed by the size of the biggest used collection
-        int m = 1;
-        for (int i = 0; i < arrays.size(); i++) m = m * this.loadfactor;
-
         // this must be multiplied with the payload size
         // and doubled for necessary memory transformation during sort operation
-        return 2 * m * this.payloadrow.objectsize;
+        return 2 * arrayCapacity(arrays.size() - 1) * this.payloadrow.objectsize;
     }
     
     private void array_remove(
@@ -571,6 +570,7 @@ public class kelondroCollectionIndex {
         TreeMap array_add_map = new TreeMap();
         ArrayList actionList;
         TreeMap actionMap;
+        boolean madegc = false;
         while (existingContainer.size() > 0) {
             oldPartitionNumber1 = ((Integer) existingContainer.lastKey()).intValue();
             containerMap = (TreeMap) existingContainer.remove(new Integer(oldPartitionNumber1));
@@ -649,6 +649,19 @@ public class kelondroCollectionIndex {
                 }
                 
                 // memory protection: flush collected collections
+                if (serverMemory.available() < minMem()) {
+                    // emergency flush
+                    indexrows_existing.addAll(array_replace_multiple(array_replace_map, 0, this.payloadrow.objectsize()));
+                    array_replace_map = new TreeMap(); // delete references
+                    indexrows_existing.addAll(array_add_multiple(array_add_map, 0, this.payloadrow.objectsize()));
+                    array_add_map = new TreeMap(); // delete references
+                    if (!madegc) {
+                        // prevent that this flush is made again even when there is enough memory
+                        System.gc();
+                        // prevent that this gc happens more than one time
+                        madegc = true;
+                    }
+                }
             }
         }
         
