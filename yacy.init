@@ -813,7 +813,7 @@ timeout_media = 15000
 rankingPath = DATA/RANKING
 
 # a list of domain name patterns that should not be cached by the httpc dns cache
-httpc.nameCacheNoCachingPatterns = .*.dyndns.org, .*.dynalias.org
+httpc.nameCacheNoCachingPatterns = .*.dyndns.org, .*.dynalias.org, .*.homeip.net
 
 #externalRedirectors
 #squid Redirector compatible
