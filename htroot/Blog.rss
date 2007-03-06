@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <rss version="2.0">
 <channel>
-	<title><![CDATA[YaCy '#[clientname]#': Bookmarks]]></title>
+	<title><![CDATA[YaCy '#[address]#': Blog]]></title>
 	<link>http://#[address]#/Blog.html</link>
     <image>
       <url>http://#[address]#/env/grafics/yacy.png</url>
