@@ -47,6 +47,7 @@
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -75,14 +76,17 @@ public class Bookmarks {
     userDB.Entry user=switchboard.userDB.getUser(header);
     boolean isAdmin=(switchboard.verifyAuthentication(header, true) || user!= null && user.hasBookmarkRight());
     String username="";
-    if(user != null)
-        username=user.getUserName();
-    else if(isAdmin)
-        username="admin";
+    if(user != null) username=user.getUserName();
+    else if(isAdmin) username="admin";    
     
     //redirect to userpage
     if(username!="" &&(post == null || !post.containsKey("user") && !post.containsKey("mode")))
         prop.put("LOCATION", "/Bookmarks.html?user="+username);
+    prop.put("user",username);
+    
+    // set peer address
+    final String address = yacyCore.seedDB.mySeed.getAddress();
+    prop.put("address", address);
     
     //defaultvalues
     prop.put("mode", 0);
@@ -252,6 +256,7 @@ public class Bookmarks {
             prop.put("bookmarks_"+count+"_link", de.anomic.data.wikiCode.replaceXMLEntities(bookmark.getUrl()));
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
             prop.put("bookmarks_"+count+"_description", bookmark.getDescription());
+            prop.put("bookmarks_"+count+"_date", bookmarksDB.dateToiso8601(new Date(bookmark.getTimeStamp())));
             prop.put("bookmarks_"+count+"_public", (bookmark.getPublic()? 1:0));
             
             //List Tags.

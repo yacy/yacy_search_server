@@ -1,11 +1,17 @@
 <?xml version="1.0"?>
 <rss version="2.0">
 <channel>
-	<title>YaCy-Blog of Peer #[peername]#</title>
+	<title><![CDATA[YaCy '#[clientname]#': Bookmarks]]></title>
 	<link>http://#[address]#/Blog.html</link>
+    <image>
+      <url>http://#[address]#/env/grafics/yacy.png</url>
+      <title>YaCy</title>
+      <link>http://#[address]#/</link>
+    </image>	
+	
 	#(mode)# #{entries}#<item>
-		<author>#[author]#</author>
-		<title>#[subject]#</title>
+		<author><![CDATA[#[author]#]]></author>
+		<title><![CDATA[#[subject]#]]></title>
 		<link>http://#[address]#/Blog.html?page=#[pageid]#</link>
 		<pubDate>#[date]#</pubDate>
 		<guid>#[pageid]#</guid>
