@@ -58,355 +58,135 @@
       </tr>
     </table>
     
-    <form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
-      <fieldset>
+    <p><form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
+      <fieldset border="0">
         <legend>Memory Settings</legend>
-        <dl>
-          <dt><label for="Xmx">Maximum used memory</label></dt>
-          <dd><input name="Xmx" id="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /> MByte</dd>
-          <dt><label for="Xms">Minimal used memory</label></dt>
-          <dd><input name="Xms" id="Xms" type="text" size="4" maxlength="4" value="#[Xms]#" /> MByte</dd>
-          <dt><input type="submit" name="setStartup" value="Set" /></dt>
-          <dd>Changes take effect after <strong>restart</strong> of YaCy</dd>
-        </dl>
+        <table border="0" cellpadding="2" cellspacing="1" width="60%">
+        <colgroup><col width="20%"><col width="40%"></colgroup>
+        <tr>
+          <td class="TableHeader" align="right"><label for="Xmx">Memory reserved for JVM</label>&nbsp;</td>
+          <td class="TableCellDark" align="right"><input name="Xmx" id="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /> MByte</td>
+		</tr><tr>
+          <td #(setStartupCommit)#class="TableCellLight"::class="commit"::class="error"#(/setStartupCommit)# colspan="2" align="right">
+            #(setStartupCommit)#::Accepted change. This will take effect after <strong>restart</strong> of YaCy#(/setStartupCommit)#
+            <input type="submit" name="setStartup" value="Set" /></td>
+        </tr>
+        </table>
       </fieldset>
-    </form>
+    </form></p>
     
-    <p><strong>RAM Cache for Database Files:</strong></p>
-    <form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
-      <table border="0" cellpadding="2" cellspacing="1">
-        <tr class="TableHeader" valign="bottom">
-          <td rowspan="2">Database<br />&nbsp;</td>
-          <td rowspan="2">DB Size<br />&nbsp;</td>
-          <td colspan="4">Node Cache</td>
-          <td colspan="5">Object Cache</td>
-          <td colspan="4">Memory Occupation (KBytes)</td>
-          <td rowspan="2">Description<br />&nbsp;</td>
-        </tr>
-        
-        <tr class="TableHeader" valign="bottom">
-          <td>Chunk<br />Size<br />(bytes)</td>
-          <td>Empty<br />(avail.)<br />Slots</td>
-          <td>Used<br />(filled)<br />Slots</td>
-          <td>Node-Cache<br />Hit:Miss<br />Uniq:Doub<br />Del:Flush<br /></td>
-          <td>Chunk<br />Size<br />(bytes)</td>
-          <td>Max<br />Size<br />Hit/Miss</td>
-          <td>&nbsp;<br />Hit-Size<br />Miss-Size</td>
-          <td>Hit-Cache<br />Hit:Miss<br />Uniq:Doub<br />Del:Flush<br /></td>
-          <td>Miss-Cache<br />Hit:Miss<br />Uniq:Doub<br />Del:Flush<br /></td>
-          <td>Used Now</td>
-          <td>Assigned Max</td>
-          <td>Default Max</td>
-          <td>Best Max</td>
-        </tr>
-        #(useRWICache)#::
-        <tr class="TableCellDark">
-          <td align="left">RWI Assortment Cluster</td>
-          <td align="right">#[slreqRWI]#</td>
-          <td align="right">#[nodszRWI]#</td>
-          <td align="right">#[slempRWI]#</td>
-          <td align="right">#[slfilRWI]#</td>
-          <td align="right">#[slhittmissRWI]#<br />#[sluniqdoubRWI]#<br />#[slflushRWI]#</td>
-          <td align="right">#[ochunksizRWI]#</td>
-          <td align="right">#[ochunkmaxRWI]#<br />#[omisscmaxRWI]#</td>
-          <td align="right">#[ohitsizeRWI]#<br />#[omisssizeRWI]#</td>
-          <td align="right">#[ohittmissRWI]#<br />#[ouniqdoubRWI]#<br />#[oflushRWI]#</td>
-          <td align="right">#[nhittmissRWI]#<br />#[nuniqdoubRWI]#<br />#[nflushRWI]#</td>
-          <td align="right">#[usedRWI]#</td>
-          <td align="right"><input name="ramCacheRWI" type="text" size="6" maxlength="7" value="#[ramCacheRWI]#" /></td>
-          <td align="right">#[dfltRWI]#</td>
-          <td align="right">#[bestRWI]#</td>
-          <td align="left">The Assortment Cluster stores most of the page indexes.
-          Flushing speed of the temporary RWI cache depends on the size of this file cache. Increasing the space of this
-          cache will speed up crawls with a depth > 3.</td>
-        </tr>#(/useRWICache)#
-        
-        <tr class="TableCellDark">
-          <td align="left">HTTP Response Header</td>
-          <td align="right">#[slreqHTTP]#</td>
-          <td align="right">#[nodszHTTP]#</td>
-          <td align="right">#[slempHTTP]#</td>
-          <td align="right">#[slfilHTTP]#</td>
-          <td align="right">#[slhittmissHTTP]#<br />#[sluniqdoubHTTP]#<br />#[slflushHTTP]#</td>
-          <td align="right">#[ochunksizHTTP]#</td>
-          <td align="right">#[ochunkmaxHTTP]#<br />#[omisscmaxHTTP]#</td>
-          <td align="right">#[ohitsizeHTTP]#<br />#[omisssizeHTTP]#</td>
-          <td align="right">#[ohittmissHTTP]#<br />#[ouniqdoubHTTP]#<br />#[oflushHTTP]#</td>
-          <td align="right">#[nhittmissHTTP]#<br />#[nuniqdoubHTTP]#<br />#[nflushHTTP]#</td>
-          <td align="right">#[usedHTTP]#</td>
-          <td align="right"><input name="ramCacheHTTP" type="text" size="6" maxlength="7" value="#[ramCacheHTTP]#" /></td>
-          <td align="right">#[dfltHTTP]#</td>
-          <td align="right">#[bestHTTP]#</td>
-          <td align="left">The Response Header database stores the HTTP heades that other servers send when YaCy retrieves web pages
-          during proxy mode, when performing crawls or if it fetches pages for snippet generation.
-          Increasing this cache will be most important for a fast proxy mode.</td>
-        </tr>
-        
-        <tr class="TableCellDark">
-          <td align="left">'loaded' URLs</td>
-          <td align="right">#[slreqLURL]#</td>
-          <td align="right">#[nodszLURL]#</td>
-          <td align="right">#[slempLURL]#</td>
-          <td align="right">#[slfilLURL]#</td>
-          <td align="right">#[slhittmissLURL]#<br />#[sluniqdoubLURL]#<br />#[slflushLURL]#</td>
-          <td align="right">#[ochunksizLURL]#</td>
-          <td align="right">#[ochunkmaxLURL]#<br />#[omisscmaxLURL]#</td>
-          <td align="right">#[ohitsizeLURL]#<br />#[omisssizeLURL]#</td>
-          <td align="right">#[ohittmissLURL]#<br />#[ouniqdoubLURL]#<br />#[oflushLURL]#</td>
-          <td align="right">#[nhittmissLURL]#<br />#[nuniqdoubLURL]#<br />#[nflushLURL]#</td>
-          <td align="right">#[usedLURL]#</td>
-          <td align="right"><input name="ramCacheLURL" type="text" size="6" maxlength="7" value="#[ramCacheLURL]#" /></td>
-          <td align="right">#[dfltLURL]#</td>
-          <td align="right">#[bestLURL]#</td>
-          <td align="left">This is the database that holds the hash/url - relation and properties regarding the url like load date and server date.
-          This cache is very important for a fast search process. Increasing the cache size will result in more search results and less IO during DHT transfer.</td>
-        </tr>
-        #(usePreNURLCache)#::
-        <tr class="TableCellDark">
-          <td align="left">'pre-noticed' URLs</td>
-          <td align="right">#[slreqPreNURL]#</td>
-          <td align="right">#[nodszPreNURL]#</td>
-          <td align="right">#[slempPreNURL]#</td>
-          <td align="right">#[slfilPreNURL]#</td>
-          <td align="right">#[slhittmissPreNURL]#<br />#[sluniqdoubPreNURL]#<br />#[slflushPreNURL]#</td>
-          <td align="right">#[ochunksizPreNURL]#</td>
-          <td align="right">#[ochunkmaxPreNURL]#<br />#[omisscmaxPreNURL]#</td>
-          <td align="right">#[ohitsizePreNURL]#<br />#[omisssizePreNURL]#</td>
-          <td align="right">#[ohittmissPreNURL]#<br />#[ouniqdoubPreNURL]#<br />#[oflushPreNURL]#</td>
-          <td align="right">#[nhittmissPreNURL]#<br />#[nuniqdoubPreNURL]#<br />#[nflushPreNURL]#</td>
-          <td align="right">#[usedPreNURL]#</td>
-          <td align="right"><input name="ramCachePreNURL" type="text" size="6" maxlength="7" value="#[ramCachePreNURL]#" /></td>
-          <td align="right">#[dfltPreNURL]#</td>
-          <td align="right">#[bestPreNURL]#</td>
-          <td align="left"></td>
-        </tr>#(/usePreNURLCache)#
-        #(useNURLCache)#::
-        <tr class="TableCellDark">
-          <td align="left">'noticed' URLs</td>
-          <td align="right">#[slreqNURL]#</td>
-          <td align="right">#[nodszNURL]#</td>
-          <td align="right">#[slempNURL]#</td>
-          <td align="right">#[slfilNURL]#</td>
-          <td align="right">#[slhittmissNURL]#<br />#[sluniqdoubNURL]#<br />#[slflushNURL]#</td>
-          <td align="right">#[ochunksizNURL]#</td>
-          <td align="right">#[ochunkmaxNURL]#<br />#[omisscmaxNURL]#</td>
-          <td align="right">#[ohitsizeNURL]#<br />#[omisssizeNURL]#</td>
-          <td align="right">#[ohittmissNURL]#<br />#[ouniqdoubNURL]#<br />#[oflushNURL]#</td>
-          <td align="right">#[nhittmissNURL]#<br />#[nuniqdoubNURL]#<br />#[nflushNURL]#</td>
-          <td align="right">#[usedNURL]#</td>
-          <td align="right"><input name="ramCacheNURL" type="text" size="6" maxlength="7" value="#[ramCacheNURL]#" /></td>
-          <td align="right">#[dfltNURL]#</td>
-          <td align="right">#[bestNURL]#</td>
-          <td align="left">A noticed URL is one that was discovered during crawling but was not loaded yet.
-          Increasing the cache size will result in faster double-check during URL recognition when doing crawls.</td>
-        </tr>#(/useNURLCache)#
-        #(useEURLCache)#::
-        <tr class="TableCellDark">
-          <td align="left">'error' URLs</td>
-          <td align="right">#[slreqEURL]#</td>
-          <td align="right">#[nodszEURL]#</td>
-          <td align="right">#[slempEURL]#</td>
-          <td align="right">#[slfilEURL]#</td>
-          <td align="right">#[slhittmissEURL]#<br />#[sluniqdoubEURL]#<br />#[slflushEURL]#</td>
-          <td align="right">#[ochunksizEURL]#</td>
-          <td align="right">#[ochunkmaxEURL]#<br />#[omisscmaxEURL]#</td>
-          <td align="right">#[ohitsizeEURL]#<br />#[omisssizeEURL]#</td>
-          <td align="right">#[ohittmissEURL]#<br />#[ouniqdoubEURL]#<br />#[oflushEURL]#</td>
-          <td align="right">#[nhittmissEURL]#<br />#[nuniqdoubEURL]#<br />#[nflushEURL]#</td>
-          <td align="right">#[usedEURL]#</td>
-          <td align="right"><input name="ramCacheEURL" type="text" size="6" maxlength="7" value="#[ramCacheEURL]#" /></td>
-          <td align="right">#[dfltEURL]#</td>
-          <td align="right">#[bestEURL]#</td>
-          <td align="left">URLs that cannot be loaded are stored in this database. It is also used for double-checked during crawling.
-          Increasing the cache size will most probably speed up crawling slightly, but not significantly.</td>
-        </tr>#(/useEURLCache)#
-        
-        <tr class="TableCellDark">
-          <td align="left">DHT Control</td>
-          <td align="right">#[slreqDHT]#</td>
-          <td align="right">#[nodszDHT]#</td>
-          <td align="right">#[slempDHT]#</td>
-          <td align="right">#[slfilDHT]#</td>
-          <td align="right">#[slhittmissDHT]#<br />#[sluniqdoubDHT]#<br />#[slflushDHT]#</td>
-          <td align="right">#[ochunksizDHT]#</td>
-          <td align="right">#[ochunkmaxDHT]#<br />#[omisscmaxDHT]#</td>
-          <td align="right">#[ohitsizeDHT]#<br />#[omisssizeDHT]#</td>
-          <td align="right">#[ohittmissDHT]#<br />#[ouniqdoubDHT]#<br />#[oflushDHT]#</td>
-          <td align="right">#[nhittmissDHT]#<br />#[nuniqdoubDHT]#<br />#[nflushDHT]#</td>
-          <td align="right">#[usedDHT]#</td>
-          <td align="right"><input name="ramCacheDHT" type="text" size="6" maxlength="7" value="#[ramCacheDHT]#" /></td>
-          <td align="right">#[dfltDHT]#</td>
-          <td align="right">#[bestDHT]#</td>
-          <td align="left">This is simply the cache for the seed-dbs (active, passive, potential).
-          This cache is divided into three equal parts.
-          Increasing this cache may speed up many functions, but we need to test this to see the effects.</td>
-        </tr>
-        
-        <tr class="TableCellDark">
-          <td align="left">Messages</td>
-          <td align="right">#[slreqMessage]#</td>
-          <td align="right">#[nodszMessage]#</td>
-          <td align="right">#[slempMessage]#</td>
-          <td align="right">#[slfilMessage]#</td>
-          <td align="right">#[slhittmissMessage]#<br />#[sluniqdoubMessage]#<br />#[slflushMessage]#</td>
-          <td align="right">#[ochunksizMessage]#</td>
-          <td align="right">#[ochunkmaxMessage]#<br />#[omisscmaxMessage]#</td>
-          <td align="right">#[ohitsizeMessage]#<br />#[omisssizeMessage]#</td>
-          <td align="right">#[ohittmissMessage]#<br />#[ouniqdoubMessage]#<br />#[oflushMessage]#</td>
-          <td align="right">#[nhittmissMessage]#<br />#[nuniqdoubMessage]#<br />#[nflushMessage]#</td>
-          <td align="right">#[usedMessage]#</td>
-          <td align="right"><input name="ramCacheMessage" type="text" size="6" maxlength="7" value="#[ramCacheMessage]#" /></td>
-          <td align="right">#[dfltMessage]#</td>
-          <td align="right">#[bestMessage]#</td>
-          <td align="left">The Message cache for peer-to-peer messages. Less important.</td>
-        </tr>
-        
-        <tr class="TableCellDark">
-          <td align="left">Wiki</td>
-          <td align="right">#[slreqWiki]#</td>
-          <td align="right">#[nodszWiki]#</td>
-          <td align="right">#[slempWiki]#</td>
-          <td align="right">#[slfilWiki]#</td>
-          <td align="right">#[slhittmissWiki]#<br />#[sluniqdoubWiki]#<br />#[slflushWiki]#</td>
-          <td align="right">#[ochunksizWiki]#</td>
-          <td align="right">#[ochunkmaxWiki]#<br />#[omisscmaxWiki]#</td>
-          <td align="right">#[ohitsizeWiki]#<br />#[omisssizeWiki]#</td>
-          <td align="right">#[ohittmissWiki]#<br />#[ouniqdoubWiki]#<br />#[oflushWiki]#</td>
-          <td align="right">#[nhittmissWiki]#<br />#[nuniqdoubWiki]#<br />#[nflushWiki]#</td>
-          <td align="right">#[usedWiki]#</td>
-          <td align="right"><input name="ramCacheWiki" type="text" size="6" maxlength="7" value="#[ramCacheWiki]#" /></td>
-          <td align="right">#[dfltWiki]#</td>
-          <td align="right">#[bestWiki]#</td>
-          <td align="left">The YaCy-Wiki uses a database to store its pages.
-          This cache is divided in two parts, one for the wiki database and one for its backup.
-          Increasing this cache may speed up access to the wiki pages.</td>
-        </tr>
-        
-        <tr class="TableCellDark">
-          <td align="left">Blog</td>
-          <td align="right">#[slreqBlog]#</td>
-          <td align="right">#[nodszBlog]#</td>
-          <td align="right">#[slempBlog]#</td>
-          <td align="right">#[slfilBlog]#</td>
-          <td align="right">#[slhittmissBlog]#<br />#[sluniqdoubBlog]#<br />#[slflushBlog]#</td>
-          <td align="right">#[ochunksizBlog]#</td>
-          <td align="right">#[ochunkmaxBlog]#</td>
-          <td align="right">#[ohitsizeBlog]#<br />#[omisssizeBlog]#</td>
-          <td align="right">#[ohittmissBlog]#<br />#[ouniqdoubBlog]#<br />#[oflushBlog]#</td>
-          <td align="right">#[nhittmissBlog]#<br />#[nuniqdoubBlog]#<br />#[nflushBlog]#</td>
-          <td align="right">#[usedBlog]#</td>
-          <td align="right"><input name="ramCacheBlog" type="text" size="6" maxlength="7" value="#[ramCacheBlog]#" /></td>
-          <td align="right">#[dfltBlog]#</td>
-          <td align="right">#[bestBlog]#</td>
-          <td align="left">The YaCy-Blog uses a database to store its entries.
-          Increasing this cache may speed up access to the Blog.</td>
-        </tr>
-        
-        <tr class="TableCellDark">
-          <td align="left">News</td>
-          <td align="right">#[slreqNews]#</td>
-          <td align="right">#[nodszNews]#</td>
-          <td align="right">#[slempNews]#</td>
-          <td align="right">#[slfilNews]#</td>
-          <td align="right">#[slhittmissNews]#<br />#[sluniqdoubNews]#<br />#[slflushNews]#</td>
-          <td align="right">#[ochunksizNews]#</td>
-          <td align="right">#[ochunkmaxNews]#</td>
-          <td align="right">#[ohitsizeNews]#<br />#[omisssizeNews]#</td>
-          <td align="right">#[ohittmissNews]#<br />#[ouniqdoubNews]#<br />#[oflushNews]#</td>
-          <td align="right">#[nhittmissNews]#<br />#[nuniqdoubNews]#<br />#[nflushNews]#</td>
-          <td align="right">#[usedNews]#</td>
-          <td align="right"><input name="ramCacheNews" type="text" size="6" maxlength="7" value="#[ramCacheNews]#" /></td>
-          <td align="right">#[dfltNews]#</td>
-          <td align="right">#[bestNews]#</td>
-          <td align="left">The News-DB stores property-lists for news that are included in seeds.
-          Increasing this cache may speed up the peer-ping.</td>
-        </tr>
-        
-        <tr class="TableCellDark">
-          <td align="left">robots.txt DB</td>
-          <td align="right">#[slreqRobots]#</td>
-          <td align="right">#[nodszRobots]#</td>
-          <td align="right">#[slempRobots]#</td>
-          <td align="right">#[slfilRobots]#</td>
-          <td align="right">#[slhittmissRobots]#<br />#[sluniqdoubRobots]#<br />#[slflushRobots]#</td>
-          <td align="right">#[ochunksizRobots]#</td>
-          <td align="right">#[ochunkmaxRobots]#</td>
-          <td align="right">#[ohitsizeRobots]#<br />#[omisssizeRobots]#</td>
-          <td align="right">#[ohittmissRobots]#<br />#[ouniqdoubRobots]#<br />#[oflushRobots]#</td>
-          <td align="right">#[nhittmissRobots]#<br />#[nuniqdoubRobots]#<br />#[nflushRobots]#</td>
-          <td align="right">#[usedRobots]#</td>
-          <td align="right"><input name="ramCacheRobots" type="text" size="6" maxlength="7" value="#[ramCacheRobots]#" /></td>
-          <td align="right">#[dfltRobots]#</td>
-          <td align="right">#[bestRobots]#</td>
-          <td align="left">The robots.txt DB stores downloaded records from robots.txt files.
-          Increasing this cache may speed up validation if crawling of the URL is allowed.</td>
-        </tr>
-        
-        <tr class="TableCellDark">
-          <td align="left">Crawl Profiles</td>
-          <td align="right">#[slreqProfiles]#</td>
-          <td align="right">#[nodszProfiles]#</td>
-          <td align="right">#[slempProfiles]#</td>
-          <td align="right">#[slfilProfiles]#</td>
-          <td align="right">#[slhittmissProfiles]#<br />#[sluniqdoubProfiles]#<br />#[slflushProfiles]#</td>
-          <td align="right">#[ochunksizProfiles]#</td>
-          <td align="right">#[ochunkmaxProfiles]#</td>
-          <td align="right">#[ohitsizeProfiles]#<br />#[omisssizeProfiles]#</td>
-          <td align="right">#[ohittmissProfiles]#<br />#[ouniqdoubProfiles]#<br />#[oflushProfiles]#</td>
-          <td align="right">#[nhittmissProfiles]#<br />#[nuniqdoubProfiles]#<br />#[nflushProfiles]#</td>
-          <td align="right">#[usedProfiles]#</td>
-          <td align="right"><input name="ramCacheProfiles" type="text" size="6" maxlength="7" value="#[ramCacheProfiles]#" /></td>
-          <td align="right">#[dfltProfiles]#</td>
-          <td align="right">#[bestProfiles]#</td>
-          <td align="left">The profile database stores properties for each crawl that is started on the local peer.
-          Increasing this cache may speed up crawling, but not much space is needed, so the effect may be low.</td>
-        </tr>
-        
-        <tr class="TableCellSummary">
-          <td align="left" colspan="11">Totals</td>
-          <td align="right">#[usedTotal]# MB</td>
-          <td align="right">#[currTotal]# MB</td>
-          <td align="right">#[dfltTotal]# MB</td>
-          <td align="right">#[bestTotal]# MB</td>
-          <td align="left">Sum of memory amounts</td>
-        </tr>
-        
-        <tr class="TableCellLight">
-          <td align="right" colspan="12">Re-Configuration:</td>
-          <td align="center"><input type="submit" name="setCustom" value="Set" /><br />these<br />custom<br />values<br />&nbsp;</td>
-          <td align="center"><input type="submit" name="setDefault" value="Set" /><br />all<br />default<br />values<br />&nbsp;</td>
-          <td align="center"><input type="submit" name="setBest" value="Set" /><br />all<br />optimum<br />values<br />&nbsp;</td>
-          <td align="left">Changes take effect after <strong>re-start</strong> of YaCy</td>
-        </tr>
-      
-      </table>
-    </form>
-    
-    <!--
-    <p><strong>Write Cache Object Allocation:</strong></p>
+    <p><strong>FlexTable RAM Index:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">
-        <td>&nbsp;<br />Chunk Sizes</td>
-        #{sizes}#
-        <td>#[chunk]#</td>
-        #{/sizes}#
+        <td>Table</td>
+        <td>Chunk Size</td>
+        <td>Count</td>
+        <td>Used Memory</td>
       </tr>
+      #{TableList}#
+      <tr class="TableCellLight">
+        <td align="left">#[tableIndexPath]#</td>
+        <td align="right">#[tableIndexChunkSize]#</td>
+        <td align="right">#[tableIndexCount]#</td>
+        <td align="right">#[tableIndexMem]# MB</td>
+      </tr>
+      #{/TableList}#
       <tr class="TableCellDark">
-        <td class="TableHeader" align="left">now alive in write cache</td>
-        #{alive}#
-        <td>#[count]#</td>
-        #{/alive}#
+        <td colspan="4">Total Mem = #[TableIndexTotalMem]# MB</td>
       </tr>
+    </table></p>
+    
+    <p><strong>Node Caches:</strong></p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>Table</td>
+        <td>Chunk Size</td>
+        <td>Count</td>
+        <td>Used Memory</td>
+        <td>Read Hit</td>
+        <td>Read Miss</td>
+        <td>Write Unique</td>
+        <td>Write Double</td>
+        <td>Deletes</td>
+        <td>Flushes</td>
+      </tr>
+      #{NodeList}#
+      <tr class="TableCellLight">
+        <td align="left">#[nodeCachePath]#</td>
+        <td align="right">#[nodeChunkSize]#</td>
+        <td align="right">#[nodeCacheCount]#</td>
+        <td align="right">#[nodeCacheMem]# MB</td>
+        <td align="right">#[nodeCacheReadHit]#</td>
+        <td align="right">#[nodeCacheReadMiss]#</td>
+        <td align="right">#[nodeCacheWriteUnique]#</td>
+        <td align="right">#[nodeCacheWriteDouble]#</td>
+        <td align="right">#[nodeCacheDeletes]#</td>
+        <td align="right">#[nodeCacheFlushes]#</td>
+      </tr>
+      #{/NodeList}#
       <tr class="TableCellDark">
-        <td class="TableHeader" align="left">currently held in write buffer heap</td>
-        #{heap}#
-        <td>#[count]#</td>
-        #{/heap}#
+        <td colspan="10">Total Mem = #[nodeCacheTotalMem]# MB; Stop Grow when less than #[nodeCacheStopGrow]# MB available left; Start Shrink when less than #[nodeCacheStartShrink]# MB availabe left</td>
       </tr>
-    </table>
-    -->
+    </table></p>
+    
+    <p><strong>Object Read Caches:</strong></p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td></td>
+        <td colspan="9">Read Hit Cache</td>
+        <td colspan="9">Read Miss Cache</td>
+      </tr>
+      <tr class="TableHeader" valign="bottom">
+        <td>Table</td>
+        <td>Chunk Size</td>
+        <td>Count</td>
+        <td>Used Memory</td>
+        <td>Read Hit</td>
+        <td>Read Miss</td>
+        <td>Write Unique</td>
+        <td>Write Double</td>
+        <td>Deletes</td>
+        <td>Flushes</td>
+        <td>Chunk Size</td>
+        <td>Count</td>
+        <td>Used Memory</td>
+        <td>Read Hit</td>
+        <td>Read Miss</td>
+        <td>Write Unique</td>
+        <td>Write Double</td>
+        <td>Deletes</td>
+        <td>Flushes</td>
+      </tr>
+      #{ObjectList}#
+      <tr class="TableCellLight">
+        <td align="left">#[objectCachePath]#</td>
+        <td align="right">#[objectHitChunkSize]#</td>
+        <td align="right">#[objectHitCacheCount]#</td>
+        <td align="right">#[objectHitCacheMem]# MB</td>
+        <td align="right">#[objectHitCacheReadHit]#</td>
+        <td align="right">#[objectHitCacheReadMiss]#</td>
+        <td align="right">#[objectHitCacheWriteUnique]#</td>
+        <td align="right">#[objectHitCacheWriteDouble]#</td>
+        <td align="right">#[objectHitCacheDeletes]#</td>
+        <td align="right">#[objectHitCacheFlushes]#</td>
+        <td align="right">#[objectMissChunkSize]#</td>
+        <td align="right">#[objectMissCacheCount]#</td>
+        <td align="right">#[objectMissCacheMem]# MB</td>
+        <td align="right">#[objectMissCacheReadHit]#</td>
+        <td align="right">#[objectMissCacheReadMiss]#</td>
+        <td align="right">#[objectMissCacheWriteUnique]#</td>
+        <td align="right">#[objectMissCacheWriteDouble]#</td>
+        <td align="right">#[objectMissCacheDeletes]#</td>
+        <td align="right">#[objectMissCacheFlushes]#</td>
+      </tr>
+      #{/ObjectList}#
+      <tr class="TableCellDark">
+        <td colspan="19">Total Mem: #[objectHitCacheTotalMem]# MB (hit), #[objectMissCacheTotalMem]# MB (miss); Stop Grow when less than #[objectCacheStopGrow]# MB available left; Start Shrink when less than #[objectCacheStartShrink]# MB availabe left</td>
+      </tr>
+    </table></p>
+    
     <!-- other cache sizes -->
-    <p><strong>Other caching structures:</strong></p>
+    <p><strong>Other Caching Structures:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">
         <td>Type</td>
@@ -424,7 +204,7 @@
         <td>HashBlacklistedCache</td>
         <td>#[blacklistcache.size]#</td>
       </tr>
-    </table>
+    </table></p>
     #%env/templates/footer.template%#
   </body>
 </html>

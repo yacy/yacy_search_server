@@ -61,37 +61,19 @@ import de.anomic.server.serverDate;
 public class yacyNewsDB {
 
     private File path;
-    private int bufferkb;
     private long preloadTime;
     protected kelondroIndex news;
 
-    public yacyNewsDB(File path, int bufferkb, long preloadTime) throws IOException {
+    public yacyNewsDB(File path, long preloadTime) throws IOException {
         this.path = path;
-        this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
-        this.news = new kelondroCache(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400, true, false);
+        this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef), true, false);
     }
 
     private void resetDB() throws IOException {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
-        this.news = new kelondroCache(kelondroTree.open(path, bufferkb / 2 * 0x400, preloadTime, yacyNewsRecord.rowdef), bufferkb / 2 * 0x400, true, false);
-    }
-
-    public int cacheNodeChunkSize() {
-        return news.cacheNodeChunkSize();
-    }
-
-    public int cacheObjectChunkSize() {
-        return news.cacheObjectChunkSize();
-    }
-
-    public int[] cacheNodeStatus() {
-        return news.cacheNodeStatus();
-    }
-    
-    public long[] cacheObjectStatus() {
-        return news.cacheObjectStatus();
+        this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef), true, false);
     }
     
     public void close() {

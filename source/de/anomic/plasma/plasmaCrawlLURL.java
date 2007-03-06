@@ -7,7 +7,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedBy: $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -68,10 +68,8 @@ import de.anomic.index.indexURLEntryNew;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexSplitTable;
-import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCodings;
@@ -93,11 +91,11 @@ public final class plasmaCrawlLURL {
     // the class object
     private kelondroIndex urlIndexFile;
 
-    public plasmaCrawlLURL(File indexPath, long buffer, long preloadTime) {
+    public plasmaCrawlLURL(File indexPath, long preloadTime) {
         super();
 
         try {
-            urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", buffer, preloadTime, indexURLEntryNew.rowdef);
+            urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", preloadTime, indexURLEntryNew.rowdef);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);
@@ -125,34 +123,6 @@ public final class plasmaCrawlLURL {
             urlIndexFile.close();
             urlIndexFile = null;
         }
-    }
-
-    public int cacheNodeChunkSize() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeChunkSize();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeChunkSize();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeChunkSize();
-        return 0;
-    }
-
-    public int[] cacheNodeStatus() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeStatus();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeStatus();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeStatus();
-        return new int[]{0,0,0,0,0,0,0,0,0,0};
-    }
-
-    public int cacheObjectChunkSize() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectChunkSize();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectChunkSize();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectChunkSize();
-        return 0;
-    }
-
-    public long[] cacheObjectStatus() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectStatus();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectStatus();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectStatus();
-        return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     }
 
     public synchronized void stack(indexURLEntry e, String initiatorHash, String executorHash, int stackType) {
@@ -590,7 +560,7 @@ public final class plasmaCrawlLURL {
         } catch (MalformedURLException e) {}
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache
-            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[2]), 1, 0);
+            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[2]), 0);
             final Iterator enu = urls.entries(true, false, null);
             while (enu.hasNext()) {
                 System.out.println(((indexURLEntry) enu.next()).toString());

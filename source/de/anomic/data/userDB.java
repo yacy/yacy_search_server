@@ -68,26 +68,16 @@ public final class userDB {
     
     kelondroMapObjects userTable;
     private final File userTableFile;
-    private final int bufferkb;
     private long preloadTime;
 	private HashMap ipUsers = new HashMap();
     private HashMap cookieUsers = new HashMap();
     
-    public userDB(File userTableFile, int bufferkb, long preloadTime) {
+    public userDB(File userTableFile, long preloadTime) {
         this.userTableFile = userTableFile;
-        this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
         userTableFile.getParentFile().mkdirs();
-        this.userTable = new kelondroMapObjects(kelondroDyn.open(userTableFile, bufferkb * 1024, preloadTime, 128, 256, '_', true, false), 10);
+        this.userTable = new kelondroMapObjects(kelondroDyn.open(userTableFile, true, true, preloadTime, 128, 256, '_', true, false), 10);
     }
-    
-    public int dbCacheNodeChunkSize() {
-        return userTable.cacheNodeChunkSize();
-    }    
-    
-    public int[] dbCacheNodeStatus() {
-        return userTable.cacheNodeStatus();
-    }    
     
     void resetDatabase() {
         // deletes the database and creates a new one
@@ -96,7 +86,7 @@ public final class userDB {
         } catch (IOException e) {}
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
         userTableFile.getParentFile().mkdirs();
-        userTable = new kelondroMapObjects(kelondroDyn.open(userTableFile, this.bufferkb, preloadTime, 256, 512, '_', true, false), 10);
+        userTable = new kelondroMapObjects(kelondroDyn.open(userTableFile, true, true, preloadTime, 256, 512, '_', true, false), 10);
     }
     
     public void close() {

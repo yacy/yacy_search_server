@@ -87,9 +87,7 @@ public final class plasmaWordIndexFile {
         theLocation = wordHash2path(databaseRoot, wordHash);
         File fp = theLocation.getParentFile();
         if (fp != null) fp.mkdirs();
-        long cacheSize = theLocation.length();
-        if (cacheSize > 1048576) cacheSize = 1048576;
-        return kelondroTree.open(theLocation, cacheSize, 0, 
+        return kelondroTree.open(theLocation, true, 0, 
                     new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength + ", byte[] ba-" + (indexRWIEntryOld.urlEntryRow.objectsize() - yacySeedDB.commonHashLength),
                             kelondroBase64Order.enhancedCoder, 0));
     }
@@ -191,7 +189,7 @@ public final class plasmaWordIndexFile {
                 i = theIndex.contentRows(-1);
             } catch (kelondroException e) {
                 e.printStackTrace();
-                theIndex.file().delete();
+                new File(theIndex.filename()).delete();
                 i = null;
             }
         }

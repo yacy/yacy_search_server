@@ -76,7 +76,6 @@ public final class plasmaWordIndexAssortment {
     private File assortmentFile;
     private serverLog log;
     private kelondroTree assortment;
-    private long bufferSize;
 
     private static String intx(int x) {
         String s = Integer.toString(x);
@@ -98,22 +97,19 @@ public final class plasmaWordIndexAssortment {
         return (rowsize - yacySeedDB.commonHashLength - 12) / indexRWIEntryOld.urlEntryRow.objectsize();
     }
     
-    public plasmaWordIndexAssortment(File storagePath, int assortmentLength, int bufferkb, long preloadTime, serverLog log) {
+    public plasmaWordIndexAssortment(File storagePath, int assortmentLength, long preloadTime, serverLog log) {
         if (!(storagePath.exists())) storagePath.mkdirs();
         this.assortmentFile = new File(storagePath, assortmentFileName + intx(assortmentLength) + ".db");
 	    //this.bufferStructureLength = 3 + 2 * assortmentLength;
-        this.bufferSize = bufferkb * 1024;
         this.log = log;
         // open assortment tree file
         long start = System.currentTimeMillis();
-        assortment = kelondroTree.open(assortmentFile, bufferSize / 2, preloadTime, bufferStructure(assortmentLength));
+        assortment = kelondroTree.open(assortmentFile, true, preloadTime, bufferStructure(assortmentLength));
         long stop = System.currentTimeMillis();
         if (log != null) log.logConfig("Opened Assortment, " +
                                   assortment.size() + " entries, width " +
-                                  assortmentLength + ", " + bufferkb + "kb buffer, " +
                                   preloadTime + " ms preloadTime, " +
-                                  (stop - start) + " ms effective, " +
-                                  assortment.cacheNodeStatus()[1] + " preloaded"); 
+                                  (stop - start) + " ms effective"); 
         
     }
     

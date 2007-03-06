@@ -36,6 +36,8 @@ import de.anomic.server.logging.serverLog;
 
 public class kelondroRowCollection {
 
+    public static final double growfactor = 1.4;
+    
     protected byte[]        chunkcache;
     protected int           chunkcount;
     protected long          lastTimeRead, lastTimeWrote;    
@@ -160,7 +162,7 @@ public class kelondroRowCollection {
     private final void ensureSize(int elements) {
         int needed = elements * rowdef.objectsize();
         if (chunkcache.length >= needed) return;
-        byte[] newChunkcache = new byte[needed * 2]; // increase space
+        byte[] newChunkcache = new byte[(int) (needed * growfactor)]; // increase space
         System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
         chunkcache = newChunkcache;
         newChunkcache = null;

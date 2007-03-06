@@ -44,14 +44,13 @@ public class indexCollectionRI implements indexRI {
 
     kelondroCollectionIndex collectionIndex;
     
-    public indexCollectionRI(File path, String filenameStub, long buffersize, long preloadTime, int maxpartition, kelondroRow payloadrow) {
+    public indexCollectionRI(File path, String filenameStub, long preloadTime, int maxpartition, kelondroRow payloadrow) {
         try {
             collectionIndex = new kelondroCollectionIndex(
                     path,
                     filenameStub,
                     12 /*keyLength*/,
                     kelondroBase64Order.enhancedCoder,
-                    buffersize,
                     preloadTime,
                     4 /*loadfactor*/,
                     maxpartition,

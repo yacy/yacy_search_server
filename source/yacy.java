@@ -635,7 +635,7 @@ public final class yacy {
         File indexRoot = new File(new File(homePath), "DATA/INDEX");
         serverLog log = new serverLog("WORDMIGRATION");
         log.logInfo("STARTING MIGRATION");
-        plasmaWordIndex wordIndexCache = new plasmaWordIndex(indexRoot, 60000000, 60000000, 10000, log);
+        plasmaWordIndex wordIndexCache = new plasmaWordIndex(indexRoot, 10000, log);
         enumerateFiles words = new enumerateFiles(new File(dbroot, "WORDS"), true, false, true, true);
         String wordhash;
         File wordfile;
@@ -713,7 +713,7 @@ public final class yacy {
         serverLog log = new serverLog("ASSORTMENTMIGRATION");
         File aclusterroot = new File(new File(homePath), "DATA/PLASMADB/ACLUSTER");
         File indexRoot = new File(new File(homePath), "DATA/INDEX");
-        plasmaWordIndex wordIndexCache = new plasmaWordIndex(indexRoot, 60000000, 60000000, 10000, log);
+        plasmaWordIndex wordIndexCache = new plasmaWordIndex(indexRoot, 10000, log);
         log.logInfo("STARTING MIGRATION");
         String[] a = aclusterroot.list();
         AssortmentImporter importer = new AssortmentImporter(wordIndexCache);
@@ -732,7 +732,7 @@ public final class yacy {
      * @param homePath path to the YaCy directory
      * @param dbcache cache size in MB
      */
-    public static void minimizeUrlDB(String homePath, int dbcache) {
+    public static void minimizeUrlDB(String homePath) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         File indexRoot = new File(new File(homePath), "DATA/INDEX");
@@ -742,18 +742,16 @@ public final class yacy {
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            int cache = dbcache * 1024; // in KB
-            log.logFine("URLDB-Caches: "+cache+" bytes");
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexRoot, cache, 10000);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexRoot, 10000);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot2, cache, 10000);
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot2, 10000);
             
             Runtime rt = Runtime.getRuntime();
             int cacheMem = (int)(serverMemory.max-rt.totalMemory());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            plasmaWordIndex wordIndex = new plasmaWordIndex(indexRoot, cacheMem, cacheMem, 10000, log);
+            plasmaWordIndex wordIndex = new plasmaWordIndex(indexRoot, 10000, log);
             Iterator indexContainerIterator = wordIndex.wordContainers("AAAAAAAAAAAA", false, false);
             
             long urlCounter = 0, wordCounter = 0;
@@ -1163,7 +1161,7 @@ public final class yacy {
         final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
         kelondroTree oldindex = null;
         try {
-            oldindex = new kelondroTree(urlHash, 1000, -1, indexURLEntryOld.rowdef);
+            oldindex = new kelondroTree(urlHash, true, -1, indexURLEntryOld.rowdef);
         } catch (IOException e) {
             System.out.println("ERROR: CANNOT OPEN OLD INDEX: " + e.getMessage());
         }
@@ -1239,7 +1237,7 @@ public final class yacy {
         serverLog log = new serverLog("URLDBCLEANUP");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         try {
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot, 4194304, 10000);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot, 10000);
             currentUrlDB.urldbcleanup();
             currentUrlDB.close();
         } catch (IOException e) {
@@ -1259,11 +1257,11 @@ public final class yacy {
         try {
             Iterator indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex(indexRoot, 8*1024*1024, 8*1024*1024, 3000, log);
+                WordIndex = new plasmaWordIndex(indexRoot, 3000, log);
                 indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, false, false);
             } else if (resource.startsWith("assortment")) {
                 int a = Integer.parseInt(resource.substring(10));
-                plasmaWordIndexAssortment assortment = new plasmaWordIndexAssortment(new File(homeDBroot, "ACLUSTER"), a, 8*1024*1024, 3000, null);
+                plasmaWordIndexAssortment assortment = new plasmaWordIndexAssortment(new File(homeDBroot, "ACLUSTER"), a, 3000, null);
                 indexContainerIterator = assortment.wordContainers();
             } else if (resource.equals("words")) {
                 plasmaWordIndexFileCluster fileDB = new plasmaWordIndexFileCluster(homeDBroot);
@@ -1327,7 +1325,7 @@ public final class yacy {
             String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
                 File dbFile = new File(yacyDBPath,dbFileNames[i]);
-                kelondroMapObjects db = new kelondroMapObjects(new kelondroDyn(dbFile, (1024 * 0x400) / 3, 3000, yacySeedDB.commonHashLength, 480, '#', true, false), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
+                kelondroMapObjects db = new kelondroMapObjects(new kelondroDyn(dbFile, true, true, 3000, yacySeedDB.commonHashLength, 480, '#', true, false), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
                 
                 kelondroMapObjects.mapIterator it;
                 it = db.maps(true, false);
@@ -1406,13 +1404,11 @@ public final class yacy {
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-minimizeurldb"))) {
             // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
             // attention: this may run long and should not be interrupted!
-            int dbcache = 4;
             if (args.length >= 3 && args[1].toLowerCase().equals("-cache")) {
-                dbcache = Integer.parseInt(args[2]);
                 args = shift(args, 1, 2);
             }
             if (args.length == 2) applicationRoot= args[1];
-            minimizeUrlDB(applicationRoot, dbcache);
+            minimizeUrlDB(applicationRoot);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-testpeerdb"))) {
             if (args.length == 2) {
                 applicationRoot= args[1];

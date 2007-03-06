@@ -111,7 +111,7 @@ public final class indexRAMRI implements indexRI {
         kelondroBufferedRA writeBuffer = null;
         if (false /*serverMemory.available() > 50 * bufferStructureBasis.objectsize() * cache.size()*/) {
             writeBuffer = new kelondroBufferedRA();
-            dumpArray = new kelondroFixedWidthArray(writeBuffer, bufferStructureBasis, 0);
+            dumpArray = new kelondroFixedWidthArray(writeBuffer, indexDumpFile.getCanonicalPath(), bufferStructureBasis, 0);
             log.logInfo("started dump of ram cache: " + cache.size() + " words; memory-enhanced write");
         } else {
             dumpArray = new kelondroFixedWidthArray(indexDumpFile, bufferStructureBasis, 0);
@@ -188,7 +188,7 @@ public final class indexRAMRI implements indexRI {
         kelondroBufferedRA readBuffer = null;
         if (false /*serverMemory.available() > indexDumpFile.length() * 2*/) {
             readBuffer = new kelondroBufferedRA(new serverByteBuffer(serverFileUtils.read(indexDumpFile)));
-            dumpArray = new kelondroFixedWidthArray(readBuffer, bufferStructureBasis, 0);
+            dumpArray = new kelondroFixedWidthArray(readBuffer, indexDumpFile.getCanonicalPath(), bufferStructureBasis, 0);
             log.logInfo("started restore of ram cache '" + indexArrayFileName + "', " + dumpArray.size() + " word/URL relations; memory-enhanced read");
         } else {
             dumpArray = new kelondroFixedWidthArray(indexDumpFile, bufferStructureBasis, 0);
@@ -228,7 +228,8 @@ public final class indexRAMRI implements indexRI {
             }
             if (readBuffer != null) readBuffer.close();
             dumpArray.close();
-            log.logConfig("finished restor " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+            dumpArray = null;
+            log.logConfig("finished restore: " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
         } catch (kelondroException e) {
             // restore failed
             log.logSevere("failed restore of indexCache array dump: " + e.getMessage(), e);

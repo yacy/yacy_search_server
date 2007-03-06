@@ -70,19 +70,19 @@ public class kelondroMapTable {
     public void declareMaps(
             String tablename, int keysize, int nodesize, int cacheslots,
             String[] sortfields, String[] longaccfields, String[] doubleaccfields, char fillChar) throws IOException {
-        declareMaps(tablename, keysize, nodesize, cacheslots, sortfields, longaccfields, doubleaccfields, fillChar, 0x800, 0);
+        declareMaps(tablename, keysize, nodesize, cacheslots, sortfields, longaccfields, doubleaccfields, fillChar, 0);
     }
     
     public void declareMaps(
             String tablename, int keysize, int nodesize, int cacheslots,
             String[] sortfields, String[] longaccfields, String[] doubleaccfields, char fillChar,
-            long buffersize /*bytes*/, long preloadTime) throws IOException {
+            long preloadTime) throws IOException {
         if (mTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareMap: table '" + tablename + "' declared twice.");
         if (tTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareMap: table '" + tablename + "' declared already in other context.");
         File tablefile = new File(tablesPath, "table." + tablename + ".mdb");
         kelondroDyn dyn;
         if (!(tablefile.exists())) tablefile.getParentFile().mkdirs();
-        dyn = new kelondroDyn(tablefile, buffersize, preloadTime, keysize, nodesize, fillChar, true, false);
+        dyn = new kelondroDyn(tablefile, true, true, preloadTime, keysize, nodesize, fillChar, true, false);
         kelondroMapObjects map = new kelondroMapObjects(dyn, cacheslots, sortfields, longaccfields, doubleaccfields, null, null);
         mTables.put(tablename, map);
     }
@@ -91,7 +91,7 @@ public class kelondroMapTable {
         if (mTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareTree: table '" + tablename + "' declared already in other context.");
         if (tTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareTree: table '" + tablename + "' declared twice.");
         File tablefile = new File(tablesPath, "table." + tablename + ".tdb");
-        kelondroIndex Tree = new kelondroCache(kelondroTree.open(tablefile, buffersize / 2, preloadTime, rowdef), buffersize / 2, true, false);
+        kelondroIndex Tree = new kelondroCache(kelondroTree.open(tablefile, true, preloadTime, rowdef), true, false);
         tTables.put(tablename, Tree);
     }
 

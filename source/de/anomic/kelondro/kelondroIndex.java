@@ -57,6 +57,7 @@ import java.util.List;
 
 public interface kelondroIndex {
 
+    public String filename(); // returns a unique identified for this index; can be a real or artificial file name
     public int size() throws IOException;
     public kelondroProfile profile();
     public kelondroRow row() throws IOException;
@@ -72,12 +73,4 @@ public interface kelondroIndex {
     public kelondroRow.Entry removeOne() throws IOException;
     public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException;
     public void close() throws IOException;
-    
-    // statistics for node caches
-    public int cacheNodeChunkSize(); // the size that the node cache uses for a single entry
-    public int[] cacheNodeStatus(); // a collection of different node cache status values
-    
-    // statistics for object caches
-    public int cacheObjectChunkSize(); // the size of an object entry
-    public long[] cacheObjectStatus(); // a collection of different object cache status values
 }

@@ -63,7 +63,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     
     public kelondroFixedWidthArray(File file, kelondroRow rowdef, int intprops) throws IOException {
         // this creates a new array
-        super(file, 0, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
+        super(file, false, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
         if (!(super.fileExisted)) {
             for (int i = 0; i < intprops; i++) {
                 setHandle(i, new Handle(NUL));
@@ -76,9 +76,9 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         markedRemoved = new TreeSet();
     }
     
-    public kelondroFixedWidthArray(kelondroRA ra, kelondroRow rowdef, int intprops) throws IOException {
+    public kelondroFixedWidthArray(kelondroRA ra, String filename, kelondroRow rowdef, int intprops) throws IOException {
         // this creates a new array
-        super(ra, 0, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, false);
+        super(ra, filename, false, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, false);
         for (int i = 0; i < intprops; i++) {
             setHandle(i, new Handle(0));
         }

@@ -29,24 +29,30 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondroIndex {
 
+    // static tracker objects
+    private static TreeMap tableTracker = new TreeMap();
+    
+    // class objects
     protected kelondroBytesIntMap index;
     private boolean RAMIndex;
     
-    public kelondroFlexTable(File path, String tablename, long buffersize, long preloadTime, kelondroRow rowdef) throws IOException {
+    public kelondroFlexTable(File path, String tablename, long preloadTime, kelondroRow rowdef) throws IOException {
     	// the buffersize applies to a possible load of the ram-index
     	// if the ram is not sufficient, a tree file is generated
     	// if, and only if a tree file exists, the preload time is applied
     	super(path, tablename, rowdef);
-    	long neededRAM = (super.row().column(0).cellwidth() + 4) * super.size();
+    	long neededRAM = (long) ((super.row().column(0).cellwidth() + 4) * super.size() * kelondroRowCollection.growfactor);
     	
     	File newpath = new File(path, tablename);
         File indexfile = new File(newpath, "col.000.index");
@@ -57,7 +63,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         System.out.println("*** Last Startup time: " + stt + " milliseconds");
         long start = System.currentTimeMillis();
 
-        if (buffersize >= neededRAM) {
+        if (serverMemory.available(neededRAM, true)) {
         	// we can use a RAM index
         	
         	if (indexfile.exists()) {
@@ -75,18 +81,19 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
                     + " index entries initialized and sorted from "
                     + super.col[0].size() + " keys.");
             RAMIndex = true;
+            tableTracker.put(this.filename(), this);
         } else {
             // too less ram for a ram index
             if (indexfile.exists()) {
                 // use existing index file
                 System.out.println("*** Using File index " + indexfile);
-                ki = new kelondroCache(kelondroTree.open(indexfile, buffersize / 3 * 2, preloadTime, treeIndexRow(rowdef.width(0), rowdef.objectOrder, rowdef.primaryKey), 2, 80), buffersize / 3, true, false);
+                ki = new kelondroCache(kelondroTree.open(indexfile, true, preloadTime, treeIndexRow(rowdef.width(0), rowdef.objectOrder, rowdef.primaryKey), 2, 80), true, false);
                 RAMIndex = false;
             } else {
                 // generate new index file
                 System.out.println("*** Generating File index for " + size() + " entries from " + indexfile);
-                System.out.println("*** Cause: too less RAM (" + (buffersize / 1024 / 1024) + " MB) configured. Assign at least " + (neededRAM / 1024 / 1024) + " MB buffersize to enable a RAM index.");
-                ki = initializeTreeIndex(indexfile, buffersize, preloadTime, rowdef.objectOrder, rowdef.primaryKey);
+                System.out.println("*** Cause: too less RAM (" + serverMemory.available() + " MB) configured. Assign at least " + (neededRAM / 1024 / 1024) + " MB buffersize to enable a RAM index.");
+                ki = initializeTreeIndex(indexfile, preloadTime, rowdef.objectOrder, rowdef.primaryKey);
 
                 System.out.println(" -done-");
                 System.out.println(ki.size() + " entries indexed from " + super.col[0].size() + " keys.");
@@ -146,8 +153,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return ri;
     }
     
-    private kelondroIndex initializeTreeIndex(File indexfile, long buffersize, long preloadTime, kelondroOrder objectOrder, int primaryKey) throws IOException {
-        kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, buffersize / 3 * 2, preloadTime, treeIndexRow(rowdef.width(0), objectOrder, primaryKey), 2, 80), buffersize / 3, true, false);
+    private kelondroIndex initializeTreeIndex(File indexfile, long preloadTime, kelondroOrder objectOrder, int primaryKey) throws IOException {
+        kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, true, preloadTime, treeIndexRow(rowdef.width(0), objectOrder, primaryKey), 2, 80), true, false);
         Iterator content = super.col[0].contentNodes(-1);
         kelondroRecords.Node node;
         kelondroRow.Entry indexentry;
@@ -313,27 +320,43 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return index.profile();
     }
     
-    public final int cacheObjectChunkSize() {
-        // dummy method
-        return -1;
+    public static final Iterator filenames() {
+        // iterates string objects; all file names from record tracker
+        return tableTracker.keySet().iterator();
+    }
+
+    public static final kelondroProfile profileStats(String filename) {
+        // returns a map for each file in the tracker;
+        // the map represents properties for each record oobjects,
+        // i.e. for cache memory allocation
+        kelondroFlexTable theFlexTable = (kelondroFlexTable) tableTracker.get(filename);
+        return theFlexTable.profile();
     }
     
-    public long[] cacheObjectStatus() {
-        // dummy method
-        return null;
+    public static final Map memoryStats(String filename) {
+        // returns a map for each file in the tracker;
+        // the map represents properties for each record oobjects,
+        // i.e. for cache memory allocation
+        kelondroFlexTable theFlexTable = (kelondroFlexTable) tableTracker.get(filename);
+        return theFlexTable.memoryStats();
     }
     
-    public final int cacheNodeChunkSize() {
-        // returns the size that the node cache uses for a single entry
-        return -1;
-    }
-    
-    public final int[] cacheNodeStatus() {
-        // a collection of different node cache status values
-        return new int[]{0,0,0,0,0,0,0,0,0,0};
+    private final Map memoryStats() {
+        // returns statistical data about this object
+        HashMap map = new HashMap();
+        try {
+            map.put("tableIndexChunkSize", (!RAMIndex) ? "0" : Integer.toString(index.row().objectsize));
+            map.put("tableIndexCount", (!RAMIndex) ? "0" : Integer.toString(index.size()));
+            map.put("tableIndexMem", (!RAMIndex) ? "0" : Integer.toString((int) (index.row().objectsize * index.size() * kelondroRowCollection.growfactor)));
+        } catch (IOException e) {
+        }
+        return map;
     }
     
     public synchronized void close() throws IOException {
+        if (tableTracker.remove(this.filename) == null) {
+            serverLog.logWarning("kelondroFlexTable", "close(): file '" + this.filename + "' was not tracked with record tracker.");
+        }
         index.close();
         super.close();
     }

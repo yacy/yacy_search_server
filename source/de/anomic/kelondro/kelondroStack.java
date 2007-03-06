@@ -69,7 +69,7 @@ public final class kelondroStack extends kelondroRecords {
 
     public kelondroStack(File file, kelondroRow rowdef) throws IOException {
         // this creates a new stack
-        super(file, 0, 0, thisOHBytes, thisOHHandles, rowdef, thisFHandles, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
+        super(file, false, 0, thisOHBytes, thisOHHandles, rowdef, thisFHandles, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
         if (super.fileExisted) {
             //if ((getHandle(root) == null) && (getHandle(toor) == null)) clear();
         } else {

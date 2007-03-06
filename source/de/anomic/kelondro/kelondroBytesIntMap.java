@@ -37,6 +37,10 @@ public class kelondroBytesIntMap {
         this.ki = ki;
     }
     
+    public kelondroRow row() throws IOException {
+        return ki.row();
+    }
+    
     public synchronized int geti(byte[] key) throws IOException {
         assert (key != null);
         //assert (!(serverLog.allZero(key)));

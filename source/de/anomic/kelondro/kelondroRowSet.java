@@ -549,4 +549,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     public static byte[] randomHash(Random r) {
         return randomHash(r.nextLong(), r.nextLong());
     }
+
+    public String filename() {
+        return null;
+    }
 }

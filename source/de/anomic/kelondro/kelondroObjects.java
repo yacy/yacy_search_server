@@ -52,22 +52,6 @@ public class kelondroObjects {
         return dyn.row().width(0);
     }
 
-    public int cacheNodeChunkSize() {
-        return dyn.cacheNodeChunkSize();
-    }
-
-    public int cacheObjectChunkSize() {
-        return dyn.cacheObjectChunkSize();
-    }
-
-    public int[] cacheNodeStatus() {
-        return dyn.cacheNodeStatus();
-    }
-    
-    public long[] cacheObjectStatus() {
-        return dyn.cacheObjectStatus();
-    }
-
     public synchronized void set(String key, kelondroObjectsEntry newMap) throws IOException {
         assert (key != null);
         assert (key.length() > 0);

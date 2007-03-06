@@ -195,22 +195,18 @@ public class yacyCore {
         if (!yacyDBPath.exists()) { yacyDBPath.mkdir(); }
 
         // create or init seed cache
-        int memDHT = Integer.parseInt(switchboard.getConfig("ramCacheDHT", "1024")) / 1024;
         long memDHT_time = Long.parseLong(switchboard.getConfig("ramCacheDHT_time", "1000"));
-        log.logConfig("DHT Cache memory = " + memDHT + " KB");
         seedDB = new yacySeedDB(
                 sb,
                 new File(yacyDBPath, "seed0.new.db"),
                 new File(yacyDBPath, "seed0.old.db"),
                 new File(yacyDBPath, "seed0.pot.db"),
-                memDHT, memDHT_time);
+                memDHT_time);
 
         // create or init news database
-        int memNews = Integer.parseInt(switchboard.getConfig("ramCacheNews", "1024")) / 1024;
         long memNews_time = Long.parseLong(switchboard.getConfig("ramCacheNews_time", "1000"));
-        log.logConfig("News Cache memory = " + memNews + " KB");
         try {
-            newsPool = new yacyNewsPool(yacyDBPath, memNews, memNews_time);
+            newsPool = new yacyNewsPool(yacyDBPath, memNews_time);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);

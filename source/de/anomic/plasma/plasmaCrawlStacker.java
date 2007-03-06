@@ -92,10 +92,10 @@ public final class plasmaCrawlStacker {
     //private boolean stopped = false;
     private stackCrawlQueue queue;
     
-    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, int dbCacheSize, long preloadTime, int dbtype) {
+    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, long preloadTime, int dbtype) {
         this.sb = sb;
         
-        this.queue = new stackCrawlQueue(dbPath, dbCacheSize, preloadTime, dbtype);
+        this.queue = new stackCrawlQueue(dbPath, preloadTime, dbtype);
         this.log.logInfo(this.queue.size() + " entries in the stackCrawl queue.");
         this.log.logInfo("STACKCRAWL thread initialized.");
         
@@ -165,22 +165,6 @@ public final class plasmaCrawlStacker {
     
     public int size() {
         return this.queue.size();
-    }
-
-    public int cacheNodeChunkSize() {
-        return this.queue.cacheNodeChunkSize();
-    }
-    
-    public int cacheObjectChunkSize() {
-        return this.queue.cacheObjectChunkSize();
-    }
-    
-    public int[] cacheNodeStatus() {
-        return this.queue.cacheNodeStatus();
-    }
-    
-    public long[] cacheObjectStatus() {
-        return this.queue.cacheObjectStatus();
     }
     
     public void job() {
@@ -614,11 +598,10 @@ public final class plasmaCrawlStacker {
         private final LinkedList urlEntryHashCache;
         private kelondroIndex urlEntryCache;
         private File cacheStacksPath;
-        private int bufferkb;
         private long preloadTime;
         private int dbtype;
         
-        public stackCrawlQueue(File cacheStacksPath, int bufferkb, long preloadTime, int dbtype) {
+        public stackCrawlQueue(File cacheStacksPath, long preloadTime, int dbtype) {
             // init the read semaphore
             this.readSync  = new serverSemaphore (0);
             
@@ -630,7 +613,6 @@ public final class plasmaCrawlStacker {
             
             // create a stack for newly entered entries
             this.cacheStacksPath = cacheStacksPath;
-            this.bufferkb = bufferkb;
             this.preloadTime = preloadTime;
             this.dbtype = dbtype;
 
@@ -691,7 +673,7 @@ public final class plasmaCrawlStacker {
                 String newCacheName = "urlPreNotice2.table";
                 cacheStacksPath.mkdirs();
                 try {
-                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, plasmaCrawlNURL.rowdef), bufferkb / 2 * 0x400, true, false);
+                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlNURL.rowdef), true, false);
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(-1);
@@ -701,28 +683,12 @@ public final class plasmaCrawlStacker {
                 File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
                 cacheFile.getParentFile().mkdirs();
                 try {
-                    this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, bufferkb / 2 * 0x400, preloadTime, plasmaCrawlNURL.rowdef), bufferkb / 2 * 0x400, true, true);
+                    this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, true, preloadTime, plasmaCrawlNURL.rowdef), true, true);
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(-1);
                 }
             }
-        }
-
-        public int cacheNodeChunkSize() {
-            return urlEntryCache.cacheNodeChunkSize();
-        }
-        
-        public int[] cacheNodeStatus() {
-            return urlEntryCache.cacheNodeStatus();
-        }
-        
-        public int cacheObjectChunkSize() {
-            return urlEntryCache.cacheObjectChunkSize();
-        }
-        
-        public long[] cacheObjectStatus() {
-            return urlEntryCache.cacheObjectStatus();
         }
         
         public void close() throws IOException {

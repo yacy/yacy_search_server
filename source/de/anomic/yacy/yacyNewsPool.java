@@ -91,8 +91,8 @@ public class yacyNewsPool {
     private int maxDistribution;
     
     
-    public yacyNewsPool(File yacyDBPath, int bufferkb, long preloadTime) throws IOException {
-        newsDB = new yacyNewsDB(new File(yacyDBPath, "news1.db"), bufferkb, preloadTime);
+    public yacyNewsPool(File yacyDBPath, long preloadTime) throws IOException {
+        newsDB = new yacyNewsDB(new File(yacyDBPath, "news1.db"), preloadTime);
         outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut1.stack"), newsDB);
         publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished1.stack"), newsDB);
         incomingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsIn1.stack"), newsDB);
@@ -107,22 +107,6 @@ public class yacyNewsPool {
             e.printStackTrace();
             return 0;
         }
-    }
-    
-    public int cacheNodeChunkSize() {
-        return newsDB.cacheNodeChunkSize();
-    }
-    
-    public int cacheObjectChunkSize() {
-        return newsDB.cacheObjectChunkSize();
-    }
-    
-    public int[] cacheNodeStatus() {
-        return newsDB.cacheNodeStatus();
-    }
-    
-    public long[] cacheObjectStatus() {
-        return newsDB.cacheObjectStatus();
     }
     
     public void publishMyNews(yacyNewsRecord record) {

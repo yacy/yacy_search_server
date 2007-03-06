@@ -89,13 +89,13 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         
         // init noticeUrlDB
         this.log.logInfo("Initializing the source noticeUrlDB");
-        this.importNurlDB =  new plasmaCrawlNURL(this.importPath, ((this.cacheSize*3)/4)/1024, preloadTime);
+        this.importNurlDB =  new plasmaCrawlNURL(this.importPath, preloadTime);
         this.importStartSize = this.importNurlDB.size();
         //int stackSize = this.importNurlDB.stackSize();
         
         // init profile DB
         this.log.logInfo("Initializing the source profileDB");
-        this.importProfileDB = new plasmaCrawlProfile(profileDbFile, ((this.cacheSize*1)/4)/1024, 300);
+        this.importProfileDB = new plasmaCrawlProfile(profileDbFile, 300);
     }
 
     public void run() {

@@ -60,7 +60,6 @@ import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
@@ -109,17 +108,15 @@ public class plasmaCrawlNURL {
 
     private final HashSet imageStackIndex, movieStackIndex, musicStackIndex; // to find out if a specific link is already on any stack
     private File cacheStacksPath;
-    private int bufferkb;
     private long preloadTime;
     initStackIndex initThead;
     
     // the class object
     private kelondroIndex urlIndexFile = null;
 
-    public plasmaCrawlNURL(File cachePath, int bufferkb, long preloadTime) {
+    public plasmaCrawlNURL(File cachePath, long preloadTime) {
         super();
         this.cacheStacksPath = cachePath;
-        this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
         
         // create a stack for newly entered entries
@@ -157,34 +154,6 @@ public class plasmaCrawlNURL {
        }
     }
     
-    public int cacheNodeChunkSize() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeChunkSize();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeChunkSize();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeChunkSize();
-        return 0;
-    }
-    
-    public int[] cacheNodeStatus() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeStatus();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeStatus();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeStatus();
-        return new int[]{0,0,0,0,0,0,0,0,0,0};
-    }
-    
-    public int cacheObjectChunkSize() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectChunkSize();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectChunkSize();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectChunkSize();
-        return 0;
-    }
-    
-    public long[] cacheObjectStatus() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectStatus();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectStatus();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectStatus();
-        return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    }
-    
     public void waitOnInitThread() {
         try {
             if (this.initThead != null) {
@@ -203,7 +172,7 @@ public class plasmaCrawlNURL {
         String newCacheName = "urlNotice5.table";
         cacheStacksPath.mkdirs();
         try {
-            urlIndexFile = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, bufferkb / 2 * 0x400, preloadTime, rowdef), bufferkb / 2 * 0x400, true, false);
+            urlIndexFile = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, rowdef), true, false);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);

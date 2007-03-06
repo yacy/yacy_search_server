@@ -81,31 +81,15 @@ public class blogBoard {
 
     private kelondroMapObjects datbase = null;
     
-    public blogBoard(File actpath, int bufferkb, long preloadTime) {
+    public blogBoard(File actpath, long preloadTime) {
     		new File(actpath.getParent()).mkdir();
         if (datbase == null) {
-            datbase = new kelondroMapObjects(kelondroDyn.open(actpath, bufferkb / 2 * 0x40, preloadTime, keyLength, recordSize, '_', true, false), 500);
+            datbase = new kelondroMapObjects(kelondroDyn.open(actpath, true, true, preloadTime, keyLength, recordSize, '_', true, false), 500);
         }
     }
     
     public int size() {
         return datbase.size();
-    }
-    
-    public int cacheNodeChunkSize() {
-        return datbase.cacheNodeChunkSize();
-    }
-    
-    public int cacheObjectChunkSize() {
-        return datbase.cacheObjectChunkSize();
-    }
-    
-    public int[] cacheNodeStatus() {
-        return datbase.cacheNodeStatus();
-    }
-    
-    public long[] cacheObjectStatus() {
-        return datbase.cacheObjectStatus();
     }
     
     public void close() {

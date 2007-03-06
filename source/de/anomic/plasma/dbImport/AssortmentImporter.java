@@ -58,7 +58,7 @@ public class AssortmentImporter extends AbstractImporter implements dbImporter{
 
         // initializing the import assortment db
         this.log.logInfo("Initializing source assortment file " + theImportAssortmentFile);
-        this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath, assortmentNr, this.cacheSize/1024, preloadTime, this.log);
+        this.assortmentFile = new plasmaWordIndexAssortment(importAssortmentPath, assortmentNr, preloadTime, this.log);
         this.importStartSize = this.assortmentFile.size();
     }
     

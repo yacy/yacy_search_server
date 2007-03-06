@@ -29,11 +29,13 @@ package de.anomic.kelondro;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroRow.Entry;
-import de.anomic.server.serverMemory;
 
 public class kelondroCache implements kelondroIndex {
 
@@ -45,17 +47,22 @@ public class kelondroCache implements kelondroIndex {
     // - a write buffer for rows that are known to be contained in target
     // furthermore, if we access a kelondroFlexTable, we can use the ram index of the underlying index
 
+    // static object tracker; stores information about object cache usage
+    private static final TreeMap objectTracker = new TreeMap();
+    private static long memStopGrow = 4000000; // a limit for the node cache to stop growing if less than this memory amount is available
+    private static long memStartShrink = 2000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
+    
+    // class objects
     private kelondroRowSet readHitCache;
     private kelondroRowSet readMissCache;
     private kelondroRowSet writeBufferUnique;  // entries of that buffer are not contained in index
     private kelondroRowSet writeBufferDoubles; // entries of that buffer shall overwrite entries in index
     private kelondroIndex  index;
     private kelondroRow    keyrow;
-    private int            maxrecords, maxmiss;
     private int            readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     private int            hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete, hasnotFlush;
     
-    public kelondroCache(kelondroIndex backupIndex, long buffersize, boolean read, boolean write) throws IOException {
+    public kelondroCache(kelondroIndex backupIndex, boolean read, boolean write) throws IOException {
         assert write == false;
         this.index = backupIndex;
         this.keyrow = new kelondroRow(new kelondroColumn[]{index.row().column(index.row().primaryKey)}, index.row().objectOrder, index.row().primaryKey);
@@ -63,8 +70,6 @@ public class kelondroCache implements kelondroIndex {
         this.readMissCache = (read) ? new kelondroRowSet(this.keyrow, 0) : null;
         this.writeBufferUnique = (write) ? new kelondroRowSet(index.row(), 0) : null;
         this.writeBufferDoubles = (write) ? new kelondroRowSet(index.row(), 0) : null;
-        this.maxmiss = (read) ? (int) (buffersize / 10 / index.row().column(index.row().primaryKey).cellwidth()) : 0;
-        this.maxrecords = (int) ((buffersize - maxmiss * index.row().column(index.row().primaryKey).cellwidth()) / index.row().objectsize());
         this.readHit = 0;
         this.readMiss = 0;
         this.writeUnique = 0;
@@ -77,17 +82,7 @@ public class kelondroCache implements kelondroIndex {
         this.hasnotDouble = 0;
         this.hasnotDelete = 0;
         this.hasnotFlush = 0;
-    }
-    
-    
-    public final int cacheNodeChunkSize() {
-        // returns the size that the node cache uses for a single entry
-        return index.cacheNodeChunkSize();
-    }
-    
-    public final int[] cacheNodeStatus() {
-        // a collection of different node cache status values
-        return index.cacheNodeStatus();
+        objectTracker.put(backupIndex.filename(), this);
     }
     
     public final int cacheObjectChunkSize() {
@@ -96,61 +91,6 @@ public class kelondroCache implements kelondroIndex {
         } catch (IOException e) {
             return 0;
         }
-    }
-    
-    public long[] cacheObjectStatus() {
-        return new long[]{
-                (long) maxrecords,
-                (long) maxmiss,
-                (long) ((readHitCache == null) ? 0 : readHitCache.size()),
-                (long) ((readMissCache == null) ? 0 : readMissCache.size()),
-                0, // this.maxAge
-                0, // minAge()
-                0, // maxAge()
-                (long) readHit,
-                (long) readMiss,
-                (long) writeUnique,
-                (long) writeDouble,
-                (long) cacheDelete,
-                (long) cacheFlush,
-                (long) hasnotHit,
-                (long) hasnotMiss,
-                (long) hasnotUnique,
-                (long) hasnotDouble,
-                (long) hasnotDelete,
-                (long) hasnotFlush
-                };
-    }
-    
-    private static long[] combinedStatus(long[] a, long[] b) {
-        return new long[]{
-                a[0] + b[0],
-                a[1] + b[1],
-                a[2] + b[2],
-                a[3] + b[3],
-                Math.max(a[4], b[4]),
-                Math.min(a[5], b[5]),
-                Math.max(a[6], b[6]),
-                a[7] + b[7],
-                a[8] + b[8],
-                a[9] + b[9],
-                a[10] + b[10],
-                a[11] + b[11],
-                a[12] + b[12],
-                a[13] + b[13],
-                a[14] + b[14],
-                a[15] + b[15],
-                a[16] + b[16],
-                a[17] + b[17],
-                a[18] + b[18]
-        };
-    }
-    
-    public static long[] combinedStatus(long[][] a, int l) {
-        if ((a == null) || (a.length == 0) || (l == 0)) return null;
-        if ((a.length >= 1) && (l == 1)) return a[0];
-        if ((a.length >= 2) && (l == 2)) return combinedStatus(a[0], a[1]);
-        return combinedStatus(combinedStatus(a, l - 1), a[l - 1]);
     }
     
     public int writeBufferSize() {
@@ -163,6 +103,63 @@ public class kelondroCache implements kelondroIndex {
         return index.profile(); // TODO: implement own profile and merge with global
     }
 
+    public static void setCacheGrowStati(long memStopGrowNew, long memStartShrinkNew) {
+        memStopGrow = memStopGrowNew;
+        memStartShrink =  memStartShrinkNew;
+    }
+    
+    public static long getMemStopGrow() {
+        return memStopGrow ;
+    }
+    
+    public static long getMemStartShrink() {
+        return memStartShrink ;
+    }
+    
+    public static final Iterator filenames() {
+        // iterates string objects; all file names from record tracker
+        return objectTracker.keySet().iterator();
+    }
+
+    public static final Map memoryStats(String filename) {
+        // returns a map for each file in the tracker;
+        // the map represents properties for each record oobjects,
+        // i.e. for cache memory allocation
+        kelondroCache theObjectsCache = (kelondroCache) objectTracker.get(filename);
+        return theObjectsCache.memoryStats();
+    }
+    
+    private final Map memoryStats() {
+        // returns statistical data about this object
+        HashMap map = new HashMap();
+        map.put("objectHitChunkSize", (readHitCache == null) ? "0" : Integer.toString(readHitCache.rowdef.objectsize));
+        map.put("objectHitCacheCount", (readHitCache == null) ? "0" : Integer.toString(readHitCache.size()));
+        map.put("objectHitMem", (readHitCache == null) ? "0" : Integer.toString((int) (readHitCache.rowdef.objectsize * readHitCache.size() * kelondroRowCollection.growfactor)));
+        map.put("objectHitCacheReadHit", Integer.toString(readHit));
+        map.put("objectHitCacheReadMiss", Integer.toString(readMiss));
+        map.put("objectHitCacheWriteUnique", Integer.toString(writeUnique));
+        map.put("objectHitCacheWriteDouble", Integer.toString(writeDouble));
+        map.put("objectHitCacheDeletes", Integer.toString(cacheDelete));
+        map.put("objectHitCacheFlushes", Integer.toString(cacheFlush));
+        
+        map.put("objectMissChunkSize", (readMissCache == null) ? "0" : Integer.toString(readMissCache.rowdef.objectsize));
+        map.put("objectMissCacheCount", (readMissCache == null) ? "0" : Integer.toString(readMissCache.size()));
+        map.put("objectMissMem", (readMissCache == null) ? "0" : Integer.toString((int) (readMissCache.rowdef.objectsize * readMissCache.size() * kelondroRowCollection.growfactor)));
+        map.put("objectMissCacheReadHit", Integer.toString(hasnotHit));
+        map.put("objectMissCacheReadMiss", Integer.toString(hasnotMiss));
+        map.put("objectMissCacheWriteUnique", Integer.toString(hasnotUnique));
+        map.put("objectMissCacheWriteDouble", Integer.toString(hasnotDouble));
+        map.put("objectMissCacheDeletes", Integer.toString(hasnotDelete));
+        map.put("objectMissCacheFlushes", Integer.toString(hasnotFlush));
+        
+        // future feature .. map.put("objectElderTimeRead", index.profile().)
+        return map;
+    }
+    
+    private int cacheGrowStatus() {
+        return kelondroRecords.cacheGrowStatus(memStopGrow, memStartShrink);
+    }
+    
     private void flushUnique() throws IOException {
         if (writeBufferUnique == null) return;
         synchronized (writeBufferUnique) {
@@ -241,25 +238,20 @@ public class kelondroCache implements kelondroIndex {
           ((writeBufferDoubles == null) ? 0 : writeBufferDoubles.size());
     }
     
-    private boolean shortMemory() {
-        return (serverMemory.available() < 2000000);
-    }
-    
     private void checkMissSpace() {
-        if ((readMissCache != null) &&
-            ((readMissCache.size() >= maxmiss) || (shortMemory()))
+        if ((readMissCache != null) && (cacheGrowStatus() < 1)
            ) {readMissCache.clear(); readMissCache.trim();}
     }
     
     private void checkHitSpace() throws IOException {
-        int s;
-        if ((s = sumRecords()) >= maxrecords) flushDoubles(s / 4);
-        if ((s = sumRecords()) >= maxrecords) flushUnique(s / 4);
-        if (((s = sumRecords()) >= maxrecords) && (readHitCache != null)) {
+        int s = sumRecords();
+        if (cacheGrowStatus() < 2) {flushDoubles(s / 4); s = sumRecords();}
+        if (cacheGrowStatus() < 2) {flushUnique(s / 4); s = sumRecords();}
+        if ((cacheGrowStatus() < 2) && (readHitCache != null)) {
             readHitCache.clear();
             readHitCache.trim();
         }
-        if (shortMemory()) {
+        if (cacheGrowStatus() < 1) {
             flushUnique();
             flushDoubles();
             if (readHitCache != null) {
@@ -640,6 +632,10 @@ public class kelondroCache implements kelondroIndex {
 
     public int size() throws IOException {
         return index.size() + ((writeBufferUnique == null) ? 0 : writeBufferUnique.size());
+    }
+
+    public String filename() {
+        return index.filename();
     }
 
 }

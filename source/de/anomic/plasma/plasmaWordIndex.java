@@ -67,7 +67,7 @@ public final class plasmaWordIndex implements indexRI {
     private       int                flushsize;
     public  final plasmaCrawlLURL    loadedURL;
     
-    public plasmaWordIndex(File indexRoot, long rwibuffer, long lurlbuffer, long preloadTime, serverLog log) {
+    public plasmaWordIndex(File indexRoot, long preloadTime, serverLog log) {
         File textindexcache = new File(indexRoot, "PUBLIC/TEXT/RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
         this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIEntryNew.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump1.array", log);
@@ -76,10 +76,10 @@ public final class plasmaWordIndex implements indexRI {
         // create collections storage path
         File textindexcollections = new File(indexRoot, "PUBLIC/TEXT/RICOLLECTION");
         if (!(textindexcollections.exists())) textindexcollections.mkdirs();
-        this.collections = new indexCollectionRI(textindexcollections, "collection", rwibuffer, preloadTime, maxCollectionPartition, indexRWIEntryNew.urlEntryRow);
+        this.collections = new indexCollectionRI(textindexcollections, "collection", preloadTime, maxCollectionPartition, indexRWIEntryNew.urlEntryRow);
 
         // create LURL-db
-        loadedURL = new plasmaCrawlLURL(indexRoot, lurlbuffer, preloadTime);
+        loadedURL = new plasmaCrawlLURL(indexRoot, preloadTime);
         
         // performance settings
         busyCacheFlush = false;

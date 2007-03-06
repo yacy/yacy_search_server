@@ -115,6 +115,11 @@ tt, *.tt {
   font-weight:bold;
 }
 
+.commit {
+  font-weight:bold;
+  color:green;
+}
+
 .help {
   font-size:90%;
 }

@@ -40,6 +40,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
     protected kelondroFixedWidthArray[] col;
     protected kelondroRow rowdef;
     protected String tablename;
+    protected String filename;
     
     public kelondroFlexWidthArray(File path, String tablename, kelondroRow rowdef) throws IOException {
         this.rowdef = rowdef;
@@ -61,6 +62,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
             tabledir.mkdirs();
             tabledir.mkdir();
         }
+        this.filename = tabledir.getCanonicalPath();
 
         // save/check property file for this array
         File propfile = new File(tabledir, "properties");
@@ -107,6 +109,10 @@ public class kelondroFlexWidthArray implements kelondroArray {
             }
             col[p] = new kelondroFixedWidthArray(new File(tabledir, colfilename(p, q)), new kelondroRow(columns, null, 0), 16);
         }
+    }
+    
+    public final String filename() {
+        return this.filename;
     }
     
     public static int staticsize(File path, String tablename) {

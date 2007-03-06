@@ -65,31 +65,13 @@ public class plasmaCrawlRobotsTxt {
     
     kelondroMapObjects robotsTable;
     private final File robotsTableFile;
-    private int bufferkb;
     private long preloadTime;
     
-    public plasmaCrawlRobotsTxt(File robotsTableFile, int bufferkb, long preloadTime) {
+    public plasmaCrawlRobotsTxt(File robotsTableFile, long preloadTime) {
         this.robotsTableFile = robotsTableFile;
-        this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMapObjects(kelondroDyn.open(robotsTableFile, bufferkb * 1024, preloadTime, 256, 512, '_', true, false), 100);
-    }
-    
-    public int cacheNodeChunkSize() {
-        return robotsTable.cacheNodeChunkSize();
-    }    
-    
-    public int cacheObjectChunkSize() {
-        return robotsTable.cacheObjectChunkSize();
-    }    
-    
-    public int[] cacheNodeStatus() {
-        return robotsTable.cacheNodeStatus();
-    }    
-    
-    public long[] cacheObjectStatus() {
-        return robotsTable.cacheObjectStatus();
+        robotsTable = new kelondroMapObjects(kelondroDyn.open(robotsTableFile, true, true, preloadTime, 256, 512, '_', true, false), 100);
     }
     
     private void resetDatabase() {
@@ -99,7 +81,7 @@ public class plasmaCrawlRobotsTxt {
         } catch (IOException e) {}
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMapObjects(kelondroDyn.open(robotsTableFile, this.bufferkb, preloadTime, 256, 512, '_', true, false), 100);
+        robotsTable = new kelondroMapObjects(kelondroDyn.open(robotsTableFile, true, true, preloadTime, 256, 512, '_', true, false), 100);
     }
     
     public void close() {

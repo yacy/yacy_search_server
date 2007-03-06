@@ -111,7 +111,7 @@ public final class plasmaHTCache {
     private ResourceInfoFactory objFactory;
     private serverThread cacheScanThread;
 
-    public plasmaHTCache(File htCachePath, long maxCacheSize, int bufferkb, long preloadTime, String cacheLayout, boolean cacheMigration) {
+    public plasmaHTCache(File htCachePath, long maxCacheSize, long preloadTime, String cacheLayout, boolean cacheMigration) {
         // this.switchboard = switchboard;
 
         this.log = new serverLog("HTCACHE");
@@ -174,7 +174,7 @@ public final class plasmaHTCache {
         // open the response header database
         File dbfile = new File(this.cachePath, "responseHeader.db");
         try {
-            this.responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, bufferkb * 0x400, preloadTime, yacySeedDB.commonHashLength, 150, '#', true, false), 500);
+            this.responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', true, false), 500);
         } catch (IOException e) {
             this.log.logSevere("the request header database could not be opened: " + e.getMessage());
             System.exit(0);
@@ -217,22 +217,6 @@ public final class plasmaHTCache {
 
     public int dbSize() {
         return this.responseHeaderDB.size();
-    }
-
-    public int cacheNodeChunkSize() {
-        return this.responseHeaderDB.cacheNodeChunkSize();
-    }
-
-    public int cacheObjectChunkSize() {
-        return this.responseHeaderDB.cacheObjectChunkSize();
-    }
-
-    public int[] cacheNodeStatus() {
-        return this.responseHeaderDB.cacheNodeStatus();
-    }
-
-    public long[] cacheObjectStatus() {
-        return this.responseHeaderDB.cacheObjectStatus();
     }
     
     public void push(Entry entry) {

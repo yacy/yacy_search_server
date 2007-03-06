@@ -67,32 +67,16 @@ public class messageBoard {
     private kelondroMapObjects database = null;
     private int sn = 0;
 
-    public messageBoard(File path, int bufferkb, long preloadTime) {
+    public messageBoard(File path, long preloadTime) {
         new File(path.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMapObjects(kelondroDyn.open(path, bufferkb * 0x400, preloadTime, categoryLength + dateFormat.length() + 2, recordSize, '_', true, false), 500);
+            database = new kelondroMapObjects(kelondroDyn.open(path, true, true, preloadTime, categoryLength + dateFormat.length() + 2, recordSize, '_', true, false), 500);
         }
         sn = 0;
     }
 
     public int size() {
         return database.size();
-    }
-    
-    public int cacheNodeChunkSize() {
-        return database.cacheNodeChunkSize();
-    }
-    
-    public int cacheObjectChunkSize() {
-        return database.cacheObjectChunkSize();
-    }
-    
-    public int[] cacheNodeStatus() {
-        return database.cacheNodeStatus();
-    }
-    
-    public long[] cacheObjectStatus() {
-        return database.cacheObjectStatus();
     }
     
     public void close() {

@@ -56,11 +56,9 @@ import java.util.LinkedList;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.yacy.yacySeedDB;
 
@@ -152,12 +150,12 @@ public class plasmaCrawlEURL {
     // the class object
     private kelondroIndex urlIndexFile = null;
 
-    public plasmaCrawlEURL(File cachePath, int bufferkb, long preloadTime) {
+    public plasmaCrawlEURL(File cachePath, long preloadTime) {
         super();
         String newCacheName = "urlErr3.table";
         cachePath.mkdirs();
         try {
-            urlIndexFile = new kelondroFlexTable(cachePath, newCacheName, bufferkb * 0x400, preloadTime, rowdef);
+            urlIndexFile = new kelondroFlexTable(cachePath, newCacheName, preloadTime, rowdef);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);
@@ -181,34 +179,6 @@ public class plasmaCrawlEURL {
             }
             urlIndexFile = null;
         }
-    }
-    
-    public int cacheNodeChunkSize() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeChunkSize();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeChunkSize();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeChunkSize();
-        return 0;
-    }
-    
-    public int[] cacheNodeStatus() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheNodeStatus();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheNodeStatus();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheNodeStatus();
-        return new int[]{0,0,0,0,0,0,0,0,0,0};
-    }
-    
-    public int cacheObjectChunkSize() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectChunkSize();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectChunkSize();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectChunkSize();
-        return 0;
-    }
-    
-    public long[] cacheObjectStatus() {
-        if (urlIndexFile instanceof kelondroTree) return ((kelondroTree) urlIndexFile).cacheObjectStatus();
-        if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).cacheObjectStatus();
-        if (urlIndexFile instanceof kelondroFlexTable) return ((kelondroFlexTable) urlIndexFile).cacheObjectStatus();
-        return new long[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     }
 
     public synchronized Entry newEntry(URL url, String referrer, String initiator, String executor,

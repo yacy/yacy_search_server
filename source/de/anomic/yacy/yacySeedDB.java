@@ -61,12 +61,10 @@ import java.util.Map;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
-import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
-import de.anomic.kelondro.kelondroRecords;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -96,7 +94,6 @@ public final class yacySeedDB {
     protected File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
 
     protected kelondroMapObjects seedActiveDB, seedPassiveDB, seedPotentialDB;
-    private int seedDBBufferKB;
     private long preloadTime;
     
     public  final plasmaSwitchboard sb;
@@ -109,9 +106,8 @@ public final class yacySeedDB {
             File seedActiveDBFile,
             File seedPassiveDBFile,
             File seedPotentialDBFile,
-            int bufferkb, long preloadTime) {
+            long preloadTime) {
         
-        this.seedDBBufferKB = bufferkb;
         this.seedActiveDBFile = seedActiveDBFile;
         this.seedPassiveDBFile = seedPassiveDBFile;
         this.seedPotentialDBFile = seedPotentialDBFile;
@@ -176,35 +172,6 @@ public final class yacySeedDB {
         } catch (IOException e) {}
     }
     
-    public int cacheNodeChunkSize() {
-        int ac = seedActiveDB.cacheNodeChunkSize();
-        int pa = seedPassiveDB.cacheNodeChunkSize();
-        int po = seedPotentialDB.cacheNodeChunkSize();
-
-        return (ac+ pa + po) / 3;
-    }
-    public int cacheObjectChunkSize() {
-        int ac = seedActiveDB.cacheObjectChunkSize();
-        int pa = seedPassiveDB.cacheObjectChunkSize();
-        int po = seedPotentialDB.cacheObjectChunkSize();
-
-        return (ac+ pa + po) / 3;
-    }
-    
-    public int[] cacheNodeStatus() {
-        int[] ac = seedActiveDB.cacheNodeStatus();
-        int[] pa = seedPassiveDB.cacheNodeStatus();
-        int[] po = seedPotentialDB.cacheNodeStatus();
-        return kelondroRecords.cacheCombinedStatus(new int[][]{ac, pa, po}, 3);
-    }
-    
-    public long[] cacheObjectStatus() {
-        return kelondroCache.combinedStatus(new long[][] {
-                seedActiveDB.cacheObjectStatus(),
-                seedPassiveDB.cacheObjectStatus(),
-                seedPotentialDB.cacheObjectStatus() }, 3);
-    }
-    
     private synchronized kelondroMapObjects openSeedTable(File seedDBFile) {
         new File(seedDBFile.getParent()).mkdirs();
         Class[] args;
@@ -225,11 +192,11 @@ public final class yacySeedDB {
             initializeHandlerMethod = null;
         }
         try {
-            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (Exception e) {
             seedDBFile.delete();
             // try again
-            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, (seedDBBufferKB * 0x400) / 3, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         }
     }
     

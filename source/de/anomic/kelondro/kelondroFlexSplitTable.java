@@ -44,9 +44,8 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     private kelondroRow rowdef;
     private File path;
     private String tablename;
-    private long buffersize;
     
-    public kelondroFlexSplitTable(File path, String tablename, long buffersize, long preloadTime, kelondroRow rowdef) throws IOException {
+    public kelondroFlexSplitTable(File path, String tablename, long preloadTime, kelondroRow rowdef) throws IOException {
         this.path = path;
         this.tablename = tablename;
         this.rowdef = rowdef;
@@ -96,21 +95,15 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             // open next biggest table
             t.remove(maxf);
             date = maxf.substring(tablename.length() + 1);
-            if (buffersize >= maxram * 2) {
-                // this will cause usage of a complete RAM index
-                table = new kelondroCache(new kelondroFlexTable(path, maxf, maxram * 2, preloadTime, rowdef), maxram / 10, true, false);
-                buffersize -= maxram * 2;
-                buffersize -= maxram / 10;
-            } else {
-                // this will cause a generation of a file index
-                table = new kelondroFlexTable(path, maxf, buffersize / (t.size() + 1), preloadTime, rowdef);
-                buffersize -= buffersize / (t.size() + 1);
-            }
+            table = new kelondroCache(new kelondroFlexTable(path, maxf, preloadTime, rowdef), true, false);
             tables.put(date, table);
         }
-        System.out.println("*** remaining buffer RAM (not used): " + buffersize);
     }
-        
+    
+    public String filename() {
+        return new File(path, tablename).toString();
+    }
+    
     private static final Calendar thisCalendar = Calendar.getInstance();
     public static final String dateSuffix(Date date) {
         int month, year;
@@ -204,7 +197,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
             // make new table
-            table = new kelondroFlexTable(path, tablename + "." + suffix, buffersize / (tables.size() + 1), -1, rowdef);
+            table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef);
             tables.put(suffix, table);
         }
         table.put(row);
@@ -235,7 +228,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
             // make new table
-            table = new kelondroFlexTable(path, tablename + "." + suffix, buffersize / (tables.size() + 1), -1, rowdef);
+            table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef);
             tables.put(suffix, table);
         }
         table.addUnique(row, entryDate);

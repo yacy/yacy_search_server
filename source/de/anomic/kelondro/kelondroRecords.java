@@ -71,11 +71,14 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -87,7 +90,6 @@ public class kelondroRecords {
 
     // constants
     protected final static int     NUL = Integer.MIN_VALUE; // the meta value for the kelondroRecords' NUL abstraction
-    private   final static long    memBlock = 500000;       // do not fill cache further if the amount of available memory is less that this
     public    final static boolean useWriteBuffer = false;  // currently only used during development/testing
     
     // memory calculation
@@ -123,6 +125,11 @@ public class kelondroRecords {
     // POS_TXTPROPS: TXTPROPC * TXTPROPW : an array of TXTPROPC byte arrays of width TXTPROPW that can hold any string
     // POS_NODES : (USEDC + FREEC) * (overhead + sum(all: COLWIDTHS)) : Node Objects
 
+    // static supervision objects: recognize and coordinate all activites
+    private static TreeMap recordTracker = new TreeMap(); // a String/filename - kelondroRecords mapping
+    private static long memStopGrow = 4000000; // a limit for the node cache to stop growing if less than this memory amount is available
+    private static long memStartShrink = 2000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
+    
     // values that are only present at run-time
     protected String           filename;     // the database's file name
     private   kelondroIOChunks entryFile;    // the database file
@@ -148,7 +155,6 @@ public class kelondroRecords {
 
     // caching buffer
     private   kelondroIntBytesMap   cacheHeaders; // the cache; holds overhead values and key element
-    private   int                   cacheSize;    // number of cache records
     private   int readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     
     // optional logger
@@ -385,7 +391,7 @@ public class kelondroRecords {
     }
 
     
-    public kelondroRecords(File file, long buffersize /* bytes */, long preloadTime,
+    public kelondroRecords(File file, boolean useNodeCache, long preloadTime,
                            short ohbytec, short ohhandlec,
                            kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth) throws IOException {
         // opens an existing file or creates a new file
@@ -403,13 +409,13 @@ public class kelondroRecords {
             //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
             //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
-            initExistingFile(raf, buffersize / 10);
+            initExistingFile(raf, useNodeCache);
         } else {
             this.filename = file.getCanonicalPath();
             kelondroRA raf = new kelondroFileRA(this.filename);
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
-            initNewFile(raf, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, buffersize / 10);
+            initNewFile(raf, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, useNodeCache);
         }
         assignRowdef(rowdef);
         if (fileExisted) {
@@ -422,33 +428,35 @@ public class kelondroRecords {
             // create new file structure
             writeOrderType();            
         }
-        initCache(buffersize / 10 * 9, preloadTime);
+        initCache(useNodeCache, preloadTime);
+        if (useNodeCache) recordTracker.put(this.filename, this);
     }
 
-    public kelondroRecords(kelondroRA ra, long buffersize /* bytes */, long preloadTime,
+    public kelondroRecords(kelondroRA ra, String filename, boolean useCache, long preloadTime,
                            short ohbytec, short ohhandlec,
                            kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
                            boolean exitOnFail) {
         // this always creates a new file
         this.fileExisted = false;
-        this.filename = null;
+        this.filename = filename;
         try {
-            initNewFile(ra, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, buffersize / 10);
+            initNewFile(ra, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, useCache);
         } catch (IOException e) {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail) System.exit(-1);
         }
         assignRowdef(rowdef);
         writeOrderType();
-        initCache(buffersize / 10 * 9, preloadTime);
+        initCache(useCache, preloadTime);
+        if (useCache) recordTracker.put(this.filename, this);
     }
-   
+
     private void initNewFile(kelondroRA ra, short ohbytec, short ohhandlec,
-                      kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth, long writeBufferSize) throws IOException {
+                      kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth, boolean useCache) throws IOException {
 
         // create new Chunked IO
         if (useWriteBuffer) {
-            this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), writeBufferSize, 30000 + random.nextLong() % 30000);
+            this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 0, 30000 + random.nextLong() % 30000);
         } else {
             this.entryFile = new kelondroRAIOChunks(ra, ra.name());
         }
@@ -558,18 +566,19 @@ public class kelondroRecords {
             this.theLogger.fine("KELONDRO DEBUG " + this.filename + ": " + message);
     }
 
-    public kelondroRecords(kelondroRA ra, long buffersize, long preloadTime) throws IOException{
+    public kelondroRecords(kelondroRA ra, String filename, boolean useNodeCache, long preloadTime) throws IOException{
         this.fileExisted = false;
-        this.filename = null;
-        initExistingFile(ra, buffersize / 10);
+        this.filename = filename;
+        initExistingFile(ra, useNodeCache);
         readOrderType();
-        initCache(buffersize / 10 * 9, preloadTime);
+        initCache(useNodeCache, preloadTime);
+        if (useNodeCache) recordTracker.put(this.filename, this);
     }
 
-    private void initExistingFile(kelondroRA ra, long writeBufferSize) throws IOException {
+    private void initExistingFile(kelondroRA ra, boolean useNodeCache) throws IOException {
         // read from Chunked IO
-        if (useWriteBuffer) {
-            this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), writeBufferSize, 30000 + random.nextLong() % 30000);
+        if ((useWriteBuffer) && (useNodeCache)) {
+            this.entryFile = new kelondroBufferedIOChunks(ra, ra.name(), 0, 30000 + random.nextLong() % 30000);
         } else {
             this.entryFile = new kelondroRAIOChunks(ra, ra.name());
         }
@@ -641,13 +650,11 @@ public class kelondroRecords {
         return oo;
     }
     
-    private void initCache(long buffersize, long preloadTime) {
-        if (buffersize <= 0) {
-            this.cacheSize = 0;
-            this.cacheHeaders = null;
-        } else {
-            this.cacheSize = (int) (buffersize / cacheNodeChunkSize());
+    private void initCache(boolean useNodeCache, long preloadTime) {
+        if (useNodeCache) {
             this.cacheHeaders = new kelondroIntBytesMap(this.headchunksize, 0);
+        } else {
+            this.cacheHeaders = null;
         }
         this.readHit = 0;
         this.readMiss = 0;
@@ -656,13 +663,13 @@ public class kelondroRecords {
         this.cacheDelete = 0;
         this.cacheFlush = 0;
         // pre-load node cache
-        if ((preloadTime > 0) && (cacheSize > 0)) {
+        if ((preloadTime > 0) && (useNodeCache)) {
             long stop = System.currentTimeMillis() + preloadTime;
             int count = 0;
             try {
                 Iterator i = contentNodes(preloadTime);
                 Node n;
-                while ((System.currentTimeMillis() < stop) && (cacheHeaders.size() < cacheSize) && (i.hasNext())) {
+                while ((System.currentTimeMillis() < stop) && (cacheGrowStatus() == 2) && (i.hasNext())) {
                     n = (Node) i.next();
                     cacheHeaders.addb(n.handle.index, n.headChunk);
                     count++;
@@ -677,66 +684,65 @@ public class kelondroRecords {
         }
     }
 
-    public File file() {
-        if (filename == null) return null;
-        return new File(filename);
+    private int cacheGrowStatus() {
+        return cacheGrowStatus(memStopGrow, memStartShrink);
     }
     
-    public final int cacheObjectChunkSize() {
-        // dummy method
-        return -1;
+    public static final int cacheGrowStatus(long stopGrow, long startShrink) {
+        // returns either 0, 1 or 2:
+        // 0: cache is not allowed to grow, but shall shrink
+        // 1: cache is allowed to grow, but need not to shrink
+        // 2: cache is allowed to grow and must not shrink
+        long available = serverMemory.available();
+        if (available > stopGrow) return 2;
+        if (available > startShrink) return 1;
+        return 0;
     }
     
-    public long[] cacheObjectStatus() {
-        // dummy method
-        return null;
+    public static void setCacheGrowStati(long memStopGrowNew, long memStartShrinkNew) {
+        memStopGrow = memStopGrowNew;
+        memStartShrink =  memStartShrinkNew;
     }
     
-    public final int cacheNodeChunkSize() {
-        // returns the size that the node cache uses for a single entry
-        return this.headchunksize + element_in_cache;
+    public static long getMemStopGrow() {
+        return memStopGrow ;
     }
     
-    public final int[] cacheNodeStatus() {
-        // a collection of different node cache status values
-        if (cacheHeaders == null) return new int[]{0,0,0,0,0,0,0,0,0,0};
-        return new int[]{
-                cacheSize,
-                cacheHeaders.size(),
-                0, // not used
-                0, // not used
-                readHit,
-                readMiss,
-                writeUnique,
-                writeDouble,
-                cacheDelete,
-                cacheFlush
-        };
+    public static long getMemStartShrink() {
+        return memStartShrink ;
     }
     
-    public final String cacheNodeStatusString() {
-        return
-              "cacheMaxSize=" + cacheSize +
-            ", cacheCurrSize=" + ((cacheHeaders == null) ? 0 : cacheHeaders.size()) +
-            ", readHit=" + readHit +
-            ", readMiss=" + readMiss +
-            ", writeUnique=" + writeUnique +
-            ", writeDouble=" + writeDouble +
-            ", cacheDelete=" + cacheDelete +
-            ", cacheFlush=" + cacheFlush;
+    public String filename() {
+        return filename;
     }
     
-    private final static int[] cacheCombinedStatus(int[] a, int[] b) {
-        int[] c = new int[a.length];
-        for (int i = a.length - 1; i >= 0; i--) c[i] = a[i] + b[i];
-        return c;
+    public static final Iterator filenames() {
+        // iterates string objects; all file names from record tracker
+        return recordTracker.keySet().iterator();
+    }
+
+    public static final Map memoryStats(String filename) {
+        // returns a map for each file in the tracker;
+        // the map represents properties for each record oobjects,
+        // i.e. for cache memory allocation
+        kelondroRecords theRecord = (kelondroRecords) recordTracker.get(filename);
+        return theRecord.memoryStats();
     }
     
-    public final static int[] cacheCombinedStatus(int[][] a, int l) {
-        if ((a == null) || (a.length == 0) || (l == 0)) return null;
-        if ((a.length >= 1) && (l == 1)) return a[0];
-        if ((a.length >= 2) && (l == 2)) return cacheCombinedStatus(a[0], a[1]);
-        return cacheCombinedStatus(cacheCombinedStatus(a, l - 1), a[l - 1]);
+    private final Map memoryStats() {
+        // returns statistical data about this object
+        if (cacheHeaders == null) return null;
+        HashMap map = new HashMap();
+        map.put("nodeChunkSize", Integer.toString(this.headchunksize + element_in_cache));
+        map.put("nodeCacheCount", Integer.toString(cacheHeaders.size()));
+        map.put("nodeCacheMem", Integer.toString(cacheHeaders.size() * (this.headchunksize + element_in_cache)));
+        map.put("nodeCacheReadHit", Integer.toString(readHit));
+        map.put("nodeCacheReadMiss", Integer.toString(readMiss));
+        map.put("nodeCacheWriteUnique", Integer.toString(writeUnique));
+        map.put("nodeCacheWriteDouble", Integer.toString(writeDouble));
+        map.put("nodeCacheDeletes", Integer.toString(cacheDelete));
+        map.put("nodeCacheFlushes", Integer.toString(cacheFlush));
+        return map;
     }
     
     public final byte[] bulkRead(int start, int end) throws IOException {
@@ -772,7 +778,7 @@ public class kelondroRecords {
     }
     
     protected synchronized final void deleteNode(Handle handle) throws IOException {
-        if ((cacheHeaders == null) || (cacheSize == 0)) {
+        if ((cacheHeaders == null) || (cacheHeaders.size() == 0)) {
             USAGE.dispose(handle);
         } else synchronized (cacheHeaders) {
             cacheHeaders.removeb(handle.index);
@@ -901,7 +907,7 @@ public class kelondroRecords {
             // init the content
             // create chunks; read them from file or cache
             this.tailChunk = null;
-            if (cacheSize == 0) {
+            if (cacheHeaders == null) {
                 if (fillTail) {
                     // read complete record
                     byte[] chunkbuffer = new byte[recordsize];
@@ -950,7 +956,7 @@ public class kelondroRecords {
                     }
                     
                     // if space left in cache, copy these value to the cache
-                    update2Cache(cp);
+                    updateNodeCache(cp);
                 } else {
                     readHit++;
                     this.headChunk = cacheEntry;
@@ -1067,7 +1073,7 @@ public class kelondroRecords {
             if (this.headChanged) {
                 //System.out.println("WRITEH(" + filename + ", " + seekpos(this.handle) + ", " + this.headChunk.length + ")");
                 entryFile.write(seekpos(this.handle), (this.headChunk == null) ? new byte[headchunksize] : this.headChunk);
-                update2Cache(cachePriority);
+                updateNodeCache(cachePriority);
                 this.headChanged = false;
             }
 
@@ -1117,32 +1123,29 @@ public class kelondroRecords {
             return s;
         }
         
-        private void update2Cache(int forPriority) {
-            if (cacheSpace()) updateNodeCache(forPriority);
-        }
-        
         private boolean cacheSpace() {
             // check for space in cache
             // should be only called within a synchronized(cacheHeaders) environment
             // returns true if it is allowed to add another entry to the cache
             // returns false if the cache is considered to be full
-            if (cacheSize == 0) return false; // no caching
+            if (cacheHeaders == null) return false; // no caching
             if (cacheHeaders.size() == 0) return true; // nothing there to flush
-            if ((cacheHeaders.size() < cacheSize) && (serverMemory.available() >= memBlock)) return true; // no need to flush cache space
+            if (cacheGrowStatus() == 2) return true; // no need to flush cache space
             
             // just delete any of the entries
-            cacheHeaders.removeoneb();
-            cacheFlush++;
-            return true;
+            if (cacheGrowStatus() <= 1) {
+                cacheHeaders.removeoneb();
+                cacheFlush++;
+            }
+            return cacheGrowStatus() > 0;
         }
         
         private void updateNodeCache(int priority) {
             if (this.handle == null) return; // wrong access
             if (this.headChunk == null) return; // nothing there to cache
             if (priority == CP_NONE) return; // it is not wanted that this shall be cached
-            if (cacheSize == 0) return; // we do not use the cache
-            if (cacheHeaders == null) return; // no cache
-            if (cacheHeaders.size() >= cacheSize) return; // no cache update if cache is full
+            if (cacheHeaders == null) return; // we do not use the cache
+            if (!(cacheSpace())) return;
             
             synchronized (cacheHeaders) {
                 // generate cache entry
@@ -1162,7 +1165,7 @@ public class kelondroRecords {
     }
     
     protected void printCache() {
-        if (cacheSize == 0) {
+        if (cacheHeaders == null) {
             System.out.println("### file report: " + size() + " entries");
             for (int i = 0; i < USAGE.allCount(); i++) {
                 // print from  file to compare
@@ -1467,12 +1470,24 @@ public class kelondroRecords {
         
     }
     
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
+        if (cacheHeaders == null) {
+            if (recordTracker.get(this.filename) != null) {
+                theLogger.severe("close(): file '" + this.filename + "' was tracked with record tracker, but it should not.");
+            }
+        } else {
+            if (recordTracker.remove(this.filename) == null) {
+                theLogger.severe("close(): file '" + this.filename + "' was not tracked with record tracker.");
+            }
+        }
         if (entryFile == null) {
-            theLogger.severe("File was closed before close was called. File = " + filename);
+            theLogger.severe("close(): file '" + this.filename + "' was closed before close was called.");
         } else {
             USAGE.writeused(true);
             this.entryFile.close();
+            this.entryFile = null;
+            this.cacheHeaders = null;
+            theLogger.fine("close(): file '" + this.filename + "' closed.");
         }
     }
 

@@ -109,9 +109,7 @@ public class kelondroCollectionIndex {
     }
     
     public kelondroCollectionIndex(File path, String filenameStub, int keyLength, kelondroOrder indexOrder,
-                                   long buffersize, long preloadTime,
-                                   int loadfactor, int maxpartitions,
-                                   kelondroRow rowdef) throws IOException {
+                                   long preloadTime, int loadfactor, int maxpartitions, kelondroRow rowdef) throws IOException {
         // the buffersize is number of bytes that are only used if the kelondroFlexTable is backed up with a kelondroTree
         this.path = path;
         this.filenameStub = filenameStub;
@@ -125,7 +123,7 @@ public class kelondroCollectionIndex {
         boolean ramIndexGeneration = false;
         boolean fileIndexGeneration = !(new File(path, filenameStub + ".index").exists());
         if (ramIndexGeneration) index = new kelondroRowSet(indexRow(keyLength, indexOrder), 0);
-        if (fileIndexGeneration) index = new kelondroFlexTable(path, filenameStub + ".index", buffersize, preloadTime, indexRow(keyLength, indexOrder));
+        if (fileIndexGeneration) index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keyLength, indexOrder));
                    
         // open array files
         this.arrays = new HashMap(); // all entries will be dynamically created with getArray()
@@ -135,7 +133,7 @@ public class kelondroCollectionIndex {
         }
         
         // open/create index table
-        if (index == null) index = openIndexFile(path, filenameStub, indexOrder, buffersize, preloadTime, loadfactor, rowdef);
+        if (index == null) index = openIndexFile(path, filenameStub, indexOrder, preloadTime, loadfactor, rowdef);
     }
     
     private void openAllArrayFiles(boolean indexGeneration, kelondroOrder indexOrder) throws IOException {
@@ -200,10 +198,9 @@ public class kelondroCollectionIndex {
     }
     
     private kelondroIndex openIndexFile(File path, String filenameStub, kelondroOrder indexOrder,
-            long buffersize, long preloadTime,
-            int loadfactor, kelondroRow rowdef) throws IOException {
+            long preloadTime, int loadfactor, kelondroRow rowdef) throws IOException {
         // open/create index table
-        kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", buffersize / 2, preloadTime, indexRow(keylength, indexOrder)), buffersize / 2, true, false);
+        kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keylength, indexOrder)), true, false);
 
         // save/check property file for this array
         File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize());
@@ -1021,13 +1018,12 @@ public class kelondroCollectionIndex {
         
         File path = new File(args[0]);
         String filenameStub = args[1];
-        long buffersize = 10000000;
         long preloadTime = 10000;
         try {
             // initialize collection index
             kelondroCollectionIndex collectionIndex  = new kelondroCollectionIndex(
                         path, filenameStub, 9 /*keyLength*/,
-                        kelondroNaturalOrder.naturalOrder, buffersize, preloadTime,
+                        kelondroNaturalOrder.naturalOrder, preloadTime,
                         4 /*loadfactor*/, 7, rowdef);
             
             // fill index with values
@@ -1055,7 +1051,7 @@ public class kelondroCollectionIndex {
             
             // printout of index
             collectionIndex.close();
-            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", buffersize, preloadTime, kelondroCollectionIndex.indexRow(9, kelondroNaturalOrder.naturalOrder));
+            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, kelondroCollectionIndex.indexRow(9, kelondroNaturalOrder.naturalOrder));
             index.print();
             index.close();
         } catch (IOException e) {

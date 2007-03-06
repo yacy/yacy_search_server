@@ -54,7 +54,6 @@ import java.util.TimeZone;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMapObjects;
-import de.anomic.kelondro.kelondroRecords;
 
 public class wikiBoard {
 
@@ -69,14 +68,14 @@ public class wikiBoard {
     private kelondroMapObjects bkpbase = null;
     private static HashMap authors = new HashMap();
 
-    public wikiBoard(File actpath, File bkppath, int bufferkb, long preloadTime) {
+    public wikiBoard(File actpath, File bkppath, long preloadTime) {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
-            datbase = new kelondroMapObjects(kelondroDyn.open(actpath, bufferkb / 2 * 0x400, preloadTime, keyLength, recordSize, '_', true, false), 500);
+            datbase = new kelondroMapObjects(kelondroDyn.open(actpath, true, true, preloadTime, keyLength, recordSize, '_', true, false), 500);
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
-            bkpbase = new kelondroMapObjects(kelondroDyn.open(bkppath, bufferkb / 2 * 0x400, preloadTime, keyLength + dateFormat.length(), recordSize, '_', true, false), 500);
+            bkpbase = new kelondroMapObjects(kelondroDyn.open(bkppath, true, true, preloadTime, keyLength + dateFormat.length(), recordSize, '_', true, false), 500);
         }
     }
 
@@ -86,28 +85,6 @@ public class wikiBoard {
 
     public int size() {
         return datbase.size();
-    }
-
-    public int cacheNodeChunkSize() {
-        int db = datbase.cacheNodeChunkSize();
-        int bk = bkpbase.cacheNodeChunkSize();
-        return (db + bk) / 2;
-    }
-
-    public int cacheObjectChunkSize() {
-        int db = datbase.cacheObjectChunkSize();
-        int bk = bkpbase.cacheObjectChunkSize();
-        return (db + bk) / 2;
-    }
-
-    public int[] cacheNodeStatus() {
-        int[] a = datbase.cacheNodeStatus();
-        int[] b = bkpbase.cacheNodeStatus();
-        return kelondroRecords.cacheCombinedStatus(new int[][]{a, b}, 2);
-    }
-
-    public long[] cacheObjectStatus() {
-        return datbase.cacheObjectStatus();
     }
 
     public void close() {

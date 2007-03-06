@@ -35,8 +35,6 @@ public class dbtest {
 
     public final static int keylength = 12;
     public final static int valuelength = 223; // sum of all data length as defined in plasmaURL
-    //public final static long buffer = 0;
-    public final static long buffer = 8192 * 1024; // 8 MB buffer
     public final static long preload = 1000; // 1 second
     public static byte[] dummyvalue2 = new byte[valuelength];
     static {
@@ -178,22 +176,21 @@ public class dbtest {
             kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength, kelondroBase64Order.enhancedCoder, 0);
             if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
-                table = new kelondroCache(new kelondroTree(tablefile, buffer / 2, preload, testRow), buffer / 2, true, false);
+                table = new kelondroCache(new kelondroTree(tablefile, true, preload, testRow), true, false);
             }
             if (dbe.equals("kelondroSplittedTree")) {
                 File tablepath = new File(tablename).getParentFile();
                 tablename = new File(tablename).getName();
                 table = new kelondroSplittedTree(tablepath, tablename, kelondroBase64Order.enhancedCoder,
-                                buffer, preload,
-                                8, testRow, 1, 80);
+                                preload, 8, testRow, 1, 80);
             }
             if (dbe.equals("kelondroFlexTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), buffer, preload, testRow);
+                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), preload, testRow);
             }
             if (dbe.equals("kelondroFlexSplitTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexSplitTable(tablepath, new File(tablename).getName(), buffer, preload, testRow);
+                table = new kelondroFlexSplitTable(tablepath, new File(tablename).getName(), preload, testRow);
             }
             if (dbe.equals("mysql")) {
                 table = new dbTable("mysql", testRow);
@@ -226,7 +223,7 @@ public class dbtest {
                     key = randomHash(random);
                     table.put(table.row().newEntry(new byte[][]{key, key, dummyvalue2}));
                     if (i % 1000 == 0) {
-                        System.out.println(i + " entries. " + ((table instanceof kelondroTree) ? ((kelondroTree) table).cacheNodeStatusString() : ""));
+                        System.out.println(i + " entries. ");
                         if (table instanceof kelondroTree) {
                             profiles = ((kelondroTree) table).profiles();
                             System.out.println("Cache Delta: " + kelondroProfile.delta(profiles[0], cacheProfileAcc).toString());
@@ -457,7 +454,11 @@ final class dbTable implements kelondroIndex {
             throw new Exception ("Unable to establish a database connection: " + e.getMessage(),e);
         }
         
-    }        
+    }
+    
+    public String filename() {
+        return "dbtest." + theDBConnection.hashCode();
+    }
     
     public void close() throws IOException {
         try {

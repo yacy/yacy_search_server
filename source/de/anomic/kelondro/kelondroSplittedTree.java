@@ -57,6 +57,7 @@ public class kelondroSplittedTree implements kelondroIndex {
     private kelondroTree[] ktfs;
     private kelondroOrder order;
     private int ff;
+    private String filename;
     
     private static File dbFile(File path, String filenameStub, int forkfactor, int columns, int number) {
         String ns = Integer.toHexString(number).toUpperCase();
@@ -67,24 +68,20 @@ public class kelondroSplittedTree implements kelondroIndex {
         while (co.length() < 2) co = "0" + co;
         return new File(path, filenameStub + "." + ff + "." + co + "." + ns + ".ktc");
     }
-
-    /*
-    private static boolean existsAll(File pathToFiles, String filenameStub, int forkfactor, int columns){
-        for (int i = 0; i < forkfactor; i++) {
-            if (!(dbFile(pathToFiles, filenameStub, forkfactor, columns, i)).exists()) return false;
-        }
-        return true;
-    }
-    */
     
     public kelondroSplittedTree(File pathToFiles, String filenameStub, kelondroOrder objectOrder,
-                            long buffersize, long preloadTime,
+                            long preloadTime,
                             int forkfactor, kelondroRow rowdef, int txtProps, int txtPropsWidth) {
+        try {
+            this.filename = new File(pathToFiles, filenameStub).getCanonicalPath();
+        } catch (IOException e) {
+            this.filename = null;
+        }
         ktfs = new kelondroTree[forkfactor];
         File f;
         for (int i = 0; i < forkfactor; i++) {
             f = dbFile(pathToFiles, filenameStub, forkfactor, rowdef.columns(), i);
-            ktfs[i] = kelondroTree.open(f, buffersize/forkfactor, preloadTime / forkfactor, rowdef, txtProps, txtPropsWidth);
+            ktfs[i] = kelondroTree.open(f, true, preloadTime / forkfactor, rowdef, txtProps, txtPropsWidth);
         }
         this.order = objectOrder;
         ff = forkfactor;
@@ -277,6 +274,10 @@ public class kelondroSplittedTree implements kelondroIndex {
     public final int[] cacheNodeStatus() {
         // a collection of different node cache status values
         return new int[]{0,0,0,0,0,0,0,0,0,0};
+    }
+
+    public String filename() {
+        return this.filename;
     }
 
 }

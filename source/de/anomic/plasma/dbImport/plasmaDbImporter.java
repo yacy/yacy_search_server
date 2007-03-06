@@ -64,7 +64,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         }         
         
         this.log.logFine("Initializing source word index db.");
-        this.importWordIndex = new plasmaWordIndex(this.importPath, this.cacheSize/2, this.cacheSize/2, preloadTime / 2, this.log);
+        this.importWordIndex = new plasmaWordIndex(this.importPath, preloadTime / 2, this.log);
 
         this.importStartSize = this.importWordIndex.size();
     }

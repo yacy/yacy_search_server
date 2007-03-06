@@ -59,35 +59,17 @@ public class plasmaCrawlProfile {
     private kelondroMapObjects profileTable;
     private HashMap domsCache;
     private File profileTableFile;
-    private int bufferkb;
     private long preloadTime;
     
     public static final int crawlProfileHandleLength = 4;  // name of the prefetch profile
     
-    public plasmaCrawlProfile(File file, int bufferkb, long preloadTime) {
+    public plasmaCrawlProfile(File file, long preloadTime) {
         this.profileTableFile = file;
-        this.bufferkb = bufferkb;
         this.preloadTime = preloadTime;
         profileTableFile.getParentFile().mkdirs();
-        kelondroDyn dyn = kelondroDyn.open(profileTableFile, bufferkb * 1024, preloadTime, crawlProfileHandleLength, 2000, '#', true, false);
+        kelondroDyn dyn = kelondroDyn.open(profileTableFile, true, true, preloadTime, crawlProfileHandleLength, 2000, '#', true, false);
         profileTable = new kelondroMapObjects(dyn, 500);
         domsCache = new HashMap();
-    }
-    
-    public int cacheNodeChunkSize() {
-        return profileTable.cacheNodeChunkSize();
-    }    
-    
-    public int cacheObjectChunkSize() {
-        return profileTable.cacheObjectChunkSize();
-    }    
-    
-    public int[] cacheNodeStatus() {
-        return profileTable.cacheNodeStatus();
-    }    
-    
-    public long[] cacheObjectStatus() {
-        return profileTable.cacheObjectStatus();
     }
     
     private void resetDatabase() {
@@ -95,7 +77,7 @@ public class plasmaCrawlProfile {
         if (profileTable != null) try { profileTable.close(); } catch (IOException e) {}
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
-        kelondroDyn dyn = kelondroDyn.open(profileTableFile, bufferkb * 1024, preloadTime, crawlProfileHandleLength, 2000, '#', true, false);
+        kelondroDyn dyn = kelondroDyn.open(profileTableFile, true, true, preloadTime, crawlProfileHandleLength, 2000, '#', true, false);
         profileTable = new kelondroMapObjects(dyn, 500);
     }
     
