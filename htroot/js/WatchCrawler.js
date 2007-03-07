@@ -210,6 +210,14 @@ function updateTable(indexingqueue, tablename){
     }
 }
 
+function shortenURL(url) {
+	if (url.length > 80) {
+		return url.substr(0, 80) + "...";
+	} else {
+		return url;
+	}
+}
+
 function createIndexingRow(queue, profile, initiator, depth, modified, anchor, url, size, deletebutton){
     row=document.createElement("tr");
     row.setAttribute("height", 10);
@@ -219,7 +227,7 @@ function createIndexingRow(queue, profile, initiator, depth, modified, anchor, u
 	row.appendChild(createCol(depth));
 	row.appendChild(createCol(modified));
 	row.appendChild(createCol(anchor));
-	row.appendChild(createLinkCol(url, url));
+	row.appendChild(createLinkCol(url, shortenURL(url)));
 	row.appendChild(createCol(size));
 	row.appendChild(deletebutton);
 	return row;

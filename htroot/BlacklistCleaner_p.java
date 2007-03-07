@@ -83,7 +83,9 @@ public class BlacklistCleaner_p {
     private static final int ERR_HOST_WRONG_CHARS = 4;
     private static final int ERR_DOUBLE_OCCURANCE = 5;
     
-    public static final Class[] supportedBLEngines = { plasmaSwitchboard.class };
+    public static final Class[] supportedBLEngines = {
+        defaultURLPattern.class
+    };
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
