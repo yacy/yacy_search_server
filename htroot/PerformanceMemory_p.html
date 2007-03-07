@@ -19,37 +19,37 @@
         <td>Now<br />#(gc)#before <a href="PerformanceMemory_p.html?gc=">GC</a>::after GC#(/gc)#</td>
         <td>Description<br />&nbsp;</td>
       </tr>
-      <tr class="TableCellDark">
-        <td class="TableHeader" align="left">Max</td>
+      <tr class="TableCellLight">
+        <td class="TableCellDark" align="left">Max</td>
         <td align="center" colspan="4">#[memoryMax]# MByte</td>
         <td align="left">maximum memory that the JVM will attempt to use</td>
       </tr>
-      <tr class="TableCellDark">
-        <td class="TableHeader" align="left">Available</td>
+      <tr class="TableCellLight">
+        <td class="TableCellDark" align="left">Available</td>
         <td align="right">#[memoryAvailAfterStartup]# MByte</td>
         <td align="right">#[memoryAvailAfterInitBGC]# MByte</td>
         <td align="right">#[memoryAvailAfterInitAGC]# MByte</td>
         <td align="right">#[memoryAvailNow]# MByte</td>
         <td align="left">total available memory including free for the JVM within maximum</td>
       </tr>
-      <tr class="TableCellDark">
-        <td class="TableHeader" align="left">Total</td>
+      <tr class="TableCellLight">
+        <td class="TableCellDark" align="left">Total</td>
         <td align="right">#[memoryTotalAfterStartup]# KByte</td>
         <td align="right">#[memoryTotalAfterInitBGC]# KByte</td>
         <td align="right">#[memoryTotalAfterInitAGC]# KByte</td>
         <td align="right">#[memoryTotalNow]# MByte</td>
         <td align="left">total memory taken from the OS</td>
       </tr>
-      <tr class="TableCellDark">
-        <td class="TableHeader" align="left">Free</td>
+      <tr class="TableCellLight">
+        <td class="TableCellDark" align="left">Free</td>
         <td align="right">#[memoryFreeAfterStartup]# KByte</td>
         <td align="right">#[memoryFreeAfterInitBGC]# KByte</td>
         <td align="right">#[memoryFreeAfterInitAGC]# KByte</td>
         <td align="right">#[memoryFreeNow]# MByte</td>
         <td align="left">free memory in the JVM within total amount</td>
       </tr>
-      <tr class="TableCellDark">
-        <td class="TableHeader" align="left">Used</td>
+      <tr class="TableCellLight">
+        <td class="TableCellDark" align="left">Used</td>
         <td align="right">#[memoryUsedAfterStartup]# KByte</td>
         <td align="right">#[memoryUsedAfterInitBGC]# KByte</td>
         <td align="right">#[memoryUsedAfterInitAGC]# KByte</td>
@@ -64,13 +64,12 @@
         <table border="0" cellpadding="2" cellspacing="1" width="60%">
           <colgroup><col width="20%" /><col width="40%" /></colgroup>
           <tr>
-            <td class="TableHeader" align="right"><label for="Xmx">Memory reserved for JVM</label>&nbsp;</td>
-            <td class="TableCellDark" align="right"><input name="Xmx" id="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /> MByte</td>
+            <td class="TableCellDark" align="right"><label for="Xmx">Memory reserved for JVM</label>&nbsp;</td>
+            <td class="TableCellLight" align="left">&nbsp;<input name="Xmx" id="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /> MByte</td>
 		  </tr>
           <tr>
-            <td #(setStartupCommit)#class="TableCellLight"::class="commit"::class="error"#(/setStartupCommit)# colspan="2" align="right">
-              #(setStartupCommit)#::Accepted change. This will take effect after <strong>restart</strong> of YaCy#(/setStartupCommit)#
-              <input type="submit" name="setStartup" value="Set" />
+            <td class="TableCellLight" align="right"><input type="submit" name="setStartup" value="Set" /></td>
+            <td #(setStartupCommit)#class="TableCellLight"::class="commit"::class="error"#(/setStartupCommit)# align="left">&nbsp;#(setStartupCommit)#::Accepted change. This will take effect after <strong>restart</strong> of YaCy#(/setStartupCommit)#
             </td>
           </tr>
         </table>
@@ -87,7 +86,7 @@
       </tr>
       #{TableList}#
       <tr class="TableCellLight">
-        <td align="left">#[tableIndexPath]#</td>
+        <td align="left" class="TableCellDark">#[tableIndexPath]#</td>
         <td align="right">#[tableIndexChunkSize]#</td>
         <td align="right">#[tableIndexCount]#</td>
         <td align="right">#[tableIndexMem]# MB</td>
@@ -114,7 +113,7 @@
       </tr>
       #{NodeList}#
       <tr class="TableCellLight">
-        <td align="left">#[nodeCachePath]#</td>
+        <td align="left" class="TableCellDark">#[nodeCachePath]#</td>
         <td align="right">#[nodeChunkSize]#</td>
         <td align="right">#[nodeCacheCount]#</td>
         <td align="right">#[nodeCacheMem]# MB</td>
@@ -161,7 +160,7 @@
       </tr>
       #{ObjectList}#
       <tr class="TableCellLight">
-        <td align="left">#[objectCachePath]#</td>
+        <td align="left" class="TableCellDark">#[objectCachePath]#</td>
         <td align="right">#[objectHitChunkSize]#</td>
         <td align="right">#[objectHitCacheCount]#</td>
         <td align="right">#[objectHitCacheMem]# MB</td>
