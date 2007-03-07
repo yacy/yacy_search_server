@@ -111,7 +111,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public static int staticRAMIndexNeed(File path, String tablename, kelondroRow rowdef) {
-        return (rowdef.column(0).cellwidth() + 4) * staticSize(path, tablename);
+        return (int) ((rowdef.column(0).cellwidth() + 4) * staticSize(path, tablename) * kelondroRowSet.growfactor);
     }
     
     public boolean hasRAMIndex() {
