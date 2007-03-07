@@ -1487,7 +1487,7 @@ public class kelondroRecords {
             this.entryFile.close();
             this.entryFile = null;
             this.cacheHeaders = null;
-            theLogger.fine("close(): file '" + this.filename + "' closed.");
+            theLogger.fine("file '" + this.filename + "' closed.");
         }
     }
 

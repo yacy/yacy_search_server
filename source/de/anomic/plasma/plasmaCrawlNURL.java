@@ -98,6 +98,7 @@ public class plasmaCrawlNURL {
         0
         );
     
+    private kelondroIndex urlIndexFile = null;
     private final plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
     private final plasmaCrawlBalancer limitStack;     // links found by crawling at target depth
     private final plasmaCrawlBalancer overhangStack;  // links found by crawling at depth+1
@@ -109,11 +110,8 @@ public class plasmaCrawlNURL {
     private final HashSet imageStackIndex, movieStackIndex, musicStackIndex; // to find out if a specific link is already on any stack
     private File cacheStacksPath;
     private long preloadTime;
-    initStackIndex initThead;
+    private initStackIndex initThead;
     
-    // the class object
-    private kelondroIndex urlIndexFile = null;
-
     public plasmaCrawlNURL(File cachePath, long preloadTime) {
         super();
         this.cacheStacksPath = cachePath;
@@ -164,10 +162,6 @@ public class plasmaCrawlNURL {
         
     }
     
-    public boolean getUseNewDB() {
-        return (urlIndexFile instanceof kelondroFlexTable);
-    }
-    
     private void openHashCache() {
         String newCacheName = "urlNotice5.table";
         cacheStacksPath.mkdirs();
@@ -190,7 +184,6 @@ public class plasmaCrawlNURL {
     }
     
     public void close() {
-        try {urlIndexFile.close();} catch (IOException e) {}
         coreStack.close();
         limitStack.close();
         overhangStack.close();
