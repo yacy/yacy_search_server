@@ -12,14 +12,13 @@
       <li><a href="/Help.html" class="MenuItemLink">Help</a></li>
     </ul>
   </li>
-  <li class="menugroup" id="menugroupCommunicationPublication">
-    <h3>Your Web</h3>
+  <li class="menugroup" id="menugroupCrawlerControl">
+    <h3>Web Crawler</h3>
     <ul class="menu">
-      <li><a href="/www/" class="MenuItemLink">Home Page Demo</a></li>
-      <li><a href="/share/" class="MenuItemLink">Your File Share</a></li>
-      <li><a href="/Wiki.html" class="MenuItemLink">YaCy Wiki</a></li>
-      <li><a href="/Blog.html" class="MenuItemLink">YaCy Blog</a></li>
-      <li><a href="/Messages_p.html" class="MenuItemLink lock">Messages <img src="notifier.gif" alt="New Messages" /></a></li>
+      <li><a href="/IndexCreate_p.html" class="MenuItemLink lock">Start Web Crawl</a></li>
+      <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Administrate Index</a></li>
+      <li><a href="/Blacklist_p.html" class="MenuItemLink lock">URL Blacklist</a></li>
+      <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Indexing with Proxy</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupMonitoring">
@@ -36,13 +35,14 @@
       <li><a href="/CookieMonitorIncoming_p.html" class="MenuItemLink lock">Cookies in Proxy</a></li>
     </ul>
   </li>
-  <li class="menugroup" id="menugroupCrawlerControl">
-    <h3>Web Crawler</h3>
+  <li class="menugroup" id="menugroupCommunicationPublication">
+    <h3>Your Web</h3>
     <ul class="menu">
-      <li><a href="/IndexCreate_p.html" class="MenuItemLink lock">Start Web Crawl</a></li>
-      <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Administrate Index</a></li>
-      <li><a href="/Blacklist_p.html" class="MenuItemLink lock">URL Blacklist</a></li>
-      <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Indexing with Proxy</a></li>
+      <li><a href="/www/" class="MenuItemLink">Home Page Demo</a></li>
+      <li><a href="/share/" class="MenuItemLink">Your File Share</a></li>
+      <li><a href="/Wiki.html" class="MenuItemLink">YaCy Wiki</a></li>
+      <li><a href="/Blog.html" class="MenuItemLink">YaCy Blog</a></li>
+      <li><a href="/Messages_p.html" class="MenuItemLink lock">Messages <img src="notifier.gif" alt="New Messages" /></a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupPeerControl">
