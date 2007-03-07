@@ -168,15 +168,25 @@ public class plasmaDHTChunk {
         String startPointHash;
         // first try to select with increasing probality a good start point
         double minimumDistance = ((double) peerRedundancy) / ((double) yacyCore.seedDB.sizeConnected());
-        if (Math.round(Math.random() * 6) != 4)
-            for (int i = 9; i > 0; i--) {
-                startPointHash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(i + System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
-                if (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash) > (minimumDistance + ((double) i / (double) 10)))
-                    return startPointHash;
+        double d, bestDistance = 0.0;
+        String bestHash = null;
+        for (int i = yacyCore.seedDB.sizeConnected() / 8; i > 0; i--) {
+            startPointHash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(i + System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
+            d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash);
+            if (d > (minimumDistance + ((double) i / (double) 10))) {
+                return startPointHash;
             }
-        // if that fails, take simply the best start point (this is usually avoided, since that leads to always the same target peers)
-        startPointHash = yacyCore.seedDB.mySeed.hash.substring(0, 11) + "z";
-        return startPointHash;
+            if (d > bestDistance) {
+                bestDistance = d;
+                bestHash = startPointHash;
+            }
+        }
+        // if that fails, take simply the best start point
+        if (bestHash == null) {
+            return yacyCore.seedDB.mySeed.hash.substring(0, 11) + "z";
+        } else {
+            return bestHash;
+        }
     }
 
     private void selectTransferContainers(String hash, int mincount, int maxcount, int maxtime) throws InterruptedException {        
