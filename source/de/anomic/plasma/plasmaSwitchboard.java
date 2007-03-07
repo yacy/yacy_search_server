@@ -982,28 +982,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         ", " + robots.size() + " entries" +
         ", " + ppRamString(robotsDBFile.length()/1024));
         
-        // start indexing management
-        log.logConfig("Starting Indexing Management");
-        wordIndex = new plasmaWordIndex(indexPath, ramRWI_time, log);
-        noticeURL = new plasmaCrawlNURL(plasmaPath, -1);
-        errorURL = new plasmaCrawlEURL(plasmaPath, -1);
-
-        // set a high maximum cache size to current size; this is adopted later automatically
-        int wordCacheMaxCount = Math.max((int) getConfigLong(WORDCACHE_INIT_COUNT, 30000),
-                                         (int) getConfigLong(WORDCACHE_MAX_COUNT, 20000));
-        setConfig(WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
-        wordIndex.setMaxWordCount(wordCacheMaxCount); 
-
-        int wordInCacheMaxCount = (int) getConfigLong(INDEX_DIST_DHT_RECEIPT_LIMIT, 1000);
-        wordIndex.setInMaxWordCount(wordInCacheMaxCount);
-        wordIndex.setWordFlushSize((int) getConfigLong("wordFlushSize", 1000));
-        
-        // set a minimum amount of memory for the indexer thread
-        long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
-        setConfig(INDEXER_MEMPREREQ, memprereq);
-        kelondroRecords.setCacheGrowStati(memprereq + (memprereq / 8) + 2 * 1024 * 1024, memprereq);
-        kelondroCache.setCacheGrowStati(memprereq + (memprereq / 8) + 2 * 1024 * 1024, memprereq);
-        
         // start a cache manager
         log.logConfig("Starting HT Cache Manager");
         
@@ -1021,6 +999,48 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String cacheLayout = getConfig(PROXY_CACHE_LAYOUT, PROXY_CACHE_LAYOUT_TREE);
         boolean cacheMigration = getConfigBool(PROXY_CACHE_MIGRATION, true);
         this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP_time, cacheLayout, cacheMigration);
+        
+        // starting message board
+        initMessages(ramMessage_time);
+        
+        // starting wiki
+        initWiki(ramWiki_time);
+        
+        //starting blog
+        initBlog(ramBlog_time);
+        
+        // Init User DB
+        this.log.logConfig("Loading User DB");
+        File userDbFile = new File(getRootPath(), DBFILE_USER);
+        this.userDB = new userDB(userDbFile, 2000);
+        this.log.logConfig("Loaded User DB from file " + userDbFile.getName() +
+        ", " + this.userDB.size() + " entries" +
+        ", " + ppRamString(userDbFile.length()/1024));
+        
+        //Init bookmarks DB
+        initBookmarks();
+        
+        // start indexing management
+        log.logConfig("Starting Indexing Management");
+        noticeURL = new plasmaCrawlNURL(plasmaPath, -1);
+        errorURL = new plasmaCrawlEURL(plasmaPath, -1);
+        wordIndex = new plasmaWordIndex(indexPath, ramRWI_time, log);
+        
+        // set a high maximum cache size to current size; this is adopted later automatically
+        int wordCacheMaxCount = Math.max((int) getConfigLong(WORDCACHE_INIT_COUNT, 30000),
+                                         (int) getConfigLong(WORDCACHE_MAX_COUNT, 20000));
+        setConfig(WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
+        wordIndex.setMaxWordCount(wordCacheMaxCount); 
+
+        int wordInCacheMaxCount = (int) getConfigLong(INDEX_DIST_DHT_RECEIPT_LIMIT, 1000);
+        wordIndex.setInMaxWordCount(wordInCacheMaxCount);
+        wordIndex.setWordFlushSize((int) getConfigLong("wordFlushSize", 1000));
+        
+        // set a minimum amount of memory for the indexer thread
+        long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
+        setConfig(INDEXER_MEMPREREQ, memprereq);
+        kelondroRecords.setCacheGrowStati(memprereq + (memprereq / 8) + 2 * 1024 * 1024, memprereq);
+        kelondroCache.setCacheGrowStati(memprereq + (memprereq / 8) + 2 * 1024 * 1024, memprereq);
         
         // make parser
         log.logConfig("Starting Parser");
@@ -1087,26 +1107,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.crawlJobsStatus.put(CRAWLJOB_GLOBAL_CRAWL_TRIGGER, new Object[]{
                 new Object(),
                 Boolean.valueOf(getConfig(CRAWLJOB_GLOBAL_CRAWL_TRIGGER + "_isPaused", "false"))});
-        
-        // starting  board
-        initMessages(ramMessage_time);
-        
-        // starting wiki
-        initWiki(ramWiki_time);
-        
-        //starting blog
-        initBlog(ramBlog_time);
-        
-        // Init User DB
-        this.log.logConfig("Loading User DB");
-        File userDbFile = new File(getRootPath(), DBFILE_USER);
-        this.userDB = new userDB(userDbFile, 2000);
-        this.log.logConfig("Loaded User DB from file " + userDbFile.getName() +
-        ", " + this.userDB.size() + " entries" +
-        ", " + ppRamString(userDbFile.length()/1024));
-        
-        //Init bookmarks DB
-        initBookmarks();
         
         // init cookie-Monitor
         this.log.logConfig("Starting Cookie Monitor");
