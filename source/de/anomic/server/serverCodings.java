@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.MessageDigest;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -175,10 +176,10 @@ public final class serverCodings {
 	return p;
     }
     
-    public static HashMap string2map(String string, String separator) {
+    public static Map string2map(String string, String separator) {
         // this can be used to parse a Map.toString() into a Map again
         if (string == null) return null;
-        HashMap map = new HashMap();
+        Map map = Collections.synchronizedMap(new HashMap());
         int pos;
         if ((pos = string.indexOf("{")) >= 0) string = string.substring(pos + 1).trim();
         if ((pos = string.lastIndexOf("}")) >= 0) string = string.substring(0, pos).trim();
@@ -210,7 +211,7 @@ public final class serverCodings {
     public static Set string2set(String string, String separator) {
         // this can be used to parse a Map.toString() into a Map again
         if (string == null) return null;
-        HashSet set = new HashSet();
+        Set set = Collections.synchronizedSet(new HashSet());
         int pos;
         if ((pos = string.indexOf("{")) >= 0) string = string.substring(pos + 1).trim();
         if ((pos = string.lastIndexOf("}")) >= 0) string = string.substring(0, pos).trim();

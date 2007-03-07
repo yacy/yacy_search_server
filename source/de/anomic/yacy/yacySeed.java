@@ -64,6 +64,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -164,7 +165,7 @@ public class yacySeed {
     }
 
     public yacySeed(String theHash) {
-        this.dna = new HashMap();
+        this.dna = Collections.synchronizedMap(new HashMap());
 
         // settings that can only be computed by originating peer:
         // at first startup -
@@ -616,7 +617,7 @@ public class yacySeed {
         if (seedStr == null) { return null; }
         final String seed = crypt.simpleDecode(seedStr, key);
         if (seed == null) { return null; }
-        final HashMap dna = serverCodings.string2map(seed, ",");
+        final Map dna = serverCodings.string2map(seed, ",");
         final String hash = (String) dna.remove(yacySeed.HASH);
         final yacySeed resultSeed = new yacySeed(hash, dna);
         if (properTest) {
