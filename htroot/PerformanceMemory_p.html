@@ -61,18 +61,13 @@
     <form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
       <fieldset>
         <legend>Memory Settings</legend>
-        <table border="0" cellpadding="2" cellspacing="1" width="60%">
-          <colgroup><col width="20%" /><col width="40%" /></colgroup>
-          <tr>
-            <td class="TableCellDark" align="right"><label for="Xmx">Memory reserved for JVM</label>&nbsp;</td>
-            <td class="TableCellLight" align="left">&nbsp;<input name="Xmx" id="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /> MByte</td>
-		  </tr>
-          <tr>
-            <td class="TableCellLight" align="right"><input type="submit" name="setStartup" value="Set" /></td>
-            <td #(setStartupCommit)#class="TableCellLight"::class="commit"::class="error"#(/setStartupCommit)# align="left">&nbsp;#(setStartupCommit)#::Accepted change. This will take effect after <strong>restart</strong> of YaCy#(/setStartupCommit)#
-            </td>
-          </tr>
-        </table>
+        <dl>
+          <dt><label for="Xmx">Memory reserved for JVM</label></dt>
+          <dd><input name="Xmx" id="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /> MByte&nbsp;
+              <input type="submit" name="setStartup" value="Set" />&nbsp;
+              #(setStartupCommit)#::<div class="commit">Accepted change. This will take effect after <strong>restart</strong> of YaCy</div>::<div class="error"></div>#(/setStartupCommit)#
+          </dd>
+        </dl>
       </fieldset>
     </form>
     

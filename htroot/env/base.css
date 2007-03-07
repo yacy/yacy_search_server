@@ -37,6 +37,13 @@
   font-family:/*Helvetica, Arial, */sans-serif;
 }
 
+/* the following dl style is needed to patch a bug in Safari
+   which occurs when definition lists appears inside of fieldsets */
+dl {
+  display:inline-block;
+  width:96%;
+}
+
 body {
   margin:0;
   padding:0;

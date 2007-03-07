@@ -33,7 +33,7 @@
         </li>
         <li>
           #(statusPassword)#<img src="/env/grafics/warning.png" alt="warning" />&nbsp;Please set a password for your peer to protect your settings (> 3 characters); if this is successful you will be asked to log in with these values immediately.::<img src="/env/grafics/ok.png" height="32px" width="32px" alt="ok" />&nbsp;Password is set#(/statusPassword)#<br />
-          <fieldset><table border="0"><tr><td>
+          <fieldset>
             <dl class="userConfig">
               <dt><label for="adminuser">Peer User:</label></dt>
               <dd><input type="text" name="adminuser" id="adminuser" value="#[defaultUser]#" size="16" maxlength="32" /></dd>
@@ -42,22 +42,22 @@
               <dt><label for="adminpw2">Peer Password:</label></dt>
               <dd><input type="password" name="adminpw2" id="adminpw2" value="" size="16" maxlength="32" /> (repeat same password)</dd>
             </dl>
-          </td></tr></table></fieldset>
+          </fieldset>
         </li>
         <li>
           #(statusName)#<img src="/env/grafics/warning.png" alt="warning" />&nbsp;Your peer name has not been customized; please set your own peer name::<img src="/env/grafics/ok.png" height="32px" width="32px" alt="ok" />&nbsp;You have a nice peer name#(/statusName)#<br />
-          <fieldset><table border="0"><tr><td>
+          <fieldset>
             <dl>
               <dt><label for="peername">Peer Name: </label></dt>
               <dd>
                 <input type="text" name="peername" id="peername" value="#[defaultName]#" size="20" maxlength="32" />
               </dd>
             </dl>
-          </td></tr></table></fieldset>
+          </fieldset>
         </li>
         <li>
           #(statusPort)#<img src="/env/grafics/warning.png" alt="warning" />&nbsp;Your peer cannot be reached from outside (what is not fatal, but would be good for the YaCy network); please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port.::<img src="/env/grafics/ok.png" height="32px" width="32px" alt="ok" />&nbsp;Your peer can be reached by other peers#(/statusPort)#<br />
-          <fieldset><table border="0"><tr><td>
+          <fieldset>
             <dl>
               <dt><label for="port">Peer Port: </label></dt>
               <dd>
@@ -70,7 +70,7 @@
                 <input type="checkbox" name="enableUpnp" id="enableUpnp" align="top" #(enabled)#::checked="checked"#(/enabled)# />
               </dd>#(/upnp)#
             </dl>
-          </td></tr></table></fieldset>
+          </fieldset>
         </li>
       </ol>
       <fieldset>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="set" value="Set Configuration" /></fieldset>
