@@ -646,7 +646,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String HTTPC_NAME_CACHE_CACHING_PATTERNS_NO = "httpc.nameCacheNoCachingPatterns";
     
     public static final String ROBOTS_TXT                       = "httpd.robots.txt";
-    public static final String ROBOTS_TXT_DEFAULT               = httpdRobotsTxtConfig.LOCKED + " " + httpdRobotsTxtConfig.DIRS;
+    public static final String ROBOTS_TXT_DEFAULT               = httpdRobotsTxtConfig.LOCKED + "," + httpdRobotsTxtConfig.DIRS;
     
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Lists

@@ -48,8 +48,6 @@
 // javac -classpath .:../classes ConfigRobotsTxt_p.java
 // if the shell's current path is HTROOT
 
-import java.util.regex.Pattern;
-
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -59,8 +57,6 @@ import de.anomic.server.servletProperties;
 import de.anomic.yacy.yacyCore;
 
 public class ConfigRobotsTxt_p {
-    
-    public static final Pattern entryBeginPattern = Pattern.compile("# (\\w*) \\((\\d*) entries\\)");
     
     public static servletProperties respond(httpHeader header, serverObjects post, serverSwitch env) {
         final servletProperties prop = new servletProperties();
@@ -82,7 +78,7 @@ public class ConfigRobotsTxt_p {
                 rbc.setStatusDisallowed(post.containsKey(httpdRobotsTxtConfig.STATUS));
                 rbc.setSurftipsDisallowed(post.containsKey(httpdRobotsTxtConfig.SURFTIPS));
                 rbc.setWikiDisallowed(post.containsKey(httpdRobotsTxtConfig.WIKI));
-                ((plasmaSwitchboard)env).setConfig(plasmaSwitchboard.ROBOTS_TXT, rbc.toString());
+                env.setConfig(plasmaSwitchboard.ROBOTS_TXT, rbc.toString());
             }
         }
         

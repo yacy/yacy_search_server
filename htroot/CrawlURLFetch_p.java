@@ -476,6 +476,8 @@ public class CrawlURLFetch_p {
         private int stackURLs(String[] urls) throws InterruptedException {
             this.lastFailed = 0;
             this.lastFetchedURLs = 0;
+            this.failed.clear();
+            
             if (urls == null) return 0;
             String reason;
             for (int i=0; i<urls.length && !isInterrupted(); i++) {

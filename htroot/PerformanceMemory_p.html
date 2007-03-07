@@ -58,22 +58,24 @@
       </tr>
     </table>
     
-    <p><form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
-      <fieldset border="0">
+    <form action="PerformanceMemory_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
         <legend>Memory Settings</legend>
         <table border="0" cellpadding="2" cellspacing="1" width="60%">
-        <colgroup><col width="20%"><col width="40%"></colgroup>
-        <tr>
-          <td class="TableHeader" align="right"><label for="Xmx">Memory reserved for JVM</label>&nbsp;</td>
-          <td class="TableCellDark" align="right"><input name="Xmx" id="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /> MByte</td>
-		</tr><tr>
-          <td #(setStartupCommit)#class="TableCellLight"::class="commit"::class="error"#(/setStartupCommit)# colspan="2" align="right">
-            #(setStartupCommit)#::Accepted change. This will take effect after <strong>restart</strong> of YaCy#(/setStartupCommit)#
-            <input type="submit" name="setStartup" value="Set" /></td>
-        </tr>
+          <colgroup><col width="20%" /><col width="40%" /></colgroup>
+          <tr>
+            <td class="TableHeader" align="right"><label for="Xmx">Memory reserved for JVM</label>&nbsp;</td>
+            <td class="TableCellDark" align="right"><input name="Xmx" id="Xmx" type="text" size="4" maxlength="4" value="#[Xmx]#" /> MByte</td>
+		  </tr>
+          <tr>
+            <td #(setStartupCommit)#class="TableCellLight"::class="commit"::class="error"#(/setStartupCommit)# colspan="2" align="right">
+              #(setStartupCommit)#::Accepted change. This will take effect after <strong>restart</strong> of YaCy#(/setStartupCommit)#
+              <input type="submit" name="setStartup" value="Set" />
+            </td>
+          </tr>
         </table>
       </fieldset>
-    </form></p>
+    </form>
     
     <p><strong>FlexTable RAM Index:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
@@ -94,7 +96,7 @@
       <tr class="TableCellDark">
         <td colspan="4">Total Mem = #[TableIndexTotalMem]# MB</td>
       </tr>
-    </table></p>
+    </table>
     
     <p><strong>Node Caches:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
@@ -127,7 +129,7 @@
       <tr class="TableCellDark">
         <td colspan="10">Total Mem = #[nodeCacheTotalMem]# MB; Stop Grow when less than #[nodeCacheStopGrow]# MB available left; Start Shrink when less than #[nodeCacheStartShrink]# MB availabe left</td>
       </tr>
-    </table></p>
+    </table>
     
     <p><strong>Object Read Caches:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
@@ -183,7 +185,7 @@
       <tr class="TableCellDark">
         <td colspan="19">Total Mem: #[objectHitCacheTotalMem]# MB (hit), #[objectMissCacheTotalMem]# MB (miss); Stop Grow when less than #[objectCacheStopGrow]# MB available left; Start Shrink when less than #[objectCacheStartShrink]# MB availabe left</td>
       </tr>
-    </table></p>
+    </table>
     
     <!-- other cache sizes -->
     <p><strong>Other Caching Structures:</strong></p>
@@ -204,7 +206,7 @@
         <td>HashBlacklistedCache</td>
         <td>#[blacklistcache.size]#</td>
       </tr>
-    </table></p>
+    </table>
     #%env/templates/footer.template%#
   </body>
 </html>

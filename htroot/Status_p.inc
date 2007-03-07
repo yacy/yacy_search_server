@@ -127,7 +127,7 @@
       Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server.
       </td>
       <td>
-      <a href="Settings_p.html#seed">[Configure]</a>.
+      <a href="Settings_p.html?page=seed">[Configure]</a>.
       ::
       Enabled: Updating periodically to server #[seedServer]#.
       Last upload: #[lastUpload]# ago.

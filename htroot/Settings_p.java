@@ -66,12 +66,9 @@ public final class Settings_p {
         
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
         
-        String page = (post == null) ? "admin" : post.get("page", "admin");
+        String page = (post == null) ? "general" : post.get("page", "general");
         
-        if (page.equals("admin")) {
-        	prop.put("settingsTables", "Settings_Admin.inc");
-        }
-        else if (page.equals("general")) {
+        if (page.equals("general")) {
             prop.put("settingsTables", "Settings_General.inc");
         }
         else if (page.equals("ProxyAccess")) {
@@ -105,7 +102,7 @@ public final class Settings_p {
             prop.put("settingsTables", "Settings_Crawler.inc");
         }        
         else {
-        	prop.put("settingsTables", "Settings_Admin.inc");
+        	prop.put("settingsTables", "Settings_General.inc");
         }
 
         prop.put("port", env.getConfig("port", "8080"));               
