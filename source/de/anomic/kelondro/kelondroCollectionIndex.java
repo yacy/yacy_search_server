@@ -284,7 +284,7 @@ public class kelondroCollectionIndex {
         // this is computed by the size of the biggest used collection
         // this must be multiplied with the payload size
         // and doubled for necessary memory transformation during sort operation
-        return 2 * arrayCapacity(arrays.size() - 1) * this.payloadrow.objectsize;
+        return (int) (2 * arrayCapacity(arrays.size() - 1) * this.payloadrow.objectsize * kelondroRowSet.growfactor);
     }
     
     private void array_remove(
