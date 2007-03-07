@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>
 <rss version="2.0"
-    xmlns:yacyTopwords="http://www.yacy.net/yacy/topwords"
-    xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
+	xmlns:yacyTopwords="http://www.yacy.net/yacy/topwords"
+	xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
 	<channel>
 		<title>YaCy P2P-Search for #[former]#</title>
 		<description>Search for #[former]#</description>
@@ -18,10 +18,11 @@
 		#(type)#
 		#{results}#
 		<item>
-			<title>#[description]#</title>
+			<title><![CDATA[#[description]#]]></title>
 			<link>#[url]#</link>
-                        #(snippet)#::<description>#[text]#</description>#(/snippet)#
+			#(snippet)#::<description><![CDATA[#[text]#]]></description>#(/snippet)#
 			<pubDate>#[date]#</pubDate>
+			<guid>#[urlhash]#</guid>
 		</item>
 		#{/results}#
 		<yacyTopwords:topwords>
