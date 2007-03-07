@@ -303,7 +303,12 @@ public class plasmaCrawlBalancer {
         // 3rd: take entry from file
         if ((result == null) && (fileStack.size() > 0)) {
             kelondroRow.Entry topentry = fileStack.top();
-            if (topentry != null) {
+            if (topentry == null) {
+                // emergency case: this means that something with the stack organization is wrong
+                // the file appears to be broken. We kill the file.
+                kelondroStack.reset(fileStack);
+                serverLog.logSevere("PLASMA BALANCER", "get() failed to fetch entry from file stack. reset stack file.");
+            } else {
                 String top = new String(topentry.getColBytes(0));
 
                 // check if the time after retrieval of last hash from same
