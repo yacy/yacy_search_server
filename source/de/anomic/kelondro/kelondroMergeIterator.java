@@ -48,15 +48,15 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Set;
 
-public class kelondroMergeIterator implements Iterator {
+public class kelondroMergeIterator implements kelondroCloneableIterator {
     
     Comparator comp;
-    Iterator a, b;
+    kelondroCloneableIterator a, b;
     Object na, nb;
     Method merger;
     boolean up;
     
-    public kelondroMergeIterator(Iterator a, Iterator b, Comparator c, Method m, boolean up) {
+    public kelondroMergeIterator(kelondroCloneableIterator a, kelondroCloneableIterator b, Comparator c, Method m, boolean up) {
         // this works currently only for String-type key iterations
         this.a = a;
         this.b = b;
@@ -65,6 +65,10 @@ public class kelondroMergeIterator implements Iterator {
         this.merger = m;
         nexta();
         nextb();
+    }
+    
+    public Object clone() {
+        return new kelondroMergeIterator((kelondroCloneableIterator) a.clone(), (kelondroCloneableIterator) b.clone(), comp, merger, up);
     }
     
     public void finalize() {
@@ -150,10 +154,10 @@ public class kelondroMergeIterator implements Iterator {
         return cascade(iterators.iterator(), c, merger, up);
     }
     
-    private static Iterator cascade(Iterator /*of*/ iiterators, Comparator c, Method merger, boolean up) {
+    private static kelondroCloneableIterator cascade(Iterator /*of*/ iiterators, Comparator c, Method merger, boolean up) {
         if (iiterators == null) return null;
         if (!(iiterators.hasNext())) return null;
-        Iterator one = (Iterator) iiterators.next();
+        kelondroCloneableIterator one = (kelondroCloneableIterator) iiterators.next();
         if (!(iiterators.hasNext())) return one;
         return new kelondroMergeIterator(one, cascade(iiterators, c, merger, up), c, merger, up);
     }

@@ -25,7 +25,6 @@
 package de.anomic.kelondro;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 public class kelondroBytesIntMap {
     
@@ -92,11 +91,11 @@ public class kelondroBytesIntMap {
         return ki.size();
     }
     
-    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
         // returns the row-iterator of the underlying kelondroIndex
         // col[0] = key
         // col[1] = integer as {b265}
-        return ki.rows(up, rotating, firstKey);
+        return ki.rows(up, firstKey);
     }
     
     public kelondroProfile profile() {

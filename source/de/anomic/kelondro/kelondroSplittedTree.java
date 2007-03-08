@@ -164,27 +164,35 @@ public class kelondroSplittedTree implements kelondroIndex {
         }
     }
     
-    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        return new ktfsIterator(up, rotating, firstKey);
+    public kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
+        return new ktfsIterator(up, firstKey);
     }
     
-    public class ktfsIterator implements Iterator {
+    public class ktfsIterator implements kelondroCloneableIterator {
 
         int c = 0;
         Iterator ktfsI;
-        boolean up, rot;
+        byte[] firstKey;
+        boolean up;
         
-        public ktfsIterator(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+        public ktfsIterator(boolean up, byte[] firstKey) throws IOException {
             this.up = up;
-            this.rot = rotating;
+            this.firstKey = firstKey;
             c = (up) ? 0 : (ff - 1);
             if (firstKey != null) throw new UnsupportedOperationException("ktfsIterator does not work with a start key");
-            ktfsI = ktfs[c].rows(up, false, firstKey); // FIXME: this works only correct with firstKey == null
+            ktfsI = ktfs[c].rows(up, firstKey); // FIXME: this works only correct with firstKey == null
+        }
+        
+        public Object clone() {
+            try {
+                return new ktfsIterator(up, firstKey);
+            } catch (IOException e) {
+                return null;
+            }
         }
         
         public boolean hasNext() {
-            return ((rot) ||
-                    (ktfsI.hasNext()) ||
+            return ((ktfsI.hasNext()) ||
                     ((up) && (c < ff)) ||
                     ((!(up)) && (c > 0)));
         }
@@ -195,42 +203,24 @@ public class kelondroSplittedTree implements kelondroIndex {
                 if (c < (ff - 1)) {
                     c++;
                     try {
-                        ktfsI = ktfs[c].rows(true, false, null);
+                        ktfsI = ktfs[c].rows(true, null);
                     } catch (IOException e) {
                         return null;
                     }
                     return ktfsI.next();
                 } else {
-                    if (rot) {
-                        c = 0;
-                        try {
-                            ktfsI = ktfs[c].rows(true, false, null);
-                        } catch (IOException e) {
-                            return null;
-                        }
-                        return ktfsI.next();
-                    }
                     return null;
                 }
             } else {
                 if (c > 0) {
                     c--;
                     try {
-                        ktfsI = ktfs[c].rows(false, false, null);
+                        ktfsI = ktfs[c].rows(false, null);
                     } catch (IOException e) {
                         return null;
                     }
                     return ktfsI.next();
                 } else {
-                    if (rot) {
-                        c = ff - 1;
-                        try {
-                            ktfsI = ktfs[c].rows(false, false, null);
-                        } catch (IOException e) {
-                            return null;
-                        }
-                        return ktfsI.next();
-                    }
                     return null;
                 }
             }

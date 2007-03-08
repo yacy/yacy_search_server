@@ -117,7 +117,9 @@ public final class serverInstantThread extends serverAbstractThread implements s
             serverLog.logSevere("SERVER", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
         } catch (InvocationTargetException e) {
-            serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + e.getTargetException().getMessage(), e.getTargetException());
+            String targetException = e.getTargetException().getMessage();
+            if (targetException.indexOf("heap space") > 0) e.getTargetException().printStackTrace();
+            serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
             e.getTargetException().printStackTrace();
         } catch (OutOfMemoryError e) {
             serverLog.logSevere("SERVER", "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
@@ -141,7 +143,9 @@ public final class serverInstantThread extends serverAbstractThread implements s
             serverLog.logSevere("SERVER", "shutting down thread '" + this.getName() + "'");
             this.terminate(false);
         } catch (InvocationTargetException e) {
-            serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread.freemem, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + e.getTargetException().getMessage(), e.getTargetException());
+            String targetException = e.getTargetException().getMessage();
+            if (targetException.indexOf("heap space") > 0) e.getTargetException().printStackTrace();
+            serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread.freemem, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
             e.getTargetException().printStackTrace();
         } catch (OutOfMemoryError e) {
             serverLog.logSevere("SERVER", "OutOfMemory Error in serverInstantThread.freemem, thread '" + this.getName() + "': " + e.getMessage());

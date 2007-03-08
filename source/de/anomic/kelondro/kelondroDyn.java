@@ -159,14 +159,18 @@ public class kelondroDyn {
         return new String(rawKey, 0, n + 1);
     }
 
-    public class dynKeyIterator implements Iterator {
+    public class dynKeyIterator implements kelondroCloneableIterator {
         // the iterator iterates all keys, which are byte[] objects
-        Iterator ri;
+        kelondroCloneableIterator ri;
         String nextKey;
 
-        public dynKeyIterator(Iterator iter) {
+        public dynKeyIterator(kelondroCloneableIterator iter) {
             ri = iter;
             nextKey = n();
+        }
+        
+        public Object clone() {
+            return new dynKeyIterator((kelondroCloneableIterator) ri.clone());
         }
 
         public boolean hasNext() {
@@ -207,14 +211,15 @@ public class kelondroDyn {
         }
     }
 
-    public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating) throws IOException {
+    public synchronized kelondroCloneableIterator dynKeys(boolean up, boolean rotating) throws IOException {
         // iterates only the keys of the Nodes
         // enumerated objects are of type String
-        return new dynKeyIterator(index.rows(up, rotating, null));
+        dynKeyIterator i = new dynKeyIterator(index.rows(up, null));
+        if (rotating) return new kelondroRotateIterator(i); else return i;
     }
 
-    public synchronized dynKeyIterator dynKeys(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        return new dynKeyIterator(index.rows(up, rotating, firstKey));
+    public synchronized dynKeyIterator dynKeys(boolean up, byte[] firstKey) throws IOException {
+        return new dynKeyIterator(index.rows(up, firstKey));
     }
     
     private byte[] getValueCached(byte[] key) throws IOException {

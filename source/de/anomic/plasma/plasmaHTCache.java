@@ -172,13 +172,7 @@ public final class plasmaHTCache {
         }
 
         // open the response header database
-        File dbfile = new File(this.cachePath, "responseHeader.db");
-        try {
-            this.responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', true, false), 500);
-        } catch (IOException e) {
-            this.log.logSevere("the request header database could not be opened: " + e.getMessage());
-            System.exit(0);
-        }
+        openResponseHeaderDB(preloadTime);
 
         // init stack
         this.cacheStack = new LinkedList();
@@ -193,6 +187,24 @@ public final class plasmaHTCache {
         this.cacheScanThread = serverInstantThread.oneTimeJob(this, "cacheScan", this.log, 120000);
     }
 
+    private void resetResponseHeaderDB() {
+        if (this.responseHeaderDB != null) try {this.responseHeaderDB.close();} catch (IOException e) {}
+        File dbfile = new File(this.cachePath, "responseHeader.db");
+        if (dbfile.exists()) dbfile.delete();
+        openResponseHeaderDB(0);
+    }
+    
+    private void openResponseHeaderDB(long preloadTime) {
+        // open the response header database
+        File dbfile = new File(this.cachePath, "responseHeader.db");
+        try {
+            this.responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', true, false), 500);
+        } catch (IOException e) {
+            this.log.logSevere("the request header database could not be opened: " + e.getMessage());
+            System.exit(0);
+        }
+    }
+    
     private void deleteOldHTCache(File directory) {
         String[] list = directory.list();
         if (list != null) {
@@ -296,6 +308,7 @@ public final class plasmaHTCache {
                 this.log.logFinest("Trying to remove responseHeader from URL: " + url.toString());
                 this.responseHeaderDB.remove(plasmaURL.urlHash(url));
             } catch (IOException e) {
+                resetResponseHeaderDB();
                 this.log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
             }
            return true;
@@ -1073,8 +1086,12 @@ public final class plasmaHTCache {
     public boolean writeResourceInfo() throws IOException {
         assert(this.nomalizedURLHash != null) : "URL Hash is null";
         if (this.resInfo == null) return false;
-        
-        plasmaHTCache.this.responseHeaderDB.set(this.nomalizedURLHash, this.resInfo.getMap());
+        try {
+            plasmaHTCache.this.responseHeaderDB.set(this.nomalizedURLHash, this.resInfo.getMap());
+        } catch (Exception e) {
+            resetResponseHeaderDB();
+            return false;
+        }
         return true;
     }    
     

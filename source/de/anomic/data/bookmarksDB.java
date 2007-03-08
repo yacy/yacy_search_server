@@ -74,6 +74,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapObjects;
@@ -873,7 +874,7 @@ public class bookmarksDB {
         }
     }
     public class tagIterator implements Iterator{
-        kelondroDyn.dynKeyIterator tagIter;
+        kelondroCloneableIterator tagIter;
         bookmarksDB.Tag nextEntry;
         public tagIterator(boolean up) throws IOException {
             flushTagCache(); //XXX: This costs performace :-((

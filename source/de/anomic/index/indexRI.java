@@ -28,15 +28,16 @@
 
 package de.anomic.index;
 
-import java.util.Iterator;
 import java.util.Set;
+
+import de.anomic.kelondro.kelondroCloneableIterator;
 
 public interface indexRI {
     
     public int size();
     public int minMem();
     
-    public Iterator wordContainers(String startWordHash, boolean rot); // method to replace wordHashes
+    public kelondroCloneableIterator wordContainers(String startWordHash, boolean rot); // method to replace wordHashes
         
     public long getUpdateTime(String wordHash);
     public int indexSize(String wordHash);

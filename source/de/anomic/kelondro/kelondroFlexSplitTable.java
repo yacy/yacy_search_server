@@ -269,17 +269,21 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         }
     }
     
-    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
         return new rowIter();
     }
 
-    public class rowIter implements Iterator {
+    public class rowIter implements kelondroCloneableIterator {
 
         Iterator t, tt;
         
         public rowIter() {
             t = tables.values().iterator();
             tt = null;
+        }
+        
+        public Object clone() {
+            return new rowIter();
         }
         
         public boolean hasNext() {
@@ -289,7 +293,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         public Object next() {
             if ((tt == null) || (!(tt.hasNext()))) {
                 try {
-                    tt = ((kelondroIndex) t.next()).rows(true, false, null);
+                    tt = ((kelondroIndex) t.next()).rows(true, null);
                 } catch (IOException e) {
                     return null;
                 }

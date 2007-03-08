@@ -53,6 +53,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexRWIEntryOld;
+import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.yacy.yacySeedDB;
@@ -72,21 +73,25 @@ public class plasmaWordIndexFileCluster implements indexRI {
         return size;
     }
     
-    public Iterator wordContainers(String startHash, boolean rot) {
+    public kelondroCloneableIterator wordContainers(String startHash, boolean rot) {
         return new containerIterator(wordHashes(startHash, rot));
     }
     
-    public class containerIterator implements Iterator {
+    public class containerIterator implements kelondroCloneableIterator {
 
         // this is a highly inefficient class that is here for the
         // only case to support a compatible interface until the
         // new database structure is in place and makes the
         // plasmaWordIndexFileCluster class superfluous
         
-        private Iterator wordIterator;
+        private kelondroCloneableIterator wordIterator;
         
-        public containerIterator(Iterator wordIterator) {
+        public containerIterator(kelondroCloneableIterator wordIterator) {
             this.wordIterator = wordIterator;
+        }
+        
+        public Object clone() {
+            return new containerIterator((kelondroCloneableIterator) this.wordIterator.clone());
         }
         
         public boolean hasNext() {
@@ -103,23 +108,27 @@ public class plasmaWordIndexFileCluster implements indexRI {
         
     }
     
-    public Iterator wordHashes(String startHash, boolean rot) {
+    public kelondroCloneableIterator wordHashes(String startHash, boolean rot) {
         // outdated method: to be replaced by wordContainers
         return wordHashes(startHash, true, rot);
     }
     
-    public Iterator wordHashes(String startHash, boolean up, boolean rot) {
+    public kelondroCloneableIterator wordHashes(String startHash, boolean up, boolean rot) {
         if (rot) throw new UnsupportedOperationException("no rot allowed");
         return new iterateFiles(startHash, up);
     }
     
-    public class iterateFiles implements Iterator {
+    public class iterateFiles implements kelondroCloneableIterator {
         
         private final ArrayList hierarchy; // contains TreeSet elements, earch TreeSet contains File Entries
         private final Comparator comp;     // for string-compare
         private String buffer;       // the prefetch-buffer
+        private String startHash;
+        private boolean up;
         
         public iterateFiles(String startHash, boolean up) {
+            this.startHash = startHash;
+            this.up = up;
             this.hierarchy = new ArrayList();
             this.comp = new kelondroNaturalOrder(up);
             
@@ -149,6 +158,10 @@ public class plasmaWordIndexFileCluster implements indexRI {
                 hierarchy.add(list);
                 buffer = next0();
             }
+        }
+        
+        public Object clone() {
+            return new iterateFiles(startHash, up);
         }
         
         private synchronized void delete(String pattern, TreeSet names) {

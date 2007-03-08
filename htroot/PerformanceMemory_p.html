@@ -76,19 +76,23 @@
       <tr class="TableHeader" valign="bottom">
         <td>Table</td>
         <td>Chunk Size</td>
-        <td>Count</td>
-        <td>Used Memory</td>
+        <td>RO Count</td>
+        <td>RO Used Memory</td>
+        <td>RW Count</td>
+        <td>RW Used Memory</td>
       </tr>
       #{TableList}#
       <tr class="TableCellLight">
         <td align="left" class="TableCellDark">#[tableIndexPath]#</td>
         <td align="right">#[tableIndexChunkSize]#</td>
-        <td align="right">#[tableIndexCount]#</td>
-        <td align="right">#[tableIndexMem]# MB</td>
+        <td align="right">#[tableROIndexCount]#</td>
+        <td align="right">#[tableROIndexMem]# MB</td>
+        <td align="right">#[tableRWIndexCount]#</td>
+        <td align="right">#[tableRWIndexMem]# MB</td>
       </tr>
       #{/TableList}#
       <tr class="TableCellDark">
-        <td colspan="4">Total Mem = #[TableIndexTotalMem]# MB</td>
+        <td colspan="6">Total Mem = #[TableIndexTotalMem]# MB</td>
       </tr>
     </table>
     

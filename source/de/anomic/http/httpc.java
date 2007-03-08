@@ -920,6 +920,9 @@ public final class httpc {
             //serverLog.logDebug("HTTPC", handle + " returned GET '" + path + "', time = " + (System.currentTimeMillis() - handle));
             return r;
         } catch (Exception e) {
+            if (e.getMessage().indexOf("heap space") > 0) {
+                e.printStackTrace();
+            }
             throw new IOException(e.getMessage());
         }
     }

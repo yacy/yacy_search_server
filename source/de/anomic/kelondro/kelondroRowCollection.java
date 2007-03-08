@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 
 public class kelondroRowCollection {
@@ -136,7 +137,7 @@ public class kelondroRowCollection {
 
     public byte[] exportCollection() {
         // returns null if the collection is empty
-        trim();
+        trim(false);
         kelondroRow row = exportRow(chunkcache.length);
         kelondroRow.Entry entry = row.newEntry();
         assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
@@ -168,11 +169,13 @@ public class kelondroRowCollection {
         newChunkcache = null;
     }
     
-    public void trim() {
+    public void trim(boolean plusGrowFactor) {
         if (chunkcache.length == 0) return;
         synchronized (chunkcache) {
             int needed = chunkcount * rowdef.objectsize();
-            if (chunkcache.length == needed) return;
+            if (plusGrowFactor) needed = (int) (needed * growfactor);
+            if (needed >= chunkcache.length) return; // in case that the growfactor causes that the cache would grow instead of shrink, simply ignore the growfactor
+            if (serverMemory.available() + 1000 < needed) return; // if the swap buffer is not available, we must give up. This is not critical. Othervise we provoke a serious problem with OOM
             byte[] newChunkcache = new byte[needed];
             System.arraycopy(chunkcache, 0, newChunkcache, 0, Math.min(chunkcache.length, newChunkcache.length));
             chunkcache = newChunkcache;

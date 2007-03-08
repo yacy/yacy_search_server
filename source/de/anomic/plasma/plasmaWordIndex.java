@@ -46,8 +46,10 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
+import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.net.URL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.logging.serverLog;
@@ -87,7 +89,7 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public int minMem() {
-        return dhtOutCache.minMem() + dhtInCache.minMem() + collections.minMem();
+        return 2*1024*1024 /* indexing overhead */ + dhtOutCache.minMem() + dhtInCache.minMem() + collections.minMem();
     }
 
     public int maxURLinDHTOutCache() {
@@ -458,13 +460,16 @@ public final class plasmaWordIndex implements indexRI {
         return containers;
     }
 
-    
-    public Iterator wordContainers(String startHash, boolean ram, boolean rot) {
-        if (rot) return new rotatingContainerIterator(startHash, ram);
-        else return wordContainers(startHash, ram);
+    public kelondroCloneableIterator wordContainers(String startHash, boolean ram, boolean rot) {
+        kelondroCloneableIterator i = wordContainers(startHash, ram);
+        if (rot) {
+            return new kelondroRotateIterator(i);
+        } else {
+            return i;
+        }
     }
 
-    public Iterator wordContainers(String startWordHash, boolean ram) {
+    public kelondroCloneableIterator wordContainers(String startWordHash, boolean ram) {
         kelondroOrder containerOrder = new indexContainerOrder((kelondroOrder) indexOrder.clone());
         containerOrder.rotate(startWordHash.getBytes());
         if (ram) {
@@ -478,37 +483,6 @@ public final class plasmaWordIndex implements indexRI {
                             true);
         }
     }
-    
-    public class rotatingContainerIterator implements Iterator {
-        Iterator i;
-        boolean ram;
-
-        public rotatingContainerIterator(String startWordHash, boolean ram) {
-            this.ram = ram;
-            i = wordContainers(startWordHash, ram);
-        }
-
-        public void finalize() {
-            i = null;
-        }
-
-        public boolean hasNext() {
-            if (i.hasNext()) return true;
-            else {
-                i = wordContainers("------------", ram);
-                return i.hasNext();
-            }
-        }
-
-        public Object next() {
-            return i.next();
-        }
-
-        public void remove() {
-            throw new java.lang.UnsupportedOperationException("rotatingWordIterator does not support remove");
-        }
-    } // class rotatingContainerIterator
-
     
     //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
     //  see http://www.yacy-forum.de/viewtopic.php?p=18093#18093

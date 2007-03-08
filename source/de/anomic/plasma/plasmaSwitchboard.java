@@ -1038,9 +1038,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // set a minimum amount of memory for the indexer thread
         long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
+        long memprereq1 = memprereq + (memprereq / 8) + 2 * 1024 * 1024;
         setConfig(INDEXER_MEMPREREQ, memprereq);
-        kelondroRecords.setCacheGrowStati(memprereq + (memprereq / 8) + 2 * 1024 * 1024, memprereq);
-        kelondroCache.setCacheGrowStati(memprereq + (memprereq / 8) + 2 * 1024 * 1024, memprereq);
+        kelondroRecords.setCacheGrowStati(memprereq1, memprereq);
+        kelondroCache.setCacheGrowStati(memprereq1, memprereq);
         
         // make parser
         log.logConfig("Starting Parser");

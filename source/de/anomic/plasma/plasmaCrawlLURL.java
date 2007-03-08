@@ -67,6 +67,7 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.index.indexURLEntryNew;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
+import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
@@ -336,21 +337,33 @@ public final class plasmaCrawlLURL {
         }
     }
 
-    public Iterator entries(boolean up, boolean rotating, String firstHash) throws IOException {
+    public kelondroCloneableIterator entries(boolean up, String firstHash) throws IOException {
         // enumerates entry elements
-        return new kiter(up, rotating, firstHash);
+        return new kiter(up, firstHash);
     }
 
-    public class kiter implements Iterator {
+    public class kiter implements kelondroCloneableIterator {
         // enumerates entry elements
         private Iterator iter;
         private boolean error;
+        boolean up;
+        String firstHash;
 
-        public kiter(boolean up, boolean rotating, String firstHash) throws IOException {
-            this.iter = plasmaCrawlLURL.this.urlIndexFile.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
+        public kiter(boolean up, String firstHash) throws IOException {
+            this.up = up;
+            this.firstHash = firstHash;
+            this.iter = plasmaCrawlLURL.this.urlIndexFile.rows(up, (firstHash == null) ? null : firstHash.getBytes());
             this.error = false;
         }
 
+        public Object clone() {
+            try {
+                return new kiter(up, firstHash);
+            } catch (IOException e) {
+                return null;
+            }
+        }
+        
         public final boolean hasNext() {
             if (this.error) { return false; }
             return this.iter.hasNext();
@@ -379,7 +392,7 @@ public final class plasmaCrawlLURL {
         serverLog log = new serverLog("URLDBCLEANUP");
         HashSet damagedURLS = new HashSet();
         try {
-            Iterator eiter = entries(true, false, null);
+            Iterator eiter = entries(true, null);
             int iteratorCount = 0;
             while (eiter.hasNext()) try {
                 eiter.next();
@@ -469,7 +482,7 @@ public final class plasmaCrawlLURL {
         public void run() {
             try {
                 serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
-                final Iterator eiter = entries(true, false, null);
+                final Iterator eiter = entries(true, null);
                 while (eiter.hasNext() && run) {
                     synchronized (this) {
                         if (this.pause) {
@@ -561,7 +574,7 @@ public final class plasmaCrawlLURL {
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache
             final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[2]), 0);
-            final Iterator enu = urls.entries(true, false, null);
+            final Iterator enu = urls.entries(true, null);
             while (enu.hasNext()) {
                 System.out.println(((indexURLEntry) enu.next()).toString());
             }

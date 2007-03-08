@@ -101,7 +101,7 @@ public class kelondroIntBytesMap {
     
     public Iterator rows() {
         try {
-            return index.rows(true, false, null);
+            return index.rows(true, null);
         } catch (IOException e) {
             return null;
         }
@@ -110,7 +110,7 @@ public class kelondroIntBytesMap {
     public void flush() {
         if (index instanceof kelondroRowSet) {
             ((kelondroRowSet) index).shape();
-            ((kelondroRowSet) index).trim();
+            ((kelondroRowSet) index).trim(true);
         }
     }
     

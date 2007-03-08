@@ -34,8 +34,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
+import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
 
@@ -254,52 +256,28 @@ public class indexCachedRI implements indexRI {
         return containers;
     }
     
-    public Iterator wordContainers(String startHash, boolean rot) {
+    public kelondroCloneableIterator wordContainers(String startHash, boolean rot) {
         // returns an iteration of indexContainers
         return wordContainers(startHash, false, rot);
     }
     
-    public Iterator wordContainers(String startHash, boolean ramOnly, boolean rot) {
-        if (rot) return new rotatingContainerIterator(startHash, ramOnly);
+    public kelondroCloneableIterator wordContainers(String startHash, boolean ramOnly, boolean rot) {
+        kelondroCloneableIterator i;
         if (ramOnly) {
-            return riExtern.wordContainers(startHash, false);
-        }
-        return new kelondroMergeIterator(
+            i = riExtern.wordContainers(startHash, false);
+        } else {
+            i = new kelondroMergeIterator(
                             riExtern.wordContainers(startHash, false),
                             backend.wordContainers(startHash, false),
                             new indexContainerOrder(this.indexOrder),
                             indexContainer.containerMergeMethod,
                             true);
+        }
+        if (rot) {
+            return new kelondroRotateIterator(i);
+        } else {
+            return i;
+        }
     }
-    
-    private class rotatingContainerIterator implements Iterator {
-        Iterator i;
-        boolean ramOnly;
-
-        public rotatingContainerIterator(String startWordHash, boolean ramOnly) {
-            this.ramOnly = ramOnly;
-            i = wordContainers(startWordHash, ramOnly);
-        }
-
-        public void finalize() {
-            i = null;
-        }
-
-        public boolean hasNext() {
-            if (i.hasNext()) return true;
-            else {
-                i = wordContainers("------------", ramOnly);
-                return i.hasNext();
-            }
-        }
-
-        public Object next() {
-            return i.next();
-        }
-
-        public void remove() {
-            throw new java.lang.UnsupportedOperationException("rotatingWordIterator does not support remove");
-        }
-    } // class rotatingContainerIterator
 
 }

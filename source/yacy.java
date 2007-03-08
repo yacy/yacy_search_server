@@ -990,7 +990,7 @@ public final class yacy {
             int c = 0;
             long start = System.currentTimeMillis();
             if (source.equals("lurl")) {
-                Iterator eiter = sb.wordIndex.loadedURL.entries(true, false, null);
+                Iterator eiter = sb.wordIndex.loadedURL.entries(true, null);
                 indexURLEntry entry;
                 while (eiter.hasNext()) {
                     try {
@@ -1010,7 +1010,7 @@ public final class yacy {
                 }
             }
             if (source.equals("eurl")) {
-                Iterator eiter = sb.errorURL.entries(true, false, null);
+                Iterator eiter = sb.errorURL.entries(true, null);
                 plasmaCrawlEURL.Entry entry;
                 while (eiter.hasNext()) {
                     try {
@@ -1029,7 +1029,7 @@ public final class yacy {
                 }
             }
             if (source.equals("nurl")) {
-                Iterator eiter = sb.noticeURL.entries(true, false, null);
+                Iterator eiter = sb.noticeURL.entries(true, null);
                 plasmaCrawlNURL.Entry entry;
                 while (eiter.hasNext()) {
                     try {
@@ -1102,7 +1102,7 @@ public final class yacy {
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
             
             if (source.equals("lurl")) {
-                Iterator eiter = sb.wordIndex.loadedURL.entries(true, false, null);
+                Iterator eiter = sb.wordIndex.loadedURL.entries(true, null);
                 indexURLEntry entry;
                 while (eiter.hasNext()) {
                     entry = (indexURLEntry) eiter.next();
@@ -1119,7 +1119,7 @@ public final class yacy {
                 }
             }
             if (source.equals("eurl")) {
-                Iterator eiter = sb.errorURL.entries(true, false, null);
+                Iterator eiter = sb.errorURL.entries(true, null);
                 plasmaCrawlEURL.Entry entry;
                 while (eiter.hasNext()) {
                     entry = (plasmaCrawlEURL.Entry) eiter.next();
@@ -1135,7 +1135,7 @@ public final class yacy {
                 }
             }
             if (source.equals("nurl")) {
-                Iterator eiter = sb.noticeURL.entries(true, false, null);
+                Iterator eiter = sb.noticeURL.entries(true, null);
                 plasmaCrawlNURL.Entry entry;
                 while (eiter.hasNext()) {
                     entry = (plasmaCrawlNURL.Entry) eiter.next();

@@ -82,7 +82,7 @@ public class kelondroMapObjects extends kelondroObjects {
 
         // fill cluster and accumulator with values
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) try {
-            kelondroDyn.dynKeyIterator it = dyn.dynKeys(true, false);
+            kelondroCloneableIterator it = dyn.dynKeys(true, false);
             String mapname;
             Object cell;
             long valuel;

@@ -253,7 +253,9 @@ public final class httpd implements serverHandler {
         // return string in case of any error that occurs during communication
         // is always (but not only) called if an IO-dependent exception occurrs.
         this.log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
-        return "501 Exception occurred: " + e.getMessage();
+        String message = e.getMessage();
+        if (message.indexOf("heap space") > 0) e.printStackTrace();
+        return "501 Exception occurred: " + message;
     }
     
     /**

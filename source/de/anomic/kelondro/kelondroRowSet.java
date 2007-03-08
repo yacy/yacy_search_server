@@ -347,21 +347,20 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return super.rows();
     }
     
-    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) {
-        return new rowIterator(up, rotating, firstKey);
+    public kelondroCloneableIterator rows(boolean up, byte[] firstKey) {
+        return new rowIterator(up, firstKey);
     }
     
-    public class rowIterator implements Iterator {
+    public class rowIterator implements kelondroCloneableIterator {
 
-        private boolean up, rot;
+        private boolean up;
         private byte[] first;
         private int p, bound;
         
-        public rowIterator(boolean up, boolean rotating, byte[] firstKey) {
+        public rowIterator(boolean up, byte[] firstKey) {
             // see that all elements are sorted
             shape();
             this.up = up;
-            this.rot = rotating;
             this.first = firstKey;
             this.bound = sortBound;
             if (first == null) {
@@ -371,8 +370,11 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             }
         }
         
+        public Object clone() {
+            return new rowIterator(up, first);
+        }
+        
         public boolean hasNext() {
-            if (rot) return true;
             if (up) {
                 return p < bound;
             } else {
@@ -383,10 +385,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         public Object next() {
             kelondroRow.Entry entry = get(p);
             if (up) p++; else p--;
-            if (rot) {
-                if (p == bound) p = 0;
-                if (p < 0) p = bound - 1;
-            }
             return entry;
         }
         
@@ -397,26 +395,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
     public void close() {
         // just for compatibility with kelondroIndex interface; do nothing
-    }
-    
-    public final int cacheObjectChunkSize() {
-        // dummy method
-        return -1;
-    }
-    
-    public long[] cacheObjectStatus() {
-        // dummy method
-        return null;
-    }
-    
-    public final int cacheNodeChunkSize() {
-        // returns the size that the node cache uses for a single entry
-        return -1;
-    }
-    
-    public final int[] cacheNodeStatus() {
-        // a collection of different node cache status values
-        return new int[]{0,0,0,0,0,0,0,0,0,0};
     }
     
     public static void main(String[] args) {

@@ -116,50 +116,31 @@ public class PerformanceMemory_p {
         String filename;
         Map map;
         int p, c = 0;
-        long mem, totalmem = 0;
+        long ROmem, RWmem, totalmem = 0;
         while (i.hasNext()) {
             filename = (String) i.next();
             map = (Map) kelondroFlexTable.memoryStats(filename);
             p = filename.indexOf("DATA");
-            mem = Long.parseLong((String) map.get("tableIndexMem"));
-            totalmem += mem;
+            ROmem = Long.parseLong((String) map.get("tableROIndexMem"));
+            RWmem = Long.parseLong((String) map.get("tableRWIndexMem"));
+            totalmem += ROmem;
+            totalmem += RWmem;
             prop.put("TableList_" + c + "_tableIndexPath", filename.substring(p));
             prop.put("TableList_" + c + "_tableIndexChunkSize", map.get("tableIndexChunkSize"));
-            prop.put("TableList_" + c + "_tableIndexCount", map.get("tableIndexCount"));
-            prop.put("TableList_" + c + "_tableIndexMem", mem / (1024 * 1024));
+            prop.put("TableList_" + c + "_tableROIndexCount", map.get("tableROIndexCount"));
+            prop.put("TableList_" + c + "_tableROIndexMem", ROmem / (1024 * 1024));
+            prop.put("TableList_" + c + "_tableRWIndexCount", map.get("tableRWIndexCount"));
+            prop.put("TableList_" + c + "_tableRWIndexMem", RWmem / (1024 * 1024));
             c++;
         }
         prop.put("TableList", c);
         prop.put("TableIndexTotalMem", totalmem / (1024 * 1024));
         
-        
-        /*
-         *     <p><strong>FlexTable RAM Index:</strong></p>
-    <table border="0" cellpadding="2" cellspacing="1">
-      <tr class="TableHeader" valign="bottom">
-        <td>Table</td>
-        <td>Chunk Size</td>
-        <td>Count</td>
-        <td>Used Memory</td>
-      </tr>
-      #{TableList}#
-      <tr class="TableCellLight">
-        <td align="left">#[tableIndexPath]#</td>
-        <td align="right">#[tableIndexChunkSize]#</td>
-        <td align="right">#[tableIndexCount]#</td>
-        <td align="right">#[tableIndexMem]# MB</td>
-      </tr>
-      #{/TableList}#
-      <tr class="TableCellDark">
-        <td colspan="10">Total Mem = #[TableIndexTotalMem]# MB</td>
-      </tr>
-    </table></p>
-         */
-        
         // write node cache table
         i = kelondroRecords.filenames();
         c = 0;
         totalmem = 0;
+        long mem;
         while (i.hasNext()) {
             filename = (String) i.next();
             map = (Map) kelondroRecords.memoryStats(filename);
@@ -226,35 +207,7 @@ public class PerformanceMemory_p {
         prop.put("objectCacheStartShrink", kelondroCache.getMemStartShrink() / (1024 * 1024));
         prop.put("objectHitCacheTotalMem", totalhitmem / (1024 * 1024));
         prop.put("objectMissCacheTotalMem", totalmissmem / (1024 * 1024));
-        /*
-      #{ObjectList}#
-      <tr class="TableCellLight">
-        <td align="left">#[objectHitCachePath]#</td>
-        <td align="right">#[objectHitChunkSize]#</td>
-        <td align="right">#[objectHitCacheCount]#</td>
-        <td align="right">#[objectHitCacheMem]# MB</td>
-        <td align="right">#[objectHitCacheReadHit]#</td>
-        <td align="right">#[objectHitCacheReadMiss]#</td>
-        <td align="right">#[objectHitCacheWriteUnique]#</td>
-        <td align="right">#[objectHitCacheWriteDouble]#</td>
-        <td align="right">#[objectHitCacheDeletes]#</td>
-        <td align="right">#[objectHitCacheFlushes]#</td>
-        <td align="right">#[objectMissChunkSize]#</td>
-        <td align="right">#[objectMissCacheCount]#</td>
-        <td align="right">#[objectMissCacheMem]# MB</td>
-        <td align="right">#[objectMissCacheReadHit]#</td>
-        <td align="right">#[objectMissCacheReadMiss]#</td>
-        <td align="right">#[objectMissCacheWriteUnique]#</td>
-        <td align="right">#[objectMissCacheWriteDouble]#</td>
-        <td align="right">#[objectMissCacheDeletes]#</td>
-        <td align="right">#[objectMissCacheFlushes]#</td>
-      </tr>
-      #{/ObjectList}#
-      <tr class="TableCellDark">
-        <td colspan="10">Total Mem: #[objectHitCacheTotalMem]# MB (hit), #[objectMissCacheTotalMem]# MB (miss); Stop Grow when #[objectCacheStopGrow]# MB available left; Start Shrink when #[objectCacheStartShrink]# MB availabe left</td>
-      </tr>
-    </table></p>
-         */
+
         // parse initialization memory settings
         String Xmx = env.getConfig("javastart_Xmx", "Xmx64m").substring(3);
         prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));

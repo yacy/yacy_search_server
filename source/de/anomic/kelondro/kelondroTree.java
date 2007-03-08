@@ -981,7 +981,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
     }
 
-    public TreeMap rowMap(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException {
+    public TreeMap rowMap(boolean up, byte[] firstKey, boolean including, int count) throws IOException {
         // returns an ordered map of keys/row relations; key objects are of type String, value objects are of type byte[][]
         kelondroOrder setOrder = (kelondroOrder) row().objectOrder.clone();
         setOrder.direction(up);
@@ -990,7 +990,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         Node n;
         String key;
         synchronized (this) {
-            Iterator i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
+            Iterator i = (firstKey == null) ? new nodeIterator(up, false) : new nodeIterator(up, false, firstKey, including);
             while ((rows.size() < count) && (i.hasNext())) {
                 n = (Node) i.next();
                 if (n == null) return rows;
@@ -1018,40 +1018,49 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         return set;
     }
     
-    public Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
         // iterates the rows of the Nodes
         // enumerated objects are of type byte[][]
         // iterates the elements in a sorted way.
         // if iteration should start at smallest element, set firstKey to null
-        return new rowIterator(up, rotating, firstKey, this.size());
+        return new rowIterator(up, firstKey, this.size());
     }
     
-    public class rowIterator implements Iterator {
+    public class rowIterator implements kelondroCloneableIterator {
         
         int chunkSize;
         byte[] start;
-        boolean inc, rot;
+        boolean inc;
         long count;
         byte[] lastKey;
         TreeMap rowBuffer;
         Iterator bufferIterator;
+        long guessedCountLimit;
         
-        public rowIterator(boolean up, boolean rotating, byte[] firstKey, long guessedCountLimit) throws IOException {
+        public rowIterator(boolean up, byte[] firstKey, long guessedCountLimit) throws IOException {
+            this.guessedCountLimit = guessedCountLimit;
             start = firstKey;
             inc = up;
-            rot = rotating;
             count = 0;
             lastKey = null;
             //System.out.println("*** rowIterator: " + filename + ": readAheadChunkSize = " + readAheadChunkSize + ", lastIteratorCount = " + lastIteratorCount);
             readAheadChunkSize = Math.min(1000, 3 + (int) ((3 * readAheadChunkSize + lastIteratorCount) / 4));
             chunkSize = (int) Math.min(readAheadChunkSize / 3, guessedCountLimit);
-            rowBuffer = rowMap(inc, rot, start, true, chunkSize);
+            rowBuffer = rowMap(inc, start, true, chunkSize);
             bufferIterator = rowBuffer.entrySet().iterator();
             lastIteratorCount = 0;
         }
         
+        public Object clone() {
+            try {
+                return new rowIterator(inc, start, guessedCountLimit);
+            } catch (IOException e) {
+                return null;
+            }
+        }
+        
         public boolean hasNext() {
-            return ((bufferIterator != null) && (bufferIterator.hasNext()) && ((rot) || (count < size())));
+            return ((bufferIterator != null) && (bufferIterator.hasNext()) && (count < size()));
         }
         
         public Object next() {
@@ -1064,7 +1073,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 // assign next buffer chunk
                 try {
                     lastKey[lastKey.length - 1]++;
-                    rowBuffer = rowMap(inc, rot, lastKey, false, chunkSize);
+                    rowBuffer = rowMap(inc, lastKey, false, chunkSize);
                     bufferIterator = rowBuffer.entrySet().iterator();
                 } catch (IOException e) {
                     rowBuffer = null;
@@ -1284,7 +1293,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 		} else if (args[0].equals("-n")) {
 		    kelondroTree fm = new kelondroTree(new File(args[1]), true, 10, new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0));
 		    //byte[][] keys = fm.getSequentialKeys(args[2].getBytes(), 500, true);
-                    Iterator rowIt = fm.rows(true, false, (args[2].length() == 0) ? null : args[2].getBytes());
+                    Iterator rowIt = fm.rows(true, (args[2].length() == 0) ? null : args[2].getBytes());
                     Vector v = new Vector();
                     while (rowIt.hasNext()) v.add(new String(((byte[][]) rowIt.next())[0]));
                     ret = v.toString().getBytes(); 
@@ -1444,7 +1453,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             b = testWord('L'); tt.put(b, b);
             int c = countElements(tt);
             System.out.println("elements: " + c);
-            Iterator i = tt.rows(true, true, testWord('G'));
+            Iterator i = tt.rows(true, testWord('G'));
             for (int j = 0; j < c; j++) {
                 System.out.println("Row " + j + ": " + new String(((kelondroRow.Entry) i.next()).getColBytes(0)));
             }
@@ -1554,7 +1563,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     public static int countElements(kelondroTree t) {
         int count = 0;
         try {
-            Iterator iter = t.rows(true, false, null);
+            Iterator iter = t.rows(true, null);
             kelondroRow.Entry row;
             while (iter.hasNext()) {
                 count++;

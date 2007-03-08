@@ -118,7 +118,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                 }
                 
                 // getting an interator and loop through the URL entries
-                Iterator entryIter = (stackTypes[i] == -1) ? this.importNurlDB.entries(true, false, null) : null;
+                Iterator entryIter = (stackTypes[i] == -1) ? this.importNurlDB.entries(true, null) : null;
                 while (true) {
                     
                     String nextHash = null;

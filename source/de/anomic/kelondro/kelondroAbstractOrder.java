@@ -70,6 +70,8 @@ public abstract class kelondroAbstractOrder implements kelondroOrder {
             return compare(((Node) a).getKey(), ((Node) b).getKey());
         } else if ((a instanceof String) && (b instanceof String)) {
             return compare(((String) a).getBytes(), ((String) b).getBytes());
+        } else if ((a instanceof kelondroRow.Entry) && (b instanceof kelondroRow.Entry)) {
+            return compare(((kelondroRow.Entry) a).getColBytes(0), ((kelondroRow.Entry) b).getColBytes(0));
         } /* else if ((a instanceof Integer) && (b instanceof Integer)) {
             return ((Integer) a).compareTo((Integer) b);
         } */ else

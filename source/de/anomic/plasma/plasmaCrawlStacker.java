@@ -619,7 +619,7 @@ public final class plasmaCrawlStacker {
             openDB();
             try {
                 // loop through the list and fill the messageList with url hashs
-                Iterator rows = this.urlEntryCache.rows(true, false, null);
+                Iterator rows = this.urlEntryCache.rows(true, null);
                 kelondroRow.Entry entry;
                 while (rows.hasNext()) {
                     entry = (kelondroRow.Entry) rows.next();

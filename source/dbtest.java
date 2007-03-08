@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
+import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
@@ -337,9 +338,9 @@ public class dbtest {
             
             if (command.equals("list")) {
                 Iterator i = null;
-                if (table instanceof kelondroSplittedTree) i = ((kelondroSplittedTree) table).rows(true, false, null);
-                if (table instanceof kelondroTree) i = ((kelondroTree) table).rows(true, false, null);
-                if (table instanceof dbTable) i = ((dbTable) table).rows(true, false, null);
+                if (table instanceof kelondroSplittedTree) i = ((kelondroSplittedTree) table).rows(true, null);
+                if (table instanceof kelondroTree) i = ((kelondroTree) table).rows(true, null);
+                if (table instanceof dbTable) i = ((dbTable) table).rows(true, null);
                 byte[][] row;
                 while (i.hasNext()) {
                     row = (byte[][]) i.next();
@@ -602,7 +603,7 @@ final class dbTable implements kelondroIndex {
         return null;
     }
     
-    public Iterator rows(boolean up, boolean rotating, byte[] startKey) throws IOException {
+    public kelondroCloneableIterator rows(boolean up, byte[] startKey) throws IOException {
         // Objects are of type byte[][]
         return null;
     }

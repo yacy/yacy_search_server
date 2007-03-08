@@ -599,7 +599,7 @@ public class kelondroCollectionIndex {
                 oldcollection.addAllUnique(collection);
                 oldcollection.shape();
                 oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
-                oldcollection.trim();
+                oldcollection.trim(false);
                 
                 // check for size of collection:
                 // if necessary shrink the collection and dump a part of that collection
@@ -716,7 +716,7 @@ public class kelondroCollectionIndex {
             oldcollection.addAllUnique(collection);
             oldcollection.shape();
             oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
-            oldcollection.trim();
+            oldcollection.trim(false);
             collection = oldcollection;
 
             // check for size of collection:
@@ -845,7 +845,7 @@ public class kelondroCollectionIndex {
             if ((k instanceof String) && (oldcollection.remove(((String) k).getBytes()) != null)) removed++;
         }
         oldcollection.shape();
-        oldcollection.trim();
+        oldcollection.trim(false);
 
         if (oldcollection.size() == 0) {
             // delete the index entry and the array
@@ -978,7 +978,8 @@ public class kelondroCollectionIndex {
         
         public keycollectionIterator(byte[] startKey, boolean rot) throws IOException {
             // iterator of {byte[], kelondroRowSet} Objects
-            indexRowIterator = index.rows(true, rot, startKey);
+            kelondroCloneableIterator i = index.rows(true, startKey);
+            indexRowIterator = (rot) ? new kelondroRotateIterator(i) : i;
         }
         
         public boolean hasNext() {

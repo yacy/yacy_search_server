@@ -384,8 +384,8 @@ public class plasmaCrawlEURL {
         Iterator i;
         boolean error = false;
         
-        public kiter(boolean up, boolean rotating, String firstHash) throws IOException {
-            i = urlIndexFile.rows(up, rotating, (firstHash == null) ? null : firstHash.getBytes());
+        public kiter(boolean up, String firstHash) throws IOException {
+            i = urlIndexFile.rows(up, (firstHash == null) ? null : firstHash.getBytes());
             error = false;
         }
 
@@ -410,8 +410,8 @@ public class plasmaCrawlEURL {
         
     }
 
-    public Iterator entries(boolean up, boolean rotating, String firstHash) throws IOException {
+    public Iterator entries(boolean up, String firstHash) throws IOException {
         // enumerates entry elements
-        return new kiter(up, rotating, firstHash);
+        return new kiter(up, firstHash);
     }
 }

@@ -44,7 +44,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     private static TreeMap tableTracker = new TreeMap();
     
     // class objects
-    protected kelondroBytesIntMap index;
+    protected kelondroBytesIntMap ROindex, RWindex;
     private boolean RAMIndex;
     
     public kelondroFlexTable(File path, String tablename, long preloadTime, kelondroRow rowdef) throws IOException {
@@ -81,6 +81,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
                     + " index entries initialized and sorted from "
                     + super.col[0].size() + " keys.");
             RAMIndex = true;
+            ROindex = new kelondroBytesIntMap(ki);
+            RWindex = new kelondroBytesIntMap(new kelondroRowSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}, super.rowdef.objectOrder, super.rowdef.primaryKey), 100));
             tableTracker.put(this.filename(), this);
         } else {
             // too less ram for a ram index
@@ -92,16 +94,17 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             } else {
                 // generate new index file
                 System.out.println("*** Generating File index for " + size() + " entries from " + indexfile);
-                System.out.println("*** Cause: too less RAM (" + serverMemory.available() + " MB) configured. Assign at least " + (neededRAM / 1024 / 1024) + " MB buffersize to enable a RAM index.");
+                System.out.println("*** Cause: too less RAM (" + serverMemory.available() + " Bytes) configured. Assign at least " + (neededRAM / 1024 / 1024) + " MB more RAM to enable a RAM index.");
                 ki = initializeTreeIndex(indexfile, preloadTime, rowdef.objectOrder, rowdef.primaryKey);
 
                 System.out.println(" -done-");
                 System.out.println(ki.size() + " entries indexed from " + super.col[0].size() + " keys.");
                 RAMIndex = false;
             }
+            ROindex = null;
+            RWindex = new kelondroBytesIntMap(ki);
         }
         // assign index to wrapper
-        index = new kelondroBytesIntMap(ki);
         description = "stt=" + Long.toString(System.currentTimeMillis() - start) + ";";
         super.col[0].setDescription(description.getBytes());
     }
@@ -122,11 +125,11 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         // it is not recommended to implement or use a has predicate unless
         // it can be ensured that it causes no IO
         if ((kelondroRecords.debugmode) && (RAMIndex != true)) serverLog.logWarning("kelondroFlexTable", "RAM index warning in file " + super.tablename);
-        return index.geti(key) >= 0;
+        return (RWindex.geti(key) >= 0) || ((ROindex != null) && (ROindex.geti(key) >= 0));
     }
     
     private kelondroIndex initializeRamIndex() {
-        kelondroRowSet ri = new kelondroRowSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}, super.rowdef.objectOrder, super.rowdef.primaryKey), 0);
+        kelondroRowSet ri = new kelondroRowSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}, super.rowdef.objectOrder, super.rowdef.primaryKey), super.col[0].size() + 1);
         Iterator content = super.col[0].contentNodes(-1);
         kelondroRecords.Node node;
         kelondroRow.Entry indexentry;
@@ -149,7 +152,6 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         System.out.print(" -ordering- ");
         System.out.flush();
         ri.shape();
-        ri.trim();
         return ri;
     }
     
@@ -183,12 +185,13 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
-            int i = index.geti(key);
-            if (i < 0) return null;
+            int pos = RWindex.geti(key);
+            if ((pos < 0) && (ROindex != null)) pos = ROindex.geti(key);
+            if (pos < 0) return null;
             // i may be greater than this.size(), because this table may have deleted entries
             // the deleted entries are subtracted from the 'real' tablesize, so the size may be
             // smaller than an index to a row entry
-            return super.get(i);
+            return super.get(pos);
     }
     
     public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
@@ -203,7 +206,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         while (i.hasNext()) {
             row = (kelondroRow.Entry) i.next();
             key = row.getColBytes(0);
-            pos = index.geti(key);
+            pos = RWindex.geti(key);
+            if ((pos < 0) && (ROindex != null)) pos = ROindex.geti(key);
             if (pos < 0) {
                 new_rows_sequential.add(row);
             } else {
@@ -225,13 +229,15 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         assert (row != null);
         assert (!(serverLog.allZero(row.getColBytes(0))));
         assert row.bytes().length <= this.rowdef.objectsize;
-        int i = index.geti(row.getColBytes(0));
-        if (i < 0) {
-            index.puti(row.getColBytes(0), super.add(row));
+        byte[] key = row.getColBytes(0);
+        int pos = RWindex.geti(key);
+        if ((pos < 0) && (ROindex != null)) pos = ROindex.geti(key);
+        if (pos < 0) {
+            RWindex.puti(key, super.add(row));
             return null;
         }
-        kelondroRow.Entry oldentry = super.get(i);
-        super.set(i, row);
+        kelondroRow.Entry oldentry = super.get(pos);
+        super.set(pos, row);
         return oldentry;
     }
     
@@ -241,7 +247,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
     public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
         assert row.bytes().length == this.rowdef.objectsize;
-        index.addi(row.getColBytes(0), super.add(row));
+        RWindex.addi(row.getColBytes(0), super.add(row));
     }
     
     public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
@@ -254,12 +260,13 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         Map.Entry entry;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            index.puti((byte[]) entry.getValue(), ((Integer) entry.getKey()).intValue());
+            RWindex.puti((byte[]) entry.getValue(), ((Integer) entry.getKey()).intValue());
         }
     }
     
     public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
-        int i = index.removei(key);
+        int i = RWindex.removei(key);
+        if ((i < 0) && (ROindex != null)) i = ROindex.removei(key); // yes, we are allowed to remove entries from RO partition of the index
         if (i < 0) return null;
         kelondroRow.Entry r;
         r = super.get(i);
@@ -268,7 +275,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
 
     public synchronized kelondroRow.Entry removeOne() throws IOException {
-        int i = index.removeonei();
+        int i = RWindex.removeonei();
+        if ((i < 0) && (ROindex != null)) i = ROindex.removeonei();
         if (i < 0) return null;
         kelondroRow.Entry r;
         r = super.get(i);
@@ -276,16 +284,26 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return r;
     }
     
-    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-        return new rowIterator(up, rotating, firstKey);
+    public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
+        return new kelondroMergeIterator(
+                new rowIterator(ROindex, up, firstKey),
+                new rowIterator(RWindex, up, firstKey),
+                row().objectOrder,
+                kelondroMergeIterator.simpleMerge,
+                up
+                );
     }
     
-    public class rowIterator implements Iterator {
+    public class rowIterator implements kelondroCloneableIterator {
 
-        Iterator indexIterator;
+        kelondroCloneableIterator indexIterator;
         
-        public rowIterator(boolean up, boolean rotating, byte[] firstKey) throws IOException {
-            indexIterator = index.rows(up, rotating, firstKey);
+        public rowIterator(kelondroBytesIntMap index, boolean up, byte[] firstKey) throws IOException {
+            indexIterator = index.rows(up, firstKey);
+        }
+        
+        public Object clone() {
+            return null;
         }
         
         public boolean hasNext() {
@@ -317,7 +335,11 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public kelondroProfile profile() {
-        return index.profile();
+        if (ROindex == null) {
+            return RWindex.profile();
+        } else {
+            return kelondroProfile.consolidate(ROindex.profile(), RWindex.profile());
+        }
     }
     
     public static final Iterator filenames() {
@@ -345,9 +367,11 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         // returns statistical data about this object
         HashMap map = new HashMap();
         try {
-            map.put("tableIndexChunkSize", (!RAMIndex) ? "0" : Integer.toString(index.row().objectsize));
-            map.put("tableIndexCount", (!RAMIndex) ? "0" : Integer.toString(index.size()));
-            map.put("tableIndexMem", (!RAMIndex) ? "0" : Integer.toString((int) (index.row().objectsize * index.size() * kelondroRowCollection.growfactor)));
+            map.put("tableIndexChunkSize", (!RAMIndex) ? "0" : Integer.toString(RWindex.row().objectsize));
+            map.put("tableROIndexCount", ((!RAMIndex) || (ROindex == null)) ? "0" : Integer.toString(ROindex.size()));
+            map.put("tableROIndexMem", ((!RAMIndex) || (ROindex == null)) ? "0" : Integer.toString((int) (ROindex.row().objectsize * ROindex.size())));
+            map.put("tableRWIndexCount", (!RAMIndex) ? "0" : Integer.toString(RWindex.size()));
+            map.put("tableRWIndexMem", (!RAMIndex) ? "0" : Integer.toString((int) (RWindex.row().objectsize * RWindex.size() * kelondroRowCollection.growfactor)));
         } catch (IOException e) {
         }
         return map;
@@ -357,7 +381,9 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         if (tableTracker.remove(this.filename) == null) {
             serverLog.logWarning("kelondroFlexTable", "close(): file '" + this.filename + "' was not tracked with record tracker.");
         }
-        index.close();
+        if (ROindex != null) {ROindex.close(); ROindex = null;}
+        RWindex.close();
+        RWindex = null;
         super.close();
     }
     

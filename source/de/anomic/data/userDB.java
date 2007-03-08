@@ -56,6 +56,7 @@ import java.util.Random;
 
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapObjects;
@@ -565,7 +566,7 @@ public final class userDB {
 
     public class userIterator implements Iterator {
         // the iterator iterates all userNames
-        kelondroDyn.dynKeyIterator userIter;
+        kelondroCloneableIterator userIter;
         userDB.Entry nextEntry;
         
         public userIterator(boolean up) throws IOException {

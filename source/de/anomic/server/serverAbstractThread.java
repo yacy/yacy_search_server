@@ -232,31 +232,6 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
             logError("thread '" + this.getName() + "': " + e.toString(),e);
         }
     }
-
-    private static long[] gcs = new long[5];
-    private static int gcs_pos = 0;
-    
-    private static long runGC() {
-        long memnow = serverMemory.available();
-        Runtime.getRuntime().gc();
-        if (++gcs_pos >= gcs.length) gcs_pos = 0;
-        return (gcs[gcs_pos] = serverMemory.available() - memnow);
-    }
-    
-    public static long GCAverage() {
-        long x = 0;
-        int y = 0;
-        for (int i=0; i<gcs.length; i++)
-            if (gcs[i] != 0) {
-                x += gcs[i];
-                y++;
-            }
-        if (y == 0) {
-            return 0;
-        } else {
-            return x / y;
-        }
-    }
     
     public void run() {
         if (startup > 0) {
@@ -296,8 +271,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 timestamp = System.currentTimeMillis();
                 ratz(this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
-            } else if ((memnow = serverMemory.available()) > memprereq ||
-                    ((memnow + GCAverage() > memprereq || GCAverage() == 0) && memnow + runGC() > memprereq)) try {
+            } else if ((memnow = serverMemory.available()) > memprereq) try {
                 // do job
                 timestamp = System.currentTimeMillis();
                 memstamp0 = serverMemory.used();
@@ -331,8 +305,7 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
                 busyCycles++;
             } else {
                 log.logWarning("Thread '" + this.getName() + "' runs short memory cycle. Free mem: " +
-                        (memnow / 1024) + " KB, needed: " + (memprereq / 1024) + " KB, " +
-                        "GC should provide max. " + (GCAverage() / 1024) + "KB");
+                        (memnow / 1024) + " KB, needed: " + (memprereq / 1024) + " KB");
                 // omit job, not enough memory
                 // process scheduled pause
                 timestamp = System.currentTimeMillis();

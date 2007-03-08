@@ -169,7 +169,6 @@ public class kelondroCache implements kelondroIndex {
                 this.cacheFlush++;
             }
             writeBufferUnique.clear();
-            writeBufferUnique.trim();
         }
     }
 
@@ -187,9 +186,11 @@ public class kelondroCache implements kelondroIndex {
                 this.cacheFlush++;
             }
             i = delete.rows();
-            while (i.hasNext()) writeBufferUnique.remove(((kelondroRow.Entry) i.next()).getColBytes(0));
+            while (i.hasNext()) {
+                writeBufferUnique.remove(((kelondroRow.Entry) i.next()).getColBytes(0));
+            }
             delete = null;
-            writeBufferUnique.trim();
+            writeBufferUnique.trim(true);
         }
     }
 
@@ -202,7 +203,6 @@ public class kelondroCache implements kelondroIndex {
                 this.cacheFlush++;
             }
             writeBufferDoubles.clear();
-            writeBufferDoubles.trim();
         }
     }
 
@@ -222,7 +222,7 @@ public class kelondroCache implements kelondroIndex {
             i = delete.rows();
             while (i.hasNext()) writeBufferDoubles.remove(((kelondroRow.Entry) i.next()).getColBytes(0));
             delete = null;
-            writeBufferDoubles.trim();
+            writeBufferDoubles.trim(true);
         }
     }
 
@@ -239,8 +239,9 @@ public class kelondroCache implements kelondroIndex {
     }
     
     private void checkMissSpace() {
-        if ((readMissCache != null) && (cacheGrowStatus() < 1)
-           ) {readMissCache.clear(); readMissCache.trim();}
+        if ((readMissCache != null) && (cacheGrowStatus() < 1)) {
+            readMissCache.clear();
+        }
     }
     
     private void checkHitSpace() throws IOException {
@@ -249,14 +250,12 @@ public class kelondroCache implements kelondroIndex {
         if (cacheGrowStatus() < 2) {flushUnique(s / 4); s = sumRecords();}
         if ((cacheGrowStatus() < 2) && (readHitCache != null)) {
             readHitCache.clear();
-            readHitCache.trim();
         }
         if (cacheGrowStatus() < 1) {
             flushUnique();
             flushDoubles();
             if (readHitCache != null) {
                 readHitCache.clear();
-                readHitCache.trim();
             }
         }
     }
@@ -625,9 +624,9 @@ public class kelondroCache implements kelondroIndex {
         return index.row();
     }
 
-    public synchronized Iterator rows(boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
         flushUnique();
-        return index.rows(up, rotating, firstKey);
+        return index.rows(up, firstKey);
     }
 
     public int size() throws IOException {

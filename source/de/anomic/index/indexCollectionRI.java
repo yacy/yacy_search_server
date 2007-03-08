@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroCollectionIndex;
 import de.anomic.kelondro.kelondroOutOfLimitsException;
 import de.anomic.kelondro.kelondroRow;
@@ -89,16 +90,24 @@ public class indexCollectionRI implements indexRI {
         return collectionIndex.minMem();
     }
 
-    public synchronized Iterator wordContainers(String startWordHash, boolean rot) {
+    public synchronized kelondroCloneableIterator wordContainers(String startWordHash, boolean rot) {
         return new wordContainersIterator(startWordHash, rot);
     }
 
-    public class wordContainersIterator implements Iterator {
+    public class wordContainersIterator implements kelondroCloneableIterator {
 
         private Iterator wci;
+        private boolean rot;
+        private String startWordHash;
         
         public wordContainersIterator(String startWordHash, boolean rot) {
-            wci = collectionIndex.keycollections(startWordHash.getBytes(), rot);
+            this.startWordHash = startWordHash;
+            this.rot = rot;
+            this.wci = collectionIndex.keycollections(startWordHash.getBytes(), rot);
+        }
+        
+        public Object clone() {
+            return new wordContainersIterator(startWordHash, rot);
         }
         
         public boolean hasNext() {

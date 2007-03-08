@@ -49,6 +49,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapObjects;
@@ -102,7 +103,7 @@ public class plasmaCrawlProfile {
     
     public class profileIterator implements Iterator {
         // the iterator iterates all keys, which are byte[] objects
-        kelondroDyn.dynKeyIterator handleIterator;
+        kelondroCloneableIterator handleIterator;
         String lastkey;
         public profileIterator(boolean up) throws IOException {
             handleIterator = profileTable.keys(up, false);
