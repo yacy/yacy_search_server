@@ -63,17 +63,23 @@ public class LogStatistics_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         
         final serverObjects prop = new serverObjects();
-        
         Logger logger = Logger.getLogger("");
+        
+        
+        
         Handler[] handlers = logger.getHandlers();
         Hashtable r = null;
+        boolean displaySubmenu = false;
         for (int i=0; i<handlers.length; i++) {
             if (handlers[i] instanceof LogalizerHandler) {
+                displaySubmenu = true;
                 LogalizerHandler h = ((LogalizerHandler)handlers[i]);
                 r = h.getParserResults(h.getParser(0));
                 break;
             }
         }
+        
+        prop.put("submenu", (displaySubmenu) ? 1 : 0);
         
         if (r == null) {
             prop.put("results", 0);

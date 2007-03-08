@@ -56,6 +56,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.GuiHandler;
+import de.anomic.server.logging.LogalizerHandler;
 
 public class ViewLog_p {
     
@@ -81,13 +82,16 @@ public class ViewLog_p {
         
         Logger logger = Logger.getLogger("");
         Handler[] handlers = logger.getHandlers();
+        boolean displaySubmenu = false;
         for (int i=0; i<handlers.length; i++) {
             if (handlers[i] instanceof GuiHandler) {
                 log = ((GuiHandler)handlers[i]).getLogLines(reversed,lines);
-                break;
+            } else if (handlers[i] instanceof LogalizerHandler) {
+                displaySubmenu = true;
             }
         }
         
+        prop.put("submenu", (displaySubmenu) ? 1 : 0);
         prop.put("reverseChecked", reversed ? 1 : 0);
         prop.put("lines", lines);
         prop.put("filter", filter);

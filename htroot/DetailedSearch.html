@@ -18,7 +18,7 @@
       </fieldset>
       <fieldset>
         <legend>Query Attributes</legend>
-        <dl>
+        <table border="0"><tr><td><dl>
           <dt><label for="global">Global:</label></dt>
           <dd><input type="checkbox" name="global" id="global"#(globalChecked)#:: checked="checked"#(/globalChecked)# /></dd>
           <dt><label for="postsort">Post-Sort:</label></dt>
@@ -29,35 +29,27 @@
           <dd><input type="text" name="localTime" id="localTime" value="#[localTime]#" size="4" maxlength="3" /></dd>
           <dt><label for="localWDist">Max. word distance:</label></dt>
           <dd><input type="text" name="localWDist" id="localWDist" value="#[localWDist]#" size="4" maxlength="4" /></dd>
-        </dl>
+        </dl></td></tr></table>
       </fieldset>
       <fieldset>
         <legend>Pre-Ranking</legend>
-        <dl>#{attrPre}#
-        
+        <table border="0"><tr><td><dl>#{attrPre}# 
           <dt><label for="#[nameorg]#">#[name]#</label>:</dt>
-          <dd id="#[nameorg]#">#{select}#
-          
-            <input type="radio" name="#[nameorg]#" value="#[value]#"#(checked)#:: checked="checked"#(/checked)# />#{/select}#
-            
+          <dd id="#[nameorg]#">#{select}# 
+            <input type="radio" name="#[nameorg]#" value="#[value]#"#(checked)#:: checked="checked"#(/checked)# />#{/select}# 
             #[value]#
-          </dd>#{/attrPre}#
-          
-        </dl>
+          </dd>#{/attrPre}# 
+        </dl></td></tr></table>
       </fieldset>
       <fieldset>
         <legend>Post-Ranking</legend>
-        <dl>#{attrPost}#
-        
+        <table border="0"><tr><td><dl>#{attrPost}# 
           <dt><label for="#[nameorg]#">#[name]#</label></dt>
-          <dd id="#[nameorg]#">#{select}#
-          
-            <input type="radio" name="#[nameorg]#" value="#[value]#"#(checked)#:: checked="checked"#(/checked)# />#{/select}#
-            
+          <dd id="#[nameorg]#">#{select}# 
+            <input type="radio" name="#[nameorg]#" value="#[value]#"#(checked)#:: checked="checked"#(/checked)# />#{/select}# 
             #[value]#
-          </dd>#{/attrPost}#
-          
-        </dl>
+          </dd>#{/attrPost}# 
+        </dl></td></tr></table>
       </fieldset>
       <fieldset>
         <input type="submit" name="EnterRanking" value="Set as Default Ranking" />

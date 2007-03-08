@@ -15,7 +15,7 @@
           The Re-Crawl option isn't used and the sites won't be stored in the Proxy Cache. Text and media types will be indexed.
           Since these URLs will be requested explicitely from another peer, they won't be distributed for remote indexing.
         </p>
-        <dl>
+        <table border="0"><tr><td><dl>
           <dt><label for="url">Fetch from URL</label>:</dt>
           <dd>
             <input type="radio" name="source" value="url" id="url" checked="checked" />
@@ -62,7 +62,7 @@
             #(freqError)#::&nbsp;<span class="error">Invalid period, fetching only once</span>#(/freqError)#
           </dd>
           <dt><input type="submit" name="start" value="Fetch URLs" /></dt>
-        </dl>
+        </dl></td></tr></table>
       </fieldset>
     </form>
     
@@ -73,7 +73,7 @@
     #(runs)#::
     <form method="post" action="CrawlURLFetch_p.html" enctype="multipart/form-data">
       <fieldset><legend>Thread to fetch URLs is #(status)#running::stopped::paused#(/status)#</legend>
-        <dl>
+        <table border="0"><tr><td><dl>
           <dt>Total runs:</dt><dd>#[totalRuns]#</dd>
           <dt>Total fetched URLs:</dt><dd>#[totalFetchedURLs]#</dd>
           <dt>Total failed URLs:</dt><dd>#[totalFailedURLs]#</dd>
@@ -98,7 +98,7 @@
             <input type="submit" name="stop" value="Stop Thread" />
             <input type="submit" name="restart" value="Restart Thread" />#(/status)#
           </dt>
-        </dl>
+        </dl></td></tr></table>
       </fieldset>
     </form>
     #(/runs)#

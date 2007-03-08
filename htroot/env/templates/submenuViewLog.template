@@ -1,0 +1,7 @@
+<div class="SubMenu">
+  <h3>Server Log Menu</h3>
+  <ul class="SubMenu">
+    <li><a href="/ViewLog_p.html" class="MenuItemLink lock">Server Log</a></li>
+    <li><a href="/LogStatistics_p.html" class="MenuItemLink lock">Log Statistics</a></li>
+  </ul>
+</div>
