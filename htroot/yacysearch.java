@@ -367,6 +367,13 @@ public class yacysearch {
                             kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
                         }
 
+						//avoid stopwords being topwords
+                        if (env.getConfig("filterOutStopwordsFromTopwords", "true").equals("true")) {
+                        if ((plasmaSwitchboard.stopwords != null) && (plasmaSwitchboard.stopwords.size() > 0)) {
+                            kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.stopwords);
+                        	}
+                        }
+						
                         String word;
                         hintcount = 0;
                         final Iterator iter = topwords.iterator();

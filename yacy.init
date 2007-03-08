@@ -462,6 +462,11 @@ xsstopw=true
 xdstopw=true
 xpstopw=true
 
+# Topwords filtering
+# If set to true, all stopwords (stopwords.yacy) are filtered from the topwords
+# Change to false if requesting hits from peers with modified stopwords-file and using the unchanged client-version
+filterOutStopwordsFromTopwords=true
+
 # performance-settings
 # delay-times for permanent loops (milliseconds)
 # the idlesleep is the pause that an proces sleeps if the last call to the
