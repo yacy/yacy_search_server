@@ -75,6 +75,11 @@ public class Messages_p {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         
+        // set peer address / name
+        final String peerAddress = yacyCore.seedDB.mySeed.getAddress();
+        final String peerName = yacyCore.seedDB.mySeed.getName();
+        prop.put("peerAddress", peerAddress);
+        prop.put("peerName", peerName);
 
         // List known hosts for message sending (from Blacklist_p.java)
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
@@ -143,6 +148,17 @@ public class Messages_p {
                     prop.put("mode_messages_"+count+"_subject", wikiCode.replaceHTML(message.subject()));
                     prop.put("mode_messages_"+count+"_key", key);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
+                    
+                    // also write out the message body (needed for the RSS feed)
+                    if (((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
+                    	prop.put("mode_messages_"+count+"_peerAddress", peerAddress); 
+                        try {
+                        	prop.put("mode_messages_"+count+"_body",new String(message.message(), "UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            // can not happen, because UTF-8 must be supported by every JVM
+                        }                    	
+                    }
+                    
                     dark = !dark;
                     count++;
                 }
