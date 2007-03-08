@@ -282,7 +282,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             tt = null;
         }
         
-        public Object clone() {
+        public Object clone(Object modifier) {
             return new rowIter();
         }
         

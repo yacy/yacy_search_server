@@ -98,16 +98,14 @@ public class indexCollectionRI implements indexRI {
 
         private Iterator wci;
         private boolean rot;
-        private String startWordHash;
         
         public wordContainersIterator(String startWordHash, boolean rot) {
-            this.startWordHash = startWordHash;
             this.rot = rot;
-            this.wci = collectionIndex.keycollections(startWordHash.getBytes(), rot);
+            this.wci = collectionIndex.keycollections(startWordHash.getBytes(), kelondroBase64Order.zero(startWordHash.length()), rot);
         }
         
-        public Object clone() {
-            return new wordContainersIterator(startWordHash, rot);
+        public Object clone(Object secondWordHash) {
+            return new wordContainersIterator((String) secondWordHash, rot);
         }
         
         public boolean hasNext() {

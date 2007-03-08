@@ -291,17 +291,15 @@ public final class indexRAMRI implements indexRI {
         
         private boolean rot;
         private Iterator iterator;
-        private String startWordHash;
         
         public wordContainerIterator(String startWordHash, boolean rot) {
-            this.startWordHash = startWordHash;
             this.rot = rot;
             this.iterator = (startWordHash == null) ? cache.values().iterator() : cache.tailMap(startWordHash).values().iterator();
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
         
-        public Object clone() {
-            return new wordContainerIterator(startWordHash, rot);
+        public Object clone(Object secondWordHash) {
+            return new wordContainerIterator((String) secondWordHash, rot);
         }
         
         public boolean hasNext() {

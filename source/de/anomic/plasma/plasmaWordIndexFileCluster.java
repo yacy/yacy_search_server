@@ -90,8 +90,8 @@ public class plasmaWordIndexFileCluster implements indexRI {
             this.wordIterator = wordIterator;
         }
         
-        public Object clone() {
-            return new containerIterator((kelondroCloneableIterator) this.wordIterator.clone());
+        public Object clone(Object modifier) {
+            return new containerIterator((kelondroCloneableIterator) this.wordIterator.clone(modifier));
         }
         
         public boolean hasNext() {
@@ -123,11 +123,9 @@ public class plasmaWordIndexFileCluster implements indexRI {
         private final ArrayList hierarchy; // contains TreeSet elements, earch TreeSet contains File Entries
         private final Comparator comp;     // for string-compare
         private String buffer;       // the prefetch-buffer
-        private String startHash;
         private boolean up;
         
         public iterateFiles(String startHash, boolean up) {
-            this.startHash = startHash;
             this.up = up;
             this.hierarchy = new ArrayList();
             this.comp = new kelondroNaturalOrder(up);
@@ -160,8 +158,8 @@ public class plasmaWordIndexFileCluster implements indexRI {
             }
         }
         
-        public Object clone() {
-            return new iterateFiles(startHash, up);
+        public Object clone(Object secondHash) {
+            return new iterateFiles((String) secondHash, up);
         }
         
         private synchronized void delete(String pattern, TreeSet names) {

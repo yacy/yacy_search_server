@@ -285,8 +285,8 @@ public class kelondroMapObjects extends kelondroObjects {
         return new mapIterator(keys(up, rotating));
     }
 
-    public synchronized mapIterator maps(final boolean up, final boolean rotating, final byte[] firstKey) throws IOException {
-        return new mapIterator(keys(up, rotating, firstKey));
+    public synchronized mapIterator maps(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
+        return new mapIterator(keys(up, rotating, firstKey, secondKey));
     }
     
     public synchronized long getLongAcc(final String field) {

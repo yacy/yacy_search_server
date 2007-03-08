@@ -463,7 +463,7 @@ public final class plasmaWordIndex implements indexRI {
     public kelondroCloneableIterator wordContainers(String startHash, boolean ram, boolean rot) {
         kelondroCloneableIterator i = wordContainers(startHash, ram);
         if (rot) {
-            return new kelondroRotateIterator(i);
+            return new kelondroRotateIterator(i, new String(kelondroBase64Order.zero(startHash.length())));
         } else {
             return i;
         }

@@ -370,8 +370,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             }
         }
         
-        public Object clone() {
-            return new rowIterator(up, first);
+        public Object clone(Object second) {
+            return new rowIterator(up, (byte[]) second);
         }
         
         public boolean hasNext() {

@@ -89,6 +89,12 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         this.log = new serverLog("BASE64");
     }
 
+    public static byte[] zero(int length) {
+        byte[] z = new byte[length];
+        while (length > 0) { length--; z[length] = (byte) alpha_standard[0]; }
+        return z;
+    }
+    
     public Object clone() {
         kelondroBase64Order o = new kelondroBase64Order(this.asc, this.rfc1113compliant);
         o.rotate(this.zero);

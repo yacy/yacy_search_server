@@ -297,13 +297,21 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     public class rowIterator implements kelondroCloneableIterator {
 
         kelondroCloneableIterator indexIterator;
+        kelondroBytesIntMap index;
+        boolean up;
         
         public rowIterator(kelondroBytesIntMap index, boolean up, byte[] firstKey) throws IOException {
+            this.index = index;
+            this.up = up;
             indexIterator = index.rows(up, firstKey);
         }
         
-        public Object clone() {
-            return null;
+        public Object clone(Object modifier) {
+            try {
+                return new rowIterator(index, up, (byte[]) modifier);
+            } catch (IOException e) {
+                return null;
+            }
         }
         
         public boolean hasNext() {

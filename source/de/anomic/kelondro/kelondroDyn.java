@@ -169,8 +169,8 @@ public class kelondroDyn {
             nextKey = n();
         }
         
-        public Object clone() {
-            return new dynKeyIterator((kelondroCloneableIterator) ri.clone());
+        public Object clone(Object modifier) {
+            return new dynKeyIterator((kelondroCloneableIterator) ri.clone(modifier));
         }
 
         public boolean hasNext() {
@@ -215,7 +215,7 @@ public class kelondroDyn {
         // iterates only the keys of the Nodes
         // enumerated objects are of type String
         dynKeyIterator i = new dynKeyIterator(index.rows(up, null));
-        if (rotating) return new kelondroRotateIterator(i); else return i;
+        if (rotating) return new kelondroRotateIterator(i, null); else return i;
     }
 
     public synchronized dynKeyIterator dynKeys(boolean up, byte[] firstKey) throws IOException {

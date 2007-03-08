@@ -129,10 +129,10 @@ public class kelondroMapTable {
         return table.maps(up, rotating);
     }
     
-    public synchronized kelondroMapObjects.mapIterator /* of Map-Elements */ maps(String tablename, boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized kelondroMapObjects.mapIterator /* of Map-Elements */ maps(String tablename, boolean up, boolean rotating, byte[] firstKey, byte[] secondKey) throws IOException {
         kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.maps: map table '" + tablename + "' does not exist.");
-        return table.maps(up, rotating, firstKey);
+        return table.maps(up, rotating, firstKey, secondKey);
     }
     
     public synchronized kelondroMapObjects.mapIterator /* of Map-Elements */ maps(String tablename, boolean up, String field) {
@@ -141,11 +141,11 @@ public class kelondroMapTable {
         return table.maps(up, field);
     }
     
-    public synchronized kelondroCloneableIterator /* of kelondroRow.Entry-Elements */ rows(String tablename, boolean up, boolean rotating, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator /* of kelondroRow.Entry-Elements */ rows(String tablename, boolean up, boolean rotating, byte[] firstKey, byte[] secondKey) throws IOException {
        kelondroIndex tree = (kelondroIndex) tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.bytes: tree table '" + tablename + "' does not exist.");
         kelondroCloneableIterator i = tree.rows(up, firstKey);
-        if (rotating) return new kelondroRotateIterator(i); else return i;
+        if (rotating) return new kelondroRotateIterator(i, secondKey); else return i;
     }
     
     // if you need the long-values from a row-iteration, please use kelondroRecords.bytes2long to convert from byte[] to long

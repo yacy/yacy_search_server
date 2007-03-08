@@ -172,20 +172,18 @@ public class kelondroSplittedTree implements kelondroIndex {
 
         int c = 0;
         Iterator ktfsI;
-        byte[] firstKey;
         boolean up;
         
         public ktfsIterator(boolean up, byte[] firstKey) throws IOException {
             this.up = up;
-            this.firstKey = firstKey;
             c = (up) ? 0 : (ff - 1);
             if (firstKey != null) throw new UnsupportedOperationException("ktfsIterator does not work with a start key");
             ktfsI = ktfs[c].rows(up, firstKey); // FIXME: this works only correct with firstKey == null
         }
         
-        public Object clone() {
+        public Object clone(Object secondKey) {
             try {
-                return new ktfsIterator(up, firstKey);
+                return new ktfsIterator(up, (byte[]) secondKey);
             } catch (IOException e) {
                 return null;
             }

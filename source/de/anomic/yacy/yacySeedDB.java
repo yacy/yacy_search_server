@@ -250,17 +250,17 @@ public final class yacySeedDB {
     
     public Enumeration seedsConnected(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
-        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedActiveDB, minVersion);
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedActiveDB, minVersion);
     }
     
     public Enumeration seedsDisconnected(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
-        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedPassiveDB, minVersion);
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedPassiveDB, minVersion);
     }
     
     public Enumeration seedsPotential(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
-        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), seedPotentialDB, minVersion);
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedPotentialDB, minVersion);
     }
     
     public yacySeed anySeedVersion(float minVersion) {
@@ -840,11 +840,11 @@ public final class yacySeedDB {
         kelondroMapObjects database;
         float minVersion;
         
-        public seedEnum(boolean up, boolean rot, byte[] firstKey, kelondroMapObjects database, float minVersion) {
+        public seedEnum(boolean up, boolean rot, byte[] firstKey, byte[] secondKey, kelondroMapObjects database, float minVersion) {
             this.database = database;
             this.minVersion = minVersion;
             try {
-                it = (firstKey == null) ? database.maps(up, rot) : database.maps(up, rot, firstKey);
+                it = (firstKey == null) ? database.maps(up, rot) : database.maps(up, rot, firstKey, secondKey);
                 while (true) {
                     nextSeed = internalNext();
                     if (nextSeed == null) break;

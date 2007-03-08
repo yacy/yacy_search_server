@@ -401,7 +401,7 @@ public class plasmaRankingCRProcess {
         int size = seq.size();
         long start = System.currentTimeMillis();
         long l;
-        final Iterator i = seq.keycollections(null, false);
+        final Iterator i = seq.keycollections(null, null, false);
         Object[] keycollection;
         String referee, refereeDom, anchor, anchorDom;
         kelondroRowSet cr_entry, rci_entry;

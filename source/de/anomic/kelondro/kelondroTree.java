@@ -1029,7 +1029,6 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     public class rowIterator implements kelondroCloneableIterator {
         
         int chunkSize;
-        byte[] start;
         boolean inc;
         long count;
         byte[] lastKey;
@@ -1039,21 +1038,20 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         
         public rowIterator(boolean up, byte[] firstKey, long guessedCountLimit) throws IOException {
             this.guessedCountLimit = guessedCountLimit;
-            start = firstKey;
             inc = up;
             count = 0;
             lastKey = null;
             //System.out.println("*** rowIterator: " + filename + ": readAheadChunkSize = " + readAheadChunkSize + ", lastIteratorCount = " + lastIteratorCount);
             readAheadChunkSize = Math.min(1000, 3 + (int) ((3 * readAheadChunkSize + lastIteratorCount) / 4));
             chunkSize = (int) Math.min(readAheadChunkSize / 3, guessedCountLimit);
-            rowBuffer = rowMap(inc, start, true, chunkSize);
+            rowBuffer = rowMap(inc, firstKey, true, chunkSize);
             bufferIterator = rowBuffer.entrySet().iterator();
             lastIteratorCount = 0;
         }
         
-        public Object clone() {
+        public Object clone(Object secondStart) {
             try {
-                return new rowIterator(inc, start, guessedCountLimit);
+                return new rowIterator(inc, (byte[]) secondStart, guessedCountLimit);
             } catch (IOException e) {
                 return null;
             }

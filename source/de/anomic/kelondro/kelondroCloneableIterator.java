@@ -30,6 +30,8 @@ import java.util.Iterator;
 
 public interface kelondroCloneableIterator extends Iterator {
 
-    public Object /* instance of kelondroCloneableIterator*/ clone();
+    // clone the iterator using a modifier
+    // the modifier can be i.e. a re-start position
+    public Object /* instance of kelondroCloneableIterator*/ clone(Object modifier);
     
 }

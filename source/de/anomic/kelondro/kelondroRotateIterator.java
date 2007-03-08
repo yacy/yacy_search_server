@@ -29,15 +29,17 @@ package de.anomic.kelondro;
 public class kelondroRotateIterator implements kelondroCloneableIterator {
     
     kelondroCloneableIterator a, clone;
+    Object modifier;
     
-    public kelondroRotateIterator(kelondroCloneableIterator a) {
+    public kelondroRotateIterator(kelondroCloneableIterator a, Object modifier) {
         // this works currently only for String-type key iterations
         this.a = a;
-        this.clone = (kelondroCloneableIterator) a.clone();
+        this.modifier = modifier;
+        this.clone = (kelondroCloneableIterator) a.clone(modifier);
     }
     
-    public Object clone() {
-        return new kelondroRotateIterator(a);
+    public Object clone(Object modifier) {
+        return new kelondroRotateIterator(a, modifier);
     }
     
     public boolean hasNext() {
@@ -46,7 +48,7 @@ public class kelondroRotateIterator implements kelondroCloneableIterator {
     
     public Object next() {
         if (!(a.hasNext())) {
-            a = (kelondroCloneableIterator) clone.clone();
+            a = (kelondroCloneableIterator) clone.clone(modifier);
         }
         return a.next();
     }

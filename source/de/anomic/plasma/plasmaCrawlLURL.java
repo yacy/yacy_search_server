@@ -347,18 +347,16 @@ public final class plasmaCrawlLURL {
         private Iterator iter;
         private boolean error;
         boolean up;
-        String firstHash;
 
         public kiter(boolean up, String firstHash) throws IOException {
             this.up = up;
-            this.firstHash = firstHash;
             this.iter = plasmaCrawlLURL.this.urlIndexFile.rows(up, (firstHash == null) ? null : firstHash.getBytes());
             this.error = false;
         }
 
-        public Object clone() {
+        public Object clone(Object secondHash) {
             try {
-                return new kiter(up, firstHash);
+                return new kiter(up, (String) secondHash);
             } catch (IOException e) {
                 return null;
             }

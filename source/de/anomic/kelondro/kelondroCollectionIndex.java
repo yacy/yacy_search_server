@@ -962,10 +962,10 @@ public class kelondroCollectionIndex {
         return collection;
     }
     
-    public synchronized Iterator keycollections(byte[] startKey, boolean rot) {
+    public synchronized Iterator keycollections(byte[] startKey, byte[] secondKey, boolean rot) {
         // returns an iteration of {byte[], kelondroRowSet} Objects
         try {
-            return new keycollectionIterator(startKey, rot);
+            return new keycollectionIterator(startKey, secondKey, rot);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -976,10 +976,10 @@ public class kelondroCollectionIndex {
         
         Iterator indexRowIterator;
         
-        public keycollectionIterator(byte[] startKey, boolean rot) throws IOException {
+        public keycollectionIterator(byte[] startKey, byte[] secondKey, boolean rot) throws IOException {
             // iterator of {byte[], kelondroRowSet} Objects
             kelondroCloneableIterator i = index.rows(true, startKey);
-            indexRowIterator = (rot) ? new kelondroRotateIterator(i) : i;
+            indexRowIterator = (rot) ? new kelondroRotateIterator(i, secondKey) : i;
         }
         
         public boolean hasNext() {

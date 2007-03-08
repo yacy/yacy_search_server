@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
@@ -274,7 +275,7 @@ public class indexCachedRI implements indexRI {
                             true);
         }
         if (rot) {
-            return new kelondroRotateIterator(i);
+            return new kelondroRotateIterator(i, new String(kelondroBase64Order.zero(startHash.length())));
         } else {
             return i;
         }

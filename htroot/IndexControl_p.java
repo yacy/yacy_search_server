@@ -64,6 +64,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
@@ -364,7 +365,7 @@ public class IndexControl_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator entryIt = new kelondroRotateIterator(switchboard.wordIndex.loadedURL.entries(true, urlhash)); 
+                final Iterator entryIt = new kelondroRotateIterator(switchboard.wordIndex.loadedURL.entries(true, urlhash), new String(kelondroBase64Order.zero(urlhash.length()))); 
                 StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br>");
                 indexURLEntry entry;
                 int i = 0;

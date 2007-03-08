@@ -127,10 +127,10 @@ public class kelondroObjects {
         return dyn.dynKeys(up, rotating);
     }
 
-    public synchronized kelondroCloneableIterator keys(final boolean up, final boolean rotating, final byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
         // simple enumeration of key names without special ordering
         kelondroCloneableIterator i = dyn.dynKeys(up, firstKey);
-        if (rotating) return new kelondroRotateIterator(i); else return i;
+        if (rotating) return new kelondroRotateIterator(i, secondKey); else return i;
     }
 
 
@@ -138,8 +138,8 @@ public class kelondroObjects {
         return new objectIterator(keys(up, rotating));
     }
 
-    public synchronized objectIterator entries(final boolean up, final boolean rotating, final byte[] firstKey) throws IOException {
-        return new objectIterator(keys(up, rotating, firstKey));
+    public synchronized objectIterator entries(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
+        return new objectIterator(keys(up, rotating, firstKey, secondKey));
     }
 
     public synchronized int size() {

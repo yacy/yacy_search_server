@@ -67,8 +67,8 @@ public class kelondroMergeIterator implements kelondroCloneableIterator {
         nextb();
     }
     
-    public Object clone() {
-        return new kelondroMergeIterator((kelondroCloneableIterator) a.clone(), (kelondroCloneableIterator) b.clone(), comp, merger, up);
+    public Object clone(Object modifier) {
+        return new kelondroMergeIterator((kelondroCloneableIterator) a.clone(modifier), (kelondroCloneableIterator) b.clone(modifier), comp, merger, up);
     }
     
     public void finalize() {
