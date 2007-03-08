@@ -106,6 +106,8 @@ public class Wiki {
         }
         if (access.equals("admin")) prop.put("mode_access", 0);
         if (access.equals("all"))   prop.put("mode_access", 1);
+
+        wikiBoard.entry page = switchboard.wikiDB.read(pagename);
         
         if (post.containsKey("submit")) {
             
@@ -122,16 +124,17 @@ public class Wiki {
             } catch (UnsupportedEncodingException e) {
                 content = post.get("content", "").getBytes();
             }
-            switchboard.wikiDB.write(switchboard.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content));
+            wikiBoard.entry newEntry = switchboard.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
+            switchboard.wikiDB.write(newEntry);
             // create a news message
             HashMap map = new HashMap();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
-            yacyCore.newsPool.publishMyNews(new yacyNewsRecord("wiki_upd", map));
+            if (!page.page().equals(content))
+                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("wiki_upd", map));
+            page = newEntry;
             prop.put("LOCATION", "/Wiki.html?page=" + pagename);
         }
-
-        wikiBoard.entry page = switchboard.wikiDB.read(pagename);
 
         if (post.containsKey("edit")) {
             if ((access.equals("admin") && (!switchboard.verifyAuthentication(header, true)))) {
