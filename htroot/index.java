@@ -93,10 +93,11 @@ public class index {
         if (cds.equals("image")) contentdom = plasmaSearchQuery.CONTENTDOM_IMAGE;
         if (cds.equals("app")) contentdom = plasmaSearchQuery.CONTENTDOM_APP;
         
+        long mylinks = 0;
         try {
-            prop.put("links", groupDigits(Long.parseLong(yacyCore.seedDB.mySeed.get(yacySeed.LCOUNT, "0"))));
+            prop.put("links", groupDigits(mylinks = Long.parseLong(yacyCore.seedDB.mySeed.get(yacySeed.LCOUNT, "0"))));
         } catch (NumberFormatException e) { prop.put("links", "0"); }
-        prop.put("total-links", groupDigits(yacyCore.seedDB.countActiveURL()));
+        prop.put("total-links", groupDigits(mylinks + yacyCore.seedDB.countActiveURL()));
         
         // we create empty entries for template strings
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");

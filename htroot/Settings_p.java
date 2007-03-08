@@ -68,10 +68,7 @@ public final class Settings_p {
         
         String page = (post == null) ? "general" : post.get("page", "general");
         
-        if (page.equals("general")) {
-            prop.put("settingsTables", "Settings_General.inc");
-        }
-        else if (page.equals("ProxyAccess")) {
+        if (page.equals("ProxyAccess")) {
             prop.put("settingsTables", "Settings_ProxyAccess.inc");
         }
         else if (page.equals("http")) {
@@ -100,9 +97,8 @@ public final class Settings_p {
         }
         else if (page.equals("crawler")) {
             prop.put("settingsTables", "Settings_Crawler.inc");
-        }        
-        else {
-        	prop.put("settingsTables", "Settings_General.inc");
+        } else {
+            prop.put("settingsTables", "");
         }
 
         prop.put("port", env.getConfig("port", "8080"));               

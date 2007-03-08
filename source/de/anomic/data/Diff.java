@@ -55,8 +55,8 @@ import java.util.ArrayList;
 public class Diff {
     
     private final ArrayList /* of Part */ parts = new ArrayList();
-    private final String o;
-    private final String n;
+    private final Object[] o;
+    private final Object[] n;
     
     /**
      * @param o the original <code>String</code>
@@ -64,10 +64,7 @@ public class Diff {
      * @throws NullPointerException if one of the arguments is <code>null</code>
      */
     public Diff(String o, String n) {
-        if (o == null || n == null) throw new NullPointerException("neither o nor n must be null");
-        this.o = o;
-        this.n = n;
-        parse(1);
+        this(o, n, 1);
     }
     
     /**
@@ -80,6 +77,17 @@ public class Diff {
      * <code>null</code>
      */
     public Diff(String o, String n, int minConsecutive) {
+        if (o == null || n == null) throw new NullPointerException("neither o nor n must be null");
+        this.o = new Comparable[o.length()];
+        for (int i=0; i<o.length(); i++)
+            this.o[i] = new Character(o.charAt(i));
+        this.n = new Comparable[n.length()];
+        for (int i=0; i<n.length(); i++)
+            this.n[i] = new Character(n.charAt(i));
+        parse((minConsecutive > 0) ? minConsecutive : 1);
+    }
+    
+    public Diff(Object[] o, Object[] n, int minConsecutive) {
         if (o == null || n == null) throw new NullPointerException("neither o nor n must be null");
         this.o = o;
         this.n = n;
@@ -108,22 +116,21 @@ public class Diff {
          *    E| | |#| | | | | | | | |#| | |#| | |#|
          *    N| | | | | | | | | | | | |#| | |#| | |
          *    C| | | | | | | | | | | | | | | | |#| |
-         *    E| | |#| | | | | | | | | |#| | |#| |#|
+         *    E| | |#| | | | | | | | |#| | |#| | |#|
          */
-        boolean[][] matrix = new boolean[this.n.length()][this.o.length()];
-        for (int y=0; y<this.n.length(); y++)
-            for (int x=0; x<this.o.length(); x++)
-                matrix[y][x] = this.o.charAt(x) == this.n.charAt(y);
+        boolean[][] matrix = new boolean[this.n.length][this.o.length];
+        for (int y=0; y<this.n.length; y++)
+            for (int x=0; x<this.o.length; x++)
+                matrix[y][x] = this.o[x].equals(this.n[y]);
         
         int s = 0, t = 0;
-        int[] tmp = findDiagonal(s, t, matrix, minLength);
-        while (tmp != null) {
+        int[] tmp;
+        while ((tmp = findDiagonal(s, t, matrix, minLength)) != null) {
             addReplacementParts(s, t, tmp[0], tmp[1]);
             this.parts.add(new Part(Part.UNCHANGED, tmp[0], s = tmp[0] + tmp[2]));
             t = tmp[1] + tmp[2];
-            tmp = findDiagonal(s, t, matrix, minLength);
         }
-        addReplacementParts(s, t, this.o.length(), this.n.length());
+        addReplacementParts(s, t, this.o.length, this.n.length);
     }
     
     private void addReplacementParts(int startx, int starty, int endx, int endy) {
@@ -154,8 +161,10 @@ public class Diff {
         for (yy=y; yy<matrix.length; yy++)
             for (xx=x; xx<matrix[yy].length; xx++)
                 if (matrix[yy][xx]) {       // reverse order! [y][x]
+                    // save position
                     rx = xx;
                     ry = yy;
+                    // follow diagonal as long as far as possible
                     for (i=1; (yy + i)<matrix.length && (xx + i)<matrix[yy].length; i++)
                         if (!matrix[yy + i][xx + i]) 
                             break;
@@ -166,14 +175,14 @@ public class Diff {
     }
     
     /**
-     * @return the original <code>String</code> passed to this class on instantiation
+     * @return the original <code>Object[]</code> passed to this class on instantiation
      */
-    public String getOriginal() { return this.o; }
+    public Object[] getOriginal() { return this.o; }
     
     /**
-     * @return the new <code>String</code> passed to this class on instantiation
+     * @return the new <code>Object[]</code> passed to this class on instantiation
      */
-    public String getNew() { return this.n; }
+    public Object[] getNew() { return this.n; }
     
     /**
      * A diff is composed of different parts. Each of these parts stands for an
@@ -225,7 +234,15 @@ public class Diff {
          * @return the plain string this diff-part cares about
          */
         public String getString() {
-            return ((this.action == ADDED) ? Diff.this.n : Diff.this.o).substring(this.posOld, this.posNew);
+            final StringBuffer sb = new StringBuffer(this.posNew - this.posOld);
+            if (this.action == ADDED) {
+                for (int i=this.posOld; i<this.posNew; i++)
+                    sb.append(Diff.this.n[i]);
+            } else {
+                for (int i=this.posOld; i<this.posNew; i++)
+                    sb.append(Diff.this.o[i]);
+            }
+            return new String(sb);
         }
         
         /**
