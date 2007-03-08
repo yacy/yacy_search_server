@@ -15,7 +15,7 @@
     <form method="get" action="LogStatistics_p.html">
       <fieldset><legend>DHT</legend>
         <fieldset>
-          <legend>URLs</legend><table border="0"><tr><td>
+          <legend>URLs</legend>
           <dl style="margin-top: .3em;">
             <dt>URLs Received:</dt><dd>#[urlSum]#</dd>
             <dt>URLs Requested:</dt><dd>#[urlReqSum]#</dd>
@@ -23,10 +23,10 @@
             <dt>Total time:</dt><dd>#[urlTimeSum]# #[urlTimeSumUnit]#</dd>
             <dt>URLs Sent:</dt><dd>#[DHTSendURLs]#</dd>
           </dl>
-        </td></tr></table></fieldset>
+        </fieldset>
         
         <fieldset>
-          <legend>RWIs / Words</legend><table border="0"><tr><td>
+          <legend>RWIs / Words</legend>
           <dl style="margin-top: .3em;">
             <dt>Words received:</dt><dd>#[wordsSum]#</dd>
             <dt>RWIs reveived:</dt><dd>#[rwiSum]#</dd>
@@ -34,11 +34,11 @@
             <dt>Total time:</dt><dd>#[rwiTimeSum]# #[rwiTimeSumUnit]#</dd>
             <dt>RWIs selected:</dt><dd>#[DHTSelectionWordsCount]#</dd>
             <dt>Selection time:</dt><dd>#[DHTSelectionWordsTimeCount]#</dd>
-          </dl></td></tr></table>
+          </dl>
         </fieldset>
         
         <fieldset>
-          <legend>Chunks / Protocol</legend><table border="0"><tr><td>
+          <legend>Chunks / Protocol</legend>
           <dl style="margin-top: .3em;">
             <dt>Sent traffic:</dt><dd>#[DHTSendTraffic]# #[DHTSendTrafficUnit]#</dd>
             <dt>Total peers selected:</dt><dd>#[DHTSelectionTargetCount]#</dd>
@@ -65,19 +65,19 @@
                 </ul>
               </div>#(/useDHTPeers)#
             </dd>
-          </dl></td></tr></table>
+          </dl>
         </fieldset>
       </fieldset>
       
-      <fieldset><legend>Ranking Distribution</legend><table border="0"><tr><td>
+      <fieldset><legend>Ranking Distribution</legend>
         <dl>
           <dt>Submitted ranking files:</dt><dd>#[rankingDistributionCount]#</dd>
           <dt>Total time submitting ranking files:</dt><dd>#[rankingDistributionTime]#</dd>
           <dt>Failed ranking distributions:</dt><dd>#[rankingDistributionFailCount]#</dd>
-        </dl></td></tr></table>
+        </dl>
       </fieldset>
       
-      <fieldset><legend>Indexing</legend><table border="0"><tr><td>
+      <fieldset><legend>Indexing</legend>
         <dl>
           <dt>Indexed sites:</dt><dd>#[indexedSites]#</dd>
           <dt>Size of indexed sites:</dt><dd>#[indexedSiteSizeSum]# #[indexedSiteSizeSumUnit]#</dd>
@@ -87,15 +87,15 @@
           <dt>Total parsing time:</dt><dd>#[indexedParsingTime]# #[indexedParsingTimeUnit]#</dd>
           <dt>Total indexing time:</dt><dd>#[indexedIndexingTime]# #[indexedIndexingTimeUnit]#</dd>
           <dt>Total storage time:</dt><dd>#[indexedStorageTime]# #[indexedStorageTimeUnit]#</dd>
-        </dl></td></tr></table>
+        </dl>
       </fieldset>
       
-      <fieldset><legend>Errors</legend><table border="0"><tr><td>
+      <fieldset><legend>Errors</legend>
         <dl>
           <dt><span class="tt">Tried to create left child node twice</span></dt><dd>#[leftChildTwiceCount]#</dd>
           <dt><span class="tt">Tried to create right child node twice</span></dt><dd>#[rightChildTwiceCount]#</dd>
           <dt><span class="tt">Malformed URL Exception</span></dt><dd>#[malformedURLCount]#</dd>
-        </dl></td></tr></table>
+        </dl>
       </fieldset>
     </form>
     #(/results)#

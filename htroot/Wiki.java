@@ -130,7 +130,7 @@ public class Wiki {
             HashMap map = new HashMap();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
-            if (!page.page().equals(content))
+            if (post.get("content", "").trim().length() > 0 && !page.page().equals(content))
                 yacyCore.newsPool.publishMyNews(new yacyNewsRecord("wiki_upd", map));
             page = newEntry;
             prop.put("LOCATION", "/Wiki.html?page=" + pagename);

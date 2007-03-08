@@ -12,16 +12,16 @@
     #(addedUrls)#::<span class="success">Added #[added]# URLs!</span>#(/addedUrls)#
     <form method="post" action="CrawlURLFetchStack_p.html" enctype="multipart/form-data">
       <fieldset><legend>Statistics</legend>
-        <table border="0"><tr><td><dl>
+        <dl>
           <dt>Currently stacked URLs:</dt><dd>#[urlCount]#</dd>
           <dt>Totally fetched / added URLs:</dt><dd>#[totalFetched]# / #[totalAdded]#</dd>
           #{peers}# 
           <dt>Fetched from #[peer]#</dt><dd>#[amount]#</dd>#{/peers}# 
-        </dl></td></tr></table>
+        </dl>
       </fieldset>
       
       <fieldset><legend>Settings</legend>
-        <table border="0"><tr><td><dl>
+        <dl>
           <dt><label for="maxSize">Maximum URLs for each transfer</label>:</dt>
           <dd>
             <input type="text" name="maxSize" id="maxSize" value="#[maxSize]#" maxlength="3" size="3" />
@@ -30,11 +30,11 @@
             <span class="success">Set max. size for each transfer to #[value]#</span>::
             <span class="error">Setting max. size for each transfer to #[value]# was unsuccessful: may not be negative</span>#(/set)#
           </dd>
-        </dl></td></tr></table>
+        </dl>
       </fieldset>
       
       <fieldset><legend>Add URLs to stack</legend>
-        <table border="0"><tr><td><dl>
+        <dl>
           <dt><label for="shiftloc">Shift URLs from Local Crawler</label>:</dt>
           <dd>
             <input type="text" name="shiftloc" id="shiftloc" value="#[locurlsVal]#" size="5" maxlength="5" style="text-align: right;" />
@@ -60,7 +60,7 @@
             <span class="success">Added #[added]# and rejected #[failed]# URLs from uploaded file successfully</span>::
             <span class="error">An internal error occured processing the uploaded file: #[error]#</span>#(/upload)#
           </dd>
-        </dl></td></tr></table>
+        </dl>
       </fieldset>
     </form>
     #%env/templates/footer.template%#

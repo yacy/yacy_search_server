@@ -17,7 +17,7 @@
     ::<p class="error">Unable to access the local file: <span class="error tt">#[msg]#</span></p>
     ::<p class="error">Deletion of <span class="error tt">htroot/robots.txt</span> failed</p>#(/error)#
     <form method="post" action="ConfigRobotsTxt_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
-      <fieldset><legend>Restrict access for</legend><table border="0"><tr><td>
+      <fieldset><legend>Restrict access for</legend>
         <input type="hidden" name="directories" value="checked" />
         <input type="hidden" name="locked" value="checked" />
         <dl>
@@ -43,7 +43,7 @@
           <dd><input type="checkbox" id="fileshare" name="fileshare"#(fileshare.checked)#:: checked="checked"#(/fileshare.checked)# /></dd>
           <dt>&nbsp;</dt>
           <dd><input type="submit" name="save" value="Set restrictions" /></dd>
-        </dl></td></tr></table>
+        </dl>
       </fieldset>
     </form>
     #%env/templates/footer.template%#

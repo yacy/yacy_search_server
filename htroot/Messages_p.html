@@ -11,7 +11,7 @@
     #(peersKnown)#::
     <form enctype="multipart/form-data" action="MessageSend_p.html" method="get">
       <fieldset><legend>Compose Message</legend>
-      <table border="0"><tr><td><dl>
+      <dl>
         <dt><label for="peers">Send message to peer</label>:</dt>
         <dd>
           <select id="peers" name="hash">#{peers}#
@@ -19,7 +19,7 @@
           </select>
           <input type="submit" name="submit" value="Compose" />
         </dd>
-      </dl></td></tr></table>
+      </dl>
     </fieldset></form>
     #(/peersKnown)#
     #(mode)#

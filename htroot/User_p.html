@@ -20,7 +20,7 @@
     #(/error)#
     
 	<form action="User_p.html">
-      <fieldset><legend>Select user</legend><table border="0"><tr><td>
+      <fieldset><legend>Select user</legend>
         <dl>
           <dt><label for="user">Select user</label>:</dt>
           <dd>
@@ -34,12 +34,12 @@
             <input type="submit" name="change_user" value="Edit User" />
             <input type="submit" name="delete_user" value="Delete User" />
           </dd>
-        </dl></td></tr></table>
+        </dl>
       </fieldset>
     </form>
     
     <form action="User_p.html" method="post">
-      <fieldset><legend>Edit current user: #[username]#</legend><table border="0"><tr><td>
+      <fieldset><legend>Edit current user: #[username]#</legend>
         <!-- Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly> -->
         <input type="hidden" name="current_user" value="#[current_user]#" />
         <dl>
@@ -71,6 +71,6 @@
           <dd><input type="text" id="tused" name="timeused" value="#[timeused]#" /></dd>
           <dt>&nbsp;</dt>
           <dd><input type="submit" name="change" value="Save User" /></dd>
-        </dl></td></tr></table>
+        </dl>
       </fieldset>
     </form>
