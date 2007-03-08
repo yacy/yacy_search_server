@@ -55,6 +55,7 @@ import java.util.TreeMap;
 import de.anomic.data.messageBoard;
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -148,10 +149,15 @@ public class Messages_p {
                     prop.put("mode_messages_"+count+"_subject", wikiCode.replaceHTML(message.subject()));
                     prop.put("mode_messages_"+count+"_key", key);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
-                    
-                    // also write out the message body (needed for the RSS feed)
+                                        
                     if (((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
-                    	prop.put("mode_messages_"+count+"_peerAddress", peerAddress); 
+                    	// set the peer address
+                    	prop.put("mode_messages_"+count+"_peerAddress", peerAddress);
+                    	
+                    	// set the rfc822 date
+                    	prop.put("mode_messages_"+count+"_rfc822Date",httpc.dateString(message.date()));
+                    	
+                    	// also write out the message body (needed for the RSS feed)
                         try {
                         	prop.put("mode_messages_"+count+"_body",new String(message.message(), "UTF-8"));
                         } catch (UnsupportedEncodingException e) {

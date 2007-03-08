@@ -8,7 +8,7 @@
 	#{bookmarks}#<item>
 		<title><![CDATA[#[title]#]]></title>
 		<link>#[link]#</link>
-		<pubDate>#[date]#</pubDate>
+		<pubDate>#[rfc822date]#</pubDate>
 		<guid>#[hash]#</guid>
 		<description><![CDATA[<p>#[description]#</p><p>Tagged with | #{tags}#<a href="Bookmarks.html?tag=#[tag]#" class="bookmarkTags">#[tag]#</a> | #{/tags}#</p>]]></description>
 		#{tags}#<category><![CDATA[#[tag]#]]></category>#{/tags}#

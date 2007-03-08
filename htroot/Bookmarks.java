@@ -57,6 +57,7 @@ import de.anomic.data.listManager;
 import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
 import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
@@ -257,6 +258,7 @@ public class Bookmarks {
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
             prop.put("bookmarks_"+count+"_description", bookmark.getDescription());
             prop.put("bookmarks_"+count+"_date", bookmarksDB.dateToiso8601(new Date(bookmark.getTimeStamp())));
+            prop.put("bookmarks_"+count+"_rfc822date", httpc.dateString(new Date(bookmark.getTimeStamp())));
             prop.put("bookmarks_"+count+"_public", (bookmark.getPublic()? 1:0));
             
             //List Tags.

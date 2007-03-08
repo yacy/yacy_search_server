@@ -13,7 +13,7 @@
 		<author><![CDATA[#[author]#]]></author>
 		<title><![CDATA[#[subject]#]]></title>
 		<link>http://#[address]#/Blog.html?page=#[pageid]#</link>
-		<pubDate>#[date]#</pubDate>
+		<pubDate>#[rfc822date]#</pubDate>
 		<guid>#[pageid]#</guid>
 		<description><![CDATA[
 #[page]#]]></description>
