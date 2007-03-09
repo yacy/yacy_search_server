@@ -125,7 +125,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
 
     private static htmlFilterTransformer transformer = null;
     public static final String proxyUserAgent = "yacy (" + httpc.systemOST +") yacy.net";
-    public static final String crawlerUserAgent = "yacybot (" + httpc.systemOST +") yacy.net";
+    public static final String crawlerUserAgent = "yacybot (" + httpc.systemOST +") yacy.net/yacy/bot.html";
     private File   htRootPath = null;
 
     private static boolean doAccessLogging = false; 
