@@ -120,12 +120,11 @@ public class PerformanceMemory_p {
         while (i.hasNext()) {
             filename = (String) i.next();
             map = (Map) kelondroFlexTable.memoryStats(filename);
-            p = filename.indexOf("DATA");
             ROmem = Long.parseLong((String) map.get("tableROIndexMem"));
             RWmem = Long.parseLong((String) map.get("tableRWIndexMem"));
             totalmem += ROmem;
             totalmem += RWmem;
-            prop.put("TableList_" + c + "_tableIndexPath", filename.substring(p));
+            prop.put("TableList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.put("TableList_" + c + "_tableIndexChunkSize", map.get("tableIndexChunkSize"));
             prop.put("TableList_" + c + "_tableROIndexCount", map.get("tableROIndexCount"));
             prop.put("TableList_" + c + "_tableROIndexMem", ROmem / (1024 * 1024));
@@ -144,10 +143,9 @@ public class PerformanceMemory_p {
         while (i.hasNext()) {
             filename = (String) i.next();
             map = (Map) kelondroRecords.memoryStats(filename);
-            p = filename.indexOf("DATA");
             mem = Long.parseLong((String) map.get("nodeCacheMem"));
             totalmem += mem;
-            prop.put("NodeList_" + c + "_nodeCachePath", filename.substring(p));
+            prop.put("NodeList_" + c + "_nodeCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.put("NodeList_" + c + "_nodeChunkSize", map.get("nodeChunkSize"));
             prop.put("NodeList_" + c + "_nodeCacheCount", map.get("nodeCacheCount"));
             prop.put("NodeList_" + c + "_nodeCacheMem", mem / (1024 * 1024));
@@ -171,8 +169,7 @@ public class PerformanceMemory_p {
         while (i.hasNext()) {
             filename = (String) i.next();
             map = (Map) kelondroCache.memoryStats(filename);
-            p = filename.indexOf("DATA");
-            prop.put("ObjectList_" + c + "_objectCachePath", filename.substring(p));
+            prop.put("ObjectList_" + c + "_objectCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             
             // hit cache
             hitmem = Long.parseLong((String) map.get("objectHitMem"));
