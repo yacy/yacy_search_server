@@ -392,14 +392,16 @@ public class plasmaCrawlNURL {
             re = stack.pop();
             if (re == null) {
                 if (s > stack.size()) continue;
-                throw new IOException("hash is null");
+                stack = kelondroStack.reset(stack); // the stack is not able to shrink
+                throw new IOException("hash is null, stack cannot shrink; reset of stack (1)");
             }
             try {
                 entry = new Entry(new String(re.getColBytes(0)));
             } catch (IOException e) {
                 serverLog.logWarning("NURL", e.getMessage());
                 if (s > stack.size()) continue;
-                throw new IOException(e.getMessage());
+                stack = kelondroStack.reset(stack); // the stack is not able to shrink
+                throw new IOException("hash is null, stack cannot shrink; reset of stack (2)");
             }
             imageStackIndex.remove(entry.hash);
             movieStackIndex.remove(entry.hash);
@@ -418,14 +420,16 @@ public class plasmaCrawlNURL {
             hash = balancer.pop(minimumDelta, maximumDomAge);
             if (hash == null) {
                 if (s > balancer.size()) continue;
-                throw new IOException("hash is null");
+                balancer.clear(); // the balancer is broken and cannot shrink
+                throw new IOException("hash is null, balancer cannot shrink; reset of balancer (1)");
             }
             try {
                 entry = new Entry(hash);
             } catch (IOException e) {
                 serverLog.logWarning("NURL", e.getMessage());
                 if (s > balancer.size()) continue;
-                throw new IOException(e.getMessage());
+                balancer.clear(); // the balancer is broken and cannot shrink
+                throw new IOException("hash is null, balancer cannot shrink; reset of balancer (2)");
             }
             imageStackIndex.remove(entry.hash);
             movieStackIndex.remove(entry.hash);
