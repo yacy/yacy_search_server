@@ -53,7 +53,6 @@
 package de.anomic.plasma;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
@@ -168,11 +167,7 @@ public final class plasmaWordIndexAssortment {
     }
     
     public void close() {
-        try {
-            assortment.close();
-        } catch (IOException e){
-            log.logSevere("unable to close assortment database: " + e.getMessage(), e);
-        }
+        assortment.close();
     }
 
 }

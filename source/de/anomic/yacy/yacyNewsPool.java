@@ -100,6 +100,14 @@ public class yacyNewsPool {
         maxDistribution = 30;
     }
     
+    public synchronized void close() {
+        newsDB.close();
+        outgoingNews.close();
+        publishedNews.close();
+        incomingNews.close();
+        processedNews.close();
+    }
+    
     public int dbSize() {
         try {
             return newsDB.size();

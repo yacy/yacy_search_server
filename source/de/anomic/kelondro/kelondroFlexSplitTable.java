@@ -331,9 +331,12 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         return new int[]{0,0,0,0,0,0,0,0,0,0};
     }
     
-    public synchronized void close() throws IOException {
+    public synchronized void close() {
+        if (tables == null) return;
         Iterator i = tables.values().iterator();
-        while (i.hasNext()) ((kelondroIndex) i.next()).close();
+        while (i.hasNext()) {
+            ((kelondroIndex) i.next()).close();
+        }
         tables = null;
     }
     

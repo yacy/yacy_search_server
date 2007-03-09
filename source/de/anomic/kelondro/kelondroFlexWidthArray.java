@@ -161,7 +161,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         }
     }
     
-    public void close() throws IOException {
+    public void close() {
         synchronized (col) {
             for (int i = 0; i < col.length; i++) {
                 if (col[i] != null) {

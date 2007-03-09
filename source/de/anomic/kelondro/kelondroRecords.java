@@ -1470,7 +1470,7 @@ public class kelondroRecords {
         
     }
     
-    public synchronized void close() throws IOException {
+    public synchronized void close() {
         if (cacheHeaders == null) {
             if (recordTracker.get(this.filename) != null) {
                 theLogger.severe("close(): file '" + this.filename + "' was tracked with record tracker, but it should not.");
@@ -1482,19 +1482,20 @@ public class kelondroRecords {
         }
         if (entryFile == null) {
             theLogger.severe("close(): file '" + this.filename + "' was closed before close was called.");
-        } else {
+        } else try {
             USAGE.writeused(true);
             this.entryFile.close();
-            this.entryFile = null;
-            this.cacheHeaders = null;
             theLogger.fine("file '" + this.filename + "' closed.");
+        } catch (IOException e) {
+            theLogger.severe("file '" + this.filename + "': failed to close.");
+            e.printStackTrace();
         }
+        this.entryFile = null;
+        this.cacheHeaders = null;
     }
 
     public void finalize() {
-        try {
-            if (entryFile != null) close();
-        } catch (IOException e) { }
+        if (entryFile != null) close();
         this.entryFile = null;
     }
 

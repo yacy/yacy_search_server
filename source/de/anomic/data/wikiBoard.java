@@ -88,8 +88,8 @@ public class wikiBoard {
     }
 
     public void close() {
-        try {datbase.close();} catch (IOException e) {}
-        try {bkpbase.close();} catch (IOException e) {}
+        datbase.close();
+        bkpbase.close();
     }
 
     private static String dateString() {

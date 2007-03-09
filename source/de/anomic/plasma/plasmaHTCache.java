@@ -188,7 +188,7 @@ public final class plasmaHTCache {
     }
 
     private void resetResponseHeaderDB() {
-        if (this.responseHeaderDB != null) try {this.responseHeaderDB.close();} catch (IOException e) {}
+        if (this.responseHeaderDB != null) this.responseHeaderDB.close();
         File dbfile = new File(this.cachePath, "responseHeader.db");
         if (dbfile.exists()) dbfile.delete();
         openResponseHeaderDB(0);
@@ -397,7 +397,7 @@ public final class plasmaHTCache {
         }
         
         // closing DB
-        try {this.responseHeaderDB.close();} catch (IOException e) {}
+        this.responseHeaderDB.close();
     }
 
     private String ageString(long date, File f) {

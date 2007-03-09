@@ -82,18 +82,14 @@ public final class userDB {
     
     void resetDatabase() {
         // deletes the database and creates a new one
-        if (userTable != null) try {
-            userTable.close();
-        } catch (IOException e) {}
+        if (userTable != null) userTable.close();
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
         userTableFile.getParentFile().mkdirs();
         userTable = new kelondroMapObjects(kelondroDyn.open(userTableFile, true, true, preloadTime, 256, 512, '_', true, false), 10);
     }
     
     public void close() {
-        try {
-            userTable.close();
-        } catch (IOException e) {}
+        userTable.close();
     }
     
     public int size() {

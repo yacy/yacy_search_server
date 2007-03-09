@@ -383,6 +383,7 @@ public final class plasmaWordIndex implements indexRI {
             dhtInCache.close();
             dhtOutCache.close();
             collections.close();
+            loadedURL.close();
         }
     }
 

@@ -150,7 +150,7 @@ public class kelondroObjects {
         }
     }
 
-    public void close() throws IOException {
+    public void close() {
         // finish queue
         //writeWorker.terminate(true);
 

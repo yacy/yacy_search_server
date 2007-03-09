@@ -161,9 +161,8 @@ public class plasmaSwitchboardQueue {
     }
 
     public void close() {
-        if (sbQueueStack != null) try {
+        if (sbQueueStack != null) {
             sbQueueStack.close();
-        } catch (IOException e) {
         }
         sbQueueStack = null;
     }

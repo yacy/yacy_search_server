@@ -385,7 +385,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return map;
     }
     
-    public synchronized void close() throws IOException {
+    public synchronized void close() {
         if (tableTracker.remove(this.filename) == null) {
             serverLog.logWarning("kelondroFlexTable", "close(): file '" + this.filename + "' was not tracked with record tracker.");
         }
@@ -393,6 +393,23 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         RWindex.close();
         RWindex = null;
         super.close();
+    }
+    
+    public static void main(String[] args) {
+        // open a file, add one entry and exit
+        File f = new File(args[0]);
+        String name = args[1];
+        kelondroRow row = new kelondroRow("Cardinal key-4 {b256}, byte[] x-64", kelondroNaturalOrder.naturalOrder, 0);
+        try {
+            kelondroFlexTable t = new kelondroFlexTable(f, name, 0, row);
+            kelondroRow.Entry entry = row.newEntry();
+            entry.setCol(0, System.currentTimeMillis());
+            entry.setCol(1, "dummy".getBytes());
+            t.put(entry);
+            t.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
 }

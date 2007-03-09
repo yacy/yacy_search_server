@@ -260,9 +260,17 @@ public class kelondroCache implements kelondroIndex {
         }
     }
     
-    public synchronized void close() throws IOException {
-        flushUnique();
-        flushDoubles();
+    public synchronized void close() {
+        try {
+            flushUnique();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            flushDoubles();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         index.close();
         readHitCache = null;
         readMissCache = null;

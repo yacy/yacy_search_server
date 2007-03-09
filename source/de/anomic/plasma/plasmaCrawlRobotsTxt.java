@@ -76,18 +76,14 @@ public class plasmaCrawlRobotsTxt {
     
     private void resetDatabase() {
         // deletes the robots.txt database and creates a new one
-        if (robotsTable != null) try {
-            robotsTable.close();
-        } catch (IOException e) {}
+        if (robotsTable != null) robotsTable.close();
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
         robotsTableFile.getParentFile().mkdirs();
         robotsTable = new kelondroMapObjects(kelondroDyn.open(robotsTableFile, true, true, preloadTime, 256, 512, '_', true, false), 100);
     }
     
     public void close() {
-        try {
-            robotsTable.close();
-        } catch (IOException e) {}
+        robotsTable.close();
     }
     
     public int size() {

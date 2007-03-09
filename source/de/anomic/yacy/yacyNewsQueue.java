@@ -83,7 +83,7 @@ public class yacyNewsQueue {
     }
 
     public void close() {
-        if (queueStack != null) try {queueStack.close();} catch (IOException e) {}
+        if (queueStack != null) queueStack.close();
         queueStack = null;
     }
 

@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -461,12 +462,13 @@ final class dbTable implements kelondroIndex {
         return "dbtest." + theDBConnection.hashCode();
     }
     
-    public void close() throws IOException {
-        try {
+    public void close() {
+        if (this.theDBConnection != null) try {
             this.theDBConnection.close();
-        } catch (Exception e) {
-            throw new IOException("Unable to close the database connection.");
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        this.theDBConnection = null;
     }
     
     public int size() throws IOException {

@@ -119,9 +119,9 @@ public final class plasmaCrawlLURL {
         }
     }
 
-    public void close() throws IOException {
+    public void close() {
         if (urlIndexFile != null) {
-            urlIndexFile.close();
+                urlIndexFile.close();
             urlIndexFile = null;
         }
     }

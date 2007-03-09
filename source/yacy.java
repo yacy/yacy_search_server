@@ -1214,7 +1214,7 @@ public final class yacy {
             }
         }
         sb.close();
-        try { oldindex.close(); } catch (IOException e) { }
+        oldindex.close();
         System.out.println("MIGRATION OF " + c + " URLs FINISHED");
     }
     
@@ -1234,15 +1234,10 @@ public final class yacy {
     private static void urldbcleanup(String homePath) {
         File root = new File(homePath);
         File indexroot = new File(root, "DATA/INDEX");
-        serverLog log = new serverLog("URLDBCLEANUP");
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
-        try {
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot, 10000);
-            currentUrlDB.urldbcleanup();
-            currentUrlDB.close();
-        } catch (IOException e) {
-            log.logSevere("IOException", e);
-        }
+        plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot, 10000);
+        currentUrlDB.urldbcleanup();
+        currentUrlDB.close();
     }
     
     private static void RWIHashList(String homePath, String targetName, String resource, String format) {

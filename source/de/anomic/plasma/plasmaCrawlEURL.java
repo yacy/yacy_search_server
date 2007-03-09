@@ -173,10 +173,7 @@ public class plasmaCrawlEURL {
     
     public void close() {
         if (urlIndexFile != null) {
-            try {
-                urlIndexFile.close();
-            } catch (IOException e) {
-            }
+            urlIndexFile.close();
             urlIndexFile = null;
         }
     }

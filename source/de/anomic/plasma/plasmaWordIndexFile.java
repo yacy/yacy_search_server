@@ -148,7 +148,7 @@ public final class plasmaWordIndexFile {
     
     public boolean deleteComplete() {
         if (theIndex == null) return false;
-        try { theIndex.close(); } catch (IOException e) {}
+        theIndex.close();
         // remove file
         boolean success = theLocation.delete();
         // and also the paren directory if that is empty

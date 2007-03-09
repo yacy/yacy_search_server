@@ -175,7 +175,7 @@ public class plasmaCrawlNURL {
     
     private void resetHashCache() {
         if (urlIndexFile != null) {
-            try {urlIndexFile.close();} catch (IOException e) {}
+            urlIndexFile.close();
             urlIndexFile = null;
             File cacheFile = new File(cacheStacksPath, "urlNotice2.db");
             cacheFile.delete();
@@ -188,13 +188,13 @@ public class plasmaCrawlNURL {
         limitStack.close();
         overhangStack.close();
         remoteStack.close();
-        try {imageStack.close();} catch (IOException e) {}
-        try {movieStack.close();} catch (IOException e) {}
-        try {musicStack.close();} catch (IOException e) {}
-        if (urlIndexFile != null) try {
+        imageStack.close();
+        movieStack.close();
+        musicStack.close();
+        if (urlIndexFile != null) {
             urlIndexFile.close();
             urlIndexFile = null;
-        } catch (IOException e) {}
+        }
     }
 
     public class initStackIndex extends Thread {

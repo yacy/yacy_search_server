@@ -249,6 +249,11 @@ public class yacyCore {
         }
     }
 
+    public synchronized void close() {
+        seedDB.close();
+        newsPool.close();
+    }
+    
     synchronized static public void triggerOnlineAction() {
         lastOnlineTime = System.currentTimeMillis();
     }

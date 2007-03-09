@@ -152,29 +152,26 @@ public class bookmarksDB {
     }
     
     public void close(){
-        try {
-            //flushBookmarkCache();
-            bookmarksTable.close();
-        } catch (IOException e) {}
-        try {
-            flushTagCache();
-            tagsTable.close();
-        } catch (IOException e) {}
-        try {
-            datesTable.close();
-        } catch (IOException e) {}
+        bookmarksTable.close();
+        flushTagCache();
+        tagsTable.close();
+        datesTable.close();
     }
+    
     public int bookmarksSize(){
         return bookmarksTable.size();
     }
+    
     public int tagSize(boolean flushed){
         if(flushed)
             flushTagCache();
         return tagsTable.size();
     }
+    
     public int tagsSize(){
         return tagSize(false);
     }
+    
     public void saveBookmark(Bookmark bookmark){
         try {
             bookmarksTable.set(bookmark.getUrlHash(), bookmark);

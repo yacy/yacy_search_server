@@ -204,14 +204,10 @@ public final class yacySeedDB {
         // this is an emergency function that should only be used if any problem with the
         // seed.db is detected
         yacyCore.log.logFine("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
-        try {
-            seedDB.close();
-            seedDBFile.delete();
-            // create new seed database
-            seedDB = openSeedTable(seedDBFile);
-        } catch (IOException e) {
-            yacyCore.log.logFine("resetSeedTable", e);
-        }
+        seedDB.close();
+        seedDBFile.delete();
+        // create new seed database
+        seedDB = openSeedTable(seedDBFile);
         return seedDB;
     }
     
@@ -220,12 +216,9 @@ public final class yacySeedDB {
     public synchronized void resetPotentialTable() { seedPotentialDB = resetSeedTable(seedPotentialDB, seedPotentialDBFile); }
     
     public void close() {
-        try {
-            seedActiveDB.close();
-            seedPassiveDB.close();
-        } catch (IOException e) {
-            yacyCore.log.logFine("close", e);
-        }
+        if (seedActiveDB != null) seedActiveDB.close();
+        if (seedPassiveDB != null) seedPassiveDB.close();
+        if (seedPotentialDB != null) seedPotentialDB.close();
     }
 
     public void initializeHandler(String mapname, Map map) {

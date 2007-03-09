@@ -465,7 +465,7 @@ public class kelondroDyn {
         }
     }
     
-    public synchronized void close() throws IOException {
+    public synchronized void close() {
         index.close();
     }
 

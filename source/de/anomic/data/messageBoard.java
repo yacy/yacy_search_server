@@ -80,7 +80,7 @@ public class messageBoard {
     }
     
     public void close() {
-        try {database.close();} catch (IOException e) {}
+        database.close();
     }
     
     private static String dateString() {

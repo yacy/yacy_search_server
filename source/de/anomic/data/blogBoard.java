@@ -93,7 +93,7 @@ public class blogBoard {
     }
     
     public void close() {
-        try {datbase.close();} catch (IOException e) {}
+        datbase.close();
     }
 
     private static String dateString(Date date) {

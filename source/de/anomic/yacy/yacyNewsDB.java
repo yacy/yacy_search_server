@@ -77,7 +77,7 @@ public class yacyNewsDB {
     }
     
     public void close() {
-        if (news != null) try {news.close();} catch (IOException e) {}
+        if (news != null) news.close();
         news = null;
     }
 

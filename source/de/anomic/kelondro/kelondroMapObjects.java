@@ -306,7 +306,7 @@ public class kelondroMapObjects extends kelondroObjects {
         return super.size();
     }
     
-    public void close() throws IOException {
+    public void close() {
         // close cluster
         if (sortClusterMap != null) {
             for (int i = 0; i < sortfields.length; i++) sortClusterMap.remove(sortfields[i]);

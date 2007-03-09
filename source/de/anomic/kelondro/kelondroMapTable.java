@@ -183,7 +183,7 @@ public class kelondroMapTable {
         throw new RuntimeException("kelondroTables.accumulator: table '" + tablename + "' does not exist.");
     }
     
-    public void close() throws IOException {
+    public void close() {
         Iterator tablesIt = mTables.values().iterator();
         while (tablesIt.hasNext()) ((kelondroMapObjects) tablesIt.next()).close();
         mTables = null;

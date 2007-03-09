@@ -75,7 +75,7 @@ public class plasmaCrawlProfile {
     
     private void resetDatabase() {
         // deletes the profile database and creates a new one
-        if (profileTable != null) try { profileTable.close(); } catch (IOException e) {}
+        if (profileTable != null) profileTable.close();
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
         kelondroDyn dyn = kelondroDyn.open(profileTableFile, true, true, preloadTime, crawlProfileHandleLength, 2000, '#', true, false);
@@ -83,9 +83,7 @@ public class plasmaCrawlProfile {
     }
     
     public void close() {
-        try {
-            profileTable.close();
-        } catch (IOException e) {}
+        profileTable.close();
     }
     
     public int size() {

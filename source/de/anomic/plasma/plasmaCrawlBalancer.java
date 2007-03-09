@@ -85,7 +85,7 @@ public class plasmaCrawlBalancer {
         ramIndex = null;
         while (sizeDomainStacks() > 0) flushOnceDomStacks(true);
         try { flushAllRamStack(); } catch (IOException e) {}
-        try { fileStack.close(); } catch (IOException e) {}
+        fileStack.close();
         fileStack = null;
     }
     

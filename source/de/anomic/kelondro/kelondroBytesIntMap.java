@@ -102,7 +102,7 @@ public class kelondroBytesIntMap {
         return ki.profile();
     }
     
-    public synchronized void close() throws IOException {
+    public synchronized void close() {
         ki.close();
     }
     

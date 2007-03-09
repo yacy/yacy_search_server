@@ -1576,7 +1576,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         userDB.close();
         bookmarksDB.close();
         messageDB.close();
-        if (facilityDB != null) try {facilityDB.close();} catch (IOException e) {}
+        if (facilityDB != null) facilityDB.close();
         sbStackCrawlThread.close();
         profiles.close();
         robots.close();
@@ -1588,6 +1588,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         noticeURL.close();
         errorURL.close();
         wordIndex.close();
+        yc.close();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
@@ -3160,7 +3161,7 @@ class delayedShutdown extends Thread {
         try {
             Thread.sleep(delay);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            sb.getLog().logInfo("interrupted delayed shutdown");
         }
         this.sb.terminate();
     }
