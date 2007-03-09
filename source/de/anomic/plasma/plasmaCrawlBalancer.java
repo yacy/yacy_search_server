@@ -184,7 +184,7 @@ public class plasmaCrawlBalancer {
             fileStack.push(fileStack.row().newEntry(new byte[][]{((String) ramStack.get(ramStack.size() / 2)).getBytes()}));
     }
     
-    public synchronized void add(String urlhash) throws IOException {
+    public synchronized void push(String urlhash) throws IOException {
         assert urlhash != null;
         if (ramIndex.contains(urlhash)) {
             serverLog.logWarning("PLASMA BALANCER", "double-check has failed for urlhash " + urlhash + " - fixed");
@@ -211,7 +211,7 @@ public class plasmaCrawlBalancer {
         }
     }
     
-    public synchronized String get(long minimumDelta, long maximumAge) throws IOException {
+    public synchronized String pop(long minimumDelta, long maximumAge) throws IOException {
         // returns an url-hash from the stack and ensures minimum delta times
         // we have 3 sources to choose from: the ramStack, the domainStacks and the fileStack
         

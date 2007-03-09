@@ -293,16 +293,16 @@ public class plasmaCrawlNURL {
         try {
             switch (stackType) {
                 case STACK_TYPE_CORE:
-                    coreStack.add(urlhash);
+                    coreStack.push(urlhash);
                     break;
                 case STACK_TYPE_LIMIT:
-                    limitStack.add(urlhash);
+                    limitStack.push(urlhash);
                     break;
                 case STACK_TYPE_OVERHANG:
-                    overhangStack.add(urlhash);
+                    overhangStack.push(urlhash);
                     break;
                 case STACK_TYPE_REMOTE:
-                    remoteStack.add(urlhash);
+                    remoteStack.push(urlhash);
                     break;
                 case STACK_TYPE_IMAGE:
                     imageStack.push(imageStack.row().newEntry(new byte[][] {urlhash.getBytes()}));
@@ -385,30 +385,54 @@ public class plasmaCrawlNURL {
 
     private Entry pop(kelondroStack stack) throws IOException {
         // this is a filo - pop
-        if (stack.size() > 0) {
-            Entry e = new Entry(new String(stack.pop().getColBytes(0)));
-            imageStackIndex.remove(e.hash);
-            movieStackIndex.remove(e.hash);
-            musicStackIndex.remove(e.hash);
-            return e;
-        } else {
-            throw new IOException("crawl stack is empty");
+        int s;
+        Entry entry;
+        kelondroRow.Entry re;
+        while ((s = stack.size()) > 0) {
+            re = stack.pop();
+            if (re == null) {
+                if (s > stack.size()) continue;
+                throw new IOException("hash is null");
+            }
+            try {
+                entry = new Entry(new String(re.getColBytes(0)));
+            } catch (IOException e) {
+                serverLog.logWarning("NURL", e.getMessage());
+                if (s > stack.size()) continue;
+                throw new IOException(e.getMessage());
+            }
+            imageStackIndex.remove(entry.hash);
+            movieStackIndex.remove(entry.hash);
+            musicStackIndex.remove(entry.hash);
+            return entry;
         }
+        throw new IOException("crawl stack is empty");
     }
 
     private Entry pop(plasmaCrawlBalancer balancer) throws IOException {
         // this is a filo - pop
-        if (balancer.size() > 0) {
-            String hash = balancer.get(minimumDelta, maximumDomAge);
-            if (hash == null) throw new IOException("hash is null");
-            Entry e = new Entry(hash);
-            imageStackIndex.remove(e.hash);
-            movieStackIndex.remove(e.hash);
-            musicStackIndex.remove(e.hash);
-            return e;
-        } else {
-            throw new IOException("balancer stack is empty");
-        }
+        String hash;
+        int s;
+        Entry entry;
+        while ((s = balancer.size()) > 0) {
+            hash = balancer.pop(minimumDelta, maximumDomAge);
+            if (hash == null) {
+                if (s > balancer.size()) continue;
+                throw new IOException("hash is null");
+            }
+            try {
+                entry = new Entry(hash);
+            } catch (IOException e) {
+                serverLog.logWarning("NURL", e.getMessage());
+                if (s > balancer.size()) continue;
+                throw new IOException(e.getMessage());
+            }
+            imageStackIndex.remove(entry.hash);
+            movieStackIndex.remove(entry.hash);
+            musicStackIndex.remove(entry.hash);
+            return entry;
+        } 
+        throw new IOException("balancer stack is empty");
     }
 
     private Entry[] top(kelondroStack stack, int count) {
@@ -505,7 +529,7 @@ public class plasmaCrawlNURL {
                 return;
             } else {
                 // show that we found nothing
-                throw new IOException("NURL: hash " + hash + " not found");
+                throw new IOException("NURL: hash " + hash + " not found during initialization of entry object");
                 //this.url = null;
             }
         }
