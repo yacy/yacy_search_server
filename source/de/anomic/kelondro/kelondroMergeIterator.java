@@ -146,7 +146,7 @@ public class kelondroMergeIterator implements kelondroCloneableIterator {
         throw new java.lang.UnsupportedOperationException("merge does not support remove");
     }
     
-    public static Iterator cascade(Set /*of*/ iterators, Comparator c, Method merger, boolean up) {
+    public static kelondroCloneableIterator cascade(Set /*of*/ iterators, Comparator c, Method merger, boolean up) {
         // this extends the ability to combine two iterators
         // to the abiliy of combining a set of iterators
         if (iterators == null) return null;

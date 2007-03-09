@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     // this is a set of kelondroFlex tables
     // the set is divided into FlexTables with different entry date
     
-    private HashMap tables;
+    private HashMap tables; // a map from a date string to a kelondroIndex object
     private kelondroRow rowdef;
     private File path;
     private String tablename;
@@ -270,47 +271,14 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     }
     
     public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
-        return new rowIter();
+        HashSet set = new HashSet();
+        Iterator i = tables.values().iterator();
+        while (i.hasNext()) {
+            set.add(((kelondroIndex) i.next()).rows(up, firstKey));
+        }
+        return kelondroMergeIterator.cascade(set, rowdef.objectOrder, kelondroMergeIterator.simpleMerge, up);
     }
 
-    public class rowIter implements kelondroCloneableIterator {
-
-        Iterator t, tt;
-        
-        public rowIter() {
-            t = tables.values().iterator();
-            tt = null;
-        }
-        
-        public Object clone(Object modifier) {
-            return new rowIter();
-        }
-        
-        public boolean hasNext() {
-            return ((t.hasNext()) || ((tt != null) && (tt.hasNext())));
-        }
-
-        public Object next() {
-            if ((tt == null) || (!(tt.hasNext()))) {
-                try {
-                    tt = ((kelondroIndex) t.next()).rows(true, null);
-                } catch (IOException e) {
-                    return null;
-                }
-            }
-            if (tt.hasNext()) {
-                return tt.next();
-            } else {
-                return this.next(); // t is empty, try next table
-            }
-        }
-
-        public void remove() {
-            if (tt != null) tt.remove();
-        }
-        
-    }
-    
     public final int cacheObjectChunkSize() {
         // dummy method
         return -1;
