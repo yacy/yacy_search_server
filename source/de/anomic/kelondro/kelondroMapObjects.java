@@ -333,16 +333,20 @@ public class kelondroMapObjects extends kelondroObjects {
         }
 
         public Object next() {
-            final String nextKey = (String) keyIterator.next();
-            if (nextKey == null) {
-                finish = true;
-                return null;
+            String nextKey;
+            Map map;
+            while (keyIterator.hasNext()) {
+                nextKey = (String) keyIterator.next();
+                if (nextKey == null) {
+                    finish = true;
+                    return null;
+                }
+                map = getMap(nextKey);
+                if (map == null) continue; // circumvention of a modified exception
+                map.put("key", nextKey);
+                return map;
             }
-            final Map map = getMap(nextKey);
-            //assert (map != null) : "nextKey = " + nextKey;
-            if (map == null) throw new kelondroException("no more elements available");
-            map.put("key", nextKey);
-            return map;
+            throw new kelondroException("no more elements available");
         }
 
         public void remove() {
