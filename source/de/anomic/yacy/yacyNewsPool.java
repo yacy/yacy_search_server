@@ -215,10 +215,16 @@ public class yacyNewsPool {
     
     public yacyNewsRecord get(int dbKey, int element) throws IOException {
         yacyNewsQueue queue = switchQueue(dbKey);
-        yacyNewsRecord record;
+        yacyNewsRecord record = null;
+        int s;
         synchronized (queue) {
-            record = queue.top(element);
-            if (record == null) queue.pop(element);
+            while ((record == null) && ((s = queue.size()) > 0)) {
+                record = queue.top(element);
+                if (record == null) {
+                    queue.pop(element);
+                    if (queue.size() == s) break;
+                }
+            }
         }
         return record;
     }
