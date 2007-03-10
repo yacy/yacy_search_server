@@ -676,7 +676,14 @@ public final class plasmaCrawlStacker {
                     this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlNURL.rowdef), true, false);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    System.exit(-1);
+                    // kill DB and try again
+                    kelondroFlexTable.delete(cacheStacksPath, newCacheName);
+                    try {
+                        this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlNURL.rowdef), true, false);
+                    } catch (IOException ee) {
+                        ee.printStackTrace();
+                        System.exit(-1);
+                    }
                 }
             } 
             if (this.dbtype == QUEUE_DB_TYPE_TREE) {
