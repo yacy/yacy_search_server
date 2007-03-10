@@ -674,13 +674,13 @@ public final class plasmaCrawlStacker {
                 cacheStacksPath.mkdirs();
                 try {
                     this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlNURL.rowdef), true, false);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     // kill DB and try again
                     kelondroFlexTable.delete(cacheStacksPath, newCacheName);
                     try {
                         this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlNURL.rowdef), true, false);
-                    } catch (IOException ee) {
+                    } catch (Exception ee) {
                         ee.printStackTrace();
                         System.exit(-1);
                     }
