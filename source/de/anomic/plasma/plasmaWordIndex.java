@@ -53,6 +53,7 @@ import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.net.URL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverMemory;
 import de.anomic.yacy.yacyDHTAction;
 
 public final class plasmaWordIndex implements indexRI {
@@ -139,7 +140,9 @@ public final class plasmaWordIndex implements indexRI {
     public void dhtOutFlushControl() {
         // check for forced flush
         synchronized (this) {
-            if ((dhtOutCache.getMaxWordCount() > wCacheMaxChunk ) || (dhtOutCache.size() > dhtOutCache.getMaxWordCount())) {
+            if ((dhtOutCache.getMaxWordCount() > wCacheMaxChunk ) ||
+                (dhtOutCache.size() > dhtOutCache.getMaxWordCount()) ||
+                (serverMemory.available() < collections.minMem())) {
                 flushCache(dhtOutCache, dhtOutCache.size() + flushsize - dhtOutCache.getMaxWordCount());
             }
         }
@@ -147,7 +150,9 @@ public final class plasmaWordIndex implements indexRI {
     public void dhtInFlushControl() {
         // check for forced flush
         synchronized (this) {
-            if ((dhtInCache.getMaxWordCount() > wCacheMaxChunk ) || (dhtInCache.size() > dhtInCache.getMaxWordCount())) {
+            if ((dhtInCache.getMaxWordCount() > wCacheMaxChunk ) ||
+                (dhtInCache.size() > dhtInCache.getMaxWordCount())||
+                (serverMemory.available() < collections.minMem())) {
                 flushCache(dhtInCache, dhtInCache.size() + flushsize - dhtInCache.getMaxWordCount());
             }
         }
@@ -215,6 +220,7 @@ public final class plasmaWordIndex implements indexRI {
                 c = ram.getContainer(wordHash, null, -1);
                 if ((c != null) && (c.size() > wCacheMaxChunk)) {
                     containerList.add(ram.deleteContainer(wordHash));
+                    if (serverMemory.available() < collections.minMem()) break; // protect memory during flush
                 } else {
                     collectMax = false;
                 }
@@ -222,6 +228,7 @@ public final class plasmaWordIndex implements indexRI {
             count = count - containerList.size();
             for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
                 if (ram.size() == 0) break;
+                if (serverMemory.available() < collections.minMem()) break; // protect memory during flush
                 // select one word to flush
                 wordHash = ram.bestFlushWordHash();
                 
