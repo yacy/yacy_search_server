@@ -45,10 +45,14 @@
 
 package de.anomic.plasma;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 
+import de.anomic.server.serverThread;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
@@ -76,8 +80,35 @@ public class plasmaGrafics {
     private static final String COL_WE_LINE        = "b0f0f0";
     private static final String COL_WE_TEXT        = "f0f0f0";
     
-    private static ymageMatrix  networkPicture = null;
-    private static long         networkPictureDate = 0;
+    private static final Color  COL_BORDER      = new Color(  0,   0,   0);
+    private static final Color  COL_NORMAL_TEXT = new Color(  0,   0,   0);
+    private static final Color  COL_LOAD_BG     = new Color(247, 247, 247);
+    
+    private static final int      CIRCLE_PIECE_COUNT = 6;
+    private static final String[] CIRCLE_PIECE_NAMES = {
+    	"Idle",
+    	"Stacking",
+    	"Parsing/Indexing",
+    	"DHT-Distribution",
+    	"YaCy Core",
+    	"Misc."
+    };
+    private static final Color[]  CIRCLE_PIECE_COLORS = {
+    	new Color(170, 255, 170),
+        new Color(115, 200, 210),
+        new Color(255, 130,  0),
+        new Color(119, 136, 153),
+        new Color(255, 230, 160),
+        new Color(190,  50, 180)
+    };
+    
+    private static final int    LEGEND_BOX_SIZE = 10;
+    
+    private static ymageMatrix   networkPicture = null;
+    private static long          networkPictureDate = 0;
+    
+    private static BufferedImage peerloadPicture = null;
+    private static long          peerloadPictureDate = 0;
 
     public static ymageMatrix getSearchEventPicture() {
         if (plasmaSearchEvent.lastEvent == null) return null;
@@ -256,6 +287,94 @@ public class plasmaGrafics {
                 img.arcArc(x, y, innerradius, angle, dotsize + r, dotsize + r, 0, 360);
             }
         }
+    }
+    
+    public static BufferedImage getPeerLoadPicture(long maxAge, int width, int height, boolean showidle) {
+        if ((peerloadPicture == null) || ((System.currentTimeMillis() - peerloadPictureDate) > maxAge)) {
+            drawPeerLoadPicture(width, height, showidle);
+        }
+        return peerloadPicture;
+    }
+    
+    private static void drawPeerLoadPicture(int width, int height, boolean showidle) {
+    	//prepare image
+    	peerloadPicture = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
+    	Graphics2D g = peerloadPicture.createGraphics();
+    	g.setBackground(COL_LOAD_BG);
+    	g.clearRect(0,0,width,height);    	
+    	
+        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        Iterator threads = sb.threadNames();
+        String threadname;
+        serverThread thread;
+        
+        long busy_time = 0;
+        long[] thread_times = new long[CIRCLE_PIECE_COUNT];
+        
+        //Iterate over threads
+        while (threads.hasNext()) {
+        	threadname = (String)threads.next();
+            thread = sb.getThread(threadname);
+            
+            //count total times
+            busy_time += thread.getBlockTime();
+            busy_time += thread.getExecTime();
+            if(showidle) thread_times[0] += thread.getSleepTime();
+            
+            //count threadgroup-specific times
+        	if(threadname.equals(plasmaSwitchboard.CRAWLSTACK)) {
+        		thread_times[1] += thread.getBlockTime()+thread.getExecTime();
+        	} else if(threadname.equals(plasmaSwitchboard.INDEXER)) {
+            	thread_times[2] = thread.getBlockTime()+thread.getExecTime();
+            } else if(threadname.equals(plasmaSwitchboard.INDEX_DIST)) {
+            	thread_times[3] = thread.getBlockTime()+thread.getExecTime();
+            } else if(threadname.equals(plasmaSwitchboard.PEER_PING)) {
+            	thread_times[4] = thread.getBlockTime()+thread.getExecTime();
+            }  else {
+            	thread_times[5] += thread.getBlockTime()+thread.getExecTime();
+            }
+        }
+        
+        int[] piece_angles = new int[CIRCLE_PIECE_COUNT];
+        //calculate angles
+        for(int i=0;i<CIRCLE_PIECE_COUNT;++i)
+        	piece_angles[i] = (int)Math.round(360f*((float)thread_times[i]/(float)(busy_time+thread_times[0])));
+        
+        int circ_w = Math.min(width,height)-20; //width of the circle (r*2)
+        int circ_x = width-circ_w-10;			//x-coordinate of circle-left
+        int circ_y = 10;						//y-coordinate of circle-top
+        
+        //draw the pieces of the circle
+        int curr_arc = 0;	//remember current angle
+        for(int i=showidle?0:1;i<CIRCLE_PIECE_COUNT;++i) {
+        	g.setColor(CIRCLE_PIECE_COLORS[i]);
+            g.fillArc(circ_x, circ_y, circ_w, circ_w, curr_arc, piece_angles[i]);
+            curr_arc += piece_angles[i];
+        }
+        
+        //FIXME: better method to avoid gaps on rounding-differences?
+        g.fillArc(circ_x, circ_y, circ_w, circ_w, curr_arc, 360-curr_arc);
+        
+        //draw border around the circle
+        g.setColor(COL_BORDER);
+        g.drawArc(circ_x, circ_y, circ_w, circ_w, 0, 360);
+        
+        for(int i=showidle?0:1;i<CIRCLE_PIECE_COUNT;++i)
+        	drawLegendLine(g, 5, height-15*(i+1), CIRCLE_PIECE_NAMES[i], CIRCLE_PIECE_COLORS[i]);
+        
+                
+        peerloadPictureDate = System.currentTimeMillis();
+    }
+    
+    
+    private static void drawLegendLine(Graphics2D g, int x, int y, String caption, Color item_color) {
+    	g.setColor(item_color);
+    	g.fillRect(x, y-LEGEND_BOX_SIZE, LEGEND_BOX_SIZE, LEGEND_BOX_SIZE);
+    	g.setColor(COL_BORDER);
+    	g.drawRect(x, y-LEGEND_BOX_SIZE, LEGEND_BOX_SIZE, LEGEND_BOX_SIZE);
+    	
+    	g.setColor(COL_NORMAL_TEXT);
+    	g.drawChars(caption.toCharArray(), 0, caption.length(), x+LEGEND_BOX_SIZE+5,y);
     }
 
 }
