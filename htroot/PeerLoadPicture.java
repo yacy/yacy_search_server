@@ -1,13 +1,19 @@
+import java.awt.Color;
 import java.awt.Image;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaGrafics;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaGrafics.CircleThreadPiece;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverThread;
 
 public class PeerLoadPicture {
-	
-	public static Image respond(httpHeader header, serverObjects post, serverSwitch env) {
+    
+    public static Image respond(httpHeader header, serverObjects post, serverSwitch env) {
 
         int width = 800;
         int height = 600;
@@ -19,11 +25,59 @@ public class PeerLoadPicture {
             showidle = post.get("showidle", "true").equals("true");
         }
         
-        //too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
-        if (width < 400 ) width = 400;
+        final CircleThreadPiece idle = new CircleThreadPiece("Idle", new Color(170, 255, 170));
+        final CircleThreadPiece misc = new CircleThreadPiece("Misc.", new Color(190,  50, 180));
+        final HashMap /* <String,CircleThreadPiece> */ pieces = new HashMap();
+        pieces.put(null, idle);
+        pieces.put(plasmaSwitchboard.CRAWLSTACK, new CircleThreadPiece("Stacking",         new Color(115, 200, 210)));
+        pieces.put(plasmaSwitchboard.INDEXER,    new CircleThreadPiece("Parsing/Indexing", new Color(255, 130,   0)));
+        pieces.put(plasmaSwitchboard.INDEX_DIST, new CircleThreadPiece("DHT-Distribution", new Color(119, 136, 153)));
+        pieces.put(plasmaSwitchboard.PEER_PING,  new CircleThreadPiece("YaCy Core",        new Color(255, 230, 160)));
+        
+        Iterator threads = env.threadNames();
+        String threadname;
+        serverThread thread;
+        
+        long busy_time = 0;
+        
+        //Iterate over threads
+        while (threads.hasNext()) {
+            threadname = (String)threads.next();
+            thread = env.getThread(threadname);
+            
+            //count total times
+            busy_time += thread.getBlockTime();
+            busy_time += thread.getExecTime();
+            if (showidle) idle.addExecTime(thread.getSleepTime());
+            
+            //count threadgroup-specific times
+            CircleThreadPiece piece = (CircleThreadPiece)pieces.get(threadname);
+            if (piece == null) {
+                misc.addExecTime(thread.getBlockTime()+thread.getExecTime());
+            } else {
+                piece.addExecTime(thread.getBlockTime()+thread.getExecTime());
+            }
+        }
+        busy_time += idle.getExecTime();
+        
+        // set respective angles
+        Iterator it = pieces.values().iterator();
+        while (it.hasNext()) {
+            ((CircleThreadPiece)it.next()).setAngle(busy_time);
+        }
+        
+        // too small values lead to an error, too big to huge CPU/memory consumption,
+        // resulting in possible DOS.
+        if (width < 400) width = 400;
         if (width > 1920) width = 1920;
         if (height < 300) height = 300;
         if (height > 1440) height = 1440;
-        return plasmaGrafics.getPeerLoadPicture(5000, width, height, showidle);
+        return plasmaGrafics.getPeerLoadPicture(
+                5000,
+                width,
+                height,
+                (CircleThreadPiece[])pieces.values().toArray(new CircleThreadPiece[pieces.size()]),
+                misc
+        );
     }
 }

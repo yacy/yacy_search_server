@@ -47,12 +47,12 @@ package de.anomic.plasma;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-import de.anomic.server.serverThread;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
@@ -84,23 +84,32 @@ public class plasmaGrafics {
     private static final Color  COL_NORMAL_TEXT = new Color(  0,   0,   0);
     private static final Color  COL_LOAD_BG     = new Color(247, 247, 247);
     
-    private static final int      CIRCLE_PIECE_COUNT = 6;
-    private static final String[] CIRCLE_PIECE_NAMES = {
-    	"Idle",
-    	"Stacking",
-    	"Parsing/Indexing",
-    	"DHT-Distribution",
-    	"YaCy Core",
-    	"Misc."
-    };
-    private static final Color[]  CIRCLE_PIECE_COLORS = {
-    	new Color(170, 255, 170),
-        new Color(115, 200, 210),
-        new Color(255, 130,  0),
-        new Color(119, 136, 153),
-        new Color(255, 230, 160),
-        new Color(190,  50, 180)
-    };
+    public static class CircleThreadPiece {
+        private final String pieceName;
+        private final Color color;
+        private long execTime = 0;
+        private int angle = 0;
+        
+        public CircleThreadPiece(String pieceName, Color color) {
+            this.pieceName = pieceName;
+            this.color = color;
+        }
+        
+        public int getAngle() { return this.angle; }
+        public Color getColor() { return this.color; }
+        public long getExecTime() { return this.execTime; }
+        public String getPieceName() { return this.pieceName; }
+        
+        public void addExecTime(long execTime) { this.execTime += execTime; }
+        public void reset() {
+            this.execTime = 0;
+            this.angle = 0;
+        }
+        public void setExecTime(long execTime) { this.execTime = execTime; }
+        public void setAngle(long totalBusyTime) {
+            this.angle = (int)Math.round(360f * ((float)this.execTime / (float)totalBusyTime));
+        }
+    }
     
     private static final int    LEGEND_BOX_SIZE = 10;
     
@@ -289,83 +298,49 @@ public class plasmaGrafics {
         }
     }
     
-    public static BufferedImage getPeerLoadPicture(long maxAge, int width, int height, boolean showidle) {
+    public static BufferedImage getPeerLoadPicture(long maxAge, int width, int height, CircleThreadPiece[] pieces, CircleThreadPiece fillRest) {
         if ((peerloadPicture == null) || ((System.currentTimeMillis() - peerloadPictureDate) > maxAge)) {
-            drawPeerLoadPicture(width, height, showidle);
+            drawPeerLoadPicture(width, height, pieces, fillRest);
         }
         return peerloadPicture;
     }
     
-    private static void drawPeerLoadPicture(int width, int height, boolean showidle) {
+    private static void drawPeerLoadPicture(int width, int height, CircleThreadPiece[] pieces, CircleThreadPiece fillRest) {
     	//prepare image
     	peerloadPicture = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
-    	Graphics2D g = peerloadPicture.createGraphics();
-    	g.setBackground(COL_LOAD_BG);
-    	g.clearRect(0,0,width,height);    	
-    	
-        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-        Iterator threads = sb.threadNames();
-        String threadname;
-        serverThread thread;
-        
-        long busy_time = 0;
-        long[] thread_times = new long[CIRCLE_PIECE_COUNT];
-        
-        //Iterate over threads
-        while (threads.hasNext()) {
-        	threadname = (String)threads.next();
-            thread = sb.getThread(threadname);
-            
-            //count total times
-            busy_time += thread.getBlockTime();
-            busy_time += thread.getExecTime();
-            if(showidle) thread_times[0] += thread.getSleepTime();
-            
-            //count threadgroup-specific times
-        	if(threadname.equals(plasmaSwitchboard.CRAWLSTACK)) {
-        		thread_times[1] += thread.getBlockTime()+thread.getExecTime();
-        	} else if(threadname.equals(plasmaSwitchboard.INDEXER)) {
-            	thread_times[2] = thread.getBlockTime()+thread.getExecTime();
-            } else if(threadname.equals(plasmaSwitchboard.INDEX_DIST)) {
-            	thread_times[3] = thread.getBlockTime()+thread.getExecTime();
-            } else if(threadname.equals(plasmaSwitchboard.PEER_PING)) {
-            	thread_times[4] = thread.getBlockTime()+thread.getExecTime();
-            }  else {
-            	thread_times[5] += thread.getBlockTime()+thread.getExecTime();
-            }
-        }
-        
-        int[] piece_angles = new int[CIRCLE_PIECE_COUNT];
-        //calculate angles
-        for(int i=0;i<CIRCLE_PIECE_COUNT;++i)
-        	piece_angles[i] = (int)Math.round(360f*((float)thread_times[i]/(float)(busy_time+thread_times[0])));
+        Graphics2D g = peerloadPicture.createGraphics();
+        g.setBackground(COL_LOAD_BG);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.clearRect(0,0,width,height);
         
         int circ_w = Math.min(width,height)-20; //width of the circle (r*2)
-        int circ_x = width-circ_w-10;			//x-coordinate of circle-left
-        int circ_y = 10;						//y-coordinate of circle-top
+        int circ_x = width-circ_w-10;           //x-coordinate of circle-left
+        int circ_y = 10;                        //y-coordinate of circle-top
+        int curr_arc = 0;                       //remember current angle
         
-        //draw the pieces of the circle
-        int curr_arc = 0;	//remember current angle
-        for(int i=showidle?0:1;i<CIRCLE_PIECE_COUNT;++i) {
-        	g.setColor(CIRCLE_PIECE_COLORS[i]);
-            g.fillArc(circ_x, circ_y, circ_w, circ_w, curr_arc, piece_angles[i]);
-            curr_arc += piece_angles[i];
+        int i;
+        for (i=0; i<pieces.length; i++) {
+            // draw the piece
+            g.setColor(pieces[i].getColor());
+            g.fillArc(circ_x, circ_y, circ_w, circ_w, curr_arc, pieces[i].getAngle());
+            curr_arc += pieces[i].getAngle();
+            
+            // draw it's legend line
+            drawLegendLine(g, 5, height - 5 - 15 * i, pieces[i].getPieceName(), pieces[i].getColor());
         }
         
+        // fill the rest
+        g.setColor(fillRest.getColor());
         //FIXME: better method to avoid gaps on rounding-differences?
-        g.fillArc(circ_x, circ_y, circ_w, circ_w, curr_arc, 360-curr_arc);
+        g.fillArc(circ_x, circ_y, circ_w, circ_w, curr_arc, 360 - curr_arc);
+        drawLegendLine(g, 5, height - 5 - 15 * i, fillRest.getPieceName(), fillRest.getColor());
         
         //draw border around the circle
         g.setColor(COL_BORDER);
         g.drawArc(circ_x, circ_y, circ_w, circ_w, 0, 360);
         
-        for(int i=showidle?0:1;i<CIRCLE_PIECE_COUNT;++i)
-        	drawLegendLine(g, 5, height-15*(i+1), CIRCLE_PIECE_NAMES[i], CIRCLE_PIECE_COLORS[i]);
-        
-                
         peerloadPictureDate = System.currentTimeMillis();
     }
-    
     
     private static void drawLegendLine(Graphics2D g, int x, int y, String caption, Color item_color) {
     	g.setColor(item_color);
