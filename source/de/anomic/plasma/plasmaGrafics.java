@@ -88,14 +88,15 @@ public class plasmaGrafics {
         private final String pieceName;
         private final Color color;
         private long execTime = 0;
-        private int angle = 0;
+        private float fraction = 0;
         
         public CircleThreadPiece(String pieceName, Color color) {
             this.pieceName = pieceName;
             this.color = color;
         }
         
-        public int getAngle() { return this.angle; }
+        public int getAngle() { return (int)Math.round(360f*this.fraction); }
+        public int getFractionPercent() { return (int)Math.round(100f*this.fraction); }
         public Color getColor() { return this.color; }
         public long getExecTime() { return this.execTime; }
         public String getPieceName() { return this.pieceName; }
@@ -103,11 +104,11 @@ public class plasmaGrafics {
         public void addExecTime(long execTime) { this.execTime += execTime; }
         public void reset() {
             this.execTime = 0;
-            this.angle = 0;
+            this.fraction = 0;
         }
         public void setExecTime(long execTime) { this.execTime = execTime; }
-        public void setAngle(long totalBusyTime) {
-            this.angle = (int)Math.round(360f * ((float)this.execTime / (float)totalBusyTime));
+        public void setFraction(long totalBusyTime) {
+            this.fraction = (float)this.execTime / (float)totalBusyTime;
         }
     }
     
@@ -316,24 +317,24 @@ public class plasmaGrafics {
         int circ_w = Math.min(width,height)-20; //width of the circle (r*2)
         int circ_x = width-circ_w-10;           //x-coordinate of circle-left
         int circ_y = 10;                        //y-coordinate of circle-top
-        int curr_arc = 0;                       //remember current angle
+        int curr_angle = 0;                       //remember current angle
         
         int i;
         for (i=0; i<pieces.length; i++) {
             // draw the piece
             g.setColor(pieces[i].getColor());
-            g.fillArc(circ_x, circ_y, circ_w, circ_w, curr_arc, pieces[i].getAngle());
-            curr_arc += pieces[i].getAngle();
+            g.fillArc(circ_x, circ_y, circ_w, circ_w, curr_angle, pieces[i].getAngle());
+            curr_angle += pieces[i].getAngle();
             
             // draw it's legend line
-            drawLegendLine(g, 5, height - 5 - 15 * i, pieces[i].getPieceName(), pieces[i].getColor());
+            drawLegendLine(g, 5, height - 5 - 15 * i, pieces[i].getPieceName()+" ("+pieces[i].getFractionPercent()+" %)", pieces[i].getColor());
         }
         
         // fill the rest
         g.setColor(fillRest.getColor());
         //FIXME: better method to avoid gaps on rounding-differences?
-        g.fillArc(circ_x, circ_y, circ_w, circ_w, curr_arc, 360 - curr_arc);
-        drawLegendLine(g, 5, height - 5 - 15 * i, fillRest.getPieceName(), fillRest.getColor());
+        g.fillArc(circ_x, circ_y, circ_w, circ_w, curr_angle, 360 - curr_angle);
+        drawLegendLine(g, 5, height - 5 - 15 * i, fillRest.getPieceName()+" ("+fillRest.getFractionPercent()+" %)", fillRest.getColor());
         
         //draw border around the circle
         g.setColor(COL_BORDER);

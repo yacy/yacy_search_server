@@ -62,9 +62,14 @@ public class PeerLoadPicture {
         
         // set respective angles
         Iterator it = pieces.values().iterator();
+        CircleThreadPiece current;
         while (it.hasNext()) {
-            ((CircleThreadPiece)it.next()).setAngle(busy_time);
+            current = (CircleThreadPiece)it.next();
+            current.setFraction(busy_time);
+            //remove unneccessary elements
+            if(current.getAngle() == 0) it.remove();
         }
+        misc.setFraction(busy_time);
         
         // too small values lead to an error, too big to huge CPU/memory consumption,
         // resulting in possible DOS.

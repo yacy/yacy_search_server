@@ -11,15 +11,15 @@ public class ParseVersion extends TestCase {
         assertEquals("dev/00000",       yacy.combined2prettyVersion(""));                 // not a number
         assertEquals("dev/00000",       yacy.combined2prettyVersion(" "));                // not a number
         assertEquals("dev/02417",       yacy.combined2prettyVersion("0.10002417"));
-        assertEquals("dev/02440",       yacy.combined2prettyVersion("0.10002440"));
+        assertEquals("dev/02440",       yacy.combined2prettyVersion("0.1000244"));
         assertEquals("dev/02417",       yacy.combined2prettyVersion("0.10002417"));
         assertEquals("dev/00000",       yacy.combined2prettyVersion("0.100024400"));      // input is too long
-        assertEquals("dev/02440",       yacy.combined2prettyVersion("0.10902440"));
-        assertEquals("0.110/02440",     yacy.combined2prettyVersion("0.11002440"));
-        assertEquals("0.111/02440",     yacy.combined2prettyVersion("0.11102440"));    
-        assertEquals("dev/00000",       yacy.combined2prettyVersion("0.00000000"));       // input is valid - no warning generated
+        assertEquals("dev/02440",       yacy.combined2prettyVersion("0.1090244"));
+        assertEquals("0.110/02440",     yacy.combined2prettyVersion("0.1100244"));
+        assertEquals("0.111/02440",     yacy.combined2prettyVersion("0.1110244"));    
+        assertEquals("dev/00000",       yacy.combined2prettyVersion("0.0"));       // input is valid - no warning generated
         assertEquals("dev/00000",       yacy.combined2prettyVersion("    0.11102440"));   // spaces are not allowed
-        assertEquals("dev/00000",       yacy.combined2prettyVersion("0.111244"));         // input is too short
+        assertEquals("dev/00000",       yacy.combined2prettyVersion("0.111"));         // input is too short
         assertEquals("dev/00000",       yacy.combined2prettyVersion("0.1112440\t\n"));    // \t and \n are not allowed
         assertEquals("dev/00000",       yacy.combined2prettyVersion("124353432xxxx4546399999"));  // not a number + too long 
         assertEquals("dev/00000",       yacy.combined2prettyVersion("123456789x"));       // not a number
