@@ -101,14 +101,16 @@ public abstract class serverAbstractThread extends Thread implements serverThrea
         startup = milliseconds;
     }
     
-    public final void setIdleSleep(long milliseconds) {
+    public final long setIdleSleep(long milliseconds) {
         // sets a sleep time for pauses between two jobs
         idlePause = milliseconds;
+        return milliseconds;
     }
     
-    public final void setBusySleep(long milliseconds) {
+    public final long setBusySleep(long milliseconds) {
         // sets a sleep time for pauses between two jobs
         busyPause = milliseconds;
+        return milliseconds;
     }
     
     public void setMemPreReqisite(long freeBytes) {

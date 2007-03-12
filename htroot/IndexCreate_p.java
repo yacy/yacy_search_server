@@ -144,13 +144,21 @@ public class IndexCreate_p {
         prop.put("indexingTextChecked", env.getConfig("indexText", "").equals("true") ? 1 : 0);
         prop.put("indexingMediaChecked", env.getConfig("indexMedia", "").equals("true") ? 1 : 0);
         prop.put("crawlOrderChecked", env.getConfig("crawlOrder", "").equals("true") ? 1 : 0);
-        long busySleep = Integer.parseInt(env.getConfig("62_remotetriggeredcrawl_busysleep", "100"));
-        if (busySleep < 100) {
-            busySleep = 100;
-            env.setConfig("62_remotetriggeredcrawl_busysleep", Long.toString(busySleep));
+        
+        long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        int LCppm = (int) (60000L / LCbusySleep);
+        prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? 1 : 0);
+        prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? 1 : 0);
+        prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? 1 : 0);
+        prop.put("customPPMdefault", ((LCppm > 10) && (LCppm < 1000)) ? Integer.toString(LCppm) : "");
+
+        long RTCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100"));
+        if (RTCbusySleep < 100) {
+            RTCbusySleep = 100;
+            env.setConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(RTCbusySleep));
         }
         if (env.getConfig("crawlResponse", "").equals("true")) {
-            if (busySleep <= 100) {
+            if (RTCbusySleep <= 100) {
                 prop.put("acceptCrawlMaxChecked", 1);
                 prop.put("acceptCrawlLimitedChecked", 0);
                 prop.put("acceptCrawlDeniedChecked", 0);
@@ -164,9 +172,10 @@ public class IndexCreate_p {
             prop.put("acceptCrawlLimitedChecked", 0);
             prop.put("acceptCrawlDeniedChecked", 1);
         }
-        int ppm = (int) (60000L / busySleep);
-        if (ppm > 60) ppm = 60;
-        prop.put("PPM", ppm);
+        int RTCppm = (int) (60000L / RTCbusySleep);
+        if (RTCppm > 60) RTCppm = 60;
+        prop.put("PPM", RTCppm);
+        
         prop.put("xsstopwChecked", env.getConfig("xsstopw", "").equals("true") ? 1 : 0);
         prop.put("xdstopwChecked", env.getConfig("xdstopw", "").equals("true") ? 1 : 0);
         prop.put("xpstopwChecked", env.getConfig("xpstopw", "").equals("true") ? 1 : 0);

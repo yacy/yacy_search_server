@@ -309,6 +309,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String PEER_PING_METHOD_START       = "peerPing";
     public static final String PEER_PING_METHOD_JOBCOUNT    = null;
     public static final String PEER_PING_METHOD_FREEMEM     = null;
+    public static final String PEER_PING_IDLESLEEP          = "30_peerping_idlesleep";
+    public static final String PEER_PING_BUSYSLEEP          = "30_peerping_busysleep";
     
     // 40_peerseedcycle
     /**
@@ -319,6 +321,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String SEED_UPLOAD_METHOD_START     = "publishSeedList";
     public static final String SEED_UPLOAD_METHOD_JOBCOUNT  = null;
     public static final String SEED_UPLOAD_METHOD_FREEMEM   = null;
+    public static final String SEED_UPLOAD_IDLESLEEP        = "40_peerseedcycle_idlesleep";
+    public static final String SEED_UPLOAD_BUSYSLEEP        = "40_peerseedcycle_busysleep";
     
     // 50_localcrawl
     /**
@@ -332,6 +336,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_START                = "coreCrawlJob";
     public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT             = "coreCrawlJobSize";
     public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM              = null;
+    public static final String CRAWLJOB_LOCAL_CRAWL_IDLESLEEP                   = "50_localcrawl_idlesleep";
+    public static final String CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP                   = "50_localcrawl_busysleep";
     
     // 61_globalcawltrigger
     /**
@@ -345,6 +351,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_START       = "limitCrawlTriggerJob";
     public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_JOBCOUNT    = "limitCrawlTriggerJobSize";
     public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_FREEMEM     = null;
+    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_IDLESLEEP          = "61_globalcrawltrigger_idlesleep";
+    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_BUSYSLEEP          = "61_globalcrawltrigger_busysleep";
     
     // 62_remotetriggeredcrawl
     /**
@@ -355,6 +363,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START     = "remoteTriggeredCrawlJob";
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT  = "remoteTriggeredCrawlJobSize";
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM   = null;
+    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP        = "62_remotetriggeredcrawl_idlesleep";
+    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP        = "62_remotetriggeredcrawl_busysleep";
     
     // 70_cachemanager
     /**
@@ -368,6 +378,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String PROXY_CACHE_ENQUEUE_METHOD_START     = "htEntryStoreJob";
     public static final String PROXY_CACHE_ENQUEUE_METHOD_JOBCOUNT  = "htEntrySize";
     public static final String PROXY_CACHE_ENQUEUE_METHOD_FREEMEM   = null;
+    public static final String PROXY_CACHE_ENQUEUE_IDLESLEEP        = "70_cachemanager_idlesleep";
+    public static final String PROXY_CACHE_ENQUEUE_BUSYSLEEP        = "70_cachemanager_busysleep";
     
     // 80_indexing
     /**
@@ -393,6 +405,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String CRAWLSTACK_METHOD_START      = "job";
     public static final String CRAWLSTACK_METHOD_JOBCOUNT   = "size";
     public static final String CRAWLSTACK_METHOD_FREEMEM    = null;
+    public static final String CRAWLSTACK_IDLESLEEP         = "82_crawlstack_idlesleep";
+    public static final String CRAWLSTACK_BUSYSLEEP         = "82_crawlstack_busysleep";
     
     // 90_cleanup
     /**
@@ -403,6 +417,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String CLEANUP_METHOD_START         = "cleanupJob";
     public static final String CLEANUP_METHOD_JOBCOUNT      = "cleanupJobSize";
     public static final String CLEANUP_METHOD_FREEMEM       = null;
+    public static final String CLEANUP_IDLESLEEP            = "90_cleanup_idlesleep";
+    public static final String CLEANUP_BUSYSLEEP            = "90_cleanup_busysleep";
     
     //////////////////////////////////////////////////////////////////////////////////////////////
     // RAM Cache settings
@@ -2926,21 +2942,38 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // 1000 <= wantedPPM        : maximum performance
         if (wantedPPM <= 10) wantedPPM = 10;
         if (wantedPPM >= 1000) wantedPPM = 1000;
-        int newBusySleep = 60000 / wantedPPM;
+        int newBusySleep = 60000 / wantedPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
+
+        serverThread thread;
         
-        serverThread CRAWLSTACK_thread = getThread(CRAWLSTACK);
-        serverThread INDEXER_thread = getThread(INDEXER);
-        serverThread PROXY_CACHE_ENQUEUE_thread = getThread(PROXY_CACHE_ENQUEUE);
-        serverThread CRAWLJOB_REMOTE_TRIGGERED_CRAWL_thread = getThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-        serverThread CRAWLJOB_GLOBAL_CRAWL_TRIGGER_thread = getThread(CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
-        serverThread CRAWLJOB_LOCAL_CRAWL_thread = getThread(CRAWLJOB_LOCAL_CRAWL);
-        serverThread INDEX_DIST_thread = getThread(INDEX_DIST);
+        thread = getThread(INDEX_DIST);
+        setConfig(INDEX_DIST_BUSYSLEEP , thread.setBusySleep(Math.max(2000, thread.setBusySleep(newBusySleep * 2))));
+        thread.setIdleSleep(30000);
         
+        thread = getThread(CRAWLJOB_LOCAL_CRAWL);
+        setConfig(CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep));
+        thread.setIdleSleep(1000);
         
-        CRAWLJOB_LOCAL_CRAWL_thread.setBusySleep(newBusySleep);
+        thread = getThread(CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+        setConfig(CRAWLJOB_GLOBAL_CRAWL_TRIGGER_BUSYSLEEP , thread.setBusySleep(Math.max(1000, newBusySleep * 3)));
+        thread.setIdleSleep(10000);
         
+        thread = getThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        setConfig(CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep * 10));
+        thread.setIdleSleep(10000);
         
-        setConfig(CRAWLJOB_LOCAL_CRAWL, Long.toString(newBusySleep));
+        thread = getThread(PROXY_CACHE_ENQUEUE);
+        setConfig(PROXY_CACHE_ENQUEUE_BUSYSLEEP , thread.setBusySleep(0));
+        thread.setIdleSleep(1000);
+        
+        thread = getThread(INDEXER);
+        setConfig(INDEXER_BUSYSLEEP , thread.setBusySleep(newBusySleep / 4));
+        thread.setIdleSleep(1000);
+        
+        thread = getThread(CRAWLSTACK);
+        setConfig(CRAWLSTACK_BUSYSLEEP , thread.setBusySleep(0));
+        thread.setIdleSleep(5000);
+        
     }
     
     public void startTransferWholeIndex(yacySeed seed, boolean delete) {

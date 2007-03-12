@@ -59,10 +59,10 @@ public interface serverThread {
     public void setStartupSleep(long milliseconds);
     // sets a sleep time before execution of the job-loop
 
-    public void setIdleSleep(long milliseconds);
+    public long setIdleSleep(long milliseconds);
     // sets a sleep time for pauses between two jobs if the job returns false (idle)
 
-    public void setBusySleep(long milliseconds);
+    public long setBusySleep(long milliseconds);
     // sets a sleep time for pauses between two jobs if the job returns true (busy)
     
     public void setMemPreReqisite(long freeBytes);

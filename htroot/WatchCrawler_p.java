@@ -143,6 +143,8 @@ public class WatchCrawler_p {
                     boolean xpstopw = post.get("xpstopw", "off").equals("on");
                     env.setConfig("xpstopw", (xpstopw) ? "true" : "false");
                     
+                    setPerformance(switchboard, post);
+                    
                     String crawlingMode = post.get("crawlingMode","url");
                     if (crawlingMode.equals("url")) {
                         // getting the crawljob start url
@@ -321,6 +323,10 @@ public class WatchCrawler_p {
                     }
                 }
             }
+            
+            if (post.containsKey("crawlingPerformance")) {
+                setPerformance(switchboard, post);
+            }
         }
         
         // crawl profiles
@@ -371,6 +377,14 @@ public class WatchCrawler_p {
         }
         prop.put("crawlProfiles", count);
         
+        // performance settings
+        long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        int LCppm = (int) (60000L / LCbusySleep);
+        prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? 1 : 0);
+        prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? 1 : 0);
+        prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? 1 : 0);
+        prop.put("customPPMdefault", ((LCppm > 10) && (LCppm < 1000)) ? Integer.toString(LCppm) : "");
+        
         // return rewrite properties
         return prop;
     }
@@ -383,6 +397,17 @@ public class WatchCrawler_p {
         if (crawlingIfOlderUnit.equals("hour")) return recrawlIfOlderNumber * 60;
         if (crawlingIfOlderUnit.equals("minute")) return recrawlIfOlderNumber;
         return -1;
+    }
+    
+    private static void setPerformance(plasmaSwitchboard sb, serverObjects post) {
+        String crawlingPerformance = post.get("crawlingPerformance","custom");
+        int wantedPPM = 1000;
+        try {
+            wantedPPM = Integer.parseInt(post.get("customPPM","1000"));
+        } catch (NumberFormatException e) {}
+        if (crawlingPerformance.equals("minimum")) wantedPPM = 10;
+        if (crawlingPerformance.equals("maximum")) wantedPPM = 1000;
+        sb.setPerformance(wantedPPM);
     }
     
 }

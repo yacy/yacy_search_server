@@ -55,6 +55,20 @@
       </table>
 
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
+        <form action="WatchCrawler_p.html" method="post" enctype="multipart/form-data">
+        <tbody>
+          <tr class="TableHeader"> 
+            <th colspan="3">Speed</th>
+          </tr>
+          <tr class="TableCellLight">
+            <td align="left" #(crawlingSpeedMinChecked)#::class="TableCellDark"#(/crawlingSpeedMinChecked)#><input type="submit" name="crawlingPerformance" value="minimum" /></td>
+            <td align="left" #(crawlingSpeedCustChecked)#::class="TableCellDark"#(/crawlingSpeedCustChecked)#><input name="customPPM" type="text" size="4" maxlength="4" value="#[customPPMdefault]#" />PPM <input type="submit" name="crawlingPerformance" value="custom" /></td>
+            <td align="left" #(crawlingSpeedMaxChecked)#::class="TableCellDark"#(/crawlingSpeedMaxChecked)#><input type="submit" name="crawlingPerformance" value="maximum" /></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
             <th>Database</th>

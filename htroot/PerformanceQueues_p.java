@@ -135,7 +135,8 @@ public class PerformanceQueues_p {
                 idlesleep = post.getLong(threadName + "_idlesleep", 1000);
                 busysleep = post.getLong(threadName + "_busysleep",  100);
                 memprereq = post.getLong(threadName + "_memprereq",    0) * 1024;
-                
+                if (memprereq == 0) memprereq = sb.getConfigLong(threadName + "_memprereq", 0);
+                    
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
                 if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
