@@ -2919,6 +2919,30 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return false;
     }
     
+    public void setPerformance(int wantedPPM) {
+        // we consider 3 cases here
+        //         wantedPPM <=   10: low performance
+        // 10   <  wantedPPM <  1000: custom performance
+        // 1000 <= wantedPPM        : maximum performance
+        if (wantedPPM <= 10) wantedPPM = 10;
+        if (wantedPPM >= 1000) wantedPPM = 1000;
+        int newBusySleep = 60000 / wantedPPM;
+        
+        serverThread CRAWLSTACK_thread = getThread(CRAWLSTACK);
+        serverThread INDEXER_thread = getThread(INDEXER);
+        serverThread PROXY_CACHE_ENQUEUE_thread = getThread(PROXY_CACHE_ENQUEUE);
+        serverThread CRAWLJOB_REMOTE_TRIGGERED_CRAWL_thread = getThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        serverThread CRAWLJOB_GLOBAL_CRAWL_TRIGGER_thread = getThread(CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+        serverThread CRAWLJOB_LOCAL_CRAWL_thread = getThread(CRAWLJOB_LOCAL_CRAWL);
+        serverThread INDEX_DIST_thread = getThread(INDEX_DIST);
+        
+        
+        CRAWLJOB_LOCAL_CRAWL_thread.setBusySleep(newBusySleep);
+        
+        
+        setConfig(CRAWLJOB_LOCAL_CRAWL, Long.toString(newBusySleep));
+    }
+    
     public void startTransferWholeIndex(yacySeed seed, boolean delete) {
         if (transferIdxThread == null) {
             this.transferIdxThread = new plasmaDHTFlush(this.log, this.wordIndex, seed, delete,
