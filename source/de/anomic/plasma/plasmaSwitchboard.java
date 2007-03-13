@@ -2741,7 +2741,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         filename = comp.url().getFile();
                         if ((seed == null) || ((address = seed.getAddress()) == null)) {
                             // seed is not known from here
-                            wordIndex.removeReferences(plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.descr()).getBytes(), "UTF-8").keySet(), urlentry.hash());
+                            wordIndex.removeWordReferences(plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.descr()).getBytes(), "UTF-8").keySet(), urlentry.hash());
                             wordIndex.loadedURL.remove(urlentry.hash()); // clean up
                             continue; // next result
                         }
@@ -2887,7 +2887,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // delete all word references
             int count = 0;
-            if (words != null) count = wordIndex.removeReferences(words, urlhash);
+            if (words != null) count = wordIndex.removeWordReferences(words, urlhash);
             
             // finally delete the url entry itself
             wordIndex.loadedURL.remove(urlhash);

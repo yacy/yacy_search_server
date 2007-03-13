@@ -210,7 +210,7 @@ public class yacysearch {
                 
             // delete the index entry locally
             final String delHash = post.get("deleteref", ""); // urlhash
-            sb.wordIndex.removeReferences(query, delHash);
+            sb.wordIndex.removeWordReferences(query, delHash);
 
             // make new news message with negative voting
             HashMap map = new HashMap();

@@ -62,6 +62,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.net.URL;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.crawler.plasmaCrawlerException;
@@ -109,13 +110,20 @@ public class plasmaSnippetCache {
     }
     
     public class TextSnippet {
+        private URL url;
         private String line;
         private String error;
-        private int source;
-        public TextSnippet(String line, int source, String errortext) {
+        private int errorCode;
+        private Set remaingHashes;
+        public TextSnippet(URL url, String line, int errorCode, Set remaingHashes, String errortext) {
+            this.url = url;
             this.line = line;
-            this.source = source;
+            this.errorCode = errorCode;
             this.error = errortext;
+            this.remaingHashes = remaingHashes;
+        }
+        public URL getUrl() {
+            return this.url;
         }
         public boolean exists() {
             return line != null;
@@ -128,6 +136,12 @@ public class plasmaSnippetCache {
         }
         public String getError() {
             return (error == null) ? "" : error.trim();
+        }
+        public int getErrorCode() {
+            return errorCode;
+        }
+        public Set getRemainingHashes() {
+            return this.remaingHashes;
         }
         public String getLineMarked(Set queryHashes) {
             if (line == null) return "";
@@ -199,9 +213,6 @@ public class plasmaSnippetCache {
             }
             return l.toString().trim();
         }
-        public int getSource() {
-            return source;
-        }
     }
     
     public class MediaSnippet {
@@ -225,7 +236,7 @@ public class plasmaSnippetCache {
         // heise = "0OQUNU3JSs05"
         if (queryhashes.size() == 0) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
-            return new TextSnippet(null, ERROR_NO_HASH_GIVEN, "no query hashes given");
+            return new TextSnippet(url, null, ERROR_NO_HASH_GIVEN, queryhashes, "no query hashes given");
         }
         String urlhash = plasmaURL.urlHash(url);
         
@@ -235,7 +246,7 @@ public class plasmaSnippetCache {
         String line = retrieveFromCache(wordhashes, urlhash);
         if (line != null) {
             //System.out.println("found snippet for URL " + url + " in cache: " + line);
-            return new TextSnippet(line, source, null);
+            return new TextSnippet(url, line, source, null, null);
         }
         
         /* ===========================================================================
@@ -273,15 +284,15 @@ public class plasmaSnippetCache {
                 }
                 
                 // if it is still not available, report an error
-                if (resContent == null) return new TextSnippet(null, ERROR_RESOURCE_LOADING, "error loading resource, plasmaHTCache.Entry cache is NULL");                
+                if (resContent == null) return new TextSnippet(url, null, ERROR_RESOURCE_LOADING, queryhashes, "error loading resource, plasmaHTCache.Entry cache is NULL");                
                 
                 source = SOURCE_WEB;
             } else {
-                return new TextSnippet(null, ERROR_SOURCE_LOADING, "no resource available");
+                return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "no resource available");
             }
         } catch (Exception e) {
             if (!(e instanceof plasmaCrawlerException)) e.printStackTrace();
-            return new TextSnippet(null, ERROR_SOURCE_LOADING, "error loading resource: " + e.getMessage());
+            return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "error loading resource: " + e.getMessage());
         } 
 
         /* ===========================================================================
@@ -291,11 +302,11 @@ public class plasmaSnippetCache {
         try {
              document = parseDocument(url, resContentLength, resContent, resInfo);            
         } catch (ParserException e) {
-            return new TextSnippet(null, ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
+            return new TextSnippet(url, null, ERROR_PARSER_FAILED, queryhashes, e.getMessage()); // cannot be parsed
         } finally {
             try { resContent.close(); } catch (Exception e) {/* ignore this */}
         }
-        if (document == null) return new TextSnippet(null, ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
+        if (document == null) return new TextSnippet(url, null, ERROR_PARSER_FAILED, queryhashes, "parser error/failed"); // cannot be parsed
         
         
         /* ===========================================================================
@@ -305,8 +316,10 @@ public class plasmaSnippetCache {
 
         // compute snippet from text
         final Iterator sentences = document.getSentences(pre);
-        if (sentences == null) return new TextSnippet(null, ERROR_PARSER_NO_LINES, "parser returned no sentences");
-        String textline = computeTextSnippet(sentences, queryhashes, 3 * queryhashes.size(), snippetMaxLength);
+        if (sentences == null) return new TextSnippet(url, null, ERROR_PARSER_NO_LINES, queryhashes, "parser returned no sentences");
+        Object[] tsr = computeTextSnippet(sentences, queryhashes, snippetMaxLength);
+        String textline = (tsr == null) ? null : (String) tsr[0];
+        Set remainingHashes = (tsr == null) ? queryhashes : (Set) tsr[1];
         
         // compute snippet from media
         String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
@@ -322,13 +335,13 @@ public class plasmaSnippetCache {
         //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
         if (textline  != null) line += (line.length() == 0) ? textline  : "<br />" + textline;
         
-        if ((line == null) || (line.length() < 3 /*snippetMinLength*/)) return new TextSnippet(null, ERROR_NO_MATCH, "no matching snippet found");
+        if ((line == null) || (remainingHashes.size() > 0)) return new TextSnippet(url, null, ERROR_NO_MATCH, remainingHashes, "no matching snippet found");
         if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
         storeToCache(wordhashes, urlhash, line);
         document.close();
-        return new TextSnippet(line, source, null);
+        return new TextSnippet(url, line, source, null, null);
     }
 
     /**
@@ -458,34 +471,25 @@ public class plasmaSnippetCache {
         return result.substring(6);
     }
     
-    private String computeTextSnippet(Iterator sentences, Set queryhashes, int minLength, int maxLength) {
+    private Object[] /*{String - the snippet, Set - remaining hashes}*/
+            computeTextSnippet(Iterator sentences, Set queryhashes, int maxLength) {
         try {
             if (sentences == null) return null;
             if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
             Iterator j;
             HashMap hs;
-            String hash;
             StringBuffer sentence;
             TreeMap os = new TreeMap();
             int uniqCounter = 9999;
             int score;
             while (sentences.hasNext()) {
                 sentence = (StringBuffer) sentences.next();
-                //System.out.println("Snippet-Sentence :" + sentence); // DEBUG
-                if (sentence.length() > minLength) {
-                    hs = hashSentence(sentence.toString());
-                    j = queryhashes.iterator();
-                    score = 0;
-                    while (j.hasNext()) {
-                        hash = (String) j.next();
-                        if (hs.containsKey(hash)) {
-                            //System.out.println("hash " + hash + " appears in line " + i);
-                            score++;
-                        }
-                    }
-                    if (score > 0) {
-                        os.put(new Integer(1000000 * score - sentence.length() * 10000 + uniqCounter--), sentence);
-                    }
+                hs = hashSentence(sentence.toString());
+                j = queryhashes.iterator();
+                score = 0;
+                while (j.hasNext()) {if (hs.containsKey((String) j.next())) score++;}
+                if (score > 0) {
+                    os.put(new Integer(1000000 * score - sentence.length() * 10000 + uniqCounter--), sentence);
                 }
             }
             
@@ -493,21 +497,24 @@ public class plasmaSnippetCache {
             Set remaininghashes;
             while (os.size() > 0) {
                 sentence = (StringBuffer) os.remove((Integer) os.lastKey()); // sentence with the biggest score
-                result = computeTextSnippet(sentence.toString(), queryhashes, minLength, maxLength);
+                Object[] tsr = computeTextSnippet(sentence.toString(), queryhashes, maxLength);
+                if (tsr == null) continue;
+                result = (String) tsr[0];
                 if ((result != null) && (result.length() > 0)) {
-                    remaininghashes = removeAppearanceHashes(result, queryhashes);
+                    remaininghashes = (Set) tsr[1];
                     if (remaininghashes.size() == 0) {
                         // we have found the snippet
-                        return result;
+                        return new Object[]{result, remaininghashes};
                     } else if (remaininghashes.size() < queryhashes.size()) {
                         // the result has not all words in it.
                         // find another sentence that represents the missing other words
                         // and find recursively more sentences
                         maxLength = maxLength - result.length();
                         if (maxLength < 20) maxLength = 20;
-                        String nextSnippet = computeTextSnippet(os.values().iterator(), remaininghashes, minLength / 2, maxLength);
-                        if ((nextSnippet == null) || (nextSnippet.length() < (minLength / 2))) return null; // no success
-                        return result + (" / " + nextSnippet);
+                        tsr = computeTextSnippet(os.values().iterator(), remaininghashes, maxLength);
+                        String nextSnippet = (String) tsr[0];
+                        if (nextSnippet == null) return tsr;
+                        return new Object[]{result + (" / " + nextSnippet), tsr[1]};
                     } else {
                         // error
                         //assert remaininghashes.size() < queryhashes.size() : "remaininghashes.size() = " + remaininghashes.size() + ", queryhashes.size() = " + queryhashes.size() + ", sentence = '" + sentence + "', result = '" + result + "'";
@@ -518,11 +525,12 @@ public class plasmaSnippetCache {
             return null;
         } catch (IndexOutOfBoundsException e) {
             log.logSevere("computeSnippet: error with string generation", e);
-            return "";
+            return new Object[]{null, queryhashes};
         }
     }
     
-    private String computeTextSnippet(String sentence, Set queryhashes, int minLength, int maxLength) {
+    private Object[] /*{String - the snippet, Set - remaining hashes}*/
+            computeTextSnippet(String sentence, Set queryhashes, int maxLength) {
         try {
             if (sentence == null) return null;
             if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
@@ -535,10 +543,13 @@ public class plasmaSnippetCache {
             j = queryhashes.iterator();
             Integer pos;
             int p, minpos = sentence.length(), maxpos = -1;
+            HashSet remainingHashes = new HashSet();
             while (j.hasNext()) {
                 hash = (String) j.next();
                 pos = (Integer) hs.get(hash);
-                if (pos != null) {
+                if (pos == null) {
+                    remainingHashes.add(hash);
+                } else {
                     p = pos.intValue();
                     if (p > maxpos) maxpos = p;
                     if (p < minpos) minpos = p;
@@ -579,7 +590,7 @@ public class plasmaSnippetCache {
                 // trim sentence, 3rd step (cut in the middle)
                 sentence = sentence.substring(6, 20).trim() + " [..] " + sentence.substring(sentence.length() - 26, sentence.length() - 6).trim();
             }
-            return sentence;
+            return new Object[] {sentence, remainingHashes};
         } catch (IndexOutOfBoundsException e) {
             log.logSevere("computeSnippet: error with string generation", e);
             return null;
@@ -838,46 +849,24 @@ public class plasmaSnippetCache {
         
         return result;
     }
-    /*
-    public void fetch(plasmaSearchResult acc, Set queryhashes, String urlmask, int fetchcount, long maxTime) {
-        // fetch snippets
-        int i = 0;
-        indexURLEntry urlentry;
-        String urlstring;
-        long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
-        while ((acc.hasMoreElements()) && (i < fetchcount) && (System.currentTimeMillis() < limitTime)) {
-            urlentry = acc.nextElement();
-            indexURLEntry.Components comp = urlentry.comp();
-            if (comp.url().getHost().endsWith(".yacyh")) continue;
-            urlstring = comp.url().toNormalform();
-            if ((urlstring.matches(urlmask)) &&
-                (!(existsInCache(comp.url(), queryhashes)))) {
-                new Fetcher(comp.url(), queryhashes, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), (int) maxTime).start();
-                i++;
-            }
+    
+    public String failConsequences(TextSnippet snippet, Set queryhashes) {
+        // problems with snippet fetch
+        String urlHash = plasmaURL.urlHash(snippet.getUrl());
+        String querystring = kelondroMSetTools.setToString(snippet.getRemainingHashes(), ' ');
+        if ((snippet.getErrorCode() == ERROR_SOURCE_LOADING) ||
+            (snippet.getErrorCode() == ERROR_RESOURCE_LOADING) ||
+            (snippet.getErrorCode() == ERROR_PARSER_FAILED) ||
+            (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
+            log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform() + ", cause: " + snippet.getError());
+            sb.wordIndex.loadedURL.remove(urlHash);
+            sb.wordIndex.removeHashReferences(queryhashes, urlHash);
         }
+        if (snippet.getErrorCode() == ERROR_NO_MATCH) {
+            log.logInfo("error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform() + ", cause: " + snippet.getError());
+            sb.wordIndex.removeHashReferences(snippet.remaingHashes, urlHash);
+        }
+        return snippet.getError();
     }
-        
-    public class Fetcher extends Thread {
-        URL url;
-        Set queryhashes;
-        int timeout;
-        boolean pre;
-        public Fetcher(URL url, Set queryhashes, boolean pre, int timeout) {
-            if (url.getHost().endsWith(".yacyh")) return;
-            this.url = url;
-            this.queryhashes = queryhashes;
-            this.timeout = timeout;
-            this.pre = pre;
-        }
-        public void run() {
-            log.logFine("snippetFetcher: try to get URL " + url);
-            plasmaSnippetCache.TextSnippet snippet = retrieveTextSnippet(url, queryhashes, true, pre, 260, timeout);
-            if (snippet.line == null)
-                log.logFine("snippetFetcher: cannot get URL " + url + ". error(" + snippet.source + "): " + snippet.error);
-            else
-                log.logFine("snippetFetcher: got URL " + url + ", the snippet is '" + snippet.line + "', source=" + snippet.source);
-        }
-    }
-    */
+    
 }

@@ -423,6 +423,16 @@ public class kelondroMSetTools {
         return list;
     }
     
+    public static String setToString(Set set, char separator) {
+        Iterator i = set.iterator();
+        StringBuffer sb = new StringBuffer(set.size() * 7);
+        if (i.hasNext()) sb.append(i.next().toString());
+        while (i.hasNext()) {
+            sb.append(separator).append(i.next().toString());
+        }
+        return new String(sb);
+    }
+    
     // ------------------------------------------------------------------------------------------------
 
     

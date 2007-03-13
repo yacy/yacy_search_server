@@ -426,16 +426,26 @@ public final class plasmaWordIndex implements indexRI {
         return removed;
     }
     
-    public int removeReferences(Set words, String urlhash) {
+    public int removeWordReferences(Set words, String urlhash) {
         // sequentially delete all word references
         // returns number of deletions
         Iterator iter = words.iterator();
-        String word;
         int count = 0;
         while (iter.hasNext()) {
-            word = (String) iter.next();
             // delete the URL reference in this word index
-            if (removeEntry(plasmaCondenser.word2hash(word), urlhash)) count++;
+            if (removeEntry(plasmaCondenser.word2hash((String) iter.next()), urlhash)) count++;
+        }
+        return count;
+    }
+    
+    public int removeHashReferences(Set hashes, String urlhash) {
+        // sequentially delete all word references
+        // returns number of deletions
+        Iterator iter = hashes.iterator();
+        int count = 0;
+        while (iter.hasNext()) {
+            // delete the URL reference in this word index
+            if (removeEntry((String) iter.next(), urlhash)) count++;
         }
         return count;
     }

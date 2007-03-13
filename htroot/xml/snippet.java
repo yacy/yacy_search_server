@@ -15,7 +15,6 @@ import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 
 public class snippet {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws MalformedURLException {
@@ -54,23 +53,20 @@ public class snippet {
         final TreeSet filtered = kelondroMSetTools.joinConstructive(query, plasmaSwitchboard.stopwords);
         if (filtered.size() > 0) {
             kelondroMSetTools.excludeDestructive(query, plasmaSwitchboard.stopwords);
-        }        
+        }
         
         // find snippet
         if (media.equals("text")) {
             // attach text snippet
             plasmaSnippetCache.TextSnippet snippet = switchboard.snippetCache.retrieveTextSnippet(url, queryHashes, true, pre, 260, textsnippet_timeout);
-            prop.put("status",snippet.getSource());
-            if (snippet.getSource() < 11) {
+            prop.put("status",snippet.getErrorCode());
+            if (snippet.getErrorCode() < 11) {
+                // no problems occurred
                 //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
                 prop.putASIS("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown"); //FIXME: the ASIS should not be needed, but we have still htmlcode in .java files
             } else {
-                String error = snippet.getError();
-                if ((remove) && (error.equals("no matching snippet found"))) {
-                    serverLog.logInfo("snippet-fetch", "no snippet found, remove words '" + querystring + "' for url = " + url.toNormalform());
-                    switchboard.wordIndex.removeReferences(query, plasmaURL.urlHash(url));
-                }
-                prop.put("text", error);
+                // problems with snippet fetch
+               prop.put("text", (remove) ? switchboard.snippetCache.failConsequences(snippet, query) : snippet.getError());
             }
             prop.put("link", 0);
             prop.put("links", 0);

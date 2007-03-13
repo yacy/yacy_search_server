@@ -178,19 +178,6 @@ public final class plasmaSearchQuery {
     		return result.toString();
     }
     
-    /*
-    public String hashes(String separator) {
-		StringBuffer result = new StringBuffer(8 * queryHashes.size());
-		Iterator i = queryHashes.iterator();
-		if (i.hasNext()) result.append((String) i.next());
-		while (i.hasNext()) {
-			result.append(separator);
-			result.append((String) i.next());
-		}
-		return result.toString();
-    }
-   */
-    
     public void filterOut(Set blueList) {
         // filter out words that appear in this set
         Iterator it = queryWords.iterator();
