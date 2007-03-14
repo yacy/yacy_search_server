@@ -429,7 +429,7 @@ public class plasmaCrawlNURL {
             try {
                 entry = new Entry(hash);
             } catch (IOException e) {
-                serverLog.logSevere("NURL", e.getMessage(), e);
+                serverLog.logWarning("NURL", e.getMessage());
                 if (s > balancer.size()) continue;
                 balancer.clear(); // the balancer is broken and cannot shrink
                 throw new IOException("IO error, balancer cannot shrink: " + e.getMessage() + "; reset of balancer (2)");

@@ -1451,9 +1451,11 @@ public class kelondroRecords {
         
         public Node next00() throws IOException {
             // see if the next record is in the bulk, and if not re-fill the bulk
-            if ((pos.index - bulkstart) >= bulksize) {
+            if (pos.index >= (bulkstart + bulksize)) {
                 bulkstart = pos.index;
                 int maxlength = Math.min(USAGE.allCount() - bulkstart, bulksize);
+                if ((POS_NODES + bulkstart * recordsize) < 0)
+                    serverLog.logSevere("kelondroRecords", "DEBUG: negative offset. POS_NODES = " + POS_NODES + ", bulkstart = " + bulkstart + ", recordsize = " + recordsize);
                 entryFile.readFully(POS_NODES + bulkstart * recordsize, bulk, 0, maxlength * recordsize);
             }
                 
