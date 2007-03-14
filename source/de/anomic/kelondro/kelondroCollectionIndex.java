@@ -597,7 +597,7 @@ public class kelondroCollectionIndex {
                     
                 // join with new collection
                 oldcollection.addAllUnique(collection);
-                oldcollection.shape();
+                oldcollection.sort();
                 oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
                 oldcollection.trim(false);
                 
@@ -714,7 +714,7 @@ public class kelondroCollectionIndex {
 
             // join with new collection
             oldcollection.addAllUnique(collection);
-            oldcollection.shape();
+            oldcollection.sort();
             oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
             oldcollection.trim(false);
             collection = oldcollection;
@@ -796,7 +796,7 @@ public class kelondroCollectionIndex {
     
     private void saveCommons(byte[] key, kelondroRowSet collection) {
         if (key.length != 12) return;
-        collection.shape();
+        collection.sort();
         TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
         Calendar gregorian = new GregorianCalendar(GMTTimeZone);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -844,7 +844,7 @@ public class kelondroCollectionIndex {
             if ((k instanceof byte[]) && (oldcollection.remove((byte[]) k) != null)) removed++;
             if ((k instanceof String) && (oldcollection.remove(((String) k).getBytes()) != null)) removed++;
         }
-        oldcollection.shape();
+        oldcollection.sort();
         oldcollection.trim(false);
 
         if (oldcollection.size() == 0) {

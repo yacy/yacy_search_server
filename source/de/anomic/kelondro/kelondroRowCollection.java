@@ -39,7 +39,7 @@ public class kelondroRowCollection {
 
     public static final double growfactor = 1.4;
     
-    protected byte[]        chunkcache;
+    private   byte[]        chunkcache;
     protected int           chunkcount;
     protected long          lastTimeRead, lastTimeWrote;    
     protected kelondroRow   rowdef;
@@ -135,7 +135,7 @@ public class kelondroRowCollection {
     
     public static final int exportOverheadSize = 14;
 
-    public byte[] exportCollection() {
+    public synchronized byte[] exportCollection() {
         // returns null if the collection is empty
         trim(false);
         kelondroRow row = exportRow(chunkcache.length);
@@ -169,18 +169,24 @@ public class kelondroRowCollection {
         newChunkcache = null;
     }
     
-    public void trim(boolean plusGrowFactor) {
-        if (chunkcache.length == 0) return;
-        synchronized (chunkcache) {
-            int needed = chunkcount * rowdef.objectsize();
-            if (plusGrowFactor) needed = (int) (needed * growfactor);
-            if (needed >= chunkcache.length) return; // in case that the growfactor causes that the cache would grow instead of shrink, simply ignore the growfactor
-            if (serverMemory.available() + 1000 < needed) return; // if the swap buffer is not available, we must give up. This is not critical. Othervise we provoke a serious problem with OOM
-            byte[] newChunkcache = new byte[needed];
-            System.arraycopy(chunkcache, 0, newChunkcache, 0, Math.min(chunkcache.length, newChunkcache.length));
-            chunkcache = newChunkcache;
-            newChunkcache = null;
-        }
+    public synchronized void trim(boolean plusGrowFactor) {
+        if (chunkcache.length == 0)
+            return;
+        int needed = chunkcount * rowdef.objectsize();
+        if (plusGrowFactor)
+            needed = (int) (needed * growfactor);
+        if (needed >= chunkcache.length)
+            return; // in case that the growfactor causes that the cache would
+                    // grow instead of shrink, simply ignore the growfactor
+        if (serverMemory.available() + 1000 < needed)
+            return; // if the swap buffer is not available, we must give up.
+                    // This is not critical. Othervise we provoke a serious
+                    // problem with OOM
+        byte[] newChunkcache = new byte[needed];
+        System.arraycopy(chunkcache, 0, newChunkcache, 0, Math.min(
+                chunkcache.length, newChunkcache.length));
+        chunkcache = newChunkcache;
+        newChunkcache = null;
     }
 
     public final long lastRead() {
@@ -191,16 +197,14 @@ public class kelondroRowCollection {
         return lastTimeWrote;
     }
     
-    public final kelondroRow.Entry get(int index) {
+    public synchronized final kelondroRow.Entry get(int index) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
         assert (index * rowdef.objectsize < chunkcache.length);
         if (index >= chunkcount) return null;
         if (index * rowdef.objectsize() >= chunkcache.length) return null;
         byte[] a = new byte[rowdef.objectsize()];
-        synchronized (chunkcache) {
-            System.arraycopy(chunkcache, index * rowdef.objectsize(), a, 0, rowdef.objectsize());
-        }
+        System.arraycopy(chunkcache, index * rowdef.objectsize(), a, 0, rowdef.objectsize());
         this.lastTimeRead = System.currentTimeMillis();
         return rowdef.newEntry(a);
     }
@@ -209,15 +213,13 @@ public class kelondroRowCollection {
         set(index, a.bytes(), 0, a.bytes().length);
     }
     
-    public final void set(int index, byte[] a, int astart, int alength) {
+    public synchronized final void set(int index, byte[] a, int astart, int alength) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount;
         assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         if (bugappearance(a, astart, alength)) return; // TODO: this is temporary; remote peers may still submit bad entries
         int l = Math.min(rowdef.objectsize(), Math.min(alength, a.length - astart));
-        synchronized (chunkcache) {
-            System.arraycopy(a, astart, chunkcache, index * rowdef.objectsize(), l);
-        }
+        System.arraycopy(a, astart, chunkcache, index * rowdef.objectsize(), l);
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
@@ -238,7 +240,7 @@ public class kelondroRowCollection {
         addUnique(a, 0, a.length);
     }
     
-    private final void addUnique(byte[] a, int astart, int alength) {
+    private synchronized final void addUnique(byte[] a, int astart, int alength) {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + a;
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
@@ -250,11 +252,9 @@ public class kelondroRowCollection {
         }
         assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         int l = Math.min(rowdef.objectsize(), Math.min(alength, a.length - astart));
-        synchronized (chunkcache) {
-            ensureSize(chunkcount + 1);
-            System.arraycopy(a, astart, chunkcache, rowdef.objectsize() * chunkcount, l);
-            chunkcount++;
-        }
+        ensureSize(chunkcount + 1);
+        System.arraycopy(a, astart, chunkcache, rowdef.objectsize() * chunkcount, l);
+        chunkcount++;
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
@@ -270,14 +270,12 @@ public class kelondroRowCollection {
         return false;
     }
 
-    public final void addAllUnique(kelondroRowCollection c) {
+    public synchronized final void addAllUnique(kelondroRowCollection c) {
         if (c == null) return;
         assert(rowdef.objectsize() == c.rowdef.objectsize());
-        synchronized(chunkcache) {
-            ensureSize(chunkcount + c.size());
-            System.arraycopy(c.chunkcache, 0, chunkcache, rowdef.objectsize() * chunkcount, rowdef.objectsize() * c.size());
-            chunkcount += c.size();
-        }
+        ensureSize(chunkcount + c.size());
+        System.arraycopy(c.chunkcache, 0, chunkcache, rowdef.objectsize() * chunkcount, rowdef.objectsize() * c.size());
+        chunkcount += c.size();
     }
 
     protected final void removeShift(int pos, int dist, int upBound) {
@@ -296,34 +294,28 @@ public class kelondroRowCollection {
         System.arraycopy(chunkcache, this.rowdef.objectsize() * (chunkcount - 1), chunkcache, this.rowdef.objectsize() * i, this.rowdef.objectsize());
     }
     
-    protected final void removeRow(int p) {
+    protected synchronized final void removeRow(int p) {
         assert ((p >= 0) && (p < chunkcount) && (chunkcount > 0)) : "p = " + p + ", chunkcount = " + chunkcount;
-        synchronized (chunkcache) {
-            if (p < sortBound) {
-                sortBound--;
-                removeShift(p, 1, chunkcount);
-                chunkcount--;
-            } else {
-                copytop(p);
-                chunkcount--;
-            }
-            
+        if (p < sortBound) {
+            removeShift(p, 1, chunkcount);
+            sortBound--;
+        } else {
+            copytop(p);
         }
+        chunkcount--;
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public kelondroRow.Entry removeOne() {
-        synchronized (chunkcache) {
-            if (chunkcount == 0) return null;
-            kelondroRow.Entry r = get(chunkcount - 1);
-            if (chunkcount == sortBound) sortBound--;
-            chunkcount--;
-            this.lastTimeWrote = System.currentTimeMillis();
-            return r;
-        }
+    public synchronized kelondroRow.Entry removeOne() {
+        if (chunkcount == 0) return null;
+        kelondroRow.Entry r = get(chunkcount - 1);
+        if (chunkcount == sortBound) sortBound--;
+        chunkcount--;
+        this.lastTimeWrote = System.currentTimeMillis();
+        return r;
     }
     
-    public void clear() {
+    public synchronized void clear() {
         this.chunkcache = new byte[0];
         this.chunkcount = 0;
         this.sortBound = 0;
@@ -334,7 +326,7 @@ public class kelondroRowCollection {
         return chunkcount;
     }
     
-    public Iterator rows() {
+    public synchronized Iterator rows() {
         // iterates kelondroRow.Entry - type entries
         return new rowIterator();
     }
@@ -361,20 +353,18 @@ public class kelondroRowCollection {
         }
     }
     
-    public void select(Set keys) {
+    public synchronized void select(Set keys) {
         // removes all entries but the ones given by urlselection
         if ((keys == null) || (keys.size() == 0)) return;
-        synchronized (this) {
-            Iterator i = rows();
-            kelondroRow.Entry row;
-            while (i.hasNext()) {
-                row = (kelondroRow.Entry) i.next();
-                if (!(keys.contains(row.getColString(0, null)))) i.remove();
-            }
+        Iterator i = rows();
+        kelondroRow.Entry row;
+        while (i.hasNext()) {
+            row = (kelondroRow.Entry) i.next();
+            if (!(keys.contains(row.getColString(0, null)))) i.remove();
         }
     }
     
-    protected final void sort() {
+    public synchronized final void sort() {
         assert (this.rowdef.objectOrder != null);
         if (this.sortBound == this.chunkcount) return; // this is already sorted
         //System.out.println("SORT(chunkcount=" + this.chunkcount + ", sortBound=" + this.sortBound + ")");
@@ -474,20 +464,17 @@ public class kelondroRowCollection {
         if (i == p) return j; else if (j == p) return i; else return p;
     }
 
-    public void uniq() {
+    public synchronized void uniq() {
         assert (this.rowdef.objectOrder != null);
         // removes double-occurrences of chunks
         // this works only if the collection was ordered with sort before
-        synchronized (chunkcache) {
-            if (chunkcount <= 1) return;
-            int i = 0;
-            while (i < chunkcount - 1) {
-                if (compare(i, i + 1) == 0) {
-                    //System.out.println("DOUBLE: " + new String(this.chunkcache, this.chunksize * i, this.chunksize));
-                    removeRow(i);
-                } else {
-                    i++;
-                }
+        if (chunkcount <= 1) return;
+        int i = 0;
+        while (i < chunkcount - 1) {
+            if (compare(i, i + 1) == 0) {
+                removeRow(i);
+            } else {
+                i++;
             }
         }
     }
@@ -521,6 +508,25 @@ public class kelondroRowCollection {
         return c;
     }
 
+    protected int compare(byte[] a, int astart, int alength, int chunknumber) {
+        assert (chunknumber < chunkcount);
+        int l = Math.min(this.rowdef.width(rowdef.primaryKey), Math.min(a.length - astart, alength));
+        return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[rowdef.primaryKey], this.rowdef.width(rowdef.primaryKey));
+    }
+    
+    protected boolean match(byte[] a, int astart, int alength, int chunknumber) {
+        if (chunknumber >= chunkcount) return false;
+        int i = 0;
+        int p = chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[rowdef.primaryKey];
+        final int len = Math.min(this.rowdef.width(rowdef.primaryKey), Math.min(alength, a.length - astart));
+        while (i < len) if (a[astart + i++] != chunkcache[p++]) return false;
+        return ((len == this.rowdef.width(rowdef.primaryKey)) || (chunkcache[len] == 0)) ;
+    }
+    
+    public synchronized void close() {
+        chunkcache = null;
+    }
+    
     public static void main(String[] args) {
         System.out.println(new java.util.Date(10957 * day));
         System.out.println(new java.util.Date(0));

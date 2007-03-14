@@ -29,85 +29,47 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.TreeMap;
-
-import de.anomic.server.logging.serverLog;
 
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
 
     private static final int collectionReSortLimit = 90;
-    private static final int removeMaxSize = 100;
 
     private kelondroProfile profile;
-    private TreeMap removeMarker;
 
     public kelondroRowSet(kelondroRow rowdef, int objectCount, byte[] cache, int sortBound) {
         super(rowdef, objectCount, cache, sortBound);
-        this.removeMarker = new TreeMap();
         this.profile = new kelondroProfile();
     }
         
     public kelondroRowSet(kelondroRowSet rs) {
         super(rs);
         this.profile = rs.profile;
-        this.removeMarker = rs.removeMarker;
     }
 
     public kelondroRowSet(kelondroRow rowdef, int objectCount) {
         super(rowdef, objectCount);
-        this.removeMarker = new TreeMap();
         this.profile = new kelondroProfile();
     }
     
     public kelondroRowSet(kelondroRow rowdef, byte[] exportedCollectionRowinstance) {
         super(rowdef, exportedCollectionRowinstance);
-        this.removeMarker = new TreeMap();
         this.profile = new kelondroProfile();
     }
     
-    public boolean has(byte[] key) throws IOException {
+    public synchronized boolean has(byte[] key) throws IOException {
         return (get(key) != null);
     }
     
-    public kelondroRow.Entry get(byte[] key) {
+    public synchronized kelondroRow.Entry get(byte[] key) {
         return get(key, 0, key.length);
     }
     
     private kelondroRow.Entry get(byte[] key, int astart, int alength) {
         long handle = profile.startRead();
-        kelondroRow.Entry entry = null;
-        synchronized (chunkcache) {
-            int index = find(key, astart, alength);
-            if ((index >= 0) && (!(isMarkedRemoved(index)))) entry = get(index);
-        }
+        int index = find(key, astart, alength);
+        kelondroRow.Entry entry = (index >= 0) ? get(index) : null;
         profile.stopRead(handle);
         return entry;
-    }
-    
-    public void addUnique(kelondroRow.Entry row) {
-        // add an entry without doing a double-occurrence test
-        if (removeMarker.size() == 0) {
-            super.addUnique(row);
-        } else {
-            this.put(row);
-        }
-    }
-    
-    public void addUnique(kelondroRow.Entry row, Date entryDate) {
-        if (removeMarker.size() == 0) {
-            super.addUnique(row, entryDate);
-        } else {
-            this.put(row, entryDate);
-        }
-    }
-    
-    public void addUniqueMultiple(List rows, Date entryDate) throws IOException {
-        if (removeMarker.size() == 0) {
-            super.addUniqueMultiple(rows, entryDate);
-        } else {
-            Iterator i = rows.iterator();
-            while (i.hasNext()) addUnique((kelondroRow.Entry) i.next(), entryDate);
-        }
     }
     
     public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
@@ -119,116 +81,34 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return put(row);
     }
     
-    public kelondroRow.Entry put(kelondroRow.Entry entry) {
+    public synchronized kelondroRow.Entry put(kelondroRow.Entry entry) {
         assert (entry != null);
         assert (entry.getColBytes(rowdef.primaryKey) != null);
         //assert (!(serverLog.allZero(entry.getColBytes(super.sortColumn))));
         long handle = profile.startWrite();
         int index = -1;
         kelondroRow.Entry oldentry = null;
-        synchronized (chunkcache) {
-            index = find(entry.bytes(), super.rowdef.colstart[rowdef.primaryKey], super.rowdef.width(rowdef.primaryKey));
-            if (isMarkedRemoved(index)) {
-                set(index, entry);
-                removeMarker.remove(new Integer(index));
-            } else if (index < 0) {
-                super.addUnique(entry);
-            } else {
-                oldentry = get(index);
-                set(index, entry);
-            }
+        index = find(entry.bytes(), super.rowdef.colstart[rowdef.primaryKey], super.rowdef.width(rowdef.primaryKey));
+        if (index < 0) {
+            super.addUnique(entry);
+        } else {
+            oldentry = get(index);
+            set(index, entry);
         }
         profile.stopWrite(handle);
         return oldentry;
     }
-    
-    public int size() {
-        return super.size() - removeMarker.size();
+
+    private synchronized kelondroRow.Entry remove(byte[] a, int start, int length) {
+        int index = find(a, start, length);
+        if (index < 0) return null;
+        kelondroRow.Entry entry = super.get(index);
+        super.removeRow(index);
+        return entry;
     }
 
     public kelondroRow.Entry remove(byte[] a) {
-        return removeMarked(a, 0, a.length);
-    }
-
-    private kelondroRow.Entry removeMarked(byte[] a, int astart, int alength) {
-        if (chunkcount == 0) return null;
-        long handle = profile.startDelete();
-
-        // check if it is contained in chunkcache
-        kelondroRow.Entry entry = null;
-        synchronized(chunkcache) {
-            int p = find(a, astart, alength);
-            if (p < 0) {
-                // the entry is not there
-                profile.stopDelete(handle);
-                return null;
-            } else {
-                // there is an entry
-                entry = get(p);
-                if (p < sortBound) {
-                    // mark entry as to-be-deleted
-                    removeMarker.put(new Integer(p), entry.getColBytes(rowdef.primaryKey));
-                    if (removeMarker.size() > removeMaxSize) resolveMarkedRemoved();
-                } else {
-                    // remove directly by swap
-                    super.copytop(p);
-                    chunkcount--;
-                }
-
-                profile.stopDelete(handle);
-                return entry;
-            }
-        }
-    }
-    
-    private boolean isMarkedRemoved(int index) {
-        return removeMarker.containsKey(new Integer(index));
-    }
-    
-    public void shape() {
-        assert (rowdef.objectOrder != null); // we cannot shape without an object order
-        synchronized (chunkcache) {
-            try {
-                resolveMarkedRemoved();
-                super.sort();
-            } catch (kelondroException e) {
-                // bad bug, cannot be fixed. We abandon all data
-                serverLog.logSevere("kelondroRowSet", "abandoned row");
-                this.clear();
-            }
-            //if (super.rowdef.column(0).cellwidth() == 4) System.out.println("TABLE OF " + super.rowdef.toString() + "\n" + serverLog.table(super.chunkcache, super.rowdef.objectsize, 0)); // DEBUG
-        }
-    }
-    
-    private void resolveMarkedRemoved() {
-        if (removeMarker.size() == 0) return;
-        
-        // check case when complete chunkcache is marked as deleted
-        if (removeMarker.size() == chunkcount) {
-            this.clear();
-            removeMarker.clear();
-            return;
-        }
-        
-        Integer nxt = (Integer) removeMarker.firstKey();
-        removeMarker.remove(nxt);
-        int idx = nxt.intValue();
-        assert (idx < sortBound) : "idx = " + idx + ", sortBound = " + sortBound;
-        int d = 1;
-        byte[] a;
-        while (removeMarker.size() > 0) {
-            nxt = (Integer) removeMarker.firstKey();
-            a = (byte[]) removeMarker.remove(nxt);
-            assert kelondroNaturalOrder.compares(a, 0, a.length, get(nxt.intValue()).getColBytes(rowdef.primaryKey), 0, a.length) == 0;
-            assert (nxt.intValue() < sortBound);
-            super.removeShift(idx, d, nxt.intValue());
-            idx = nxt.intValue() - d;
-            d++;
-        }
-        super.removeShift(idx, d, chunkcount);
-        chunkcount -= d;
-        sortBound -= d; // there are all markers below the sortBound
-        removeMarker.clear();
+        return remove(a, 0, a.length);
     }
     
     public void removeMarkedAll(kelondroRowCollection c) {
@@ -237,7 +117,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         kelondroRow.Entry entry;
         while (i.hasNext()) {
             entry = (kelondroRow.Entry) i.next();
-            removeMarked(entry.bytes(), 0, entry.bytes().length);
+            remove(entry.bytes(), 0, entry.bytes().length);
         }
         profile.stopDelete(handle);
     }
@@ -246,9 +126,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         if ((rowdef.objectOrder == null) ||
                 (!(rowdef.objectOrder.signature().equals(newOrder.signature()))) ||
                 (newColumn != rowdef.primaryKey)) {
-            resolveMarkedRemoved();
             rowdef.setOrdering(newOrder, newColumn);
-            assert (removeMarker.size() == 0);
             this.sortBound = 0;
         }
     }
@@ -259,7 +137,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         if (rowdef.objectOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
         
         // check if a re-sorting make sense
-        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) shape();
+        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) sort();
         
         // first try to find in sorted area
         int p = binarySearch(a, astart, alength);
@@ -322,32 +200,17 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
         return l;
     }
-
-    private int compare(byte[] a, int astart, int alength, int chunknumber) {
-        assert (chunknumber < chunkcount);
-        int l = Math.min(this.rowdef.width(rowdef.primaryKey), Math.min(a.length - astart, alength));
-        return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[rowdef.primaryKey], this.rowdef.width(rowdef.primaryKey));
-    }
-    
-    private boolean match(byte[] a, int astart, int alength, int chunknumber) {
-        if (chunknumber >= chunkcount) return false;
-        int i = 0;
-        int p = chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[rowdef.primaryKey];
-        final int len = Math.min(this.rowdef.width(rowdef.primaryKey), Math.min(alength, a.length - astart));
-        while (i < len) if (a[astart + i++] != chunkcache[p++]) return false;
-        return ((len == this.rowdef.width(rowdef.primaryKey)) || (chunkcache[len] == 0)) ;
-    }
     
     public kelondroProfile profile() {
         return profile;
     }
     
-    public Iterator rows() {
-        shape();
+    public synchronized Iterator rows() {
+        sort();
         return super.rows();
     }
     
-    public kelondroCloneableIterator rows(boolean up, byte[] firstKey) {
+    public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) {
         return new rowIterator(up, firstKey);
     }
     
@@ -359,7 +222,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         
         public rowIterator(boolean up, byte[] firstKey) {
             // see that all elements are sorted
-            shape();
+            sort();
             this.up = up;
             this.first = firstKey;
             this.bound = sortBound;
@@ -391,10 +254,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         public void remove() {
             throw new UnsupportedOperationException();
         }
-    }
-    
-    public void close() {
-        // just for compatibility with kelondroIndex interface; do nothing
     }
     
     public static void main(String[] args) {
@@ -502,18 +361,18 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             c.put(c.rowdef.newEntry(new byte[][]{key, key}));
             if (i % 1000 == 0) {
                 for (int j = 0; j < delkeys.length; j++) c.remove(delkeys[j]);
-                c.shape();
+                c.sort();
             }
         }
         for (int j = 0; j < delkeys.length; j++) c.remove(delkeys[j]);
-        c.shape();
+        c.sort();
         random = new Random(0);
         for (int i = 0; i < testsize; i++) {
             key = randomHash(random);
             if (i % 5 == 0) continue;
             if (c.get(key) == null) System.out.println("missing entry " + new String(key));
         }
-        c.shape();
+        c.sort();
         System.out.println("RESULT SIZE: " + c.size());
         System.out.println("Time: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
     }

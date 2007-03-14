@@ -151,7 +151,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         }
         System.out.print(" -ordering- ");
         System.out.flush();
-        ri.shape();
+        ri.sort();
         return ri;
     }
     

@@ -109,7 +109,7 @@ public class kelondroIntBytesMap {
     
     public void flush() {
         if (index instanceof kelondroRowSet) {
-            ((kelondroRowSet) index).shape();
+            ((kelondroRowSet) index).sort();
             ((kelondroRowSet) index).trim(true);
         }
     }
