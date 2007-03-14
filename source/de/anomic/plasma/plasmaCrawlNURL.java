@@ -388,6 +388,7 @@ public class plasmaCrawlNURL {
         int s;
         Entry entry;
         kelondroRow.Entry re;
+        synchronized (stack) {
         while ((s = stack.size()) > 0) {
             re = stack.pop();
             if (re == null) {
@@ -408,6 +409,7 @@ public class plasmaCrawlNURL {
             musicStackIndex.remove(entry.hash);
             return entry;
         }
+        }
         throw new IOException("crawl stack is empty");
     }
 
@@ -416,6 +418,7 @@ public class plasmaCrawlNURL {
         String hash;
         int s;
         Entry entry;
+        synchronized (balancer) {
         while ((s = balancer.size()) > 0) {
             hash = balancer.pop(minimumDelta, maximumDomAge);
             if (hash == null) {
@@ -426,16 +429,17 @@ public class plasmaCrawlNURL {
             try {
                 entry = new Entry(hash);
             } catch (IOException e) {
-                serverLog.logWarning("NURL", e.getMessage());
+                serverLog.logSevere("NURL", e.getMessage(), e);
                 if (s > balancer.size()) continue;
                 balancer.clear(); // the balancer is broken and cannot shrink
-                throw new IOException("hash is null, balancer cannot shrink; reset of balancer (2)");
+                throw new IOException("IO error, balancer cannot shrink: " + e.getMessage() + "; reset of balancer (2)");
             }
             imageStackIndex.remove(entry.hash);
             movieStackIndex.remove(entry.hash);
             musicStackIndex.remove(entry.hash);
             return entry;
-        } 
+        }
+        }
         throw new IOException("balancer stack is empty");
     }
 
