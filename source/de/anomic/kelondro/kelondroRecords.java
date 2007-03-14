@@ -1429,7 +1429,7 @@ public class kelondroRecords {
                 try {
                     nn = next00();
                 } catch (IOException e) {
-                    serverLog.logSevere("kelondroRecords", filename + " failed with " + e.getMessage());
+                    serverLog.logSevere("kelondroRecords", filename + " failed with " + e.getMessage(), e);
                     return null;
                 }
                 byte[] key = nn.getKey();
