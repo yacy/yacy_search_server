@@ -13,6 +13,7 @@
 	<item>
 		<author><![CDATA[#[from]#]]></author>
 		<title><![CDATA[#[subject]#]]></title>
+		<category>#[category]#</category>
 		<link>http://#[peerAddress]#/Messages_p.html?action=view&amp;object=#[key]#</link>
 		<pubDate>#[rfc822Date]#</pubDate>
 		<guid>#[key]#</guid>

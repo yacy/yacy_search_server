@@ -132,7 +132,7 @@ public class Messages_p {
         if (action.equals("list")) {
             prop.put("mode", 0); //list
             try {
-                Iterator i = switchboard.messageDB.keys("remote", true);
+                Iterator i = switchboard.messageDB.keys(null, true);
                 String key;
 
                 boolean dark = true;
@@ -146,7 +146,8 @@ public class Messages_p {
                     prop.put("mode_messages_"+count+"_to", message.recipient());
                     //prop.put("mode_messages_"+count+"_subject", wikiTransformer.transform(message.subject()));
                     //TODO: not needed, when all templates will be cleaned via replaceHTML
-                    prop.put("mode_messages_"+count+"_subject", wikiCode.replaceHTML(message.subject()));
+                    prop.put("mode_messages_"+count+"_subject", message.subject());
+                    prop.put("mode_messages_"+count+"_category", message.category());
                     prop.put("mode_messages_"+count+"_key", key);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
                                         
@@ -186,7 +187,7 @@ public class Messages_p {
             prop.put("mode_date", dateString(message.date()));
             //prop.put("mode_messages_subject", wikiTransformer.transform(message.subject()));
             //TODO: not needed, when all templates will be cleaned via replaceHTML
-            prop.put("mode_subject", wikiCode.replaceHTML(message.subject()));
+            prop.put("mode_subject", message.subject());
             String theMessage = null;
             try {
                 theMessage = new String(message.message(), "UTF-8");

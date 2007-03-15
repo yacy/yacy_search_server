@@ -46,7 +46,9 @@
 // javac -classpath .:../Classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -54,12 +56,16 @@ import java.util.Iterator;
 
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
+import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
 import de.anomic.data.blogBoard.entry;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyCore;
 
 public class BlogComments {
 
@@ -147,6 +153,36 @@ public class BlogComments {
                 blogEntry.addComment(commentID);
                 switchboard.blogDB.write(blogEntry);
                 switchboard.blogCommentDB.write(switchboard.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
+                prop.put("LOCATION","BlogComments.html?page=" + pagename);
+                
+                messageBoard.entry msgEntry = null;
+                try {
+                    switchboard.messageDB.write(msgEntry = switchboard.messageDB.newEntry(
+                            "blogComment",
+                            StrAuthor,
+                            yacyCore.seedDB.mySeed.hash,
+                            yacyCore.seedDB.mySeed.getName(), yacyCore.seedDB.mySeed.hash,
+                            "new blog comment: " + new String(blogEntry.subject(),"UTF-8"), content));
+                } catch (UnsupportedEncodingException e1) {
+                    switchboard.messageDB.write(msgEntry = switchboard.messageDB.newEntry(
+                            "blogComment",
+                            StrAuthor,
+                            yacyCore.seedDB.mySeed.hash,
+                            yacyCore.seedDB.mySeed.getName(), yacyCore.seedDB.mySeed.hash,
+                            "new blog comment: " + new String(blogEntry.subject()), content));
+                }
+
+                messageForwardingViaEmail(env, msgEntry);
+                
+                // finally write notification
+                File notifierSource = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
+                File notifierDest   = new File(switchboard.getConfig("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+                try {
+                    serverFileUtils.copy(notifierSource, notifierDest);
+                } catch (IOException e) {
+                    serverLog.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
+                  
+                }
             }
 		}
 
@@ -263,4 +299,50 @@ public class BlogComments {
 		// return rewrite properties
 		return prop;
 	}
+    
+    private static void messageForwardingViaEmail(serverSwitch env, messageBoard.entry msgEntry) {
+        try {
+            if (!Boolean.valueOf(env.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
+
+            // getting the recipient address
+            String sendMailTo = env.getConfig("msgForwardingTo","root@localhost").trim();
+            
+            // getting the sendmail configuration
+            String sendMailStr = env.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
+            String[] sendMail = sendMailStr.trim().split(" ");
+
+            // building the message text
+            StringBuffer emailTxt = new StringBuffer();
+            emailTxt.append("To: ")
+            .append(sendMailTo)
+            .append("\nFrom: ")
+            .append("yacy@")
+            .append(yacyCore.seedDB.mySeed.getName())
+            .append("\nSubject: [YaCy] ")
+            .append(msgEntry.subject().replace('\n', ' '))
+            .append("\nDate: ")
+            .append(msgEntry.date())
+            .append("\n")
+            .append("\nMessage from: ")
+            .append(msgEntry.author())
+            .append("/")
+            .append(msgEntry.authorHash())
+            .append("\nMessage to:   ")
+            .append(msgEntry.recipient()) 
+            .append("/")
+            .append(msgEntry.recipientHash())
+            .append("\nCategory:     ")
+            .append(msgEntry.category())
+            .append("\n===================================================================\n")
+            .append(new String(msgEntry.message()));
+
+            Process process=Runtime.getRuntime().exec(sendMail);
+            PrintWriter email = new PrintWriter(process.getOutputStream());
+            email.print(new String(emailTxt));
+            email.close();                        
+        } catch (Exception e) {
+            yacyCore.log.logWarning("message: message forwarding via email failed. ",e);
+        }
+
+    }
 }
