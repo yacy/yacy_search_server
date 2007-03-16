@@ -79,6 +79,7 @@ public class plasmaCrawlBalancer {
     private HashMap       domainStacks;    // a map from domain name part to Lists with url hashs
     private File          cacheStacksPath;
     private String        stackname;
+    private boolean       top;             // to alternate between top and bottom of the file stack
     
     public plasmaCrawlBalancer(File cachePath, String stackname) {
         this.cacheStacksPath = cachePath;
@@ -87,6 +88,7 @@ public class plasmaCrawlBalancer {
         urlFileStack    = kelondroStack.open(stackFile, stackrow);
         domainStacks = new HashMap();
         urlRAMStack     = new ArrayList();
+        top = true;
         
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
@@ -94,7 +96,7 @@ public class plasmaCrawlBalancer {
     }
 
     public synchronized void close() {
-        while (sizeDomainStacks() > 0) flushOnceDomStacks(true);
+        while (sizeDomainStacks() > 0) flushOnceDomStacks(0, true); // flush to ram, because the ram flush is optimized
         try { flushAllRamStack(); } catch (IOException e) {}
         if (urlFileIndex != null) {
             urlFileIndex.close();
@@ -156,12 +158,17 @@ public class plasmaCrawlBalancer {
        // iterate through the RAM stack
        Iterator i = urlRAMStack.iterator();
        String h;
+       boolean removed = false;
        while (i.hasNext()) {
            h = (String) i.next();
            if (h.equals(urlhash)) {
                i.remove();
+               removed = true;
                break;
            }
+       }
+       if ((kelondroRecords.debugmode) && (!removed)) {
+           serverLog.logWarning("PLASMA BALANCER", "remove: not found urlhash " + urlhash + " in " + stackname);
        }
        
        // we cannot iterate through the file stack, because the stack iterator
@@ -208,8 +215,9 @@ public class plasmaCrawlBalancer {
         return sum;
     }
     
-    private void flushOnceDomStacks(boolean ram) {
-        // takes one entry from every domain stack and puts it on the file stack
+    private void flushOnceDomStacks(int minimumleft, boolean ram) {
+        // takes one entry from every domain stack and puts it on the ram or file stack
+        // the minimumleft value is a limit for the number of entries that should be left
         if (domainStacks.size() == 0) return;
         Iterator i = domainStacks.entrySet().iterator();
         Map.Entry entry;
@@ -217,7 +225,7 @@ public class plasmaCrawlBalancer {
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
             list = (LinkedList) entry.getValue();
-            if (list.size() != 0) {
+            if (list.size() > minimumleft) {
                 if (ram) {
                     urlRAMStack.add(list.removeFirst());
                 } else try {
@@ -253,11 +261,11 @@ public class plasmaCrawlBalancer {
         if (domainList == null) {
             // create new list
             domainList = new LinkedList();
-            domainList.addLast(entry.urlhash());
+            domainList.add(entry.urlhash());
             domainStacks.put(dom, domainList);
         } else {
             // extend existent domain list
-            domainList.add(entry.urlhash());
+            domainList.addLast(entry.urlhash());
         }
         
         // add to index
@@ -265,7 +273,7 @@ public class plasmaCrawlBalancer {
         
         // check size of domainStacks and flush
         if ((domainStacks.size() > 20) || (sizeDomainStacks() > 1000)) {
-            flushOnceDomStacks(false);
+            flushOnceDomStacks(1, urlRAMStack.size() < 100); // when the ram stack is small, flush it there
         }
     }
     
@@ -360,27 +368,28 @@ public class plasmaCrawlBalancer {
         
         // 3rd: take entry from file
         if ((result == null) && (urlFileStack.size() > 0)) {
-            kelondroRow.Entry topentry = urlFileStack.top();
-            if (topentry == null) {
+            kelondroRow.Entry nextentry = (top) ? urlFileStack.top() : urlFileStack.bot();
+            if (nextentry == null) {
                 // emergency case: this means that something with the stack organization is wrong
                 // the file appears to be broken. We kill the file.
                 kelondroStack.reset(urlFileStack);
                 serverLog.logSevere("PLASMA BALANCER", "get() failed to fetch entry from file stack. reset stack file.");
             } else {
-                String top = new String(topentry.getColBytes(0));
+                String nexthash = new String(nextentry.getColBytes(0));
 
                 // check if the time after retrieval of last hash from same
                 // domain is not shorter than the minimumDelta
-                long delta = lastAccessDelta(top);
+                long delta = lastAccessDelta(nexthash);
                 if (delta > minimumDelta) {
-                    // the entry from top is fine
-                    result = new String(urlFileStack.pop().getColBytes(0));
+                    // the entry is fine
+                    result = new String((top) ? urlFileStack.pop().getColBytes(0) : urlFileStack.pot().getColBytes(0));
                 } else {
-                    // try entry from bottom
-                    result = new String(urlFileStack.pot().getColBytes(0));
+                    // try other entry
+                    result = new String((top) ? urlFileStack.pot().getColBytes(0) : urlFileStack.pop().getColBytes(0));
                     delta = lastAccessDelta(result);
                 }
             }
+            top = !top; // alternate top/bottom
         }
         
         // check case where we did not found anything
@@ -419,7 +428,7 @@ public class plasmaCrawlBalancer {
         // to avoid that new urls get hidden by old entries from the file stack
         while ((sizeDomainStacks() > 0) && (urlRAMStack.size() <= dist)) {
             // flush only that much as we need to display
-            flushOnceDomStacks(true); 
+            flushOnceDomStacks(0, true); 
         }
         while ((urlRAMStack.size() <= dist) && (urlFileStack.size() > 0)) {
             // flush some entries from disc to ram stack
