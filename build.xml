@@ -601,6 +601,7 @@
   <delete dir="${release_main}" failonerror="false"/>
   <delete dir="${release_ext}" failonerror="false"/>
   <delete file="${build}/yacy.java" failonerror="false"/>
+  <delete file="yacy.jar" failonerror="false"/>
   <delete failonerror="false">    
     <fileset dir="${src}" includes="**/*.class" />
     <fileset dir="${build}" includes="**/*.class" />
