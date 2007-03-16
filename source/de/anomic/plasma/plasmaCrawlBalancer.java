@@ -185,9 +185,14 @@ public class plasmaCrawlBalancer {
     public synchronized int size() {
         int componentsize = urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks();
         try {
-            if ((kelondroRecords.debugmode) && (componentsize != urlFileIndex.size())) {
+            if (componentsize != urlFileIndex.size()) {
                 // hier ist urlIndexFile.size() immer grš§er. warum?
-                serverLog.logWarning("PLASMA BALANCER", "size operation wrong - componentsize = " + componentsize + ", ramIndex.size() = " + urlFileIndex.size());
+                if (kelondroRecords.debugmode) {
+                    serverLog.logWarning("PLASMA BALANCER", "size operation wrong in " + stackname + " - componentsize = " + componentsize + ", urlFileIndex.size() = " + urlFileIndex.size());
+                }
+                if (componentsize == 0) {
+                    resetFileIndex();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -238,7 +243,7 @@ public class plasmaCrawlBalancer {
     public synchronized void push(plasmaCrawlEntry entry) throws IOException {
         assert entry != null;
         if (urlFileIndex.has(entry.urlhash().getBytes())) {
-            serverLog.logWarning("PLASMA BALANCER", "double-check has failed for urlhash " + entry.urlhash() + " - fixed");
+            serverLog.logWarning("PLASMA BALANCER", "double-check has failed for urlhash " + entry.urlhash()  + " in " + stackname + " - fixed");
             return;
         }
         
@@ -410,21 +415,27 @@ public class plasmaCrawlBalancer {
     }
     
     public synchronized plasmaCrawlEntry top(int dist) throws IOException {
-        int availableInRam = urlRAMStack.size() + sizeDomainStacks();
-        if ((availableInRam <= dist) && (urlFileStack.size() > (dist - availableInRam))) {
-            // flush some entries from disc to domain stacks
-            try {
-                for (int i = 0; i <= (dist - availableInRam); i++) {
-                    if (urlFileStack.size() == 0) break;
-                    urlRAMStack.add(new String(urlFileStack.pop().getColBytes(0)));
-                }
-            } catch (IOException e) {}
+        // if we need to flush anything, then flush the domain stack first,
+        // to avoid that new urls get hidden by old entries from the file stack
+        while ((sizeDomainStacks() > 0) && (urlRAMStack.size() <= dist)) {
+            // flush only that much as we need to display
+            flushOnceDomStacks(true); 
         }
-        while ((sizeDomainStacks() > 0) && (urlRAMStack.size() <= dist)) flushOnceDomStacks(true); // flush only that much as we need to display
+        while ((urlRAMStack.size() <= dist) && (urlFileStack.size() > 0)) {
+            // flush some entries from disc to ram stack
+            try {
+                urlRAMStack.add(new String(urlFileStack.pop().getColBytes(0)));
+            } catch (IOException e) {
+                break;
+            }
+        }
         if (dist >= urlRAMStack.size()) return null;
         String urlhash = (String) urlRAMStack.get(dist);
         kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
-        if (entry == null) return null;
+        if (entry == null) {
+            if (kelondroRecords.debugmode) serverLog.logWarning("PLASMA BALANCER", "no entry in index for urlhash " + urlhash);
+            return null;
+        }
         return new plasmaCrawlEntry(entry);
     }
 

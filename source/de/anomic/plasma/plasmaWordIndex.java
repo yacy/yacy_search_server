@@ -61,6 +61,7 @@ public final class plasmaWordIndex implements indexRI {
     // environment constants
     public  static final long wCacheMaxAge   = 1000 * 60 * 30; // milliseconds; 30 minutes
     public  static final int  wCacheMaxChunk = 1000;           // number of references for each urlhash
+    public  static final int  lowcachedivisor = 200;
     public  static final int  maxCollectionPartition = 7; // should be 7
     
     private final kelondroOrder      indexOrder = kelondroBase64Order.enhancedCoder;
@@ -201,8 +202,8 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public void flushCacheSome() {
-        flushCache(dhtOutCache, flushsize);
-        flushCache(dhtInCache, flushsize);
+        flushCache(dhtOutCache, (dhtOutCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtOutCache.size() / lowcachedivisor)));
+        flushCache(dhtInCache, (dhtInCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtInCache.size() / lowcachedivisor)));
     }
     
     private void flushCache(indexRAMRI ram, int count) {
