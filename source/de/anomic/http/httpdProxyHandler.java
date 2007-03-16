@@ -328,7 +328,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             switchboard.proxyLastAccess = System.currentTimeMillis();
 
             // using an ByteCount OutputStream to count the send bytes (needed for the logfile)
-            respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2);
+            respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2,"PROXY");
 
             String host = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
             String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);           // always starts with leading '/'
@@ -893,7 +893,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             switchboard.proxyLastAccess = System.currentTimeMillis();            
             
             // using an ByteCount OutputStream to count the send bytes
-            respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2);                                   
+            respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2,"PROXY");                                   
             
             String host = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
             String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
@@ -998,7 +998,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             switchboard.proxyLastAccess = System.currentTimeMillis();
             
             // using an ByteCount OutputStream to count the send bytes
-            respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2);
+            respond = new httpdByteCountOutputStream(respond,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE).length() + 2,"PROXY");
                         
             String host    = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
             String path    = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);

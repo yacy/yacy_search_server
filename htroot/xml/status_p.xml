@@ -14,7 +14,7 @@
   <processors>#[processors]#</processors>
   <traffic>
 	<in>#[trafficIn]#</in>
-	<out>#[trafficOut]#</out>
+	<proxy>#[trafficProxy]#</proxy>
 	<crawler>#[trafficCrawler]#</crawler>
   </traffic>
 </status>

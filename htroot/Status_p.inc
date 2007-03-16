@@ -59,7 +59,7 @@
   </tr>
   <tr class="TableCellDark">
     <td>Traffic</td>
-    <td>Proxy: #[trafficOut]# | Crawler: #[trafficCrawler]#</td>
+    <td>Proxy: #[trafficProxy]# | Crawler: #[trafficCrawler]#</td>
     <td>[<a href="Status.html?ResetTraffic=">Reset</a>]</td>
   </tr>
   <tr class="TableCellLight">

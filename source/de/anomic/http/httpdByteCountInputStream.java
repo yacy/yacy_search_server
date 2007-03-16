@@ -70,8 +70,7 @@ public class httpdByteCountInputStream extends FilterInputStream {
      * @param inputStream the {@link InputStream} to read from
      */
     public httpdByteCountInputStream(InputStream inputStream, String accountName) {
-        super(inputStream);
-        this.byteCountAccountName = accountName;
+        this(inputStream,0,accountName);
     }
     
     /**

@@ -572,6 +572,7 @@ public final class httpc {
 
     /**
     * Returns the given date in an HTTP-usable format.
+    * (according to RFC822)
     *
     * @param date The Date-Object to be converted.
     * @return String with the date.
@@ -696,6 +697,10 @@ public final class httpc {
             if (incomingByteCountAccounting != null) {
                 this.clientInputByteCount = new httpdByteCountInputStream(this.socket.getInputStream(),incomingByteCountAccounting);
             }
+            if (outgoingByteCountAccounting != null) {
+                this.clientOutputByteCount = new httpdByteCountOutputStream(this.socket.getOutputStream(),outgoingByteCountAccounting);
+            }
+            
             
             // getting input and output streams
             this.clientInput  = new PushbackInputStream((this.clientInputByteCount!=null)?

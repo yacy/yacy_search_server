@@ -75,7 +75,7 @@ public class status_p {
 
 		// proxy traffic
 		prop.put("trafficIn", httpdByteCountInputStream.getGlobalCount());
-		prop.put("trafficOut", httpdByteCountOutputStream.getGlobalCount());
+		prop.put("trafficProxy", httpdByteCountOutputStream.getAccountCount("PROXY"));
 		prop.put("trafficCrawler", httpdByteCountInputStream.getAccountCount("CRAWLER"));
 
         // return rewrite properties

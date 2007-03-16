@@ -55,7 +55,7 @@ public class httpdBoundedSizeOutputStream extends httpdByteCountOutputStream {
     }
     
     public httpdBoundedSizeOutputStream(OutputStream outputStream, long initByteCount, long sizeLimit) {
-        super(outputStream,initByteCount);
+        super(outputStream,initByteCount,null);
         this.maxSize = sizeLimit;
     }    
 

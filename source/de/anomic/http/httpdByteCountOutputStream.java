@@ -47,6 +47,7 @@ package de.anomic.http;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 public class httpdByteCountOutputStream extends BufferedOutputStream {
     
@@ -54,24 +55,31 @@ public class httpdByteCountOutputStream extends BufferedOutputStream {
     private static long globalByteCount = 0;    
     private boolean finished = false;    
     
+    private static final HashMap byteCountInfo = new HashMap(2);
     protected long byteCount;
+    protected String byteCountAccountName = null; 
 
     /**
      * Constructor of this class
      * @param outputStream the {@link OutputStream} to write to
      */
     public httpdByteCountOutputStream(OutputStream outputStream) {
-        this(outputStream,0);
+        this(outputStream,null);
     }
+    
+    public httpdByteCountOutputStream(OutputStream outputStream, String accountName) {
+        this(outputStream,0,accountName);
+    }    
     
     /**
      * Constructor of this class
      * @param outputStream the {@link OutputStream} to write to
      * @param initByteCount to initialize the bytecount with a given value
      */
-    public httpdByteCountOutputStream(OutputStream outputStream, long initByteCount) {
+    public httpdByteCountOutputStream(OutputStream outputStream, long initByteCount, String accountName) {
         super(outputStream);
         this.byteCount = initByteCount;
+        this.byteCountAccountName = accountName;
     }    
 
     /** @see java.io.OutputStream#write(byte[]) */
@@ -100,15 +108,29 @@ public class httpdByteCountOutputStream extends BufferedOutputStream {
         return this.byteCount;
     }
     
+    public String getAccountName() {
+        return this.byteCountAccountName;
+    }    
+    
     public static long getGlobalCount() {
         synchronized (syncObject) {
             return globalByteCount;
         }
     }
     
+    public static long getAccountCount(String accountName) {
+        synchronized (syncObject) {
+            if (byteCountInfo.containsKey(accountName)) {
+                return ((Long)byteCountInfo.get(accountName)).longValue();
+            }
+            return 0;
+        }
+    }    
+    
     public static void resetCount() {
         synchronized (syncObject) {
             globalByteCount = 0;
+            byteCountInfo.clear();
         }
     }    
     
@@ -118,7 +140,16 @@ public class httpdByteCountOutputStream extends BufferedOutputStream {
         this.finished = true;
         synchronized (syncObject) {
             globalByteCount += this.byteCount;
-        }        
+            if (this.byteCountAccountName != null) {
+                long lastByteCount = 0;
+                if (byteCountInfo.containsKey(this.byteCountAccountName)) {
+                    lastByteCount = ((Long)byteCountInfo.get(this.byteCountAccountName)).longValue();
+                }
+                lastByteCount += this.byteCount;
+                byteCountInfo.put(this.byteCountAccountName,new Long(lastByteCount));
+            }
+            
+        }            
     }
     
     protected void finalize() throws Throwable {

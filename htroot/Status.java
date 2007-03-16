@@ -298,8 +298,8 @@ public class Status {
         prop.put("processors", rt.availableProcessors());
 
         // proxy traffic
-        prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
-        prop.put("trafficOut",bytesToString(httpdByteCountOutputStream.getGlobalCount()));
+        //prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
+        prop.put("trafficProxy",bytesToString(httpdByteCountOutputStream.getAccountCount("PROXY")));
         prop.put("trafficCrawler",bytesToString(httpdByteCountInputStream.getAccountCount("CRAWLER")));
 
         // connection information
