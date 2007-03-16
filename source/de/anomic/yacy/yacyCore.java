@@ -76,7 +76,6 @@ import java.util.TimeZone;
 
 import de.anomic.http.httpc;
 import de.anomic.net.URL;
-import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
@@ -594,7 +593,7 @@ public class yacyCore {
             if (newSeeds >= 0) {
                 // success! we have published our peer to a senior peer
                 // update latest news from the other peer
-//              log.logInfo("publish: handshaked " + t.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + t.seed.getName() + "' at " + t.seed.getAddress());
+                // log.logInfo("publish: handshaked " + t.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + t.seed.getName() + "' at " + t.seed.getAddress());
                 peerActions.saveMySeed();
                 return newSeeds;
             }
@@ -603,17 +602,16 @@ public class yacyCore {
             if (seedDB.mySeed.isProper() == null && !force) { return 0; }
 
             // still no success: ask own NAT or internet responder
-            final boolean DI604use = switchboard.getConfig("DI604use", "false").equals("true");
-            final String  DI604pw  = switchboard.getConfig("DI604pw", "");
-            String  ip       = switchboard.getConfig("staticIP", "");
-            if (ip.equals("")) {
-                ip = natLib.retrieveIP(DI604use, DI604pw);
-            }
-//          yacyCore.log.logDebug("DEBUG: new IP=" + ip);
+            //final boolean DI604use = switchboard.getConfig("DI604use", "false").equals("true");
+            //final String  DI604pw  = switchboard.getConfig("DI604pw", "");
+            String  ip = switchboard.getConfig("staticIP", "");
+            //if (ip.equals("")) ip = natLib.retrieveIP(DI604use, DI604pw);
+            
+            // yacyCore.log.logDebug("DEBUG: new IP=" + ip);
             seedDB.mySeed.put(yacySeed.IP, ip);
             if (seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR).equals(yacySeed.PEERTYPE_JUNIOR)) // ???????????????
                 seedDB.mySeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); // to start bootstraping, we need to be recognised as PEERTYPE_SENIOR peer
-            log.logInfo("publish: no recipient found, asked NAT or responder; our address is " +
+            log.logInfo("publish: no recipient found, our address is " +
                     ((seedDB.mySeed.getAddress() == null) ? "unknown" : seedDB.mySeed.getAddress()));
             peerActions.saveMySeed();
             return 0;
