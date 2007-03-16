@@ -223,14 +223,12 @@ public class kelondroFlexWidthArray implements kelondroArray {
         assert rowentry.bytes().length == this.rowdef.objectsize;
         int c = 0;
         kelondroRow.Entry e;
-        int lastcol;
         synchronized (col) {
             while (c < rowdef.columns()) {
-                lastcol = c + col[c].row().columns() - 1;
                 e = col[c].row().newEntry(
                         rowentry.bytes(),
                         rowdef.colstart[c],
-                        rowdef.colstart[lastcol] - rowdef.colstart[c] + rowdef.width(lastcol));
+                        col[c].row().objectsize());
                 col[c].set(index, e);
                 c = c + col[c].row().columns();
             }

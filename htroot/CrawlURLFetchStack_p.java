@@ -56,6 +56,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
@@ -272,7 +273,7 @@ public class CrawlURLFetchStack_p {
     }
     
     private static int shiftFromNotice(plasmaCrawlNURL nurl, int fromStackType, URLFetcherStack stack, int count) {
-        plasmaCrawlNURL.Entry entry;
+        plasmaCrawlEntry entry;
         int failed = 0;
         for (int i=0; i<count; i++) try {
             entry = nurl.pop(fromStackType);

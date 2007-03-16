@@ -53,7 +53,6 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import de.anomic.data.messageBoard;
-import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;

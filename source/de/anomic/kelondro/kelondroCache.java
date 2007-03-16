@@ -557,7 +557,6 @@ public class kelondroCache implements kelondroIndex {
             } else {
                 this.hasnotHit++;
                 this.hasnotDouble++;
-                return null;
             }
         }
         
@@ -569,8 +568,6 @@ public class kelondroCache implements kelondroIndex {
             } else {
                 this.readHit++;
                 this.cacheDelete++;
-                index.remove(key);
-                return entry;
             }
         }
         

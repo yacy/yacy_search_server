@@ -49,11 +49,8 @@
 import java.io.IOException;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.plasma.plasmaCrawlEURL;
-import de.anomic.plasma.plasmaCrawlNURL;
+import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -85,7 +82,7 @@ public final class crawlReceipt {
         String youare     = post.get("youare", "");    // seed hash of the target peer, needed for network stability
         //String process    = post.get("process", "");  // process type
         String key        = post.get("key", "");      // transmission key
-        String receivedUrlhash    = post.get("urlhash", "");  // the url hash that has been crawled
+        //String receivedUrlhash    = post.get("urlhash", "");  // the url hash that has been crawled
         String result     = post.get("result", "");   // the result; either "ok" or "fail"
         String reason     = post.get("reason", "");   // the reason for that result
         //String words      = post.get("wordh", "");    // priority word hashes
@@ -114,60 +111,60 @@ public final class crawlReceipt {
         
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
-                
-        
+
         if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
             // no yacy connection / unknown peers
             prop.putASIS("delay", "3600");
-        } else if (propStr == null) {
+            return prop;
+        }
+        
+        if (propStr == null) {
             // error with url / wrong key
             prop.putASIS("delay", "3600");
-        } else if (result.equals("fill")) {
-            // generating a new loaded URL entry
-            indexURLEntry entry = switchboard.wordIndex.loadedURL.newEntry(propStr);
-            if (entry == null) {
-                log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) for hash " + receivedUrlhash + " from peer " + iam +
-                              "\n\tURL properties: "+ propStr);
-            } else {
-                indexURLEntry.Components comp = entry.comp();
-            if (comp.url() == null) {
-                log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + receivedUrlhash + " from peer " + iam +
-                              "\n\tURL properties: "+ propStr);
-            } else try {
-                // put new entry into database
-                switchboard.wordIndex.loadedURL.store(entry);
-                switchboard.wordIndex.loadedURL.stack(entry, youare, iam, 1);
-                
-                // generating url hash
-                String newUrlHash = plasmaURL.urlHash(comp.url());
-                String oldUrlHash = plasmaURL.oldurlHash(comp.url());
-                
-                // removing URL from notice URL                
-                switchboard.noticeURL.remove(newUrlHash);
-                switchboard.noticeURL.remove(oldUrlHash); 
-                
-                log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + receivedUrlhash + ":" + comp.url().toNormalform());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            }            
+            return prop;
+        }
+        
+        // generating a new loaded URL entry
+        indexURLEntry entry = switchboard.wordIndex.loadedURL.newEntry(propStr);
+        if (entry == null) {
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
+            prop.putASIS("delay", "3600");
+            return prop;
+        }
+        
+        indexURLEntry.Components comp = entry.comp();
+        if (comp.url() == null) {
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
+            prop.putASIS("delay", "3600");
+            return prop;
+        }
+        
+        if (result.equals("fill")) try {
+            // put new entry into database
+            switchboard.wordIndex.loadedURL.store(entry);
+            switchboard.wordIndex.loadedURL.stack(entry, youare, iam, 1);
+            switchboard.delegatedURL.remove(entry.hash()); // the delegated work has been done
+            log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + comp.url().toNormalform());
+
             // ready for more
             prop.putASIS("delay", "10");
-        } else {
-            try {
-                plasmaCrawlNURL.Entry en = switchboard.noticeURL.getEntry(receivedUrlhash);
-                plasmaCrawlEURL.Entry ee = switchboard.errorURL.newEntry(en.url(), en.referrerHash(), en.initiator(), iam, en.name(), result + ":" + reason, new kelondroBitfield());
-                ee.store();
-                switchboard.errorURL.stackPushEntry(ee);
-                switchboard.noticeURL.remove(receivedUrlhash);
-            } catch (IOException e) {
-
-            }
-            prop.putASIS("delay", "100"); // what shall we do with that???
+            return prop;
+        } catch (IOException e) {
+            e.printStackTrace();
+            prop.putASIS("delay", "3600");
+            return prop;
         }
+
+        switchboard.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
+        plasmaCrawlZURL.Entry ee = switchboard.errorURL.newEntry(entry.toBalancerEntry(), youare, null, 0, result + ":" + reason);
+        ee.store();
+        switchboard.errorURL.stackPushEntry(ee);
+        //switchboard.noticeURL.remove(receivedUrlhash);
+        prop.putASIS("delay", "3600");
+        return prop;
 	
-	// return rewrite properties
-	return prop;
+         // return rewrite properties
+	
     }
 
 }

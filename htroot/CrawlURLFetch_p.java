@@ -49,10 +49,9 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.net.URL;
-import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlProfile;
+import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverSwitch;
 import de.anomic.http.httpHeader;
@@ -499,14 +498,9 @@ public class CrawlURLFetch_p {
                     totalFailed++;
                     this.failed.put(urls[i], reason);
                     try {
-                        plasmaCrawlEURL.Entry ee = this.sb.errorURL.newEntry(
+                        plasmaCrawlZURL.Entry ee = this.sb.errorURL.newEntry(
                                 new URL(urls[i]),
-                                null,
-                                yacyCore.seedDB.mySeed.hash,
-                                yacyCore.seedDB.mySeed.hash,
-                                "",
-                                reason,
-                                new kelondroBitfield());
+                                reason);
                         ee.store();
                         this.sb.errorURL.stackPushEntry(ee);
                     } catch (MalformedURLException e) {  }

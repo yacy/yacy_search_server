@@ -46,23 +46,8 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-
-import de.anomic.plasma.plasmaURL;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroCache;
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroFlexTable;
-import de.anomic.kelondro.kelondroIndex;
-import de.anomic.kelondro.kelondroRecords;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroStack;
-import de.anomic.net.URL;
-import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacySeedDB;
 
 public class plasmaCrawlNURL {
     
@@ -78,166 +63,33 @@ public class plasmaCrawlNURL {
     private static final long minimumDelta  =    500; // the minimum time difference between access of the same domain
     private static final long maximumDomAge =  60000; // the maximum age of a domain until it is used for another crawl attempt
     
-    /**
-     * column length definition for the {@link plasmaURL#urlIndexFile} DB
-     */
-    public final static kelondroRow rowdef = new kelondroRow(
-        "String urlhash-" + yacySeedDB.commonHashLength + ", " +    // the url's hash
-        "String initiator-" + yacySeedDB.commonHashLength + ", " +  // the crawling initiator
-        "String urlstring-256, " +                                  // the url as string
-        "String refhash-" + yacySeedDB.commonHashLength + ", " +    // the url's referrer hash
-        "String urlname-40, " +                                     // the name of the url, from anchor tag <a>name</a>
-        "Cardinal appdate-4 {b64e}, " +                             // the time when the url was first time appeared
-        "String profile-4, " +                                      // the name of the prefetch profile handle
-        "Cardinal depth-2 {b64e}, " +                               // the prefetch depth so far, starts at 0
-        "Cardinal parentbr-3 {b64e}, " +                            // number of anchors of the parent
-        "Cardinal forkfactor-4 {b64e}, " +                          // sum of anchors of all ancestors
-        "byte[] flags-4, " +                                        // flags
-        "String handle-4",                                          // extra handle
-        kelondroBase64Order.enhancedCoder,
-        0
-        );
-    
-    private kelondroIndex urlIndexFile = null;
     private final plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
     private final plasmaCrawlBalancer limitStack;     // links found by crawling at target depth
-    private final plasmaCrawlBalancer overhangStack;  // links found by crawling at depth+1
     private final plasmaCrawlBalancer remoteStack;    // links from remote crawl orders
-    private kelondroStack imageStack;     // links pointing to image resources
-    private kelondroStack movieStack;     // links pointing to movie resources
-    private kelondroStack musicStack;     // links pointing to music resources
+    //private final plasmaCrawlBalancer overhangStack;  // links found by crawling at depth+1
+    //private kelondroStack imageStack;     // links pointing to image resources
+    //private kelondroStack movieStack;     // links pointing to movie resources
+    //private kelondroStack musicStack;     // links pointing to music resources
 
-    private final HashSet imageStackIndex, movieStackIndex, musicStackIndex; // to find out if a specific link is already on any stack
-    private File cacheStacksPath;
-    private long preloadTime;
-    private initStackIndex initThead;
-    
-    public plasmaCrawlNURL(File cachePath, long preloadTime) {
+    public plasmaCrawlNURL(File cachePath) {
         super();
-        this.cacheStacksPath = cachePath;
-        this.preloadTime = preloadTime;
-        
-        // create a stack for newly entered entries
-        if (!(cachePath.exists())) cachePath.mkdir(); // make the path
-        openHashCache();
-
-        File coreStackFile = new File(cachePath, "urlNoticeLocal0.stack");
-        File limitStackFile = new File(cachePath, "urlNoticeLimit0.stack");
-        File overhangStackFile = new File(cachePath, "urlNoticeOverhang0.stack");
-        File remoteStackFile = new File(cachePath, "urlNoticeRemote0.stack");
-        File imageStackFile = new File(cachePath, "urlNoticeImage0.stack");
-        File movieStackFile = new File(cachePath, "urlNoticeMovie0.stack");
-        File musicStackFile = new File(cachePath, "urlNoticeMusic0.stack");
-        coreStack = new plasmaCrawlBalancer(coreStackFile);
-        limitStack = new plasmaCrawlBalancer(limitStackFile);
-        overhangStack = new plasmaCrawlBalancer(overhangStackFile);
-        remoteStack = new plasmaCrawlBalancer(remoteStackFile);
-        kelondroRow rowdef = new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 0);
-        imageStack = kelondroStack.open(imageStackFile, rowdef);
-        movieStack = kelondroStack.open(movieStackFile, rowdef);
-        musicStack = kelondroStack.open(musicStackFile, rowdef);
-
-        // init stack Index
-        imageStackIndex    = new HashSet();
-        movieStackIndex    = new HashSet();
-        musicStackIndex    = new HashSet();
-        (initThead = new initStackIndex()).start();
+        coreStack = new plasmaCrawlBalancer(cachePath, "urlNoticeCoreStack");
+        limitStack = new plasmaCrawlBalancer(cachePath, "urlNoticeLimitStack");
+        //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
+        remoteStack = new plasmaCrawlBalancer(cachePath, "urlNoticeRemoteStack");
     }
 
     public int size() {
-        try {
-           return urlIndexFile.size() ;
-       } catch (IOException e) {
-           return 0;
-       }
-    }
-    
-    public void waitOnInitThread() {
-        try {
-            if (this.initThead != null) {
-                this.initThead.join();
-            }
-        } catch (NullPointerException e) {            
-        } catch (InterruptedException e) {}
-        
-    }
-    
-    private void openHashCache() {
-        String newCacheName = "urlNotice5.table";
-        cacheStacksPath.mkdirs();
-        try {
-            urlIndexFile = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, rowdef), true, false);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
-    }
-    
-    private void resetHashCache() {
-        if (urlIndexFile != null) {
-            urlIndexFile.close();
-            urlIndexFile = null;
-            File cacheFile = new File(cacheStacksPath, "urlNotice2.db");
-            cacheFile.delete();
-        }
-        openHashCache();
+        return coreStack.size() + limitStack.size() + remoteStack.size();
     }
     
     public void close() {
         coreStack.close();
         limitStack.close();
-        overhangStack.close();
+        //overhangStack.close();
         remoteStack.close();
-        imageStack.close();
-        movieStack.close();
-        musicStack.close();
-        if (urlIndexFile != null) {
-            urlIndexFile.close();
-            urlIndexFile = null;
-        }
-    }
-
-    public class initStackIndex extends Thread {
-        public void run() {
-            Iterator i;
-            try {
-                i = imageStack.iterator();
-                while (i.hasNext()) imageStackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
-            } catch (Exception e) {
-                imageStack = kelondroStack.reset(imageStack);
-            }
-            try {
-                i = movieStack.iterator();
-                while (i.hasNext()) movieStackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
-            } catch (Exception e) {
-                movieStack = kelondroStack.reset(movieStack);
-            }
-            try {
-                i = musicStack.iterator();
-                while (i.hasNext()) musicStackIndex.add(new String(((kelondroRecords.Node) i.next()).getKey(), "UTF-8"));
-            } catch (Exception e) {
-                musicStack = kelondroStack.reset(musicStack);
-            }
-            plasmaCrawlNURL.this.initThead = null;
-        }
     }
     
-    public boolean remove(String hash) {
-        if (hash == null) return false;
-        try {
-            urlIndexFile.remove(hash.getBytes());
-            return true;
-        } catch (IOException e) {
-            return false;
-        }
-    }
-    
-    private static String normalizeHandle(int h) {
-        String d = Integer.toHexString(h);
-        while (d.length() < rowdef.width(11)) d = "0" + d;
-        return d;
-    }
-
     public int stackSize() {
         // this does not count the overhang stack size
         return coreStack.size()  + limitStack.size() + remoteStack.size();
@@ -247,11 +99,8 @@ public class plasmaCrawlNURL {
         switch (stackType) {
             case STACK_TYPE_CORE:     return coreStack.size();
             case STACK_TYPE_LIMIT:    return limitStack.size();
-            case STACK_TYPE_OVERHANG: return overhangStack.size();
+            case STACK_TYPE_OVERHANG: return 0;
             case STACK_TYPE_REMOTE:   return remoteStack.size();
-            case STACK_TYPE_IMAGE:    return imageStack.size();
-            case STACK_TYPE_MOVIE:    return movieStack.size();
-            case STACK_TYPE_MUSIC:    return musicStack.size();
             default: return -1;
         }
     }
@@ -260,111 +109,65 @@ public class plasmaCrawlNURL {
         return
             coreStack.has(urlhash) ||
             limitStack.has(urlhash) ||
-            overhangStack.has(urlhash) || 
-            remoteStack.has(urlhash) ||
-            imageStackIndex.contains(urlhash) || 
-            movieStackIndex.contains(urlhash) || 
-            musicStackIndex.contains(urlhash);
-    }
-
-    public synchronized Entry newEntry(String initiator, URL url, Date loaddate,
-                                       String referrer, String name, String profile,
-                                       int depth, int anchors, int forkfactor) {
-        return new Entry(initiator, url, referrer, name, loaddate,
-                            profile, depth, anchors, forkfactor);
+            //overhangStack.has(urlhash) || 
+            remoteStack.has(urlhash);
     }
     
-    public synchronized Entry newEntry(Entry oldEntry) {
-        if (oldEntry == null) return null;
-        return new Entry(
-                oldEntry.initiator(),
-                oldEntry.url(),
-                oldEntry.referrerHash(),
-                oldEntry.name(),
-                oldEntry.loaddate(),
-                oldEntry.profileHandle(),
-                oldEntry.depth(),
-                oldEntry.anchors,
-                oldEntry.forkfactor
-        );
-    }
-
-    public void push(int stackType, String urlhash) {
+    public void push(int stackType, plasmaCrawlEntry entry) {
         try {
             switch (stackType) {
                 case STACK_TYPE_CORE:
-                    coreStack.push(urlhash);
+                    coreStack.push(entry);
                     break;
                 case STACK_TYPE_LIMIT:
-                    limitStack.push(urlhash);
-                    break;
-                case STACK_TYPE_OVERHANG:
-                    overhangStack.push(urlhash);
+                    limitStack.push(entry);
                     break;
                 case STACK_TYPE_REMOTE:
-                    remoteStack.push(urlhash);
-                    break;
-                case STACK_TYPE_IMAGE:
-                    imageStack.push(imageStack.row().newEntry(new byte[][] {urlhash.getBytes()}));
-                    imageStackIndex.add(urlhash);
-                    break;
-                case STACK_TYPE_MOVIE:
-                    movieStack.push(movieStack.row().newEntry(new byte[][] {urlhash.getBytes()}));
-                    movieStackIndex.add(urlhash);
-                    break;
-                case STACK_TYPE_MUSIC:
-                    musicStack.push(musicStack.row().newEntry(new byte[][] {urlhash.getBytes()}));
-                    musicStackIndex.add(urlhash);
+                    remoteStack.push(entry);
                     break;
                 default: break;
             }
         } catch (IOException er) {}
     }
 
-    public Entry[] top(int stackType, int count) {
+    public plasmaCrawlEntry get(String urlhash) {
+        plasmaCrawlEntry entry = null;
+        try {if ((entry = coreStack.get(urlhash)) != null) return entry;} catch (IOException e) {}
+        try {if ((entry = limitStack.get(urlhash)) != null) return entry;} catch (IOException e) {}
+        try {if ((entry = remoteStack.get(urlhash)) != null) return entry;} catch (IOException e) {}
+        return null;
+    }
+    
+    public plasmaCrawlEntry remove(String urlhash) {
+        plasmaCrawlEntry entry = null;
+        try {if ((entry = coreStack.remove(urlhash)) != null) return entry;} catch (IOException e) {}
+        try {if ((entry = limitStack.remove(urlhash)) != null) return entry;} catch (IOException e) {}
+        try {if ((entry = remoteStack.remove(urlhash)) != null) return entry;} catch (IOException e) {}
+        return null;
+    }
+    
+    public plasmaCrawlEntry[] top(int stackType, int count) {
         switch (stackType) {
             case STACK_TYPE_CORE:     return top(coreStack, count);
             case STACK_TYPE_LIMIT:    return top(limitStack, count);
-            case STACK_TYPE_OVERHANG: return top(overhangStack, count);
             case STACK_TYPE_REMOTE:   return top(remoteStack, count);
-            case STACK_TYPE_IMAGE:    return top(imageStack, count);
-            case STACK_TYPE_MOVIE:    return top(movieStack, count);
-            case STACK_TYPE_MUSIC:    return top(musicStack, count);
             default: return null;
         }
     }
     
-    public Iterator iterator(int stackType) {
-        // returns an iterator of String objects
-        switch (stackType) {
-        case STACK_TYPE_CORE:     return coreStack.iterator();
-        case STACK_TYPE_LIMIT:    return limitStack.iterator();
-        case STACK_TYPE_OVERHANG: return overhangStack.iterator();
-        case STACK_TYPE_REMOTE:   return remoteStack.iterator();
-        case STACK_TYPE_IMAGE:    return imageStackIndex.iterator();
-        case STACK_TYPE_MOVIE:    return movieStackIndex.iterator();
-        case STACK_TYPE_MUSIC:    return musicStackIndex.iterator();
-        default: return null;
-        }        
-    }
-
-    public Entry pop(int stackType) throws IOException {
+    public plasmaCrawlEntry pop(int stackType) throws IOException {
         switch (stackType) {
             case STACK_TYPE_CORE:     return pop(coreStack);
             case STACK_TYPE_LIMIT:    return pop(limitStack);
-            case STACK_TYPE_OVERHANG: return pop(overhangStack);
             case STACK_TYPE_REMOTE:   return pop(remoteStack);
-            case STACK_TYPE_IMAGE:    return pop(imageStack);
-            case STACK_TYPE_MOVIE:    return pop(movieStack);
-            case STACK_TYPE_MUSIC:    return pop(musicStack);
             default: return null;
         }
     }
 
     public void shift(int fromStack, int toStack) {
         try {
-            Entry entry = pop(fromStack);
-            push(toStack, entry.hash());
+            plasmaCrawlEntry entry = pop(fromStack);
+            if (entry != null) push(toStack, entry);
         } catch (IOException e) {
             return;
         }
@@ -374,329 +177,55 @@ public class plasmaCrawlNURL {
         switch (stackType) {
                 case STACK_TYPE_CORE:     coreStack.clear(); break;
                 case STACK_TYPE_LIMIT:    limitStack.clear(); break;
-                case STACK_TYPE_OVERHANG: overhangStack.clear(); break;
                 case STACK_TYPE_REMOTE:   remoteStack.clear(); break;
-                case STACK_TYPE_IMAGE:    imageStack = kelondroStack.reset(imageStack); break;
-                case STACK_TYPE_MOVIE:    movieStack = kelondroStack.reset(movieStack); break;
-                case STACK_TYPE_MUSIC:    musicStack = kelondroStack.reset(musicStack); break;
                 default: return;
             }
     }
-
-    private Entry pop(kelondroStack stack) throws IOException {
+    
+    private plasmaCrawlEntry pop(plasmaCrawlBalancer balancer) throws IOException {
         // this is a filo - pop
         int s;
-        Entry entry;
-        kelondroRow.Entry re;
-        synchronized (stack) {
-        while ((s = stack.size()) > 0) {
-            re = stack.pop();
-            if (re == null) {
-                if (s > stack.size()) continue;
-                stack = kelondroStack.reset(stack); // the stack is not able to shrink
-                throw new IOException("hash is null, stack cannot shrink; reset of stack (1)");
-            }
-            try {
-                entry = new Entry(new String(re.getColBytes(0)));
-            } catch (IOException e) {
-                serverLog.logWarning("NURL", e.getMessage());
-                if (s > stack.size()) continue;
-                stack = kelondroStack.reset(stack); // the stack is not able to shrink
-                throw new IOException("hash is null, stack cannot shrink; reset of stack (2)");
-            }
-            imageStackIndex.remove(entry.hash);
-            movieStackIndex.remove(entry.hash);
-            musicStackIndex.remove(entry.hash);
-            return entry;
-        }
-        }
-        throw new IOException("crawl stack is empty");
-    }
-
-    private Entry pop(plasmaCrawlBalancer balancer) throws IOException {
-        // this is a filo - pop
-        String hash;
-        int s;
-        Entry entry;
+        plasmaCrawlEntry entry;
         synchronized (balancer) {
         while ((s = balancer.size()) > 0) {
-            hash = balancer.pop(minimumDelta, maximumDomAge);
-            if (hash == null) {
+            entry = balancer.pop(minimumDelta, maximumDomAge);
+            if (entry == null) {
                 if (s > balancer.size()) continue;
                 balancer.clear(); // the balancer is broken and cannot shrink
-                throw new IOException("hash is null, balancer cannot shrink; reset of balancer (1)");
+                throw new IOException("entry is null, balancer cannot shrink; reset of balancer");
             }
-            try {
-                entry = new Entry(hash);
-            } catch (IOException e) {
-                serverLog.logWarning("NURL", e.getMessage());
-                if (s > balancer.size()) continue;
-                balancer.clear(); // the balancer is broken and cannot shrink
-                throw new IOException("IO error, balancer cannot shrink: " + e.getMessage() + "; reset of balancer (2)");
-            }
-            imageStackIndex.remove(entry.hash);
-            movieStackIndex.remove(entry.hash);
-            musicStackIndex.remove(entry.hash);
             return entry;
         }
         }
         throw new IOException("balancer stack is empty");
     }
-
-    private Entry[] top(kelondroStack stack, int count) {
-        // this is a filo - top
-        if (count > stack.size()) count = stack.size();
-        ArrayList list = new ArrayList(count);
-        for (int i = 0; i < count; i++) {
-            try {
-                byte[] hash = stack.top(i).getColBytes(0);
-                list.add(new Entry(new String(hash)));
-            } catch (IOException e) {
-                continue;
-            }
-        }
-        return (Entry[]) list.toArray(new Entry[list.size()]);
-    }
-
-    private Entry[] top(plasmaCrawlBalancer balancer, int count) {
+    
+    private plasmaCrawlEntry[] top(plasmaCrawlBalancer balancer, int count) {
         // this is a filo - top
         if (count > balancer.size()) count = balancer.size();
         ArrayList list = new ArrayList(count);
         for (int i = 0; i < count; i++) {
             try {
-                String urlhash = balancer.top(i);
-                if (urlhash == null) break;
-                list.add(new Entry(urlhash));
+                plasmaCrawlEntry entry = balancer.top(i);
+                if (entry == null) break;
+                list.add(entry);
             } catch (IOException e) {
                 break;
             }
         }
-        return (Entry[])list.toArray(new Entry[list.size()]);
+        return (plasmaCrawlEntry[]) list.toArray(new plasmaCrawlEntry[list.size()]);
     }
-
-    public synchronized Entry getEntry(String hash) throws IOException {
-        return new Entry(hash);
-    }
-
-    public class Entry {
-        private String   initiator;     // the initiator hash, is NULL or "" if it is the own proxy;
-                                        // if this is generated by a crawl, the own peer hash in entered
-        private String   hash;          // the url's hash
-        private String   referrer;      // the url's referrer hash
-        private URL      url;           // the url as string
-        private String   name;          // the name of the url, from anchor tag <a>name</a>     
-        private Date     loaddate;      // the time when the url was first time appeared
-        private String   profileHandle; // the name of the prefetch profile
-        private int      depth;         // the prefetch depth so far, starts at 0
-        private int      anchors;       // number of anchors of the parent
-        private int      forkfactor;    // sum of anchors of all ancestors
-        private kelondroBitfield flags;
-        private int      handle;
-        private boolean  stored;
-
-        public Entry(String initiator, 
-                     URL url, 
-                     String referrer, 
-                     String name, 
-                     Date loaddate, 
-                     String profileHandle,
-                     int depth, 
-                     int anchors, 
-                     int forkfactor
-        ) {
-            // create new entry and store it into database
-            this.hash          = plasmaURL.urlHash(url);
-            this.initiator     = initiator;
-            this.url           = url;
-            this.referrer      = (referrer == null) ? plasmaURL.dummyHash : referrer;
-            this.name          = (name == null) ? "" : name;
-            this.loaddate      = (loaddate == null) ? new Date() : loaddate;
-            this.profileHandle = profileHandle; // must not be null
-            this.depth         = depth;
-            this.anchors       = anchors;
-            this.forkfactor    = forkfactor;
-            this.flags         = new kelondroBitfield(rowdef.width(10));
-            this.handle        = 0;
-            this.stored        = false;
+    
+    public Iterator iterator(int stackType) {
+        // returns an iterator of plasmaCrawlBalancerEntry Objects
+        try {switch (stackType) {
+        case STACK_TYPE_CORE:     return coreStack.iterator();
+        case STACK_TYPE_LIMIT:    return limitStack.iterator();
+        case STACK_TYPE_REMOTE:   return remoteStack.iterator();
+        default: return null;
+        }} catch (IOException e) {
+            return new HashSet().iterator();
         }
-
-        public Entry(String hash) throws IOException {
-            // generates an plasmaNURLEntry using the url hash
-            // to speed up the access, the url-hashes are buffered
-            // in the hash cache.
-            // we have two options to find the url:
-            // - look into the hash cache
-            // - look into the filed properties
-            // if the url cannot be found, this returns null
-            this.hash = hash;
-            if (hash == null) throw new IOException("hash is null");
-            kelondroRow.Entry entry = urlIndexFile.get(hash.getBytes());
-            if (entry != null) {
-                insertEntry(entry);
-                this.stored = true;
-                return;
-            } else {
-                // show that we found nothing
-                throw new IOException("NURL: hash " + hash + " not found during initialization of entry object");
-                //this.url = null;
-            }
-        }
-
-        public Entry(kelondroRow.Entry entry) throws IOException {
-            assert (entry != null);
-            insertEntry(entry);
-            this.stored = false;
-        }
-
-        private void insertEntry(kelondroRow.Entry entry) throws IOException {
-            String urlstring = entry.getColString(2, null);
-            if (urlstring == null) throw new IOException ("url string is null");
-            this.hash = entry.getColString(0, null);
-            this.initiator = entry.getColString(1, null);
-            this.url = new URL(urlstring);
-            this.referrer = (entry.empty(3)) ? plasmaURL.dummyHash : entry.getColString(3, null);
-            this.name = (entry.empty(4)) ? "" : entry.getColString(4, "UTF-8").trim();
-            this.loaddate = new Date(86400000 * entry.getColLong(5));
-            this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, null).trim();
-            this.depth = (int) entry.getColLong(7);
-            this.anchors = (int) entry.getColLong(8);
-            this.forkfactor = (int) entry.getColLong(9);
-            this.flags = new kelondroBitfield(entry.getColBytes(10));
-            this.handle = Integer.parseInt(entry.getColString(11, null), 16);
-            return;
-        }
-        
-        public void store() {
-            // stores the values from the object variables into the database
-            if (this.stored) return;
-            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, rowdef.width(5));
-            // store the hash in the hash cache
-            try {
-                // even if the entry exists, we simply overwrite it
-                byte[][] entry = new byte[][] { 
-                    this.hash.getBytes(),
-                    (initiator == null) ? "".getBytes() : this.initiator.getBytes(),
-                    this.url.toString().getBytes(),
-                    this.referrer.getBytes(),
-                    this.name.getBytes("UTF-8"),
-                    loaddatestr.getBytes(),
-                    (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, rowdef.width(7)).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, rowdef.width(8)).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, rowdef.width(9)).getBytes(),
-                    this.flags.bytes(),
-                    normalizeHandle(this.handle).getBytes()
-                };
-                if (urlIndexFile == null) System.out.println("urlHashCache is NULL");
-                if ((urlIndexFile != null) && (urlIndexFile.row() == null)) System.out.println("row() is NULL");
-                urlIndexFile.put(urlIndexFile.row().newEntry(entry));
-                this.stored = true;
-            } catch (IOException e) {
-                serverLog.logSevere("PLASMA", "INTERNAL ERROR AT plasmaNURL:store:" + e.toString() + ", resetting NURL-DB");
-                e.printStackTrace();
-                resetHashCache();
-            } catch (kelondroException e) {
-                serverLog.logSevere("PLASMA", "plasmaCrawlNURL.store failed: " + e.toString() + ", resetting NURL-DB");
-                e.printStackTrace();
-                resetHashCache();
-            }
-        }
-
-        public String toString() {
-            StringBuffer str = new StringBuffer();
-            str.append("hash: ").append(hash==null ? "null" : hash).append(" | ")
-               .append("initiator: ").append(initiator==null?"null":initiator).append(" | ")
-               .append("url: ").append(url==null?"null":url.toString()).append(" | ")
-               .append("referrer: ").append((referrer == null) ? plasmaURL.dummyHash : referrer).append(" | ")
-               .append("name: ").append((name == null) ? "null" : name).append(" | ")
-               .append("loaddate: ").append((loaddate == null) ? new Date() : loaddate).append(" | ")
-               .append("profile: ").append(profileHandle==null?"null":profileHandle).append(" | ")
-               .append("depth: ").append(Integer.toString(depth)).append(" | ")
-               .append("forkfactor: ").append(Integer.toString(forkfactor)).append(" | ")
-               .append("flags: ").append((flags==null) ? "null" : flags.exportB64());
-               return str.toString();
-        }
-
-        /**
-         * return a url-hash, based on the md5 algorithm
-         * the result is a String of 12 bytes within a 72-bit space
-         * (each byte has an 6-bit range)
-         * that should be enough for all web pages on the world
-         */
-        public String hash() {
-            return this.hash;
-        }
-
-        public String initiator() {
-            if (initiator == null) return null;
-            if (initiator.length() == 0) return null; 
-            return initiator;
-        }
-
-        public boolean proxy() {
-            return (initiator() == null);
-        }
-
-        public String referrerHash() {
-            return this.referrer;
-        }
-
-        public URL url() {
-            return url;
-        }
-
-        public Date loaddate() {
-            return loaddate;
-        }
-
-        public String name() {
-            // return the creator's hash
-            return name;
-        }
-
-        public int depth() {
-            return depth;
-        }
-
-        public String profileHandle() {
-            return profileHandle;
-        }
-    }
-
-    public class kiter implements Iterator {
-        // enumerates entry elements
-        Iterator i;
-        boolean error = false;
-        
-        public kiter(boolean up, String firstHash) throws IOException {
-            i = urlIndexFile.rows(up, (firstHash == null) ? null : firstHash.getBytes());
-            error = false;
-        }
-
-        public boolean hasNext() {
-            if (error) return false;
-            return i.hasNext();
-        }
-
-        public Object next() throws RuntimeException {
-            kelondroRow.Entry e = (kelondroRow.Entry) i.next();
-            if (e == null) return null;
-            try {
-                return new Entry(e);
-            } catch (IOException ex) {
-                throw new RuntimeException("error '" + ex.getMessage() + "' for hash " + e.getColString(0, null));
-            }
-        }
-        
-        public void remove() {
-            i.remove();
-        }
-        
-    }
-
-    public Iterator entries(boolean up, String firstHash) throws IOException {
-        // enumerates entry elements
-        return new kiter(up, firstHash);
     }
     
 }

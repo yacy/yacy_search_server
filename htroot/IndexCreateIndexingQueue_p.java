@@ -50,7 +50,7 @@ import java.util.ArrayList;
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
-import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardQueue;
 import de.anomic.server.serverObjects;
@@ -186,7 +186,7 @@ public class IndexCreateIndexingQueue_p {
             dark = true;
             URL url; 
             String initiatorHash, executorHash;
-            plasmaCrawlEURL.Entry entry;
+            plasmaCrawlZURL.Entry entry;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
             for (int i = switchboard.errorURL.stackSize() - 1; i >= (switchboard.errorURL.stackSize() - showRejectedCount); i--) {
@@ -202,7 +202,7 @@ public class IndexCreateIndexingQueue_p {
                     prop.put("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : wikiCode.replaceHTML(initiatorSeed.getName())));
                     prop.put("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : wikiCode.replaceHTML(executorSeed.getName())));
                     prop.put("rejected_list_"+j+"_url", wikiCode.replaceHTML(url.toString()));
-                    prop.put("rejected_list_"+j+"_failreason", entry.failreason());
+                    prop.put("rejected_list_"+j+"_failreason", entry.anycause());
                     prop.put("rejected_list_"+j+"_dark", ((dark) ? 1 : 0));
                     dark = !dark;
                     j++;

@@ -176,20 +176,20 @@ public class kelondroRow {
             for (int i = 0; i < objectsize; i++) this.rowinstance[i] = 0;
         }
         
-        public Entry(byte[] rowinstance) {
-            this(rowinstance, 0, rowinstance.length);
+        public Entry(byte[] newrow) {
+            this(newrow, 0, newrow.length);
         }
         
-        public Entry(byte[] rowinstance, int start, int length) {
-            assert objectsize == length : "objectsize = " + objectsize + ", length = " + length;
+        public Entry(byte[] newrow, int start, int length) {
+            assert newrow.length >= (length + start) : "objectsize = " + objectsize + ", start = " + start + ", length = " + length;
+            assert objectsize == length : "objectsize = " + objectsize + ", start = " + start + ", length = " + length;
             this.rowinstance = new byte[objectsize];
-            int ll = Math.min(objectsize, length);
-            System.arraycopy(rowinstance, start, this.rowinstance, 0, ll);
-            for (int i = ll; i < objectsize; i++) this.rowinstance[i] = 0;
+            System.arraycopy(newrow, start, this.rowinstance, 0, objectsize);
+            //for (int i = ll; i < objectsize; i++) this.rowinstance[i] = 0;
         }
         
         public Entry(byte[][] cols) {
-            assert row.length == cols.length;
+            assert row.length == cols.length : "cols.length = " + cols.length + ", row.length = " + row.length;
             rowinstance = new byte[objectsize];
             int ll;
             int cs, cw;

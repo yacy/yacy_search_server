@@ -66,7 +66,7 @@ public class snippet {
                 prop.putASIS("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown"); //FIXME: the ASIS should not be needed, but we have still htmlcode in .java files
             } else {
                 // problems with snippet fetch
-               prop.put("text", (remove) ? switchboard.snippetCache.failConsequences(snippet, query) : snippet.getError());
+               prop.put("text", (remove) ? switchboard.snippetCache.failConsequences(snippet, queryHashes) : snippet.getError());
             }
             prop.put("link", 0);
             prop.put("links", 0);

@@ -28,11 +28,6 @@
           <td>
             <table cellpadding="0" cellspacing="0">
               <tr>
-                <td>From&nbsp;File:</td>
-                <td><input type="radio" name="crawlingMode" value="file" /></td>
-                <td><input type="file" name="crawlingFile" size="28" /></td>
-              </tr>
-              <tr>
                 <td>From&nbsp;URL:</td>
                 <td><input type="radio" name="crawlingMode" value="url" checked="checked" /></td>
                 <td>
@@ -41,7 +36,12 @@
                 </td>
               </tr>
               <tr>
-                <td colspan="2"><span id="title"></span></td>
+                <td>From&nbsp;File:</td>
+                <td><input type="radio" name="crawlingMode" value="file" /></td>
+                <td><input type="file" name="crawlingFile" size="28" /></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="commit"><span id="title"><br></span></td>
               </tr>
             </table>
           </td>
@@ -125,7 +125,7 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td>Store to Proxy Cache:</td>
+          <td>Store to Web Cache:</td>
           <td><input type="checkbox" name="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# /></td>
           <td>
             This option is used by default for proxy prefetch, but is not needed for explicit crawling.
@@ -194,9 +194,9 @@
         <tr valign="top" class="TableCellLight">
           <td>Wanted Performance:</td>
           <td>
-            <input type="radio" name="crawlingSpeed" value="maximum" #(crawlingSpeedMaxChecked)#::checked="checked"#(/crawlingSpeedMaxChecked)# />maximum&nbsp;&nbsp;
-			<input type="radio" name="crawlingSpeed" value="custom" #(crawlingSpeedCustChecked)#::checked="checked"#(/crawlingSpeedCustChecked)# />custom: <input name="customPPM" type="text" size="4" maxlength="4" value="#[customPPMdefault]#" />PPM&nbsp;&nbsp;
-			<input type="radio" name="crawlingSpeed" value="minimum" #(crawlingSpeedMinChecked)#::checked="checked"#(/crawlingSpeedMinChecked)# />optimal as background process
+            <input type="radio" name="crawlingPerformance" value="maximum" #(crawlingSpeedMaxChecked)#::checked="checked"#(/crawlingSpeedMaxChecked)# />maximum&nbsp;&nbsp;
+			<input type="radio" name="crawlingPerformance" value="custom" #(crawlingSpeedCustChecked)#::checked="checked"#(/crawlingSpeedCustChecked)# />custom: <input name="customPPM" type="text" size="4" maxlength="4" value="#[customPPMdefault]#" />PPM&nbsp;&nbsp;
+			<input type="radio" name="crawlingPerformance" value="minimum" #(crawlingSpeedMinChecked)#::checked="checked"#(/crawlingSpeedMinChecked)# />optimal as background process
           </td>
           <td colspan="3">
             Set wanted level of computing power, used for this and other running crawl tasks. (PPM = pages per minute)

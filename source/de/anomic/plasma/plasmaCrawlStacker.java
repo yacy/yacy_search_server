@@ -48,7 +48,6 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -61,8 +60,6 @@ import de.anomic.data.robotsParser;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFlexTable;
@@ -171,7 +168,7 @@ public final class plasmaCrawlStacker {
         try {
             // getting a new message from the crawler queue
             checkInterruption();
-            stackCrawlMessage theMsg = this.queue.waitForMessage();
+            plasmaCrawlEntry theMsg = this.queue.waitForMessage();
             
             if (theMsg != null) {
                 // getting a free session thread from the pool
@@ -196,18 +193,18 @@ public final class plasmaCrawlStacker {
     }
     
     public void enqueue(
-            String nexturlString, 
-            String referrerString, 
+            URL nexturl, 
+            String referrerhash, 
             String initiatorHash, 
             String name, 
             Date loadDate, 
             int currentdepth, 
             plasmaCrawlProfile.entry profile) {
         if (profile != null) try {            
-            this.queue.addMessage(new stackCrawlMessage(
+            this.queue.addMessage(new plasmaCrawlEntry(
                     initiatorHash,
-                    nexturlString,
-                    referrerString,
+                    nexturl,
+                    referrerhash,
                     name,
                     loadDate,
                     profile.handle(),
@@ -220,7 +217,7 @@ public final class plasmaCrawlStacker {
         }
     }
     
-    public String dequeue(stackCrawlMessage theMsg) throws InterruptedException {
+    public String dequeue(plasmaCrawlEntry theMsg) throws InterruptedException {
         
         plasmaCrawlProfile.entry profile = this.sb.profiles.getEntry(theMsg.profileHandle());
         if (profile == null) {
@@ -231,8 +228,8 @@ public final class plasmaCrawlStacker {
         
         return stackCrawl(
                 theMsg.url().toString(),
-                theMsg.referrerHash(),
-                theMsg.initiatorHash(),
+                theMsg.referrerhash(),
+                theMsg.initiator(),
                 theMsg.name(),
                 theMsg.loaddate(),
                 theMsg.depth(),
@@ -424,174 +421,22 @@ public final class plasmaCrawlStacker {
         
         // add the url into the crawling queue
         checkInterruption();
-        plasmaCrawlNURL.Entry ne = this.sb.noticeURL.newEntry(initiatorHash, /* initiator, needed for p2p-feedback */
+        plasmaCrawlEntry ne = new plasmaCrawlEntry(initiatorHash, /* initiator, needed for p2p-feedback */
                 nexturl, /* url clear text string */
-                loadDate, /* load date */
                 referrerHash, /* last url in crawling queue */
-                name, /* the anchor name */
+                name, /* load date */
+                loadDate, /* the anchor name */
                 (profile == null) ? null : profile.handle(),  // profile must not be null!
                 currentdepth, /*depth so far*/
                 0, /*anchors, default value */
                 0  /*forkfactor, default value */
         );
-        ne.store();
         this.sb.noticeURL.push(
                 ((global) ? plasmaCrawlNURL.STACK_TYPE_LIMIT :
                 ((local) ? plasmaCrawlNURL.STACK_TYPE_CORE : plasmaCrawlNURL.STACK_TYPE_REMOTE)) /*local/remote stack*/,
-                ne.hash());
+                ne);
         return null;
     }
-    
-    public final class stackCrawlMessage {
-        private String   initiator;     // the initiator hash, is NULL or "" if it is the own proxy;
-        String   urlHash;          // the url's hash
-        private String   referrerHash;      // the url's referrer hash
-        private String   url;           // the url as string
-        String   name;          // the name of the url, from anchor tag <a>name</a>     
-        private Date     loaddate;      // the time when the url was first time appeared
-        private String   profileHandle; // the name of the prefetch profile
-        private int      depth;         // the prefetch depth so far, starts at 0
-        private int      anchors;       // number of anchors of the parent
-        private int      forkfactor;    // sum of anchors of all ancestors
-        private kelondroBitfield flags;
-        private int      handle;
-        
-        // loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
-        public stackCrawlMessage(
-                String initiator, 
-                String urlString, 
-                String referrerUrlString, 
-                String name, 
-                Date loaddate, 
-                String profileHandle,
-                int depth, 
-                int anchors, 
-                int forkfactor) {
-            try {
-                // create new entry and store it into database
-                this.urlHash       = plasmaURL.urlHash(urlString);
-                this.initiator     = initiator;
-                this.url           = urlString;
-                this.referrerHash  = (referrerUrlString == null) ? plasmaURL.dummyHash : plasmaURL.urlHash(referrerUrlString);
-                this.name          = (name == null) ? "" : name;
-                this.loaddate      = (loaddate == null) ? new Date() : loaddate;
-                this.profileHandle = profileHandle; // must not be null
-                this.depth         = depth;
-                this.anchors       = anchors;
-                this.forkfactor    = forkfactor;
-                this.flags         = new kelondroBitfield();
-                this.handle        = 0;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } 
-        
-        public stackCrawlMessage(String urlHash, kelondroRow.Entry entry) {
-            if (urlHash == null) throw new NullPointerException("Url hash was null");
-            if (entry == null) throw new NullPointerException("kelondroRow.Entry was null");
-
-            try {
-                this.urlHash       = urlHash;
-                this.initiator     = entry.getColString(1, "UTF-8");
-                this.url           = entry.getColString(2, "UTF-8").trim();
-                this.referrerHash  = (entry.empty(3)) ? plasmaURL.dummyHash : entry.getColString(3, "UTF-8");
-                this.name          = (entry.empty(4)) ? "" : entry.getColString(4, "UTF-8").trim();
-                this.loaddate      = new Date(86400000 * entry.getColLong(5));
-                this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, "UTF-8").trim();
-                this.depth         = (int) entry.getColLong(7);
-                this.anchors       = (int) entry.getColLong(8);
-                this.forkfactor    = (int) entry.getColLong(9);
-                this.flags         = new kelondroBitfield(entry.getColBytes(10));
-                try {
-                    this.handle        = Integer.parseInt(new String(entry.getColBytes(11), "UTF-8"));
-                } catch (NumberFormatException ee) {
-                    System.out.println("BUG in stackCrawlMessage. entry = " + entry.toString());
-                    throw new RuntimeException(ee.getMessage());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new IllegalStateException(e.toString());
-            }
-        }
-        
-        public String url() {
-            return this.url;
-        }        
-        
-        public String referrerHash() {
-            return this.referrerHash;
-        }
-        
-        public String initiatorHash() {
-            if (this.initiator == null) return null;
-            if (this.initiator.length() == 0) return null; 
-            return this.initiator;
-        }
-        
-        public Date loaddate() {
-            return this.loaddate;
-        }
-
-        public String name() {
-            return this.name;
-        }
-
-        public int depth() {
-            return this.depth;
-        }
-
-        public String profileHandle() {
-            return this.profileHandle;
-        }        
-        
-        public String toString() {
-            StringBuffer str = new StringBuffer();
-            str.append("urlHash: ").append(urlHash==null ? "null" : urlHash).append(" | ")
-               .append("initiator: ").append(initiator==null?"null":initiator).append(" | ")
-               .append("url: ").append(url==null?"null":url).append(" | ")
-               .append("referrer: ").append((referrerHash == null) ? plasmaURL.dummyHash : referrerHash).append(" | ")
-               .append("name: ").append((name == null) ? "null" : name).append(" | ")
-               .append("loaddate: ").append((loaddate == null) ? new Date() : loaddate).append(" | ")
-               .append("profile: ").append(profileHandle==null?"null":profileHandle).append(" | ")
-               .append("depth: ").append(Integer.toString(depth)).append(" | ")
-               .append("forkfactor: ").append(Integer.toString(forkfactor)).append(" | ")
-               //.append("flags: ").append((flags==null) ? "null" : flags.toString())
-               ;
-               return str.toString();
-        }
-        
-        public byte[][] getBytes() {
-            // stores the values from the object variables into the database
-            String loaddatestr = kelondroBase64Order.enhancedCoder.encodeLong(loaddate.getTime() / 86400000, plasmaCrawlNURL.rowdef.width(5));
-            // store the hash in the hash cache
-
-            // even if the entry exists, we simply overwrite it
-            byte[][] entry = null;
-            try {
-                entry = new byte[][] { 
-                    this.urlHash.getBytes(),
-                    (this.initiator == null) ? "".getBytes() : this.initiator.getBytes(),
-                    this.url.getBytes(),
-                    this.referrerHash.getBytes(),
-                    this.name.getBytes("UTF-8"),
-                    loaddatestr.getBytes(),
-                    (this.profileHandle == null) ? null : this.profileHandle.getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.depth, plasmaCrawlNURL.rowdef.width(7)).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.anchors, plasmaCrawlNURL.rowdef.width(8)).getBytes(),
-                    kelondroBase64Order.enhancedCoder.encodeLong(this.forkfactor, plasmaCrawlNURL.rowdef.width(9)).getBytes(),
-                    this.flags.bytes(),
-                    normalizeHandle(this.handle).getBytes()
-                };
-            } catch (UnsupportedEncodingException e) { /* ignore this */ }
-            return entry;
-        }        
-        
-        private String normalizeHandle(int h) {
-            String d = Integer.toHexString(h);
-            while (d.length() < plasmaCrawlNURL.rowdef.width(11)) d = "0" + d;
-            return d;
-        }
-    }      
     
     final class stackCrawlQueue {
         
@@ -657,10 +502,10 @@ public final class plasmaCrawlStacker {
                 // do nothing..
             } 
             if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
-                kelondroFlexWidthArray.delete(cacheStacksPath, "urlPreNotice2.table");
+                kelondroFlexWidthArray.delete(cacheStacksPath, "urlNoticeStacker7.db");
             } 
             if (this.dbtype == QUEUE_DB_TYPE_TREE) {
-                File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
+                File cacheFile = new File(cacheStacksPath, "urlNoticeStacker.db");
                 cacheFile.delete();
             }
         }
@@ -669,19 +514,19 @@ public final class plasmaCrawlStacker {
             if (!(cacheStacksPath.exists())) cacheStacksPath.mkdir(); // make the path
             
             if (this.dbtype == QUEUE_DB_TYPE_RAM) {
-                this.urlEntryCache = new kelondroRowSet(plasmaCrawlNURL.rowdef, 0);
+                this.urlEntryCache = new kelondroRowSet(plasmaCrawlEntry.rowdef, 0);
             } 
             if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
-                String newCacheName = "urlPreNotice2.table";
+                String newCacheName = "urlNoticeStacker7.db";
                 cacheStacksPath.mkdirs();
                 try {
-                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlNURL.rowdef), true, false);
+                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef), true, false);
                 } catch (Exception e) {
                     e.printStackTrace();
                     // kill DB and try again
                     kelondroFlexTable.delete(cacheStacksPath, newCacheName);
                     try {
-                        this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlNURL.rowdef), true, false);
+                        this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef), true, false);
                     } catch (Exception ee) {
                         ee.printStackTrace();
                         System.exit(-1);
@@ -689,10 +534,10 @@ public final class plasmaCrawlStacker {
                 }
             } 
             if (this.dbtype == QUEUE_DB_TYPE_TREE) {
-                File cacheFile = new File(cacheStacksPath, "urlPreNotice.db");
+                File cacheFile = new File(cacheStacksPath, "urlNoticeStacker.db");
                 cacheFile.getParentFile().mkdirs();
                 try {
-                    this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, true, preloadTime, plasmaCrawlNURL.rowdef), true, true);
+                    this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, true, preloadTime, plasmaCrawlEntry.rowdef), true, true);
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(-1);
@@ -708,7 +553,7 @@ public final class plasmaCrawlStacker {
             this.urlEntryHashCache.clear();            
         }
 
-        public void addMessage(stackCrawlMessage newMessage) 
+        public void addMessage(plasmaCrawlEntry newMessage) 
         throws InterruptedException, IOException {
             if (newMessage == null) throw new NullPointerException();
             
@@ -717,9 +562,9 @@ public final class plasmaCrawlStacker {
                 
                 boolean insertionDoneSuccessfully = false;
                 synchronized(this.urlEntryHashCache) {                    
-                    kelondroRow.Entry oldValue = this.urlEntryCache.put(this.urlEntryCache.row().newEntry(newMessage.getBytes()));                        
+                    kelondroRow.Entry oldValue = this.urlEntryCache.put(newMessage.toRow());                        
                     if (oldValue == null) {
-                        insertionDoneSuccessfully = this.urlEntryHashCache.add(newMessage.urlHash);
+                        insertionDoneSuccessfully = this.urlEntryHashCache.add(newMessage.urlhash());
                     }
                 }
                 
@@ -741,7 +586,7 @@ public final class plasmaCrawlStacker {
             return this.dbtype;
         }
         
-        public stackCrawlMessage waitForMessage() throws InterruptedException, IOException {
+        public plasmaCrawlEntry waitForMessage() throws InterruptedException, IOException {
             this.readSync.P();         
             this.writeSync.P();
             
@@ -759,7 +604,7 @@ public final class plasmaCrawlStacker {
             }
             
             if ((urlHash == null) || (entry == null)) return null;
-            return new stackCrawlMessage(urlHash, entry);
+            return new plasmaCrawlEntry(entry);
         }
     }    
     
@@ -941,7 +786,7 @@ public final class plasmaCrawlStacker {
             private boolean running = false;
             private boolean stopped = false;
             private boolean done = false;
-            private stackCrawlMessage theMsg;        
+            private plasmaCrawlEntry theMsg;        
             
             public Worker(ThreadGroup theThreadGroup) {
                 super(theThreadGroup,"stackCrawlThread_created");
@@ -963,7 +808,7 @@ public final class plasmaCrawlStacker {
                 }            
             }
             
-            public synchronized void execute(stackCrawlMessage newMsg) {
+            public synchronized void execute(plasmaCrawlEntry newMsg) {
                 this.theMsg = newMsg;
                 this.done = false;
                 
@@ -1020,7 +865,7 @@ public final class plasmaCrawlStacker {
                 
             private void execute() throws InterruptedException {
                 try {
-                    this.setName("stackCrawlThread_" + this.theMsg.url);
+                    this.setName("stackCrawlThread_" + this.theMsg.url());
                     String rejectReason = dequeue(this.theMsg);
 
                     // check for interruption
@@ -1028,15 +873,9 @@ public final class plasmaCrawlStacker {
                     
                     // if the url was rejected we store it into the error URL db
                     if (rejectReason != null) {
-                        plasmaCrawlEURL.Entry ee = sb.errorURL.newEntry(
-                                new URL(this.theMsg.url()),
-                                this.theMsg.referrerHash(),
-                                this.theMsg.initiatorHash(),
-                                yacyCore.seedDB.mySeed.hash,
-                                this.theMsg.name,
-                                rejectReason,
-                                new kelondroBitfield()
-                        );
+                        plasmaCrawlZURL.Entry ee = sb.errorURL.newEntry(
+                                this.theMsg, yacyCore.seedDB.mySeed.hash, null,
+                                0, rejectReason);
                         ee.store();
                         sb.errorURL.stackPushEntry(ee);
                     }

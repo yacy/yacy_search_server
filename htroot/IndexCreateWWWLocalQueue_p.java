@@ -43,7 +43,6 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -54,10 +53,10 @@ import java.util.regex.PatternSyntaxException;
 
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaCrawlNURL.Entry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -101,15 +100,11 @@ public class IndexCreateWWWLocalQueue_p {
                         
                         // iterating through the list of URLs
                         Iterator iter = switchboard.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
+                        plasmaCrawlEntry entry;
                         while (iter.hasNext()) {
+                            entry = (plasmaCrawlEntry) iter.next();
                             String value = null;
-                            String nextHash = (String) iter.next();
-                            Entry entry = null;
-                            try {
-                                entry = switchboard.noticeURL.getEntry(nextHash);
-                            } catch (IOException e) {
-                                continue;
-                            }
+                            String nextHash = entry.urlhash();
                             if ((option.equals("URL")&&(entry.url() != null))) {
                                 value = entry.url().toString();
                             } else if ((option.equals("AnchorName"))) {
@@ -162,9 +157,9 @@ public class IndexCreateWWWLocalQueue_p {
             prop.put("crawler-queue", 0);
         } else {
             prop.put("crawler-queue", 1);
-            plasmaCrawlNURL.Entry[] crawlerList = switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
+            plasmaCrawlEntry[] crawlerList = switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
 
-            plasmaCrawlNURL.Entry urle;
+            plasmaCrawlEntry urle;
             boolean dark = true;
             yacySeed initiator;
             String profileHandle;
@@ -183,7 +178,7 @@ public class IndexCreateWWWLocalQueue_p {
                     prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
                     prop.put("crawler-queue_list_"+showNum+"_anchor", wikiCode.replaceHTML(urle.name()));
                     prop.put("crawler-queue_list_"+showNum+"_url", wikiCode.replaceHTML(urle.url().toString()));
-                    prop.put("crawler-queue_list_"+showNum+"_hash", urle.hash());
+                    prop.put("crawler-queue_list_"+showNum+"_hash", urle.urlhash());
                     dark = !dark;
                     showNum++;
                 } else {

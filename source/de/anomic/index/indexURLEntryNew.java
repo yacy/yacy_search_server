@@ -13,6 +13,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.server.serverCharBuffer;
@@ -367,6 +368,19 @@ public class indexURLEntryNew implements indexURLEntry {
         //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
     }
 
+    public plasmaCrawlEntry toBalancerEntry() {
+        return new plasmaCrawlEntry(
+                null, 
+                comp().url(), 
+                referrerHash(), 
+                comp().descr(),
+                loaddate(), 
+                null,
+                0, 
+                0, 
+                0);
+    }
+    
     /**
      * Returns this object as String.<br> 
      * This e.g. looks like this:

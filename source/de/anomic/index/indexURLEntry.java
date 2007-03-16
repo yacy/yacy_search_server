@@ -34,6 +34,7 @@ import java.util.Date;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.index.indexRWIEntry;
 
 public interface indexURLEntry {
@@ -60,6 +61,7 @@ public interface indexURLEntry {
     public indexRWIEntry word();
     public boolean isOlder(indexURLEntry other);
     public String toString(String snippet);
+    public plasmaCrawlEntry toBalancerEntry();
     public String toString();
 
     public class Components {

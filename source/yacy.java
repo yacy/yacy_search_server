@@ -84,9 +84,10 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
-import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaCrawlNURL;
+import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.plasmaWordIndexAssortment;
@@ -1011,11 +1012,11 @@ public final class yacy {
             }
             if (source.equals("eurl")) {
                 Iterator eiter = sb.errorURL.entries(true, null);
-                plasmaCrawlEURL.Entry entry;
+                plasmaCrawlZURL.Entry entry;
                 while (eiter.hasNext()) {
                     try {
-                        entry = (plasmaCrawlEURL.Entry) eiter.next();
-                        if ((entry != null) && (entry.url() != null)) doms.put(entry.url().getHost(), entry.failreason());
+                        entry = (plasmaCrawlZURL.Entry) eiter.next();
+                        if ((entry != null) && (entry.url() != null)) doms.put(entry.url().getHost(), entry.anycause());
                     } catch (Exception e) {
                         // here a MalformedURLException may occur
                         // just ignore
@@ -1029,11 +1030,11 @@ public final class yacy {
                 }
             }
             if (source.equals("nurl")) {
-                Iterator eiter = sb.noticeURL.entries(true, null);
-                plasmaCrawlNURL.Entry entry;
+                Iterator eiter = sb.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
+                plasmaCrawlEntry entry;
                 while (eiter.hasNext()) {
                     try {
-                        entry = (plasmaCrawlNURL.Entry) eiter.next();
+                        entry = (plasmaCrawlEntry) eiter.next();
                         if ((entry != null) && (entry.url() != null)) doms.put(entry.url().getHost(), "profile=" + entry.profileHandle() + ", depth=" + entry.depth());
                     } catch (Exception e) {
                         // here a MalformedURLException may occur
@@ -1120,12 +1121,12 @@ public final class yacy {
             }
             if (source.equals("eurl")) {
                 Iterator eiter = sb.errorURL.entries(true, null);
-                plasmaCrawlEURL.Entry entry;
+                plasmaCrawlZURL.Entry entry;
                 while (eiter.hasNext()) {
-                    entry = (plasmaCrawlEURL.Entry) eiter.next();
+                    entry = (plasmaCrawlZURL.Entry) eiter.next();
                     if ((entry != null) && (entry.url() != null)) {
                         if (html) {
-                            bos.write(("<a href=\"" + entry.url() + "\">" + entry.url() + "</a> " + entry.failreason() + "<br>").getBytes("UTF-8"));
+                            bos.write(("<a href=\"" + entry.url() + "\">" + entry.url() + "</a> " + entry.anycause() + "<br>").getBytes("UTF-8"));
                             bos.write(serverCore.crlf);
                         } else {
                             bos.write(entry.url().toString().getBytes());
@@ -1135,10 +1136,10 @@ public final class yacy {
                 }
             }
             if (source.equals("nurl")) {
-                Iterator eiter = sb.noticeURL.entries(true, null);
-                plasmaCrawlNURL.Entry entry;
+                Iterator eiter = sb.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
+                plasmaCrawlEntry entry;
                 while (eiter.hasNext()) {
-                    entry = (plasmaCrawlNURL.Entry) eiter.next();
+                    entry = (plasmaCrawlEntry) eiter.next();
                     if ((entry != null) && (entry.url() != null)) {
                         if (html) {
                             bos.write(("<a href=\"" + entry.url() + "\">" + entry.url() + "</a> " + "profile=" + entry.profileHandle() + ", depth=" + entry.depth() + "<br>").getBytes("UTF-8"));

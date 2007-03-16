@@ -51,11 +51,11 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.plasma.plasmaURL;
-import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.net.URL;
-import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
 import de.anomic.plasma.plasmaCrawlProfile;
+import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
@@ -290,15 +290,19 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
         String referrerHash = (this.refererURLString==null)?null:plasmaURL.urlHash(this.refererURLString);
         
         // create a new errorURL DB entry
-        plasmaCrawlEURL.Entry ee = this.sb.errorURL.newEntry(
-                this.url,
-                referrerHash,
+        plasmaCrawlEntry bentry = new plasmaCrawlEntry(
                 this.initiator,
-                yacyCore.seedDB.mySeed.hash,
-                this.name,
-                (failreason==null)?"Unknown reason":failreason,
-                new kelondroBitfield()
-        );
+                this.url,
+                referrerHash, 
+                this.name, 
+                null,
+                this.profile.handle(),
+                this.depth, 
+                0, 
+                0);
+        plasmaCrawlZURL.Entry ee = this.sb.errorURL.newEntry(
+                bentry, yacyCore.seedDB.mySeed.hash, null,
+                0, (failreason==null)?"Unknown reason":failreason);
         
         // store the entry
         ee.store();

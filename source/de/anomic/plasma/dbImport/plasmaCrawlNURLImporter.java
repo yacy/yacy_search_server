@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeMap;
 
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -89,7 +90,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         
         // init noticeUrlDB
         this.log.logInfo("Initializing the source noticeUrlDB");
-        this.importNurlDB =  new plasmaCrawlNURL(this.importPath, preloadTime);
+        this.importNurlDB = new plasmaCrawlNURL(this.importPath);
         this.importStartSize = this.importNurlDB.size();
         //int stackSize = this.importNurlDB.stackSize();
         
@@ -101,7 +102,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
     public void run() {
         try {   
             // waiting on init thread to finish
-            this.importNurlDB.waitOnInitThread();
+            //this.importNurlDB.waitOnInitThread();
             
             // the stack types we want to import
             int[] stackTypes = new int[] {plasmaCrawlNURL.STACK_TYPE_CORE,
@@ -110,38 +111,38 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                                           -1};
             
             // looping through the various stacks
-            for (int i=0; i< stackTypes.length; i++) {
-                if (stackTypes[i] != -1) {
-                    this.log.logInfo("Starting to import stacktype '" + stackTypes[i] + "' containing '" + this.importNurlDB.stackSize(stackTypes[i]) + "' entries.");
+            for (int stackType=0; stackType< stackTypes.length; stackType++) {
+                if (stackTypes[stackType] != -1) {
+                    this.log.logInfo("Starting to import stacktype '" + stackTypes[stackType] + "' containing '" + this.importNurlDB.stackSize(stackTypes[stackType]) + "' entries.");
                 } else {
                     this.log.logInfo("Starting to import '" + this.importNurlDB.size() + "' entries not available in any stack.");
                 }
                 
                 // getting an interator and loop through the URL entries
-                Iterator entryIter = (stackTypes[i] == -1) ? this.importNurlDB.entries(true, null) : null;
+                Iterator entryIter = (stackTypes[stackType] == -1) ? this.importNurlDB.iterator(stackType) : null;
                 while (true) {
                     
                     String nextHash = null;
-                    plasmaCrawlNURL.Entry nextEntry = null;
+                    plasmaCrawlEntry nextEntry = null;
                     
                     try {                        
-                        if (stackTypes[i] != -1) {
-                            if (this.importNurlDB.stackSize(stackTypes[i]) == 0) break;
+                        if (stackTypes[stackType] != -1) {
+                            if (this.importNurlDB.stackSize(stackTypes[stackType]) == 0) break;
                             
                             this.urlCount++;
-                            nextEntry = this.importNurlDB.pop(stackTypes[i]);
-                            nextHash = nextEntry.hash();
+                            nextEntry = this.importNurlDB.pop(stackTypes[stackType]);
+                            nextHash = nextEntry.urlhash();
                         } else {
                             if (!entryIter.hasNext()) break;
                             
                             this.urlCount++;
-                            nextEntry = (plasmaCrawlNURL.Entry) entryIter.next();
-                            nextHash = nextEntry.hash();
+                            nextEntry = (plasmaCrawlEntry) entryIter.next();
+                            nextHash = nextEntry.urlhash();
                         }
                     } catch (IOException e) {
                         this.log.logWarning("Unable to import entry: " + e.toString());
                         
-                        if ((stackTypes[i] != -1) &&(this.importNurlDB.stackSize(stackTypes[i]) == 0)) break;
+                        if ((stackTypes[stackType] != -1) &&(this.importNurlDB.stackSize(stackTypes[stackType]) == 0)) break;
                         continue;
                     }
                     
@@ -176,9 +177,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                         
                         // if the url does not alredy exists in the destination stack we insert it now
                         if (!this.sb.noticeURL.existsInStack(nextHash)) {
-                            plasmaCrawlNURL.Entry ne = this.sb.noticeURL.newEntry(nextEntry);
-                            ne.store();
-                            this.sb.noticeURL.push((stackTypes[i] != -1) ? stackTypes[i] : plasmaCrawlNURL.STACK_TYPE_CORE, ne.hash());
+                            this.sb.noticeURL.push((stackTypes[stackType] != -1) ? stackTypes[stackType] : plasmaCrawlNURL.STACK_TYPE_CORE, nextEntry);
                         }
                         
                         // removing hash from the import db
@@ -191,7 +190,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                     }                 
                     if (this.isAborted()) break; 
                 }
-                this.log.logInfo("Finished to import stacktype '" + stackTypes[i] + "'");
+                this.log.logInfo("Finished to import stacktype '" + stackTypes[stackType] + "'");
             }
             
             //int size = this.importNurlDB.size();

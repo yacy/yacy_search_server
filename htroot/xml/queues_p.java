@@ -54,6 +54,7 @@ import java.util.Locale;
 
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -183,10 +184,10 @@ public class queues_p {
     }
     
     
-    public static final void addNTable(serverObjects prop, String tableName, plasmaCrawlNURL.Entry[] crawlerList) {
+    public static final void addNTable(serverObjects prop, String tableName, plasmaCrawlEntry[] crawlerList) {
 
         int showNum = 0;
-        plasmaCrawlNURL.Entry urle;
+        plasmaCrawlEntry urle;
         yacySeed initiator;
         for (int i = 0; i < crawlerList.length; i++) {
             urle = crawlerList[i];
@@ -198,7 +199,7 @@ public class queues_p {
                 prop.put(tableName + "_" + showNum + "_modified", daydate(urle.loaddate()));
                 prop.putSafeXML(tableName + "_" + showNum + "_anchor", urle.name());
                 prop.putSafeXML(tableName + "_" + showNum + "_url", urle.url().toString());
-                prop.put(tableName + "_" + showNum + "_hash", urle.hash());
+                prop.put(tableName + "_" + showNum + "_hash", urle.urlhash());
                 showNum++;
             }
         }

@@ -454,7 +454,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
         if (rcLocal == null) return;
         plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, rcLocal, timeout - System.currentTimeMillis());
-        preorder.remove(true, true);
+        if (preorder.filteredCount()> query.wantedResults) preorder.remove(true, true);
         
         // start url-fetch
         indexRWIEntryNew entry;

@@ -311,6 +311,7 @@ public final class kelondroStack extends kelondroRecords {
         }
         
         public void remove() {
+            ni.remove();
         }
         
     }

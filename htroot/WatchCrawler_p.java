@@ -39,10 +39,9 @@ import de.anomic.data.wikiCode;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
-import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.net.URL;
-import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlProfile;
+import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverFileUtils;
@@ -222,8 +221,7 @@ public class WatchCrawler_p {
                                 prop.put("info_crawlingURL", wikiCode.replaceHTML(((String) post.get("crawlingURL"))));
                                 prop.put("info_reasonString", reasonString);
                                 
-                                plasmaCrawlEURL.Entry ee = switchboard.errorURL.newEntry(crawlingStartURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
-                                                                                                 crawlingStartURL.getHost(), reasonString, new kelondroBitfield());
+                                plasmaCrawlZURL.Entry ee = switchboard.errorURL.newEntry(crawlingStartURL, reasonString);
                                 ee.store();
                                 switchboard.errorURL.stackPushEntry(ee);
                             }
@@ -300,8 +298,7 @@ public class WatchCrawler_p {
                                     if (rejectReason == null) {
                                         c++;
                                     } else {
-                                        plasmaCrawlEURL.Entry ee = switchboard.errorURL.newEntry(nexturlURL, null, yacyCore.seedDB.mySeed.hash, yacyCore.seedDB.mySeed.hash,
-                                                                                                         (String) e.getValue(), rejectReason, new kelondroBitfield());
+                                        plasmaCrawlZURL.Entry ee = switchboard.errorURL.newEntry(nexturlURL, rejectReason);
                                         ee.store();
                                         switchboard.errorURL.stackPushEntry(ee);
                                     }
@@ -401,9 +398,10 @@ public class WatchCrawler_p {
     
     private static void setPerformance(plasmaSwitchboard sb, serverObjects post) {
         String crawlingPerformance = post.get("crawlingPerformance","custom");
-        int wantedPPM = 1000;
+        long LCbusySleep = Integer.parseInt(sb.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        int wantedPPM = (int) (60000L / LCbusySleep);
         try {
-            wantedPPM = Integer.parseInt(post.get("customPPM","1000"));
+            wantedPPM = Integer.parseInt(post.get("customPPM",Integer.toString(wantedPPM)));
         } catch (NumberFormatException e) {}
         if (crawlingPerformance.equals("minimum")) wantedPPM = 10;
         if (crawlingPerformance.equals("maximum")) wantedPPM = 1000;

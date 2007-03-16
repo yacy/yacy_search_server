@@ -43,17 +43,18 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroCache;
+import de.anomic.kelondro.kelondroFlexTable;
+import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
@@ -61,86 +62,136 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
 public class plasmaCrawlBalancer {
+    
+    private static final String stackSuffix = "7.stack";
+    private static final String indexSuffix = "7.db";
 
     // a shared domainAccess map for all balancers
     private static final Map domainAccess = Collections.synchronizedMap(new HashMap());
     
     // definition of payload for fileStack
-    private static final kelondroRow payload = new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 0);
+    private static final kelondroRow stackrow = new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 0);
     
     // class variables
-    private ArrayList     ramStack;     // a list that is flused first
-    private kelondroStack fileStack;    // a file with url hashes
-    private HashMap       domainStacks; // a map from domain name part to Lists with url hashs
-    private HashSet       ramIndex;     // an index is needed externally, we provide that internally
+    private ArrayList     urlRAMStack;     // a list that is flused first
+    private kelondroStack urlFileStack;    // a file with url hashes
+    private kelondroIndex urlFileIndex;
+    private HashMap       domainStacks;    // a map from domain name part to Lists with url hashs
+    private File          cacheStacksPath;
+    private String        stackname;
     
-    public plasmaCrawlBalancer(File stackFile) {
-        fileStack    = kelondroStack.open(stackFile, payload);
+    public plasmaCrawlBalancer(File cachePath, String stackname) {
+        this.cacheStacksPath = cachePath;
+        this.stackname = stackname;
+        File stackFile = new File(cachePath, stackname + stackSuffix);
+        urlFileStack    = kelondroStack.open(stackFile, stackrow);
         domainStacks = new HashMap();
-        ramStack     = new ArrayList();
-        ramIndex     = makeIndex();
+        urlRAMStack     = new ArrayList();
+        
+        // create a stack for newly entered entries
+        if (!(cachePath.exists())) cachePath.mkdir(); // make the path
+        openFileIndex();
     }
 
     public synchronized void close() {
-        ramIndex = null;
         while (sizeDomainStacks() > 0) flushOnceDomStacks(true);
         try { flushAllRamStack(); } catch (IOException e) {}
-        fileStack.close();
-        fileStack = null;
+        if (urlFileIndex != null) {
+            urlFileIndex.close();
+            urlFileIndex = null;
+        }
+        if (urlFileStack != null) {
+            urlFileStack.close();
+            urlFileStack = null;
+        }
     }
     
     public void finalize() {
-        if (fileStack != null) close();
+        if (urlFileStack != null) close();
     }
     
     public synchronized void clear() {
-        fileStack = kelondroStack.reset(fileStack);
+        urlFileStack = kelondroStack.reset(urlFileStack);
         domainStacks.clear();
-        ramStack.clear();
-        ramIndex = new HashSet();
+        urlRAMStack.clear();
+        resetFileIndex();
     }
     
-    private HashSet makeIndex() {
-        HashSet index = new HashSet(); // TODO: replace with kelondroIndex
-        
-        // take all elements from the file stack
+
+    private void openFileIndex() {
+        cacheStacksPath.mkdirs();
         try {
-            Iterator i = fileStack.keyIterator(); // iterates byte[] - objects
-            while (i.hasNext()) index.add(new String((byte[]) i.next(), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {}
-        
-        // take elements from the ram stack
-        for (int i = 0; i < ramStack.size(); i++) index.add(ramStack.get(i));
-        
-        // take elememts from domain stacks
-        Iterator i = domainStacks.entrySet().iterator();
-        Map.Entry entry;
-        LinkedList list;
-        Iterator ii;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            list = (LinkedList) entry.getValue();
-            ii = list.iterator();
-            while (ii.hasNext()) index.add(ii.next());
+            urlFileIndex = new kelondroCache(new kelondroFlexTable(cacheStacksPath, stackname + indexSuffix, -1, plasmaCrawlEntry.rowdef), true, false);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
         }
-        
-        return index;
+    }
+    
+    private void resetFileIndex() {
+        if (urlFileIndex != null) {
+            urlFileIndex.close();
+            urlFileIndex = null;
+            File cacheFile = new File(cacheStacksPath, stackname + indexSuffix);
+            cacheFile.delete();
+        }
+        openFileIndex();
+    }
+    
+    public synchronized plasmaCrawlEntry get(String urlhash) throws IOException {
+       kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
+       if (entry == null) return null;
+       return new plasmaCrawlEntry(entry);
+    }
+    
+    public synchronized plasmaCrawlEntry remove(String urlhash) throws IOException {
+        // this method is only here, because so many import/export methods need it
+        // and it was implemented in the previous architecture
+        // however, usage is not recommendet
+       kelondroRow.Entry entry = urlFileIndex.remove(urlhash.getBytes());
+       if (entry == null) return null;
+       
+       // now delete that thing also from the queues
+       
+       // iterate through the RAM stack
+       Iterator i = urlRAMStack.iterator();
+       String h;
+       while (i.hasNext()) {
+           h = (String) i.next();
+           if (h.equals(urlhash)) {
+               i.remove();
+               break;
+           }
+       }
+       
+       // we cannot iterate through the file stack, because the stack iterator
+       // has not yet a delete method implemented. It would also be a bad idea
+       // to do that, it would make too much IO load
+       // instead, the top/pop methods that aquire elements from the stack, that
+       // cannot be found in the urlFileIndex must handle that case silently
+       
+       return new plasmaCrawlEntry(entry);
     }
     
     public boolean has(String urlhash) {
-        return ramIndex.contains(urlhash);
-    }
-    
-    public Iterator iterator() {
-        return ramIndex.iterator();
+        try {
+            return urlFileIndex.has(urlhash.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
     
     public synchronized int size() {
-        int componentsize = fileStack.size() + ramStack.size() + sizeDomainStacks();
-        if ((kelondroRecords.debugmode) && (componentsize != ramIndex.size())) {
-            // hier ist ramIndex.size() immer grš§er. warum?
-            serverLog.logWarning("PLASMA BALANCER", "size operation wrong - componentsize = " + componentsize + ", ramIndex.size() = " + ramIndex.size());
-        }        
+        int componentsize = urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks();
+        try {
+            if ((kelondroRecords.debugmode) && (componentsize != urlFileIndex.size())) {
+                // hier ist urlIndexFile.size() immer grš§er. warum?
+                serverLog.logWarning("PLASMA BALANCER", "size operation wrong - componentsize = " + componentsize + ", ramIndex.size() = " + urlFileIndex.size());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return componentsize;
     }
     
@@ -163,9 +214,9 @@ public class plasmaCrawlBalancer {
             list = (LinkedList) entry.getValue();
             if (list.size() != 0) {
                 if (ram) {
-                    ramStack.add(list.removeFirst());
+                    urlRAMStack.add(list.removeFirst());
                 } else try {
-                    fileStack.push(fileStack.row().newEntry(new byte[][]{((String) list.removeFirst()).getBytes()}));
+                    urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{((String) list.removeFirst()).getBytes()}));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -176,34 +227,36 @@ public class plasmaCrawlBalancer {
     
     private void flushAllRamStack() throws IOException {
         // this flushes only the ramStack to the fileStack, but does not flush the domainStacks
-        for (int i = 0; i < ramStack.size() / 2; i++) {
-            fileStack.push(fileStack.row().newEntry(new byte[][]{((String) ramStack.get(i)).getBytes()}));
-            fileStack.push(fileStack.row().newEntry(new byte[][]{((String) ramStack.get(ramStack.size() - i - 1)).getBytes()}));
+        for (int i = 0; i < urlRAMStack.size() / 2; i++) {
+            urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{((String) urlRAMStack.get(i)).getBytes()}));
+            urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{((String) urlRAMStack.get(urlRAMStack.size() - i - 1)).getBytes()}));
         }
-        if (ramStack.size() % 2 == 1) 
-            fileStack.push(fileStack.row().newEntry(new byte[][]{((String) ramStack.get(ramStack.size() / 2)).getBytes()}));
+        if (urlRAMStack.size() % 2 == 1) 
+            urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{((String) urlRAMStack.get(urlRAMStack.size() / 2)).getBytes()}));
     }
     
-    public synchronized void push(String urlhash) throws IOException {
-        assert urlhash != null;
-        if (ramIndex.contains(urlhash)) {
-            serverLog.logWarning("PLASMA BALANCER", "double-check has failed for urlhash " + urlhash + " - fixed");
+    public synchronized void push(plasmaCrawlEntry entry) throws IOException {
+        assert entry != null;
+        if (urlFileIndex.has(entry.urlhash().getBytes())) {
+            serverLog.logWarning("PLASMA BALANCER", "double-check has failed for urlhash " + entry.urlhash() + " - fixed");
             return;
         }
-        String dom = urlhash.substring(6);
+        
+        // extend domain stack
+        String dom = entry.urlhash().substring(6);
         LinkedList domainList = (LinkedList) domainStacks.get(dom);
         if (domainList == null) {
             // create new list
             domainList = new LinkedList();
-            domainList.addLast(urlhash);
+            domainList.addLast(entry.urlhash());
             domainStacks.put(dom, domainList);
         } else {
             // extend existent domain list
-            domainList.add(urlhash);
+            domainList.add(entry.urlhash());
         }
         
         // add to index
-        ramIndex.add(urlhash);
+        urlFileIndex.put(entry.toRow());
         
         // check size of domainStacks and flush
         if ((domainStacks.size() > 20) || (sizeDomainStacks() > 1000)) {
@@ -211,15 +264,15 @@ public class plasmaCrawlBalancer {
         }
     }
     
-    public synchronized String pop(long minimumDelta, long maximumAge) throws IOException {
+    public synchronized plasmaCrawlEntry pop(long minimumDelta, long maximumAge) throws IOException {
         // returns an url-hash from the stack and ensures minimum delta times
         // we have 3 sources to choose from: the ramStack, the domainStacks and the fileStack
         
         String result = null; // the result
         
         // 1st: check ramStack
-        if (ramStack.size() > 0) {
-            result = (String) ramStack.remove(0);
+        if (urlRAMStack.size() > 0) {
+            result = (String) urlRAMStack.remove(0);
         }
         
         // 2nd-a: check domainStacks for latest arrivals
@@ -301,12 +354,12 @@ public class plasmaCrawlBalancer {
         }
         
         // 3rd: take entry from file
-        if ((result == null) && (fileStack.size() > 0)) {
-            kelondroRow.Entry topentry = fileStack.top();
+        if ((result == null) && (urlFileStack.size() > 0)) {
+            kelondroRow.Entry topentry = urlFileStack.top();
             if (topentry == null) {
                 // emergency case: this means that something with the stack organization is wrong
                 // the file appears to be broken. We kill the file.
-                kelondroStack.reset(fileStack);
+                kelondroStack.reset(urlFileStack);
                 serverLog.logSevere("PLASMA BALANCER", "get() failed to fetch entry from file stack. reset stack file.");
             } else {
                 String top = new String(topentry.getColBytes(0));
@@ -316,10 +369,10 @@ public class plasmaCrawlBalancer {
                 long delta = lastAccessDelta(top);
                 if (delta > minimumDelta) {
                     // the entry from top is fine
-                    result = new String(fileStack.pop().getColBytes(0));
+                    result = new String(urlFileStack.pop().getColBytes(0));
                 } else {
                     // try entry from bottom
-                    result = new String(fileStack.pot().getColBytes(0));
+                    result = new String(urlFileStack.pot().getColBytes(0));
                     delta = lastAccessDelta(result);
                 }
             }
@@ -327,7 +380,7 @@ public class plasmaCrawlBalancer {
         
         // check case where we did not found anything
         if (result == null) {
-            serverLog.logSevere("PLASMA BALANCER", "get() was not able to find a valid urlhash - total size = " + size() + ", fileStack.size() = " + fileStack.size() + ", ramStack.size() = " + ramStack.size() + ", domainStacks.size() = " + domainStacks.size());
+            serverLog.logSevere("PLASMA BALANCER", "get() was not able to find a valid urlhash - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
             return null;
         }
         
@@ -344,8 +397,9 @@ public class plasmaCrawlBalancer {
         
         // update statistical data
         domainAccess.put(result.substring(6), new Long(System.currentTimeMillis()));
-        ramIndex.remove(result);
-        return result;
+        kelondroRow.Entry entry = urlFileIndex.remove(result.getBytes());
+        if (entry == null) return null;
+        return new plasmaCrawlEntry(entry);
     }
     
     private long lastAccessDelta(String hash) {
@@ -355,19 +409,55 @@ public class plasmaCrawlBalancer {
         return System.currentTimeMillis() - lastAccess.longValue();
     }
     
-    public synchronized String top(int dist) {
-        int availableInRam = ramStack.size() + sizeDomainStacks();
-        if ((availableInRam < dist) && (fileStack.size() > (dist - availableInRam))) {
+    public synchronized plasmaCrawlEntry top(int dist) throws IOException {
+        int availableInRam = urlRAMStack.size() + sizeDomainStacks();
+        if ((availableInRam <= dist) && (urlFileStack.size() > (dist - availableInRam))) {
             // flush some entries from disc to domain stacks
             try {
-                for (int i = 0; i < (dist - availableInRam); i++) {
-                    ramStack.add(new String(fileStack.pop().getColBytes(0)));
+                for (int i = 0; i <= (dist - availableInRam); i++) {
+                    if (urlFileStack.size() == 0) break;
+                    urlRAMStack.add(new String(urlFileStack.pop().getColBytes(0)));
                 }
             } catch (IOException e) {}
         }
-        while ((sizeDomainStacks() > 0) && (ramStack.size() <= dist)) flushOnceDomStacks(true); // flush only that much as we need to display
-        if (dist >= ramStack.size()) return null;
-        return (String) ramStack.get(dist);
+        while ((sizeDomainStacks() > 0) && (urlRAMStack.size() <= dist)) flushOnceDomStacks(true); // flush only that much as we need to display
+        if (dist >= urlRAMStack.size()) return null;
+        String urlhash = (String) urlRAMStack.get(dist);
+        kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
+        if (entry == null) return null;
+        return new plasmaCrawlEntry(entry);
+    }
+
+    public Iterator iterator() throws IOException {
+        return new EntryIterator();
+    }
+    
+    public class EntryIterator implements Iterator {
+
+        Iterator rowIterator;
+        
+        public EntryIterator() throws IOException {
+            rowIterator = urlFileIndex.rows(true, null);
+        }
+        
+        public boolean hasNext() {
+            return (rowIterator == null) ? false : rowIterator.hasNext();
+        }
+
+        public Object next() {
+            kelondroRow.Entry entry = (kelondroRow.Entry) rowIterator.next();
+            try {
+                return (entry == null) ? null : new plasmaCrawlEntry(entry);
+            } catch (IOException e) {
+                rowIterator = null;
+                return null;
+            }
+        }
+
+        public void remove() {
+            if (rowIterator != null) rowIterator.remove();
+        }
+        
     }
     
 }

@@ -512,6 +512,7 @@ public class plasmaSnippetCache {
                         maxLength = maxLength - result.length();
                         if (maxLength < 20) maxLength = 20;
                         tsr = computeTextSnippet(os.values().iterator(), remaininghashes, maxLength);
+                        if (tsr == null) return null;
                         String nextSnippet = (String) tsr[0];
                         if (nextSnippet == null) return tsr;
                         return new Object[]{result + (" / " + nextSnippet), tsr[1]};
