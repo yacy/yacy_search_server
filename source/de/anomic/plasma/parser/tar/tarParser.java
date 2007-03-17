@@ -213,6 +213,7 @@ public class tarParser extends AbstractParser implements Parser {
                     docKeywords.toString().split(" |,"),
                     docShortTitle.toString(), 
                     docLongTitle.toString(),
+                    "", // TODO: AUTHOR
                     (String[])docSections.toArray(new String[docSections.size()]),
                     docAbstrct.toString(),
                     ((serverByteBuffer)docText).toByteArray(),
@@ -226,6 +227,7 @@ public class tarParser extends AbstractParser implements Parser {
                         docKeywords.toString().split(" |,"),
                         docShortTitle.toString(), 
                         docLongTitle.toString(),
+                        "", // TODO: AUTHOR
                         (String[])docSections.toArray(new String[docSections.size()]),
                         docAbstrct.toString(),
                         outputFile,

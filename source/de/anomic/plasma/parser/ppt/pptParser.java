@@ -114,6 +114,7 @@ public class pptParser extends AbstractParser implements Parser {
                     replaceAll("\r"," ").
                     replaceAll("\t"," "),
                     null,
+                    "", // TODO: AUTHOR
                     null,
                     null,
                     contents.getBytes("UTF-8"),

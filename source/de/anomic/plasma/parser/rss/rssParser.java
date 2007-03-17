@@ -190,6 +190,7 @@ public class rssParser extends AbstractParser implements Parser {
                     null,
                     null,
                     feedTitle,
+                    "", // TODO: AUTHOR
                     (String[]) feedSections.toArray(new String[feedSections.size()]),
                     feedDescription,
                     text.getBytes(),

@@ -1645,6 +1645,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 return false;
             }
 
+            if ((sbQueue.size() == 0) && ((getThread(CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0))) setPerformance((int) Math.max(120, 60000 / getConfigLong(INDEX_DIST_BUSYSLEEP, 6000))); // if there is no activity, set low performance
+            
             // flush some entries from the RAM cache
             if (sbQueue.size() == 0) wordIndex.flushCacheSome(); // permanent flushing only if we are not busy
             wordIndex.loadedURL.flushCacheSome();
@@ -2227,8 +2229,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     indexURLEntry newEntry = wordIndex.loadedURL.newEntry(
                             entry.url(),                               // URL
                             docDescription,                            // document description
-                            "",                                        // author
-                            "",                                        // tags
+                            document.getAuthor(),                      // author
+                            document.getKeywords(' '),                 // tags
                             "",                                        // ETag
                             docDate,                                   // modification date
                             new Date(),                                // loaded date

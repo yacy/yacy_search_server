@@ -238,7 +238,8 @@ public class yacysearch {
                     map.put("url", comp.url().toNormalform().replace(',', '|'));
                     map.put("title", comp.descr().replace(',', ' '));
                     map.put("description", ((document == null) ? comp.descr() : document.getMainLongTitle()).replace(',', ' '));
-                    map.put("tags",  ((document == null) ? "" : document.getKeywords(' ')));
+                    map.put("author", ((document == null) ? "" : document.getAuthor()));
+                    map.put("tags", ((document == null) ? "" : document.getKeywords(' ')));
                     yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippadd", map));
                     document.close();
                 }

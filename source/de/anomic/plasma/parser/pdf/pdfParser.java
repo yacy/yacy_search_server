@@ -158,6 +158,7 @@ public class pdfParser extends AbstractParser implements Parser {
                         docKeywords,
                         docSubject,
                         docTitle,
+                        "", // TODO: AUTHOR
                         null,
                         null,
                         contentBytes,
@@ -171,6 +172,7 @@ public class pdfParser extends AbstractParser implements Parser {
                         docKeywords,
                         docSubject,
                         docTitle,
+                        "", // TODO: AUTHOR
                         null,
                         null,
                         writerFile,

@@ -173,6 +173,7 @@ public class odtParser extends AbstractParser implements Parser {
                         docKeywords,
                         docShortTitle, 
                         docLongTitle,
+                        "", // TODO: AUTHOR
                         null,
                         docDescription,
                         contentBytes,
@@ -186,6 +187,7 @@ public class odtParser extends AbstractParser implements Parser {
                         docKeywords,
                         docShortTitle, 
                         docLongTitle,
+                        "", // TODO: AUTHOR
                         null,
                         docDescription,
                         writerFile,

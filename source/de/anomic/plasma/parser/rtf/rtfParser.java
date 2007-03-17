@@ -102,6 +102,7 @@ implements Parser {
                         replaceAll("\r"," ").
                         replaceAll("\t"," "),
                     null,
+                    "", // TODO: AUTHOR
                     null,
                     null,
                     bodyText.getBytes("UTF-8"),

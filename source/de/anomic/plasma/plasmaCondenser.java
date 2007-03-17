@@ -154,7 +154,7 @@ public final class plasmaCondenser {
             insertTextToWords(document.getMainLongTitle(),  1, indexRWIEntryNew.flag_app_descr, wflags);
             insertTextToWords(document.getMainShortTitle(), 2, indexRWIEntryNew.flag_app_descr, wflags);
             insertTextToWords(document.getAbstract(),       3, indexRWIEntryNew.flag_app_descr, wflags);
-            // missing: author!
+            insertTextToWords(document.getAuthor(),         4, indexRWIEntryNew.flag_app_descr, wflags);
             // missing: tags!
             String[] titles = document.getSectionTitles();
             for (int i = 0; i < titles.length; i++) {

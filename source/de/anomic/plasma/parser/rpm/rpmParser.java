@@ -152,6 +152,7 @@ public class rpmParser extends AbstractParser implements Parser {
                     null,
                     name,
                     summary,
+                    "", // TODO: AUTHOR
                     null,
                     description,
                     content.toString().getBytes("UTF-8"),

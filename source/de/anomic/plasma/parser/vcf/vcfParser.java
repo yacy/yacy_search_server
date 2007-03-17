@@ -247,6 +247,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     null,                       // a list of extracted keywords
                     null,                       // a short document title
                     parsedTitle.toString(),     // a long document title
+                    "",                         // TODO: AUTHOR
                     sections,                   // an array of section headlines
                     "vCard",                    // an abstract
                     text,                       // the parsed document text

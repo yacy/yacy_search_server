@@ -275,8 +275,22 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     
     public String getTitle() {
         // construct a title string, even if the document has no title
-        // if there is one, return it
-        if (title.length() > 0) return title;
+        
+        // some documents have a title tag as meta tag
+        String s = (String) metas.get("title");
+        
+        // try to construct the title with the content of the title tag
+        if (title.length() > 0) {
+            if (s == null) {
+                return title;
+            } else {
+                if ((title.compareToIgnoreCase(s) == 0) || (title.indexOf(s) >= 0)) return s; else return title + ": " + s;
+            }
+        } else {
+            if (s != null) {
+                return s;
+            }
+        }
         
         // othervise take any headline
         for (int i = 0; i < 4; i++) {
@@ -284,7 +298,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
         
         // take description tag
-        String s = getDescription();
+        s = getDescription();
         if (s.length() > 0) return s;
         
         // extract headline from content
@@ -336,9 +350,11 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         if (s == null) return ""; else return s;
     }
     
-    public String getCopyright() {
-        String s = (String) metas.get("copyright");
-        if (s == null) return ""; else return s;
+    public String getAuthor() {
+        String s = (String) metas.get("author");
+        if (s == null) s = (String) metas.get("copyright");
+        if (s == null) return "";
+        return s;
     }
     
     public String[] getContentLanguages() {

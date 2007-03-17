@@ -66,6 +66,7 @@ public class plasmaParserDocument {
     private String[] keywords;  // most resources provide a keyword field
     private String shortTitle;  // a shortTitle mostly appears in the window header (border)
     private String longTitle;   // the real title of the document, commonly h1-tags
+    private String author;      // author or copyright
     private String[] sections;  // if present: more titles/headlines appearing in the document
     private String abstrct;     // an abstract, if present: short content description
     private Object text;  // the clear text, all that is visible
@@ -80,7 +81,7 @@ public class plasmaParserDocument {
     private InputStream textStream; 
                     
     public plasmaParserDocument(URL location, String mimeType, String charset,
-                    String[] keywords, String shortTitle, String longTitle,
+                    String[] keywords, String shortTitle, String longTitle, String author,
                     String[] sections, String abstrct,
                     byte[] text, Map anchors, TreeSet images) {
         this.location = location;
@@ -89,6 +90,7 @@ public class plasmaParserDocument {
         this.keywords = (keywords==null) ? new String[0] : keywords;
         this.shortTitle = (shortTitle==null)?"":shortTitle;
         this.longTitle = (longTitle==null)?"":longTitle;
+        this.author = (author==null)?"":author;
         this.sections = (sections==null)?new String[0]:sections;
         this.abstrct = (abstrct==null)?"":abstrct;
         this.text = (text==null)?new byte[0]:text;
@@ -103,7 +105,7 @@ public class plasmaParserDocument {
     }
     
     public plasmaParserDocument(URL location, String mimeType, String charset,
-            String[] keywords, String shortTitle, String longTitle,
+            String[] keywords, String shortTitle, String longTitle, String author,
             String[] sections, String abstrct,
             File text, Map anchors, TreeSet images) {
         this.location = location;
@@ -112,6 +114,7 @@ public class plasmaParserDocument {
         this.keywords = (keywords==null) ? new String[0] : keywords;
         this.shortTitle = (shortTitle==null)?"":shortTitle;
         this.longTitle = (longTitle==null)?"":longTitle;
+        this.author = (author==null)?"":author;
         this.sections = (sections==null)?new String[0]:sections;
         this.abstrct = (abstrct==null)?"":abstrct;
         this.text = text;
@@ -155,6 +158,10 @@ public class plasmaParserDocument {
 
     public String getAbstract() {
         if (abstrct != null) return abstrct; else return getMainLongTitle();
+    }
+    
+    public String getAuthor() {
+        if (author != null) return author; else return "";
     }
     
     public InputStream getText() {

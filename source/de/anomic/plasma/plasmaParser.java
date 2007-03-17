@@ -753,11 +753,19 @@ public final class plasmaParser {
             String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
             int p = 0;
             for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
-            plasmaParserDocument ppd =  new plasmaParserDocument(new URL(location.toNormalform()),
-                                mimeType, charSet, scraper.getKeywords(),
-                                scraper.getTitle(), scraper.getTitle(),
-                                sections, scraper.getDescription(),
-                                scraper.getText(), scraper.getAnchors(), scraper.getImages());
+            plasmaParserDocument ppd =  new plasmaParserDocument(
+                    new URL(location.toNormalform()),
+                    mimeType,
+                    charSet,
+                    scraper.getKeywords(),
+                    scraper.getTitle(),
+                    scraper.getTitle(),
+                    scraper.getAuthor(),
+                    sections,
+                    scraper.getDescription(),
+                    scraper.getText(),
+                    scraper.getAnchors(),
+                    scraper.getImages());
             //scraper.close();
             return ppd;
         } catch (MalformedURLException e) {
