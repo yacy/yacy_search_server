@@ -265,7 +265,7 @@ public final class indexRAMRI implements indexRI {
         return this.cacheMaxCount;
     }
     
-    public synchronized int size() {
+    public int size() {
         return cache.size();
     }
 

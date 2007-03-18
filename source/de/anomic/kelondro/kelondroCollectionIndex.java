@@ -272,7 +272,7 @@ public class kelondroCollectionIndex {
         }
     }
     
-    public synchronized int size() throws IOException {
+    public int size() throws IOException {
         return index.size();
     }
     

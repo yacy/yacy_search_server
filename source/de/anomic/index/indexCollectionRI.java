@@ -67,7 +67,7 @@ public class indexCollectionRI implements indexRI {
         return entries.updated();
     }
     
-    public synchronized int size() {
+    public int size() {
         try {
             return collectionIndex.size();
         } catch (IOException e) {

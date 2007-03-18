@@ -122,7 +122,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         return new String(suffix);    
     }
     
-    public synchronized int size() throws IOException {
+    public int size() throws IOException {
         Iterator i = tables.values().iterator();
         int s = 0;
         while (i.hasNext()) {
